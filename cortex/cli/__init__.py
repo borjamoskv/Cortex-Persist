@@ -4,18 +4,8 @@ CORTEX CLI — Package init.
 Re-exports the main CLI group and shared utilities.
 """
 
-from __future__ import annotations
-
-import json
-import sqlite3
-import sys
-import os
-from pathlib import Path
-
 import click
 from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
 
 from cortex import __version__
 from cortex.engine import CortexEngine

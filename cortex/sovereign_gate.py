@@ -10,7 +10,6 @@ Resolves the architectural tension between the Fractal Swarm
 confirmation" by providing an enforceable gate.
 """
 
-from __future__ import annotations
 
 import hashlib
 import hmac
@@ -23,7 +22,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("cortex.gate")
 

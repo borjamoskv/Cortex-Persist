@@ -16,36 +16,42 @@ from cortex.timing import TimingTracker
 @pytest.fixture(scope="function")
 def client(monkeypatch):
     test_db = "test_consensus_final.db"
-    if os.path.exists(test_db):
-        os.remove(test_db)
-    
+    # Clean up any leftover db files (including WAL/SHM)
+    for suffix in ("", "-wal", "-shm"):
+        path = test_db + suffix
+        if os.path.exists(path):
+            os.remove(path)
+
     # Patch DB_PATH in modules before TestClient starts lifespan
     monkeypatch.setenv("CORTEX_DB", test_db)
     monkeypatch.setattr(cortex.config, "DB_PATH", test_db)
     monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
     monkeypatch.setattr(cortex.auth, "DB_PATH", test_db)
-    
+
     # Clear the AuthManager singleton to force restart with new DB
     monkeypatch.setattr(cortex.auth, "_auth_manager", None)
-    
+
     with TestClient(app) as c:
         # After lifespan start, api_state should be initialized with test_db
         # We need an admin key to proceed
-        raw_key, api_key = api_state.auth_manager.create_key(
-            "test_agent", 
+        raw_key, _ = api_state.auth_manager.create_key(
+            "test_agent",
             tenant_id="test_proj",
-            permissions=["read", "write", "admin"]
+            permissions=["read", "write", "admin"],
         )
         c.headers = {"Authorization": f"Bearer {raw_key}"}
         yield c
-    
+
+    # Teardown: close sync resources (async close is handled by lifespan)
     if getattr(api_state, "engine", None):
-        api_state.engine.close()
-    if os.path.exists(test_db):
-        try:
-            os.remove(test_db)
-        except OSError:
-            pass
+        api_state.engine.close_sync()
+    for suffix in ("", "-wal", "-shm"):
+        path = test_db + suffix
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
 def test_consensus_flow(client):
     # 1. Store a fact
@@ -72,7 +78,7 @@ def test_consensus_flow(client):
     
     # Engine direct votes to reach threshold (+5 net votes needed for 'verified' at 1.5)
     for i in range(4):
-        api_state.engine.vote(fact_id, f"agent_{i}", 1)
+        api_state.engine.vote_sync(fact_id, f"agent_{i}", 1)
         
     # 4. Verify shifted confidence
     resp = client.get(f"/v1/projects/test_proj/facts")
@@ -84,15 +90,15 @@ def test_recall_ordering(client):
     proj = "test_proj_ordering"
     
     # Let's just create a new key for this proj
-    raw_key, api_key = api_state.auth_manager.create_key("voter_agent", tenant_id=proj)
+    raw_key, _ = api_state.auth_manager.create_key("voter_agent", tenant_id=proj)
     client.headers = {"Authorization": f"Bearer {raw_key}"}
 
     # Store old fact with high consensus
     resp = client.post("/v1/facts", json={"project": proj, "content": "Verified Old"})
     assert resp.status_code == 200
     fid_old = resp.json()["fact_id"]
-    for i in range(10): 
-        api_state.engine.vote(fid_old, f"voter_{i}", 1) # Score = 2.0
+    for i in range(10):
+        api_state.engine.vote_sync(fid_old, f"voter_{i}", 1)  # Score = 2.0
         
     # Store new fact (Score = 1.0)
     resp = client.post("/v1/facts", json={"project": proj, "content": "Stated New"})
@@ -101,8 +107,8 @@ def test_recall_ordering(client):
     # Store disputed fact
     resp = client.post("/v1/facts", json={"project": proj, "content": "Disputed"})
     fid_bad = resp.json()["fact_id"]
-    for i in range(6): 
-        api_state.engine.vote(fid_bad, f"hater_{i}", -1) # Score = 0.4
+    for i in range(6):
+        api_state.engine.vote_sync(fid_bad, f"hater_{i}", -1)  # Score = 0.4
     
     # Recall and check order
     resp = client.get(f"/v1/projects/{proj}/facts")
@@ -153,9 +159,9 @@ def test_rwc_flow(client):
     assert resp.json()["new_consensus_score"] == 1.0
 
     # 5. Manually boost Alpha's reputation and vote again
-    with api_state.engine._get_conn() as conn:
-        conn.execute("UPDATE agents SET reputation_score = 0.9 WHERE id = ?", (alpha_id,))
-        conn.commit()
+    conn = api_state.engine._get_sync_conn()
+    conn.execute("UPDATE agents SET reputation_score = 0.9 WHERE id = ?", (alpha_id,))
+    conn.commit()
 
     # Alpha votes again (updates existing vote)
     resp = client.post(f"/v1/facts/{fact_id}/vote-v2", json={

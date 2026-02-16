@@ -21,11 +21,12 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.metrics import metrics
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.consensus_mixin import ConsensusMixin
+from cortex.engine.sync_compat import SyncCompatMixin
 
 logger = logging.getLogger("cortex")
 
 
-class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin):
+class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin, SyncCompatMixin):
     """The Sovereign Ledger for AI Agents."""
 
     def __init__(
@@ -62,7 +63,8 @@ class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin):
                 await self._conn.load_extension(sqlite_vec.loadable_path())
                 await self._conn.enable_load_extension(False)
                 self._vec_available = True
-            except (OSError, AttributeError, Exception):
+            except (OSError, AttributeError) as e:
+                logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
 
             await self._conn.execute("PRAGMA journal_mode=WAL")
@@ -80,79 +82,8 @@ class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin):
         """Public alias for backward compatibility. WARNING: Synchronous call to async resource."""
         return self._get_conn()
 
-    # ─── Sync Compatibility Layer ─────────────────────────────────
-    # Used by sync callers: cortex.sync.read, cortex.sync.write,
-    # cortex.sync.common, CLI, etc.
-
-    def _get_sync_conn(self):
-        """Get a raw sqlite3.Connection for sync callers."""
-        import sqlite3 as _sqlite3
-        if not hasattr(self, "_sync_conn") or self._sync_conn is None:
-            self._sync_conn = _sqlite3.connect(str(self._db_path), timeout=30)
-            self._sync_conn.execute("PRAGMA journal_mode=WAL")
-            self._sync_conn.execute("PRAGMA synchronous=NORMAL")
-            self._sync_conn.execute("PRAGMA foreign_keys=ON")
-            try:
-                self._sync_conn.enable_load_extension(True)
-                sqlite_vec.load(self._sync_conn)
-                self._sync_conn.enable_load_extension(False)
-            except (OSError, AttributeError, Exception):
-                pass
-        return self._sync_conn
-
-    def init_db_sync(self) -> None:
-        """Initialize database schema (sync version)."""
-        from cortex.schema import ALL_SCHEMA
-        conn = self._get_sync_conn()
-        for stmt in ALL_SCHEMA:
-            if "USING vec0" in stmt and not self._vec_available:
-                continue
-            conn.executescript(stmt)
-        conn.commit()
-        from cortex.migrations.core import run_migrations
-        run_migrations(conn)
-        for k, v in get_init_meta():
-            conn.execute(
-                "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
-                (k, v),
-            )
-        conn.commit()
-        logger.info("CORTEX database initialized (sync) at %s", self._db_path)
-
-    def store_sync(
-        self,
-        project: str,
-        content: str,
-        fact_type: str = "knowledge",
-        tags=None,
-        confidence: str = "stated",
-        source=None,
-        meta=None,
-        valid_from=None,
-    ) -> int:
-        """Store a fact synchronously (for sync callers like sync.read)."""
-        import json as _json
-        conn = self._get_sync_conn()
-        ts = valid_from or now_iso()
-        tags_json = _json.dumps(tags or [])
-        meta_json = _json.dumps(meta or {})
-        cursor = conn.execute(
-            "INSERT INTO facts (project, content, fact_type, tags, confidence, "
-            "valid_from, source, meta, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (project, content, fact_type, tags_json, confidence,
-             ts, source, meta_json, ts, ts),
-        )
-        conn.commit()
-        return cursor.lastrowid
-
-    def close_sync(self):
-        """Close sync connection."""
-        if hasattr(self, "_sync_conn") and self._sync_conn:
-            self._sync_conn.close()
-            self._sync_conn = None
-
     def _get_embedder(self) -> LocalEmbedder:
+        """Lazily initialize and return the local embedding model."""
         if self._embedder is None:
             self._embedder = LocalEmbedder()
         return self._embedder
@@ -236,7 +167,7 @@ class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin):
 
     async def process_graph_outbox_async(self, limit: int = 10) -> int:
         """Process pending CDC events to sync Neo4j."""
-        from cortex.graph import get_graph_async
+        from cortex.graph import get_graph
         
         conn = await self.get_conn()
         async with conn.execute(
@@ -296,6 +227,9 @@ class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin):
         if self._conn:
             await self._conn.close()
             self._conn = None
+        self.close_sync()
+        self._ledger = None
+        self._embedder = None
 
     async def __aenter__(self):
         return self

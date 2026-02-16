@@ -4,13 +4,11 @@ CORTEX v4.0 — Neural Hive API.
 Endpoints for visualizing the memory graph in 3D.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import json
+from typing import List
 import sqlite3
-from pathlib import Path
-from cortex.auth import AuthResult, require_auth, require_permission
+from cortex.auth import AuthResult, require_permission
 
 router = APIRouter(prefix="/hive", tags=["hive"])
 

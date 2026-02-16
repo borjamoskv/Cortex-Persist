@@ -5,20 +5,18 @@ FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization and routing.
 """
 
-from __future__ import annotations
 
 import logging
-import random
 import sqlite3
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex.auth import AuthManager, AuthResult, get_auth_manager, require_auth, require_permission
+from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
 from cortex.timing import TimingTracker
 from cortex.config import DB_PATH, ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
@@ -93,41 +91,68 @@ app = FastAPI(
 # ─── Middleware ──────────────────────────────────────────────────────
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """In-memory rate limiter (Sliding Window)."""
-    
+    """In-memory rate limiter (Sliding Window, bounded).
+
+    Tracks at most ``MAX_TRACKED_IPS`` unique clients.  When the limit
+    is reached, the oldest 20 % of entries are evicted to keep memory
+    usage predictable under DDoS or scanner traffic.
+    """
+
+    MAX_TRACKED_IPS = 10_000
+
     def __init__(self, app, limit: int = 100, window: int = 60):
         super().__init__(app)
         self.limit = limit
         self.window = window
         self.requests: dict[str, list[float]] = {}
-        
+
     async def dispatch(self, request: Request, call_next):
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
-        
+
         if client_ip not in self.requests:
             self.requests[client_ip] = []
-        
+
         # Remove timestamps older than window
-        self.requests[client_ip] = [t for t in self.requests[client_ip] if now - t < self.window]
-        
+        self.requests[client_ip] = [
+            t for t in self.requests[client_ip] if now - t < self.window
+        ]
+
         if len(self.requests[client_ip]) >= self.limit:
             logger.warning("Rate limit exceeded for %s", client_ip)
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too Many Requests. Please slow down."},
-                headers={"Retry-After": str(self.window)}
+                headers={"Retry-After": str(self.window)},
             )
-            
+
         self.requests[client_ip].append(now)
-        
-        # Periodic cleanup (1% of requests)
-        if random.random() < 0.01:
-            expired_keys = [ip for ip, reqs in self.requests.items() if not reqs or now - reqs[-1] > self.window]
-            for ip in expired_keys:
-                del self.requests[ip]
-        
+
+        # Bounded eviction — deterministic, not probabilistic
+        if len(self.requests) > self.MAX_TRACKED_IPS:
+            self._evict(now)
+
         return await call_next(request)
+
+    def _evict(self, now: float) -> None:
+        """Remove stale entries; if still over limit, drop oldest 20 %."""
+        # First pass: remove truly expired IPs
+        expired = [
+            ip for ip, ts in self.requests.items()
+            if not ts or now - ts[-1] > self.window
+        ]
+        for ip in expired:
+            del self.requests[ip]
+
+        # Second pass: if still over limit, drop oldest 20 %
+        if len(self.requests) > self.MAX_TRACKED_IPS:
+            by_age = sorted(
+                self.requests.items(),
+                key=lambda kv: kv[1][-1] if kv[1] else 0,
+            )
+            to_drop = max(1, len(by_age) // 5)
+            for ip, _ in by_age[:to_drop]:
+                del self.requests[ip]
 
 
 app.add_middleware(
@@ -141,9 +166,7 @@ app.add_middleware(RateLimitMiddleware, limit=RATE_LIMIT, window=RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
 
 
-# ─── Dependencies ───────────────────────────────────────────────────
 
-from cortex.api_deps import get_engine, get_tracker
 
 # ─── Exception Handlers ──────────────────────────────────────────────
 

@@ -130,13 +130,14 @@ class FederatedEngine:
     async def close_all(self) -> None:
         """Close all tenant shard connections."""
         async with self._lock:
+            count = len(self._shards)
             for tenant_id, engine in self._shards.items():
                 try:
                     await engine.close()
                 except Exception as e:
                     logger.warning("Error closing shard '%s': %s", tenant_id, e)
             self._shards.clear()
-        logger.info("Federation: closed all %d shards", len(self._shards))
+        logger.info("Federation: closed all %d shards", count)
 
     @staticmethod
     def _sanitize_tenant_id(tenant_id: str) -> str:
