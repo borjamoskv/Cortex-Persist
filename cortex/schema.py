@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS facts (
     meta        TEXT DEFAULT '{}',
     consensus_score REAL DEFAULT 1.0,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    tx_id       INTEGER REFERENCES transactions(id)
 );
 """
 

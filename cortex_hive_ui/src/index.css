@@ -24,3 +24,31 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* Custom UI Utilities */
+.legend-item {
+  @apply flex items-center gap-2 justify-end;
+}
+
+.legend-label {
+  @apply text-[10px] uppercase font-mono tracking-tighter text-white/40;
+}
+
+.legend-indicator {
+  @apply w-2 h-2 rounded-full;
+  background-color: var(--legend-color);
+  box-shadow: 0 0 10px var(--legend-color);
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

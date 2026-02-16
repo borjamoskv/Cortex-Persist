@@ -195,26 +195,13 @@ export function CodexView() {
                                 Synchronizing Neural Hive Synapses
                             </div>
                             <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-transparent via-[#7d5fff] to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                                <div className="h-full bg-gradient-to-r from-transparent via-[#7d5fff] to-transparent animate-shimmer" />
                             </div>
                         </div>
                     )}
                 </div>
             )}
         </main>
-
-        {/* Global Shimmer Animation */}
-        <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes shimmer {
-                0% { background-position: -200% 0; }
-                100% { background-position: 200% 0; }
-            }
-            .animate-shimmer {
-                animation: shimmer 2s infinite linear;
-            }
-            .no-scrollbar::-webkit-scrollbar { display: none; }
-            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        `}} />
     </div>
   );
 }

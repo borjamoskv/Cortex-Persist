@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import sys
+import os
 from pathlib import Path
 
 import click
@@ -861,32 +862,39 @@ def snapshot_list(db):
     console.print(table)
 
 
-# ─── Missions ────────────────────────────────────────────────────
+# ─── Launchpad ───────────────────────────────────────────────────
 
 @cli.group()
-def mission():
-    """Orchestrate AI Swarm missions."""
+def launchpad():
+    """Orchestrate AI Swarm missions via CORTEX Launchpad."""
     pass
 
 
-@mission.command("launch")
+@launchpad.command("launch")
 @click.argument("project")
-@click.argument("goal")
-@click.option("--formation", "-f", default="IRON_DOME", help="Swarm formation")
+@click.argument("goal", required=False)
+@click.option("--file", "-f", "mission_file", type=click.Path(exists=True), help="YAML/JSON mission definition file")
+@click.option("--formation", default="IRON_DOME", help="Swarm formation")
 @click.option("--agents", "-a", default=10, help="Number of agents")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def mission_launch(project, goal, formation, agents, db):
-    """Launch a new swarm mission."""
+def mission_launch(project, goal, mission_file, formation, agents, db):
+    """Launch a new swarm mission. Provide a goal or a mission file."""
+    if not goal and not mission_file:
+        console.print("[red]Error: You must provide either a goal or a mission file (--file).[/]")
+        return
+
     engine = get_engine(db)
     orchestrator = MissionOrchestrator(engine)
     
     try:
-        with console.status(f"[bold blue]Launching mission in {project}...[/]"):
+        display_goal = goal if goal else f"File: {os.path.basename(mission_file)}"
+        with console.status(f"[bold blue]Launching mission in {project}: {display_goal}...[/]"):
             result = orchestrator.launch(
                 project=project,
                 goal=goal,
                 formation=formation,
-                agents=agents
+                agents=agents,
+                mission_file=mission_file
             )
             
         if result["status"] == "success":
@@ -915,7 +923,7 @@ def mission_launch(project, goal, formation, agents, db):
         engine.close()
 
 
-@mission.command("list")
+@launchpad.command("list")
 @click.option("--project", "-p", default=None, help="Filter by project")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mission_list(project, db):
@@ -953,7 +961,8 @@ def mission_list(project, db):
 
 cli.add_command(ledger)
 cli.add_command(timeline)
-cli.add_command(mission)
+cli.add_command(launchpad)
+cli.add_command(launchpad, name="mission") # Alias for compatibility
 
 
 if __name__ == "__main__":

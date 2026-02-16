@@ -8,7 +8,6 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from starlette.concurrency import run_in_threadpool
 
-from cortex import api_state
 from cortex.auth import AuthResult, require_permission
 from cortex.models import (
     StoreRequest, StoreResponse, FactResponse, 
@@ -81,12 +80,13 @@ async def cast_vote(
     fact_id: int,
     req: VoteRequest,
     auth: AuthResult = Depends(require_permission("write")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> VoteResponse:
     """Cast a consensus vote (verify/dispute) on a fact."""
     try:
         # Ownership check
         def _check_owner():
-            with api_state.engine._get_conn() as conn:
+            with engine._get_conn() as conn:
                 row = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)).fetchone()
                 return row[0] if row else None
         
@@ -100,11 +100,11 @@ async def cast_vote(
         agent_id = auth.key_name or "api_agent"
         
         # Cast vote (req.value is 1, -1, or 0)
-        score = await run_in_threadpool(api_state.engine.vote, fact_id, agent_id, req.value)
+        score = await run_in_threadpool(engine.vote, fact_id, agent_id, req.value)
         
         # Get updated confidence for the response
         def _fetch_fact_status():
-            with api_state.engine._get_conn() as conn:
+            with engine._get_conn() as conn:
                 row = conn.execute("SELECT confidence FROM facts WHERE id = ?", (fact_id,)).fetchone()
                 return row[0] if row else "unknown"
         
@@ -129,12 +129,13 @@ async def cast_vote_v2(
     fact_id: int,
     req: VoteV2Request,
     auth: AuthResult = Depends(require_permission("write")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> VoteResponse:
     """Cast a reputation-weighted consensus vote (RWC)."""
     try:
         # Ownership check
         def _check_owner():
-            with api_state.engine._get_conn() as conn:
+            with engine._get_conn() as conn:
                 row = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)).fetchone()
                 return row[0] if row else None
 
@@ -146,7 +147,7 @@ async def cast_vote_v2(
 
         # Cast RWC vote
         score = await run_in_threadpool(
-            api_state.engine.vote, 
+            engine.vote, 
             fact_id=fact_id, 
             agent=auth.key_name or "api_agent", 
             value=req.vote, 
@@ -155,7 +156,7 @@ async def cast_vote_v2(
 
         # Get updated confidence for the response
         def _fetch_fact_status():
-            with api_state.engine._get_conn() as conn:
+            with engine._get_conn() as conn:
                 row = conn.execute("SELECT confidence FROM facts WHERE id = ?", (fact_id,)).fetchone()
                 return row[0] if row else "unknown"
 
@@ -178,14 +179,14 @@ async def cast_vote_v2(
 
 
 @router.get("/v1/facts/{fact_id}/votes", response_model=List[dict])
-async def get_votes(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("read")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> List[dict]:
     """Retrieve all votes for a specific fact (Tenant Isolated)."""
     # Ownership check
     def _check_owner():
-        with api_state.engine._get_conn() as conn:
+        with engine._get_conn() as conn:
             row = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)).fetchone()
             return row[0] if row else None
 
@@ -196,7 +197,7 @@ async def get_votes(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     def _get_votes():
-        with api_state.engine._get_conn() as conn:
+        with engine._get_conn() as conn:
             # Combined query for legacy and v2 votes
             v2_votes = conn.execute(
                 """
@@ -237,11 +238,12 @@ async def get_votes(
 async def deprecate_fact(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("write")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> dict:
     """Soft-deprecate a fact (mark as invalid)."""
     # Ownership check
     def _check_owner():
-        with api_state.engine._get_conn() as conn:
+        with engine._get_conn() as conn:
             row = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)).fetchone()
             return row[0] if row else None
     
@@ -251,7 +253,7 @@ async def deprecate_fact(
     if project != auth.tenant_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    success = await run_in_threadpool(api_state.engine.deprecate, fact_id, project)
+    success = await run_in_threadpool(engine.deprecate, fact_id, project)
     if not success:
         raise HTTPException(status_code=500, detail="Deprecation failed")
     
