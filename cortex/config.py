@@ -28,8 +28,12 @@ RATE_WINDOW = int(os.environ.get("CORTEX_RATE_WINDOW", "60"))
 GRAPH_BACKEND = os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite") # sqlite or neo4j
 NEO4J_URI = os.environ.get("CORTEX_NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.environ.get("CORTEX_NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("CORTEX_NEO4J_PASSWORD", "password")
+NEO4J_PASSWORD = os.environ.get("CORTEX_NEO4J_PASSWORD", "")
 
 # Ensure directories exist
 CORTEX_DIR.mkdir(parents=True, exist_ok=True)
 Path(AGENT_DIR / "memory").mkdir(parents=True, exist_ok=True)
+
+# Ledger Configuration
+CHECKPOINT_BATCH_SIZE = int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000"))
+CONNECTION_POOL_SIZE = int(os.environ.get("CORTEX_POOL_SIZE", "5"))

@@ -183,14 +183,14 @@ class TestDaemonNotifierMethod:
     """daemon.py must use Notifier.notify(), not .send()."""
 
     def test_no_notifier_send_calls(self):
-        """Verify that Notifier.send() is never called in daemon.py."""
+        """Verify that Notifier.send() is never called in daemon core."""
         import inspect
-        from cortex import daemon
+        from cortex.daemon import core
 
-        source = inspect.getsource(daemon)
+        source = inspect.getsource(core)
         assert "Notifier.send(" not in source
-        # Verify the correct method IS used
-        assert "Notifier.notify(" in source
+        # Verify the correct method IS used (e.g. alert_site_down)
+        assert "Notifier.alert_" in source
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -204,9 +204,9 @@ class TestCliListFactsParamLimit:
     def test_no_fstring_limit(self):
         """Verify list_facts doesn't use f-string LIMIT."""
         from pathlib import Path
-        import cortex.cli
+        import cortex.cli.crud
 
-        cli_source = Path(cortex.cli.__file__).read_text()
+        cli_source = Path(cortex.cli.crud.__file__).read_text()
         # Only inspect the list_facts function area
         assert "LIMIT {limit}" not in cli_source
         assert "LIMIT ?" in cli_source

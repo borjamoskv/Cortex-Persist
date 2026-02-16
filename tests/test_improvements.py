@@ -24,6 +24,7 @@ from cortex.migrations import (
     get_current_version,
     run_migrations,
 )
+import sqlite_vec
 
 
 @pytest.fixture
@@ -353,6 +354,14 @@ class TestMigrations:
     def test_migrations_applied(self, tmp_path):
         db = tmp_path / "test.db"
         conn = sqlite3.connect(str(db))
+        try:
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(False)
+        except (AttributeError, OSError):
+            pass
         # Create minimal facts table for migrations
         conn.execute("""
             CREATE TABLE facts (
@@ -373,6 +382,15 @@ class TestMigrations:
     def test_migrations_idempotent(self, tmp_path):
         db = tmp_path / "test.db"
         conn = sqlite3.connect(str(db))
+        try:
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(False)
+        except (AttributeError, OSError):
+            pass
+
         conn.execute("""
             CREATE TABLE facts (
                 id INTEGER PRIMARY KEY,

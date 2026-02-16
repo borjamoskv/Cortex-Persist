@@ -202,7 +202,8 @@ def text_search(
 
         cursor = conn.execute(sql, params)
         rows = cursor.fetchall()
-    except (sqlite3.Error, ValueError, RuntimeError):
+    except (sqlite3.Error, ValueError, RuntimeError, Exception) as e:
+        logger.error("Text search failed (%s): %s", type(e).__name__, e)
         return []
 
     results = []

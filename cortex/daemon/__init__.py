@@ -4,7 +4,17 @@ CORTEX Daemon — Package init.
 Re-exports from sub-modules for backward compatibility.
 """
 
+import ssl  # noqa: F401 — re-export for backward compat (tests patch via cortex.daemon.ssl)
+import time  # noqa: F401
+import socket  # noqa: F401
+
 from cortex.daemon.models import (  # noqa: F401
+    BUNDLE_ID,
+    DEFAULT_COOLDOWN,
+    DEFAULT_INTERVAL,
+    DEFAULT_MEMORY_STALE_HOURS,
+    DEFAULT_STALE_HOURS,
+    STATUS_FILE,
     SiteStatus, GhostAlert, MemoryAlert, CertAlert,
     EngineHealthAlert, DiskAlert, DaemonStatus,
 )
