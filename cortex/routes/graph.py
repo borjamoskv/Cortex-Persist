@@ -11,7 +11,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from starlette.concurrency import run_in_threadpool
 from cortex.auth import AuthResult, require_permission
-from cortex import api_state
+from cortex.api_deps import get_engine
+from cortex.engine import CortexEngine
 from cortex.graph import get_graph as _get_graph_impl
 
 router = APIRouter(tags=["graph"])
@@ -23,6 +24,7 @@ async def get_graph(
     project: str,
     limit: int = Query(50, ge=1, le=500),
     auth: AuthResult = Depends(require_permission("read")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> dict:
     """Get entity graph for a specific project."""
     # Tenant Isolation
@@ -30,8 +32,11 @@ async def get_graph(
         raise HTTPException(status_code=403, detail="Forbidden: Access to this project is denied")
 
     try:
-        conn = api_state.engine.conn
-        result = await run_in_threadpool(_get_graph_impl, conn, project=project, limit=limit)
+        def _get_impl():
+            with engine.get_connection() as conn:
+                return _get_graph_impl(conn, project=project, limit=limit)
+        
+        result = await run_in_threadpool(_get_impl)
         return result
     except sqlite3.Error as e:
         logger.error("Graph unavailable: %s", e)
@@ -42,11 +47,15 @@ async def get_graph(
 async def get_graph_all(
     limit: int = Query(50, ge=1, le=500),
     auth: AuthResult = Depends(require_permission("read")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> dict:
     """Get entity graph across all projects."""
     try:
-        conn = api_state.engine.conn
-        result = await run_in_threadpool(_get_graph_impl, conn, project=None, limit=limit)
+        def _get_impl():
+            with engine.get_connection() as conn:
+                return _get_graph_impl(conn, project=None, limit=limit)
+        
+        result = await run_in_threadpool(_get_impl)
         return result
     except sqlite3.Error as e:
         logger.error("Graph unavailable: %s", e)

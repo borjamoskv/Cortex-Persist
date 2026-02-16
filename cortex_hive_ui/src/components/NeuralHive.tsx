@@ -171,9 +171,9 @@ export default function NeuralHive({ data, onNodeSelect }: { data: { nodes: Node
       {/* Legend & Stats Overlay */}
       <div className="absolute top-40 right-8 flex flex-col gap-2 pointer-events-none">
           {Object.entries(COLORS).filter(([k]) => k !== 'glow' && k !== 'default').map(([name, color]) => (
-              <div key={name} className="flex items-center gap-2 justify-end">
-                  <span className="text-[10px] uppercase font-mono tracking-tighter text-white/40">{name}</span>
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }} />
+              <div key={name} className="legend-item">
+                  <span className="legend-label">{name}</span>
+                  <div className="legend-indicator" style={{ '--legend-color': color } as React.CSSProperties} />
               </div>
           ))}
       </div>

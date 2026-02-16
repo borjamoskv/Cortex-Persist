@@ -310,6 +310,48 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     font-size: 11px;
     color: var(--text-dim);
   }
+
+  /* ─── MISSIONS ──────────────────── */
+  #card-missions { grid-column: span 12; margin-top: 24px; }
+  .mission-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin-top: 16px;
+  }
+  .mission-table th {
+    text-align: left;
+    color: var(--text-dim);
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  .mission-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .mission-project { color: var(--primary); font-weight: 700; }
+  .mission-type { 
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    font-size: 9px;
+  }
+  .mission-content { color: var(--text); line-height: 1.4; max-width: 600px; }
+  .mission-status { color: var(--text-dim); }
+  .status-tag {
+    padding: 2px 6px;
+    border-radius: 100px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .status-tag.intent { border-color: var(--accent); color: var(--accent); }
+  .status-tag.report { border-color: var(--primary); color: var(--primary); }
 </style>
 </head>
 <body>
@@ -373,7 +415,32 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Row 3: Search -->
+    </div>
+    
+    <!-- Row 3: Swarm Mission Monitor -->
+    <div class="card" id="card-missions">
+      <div class="card-header">
+        <div class="card-label">Swarm Mission Monitor</div>
+        <div class="status-badge" style="margin:0">Live Feed</div>
+      </div>
+      <div id="mission-feed">
+        <table class="mission-table">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Status</th>
+              <th>Mission Objective / Findings</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="mission-tbody">
+            <tr><td colspan="4" style="text-align:center; color:var(--text-dim); padding:40px;">No missions found in ledger.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Row 4: Search -->
     <div id="search-section">
       <div class="search-wrapper">
         <input class="search-input" id="search" type="text"
@@ -420,6 +487,9 @@ async function init() {
     renderStatus(status);
     renderTime(today);
     renderCharts(history, today);
+
+    // Missions (async)
+    fetchMissions();
 
     // Daemon status (non-blocking)
     try {
@@ -586,6 +656,33 @@ async function doSearch(q) {
     `).join('');
   } catch(e) {
     console.error(e);
+  }
+}
+
+async function fetchMissions() {
+  const el = document.getElementById('mission-tbody');
+  try {
+    const r = await fetch('/v1/missions/', {headers});
+    const missions = await r.json();
+    
+    if (!missions.length) return;
+
+    el.innerHTML = missions.slice(0, 10).map(m => {
+      const isReport = m.fact_type === 'report';
+      const statusClass = isReport ? 'report' : 'intent';
+      const statusLabel = isReport ? 'COMPLETED' : 'STATED';
+      
+      return `
+        <tr>
+          <td class="mission-project">${sanitize(m.project)}</td>
+          <td><span class="status-tag ${statusClass}">${statusLabel}</span></td>
+          <td class="mission-content">${sanitize(m.content).replace('MISSION_INTENT:', '<b>Intent:</b>').replace('MISSION_REPORT:', '<b>Report:</b>')}</td>
+          <td style="color:var(--text-dim); font-size:10px;">${new Date(m.created_at).toLocaleTimeString()}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch(e) {
+    console.error("Missions fetch failed", e);
   }
 }
 

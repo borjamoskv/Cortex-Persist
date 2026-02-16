@@ -7,11 +7,11 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.concurrency import run_in_threadpool
 
-from cortex import api_state
 from cortex.auth import AuthResult, require_permission
 from cortex.ledger import ImmutableLedger
 from cortex.models import LedgerReportResponse, CheckpointResponse
 from cortex.engine import CortexEngine
+from cortex.api_deps import get_engine
 
 
 class LedgerError(Exception):
@@ -30,11 +30,12 @@ router = APIRouter(prefix="/v1/ledger", tags=["ledger"])
 @router.get("/status", response_model=LedgerReportResponse)
 async def get_ledger_status(
     auth: AuthResult = Depends(require_permission("admin")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> LedgerReportResponse:
     """Check the cryptographic integrity of the entire ledger."""
     try:
         def _verify():
-            with api_state.engine.get_connection() as conn:
+            with engine.get_connection() as conn:
                 ledger = ImmutableLedger(conn)
                 report = ledger.verify_integrity()
                 if not report["valid"]:
@@ -56,11 +57,12 @@ async def get_ledger_status(
 @router.post("/checkpoint", response_model=CheckpointResponse)
 async def create_checkpoint(
     auth: AuthResult = Depends(require_permission("admin")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> CheckpointResponse:
     """Manually trigger a Merkle root checkpoint for recent transactions."""
     try:
         def _checkpoint():
-            with api_state.engine.get_connection() as conn:
+            with engine.get_connection() as conn:
                 ledger = ImmutableLedger(conn)
                 return ledger.create_merkle_checkpoint()
         
@@ -85,6 +87,7 @@ async def create_checkpoint(
 @router.get("/verify", response_model=LedgerReportResponse)
 async def verify_ledger(
     auth: AuthResult = Depends(require_permission("admin")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> LedgerReportResponse:
     """Alias for /status — performs full integrity verification."""
-    return await get_ledger_status(auth)
+    return await get_ledger_status(auth, engine)

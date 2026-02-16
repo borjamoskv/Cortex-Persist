@@ -31,17 +31,19 @@ class MissionOrchestrator:
     def launch(
         self, 
         project: str, 
-        goal: str, 
+        goal: Optional[str] = None, 
         formation: str = "IRON_DOME",
         agents: int = 10,
-        context: Optional[str] = None
+        context: Optional[str] = None,
+        mission_file: Optional[str] = None
     ) -> Dict[str, Any]:
         """Record intent and launch a swarm mission via subprocess."""
         
         # 1. Record the intent in the ledger
+        display_goal = goal if goal else f"File: {mission_file}"
         intent_fact = {
             "project": project,
-            "content": f"MISSION_INTENT: {goal} (Formation: {formation}, Agents: {agents})",
+            "content": f"MISSION_INTENT: {display_goal} (Formation: {formation}, Agents: {agents})",
             "fact_type": "intent",
             "tags": ["swarm", "mission", "launch"],
             "confidence": "intended",
@@ -52,15 +54,19 @@ class MissionOrchestrator:
         logger.info(f"Recorded mission intent #{fact_id} for project {project}")
 
         # 2. Build the command
-        # Assumes node is in PATH
-        cmd = [
-            "node", 
-            str(self.swarm_path),
-            "--mission", goal,
+        cmd = ["node", str(self.swarm_path)]
+        
+        if mission_file:
+            cmd.extend(["--file", mission_file])
+        
+        if goal:
+            cmd.extend(["--mission", goal])
+            
+        cmd.extend([
             "--project", project,
             "--formation", formation,
             "--agents", str(agents)
-        ]
+        ])
         
         if context:
             cmd.extend(["--context", context])

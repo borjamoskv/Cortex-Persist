@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, Query
 from starlette.concurrency import run_in_threadpool
 from cortex.auth import AuthResult, require_permission
 from cortex.models import SearchRequest, SearchResult
-from cortex import api_state
+from cortex.api_deps import get_engine
+from cortex.engine import CortexEngine
 
 router = APIRouter(tags=["search"])
 
@@ -14,10 +15,11 @@ router = APIRouter(tags=["search"])
 async def search_facts(
     req: SearchRequest,
     auth: AuthResult = Depends(require_permission("read")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> list[SearchResult]:
     """Semantic search across all facts."""
     results = await run_in_threadpool(
-        api_state.engine.search, 
+        engine.search, 
         req.query, 
         top_k=req.k, 
         project=req.project,
@@ -46,10 +48,11 @@ async def search_facts_get(
     project: str | None = Query(None),
     as_of: str | None = Query(None),
     auth: AuthResult = Depends(require_permission("read")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> list[SearchResult]:
     """Semantic search (GET) for frontend convenience."""
     results = await run_in_threadpool(
-        api_state.engine.search, 
+        engine.search, 
         query, 
         top_k=limit, 
         project=project,
