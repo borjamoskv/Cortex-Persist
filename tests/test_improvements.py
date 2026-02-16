@@ -102,6 +102,39 @@ class TestStoreMany:
         recalled = engine.recall("batch")
         assert len(recalled) == 10
 
+    def test_batch_store_rollback_on_db_error(self, engine):
+        """Forces a DB error mid-batch and verifies full ROLLBACK.
+
+        Patches engine.store (Python-level) to raise sqlite3.IntegrityError
+        on the 3rd call, since pysqlite3 C extension slots are read-only.
+        """
+        from unittest.mock import patch as mock_patch
+        from cortex.exceptions import DatabaseTransactionError
+
+        facts = [
+            {"project": "rollback_test", "content": f"Fact {i}"}
+            for i in range(5)
+        ]
+
+        original_store = engine.store
+        call_count = {"n": 0}
+
+        def failing_store(*args, **kwargs):
+            call_count["n"] += 1
+            if call_count["n"] == 3:
+                raise sqlite3.IntegrityError("Simulated mid-batch failure")
+            return original_store(*args, **kwargs)
+
+        with mock_patch.object(engine, 'store', side_effect=failing_store):
+            with pytest.raises(DatabaseTransactionError, match="Cambios revertidos"):
+                engine.store_many(facts)
+
+        # Verify zero partial commits survived the rollback
+        recalled = engine.recall("rollback_test")
+        assert len(recalled) == 0, (
+            f"Expected 0 facts after rollback, got {len(recalled)}"
+        )
+
 
 # ─── update Tests ─────────────────────────────────────────────────────
 
