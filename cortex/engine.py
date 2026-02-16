@@ -18,7 +18,7 @@ from typing import Optional
 import sqlite_vec
 
 from cortex.embeddings import LocalEmbedder
-from cortex.embeddings import LocalEmbedder
+from cortex.exceptions import DatabaseTransactionError
 from cortex.schema import get_init_meta
 from cortex.migrations import run_migrations
 from cortex.search import SearchResult, semantic_search, text_search
@@ -256,20 +256,26 @@ class CortexEngine:
         return fact_id
 
     def store_many(self, facts: list[dict]) -> list[int]:
-        """Store multiple facts in a single transaction (Atomic)."""
+        """Store multiple facts atomically. Full ROLLBACK on any failure.
+
+        If any single record fails, the entire batch is reverted.
+        Validation errors (ValueError) pass through unchanged.
+        Database errors are wrapped in DatabaseTransactionError to avoid
+        leaking internal SQLite details.
+        """
         if not facts:
             raise ValueError("Cannot store empty list of facts")
 
         conn = self._get_conn()
         ids = []
         try:
-            with conn: # Handles BEGIN/COMMIT/ROLLBACK automatically
+            with conn:  # BEGIN/COMMIT/ROLLBACK managed by context manager
                 for f in facts:
                     if "project" not in f or not f["project"] or not str(f["project"]).strip():
                         raise ValueError("Fact must have project")
                     if "content" not in f or not f["content"] or not str(f["content"]).strip():
                         raise ValueError("Fact must have content")
-                        
+
                     fid = self.store(
                         project=f["project"],
                         content=f["content"],
@@ -279,13 +285,21 @@ class CortexEngine:
                         source=f.get("source", None),
                         meta=f.get("meta", None),
                         valid_from=f.get("valid_from", None),
-                        commit=False, # Don't commit inside the loop
+                        commit=False,
                     )
                     ids.append(fid)
             logger.info("Batch stored %d facts", len(ids))
             return ids
-        except Exception as e:
-            logger.error("Batch store failed: %s", e)
+        except sqlite3.Error as e:
+            # Rollback already executed by context manager
+            logger.error(
+                "Batch insert failed. Transaction rolled back safely. Error: %s", e
+            )
+            raise DatabaseTransactionError(
+                "Error crítico al persistir los datos. Cambios revertidos."
+            ) from e
+        except ValueError:
+            # Validation errors pass through unchanged
             raise
 
     def update(
