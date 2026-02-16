@@ -322,7 +322,7 @@ def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None
             )
             result.errors_synced += 1
             existing.add(content)
-        except (json.JSONDecodeError, Exception) as e:
+        except (json.JSONDecodeError, sqlite3.Error, ValueError) as e:
             result.errors.append(f"Error sincronizando mistake: {e}")
 
 
@@ -361,7 +361,7 @@ def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             )
             result.bridges_synced += 1
             existing.add(content)
-        except (json.JSONDecodeError, Exception) as e:
+        except (json.JSONDecodeError, sqlite3.Error, ValueError) as e:
             result.errors.append(f"Error sincronizando bridge: {e}")
 
 

@@ -13,6 +13,7 @@ Configuration is loaded from ~/.cortex/daemon_config.json when present.
 from __future__ import annotations
 
 import json
+import sqlite3
 import logging
 import os
 import signal
@@ -701,7 +702,7 @@ class MoskvDaemon:
             export_snapshot(engine)
 
             engine.close()
-        except Exception as e:
+        except (sqlite3.Error, OSError, json.JSONDecodeError, ValueError) as e:
             status.errors.append(f"Memory sync error: {e}")
             logger.exception("Memory sync failed")
 

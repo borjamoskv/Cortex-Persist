@@ -39,7 +39,7 @@ def get_tracker(engine: CortexEngine) -> TimingTracker:
 
 @click.group()
 @click.version_option(__version__, prog_name="cortex")
-def cli():
+def cli() -> None:
     """CORTEX — The Sovereign Ledger for AI Agents."""
     pass
 
@@ -48,7 +48,7 @@ def cli():
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def init(db):
+def init(db) -> None:
     """Initialize CORTEX database."""
     engine = get_engine(db)
     engine.init_db()
@@ -71,7 +71,7 @@ def init(db):
 @click.option("--confidence", default="stated", help="Confidence level")
 @click.option("--source", default=None, help="Source of the fact")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def store(project, content, fact_type, tags, confidence, source, db):
+def store(project, content, fact_type, tags, confidence, source, db) -> None:
     """Store a fact in CORTEX."""
     engine = get_engine(db)
     tag_list = [t.strip() for t in tags.split(",")] if tags else None
@@ -96,7 +96,7 @@ def store(project, content, fact_type, tags, confidence, source, db):
 @click.option("--project", "-p", default=None, help="Scope to project")
 @click.option("--top", "-k", default=5, help="Number of results")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def search(query, project, top, db):
+def search(query, project, top, db) -> None:
     """Semantic search across CORTEX memory."""
     engine = get_engine(db)
 
@@ -134,7 +134,7 @@ def search(query, project, top, db):
 @cli.command()
 @click.argument("project")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def recall(project, db):
+def recall(project, db) -> None:
     """Load full context for a project."""
     engine = get_engine(db)
     facts = engine.recall(project)
@@ -170,7 +170,7 @@ def recall(project, db):
 @click.argument("project")
 @click.option("--at", "as_of", default=None, help="Point-in-time (ISO 8601)")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def history(project, as_of, db):
+def history(project, as_of, db) -> None:
     """Temporal query: what did we know at a specific time?"""
     engine = get_engine(db)
     facts = engine.history(project, as_of=as_of)
@@ -196,7 +196,7 @@ def history(project, as_of, db):
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--json-output", is_flag=True, help="Output as JSON")
-def status(db, json_output):
+def status(db, json_output) -> None:
     """Show CORTEX health and statistics."""
     engine = get_engine(db)
 
@@ -240,7 +240,7 @@ def status(db, json_output):
 @cli.command()
 @click.option("--source", default="~/.agent/memory", help="v3.1 memory directory")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def migrate(source, db):
+def migrate(source, db) -> None:
     """Import CORTEX v3.1 data into v4.0."""
     from cortex.migrate import migrate_v31_to_v40
 
@@ -266,7 +266,7 @@ def migrate(source, db):
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def sync(db):
+def sync(db) -> None:
     """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
 
 
@@ -302,7 +302,7 @@ def sync(db):
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--out", default="~/.cortex/context-snapshot.md", help="Ruta de salida")
-def export(db, out):
+def export(db, out) -> None:
     """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
 
 
@@ -315,7 +315,7 @@ def export(db, out):
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def writeback(db):
+def writeback(db) -> None:
     """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
 
 
@@ -349,7 +349,7 @@ def writeback(db):
 @click.argument("fact_id", type=int)
 @click.option("--reason", "-r", default=None, help="Razón de la eliminación")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def delete(fact_id, reason, db):
+def delete(fact_id, reason, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
     engine = get_engine(db)
     conn = engine._get_conn()
@@ -393,7 +393,7 @@ def delete(fact_id, reason, db):
 @click.option("--type", "fact_type", default=None, help="Filtrar por tipo")
 @click.option("--limit", "-n", default=20, help="Máximo de resultados")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def list_facts(project, fact_type, limit, db):
+def list_facts(project, fact_type, limit, db) -> None:
     """Listar facts activos (tabulado)."""
     engine = get_engine(db)
     conn = engine._get_conn()
@@ -441,7 +441,7 @@ def list_facts(project, fact_type, limit, db):
 @click.argument("fact_id", type=int)
 @click.argument("new_content")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def edit(fact_id, new_content, db):
+def edit(fact_id, new_content, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
     engine = get_engine(db)
     conn = engine._get_conn()
@@ -493,7 +493,7 @@ def edit(fact_id, new_content, db):
 @click.option("--project", "-p", default=None, help="Filter by project")
 @click.option("--days", "-d", default=1, help="Number of days (default: 1 = today)")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def time_cmd(project, days, db):
+def time_cmd(project, days, db) -> None:
     """Show time tracking summary."""
     engine = get_engine(db)
     engine.init_db()
@@ -543,7 +543,7 @@ def time_cmd(project, days, db):
 @click.option("--category", "-c", default=None, help="Activity category")
 @click.option("--branch", "-b", default=None, help="Git branch")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def heartbeat_cmd(project, entity, category, branch, db):
+def heartbeat_cmd(project, entity, category, branch, db) -> None:
     """Record an activity heartbeat."""
     engine = get_engine(db)
     engine.init_db()

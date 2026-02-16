@@ -81,7 +81,7 @@ async def require_auth(
     return result
 
 
-def require_permission(permission: str):
+def require_permission(permission: str) -> ...:  # Returns a FastAPI dependency
     """Factory for permission-checking dependencies."""
 
     async def checker(auth: AuthResult = Depends(require_auth)) -> AuthResult:
@@ -173,12 +173,12 @@ class TimeSummaryResponse(BaseModel):
 
 
 @app.get("/", tags=["health"])
-async def root():
+async def root() -> dict:
     return {"service": "cortex", "version": "4.0.0a1", "status": "operational"}
 
 
 @app.get("/health", tags=["health"])
-async def health():
+async def health() -> dict:
     try:
         stats = engine.stats()
         return {"status": "healthy", "facts": stats["total_facts"], "version": "4.0.0a1"}
@@ -190,7 +190,7 @@ async def health():
 async def store_fact(
     req: StoreRequest,
     auth: AuthResult = Depends(require_permission("write")),
-):
+) -> StoreResponse:
     """Store a new fact with vector embedding."""
     fact_id = engine.store(
         project=req.project,
@@ -211,7 +211,7 @@ async def store_fact(
 async def search_facts(
     req: SearchRequest,
     auth: AuthResult = Depends(require_permission("read")),
-):
+) -> list[SearchResult]:
     """Semantic search across all facts."""
     results = engine.search(req.query, top_k=req.k)
     return [
@@ -232,7 +232,7 @@ async def recall_project(
     project: str,
     include_deprecated: bool = Query(False),
     auth: AuthResult = Depends(require_permission("read")),
-):
+) -> list[FactResponse]:
     """Recall all facts for a project."""
     if include_deprecated:
         facts = engine.history(project)
@@ -259,7 +259,7 @@ async def recall_project(
 async def deprecate_fact(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("write")),
-):
+) -> dict:
     """Deprecate a fact (soft delete — never removes data)."""
     success = engine.deprecate(fact_id, reason=f"api:{auth.key_name}")
     if not success:
@@ -268,7 +268,7 @@ async def deprecate_fact(
 
 
 @app.get("/v1/status", response_model=StatusResponse, tags=["admin"])
-async def status(auth: AuthResult = Depends(require_permission("read"))):
+async def status(auth: AuthResult = Depends(require_permission("read"))) -> StatusResponse:
     """Get engine status and statistics."""
     stats = engine.stats()
     return StatusResponse(
@@ -290,7 +290,7 @@ async def status(auth: AuthResult = Depends(require_permission("read"))):
 async def record_heartbeat(
     req: HeartbeatRequest,
     auth: AuthResult = Depends(require_permission("write")),
-):
+) -> dict:
     """Record an activity heartbeat for automatic time tracking."""
     hb_id = tracker.heartbeat(
         project=req.project,
@@ -309,7 +309,7 @@ async def record_heartbeat(
 async def time_today(
     project: Optional[str] = Query(None),
     auth: AuthResult = Depends(require_permission("read")),
-):
+) -> TimeSummaryResponse:
     """Get today's time tracking summary."""
     summary = tracker.today(project=project)
     return TimeSummaryResponse(
@@ -328,7 +328,7 @@ async def time_report(
     project: Optional[str] = Query(None),
     days: int = Query(7),
     auth: AuthResult = Depends(require_permission("read")),
-):
+) -> TimeSummaryResponse:
     """Get time tracking report for the last N days."""
     summary = tracker.report(project=project, days=days)
     return TimeSummaryResponse(
@@ -346,7 +346,7 @@ async def time_report(
 async def get_time_history(
     days: int = Query(7, ge=1, le=365),
     auth: AuthResult = Depends(require_permission("read")),
-):
+) -> list:
     """Get daily time history."""
     return tracker.daily(days=days)
 
@@ -359,7 +359,7 @@ async def create_api_key(
     name: str = Query(...),
     tenant_id: str = Query("default"),
     authorization: str = Header(None),
-):
+) -> dict:
     """Create a new API key. First key requires no auth (bootstrap)."""
     keys = auth_manager.list_keys()
     if keys:
@@ -390,7 +390,7 @@ async def create_api_key(
 
 
 @app.get("/v1/admin/keys", tags=["admin"])
-async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))):
+async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))) -> list[dict]:
     """List all API keys (hashed, never reveals raw key)."""
     keys = auth_manager.list_keys()
     return [
@@ -412,7 +412,7 @@ async def list_api_keys(auth: AuthResult = Depends(require_permission("admin")))
 
 
 @app.get("/v1/daemon/status", tags=["daemon"])
-async def daemon_status(auth: AuthResult = Depends(require_permission("read"))):
+async def daemon_status(auth: AuthResult = Depends(require_permission("read"))) -> dict:
     """Get last daemon watchdog check results."""
     from cortex.daemon import MoskvDaemon
     status = MoskvDaemon.load_status()
@@ -425,7 +425,7 @@ async def daemon_status(auth: AuthResult = Depends(require_permission("read"))):
 
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["dashboard"])
-async def dashboard():
+async def dashboard() -> str:
     """Serve the embedded memory dashboard."""
     from cortex.dashboard import get_dashboard_html
     return get_dashboard_html()
