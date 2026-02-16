@@ -7,17 +7,35 @@ never in plaintext. Supports scoped permissions per tenant.
 
 from __future__ import annotations
 
+from functools import lru_cache
 import hashlib
 import hmac
 import json
 import logging
+import os
 import secrets
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
+from fastapi import Depends, Header, HTTPException
+
 logger = logging.getLogger(__name__)
+
+# ─── Config ───────────────────────────────────────────────────────────
+
+from cortex.config import DB_PATH
+_auth_manager: Optional[AuthManager] = None
+
+
+def get_auth_manager() -> AuthManager:
+    """Lazy-load the global AuthManager instance."""
+    from cortex.config import DB_PATH
+    global _auth_manager
+    if _auth_manager is None:
+        _auth_manager = AuthManager(DB_PATH)
+    return _auth_manager
 
 # ─── Schema ───────────────────────────────────────────────────────────
 
@@ -137,8 +155,9 @@ class AuthManager:
         finally:
             conn.close()
 
+    @lru_cache(maxsize=1024)
     def authenticate(self, raw_key: str) -> AuthResult:
-        """Authenticate a request using an API key."""
+        """Authenticate a request using an API key (Cached)."""
         if not raw_key or not raw_key.startswith("ctx_"):
             return AuthResult(authenticated=False, error="Invalid key format")
 
@@ -214,3 +233,38 @@ class AuthManager:
             ]
         finally:
             conn.close()
+
+
+# ─── FastAPI Dependencies ─────────────────────────────────────────────
+
+
+async def require_auth(
+    authorization: str = Header(None, description="Bearer <api-key>"),
+) -> AuthResult:
+    """Extract and validate API key from Authorization header."""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Use: Bearer <api-key>")
+
+    manager = get_auth_manager()
+    result = manager.authenticate(parts[1])
+    if not result.authenticated:
+        raise HTTPException(status_code=401, detail=result.error)
+    return result
+
+
+def require_permission(permission: str):
+    """Factory for permission-checking dependencies."""
+
+    async def checker(auth: AuthResult = Depends(require_auth)) -> AuthResult:
+        if permission not in auth.permissions:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Missing permission: {permission}",
+            )
+        return auth
+
+    return checker

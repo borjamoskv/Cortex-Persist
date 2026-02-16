@@ -1,0 +1,65 @@
+site_name: CORTEX
+site_description: Local-first sovereign memory infrastructure for AI agents
+site_url: https://borjamoskv.github.io/cortex
+repo_url: https://github.com/borjamoskv/cortex
+repo_name: borjamoskv/cortex
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quickstart: quickstart.md
+      - Installation: installation.md
+  - Reference:
+      - CLI: cli.md
+      - REST API: api.md
+      - Architecture: architecture.md
+  - Tutorials:
+      - Memory for LangChain Agents: tutorials/langchain.md
+      - Time-Travel Debugging: tutorials/temporal.md
+      - Site Monitoring Daemon: tutorials/daemon.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+
+plugins:
+  - search

@@ -2,46 +2,76 @@
 CORTEX v4.0 — REST API.
 
 FastAPI server exposing the sovereign memory engine.
-Authenticated via API keys with tenant isolation.
+Main entry point for initialization and routing.
 """
 
 from __future__ import annotations
 
-import os
 import sqlite3
+import time
+import logging
 from contextlib import asynccontextmanager
-from typing import Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex.auth import AuthManager, AuthResult
+from cortex.auth import AuthManager, AuthResult, get_auth_manager, require_auth, require_permission
 from cortex.engine import CortexEngine
 from cortex.timing import TimingTracker
+from cortex.config import DB_PATH, ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
+from cortex.hive import router as hive_router
+from cortex import api_state
 
-# ─── Config ───────────────────────────────────────────────────────────
+# Import routers
+from cortex.routes import (
+    facts as facts_router,
+    search as search_router,
+    admin as admin_router,
+    timing as timing_router,
+    daemon as daemon_router,
+    dashboard as dashboard_router,
+    agents as agents_router,
+)
 
-DB_PATH = os.environ.get("CORTEX_DB", os.path.expanduser("~/.cortex/cortex.db"))
-
-# ─── Globals (initialized at startup) ────────────────────────────────
-
-engine: CortexEngine | None = None
-auth_manager: AuthManager | None = None
-tracker: TimingTracker | None = None
+logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize engine, auth, and timing on startup."""
-    global engine, auth_manager, tracker
     engine = CortexEngine(DB_PATH)
     engine.init_db()
     auth_manager = AuthManager(DB_PATH)
-    # Timing tracker shares the engine's connection
-    tracker = TimingTracker(engine._get_conn())
-    yield
+    
+    # Sync to cortex.auth so dependencies use the same instance
+    import cortex.auth
+    cortex.auth._auth_manager = auth_manager
+    
+    # Timing tracker gets its own connection to avoid SQLite locking issues
+    timing_conn = sqlite3.connect(DB_PATH, timeout=10, check_same_thread=False)
+    tracker = TimingTracker(timing_conn)
+    
+    # Store in app state to avoid globals
+    app.state.engine = engine
+    app.state.auth_manager = auth_manager
+    app.state.tracker = tracker
+    
+    # Backward compatibility for api_state (temporary)
+    api_state.engine = engine
+    api_state.auth_manager = auth_manager
+    api_state.tracker = tracker
+    
+    try:
+        yield
+    finally:
+        engine.close()
+        timing_conn.close()
+        cortex.auth._auth_manager = None
+        api_state.engine = None
+        api_state.auth_manager = None
+        api_state.tracker = None
 
 
 app = FastAPI(
@@ -52,380 +82,102 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# ─── Middleware ──────────────────────────────────────────────────────
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """In-memory rate limiter (Sliding Window)."""
+    
+    def __init__(self, app, limit: int = 100, window: int = 60):
+        super().__init__(app)
+        self.limit = limit
+        self.window = window
+        self.requests: dict[str, list[float]] = {}
+        
+    async def dispatch(self, request: Request, call_next):
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        
+        if client_ip not in self.requests:
+            self.requests[client_ip] = []
+        
+        # Remove timestamps older than window
+        self.requests[client_ip] = [t for t in self.requests[client_ip] if now - t < self.window]
+        
+        if len(self.requests[client_ip]) >= self.limit:
+            logger.warning(f"Rate limit exceeded for {client_ip}")
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too Many Requests. Please slow down."},
+                headers={"Retry-After": str(self.window)}
+            )
+            
+        self.requests[client_ip].append(now)
+        
+        # Periodic cleanup (1% of requests)
+        import random
+        if random.random() < 0.01:
+            expired_keys = [ip for ip, reqs in self.requests.items() if not reqs or now - reqs[-1] > self.window]
+            for ip in expired_keys:
+                del self.requests[ip]
+        
+        return await call_next(request)
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+app.add_middleware(RateLimitMiddleware, limit=RATE_LIMIT, window=RATE_WINDOW)
 
 
-# ─── Auth Dependency ──────────────────────────────────────────────────
+# ─── Dependencies ───────────────────────────────────────────────────
+
+from cortex.api_deps import get_engine, get_tracker
+
+# ─── Exception Handlers ──────────────────────────────────────────────
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
+    return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+@app.exception_handler(sqlite3.Error)
+async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
+    logger.error("Database error: %s", exc)
+    return JSONResponse(status_code=500, content={"detail": "Internal database error"})
+
+@app.exception_handler(Exception)
+async def universal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error("Unhandled exception: %s", exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected server error occurred."}
+    )
 
 
-async def require_auth(
-    authorization: str = Header(None, description="Bearer <api-key>"),
-) -> AuthResult:
-    """Extract and validate API key from Authorization header."""
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Missing Authorization header")
-
-    parts = authorization.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Use: Bearer <api-key>")
-
-    result = auth_manager.authenticate(parts[1])
-    if not result.authenticated:
-        raise HTTPException(status_code=401, detail=result.error)
-    return result
-
-
-def require_permission(permission: str) -> ...:  # Returns a FastAPI dependency
-    """Factory for permission-checking dependencies."""
-
-    async def checker(auth: AuthResult = Depends(require_auth)) -> AuthResult:
-        if permission not in auth.permissions:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Missing permission: {permission}",
-            )
-        return auth
-
-    return checker
-
-
-# ─── Request/Response Models ──────────────────────────────────────────
-
-
-class StoreRequest(BaseModel):
-    project: str = Field(..., description="Project/namespace for the fact")
-    content: str = Field(..., description="The fact content")
-    fact_type: str = Field("knowledge", description="Type: knowledge, decision, mistake, bridge, ghost")
-    tags: list[str] = Field(default_factory=list, description="Optional tags")
-    metadata: dict | None = Field(None, description="Optional JSON metadata")
-
-
-class StoreResponse(BaseModel):
-    fact_id: int
-    project: str
-    message: str
-
-
-class SearchRequest(BaseModel):
-    query: str = Field(..., description="Natural language search query")
-    k: int = Field(5, ge=1, le=50, description="Number of results")
-    project: str | None = Field(None, description="Filter by project")
-
-
-class SearchResult(BaseModel):
-    fact_id: int
-    project: str
-    content: str
-    fact_type: str
-    score: float
-    tags: list[str]
-
-
-class FactResponse(BaseModel):
-    id: int
-    project: str
-    content: str
-    fact_type: str
-    tags: list[str]
-    created_at: str
-    valid_from: str
-    valid_until: str | None
-    metadata: dict | None
-
-
-class StatusResponse(BaseModel):
-    version: str
-    total_facts: int
-    active_facts: int
-    deprecated: int
-    projects: int
-    embeddings: int
-    transactions: int
-    db_size_mb: float
-
-
-class HeartbeatRequest(BaseModel):
-    project: str
-    entity: str = ""
-    category: Optional[str] = None
-    branch: Optional[str] = None
-    language: Optional[str] = None
-    meta: Optional[dict] = None
-
-
-class TimeSummaryResponse(BaseModel):
-    total_seconds: int
-    total_hours: float
-    by_category: dict[str, int]
-    by_project: dict[str, int]
-    entries: int
-    heartbeats: int
-    top_entities: list[list]  # [[entity, count], ...]
-
-
-# ─── Endpoints ────────────────────────────────────────────────────────
-
+# ─── Routes ──────────────────────────────────────────────────────────
 
 @app.get("/", tags=["health"])
 async def root() -> dict:
     return {"service": "cortex", "version": "4.0.0a1", "status": "operational"}
 
-
 @app.get("/health", tags=["health"])
-async def health() -> dict:
+def health() -> dict:
     try:
-        stats = engine.stats()
+        stats = api_state.engine.stats()
         return {"status": "healthy", "facts": stats["total_facts"], "version": "4.0.0a1"}
-    except (sqlite3.OperationalError, KeyError):
-        return {"status": "healthy", "facts": 0, "version": "4.0.0a1"}
+    except Exception:
+        return {"status": "unhealthy", "facts": 0, "version": "4.0.0a1"}
 
-
-@app.post("/v1/facts", response_model=StoreResponse, tags=["facts"])
-async def store_fact(
-    req: StoreRequest,
-    auth: AuthResult = Depends(require_permission("write")),
-) -> StoreResponse:
-    """Store a new fact with vector embedding."""
-    fact_id = engine.store(
-        project=req.project,
-        content=req.content,
-        fact_type=req.fact_type,
-        tags=req.tags,
-        meta=req.metadata,
-        source=f"api:{auth.key_name}",
-    )
-    return StoreResponse(
-        fact_id=fact_id,
-        project=req.project,
-        message=f"Stored fact #{fact_id}",
-    )
-
-
-@app.post("/v1/search", response_model=list[SearchResult], tags=["search"])
-async def search_facts(
-    req: SearchRequest,
-    auth: AuthResult = Depends(require_permission("read")),
-) -> list[SearchResult]:
-    """Semantic search across all facts."""
-    results = engine.search(req.query, top_k=req.k)
-    return [
-        SearchResult(
-            fact_id=r.fact_id,
-            project=r.project,
-            content=r.content,
-            fact_type=r.fact_type,
-            score=r.score,
-            tags=r.tags,
-        )
-        for r in results
-    ]
-
-
-@app.get("/v1/projects/{project}/facts", response_model=list[FactResponse], tags=["facts"])
-async def recall_project(
-    project: str,
-    include_deprecated: bool = Query(False),
-    auth: AuthResult = Depends(require_permission("read")),
-) -> list[FactResponse]:
-    """Recall all facts for a project."""
-    if include_deprecated:
-        facts = engine.history(project)
-    else:
-        facts = engine.recall(project)
-
-    return [
-        FactResponse(
-            id=f.id,
-            project=f.project,
-            content=f.content,
-            fact_type=f.fact_type,
-            tags=f.tags,
-            created_at=f.valid_from,
-            valid_from=f.valid_from,
-            valid_until=f.valid_until,
-            metadata=f.meta if f.meta else None,
-        )
-        for f in facts
-    ]
-
-
-@app.delete("/v1/facts/{fact_id}", tags=["facts"])
-async def deprecate_fact(
-    fact_id: int,
-    auth: AuthResult = Depends(require_permission("write")),
-) -> dict:
-    """Deprecate a fact (soft delete — never removes data)."""
-    success = engine.deprecate(fact_id, reason=f"api:{auth.key_name}")
-    if not success:
-        raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found or already deprecated")
-    return {"message": f"Fact #{fact_id} deprecated", "fact_id": fact_id}
-
-
-@app.get("/v1/status", response_model=StatusResponse, tags=["admin"])
-async def status(auth: AuthResult = Depends(require_permission("read"))) -> StatusResponse:
-    """Get engine status and statistics."""
-    stats = engine.stats()
-    return StatusResponse(
-        version="4.0.0a1",
-        total_facts=stats["total_facts"],
-        active_facts=stats["active_facts"],
-        deprecated=stats["deprecated_facts"],
-        projects=stats["project_count"],
-        embeddings=stats["embeddings"],
-        transactions=stats["transactions"],
-        db_size_mb=stats["db_size_mb"],
-    )
-
-
-# ─── Time Tracking Endpoints ────────────────────────────────────────
-
-
-@app.post("/v1/heartbeat", tags=["timing"])
-async def record_heartbeat(
-    req: HeartbeatRequest,
-    auth: AuthResult = Depends(require_permission("write")),
-) -> dict:
-    """Record an activity heartbeat for automatic time tracking."""
-    hb_id = tracker.heartbeat(
-        project=req.project,
-        entity=req.entity,
-        category=req.category,
-        branch=req.branch,
-        language=req.language,
-        meta=req.meta,
-    )
-    # Auto-flush after every heartbeat to keep entries fresh
-    tracker.flush()
-    return {"id": hb_id, "status": "recorded"}
-
-
-@app.get("/v1/time/today", tags=["timing"])
-async def time_today(
-    project: Optional[str] = Query(None),
-    auth: AuthResult = Depends(require_permission("read")),
-) -> TimeSummaryResponse:
-    """Get today's time tracking summary."""
-    summary = tracker.today(project=project)
-    return TimeSummaryResponse(
-        total_seconds=summary.total_seconds,
-        total_hours=summary.total_hours,
-        by_category=summary.by_category,
-        by_project=summary.by_project,
-        entries=summary.entries,
-        heartbeats=summary.heartbeats,
-        top_entities=[[e, c] for e, c in summary.top_entities],
-    )
-
-
-@app.get("/v1/time", tags=["timing"])
-async def time_report(
-    project: Optional[str] = Query(None),
-    days: int = Query(7),
-    auth: AuthResult = Depends(require_permission("read")),
-) -> TimeSummaryResponse:
-    """Get time tracking report for the last N days."""
-    summary = tracker.report(project=project, days=days)
-    return TimeSummaryResponse(
-        total_seconds=summary.total_seconds,
-        total_hours=summary.total_hours,
-        by_category=summary.by_category,
-        by_project=summary.by_project,
-        entries=summary.entries,
-        heartbeats=summary.heartbeats,
-        top_entities=[[e, c] for e, c in summary.top_entities],
-    )
-
-
-@app.get("/v1/time/history", tags=["timing"])
-async def get_time_history(
-    days: int = Query(7, ge=1, le=365),
-    auth: AuthResult = Depends(require_permission("read")),
-) -> list:
-    """Get daily time history."""
-    return tracker.daily(days=days)
-
-
-# ─── Admin Endpoints ─────────────────────────────────────────────────
-
-
-@app.post("/v1/admin/keys", tags=["admin"])
-async def create_api_key(
-    name: str = Query(...),
-    tenant_id: str = Query("default"),
-    authorization: str = Header(None),
-) -> dict:
-    """Create a new API key. First key requires no auth (bootstrap)."""
-    keys = auth_manager.list_keys()
-    if keys:
-        # Require auth after first key
-        if not authorization:
-            raise HTTPException(status_code=401, detail="Auth required")
-        parts = authorization.split(" ", 1)
-        if len(parts) != 2:
-            raise HTTPException(status_code=401, detail="Invalid auth")
-        result = auth_manager.authenticate(parts[1])
-        if not result.authenticated:
-            raise HTTPException(status_code=401, detail=result.error)
-        if "admin" not in result.permissions:
-            raise HTTPException(status_code=403, detail="Admin permission required")
-
-    raw_key, api_key = auth_manager.create_key(
-        name=name,
-        tenant_id=tenant_id,
-        permissions=["read", "write", "admin"],
-    )
-    return {
-        "key": raw_key,
-        "name": api_key.name,
-        "prefix": api_key.key_prefix,
-        "tenant_id": api_key.tenant_id,
-        "message": "⚠️  Save this key — it will NOT be shown again.",
-    }
-
-
-@app.get("/v1/admin/keys", tags=["admin"])
-async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))) -> list[dict]:
-    """List all API keys (hashed, never reveals raw key)."""
-    keys = auth_manager.list_keys()
-    return [
-        {
-            "id": k.id,
-            "name": k.name,
-            "prefix": k.key_prefix,
-            "tenant_id": k.tenant_id,
-            "permissions": k.permissions,
-            "is_active": k.is_active,
-            "created_at": k.created_at,
-            "last_used": k.last_used,
-        }
-        for k in keys
-    ]
-
-
-# ─── Daemon Status ────────────────────────────────────────────────────
-
-
-@app.get("/v1/daemon/status", tags=["daemon"])
-async def daemon_status(auth: AuthResult = Depends(require_permission("read"))) -> dict:
-    """Get last daemon watchdog check results."""
-    from cortex.daemon import MoskvDaemon
-    status = MoskvDaemon.load_status()
-    if not status:
-        return {"status": "no_data", "message": "Daemon has not run yet."}
-    return status
-
-
-# ─── Dashboard ───────────────────────────────────────────────────────
-
-
-@app.get("/dashboard", response_class=HTMLResponse, tags=["dashboard"])
-async def dashboard() -> str:
-    """Serve the embedded memory dashboard."""
-    from cortex.dashboard import get_dashboard_html
-    return get_dashboard_html()
+# Include logical routers
+app.include_router(facts_router.router)
+app.include_router(search_router.router)
+app.include_router(admin_router.router)
+app.include_router(timing_router.router)
+app.include_router(daemon_router.router)
+app.include_router(dashboard_router.router)
+app.include_router(agents_router.router)
+app.include_router(hive_router)

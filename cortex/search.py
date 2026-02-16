@@ -12,6 +12,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from typing import Optional
+from cortex.temporal import build_temporal_filter_params
 
 logger = logging.getLogger("cortex.search")
 
@@ -52,7 +53,7 @@ def semantic_search(
     query_embedding: list[float],
     top_k: int = 5,
     project: Optional[str] = None,
-    temporal_filter: Optional[str] = None,
+    as_of: Optional[str] = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec.
 
@@ -86,8 +87,13 @@ def semantic_search(
         sql += " AND f.project = ?"
         params.append(project)
 
-    if temporal_filter:
-        sql += f" AND f.{temporal_filter}"
+    if as_of:
+        clause, t_params = build_temporal_filter_params(as_of)
+        sql += f" AND f.{clause}"
+        params.extend(t_params)
+    else:
+        # Default to active facts
+        sql += " AND f.valid_until IS NULL"
 
     sql += " ORDER BY ve.distance ASC"
 
@@ -100,8 +106,15 @@ def semantic_search(
 
     results = []
     for row in rows[:top_k]:
-        tags = json.loads(row[7]) if row[7] else []
-        meta = json.loads(row[9]) if row[9] else {}
+        try:
+            tags = json.loads(row[7]) if row[7] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+            
+        try:
+            meta = json.loads(row[9]) if row[9] else {}
+        except (json.JSONDecodeError, TypeError):
+            meta = {}
         # Convert distance to similarity score (1 - distance for cosine)
         score = 1.0 - (row[10] if row[10] else 0.0)
 
@@ -127,7 +140,9 @@ def text_search(
     query: str,
     project: Optional[str] = None,
     fact_type: Optional[str] = None,
+    tags: Optional[list[str]] = None,
     limit: int = 20,
+    as_of: Optional[str] = None,
 ) -> list[SearchResult]:
     """Perform text search using LIKE (fallback when vectors unavailable).
 
@@ -136,37 +151,60 @@ def text_search(
         query: Text to search for.
         project: Optional project scope filter.
         fact_type: Optional fact type filter.
+        tags: Optional list of tags to require.
         limit: Maximum results.
 
     Returns:
         List of SearchResult ordered by relevance.
     """
-    sql = """
-        SELECT id, content, project, fact_type, confidence,
-               valid_from, valid_until, tags, source, meta
-        FROM facts
-        WHERE content LIKE ?
-          AND valid_until IS NULL
-    """
-    params: list = [f"%{query}%"]
+    try:
+        sql = """
+            SELECT id, content, project, fact_type, confidence,
+                   valid_from, valid_until, tags, source, meta
+            FROM facts
+            WHERE content LIKE ?
+        """
+        params: list = [f"%{query}%"]
 
-    if project:
-        sql += " AND project = ?"
-        params.append(project)
+        if as_of:
+            clause, t_params = build_temporal_filter_params(as_of)
+            sql += f" AND {clause}"
+            params.extend(t_params)
+        else:
+            sql += " AND valid_until IS NULL"
 
-    if fact_type:
-        sql += " AND fact_type = ?"
-        params.append(fact_type)
+        if project:
+            sql += " AND project = ?"
+            params.append(project)
 
-    sql += f" ORDER BY updated_at DESC LIMIT {limit}"
+        if fact_type:
+            sql += " AND fact_type = ?"
+            params.append(fact_type)
 
-    cursor = conn.execute(sql, params)
-    rows = cursor.fetchall()
+        if tags:
+            for tag in tags:
+                sql += " AND tags LIKE ?"
+                params.append(f'%"{tag}"%')
+
+        sql += " ORDER BY updated_at DESC LIMIT ?"
+        params.append(limit)
+
+        cursor = conn.execute(sql, params)
+        rows = cursor.fetchall()
+    except (sqlite3.Error, ValueError, RuntimeError):
+        return []
 
     results = []
     for row in rows:
-        tags = json.loads(row[7]) if row[7] else []
-        meta = json.loads(row[9]) if row[9] else {}
+        try:
+            tags = json.loads(row[7]) if row[7] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+            
+        try:
+            meta = json.loads(row[9]) if row[9] else {}
+        except (json.JSONDecodeError, TypeError):
+            meta = {}
 
         results.append(SearchResult(
             fact_id=row[0],

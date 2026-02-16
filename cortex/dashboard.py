@@ -549,6 +549,12 @@ document.getElementById('search').addEventListener('input', e => {
   debounce = setTimeout(() => doSearch(e.target.value), 300);
 });
 
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 async function doSearch(q) {
   const el = document.getElementById('results');
   if (!q.trim()) { el.innerHTML = ''; return; }
@@ -568,13 +574,13 @@ async function doSearch(q) {
     el.innerHTML = res.map(item => `
       <div class="feed-item">
         <div class="feed-header">
-          <span class="feed-project">${item.project}</span>
+          <span class="feed-project">${sanitize(item.project)}</span>
           <span>${(item.score * 100).toFixed(0)}% Match</span>
         </div>
-        <div class="feed-content">${item.content}</div>
+        <div class="feed-content">${sanitize(item.content)}</div>
         <div>
-           <span class="tag">${item.fact_type}</span>
-           ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+           <span class="tag">${sanitize(item.fact_type)}</span>
+           ${item.tags.map(t => `<span class="tag">${sanitize(t)}</span>`).join('')}
         </div>
       </div>
     `).join('');

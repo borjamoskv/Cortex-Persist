@@ -1,0 +1,1 @@
+/Users/borjafernandezangulo/.cortex/workflows/diagnostico.md

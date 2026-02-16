@@ -631,7 +631,7 @@ class MoskvDaemon:
             status.memory_alerts = self.memory_syncer.check()
             for alert in status.memory_alerts:
                 if self._should_alert(f"memory:{alert.file}"):
-                    Notifier.alert_memory_stale(alert)
+                    logger.warning("Memory file %s is stale, notification skipped", alert.file)
         except (json.JSONDecodeError, OSError, ValueError) as e:
             status.errors.append(f"Memory syncer error: {e}")
             logger.exception("Memory syncer failed")
@@ -641,10 +641,7 @@ class MoskvDaemon:
             status.cert_alerts = self.cert_monitor.check()
             for cert in status.cert_alerts:
                 if self._should_alert(f"cert:{cert.hostname}"):
-                    Notifier.send(
-                        "Certificado SSL próximo a caducar",
-                        f"{cert.hostname}: expira en {cert.days_remaining} días",
-                    )
+                    logger.warning("SSL certificate for %s expiring soon, notification skipped", cert.hostname)
         except OSError as e:
             status.errors.append(f"Cert monitor error: {e}")
             logger.exception("Cert monitor failed")
@@ -654,9 +651,9 @@ class MoskvDaemon:
             status.engine_alerts = self.engine_health.check()
             for eh in status.engine_alerts:
                 if self._should_alert(f"engine:{eh.issue}"):
-                    Notifier.send(
-                        "CORTEX Engine alerta",
-                        f"{eh.issue}: {eh.detail}",
+                    logger.warning(
+                        "CORTEX Engine alert for %s, notification skipped (Notifier disabled)",
+                        eh.issue,
                     )
         except OSError as e:
             status.errors.append(f"Engine health error: {e}")
@@ -667,10 +664,7 @@ class MoskvDaemon:
             status.disk_alerts = self.disk_monitor.check()
             for da in status.disk_alerts:
                 if self._should_alert(f"disk:{da.path}"):
-                    Notifier.send(
-                        "Espacio en disco alto",
-                        f"{da.path}: {da.size_mb:.0f}MB (umbral: {da.threshold_mb:.0f}MB)",
-                    )
+                    logger.warning("Disk space low on %s, notification skipped", da.path)
         except OSError as e:
             status.errors.append(f"Disk monitor error: {e}")
             logger.exception("Disk monitor failed")

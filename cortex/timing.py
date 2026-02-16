@@ -129,6 +129,8 @@ class TimeSummary:
 # ─── Timing Tracker ───────────────────────────────────────────────────
 
 
+import threading
+
 class TimingTracker:
     """Automatic time tracker using heartbeats.
 
@@ -143,6 +145,7 @@ class TimingTracker:
     def __init__(self, conn: sqlite3.Connection, gap_seconds: int = DEFAULT_GAP_SECONDS):
         self._conn = conn
         self._gap_seconds = gap_seconds
+        self._lock = threading.Lock()
 
     def heartbeat(
         self,
@@ -192,7 +195,8 @@ class TimingTracker:
         Returns:
             Number of time entries created.
         """
-        gap = gap_seconds or self._gap_seconds
+        with self._lock:
+            gap = gap_seconds or self._gap_seconds
 
         # Get all heartbeats not yet assigned to a time entry
         # We track which heartbeats have been flushed by checking
@@ -454,3 +458,23 @@ class TimingTracker:
             heartbeats=total_heartbeats,
             top_entities=top_entities,
         )
+
+    def _safe_json_list(self, val: any) -> list:
+        """Safely decode JSON list, returning [] on failure."""
+        if not val:
+            return []
+        try:
+            parsed = json.loads(val)
+            return parsed if isinstance(parsed, list) else []
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def _safe_json_dict(self, val: any) -> dict:
+        """Safely decode JSON dict, returning {} on failure."""
+        if not val:
+            return {}
+        try:
+            parsed = json.loads(val)
+            return parsed if isinstance(parsed, dict) else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
