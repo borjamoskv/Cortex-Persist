@@ -25,7 +25,7 @@ def run():
         df_unverified = pd.read_sql_query("SELECT project, COUNT(*) as count FROM facts WHERE confidence != 'verified' AND valid_until IS NULL GROUP BY project", conn)
         try:
             df_orphans = pd.read_sql_query("SELECT name, entity_type, project, mention_count FROM entities WHERE id NOT IN (SELECT source_entity_id FROM entity_relations) AND id NOT IN (SELECT target_entity_id FROM entity_relations)", conn)
-        except:
+        except (sqlite3.OperationalError, pd.errors.DatabaseError):
             df_orphans = pd.DataFrame(columns=['name', 'entity_type', 'project', 'mention_count'])
         df = pd.read_sql_query("SELECT project, fact_type, content, confidence, tags FROM facts WHERE valid_until IS NULL", conn)
 

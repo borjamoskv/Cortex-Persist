@@ -7,9 +7,10 @@ Main entry point for initialization and routing.
 
 from __future__ import annotations
 
+import logging
+import random
 import sqlite3
 import time
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, Request
@@ -106,7 +107,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.requests[client_ip] = [t for t in self.requests[client_ip] if now - t < self.window]
         
         if len(self.requests[client_ip]) >= self.limit:
-            logger.warning(f"Rate limit exceeded for {client_ip}")
+            logger.warning("Rate limit exceeded for %s", client_ip)
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too Many Requests. Please slow down."},
@@ -116,7 +117,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.requests[client_ip].append(now)
         
         # Periodic cleanup (1% of requests)
-        import random
         if random.random() < 0.01:
             expired_keys = [ip for ip, reqs in self.requests.items() if not reqs or now - reqs[-1] > self.window]
             for ip in expired_keys:
