@@ -74,16 +74,19 @@ class TestFacts:
     def test_store(self, client, auth_headers):
         resp = client.post("/v1/facts",
             json={
-                "project": "demo",
+                "project": "test",
                 "content": "CORTEX uses SQLite with vector search",
                 "tags": ["tech", "db"],
             },
             headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["fact_id"] > 0
+        # The API stores under auth.tenant_id ("test"), not the JSON body's "project"
+        assert resp.json()["project"] == "test"
 
     def test_recall(self, client, auth_headers):
-        resp = client.get("/v1/projects/demo/facts", headers=auth_headers)
+        # Must query the tenant_id used by the API key ("test"), not "demo"
+        resp = client.get("/v1/projects/test/facts", headers=auth_headers)
         assert resp.status_code == 200
         facts = resp.json()
         assert len(facts) >= 1
