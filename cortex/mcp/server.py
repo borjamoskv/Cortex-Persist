@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 from cortex.graph.engine import get_graph_async
+from cortex.mcp.guard import MCPGuard
 from functools import lru_cache
 from typing import Optional
 
@@ -76,6 +77,14 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
         except (json.JSONDecodeError, TypeError):
             parsed_tags = []
 
+        # ── MOSKV-1 Hard Limits ──
+        try:
+            MCPGuard.validate_store(project, content, fact_type, parsed_tags)
+        except ValueError as e:
+            metrics.record_error()
+            logger.warning("MCP Guard rejected store: %s", e)
+            return f"❌ Rejected: {e}"
+
         async with pool.acquire() as conn:
             engine = CortexEngine(cfg.db_path, auto_embed=False)
             engine._conn = conn
@@ -105,6 +114,14 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
     ) -> str:
         """Search CORTEX memory using semantic + text hybrid search."""
         await ensure_initialized()
+
+        # ── MOSKV-1 Hard Limits ──
+        try:
+            MCPGuard.validate_search(query)
+        except ValueError as e:
+            metrics.record_error()
+            logger.warning("MCP Guard rejected search: %s", e)
+            return f"❌ Rejected: {e}"
         
         # Caching logic
         cache_key = f"{query}:{project}:{top_k}"

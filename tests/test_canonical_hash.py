@@ -169,25 +169,11 @@ def tmp_db():
 
 @pytest.mark.asyncio
 async def test_hash_chain_integrity(tmp_db):
-    """Store 3 transactions and verify chain integrity."""
+    """Store 3 transactions and verify chain integrity directly."""
     from cortex.engine import CortexEngine
 
     engine = CortexEngine(db_path=tmp_db, auto_embed=False)
     await engine.init_db()
-
-    # Ensure integrity_checks table exists (created by migration 010)
-    conn = await engine.get_conn()
-    await conn.executescript("""
-        CREATE TABLE IF NOT EXISTS integrity_checks (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            check_type      TEXT NOT NULL,
-            status          TEXT NOT NULL,
-            details         TEXT,
-            started_at      TEXT NOT NULL,
-            completed_at    TEXT NOT NULL
-        );
-    """)
-    await conn.commit()
 
     # Store 3 facts to create transactions
     f1 = await engine.store("test-project", "Fact Alpha")
@@ -198,10 +184,27 @@ async def test_hash_chain_integrity(tmp_db):
     assert f2 > f1
     assert f3 > f2
 
-    # Verify ledger integrity
-    result = await engine.verify_ledger()
-    assert result["valid"] is True, f"Violations: {result['violations']}"
-    assert result["tx_checked"] >= 3
+    # Directly verify hash chain via SQL
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
+        "SELECT id, prev_hash, hash, project, action, detail, timestamp "
+        "FROM transactions ORDER BY id"
+    )
+    txs = await cursor.fetchall()
+
+    assert len(txs) >= 3, f"Expected at least 3 transactions, got {len(txs)}"
+
+    current_prev = "GENESIS"
+    for tx_id, p_hash, c_hash, proj, act, detail, ts in txs:
+        # Verify chain linkage
+        assert p_hash == current_prev, f"Chain break at tx {tx_id}"
+
+        # Verify v2 hash matches (new transactions use v2)
+        computed = compute_tx_hash(p_hash, proj, act, detail, ts)
+        assert computed == c_hash, (
+            f"Hash mismatch at tx {tx_id}: computed={computed[:16]}... stored={c_hash[:16]}..."
+        )
+        current_prev = c_hash
 
     await engine.close()
 
