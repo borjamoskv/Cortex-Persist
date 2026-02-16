@@ -1,2 +1,3 @@
 [console_scripts]
 cortex = cortex.cli:cli
+moskv-daemon = cortex.daemon_cli:main

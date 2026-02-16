@@ -221,7 +221,13 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
 def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate mistakes.jsonl — error memory."""
-    for line in path.read_text(encoding="utf-8").strip().splitlines():
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as e:
+        stats["errors"].append(f"Failed to read mistakes.jsonl: {e}")
+        return
+
+    for line in content.strip().splitlines():
         try:
             mistake = json.loads(line)
             project = mistake.get("project", "__system__")
@@ -249,7 +255,13 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
 
 def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate bridges.jsonl — cross-project connections."""
-    for line in path.read_text(encoding="utf-8").strip().splitlines():
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as e:
+        stats["errors"].append(f"Failed to read bridges.jsonl: {e}")
+        return
+
+    for line in content.strip().splitlines():
         try:
             bridge = json.loads(line)
 

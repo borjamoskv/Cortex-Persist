@@ -17,19 +17,26 @@ Requires-Dist: sentence-transformers>=3.0
 Requires-Dist: onnxruntime>=1.17
 Requires-Dist: click>=8.0
 Requires-Dist: rich>=13.0
+Provides-Extra: api
+Requires-Dist: fastapi>=0.110; extra == "api"
+Requires-Dist: uvicorn[standard]>=0.27; extra == "api"
+Requires-Dist: httpx>=0.27; extra == "api"
 Provides-Extra: dev
 Requires-Dist: pytest>=8.0; extra == "dev"
 Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
+Provides-Extra: all
+Requires-Dist: cortex-memory[api,dev]; extra == "all"
 
 # CORTEX — The Sovereign Ledger for AI Agents
 
-> Local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults. Zero network dependencies.
+> Local-first memory infrastructure with vector search, temporal facts, cryptographic vaults, and a persistent watchdog daemon. Zero network dependencies.
 
 ## Quick Start
 
 ```bash
-# Install
-pip install -e .
+# Install (with API server)
+pip install -e ".[all]"
 
 # Initialize database
 cortex init
@@ -43,11 +50,51 @@ cortex search "what framework does naroa use?"
 # Recall project context
 cortex recall naroa-web
 
-# Import from CORTEX v3.1
-cortex migrate
-
 # Check status
 cortex status
+```
+
+## MOSKV-1 Daemon
+
+Persistent watchdog that runs in the background — monitoring, alerting, remembering.
+
+```bash
+# Run a single check
+moskv-daemon check
+
+# Install as macOS launchd agent (runs every 5 min + on login)
+moskv-daemon install
+
+# Show last check results
+moskv-daemon status
+
+# Remove launchd agent
+moskv-daemon uninstall
+```
+
+### What it monitors
+
+| Check | Threshold | Alert |
+|---|---|---|
+| **Site Health** | HTTP 4xx/5xx/timeout | macOS notification |
+| **Stale Projects** | No activity >48h in `ghosts.json` | macOS notification |
+| **Memory Freshness** | `system.json` not updated >24h | macOS notification |
+
+## REST API
+
+```bash
+# Start server
+uvicorn cortex.api:app --port 8484
+
+# Endpoints
+GET  /v1/status                  # Engine status
+POST /v1/facts                   # Store a fact  
+POST /v1/search                  # Semantic search
+GET  /v1/recall/{project}        # Recall project context
+GET  /v1/time/today              # Today's time tracking
+GET  /v1/time/history?days=14    # Time history
+GET  /v1/daemon/status           # Daemon watchdog results
+GET  /dashboard                  # Industrial Noir dashboard UI
 ```
 
 ## Architecture
@@ -57,7 +104,15 @@ SQLite + sqlite-vec (vector search)
   + Temporal Facts (valid_from/valid_until)
   + ONNX Embeddings (local, ~5ms/embed)
   + Hash-Chained Transaction Ledger
+  + Automatic Time Tracking (heartbeats)
+  + Persistent Daemon (launchd)
   = The Sovereign Ledger
+```
+
+## Testing
+
+```bash
+pytest tests/ -v    # 85 tests
 ```
 
 ## License

@@ -18,13 +18,16 @@ from typing import Optional
 import sqlite_vec
 
 from cortex.embeddings import LocalEmbedder
-from cortex.schema import ALL_SCHEMA, get_init_meta
+from cortex.embeddings import LocalEmbedder
+from cortex.schema import get_init_meta
+from cortex.migrations import run_migrations
 from cortex.search import SearchResult, semantic_search, text_search
+from cortex.graph import get_graph, query_entity
 from cortex.temporal import build_temporal_filter_params, now_iso
 
 logger = logging.getLogger("cortex")
 
-DEFAULT_DB_PATH = Path.home() / ".cortex" / "cortex.db"
+from cortex.config import DEFAULT_DB_PATH
 
 
 @dataclass
@@ -41,6 +44,7 @@ class Fact:
     valid_until: Optional[str]
     source: Optional[str]
     meta: dict
+    consensus_score: float = 1.0
 
     def is_active(self) -> bool:
         return self.valid_until is None
@@ -57,6 +61,7 @@ class Fact:
             "valid_until": self.valid_until,
             "source": self.source,
             "active": self.is_active(),
+            "consensus_score": self.consensus_score,
         }
 
 
@@ -123,6 +128,10 @@ class CortexEngine:
 
         return self._conn
 
+    def get_connection(self) -> sqlite3.Connection:
+        """Public alias for _get_conn (backward compatibility)."""
+        return self._get_conn()
+
     def _get_embedder(self) -> LocalEmbedder:
         """Get or create local embedder (lazy load)."""
         if self._embedder is None:
@@ -132,19 +141,22 @@ class CortexEngine:
     # ─── Database Initialization ──────────────────────────────────
 
     def init_db(self) -> None:
-        """Initialize database schema. Safe to call multiple times."""
+        """Initialize database schema using migrations. Safe to call multiple times."""
+        from cortex.schema import ALL_SCHEMA, get_init_meta
         conn = self._get_conn()
-        for statement in ALL_SCHEMA:
-            # Skip vec0 virtual table if extension not available
-            if "vec0" in statement and not self._vec_available:
-                logger.info("Skipping vec0 table (extension not available)")
+        
+        # 1. Initialize base schema if not existing
+        for stmt in ALL_SCHEMA:
+            # Skip vector tables if extension is not loaded
+            if "USING vec0" in stmt and not self._vec_available:
                 continue
-            for sql in statement.strip().split(";"):
-                sql = sql.strip()
-                if sql:
-                    conn.execute(sql)
+            conn.executescript(stmt)
+        conn.commit()
+        
+        # 2. Run migrations (creates/updates tables)
+        run_migrations(conn)
 
-        # Insert metadata if not exists
+        # 3. Insert metadata if not exists
         for key, value in get_init_meta():
             conn.execute(
                 "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
@@ -152,7 +164,7 @@ class CortexEngine:
             )
 
         conn.commit()
-        logger.info("CORTEX database initialized at %s", self._db_path)
+        logger.info("CORTEX database initialized (schema + migrated) at %s", self._db_path)
 
     # ─── Store ────────────────────────────────────────────────────
 
@@ -166,6 +178,7 @@ class CortexEngine:
         source: Optional[str] = None,
         meta: Optional[dict] = None,
         valid_from: Optional[str] = None,
+        commit: bool = True,
     ) -> int:
         """Store a fact with automatic embedding and temporal metadata.
 
@@ -178,10 +191,16 @@ class CortexEngine:
             source: Where the fact came from.
             meta: Additional metadata dict.
             valid_from: When fact became valid (default: now).
+            commit: Whether to commit the transaction (False for batch ops).
 
         Returns:
             The fact ID.
         """
+        if not project or not project.strip():
+            raise ValueError("project cannot be empty")
+        if not content or not content.strip():
+            raise ValueError("content cannot be empty")
+
         conn = self._get_conn()
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
@@ -210,6 +229,13 @@ class CortexEngine:
                 )
             except (ValueError, sqlite3.Error) as e:
                 logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+        
+        # Auto-extract Graph Entities & Relationships
+        from cortex.graph import process_fact_graph
+        try:
+            process_fact_graph(conn, fact_id, content, project, ts)
+        except Exception as e:
+            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
         # Log transaction
         self._log_transaction(conn, project, "store", {
@@ -218,9 +244,123 @@ class CortexEngine:
             "content_preview": content[:100],
         })
 
-        conn.commit()
-        logger.info("Stored fact #%d in project '%s'", fact_id, project)
+        if commit:
+            conn.commit()
+            logger.info("Stored fact #%d in project '%s'", fact_id, project)
         return fact_id
+
+    def store_many(self, facts: list[dict]) -> list[int]:
+        """Store multiple facts in a single transaction (Atomic)."""
+        if not facts:
+            raise ValueError("Cannot store empty list of facts")
+
+        conn = self._get_conn()
+        ids = []
+        try:
+            with conn: # Handles BEGIN/COMMIT/ROLLBACK automatically
+                for f in facts:
+                    if "project" not in f or not f["project"] or not str(f["project"]).strip():
+                        raise ValueError("Fact must have project")
+                    if "content" not in f or not f["content"] or not str(f["content"]).strip():
+                        raise ValueError("Fact must have content")
+                        
+                    fid = self.store(
+                        project=f["project"],
+                        content=f["content"],
+                        fact_type=f.get("fact_type", "knowledge"),
+                        tags=f.get("tags", []),
+                        confidence=f.get("confidence", "stated"),
+                        source=f.get("source", None),
+                        meta=f.get("meta", None),
+                        valid_from=f.get("valid_from", None),
+                        commit=False, # Don't commit inside the loop
+                    )
+                    ids.append(fid)
+            logger.info("Batch stored %d facts", len(ids))
+            return ids
+        except Exception as e:
+            logger.error("Batch store failed: %s", e)
+            raise
+
+    def update(
+        self,
+        fact_id: int,
+        content: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        meta: Optional[dict] = None,
+    ) -> int:
+        """Update a fact by deprecating the old one and creating a new one.
+
+        Args:
+            fact_id: ID of the fact to update.
+            content: New content (optional).
+            tags: New tags (optional).
+            meta: New metadata (optional).
+
+        Returns:
+            The ID of the new fact.
+        """
+        if fact_id <= 0:
+            raise ValueError("Invalid fact ID")
+
+        conn = self._get_conn()
+        row = conn.execute(
+            "SELECT project, content, fact_type, tags, confidence, source, meta FROM facts WHERE id = ? AND valid_until IS NULL",
+            (fact_id,),
+        ).fetchone()
+
+        if not row:
+            raise ValueError(f"Fact {fact_id} not found or inactive")
+
+        project, old_content, fact_type, old_tags_json, confidence, source, old_meta_json = row
+        
+        # Parse old values safely
+        try:
+            old_tags = json.loads(old_tags_json) if old_tags_json else []
+        except (json.JSONDecodeError, TypeError):
+            old_tags = []
+            
+        try:
+            old_meta = json.loads(old_meta_json) if old_meta_json else {}
+        except (json.JSONDecodeError, TypeError):
+            old_meta = {}
+
+        # Prepare new values
+        new_content = content if content is not None else old_content
+        new_tags = tags if tags is not None else old_tags
+        new_meta = old_meta.copy()
+        if meta:
+            new_meta.update(meta)
+            
+        new_meta["previous_fact_id"] = fact_id
+        
+        # Store as new fact
+        new_id = self.store(
+            project=project,
+            content=new_content,
+            fact_type=fact_type,
+            tags=new_tags,
+            confidence=confidence,
+            source=source,
+            meta=new_meta,
+        )
+
+        # Deprecate old fact
+        self.deprecate(fact_id, reason=f"updated_by_{new_id}")
+        
+        return new_id
+
+    # ─── Graph ────────────────────────────────────────────────────
+
+    def graph(self, project: Optional[str] = None, limit: int = 50) -> dict:
+        """Get knowledge graph (entities and relationships)."""
+        conn = self._get_conn()
+        return get_graph(conn, project, limit)
+
+    def query_entity(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+        """Query specific entity in the graph."""
+        conn = self._get_conn()
+        return query_entity(conn, name, project)
 
     # ─── Search ───────────────────────────────────────────────────
 
@@ -230,6 +370,7 @@ class CortexEngine:
         project: Optional[str] = None,
         top_k: int = 5,
         as_of: Optional[str] = None,
+        **kwargs,
     ) -> list[SearchResult]:
         """Semantic search across facts.
 
@@ -242,52 +383,246 @@ class CortexEngine:
         Returns:
             List of SearchResult ordered by relevance.
         """
+        if not query or not query.strip():
+            raise ValueError("query cannot be empty")
+            
         conn = self._get_conn()
-
-        temporal_clause = None
-        if as_of:
-            clause, _ = build_temporal_filter_params(as_of)
-            temporal_clause = clause
 
         # Try semantic search first
         try:
             embedder = self._get_embedder()
             query_embedding = embedder.embed(query)
             results = semantic_search(
-                conn, query_embedding, top_k, project, temporal_clause
+                conn, query_embedding, top_k, project, as_of
             )
             if results:
                 return results
-        except (ValueError, RuntimeError) as e:
+        except (ValueError, RuntimeError, sqlite3.Error) as e:
             logger.warning("Semantic search failed, falling back to text: %s", e)
 
         # Fallback to text search
-        return text_search(conn, query, project, limit=top_k)
+        return text_search(
+            conn, query, project, limit=top_k, fact_type=kwargs.get("fact_type"), tags=kwargs.get("tags")
+        )
 
     # ─── Recall (Project Context) ─────────────────────────────────
 
-    def recall(self, project: str) -> list[Fact]:
+    def recall(
+        self,
+        project: str,
+        limit: Optional[int] = None,
+        offset: int = 0,
+    ) -> list[Fact]:
         """Load all active facts for a project.
 
         Args:
             project: Project identifier.
-
+            limit: Max facts to return.
+            offset: Pagination offset.
         Returns:
             List of active Facts for the project.
         """
         conn = self._get_conn()
-        cursor = conn.execute(
-            """
+        query = """
             SELECT id, project, content, fact_type, tags, confidence,
-                   valid_from, valid_until, source, meta
+                   valid_from, valid_until, source, meta, consensus_score
             FROM facts
             WHERE project = ? AND valid_until IS NULL
-            ORDER BY fact_type, created_at DESC
-            """,
-            (project,),
-        )
+            ORDER BY 
+                (consensus_score * 0.8 + (1.0 / (1.0 + (julianday('now') - julianday(created_at)))) * 0.2) DESC,
+                fact_type, 
+                created_at DESC
+        """
+        params = [project]
+        if limit:
+            query += " LIMIT ?"
+            params.append(limit)
+
+        if offset:
+            query += " OFFSET ?"
+            params.append(offset)
+
+        cursor = conn.execute(query, params)
 
         return [self._row_to_fact(row) for row in cursor.fetchall()]
+
+    def _verify_fact_tenant(self, fact_id: int, tenant_id: str) -> bool:
+        """Lightweight check for fact tenant ownership."""
+        conn = self._get_conn()
+        row = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)).fetchone()
+        return row is not None and row[0] == tenant_id
+
+    def vote(self, fact_id: int, agent: str, value: int, agent_id: Optional[str] = None) -> float:
+        """Cast a consensus vote on a fact.
+
+        Args:
+            fact_id: The ID of the fact to vote on.
+            agent: The name of the agent voting (legacy).
+            value: Vote value (1 for verify, -1 for dispute, 0 to remove).
+            agent_id: The UUID of the agent (RWC v2). If provided, uses RWC logic.
+
+        Returns:
+            The updated consensus_score.
+        """
+        if agent_id:
+            return self.vote_v2(fact_id, agent_id, value)
+
+        # Legacy fallback
+        conn = self._get_conn()
+        if value == 0:
+            conn.execute(
+                "DELETE FROM consensus_votes WHERE fact_id = ? AND agent = ?",
+                (fact_id, agent),
+            )
+        else:
+            conn.execute(
+                "INSERT OR REPLACE INTO consensus_votes (fact_id, agent, vote) VALUES (?, ?, ?)",
+                (fact_id, agent, value),
+            )
+        score = self._recalculate_consensus(fact_id, conn)
+        conn.commit()
+        logger.info("Agent '%s' voted %d on fact #%d (New score: %.2f)",
+                     agent, value, fact_id, score)
+        return score
+
+    def register_agent(self, name: str, agent_type: str = "ai", public_key: str = "", tenant_id: str = "default") -> str:
+        """Register a new agent for Reputation-Weighted Consensus.
+
+        Returns:
+            The unique agent UUID.
+        """
+        import uuid
+        agent_id = str(uuid.uuid4())
+        conn = self._get_conn()
+        conn.execute(
+            """
+            INSERT INTO agents (id, name, agent_type, public_key, tenant_id)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (agent_id, name, agent_type, public_key, tenant_id),
+        )
+        conn.commit()
+        logger.info("Registered new agent: %s (%s)", name, agent_id)
+        return agent_id
+
+    def vote_v2(self, fact_id: int, agent_id: str, value: int, reason: Optional[str] = None) -> float:
+        """Cast a reputation-weighted vote (RWC v2)."""
+        conn = self._get_conn()
+        
+        # 1. Fetch agent reputation
+        agent = conn.execute(
+            "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
+            (agent_id,)
+        ).fetchone()
+        
+        if not agent:
+            raise ValueError(f"Agent {agent_id} not found or inactive")
+        
+        rep = agent[0]
+        
+        if value == 0:
+            conn.execute(
+                "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                (fact_id, agent_id)
+            )
+        else:
+            # 2. Record vote with current reputation snapshot
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO consensus_votes_v2 
+                (fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (fact_id, agent_id, value, rep, rep, reason)
+            )
+        
+        # 3. Recalculate and commit
+        score = self._recalculate_consensus_v2(fact_id, conn)
+        conn.commit()
+        return score
+
+    def _recalculate_consensus_v2(self, fact_id: int, conn: sqlite3.Connection) -> float:
+        """Calculate consensus score using reputation weights."""
+        # Query all active votes for this fact
+        votes = conn.execute(
+            """
+            SELECT v.vote, v.vote_weight, a.reputation_score
+            FROM consensus_votes_v2 v
+            JOIN agents a ON v.agent_id = a.id
+            WHERE v.fact_id = ? AND a.is_active = 1
+            """,
+            (fact_id,)
+        ).fetchall()
+
+        if not votes:
+            # Fall back to legacy if no v2 votes exist yet? 
+            # For now, we'll return the legacy score if v2 is empty
+            return self._recalculate_consensus(fact_id, conn)
+
+        weighted_sum = 0.0
+        total_weight = 0.0
+        
+        for vote, vote_weight, current_rep in votes:
+            # Use the higher of recorded weight or current reputation
+            # (or just current rep depending on policy)
+            weight = max(vote_weight, current_rep)
+            weighted_sum += vote * weight
+            total_weight += weight
+
+        if total_weight > 0:
+            normalized = weighted_sum / total_weight  # Range [-1, 1]
+            score = 1.0 + normalized  # Scale to [0, 2]
+        else:
+            score = 1.0
+
+        # Update fact
+        new_confidence = None
+        if score >= 1.6: new_confidence = "verified"
+        elif score <= 0.4: new_confidence = "disputed"
+        
+        if new_confidence:
+            conn.execute(
+                "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
+                (score, new_confidence, fact_id)
+            )
+        else:
+            conn.execute(
+                "UPDATE facts SET consensus_score = ? WHERE id = ?",
+                (score, fact_id)
+            )
+            
+        return score
+
+    def _recalculate_consensus(self, fact_id: int, conn: sqlite3.Connection) -> float:
+        """Update consensus_score based on votes and adjust confidence."""
+        row = conn.execute(
+            "SELECT SUM(vote) FROM consensus_votes WHERE fact_id = ?",
+            (fact_id,),
+        ).fetchone()
+        vote_sum = row[0] or 0
+        # Score starts at 1.0 (neutral). Each vote adds/removes 0.1.
+        # Verified threshold: 1.5 (net +5 votes)
+        # Disputed threshold: 0.5 (net -5 votes)
+        score = max(0.0, 1.0 + (vote_sum * 0.1))
+
+        # Thresholds for automatic confidence shifting
+        new_confidence = None
+        if score >= 1.5:
+            new_confidence = "verified"
+        elif score <= 0.5:
+            new_confidence = "disputed"
+
+        if new_confidence:
+            conn.execute(
+                "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
+                (score, new_confidence, fact_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE facts SET consensus_score = ? WHERE id = ?",
+                (score, fact_id),
+            )
+        return score
 
     # ─── History (Temporal Query) ─────────────────────────────────
 
@@ -309,16 +644,16 @@ class CortexEngine:
 
         if as_of:
             clause, params = build_temporal_filter_params(as_of)
-            cursor = conn.execute(
-                f"""
+            query = f"""
                 SELECT id, project, content, fact_type, tags, confidence,
                        valid_from, valid_until, source, meta
                 FROM facts
                 WHERE project = ? AND {clause}
                 ORDER BY valid_from DESC
-                """,
-                [project] + params,
-            )
+                """
+            # Combine params safely
+            full_params = [project] + params
+            cursor = conn.execute(query, full_params)
         else:
             cursor = conn.execute(
                 """
@@ -345,6 +680,9 @@ class CortexEngine:
         Returns:
             True if fact was found and deprecated.
         """
+        if fact_id <= 0:
+            raise ValueError("Invalid fact_id")
+
         conn = self._get_conn()
         ts = now_iso()
 
@@ -459,17 +797,28 @@ class CortexEngine:
     @staticmethod
     def _row_to_fact(row: tuple) -> Fact:
         """Convert a database row to a Fact object."""
+        try:
+            tags = json.loads(row[4]) if row[4] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+            
+        try:
+            meta = json.loads(row[9]) if row[9] else {}
+        except (json.JSONDecodeError, TypeError):
+            meta = {}
+
         return Fact(
             id=row[0],
             project=row[1],
             content=row[2],
             fact_type=row[3],
-            tags=json.loads(row[4]) if row[4] else [],
+            tags=tags,
             confidence=row[5],
             valid_from=row[6],
             valid_until=row[7],
             source=row[8],
-            meta=json.loads(row[9]) if row[9] else {},
+            meta=meta,
+            consensus_score=row[10] if len(row) > 10 else 1.0,
         )
 
     def close(self) -> None:

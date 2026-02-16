@@ -109,31 +109,47 @@ def sync_memory(engine: CortexEngine) -> SyncResult:
 
     # ── 1. Sincronizar ghosts.json ───────────────────────────────
     ghosts_file = MEMORY_DIR / "ghosts.json"
-    ghosts_hash = _file_hash(ghosts_file)
-    if ghosts_hash and ghosts_hash != state.get("ghosts_hash"):
-        _sync_ghosts(engine, ghosts_file, result)
-        state["ghosts_hash"] = ghosts_hash
+    try:
+        ghosts_hash = _file_hash(ghosts_file)
+        if ghosts_hash and ghosts_hash != state.get("ghosts_hash"):
+            _sync_ghosts(engine, ghosts_file, result)
+            state["ghosts_hash"] = ghosts_hash
+    except Exception as e:
+        result.errors.append(f"ghosts.json: {e}")
+        logger.error("Syncing ghosts failed: %s", e)
 
     # ── 2. Sincronizar system.json (conocimiento global) ─────────
     system_file = MEMORY_DIR / "system.json"
-    system_hash = _file_hash(system_file)
-    if system_hash and system_hash != state.get("system_hash"):
-        _sync_system(engine, system_file, result)
-        state["system_hash"] = system_hash
+    try:
+        system_hash = _file_hash(system_file)
+        if system_hash and system_hash != state.get("system_hash"):
+            _sync_system(engine, system_file, result)
+            state["system_hash"] = system_hash
+    except Exception as e:
+        result.errors.append(f"system.json: {e}")
+        logger.error("Syncing system failed: %s", e)
 
     # ── 3. Sincronizar mistakes.jsonl (errores) ──────────────────
     mistakes_file = MEMORY_DIR / "mistakes.jsonl"
-    mistakes_hash = _file_hash(mistakes_file)
-    if mistakes_hash and mistakes_hash != state.get("mistakes_hash"):
-        _sync_mistakes(engine, mistakes_file, result)
-        state["mistakes_hash"] = mistakes_hash
+    try:
+        mistakes_hash = _file_hash(mistakes_file)
+        if mistakes_hash and mistakes_hash != state.get("mistakes_hash"):
+            _sync_mistakes(engine, mistakes_file, result)
+            state["mistakes_hash"] = mistakes_hash
+    except Exception as e:
+        result.errors.append(f"mistakes.jsonl: {e}")
+        logger.error("Syncing mistakes failed: %s", e)
 
     # ── 4. Sincronizar bridges.jsonl (conexiones entre proyectos)
     bridges_file = MEMORY_DIR / "bridges.jsonl"
-    bridges_hash = _file_hash(bridges_file)
-    if bridges_hash and bridges_hash != state.get("bridges_hash"):
-        _sync_bridges(engine, bridges_file, result)
-        state["bridges_hash"] = bridges_hash
+    try:
+        bridges_hash = _file_hash(bridges_file)
+        if bridges_hash and bridges_hash != state.get("bridges_hash"):
+            _sync_bridges(engine, bridges_file, result)
+            state["bridges_hash"] = bridges_hash
+    except Exception as e:
+        result.errors.append(f"bridges.jsonl: {e}")
+        logger.error("Syncing bridges failed: %s", e)
 
     # Guardar estado para la próxima ejecución
     state["last_sync"] = result.synced_at

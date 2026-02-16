@@ -45,7 +45,7 @@ moskv-daemon uninstall
 ### What it monitors
 
 | Check | Threshold | Alert |
-|---|---|---|
+| :--- | :--- | :--- |
 | **Site Health** | HTTP 4xx/5xx/timeout | macOS notification |
 | **Stale Projects** | No activity >48h in `ghosts.json` | macOS notification |
 | **Memory Freshness** | `system.json` not updated >24h | macOS notification |
