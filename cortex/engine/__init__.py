@@ -12,16 +12,15 @@ import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.embeddings import LocalEmbedder
+from cortex.engine.consensus_mixin import ConsensusMixin
+from cortex.engine.models import Fact, row_to_fact
+from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.sync_compat import SyncCompatMixin
+from cortex.metrics import metrics
 from cortex.migrations.core import run_migrations, run_migrations_async
 from cortex.schema import get_init_meta
 from cortex.temporal import now_iso
-
-from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.store_mixin import StoreMixin
-from cortex.metrics import metrics
-from cortex.engine.query_mixin import QueryMixin
-from cortex.engine.consensus_mixin import ConsensusMixin
-from cortex.engine.sync_compat import SyncCompatMixin
 
 logger = logging.getLogger("cortex")
 
@@ -92,8 +91,8 @@ class CortexEngine(StoreMixin, QueryMixin, ConsensusMixin, SyncCompatMixin):
 
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
-        from cortex.schema import ALL_SCHEMA
         from cortex.engine.ledger import ImmutableLedger
+        from cortex.schema import ALL_SCHEMA
 
         conn = await self.get_conn()
 

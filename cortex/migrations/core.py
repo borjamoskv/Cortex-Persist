@@ -6,7 +6,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import sqlite3
+
 import aiosqlite
+
 from cortex.migrations.registry import MIGRATIONS
 from cortex.schema import ALL_SCHEMA
 

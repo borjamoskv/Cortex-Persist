@@ -13,10 +13,10 @@ from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.utils import (
-    MCPServerConfig,
-    MCPMetrics,
-    SimpleAsyncCache,
     AsyncConnectionPool,
+    MCPMetrics,
+    MCPServerConfig,
+    SimpleAsyncCache,
 )
 
 logger = logging.getLogger("cortex.mcp.server")

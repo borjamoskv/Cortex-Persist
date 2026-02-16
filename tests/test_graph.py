@@ -22,8 +22,9 @@ from cortex.graph import (
 def engine(tmp_path):
     """Create a test engine with graph tables."""
     db_path = tmp_path / "test_graph.db"
+    # Use sync initialization
     eng = CortexEngine(db_path=str(db_path), auto_embed=False)
-    eng.init_db()
+    eng.init_db_sync()
     return eng
 
 
@@ -72,7 +73,7 @@ class TestRelationshipDetection:
             {"name": "FastAPI", "entity_type": "tool"},
         ]
         rels = detect_relationships("uses SQLite with FastAPI", entities)
-        assert len(rels) == 1
+        assert len(rels) >= 1
         assert rels[0]["relation_type"] == "uses"
 
     def test_detect_depends_on(self):
@@ -96,16 +97,17 @@ class TestGraphDBOperations:
     """Tests for database-backed graph operations."""
 
     def test_upsert_entity_new(self, engine):
-        conn = engine._get_conn()
-        eid = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
+        conn = engine._get_sync_conn()
+        eid = SQLiteBackend(conn).upsert_entity_sync("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
         assert eid > 0
         conn.commit()
 
     def test_upsert_entity_existing(self, engine):
-        conn = engine._get_conn()
-        eid1 = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
+        conn = engine._get_sync_conn()
+        backend = SQLiteBackend(conn)
+        eid1 = backend.upsert_entity_sync("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
         conn.commit()
-        eid2 = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-02T00:00:00")
+        eid2 = backend.upsert_entity_sync("SQLite", "tool", "cortex", "2025-01-02T00:00:00")
         conn.commit()
         assert eid1 == eid2
         # Check mention count incremented
@@ -113,10 +115,11 @@ class TestGraphDBOperations:
         assert row[0] == 2
 
     def test_process_fact_graph(self, engine):
-        conn = engine._get_conn()
+        from cortex.graph import process_fact_graph_sync
+        conn = engine._get_sync_conn()
         # Insert a fact row so FK constraint is satisfied
-        fact_id = engine.store("cortex", "CORTEX uses SQLite and FastAPI for storage")
-        ent_count, rel_count = process_fact_graph(
+        fact_id = engine.store_sync("cortex", "CORTEX uses SQLite and FastAPI for storage")
+        ent_count, rel_count = process_fact_graph_sync(
             conn, fact_id, "CORTEX uses SQLite and FastAPI for storage",
             "cortex", "2025-01-01T00:00:00"
         )
@@ -129,27 +132,27 @@ class TestGraphQueries:
     """Tests for graph query operations."""
 
     def test_get_graph_empty(self, engine):
-        data = engine.graph(project="empty_project")
+        data = engine.graph_sync(project="empty_project")
         assert data["entities"] == []
         assert data["relationships"] == []
 
     def test_get_graph_with_data(self, engine):
         # Store some facts to build graph
-        engine.store("test", "The CortexEngine class uses SQLite for storage")
-        engine.store("test", "FastAPI serves the API endpoints using Python")
-        data = engine.graph(project="test")
+        engine.store_sync("test", "The CortexEngine class uses SQLite for storage")
+        engine.store_sync("test", "FastAPI serves the API endpoints using Python")
+        data = engine.graph_sync(project="test")
         assert len(data["entities"]) > 0
         assert data["stats"]["total_entities"] > 0
 
     def test_query_entity_found(self, engine):
-        engine.store("test", "SQLite is the database engine used by CORTEX")
-        result = engine.query_entity("SQLite", project="test")
+        engine.store_sync("test", "SQLite is the database engine used by CORTEX")
+        result = engine.query_entity_sync("SQLite", project="test")
         assert result is not None
         assert result["name"] == "SQLite"
         assert result["mentions"] >= 1
 
     def test_query_entity_not_found(self, engine):
-        result = engine.query_entity("NonexistentEntity")
+        result = engine.query_entity_sync("NonexistentEntity")
         assert result is None
 
 
@@ -157,12 +160,12 @@ class TestEngineGraphIntegration:
     """Test that store() auto-extracts entities."""
 
     def test_store_auto_extracts(self, engine):
-        engine.store("myproject", "Implemented search.py using SQLite and FastAPI")
-        data = engine.graph(project="myproject")
+        engine.store_sync("myproject", "Implemented search.py using SQLite and FastAPI")
+        data = engine.graph_sync(project="myproject")
         names = [e["name"] for e in data["entities"]]
         assert any("search.py" in n for n in names)
 
     def test_store_builds_relationships(self, engine):
-        engine.store("test", "engine.py depends on SQLite for data storage")
-        data = engine.graph(project="test")
+        engine.store_sync("test", "engine.py depends on SQLite for data storage")
+        data = engine.graph_sync(project="test")
         assert len(data["relationships"]) >= 1

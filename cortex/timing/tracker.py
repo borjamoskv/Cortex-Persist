@@ -10,7 +10,10 @@ from datetime import datetime, timedelta, timezone
 
 from cortex.temporal import now_iso
 from cortex.timing.models import (
-    TimeEntry, TimeSummary, DEFAULT_GAP_SECONDS, classify_entity,
+    DEFAULT_GAP_SECONDS,
+    TimeEntry,
+    TimeSummary,
+    classify_entity,
 )
 
 logger = logging.getLogger("cortex")

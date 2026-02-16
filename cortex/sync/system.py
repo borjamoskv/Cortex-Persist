@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from cortex.sync.common import SyncResult, get_existing_contents, calculate_fact_diff
+from cortex.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

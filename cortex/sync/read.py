@@ -9,17 +9,18 @@ from typing import TYPE_CHECKING, Any
 from cortex.sync.common import (
     MEMORY_DIR,
     SyncResult,
+    calculate_fact_diff,
     file_hash,
     get_existing_contents,
     load_sync_state,
     save_sync_state,
-    calculate_fact_diff,
 )
 from cortex.sync.system import sync_system
 from cortex.temporal import now_iso
 
 if TYPE_CHECKING:
     from pathlib import Path
+
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.sync")

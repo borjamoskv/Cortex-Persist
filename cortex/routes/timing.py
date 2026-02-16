@@ -2,14 +2,16 @@
 CORTEX v4.0 — Timing Router.
 """
 
-import sqlite3
 import logging
+import sqlite3
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette.concurrency import run_in_threadpool
+
+from cortex import api_state
 from cortex.auth import AuthResult, require_permission
 from cortex.models import HeartbeatRequest, TimeSummaryResponse
-from cortex import api_state
 
 router = APIRouter(tags=["timing"])
 logger = logging.getLogger("uvicorn.error")

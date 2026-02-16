@@ -3,10 +3,11 @@ CORTEX v4.0 - Search Router.
 """
 
 from fastapi import APIRouter, Depends, Query
-from cortex.auth import AuthResult, require_permission
-from cortex.models import SearchRequest, SearchResult
+
 from cortex.api_deps import get_engine
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
+from cortex.models import SearchRequest, SearchResult
 
 router = APIRouter(tags=["search"])
 

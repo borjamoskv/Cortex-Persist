@@ -9,8 +9,8 @@ vs original: [384 × 4 bytes float32] = 1,536 bytes (JSON is even larger)
 """
 from __future__ import annotations
 
-import struct
 import logging
+import struct
 from typing import List
 
 logger = logging.getLogger("cortex.embeddings.compression")

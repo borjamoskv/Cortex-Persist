@@ -6,7 +6,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import cli, console, get_engine, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
 
 @cli.group()
@@ -53,7 +53,7 @@ def mejoralo_scan(project, path, deep, db):
         if result.dead_code:
             console.print("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
     finally:
-        engine.close()
+        engine.close_sync()
 
 
 @mejoralo.command("record")
@@ -79,7 +79,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
             f"{score_before} → {score_after} ([{color}]Δ{delta:+d}[/])"
         )
     finally:
-        engine.close()
+        engine.close_sync()
 
 
 @mejoralo.command("history")
@@ -116,7 +116,7 @@ def mejoralo_history(project, limit, db):
             )
         console.print(table)
     finally:
-        engine.close()
+        engine.close_sync()
 
 
 @mejoralo.command("ship")
@@ -140,4 +140,4 @@ def mejoralo_ship(project, path, db):
         else:
             console.print(f"  [bold red]⛔ NOT READY — {result.passed}/{result.total} sellos aprobados[/]")
     finally:
-        engine.close()
+        engine.close_sync()

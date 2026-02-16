@@ -7,7 +7,7 @@ import json
 import click
 from rich.table import Table
 
-from cortex.cli import cli, console, get_engine, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.sync import export_to_json
 
 

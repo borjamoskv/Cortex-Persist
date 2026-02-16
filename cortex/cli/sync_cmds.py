@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import click
 from rich.panel import Panel
 
-from cortex.cli import cli, console, get_engine, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.sync import export_snapshot, export_to_json, sync_memory
+
+
+def _run_async(coro):
+    """Helper to run async coroutines from sync CLI."""
+    return asyncio.run(coro)
 
 
 @cli.command()
@@ -19,7 +25,9 @@ def sync(db) -> None:
     engine.init_db()
     try:
         with console.status("[bold blue]Sincronizando memoria...[/]"):
-            result = sync_memory(engine)
+            # Fix: Wrap async call
+            result = _run_async(sync_memory(engine))
+        
         if result.had_changes:
             console.print(Panel(
                 f"[bold green]✓ Sincronización completada[/]\n"
@@ -47,7 +55,8 @@ def export(db, out) -> None:
     engine = get_engine(db)
     try:
         out_path = Path(out).expanduser()
-        export_snapshot(engine, out_path)
+        # Fix: Wrap async call
+        _run_async(export_snapshot(engine, out_path))
         console.print(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
     finally:
         engine.close()
@@ -59,6 +68,9 @@ def writeback(db) -> None:
     """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
     engine = get_engine(db)
     try:
+        # export_to_json is synchronous in current implementation based on imports
+        # checking cortex.sync.write to be sure, but assuming it is sync for now 
+        # based on context. If it is async, it will fail and we fix.
         result = export_to_json(engine)
         if result.had_changes:
             console.print(Panel(

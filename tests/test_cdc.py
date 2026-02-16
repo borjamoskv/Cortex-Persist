@@ -5,11 +5,8 @@ from cortex.engine import CortexEngine
 from cortex.schema import ALL_SCHEMA
 
 @pytest.mark.asyncio
-async def test_cdc_outbox_flow():
-    db_path = "test_cdc.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
-        
+async def test_cdc_outbox_flow(tmp_path):
+    db_path = str(tmp_path / "test_cdc.db")
     engine = CortexEngine(db_path=db_path)
     await engine.init_db()
     
@@ -33,12 +30,9 @@ async def test_cdc_outbox_flow():
         assert row[1] == "pending"
         assert row[2] == fact_id
         
-    # 5. Process outbox (Neo4j will likely skip since it's not running, but status should update if we handle initialization check)
+    # 5. Process outbox
+    # We expect this to return 0 if Neo4j is not running/configured
     processed = await engine.process_graph_outbox_async()
-    
-    # If Neo4j is not initialized, processed will be 0 but status shouldn't change to 'processed'
-    # Actually, my implementation returns 0 if neo4j not initialized.
+    assert processed == 0
     
     await engine.close()
-    if os.path.exists(db_path):
-        os.remove(db_path)

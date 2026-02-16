@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import cli, console, get_engine, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.launchpad import MissionOrchestrator
 
 

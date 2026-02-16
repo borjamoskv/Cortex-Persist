@@ -16,29 +16,51 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from cortex import api_state
 from cortex.auth import AuthManager
+from cortex.config import ALLOWED_ORIGINS, DB_PATH, RATE_LIMIT, RATE_WINDOW
 from cortex.engine import CortexEngine
-from cortex.timing import TimingTracker
-from cortex.config import DB_PATH, ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
 from cortex.hive import router as hive_router
 from cortex.metrics import MetricsMiddleware, metrics
-from cortex import api_state
+from cortex.routes import (
+    admin as admin_router,
+)
+from cortex.routes import (
+    agents as agents_router,
+)
+from cortex.routes import (
+    daemon as daemon_router,
+)
+from cortex.routes import (
+    dashboard as dashboard_router,
+)
 
 # Import routers
 from cortex.routes import (
     facts as facts_router,
-    search as search_router,
-    admin as admin_router,
-    timing as timing_router,
-    daemon as daemon_router,
-    dashboard as dashboard_router,
-    agents as agents_router,
-    graph as graph_router,
-    ledger as ledger_router,
-    missions as missions_router,
-    mejoralo as mejoralo_router,
+)
+from cortex.routes import (
     gate as gate_router,
 )
+from cortex.routes import (
+    graph as graph_router,
+)
+from cortex.routes import (
+    ledger as ledger_router,
+)
+from cortex.routes import (
+    mejoralo as mejoralo_router,
+)
+from cortex.routes import (
+    missions as missions_router,
+)
+from cortex.routes import (
+    search as search_router,
+)
+from cortex.routes import (
+    timing as timing_router,
+)
+from cortex.timing import TimingTracker
 
 logger = logging.getLogger("uvicorn.error")
 

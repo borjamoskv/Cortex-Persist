@@ -5,7 +5,6 @@ API key management with SHA-256 hashing. Keys are stored hashed,
 never in plaintext. Supports scoped permissions per tenant.
 """
 
-from functools import lru_cache
 import hashlib
 import json
 import logging
@@ -13,6 +12,7 @@ import secrets
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends, Header, HTTPException
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # ─── Config ───────────────────────────────────────────────────────────
 
 from cortex.config import DB_PATH
+
 _auth_manager: Optional[AuthManager] = None
 
 

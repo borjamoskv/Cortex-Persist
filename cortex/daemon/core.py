@@ -10,19 +10,31 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
+
 from cortex.daemon.models import (
+    AGENT_DIR,
+    CONFIG_FILE,
+    CORTEX_DB,
+    CORTEX_DIR,
+    DEFAULT_CERT_WARN_DAYS,
+    DEFAULT_COOLDOWN,
+    DEFAULT_DISK_WARN_MB,
+    DEFAULT_INTERVAL,
+    DEFAULT_MEMORY_STALE_HOURS,
+    DEFAULT_STALE_HOURS,
+    STATUS_FILE,
     DaemonStatus,
-    DEFAULT_INTERVAL, DEFAULT_STALE_HOURS, DEFAULT_MEMORY_STALE_HOURS,
-    DEFAULT_COOLDOWN, DEFAULT_CERT_WARN_DAYS, DEFAULT_DISK_WARN_MB,
-    CONFIG_FILE, STATUS_FILE, CORTEX_DB, CORTEX_DIR, AGENT_DIR,
 )
 from cortex.daemon.monitors import (
-    SiteMonitor, GhostWatcher, MemorySyncer,
-    CertMonitor, EngineHealthCheck, DiskMonitor,
+    CertMonitor,
+    DiskMonitor,
+    EngineHealthCheck,
+    GhostWatcher,
+    MemorySyncer,
+    SiteMonitor,
 )
 from cortex.daemon.notifier import Notifier
-
-import httpx
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -197,7 +209,7 @@ class MoskvDaemon:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
         try:
             from cortex.engine import CortexEngine
-            from cortex.sync import sync_memory, export_snapshot, export_to_json
+            from cortex.sync import export_snapshot, export_to_json, sync_memory
             engine = CortexEngine()
             engine.init_db()
             sync_result = sync_memory(engine)
