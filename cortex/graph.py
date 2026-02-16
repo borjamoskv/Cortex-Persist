@@ -78,6 +78,29 @@ class Relationship:
             "weight": self.weight,
         }
 
+@dataclass
+class Ghost:
+    """A dangling reference that needs resolution."""
+    id: int | str = 0
+    reference: str = ""
+    context: str = ""
+    project: str = ""
+    status: str = "open" # open, resolved, pending_review
+    detected_at: str = ""
+    resolved_at: Optional[str] = None
+    target_id: Optional[int | str] = None
+    confidence: float = 0.0
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "reference": self.reference,
+            "project": self.project,
+            "status": self.status,
+            "confidence": self.confidence,
+            "target_id": self.target_id
+        }
+
 # ─── Abstract Backend ────────────────────────────────────────────────
 
 class GraphBackend(ABC):
@@ -95,6 +118,14 @@ class GraphBackend(ABC):
 
     @abstractmethod
     def query_entity(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def upsert_ghost(self, reference: str, context: str, project: str, timestamp: str) -> int | str:
+        pass
+
+    @abstractmethod
+    def resolve_ghost(self, ghost_id: int | str, target_id: int | str, confidence: float, timestamp: str) -> bool:
         pass
 
 # ─── SQLite Backend ──────────────────────────────────────────────────

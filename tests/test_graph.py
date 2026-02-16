@@ -13,7 +13,8 @@ from cortex.graph import (
     get_graph,
     process_fact_graph,
     query_entity,
-    upsert_entity,
+    SQLiteBackend,
+    Relationship,
 )
 
 
@@ -96,15 +97,15 @@ class TestGraphDBOperations:
 
     def test_upsert_entity_new(self, engine):
         conn = engine._get_conn()
-        eid = upsert_entity(conn, "SQLite", "tool", "cortex", "2025-01-01T00:00:00")
+        eid = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
         assert eid > 0
         conn.commit()
 
     def test_upsert_entity_existing(self, engine):
         conn = engine._get_conn()
-        eid1 = upsert_entity(conn, "SQLite", "tool", "cortex", "2025-01-01T00:00:00")
+        eid1 = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-01T00:00:00")
         conn.commit()
-        eid2 = upsert_entity(conn, "SQLite", "tool", "cortex", "2025-01-02T00:00:00")
+        eid2 = SQLiteBackend(conn).upsert_entity("SQLite", "tool", "cortex", "2025-01-02T00:00:00")
         conn.commit()
         assert eid1 == eid2
         # Check mention count incremented
