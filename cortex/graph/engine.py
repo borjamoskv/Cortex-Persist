@@ -147,45 +147,29 @@ async def process_fact_graph(
         return 0, 0
 
 
-def get_graph(conn, project: Optional[str] = None, limit: int = 50) -> dict:
-    """Get graph data (sync - used from hive.py and other sync contexts)."""
-    backend = get_backend(conn)
-    # If backend methods are async (new API), run in event loop
-    import asyncio
-    coro = backend.get_graph(project, limit)
-    if asyncio.iscoroutine(coro):
-        try:
-            loop = asyncio.get_running_loop()
-            # Already in async context — can't use run(), caller should use async version
-            logger.warning("get_graph called sync inside async loop; use get_graph_async")
-            return {"entities": [], "relationships": []}
-        except RuntimeError:
-            return asyncio.run(coro)
-    return coro  # type: ignore[return-value]
+async def get_graph(
+    conn, project: Optional[str] = None, limit: int = 50
+) -> dict:
+    """Get graph data for a project or all projects.
 
-
-async def get_graph_async(conn, project: Optional[str] = None, limit: int = 50) -> dict:
-    """Get graph data (async)."""
+    Args:
+        conn: Active database connection.
+        project: Optional project filter.
+        limit: Maximum entities to return.
+    """
     backend = get_backend(conn)
     return await backend.get_graph(project, limit)
 
 
-def query_entity(conn, name: str, project: Optional[str] = None) -> Optional[dict]:
-    """Query a specific entity (sync)."""
-    backend = get_backend(conn)
-    import asyncio
-    coro = backend.query_entity(name, project)
-    if asyncio.iscoroutine(coro):
-        try:
-            asyncio.get_running_loop()
-            logger.warning("query_entity called sync inside async loop; use query_entity_async")
-            return None
-        except RuntimeError:
-            return asyncio.run(coro)
-    return coro  # type: ignore[return-value]
+async def query_entity(
+    conn, name: str, project: Optional[str] = None
+) -> Optional[dict]:
+    """Query a specific entity by name.
 
-
-async def query_entity_async(conn, name: str, project: Optional[str] = None) -> Optional[dict]:
-    """Query a specific entity (async)."""
+    Args:
+        conn: Active database connection.
+        name: Entity name to search for.
+        project: Optional project filter.
+    """
     backend = get_backend(conn)
     return await backend.query_entity(name, project)

@@ -3,7 +3,6 @@
 Configuration, Metrics, Caching, and Connection Pooling.
 """
 import asyncio
-import json
 import logging
 import os
 import sqlite3

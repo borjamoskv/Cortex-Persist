@@ -8,11 +8,10 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from starlette.concurrency import run_in_threadpool
 from cortex.auth import AuthResult, require_permission
 from cortex.api_deps import get_engine
 from cortex.engine import CortexEngine
-from cortex.graph import get_graph as _get_graph_sync
+from cortex.graph import get_graph as _get_graph
 
 router = APIRouter(tags=["graph"])
 logger = logging.getLogger("uvicorn.error")
@@ -31,8 +30,7 @@ async def get_graph(
 
     try:
         conn = await engine.get_conn()
-        result = await run_in_threadpool(_get_graph_sync, conn, project, limit)
-        return result
+        return await _get_graph(conn, project, limit)
     except Exception as e:
         logger.error("Graph unavailable: %s", e)
         raise HTTPException(status_code=500, detail="Graph unavailable")
@@ -47,8 +45,7 @@ async def get_graph_all(
     """Get entity graph across all projects."""
     try:
         conn = await engine.get_conn()
-        result = await run_in_threadpool(_get_graph_sync, conn, None, limit)
-        return result
+        return await _get_graph(conn, None, limit)
     except Exception as e:
         logger.error("Graph unavailable: %s", e)
         raise HTTPException(status_code=500, detail="Graph unavailable")

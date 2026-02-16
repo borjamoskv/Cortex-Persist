@@ -6,13 +6,12 @@ import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from cortex.engine import CortexEngine
-from cortex.engine.ledger import ImmutableLedger
-from cortex.graph.engine import get_graph_async
-from cortex.mcp.guard import MCPGuard
 from functools import lru_cache
 from typing import Optional
 
+from cortex.engine import CortexEngine
+from cortex.engine.ledger import ImmutableLedger
+from cortex.mcp.guard import MCPGuard
 from cortex.mcp.utils import (
     MCPServerConfig,
     MCPMetrics,
@@ -31,34 +30,37 @@ except ImportError:
     logger.debug("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
 
 
-def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
-    """Create and configure an optimized CORTEX MCP server instance."""
-    if not _MCP_AVAILABLE:
-        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
+# ─── Server Context ──────────────────────────────────────────────────
 
-    cfg = config or MCPServerConfig()
-    mcp = FastMCP("CORTEX Memory v2")
-    
-    metrics = MCPMetrics()
-    executor = ThreadPoolExecutor(max_workers=cfg.max_workers)
-    pool = AsyncConnectionPool(cfg.db_path, max_connections=cfg.max_workers)
-    
-    # State management inside the function closure
-    _state = {"initialized": False}
 
-    async def ensure_initialized():
-        if not _state["initialized"]:
-            await pool.initialize()
-            _state["initialized"] = True
+class _MCPContext:
+    """Encapsulates the shared state for an MCP server instance.
 
-    @lru_cache(maxsize=cfg.query_cache_size)
-    def cached_search(query: str, project: Optional[str], top_k: int):
-        # This is a sync bridge for lru_cache; actual IO happens in run_in_executor
-        pass
+    Replaces the old ``_state`` dict anti-pattern with a proper class
+    that owns its lifecycle.
+    """
 
-    search_cache = SimpleAsyncCache(maxsize=cfg.query_cache_size)
+    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized")
 
-    # ─── Tools ────────────────────────────────────────────────────
+    def __init__(self, cfg: MCPServerConfig) -> None:
+        self.cfg = cfg
+        self.metrics = MCPMetrics()
+        self.executor = ThreadPoolExecutor(max_workers=cfg.max_workers)
+        self.pool = AsyncConnectionPool(cfg.db_path, max_connections=cfg.max_workers)
+        self.search_cache = SimpleAsyncCache(maxsize=cfg.query_cache_size)
+        self._initialized = False
+
+    async def ensure_ready(self) -> None:
+        if not self._initialized:
+            await self.pool.initialize()
+            self._initialized = True
+
+
+# ─── Tool Registrators ───────────────────────────────────────────────
+
+
+def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+    """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
     async def cortex_store(
@@ -69,42 +71,39 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
         source: str = "",
     ) -> str:
         """Store a fact in CORTEX memory."""
-        await ensure_initialized()
-        from cortex.engine import CortexEngine
-        
+        await ctx.ensure_ready()
+
         try:
             parsed_tags = json.loads(tags) if tags else []
         except (json.JSONDecodeError, TypeError):
             parsed_tags = []
 
-        # ── MOSKV-1 Hard Limits ──
         try:
             MCPGuard.validate_store(project, content, fact_type, parsed_tags)
         except ValueError as e:
-            metrics.record_error()
+            ctx.metrics.record_error()
             logger.warning("MCP Guard rejected store: %s", e)
             return f"❌ Rejected: {e}"
 
-        async with pool.acquire() as conn:
-            engine = CortexEngine(cfg.db_path, auto_embed=False)
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            
+
             loop = asyncio.get_event_loop()
             fact_id = await loop.run_in_executor(
-                executor,
+                ctx.executor,
                 engine.store,
-                project,
-                content,
-                fact_type,
-                parsed_tags,
-                "stated",
-                source or None
+                project, content, fact_type, parsed_tags,
+                "stated", source or None,
             )
-            
-        metrics.record_request()
-        # Invalidate search cache on store
-        search_cache.clear()
+
+        ctx.metrics.record_request()
+        ctx.search_cache.clear()
         return f"✓ Stored fact #{fact_id} in project '{project}'"
+
+
+def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+    """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
     async def cortex_search(
@@ -113,68 +112,64 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
         top_k: int = 5,
     ) -> str:
         """Search CORTEX memory using semantic + text hybrid search."""
-        await ensure_initialized()
+        await ctx.ensure_ready()
 
-        # ── MOSKV-1 Hard Limits ──
         try:
             MCPGuard.validate_search(query)
         except ValueError as e:
-            metrics.record_error()
+            ctx.metrics.record_error()
             logger.warning("MCP Guard rejected search: %s", e)
             return f"❌ Rejected: {e}"
-        
-        # Caching logic
+
         cache_key = f"{query}:{project}:{top_k}"
-        cached_result = search_cache.get(cache_key)
+        cached_result = ctx.search_cache.get(cache_key)
         if cached_result:
-            metrics.record_request(cached=True)
+            ctx.metrics.record_request(cached=True)
             return cached_result
 
-        from cortex.engine import CortexEngine
-        
-        async with pool.acquire() as conn:
-            engine = CortexEngine(cfg.db_path, auto_embed=False)
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            
+
             loop = asyncio.get_event_loop()
             results = await loop.run_in_executor(
-                executor,
+                ctx.executor,
                 engine.search,
-                query,
-                project or None,
-                min(max(top_k, 1), 20)
+                query, project or None, min(max(top_k, 1), 20),
             )
 
         if not results:
-            search_cache.set(cache_key, "No results found.")
+            ctx.search_cache.set(cache_key, "No results found.")
             return "No results found."
 
-        metrics.record_request()
+        ctx.metrics.record_request()
         lines = [f"Found {len(results)} results:\n"]
         for r in results:
             lines.append(
                 f"[#{r.fact_id}] (score: {r.score:.3f}) "
                 f"[{r.project}/{r.fact_type}]\n{r.content}\n"
             )
-        
+
         output = "\n".join(lines)
-        search_cache.set(cache_key, output)
+        ctx.search_cache.set(cache_key, output)
         return output
+
+
+def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+    """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
     async def cortex_status() -> str:
         """Get CORTEX system status and metrics."""
-        await ensure_initialized()
-        from cortex.engine import CortexEngine
-        
-        async with pool.acquire() as conn:
-            engine = CortexEngine(cfg.db_path, auto_embed=False)
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            # Use get_connection() for public API consistency
             _ = engine.get_connection()
             stats = engine.stats()
-            
-        m_summary = metrics.get_summary()
+
+        m_summary = ctx.metrics.get_summary()
         return (
             f"CORTEX Status (Optimized v2):\n"
             f"  Facts: {stats.get('total_facts', 0)} total, "
@@ -184,26 +179,55 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
             f"  MCP Metrics: {json.dumps(m_summary, indent=2)}"
         )
 
+
+def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+    """Register the ``cortex_ledger_verify`` tool on *mcp*."""
+
     @mcp.tool()
     async def cortex_ledger_verify() -> str:
         """Perform a full integrity check on the CORTEX ledger."""
-        await ensure_initialized()
-        from cortex.engine.ledger import ImmutableLedger
-        
-        async with pool.acquire() as conn:
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
             ledger = ImmutableLedger(conn)
             report = await asyncio.get_event_loop().run_in_executor(
-                executor,
-                ledger.verify_integrity
+                ctx.executor, ledger.verify_integrity,
             )
-            
+
         if report["valid"]:
-            return (f"✅ Ledger Integrity: OK\n"
-                    f"Transactions verified: {report['tx_checked']}\n"
-                    f"Facts checked: {report['facts_checked']}")
-        else:
-            return (f"❌ Ledger Integrity: VIOLATION\n"
-                    f"Violations: {json.dumps(report['violations'], indent=2)}")
+            return (
+                f"✅ Ledger Integrity: OK\n"
+                f"Transactions verified: {report['tx_checked']}\n"
+                f"Facts checked: {report['facts_checked']}"
+            )
+        return (
+            f"❌ Ledger Integrity: VIOLATION\n"
+            f"Violations: {json.dumps(report['violations'], indent=2)}"
+        )
+
+
+# ─── Factory ─────────────────────────────────────────────────────────
+
+
+def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":
+    """Create and configure an optimized CORTEX MCP server instance.
+
+    Each tool is registered via a dedicated helper, keeping this
+    function focused on orchestration (cognitive complexity ≤ 5).
+    """
+    if not _MCP_AVAILABLE:
+        raise ImportError(
+            "MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'"
+        )
+
+    cfg = config or MCPServerConfig()
+    mcp = FastMCP("CORTEX Memory v2")
+    ctx = _MCPContext(cfg)
+
+    _register_store_tool(mcp, ctx)
+    _register_search_tool(mcp, ctx)
+    _register_status_tool(mcp, ctx)
+    _register_ledger_tool(mcp, ctx)
 
     return mcp
 
@@ -212,9 +236,9 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
     """Start the CORTEX MCP server."""
     mcp = create_mcp_server(config)
     cfg = config or MCPServerConfig()
-    
+
     if cfg.transport == "sse":
-        logger.info(f"Starting CORTEX MCP server v2 (SSE) on {cfg.host}:{cfg.port}")
+        logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
         mcp.run_sse(host=cfg.host, port=cfg.port)
     else:
         logger.info("Starting CORTEX MCP server v2 (stdio)")

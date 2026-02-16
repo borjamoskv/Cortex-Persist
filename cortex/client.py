@@ -11,11 +11,9 @@ Usage:
     results = client.search("what is important?")
 """
 
-from __future__ import annotations
-
 import os
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 import httpx
 

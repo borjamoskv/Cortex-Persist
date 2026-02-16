@@ -3,6 +3,7 @@ CORTEX v4.0 — Schema Migrations Core.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import sqlite3
 import aiosqlite
@@ -123,16 +124,15 @@ async def run_migrations_async(conn: aiosqlite.Connection) -> int:
         if version > current:
             logger.info("Applying async migration %d: %s", version, description)
             try:
-                # Migrations are currently sync functions, we wrap them
-                # In the future we might want async migrations too
-                # For now, we pass the underlying literal connection if needed
-                # but aiosqlite connections work with executescript
-                func(conn) # Assuming func is sync and simple
+                # Sync migration functions call conn.execute() / conn.executescript()
+                # without await. Run them on aiosqlite's internal worker thread
+                # so they use the same thread that owns the connection.
+                await conn._execute(func, conn._conn)
             except Exception as e:
                 logger.error("Migration %d failed: %s", version, e)
                 await conn.rollback()
                 continue
-            
+
             await conn.execute(
                 "INSERT INTO schema_version (version, description) VALUES (?, ?)",
                 (version, description),

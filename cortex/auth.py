@@ -5,14 +5,10 @@ API key management with SHA-256 hashing. Keys are stored hashed,
 never in plaintext. Supports scoped permissions per tenant.
 """
 
-from __future__ import annotations
-
 from functools import lru_cache
 import hashlib
-import hmac
 import json
 import logging
-import os
 import secrets
 import sqlite3
 from dataclasses import dataclass, field

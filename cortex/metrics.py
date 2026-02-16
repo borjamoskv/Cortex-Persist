@@ -10,10 +10,7 @@ to CORTEX as ``system_health`` facts so they survive process restarts
 and remain queryable during forensic analysis.
 """
 
-from __future__ import annotations
-
 import asyncio
-import json
 import logging
 import time
 from collections import defaultdict, deque
