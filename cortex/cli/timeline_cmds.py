@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+
 import click
 from rich.table import Table
 
-from cortex.cli import cli, console, DEFAULT_DB
 from cortex.api_deps import get_engine
+from cortex.cli import DEFAULT_DB, cli, console
+
 
 @cli.group()
 def timeline():

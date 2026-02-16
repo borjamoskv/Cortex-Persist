@@ -1,6 +1,7 @@
 """Data types for MEJORAlo engine."""
 from dataclasses import dataclass, field
 
+
 @dataclass
 class DimensionResult:
     """Result for a single X-Ray dimension."""

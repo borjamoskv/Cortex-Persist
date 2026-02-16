@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+
 class GraphBackend(ABC):
     @abstractmethod
     async def upsert_entity(self, name: str, entity_type: str, project: str, timestamp: str) -> int | str:

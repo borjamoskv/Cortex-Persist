@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from cortex.engine import CortexEngine
-from .types import ScanResult, ShipResult
-from .utils import detect_stack
+
+from .ledger import get_history, record_session
 from .scan import scan
 from .ship import check_ship_gate
-from .ledger import record_session, get_history
+from .types import ScanResult, ShipResult
+from .utils import detect_stack
 
 logger = logging.getLogger("cortex.mejoralo")
 

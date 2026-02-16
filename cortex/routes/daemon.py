@@ -3,6 +3,7 @@ CORTEX v4.0 — Daemon Router.
 """
 
 from fastapi import APIRouter, Depends
+
 from cortex.auth import AuthResult, require_permission
 
 router = APIRouter(tags=["daemon"])

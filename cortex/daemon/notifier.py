@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import subprocess
 
-from cortex.daemon.models import SiteStatus, GhostAlert, MemoryAlert
+from cortex.daemon.models import GhostAlert, MemoryAlert, SiteStatus
 
 logger = logging.getLogger("moskv-daemon")
 

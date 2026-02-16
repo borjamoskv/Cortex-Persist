@@ -4,6 +4,7 @@ CORTEX v4.0 — Dashboard Router.
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
+
 from cortex.auth import AuthResult, require_permission
 
 router = APIRouter(tags=["dashboard"])

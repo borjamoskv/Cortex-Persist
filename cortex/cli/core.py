@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex import __version__
-from cortex.cli import cli, console, get_engine, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
 
 @cli.command()
@@ -193,7 +193,7 @@ def migrate_graph(db) -> None:
     """Migrate local SQLite graph data to Neo4j global knowledge graph."""
     engine = get_engine(db)
     try:
-        from cortex.graph import process_fact_graph, GRAPH_BACKEND
+        from cortex.graph import GRAPH_BACKEND, process_fact_graph
         if GRAPH_BACKEND != "neo4j":
             console.print("[yellow]WARNING: CORTEX_GRAPH_BACKEND is not set to 'neo4j'.[/]")
             console.print("[dim]Migration will only re-process data into SQLite unless you set CORTEX_GRAPH_BACKEND=neo4j.[/]")

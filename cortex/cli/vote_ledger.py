@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import sys
 import asyncio
+import sys
+
 import click
 from rich.panel import Panel
 
-from cortex.cli import cli, console, DEFAULT_DB
 from cortex.api_deps import get_engine
+from cortex.cli import DEFAULT_DB, cli, console
 from cortex.engine.ledger import ImmutableLedger
+
 
 @cli.command()
 @click.argument("fact_id", type=int)

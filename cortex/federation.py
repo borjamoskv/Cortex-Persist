@@ -13,7 +13,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from cortex.config import SHARD_DIR, FEDERATION_MODE
+from cortex.config import FEDERATION_MODE, SHARD_DIR
 
 logger = logging.getLogger("cortex.federation")
 

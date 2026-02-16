@@ -1,10 +1,11 @@
 import logging
 import os
 from pathlib import Path
-from cortex.mejoralo.types import ShipResult, ShipSeal
-from cortex.mejoralo.utils import detect_stack, get_build_cmd, get_test_cmd, get_lint_cmd, run_quiet
+
 from cortex.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
 from cortex.mejoralo.scan import scan
+from cortex.mejoralo.types import ShipResult, ShipSeal
+from cortex.mejoralo.utils import detect_stack, get_build_cmd, get_lint_cmd, get_test_cmd, run_quiet
 
 logger = logging.getLogger("cortex.mejoralo")
 

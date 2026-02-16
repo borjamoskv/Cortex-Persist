@@ -42,10 +42,10 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
     # Note: These are 'IF NOT EXISTS' so safe to run even if schema.py were applied
     from cortex.schema import (
         CREATE_AGENTS,
-        CREATE_VOTES_V2,
-        CREATE_TRUST_EDGES,
         CREATE_OUTCOMES,
         CREATE_RWC_INDEXES,
+        CREATE_TRUST_EDGES,
+        CREATE_VOTES_V2,
     )
 
     conn.executescript(CREATE_AGENTS)

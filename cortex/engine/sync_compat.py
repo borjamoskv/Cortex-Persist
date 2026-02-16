@@ -51,8 +51,8 @@ class SyncCompatMixin:
 
     def init_db_sync(self) -> None:
         """Initialize database schema (sync version)."""
-        from cortex.schema import ALL_SCHEMA
         from cortex.migrations.core import run_migrations
+        from cortex.schema import ALL_SCHEMA
 
         conn = self._get_sync_conn()
         for stmt in ALL_SCHEMA:
@@ -167,6 +167,20 @@ class SyncCompatMixin:
             vector_weight=vector_weight,
             text_weight=text_weight,
         )
+
+    # ─── Graph ──────────────────────────────────────────────────
+
+    def graph_sync(self, project: Optional[str] = None, limit: int = 50) -> dict:
+        """Retrieve the graph synchronously."""
+        from cortex.graph.backends.sqlite import SQLiteBackend
+        conn = self._get_sync_conn()
+        return SQLiteBackend(conn).get_graph_sync(project=project, limit=limit)
+
+    def query_entity_sync(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+        """Query an entity and its connections synchronously."""
+        from cortex.graph.backends.sqlite import SQLiteBackend
+        conn = self._get_sync_conn()
+        return SQLiteBackend(conn).query_entity_sync(name=name, project=project)
 
     # ─── Consensus ──────────────────────────────────────────────
 

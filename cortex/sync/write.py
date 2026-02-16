@@ -4,8 +4,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from typing import TYPE_CHECKING
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cortex.sync.common import (
     CORTEX_DIR,

@@ -6,7 +6,6 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-
 # ─── Activity Classification ─────────────────────────────────────────
 
 CATEGORY_MAP: dict[str, str] = {

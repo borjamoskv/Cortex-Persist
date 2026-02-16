@@ -17,8 +17,8 @@ from typing import Optional
 
 from cortex.config import (
     MCP_MAX_CONTENT_LENGTH,
-    MCP_MAX_TAGS,
     MCP_MAX_QUERY_LENGTH,
+    MCP_MAX_TAGS,
 )
 
 logger = logging.getLogger("cortex.mcp.guard")

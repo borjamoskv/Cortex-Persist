@@ -5,8 +5,12 @@ Re-exports for backward compatibility.
 """
 
 from cortex.timing.models import (  # noqa: F401
-    Heartbeat, TimeEntry, TimeSummary,
-    CATEGORY_MAP, ENTITY_KEYWORDS, DEFAULT_GAP_SECONDS,
+    CATEGORY_MAP,
+    DEFAULT_GAP_SECONDS,
+    ENTITY_KEYWORDS,
+    Heartbeat,
+    TimeEntry,
+    TimeSummary,
     classify_entity,
 )
 from cortex.timing.tracker import TimingTracker  # noqa: F401

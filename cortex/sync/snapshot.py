@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cortex.sync.common import CORTEX_DIR
 from cortex.temporal import now_iso

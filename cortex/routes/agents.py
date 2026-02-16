@@ -3,11 +3,13 @@ CORTEX v4.0 - Agents Router (Reputation Management).
 """
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
-from cortex.auth import AuthResult, require_permission
-from cortex.models import AgentRegisterRequest, AgentResponse
+
 from cortex.api_deps import get_engine
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
+from cortex.models import AgentRegisterRequest, AgentResponse
 
 router = APIRouter(tags=["agents"])
 logger = logging.getLogger("uvicorn.error")

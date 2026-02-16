@@ -7,9 +7,10 @@ Exposes entity graph endpoints for UI and external consumers.
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, HTTPException
-from cortex.auth import AuthResult, require_permission
+from fastapi import APIRouter, Depends, HTTPException, Query
+
 from cortex.api_deps import get_engine
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
 from cortex.graph import get_graph as _get_graph
 

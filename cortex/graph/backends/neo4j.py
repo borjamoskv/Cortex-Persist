@@ -1,7 +1,9 @@
 import logging
 import re
 from typing import Optional
-from cortex.config import NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
+
+from cortex.config import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+
 from .base import GraphBackend
 
 logger = logging.getLogger("cortex.graph.backends")

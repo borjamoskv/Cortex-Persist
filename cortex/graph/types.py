@@ -5,6 +5,7 @@ Entities, Relationships, and Ghost definitions.
 from dataclasses import dataclass, field
 from typing import Optional
 
+
 @dataclass
 class Entity:
     """A named entity extracted from facts."""

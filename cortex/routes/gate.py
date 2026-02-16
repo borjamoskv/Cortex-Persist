@@ -4,21 +4,22 @@ CORTEX v4.0 — SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from cortex.auth import require_permission
+from cortex.models import (
+    GateActionResponse,
+    GateApprovalRequest,
+    GateStatusResponse,
+)
 from cortex.sovereign_gate import (
-    get_gate,
     GateError,
     GateExpired,
     GateInvalidSignature,
     GateNotApproved,
-)
-from cortex.models import (
-    GateApprovalRequest,
-    GateActionResponse,
-    GateStatusResponse,
+    get_gate,
 )
 
 router = APIRouter(prefix="/v1/gate", tags=["sovereign-gate"])

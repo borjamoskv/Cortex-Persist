@@ -1,11 +1,15 @@
 import logging
 import os
 from pathlib import Path
-from cortex.mejoralo.types import DimensionResult, ScanResult
+
 from cortex.mejoralo.constants import (
-    PSI_PATTERNS, SECURITY_PATTERNS, MAX_LOC,
-    SCAN_EXTENSIONS, SKIP_DIRS
+    MAX_LOC,
+    PSI_PATTERNS,
+    SCAN_EXTENSIONS,
+    SECURITY_PATTERNS,
+    SKIP_DIRS,
 )
+from cortex.mejoralo.types import DimensionResult, ScanResult
 from cortex.mejoralo.utils import detect_stack
 
 logger = logging.getLogger("cortex.mejoralo")

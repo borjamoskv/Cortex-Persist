@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import json
 import logging
-import aiosqlite
 from typing import Any, Dict, List, Optional
+
+import aiosqlite
 
 from cortex.temporal import now_iso
 

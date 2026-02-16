@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli import cli, console, get_engine, get_tracker, DEFAULT_DB
+from cortex.cli import DEFAULT_DB, cli, console, get_engine, get_tracker
 
 
 @cli.command("time")

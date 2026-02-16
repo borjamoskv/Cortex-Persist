@@ -5,12 +5,12 @@ from cortex.migrations.mig_base import (
     _migration_004_vector_index,
     _migration_005_fts5_setup,
 )
-from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_consensus import (
     _migration_007_consensus_layer,
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
+from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ledger import (
     _migration_010_immutable_ledger,
     _migration_011_link_facts_to_tx,

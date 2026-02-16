@@ -6,6 +6,7 @@ and cryptographic vaults. Zero network dependencies.
 """
 
 import sys
+
 try:
     # Use pysqlite3 if available (allows newer SQLite versions + extensions)
     __import__('pysqlite3')

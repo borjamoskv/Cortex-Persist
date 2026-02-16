@@ -4,23 +4,24 @@ CORTEX v4.0 — MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
-from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 
+from fastapi import APIRouter, Depends, Query
+
 from cortex.api_deps import get_engine
+from cortex.auth import require_permission
 from cortex.engine import CortexEngine
 from cortex.mejoralo import MejoraloEngine
 from cortex.models import (
+    DimensionResultModel,
     MejoraloScanRequest,
     MejoraloScanResponse,
     MejoraloSessionRequest,
     MejoraloSessionResponse,
     MejoraloShipRequest,
     MejoraloShipResponse,
-    DimensionResultModel,
     ShipSealModel,
 )
-from cortex.auth import require_permission
 
 router = APIRouter(prefix="/v1/mejoralo", tags=["mejoralo"])
 

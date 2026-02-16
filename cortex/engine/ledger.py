@@ -10,16 +10,17 @@ Adaptive checkpointing: reduces batch size during high write-rate periods
 
 import hashlib
 import json
+import logging
 import time
 from collections import deque
-from cortex.canonical import compute_tx_hash, compute_tx_hash_v1
-import logging
-import aiosqlite
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-from cortex.config import CHECKPOINT_MIN, CHECKPOINT_MAX
+import aiosqlite
+
+from cortex.canonical import compute_tx_hash, compute_tx_hash_v1
+from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
 
 logger = logging.getLogger("cortex")
 

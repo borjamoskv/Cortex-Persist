@@ -5,15 +5,20 @@ Modularized fact operations: store, recall, deprecate, vote.
 
 import logging
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
 
-from cortex.auth import AuthResult, require_permission
-from cortex.models import (
-    StoreRequest, StoreResponse, FactResponse,
-    VoteRequest, VoteResponse, VoteV2Request
-)
+from fastapi import APIRouter, Depends, HTTPException, Query
+
 from cortex.api_deps import get_engine
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
+from cortex.models import (
+    FactResponse,
+    StoreRequest,
+    StoreResponse,
+    VoteRequest,
+    VoteResponse,
+    VoteV2Request,
+)
 
 logger = logging.getLogger("cortex.api.facts")
 router = APIRouter(tags=["facts"])
