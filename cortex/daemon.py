@@ -7,6 +7,7 @@ Persistent watchdog that gives MOSKV-1 three capabilities:
 3. Automatic Memory: CORTEX freshness monitoring
 
 Runs as a launchd agent on macOS, checking every 5 minutes.
+Configuration is loaded from ~/.cortex/daemon_config.json when present.
 """
 
 from __future__ import annotations
@@ -14,6 +15,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import signal
+import ssl
+import socket
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -31,7 +35,15 @@ DEFAULT_INTERVAL = 300  # 5 minutes
 DEFAULT_STALE_HOURS = 48  # ghost projects stale after 48h
 DEFAULT_MEMORY_STALE_HOURS = 24  # system.json stale after 24h
 DEFAULT_TIMEOUT = 10  # HTTP timeout seconds
+DEFAULT_COOLDOWN = 3600  # 1 hour between duplicate alerts
+DEFAULT_RETRIES = 1  # HTTP retry count before declaring failure
+RETRY_BACKOFF = 2.0  # seconds between retries
+DEFAULT_CERT_WARN_DAYS = 14  # warn if SSL expires within 14 days
+DEFAULT_DISK_WARN_MB = 500  # warn if cortex dir exceeds 500 MB
+CORTEX_DIR = Path.home() / ".cortex"
+CORTEX_DB = CORTEX_DIR / "cortex.db"
 AGENT_DIR = Path.home() / ".agent"
+CONFIG_FILE = CORTEX_DIR / "daemon_config.json"
 STATUS_FILE = AGENT_DIR / "memory" / "daemon_status.json"
 BUNDLE_ID = "com.moskv.daemon"
 
@@ -69,12 +81,39 @@ class MemoryAlert:
 
 
 @dataclass
+class CertAlert:
+    """SSL certificate expiry warning."""
+    hostname: str
+    expires_at: str
+    days_remaining: int
+
+
+@dataclass
+class EngineHealthAlert:
+    """CORTEX engine / database health issue."""
+    issue: str
+    detail: str = ""
+
+
+@dataclass
+class DiskAlert:
+    """Disk usage warning for CORTEX data directory."""
+    path: str
+    size_mb: float
+    threshold_mb: float
+
+
+@dataclass
 class DaemonStatus:
     """Full daemon check result — persisted to disk."""
     checked_at: str
+    check_duration_ms: float = 0.0
     sites: list[SiteStatus] = field(default_factory=list)
     stale_ghosts: list[GhostAlert] = field(default_factory=list)
     memory_alerts: list[MemoryAlert] = field(default_factory=list)
+    cert_alerts: list[CertAlert] = field(default_factory=list)
+    engine_alerts: list[EngineHealthAlert] = field(default_factory=list)
+    disk_alerts: list[DiskAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -83,12 +122,16 @@ class DaemonStatus:
             all(s.healthy for s in self.sites)
             and len(self.stale_ghosts) == 0
             and len(self.memory_alerts) == 0
+            and len(self.cert_alerts) == 0
+            and len(self.engine_alerts) == 0
+            and len(self.disk_alerts) == 0
             and len(self.errors) == 0
         )
 
     def to_dict(self) -> dict:
         return {
             "checked_at": self.checked_at,
+            "check_duration_ms": round(self.check_duration_ms, 1),
             "all_healthy": self.all_healthy,
             "sites": [
                 {
@@ -119,6 +162,29 @@ class DaemonStatus:
                 }
                 for m in self.memory_alerts
             ],
+            "cert_alerts": [
+                {
+                    "hostname": c.hostname,
+                    "expires_at": c.expires_at,
+                    "days_remaining": c.days_remaining,
+                }
+                for c in self.cert_alerts
+            ],
+            "engine_alerts": [
+                {
+                    "issue": e.issue,
+                    "detail": e.detail,
+                }
+                for e in self.engine_alerts
+            ],
+            "disk_alerts": [
+                {
+                    "path": d.path,
+                    "size_mb": round(d.size_mb, 1),
+                    "threshold_mb": d.threshold_mb,
+                }
+                for d in self.disk_alerts
+            ],
             "errors": self.errors,
         }
 
@@ -144,7 +210,7 @@ class Notifier:
                 timeout=5,
             )
             return True
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.warning("Notification failed: %s", e)
             return False
 
@@ -183,9 +249,11 @@ class SiteMonitor:
         self,
         urls: list[str],
         timeout: float = DEFAULT_TIMEOUT,
+        retries: int = DEFAULT_RETRIES,
     ):
         self.urls = urls
         self.timeout = timeout
+        self.retries = retries
 
     def check_all(self) -> list[SiteStatus]:
         """Check all URLs. Returns list of SiteStatus."""
@@ -195,28 +263,37 @@ class SiteMonitor:
         return results
 
     def _check_one(self, url: str) -> SiteStatus:
-        """Check a single URL."""
+        """Check a single URL with retry and backoff."""
         now = datetime.now(timezone.utc).isoformat()
-        try:
-            start = time.monotonic()
-            resp = httpx.get(url, timeout=self.timeout, follow_redirects=True)
-            elapsed = (time.monotonic() - start) * 1000
+        last_error = ""
 
-            healthy = 200 <= resp.status_code < 400
-            return SiteStatus(
-                url=url,
-                healthy=healthy,
-                status_code=resp.status_code,
-                response_ms=elapsed,
-                checked_at=now,
-                error="" if healthy else f"HTTP {resp.status_code}",
-            )
-        except httpx.TimeoutException:
-            return SiteStatus(url=url, healthy=False, error="timeout", checked_at=now)
-        except httpx.ConnectError:
-            return SiteStatus(url=url, healthy=False, error="connection refused", checked_at=now)
-        except Exception as e:
-            return SiteStatus(url=url, healthy=False, error=str(e)[:100], checked_at=now)
+        for attempt in range(1 + self.retries):
+            try:
+                start = time.monotonic()
+                resp = httpx.get(url, timeout=self.timeout, follow_redirects=True)
+                elapsed = (time.monotonic() - start) * 1000
+
+                healthy = 200 <= resp.status_code < 400
+                return SiteStatus(
+                    url=url,
+                    healthy=healthy,
+                    status_code=resp.status_code,
+                    response_ms=elapsed,
+                    checked_at=now,
+                    error="" if healthy else f"HTTP {resp.status_code}",
+                )
+            except httpx.TimeoutException:
+                last_error = "timeout"
+            except httpx.ConnectError:
+                last_error = "connection refused"
+            except httpx.HTTPError as e:
+                last_error = str(e)[:100]
+
+            if attempt < self.retries:
+                logger.debug("Retry %d/%d for %s (%s)", attempt + 1, self.retries, url, last_error)
+                time.sleep(RETRY_BACKOFF)
+
+        return SiteStatus(url=url, healthy=False, error=last_error, checked_at=now)
 
 
 # ─── Ghost Watcher ────────────────────────────────────────────────────
@@ -317,6 +394,138 @@ class MemorySyncer:
         return alerts
 
 
+# ─── SSL Certificate Monitor ─────────────────────────────────────────
+
+
+class CertMonitor:
+    """Checks SSL certificate expiry for monitored hostnames."""
+
+    def __init__(
+        self,
+        hostnames: list[str],
+        warn_days: int = DEFAULT_CERT_WARN_DAYS,
+    ):
+        self.hostnames = hostnames
+        self.warn_days = warn_days
+
+    def check(self) -> list[CertAlert]:
+        """Return alerts for certs expiring within warn_days."""
+        alerts = []
+        for hostname in self.hostnames:
+            alert = self._check_one(hostname)
+            if alert:
+                alerts.append(alert)
+        return alerts
+
+    def _check_one(self, hostname: str) -> CertAlert | None:
+        """Check a single hostname's SSL certificate."""
+        try:
+            ctx = ssl.create_default_context()
+            with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
+                with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
+                    cert = ssock.getpeercert()
+
+            not_after = cert.get("notAfter", "")
+            if not not_after:
+                return None
+
+            # Parse SSL date format: 'MMM DD HH:MM:SS YYYY GMT'
+            expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+            expires = expires.replace(tzinfo=timezone.utc)
+            days_left = (expires - datetime.now(timezone.utc)).days
+
+            if days_left < self.warn_days:
+                return CertAlert(
+                    hostname=hostname,
+                    expires_at=not_after,
+                    days_remaining=days_left,
+                )
+        except (socket.error, ssl.SSLError, OSError) as e:
+            logger.warning("SSL check failed for %s: %s", hostname, e)
+        return None
+
+
+# ─── Engine Health Check ─────────────────────────────────────────────
+
+
+class EngineHealthCheck:
+    """Verifies CORTEX database exists and is accessible."""
+
+    def __init__(self, db_path: Path = CORTEX_DB):
+        self.db_path = db_path
+
+    def check(self) -> list[EngineHealthAlert]:
+        """Return alerts if CORTEX database is missing or unreadable."""
+        alerts = []
+
+        if not self.db_path.exists():
+            alerts.append(EngineHealthAlert(
+                issue="database_missing",
+                detail=f"{self.db_path} not found",
+            ))
+            return alerts
+
+        if not os.access(self.db_path, os.R_OK):
+            alerts.append(EngineHealthAlert(
+                issue="database_unreadable",
+                detail=f"No read permission on {self.db_path}",
+            ))
+
+        # Basic integrity: file should be > 0 bytes
+        try:
+            size = self.db_path.stat().st_size
+            if size == 0:
+                alerts.append(EngineHealthAlert(
+                    issue="database_empty",
+                    detail="Database file is 0 bytes",
+                ))
+        except OSError as e:
+            alerts.append(EngineHealthAlert(
+                issue="database_stat_error",
+                detail=str(e),
+            ))
+
+        return alerts
+
+
+# ─── Disk Monitor ────────────────────────────────────────────────────
+
+
+class DiskMonitor:
+    """Monitors disk usage of the CORTEX data directory."""
+
+    def __init__(
+        self,
+        watch_path: Path = CORTEX_DIR,
+        threshold_mb: float = DEFAULT_DISK_WARN_MB,
+    ):
+        self.watch_path = watch_path
+        self.threshold_mb = threshold_mb
+
+    def check(self) -> list[DiskAlert]:
+        """Return alert if watch_path exceeds threshold."""
+        if not self.watch_path.exists():
+            return []
+
+        total = 0
+        try:
+            for f in self.watch_path.rglob("*"):
+                if f.is_file():
+                    total += f.stat().st_size
+        except OSError as e:
+            logger.warning("Disk check error: %s", e)
+            return []
+
+        size_mb = total / (1024 * 1024)
+        if size_mb > self.threshold_mb:
+            return [DiskAlert(
+                path=str(self.watch_path),
+                size_mb=size_mb,
+                threshold_mb=self.threshold_mb,
+            )]
+        return []
+
+
 # ─── Main Daemon ──────────────────────────────────────────────────────
 
 
@@ -324,6 +533,7 @@ class MoskvDaemon:
     """MOSKV-1 persistent watchdog.
 
     Orchestrates all monitors and sends alerts.
+    Configuration is loaded from ~/.cortex/daemon_config.json when present.
 
     Usage:
         daemon = MoskvDaemon()
@@ -337,21 +547,61 @@ class MoskvDaemon:
         config_dir: Path = AGENT_DIR / "memory",
         stale_hours: float = DEFAULT_STALE_HOURS,
         memory_stale_hours: float = DEFAULT_MEMORY_STALE_HOURS,
+        cooldown: float = DEFAULT_COOLDOWN,
         notify: bool = True,
     ):
         self.notify_enabled = notify
         self.config_dir = config_dir
+        self._shutdown = False
 
-        default_sites = ["https://naroa.online"]
-        self.site_monitor = SiteMonitor(sites or default_sites)
-        self.ghost_watcher = GhostWatcher(config_dir / "ghosts.json", stale_hours)
-        self.memory_syncer = MemorySyncer(config_dir / "system.json", memory_stale_hours)
+        # Load config file if present (sites, stale_hours, etc.)
+        file_config = self._load_config()
+        resolved_sites = sites or file_config.get("sites", [])
+
+        self.site_monitor = SiteMonitor(resolved_sites)
+        self.ghost_watcher = GhostWatcher(
+            config_dir / "ghosts.json",
+            file_config.get("stale_hours", stale_hours),
+        )
+        self.memory_syncer = MemorySyncer(
+            config_dir / "system.json",
+            file_config.get("memory_stale_hours", memory_stale_hours),
+        )
+
+        # New monitors (Wave 2)
+        cert_hostnames = [
+            h.replace("https://", "").replace("http://", "").split("/")[0]
+            for h in resolved_sites if h.startswith("https://")
+        ]
+        self.cert_monitor = CertMonitor(
+            cert_hostnames,
+            file_config.get("cert_warn_days", DEFAULT_CERT_WARN_DAYS),
+        )
+        self.engine_health = EngineHealthCheck(
+            Path(file_config.get("db_path", str(CORTEX_DB)))
+        )
+        self.disk_monitor = DiskMonitor(
+            Path(file_config.get("watch_path", str(CORTEX_DIR))),
+            file_config.get("disk_warn_mb", DEFAULT_DISK_WARN_MB),
+        )
 
         self._last_alerts: dict[str, float] = {}  # cooldown tracker
-        self._cooldown = 3600  # 1 hour between duplicate alerts
+        self._cooldown = file_config.get("cooldown", cooldown)
+
+    @staticmethod
+    def _load_config() -> dict:
+        """Load daemon config from ~/.cortex/daemon_config.json if it exists."""
+        if not CONFIG_FILE.exists():
+            return {}
+        try:
+            return json.loads(CONFIG_FILE.read_text())
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning("Failed to load daemon config: %s", e)
+            return {}
 
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
+        check_start = time.monotonic()
         now = datetime.now(timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
 
@@ -361,7 +611,7 @@ class MoskvDaemon:
             for site in status.sites:
                 if not site.healthy and self._should_alert(f"site:{site.url}"):
                     Notifier.alert_site_down(site)
-        except Exception as e:
+        except (httpx.HTTPError, OSError) as e:
             status.errors.append(f"Site monitor error: {e}")
             logger.exception("Site monitor failed")
 
@@ -371,7 +621,7 @@ class MoskvDaemon:
             for ghost in status.stale_ghosts:
                 if self._should_alert(f"ghost:{ghost.project}"):
                     Notifier.alert_stale_project(ghost)
-        except Exception as e:
+        except (json.JSONDecodeError, OSError, ValueError) as e:
             status.errors.append(f"Ghost watcher error: {e}")
             logger.exception("Ghost watcher failed")
 
@@ -381,30 +631,122 @@ class MoskvDaemon:
             for alert in status.memory_alerts:
                 if self._should_alert(f"memory:{alert.file}"):
                     Notifier.alert_memory_stale(alert)
-        except Exception as e:
+        except (json.JSONDecodeError, OSError, ValueError) as e:
             status.errors.append(f"Memory syncer error: {e}")
             logger.exception("Memory syncer failed")
+
+        # 4. SSL certificate checks
+        try:
+            status.cert_alerts = self.cert_monitor.check()
+            for cert in status.cert_alerts:
+                if self._should_alert(f"cert:{cert.hostname}"):
+                    Notifier.send(
+                        "Certificado SSL próximo a caducar",
+                        f"{cert.hostname}: expira en {cert.days_remaining} días",
+                    )
+        except OSError as e:
+            status.errors.append(f"Cert monitor error: {e}")
+            logger.exception("Cert monitor failed")
+
+        # 5. Engine health
+        try:
+            status.engine_alerts = self.engine_health.check()
+            for eh in status.engine_alerts:
+                if self._should_alert(f"engine:{eh.issue}"):
+                    Notifier.send(
+                        "CORTEX Engine alerta",
+                        f"{eh.issue}: {eh.detail}",
+                    )
+        except OSError as e:
+            status.errors.append(f"Engine health error: {e}")
+            logger.exception("Engine health check failed")
+
+        # 6. Disk usage
+        try:
+            status.disk_alerts = self.disk_monitor.check()
+            for da in status.disk_alerts:
+                if self._should_alert(f"disk:{da.path}"):
+                    Notifier.send(
+                        "Espacio en disco alto",
+                        f"{da.path}: {da.size_mb:.0f}MB (umbral: {da.threshold_mb:.0f}MB)",
+                    )
+        except OSError as e:
+            status.errors.append(f"Disk monitor error: {e}")
+            logger.exception("Disk monitor failed")
+
+        # 7. Sincronización automática de memoria JSON ↔ CORTEX DB
+        try:
+            from cortex.engine import CortexEngine
+            from cortex.sync import sync_memory, export_snapshot, export_to_json
+            engine = CortexEngine()
+            engine.init_db()
+
+            # Forward: JSON → CORTEX
+            sync_result = sync_memory(engine)
+            if sync_result.had_changes:
+                logger.info(
+                    "Sync automático: %d hechos sincronizados",
+                    sync_result.total,
+                )
+
+            # Reverse: CORTEX → JSON (write-back atómico)
+            wb_result = export_to_json(engine)
+            if wb_result.had_changes:
+                logger.info(
+                    "Write-back automático: %d archivos, %d items",
+                    wb_result.files_written, wb_result.items_exported,
+                )
+
+            # Snapshot: CORTEX → markdown legible
+            export_snapshot(engine)
+
+            engine.close()
+        except Exception as e:
+            status.errors.append(f"Memory sync error: {e}")
+            logger.exception("Memory sync failed")
+
+        # Record check duration
+        status.check_duration_ms = (time.monotonic() - check_start) * 1000
 
         # Persist status
         self._save_status(status)
 
         level = "✅" if status.all_healthy else "⚠️"
         logger.info(
-            "%s Check complete: %d sites, %d stale ghosts, %d memory alerts",
-            level, len(status.sites), len(status.stale_ghosts), len(status.memory_alerts),
+            "%s Check complete in %.0fms: %d sites, %d stale ghosts, %d memory alerts",
+            level, status.check_duration_ms,
+            len(status.sites), len(status.stale_ghosts), len(status.memory_alerts),
         )
 
         return status
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
-        """Run checks in a loop forever."""
+        """Run checks in a loop until stopped.
+
+        Handles both KeyboardInterrupt (Ctrl+C) and SIGTERM (launchd stop)
+        for graceful shutdown.
+        """
+        def _handle_signal(signum: int, frame: object) -> None:
+            sig_name = signal.Signals(signum).name
+            logger.info("Received %s, shutting down gracefully...", sig_name)
+            self._shutdown = True
+
+        signal.signal(signal.SIGTERM, _handle_signal)
+        signal.signal(signal.SIGINT, _handle_signal)
+
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
         try:
-            while True:
+            while not self._shutdown:
                 self.check()
-                time.sleep(interval)
+                # Sleep in small increments to respond quickly to signals
+                for _ in range(interval):
+                    if self._shutdown:
+                        break
+                    time.sleep(1)
         except KeyboardInterrupt:
-            logger.info("Daemon stopped by user")
+            pass
+        finally:
+            logger.info("MOSKV-1 Daemon stopped")
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts (1 per hour per key)."""

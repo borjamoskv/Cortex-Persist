@@ -94,8 +94,8 @@ def semantic_search(
     try:
         cursor = conn.execute(sql, params)
         rows = cursor.fetchall()
-    except Exception as e:
-        logger.error(f"Semantic search failed: {e}")
+    except (sqlite3.Error, ValueError) as e:
+        logger.error("Semantic search failed: %s", e)
         return []
 
     results = []

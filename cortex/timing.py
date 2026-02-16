@@ -180,7 +180,7 @@ class TimingTracker:
             (project, entity, cat, branch, language, ts, meta_json),
         )
         self._conn.commit()
-        logger.debug(f"Heartbeat: {project}/{entity} [{cat}]")
+        logger.debug("Heartbeat: %s/%s [%s]", project, entity, cat)
         return cursor.lastrowid
 
     def flush(self, gap_seconds: int | None = None) -> int:

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  MOSKV-1 Daemon — macOS LaunchAgent
+  ───────────────────────────────────
+  Install:   cp launchd/com.moskv.daemon.plist ~/Library/LaunchAgents/
+             launchctl load ~/Library/LaunchAgents/com.moskv.daemon.plist
+  Uninstall: launchctl unload ~/Library/LaunchAgents/com.moskv.daemon.plist
+
+  NOTE: Update the Python path below to match your environment.
+        Run `which python` inside your cortex venv to get the correct path.
+-->
 <plist version="1.0">
 <dict>
     <key>Label</key>
@@ -7,6 +17,7 @@
 
     <key>ProgramArguments</key>
     <array>
+        <!-- ⚠️  Adjust this path to your venv Python -->
         <string>/Users/borjafernandezangulo/cortex/.venv/bin/python</string>
         <string>-m</string>
         <string>cortex.daemon_cli</string>
@@ -16,17 +27,27 @@
     <key>WorkingDirectory</key>
     <string>/Users/borjafernandezangulo/cortex</string>
 
+    <!-- Run every 5 minutes -->
     <key>StartInterval</key>
     <integer>300</integer>
 
+    <!-- Run immediately when loaded -->
     <key>RunAtLoad</key>
     <true/>
 
+    <!-- Auto-restart if daemon crashes -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <!-- Logs: persistent location (~/.cortex/logs/) -->
     <key>StandardOutPath</key>
-    <string>/tmp/moskv-daemon.log</string>
+    <string>/Users/borjafernandezangulo/.cortex/logs/moskv-daemon.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/moskv-daemon.err</string>
+    <string>/Users/borjafernandezangulo/.cortex/logs/moskv-daemon.err</string>
 
     <key>EnvironmentVariables</key>
     <dict>

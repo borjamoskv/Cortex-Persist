@@ -112,8 +112,8 @@ class CortexEngine:
             if hasattr(self._conn, 'enable_load_extension'):
                 self._conn.enable_load_extension(False)
             self._vec_available = True
-        except Exception as e:
-            logger.warning(f"sqlite-vec not available: {e}. Vector search disabled.")
+        except (OSError, AttributeError) as e:
+            logger.warning("sqlite-vec not available: %s. Vector search disabled.", e)
             self._vec_available = False
 
         # Performance pragmas
@@ -152,7 +152,7 @@ class CortexEngine:
             )
 
         conn.commit()
-        logger.info(f"CORTEX database initialized at {self._db_path}")
+        logger.info("CORTEX database initialized at %s", self._db_path)
 
     # ─── Store ────────────────────────────────────────────────────
 
@@ -208,8 +208,8 @@ class CortexEngine:
                     "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
                     (fact_id, embedding_json),
                 )
-            except Exception as e:
-                logger.warning(f"Embedding failed for fact {fact_id}: {e}")
+            except (ValueError, sqlite3.Error) as e:
+                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
 
         # Log transaction
         self._log_transaction(conn, project, "store", {
@@ -219,7 +219,7 @@ class CortexEngine:
         })
 
         conn.commit()
-        logger.info(f"Stored fact #{fact_id} in project '{project}'")
+        logger.info("Stored fact #%d in project '%s'", fact_id, project)
         return fact_id
 
     # ─── Search ───────────────────────────────────────────────────
@@ -258,8 +258,8 @@ class CortexEngine:
             )
             if results:
                 return results
-        except Exception as e:
-            logger.warning(f"Semantic search failed, falling back to text: {e}")
+        except (ValueError, RuntimeError) as e:
+            logger.warning("Semantic search failed, falling back to text: %s", e)
 
         # Fallback to text search
         return text_search(conn, query, project, limit=top_k)
@@ -368,7 +368,7 @@ class CortexEngine:
                 "reason": reason,
             })
             conn.commit()
-            logger.info(f"Deprecated fact #{fact_id}")
+            logger.info("Deprecated fact #%d", fact_id)
             return True
 
         return False

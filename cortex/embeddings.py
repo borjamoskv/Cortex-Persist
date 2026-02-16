@@ -45,12 +45,12 @@ class LocalEmbedder:
         try:
             from sentence_transformers import SentenceTransformer
 
-            logger.info(f"Loading embedding model: {self._model_name}")
+            logger.info("Loading embedding model: %s", self._model_name)
             self._model = SentenceTransformer(
                 self._model_name,
                 cache_folder=str(self._cache_dir),
             )
-            logger.info(f"Model loaded. Dimension: {EMBEDDING_DIM}")
+            logger.info("Model loaded. Dimension: %d", EMBEDDING_DIM)
         except ImportError:
             raise RuntimeError(
                 "sentence-transformers not installed. "

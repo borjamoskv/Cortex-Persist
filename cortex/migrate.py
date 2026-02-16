@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 from pathlib import Path
 from typing import Optional
 
@@ -41,7 +42,7 @@ def migrate_v31_to_v40(
     }
 
     if not src.exists():
-        logger.warning(f"Source directory not found: {src}")
+        logger.warning("Source directory not found: %s", src)
         stats["errors"].append(f"Source not found: {src}")
         return stats
 
@@ -66,7 +67,7 @@ def migrate_v31_to_v40(
     if bridges_file.exists():
         _migrate_bridges(engine, bridges_file, stats)
 
-    logger.info(f"Migration complete: {stats}")
+    logger.info("Migration complete: %s", stats)
     return stats
 
 
@@ -74,7 +75,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate system.json — preferences, decisions, knowledge, sessions."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
+    except (json.JSONDecodeError, OSError) as e:
         stats["errors"].append(f"Failed to read system.json: {e}")
         return
 
@@ -151,7 +152,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
                 ),
             )
             stats["sessions_imported"] += 1
-        except Exception as e:
+        except sqlite3.Error as e:
             stats["errors"].append(f"Session import failed: {e}")
 
     conn.commit()
@@ -161,7 +162,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate a single project JSON file."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
+    except (json.JSONDecodeError, OSError) as e:
         stats["errors"].append(f"Failed to read {path.name}: {e}")
         return
 
@@ -242,7 +243,7 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
                 meta=mistake,
             )
             stats["errors_imported"] += 1
-        except Exception as e:
+        except (json.JSONDecodeError, sqlite3.Error) as e:
             stats["errors"].append(f"Mistake import failed: {e}")
 
 
@@ -269,5 +270,5 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
                 meta=bridge,
             )
             stats["bridges_imported"] += 1
-        except Exception as e:
+        except (json.JSONDecodeError, sqlite3.Error) as e:
             stats["errors"].append(f"Bridge import failed: {e}")

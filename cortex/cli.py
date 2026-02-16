@@ -7,7 +7,9 @@ Command-line tool for the sovereign memory engine.
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
+from pathlib import Path
 
 import click
 from rich.console import Console
@@ -199,7 +201,7 @@ def status(db, json_output):
 
     try:
         s = engine.stats()
-    except Exception as e:
+    except (sqlite3.OperationalError, FileNotFoundError) as e:
         console.print(f"[red]Error: {e}[/]")
         console.print("[dim]Run 'cortex init' first.[/]")
         engine.close()
@@ -256,6 +258,231 @@ def migrate(source, db):
         title="🔄 v3.1 → v4.0 Migration",
         border_style="green",
     ))
+    engine.close()
+
+
+# ─── Sync ────────────────────────────────────────────────────────
+
+@cli.command()
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def sync(db):
+    """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
+    from cortex.sync import sync_memory
+
+    engine = get_engine(db)
+    engine.init_db()
+
+    with console.status("[bold blue]Sincronizando memoria...[/]"):
+        result = sync_memory(engine)
+
+    if result.had_changes:
+        console.print(Panel(
+            f"[bold green]✓ Sincronización completada[/]\n"
+            f"Facts: {result.facts_synced}\n"
+            f"Ghosts: {result.ghosts_synced}\n"
+            f"Errores: {result.errors_synced}\n"
+            f"Bridges: {result.bridges_synced}\n"
+            f"Omitidos (ya existían): {result.skipped}",
+            title="🔄 CORTEX Sync",
+            border_style="green",
+        ))
+    else:
+        console.print("[dim]Sin cambios desde la última sincronización.[/]")
+
+    if result.errors:
+        for err in result.errors:
+            console.print(f"[red]  ✗ {err}[/]")
+
+    engine.close()
+
+
+# ─── Export ──────────────────────────────────────────────────────
+
+@cli.command()
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option("--out", default="~/.cortex/context-snapshot.md", help="Ruta de salida")
+def export(db, out):
+    """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
+    from cortex.sync import export_snapshot
+
+    engine = get_engine(db)
+    out_path = Path(out).expanduser()
+    export_snapshot(engine, out_path)
+    console.print(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
+    engine.close()
+
+
+@cli.command()
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def writeback(db):
+    """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
+    from cortex.sync import export_to_json
+
+    engine = get_engine(db)
+    result = export_to_json(engine)
+
+    if result.had_changes:
+        console.print(Panel(
+            f"[bold green]✓ Write-back completado[/]\n"
+            f"Archivos actualizados: {result.files_written}\n"
+            f"Archivos sin cambios: {result.files_skipped}\n"
+            f"Items exportados: {result.items_exported}",
+            title="🔄 CORTEX → JSON",
+            border_style="cyan",
+        ))
+    else:
+        console.print(
+            "[dim]Sin cambios en DB desde el último write-back. "
+            f"({result.files_skipped} archivos verificados)[/]"
+        )
+
+    for err in result.errors:
+        console.print(f"[red]  ✗ {err}[/]")
+
+    engine.close()
+
+
+# ─── Delete (Soft-Delete + Auto Write-back) ──────────────────────
+
+@cli.command()
+@click.argument("fact_id", type=int)
+@click.option("--reason", "-r", default=None, help="Razón de la eliminación")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def delete(fact_id, reason, db):
+    """Soft-delete: depreca un fact y auto-sincroniza JSON."""
+    engine = get_engine(db)
+    conn = engine._get_conn()
+
+    # Mostrar qué se va a borrar
+    row = conn.execute(
+        "SELECT project, content, fact_type FROM facts WHERE id = ? AND valid_until IS NULL",
+        (fact_id,),
+    ).fetchone()
+
+    if not row:
+        console.print(f"[red]✗ No se encontró fact activo con ID {fact_id}[/]")
+        engine.close()
+        return
+
+    console.print(
+        f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
+        f"[cyan]{row[0]}[/] ({row[2]}) — {row[1][:80]}..."
+    )
+
+    success = engine.deprecate(fact_id, reason or "deleted-via-cli")
+
+    if success:
+        # Auto write-back (Closed Loop)
+        from cortex.sync import export_to_json
+        wb = export_to_json(engine)
+        console.print(
+            f"[green]✓[/] Fact #{fact_id} deprecado. "
+            f"Write-back: {wb.files_written} archivos actualizados."
+        )
+    else:
+        console.print(f"[red]✗ No se pudo deprecar fact #{fact_id}[/]")
+
+    engine.close()
+
+
+# ─── List (Read) ─────────────────────────────────────────────────
+
+@cli.command("list")
+@click.option("--project", "-p", default=None, help="Filtrar por proyecto")
+@click.option("--type", "fact_type", default=None, help="Filtrar por tipo")
+@click.option("--limit", "-n", default=20, help="Máximo de resultados")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def list_facts(project, fact_type, limit, db):
+    """Listar facts activos (tabulado)."""
+    engine = get_engine(db)
+    conn = engine._get_conn()
+
+    query = "SELECT id, project, content, fact_type, tags, confidence FROM facts WHERE valid_until IS NULL"
+    params = []
+
+    if project:
+        query += " AND project = ?"
+        params.append(project)
+    if fact_type:
+        query += " AND fact_type = ?"
+        params.append(fact_type)
+
+    query += " ORDER BY project, fact_type, id"
+    query += f" LIMIT {limit}"
+
+    rows = conn.execute(query, params).fetchall()
+
+    if not rows:
+        console.print("[dim]No se encontraron facts activos.[/]")
+        engine.close()
+        return
+
+    table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")
+    table.add_column("ID", style="bold", width=5)
+    table.add_column("Proyecto", style="cyan", width=18)
+    table.add_column("Tipo", width=10)
+    table.add_column("Contenido", width=60)
+    table.add_column("Tags", style="dim", width=15)
+
+    for row in rows:
+        content_preview = row[2][:57] + "..." if len(row[2]) > 60 else row[2]
+        tags = json.loads(row[4]) if row[4] else []
+        tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
+        table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
+
+    console.print(table)
+    engine.close()
+
+
+# ─── Edit (Deprecate + Store + Auto Write-back) ─────────────────
+
+@cli.command()
+@click.argument("fact_id", type=int)
+@click.argument("new_content")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def edit(fact_id, new_content, db):
+    """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
+    engine = get_engine(db)
+    conn = engine._get_conn()
+
+    # Obtener fact original
+    row = conn.execute(
+        "SELECT project, content, fact_type, tags, confidence, source FROM facts "
+        "WHERE id = ? AND valid_until IS NULL",
+        (fact_id,),
+    ).fetchone()
+
+    if not row:
+        console.print(f"[red]✗ No se encontró fact activo con ID {fact_id}[/]")
+        engine.close()
+        return
+
+    project, old_content, fact_type, tags_json, confidence, source = row
+    tags = json.loads(tags_json) if tags_json else None
+
+    # Deprecar el viejo
+    engine.deprecate(fact_id, f"edited → new version")
+
+    # Crear el nuevo con los mismos metadatos
+    new_id = engine.store(
+        project=project,
+        content=new_content,
+        fact_type=fact_type,
+        tags=tags,
+        confidence=confidence,
+        source=source or "edit-via-cli",
+    )
+
+    # Auto write-back
+    from cortex.sync import export_to_json
+    wb = export_to_json(engine)
+
+    console.print(
+        f"[green]✓[/] Fact #{fact_id} → #{new_id} editado.\n"
+        f"  [dim]Antes:[/] {old_content[:60]}...\n"
+        f"  [bold]Ahora:[/] {new_content[:60]}...\n"
+        f"  Write-back: {wb.files_written} archivos actualizados."
+    )
     engine.close()
 
 
