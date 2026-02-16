@@ -14,6 +14,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
+import sqlite3
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -173,7 +176,7 @@ def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             (result.synced_at,),
         )
         conn.commit()
-    except Exception as e:
+    except sqlite3.Error as e:
         result.errors.append(f"Error deprecando ghosts antiguos: {e}")
 
     # Insertar snapshot actual de cada proyecto
@@ -196,7 +199,7 @@ def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
                 valid_from=ghost_data.get("timestamp"),
             )
             result.ghosts_synced += 1
-        except Exception as e:
+        except (sqlite3.Error, ValueError) as e:
             result.errors.append(f"Error sincronizando ghost {project_name}: {e}")
 
 
@@ -234,7 +237,7 @@ def _sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             )
             result.facts_synced += 1
             existing.add(content)
-        except Exception as e:
+        except (sqlite3.Error, ValueError) as e:
             result.errors.append(f"Error sincronizando knowledge {ki.get('id', '?')}: {e}")
 
     # Decisiones globales
@@ -255,7 +258,7 @@ def _sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             )
             result.facts_synced += 1
             existing.add(content)
-        except Exception as e:
+        except (sqlite3.Error, ValueError) as e:
             result.errors.append(f"Error sincronizando decisión {decision.get('id', '?')}: {e}")
 
     # Ecosistema — resumen de estado
@@ -278,7 +281,7 @@ def _sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
                     meta=eco,
                 )
                 result.facts_synced += 1
-            except Exception as e:
+            except (sqlite3.Error, ValueError) as e:
                 result.errors.append(f"Error sincronizando ecosistema: {e}")
 
 
@@ -549,8 +552,7 @@ def _atomic_write(path: Path, content: str) -> None:
     Evita corrupción si el proceso muere a mitad de escritura.
     En POSIX, os.replace() es atómico dentro del mismo filesystem.
     """
-    import tempfile
-    import os
+    # tempfile and os imported at module level
 
     path.parent.mkdir(parents=True, exist_ok=True)
     # Crear temp en el mismo directorio para garantizar mismo filesystem

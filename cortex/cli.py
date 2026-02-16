@@ -18,6 +18,7 @@ from rich.table import Table
 
 from cortex import __version__
 from cortex.engine import CortexEngine
+from cortex.sync import export_snapshot, export_to_json, sync_memory
 from cortex.timing import TimingTracker
 
 console = Console()
@@ -267,7 +268,7 @@ def migrate(source, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def sync(db):
     """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
-    from cortex.sync import sync_memory
+
 
     engine = get_engine(db)
     engine.init_db()
@@ -303,7 +304,7 @@ def sync(db):
 @click.option("--out", default="~/.cortex/context-snapshot.md", help="Ruta de salida")
 def export(db, out):
     """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
-    from cortex.sync import export_snapshot
+
 
     engine = get_engine(db)
     out_path = Path(out).expanduser()
@@ -316,7 +317,7 @@ def export(db, out):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def writeback(db):
     """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
-    from cortex.sync import export_to_json
+
 
     engine = get_engine(db)
     result = export_to_json(engine)
@@ -373,7 +374,7 @@ def delete(fact_id, reason, db):
 
     if success:
         # Auto write-back (Closed Loop)
-        from cortex.sync import export_to_json
+
         wb = export_to_json(engine)
         console.print(
             f"[green]✓[/] Fact #{fact_id} deprecado. "
@@ -474,7 +475,7 @@ def edit(fact_id, new_content, db):
     )
 
     # Auto write-back
-    from cortex.sync import export_to_json
+
     wb = export_to_json(engine)
 
     console.print(
