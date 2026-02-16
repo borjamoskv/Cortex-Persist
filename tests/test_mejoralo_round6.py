@@ -29,7 +29,7 @@ class TestCLIResourceSafety:
         engine = self._make_mock_engine()
         engine.search.side_effect = sqlite3.OperationalError("disk I/O error")
 
-        with patch("cortex.cli.get_engine", return_value=engine):
+        with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
             from cortex.cli import cli
             runner = CliRunner()
@@ -41,7 +41,7 @@ class TestCLIResourceSafety:
         engine = self._make_mock_engine()
         engine.recall.side_effect = RuntimeError("unexpected")
 
-        with patch("cortex.cli.get_engine", return_value=engine):
+        with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
             from cortex.cli import cli
             runner = CliRunner()
@@ -53,7 +53,7 @@ class TestCLIResourceSafety:
         engine = self._make_mock_engine()
         engine.history.side_effect = sqlite3.OperationalError("corrupt")
 
-        with patch("cortex.cli.get_engine", return_value=engine):
+        with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
             from cortex.cli import cli
             runner = CliRunner()
@@ -65,7 +65,7 @@ class TestCLIResourceSafety:
         engine = self._make_mock_engine()
         engine.stats.side_effect = FileNotFoundError("no db")
 
-        with patch("cortex.cli.get_engine", return_value=engine):
+        with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
             from cortex.cli import cli
             runner = CliRunner()
@@ -79,7 +79,7 @@ class TestCLIResourceSafety:
         conn.execute.return_value.fetchall.return_value = []
         engine.get_connection.return_value = conn
 
-        with patch("cortex.cli.get_engine", return_value=engine):
+        with patch("cortex.cli.crud.get_engine", return_value=engine):
             from click.testing import CliRunner
             from cortex.cli import cli
             runner = CliRunner()
@@ -109,8 +109,8 @@ class TestEditDefensiveJSON:
         engine.deprecate.return_value = True
         engine.store.return_value = 42
 
-        with patch("cortex.cli.get_engine", return_value=engine), \
-             patch("cortex.cli.export_to_json") as mock_wb:
+        with patch("cortex.cli.crud.get_engine", return_value=engine), \
+             patch("cortex.cli.crud.export_to_json") as mock_wb:
             mock_wb.return_value = MagicMock(files_written=0)
             from click.testing import CliRunner
             from cortex.cli import cli

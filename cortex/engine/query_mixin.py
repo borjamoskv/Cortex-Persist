@@ -55,15 +55,60 @@ class QueryMixin:
         query = "SELECT f.id, f.project, f.content, f.fact_type, f.tags, f.confidence, f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, f.created_at, f.updated_at, f.tx_id, t.hash FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id WHERE (f.created_at <= ? AND (f.valid_until IS NULL OR f.valid_until > ?)) AND (f.tx_id IS NULL OR f.tx_id <= ?)"
         params = [tx_time, tx_time, target_tx_id]
         if project: query += " AND f.project = ?"; params.append(project)
-        query += " ORDER BY id ASC"
+        query += " ORDER BY f.id ASC"
         cursor = conn.execute(query, params)
         return [self._row_to_fact(row) for row in cursor.fetchall()]
 
     def stats(self) -> dict:
         conn = self._get_conn()
         total = conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
-        active = conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL").fetchone()[0]
-        projects = [p[0] for p in conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL").fetchall()]
-        types = {t: c for t, c in conn.execute("SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type").fetchall()}
+        active = conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL"
+        ).fetchone()[0]
+        projects = [
+            p[0]
+            for p in conn.execute(
+                "SELECT DISTINCT project FROM facts WHERE valid_until IS NULL"
+            ).fetchall()
+        ]
+        types = {
+            t: c
+            for t, c in conn.execute(
+                "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
+            ).fetchall()
+        }
         tx_count = conn.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
-        return {"total_facts": total, "active_facts": active, "deprecated_facts": total-active, "projects": projects, "project_count": len(projects), "types": types, "transactions": tx_count}
+        
+        db_size = (
+            self._db_path.stat().st_size / (1024 * 1024)
+            if self._db_path.exists()
+            else 0
+        )
+
+        try:
+            embeddings = conn.execute("SELECT COUNT(*) FROM fact_embeddings").fetchone()[0]
+        except Exception:
+            embeddings = 0
+
+        return {
+            "total_facts": total,
+            "active_facts": active,
+            "deprecated_facts": total - active,
+            "projects": projects,
+            "project_count": len(projects),
+            "types": types,
+            "transactions": tx_count,
+            "embeddings": embeddings,
+            "db_path": str(self._db_path),
+            "db_size_mb": round(db_size, 2),
+        }
+
+    def graph(self, project: Optional[str] = None):
+        from cortex.graph import get_graph
+
+        return get_graph(self._get_conn(), project)
+
+    def query_entity(self, name: str, project: Optional[str] = None) -> list[dict]:
+        from cortex.graph import query_entity
+
+        return query_entity(self._get_conn(), name, project)

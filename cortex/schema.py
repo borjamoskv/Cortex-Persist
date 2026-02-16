@@ -206,6 +206,27 @@ CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
 """
 
+# ─── Ghosts (Unresolved Entities) ────────────────────────────────────
+CREATE_GHOSTS = """
+CREATE TABLE IF NOT EXISTS ghosts (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference       TEXT NOT NULL,
+    context         TEXT,
+    project         TEXT NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'open', -- open, resolved
+    target_id       INTEGER,
+    confidence      REAL DEFAULT 0.0,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    resolved_at     TEXT,
+    meta            TEXT DEFAULT '{}'
+);
+"""
+
+CREATE_GHOSTS_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_ghosts_project ON ghosts(project);
+CREATE INDEX IF NOT EXISTS idx_ghosts_ref ON ghosts(reference);
+"""
+
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
     CREATE_FACTS,
@@ -225,6 +246,8 @@ ALL_SCHEMA = [
     CREATE_TRUST_EDGES,
     CREATE_OUTCOMES,
     CREATE_RWC_INDEXES,
+    CREATE_GHOSTS,
+    CREATE_GHOSTS_INDEX,
 ]
 
 

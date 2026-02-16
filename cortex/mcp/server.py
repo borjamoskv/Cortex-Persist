@@ -70,7 +70,7 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
         
         try:
             parsed_tags = json.loads(tags) if tags else []
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, TypeError):
             parsed_tags = []
 
         async with pool.acquire() as conn:
@@ -150,6 +150,8 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> FastMCP:
         async with pool.acquire() as conn:
             engine = CortexEngine(cfg.db_path, auto_embed=False)
             engine._conn = conn
+            # Use get_connection() for public API consistency
+            _ = engine.get_connection()
             stats = engine.stats()
             
         m_summary = metrics.get_summary()

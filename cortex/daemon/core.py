@@ -84,6 +84,15 @@ class MoskvDaemon:
         self._last_alerts: dict[str, float] = {}
         self._cooldown = file_config.get("cooldown", cooldown)
 
+        # Time Tracker (for flushing heartbeats)
+        try:
+            from cortex.timing import TimingTracker
+            self.timing_conn = sqlite3.connect(file_config.get("db_path", str(CORTEX_DB)))
+            self.tracker = TimingTracker(self.timing_conn)
+        except (ImportError, sqlite3.Error) as e:
+            logger.error("Failed to init TimeTracker: %s", e)
+            self.tracker = None
+
     @staticmethod
     def _load_config() -> dict:
         """Load daemon config from ~/.cortex/daemon_config.json if it exists."""
@@ -117,7 +126,7 @@ class MoskvDaemon:
             for ghost in status.stale_ghosts:
                 if self._should_alert(f"ghost:{ghost.project}"):
                     Notifier.alert_stale_project(ghost)
-        except (json.JSONDecodeError, OSError, ValueError) as e:
+        except (ValueError, OSError) as e:
             status.errors.append(f"Ghost watcher error: {e}")
             logger.exception("Ghost watcher failed")
 
@@ -127,7 +136,7 @@ class MoskvDaemon:
             for alert in status.memory_alerts:
                 if self._should_alert(f"memory:{alert.file}"):
                     logger.warning("Memory file %s is stale, notification skipped", alert.file)
-        except (json.JSONDecodeError, OSError, ValueError) as e:
+        except (ValueError, OSError) as e:
             status.errors.append(f"Memory syncer error: {e}")
             logger.exception("Memory syncer failed")
 
@@ -164,6 +173,15 @@ class MoskvDaemon:
         # 7. Automatic memory sync
         self._auto_sync(status)
 
+        # 8. Time Tracker Flush
+        if self.tracker:
+            try:
+                entries = self.tracker.flush()
+                if entries > 0:
+                    logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
+            except sqlite3.Error as e:
+                logger.error("TimeTracker flush error: %s", e)
+
         status.check_duration_ms = (time.monotonic() - check_start) * 1000
         self._save_status(status)
 
@@ -190,7 +208,7 @@ class MoskvDaemon:
                 logger.info("Write-back automático: %d archivos, %d items", wb_result.files_written, wb_result.items_exported)
             export_snapshot(engine)
             engine.close()
-        except (sqlite3.Error, OSError, json.JSONDecodeError, ValueError) as e:
+        except (sqlite3.Error, OSError, ValueError) as e:
             status.errors.append(f"Memory sync error: {e}")
             logger.exception("Memory sync failed")
 

@@ -49,7 +49,7 @@ def test_sync_narrowed_exceptions(tmp_path):
     engine = MagicMock(spec=CortexEngine)
 
     with patch("cortex.sync.MEMORY_DIR", tmp_path):
-        with patch("cortex.sync._file_hash", side_effect=OSError("Disk failure")):
+        with patch("cortex.sync.read.file_hash", side_effect=OSError("Disk failure")):
             result = sync_memory(engine)
             # sync_memory now catches OSError from _file_hash
             assert any("Disk failure" in err for err in result.errors)
@@ -59,7 +59,7 @@ def test_export_to_json_exceptions(tmp_path):
     engine = MagicMock(spec=CortexEngine)
     with patch("cortex.sync.MEMORY_DIR", tmp_path):
         # Mock _db_content_hash to raise an expected exception
-        with patch("cortex.sync._db_content_hash", side_effect=sqlite3.Error("DB Locked")):
+        with patch("cortex.sync.write.db_content_hash", side_effect=sqlite3.Error("DB Locked")):
             result = export_to_json(engine)
             assert any("DB Locked" in err for err in result.errors)
             assert result.files_skipped == 0  # because it failed before skip check
