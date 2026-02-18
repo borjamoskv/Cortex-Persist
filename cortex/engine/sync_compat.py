@@ -110,6 +110,20 @@ class SyncCompatMixin:
                 logger.warning("Embedding failed for fact %d: %s", fact_id, e)
         conn.commit()
 
+        # Log to ledger (sync)
+        import hashlib
+        content_hash = hashlib.sha256(content.encode()).hexdigest()
+        self._log_transaction_sync(
+            conn, project, "store", {"fact_id": fact_id, "content_hash": content_hash}
+        )
+
+        # CDC: Encole for Neo4j sync
+        conn.execute(
+            "INSERT INTO graph_outbox (fact_id, action, status) VALUES (?, ?, ?)",
+            (fact_id, "store_fact", "pending"),
+        )
+        conn.commit()
+
         # Graph extraction (sync)
         try:
             from cortex.graph import process_fact_graph_sync
@@ -335,6 +349,39 @@ class SyncCompatMixin:
             query += " OFFSET ?"
             params.append(offset)
 
+        cursor = conn.execute(query, params)
+        rows = cursor.fetchall()
+        return [self._row_to_fact(row) for row in rows]
+
+    def reconstruct_state_sync(
+        self,
+        target_tx_id: int,
+        project: str | None = None,
+    ) -> list[Fact]:
+        """Synchronous version of reconstruct_state."""
+        from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
+
+        conn = self._get_sync_conn()
+        cursor = conn.execute(
+            "SELECT timestamp FROM transactions WHERE id = ?",
+            (target_tx_id,),
+        )
+        tx = cursor.fetchone()
+        if not tx:
+            raise ValueError(f"Transaction {target_tx_id} not found")
+        tx_time = tx[0]
+
+        query = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+            "WHERE (f.created_at <= ? "
+            "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
+            "  AND (f.tx_id IS NULL OR f.tx_id <= ?)"
+        )
+        params: list = [tx_time, tx_time, target_tx_id]
+        if project:
+            query += " AND f.project = ?"
+            params.append(project)
+        query += " ORDER BY f.id ASC"
         cursor = conn.execute(query, params)
         rows = cursor.fetchall()
         return [self._row_to_fact(row) for row in rows]

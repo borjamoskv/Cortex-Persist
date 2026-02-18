@@ -138,7 +138,7 @@ class AuthManager:
         finally:
             conn.close()
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=1024)  # noqa: B019
     def authenticate(self, raw_key: str) -> AuthResult:
         """Authenticate a request using an API key (Cached)."""
         if not raw_key or not raw_key.startswith("ctx_"):

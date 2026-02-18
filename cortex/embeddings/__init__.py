@@ -62,7 +62,7 @@ class LocalEmbedder:
                 "Run: pip install sentence-transformers onnxruntime"
             ) from exc
 
-    @lru_cache(maxsize=_CACHE_SIZE)
+    @lru_cache(maxsize=_CACHE_SIZE)  # noqa: B019
     def _embed_cached(self, text: str) -> list[float]:
         """Internal cached embedding for single strings."""
         self._ensure_model()

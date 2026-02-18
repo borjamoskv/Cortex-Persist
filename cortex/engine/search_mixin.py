@@ -17,7 +17,8 @@ class SearchMixin:
                 if embedder:
                     embedding = embedder.embed(query)
                     results = await semantic_search(conn, embedding, top_k, project, as_of)
-                    if results: return results
+                    if results:
+                        return results
             except Exception as e:
                 logger.warning(f"Semantic search failed: {e}")
 

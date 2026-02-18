@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -31,9 +32,9 @@ from cortex.temporal import now_iso
 logger = logging.getLogger("cortex")
 
 
-from cortex.consensus.manager import ConsensusManager
-from cortex.embeddings.manager import EmbeddingManager
-from cortex.facts.manager import FactManager
+from cortex.consensus.manager import ConsensusManager  # noqa: E402
+from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
+from cortex.facts.manager import FactManager  # noqa: E402
 
 
 class CortexEngine(SyncCompatMixin):

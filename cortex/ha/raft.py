@@ -95,7 +95,7 @@ class RaftNode:
         self.voted_for = self.node_id
         self.last_heartbeat = time.monotonic()
 
-        votes_received = 1  # Vote for self
+        _votes_received = 1  # Vote for self
 
         # In a real implementation, we would send RequestVote RPCs to peers here.
         # For now, we simulate a single-node cluster wins immediately if no peers,

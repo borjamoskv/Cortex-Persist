@@ -21,14 +21,14 @@ def test_wave6():
 
     print("🚀 Initializing Test Engine...")
     engine = CortexEngine(db_path=db_path)
-    engine.init_db()
+    engine.init_db_sync()
 
     print("📝 Storing Facts...")
-    f1 = engine.store("project-x", "Fact 1: Initial state", fact_type="knowledge")
-    f2 = engine.store("project-x", "Fact 2: Second state", fact_type="knowledge")
+    f1 = engine.store_sync("project-x", "Fact 1: Initial state", fact_type="knowledge")
+    f2 = engine.store_sync("project-x", "Fact 2: Second state", fact_type="knowledge")
 
     # Get tx_ids
-    conn = engine.get_connection()
+    conn = engine._get_sync_conn()
     txs = conn.execute("SELECT id, action FROM transactions ORDER BY id ASC").fetchall()
     print(f"Transactions: {txs}")
 
@@ -36,7 +36,7 @@ def test_wave6():
     first_tx = txs[0][0]
 
     print(f"🕰 Reconstructing state at TX #{first_tx}...")
-    state1 = engine.reconstruct_state(first_tx, project="project-x")
+    state1 = engine.reconstruct_state_sync(first_tx, project="project-x")
     print(f"State 1 size: {len(state1)}")
     for f in state1:
         print(f"  - {f.content}")
@@ -44,7 +44,7 @@ def test_wave6():
     assert "Initial state" in state1[0].content
 
     print(f"🕰 Reconstructing state at TX #{latest_tx}...")
-    state2 = engine.reconstruct_state(latest_tx, project="project-x")
+    state2 = engine.reconstruct_state_sync(latest_tx, project="project-x")
     print(f"State 2 size: {len(state2)}")
     for f in state2:
         print(f"  - {f.content}")
@@ -55,7 +55,7 @@ def test_wave6():
     ledger = ImmutableLedger(conn)
     # Set batch size small for testing
     ImmutableLedger.CHECKPOINT_BATCH_SIZE = 1
-    ledger.create_checkpoint()
+    ledger.create_checkpoint_sync()
 
     root_row = conn.execute(
         "SELECT root_hash FROM merkle_roots ORDER BY id DESC LIMIT 1"

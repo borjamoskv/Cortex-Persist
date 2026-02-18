@@ -222,6 +222,77 @@ class ImmutableLedger:
             )
             return cursor.lastrowid
 
+    def compute_merkle_root_sync(self, conn, start_id: int, end_id: int) -> str | None:
+        """Compute Merkle root for a range of transactions synchronously."""
+        cursor = conn.execute(
+            "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id ASC",
+            (start_id, end_id),
+        )
+        hashes = [row[0] for row in cursor.fetchall()]
+        if not hashes:
+            return None
+        tree = MerkleTree(hashes)
+        return tree.get_root()
+
+    def create_checkpoint_sync(self, conn=None) -> int | None:
+        """Create a Merkle tree checkpoint for recent transactions synchronously."""
+        batch_size = self.adaptive_batch_size
+
+        # If no conn provided, we can't easily get one if we only have a pool
+        # For sync usage, the caller should provide the connection.
+        if conn is None:
+            if hasattr(self.pool, "_get_sync_conn"):
+                conn = self.pool._get_sync_conn()
+            else:
+                # Last resort — if pool has a db_path attribute (CortexEngine does)
+                logger.warning("No sync connection provided to create_checkpoint_sync")
+                return None
+
+        # Find last checkpointed transaction
+        cursor = conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+        row = cursor.fetchone()
+        last_tx = row[0] or 0 if row else 0
+
+        # Count pending transactions
+        cursor = conn.execute(
+            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
+        )
+        row = cursor.fetchone()
+        pending = row[0] if row else 0
+
+        if pending < batch_size:
+            return None
+
+        start_id = last_tx + 1
+        # Get the ID of the N-th transaction from start
+        cursor = conn.execute(
+            "SELECT id FROM transactions WHERE id >= ? ORDER BY id LIMIT 1 OFFSET ?",
+            (start_id, batch_size - 1),
+        )
+        end_row = cursor.fetchone()
+
+        if not end_row:
+            return None
+
+        end_id = end_row[0]
+        root_hash = self.compute_merkle_root_sync(conn, start_id, end_id)
+
+        if not root_hash:
+            return None
+
+        cursor = conn.execute(
+            """
+            INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count)
+            VALUES (?, ?, ?, ?)
+            """,
+            (root_hash, start_id, end_id, batch_size),
+        )
+        conn.commit()
+        logger.info(
+            "Created Merkle checkpoint #%d (TX %d-%d) [sync]", cursor.lastrowid, start_id, end_id
+        )
+        return cursor.lastrowid
+
     async def verify_integrity_async(self) -> dict:
         """Verify hash chain continuity and Merkle checkpoints (async)."""
         violations = []
