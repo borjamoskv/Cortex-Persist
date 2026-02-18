@@ -4,9 +4,9 @@ Configuration, Metrics, Caching, and Connection Pooling.
 """
 
 import asyncio
+import aiosqlite
 import logging
 import os
-import sqlite3
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -94,7 +94,7 @@ class AsyncConnectionPool:
         self.db_path = os.path.expanduser(db_path)
         self.max_connections = max_connections
         self.acquire_timeout = acquire_timeout
-        self._pool: asyncio.Queue[sqlite3.Connection] = asyncio.Queue(maxsize=max_connections)
+        self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue(maxsize=max_connections)
         self._initialized = False
         self._lock = asyncio.Lock()
 
@@ -107,11 +107,12 @@ class AsyncConnectionPool:
             logger.debug("Initializing connection pool for %s", self.db_path)
             try:
                 for _ in range(self.max_connections):
-                    conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30.0)
-                    conn.execute("PRAGMA journal_mode=WAL")
-                    conn.execute("PRAGMA synchronous=NORMAL")
+                    conn = await aiosqlite.connect(self.db_path, timeout=30.0)
+                    await conn.execute("PRAGMA journal_mode=WAL")
+                    await conn.execute("PRAGMA synchronous=NORMAL")
                     # Quick health check
-                    conn.execute("SELECT 1").fetchone()
+                    async with conn.execute("SELECT 1") as cursor:
+                        await cursor.fetchone()
                     await self._pool.put(conn)
                 self._initialized = True
                 return True
@@ -122,9 +123,9 @@ class AsyncConnectionPool:
                 return False
 
     @asynccontextmanager
-    async def acquire(self) -> AsyncIterator[sqlite3.Connection]:
+    async def acquire(self) -> AsyncIterator[aiosqlite.Connection]:
         """Acquire a connection with timeout."""
-        conn: sqlite3.Connection | None = None
+        conn: aiosqlite.Connection | None = None
         try:
             conn = await asyncio.wait_for(self._pool.get(), timeout=self.acquire_timeout)
         except asyncio.TimeoutError:
@@ -134,11 +135,11 @@ class AsyncConnectionPool:
         try:
             # Verify connection is still alive
             try:
-                conn.execute("SELECT 1")
-            except sqlite3.Error:
+                await conn.execute("SELECT 1")
+            except Exception:
                 logger.warning("Reviving stale database connection")
-                conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30.0)
-                conn.execute("PRAGMA journal_mode=WAL")
+                conn = await aiosqlite.connect(self.db_path, timeout=30.0)
+                await conn.execute("PRAGMA journal_mode=WAL")
 
             yield conn
         finally:
@@ -151,7 +152,7 @@ class AsyncConnectionPool:
             while not self._pool.empty():
                 conn = await self._pool.get()
                 try:
-                    conn.close()
+                    await conn.close()
                 except Exception:
                     pass
             self._initialized = False

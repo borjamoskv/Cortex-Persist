@@ -121,6 +121,9 @@ class CortexEngine(SyncCompatMixin):
             raise RuntimeError("Connection not initialized. Call get_conn() first.")
         return self._conn
 
+    def get_connection(self) -> aiosqlite.Connection:
+        return self.get_conn()
+
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
     async def store(self, *args, **kwargs):
@@ -144,8 +147,8 @@ class CortexEngine(SyncCompatMixin):
     async def vote(self, *args, **kwargs):
         return await self.consensus.vote(*args, **kwargs)
 
-    async def stats(self):
-        return await self.facts.stats()
+    def stats(self):
+        return self.facts.stats()
 
     # ─── Schema ───────────────────────────────────────────────────
 

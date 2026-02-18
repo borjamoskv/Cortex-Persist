@@ -1,15 +1,15 @@
 """
 CORTEX v4.0 - Facts Router.
-Modularized fact operations: store, recall, deprecate, vote.
 """
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from cortex.api_deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
+from cortex.i18n import get_trans
 from cortex.models import (
     FactResponse,
     StoreRequest,
@@ -19,8 +19,8 @@ from cortex.models import (
     VoteV2Request,
 )
 
-logger = logging.getLogger("cortex.api.facts")
 router = APIRouter(tags=["facts"])
+logger = logging.getLogger("uvicorn.error")
 
 
 @router.post("/v1/facts", response_model=StoreResponse)
@@ -29,50 +29,49 @@ async def store_fact(
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> StoreResponse:
-    """Store a fact with automatic tenant isolation."""
+    """Store a fact (scoped to authenticated tenant)."""
     fact_id = await engine.store(
         project=auth.tenant_id,
         content=req.content,
         fact_type=req.fact_type,
         tags=req.tags,
-        meta=req.metadata,
+        source=req.source,
+        meta=req.meta,
     )
-    return StoreResponse(
-        fact_id=fact_id,
-        project=auth.tenant_id,
-        message=f"Fact #{fact_id} stored in project '{auth.tenant_id}'",
-    )
+    return StoreResponse(fact_id=fact_id, project=auth.tenant_id, status="stored")
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])
-async def recall_project(
+async def recall_facts(
     project: str,
+    request: Request,
     limit: int | None = Query(None, ge=1, le=1000),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
+    lang = request.headers.get("Accept-Language", "en")
     if project != auth.tenant_id:
-        raise HTTPException(status_code=403, detail="Forbidden: Namespace mismatch")
+        raise HTTPException(status_code=403, detail=get_trans("error_namespace_mismatch", lang))
 
     facts = await engine.recall(project=project, limit=limit)
 
     return [
         FactResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            fact_type=f["fact_type"],
-            tags=f["tags"],
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            metadata=f["meta"] if f.get("meta") else None,
-            confidence=f["confidence"],
-            consensus_score=f["consensus_score"],
-            hash=f.get("hash"),
-            tx_id=f.get("tx_id"),
+            id=f.id,
+            project=f.project,
+            content=f.content,
+            fact_type=f.fact_type,
+            tags=f.tags,
+            confidence=f.confidence,
+            valid_from=f.valid_from,
+            valid_until=f.valid_until,
+            source=f.source,
+            meta=f.meta,
+            created_at=f.created_at,
+            updated_at=f.updated_at,
+            tx_id=f.tx_id,
+            hash=f.hash,
         )
         for f in facts
     ]
@@ -82,31 +81,30 @@ async def recall_project(
 async def cast_vote(
     fact_id: int,
     req: VoteRequest,
+    request: Request,
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> VoteResponse:
     """Cast a consensus vote (verify/dispute) on a fact."""
+    lang = request.headers.get("Accept-Language", "en")
     try:
         fact = await engine.get_fact(fact_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
+            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
 
         if fact["project"] != auth.tenant_id:
-            raise HTTPException(status_code=403, detail="Forbidden: Fact belongs to another tenant")
+            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
         agent_id = auth.key_name or "api_agent"
         score = await engine.vote(fact_id, agent_id, req.value)
 
-        # Re-fetch for updated confidence
+        # Confidence is updated automatically by manager
         updated_fact = await engine.get_fact(fact_id)
-        confidence = updated_fact["confidence"] if updated_fact else "unknown"
 
         return VoteResponse(
             fact_id=fact_id,
-            agent=agent_id,
-            vote=req.value,
-            new_consensus_score=score,
-            confidence=confidence,
+            score=score,
+            confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
     except HTTPException:
         raise
@@ -121,17 +119,19 @@ async def cast_vote(
 async def cast_vote_v2(
     fact_id: int,
     req: VoteV2Request,
+    request: Request,
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> VoteResponse:
     """Cast a reputation-weighted consensus vote (RWC)."""
+    lang = request.headers.get("Accept-Language", "en")
     try:
         fact = await engine.get_fact(fact_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
+            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
 
         if fact["project"] != auth.tenant_id:
-            raise HTTPException(status_code=403, detail="Forbidden: Fact belongs to another tenant")
+            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
         score = await engine.vote(
             fact_id=fact_id,
@@ -142,14 +142,11 @@ async def cast_vote_v2(
 
         # Re-fetch for updated confidence
         updated_fact = await engine.get_fact(fact_id)
-        confidence = updated_fact["confidence"] if updated_fact else "unknown"
 
         return VoteResponse(
             fact_id=fact_id,
-            agent=req.agent_id,
-            vote=req.vote,
-            new_consensus_score=score,
-            confidence=confidence,
+            score=score,
+            confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
     except HTTPException:
         raise
@@ -161,46 +158,41 @@ async def cast_vote_v2(
 
 
 @router.get("/v1/facts/{fact_id}/votes", response_model=list[dict])
-async def get_votes(
+async def list_votes(
     fact_id: int,
+    request: Request,
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[dict]:
     """Retrieve all votes for a specific fact (Tenant Isolated)."""
+    lang = request.headers.get("Accept-Language", "en")
     fact = await engine.get_fact(fact_id)
     if not fact:
-        raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
+        raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
 
     if fact["project"] != auth.tenant_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     votes = await engine.get_votes(fact_id)
 
-    return [
-        {
-            "type": r["type"],
-            "vote": r["vote"],
-            "agent": r["agent"],
-            "timestamp": r["created_at"],
-            "reputation": r["reputation_score"],
-        }
-        for r in votes
-    ]
+    return [{"agent": v[0], "vote": v[1], "tx_id": v[2]} for v in votes]
 
 
-@router.delete("/v1/facts/{fact_id}")
+@router.delete("/v1/facts/{fact_id}", response_model=dict)
 async def deprecate_fact(
     fact_id: int,
+    request: Request,
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
     """Soft-deprecate a fact (mark as invalid)."""
+    lang = request.headers.get("Accept-Language", "en")
     fact = await engine.get_fact(fact_id)
     if not fact:
-        raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
+        raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
 
     if fact["project"] != auth.tenant_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     success = await engine.deprecate(fact_id, auth.tenant_id)
     if not success:

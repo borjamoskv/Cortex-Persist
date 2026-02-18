@@ -1,14 +1,32 @@
 Business Source License 1.1
 
 Parameters
+
 Licensor: Sovereign Systems Labs SL
-Licensed Work: CORTEX (Repository and its collective software components)
-Additional Use Grant: None.
+Licensed Work: The CORTEX repository and its collective software components.
+Additional Use Grant: You may use the Licensed Work for non-commercial purposes, including personal use, educational use, and internal testing.
 Change Date: 2030-01-01
 Change License: Apache License, Version 2.0
 
 1. Sub-licensing and Distribution.
-The Licensor hereby grants you a non-exclusive, world-wide, royalty-free, and non-transferable license to use, copy, modify, create derivative works, display and distribute the Licensed Work for non-commercial purposes only...
-[Full BSL 1.1 Standard Terms]
-...
-Note: This is a restricted license. For commercial use, please contact Sovereign Systems Labs SL.
+
+The Licensor hereby grants you a non-exclusive, world-wide, royalty-free, and non-transferable license to use, copy, modify, create derivative works, display and distribute the Licensed Work for non-commercial purposes only.
+
+2. Commercial Use.
+
+Commercial use of the Licensed Work requires a separate commercial license from the Licensor. "Commercial Use" includes, but is not limited to:
+a. Incorporating the Licensed Work into a product or service that is sold or monetized.
+b. Offering the Licensed Work as a hosted service (SaaS).
+c. Using the Licensed Work to support a commercial enterprise's critical infrastructure.
+
+3. Change Date.
+
+On the Change Date specified above, the Licensor hereby grants you a perpetual, world-wide, royalty-free, non-exclusive license to use the Licensed Work under the terms of the Change License specified above.
+
+4. Disclaimer.
+
+THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
+
+---
+
+For commercial inquiries, please contact: borja@moskv.com

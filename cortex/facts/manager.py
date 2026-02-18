@@ -227,36 +227,39 @@ class FactManager:
         await conn.commit()
         return ghost_id
 
-    async def stats(self) -> dict:
-        conn = await self.engine.get_conn()
-        cursor = await conn.execute("SELECT COUNT(*) FROM facts")
-        total = (await cursor.fetchone())[0]
-
-        cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-        active = (await cursor.fetchone())[0]
-
-        cursor = await conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
-        projects = [p[0] for p in await cursor.fetchall()]
-
-        cursor = await conn.execute(
-            "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
-        )
-        types = dict(await cursor.fetchall())
-
-        cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
-        tx_count = (await cursor.fetchone())[0]
-
-        db_size = (
-            self.engine._db_path.stat().st_size / (1024 * 1024)
-            if self.engine._db_path.exists()
-            else 0
-        )
-
+    def stats(self) -> dict:
+        conn = self.engine._get_sync_conn()
         try:
-            cursor = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
-            embeddings = (await cursor.fetchone())[0]
-        except Exception:
-            embeddings = 0
+            cursor = conn.execute("SELECT COUNT(*) FROM facts")
+            total = cursor.fetchone()[0]
+
+            cursor = conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
+            active = cursor.fetchone()[0]
+
+            cursor = conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
+            projects = [p[0] for p in cursor.fetchall()]
+
+            cursor = conn.execute(
+                "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
+            )
+            types = dict(cursor.fetchall())
+
+            cursor = conn.execute("SELECT COUNT(*) FROM transactions")
+            tx_count = cursor.fetchone()[0]
+
+            db_size = (
+                self.engine._db_path.stat().st_size / (1024 * 1024)
+                if self.engine._db_path.exists()
+                else 0
+            )
+
+            try:
+                cursor = conn.execute("SELECT COUNT(*) FROM fact_embeddings")
+                embeddings = cursor.fetchone()[0]
+            except Exception:
+                embeddings = 0
+        finally:
+            conn.close()
 
         return {
             "total_facts": total,

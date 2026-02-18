@@ -1,23 +1,39 @@
-# LLMs.txt — CORTEX Context Protocol
+# CORTEX — The Sovereign Ledger for AI Agents
 
-## Project Overview
-Name: CORTEX v4.0 (Sovereign Ledger)
-Purpose: The central memory, decision engine, and swarm coordinator for MOSKV-1.
-Stack: Python 3.14, AsyncIO, SQLite (aiosqlite), Pydantic.
+> Local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults.
 
-## Key Documentation
-- [Architecture Overview](docs/architecture/overview.md)
-- [Swarm Protocol (AGENTS.md)](AGENTS.md)
-- [Legacy Memory (MEMORIA)](docs/memoria_v3.md)
+## Quick Start for Agents
 
-## Core Context Maps
-- [Database Schema](cortex/schema.py)
-- [Sovereign Engine](cortex/engine.py)
-- [Ledger & Merkle](cortex/ledger.py)
-- [Swarm Dispatch](cortex/dispatch.py)
+CORTEX is designed to be used by AI agents via the **Model Context Protocol (MCP)**.
 
-## Constraints & Rules
-1.  **Async First**: All I/O must be async (`async def`, `await`). No blocking calls.
-2.  **Type Safety**: Use Pydantic models for data exchange. `mypy` strict mode.
-3.  **Testing**: `pytest-asyncio` required. No global state leakage between tests.
-4.  **No Fluff**: Code must be concise, functional, and self-documenting.
+### MCP Server Config
+
+```json
+{
+  "mcpServers": {
+    "cortex": {
+      "command": "python",
+      "args": ["-m", "cortex.mcp"]
+    }
+  }
+}
+```
+
+### Available Tools
+
+- `cortex_store(project, content)`: Remember a fact.
+- `cortex_search(query)`: Retrieve relevant memories.
+- `cortex_recall(project)`: Get full project context.
+- `cortex_status()`: System health check.
+
+## Architecture
+
+- **Engine**: SQLite + sqlite-vec (local vectors)
+- **Embeddings**: ONNX (all-MiniLM-L6-v2) ~384 dim
+- **Integrity**: SHA-256 hash-chained ledger
+- **Protocol**: MCP (Model Context Protocol)
+
+## Documentation
+
+Full documentation available in `README.md`.
+Source code: https://github.com/borjamoskv/cortex

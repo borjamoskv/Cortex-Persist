@@ -1,0 +1,161 @@
+:root {
+    --obsidian: #050505;
+    --gray-900: #0a0a0a;
+    --cyber-lime: #CCFF00;
+    --text-main: #FFFFFF;
+    --text-dim: rgba(255, 255, 255, 0.4);
+    --border: rgba(255, 255, 255, 0.1);
+    --font-heading: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.industrial-noir {
+    background-color: var(--obsidian);
+    color: var(--text-main);
+    font-family: var(--font-heading);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Grain Animation */
+.grain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://grainy-gradients.vercel.app/noise.svg');
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Navigation */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pulse {
+    color: var(--cyber-lime);
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 0.2; }
+    to { opacity: 1; text-shadow: 0 0 10px var(--cyber-lime); }
+}
+
+/* Main Layout */
+.poster-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    padding: 4rem 2rem;
+    align-items: end;
+}
+
+/* Typography Sculpture */
+.typographic-sculpture {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.main-title {
+    font-size: 8.5vw;
+    line-height: 0.9;
+    font-weight: 900;
+    letter-spacing: -4px;
+    text-transform: uppercase;
+}
+
+.main-title .line {
+    display: block;
+}
+
+.main-title .dim {
+    color: var(--text-dim);
+}
+
+.main-title .accent {
+    color: var(--obsidian);
+    -webkit-text-stroke: 1px var(--text-main);
+}
+
+.secondary-text {
+    max-width: 500px;
+    font-size: 1.2rem;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--text-dim);
+}
+
+.final-statement {
+    display: flex;
+    gap: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.final-statement .highlight {
+    color: var(--cyber-lime);
+}
+
+/* Side Modules */
+.control-modules {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-left: 1px solid var(--border);
+    padding-left: 2rem;
+}
+
+.module {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.module:hover {
+    background: var(--text-main);
+    color: var(--obsidian);
+}
+
+.module-label {
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.6;
+}
+
+.module-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Footer */
+.bottom-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+}

@@ -1,6 +1,12 @@
+"""
+CORTEX v4.1 — Merkle Tree Implementation.
+Standard Merkle Tree for cryptographic verification of transactions.
+"""
+
+from __future__ import annotations
+
 import hashlib
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -8,15 +14,14 @@ class MerkleNode:
     """A node in the Merkle Tree."""
 
     hash: str
-    left: Optional["MerkleNode"] = None
-    right: Optional["MerkleNode"] = None
+    left: MerkleNode | None = None
+    right: MerkleNode | None = None
     is_leaf: bool = False
 
 
 class MerkleTree:
     """
-    Merkle tree for batch verification.
-    Shared by transaction ledger and vote ledger.
+    Merkle tree for batch transaction verification.
     """
 
     def __init__(self, leaves: list[str]):
@@ -38,16 +43,25 @@ class MerkleTree:
 
     def _build_tree(self, nodes: list[MerkleNode]) -> MerkleNode:
         """Recursively build the tree bottom-up."""
+        if not nodes:
+            raise ValueError("Nodes list cannot be empty")
         if len(nodes) == 1:
             return nodes[0]
 
         next_level = []
+        # Process in pairs
         for i in range(0, len(nodes), 2):
             left = nodes[i]
+            # Use same node if odd count (duplicate right sibling)
             right = nodes[i + 1] if i + 1 < len(nodes) else left
-
-            combined_hash = self._hash_pair(left.hash, right.hash)
-            next_level.append(MerkleNode(hash=combined_hash, left=left, right=right))
+            
+            next_level.append(
+                MerkleNode(
+                    hash=self._hash_pair(left.hash, right.hash),
+                    left=left,
+                    right=right
+                )
+            )
 
         return self._build_tree(next_level)
 
@@ -57,30 +71,34 @@ class MerkleTree:
 
     def get_proof(self, index: int) -> list[tuple[str, str]]:
         """Get a Merkle proof for a leaf at the given index."""
-        if not self.root or index >= len(self.leaves):
+        if not self.root or index < 0 or index >= len(self.leaves):
             return []
 
-        proof = []
-        current_idx = index
+        proof: list[tuple[str, str]] = []
         current_level = [MerkleNode(h, is_leaf=True) for h in self.leaves]
+        curr_idx = index
 
         while len(current_level) > 1:
+            # Determine sibling
+            is_right_child = curr_idx % 2 == 1
+            sibling_idx = curr_idx - 1 if is_right_child else curr_idx + 1
+
+            if sibling_idx < len(current_level):
+                sibling_hash = current_level[sibling_idx].hash
+                proof.append((sibling_hash, "L" if is_right_child else "R"))
+            else:
+                # Odd node count, sibling is itself (right=left)
+                proof.append((current_level[curr_idx].hash, "R"))
+
+            # Move to next level
             next_level = []
             for i in range(0, len(current_level), 2):
-                left = current_level[i]
-                right = current_level[i + 1] if i + 1 < len(current_level) else left
-
-                if i == current_idx or (i + 1 == current_idx and i + 1 < len(current_level)):
-                    if current_idx == i:
-                        proof.append((right.hash, "R"))
-                    else:
-                        proof.append((left.hash, "L"))
-
-                combined_hash = self._hash_pair(left.hash, right.hash)
-                next_level.append(MerkleNode(hash=combined_hash, left=left, right=right))
-
-            current_idx //= 2
+                l = current_level[i]
+                r = current_level[i + 1] if i + 1 < len(current_level) else l
+                next_level.append(MerkleNode(hash=self._hash_pair(l.hash, r.hash), left=l, right=r))
+            
             current_level = next_level
+            curr_idx //= 2
 
         return proof
 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOSKV // KITCHEN BLUEPRINT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;900&family=JetBrains+Mono:wght@100;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="industrial-noir">
+    <div class="grain-overlay"></div>
+    
+    <nav class="top-nav">
+        <div class="serial-number">REF: BA-2026-KITCHEN</div>
+        <div class="brand">BORJA MOSKV</div>
+        <div class="system-status">SYSTEM: <span class="pulse">ONLINE</span></div>
+    </nav>
+
+    <main class="poster-layout">
+        <!-- El mensaje como Arte Tipográfico -->
+        <section class="typographic-sculpture">
+            <h1 class="main-title">
+                <span class="line">UNA COCINA.</span>
+                <span class="line dim">PERO LA NEVERA ESTÁ</span>
+                <span class="line accent">MINANDO HASHES.</span>
+            </h1>
+            
+            <div class="secondary-text">
+                <p>La tostadora ejecuta prompts. El microondas susurra embeddings mientras recalienta lentejas.</p>
+            </div>
+
+            <div class="final-statement">
+                <span>NADA DISTÓPICO.</span>
+                <span>NADA ÉPICO.</span>
+                <span class="highlight">SIMPLEMENTE MARTES.</span>
+            </div>
+        </section>
+
+        <!-- Interfaz de Control (Minimalista) -->
+        <aside class="control-modules">
+            <div class="module" onclick="location.href='https://borjamoskv.com/cocina'">
+                <div class="module-label">CORE_AUDIO</div>
+                <div class="module-value">MOSKVLOGIA_V3</div>
+            </div>
+            <div class="module" onclick="location.href='https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa'">
+                <div class="module-label">STREAM_ID</div>
+                <div class="module-value">SPOTIFY_LINK</div>
+            </div>
+            <div class="module" onclick="location.href='https://cosmiccountry.substack.com/'">
+                <div class="module-label">LOGS</div>
+                <div class="module-value">SUBSTACK_FEED</div>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="bottom-info">
+        <div class="legal">THINK DIFFERENT // BORJA MOSKV 2026</div>
+        <div class="clock" id="clock">00:00:00</div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
