@@ -3,7 +3,6 @@ CORTEX v4.0 — API Dependencies.
 Shared dependencies for FastAPI routes.
 """
 
-from __future__ import annotations
 
 from fastapi import Request
 

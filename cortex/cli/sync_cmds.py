@@ -22,7 +22,7 @@ def _run_async(coro):
 def sync(db) -> None:
     """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
     engine = get_engine(db)
-    engine.init_db()
+    engine.init_db_sync()
     try:
         with console.status("[bold blue]Sincronizando memoria...[/]"):
             # Fix: Wrap async call
@@ -57,6 +57,7 @@ def sync(db) -> None:
 def export(db, out) -> None:
     """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
     engine = get_engine(db)
+    engine.init_db_sync()
     try:
         out_path = Path(out).expanduser()
         # Fix: Wrap async call

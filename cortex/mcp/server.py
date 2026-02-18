@@ -89,10 +89,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
 
-            loop = asyncio.get_event_loop()
-            fact_id = await loop.run_in_executor(
-                ctx.executor,
-                engine.store,
+            fact_id = await engine.store(
                 project,
                 content,
                 fact_type,
@@ -135,10 +132,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
 
-            loop = asyncio.get_event_loop()
-            results = await loop.run_in_executor(
-                ctx.executor,
-                engine.search,
+            results = await engine.search(
                 query,
                 project or None,
                 min(max(top_k, 1), 20),
@@ -171,15 +165,15 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            _ = engine.get_connection()
-            stats = engine.stats()
+            stats = await engine.stats()
 
         m_summary = ctx.metrics.get_summary()
         return (
             f"CORTEX Status (Optimized v2):\n"
             f"  Facts: {stats.get('total_facts', 0)} total, "
             f"{stats.get('active_facts', 0)} active\n"
-            f"  Projects: {stats.get('projects', 0)}\n"
+            f"  Projects: {stats.get('project_count', 0)}\n"
+            f"  Fact Types: {json.dumps(stats.get('types', {}))}\n"
             f"  DB Size: {stats.get('db_size_mb', 0):.1f} MB\n"
             f"  MCP Metrics: {json.dumps(m_summary, indent=2)}"
         )
@@ -193,18 +187,15 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         """Perform a full integrity check on the CORTEX ledger."""
         await ctx.ensure_ready()
 
-        async with ctx.pool.acquire() as conn:
-            ledger = ImmutableLedger(conn)
-            report = await asyncio.get_event_loop().run_in_executor(
-                ctx.executor,
-                ledger.verify_integrity,
-            )
+        # ImmutableLedger expects a pool, not a single connection
+        ledger = ImmutableLedger(ctx.pool)
+        report = await ledger.verify_integrity_async()
 
         if report["valid"]:
             return (
                 f"✅ Ledger Integrity: OK\n"
                 f"Transactions verified: {report['tx_checked']}\n"
-                f"Facts checked: {report['facts_checked']}"
+                f"Roots checked: {report['roots_checked']}"
             )
         return (
             f"❌ Ledger Integrity: VIOLATION\n"
@@ -236,14 +227,24 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":
     return mcp
 
 
+# ─── Global Server Instance ──────────────────────────────────────────
+
+# Default configuration
+_default_config = MCPServerConfig()
+mcp = create_mcp_server(_default_config)
+
+
 def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
-    mcp = create_mcp_server(config)
-    cfg = config or MCPServerConfig()
+    global mcp
+    if config:
+        mcp = create_mcp_server(config)
+
+    cfg = config or _default_config
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
-        mcp.run_sse(host=cfg.host, port=cfg.port)
+        mcp.run(transport="sse", host=cfg.host, port=cfg.port)
     else:
         logger.info("Starting CORTEX MCP server v2 (stdio)")
-        mcp.run_stdio()
+        mcp.run()

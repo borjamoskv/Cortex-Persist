@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
 
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Request
 
 logger = logging.getLogger(__name__)
 
@@ -232,32 +232,40 @@ def get_auth_manager() -> AuthManager:
 # ─── FastAPI Dependencies ─────────────────────────────────────────────
 
 async def require_auth(
-    authorization: str = Header(None, description="Bearer <api-key>"),
+    request: Request,
+    authorization: str | None = Header(None, description="Bearer <api-key>"),
 ) -> AuthResult:
-    """Extract and validate API key from Authorization header."""
+    """Extract and validate API key from Authorization header with i18n support."""
+    from cortex.i18n import get_trans
+    lang = request.headers.get("Accept-Language", "en")
+
     if not authorization:
-        raise HTTPException(status_code=401, detail="Missing Authorization header")
+        raise HTTPException(status_code=401, detail=get_trans("error_missing_auth", lang))
 
     parts = authorization.split(" ", 1)
     if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Use: Bearer <api-key>")
+        raise HTTPException(status_code=401, detail=get_trans("error_invalid_key_format", lang))
 
     manager = get_auth_manager()
     result = manager.authenticate(parts[1])
     if not result.authenticated:
-        raise HTTPException(status_code=401, detail=result.error)
+        error_msg = get_trans("error_invalid_revoked_key", lang) if result.error else result.error
+        raise HTTPException(status_code=401, detail=error_msg)
     return result
 
 
 def require_permission(permission: str):
-    """Factory for permission-checking dependencies."""
+    """Factory for permission-checking dependencies with i18n support."""
 
-    async def checker(auth: AuthResult = Depends(require_auth)) -> AuthResult:
+    async def checker(
+        request: Request, 
+        auth: AuthResult = Depends(require_auth)
+    ) -> AuthResult:
         if permission not in auth.permissions:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Missing permission: {permission}",
-            )
+            from cortex.i18n import get_trans
+            lang = request.headers.get("Accept-Language", "en")
+            detail = get_trans("error_missing_permission", lang).format(permission=permission)
+            raise HTTPException(status_code=403, detail=detail)
         return auth
 
     return checker

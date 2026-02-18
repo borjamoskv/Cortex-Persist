@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -5,8 +6,83 @@ __pycache__/
 dist/
 build/
 .eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Databases
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
+
+# Testing
 .pytest_cache/
-.venv/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
+
+# Temporary analysis files (internal)
+kimi_*.md
+context_for_kimi.md
+full_cortex_context.md
+consensus_output.txt
+test_output.txt
+safety_net.patch
+
+# Debug scripts (not for distribution)
+debug_*.py
+repro_*.py
+inspect_*.py
+verify_*.py
+smoke_test_*.py
+
+# Internal docs (not for public)
+WAVE5_*.md
+CORTEX_ASYNC_*.md
+CORTEX_V4_*.md
+CORTEX_WAVE4_*.md
+SECURITY_ARCHITECTURE_*.md
+HARDENING_*.md
+cortex_notebooklm_digest.md
+kimi_help.txt
+implementation_plan.md
+
+# Snapshots (internal)
+snapshots/
+
+# NotebookLM sources (internal)
+notebooklm_sources/
+
+# Generated images
+*.png
+
+# Agent internals
+.agent/
+.agent_backup_workflows/
+.cortex/
+.clj-kondo/
+.lsp/
+.qodo/
+
+# Misc
+site/
+static-analysis.datadog.yml

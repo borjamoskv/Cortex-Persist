@@ -1,9 +1,10 @@
 [project]
 name = "cortex-memory"
-version = "4.0.0a1"
+version = "4.0.0"
 description = "The Sovereign Ledger for AI Agents — local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults."
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "BSL-1.1"}
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
     {name = "Borja Moskv", email = "borja@moskv.com"},
@@ -16,6 +17,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
+[project.urls]
+Homepage = "https://github.com/borjamoskv/cortex"
+Repository = "https://github.com/borjamoskv/cortex"
+Issues = "https://github.com/borjamoskv/cortex/issues"
 
 dependencies = [
     "sqlite-vec>=0.1.6",

@@ -5,6 +5,7 @@ FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization and routing.
 """
 
+
 import logging
 import sqlite3
 import time
@@ -15,48 +16,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex import api_state
-from cortex.auth import AuthManager
+from cortex import __version__, api_state, config
 from cortex.config import ALLOWED_ORIGINS, DB_PATH, RATE_LIMIT, RATE_WINDOW
+from cortex.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
 from cortex.hive import router as hive_router
 from cortex.metrics import MetricsMiddleware, metrics
 from cortex.routes import (
     admin as admin_router,
-)
-from cortex.routes import (
     agents as agents_router,
-)
-from cortex.routes import (
     daemon as daemon_router,
-)
-from cortex.routes import (
     dashboard as dashboard_router,
-)
-
-# Import routers
-from cortex.routes import (
     facts as facts_router,
-)
-from cortex.routes import (
     gate as gate_router,
-)
-from cortex.routes import (
     graph as graph_router,
-)
-from cortex.routes import (
     ledger as ledger_router,
-)
-from cortex.routes import (
     mejoralo as mejoralo_router,
-)
-from cortex.routes import (
     missions as missions_router,
-)
-from cortex.routes import (
     search as search_router,
-)
-from cortex.routes import (
     timing as timing_router,
 )
 from cortex.timing import TimingTracker
@@ -70,15 +48,17 @@ async def lifespan(app: FastAPI):
     from cortex.connection_pool import CortexConnectionPool
     from cortex.engine_async import AsyncCortexEngine
 
-    # 1. Initialize Core Async Foundation (Wave 5)
-    pool = CortexConnectionPool(DB_PATH)
-    await pool.initialize()
-    async_engine = AsyncCortexEngine(pool, DB_PATH)
-
-    # 2. Legacy Engine for compatibility
-    engine = CortexEngine(DB_PATH)
+    # 1. Legacy Engine first — handles schema creation and migrations
+    db_path = config.DB_PATH  # Read at runtime, not import time
+    logger.info("Starting lifespan with DB_PATH: %s", db_path)
+    engine = CortexEngine(db_path)
     await engine.init_db()
-    auth_manager = AuthManager(DB_PATH)
+    auth_manager = AuthManager(db_path)
+
+    # 2. Async pool AFTER schema/migrations exist
+    pool = CortexConnectionPool(db_path)
+    await pool.initialize()
+    async_engine = AsyncCortexEngine(pool, db_path)
 
     # Sync to cortex.auth so dependencies use the same instance
     import cortex.auth
@@ -86,7 +66,7 @@ async def lifespan(app: FastAPI):
     cortex.auth._auth_manager = auth_manager
 
     # Timing tracker gets its own connection to avoid SQLite locking issues
-    timing_conn = sqlite3.connect(DB_PATH, timeout=10, check_same_thread=False)
+    timing_conn = sqlite3.connect(db_path, timeout=10, check_same_thread=False)
     tracker = TimingTracker(timing_conn)
 
     # Store in app state
@@ -117,7 +97,7 @@ app = FastAPI(
     title="CORTEX — Sovereign Memory API",
     description="Local-first memory infrastructure for AI agents. "
     "Vector search, temporal facts, cryptographic ledger.",
-    version="4.0.0a1",
+    version=__version__,
     lifespan=lifespan,
 )
 
@@ -223,12 +203,12 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 async def root_node(request: Request) -> dict:
     from cortex.i18n import get_trans
 
-    # Default to 'es' (Spanish) if no header is provided
-    lang = request.headers.get("Accept-Language", "es")
+    # Use DEFAULT_LANGUAGE if no header is provided
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
     return {
         "service": "cortex",
-        "version": "4.0.0a1",
+        "version": __version__,
         "status": get_trans("system_operational", lang),
         "description": get_trans("info_service_desc", lang)
     }
@@ -239,13 +219,13 @@ async def health_check(request: Request) -> dict:
     """Simple status check for load balancers."""
     from cortex.i18n import get_trans
 
-    # Default to 'es' (Spanish)
-    lang = request.headers.get("Accept-Language", "es")
+    # Use DEFAULT_LANGUAGE if no header is provided
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
     return {
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
-        "version": "4.0.0a1"
+        "version": __version__
     }
 
 
