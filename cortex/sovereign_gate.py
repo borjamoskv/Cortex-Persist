@@ -18,6 +18,7 @@ import os
 import subprocess
 import time
 import uuid
+import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -158,8 +159,13 @@ class SovereignGate:
             secret
             or os.environ.get("CORTEX_GATE_SECRET")
             or os.environ.get("CORTEX_VAULT_KEY")
-            or "cortex-dev-secret"  # Fallback for dev only
-        ).encode("utf-8")
+        )
+        if not self._secret:
+            logger.warning("No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session.")
+            self._secret = secrets.token_hex(32)
+        
+        if isinstance(self._secret, str):
+            self._secret = self._secret.encode("utf-8")
 
         self._pending: Dict[str, PendingAction] = {}
         self._audit_log: List[Dict[str, Any]] = []

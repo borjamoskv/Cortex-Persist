@@ -94,13 +94,9 @@ def measure_architecture():
 
 
 def measure_security():
-    patterns = [r"eval\(", r"innerHTML", r"\bpassword\s*=", r"\bsecret\s*=", r"\bapi_key\s*="]
+    patterns = [r"eval\(", r"innerHTML", r"password\s*=", r"secret\s*=", r"api_key\s*="]
     hits = 0
     for path in iter_files(extensions=[".py", ".js", ".html"]):
-        # Skip self-scan to avoid finding the patterns themselves
-        if "xray_scan.py" in path:
-            continue
-
         try:
             with open(path, "r") as f:
                 content = f.read()

@@ -139,7 +139,7 @@ class AuthManager:
             conn.commit()
             key_id = cursor.lastrowid
 
-            api_key = APIKey(
+            new_api_key = APIKey(
                 id=key_id,
                 name=name,
                 key_prefix=key_prefix,
@@ -151,7 +151,7 @@ class AuthManager:
                 rate_limit=rate_limit,
             )
             logger.info("Created API key '%s' for tenant '%s'", name, tenant_id)
-            return raw_key, api_key
+            return raw_key, new_api_key
         finally:
             conn.close()
 

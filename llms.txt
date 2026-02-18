@@ -1,0 +1,23 @@
+# LLMs.txt — CORTEX Context Protocol
+
+## Project Overview
+Name: CORTEX v4.0 (Sovereign Ledger)
+Purpose: The central memory, decision engine, and swarm coordinator for MOSKV-1.
+Stack: Python 3.14, AsyncIO, SQLite (aiosqlite), Pydantic.
+
+## Key Documentation
+- [Architecture Overview](docs/architecture/overview.md)
+- [Swarm Protocol (AGENTS.md)](AGENTS.md)
+- [Legacy Memory (MEMORIA)](docs/memoria_v3.md)
+
+## Core Context Maps
+- [Database Schema](cortex/schema.py)
+- [Sovereign Engine](cortex/engine.py)
+- [Ledger & Merkle](cortex/ledger.py)
+- [Swarm Dispatch](cortex/dispatch.py)
+
+## Constraints & Rules
+1.  **Async First**: All I/O must be async (`async def`, `await`). No blocking calls.
+2.  **Type Safety**: Use Pydantic models for data exchange. `mypy` strict mode.
+3.  **Testing**: `pytest-asyncio` required. No global state leakage between tests.
+4.  **No Fluff**: Code must be concise, functional, and self-documenting.
