@@ -195,7 +195,7 @@ class Neo4jBackend(GraphBackend):
         # Basic CYPHER expansion
         # LIMIT is hard to apply to nodes globally in expansion with plain Cypher without APOC,
         # but we can try a variable length match
-        query = f"""
+        _query = f"""
         MATCH (s:Entity) WHERE s.name IN $seeds
         CALL {{
             WITH s

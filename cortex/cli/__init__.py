@@ -37,7 +37,7 @@ def cli() -> None:
 
 
 # ─── Registrar todos los sub-módulos ───────────────────────────────────
-from cortex.cli import (
+from cortex.cli import (  # noqa: E402
     core,  # noqa: E402, F401
     crud,  # noqa: E402, F401
     launchpad_cmds,  # noqa: E402, F401

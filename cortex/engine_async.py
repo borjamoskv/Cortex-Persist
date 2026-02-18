@@ -116,7 +116,8 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             conn.row_factory = aiosqlite.Row
             async with conn.execute(f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE f.id = ?", (fact_id,)) as cursor:
                 row = await cursor.fetchone()
-                if not row: return None
+                if not row:
+                    return None
                 d = dict(row)
                 d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
                 d["meta"] = json.loads(d["meta"]) if d.get("meta") else {}
