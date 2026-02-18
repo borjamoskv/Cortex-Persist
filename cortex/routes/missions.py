@@ -2,7 +2,6 @@
 CORTEX v4.0 — Mission Orchestration Router.
 """
 
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 
@@ -32,9 +31,9 @@ async def launch_mission(
     return result
 
 
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=list[dict])
 async def list_missions(
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     engine: CortexEngine = Depends(get_engine),
     _=Depends(require_permission("read")),
 ):

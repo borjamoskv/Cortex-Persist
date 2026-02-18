@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 
@@ -12,7 +12,7 @@ def record_session(
     project: str,
     score_before: int,
     score_after: int,
-    actions: Optional[List[str]] = None,
+    actions: list[str] | None = None,
 ) -> int:
     """
     Record a MEJORAlo audit session in the CORTEX ledger.
@@ -49,7 +49,7 @@ def record_session(
     return fact_id
 
 
-def get_history(engine: CortexEngine, project: str, limit: int = 20) -> List[Dict[str, Any]]:
+def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dict[str, Any]]:
     """Retrieve past MEJORAlo sessions from the ledger."""
     conn = engine._get_conn()
     rows = conn.execute(

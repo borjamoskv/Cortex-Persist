@@ -45,7 +45,7 @@ async def register_agent(
         raise
     except Exception:
         logger.exception("Agent registration failed")
-        raise HTTPException(status_code=500, detail="Internal registration error")
+        raise HTTPException(status_code=500, detail="Internal registration error") from None
 
 
 @router.get("/v1/agents/{agent_id}", response_model=AgentResponse)

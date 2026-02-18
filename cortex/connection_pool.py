@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
 
 import aiosqlite
 
@@ -105,7 +105,7 @@ class CortexConnectionPool:
 
         # Enforce max concurrency
         await self._semaphore.acquire()
-        conn: Optional[aiosqlite.Connection] = None
+        conn: aiosqlite.Connection | None = None
 
         try:
             # Try to get from pool without waiting

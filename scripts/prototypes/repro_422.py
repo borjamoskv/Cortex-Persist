@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 BASE_URL = "http://localhost:8000"
 KEY = "ctx_1a8011210fe7d35813661745d9a55b27826a095bb7192fa9e7cace484c7ed22f"  # From test log

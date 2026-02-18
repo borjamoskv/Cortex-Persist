@@ -5,7 +5,7 @@ Provides data structures for eventual consistency in HA clusters.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Generic, TypeVar, Set
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -17,7 +17,7 @@ class VectorClock:
     """
 
     node_id: str
-    counters: Dict[str, int] = field(default_factory=dict)
+    counters: dict[str, int] = field(default_factory=dict)
 
     def increment(self) -> "VectorClock":
         """Increment this node's counter."""
@@ -93,7 +93,7 @@ class ORSet(Generic[T]):
 
     def __init__(self):
         # element -> set of unique action IDs (add tags)
-        self.elements: Dict[T, Set[str]] = {}
+        self.elements: dict[T, set[str]] = {}
         # set of removed action IDs (tombstones could be handled, but simple ORSet uses this)
         # Actually OR-Set usually:
         # Add: generate unique ID, add to set for element
@@ -106,7 +106,7 @@ class ORSet(Generic[T]):
         # Merge(S1, S2) -> (S1 INTERSECT S2) U (S1 - Removals2) ... no, state based is simpler:
         # Just S1 U S2. Remove involves keeping a 'tombstone' set?
         # Let's implement a simplified State-based OR-Set where we just track (element, uuid).
-        self._state: Set[tuple[T, str]] = set()
+        self._state: set[tuple[T, str]] = set()
 
     def add(self, element: T, uid: str):
         self._state.add((element, uid))

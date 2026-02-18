@@ -8,8 +8,9 @@ import tempfile
 
 import pytest
 from fastapi.testclient import TestClient
-import cortex.config
+
 import cortex.api
+import cortex.config
 
 # Set test DB path
 _test_db = tempfile.mktemp(suffix=".db")

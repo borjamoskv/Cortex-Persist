@@ -2,7 +2,6 @@
 CORTEX v4.0 - Search Router.
 """
 
-from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query
 
@@ -14,12 +13,12 @@ from cortex.models import SearchRequest, SearchResult
 router = APIRouter(tags=["search"])
 
 
-@router.post("/v1/search", response_model=List[SearchResult])
+@router.post("/v1/search", response_model=list[SearchResult])
 async def search_facts(
     req: SearchRequest,
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
-) -> List[SearchResult]:
+) -> list[SearchResult]:
     """Semantic search across facts (scoped to tenant)."""
     results = await engine.search(
         query=req.query,
@@ -44,14 +43,14 @@ async def search_facts(
     ]
 
 
-@router.get("/v1/search", response_model=List[SearchResult])
+@router.get("/v1/search", response_model=list[SearchResult])
 async def search_facts_get(
     query: str = Query(..., max_length=1024),
     k: int = Query(5, ge=1, le=50),
-    as_of: Optional[str] = None,
+    as_of: str | None = None,
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
-) -> List[SearchResult]:
+) -> list[SearchResult]:
     """Semantic search via GET (scoped to tenant)."""
     results = await engine.search(
         query=query,

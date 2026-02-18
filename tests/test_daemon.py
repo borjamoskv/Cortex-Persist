@@ -25,7 +25,6 @@ from cortex.daemon import (
     SiteStatus,
 )
 
-
 # ─── SiteStatus ───────────────────────────────────────────────────────
 
 

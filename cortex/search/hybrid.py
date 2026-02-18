@@ -7,7 +7,6 @@
 
 import logging
 import sqlite3
-from typing import Optional
 
 import aiosqlite
 
@@ -25,8 +24,8 @@ async def hybrid_search(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
-    project: Optional[str] = None,
-    as_of: Optional[str] = None,
+    project: str | None = None,
+    as_of: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
 ) -> list[SearchResult]:
@@ -64,7 +63,7 @@ def hybrid_search_sync(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
-    project: Optional[str] = None,
+    project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
 ) -> list[SearchResult]:

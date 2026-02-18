@@ -7,7 +7,6 @@ import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
 
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
@@ -216,7 +215,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":
+def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -237,7 +236,7 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":
     return mcp
 
 
-def run_server(config: Optional[MCPServerConfig] = None) -> None:
+def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
     mcp = create_mcp_server(config)
     cfg = config or MCPServerConfig()

@@ -11,7 +11,6 @@ import hashlib
 import json
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import aiosqlite
 
@@ -113,7 +112,7 @@ class EmbeddingPrunerMixin:
         )
         return stats
 
-    async def verify_embedding_hash(self, fact_id: int) -> Optional[dict]:
+    async def verify_embedding_hash(self, fact_id: int) -> dict | None:
         """Check if a pruned embedding's hash exists and return metadata.
 
         Returns:

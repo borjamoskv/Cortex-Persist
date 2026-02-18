@@ -7,10 +7,8 @@ Anti-entropy protocol for syncing state between nodes.
 import asyncio
 import logging
 import random
-from typing import List, Optional
 
 import aiosqlite
-
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +20,14 @@ class GossipProtocol:
     """
 
     def __init__(
-        self, node_id: str, conn: aiosqlite.Connection, peers: List[str], interval: float = 30.0
+        self, node_id: str, conn: aiosqlite.Connection, peers: list[str], interval: float = 30.0
     ):
         self.node_id = node_id
         self.conn = conn
         self.peers = peers
         self.interval = interval
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def start(self):
         """Start gossip loop."""

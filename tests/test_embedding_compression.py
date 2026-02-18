@@ -4,7 +4,8 @@ Tests quantize/dequantize roundtrip, compression ratio, and edge cases.
 """
 
 import pytest
-from cortex.compression import quantize_int8, dequantize_int8, compression_ratio
+
+from cortex.compression import compression_ratio, dequantize_int8, quantize_int8
 
 try:
     import numpy as np

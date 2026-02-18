@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import struct
-from typing import List
 
 logger = logging.getLogger("cortex.embeddings.compression")
 
@@ -25,7 +24,7 @@ except ImportError:
     logger.debug("numpy not available — embedding compression disabled")
 
 
-def quantize_int8(embedding: List[float]) -> bytes:
+def quantize_int8(embedding: list[float]) -> bytes:
     """Quantize float32 embedding to int8 (3.9x storage reduction).
 
     Stores a single float32 scale factor followed by 384 int8 values.
@@ -49,7 +48,7 @@ def quantize_int8(embedding: List[float]) -> bytes:
     return struct.pack("f", scale) + quantized.tobytes()
 
 
-def dequantize_int8(data: bytes) -> List[float]:
+def dequantize_int8(data: bytes) -> list[float]:
     """Dequantize int8 back to float32 for search.
 
     Args:

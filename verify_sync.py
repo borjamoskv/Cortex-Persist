@@ -1,5 +1,6 @@
-from cortex.engine import CortexEngine
 import logging
+
+from cortex.engine import CortexEngine
 
 logging.basicConfig(level=logging.INFO)
 engine = CortexEngine()

@@ -8,6 +8,8 @@ Adaptive checkpointing: reduces batch size during high write-rate periods
 (e.g., swarm bursts) to minimize data loss on crash.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
@@ -15,8 +17,10 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from cortex.connection_pool import CortexConnectionPool
 
 from cortex.canonical import compute_tx_hash, compute_tx_hash_v1
 from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
@@ -29,8 +33,8 @@ class MerkleNode:
     """A node in the Merkle Tree."""
 
     hash: str
-    left: Optional["MerkleNode"] = None
-    right: Optional["MerkleNode"] = None
+    left: MerkleNode | None = None
+    right: MerkleNode | None = None
     is_leaf: bool = False
 
 
@@ -39,7 +43,7 @@ class MerkleTree:
     Merkle tree for batch transaction verification.
     """
 
-    def __init__(self, leaves: List[str]):
+    def __init__(self, leaves: list[str]):
         """
         Build a Merkle tree from leaf hashes.
         """
@@ -56,7 +60,7 @@ class MerkleTree:
         combined = left + right
         return hashlib.sha256(combined.encode()).hexdigest()
 
-    def _build_tree(self, nodes: List[MerkleNode]) -> MerkleNode:
+    def _build_tree(self, nodes: list[MerkleNode]) -> MerkleNode:
         """Recursively build the tree bottom-up."""
         if len(nodes) == 1:
             return nodes[0]
@@ -71,11 +75,11 @@ class MerkleTree:
 
         return self._build_tree(next_level)
 
-    def get_root(self) -> Optional[str]:
+    def get_root(self) -> str | None:
         """Get the root hash of the tree."""
         return self.root.hash if self.root else None
 
-    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+    def get_proof(self, index: int) -> list[tuple[str, str]]:
         """Get a Merkle proof for a leaf at the given index."""
         if not self.root or index >= len(self.leaves):
             return []
@@ -105,7 +109,7 @@ class MerkleTree:
         return proof
 
     @staticmethod
-    def verify_proof(leaf_hash: str, proof: List[Tuple[str, str]], root: str) -> bool:
+    def verify_proof(leaf_hash: str, proof: list[tuple[str, str]], root: str) -> bool:
         """Verify a Merkle proof against a root hash."""
         # This is a static method that can be used without an instance
         current = leaf_hash
@@ -130,7 +134,7 @@ class ImmutableLedger:
     WRITE_RATE_WINDOW = 60  # seconds
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
-    def __init__(self, pool: "CortexConnectionPool"):
+    def __init__(self, pool: CortexConnectionPool):
         self.pool = pool
         self._write_timestamps: deque[float] = deque(maxlen=5000)
 
@@ -149,7 +153,7 @@ class ImmutableLedger:
             return CHECKPOINT_MIN
         return CHECKPOINT_MAX
 
-    async def compute_merkle_root_async(self, start_id: int, end_id: int) -> Optional[str]:
+    async def compute_merkle_root_async(self, start_id: int, end_id: int) -> str | None:
         """Compute Merkle root for a range of transactions (async)."""
         async with self.pool.acquire() as conn:
             cursor = await conn.execute(
@@ -164,7 +168,7 @@ class ImmutableLedger:
             tree = MerkleTree(hashes)
             return tree.get_root()
 
-    async def create_checkpoint_async(self) -> Optional[int]:
+    async def create_checkpoint_async(self) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
         batch_size = self.adaptive_batch_size
 

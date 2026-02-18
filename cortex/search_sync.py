@@ -14,7 +14,6 @@ import json
 import logging
 import sqlite3
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger("cortex.search_sync")
 
@@ -34,7 +33,7 @@ class SyncSearchResult:
     project: str
     fact_type: str
     score: float = 0.0
-    source: Optional[str] = None
+    source: str | None = None
     confidence: str = "stated"
     tags: list[str] = field(default_factory=list)
 
@@ -53,7 +52,7 @@ def semantic_search_sync(
     conn: sqlite3.Connection,
     query_embedding: list[float],
     top_k: int = 5,
-    project: Optional[str] = None,
+    project: str | None = None,
 ) -> list[SyncSearchResult]:
     """Vector KNN search using sqlite-vec (sync)."""
     embedding_json = json.dumps(query_embedding)
@@ -130,7 +129,7 @@ def _sanitize_fts_query(query: str) -> str:
 
 def _build_fts_query(
     query: str,
-    project: Optional[str],
+    project: str | None,
     limit: int,
 ) -> tuple[str, list]:
     """Build FTS5 MATCH query."""
@@ -154,7 +153,7 @@ def _build_fts_query(
 
 def _build_like_query(
     query: str,
-    project: Optional[str],
+    project: str | None,
     limit: int,
 ) -> tuple[str, list]:
     """Build LIKE fallback query."""
@@ -201,7 +200,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SyncSearchResult]:
     """Full-text search with FTS5 (fast) and LIKE fallback (sync)."""
@@ -227,7 +226,7 @@ def hybrid_search_sync(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
-    project: Optional[str] = None,
+    project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
 ) -> list[SyncSearchResult]:

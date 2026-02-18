@@ -4,6 +4,7 @@ Tests input validation, poisoning detection, and content limits.
 """
 
 import pytest
+
 from cortex.mcp.guard import MCPGuard
 
 

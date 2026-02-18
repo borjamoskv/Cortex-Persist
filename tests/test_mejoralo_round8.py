@@ -11,8 +11,7 @@ from collections import deque
 
 import pytest
 
-from cortex.metrics import MetricsRegistry, _HISTOGRAM_MAX_OBSERVATIONS
-
+from cortex.metrics import _HISTOGRAM_MAX_OBSERVATIONS, MetricsRegistry
 
 # ─── Metrics: Histogram Cap ──────────────────────────────────────────
 
@@ -86,8 +85,9 @@ class TestAsyncClientExport:
     """Verify export() uses fmt (not format)."""
 
     def test_export_signature_uses_fmt(self):
-        from cortex.async_client import AsyncCortexClient
         import inspect
+
+        from cortex.async_client import AsyncCortexClient
 
         sig = inspect.signature(AsyncCortexClient.export)
         assert "fmt" in sig.parameters
@@ -107,14 +107,16 @@ class TestApiStatusErrorHandling:
 
     @pytest.fixture
     def client(self):
-        from cortex.api import app
         from fastapi.testclient import TestClient
+
+        from cortex.api import app
 
         return TestClient(app)
 
     def test_status_endpoint_handles_db_error(self, client):
-        from cortex.routes.admin import status
         import inspect
+
+        from cortex.routes.admin import status
 
         source = inspect.getsource(status)
         assert "sqlite3.Error" in source
@@ -125,8 +127,9 @@ class TestApiExportFmtParameter:
     """export_project uses fmt (not format) internally."""
 
     def test_export_endpoint_no_format_shadow(self):
-        from cortex.routes.admin import export_project
         import inspect
+
+        from cortex.routes.admin import export_project
 
         source = inspect.getsource(export_project)
         # Should use fmt variable, not format
@@ -134,8 +137,9 @@ class TestApiExportFmtParameter:
 
     def test_export_endpoint_preserves_format_query_param(self):
         """The query param should still be called 'format' for API compat."""
-        from cortex.routes.admin import export_project
         import inspect
+
+        from cortex.routes.admin import export_project
 
         source = inspect.getsource(export_project)
         assert 'alias="format"' in source
@@ -145,30 +149,34 @@ class TestApiTimeErrorHandling:
     """Time endpoints catch sqlite3.Error."""
 
     def test_heartbeat_has_error_handling(self):
-        from cortex.routes.timing import record_heartbeat
         import inspect
+
+        from cortex.routes.timing import record_heartbeat
 
         source = inspect.getsource(record_heartbeat)
         assert "sqlite3.Error" in source
         assert "Heartbeat failed" in source
 
     def test_time_today_has_error_handling(self):
-        from cortex.routes.timing import time_today
         import inspect
+
+        from cortex.routes.timing import time_today
 
         source = inspect.getsource(time_today)
         assert "sqlite3.Error" in source
 
     def test_time_report_has_error_handling(self):
-        from cortex.routes.timing import time_report
         import inspect
+
+        from cortex.routes.timing import time_report
 
         source = inspect.getsource(time_report)
         assert "sqlite3.Error" in source
 
     def test_time_history_has_error_handling(self):
-        from cortex.routes.timing import get_time_history
         import inspect
+
+        from cortex.routes.timing import get_time_history
 
         source = inspect.getsource(get_time_history)
         assert "sqlite3.Error" in source
@@ -178,16 +186,18 @@ class TestApiGraphErrorHandling:
     """Graph endpoints catch sqlite3.Error."""
 
     def test_graph_project_has_error_handling(self):
-        from cortex.routes.graph import get_graph
         import inspect
+
+        from cortex.routes.graph import get_graph
 
         source = inspect.getsource(get_graph)
         assert "sqlite3.Error" in source
         assert "Graph unavailable" in source
 
     def test_graph_all_has_error_handling(self):
-        from cortex.routes.graph import get_graph_all
         import inspect
+
+        from cortex.routes.graph import get_graph_all
 
         source = inspect.getsource(get_graph_all)
         assert "sqlite3.Error" in source

@@ -9,7 +9,7 @@ import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Set
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -113,7 +113,7 @@ def get_existing_contents(
     engine: CortexEngine,
     project: str | None = None,
     fact_type: str | None = None,
-) -> Set[str]:
+) -> set[str]:
     """Obtiene set de contenidos existentes para deduplicación rápida.
 
     Args:
@@ -160,12 +160,12 @@ def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
     # Serializar el contenido completo como un hash determinista
     hasher = hashlib.sha256()
     for row in rows:
-        hasher.update(f"{row[0]}|{row[1]}|{row[2]}|{row[3]}\n".encode("utf-8"))
+        hasher.update(f"{row[0]}|{row[1]}|{row[2]}|{row[3]}\n".encode())
     return hasher.hexdigest()
 
 
 def calculate_fact_diff(
-    existing: Set[str], candidates: list[dict], content_generator: Any
+    existing: set[str], candidates: list[dict], content_generator: Any
 ) -> list[tuple[str, dict]]:
     """Calcula qué hechos son nuevos comparándolos con lo existente."""
     results = []

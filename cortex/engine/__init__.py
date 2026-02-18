@@ -5,9 +5,13 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from pathlib import Path
-from typing import Optional, Any, AsyncIterator
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Optional
+
+if TYPE_CHECKING:
+    import sqlite3
 
 import aiosqlite
 import sqlite_vec
@@ -27,9 +31,9 @@ from cortex.temporal import now_iso
 logger = logging.getLogger("cortex")
 
 
-from cortex.facts.manager import FactManager
-from cortex.embeddings.manager import EmbeddingManager
 from cortex.consensus.manager import ConsensusManager
+from cortex.embeddings.manager import EmbeddingManager
+from cortex.facts.manager import FactManager
 
 
 class CortexEngine(SyncCompatMixin):
@@ -43,11 +47,11 @@ class CortexEngine(SyncCompatMixin):
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._auto_embed = auto_embed
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._embedder: LocalEmbedder | None = None
 
         # Composition layers
         self.facts = FactManager(self)
@@ -74,7 +78,7 @@ class CortexEngine(SyncCompatMixin):
         # For CLI usage, a fresh connection is safer to avoid async loop conflict.
         import sqlite3
         conn = sqlite3.connect(str(self._db_path), timeout=30)
-        
+
         # Enable vector extension if possible
         try:
             conn.enable_load_extension(True)
@@ -84,7 +88,7 @@ class CortexEngine(SyncCompatMixin):
             self._vec_available = True
         except (OSError, AttributeError):
             pass
-            
+
         return conn
 
     # ─── Connection ───────────────────────────────────────────────
@@ -157,7 +161,6 @@ class CortexEngine(SyncCompatMixin):
             await conn.executescript(stmt)
         await conn.commit()
 
-        from cortex.migrations.core import run_migrations_async
 
         await run_migrations_async(conn)
 

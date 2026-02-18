@@ -6,7 +6,6 @@
 """SQLite Graph Backend."""
 
 import logging
-from typing import Optional
 
 import aiosqlite
 
@@ -129,7 +128,7 @@ class SQLiteBackend(GraphBackend):
             )
             return cursor.lastrowid
 
-    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict:
         query_entities = "SELECT id, name, entity_type, project, mention_count FROM entities"
         params_entities = []
         if project:
@@ -213,7 +212,7 @@ class SQLiteBackend(GraphBackend):
             "stats": {"total_entities": total_entities, "total_relationships": total_rels},
         }
 
-    def get_graph_sync(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    def get_graph_sync(self, project: str | None = None, limit: int = 50) -> dict:
         if project:
             entity_rows = self.conn.execute(
                 "SELECT id, name, entity_type, project, mention_count "
@@ -273,7 +272,7 @@ class SQLiteBackend(GraphBackend):
             "stats": {"total_entities": total_entities, "total_relationships": total_rels},
         }
 
-    async def query_entity(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    async def query_entity(self, name: str, project: str | None = None) -> dict | None:
         if not name or not name.strip():
             return None
 
@@ -319,7 +318,7 @@ class SQLiteBackend(GraphBackend):
         ]
         return entity
 
-    def query_entity_sync(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    def query_entity_sync(self, name: str, project: str | None = None) -> dict | None:
         if not name or not name.strip():
             return None
         q = "SELECT id, name, entity_type, project, mention_count FROM entities WHERE name = ?"

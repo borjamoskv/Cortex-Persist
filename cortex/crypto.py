@@ -5,7 +5,6 @@ Implements L3 Application-Level Encryption using AES-GCM.
 
 import base64
 import os
-from typing import Optional
 
 try:
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -16,7 +15,7 @@ except ImportError:
 class Vault:
     """Secure Vault for storing sensitive facts."""
 
-    def __init__(self, key: Optional[bytes] = None):
+    def __init__(self, key: bytes | None = None):
         if not AESGCM:
             self._key = None
             return
@@ -67,7 +66,7 @@ class Vault:
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
         except Exception as e:
-            raise ValueError(f"Decryption failed: {e}")
+            raise ValueError(f"Decryption failed: {e}") from e
 
     @staticmethod
     def generate_key() -> str:

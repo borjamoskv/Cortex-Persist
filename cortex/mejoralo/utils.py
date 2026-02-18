@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .constants import STACK_MARKERS
 
@@ -16,7 +16,7 @@ def detect_stack(path: str | Path) -> str:
     return "unknown"
 
 
-def get_build_cmd(stack: str) -> Optional[list[str]]:
+def get_build_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "run", "build"],
         "python": ["python", "-m", "py_compile", "."],
@@ -25,7 +25,7 @@ def get_build_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def get_test_cmd(stack: str) -> Optional[list[str]]:
+def get_test_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "test"],
         "python": ["python", "-m", "pytest", "--tb=no", "-q"],
@@ -34,7 +34,7 @@ def get_test_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def get_lint_cmd(stack: str) -> Optional[list[str]]:
+def get_lint_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npx", "eslint", "."],
         "python": ["python", "-m", "ruff", "check", "."],
@@ -42,7 +42,7 @@ def get_lint_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def run_quiet(cmd: list[str], cwd: str) -> Dict[str, Any]:
+def run_quiet(cmd: list[str], cwd: str) -> dict[str, Any]:
     """Run a command quietly, capturing output."""
     try:
         proc = subprocess.run(

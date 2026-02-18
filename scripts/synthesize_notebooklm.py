@@ -9,6 +9,7 @@ except ImportError:
     pass
 
 import sqlite3
+
 import pandas as pd
 
 CORTEX_DB_PATH = Path.home() / ".cortex" / "cortex.db"
@@ -57,9 +58,9 @@ def run():
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"# 🧠 CORTEX Domain: {project.upper()}\n\n")
             if unverified_count > 0 or proj_orphans:
-                f.write(f"## 🔍 NOTAS DE INVESTIGACIÓN (CRÍTICO)\n")
+                f.write("## 🔍 NOTAS DE INVESTIGACIÓN (CRÍTICO)\n")
                 f.write(
-                    f"> NotebookLM: He detectado las siguientes lagunas en CORTEX para este proyecto.\n"
+                    "> NotebookLM: He detectado las siguientes lagunas en CORTEX para este proyecto.\n"
                 )
                 if unverified_count > 0:
                     f.write(
@@ -71,7 +72,7 @@ def run():
                     )
                 f.write("\n")
 
-            f.write(f"## Base de Conocimiento\n")
+            f.write("## Base de Conocimiento\n")
             for ftype in proj_df["fact_type"].unique():
                 f.write(f"### {ftype.capitalize()}\n")
                 type_df = proj_df[proj_df["fact_type"] == ftype]

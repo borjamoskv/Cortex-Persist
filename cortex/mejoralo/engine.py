@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 
@@ -43,7 +43,7 @@ class MejoraloEngine:
         project: str,
         score_before: int,
         score_after: int,
-        actions: Optional[List[str]] = None,
+        actions: list[str] | None = None,
     ) -> int:
         """
         Record a MEJORAlo audit session in the CORTEX ledger.
@@ -52,7 +52,7 @@ class MejoraloEngine:
 
     # ── History ──────────────────────────────────────────────────────
 
-    def history(self, project: str, limit: int = 20) -> List[Dict[str, Any]]:
+    def history(self, project: str, limit: int = 20) -> list[dict[str, Any]]:
         """Retrieve past MEJORAlo sessions from the ledger."""
         return get_history(self.engine, project, limit)
 

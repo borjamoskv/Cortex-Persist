@@ -5,8 +5,9 @@ import sys
 # Ensure we can import from local cortex
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from cortex.async_client import AsyncCortexClient
 from dotenv import load_dotenv
+
+from cortex.async_client import AsyncCortexClient
 
 load_dotenv()
 
@@ -27,7 +28,7 @@ async def seed_codex():
         return
 
     print("📜 Reading Codex...")
-    with open(CODEX_PATH, "r") as f:
+    with open(CODEX_PATH) as f:
         content = f.read()
 
     # Split into sections (naive parsing)

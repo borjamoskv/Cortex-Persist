@@ -6,12 +6,13 @@ Executes all notebook cells as a script. Generates:
   2. cortex_notebooklm_digest.md (Master Digest for NotebookLM)
 """
 
-import sqlite3
-import pandas as pd
 import json
+import sqlite3
 from datetime import datetime
 from pathlib import Path
+
 import matplotlib
+import pandas as pd
 
 matplotlib.use("Agg")  # headless
 import matplotlib.pyplot as plt
@@ -156,7 +157,7 @@ print("\n📝 Generando Master Digest para NotebookLM...")
 
 ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 doc = []
-doc.append(f"# 🧠 CORTEX MASTER KNOWLEDGE DIGEST\n")
+doc.append("# 🧠 CORTEX MASTER KNOWLEDGE DIGEST\n")
 doc.append(f"> *Auto-generado: {ts}*\n\n")
 
 doc.append("## INTRODUCCIÓN Y CONTEXTO DEL SISTEMA\n")
@@ -261,11 +262,11 @@ with open(MASTER_FILE, "w", encoding="utf-8") as f:
 
 conn.close()
 
-print(f"\n🎯 ¡Master Digest generado!")
+print("\n🎯 ¡Master Digest generado!")
 print(f"   Archivo: {MASTER_FILE}")
 print(f"   Tamaño:  {len(content):,} caracteres")
-print(f"\n📋 Siguientes pasos:")
-print(f"   1. Ve a https://notebooklm.google.com/")
-print(f"   2. Crea un cuaderno 'CORTEX Brain'")
+print("\n📋 Siguientes pasos:")
+print("   1. Ve a https://notebooklm.google.com/")
+print("   2. Crea un cuaderno 'CORTEX Brain'")
 print(f"   3. Sube '{MASTER_FILE}' como fuente")
-print(f"   4. ¡Dale a 'Generate Audio Overview'! 🎧")
+print("   4. ¡Dale a 'Generate Audio Overview'! 🎧")

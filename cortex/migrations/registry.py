@@ -11,14 +11,13 @@ from cortex.migrations.mig_consensus import (
     _migration_009_reputation_consensus,
 )
 from cortex.migrations.mig_graph import _migration_006_graph_memory
+from cortex.migrations.mig_ha import _migration_013_cluster_nodes
 from cortex.migrations.mig_ledger import (
     _migration_010_immutable_ledger,
     _migration_011_link_facts_to_tx,
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
-from cortex.migrations.mig_ha import _migration_013_cluster_nodes
-
 
 MIGRATIONS = [
     (1, "Add updated_at column", _migration_001_add_updated_at),

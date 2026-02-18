@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Optional
 
 from cortex.metrics import metrics
 
@@ -22,7 +21,7 @@ class ConsensusManager:
         fact_id: int,
         agent: str,
         value: int,
-        agent_id: Optional[str] = None,
+        agent_id: str | None = None,
     ) -> float:
         if agent_id:
             return await self.vote_v2(fact_id, agent_id, value)
@@ -78,7 +77,7 @@ class ConsensusManager:
         fact_id: int,
         agent_id: str,
         value: int,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> float:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")

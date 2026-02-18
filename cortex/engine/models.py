@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -16,14 +15,14 @@ class Fact:
     tags: list[str]
     confidence: str
     valid_from: str
-    valid_until: Optional[str]
-    source: Optional[str]
+    valid_until: str | None
+    source: str | None
     meta: dict
     created_at: str
     updated_at: str
     consensus_score: float = 1.0
-    tx_id: Optional[int] = None
-    hash: Optional[str] = None
+    tx_id: int | None = None
+    hash: str | None = None
 
     def is_active(self) -> bool:
         return self.valid_until is None

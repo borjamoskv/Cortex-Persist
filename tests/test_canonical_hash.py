@@ -7,13 +7,13 @@ Covers:
 - Time travel reconstruction
 """
 
-import pytest
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from cortex.canonical import canonical_json, compute_tx_hash, compute_tx_hash_v1
 from cortex.temporal import time_travel_filter
-
 
 # ─── Canonical JSON ──────────────────────────────────────────────
 

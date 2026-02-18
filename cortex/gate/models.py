@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ActionLevel(str, Enum):
@@ -42,22 +42,22 @@ class PendingAction:
     action_id: str
     level: ActionLevel
     description: str
-    command: Optional[List[str]] = None
-    project: Optional[str] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    command: list[str] | None = None
+    project: str | None = None
+    context: dict[str, Any] = field(default_factory=dict)
     status: ActionStatus = ActionStatus.PENDING
     created_at: float = field(default_factory=time.time)
-    approved_at: Optional[float] = None
-    executed_at: Optional[float] = None
+    approved_at: float | None = None
+    executed_at: float | None = None
     hmac_challenge: str = ""
-    operator_id: Optional[str] = None
-    result: Optional[Dict[str, Any]] = None
+    operator_id: str | None = None
+    result: dict[str, Any] | None = None
 
     def is_expired(self, timeout_seconds: float) -> bool:
         """Check if the action has exceeded its timeout."""
         return time.time() - self.created_at > timeout_seconds
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary for API responses and audit log."""
         return {
             "action_id": self.action_id,

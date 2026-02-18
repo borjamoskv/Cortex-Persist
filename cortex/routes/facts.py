@@ -4,7 +4,6 @@ Modularized fact operations: store, recall, deprecate, vote.
 """
 
 import logging
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -45,13 +44,13 @@ async def store_fact(
     )
 
 
-@router.get("/v1/projects/{project}/facts", response_model=List[FactResponse])
+@router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])
 async def recall_project(
     project: str,
-    limit: Optional[int] = Query(None, ge=1, le=1000),
+    limit: int | None = Query(None, ge=1, le=1000),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
-) -> List[FactResponse]:
+) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
     if project != auth.tenant_id:
         raise HTTPException(status_code=403, detail="Forbidden: Namespace mismatch")
@@ -112,10 +111,10 @@ async def cast_vote(
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except Exception:
         logger.exception("Unexpected error during voting for fact #%d", fact_id)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from None
 
 
 @router.post("/v1/facts/{fact_id}/vote-v2", response_model=VoteResponse)
@@ -155,18 +154,18 @@ async def cast_vote_v2(
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
     except Exception:
         logger.exception("RWC Vote failed")
-        raise HTTPException(status_code=500, detail="Internal voting error")
+        raise HTTPException(status_code=500, detail="Internal voting error") from None
 
 
-@router.get("/v1/facts/{fact_id}/votes", response_model=List[dict])
+@router.get("/v1/facts/{fact_id}/votes", response_model=list[dict])
 async def get_votes(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
-) -> List[dict]:
+) -> list[dict]:
     """Retrieve all votes for a specific fact (Tenant Isolated)."""
     fact = await engine.get_fact(fact_id)
     if not fact:

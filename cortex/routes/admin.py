@@ -3,7 +3,6 @@ CORTEX v4.0 - Admin Router.
 """
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from starlette.concurrency import run_in_threadpool
@@ -22,7 +21,7 @@ logger = logging.getLogger("uvicorn.error")
 @router.get("/v1/projects/{project}/export")
 async def export_project(
     project: str,
-    path: Optional[str] = Query(None),
+    path: str | None = Query(None),
     fmt: str = Query("json", alias="format"),
 ) -> dict:
     """Export a project to a JSON file (with path validation)."""
@@ -43,7 +42,7 @@ async def export_project(
                     status_code=400, detail="Path must be relative and within the workspace"
                 )
         except (ValueError, RuntimeError) as e:
-            raise HTTPException(status_code=400, detail=f"Invalid path: {e}")
+            raise HTTPException(status_code=400, detail=f"Invalid path: {e}") from None
 
     try:
         # export_to_json is sync, uses its own connection
@@ -51,7 +50,7 @@ async def export_project(
         return {"message": f"Exported project '{project}' to {out_path}", "path": str(out_path)}
     except Exception as e:
         logger.error("Export failed: %s", e)
-        raise HTTPException(status_code=500, detail="Export failed")
+        raise HTTPException(status_code=500, detail="Export failed") from None
 
 
 @router.get("/v1/status", response_model=StatusResponse)
@@ -74,7 +73,7 @@ async def status(
         )
     except Exception as e:
         logger.error("Status unavailable: %s", e)
-        raise HTTPException(status_code=500, detail="Status unavailable")
+        raise HTTPException(status_code=500, detail="Status unavailable") from None
 
 
 @router.post("/v1/admin/keys")

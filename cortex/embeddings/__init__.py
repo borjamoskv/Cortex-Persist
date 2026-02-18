@@ -36,7 +36,7 @@ class LocalEmbedder:
     def __init__(
         self,
         model_name: str = DEFAULT_MODEL,
-        cache_dir: Optional[Path] = None,
+        cache_dir: Path | None = None,
     ):
         self._model_name = model_name
         self._cache_dir = cache_dir or DEFAULT_CACHE_DIR
@@ -56,11 +56,11 @@ class LocalEmbedder:
                 cache_folder=str(self._cache_dir),
             )
             logger.info("Model loaded. Dimension: %d", EMBEDDING_DIM)
-        except ImportError:
+        except ImportError as exc:
             raise RuntimeError(
                 "sentence-transformers not installed. "
                 "Run: pip install sentence-transformers onnxruntime"
-            )
+            ) from exc
 
     @lru_cache(maxsize=_CACHE_SIZE)
     def _embed_cached(self, text: str) -> list[float]:

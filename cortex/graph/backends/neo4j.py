@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import Optional
 
 from cortex.config import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
@@ -65,7 +64,7 @@ class Neo4jBackend(GraphBackend):
             record = result.single()
             return str(record["id"]) if record else ""
 
-    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict:
         if not self._initialized:
             return {"entities": [], "relationships": []}
 
@@ -91,7 +90,7 @@ class Neo4jBackend(GraphBackend):
 
         return {"entities": entities, "relationships": []}
 
-    async def query_entity(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    async def query_entity(self, name: str, project: str | None = None) -> dict | None:
         if not self._initialized:
             return None
 

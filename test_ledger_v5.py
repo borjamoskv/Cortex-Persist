@@ -1,7 +1,8 @@
 import asyncio
 import os
-from cortex.engine import CortexEngine
+
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.engine import CortexEngine
 
 
 async def test_ledger():

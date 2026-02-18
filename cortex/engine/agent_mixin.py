@@ -1,7 +1,9 @@
 """Agent management mixin."""
 import uuid
+from typing import Any
+
 import aiosqlite
-from typing import Optional, Dict, Any, List
+
 
 class AgentMixin:
     """Mixin for agent management operations."""
@@ -21,14 +23,14 @@ class AgentMixin:
                 await conn.rollback()
                 raise e
 
-    async def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
+    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute("SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?", (agent_id,)) as cursor:
                 row = await cursor.fetchone()
                 return dict(row) if row else None
 
-    async def list_agents(self, tenant_id: str) -> List[Dict[str, Any]]:
+    async def list_agents(self, tenant_id: str) -> list[dict[str, Any]]:
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute("SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE tenant_id = ?", (tenant_id,)) as cursor:

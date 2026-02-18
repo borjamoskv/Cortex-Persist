@@ -8,8 +8,9 @@ sys.path.append(str(Path.cwd()))
 
 async def verify_ledger_api():
     print("--- Verifying Ledger API & Metrics ---")
-    from cortex.api import app
     from fastapi.testclient import TestClient
+
+    from cortex.api import app
 
     client = TestClient(app)
 
@@ -34,7 +35,7 @@ async def verify_ledger_api():
 async def verify_mcp_v2():
     print("\n--- Verifying MCP v2 ---")
     try:
-        from cortex.mcp_server_v2 import create_mcp_server, MCPServerConfig
+        from cortex.mcp_server_v2 import MCPServerConfig, create_mcp_server
 
         config = MCPServerConfig(db_path="~/.cortex/cortex_test.db")
         mcp = create_mcp_server(config)

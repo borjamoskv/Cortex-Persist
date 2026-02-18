@@ -6,13 +6,13 @@ Parte de la Arquitectura de Soberanía Wave 5.
 """
 
 import hashlib
-import json
 import logging
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime, timezone
+from typing import Any
 
 import aiosqlite
+
 from cortex.consensus.merkle import MerkleTree, compute_merkle_root
 
 logger = logging.getLogger("cortex.consensus.ledger")
@@ -28,7 +28,7 @@ class VoteEntry:
     prev_hash: str
     hash: str
     timestamp: str
-    signature: Optional[str] = None
+    signature: str | None = None
 
 
 class ImmutableVoteLedger:
@@ -37,7 +37,7 @@ class ImmutableVoteLedger:
     Garantiza la inmutabilidad de los votos mediante encadenamiento de hashes SHA-256.
     Protocolo: MEJORAlo God Mode 7.3 - Wave 5 Structural Correction
     """
-    
+
     GENESIS_HASH = "0" * 64
     MERKLE_BATCH_SIZE = 1000
 
@@ -64,19 +64,19 @@ class ImmutableVoteLedger:
             pass
 
     async def append_vote(
-        self, 
-        fact_id: int, 
-        agent_id: str, 
-        vote: int, 
-        vote_weight: float = 1.0, 
-        signature: Optional[str] = None
+        self,
+        fact_id: int,
+        agent_id: str,
+        vote: int,
+        vote_weight: float = 1.0,
+        signature: str | None = None
     ) -> VoteEntry:
         """
         Añade un voto de forma segura y sellada.
         """
         timestamp = datetime.now(timezone.utc).isoformat()
         conn = await self._get_conn()
-        
+
         should_commit = hasattr(self._db, "acquire")
         if should_commit:
             await conn.execute("BEGIN IMMEDIATE")
@@ -98,9 +98,9 @@ class ImmutableVoteLedger:
                 """,
                 (fact_id, agent_id, vote, vote_weight, prev_hash, entry_hash, timestamp, signature)
             )
-            
+
             vote_id = cursor.lastrowid
-            
+
             if should_commit:
                 await conn.commit()
 
@@ -120,7 +120,7 @@ class ImmutableVoteLedger:
         finally:
             await self._release_conn(conn)
 
-    async def verify_chain_integrity(self) -> Dict[str, Any]:
+    async def verify_chain_integrity(self) -> dict[str, Any]:
         """
         Audita toda la cadena de votos.
         """
@@ -132,29 +132,29 @@ class ImmutableVoteLedger:
                 "FROM vote_ledger ORDER BY id ASC"
             )
             rows = await cursor.fetchall()
-            
+
             expected_prev = self.GENESIS_HASH
             for row in rows:
                 v_id, p_hash, c_hash, f_id, a_id, v_val, weight, ts = row
                 if p_hash != expected_prev:
                     violations.append({
-                        "vote_id": v_id, 
-                        "type": "CHAIN_BREAK", 
-                        "expected_prev": expected_prev, 
+                        "vote_id": v_id,
+                        "type": "CHAIN_BREAK",
+                        "expected_prev": expected_prev,
                         "actual_prev": p_hash
                     })
-                
+
                 actual_hash = self._compute_hash(p_hash, f_id, a_id, v_val, weight, ts)
                 if actual_hash != c_hash:
                     violations.append({
-                        "vote_id": v_id, 
-                        "type": "DATA_TAMPERING", 
-                        "expected_hash": c_hash, 
+                        "vote_id": v_id,
+                        "type": "DATA_TAMPERING",
+                        "expected_hash": c_hash,
                         "actual_hash": actual_hash
                     })
-                
+
                 expected_prev = c_hash
-                
+
             return {
                 "valid": len(violations) == 0,
                 "violations": violations,
@@ -175,16 +175,16 @@ class ImmutableVoteLedger:
         if count >= self.MERKLE_BATCH_SIZE:
             await self._create_checkpoint_internal(conn)
 
-    async def create_checkpoint(self) -> Optional[str]:
+    async def create_checkpoint(self) -> str | None:
         """Dispara manualmente un punto de control."""
         conn = await self._get_conn()
         try:
             should_commit = hasattr(self._db, "acquire")
             if should_commit:
                 await conn.execute("BEGIN IMMEDIATE")
-            
+
             root = await self._create_checkpoint_internal(conn)
-            
+
             if should_commit:
                 await conn.commit()
             return root
@@ -195,7 +195,7 @@ class ImmutableVoteLedger:
         finally:
             await self._release_conn(conn)
 
-    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> Optional[str]:
+    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> str | None:
         """Lógica interna de creación de punto de control."""
         async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
             row = await cursor.fetchone()
@@ -225,7 +225,7 @@ class ImmutableVoteLedger:
         logger.info(f"Punto de control Merkle creado: {start_id}-{end_id} -> {root_hash}")
         return root_hash
 
-    async def verify_merkle_roots(self) -> List[Dict[str, Any]]:
+    async def verify_merkle_roots(self) -> list[dict[str, Any]]:
         """Verifica todas las raíces Merkle almacenadas."""
         results = []
         conn = await self._get_conn()

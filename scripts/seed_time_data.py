@@ -1,14 +1,14 @@
-import sys
 import os
 import random
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Ensure we can import from cortex
 sys.path.append(os.getcwd())
 
-from cortex.timing import TimingTracker
 from cortex.engine import CortexEngine
+from cortex.timing import TimingTracker
 
 # Configuration
 DB_PATH = Path.home() / ".cortex/cortex.db"

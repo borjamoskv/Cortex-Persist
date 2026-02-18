@@ -3,6 +3,7 @@ Generate CORTEX API Key directly via AuthManager.
 """
 
 import os
+
 from cortex.auth import AuthManager
 
 # Ensure we use the default DB path

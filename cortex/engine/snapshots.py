@@ -4,7 +4,6 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 import aiosqlite
 
@@ -90,13 +89,13 @@ class SnapshotManager:
             size_mb=size_mb,
         )
 
-    async def list_snapshots(self) -> List[SnapshotRecord]:
+    async def list_snapshots(self) -> list[SnapshotRecord]:
         """List all available snapshots in the snapshot directory."""
         snapshots = []
         for meta_file in self.snapshot_dir.glob("*.json"):
             try:
                 # small files, sync is okay
-                with open(meta_file, "r") as f:
+                with open(meta_file) as f:
                     data = json.load(f)
                     # Check if the DB file actually exists
                     db_file = Path(data["path"])

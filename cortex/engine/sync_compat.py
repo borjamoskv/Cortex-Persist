@@ -9,12 +9,11 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3 as _sqlite3
-from typing import Optional
 
 import sqlite_vec
 
-from cortex.temporal import now_iso
 from cortex.engine.models import Fact
+from cortex.temporal import now_iso
 
 logger = logging.getLogger("cortex")
 
@@ -126,7 +125,7 @@ class SyncCompatMixin:
     def search_sync(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 5,
     ) -> list:
         """Semantic vector search with text fallback (sync)."""
@@ -159,7 +158,7 @@ class SyncCompatMixin:
     def hybrid_search_sync(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 10,
         vector_weight: float = 0.6,
         text_weight: float = 0.4,
@@ -188,14 +187,14 @@ class SyncCompatMixin:
 
     # ─── Graph ──────────────────────────────────────────────────
 
-    def graph_sync(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    def graph_sync(self, project: str | None = None, limit: int = 50) -> dict:
         """Retrieve the graph synchronously."""
         from cortex.graph.backends.sqlite import SQLiteBackend
 
         conn = self._get_sync_conn()
         return SQLiteBackend(conn).get_graph_sync(project=project, limit=limit)
 
-    def query_entity_sync(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    def query_entity_sync(self, name: str, project: str | None = None) -> dict | None:
         """Query an entity and its connections synchronously."""
         from cortex.graph.backends.sqlite import SQLiteBackend
 
@@ -277,7 +276,7 @@ class SyncCompatMixin:
         # Note: Auto-checkpoint is skipped in sync mode for now to avoid complexity
         return tx_id
 
-    def deprecate_sync(self, fact_id: int, reason: Optional[str] = None) -> bool:
+    def deprecate_sync(self, fact_id: int, reason: str | None = None) -> bool:
         """Synchronous version of deprecate."""
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
@@ -312,7 +311,7 @@ class SyncCompatMixin:
     def recall_sync(
         self,
         project: str,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
         """Synchronous version of recall."""
@@ -343,7 +342,7 @@ class SyncCompatMixin:
     def history_sync(
         self,
         project: str,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> list[Fact]:
         """Synchronous version of history."""
         from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN

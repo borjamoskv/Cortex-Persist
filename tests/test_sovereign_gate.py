@@ -11,11 +11,11 @@ import pytest
 from cortex.sovereign_gate import (
     ActionLevel,
     ActionStatus,
-    GatePolicy,
     GateError,
     GateExpired,
     GateInvalidSignature,
     GateNotApproved,
+    GatePolicy,
     SovereignGate,
     reset_gate,
 )
