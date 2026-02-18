@@ -26,6 +26,8 @@ from cortex.engine.agent_mixin import AgentMixin
 
 logger = logging.getLogger("cortex.engine.async")
 
+TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
+
 class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     """
     Native async database engine for CORTEX.
@@ -124,16 +126,16 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 d["meta"] = json.loads(d["meta"]) if d.get("meta") else {}
                 return d
 
-    async def vote(self, fact_id: int, agent: str, value: int, agent_id: Optional[str] = None, signature: Optional[str] = None) -> float:
+    async def vote(self, fact_id: int, agent: str, value: int, signature: Optional[str] = None) -> float:
         """Vote with immutable ledger logging and reputation-weighted consensus."""
         if value not in (-1, 0, 1):
              raise ValueError("Vote must be -1, 0, or 1")
              
         async with self.session() as conn:
-            await conn.execute("BEGIN IMMEDIATE")
+            await conn.execute(TX_BEGIN_IMMEDIATE)
             try:
-                # 1. Resolve agent_id
-                target_agent_id = agent_id or agent
+                # 1. Resolve agent_id (agent parameter is the identifier)
+                target_agent_id = agent
                 
                 async with conn.execute("SELECT reputation_score FROM agents WHERE id = ?", (target_agent_id,)) as cursor:
                     row = await cursor.fetchone()
@@ -186,7 +188,13 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                     score = 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
                 
                 # Update fact
-                conf = "verified" if score >= 1.5 else ("disputed" if score <= 0.5 else "stated")
+                if score >= 1.5:
+                    conf = "verified"
+                elif score <= 0.5:
+                    conf = "disputed"
+                else:
+                    conf = "stated"
+
                 await conn.execute(
                     "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
                     (score, conf, fact_id)

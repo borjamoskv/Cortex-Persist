@@ -220,14 +220,33 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 
 
 @app.get("/", tags=["health"])
-async def root_node() -> dict:
-    return {"service": "cortex", "version": "4.0.0a1", "status": "operational"}
+async def root_node(request: Request) -> dict:
+    from cortex.i18n import get_trans
+    
+    # Default to 'es' (Spanish) if no header is provided
+    lang = request.headers.get("Accept-Language", "es")
+    
+    return {
+        "service": "cortex",
+        "version": "4.0.0a1",
+        "status": get_trans("system_operational", lang),
+        "description": get_trans("info_service_desc", lang)
+    }
 
 
 @app.get("/health", tags=["health"])
-async def health_check() -> dict:
+async def health_check(request: Request) -> dict:
     """Simple status check for load balancers."""
-    return {"status": "healthy", "engine": "online", "version": "4.0.0a1"}
+    from cortex.i18n import get_trans
+    
+    # Default to 'es' (Spanish)
+    lang = request.headers.get("Accept-Language", "es")
+    
+    return {
+        "status": get_trans("system_healthy", lang),
+        "engine": get_trans("engine_online", lang),
+        "version": "4.0.0a1"
+    }
 
 
 @app.get("/metrics", tags=["health"])

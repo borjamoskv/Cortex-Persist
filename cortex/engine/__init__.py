@@ -47,6 +47,7 @@ class CortexEngine(SyncCompatMixin):
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
+        self._embedder: Optional[LocalEmbedder] = None
 
         # Composition layers
         self.facts = FactManager(self)
@@ -58,6 +59,33 @@ class CortexEngine(SyncCompatMixin):
         """Proporciona una sesión transaccional (conexión) válida."""
         conn = await self.get_conn()
         yield conn
+
+    def _get_embedder(self) -> LocalEmbedder:
+        """Protocol requirement for SearchMixin (Sync/Async)."""
+        if self._embedder is None:
+            self._embedder = LocalEmbedder()
+        return self._embedder
+
+    def _get_sync_conn(self) -> sqlite3.Connection:
+        """Protocol requirement for SyncCompatMixin (Sync)."""
+        # This engine legacy wrapper actually uses asyncio for everything,
+        # but SyncCompatMixin needs a raw sqlite3 connection for sync fallback.
+        # We create a transient one or reuse if possible.
+        # For CLI usage, a fresh connection is safer to avoid async loop conflict.
+        import sqlite3
+        conn = sqlite3.connect(str(self._db_path), timeout=30)
+        
+        # Enable vector extension if possible
+        try:
+            conn.enable_load_extension(True)
+            import sqlite_vec
+            conn.load_extension(sqlite_vec.loadable_path())
+            conn.enable_load_extension(False)
+            self._vec_available = True
+        except (OSError, AttributeError):
+            pass
+            
+        return conn
 
     # ─── Connection ───────────────────────────────────────────────
 
