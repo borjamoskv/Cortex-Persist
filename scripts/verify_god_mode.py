@@ -1,10 +1,7 @@
-import requests
 import os
 import sys
 
 import requests
-import os
-import sys
 
 # Configuration with env var overrides
 API_PORT = os.getenv("CORTEX_PORT", "8484")

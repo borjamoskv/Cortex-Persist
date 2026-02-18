@@ -4,9 +4,9 @@ import pytest
 
 from cortex.engine import CortexEngine
 from cortex.graph import (
+    SQLiteBackend,
     detect_relationships,
     extract_entities,
-    SQLiteBackend,
 )
 
 

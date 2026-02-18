@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 from cortex.config import (
     MCP_MAX_CONTENT_LENGTH,
@@ -61,7 +60,7 @@ class MCPGuard:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> None:
         """Validate inputs for cortex_store. Raises ValueError on violation."""
         # Project

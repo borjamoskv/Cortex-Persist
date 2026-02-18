@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
-
+from typing import Any
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.search import SearchResult, semantic_search, text_search
@@ -32,13 +31,13 @@ class FactManager:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         confidence: str = "stated",
-        source: Optional[str] = None,
-        meta: Optional[Dict[str, Any]] = None,
-        valid_from: Optional[str] = None,
+        source: str | None = None,
+        meta: dict[str, Any] | None = None,
+        valid_from: str | None = None,
         commit: bool = True,
-        tx_id: Optional[int] = None,
+        tx_id: int | None = None,
     ) -> int:
         if not project or not project.strip():
             raise ValueError("project cannot be empty")
@@ -101,9 +100,9 @@ class FactManager:
     async def search(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 5,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
         **kwargs,
     ) -> list[SearchResult]:
         if not query or not query.strip():
@@ -120,7 +119,7 @@ class FactManager:
         return await text_search(conn, query, project, limit=top_k, **kwargs)
 
     async def recall(
-        self, project: str, limit: Optional[int] = None, offset: int = 0
+        self, project: str, limit: int | None = None, offset: int = 0
     ) -> list[Fact]:
         conn = await self.engine.get_conn()
         query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.project = ? AND f.valid_until IS NULL ORDER BY (f.consensus_score * 0.8 + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, f.fact_type, f.created_at DESC"
@@ -138,9 +137,9 @@ class FactManager:
     async def update(
         self,
         fact_id: int,
-        content: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        content: str | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
         conn = await self.engine.get_conn()
         cursor = await conn.execute(
@@ -170,7 +169,7 @@ class FactManager:
         await self.deprecate(fact_id, reason=f"updated_by_{new_id}")
         return new_id
 
-    async def deprecate(self, fact_id: int, reason: Optional[str] = None) -> bool:
+    async def deprecate(self, fact_id: int, reason: str | None = None) -> bool:
         conn = await self.engine.get_conn()
         ts = now_iso()
         cursor = await conn.execute(
@@ -198,7 +197,7 @@ class FactManager:
             return True
         return False
 
-    async def history(self, project: str, as_of: Optional[str] = None) -> list[Fact]:
+    async def history(self, project: str, as_of: str | None = None) -> list[Fact]:
         conn = await self.engine.get_conn()
         if as_of:
             clause, params = build_temporal_filter_params(as_of, table_alias="f")

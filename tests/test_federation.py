@@ -3,8 +3,9 @@
 Tests shard isolation, cross-shard search, tenant ID sanitization, and factory.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from cortex.federation import FederatedEngine, get_engine
 

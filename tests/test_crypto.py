@@ -1,6 +1,7 @@
 """Tests for L3 Vaults."""
 
 import pytest
+
 from cortex.crypto import Vault
 
 try:

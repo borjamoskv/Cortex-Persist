@@ -5,8 +5,8 @@ El corazón del bucle perpetuo. Monitorea proyectos y dispara mejoras automátic
 """
 
 import argparse
-from datetime import datetime
 import random
+from datetime import datetime
 
 
 def pulse(dry_run=False):
@@ -21,7 +21,7 @@ def pulse(dry_run=False):
         if decay_score > 40:
             print(f"    🚨 TRIGGER: High Decay ({decay_score}). Initiating MEJORAlo wave...")
             if not dry_run:
-                print(f"       (Execution simulated in v7.1 initial release)")
+                print("       (Execution simulated in v7.1 initial release)")
 
 
 def calculate_decay(project_name):

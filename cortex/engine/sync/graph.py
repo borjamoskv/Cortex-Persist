@@ -3,21 +3,21 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+
 from cortex.temporal import now_iso
 
 logger = logging.getLogger("cortex.engine.sync.graph")
 
 
 class SyncGraphMixin:
-    def graph_sync(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    def graph_sync(self, project: str | None = None, limit: int = 50) -> dict:
         """Retrieve the graph synchronously."""
         from cortex.graph.backends.sqlite import SQLiteBackend
 
         conn = self._get_sync_conn()
         return SQLiteBackend(conn).get_graph_sync(project=project, limit=limit)
 
-    def query_entity_sync(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    def query_entity_sync(self, name: str, project: str | None = None) -> dict | None:
         """Query an entity and its connections synchronously."""
         from cortex.graph.backends.sqlite import SQLiteBackend
 

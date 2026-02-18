@@ -1,7 +1,6 @@
 """Graph Storage Backends - Base Class."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 
 class GraphBackend(ABC):
@@ -23,11 +22,11 @@ class GraphBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict:
+    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict:
         pass
 
     @abstractmethod
-    async def query_entity(self, name: str, project: Optional[str] = None) -> Optional[dict]:
+    async def query_entity(self, name: str, project: str | None = None) -> dict | None:
         pass
 
     @abstractmethod

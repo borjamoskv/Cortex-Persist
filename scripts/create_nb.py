@@ -12,7 +12,8 @@ Usage:  python create_nb.py
 Output: notebooks/cortex_notebooklm.ipynb
 """
 
-import json, textwrap
+import json
+import textwrap
 
 
 def cell_md(lines: str):

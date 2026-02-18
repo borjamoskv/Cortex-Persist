@@ -1,6 +1,6 @@
 import os
-import subprocess
 import re
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
 # Constants
@@ -74,11 +74,11 @@ def measure_architecture():
     for path in iter_files(extensions=[".py"]):
         total_files += 1
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 lines = len(f.readlines())
                 if lines > 300:
                     files_over_limit.append((path, lines))
-        except (OSError, IOError):
+        except OSError:
             pass
 
     if not total_files:
@@ -98,7 +98,7 @@ def measure_security():
     hits = 0
     for path in iter_files(extensions=[".py", ".js", ".html"]):
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 content = f.read()
                 lines = content.splitlines()
                 for i, line in enumerate(lines):
@@ -111,11 +111,11 @@ def measure_security():
                                 continue
                             if "innerHTML" in line and "AsciiEffect.js" in path: # Three.js lib
                                 continue
-                                
+
                             hits += 1
                             print(f"  Security Risk: {p} in {path}:{i+1}")
         except: pass
-    
+
     score = 1.0 - (hits * 0.1)
     return max(0.0, score)
 
@@ -131,7 +131,7 @@ def measure_complexity():
     complexity_hits = 0
     for path in iter_files(extensions=[".py"]):
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 lines = f.readlines()
                 current_func_lines = 0
                 in_func = False
@@ -151,7 +151,7 @@ def measure_complexity():
                         if current_func_lines > 50:
                             complexity_hits += 1
                             in_func = False
-        except (OSError, IOError):
+        except OSError:
             pass
 
     score = 1.0 - (complexity_hits * 0.05)
@@ -164,14 +164,14 @@ def measure_psi():
     hits = 0
     for path in iter_files(extensions=[".py", ".md", ".txt"]):
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 content = f.read()
                 for term in psi_terms:
                     count = content.count(term)
                     if count > 0:
                         hits += count
                         # print(f"  Psi Hit: {term} in {path}")
-        except (OSError, IOError):
+        except OSError:
             pass
 
     print(f"  Psi Markers found: {hits}")

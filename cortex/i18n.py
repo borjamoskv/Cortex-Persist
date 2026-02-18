@@ -6,11 +6,10 @@ Default: English (en)
 Supported: Spanish (es), Basque (eu)
 """
 
-from typing import Dict
 
 # Dictionary of translations
 # Structure: { key: { lang: translation } }
-TRANSLATIONS: Dict[str, Dict[str, str]] = {
+TRANSLATIONS: dict[str, dict[str, str]] = {
     # System Status
     "system_operational": {
         "en": "operational",
@@ -27,7 +26,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "es": "en línea",
         "eu": "konektatuta",
     },
-    
+
     # Errors
     "error_too_many_requests": {
         "en": "Too Many Requests. Please slow down.",
@@ -66,9 +65,9 @@ def get_trans(key: str, lang: str = "en") -> str:
     """
     # Normalize lang code (e.g. 'es-ES' -> 'es')
     lang_code = lang.split("-")[0].lower()
-    
+
     entry = TRANSLATIONS.get(key)
     if not entry:
         return key  # Return key if not found
-    
+
     return entry.get(lang_code, entry.get("en", key))

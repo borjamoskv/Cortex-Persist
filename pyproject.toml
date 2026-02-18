@@ -65,5 +65,9 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
-ignore = ["E501"]
+ignore = ["E501", "B008", "W291", "W293"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["E402", "F821"]
+"cortex/**/__init__.py" = ["F401"]
 

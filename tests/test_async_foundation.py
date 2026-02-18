@@ -6,13 +6,13 @@ Verifies CortexConnectionPool and AsyncCortexEngine.
 import asyncio
 import os
 import tempfile
-import pytest
+
 import aiosqlite
+import pytest
 
 from cortex.connection_pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 from cortex.exceptions import FactNotFound
-
 from cortex.schema import ALL_SCHEMA
 
 # Setup simplistic schema for testing
@@ -112,26 +112,26 @@ async def test_engine_crud(engine):
     fid = await engine.store("test-proj", "Hello Async World", fact_type="test")
     assert fid > 0
     print(f"Fact stored with ID: {fid}")
-    
+
     # Retrieve
     print(f"Retrieving fact #{fid}...")
     fact = await engine.retrieve(fid)
     assert fact["content"] == "Hello Async World"
     assert fact["project"] == "test-proj"
     print("Fact retrieved successfully")
-    
+
     # Search
     print("Searching for 'Async'...")
     results = await engine.search("Async", project="test-proj")
     assert len(results) == 1
     assert results[0].fact_id == fid
     print("Search successful")
-    
+
     # Delete
     print(f"Deleting fact #{fid}...")
     assert await engine.delete_fact(fid)
     print("Fact deleted")
-    
+
     # Verify missing
     print("Verifying fact is missing...")
     with pytest.raises(FactNotFound):

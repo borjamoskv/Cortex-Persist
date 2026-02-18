@@ -1,8 +1,7 @@
 import asyncio
-import logging
-import shutil
 import uuid
 from pathlib import Path
+
 
 # Simplified logging for robustness
 def log(msg):
@@ -11,21 +10,22 @@ def log(msg):
 from cortex.connection_pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 
+
 async def simulate_consensus():
     # 1. Setup Sandbox
     # Use unique DB to avoid disk I/O errors from locks
     run_id = str(uuid.uuid4())[:8]
     db_path = Path(f"test_consensus_{run_id}.db")
-    
-    log(f"🦅 SOVEREIGN CONSENSUS SIMULATION v1.5 (GOD MODE FINAL PATCH)")
+
+    log("🦅 SOVEREIGN CONSENSUS SIMULATION v1.5 (GOD MODE FINAL PATCH)")
     print(f"📦 Database: {db_path}")
     print("-" * 40)
-    
+
     # 2. Init Storage
     pool = CortexConnectionPool(str(db_path))
     await pool.initialize()
     engine = AsyncCortexEngine(pool, str(db_path))
-    
+
     # Init Schema (Minimal for sim)
     async with engine.session() as conn:
         from cortex.schema import ALL_SCHEMA
@@ -53,7 +53,7 @@ async def simulate_consensus():
             "agent_b": 0.2,
             "agent_c": 0.5
         }
-        
+
         async with engine.session() as conn:
             for name, score in agents.items():
                 await conn.execute(
@@ -65,19 +65,19 @@ async def simulate_consensus():
 
         # 5. Vote
         print("\n[Step 2] Executing Consensus Round...")
-        
+
         s1 = await engine.vote(fact_id, "agent_a", 1)
         print(f"🗳️ Agent A (+1) -> Score: {s1}")
-        
+
         s2 = await engine.vote(fact_id, "agent_b", -1)
         print(f"🗳️ Agent B (-1) -> Score: {s2}")
-        
+
         s3 = await engine.vote(fact_id, "agent_c", 1)
         print(f"🗳️ Agent C (+1) -> Score: {s3}")
 
         # 6. Verify
         print("\n[Step 3] Verifying Ledger Constraints...")
-        
+
         fact = await engine.get_fact(fact_id)
         if fact:
             print(f"📊 Final Score: {fact['consensus_score']}")

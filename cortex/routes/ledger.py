@@ -55,7 +55,7 @@ async def get_ledger_status(
         )
     except Exception as e:
         logger.exception("Ledger integrity check failed")
-        raise HTTPException(status_code=500, detail=f"Integrity check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Integrity check failed: {str(e)}") from None
 
 
 @router.post("/checkpoint", response_model=CheckpointResponse)
@@ -79,7 +79,7 @@ async def create_checkpoint(
             )
     except Exception as e:
         logger.exception("Merkle checkpoint creation failed")
-        raise HTTPException(status_code=500, detail=f"Checkpoint failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Checkpoint failed: {str(e)}") from None
 
 
 @router.get("/verify", response_model=LedgerReportResponse)

@@ -4,7 +4,6 @@ CORTEX v4.0 — SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -33,7 +32,7 @@ async def gate_status(
     return GateStatusResponse(**gate.get_status())
 
 
-@router.get("/pending", response_model=List[GateActionResponse])
+@router.get("/pending", response_model=list[GateActionResponse])
 async def list_pending(
     _=Depends(require_permission("read")),
 ):
@@ -59,11 +58,11 @@ async def approve_action(
         action = gate._get_action(action_id)
         return GateActionResponse(**action.to_dict())
     except GateExpired as e:
-        raise HTTPException(status_code=410, detail=str(e))
+        raise HTTPException(status_code=410, detail=str(e)) from None
     except GateInvalidSignature as e:
-        raise HTTPException(status_code=403, detail=str(e))
+        raise HTTPException(status_code=403, detail=str(e)) from None
     except GateError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
 
 
 @router.post("/{action_id}/deny")
@@ -77,7 +76,7 @@ async def deny_action(
         gate.deny(action_id, reason="Denied via API")
         return {"status": "denied", "action_id": action_id}
     except GateError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
 
 
 @router.get("/audit")

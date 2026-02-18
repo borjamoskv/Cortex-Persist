@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+
 from cortex.api import app
 from cortex.auth import AuthResult
 from cortex.config import DB_PATH
@@ -95,7 +96,7 @@ def test_path_traversal_export():
     # We need to simulate being admin.
 
     # Mocking auth for this test:
-    from cortex.auth import require_auth, AuthResult
+    from cortex.auth import AuthResult, require_auth
 
     # Override dependency
     async def mock_admin_auth():

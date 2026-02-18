@@ -4,7 +4,6 @@ Entities, Relationships, and Ghost definitions.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -64,8 +63,8 @@ class Ghost:
     project: str = ""
     status: str = "open"  # open, resolved, pending_review
     detected_at: str = ""
-    resolved_at: Optional[str] = None
-    target_id: Optional[int | str] = None
+    resolved_at: str | None = None
+    target_id: int | str | None = None
     confidence: float = 0.0
 
     def to_dict(self) -> dict:

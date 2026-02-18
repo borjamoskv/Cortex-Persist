@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 # ─── Activity Classification ─────────────────────────────────────────
 
@@ -104,8 +103,8 @@ class Heartbeat:
     project: str
     entity: str
     category: str
-    branch: Optional[str]
-    language: Optional[str]
+    branch: str | None
+    language: str | None
     timestamp: str
     meta: dict
 

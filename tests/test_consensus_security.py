@@ -1,10 +1,12 @@
-import pytest
 import os
+
+import pytest
 from fastapi.testclient import TestClient
+
+from cortex import api_state
 from cortex.api import app
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex import api_state
 
 
 @pytest.fixture

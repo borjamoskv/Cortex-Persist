@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
+import sqlite_vec
 
 from cortex.engine import CortexEngine
 from cortex.export import export_facts
@@ -23,7 +24,6 @@ from cortex.migrations import (
     get_current_version,
     run_migrations,
 )
-import sqlite_vec
 
 
 @pytest_asyncio.fixture
@@ -137,7 +137,7 @@ class TestStoreMany:
 
     def test_database_transaction_error_exists(self):
         """Verify DatabaseTransactionError is importable and properly typed."""
-        from cortex.exceptions import DatabaseTransactionError, CortexError
+        from cortex.exceptions import CortexError, DatabaseTransactionError
 
         assert issubclass(DatabaseTransactionError, CortexError)
         assert issubclass(DatabaseTransactionError, Exception)

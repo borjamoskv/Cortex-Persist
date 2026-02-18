@@ -13,27 +13,10 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
-from typing import Optional
 
 from fastapi import Depends, Header, HTTPException
 
 logger = logging.getLogger(__name__)
-
-# ─── Config ───────────────────────────────────────────────────────────
-
-
-_auth_manager: Optional[AuthManager] = None
-
-
-def get_auth_manager() -> AuthManager:
-    """Lazy-load the global AuthManager instance."""
-    from cortex.config import DB_PATH
-
-    global _auth_manager
-    if _auth_manager is None:
-        _auth_manager = AuthManager(DB_PATH)
-    return _auth_manager
-
 
 # ─── Schema ───────────────────────────────────────────────────────────
 
@@ -66,7 +49,7 @@ class APIKey:
     tenant_id: str
     permissions: list[str]
     created_at: str
-    last_used: Optional[str]
+    last_used: str | None
     is_active: bool
     rate_limit: int
 
@@ -231,8 +214,22 @@ class AuthManager:
             conn.close()
 
 
-# ─── FastAPI Dependencies ─────────────────────────────────────────────
+# ─── Singleton ────────────────────────────────────────────────────────
 
+_auth_manager: AuthManager | None = None
+
+
+def get_auth_manager() -> AuthManager:
+    """Lazy-load the global AuthManager instance."""
+    from cortex.config import DB_PATH
+
+    global _auth_manager
+    if _auth_manager is None:
+        _auth_manager = AuthManager(DB_PATH)
+    return _auth_manager
+
+
+# ─── FastAPI Dependencies ─────────────────────────────────────────────
 
 async def require_auth(
     authorization: str = Header(None, description="Bearer <api-key>"),

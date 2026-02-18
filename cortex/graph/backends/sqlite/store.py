@@ -1,6 +1,7 @@
 """SQLite Graph Store Mixin."""
 import aiosqlite
 
+
 class SQLiteStoreMixin:
     """Mixin for graph storage operations."""
 

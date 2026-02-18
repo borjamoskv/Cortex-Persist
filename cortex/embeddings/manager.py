@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Union
 
 from cortex.embeddings import LocalEmbedder
 
@@ -22,10 +21,10 @@ class EmbeddingManager:
             self._embedder = LocalEmbedder()
         return self._embedder
 
-    def embed(self, text: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
+    def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         """Generate embedding for a single text or batch."""
         return self._get_embedder().embed(text)
 
-    def embed_batch(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         return self._get_embedder().embed_batch(texts, batch_size=batch_size)

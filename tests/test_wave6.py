@@ -10,8 +10,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from cortex.engine import CortexEngine
-from cortex.engine.snapshots import SnapshotManager
 from cortex.engine.ledger import ImmutableLedger
+from cortex.engine.snapshots import SnapshotManager
 
 
 def test_wave6():

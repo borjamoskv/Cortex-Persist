@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Optional
 
 from cortex.metrics import metrics
 
@@ -17,7 +16,7 @@ class ConsensusMixin:
         fact_id: int,
         agent: str,
         value: int,
-        agent_id: Optional[str] = None,
+        agent_id: str | None = None,
     ) -> float:
         """Cast a v1 consensus vote on a fact.
 
@@ -82,7 +81,7 @@ class ConsensusMixin:
         fact_id: int,
         agent_id: str,
         value: int,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> float:
         """Cast a reputation-weighted consensus vote (v2).
 

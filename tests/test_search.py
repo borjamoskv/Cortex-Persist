@@ -7,8 +7,9 @@ type filtering, limit enforcement.
 
 import os
 import tempfile
-import pytest_asyncio
+
 import pytest
+import pytest_asyncio
 
 from cortex.engine import CortexEngine
 from cortex.search import text_search

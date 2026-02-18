@@ -11,7 +11,6 @@ import json
 import sqlite3
 from unittest.mock import MagicMock, patch
 
-
 # ═══ CLI try/finally resource safety ═══════════════════════════════
 
 
@@ -30,6 +29,7 @@ class TestCLIResourceSafety:
 
         with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -43,6 +43,7 @@ class TestCLIResourceSafety:
 
         with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -56,6 +57,7 @@ class TestCLIResourceSafety:
 
         with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -69,6 +71,7 @@ class TestCLIResourceSafety:
 
         with patch("cortex.cli.core.get_engine", return_value=engine):
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -84,6 +87,7 @@ class TestCLIResourceSafety:
 
         with patch("cortex.cli.crud.get_engine", return_value=engine):
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -120,6 +124,7 @@ class TestEditDefensiveJSON:
         ):
             mock_wb.return_value = MagicMock(files_written=0)
             from click.testing import CliRunner
+
             from cortex.cli import cli
 
             runner = CliRunner()
@@ -182,6 +187,7 @@ class TestAPIErrorHandling:
     def test_value_error_handler_returns_422(self):
         """ValueError exception handler returns HTTP 422."""
         import asyncio
+
         from cortex.api import value_error_handler
 
         request = MagicMock()
@@ -210,6 +216,7 @@ class TestAsyncClientParity:
     def test_async_client_has_error_handling(self):
         """AsyncCortexClient._request should handle transport and JSON errors."""
         import inspect
+
         from cortex.async_client import AsyncCortexClient
 
         source = inspect.getsource(AsyncCortexClient._request)

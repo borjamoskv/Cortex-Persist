@@ -4,10 +4,11 @@ Tests that the ledger dynamically adjusts batch size based on write rate.
 """
 
 import time
-import pytest
-import aiosqlite
 
-from cortex.config import CHECKPOINT_MIN, CHECKPOINT_MAX
+import aiosqlite
+import pytest
+
+from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
 from cortex.engine.ledger import ImmutableLedger
 
 

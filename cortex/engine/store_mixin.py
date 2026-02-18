@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -19,14 +19,14 @@ class StoreMixin:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         confidence: str = "stated",
-        source: Optional[str] = None,
-        meta: Optional[Dict[str, Any]] = None,
-        valid_from: Optional[str] = None,
+        source: str | None = None,
+        meta: dict[str, Any] | None = None,
+        valid_from: str | None = None,
         commit: bool = True,
-        tx_id: Optional[int] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        tx_id: int | None = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
         if conn:
@@ -65,13 +65,13 @@ class StoreMixin:
         project: str,
         content: str,
         fact_type: str,
-        tags: Optional[List[str]],
+        tags: list[str] | None,
         confidence: str,
-        source: Optional[str],
-        meta: Optional[Dict[str, Any]],
-        valid_from: Optional[str],
+        source: str | None,
+        meta: dict[str, Any] | None,
+        valid_from: str | None,
         commit: bool,
-        tx_id: Optional[int],
+        tx_id: int | None,
     ) -> int:
         if not project or not project.strip():
             raise ValueError("project cannot be empty")
@@ -129,7 +129,7 @@ class StoreMixin:
 
         return fact_id
 
-    async def store_many(self, facts: List[Dict[str, Any]]) -> List[int]:
+    async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
 
@@ -151,9 +151,9 @@ class StoreMixin:
     async def update(
         self,
         fact_id: int,
-        content: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        content: str | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
         async with self.session() as conn:
             cursor = await conn.execute(
@@ -200,8 +200,8 @@ class StoreMixin:
     async def deprecate(
         self,
         fact_id: int,
-        reason: Optional[str] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
@@ -215,7 +215,7 @@ class StoreMixin:
             return res
 
     async def _deprecate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str]
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None
     ) -> bool:
         ts = now_iso()
         cursor = await conn.execute(
@@ -247,7 +247,7 @@ class StoreMixin:
         reference: str,
         context: str,
         project: str,
-        conn: Optional[aiosqlite.Connection] = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> int:
         if conn:
             return await self._register_ghost_impl(conn, reference, context, project)
@@ -283,7 +283,7 @@ class StoreMixin:
         ghost_id: int,
         target_entity_id: int,
         confidence: float = 1.0,
-        conn: Optional[aiosqlite.Connection] = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> bool:
         if conn:
             return await self._resolve_ghost_impl(conn, ghost_id, target_entity_id, confidence)

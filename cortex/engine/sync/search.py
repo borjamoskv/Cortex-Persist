@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger("cortex.engine.sync.search")
 
@@ -12,7 +11,7 @@ class SyncSearchMixin:
     def search_sync(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 5,
     ) -> list:
         """Semantic vector search with text fallback (sync)."""
@@ -45,7 +44,7 @@ class SyncSearchMixin:
     def hybrid_search_sync(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 10,
         vector_weight: float = 0.6,
         text_weight: float = 0.4,

@@ -1,6 +1,7 @@
 """Tests for Ghost Resolution."""
 
 import pytest
+
 from cortex.engine import CortexEngine
 
 

@@ -1,6 +1,6 @@
 import hashlib
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Optional
 
 
 @dataclass
@@ -19,7 +19,7 @@ class MerkleTree:
     Shared by transaction ledger and vote ledger.
     """
 
-    def __init__(self, leaves: List[str]):
+    def __init__(self, leaves: list[str]):
         """
         Build a Merkle tree from leaf hashes.
         """
@@ -36,7 +36,7 @@ class MerkleTree:
         combined = left + right
         return hashlib.sha256(combined.encode()).hexdigest()
 
-    def _build_tree(self, nodes: List[MerkleNode]) -> MerkleNode:
+    def _build_tree(self, nodes: list[MerkleNode]) -> MerkleNode:
         """Recursively build the tree bottom-up."""
         if len(nodes) == 1:
             return nodes[0]
@@ -51,11 +51,11 @@ class MerkleTree:
 
         return self._build_tree(next_level)
 
-    def get_root(self) -> Optional[str]:
+    def get_root(self) -> str | None:
         """Get the root hash of the tree."""
         return self.root.hash if self.root else None
 
-    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+    def get_proof(self, index: int) -> list[tuple[str, str]]:
         """Get a Merkle proof for a leaf at the given index."""
         if not self.root or index >= len(self.leaves):
             return []
@@ -85,7 +85,7 @@ class MerkleTree:
         return proof
 
     @staticmethod
-    def verify_proof(leaf_hash: str, proof: List[Tuple[str, str]], root: str) -> bool:
+    def verify_proof(leaf_hash: str, proof: list[tuple[str, str]], root: str) -> bool:
         """Verify a Merkle proof against a root hash."""
         current = leaf_hash
         for sibling, direction in proof:

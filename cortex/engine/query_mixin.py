@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from cortex.engine.models import Fact
 from cortex.search import SearchResult, semantic_search, text_search
@@ -24,7 +23,9 @@ class QueryMixin:
     async def search(
         self,
         query: str,
-        project: Optional[str] = None,
+        project: str | None = None,
+        top_k: int = 5,
+        as_of: str | None = None,
         graph_depth: int = 0,
         **kwargs,
     ) -> list[SearchResult]:
@@ -45,7 +46,7 @@ class QueryMixin:
                 )
             except Exception as e:
                 logger.warning("Semantic search failed: %s", e)
-            
+
             if not results:
                 results = await text_search(conn, query, project, limit=top_k, **kwargs)
 
@@ -61,7 +62,7 @@ class QueryMixin:
     async def recall(
         self,
         project: str,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
         async with self.session() as conn:
@@ -88,7 +89,7 @@ class QueryMixin:
     async def history(
         self,
         project: str,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> list[Fact]:
         async with self.session() as conn:
             if as_of:
@@ -112,7 +113,7 @@ class QueryMixin:
     async def reconstruct_state(
         self,
         target_tx_id: int,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> list[Fact]:
         async with self.session() as conn:
             cursor = await conn.execute(
@@ -197,7 +198,7 @@ class QueryMixin:
                 "db_size_mb": round(db_size, 2),
             }
 
-    async def graph(self, project: Optional[str] = None):
+    async def graph(self, project: str | None = None):
         """Get entity graph for a project."""
         from cortex.graph import get_graph
 
@@ -207,7 +208,7 @@ class QueryMixin:
     async def query_entity(
         self,
         name: str,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> list[dict]:
         """Query a specific entity by name."""
         from cortex.graph import query_entity

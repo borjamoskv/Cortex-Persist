@@ -4,7 +4,6 @@ CORTEX v4.0 — MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
-from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
@@ -70,7 +69,7 @@ async def record_session(
     )
 
 
-@router.get("/history", response_model=List[dict])
+@router.get("/history", response_model=list[dict])
 async def get_history(
     project: str = Query(...),
     limit: int = Query(20, ge=1, le=100),

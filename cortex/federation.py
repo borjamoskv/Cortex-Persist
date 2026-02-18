@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cortex.config import FEDERATION_MODE, SHARD_DIR
 
@@ -34,7 +34,7 @@ class FederatedEngine:
         self._shard_dir = Path(shard_dir)
         self._shard_dir.mkdir(parents=True, exist_ok=True)
         self._auto_embed = auto_embed
-        self._shards: Dict[str, Any] = {}  # tenant_id → CortexEngine
+        self._shards: dict[str, Any] = {}  # tenant_id → CortexEngine
         self._lock = asyncio.Lock()
 
     async def get_shard(self, tenant_id: str) -> Any:
@@ -72,10 +72,10 @@ class FederatedEngine:
     async def search(
         self,
         query: str,
-        tenant_id: Optional[str] = None,
+        tenant_id: str | None = None,
         top_k: int = 5,
         **kwargs,
-    ) -> List:
+    ) -> list:
         """Search across one or all tenant shards.
 
         If tenant_id is provided, searches only that shard.
@@ -110,7 +110,7 @@ class FederatedEngine:
         self,
         tenant_id: str,
         project: str,
-    ) -> List:
+    ) -> list:
         """Recall facts from a specific tenant shard."""
         engine = await self.get_shard(tenant_id)
         return await engine.recall(project)
@@ -121,7 +121,7 @@ class FederatedEngine:
         return len(self._shards)
 
     @property
-    def tenants(self) -> List[str]:
+    def tenants(self) -> list[str]:
         """List of active tenant IDs."""
         return list(self._shards.keys())
 

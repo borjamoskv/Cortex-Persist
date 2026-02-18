@@ -8,10 +8,11 @@ import logging
 import os
 import sqlite3
 import time
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, AsyncIterator, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.mcp.utils")
 
@@ -64,9 +65,9 @@ class SimpleAsyncCache:
     def __init__(self, maxsize: int = 100, ttl_seconds: int = 300):
         self.maxsize = maxsize
         self.ttl = ttl_seconds
-        self._cache: Dict[str, tuple[float, Any]] = {}
+        self._cache: dict[str, tuple[float, Any]] = {}
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         if key not in self._cache:
             return None
         timestamp, value = self._cache[key]
@@ -123,12 +124,12 @@ class AsyncConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[sqlite3.Connection]:
         """Acquire a connection with timeout."""
-        conn: Optional[sqlite3.Connection] = None
+        conn: sqlite3.Connection | None = None
         try:
             conn = await asyncio.wait_for(self._pool.get(), timeout=self.acquire_timeout)
         except asyncio.TimeoutError:
             logger.error("Connection pool exhausted (timeout after %ss)", self.acquire_timeout)
-            raise RuntimeError("Database connection timed out")
+            raise RuntimeError("Database connection timed out") from None
 
         try:
             # Verify connection is still alive

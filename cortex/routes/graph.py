@@ -33,7 +33,7 @@ async def get_graph(
         return await _get_graph(conn, project, limit)
     except Exception as e:
         logger.error("Graph unavailable: %s", e)
-        raise HTTPException(status_code=500, detail="Graph unavailable")
+        raise HTTPException(status_code=500, detail="Graph unavailable") from None
 
 
 @router.get("/v1/graph")
@@ -48,4 +48,4 @@ async def get_graph_all(
         return await _get_graph(conn, None, limit)
     except Exception as e:
         logger.error("Graph unavailable: %s", e)
-        raise HTTPException(status_code=500, detail="Graph unavailable")
+        raise HTTPException(status_code=500, detail="Graph unavailable") from None

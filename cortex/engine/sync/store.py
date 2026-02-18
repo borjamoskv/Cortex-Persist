@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Optional
-from cortex.temporal import now_iso, build_temporal_filter_params
+
 from cortex.engine.models import Fact
+from cortex.temporal import build_temporal_filter_params, now_iso
 
 logger = logging.getLogger("cortex.engine.sync.store")
 
@@ -59,7 +59,7 @@ class SyncStoreMixin:
     def recall_sync(
         self,
         project: str,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
         """Synchronous version of recall."""
@@ -90,7 +90,7 @@ class SyncStoreMixin:
     def history_sync(
         self,
         project: str,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> list[Fact]:
         """Synchronous version of history."""
         from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
@@ -115,7 +115,7 @@ class SyncStoreMixin:
         rows = cursor.fetchall()
         return [self._row_to_fact(row) for row in rows]
 
-    def deprecate_sync(self, fact_id: int, reason: Optional[str] = None) -> bool:
+    def deprecate_sync(self, fact_id: int, reason: str | None = None) -> bool:
         """Synchronous version of deprecate."""
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")

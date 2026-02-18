@@ -8,7 +8,6 @@
 import json
 import logging
 import sqlite3
-from typing import Optional
 
 import aiosqlite
 
@@ -26,13 +25,13 @@ async def semantic_search(
     conn: aiosqlite.Connection,
     query_embedding: list[float],
     top_k: int = 5,
-    project: Optional[str] = None,
-    as_of: Optional[str] = None,
+    project: str | None = None,
+    as_of: str | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
 
-    sql = f"""
+    sql = """
         SELECT
             f.id, f.content, f.project, f.fact_type, f.confidence,
             f.valid_from, f.valid_until, f.tags, f.source, f.meta,
@@ -102,7 +101,7 @@ def semantic_search_sync(
     conn: sqlite3.Connection,
     query_embedding: list[float],
     top_k: int = 5,
-    project: Optional[str] = None,
+    project: str | None = None,
 ) -> list[SearchResult]:
     """Vector KNN search (sync)."""
     embedding_json = json.dumps(query_embedding)

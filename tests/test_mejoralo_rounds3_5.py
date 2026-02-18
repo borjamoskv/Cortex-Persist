@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import sqlite3
 
-
 # ──────────────────────────────────────────────────────────────────────
 # Round 3 — search.py
 # ──────────────────────────────────────────────────────────────────────
@@ -76,8 +75,9 @@ class TestSearchDefensiveJson:
 
     def test_text_search_limit_is_parameterized(self):
         """Ensure LIMIT is parameterized (SQL injection prevention)."""
-        from cortex.search import text_search
         import inspect
+
+        from cortex.search import text_search
 
         source = inspect.getsource(text_search)
         # Should NOT contain f-string LIMIT
@@ -180,6 +180,7 @@ class TestDaemonNotifierMethod:
     def test_no_notifier_send_calls(self):
         """Verify that Notifier.send() is never called in daemon core."""
         import inspect
+
         from cortex.daemon import core
 
         source = inspect.getsource(core)
@@ -199,6 +200,7 @@ class TestCliListFactsParamLimit:
     def test_no_fstring_limit(self):
         """Verify list_facts doesn't use f-string LIMIT."""
         from pathlib import Path
+
         import cortex.cli.crud
 
         cli_source = Path(cortex.cli.crud.__file__).read_text()

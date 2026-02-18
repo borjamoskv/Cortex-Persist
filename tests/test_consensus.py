@@ -1,6 +1,7 @@
-import pytest
 import os
 import unittest.mock as mock
+
+import pytest
 
 # Integration test for the Consensus System
 
@@ -18,15 +19,16 @@ def client(monkeypatch):
 
     # Patch environment
     monkeypatch.setenv("CORTEX_DB", test_db)
-    
+
     import cortex.config
     monkeypatch.setattr(cortex.config, "DB_PATH", test_db)
 
     # Now import app and state
-    from cortex.api import app
-    from cortex import api_state
-    import cortex.auth
     from fastapi.testclient import TestClient
+
+    import cortex.auth
+    from cortex import api_state
+    from cortex.api import app
 
     # Set up some test state
     monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
@@ -122,6 +124,6 @@ def test_rwc_flow(client):
     # 5. Check score (should be > 1.0 because whale has more weight)
     resp_recall = client.get("/v1/recall?project=test_proj")
     fact = next(f for f in resp_recall.json() if f["fact_id"] == fid)
-    
+
     assert fact["consensus_score"] > 1.0
     assert fact["confidence"] == "verified"

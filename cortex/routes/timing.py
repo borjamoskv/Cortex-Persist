@@ -4,7 +4,6 @@ CORTEX v4.0 — Timing Router.
 
 import logging
 import sqlite3
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette.concurrency import run_in_threadpool
@@ -41,12 +40,12 @@ async def record_heartbeat(
         return {"id": hb_id, "status": "recorded"}
     except sqlite3.Error as e:
         logger.error("Heartbeat failed: %s", e)
-        raise HTTPException(status_code=500, detail="Heartbeat failed")
+        raise HTTPException(status_code=500, detail="Heartbeat failed") from None
 
 
 @router.get("/v1/time/today", response_model=TimeSummaryResponse)
 async def time_today(
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:
     """Get today's time tracking summary."""
@@ -71,12 +70,12 @@ async def time_today(
         )
     except sqlite3.Error as e:
         logger.error("Time summary failed: %s", e)
-        raise HTTPException(status_code=500, detail="Time summary failed")
+        raise HTTPException(status_code=500, detail="Time summary failed") from None
 
 
 @router.get("/v1/time", response_model=TimeSummaryResponse)
 async def time_report(
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     days: int = Query(7),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:
@@ -102,7 +101,7 @@ async def time_report(
         )
     except sqlite3.Error as e:
         logger.error("Time report failed: %s", e)
-        raise HTTPException(status_code=500, detail="Time report failed")
+        raise HTTPException(status_code=500, detail="Time report failed") from None
 
 
 @router.get("/v1/time/history")
@@ -115,4 +114,4 @@ async def get_time_history(
         return await run_in_threadpool(api_state.tracker.daily, days=days)
     except sqlite3.Error as e:
         logger.error("Time history failed: %s", e)
-        raise HTTPException(status_code=500, detail="Time history failed")
+        raise HTTPException(status_code=500, detail="Time history failed") from None

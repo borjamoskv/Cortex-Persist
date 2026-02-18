@@ -7,7 +7,6 @@
 
 import logging
 import sqlite3
-from typing import Optional
 
 import aiosqlite
 
@@ -27,11 +26,11 @@ logger = logging.getLogger("cortex.search.text")
 async def text_search(
     conn: aiosqlite.Connection,
     query: str,
-    project: Optional[str] = None,
-    fact_type: Optional[str] = None,
-    tags: Optional[list[str]] = None,
+    project: str | None = None,
+    fact_type: str | None = None,
+    tags: list[str] | None = None,
     limit: int = 20,
-    as_of: Optional[str] = None,
+    as_of: str | None = None,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
     use_fts = await _has_fts5(conn)
@@ -114,7 +113,7 @@ async def _like_search(conn, query, project, fact_type, tags, limit, as_of):
 def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Full-text search (sync)."""

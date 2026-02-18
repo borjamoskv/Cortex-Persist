@@ -185,7 +185,7 @@ class CertMonitor:
             days_left = (expires - datetime.now(timezone.utc)).days
             if days_left < self.warn_days:
                 return CertAlert(hostname=hostname, expires_at=not_after, days_remaining=days_left)
-        except (socket.error, ssl.SSLError, OSError) as e:
+        except (ssl.SSLError, OSError) as e:
             logger.warning("SSL check failed for %s: %s", hostname, e)
         return None
 

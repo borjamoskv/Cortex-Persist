@@ -4,7 +4,6 @@ Extraction, relationship detection, and backend orchestration.
 """
 
 import logging
-from typing import Optional
 
 from cortex.config import GRAPH_BACKEND
 from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
@@ -174,7 +173,7 @@ def process_fact_graph_sync(
         return 0, 0
 
 
-async def get_graph(conn, project: Optional[str] = None, limit: int = 50) -> dict:
+async def get_graph(conn, project: str | None = None, limit: int = 50) -> dict:
     """Get graph data for a project or all projects.
 
     Args:
@@ -186,13 +185,13 @@ async def get_graph(conn, project: Optional[str] = None, limit: int = 50) -> dic
     return await backend.get_graph(project, limit)
 
 
-def get_graph_sync(conn, project: Optional[str] = None, limit: int = 50) -> dict:
+def get_graph_sync(conn, project: str | None = None, limit: int = 50) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
     return backend.get_graph_sync(project, limit)
 
 
-async def query_entity(conn, name: str, project: Optional[str] = None) -> Optional[dict]:
+async def query_entity(conn, name: str, project: str | None = None) -> dict | None:
     """Query a specific entity by name.
 
     Args:
@@ -204,7 +203,7 @@ async def query_entity(conn, name: str, project: Optional[str] = None) -> Option
     return await backend.query_entity(name, project)
 
 
-def query_entity_sync(conn, name: str, project: Optional[str] = None) -> Optional[dict]:
+def query_entity_sync(conn, name: str, project: str | None = None) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
     return backend.query_entity_sync(name, project)

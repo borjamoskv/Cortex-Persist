@@ -6,15 +6,15 @@ import hmac
 import json
 import logging
 import os
+import secrets
 import subprocess
 import time
 import uuid
-import secrets
-from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
+from typing import Any, Optional
 
-from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
 from .exceptions import GateError, GateExpired, GateInvalidSignature, GateNotApproved
+from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
 
 logger = logging.getLogger("cortex.gate")
 _gate_instance: Optional['SovereignGate'] = None
@@ -38,8 +38,8 @@ class SovereignGate:
 
     def __init__(
         self,
-        policy: Optional[GatePolicy] = None,
-        secret: Optional[str] = None,
+        policy: GatePolicy | None = None,
+        secret: str | None = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         # Resolve policy from env if not provided
@@ -61,8 +61,8 @@ class SovereignGate:
         if isinstance(self._secret, str):
             self._secret = self._secret.encode("utf-8")
 
-        self._pending: Dict[str, PendingAction] = {}
-        self._audit_log: List[Dict[str, Any]] = []
+        self._pending: dict[str, PendingAction] = {}
+        self._audit_log: list[dict[str, Any]] = []
 
         logger.info(
             "SovereignGate initialized — policy=%s timeout=%ds",
@@ -76,9 +76,9 @@ class SovereignGate:
         self,
         level: ActionLevel,
         description: str,
-        command: Optional[List[str]] = None,
-        project: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None,
+        command: list[str] | None = None,
+        project: str | None = None,
+        context: dict[str, Any] | None = None,
     ) -> PendingAction:
         """
         Register an L3/L4 action and generate an HMAC challenge.
@@ -186,7 +186,7 @@ class SovereignGate:
 
         # ENFORCE mode — actual interactive prompt
         print(f"\n{'=' * 60}")
-        print(f"⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
+        print("⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
         print(f"{'=' * 60}")
         print(f"  Action:  {action.description}")
         print(f"  Level:   {action.level.value}")
@@ -228,7 +228,7 @@ class SovereignGate:
     def execute_subprocess(
         self,
         action_id: str,
-        cmd: List[str],
+        cmd: list[str],
         **kwargs: Any,
     ) -> subprocess.CompletedProcess:
         """
@@ -261,16 +261,16 @@ class SovereignGate:
 
     # ─── Query API ────────────────────────────────────────────────
 
-    def get_pending(self) -> List[PendingAction]:
+    def get_pending(self) -> list[PendingAction]:
         """Return all pending actions, expiring stale ones first."""
         self._sweep_expired()
         return [a for a in self._pending.values() if a.status == ActionStatus.PENDING]
 
-    def get_audit_log(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_audit_log(self, limit: int = 50) -> list[dict[str, Any]]:
         """Return the most recent audit log entries."""
         return self._audit_log[-limit:]
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Return gate status summary."""
         self._sweep_expired()
         statuses = {}
@@ -318,8 +318,8 @@ class SovereignGate:
 
 
 def get_gate(
-    policy: Optional[GatePolicy] = None,
-    secret: Optional[str] = None,
+    policy: GatePolicy | None = None,
+    secret: str | None = None,
     timeout: float = SovereignGate.DEFAULT_TIMEOUT,
 ) -> SovereignGate:
     """Get or create the global SovereignGate singleton."""

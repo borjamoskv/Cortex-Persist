@@ -13,7 +13,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ═══ MCP Server defensive JSON ═══════════════════════════════════
 
 
@@ -26,6 +25,7 @@ class TestMCPServerHardening:
         with patch("cortex.mcp.server._MCP_AVAILABLE", True), patch("cortex.mcp.server.FastMCP"):
             # Just verify the module can be imported and the pattern exists
             import inspect
+
             from cortex.mcp.server import create_mcp_server
 
             source = inspect.getsource(create_mcp_server)
@@ -35,6 +35,7 @@ class TestMCPServerHardening:
     def test_cortex_recall_defensive_json(self):
         """cortex_recall should now have defensive JSON for tags."""
         import inspect
+
         from cortex.mcp.server import create_mcp_server
 
         source = inspect.getsource(create_mcp_server)
@@ -45,6 +46,7 @@ class TestMCPServerHardening:
     def test_list_projects_uses_public_api(self):
         """list_projects should use get_connection() not _get_conn()."""
         import inspect
+
         from cortex.mcp.server import create_mcp_server
 
         source = inspect.getsource(create_mcp_server)
@@ -146,8 +148,9 @@ class TestEmbeddingsInputValidation:
 
     def test_embed_accepts_list_input(self):
         """embed() should delegate list input to embed_batch()."""
-        from cortex.embeddings import LocalEmbedder
         from unittest.mock import patch
+
+        from cortex.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder()
         with patch.object(embedder, "embed_batch", return_value=[[0.1, 0.2]]) as mock:

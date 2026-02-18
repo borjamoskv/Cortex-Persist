@@ -5,10 +5,9 @@ Provides Merkle tree computation and verification for ledger checkpoints.
 """
 
 import hashlib
-from typing import List, Tuple
 
 
-def compute_merkle_root(hashes: List[str]) -> str:
+def compute_merkle_root(hashes: list[str]) -> str:
     """
     Compute the Merkle root of a list of hashes.
 
@@ -38,7 +37,7 @@ def compute_merkle_root(hashes: List[str]) -> str:
     return current_level[0]
 
 
-def verify_merkle_proof(leaf_hash: str, proof: List[Tuple[str, str]], root_hash: str) -> bool:
+def verify_merkle_proof(leaf_hash: str, proof: list[tuple[str, str]], root_hash: str) -> bool:
     """
     Verify a Merkle inclusion proof.
 
@@ -66,11 +65,11 @@ class MerkleTree:
     A simple Merkle tree implementation for batch verification.
     """
 
-    def __init__(self, items: List[str]):
+    def __init__(self, items: list[str]):
         self.leaves = items
         self.tree = self._build_tree(items)
 
-    def _build_tree(self, hashes: List[str]) -> List[List[str]]:
+    def _build_tree(self, hashes: list[str]) -> list[list[str]]:
         if not hashes:
             return [[""]]
 
@@ -96,7 +95,7 @@ class MerkleTree:
         """Return the root hash of the tree."""
         return self.tree[-1][0] if self.tree and self.tree[-1] else ""
 
-    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+    def get_proof(self, index: int) -> list[tuple[str, str]]:
         """
         Get a Merkle proof for the leaf at 'index'.
 

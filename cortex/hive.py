@@ -5,7 +5,6 @@ Endpoints for visualizing the memory graph in 3D.
 """
 
 import sqlite3
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -30,8 +29,8 @@ class GraphLink(BaseModel):
 
 
 class GraphData(BaseModel):
-    nodes: List[GraphNode]
-    links: List[GraphLink]
+    nodes: list[GraphNode]
+    links: list[GraphLink]
 
 
 @router.get("/graph", response_model=GraphData)
@@ -116,6 +115,6 @@ def get_hive_graph(
         return GraphData(nodes=nodes, links=links)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from None
     finally:
         conn.close()
