@@ -1,0 +1,93 @@
+# ──────────────────────────────────────────────────────────────────────
+# CORTEX External Database Templates
+# ──────────────────────────────────────────────────────────────────────
+# Configure external database connections for CORTEX agents.
+# Uncomment and fill in your credentials.
+#
+# Supports: PostgreSQL, MySQL, AlloyDB, Spanner, BigQuery,
+#           MongoDB, Redis, Elasticsearch, Neo4j, Oracle, TiDB
+#
+# Security: Use environment variables for credentials:
+#   export SAP_DB_PASSWORD=your_password
+#
+# Docs: https://googleapis.github.io/genai-toolbox/resources/sources/
+# ──────────────────────────────────────────────────────────────────────
+
+# ─── SAP Datasphere (PostgreSQL-compatible) ───────────────────────────
+# sources:
+#   sap-datasphere:
+#     kind: postgres
+#     host: your-datasphere-host.cloud.sap
+#     port: 443
+#     database: your_database
+#     user: your_user
+#     password: ${SAP_DB_PASSWORD}
+#
+# tools:
+#   sap-query-orders:
+#     kind: postgres-sql
+#     source: sap-datasphere
+#     description: Query order data from SAP Datasphere
+#     parameters:
+#       - name: customer_id
+#         type: string
+#         description: Customer ID to filter orders
+#     statement: >
+#       SELECT order_id, customer_id, order_date, total_amount
+#       FROM orders
+#       WHERE customer_id = $1
+#       ORDER BY order_date DESC
+#       LIMIT 50
+
+# ─── AlloyDB (Google Cloud) ───────────────────────────────────────────
+# sources:
+#   alloydb-main:
+#     kind: alloydb-postgres
+#     project: your-gcp-project
+#     region: us-central1
+#     cluster: your-cluster
+#     instance: your-instance
+#     database: your_db
+#     user: your_user
+#     password: ${ALLOYDB_PASSWORD}
+
+# ─── Cloud SQL PostgreSQL ─────────────────────────────────────────────
+# sources:
+#   cloudsql-pg:
+#     kind: cloud-sql-postgres
+#     project: your-gcp-project
+#     region: us-central1
+#     instance: your-instance
+#     database: your_db
+#     user: your_user
+#     password: ${CLOUDSQL_PASSWORD}
+
+# ─── Spanner ──────────────────────────────────────────────────────────
+# sources:
+#   spanner-main:
+#     kind: spanner
+#     project: your-gcp-project
+#     instance: your-instance
+#     database: your_db
+
+# ─── MySQL ────────────────────────────────────────────────────────────
+# sources:
+#   mysql-main:
+#     kind: mysql
+#     host: your-mysql-host
+#     port: 3306
+#     database: your_db
+#     user: your_user
+#     password: ${MYSQL_PASSWORD}
+
+# ─── BigQuery ─────────────────────────────────────────────────────────
+# sources:
+#   bigquery-main:
+#     kind: bigquery
+#     project: your-gcp-project
+#     dataset: your_dataset
+
+# ─── Toolsets ─────────────────────────────────────────────────────────
+# toolsets:
+#   sap-readonly:
+#     - sap-query-orders

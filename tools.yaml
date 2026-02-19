@@ -1,0 +1,99 @@
+# ──────────────────────────────────────────────────────────────────────
+# CORTEX MCP Toolbox Configuration
+# ──────────────────────────────────────────────────────────────────────
+# This file defines database tools that can be exposed via MCP Toolbox.
+# Run with: toolbox --tools-file tools.yaml
+#
+# Docs: https://googleapis.github.io/genai-toolbox/getting-started/introduction/
+# ──────────────────────────────────────────────────────────────────────
+
+sources:
+  cortex-sqlite:
+    kind: sqlite
+    database: ~/.cortex/cortex.db
+
+tools:
+  search-facts:
+    kind: sqlite-sql
+    source: cortex-sqlite
+    description: >
+      Search for facts in CORTEX sovereign memory by keyword.
+      Returns matching facts with their project, type, and creation date.
+    parameters:
+      - name: query
+        type: string
+        description: Search term to find in fact content
+    statement: >
+      SELECT id, project, content, fact_type, created_at
+      FROM facts
+      WHERE content LIKE '%' || ? || '%'
+      AND deprecated_at IS NULL
+      ORDER BY created_at DESC
+      LIMIT 20
+
+  get-project-stats:
+    kind: sqlite-sql
+    source: cortex-sqlite
+    description: >
+      Get statistics for a specific project in CORTEX memory.
+      Returns fact counts grouped by type.
+    parameters:
+      - name: project
+        type: string
+        description: Project name (e.g. 'cortex', 'naroa-2026')
+    statement: >
+      SELECT fact_type, COUNT(*) as count
+      FROM facts
+      WHERE project = ? AND deprecated_at IS NULL
+      GROUP BY fact_type
+      ORDER BY count DESC
+
+  list-projects:
+    kind: sqlite-sql
+    source: cortex-sqlite
+    description: >
+      List all projects in CORTEX memory with their fact counts.
+    parameters: []
+    statement: >
+      SELECT project, COUNT(*) as fact_count
+      FROM facts
+      WHERE deprecated_at IS NULL
+      GROUP BY project
+      ORDER BY fact_count DESC
+
+  get-recent-facts:
+    kind: sqlite-sql
+    source: cortex-sqlite
+    description: >
+      Get the most recent facts stored in CORTEX memory.
+    parameters:
+      - name: limit
+        type: integer
+        description: Number of recent facts to return (max 50)
+    statement: >
+      SELECT id, project, content, fact_type, created_at
+      FROM facts
+      WHERE deprecated_at IS NULL
+      ORDER BY created_at DESC
+      LIMIT MIN(?, 50)
+
+  get-ghosts:
+    kind: sqlite-sql
+    source: cortex-sqlite
+    description: >
+      Get all unresolved ghosts (incomplete work items) across projects.
+    parameters: []
+    statement: >
+      SELECT id, project, content, created_at
+      FROM facts
+      WHERE fact_type = 'ghost'
+      AND deprecated_at IS NULL
+      ORDER BY created_at DESC
+
+toolsets:
+  cortex-readonly:
+    - search-facts
+    - get-project-stats
+    - list-projects
+    - get-recent-facts
+    - get-ghosts
