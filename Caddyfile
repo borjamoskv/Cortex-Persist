@@ -1,0 +1,21 @@
+# Caddyfile for CORTEX production
+# Replace api.cortex.dev with your domain
+
+api.cortex.dev {
+    reverse_proxy cortex:8000
+
+    header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/cortex.log
+        format json
+    }
+}
