@@ -133,3 +133,54 @@ class MCPGuard:
                 logger.debug("Poison pattern matched: %s", pattern.pattern)
                 return True
         return False
+
+    # ─── External Query Validators ─────────────────────────────────
+
+    _ALLOWED_TOOLBOX_URLS: list[str] = [
+        "http://127.0.0.1:5000",
+        "http://localhost:5000",
+    ]
+
+    @classmethod
+    def validate_toolbox_url(cls, url: str) -> None:
+        """Validate that a Toolbox server URL is in the allowlist.
+
+        Raises ValueError if the URL is not permitted.
+        """
+        normalized = url.rstrip("/")
+        allowed = [u.rstrip("/") for u in cls._ALLOWED_TOOLBOX_URLS]
+        if normalized not in allowed:
+            raise ValueError(
+                f"Toolbox URL '{url}' not in allowlist. "
+                f"Allowed: {', '.join(allowed)}"
+            )
+
+    @classmethod
+    def add_allowed_toolbox_url(cls, url: str) -> None:
+        """Add a URL to the Toolbox allowlist at runtime."""
+        normalized = url.rstrip("/")
+        if normalized not in [u.rstrip("/") for u in cls._ALLOWED_TOOLBOX_URLS]:
+            cls._ALLOWED_TOOLBOX_URLS.append(normalized)
+            logger.info("Added Toolbox URL to allowlist: %s", normalized)
+
+    @classmethod
+    def validate_external_query(cls, tool_name: str, parameters: dict) -> None:
+        """Validate an external Toolbox query before execution.
+
+        Checks tool name format and scans parameter values for poisoning.
+        Raises ValueError on violation.
+        """
+        if not tool_name or not tool_name.strip():
+            raise ValueError("external tool name cannot be empty")
+        if len(tool_name) > 256:
+            raise ValueError(f"tool name too long ({len(tool_name)} > 256)")
+
+        for key, value in parameters.items():
+            if isinstance(value, str) and cls.detect_poisoning(value):
+                logger.warning(
+                    "GUARD: Poisoning attempt in external query param %s", key
+                )
+                raise ValueError(
+                    f"parameter '{key}' rejected: suspicious pattern detected"
+                )
+
