@@ -1,0 +1,70 @@
+# CORTEX Production Deployment
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  cortex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cortex-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - CORTEX_DB_PATH=/data/cortex.db
+      - CORTEX_RATE_LIMIT=300
+      - CORTEX_RATE_WINDOW=60
+      - CORTEX_ALLOWED_ORIGINS=https://yourdomain.com
+      # LLM Providers (uncomment as needed)
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Stripe (for SaaS billing)
+      # - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      # - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    volumes:
+      - cortex-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "2.0"
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Optional: Caddy reverse proxy with automatic TLS
+  caddy:
+    image: caddy:2-alpine
+    container_name: cortex-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      cortex:
+        condition: service_healthy
+    profiles:
+      - tls
+
+volumes:
+  cortex-data:
+    driver: local
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local

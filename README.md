@@ -6,6 +6,8 @@
 ![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-production-green.svg)
+![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
+[![Docs](https://img.shields.io/badge/docs-live-brightgreen)](https://borjamoskv.github.io/cortex/)
 
 ---
 
