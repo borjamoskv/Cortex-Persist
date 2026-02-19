@@ -31,7 +31,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     new_kb = calculate_fact_diff(existing, kb_candidates, lambda x: x.get("content", str(x)))
     for content, kb in new_kb:
         try:
-            engine.store(
+            engine.store_sync(
                 project="__system__",
                 content=content,
                 fact_type="knowledge",
@@ -55,7 +55,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     )
     for content, dec in new_dec:
         try:
-            engine.store(
+            engine.store_sync(
                 project="__system__",
                 content=content,
                 fact_type="decision",
@@ -80,7 +80,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
         )
         if eco_content not in existing:
             try:
-                engine.store(
+                engine.store_sync(
                     project="__system__",
                     content=eco_content,
                     fact_type="knowledge",

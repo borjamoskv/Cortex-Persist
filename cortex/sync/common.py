@@ -145,7 +145,7 @@ def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
     Esto permite detectar si la DB ha cambiado desde el último write-back
     sin necesidad de comparar fila por fila.
     """
-    conn = engine._get_conn()
+    conn = engine._get_sync_conn()
     if fact_type:
         rows = conn.execute(
             "SELECT id, content, meta, valid_from FROM facts "
