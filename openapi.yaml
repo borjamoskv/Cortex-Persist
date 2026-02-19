@@ -1,0 +1,2745 @@
+openapi: 3.1.0
+info:
+  title: CORTEX — Sovereign Memory Engine
+  description: Enterprise API for persistent AI memory, semantic search, and multi-agent
+    swarm coordination.
+  version: 4.3.0
+  contact:
+    name: Borja Moskv
+    email: borjamoskv@gmail.com
+  license:
+    name: BSL 1.1
+    url: https://mariadb.com/bsl11/
+paths:
+  /:
+    get:
+      tags:
+      - health
+      summary: Root Node
+      operationId: root_node__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Root Node  Get
+  /health:
+    get:
+      tags:
+      - health
+      summary: Health Check
+      description: Simple status check for load balancers.
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Health Check Health Get
+  /metrics:
+    get:
+      tags:
+      - health
+      summary: Get Metrics
+      description: Expose Prometheus metrics.
+      operationId: get_metrics_metrics_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/facts:
+    post:
+      tags:
+      - facts
+      summary: Store Fact
+      description: Store a fact (scoped to authenticated tenant).
+      operationId: store_fact_v1_facts_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{project}/facts:
+    get:
+      tags:
+      - facts
+      summary: Recall Facts
+      description: Recall facts for a specific project with tenant isolation.
+      operationId: recall_facts_v1_projects__project__facts_get
+      parameters:
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: limit
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 1000
+            minimum: 1
+          - type: 'null'
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FactResponse'
+                title: Response Recall Facts V1 Projects  Project  Facts Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/facts/{fact_id}/vote:
+    post:
+      tags:
+      - facts
+      summary: Cast Vote
+      description: Cast a consensus vote (verify/dispute) on a fact.
+      operationId: cast_vote_v1_facts__fact_id__vote_post
+      parameters:
+      - name: fact_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Fact Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/facts/{fact_id}/vote-v2:
+    post:
+      tags:
+      - facts
+      summary: Cast Vote V2
+      description: Cast a reputation-weighted consensus vote (RWC).
+      operationId: cast_vote_v2_v1_facts__fact_id__vote_v2_post
+      parameters:
+      - name: fact_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Fact Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteV2Request'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/facts/{fact_id}/votes:
+    get:
+      tags:
+      - facts
+      summary: List Votes
+      description: Retrieve all votes for a specific fact (Tenant Isolated).
+      operationId: list_votes_v1_facts__fact_id__votes_get
+      parameters:
+      - name: fact_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Fact Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response List Votes V1 Facts  Fact Id  Votes Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/facts/{fact_id}:
+    delete:
+      tags:
+      - facts
+      summary: Deprecate Fact
+      description: Soft-deprecate a fact (mark as invalid).
+      operationId: deprecate_fact_v1_facts__fact_id__delete
+      parameters:
+      - name: fact_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Fact Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Deprecate Fact V1 Facts  Fact Id  Delete
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/search:
+    post:
+      tags:
+      - search
+      summary: Search Facts
+      description: Semantic + Graph-RAG search across facts (scoped to tenant).
+      operationId: search_facts_v1_search_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+                title: Response Search Facts V1 Search Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - search
+      summary: Search Facts Get
+      description: Semantic + Graph-RAG search via GET (scoped to tenant).
+      operationId: search_facts_get_v1_search_get
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          maxLength: 1024
+          title: Query
+      - name: k
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 5
+          title: K
+      - name: as_of
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: As Of
+      - name: graph_depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 5
+          minimum: 0
+          default: 0
+          title: Graph Depth
+      - name: include_graph
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Graph
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+                title: Response Search Facts Get V1 Search Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/ask:
+    post:
+      tags:
+      - ask
+      summary: Ask Cortex
+      description: 'RAG endpoint: search → synthesize → answer.
+
+
+        Searches CORTEX memory for relevant facts, then uses the configured
+
+        LLM to synthesize an answer grounded in those facts.
+
+
+        Returns 503 if no LLM provider is configured.'
+      operationId: ask_cortex_v1_ask_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/llm/status:
+    get:
+      tags:
+      - ask
+      summary: Llm Status
+      description: Check LLM provider status and list supported providers.
+      operationId: llm_status_v1_llm_status_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMStatusResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{project}/export:
+    get:
+      tags:
+      - admin
+      summary: Export Project
+      description: Export a project to a JSON file (with path validation).
+      operationId: export_project_v1_projects__project__export_get
+      parameters:
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: path
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Path
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          default: json
+          title: Format
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Export Project V1 Projects  Project  Export Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/status:
+    get:
+      tags:
+      - admin
+      summary: Status
+      description: Get engine status and statistics.
+      operationId: status_v1_status_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/admin/keys:
+    post:
+      tags:
+      - admin
+      summary: Create Api Key
+      description: Create a new API key. First key requires no auth (bootstrap).
+      operationId: create_api_key_v1_admin_keys_post
+      parameters:
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Name
+      - name: tenant_id
+        in: query
+        required: false
+        schema:
+          type: string
+          default: default
+          title: Tenant Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          type: string
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Api Key V1 Admin Keys Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - admin
+      summary: List Api Keys
+      description: List all API keys (hashed, never reveals raw key).
+      operationId: list_api_keys_v1_admin_keys_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response List Api Keys V1 Admin Keys Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/handoff:
+    post:
+      tags:
+      - admin
+      summary: Handoff Generate
+      description: Generate a session handoff with hot context.
+      operationId: handoff_generate_v1_handoff_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Handoff Generate V1 Handoff Post
+  /v1/heartbeat:
+    post:
+      tags:
+      - timing
+      summary: Record Heartbeat
+      description: Record an activity heartbeat for automatic time tracking.
+      operationId: record_heartbeat_v1_heartbeat_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Record Heartbeat V1 Heartbeat Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/time/today:
+    get:
+      tags:
+      - timing
+      summary: Time Today
+      description: Get today's time tracking summary.
+      operationId: time_today_v1_time_today_get
+      parameters:
+      - name: project
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSummaryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/time:
+    get:
+      tags:
+      - timing
+      summary: Time Report
+      description: Get time tracking report for the last N days.
+      operationId: time_report_v1_time_get
+      parameters:
+      - name: project
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 7
+          title: Days
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSummaryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/time/history:
+    get:
+      tags:
+      - timing
+      summary: Get Time History
+      description: Get daily time history.
+      operationId: get_time_history_v1_time_history_get
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 365
+          minimum: 1
+          default: 7
+          title: Days
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                title: Response Get Time History V1 Time History Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/daemon/status:
+    get:
+      tags:
+      - daemon
+      summary: Daemon Status
+      description: Get last daemon watchdog check results.
+      operationId: daemon_status_v1_daemon_status_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Daemon Status V1 Daemon Status Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dashboard:
+    get:
+      tags:
+      - dashboard
+      summary: Dashboard
+      description: Serve the embedded memory dashboard.
+      operationId: dashboard_dashboard_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/agents:
+    post:
+      tags:
+      - agents
+      summary: Register Agent
+      description: Register a new agent for Reputation-Weighted Consensus (Requires
+        Admin).
+      operationId: register_agent_v1_agents_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRegisterRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - agents
+      summary: List Agents
+      description: List all agents for the current tenant.
+      operationId: list_agents_v1_agents_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentResponse'
+                title: Response List Agents V1 Agents Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/agents/{agent_id}:
+    get:
+      tags:
+      - agents
+      summary: Get Agent
+      description: Get agent details and current reputation.
+      operationId: get_agent_v1_agents__agent_id__get
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/graph/{project}:
+    get:
+      tags:
+      - graph
+      summary: Get Graph
+      description: Get entity graph for a specific project.
+      operationId: get_graph_v1_graph__project__get
+      parameters:
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Graph V1 Graph  Project  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/graph:
+    get:
+      tags:
+      - graph
+      summary: Get Graph All
+      description: Get entity graph across all projects.
+      operationId: get_graph_all_v1_graph_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Graph All V1 Graph Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/ledger/status:
+    get:
+      tags:
+      - ledger
+      summary: Get Ledger Status
+      description: Check the cryptographic integrity of all ledgers (Tx and Votes).
+      operationId: get_ledger_status_v1_ledger_status_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerReportResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/ledger/checkpoint:
+    post:
+      tags:
+      - ledger
+      summary: Create Checkpoint
+      description: Manually trigger a Merkle root checkpoint for recent transactions.
+      operationId: create_checkpoint_v1_ledger_checkpoint_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/ledger/verify:
+    get:
+      tags:
+      - ledger
+      summary: Verify Ledger
+      description: Alias for /status - performs full integrity verification.
+      operationId: verify_ledger_v1_ledger_verify_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerReportResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/missions/launch:
+    post:
+      tags:
+      - missions
+      summary: Launch Mission
+      description: Launch a new swarm mission through the CORTEX Launchpad.
+      operationId: launch_mission_v1_missions_launch_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionLaunchRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/missions/:
+    get:
+      tags:
+      - missions
+      summary: List Missions
+      description: List recent mission intents and reports from the ledger.
+      operationId: list_missions_v1_missions__get
+      parameters:
+      - name: project
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response List Missions V1 Missions  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/mejoralo/scan:
+    post:
+      tags:
+      - mejoralo
+      summary: Scan Project
+      description: Execute X-Ray 13D scan on a project.
+      operationId: scan_project_v1_mejoralo_scan_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MejoraloScanRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MejoraloScanResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/mejoralo/record:
+    post:
+      tags:
+      - mejoralo
+      summary: Record Session
+      description: Record a MEJORAlo audit session in the ledger.
+      operationId: record_session_v1_mejoralo_record_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MejoraloSessionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MejoraloSessionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/mejoralo/history:
+    get:
+      tags:
+      - mejoralo
+      summary: Get History
+      description: Retrieve MEJORAlo session history for a project.
+      operationId: get_history_v1_mejoralo_history_get
+      parameters:
+      - name: project
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Get History V1 Mejoralo History Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/mejoralo/ship:
+    post:
+      tags:
+      - mejoralo
+      summary: Ship Gate
+      description: Validate the 7 Seals for production readiness.
+      operationId: ship_gate_v1_mejoralo_ship_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MejoraloShipRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MejoraloShipResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/gate/status:
+    get:
+      tags:
+      - sovereign-gate
+      summary: Gate Status
+      description: Get the current SovereignGate status.
+      operationId: gate_status_v1_gate_status_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GateStatusResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/gate/pending:
+    get:
+      tags:
+      - sovereign-gate
+      summary: List Pending
+      description: List all pending L3 actions awaiting approval.
+      operationId: list_pending_v1_gate_pending_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GateActionResponse'
+                title: Response List Pending V1 Gate Pending Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/gate/{action_id}/approve:
+    post:
+      tags:
+      - sovereign-gate
+      summary: Approve Action
+      description: Approve a pending L3 action with HMAC signature.
+      operationId: approve_action_v1_gate__action_id__approve_post
+      parameters:
+      - name: action_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Action Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GateApprovalRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GateActionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/gate/{action_id}/deny:
+    post:
+      tags:
+      - sovereign-gate
+      summary: Deny Action
+      description: Deny a pending L3 action.
+      operationId: deny_action_v1_gate__action_id__deny_post
+      parameters:
+      - name: action_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Action Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/gate/audit:
+    get:
+      tags:
+      - sovereign-gate
+      summary: Get Audit Log
+      description: View the SovereignGate audit log.
+      operationId: get_audit_log_v1_gate_audit_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /hive/graph:
+    get:
+      tags:
+      - hive
+      summary: Get Hive Graph
+      description: 'Get the knowledge graph for 3D visualization.
+
+        Nodes are facts, links are semantic similarities.'
+      operationId: get_hive_graph_hive_graph_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 500
+          title: Limit
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Bearer <api-key>
+          title: Authorization
+        description: Bearer <api-key>
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphData'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    AgentRegisterRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          title: Name
+        agent_type:
+          type: string
+          title: Agent Type
+          description: ai, human, oracle, system
+          default: ai
+        public_key:
+          type: string
+          title: Public Key
+          description: Optional Ed25519 public key
+          default: ''
+      type: object
+      required:
+      - name
+      title: AgentRegisterRequest
+    AgentResponse:
+      properties:
+        agent_id:
+          type: string
+          title: Agent Id
+        name:
+          type: string
+          title: Name
+        agent_type:
+          type: string
+          title: Agent Type
+        reputation_score:
+          type: number
+          title: Reputation Score
+        created_at:
+          type: string
+          title: Created At
+      type: object
+      required:
+      - agent_id
+      - name
+      - agent_type
+      - reputation_score
+      - created_at
+      title: AgentResponse
+    AskRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 4096
+          minLength: 1
+          title: Query
+          description: Natural language question
+        project:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project
+          description: Filter by project (optional)
+        k:
+          type: integer
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          description: Number of facts to retrieve
+          default: 10
+        temperature:
+          type: number
+          maximum: 2.0
+          minimum: 0.0
+          title: Temperature
+          description: LLM sampling temperature
+          default: 0.3
+        max_tokens:
+          type: integer
+          maximum: 8192.0
+          minimum: 64.0
+          title: Max Tokens
+          description: Max response tokens
+          default: 2048
+        system_prompt:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: System Prompt
+          description: Override system prompt (optional)
+      type: object
+      required:
+      - query
+      title: AskRequest
+      description: 'RAG query: search CORTEX memory and synthesize an answer.'
+    AskResponse:
+      properties:
+        answer:
+          type: string
+          title: Answer
+        sources:
+          items:
+            $ref: '#/components/schemas/AskSource'
+          type: array
+          title: Sources
+        model:
+          type: string
+          title: Model
+        provider:
+          type: string
+          title: Provider
+        facts_found:
+          type: integer
+          title: Facts Found
+      type: object
+      required:
+      - answer
+      - sources
+      - model
+      - provider
+      - facts_found
+      title: AskResponse
+      description: RAG response with answer and sources.
+    AskSource:
+      properties:
+        fact_id:
+          type: integer
+          title: Fact Id
+        content:
+          type: string
+          title: Content
+        score:
+          type: number
+          title: Score
+        project:
+          type: string
+          title: Project
+      type: object
+      required:
+      - fact_id
+      - content
+      - score
+      - project
+      title: AskSource
+      description: A source fact that contributed to the answer.
+    CheckpointResponse:
+      properties:
+        checkpoint_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Checkpoint Id
+        message:
+          type: string
+          title: Message
+        status:
+          type: string
+          title: Status
+          default: success
+      type: object
+      required:
+      - checkpoint_id
+      - message
+      title: CheckpointResponse
+    DimensionResultModel:
+      properties:
+        name:
+          type: string
+          title: Name
+        score:
+          type: integer
+          maximum: 100.0
+          minimum: 0.0
+          title: Score
+        weight:
+          type: string
+          title: Weight
+        findings:
+          items:
+            type: string
+          type: array
+          title: Findings
+      type: object
+      required:
+      - name
+      - score
+      - weight
+      title: DimensionResultModel
+    FactResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        project:
+          type: string
+          title: Project
+        content:
+          type: string
+          title: Content
+        fact_type:
+          type: string
+          title: Fact Type
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+        valid_from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Valid From
+        valid_until:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Valid Until
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata
+        confidence:
+          type: string
+          title: Confidence
+          default: stated
+        consensus_score:
+          type: number
+          title: Consensus Score
+          default: 1.0
+        tx_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tx Id
+        hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hash
+      type: object
+      required:
+      - id
+      - project
+      - content
+      - fact_type
+      - tags
+      - created_at
+      - updated_at
+      title: FactResponse
+    GateActionResponse:
+      properties:
+        action_id:
+          type: string
+          title: Action Id
+        level:
+          type: string
+          title: Level
+        description:
+          type: string
+          title: Description
+        command:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Command
+        project:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          title: Created At
+        approved_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approved At
+        operator_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Operator Id
+      type: object
+      required:
+      - action_id
+      - level
+      - description
+      - status
+      - created_at
+      title: GateActionResponse
+    GateApprovalRequest:
+      properties:
+        signature:
+          type: string
+          title: Signature
+          description: HMAC-SHA256 signature of the challenge
+        operator_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Operator Id
+          description: Operator identifier
+      type: object
+      required:
+      - signature
+      title: GateApprovalRequest
+    GateStatusResponse:
+      properties:
+        policy:
+          type: string
+          title: Policy
+        timeout_seconds:
+          type: integer
+          title: Timeout Seconds
+        pending:
+          type: integer
+          title: Pending
+          default: 0
+        approved:
+          type: integer
+          title: Approved
+          default: 0
+        denied:
+          type: integer
+          title: Denied
+          default: 0
+        expired:
+          type: integer
+          title: Expired
+          default: 0
+        executed:
+          type: integer
+          title: Executed
+          default: 0
+        total_audit_entries:
+          type: integer
+          title: Total Audit Entries
+          default: 0
+      type: object
+      required:
+      - policy
+      - timeout_seconds
+      title: GateStatusResponse
+    GraphData:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/GraphNode'
+          type: array
+          title: Nodes
+        links:
+          items:
+            $ref: '#/components/schemas/GraphLink'
+          type: array
+          title: Links
+      type: object
+      required:
+      - nodes
+      - links
+      title: GraphData
+    GraphLink:
+      properties:
+        source:
+          type: integer
+          title: Source
+        target:
+          type: integer
+          title: Target
+        value:
+          type: number
+          title: Value
+      type: object
+      required:
+      - source
+      - target
+      - value
+      title: GraphLink
+    GraphNode:
+      properties:
+        id:
+          type: integer
+          title: Id
+        val:
+          type: integer
+          title: Val
+        name:
+          type: string
+          title: Name
+        group:
+          type: string
+          title: Group
+        color:
+          type: string
+          title: Color
+      type: object
+      required:
+      - id
+      - val
+      - name
+      - group
+      - color
+      title: GraphNode
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HeartbeatRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+        entity:
+          type: string
+          maxLength: 1024
+          title: Entity
+          default: ''
+        category:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Category
+        branch:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Branch
+        language:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Language
+        meta:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Meta
+      type: object
+      required:
+      - project
+      title: HeartbeatRequest
+    LLMStatusResponse:
+      properties:
+        available:
+          type: boolean
+          title: Available
+        provider:
+          type: string
+          title: Provider
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+        supported_providers:
+          items:
+            type: string
+          type: array
+          title: Supported Providers
+      type: object
+      required:
+      - available
+      - provider
+      - supported_providers
+      title: LLMStatusResponse
+      description: LLM provider status.
+    LedgerReportResponse:
+      properties:
+        valid:
+          type: boolean
+          title: Valid
+        violations:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Violations
+        tx_checked:
+          type: integer
+          title: Tx Checked
+          default: 0
+        roots_checked:
+          type: integer
+          title: Roots Checked
+          default: 0
+        votes_checked:
+          type: integer
+          title: Votes Checked
+          default: 0
+        vote_checkpoints_checked:
+          type: integer
+          title: Vote Checkpoints Checked
+          default: 0
+      type: object
+      required:
+      - valid
+      - violations
+      title: LedgerReportResponse
+    MejoraloScanRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+        path:
+          type: string
+          title: Path
+          description: Ruta al directorio del proyecto
+        deep:
+          type: boolean
+          title: Deep
+          description: Activa dimensión Psi + análisis profundo
+          default: false
+      type: object
+      required:
+      - project
+      - path
+      title: MejoraloScanRequest
+    MejoraloScanResponse:
+      properties:
+        project:
+          type: string
+          title: Project
+        score:
+          type: integer
+          title: Score
+        stack:
+          type: string
+          title: Stack
+        dimensions:
+          items:
+            $ref: '#/components/schemas/DimensionResultModel'
+          type: array
+          title: Dimensions
+        dead_code:
+          type: boolean
+          title: Dead Code
+        total_files:
+          type: integer
+          title: Total Files
+          default: 0
+        total_loc:
+          type: integer
+          title: Total Loc
+          default: 0
+        fact_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Fact Id
+      type: object
+      required:
+      - project
+      - score
+      - stack
+      - dimensions
+      - dead_code
+      title: MejoraloScanResponse
+    MejoraloSessionRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+        score_before:
+          type: integer
+          maximum: 100.0
+          minimum: 0.0
+          title: Score Before
+        score_after:
+          type: integer
+          maximum: 100.0
+          minimum: 0.0
+          title: Score After
+        actions:
+          items:
+            type: string
+          type: array
+          title: Actions
+      type: object
+      required:
+      - project
+      - score_before
+      - score_after
+      title: MejoraloSessionRequest
+    MejoraloSessionResponse:
+      properties:
+        fact_id:
+          type: integer
+          title: Fact Id
+        project:
+          type: string
+          title: Project
+        delta:
+          type: integer
+          title: Delta
+        status:
+          type: string
+          title: Status
+          default: recorded
+      type: object
+      required:
+      - fact_id
+      - project
+      - delta
+      title: MejoraloSessionResponse
+    MejoraloShipRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+        path:
+          type: string
+          title: Path
+          description: Ruta al directorio del proyecto
+      type: object
+      required:
+      - project
+      - path
+      title: MejoraloShipRequest
+    MejoraloShipResponse:
+      properties:
+        project:
+          type: string
+          title: Project
+        ready:
+          type: boolean
+          title: Ready
+        seals:
+          items:
+            $ref: '#/components/schemas/ShipSealModel'
+          type: array
+          title: Seals
+        passed:
+          type: integer
+          title: Passed
+        total:
+          type: integer
+          title: Total
+          default: 7
+      type: object
+      required:
+      - project
+      - ready
+      - seals
+      - passed
+      title: MejoraloShipResponse
+    MissionLaunchRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+        goal:
+          type: string
+          maxLength: 2000
+          title: Goal
+        formation:
+          type: string
+          title: Formation
+          default: IRON_DOME
+        agents:
+          type: integer
+          maximum: 50.0
+          minimum: 1.0
+          title: Agents
+          default: 10
+      type: object
+      required:
+      - project
+      - goal
+      title: MissionLaunchRequest
+    MissionResponse:
+      properties:
+        intent_id:
+          type: integer
+          title: Intent Id
+        result_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Result Id
+        status:
+          type: string
+          title: Status
+        stdout:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stdout
+        stderr:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stderr
+      type: object
+      required:
+      - intent_id
+      - status
+      title: MissionResponse
+    SearchRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 1024
+          title: Query
+          description: Natural language search query
+        k:
+          type: integer
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          description: Number of results
+          default: 5
+        project:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Project
+          description: Filter by project
+        as_of:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: As Of
+          description: Temporal filter (ISO 8601)
+        fact_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fact Type
+          description: Filter by fact type
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Tags
+          description: Filter by tags
+        graph_depth:
+          type: integer
+          maximum: 5.0
+          minimum: 0.0
+          title: Graph Depth
+          description: Enable Graph-RAG (0=off, >0=depth of context traversal)
+          default: 0
+        include_graph:
+          type: boolean
+          title: Include Graph
+          description: Include the localized context subgraph in response
+          default: false
+      type: object
+      required:
+      - query
+      title: SearchRequest
+    SearchResult:
+      properties:
+        fact_id:
+          type: integer
+          title: Fact Id
+        project:
+          type: string
+          title: Project
+        content:
+          type: string
+          title: Content
+        fact_type:
+          type: string
+          title: Fact Type
+        score:
+          type: number
+          title: Score
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+        consensus_score:
+          type: number
+          title: Consensus Score
+          default: 1.0
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+        valid_from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Valid From
+        valid_until:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Valid Until
+        tx_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tx Id
+        hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hash
+        context:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Context
+          description: Graph-RAG context (subgraph or related entities)
+      type: object
+      required:
+      - fact_id
+      - project
+      - content
+      - fact_type
+      - score
+      - tags
+      - created_at
+      - updated_at
+      title: SearchResult
+    ShipSealModel:
+      properties:
+        name:
+          type: string
+          title: Name
+        passed:
+          type: boolean
+          title: Passed
+        detail:
+          type: string
+          title: Detail
+          default: ''
+      type: object
+      required:
+      - name
+      - passed
+      title: ShipSealModel
+    StatusResponse:
+      properties:
+        version:
+          type: string
+          title: Version
+        total_facts:
+          type: integer
+          title: Total Facts
+        active_facts:
+          type: integer
+          title: Active Facts
+        deprecated:
+          type: integer
+          title: Deprecated
+        projects:
+          type: integer
+          title: Projects
+        embeddings:
+          type: integer
+          title: Embeddings
+        transactions:
+          type: integer
+          title: Transactions
+        db_size_mb:
+          type: number
+          title: Db Size Mb
+      type: object
+      required:
+      - version
+      - total_facts
+      - active_facts
+      - deprecated
+      - projects
+      - embeddings
+      - transactions
+      - db_size_mb
+      title: StatusResponse
+    StoreRequest:
+      properties:
+        project:
+          type: string
+          maxLength: 100
+          title: Project
+          description: Project/namespace for the fact
+        content:
+          type: string
+          maxLength: 50000
+          title: Content
+          description: The fact content
+        fact_type:
+          type: string
+          maxLength: 20
+          title: Fact Type
+          description: 'Type: knowledge, decision, mistake, bridge, ghost'
+          default: knowledge
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+          description: Optional tags
+        source:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Source
+          description: Source of the fact (e.g. agent name)
+        meta:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Meta
+          description: Optional JSON metadata
+      type: object
+      required:
+      - project
+      - content
+      title: StoreRequest
+    StoreResponse:
+      properties:
+        fact_id:
+          type: integer
+          title: Fact Id
+        project:
+          type: string
+          title: Project
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - fact_id
+      - project
+      - message
+      title: StoreResponse
+    TimeSummaryResponse:
+      properties:
+        total_seconds:
+          type: integer
+          title: Total Seconds
+        total_hours:
+          type: number
+          title: Total Hours
+        by_category:
+          additionalProperties:
+            type: integer
+          type: object
+          title: By Category
+        by_project:
+          additionalProperties:
+            type: integer
+          type: object
+          title: By Project
+        entries:
+          type: integer
+          title: Entries
+        heartbeats:
+          type: integer
+          title: Heartbeats
+        top_entities:
+          items:
+            items: {}
+            type: array
+          type: array
+          title: Top Entities
+      type: object
+      required:
+      - total_seconds
+      - total_hours
+      - by_category
+      - by_project
+      - entries
+      - heartbeats
+      - top_entities
+      title: TimeSummaryResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VoteRequest:
+      properties:
+        value:
+          type: integer
+          title: Value
+          description: 1 to verify, -1 to dispute, 0 to remove
+      type: object
+      required:
+      - value
+      title: VoteRequest
+    VoteResponse:
+      properties:
+        fact_id:
+          type: integer
+          title: Fact Id
+        agent:
+          type: string
+          title: Agent
+        vote:
+          type: integer
+          title: Vote
+        new_consensus_score:
+          type: number
+          title: New Consensus Score
+        confidence:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Confidence
+        status:
+          type: string
+          title: Status
+          default: recorded
+      type: object
+      required:
+      - fact_id
+      - agent
+      - vote
+      - new_consensus_score
+      title: VoteResponse
+    VoteV2Request:
+      properties:
+        agent_id:
+          type: string
+          title: Agent Id
+          description: UUID of the registered agent
+        vote:
+          type: integer
+          title: Vote
+          description: 1 to verify, -1 to dispute, 0 to remove
+        reason:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+          title: Reason
+        signature:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Signature
+          description: Optional cryptographic signature
+      type: object
+      required:
+      - agent_id
+      - vote
+      title: VoteV2Request

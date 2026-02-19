@@ -1,0 +1,25 @@
+{
+  "name": "@cortex-memory/sdk",
+  "version": "0.1.0",
+  "description": "JavaScript/TypeScript SDK for CORTEX — Sovereign Memory Engine for Enterprise AI Swarms",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist/"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["cortex", "memory", "ai", "agents", "rag", "semantic-search"],
+  "author": "Borja Moskv <borjamoskv@gmail.com>",
+  "license": "BSL-1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borjamoskv/cortex"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
