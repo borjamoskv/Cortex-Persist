@@ -22,7 +22,7 @@ async def search_facts(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id,
+        project=auth.tenant_id or req.project,
         as_of=req.as_of,
         graph_depth=req.graph_depth,
         include_graph=req.include_graph,

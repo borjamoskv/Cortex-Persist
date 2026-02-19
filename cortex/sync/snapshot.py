@@ -61,7 +61,7 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
         "",
     ]
 
-    stats = await engine.stats()
+    stats = engine.stats()
     db_path = engine._db_path
     db_size_mb = db_path.stat().st_size / (1024 * 1024) if db_path.exists() else 0.0
 

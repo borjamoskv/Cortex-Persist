@@ -20,20 +20,37 @@ def client():
     # Force lifespan to run and use the test DB
     import cortex.api as api_mod
 
-    original_db = api_mod.DB_PATH
-    # Use the module-level _test_db if env var is missing
+    import cortex.config
+    
+    original_db_api = api_mod.DB_PATH
+    original_db_config = cortex.config.DB_PATH
+    
+    # Patch both locations as they are imported separately
     api_mod.DB_PATH = os.environ.get("CORTEX_DB", _test_db)
+    cortex.config.DB_PATH = os.environ.get("CORTEX_DB", _test_db)
+    
+    # Reset singleton to ensure it picks up the new DB_PATH
+    import cortex.auth
+    cortex.auth._auth_manager = None
+    
+    import cortex.api_state
+    cortex.api_state.auth_manager = None
 
     try:
         with TestClient(api_mod.app) as c:
             yield c
     finally:
-        api_mod.DB_PATH = original_db
+        api_mod.DB_PATH = original_db_api
+        cortex.config.DB_PATH = original_db_config
+        
+        # Reset again to restore original state
+        cortex.auth._auth_manager = None
+        cortex.api_state.auth_manager = None
 
 
 @pytest.fixture(scope="module")
 def api_key(client):
-    resp = client.post("/v1/admin/keys?name=hardening-test&tenant_id=default")
+    resp = client.post("/v1/admin/keys?name=hardening-test&tenant_id=")
     if resp.status_code != 200:
         pytest.fail(f"Failed to create key (Status {resp.status_code}): {resp.text}")
     return resp.json()["key"]

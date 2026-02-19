@@ -23,9 +23,10 @@ def engine(tmp_path):
     """Create a fresh engine in a temp directory."""
     db_path = tmp_path / "test.db"
     eng = CortexEngine(db_path=db_path)
-    eng.init_db()
+
+    eng.init_db_sync()
     yield eng
-    eng.close()
+    eng.close_sync()
 
 
 @pytest.fixture
@@ -145,10 +146,10 @@ class TestWriteBack:
         monkeypatch.setattr("cortex.sync.common.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         # Store test facts
-        engine.store("test", "Test ghost content", fact_type="ghost")
-        engine.store("test", "Test knowledge content", fact_type="knowledge")
-        engine.store("test", "Test error content", fact_type="error")
-        engine.store("test", "Test bridge content", fact_type="bridge")
+        engine.store_sync("test", "Test ghost content", fact_type="ghost")
+        engine.store_sync("test", "Test knowledge content", fact_type="knowledge")
+        engine.store_sync("test", "Test error content", fact_type="error")
+        engine.store_sync("test", "Test bridge content", fact_type="bridge")
 
         result = export_to_json(engine)
 
@@ -161,7 +162,7 @@ class TestWriteBack:
         monkeypatch.setattr("cortex.sync.write.MEMORY_DIR", tmp_path / "memory")
         monkeypatch.setattr("cortex.sync.common.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
-        engine.store("test", "Some content", fact_type="knowledge")
+        engine.store_sync("test", "Some content", fact_type="knowledge")
 
         result1 = export_to_json(engine)
         result2 = export_to_json(engine)
@@ -174,31 +175,34 @@ class TestWriteBack:
 class TestExportSnapshot:
     """Tests for markdown snapshot export."""
 
-    def test_snapshot_creates_file(self, engine, tmp_path):
+    @pytest.mark.asyncio
+    async def test_snapshot_creates_file(self, engine, tmp_path):
         """Export should create a markdown file."""
-        engine.store("test-project", "Test fact for snapshot")
+        engine.store_sync("test-project", "Test fact for snapshot")
         out_path = tmp_path / "snapshot.md"
 
-        result = export_snapshot(engine, out_path=out_path)
+        result = await engine.export_snapshot(out_path=out_path)
 
         assert result == out_path
         assert out_path.exists()
 
-    def test_snapshot_contains_facts(self, engine, tmp_path):
+    @pytest.mark.asyncio
+    async def test_snapshot_contains_facts(self, engine, tmp_path):
         """Snapshot should include stored facts."""
-        engine.store("test-project", "Unique snapshot test content xyz123")
+        engine.store_sync("test-project", "Unique snapshot test content xyz123")
         out_path = tmp_path / "snapshot.md"
 
-        export_snapshot(engine, out_path=out_path)
+        await engine.export_snapshot(out_path=out_path)
         content = out_path.read_text(encoding="utf-8")
 
         assert "Unique snapshot test content xyz123" in content
         assert "test-project" in content
 
-    def test_snapshot_contains_header(self, engine, tmp_path):
+    @pytest.mark.asyncio
+    async def test_snapshot_contains_header(self, engine, tmp_path):
         """Snapshot should have CORTEX header."""
         out_path = tmp_path / "snapshot.md"
-        export_snapshot(engine, out_path=out_path)
+        await engine.export_snapshot(out_path=out_path)
         content = out_path.read_text(encoding="utf-8")
 
         assert "CORTEX" in content

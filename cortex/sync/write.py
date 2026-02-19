@@ -114,7 +114,7 @@ def export_to_json(engine: CortexEngine) -> WritebackResult:
 
 def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye ghosts.json desde facts tipo 'ghost'."""
-    conn = engine._get_conn()
+    conn = engine._get_sync_conn()
     rows = conn.execute(
         "SELECT project, meta FROM facts "
         "WHERE fact_type = 'ghost' AND valid_until IS NULL "
@@ -137,7 +137,7 @@ def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
 
 def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye system.json desde facts tipo 'knowledge' y 'decision'."""
-    conn = engine._get_conn()
+    conn = engine._get_sync_conn()
 
     # Leer system.json existente para preservar estructura
     system_path = MEMORY_DIR / "system.json"
@@ -204,7 +204,7 @@ def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
 
 def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye mistakes.jsonl desde facts tipo 'error'."""
-    conn = engine._get_conn()
+    conn = engine._get_sync_conn()
     rows = conn.execute(
         "SELECT project, content, tags, valid_from, meta FROM facts "
         "WHERE fact_type = 'error' AND valid_until IS NULL ORDER BY id"
@@ -234,7 +234,7 @@ def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
 
 def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye bridges.jsonl desde facts tipo 'bridge'."""
-    conn = engine._get_conn()
+    conn = engine._get_sync_conn()
     rows = conn.execute(
         "SELECT content, tags, valid_from, meta FROM facts "
         "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
