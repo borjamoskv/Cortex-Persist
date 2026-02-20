@@ -36,7 +36,7 @@ SECURITY_PATTERNS = re.compile(
     re.IGNORECASE,
 )
 
-MAX_LOC = 300  # Lines of code threshold for architecture dimension
+MAX_LOC = 500  # Lines of code threshold for architecture dimension
 
 # File extensions to scan per stack
 SCAN_EXTENSIONS = {
