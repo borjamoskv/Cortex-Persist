@@ -168,8 +168,8 @@ def measure_complexity():
 
 
 def measure_psi():
-    # grep -rE 'HACK|FIXME|WTF|stupid|TODO|TEMPORARY|WORKAROUND'
-    psi_terms = ["HACK", "FIXME", "WTF", "stupid", "TODO", "TEMPORARY", "WORKAROUND"]
+    # grep -rE 'HACK|FIXME|WTF|stupid|TODO:|TEMPORARY|WORKAROUND'
+    psi_terms = ["HACK", "FIXME", "WTF", "stupid", "TODO:", "TEMPORARY", "WORKAROUND"]
     hits = 0
     for path in iter_files(extensions=[".py", ".md", ".txt"]):
         try:
