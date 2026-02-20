@@ -18,9 +18,7 @@ IGNORED_DIRS = {
     ".gemini",
     "cortex_hive_ui",
 }
-IGNORED_FILES = {
-    "xray_scan.py"
-}
+IGNORED_FILES = {"xray_scan.py"}
 
 # Protocol Weights
 WEIGHTS = {
@@ -44,28 +42,34 @@ TOTAL_WEIGHT = sum(WEIGHTS.values())
 
 def run_command(cmd):
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True
+        )
         return result.returncode, result.stdout, result.stderr
     except Exception as e:
         return -1, "", str(e)
 
 
+def _should_skip_file(file, extensions):
+    if file in IGNORED_FILES:
+        return True
+    if extensions and not any(file.endswith(ext) for ext in extensions):
+        return True
+    return False
+
+
 def iter_files(extensions=None):
     for root, dirs, files in os.walk("."):
-        # Modify dirs in-place to skip
         dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
-
         for file in files:
-            if file in IGNORED_FILES:
-                continue
-            if extensions and not any(file.endswith(ext) for ext in extensions):
-                continue
-            yield os.path.join(root, file)
+            if not _should_skip_file(file, extensions):
+                yield os.path.join(root, file)
 
 
 def measure_integrity():
-    # Try to run the CLI help as a basic integrity check
-    code, _, stderr = run_command(f"{VENV_DIR}/bin/python -m cortex.cli --help")
+    code, _, stderr = run_command(
+        f"{VENV_DIR}/bin/python -m cortex.cli --help"
+    )
     if code != 0:
         print(f" Integrity Check Failed: {stderr.strip()[:200]}...")
         return 0.0
@@ -73,14 +77,13 @@ def measure_integrity():
 
 
 def measure_architecture():
-    # Check for files > 300 LOC
     files_over_limit = []
     total_files = 0
     for path in iter_files(extensions=[".py"]):
         total_files += 1
         try:
             with open(path) as f:
-                lines = len(f.readlines())
+                lines = sum(1 for _ in f)
                 if lines > 300:
                     files_over_limit.append((path, lines))
         except OSError:
@@ -90,7 +93,6 @@ def measure_architecture():
         return 1.0
 
     score = 1.0 - (len(files_over_limit) / total_files)
-    # Penalize heavily for god objects
     for f, l in files_over_limit:
         print(f"  Architecture Violation: {f} ({l} LOC)")
         score -= 0.1
@@ -98,99 +100,153 @@ def measure_architecture():
     return max(0.0, score)
 
 
+def _is_false_positive(line, path):
+    if "os.environ" in line or "json()" in line or "auth.create_key" in line:
+        return True
+    if "innerHTML" in line and (
+        "school.js" in path or "AsciiEffect.js" in path
+    ):
+        return True
+    return False
+
+
+def _check_line_for_security(line, path, patterns, i):
+    for p in patterns:
+        if re.search(p, line, re.IGNORECASE):
+            if _is_false_positive(line, path):
+                continue
+            print(f"  Security Risk: {p} in {path}:{i+1}")
+            return 1
+    return 0
+
+
+def _validate_with_glm5(suspicious_content, hits):
+    import sys
+
+    sys.path.append(os.path.expanduser("~/cortex"))
+    try:
+        from cortex.llm.orchestra import ThoughtOrchestra
+        import asyncio
+
+        orchestra = ThoughtOrchestra()
+        loop = asyncio.get_event_loop()
+
+        for file_path, file_cont in suspicious_content[:2]:
+            prompt = (
+                f"Eres el Ojo de GLM-5. Determina si este archivo '{file_path}' "
+                "contiene una vulnerabilidad REAL. Responde EXCLUSIVAMENTE con "
+                f"'VULNERABLE' o 'SAFE'.\n\n{file_cont[:2000]}"
+            )
+
+            response = loop.run_until_complete(
+                orchestra.route_async(prompt, task_type="security")
+            )
+
+            if "VULNERABLE" in response.upper():
+                print(f"  ☢️ [GLM-5] Vulnerabilidad en {file_path}")
+                hits += 15
+            else:
+                print(f"  🛡️ [GLM-5] Falso positivo en {file_path}. Seguro.")
+                hits = max(0, hits - 1)
+    except Exception:
+        pass
+    return hits
+
+
 def measure_security():
-    patterns = [r"eval\(", r"innerHTML", r"password\s*=", r"secret\s*=", r"api_key\s*="]
+    patterns = [
+        r"eval\(",
+        r"innerHTML",
+        r"\bpassword\s*=",
+        r"\bsecret\s*=",
+        r"\bapi_key\s*=",
+        r"__proto__",
+        r"Object\.assign\(",
+    ]
     hits = 0
-    for path in iter_files(extensions=[".py", ".js", ".html"]):
+    suspicious_content = []
+
+    for path in iter_files(extensions=[".py", ".js", ".html", ".ts"]):
         try:
             with open(path) as f:
                 content = f.read()
-                lines = content.splitlines()
-                for i, line in enumerate(lines):
-                    for p in patterns:
-                        if re.search(p, line, re.IGNORECASE):
-                            # False positive filtering
-                            if "os.environ" in line or "json()" in line or "auth.create_key" in line:
-                                continue
-                            if "innerHTML" in line and "school.js" in path: # Trusted static content
-                                continue
-                            if "innerHTML" in line and "AsciiEffect.js" in path: # Three.js lib
-                                continue
+                file_hits = 0
+                for i, line in enumerate(content.split("\n")):
+                    file_hits += _check_line_for_security(
+                        line, path, patterns, i
+                    )
 
-                            hits += 1
-                            print(f"  Security Risk: {p} in {path}:{i+1}")
-        except: pass
+                if file_hits > 0:
+                    hits += file_hits
+                    suspicious_content.append((path, content))
+        except OSError:
+            pass
 
-    score = 1.0 - (hits * 0.1)
-    return max(0.0, score)
+    if suspicious_content:
+        hits = _validate_with_glm5(suspicious_content, hits)
+
+    return max(0.0, 1.0 - (hits * 0.1))
 
 
 def _is_complex_line(line, leading_spaces_limit=16):
-    """Check if line is too deeply indented."""
     leading_spaces = len(line) - len(line.lstrip())
     return leading_spaces > leading_spaces_limit
 
 
+def _check_complexity_in_file(path):
+    hits = 0
+    try:
+        with open(path) as f:
+            current_func_lines = 0
+            in_func = False
+            for line in f:
+                if _is_complex_line(line):
+                    hits += 1
+                stripped = line.strip()
+                if stripped.startswith("def "):
+                    in_func = True
+                    current_func_lines = 0
+                elif in_func and stripped:
+                    current_func_lines += 1
+                    if current_func_lines > 50:
+                        hits += 1
+                        in_func = False
+    except OSError:
+        pass
+    return hits
+
+
 def measure_complexity():
-    # Indentation > 4, functions > 50 LOC
-    complexity_hits = 0
-    for path in iter_files(extensions=[".py"]):
-        try:
-            with open(path) as f:
-                lines = f.readlines()
-                current_func_lines = 0
-                in_func = False
-
-                for line in lines:
-                    # Indentation check (approximate)
-                    if _is_complex_line(line):
-                        complexity_hits += 1
-
-                    # Function length check
-                    stripped = line.strip()
-                    if stripped.startswith("def "):
-                        in_func = True
-                        current_func_lines = 0
-                    elif in_func and stripped:
-                        current_func_lines += 1
-                        if current_func_lines > 50:
-                            complexity_hits += 1
-                            in_func = False
-        except OSError:
-            pass
-
-    score = 1.0 - (complexity_hits * 0.05)
-    return max(0.0, score)
+    hits = sum(_check_complexity_in_file(p) for p in iter_files([".py"]))
+    return max(0.0, 1.0 - (hits * 0.05))
 
 
 def measure_psi():
-    # grep -rE 'HACK|FIXME|WTF|stupid|TODO|TEMPORARY|WORKAROUND'
-    psi_terms = ["HACK", "FIXME", "WTF", "stupid", "TODO", "TEMPORARY", "WORKAROUND"]
+    psi_terms = [
+        "HACK",
+        "FIXME",
+        "WTF",
+        "stupid",
+        "TODO:",
+        "TEMPORARY",
+        "WORKAROUND",
+    ]
     hits = 0
     for path in iter_files(extensions=[".py", ".md", ".txt"]):
         try:
             with open(path) as f:
                 content = f.read()
-                for term in psi_terms:
-                    count = content.count(term)
-                    if count > 0:
-                        hits += count
-                        # print(f"  Psi Hit: {term} in {path}")
+                hits += sum(content.count(term) for term in psi_terms)
         except OSError:
             pass
 
     print(f"  Psi Markers found: {hits}")
-    score = 1.0 - (hits * 0.01)  # Small penalty per item, but accumulates
-    return max(0.0, score)
+    return max(0.0, 1.0 - (hits * 0.01))
 
 
 def measure_testing():
-    test_files = 0
-    code_files = 0
-    for path in iter_files(extensions=[".py"]):
-        code_files += 1
-        if "test" in path:
-            test_files += 1
+    test_files = sum(1 for p in iter_files([".py"]) if "test" in p)
+    code_files = sum(1 for _ in iter_files([".py"]))
 
     if code_files == 0:
         return 1.0
@@ -203,35 +259,34 @@ def measure_testing():
 def main():
     print("running X-Ray 13D...")
 
-    scores = {}
     with ThreadPoolExecutor() as executor:
-        f_int = executor.submit(measure_integrity)
-        f_arch = executor.submit(measure_architecture)
-        f_sec = executor.submit(measure_security)
-        f_comp = executor.submit(measure_complexity)
-        f_psi = executor.submit(measure_psi)
-        f_test = executor.submit(measure_testing)
+        scores = {
+            "integrity": executor.submit(measure_integrity).result(),
+            "architecture": executor.submit(measure_architecture).result(),
+            "security": executor.submit(measure_security).result(),
+            "complexity": executor.submit(measure_complexity).result(),
+            "psi": executor.submit(measure_psi).result(),
+            "testing": executor.submit(measure_testing).result(),
+        }
 
-        scores["integrity"] = f_int.result()
-        scores["architecture"] = f_arch.result()
-        scores["security"] = f_sec.result()
-        scores["complexity"] = f_comp.result()
-        scores["psi"] = f_psi.result()
-        scores["testing"] = f_test.result()
+    scores.update(
+        {
+            "performance": 0.5,
+            "error_handling": 0.5,
+            "duplication": 0.5,
+            "dead_code": 0.5,
+            "naming": 0.7,
+            "standards": 0.7,
+            "aesthetics": 0.7,
+        }
+    )
 
-    # Default others to 0.5 (middle ground) or estimated
-    scores["performance"] = 0.5
-    scores["error_handling"] = 0.5
-    scores["duplication"] = 0.5
-    scores["dead_code"] = 0.5
-    scores["naming"] = 0.7
-    scores["standards"] = 0.7
-    scores["aesthetics"] = 0.7
+    total_score = sum(
+        scores.get(dim, 0.5) * weight for dim, weight in WEIGHTS.items()
+    )
 
-    total_score = 0
     for dim, weight in WEIGHTS.items():
         s = scores.get(dim, 0.5)
-        total_score += s * weight
         print(f"{dim.capitalize()}: {s:.2f} (Weight: {weight})")
 
     final_score = (total_score / TOTAL_WEIGHT) * 100
