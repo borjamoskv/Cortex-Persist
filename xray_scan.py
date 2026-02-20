@@ -98,32 +98,71 @@ def measure_architecture():
     return max(0.0, score)
 
 
+def _check_line_for_security(line, path, patterns, i):
+    for p in patterns:
+        if re.search(p, line, re.IGNORECASE):
+            # False positive filtering
+            if "os.environ" in line or "json()" in line or "auth.create_key" in line:
+                continue
+            if "innerHTML" in line and "school.js" in path: # Trusted static content
+                continue
+            if "innerHTML" in line and "AsciiEffect.js" in path: # Three.js lib
+                continue
+            print(f"  Security Risk: {p} in {path}:{i+1}")
+            return 1
+    return 0
+
 def measure_security():
-    patterns = [r"eval\(", r"innerHTML", r"\bpassword\s*=", r"\bsecret\s*=", r"\bapi_key\s*="]
+    patterns = [r"eval\(", r"innerHTML", r"\bpassword\s*=", r"\bsecret\s*=", r"\bapi_key\s*=", r"__proto__", r"Object\.assign\("]
     hits = 0
-    for path in iter_files(extensions=[".py", ".js", ".html"]):
-        # Skip self-scan to avoid finding the patterns themselves
+    suspicious_content = []
+    
+    for path in iter_files(extensions=[".py", ".js", ".html", ".ts"]):
         if "xray_scan.py" in path:
             continue
 
         try:
             with open(path) as f:
                 content = f.read()
-                lines = content.splitlines()
-                for i, line in enumerate(lines):
-                    for p in patterns:
-                        if re.search(p, line, re.IGNORECASE):
-                            # False positive filtering
-                            if "os.environ" in line or "json()" in line or "auth.create_key" in line:
-                                continue
-                            if "innerHTML" in line and "school.js" in path: # Trusted static content
-                                continue
-                            if "innerHTML" in line and "AsciiEffect.js" in path: # Three.js lib
-                                continue
-
-                            hits += 1
-                            print(f"  Security Risk: {p} in {path}:{i+1}")
-        except: pass
+                file_hits = 0
+                for i, line in enumerate(content.split('\n')):
+                    file_hits += _check_line_for_security(line, path, patterns, i)
+                
+                if file_hits > 0:
+                    hits += file_hits
+                    suspicious_content.append((path, content))
+        except OSError:
+            pass
+            
+    # 🧠 Ojo de GLM-5: Neural Verification against false positives and deep zero-days
+    if suspicious_content:
+        import sys
+        sys.path.append(os.path.expanduser("~/cortex"))
+        try:
+            # Invoking the cognitive layer inside the scanner
+            from cortex.llm.orchestra import ThoughtOrchestra
+            import asyncio
+            
+            orchestra = ThoughtOrchestra()
+            
+            for file_path, file_cont in suspicious_content[:2]:
+                prompt = f"Eres el Ojo de GLM-5. Determina si este archivo '{file_path}' contiene una vulnerabilidad REAL (como Injection o Prototype Pollution). Responde EXCLUSIVAMENTE con 'VULNERABLE' o 'SAFE'.\n\n{file_cont[:2000]}"
+                
+                # Sincronizamos la llamada asíncrona rápidamente
+                loop = asyncio.get_event_loop()
+                response = loop.run_until_complete(
+                    orchestra.route_async(prompt, task_type="security")
+                )
+                
+                if "VULNERABLE" in response.upper():
+                    print(f"  ☢️ [GLM-5 X-Ray Neural] Vulnerabilidad CRÍTICA 0-Day confirmada en {file_path}")
+                    hits += 15 # Severe penalty to pull the score down to BRUTAL
+                else:
+                    print(f"  🛡️ [GLM-5 X-Ray Neural] Falso positivo mitigado en {file_path}. Validado Seguro.")
+                    hits -= max(0, file_hits) # Pardon the regex points
+                    
+        except Exception as e:
+            pass # Si falla cargarlo, ignora la capa neural
 
     score = 1.0 - (hits * 0.1)
     return max(0.0, score)
@@ -135,33 +174,33 @@ def _is_complex_line(line, leading_spaces_limit=16):
     return leading_spaces > leading_spaces_limit
 
 
+def _check_complexity_in_file(path):
+    hits = 0
+    try:
+        with open(path) as f:
+            current_func_lines = 0
+            in_func = False
+            for line in f:
+                if _is_complex_line(line):
+                    hits += 1
+                stripped = line.strip()
+                if stripped.startswith("def "):
+                    in_func = True
+                    current_func_lines = 0
+                elif in_func and stripped:
+                    current_func_lines += 1
+                    if current_func_lines > 50:
+                        hits += 1
+                        in_func = False
+    except OSError:
+        pass
+    return hits
+
 def measure_complexity():
     # Indentation > 4, functions > 50 LOC
     complexity_hits = 0
     for path in iter_files(extensions=[".py"]):
-        try:
-            with open(path) as f:
-                lines = f.readlines()
-                current_func_lines = 0
-                in_func = False
-
-                for line in lines:
-                    # Indentation check (approximate)
-                    if _is_complex_line(line):
-                        complexity_hits += 1
-
-                    # Function length check
-                    stripped = line.strip()
-                    if stripped.startswith("def "):
-                        in_func = True
-                        current_func_lines = 0
-                    elif in_func and stripped:
-                        current_func_lines += 1
-                        if current_func_lines > 50:
-                            complexity_hits += 1
-                            in_func = False
-        except OSError:
-            pass
+        complexity_hits += _check_complexity_in_file(path)
 
     score = 1.0 - (complexity_hits * 0.05)
     return max(0.0, score)

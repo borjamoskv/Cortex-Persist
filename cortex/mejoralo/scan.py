@@ -46,6 +46,7 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
     large_files: list[str] = []
     psi_findings: list[str] = []
     security_findings: list[str] = []
+    complexity_penalties = 0
 
     for sf in source_files:
         try:
@@ -60,6 +61,12 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
         # Architecture: files > MAX_LOC
         if loc > MAX_LOC:
             large_files.append(f"{rel} ({loc} LOC)")
+
+        # Complexity: count lines with > 16 spaces of indentation (4 levels deep)
+        for line in lines:
+            indent = len(line) - len(line.lstrip())
+            if indent >= 16:
+                complexity_penalties += 1
 
         content = "\n".join(lines)
 
@@ -116,14 +123,20 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
         )
     )
 
-    # 4. Complexity (indentation depth proxy — simplified)
-    complexity_score = 85 if source_files else 0
+    # 4. Complexity (indentation depth proxy)
+    if not source_files:
+        complexity_score = 0
+    else:
+        complexity_ratio = complexity_penalties / max(1, total_loc)
+        complexity_penalty = min(100, int(complexity_ratio * 100))
+        complexity_score = max(0, 100 - complexity_penalty)
+        
     dimensions.append(
         DimensionResult(
             name="Complejidad",
             score=complexity_score,
             weight="high",
-            findings=[],
+            findings=[f"High nesting detected in {len(source_files)} files"] if complexity_penalty > 0 else [],
         )
     )
 
