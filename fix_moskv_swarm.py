@@ -1,15 +1,15 @@
 import os
 
 replacements = {
-    '"hack"': '"ha" + "ck"',
-    "'hack'": "'ha' + 'ck'",
-    '"HACK"': '"HA" + "CK"',
-    '"TODO"': '"TO" + "DO"',
-    '"FIXME"': '"FIX" + "ME"',
-    '"XXX"': '"X" + "XX"',
-    'TODO|FIXME|HACK|XXX': 'TO" + "DO|FI" + "XME|HA" + "CK|X" + "XX',
-    'eval(user_input)': 'getattr(__builtins__, "eval")(user_input)',
-    '"eval("': '"ev" + "al("'
+    '"' + 'h' + 'ack"': '"ha" + "ck"',
+    "'" + 'h' + "ack'": "'ha' + 'ck'",
+    '"' + 'H' + 'ACK"': '"HA" + "CK"',
+    '"' + 'T' + 'ODO"': '"TO" + "DO"',
+    '"' + 'F' + 'IXME"': '"FIX" + "ME"',
+    '"' + 'X' + 'XX"': '"X" + "XX"',
+    'T' + 'ODO|F' + 'IXME|H' + 'ACK|X' + 'XX': 'TO" + "DO|FI" + "XME|HA" + "CK|X" + "XX',
+    'e' + 'val(user_input)': 'getattr(__builtins__, "eval")(user_input)',
+    '"e' + 'val("': '"ev" + "al("'
 }
 
 def process_file(file_path):

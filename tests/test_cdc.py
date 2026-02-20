@@ -31,7 +31,12 @@ async def test_cdc_outbox_flow(tmp_path):
 
     # 5. Process outbox
     # We expect this to return 0 if Neo4j is not running/configured
-    processed = await engine.process_graph_outbox_async()
-    assert processed == 0
+    from unittest.mock import patch
+    with patch("cortex.graph.backends.neo4j.Neo4jBackend") as MockBackend:
+        # Simulate uninitialized backend
+        instance = MockBackend.return_value
+        instance._initialized = False
+        processed = await engine.process_graph_outbox_async()
+        assert processed == 0
 
     await engine.close()
