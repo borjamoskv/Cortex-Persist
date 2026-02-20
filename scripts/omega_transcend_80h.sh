@@ -28,9 +28,8 @@ while true; do
     
     echo "[$(date)] [VÓRTICE AETHER] Iniciando mutación Ouroboros..." >> "$LOG_FILE"
     
-    # Randomly select a project to hit with a deep scan/audit
-    PROJECTS=("cortex" "game/naroa-2026" "game/moskv-swarm" "nexus-tracker" "antigravity" "cortex-landing")
-    RANDOM_PROJECT=${PROJECTS[$RANDOM % ${#PROJECTS[@]}]}
+    # Focus only on naroa.online
+    RANDOM_PROJECT="game/naroa-2026"
     
     echo "[$(date)] [AETHER-Ω] Lanzando MEJORAlo --brutal (Deep Audit) sobre $RANDOM_PROJECT..." >> "$LOG_FILE"
     

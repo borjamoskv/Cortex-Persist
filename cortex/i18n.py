@@ -279,5 +279,7 @@ def get_trans(key: str, lang: str | None = "en") -> str:
     Protected against LRU cache pollution attacks.
     Cached for high-performance localized responses (Sovereign Level).
     """
+    if key not in TRANSLATIONS:
+        return key
     return _cached_trans(key, _normalize_lang(lang))
 
