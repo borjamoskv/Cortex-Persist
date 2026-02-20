@@ -1,6 +1,28 @@
 import { create } from 'zustand';
 import * as Tone from 'tone';
 
+// ─── MASTER BUS (Singleton Audio Nodes) ─────────────────────────────
+export const masterCompressor = new Tone.Compressor({ threshold: -24, ratio: 4 });
+export const masterEQ = new Tone.EQ3({ low: 0, mid: 0, high: 0 });
+export const masterAnalyzer = new Tone.Analyser('fft', 64);
+export const masterMeter = new Tone.Meter({ smoothing: 0.8 });
+export const masterBus = new Tone.Channel(0, 0);
+
+// Chain: masterBus → EQ → Compressor → Analyzer + Meter → Destination
+masterBus.chain(masterEQ, masterCompressor, masterAnalyzer, masterMeter, Tone.getDestination());
+
+// ─── TRACK COLOR PALETTE ────────────────────────────────────────────
+const TRACK_COLORS = [
+  '#CCFF00', // Cyber Lime
+  '#6600FF', // Electric Violet
+  '#FF3366', // Neon Rose
+  '#00D4FF', // Cyan Pulse
+  '#FF9500', // Amber Core
+  '#06D6A0', // Emerald Synth
+  '#FF006E', // Magenta Rush
+  '#3A86FF', // Cobalt Wave
+];
+
 export interface Track {
   id: string;
   name: string;
@@ -39,10 +61,20 @@ interface WebAudioStore {
   bpm: number;
   zoom: number; // px per second
   
+  // Master Processing Node states
+  masterFx: {
+    eqLow: number;
+    eqMid: number;
+    eqHigh: number;
+    compThreshold: number;
+    compRatio: number;
+  };
+  
   // Actions
   addTrack: (file?: File) => Promise<void>;
   removeTrack: (id: string) => void;
   updateTrack: (id: string, updates: Partial<Track>) => void;
+  updateMasterFx: (updates: Partial<WebAudioStore['masterFx']>) => void;
   selectTrack: (id: string | null) => void;
   splitTrack: (id: string, splitTime: number) => void;
   togglePlay: () => Promise<void>;
@@ -60,17 +92,24 @@ export const useStore = create<WebAudioStore>((set, get) => ({
   masterVolume: 1,
   bpm: 120,
   zoom: 50,
+  masterFx: {
+    eqLow: 0,
+    eqMid: 0,
+    eqHigh: 0,
+    compThreshold: -24,
+    compRatio: 4,
+  },
 
   addTrack: async (file) => {
     await Tone.start(); // Ensure audio context is ready
     
-    let url = null;
+    let url: string | null = null;
     let duration = 0;
-    let player = null;
+    let player: Tone.Player | null = null;
     
     const reverb = new Tone.Freeverb({ roomSize: 0.8, wet: 0 });
     const delay = new Tone.PingPongDelay({ delayTime: "8n", feedback: 0.4, wet: 0 });
-    const channel = new Tone.Channel(0, 0).toDestination();
+    const channel = new Tone.Channel(0, 0).connect(masterBus);
 
     if (file) {
       url = URL.createObjectURL(file);
@@ -86,8 +125,9 @@ export const useStore = create<WebAudioStore>((set, get) => ({
         }
       });
       player.chain(reverb, delay, channel);
-      // We don't start here, we wait for onload if it's a file
     }
+
+    const colorIndex = get().tracks.length % TRACK_COLORS.length;
 
     set((state) => ({
       tracks: [...state.tracks, {
@@ -98,7 +138,7 @@ export const useStore = create<WebAudioStore>((set, get) => ({
         pan: 0,
         muted: false,
         solo: false,
-        color: state.tracks.length % 2 === 0 ? '#CCFF00' : '#6600FF',
+        color: TRACK_COLORS[colorIndex],
         startTime: 0,
         duration,
         sourceOffset: 0,
@@ -187,11 +227,11 @@ export const useStore = create<WebAudioStore>((set, get) => ({
     
     const timeIntoTrack = splitTime - track.startTime;
     
-    // Create new player for the sliced portion (sharing same audiourl)
+    // Create new player for the sliced portion (sharing same audio url)
     const newPlayer = new Tone.Player({ url: track.url || undefined });
     const newReverb = new Tone.Freeverb({ roomSize: track.fx.reverbSize, wet: track.fx.reverbOn ? track.fx.reverbMix : 0 });
     const newDelay = new Tone.PingPongDelay({ delayTime: "8n", feedback: 0.4, wet: track.fx.delayOn ? track.fx.delayMix : 0 });
-    const newChannel = new Tone.Channel(track.pan, Tone.gainToDb(track.volume)).toDestination();
+    const newChannel = new Tone.Channel(track.pan, Tone.gainToDb(track.volume)).connect(masterBus);
     newChannel.mute = track.muted;
     newChannel.solo = track.solo;
     
@@ -201,9 +241,6 @@ export const useStore = create<WebAudioStore>((set, get) => ({
     const newDuration = track.duration - timeIntoTrack;
     const newStartTime = splitTime;
     
-    // Schedule the new player
-    // Note: To avoid errors, we do this asynchronously or immediately if buffer is already loaded from Cache.
-    // Tone.js auto-caches URL buffers.
     newPlayer.sync().start(newStartTime, newSourceOffset, newDuration);
     
     // Update original track duration
@@ -225,9 +262,7 @@ export const useStore = create<WebAudioStore>((set, get) => ({
     };
     
     const newTracks = [...state.tracks];
-    // Shrink original track
     newTracks[trackIndex] = { ...track, duration: origUpdatedDuration };
-    // Insert new track right after
     newTracks.splice(trackIndex + 1, 0, newTrack);
     
     return { tracks: newTracks };
@@ -251,7 +286,7 @@ export const useStore = create<WebAudioStore>((set, get) => ({
   },
   
   setMasterVolume: (vol) => {
-    Tone.Destination.volume.value = Tone.gainToDb(vol);
+    masterBus.volume.value = Tone.gainToDb(vol);
     set({ masterVolume: vol });
   },
   
@@ -260,5 +295,17 @@ export const useStore = create<WebAudioStore>((set, get) => ({
     set({ bpm });
   },
 
-  setZoom: (z) => set({ zoom: z })
+  setZoom: (z) => set({ zoom: z }),
+
+  updateMasterFx: (updates) => set((state) => {
+    const newFx = { ...state.masterFx, ...updates };
+    
+    if (updates.eqLow !== undefined) masterEQ.low.value = updates.eqLow;
+    if (updates.eqMid !== undefined) masterEQ.mid.value = updates.eqMid;
+    if (updates.eqHigh !== undefined) masterEQ.high.value = updates.eqHigh;
+    if (updates.compThreshold !== undefined) masterCompressor.threshold.value = updates.compThreshold;
+    if (updates.compRatio !== undefined) masterCompressor.ratio.value = updates.compRatio;
+    
+    return { masterFx: newFx };
+  })
 }));

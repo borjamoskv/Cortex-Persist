@@ -46,10 +46,8 @@ class TursoBackend:
             ) from exc
 
         logger.info("Connecting to Turso: %s", self.url)
-        self._conn = libsql.connect(
-            self.url,
-            auth_token=self.auth_token,
-        )
+        import asyncio
+        self._conn = await asyncio.to_thread(libsql.connect, self.url, auth_token=self.auth_token)
         logger.info("Connected to Turso successfully")
 
     def _ensure_conn(self):
@@ -60,7 +58,8 @@ class TursoBackend:
         """Execute SQL and return rows as list of dicts."""
         self._ensure_conn()
         try:
-            cursor = self._conn.execute(sql, params)
+            import asyncio
+            cursor = await asyncio.to_thread(self._conn.execute, sql, params)
             if cursor.description is None:
                 return []
 
@@ -75,8 +74,9 @@ class TursoBackend:
         """Execute INSERT and return lastrowid."""
         self._ensure_conn()
         try:
-            cursor = self._conn.execute(sql, params)
-            self._conn.commit()
+            import asyncio
+            cursor = await asyncio.to_thread(self._conn.execute, sql, params)
+            await asyncio.to_thread(self._conn.commit)
             return cursor.lastrowid or 0
         except (OSError, ValueError) as e:
             logger.error("Turso insert error: %s", e)
@@ -86,9 +86,12 @@ class TursoBackend:
         """Execute a statement with multiple parameter sets."""
         self._ensure_conn()
         try:
-            for params in params_list:
-                self._conn.execute(sql, params)
-            self._conn.commit()
+            import asyncio
+            def _exec_many():
+                for params in params_list:
+                    self._conn.execute(sql, params)
+                self._conn.commit()
+            await asyncio.to_thread(_exec_many)
         except (OSError, ValueError) as e:
             logger.error("Turso executemany error: %s", e)
             raise
@@ -102,9 +105,12 @@ class TursoBackend:
         self._ensure_conn()
         statements = [s.strip() for s in script.split(";") if s.strip()]
         try:
-            for stmt in statements:
-                self._conn.execute(stmt)
-            self._conn.commit()
+            import asyncio
+            def _exec_script():
+                for stmt in statements:
+                    self._conn.execute(stmt)
+                self._conn.commit()
+            await asyncio.to_thread(_exec_script)
         except (OSError, ValueError) as e:
             logger.error("Turso executescript error: %s", e)
             raise
@@ -112,13 +118,15 @@ class TursoBackend:
     async def commit(self) -> None:
         """Commit current transaction."""
         self._ensure_conn()
-        self._conn.commit()
+        import asyncio
+        await asyncio.to_thread(self._conn.commit)
 
     async def close(self) -> None:
         """Close the connection."""
         if self._conn:
             try:
-                self._conn.close()
+                import asyncio
+                await asyncio.to_thread(self._conn.close)
             except (OSError, ValueError) as e:
                 logger.warning("Error closing Turso connection: %s", e)
             self._conn = None

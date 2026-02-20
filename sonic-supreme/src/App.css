@@ -1,42 +1,55 @@
+/* SONIC_SUPREME — App-specific styles */
+
+/* Root reset for fullscreen DAW */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* ─── METER BAR ANIMATION ─────────────────────────────────── */
+.meter-bar {
+  transition: height 0.06s linear;
+  will-change: height;
 }
 
-@keyframes logo-spin {
+/* ─── TRACK LANE HOVER ────────────────────────────────────── */
+.track-lane:hover {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* ─── FX RACK TOGGLE ──────────────────────────────────────── */
+.fx-toggle {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fx-toggle.active {
+  box-shadow: 0 0 12px var(--glow-color, rgba(102, 0, 255, 0.7));
+}
+
+/* ─── KNOB ROTATION STYLE ─────────────────────────────────── */
+.knob-indicator {
+  transform-origin: center center;
+  transition: transform 0.1s ease-out;
+}
+
+/* ─── INSPECTOR PANEL ─────────────────────────────────────── */
+.inspector-enter {
+  animation: slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
   from {
-    transform: rotate(0deg);
+    transform: translateX(100%);
+    opacity: 0;
   }
   to {
-    transform: rotate(360deg);
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+/* ─── SPECTRUM BAR ────────────────────────────────────────── */
+.spectrum-bar {
+  transition: height 0.05s linear;
+  will-change: height;
 }
