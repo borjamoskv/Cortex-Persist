@@ -96,7 +96,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-reasoner"),
         ("zhipu", "glm-5"),
-        ("gemini", "gemini-2.5-pro"),
+        ("gemini", "gemini-2.0-flash"),
         ("qwen", "qwen-max"),
     ],
     ThinkingMode.CODE: [

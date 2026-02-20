@@ -14,19 +14,20 @@ from pathlib import Path
 
 import pytest
 
-from cortex.compactor import (
     CompactionResult,
     CompactionStrategy,
-    _content_hash,
-    _merge_error_contents,
-    _normalize_content,
-    _similarity,
     compact,
     compact_session,
-    find_duplicates,
-    find_stale_facts,
     get_compaction_stats,
 )
+from cortex.compaction.utils import (
+    content_hash as _content_hash,
+    merge_error_contents as _merge_error_contents,
+    normalize_content as _normalize_content,
+    similarity as _similarity,
+)
+from cortex.compaction.strategies.dedup import find_duplicates
+from cortex.compaction.strategies.staleness import find_stale_facts
 from cortex.engine import CortexEngine
 
 

@@ -15,7 +15,7 @@ PSI_TERMS = [
     "FIX" + "ME",
     "W" + "TF",
     "stu" + "pid",
-    "TO" + "DO",
+    "TO" + "DO:",
     "X" + "XX",
     "KLU" + "DGE",
     "UG" + "LY",

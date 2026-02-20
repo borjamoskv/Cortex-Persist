@@ -8,6 +8,7 @@ Supported: Spanish (es), Basque (eu)
 
 
 from functools import lru_cache
+from typing import Final, Mapping
 
 __all__ = [
     "get_trans",
@@ -17,8 +18,8 @@ __all__ = [
 ]
 
 # Defaults and supported languages
-DEFAULT_LANGUAGE = "en"
-SUPPORTED_LANGUAGES = frozenset({"en", "es", "eu"})
+DEFAULT_LANGUAGE: Final[str] = "en"
+SUPPORTED_LANGUAGES: Final[frozenset[str]] = frozenset({"en", "es", "eu"})
 
 
 def get_supported_languages() -> frozenset[str]:
@@ -27,7 +28,7 @@ def get_supported_languages() -> frozenset[str]:
 
 
 # Dictionary of translations
-TRANSLATIONS: dict[str, dict[str, str]] = {
+TRANSLATIONS: Final[Mapping[str, Mapping[str, str]]] = {
     # System Status
     "system_operational": {
         "en": "operational",
@@ -248,22 +249,35 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 }
 
 
+def _normalize_lang(lang: str | None) -> str:
+    """Normalizes the language code, strictly falling back to DEFAULT_LANGUAGE."""
+    if not lang or not isinstance(lang, str):
+        return DEFAULT_LANGUAGE
+    
+    # Extract primary language tag safely (RFC 5646)
+    lang_code = lang.split("-")[0].lower()[:2]
+    
+    if lang_code in SUPPORTED_LANGUAGES:
+        return lang_code
+    return DEFAULT_LANGUAGE
+
+
 @lru_cache(maxsize=1024)
+def _cached_trans(key: str, lang_code: str) -> str:
+    """Underlying cached translation lookup using normalized language codes."""
+    entry = TRANSLATIONS.get(key)
+    if not entry:
+        return key
+
+    return entry.get(lang_code, entry.get(DEFAULT_LANGUAGE, key))
+
+
 def get_trans(key: str, lang: str | None = "en") -> str:
     """Retrieve a translation for a given key and language.
     
     Falls back to English if the language or key is missing.
+    Protected against LRU cache pollution attacks.
     Cached for high-performance localized responses (Sovereign Level).
     """
-    if not lang or not isinstance(lang, str):
-        lang = "en"
-        
-    # Normalize lang code (e.g. 'es-ES' -> 'es')
-    lang_code = lang.split("-")[0].lower()
-
-    entry = TRANSLATIONS.get(key)
-    if not entry:
-        return key  # Return key if not found
-
-    return entry.get(lang_code, entry.get("en", key))
+    return _cached_trans(key, _normalize_lang(lang))
 
