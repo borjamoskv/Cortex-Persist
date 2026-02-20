@@ -113,6 +113,26 @@ check_nervous_system() {
     return 0
 }
 
+# -- INTEGRACIÓN NEXUS-TRACKER --
+nexus_create_issue() {
+    local title="$1"
+    local desc="$2"
+    # Create the issue and immediately capture the ID. Requires jq.
+    curl -s -X 'POST' 'http://127.0.0.1:8000/api/issues/' \
+        -H 'Content-Type: application/json' \
+        -d "{\"title\": \"$title\", \"description\": \"$desc\", \"status\": \"in_progress\"}" \
+        | grep -o '"id":[0-9]*' | cut -d':' -f2 | head -n 1 2>/dev/null || echo ""
+}
+
+nexus_complete_issue() {
+    local id="$1"
+    if [ -n "$id" ] && [ "$id" != "null" ]; then
+        curl -s -X 'PATCH' "http://127.0.0.1:8000/api/issues/$id" \
+            -H 'Content-Type: application/json' \
+            -d '{"status": "done"}' >/dev/null
+    fi
+}
+
 # -- BUCLE PRINCIPAL --
 check_cortex_health
 
@@ -130,6 +150,11 @@ while true; do
   if [ -n "$GHOST_TARGET" ]; then
     log_warn "FANTASMA DETECTADO: Interrupción Causal Requerida."
     afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true
+    
+    # Nexo Automático
+    NEXUS_ID=$(nexus_create_issue "GHOST PROTOCOL: Fantasma Aislado" "Target: $GHOST_TARGET")
+    if [ -n "$NEXUS_ID" ]; then log_action "⬢ NEXUS-TRACKER: Tarjeta Kanban Creada [ID: $NEXUS_ID / IN_PROGRESS]"; fi
+    
     log_council "Invocando 5 Porqués (L1-CAUSAL) sobre: $GHOST_TARGET"
     log_action "Desplegando Enjambre (Modo DIAGNOSE)..."
     
@@ -143,15 +168,23 @@ while true; do
     MODE="GHOST_HEAL"
     TARGET="$GHOST_TARGET"
     post_execution_commit "$TARGET" "$MODE"
+    
+    nexus_complete_issue "$NEXUS_ID"
+    if [ -n "$NEXUS_ID" ]; then log_ok "⬢ NEXUS-TRACKER: Tarjeta Kanban movida a [DONE]"; fi
   else
     log_ok "Ecosistema Libre de Bloqueos. CORTEX Sincronizado."
     
     RTARGET=$(get_random_target)
     log_action "Selección de entropía (L1): $RTARGET"
+    
+    ACTION_TYPE=$((RANDOM % 5))
+    
+    # Nexo Automático
+    NEXUS_ID=$(nexus_create_issue "ENTROPY PURGE: $(basename "$RTARGET")" "Auto-Evolution Mode: $ACTION_TYPE")
+    if [ -n "$NEXUS_ID" ]; then log_action "⬢ NEXUS-TRACKER: Tarjeta Kanban Creada [ID: $NEXUS_ID / IN_PROGRESS]"; fi
+
     log_council "Invocando Consejo de Guerra (L2) para Invasión de Entropía..."
     
-    # We select if we do a pulse, an entropy reduction, visual scaling, a deep architectural timeline check, or Genesis
-    ACTION_TYPE=$((RANDOM % 5))
     case $ACTION_TYPE in
         0)
             log_action "Decisión: ENDURECIMIENTO DE FORTALEZA (ouro-fortress)"
@@ -179,6 +212,9 @@ while true; do
     MODE="ENTROPY_CRUSH_$ACTION_TYPE"
     TARGET="$RTARGET"
     post_execution_commit "$TARGET" "$MODE"
+    
+    nexus_complete_issue "$NEXUS_ID"
+    if [ -n "$NEXUS_ID" ]; then log_ok "⬢ NEXUS-TRACKER: Tarjeta Kanban movida a [DONE]"; fi
   fi
 
   log_sys "L4-META-COG: Transcribiendo aprendizajes de la sesión."

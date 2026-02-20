@@ -7,13 +7,12 @@ Also tests session compaction, stats, and the complete compact() pipeline.
 
 from __future__ import annotations
 
-import sqlite3
-import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
+from cortex.compactor import (
     CompactionResult,
     CompactionStrategy,
     compact,
@@ -29,7 +28,6 @@ from cortex.compaction.utils import (
 from cortex.compaction.strategies.dedup import find_duplicates
 from cortex.compaction.strategies.staleness import find_stale_facts
 from cortex.engine import CortexEngine
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 
@@ -47,23 +45,47 @@ def engine(tmp_path: Path) -> CortexEngine:
 def seeded_engine(engine: CortexEngine) -> CortexEngine:
     """Engine with pre-loaded facts for compaction testing."""
     # 2 exact duplicates
-    engine.store_sync(project="test", content="The sky is blue", fact_type="knowledge")
-    engine.store_sync(project="test", content="The sky is blue", fact_type="knowledge")
+    engine.store_sync(
+        project="test", content="The sky is blue", fact_type="knowledge"
+    )
+    engine.store_sync(
+        project="test", content="The sky is blue", fact_type="knowledge"
+    )
 
     # 2 near-duplicates
-    engine.store_sync(project="test", content="Python is great for scripting", fact_type="knowledge")
-    engine.store_sync(project="test", content="Python is great for scripting tasks", fact_type="knowledge")
+    engine.store_sync(
+        project="test",
+        content="Python is great for scripting",
+        fact_type="knowledge",
+    )
+    engine.store_sync(
+        project="test",
+        content="Python is great for scripting tasks",
+        fact_type="knowledge",
+    )
 
     # 3 identical errors
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
+    engine.store_sync(
+        project="test", content="Connection timeout to DB", fact_type="error"
+    )
+    engine.store_sync(
+        project="test", content="Connection timeout to DB", fact_type="error"
+    )
+    engine.store_sync(
+        project="test", content="Connection timeout to DB", fact_type="error"
+    )
 
     # 1 unique fact (should survive compaction)
-    engine.store_sync(project="test", content="CORTEX uses SQLite for storage", fact_type="decision")
+    engine.store_sync(
+        project="test",
+        content="CORTEX uses SQLite for storage",
+        fact_type="decision",
+    )
 
     # 1 fact in a different project (should not be affected)
-    engine.store_sync(project="other", content="The sky is blue", fact_type="knowledge")
+    engine.store_sync(
+        project="other", content="The sky is blue", fact_type="knowledge"
+    )
 
     return engine
 
@@ -90,7 +112,9 @@ class TestContentHash:
         assert _content_hash("hello world") == _content_hash("hello world")
 
     def test_normalized_match(self):
-        assert _content_hash("  Hello  WORLD  ") == _content_hash("hello world")
+        assert _content_hash("  Hello  WORLD  ") == _content_hash(
+            "hello world"
+        )
 
     def test_different_content(self):
         assert _content_hash("hello") != _content_hash("world")
@@ -165,26 +189,50 @@ class TestFindDuplicates:
         assert find_duplicates(engine, "empty_project") == []
 
     def test_no_duplicates(self, engine: CortexEngine):
-        engine.store_sync(project="p", content="The quantum state of a neutron star collapse", fact_type="knowledge")
-        engine.store_sync(project="p", content="Recipe for making sourdough bread from scratch", fact_type="knowledge")
+        engine.store_sync(
+            project="p",
+            content="The quantum state of a neutron star collapse",
+            fact_type="knowledge",
+        )
+        engine.store_sync(
+            project="p",
+            content="Recipe for making sourdough bread from scratch",
+            fact_type="knowledge",
+        )
         assert find_duplicates(engine, "p") == []
 
     def test_exact_duplicates(self, engine: CortexEngine):
-        engine.store_sync(project="p", content="duplicate content", fact_type="knowledge")
-        engine.store_sync(project="p", content="duplicate content", fact_type="knowledge")
+        engine.store_sync(
+            project="p", content="duplicate content", fact_type="knowledge"
+        )
+        engine.store_sync(
+            project="p", content="duplicate content", fact_type="knowledge"
+        )
         groups = find_duplicates(engine, "p")
         assert len(groups) == 1
         assert len(groups[0]) == 2
 
     def test_near_duplicates(self, engine: CortexEngine):
-        engine.store_sync(project="p", content="This is a long sentence about testing", fact_type="knowledge")
-        engine.store_sync(project="p", content="This is a long sentence about testing things", fact_type="knowledge")
+        engine.store_sync(
+            project="p",
+            content="This is a long sentence about testing",
+            fact_type="knowledge",
+        )
+        engine.store_sync(
+            project="p",
+            content="This is a long sentence about testing things",
+            fact_type="knowledge",
+        )
         groups = find_duplicates(engine, "p", similarity_threshold=0.85)
         assert len(groups) >= 1
 
     def test_project_isolation(self, engine: CortexEngine):
-        engine.store_sync(project="a", content="same content", fact_type="knowledge")
-        engine.store_sync(project="b", content="same content", fact_type="knowledge")
+        engine.store_sync(
+            project="a", content="same content", fact_type="knowledge"
+        )
+        engine.store_sync(
+            project="b", content="same content", fact_type="knowledge"
+        )
         # Should not find cross-project duplicates
         groups = find_duplicates(engine, "a")
         assert len(groups) == 0
@@ -195,13 +243,17 @@ class TestFindDuplicates:
 
 class TestFindStaleFacts:
     def test_no_stale(self, engine: CortexEngine):
-        engine.store_sync(project="p", content="fresh fact", fact_type="knowledge")
+        engine.store_sync(
+            project="p", content="fresh fact", fact_type="knowledge"
+        )
         assert find_stale_facts(engine, "p", max_age_days=90) == []
 
     def test_finds_stale(self, engine: CortexEngine):
         # Insert a fact with old timestamp directly
         conn = engine._get_sync_conn()
-        old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
+        old_date = (
+            datetime.now(timezone.utc) - timedelta(days=120)
+        ).isoformat()
         conn.execute(
             "INSERT INTO facts (project, content, fact_type, valid_from, consensus_score, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -209,20 +261,34 @@ class TestFindStaleFacts:
         )
         conn.commit()
 
-        stale = find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
+        stale = find_stale_facts(
+            engine, "p", max_age_days=90, min_consensus=0.5
+        )
         assert len(stale) == 1
 
     def test_high_consensus_not_stale(self, engine: CortexEngine):
         conn = engine._get_sync_conn()
-        old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
+        old_date = (
+            datetime.now(timezone.utc) - timedelta(days=120)
+        ).isoformat()
         conn.execute(
             "INSERT INTO facts (project, content, fact_type, valid_from, consensus_score, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p", "high consensus old", "knowledge", old_date, 0.9, old_date, old_date),
+            (
+                "p",
+                "high consensus old",
+                "knowledge",
+                old_date,
+                0.9,
+                old_date,
+                old_date,
+            ),
         )
         conn.commit()
 
-        stale = find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
+        stale = find_stale_facts(
+            engine, "p", max_age_days=90, min_consensus=0.5
+        )
         assert len(stale) == 0
 
 
@@ -267,11 +333,21 @@ class TestCompact:
 
     def test_staleness_prune(self, engine: CortexEngine):
         conn = engine._get_sync_conn()
-        old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
+        old_date = (
+            datetime.now(timezone.utc) - timedelta(days=120)
+        ).isoformat()
         conn.execute(
             "INSERT INTO facts (project, content, fact_type, valid_from, consensus_score, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p", "stale fact", "knowledge", old_date, 0.2, old_date, old_date),
+            (
+                "p",
+                "stale fact",
+                "knowledge",
+                old_date,
+                0.2,
+                old_date,
+                old_date,
+            ),
         )
         conn.commit()
 
@@ -323,7 +399,9 @@ class TestCompactSession:
 
     def test_max_facts_limit(self, engine: CortexEngine):
         for i in range(20):
-            engine.store_sync(project="p", content=f"Fact number {i}", fact_type="knowledge")
+            engine.store_sync(
+                project="p", content=f"Fact number {i}", fact_type="knowledge"
+            )
         output = compact_session(engine, "p", max_facts=5)
         # Should contain markdown but limited content
         assert "# p" in output
@@ -348,5 +426,7 @@ class TestGetCompactionStats:
         stats = get_compaction_stats(seeded_engine, project="test")
         assert stats["total_compactions"] >= 1
 
-        stats_other = get_compaction_stats(seeded_engine, project="nonexistent")
+        stats_other = get_compaction_stats(
+            seeded_engine, project="nonexistent"
+        )
         assert stats_other["total_compactions"] == 0

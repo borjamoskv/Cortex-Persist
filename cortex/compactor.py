@@ -18,14 +18,11 @@ Ledger hash-chain remains intact. time_travel still works.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from difflib import SequenceMatcher
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -87,8 +84,40 @@ class CompactionResult:
         }
 
 
-
 # ─── Main Entry Point ───────────────────────────────────────────────
+
+
+def _apply_strategies(
+    engine: CortexEngine,
+    project: str,
+    strategies: list[CompactionStrategy],
+    result: CompactionResult,
+    dry_run: bool,
+    similarity_threshold: float,
+    max_age_days: int,
+    min_consensus: float,
+) -> None:
+    """Execute selected compaction strategies."""
+    if CompactionStrategy.DEDUP in strategies:
+        from cortex.compaction.strategies.dedup import execute_dedup
+
+        execute_dedup(engine, project, result, dry_run, similarity_threshold)
+
+    if CompactionStrategy.MERGE_ERRORS in strategies:
+        from cortex.compaction.strategies.merge_errors import (
+            execute_merge_errors,
+        )
+
+        execute_merge_errors(engine, project, result, dry_run)
+
+    if CompactionStrategy.STALENESS_PRUNE in strategies:
+        from cortex.compaction.strategies.staleness import (
+            execute_staleness_prune,
+        )
+
+        execute_staleness_prune(
+            engine, project, result, dry_run, max_age_days, min_consensus
+        )
 
 
 def compact(
@@ -118,20 +147,16 @@ def compact(
         project=project, original_count=count_before, dry_run=dry_run
     )
 
-    # Dispatch strategies
-    if CompactionStrategy.DEDUP in strategies:
-        from cortex.compaction.strategies.dedup import execute_dedup
-        execute_dedup(engine, project, result, dry_run, similarity_threshold)
-
-    if CompactionStrategy.MERGE_ERRORS in strategies:
-        from cortex.compaction.strategies.merge_errors import execute_merge_errors
-        execute_merge_errors(engine, project, result, dry_run)
-
-    if CompactionStrategy.STALENESS_PRUNE in strategies:
-        from cortex.compaction.strategies.staleness import execute_staleness_prune
-        execute_staleness_prune(
-            engine, project, result, dry_run, max_age_days, min_consensus
-        )
+    _apply_strategies(
+        engine,
+        project,
+        strategies,
+        result,
+        dry_run,
+        similarity_threshold,
+        max_age_days,
+        min_consensus,
+    )
 
     # Final count
     count_after = conn.execute(
@@ -166,7 +191,16 @@ def compact(
 # ─── Session Compaction ──────────────────────────────────────────────
 
 
-_TYPE_ORDER = ["axiom", "decision", "rule", "error", "knowledge", "ghost", "intent", "schema"]
+_TYPE_ORDER = [
+    "axiom",
+    "decision",
+    "rule",
+    "error",
+    "knowledge",
+    "ghost",
+    "intent",
+    "schema",
+]
 
 
 def compact_session(
@@ -204,7 +238,9 @@ def compact_session(
     return _format_session_context(project, by_type)
 
 
-def _format_session_context(project: str, by_type: dict[str, list[tuple]]) -> str:
+def _format_session_context(
+    project: str, by_type: dict[str, list[tuple]]
+) -> str:
     """Format grouped facts into markdown context."""
     lines = [f"# {project}", ""]
 
@@ -220,7 +256,9 @@ def _format_session_context(project: str, by_type: dict[str, list[tuple]]) -> st
     return "\n".join(lines)
 
 
-def _append_type_section(lines: list[str], fact_type: str, facts: list[tuple]) -> None:
+def _append_type_section(
+    lines: list[str], fact_type: str, facts: list[tuple]
+) -> None:
     """Append a fact type section to the output lines."""
     lines.append(f"## {fact_type.capitalize()} ({len(facts)})")
     lines.append("")
@@ -260,16 +298,18 @@ def get_compaction_stats(
     for row in rows:
         original_ids = json.loads(row[3]) if row[3] else []
         total_deprecated += len(original_ids)
-        history.append({
-            "id": row[0],
-            "project": row[1],
-            "strategy": row[2],
-            "deprecated_count": len(original_ids),
-            "new_fact_id": row[4],
-            "facts_before": row[5],
-            "facts_after": row[6],
-            "timestamp": row[7],
-        })
+        history.append(
+            {
+                "id": row[0],
+                "project": row[1],
+                "strategy": row[2],
+                "deprecated_count": len(original_ids),
+                "new_fact_id": row[4],
+                "facts_before": row[5],
+                "facts_after": row[6],
+                "timestamp": row[7],
+            }
+        )
 
     return {
         "total_compactions": len(rows),
