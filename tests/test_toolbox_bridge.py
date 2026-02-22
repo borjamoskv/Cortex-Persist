@@ -156,3 +156,44 @@ class TestMCPGuardExternalQuery:
     def test_trailing_slash_normalized(self):
         """URLs with trailing slashes should be normalized."""
         MCPGuard.validate_toolbox_url("http://127.0.0.1:5000/")
+
+
+class TestRunnerToolboxArgs:
+    """Test that the ADK runner CLI accepts Toolbox arguments."""
+
+    def test_runner_parse_toolbox_url(self):
+        """Runner should accept --toolbox-url."""
+        import sys
+
+        from cortex.adk.runner import _parse_args
+
+        original_argv = sys.argv
+        try:
+            sys.argv = [
+                "cortex-adk",
+                "--toolbox-url", "http://my-toolbox:5000",
+                "--toolbox-toolset", "cortex-readonly",
+                "--agent", "analyst",
+            ]
+            args = _parse_args()
+            assert args.toolbox_url == "http://my-toolbox:5000"
+            assert args.toolbox_toolset == "cortex-readonly"
+            assert args.agent == "analyst"
+        finally:
+            sys.argv = original_argv
+
+    def test_runner_default_toolbox_args(self):
+        """Default Toolbox args should be None/empty."""
+        import sys
+
+        from cortex.adk.runner import _parse_args
+
+        original_argv = sys.argv
+        try:
+            sys.argv = ["cortex-adk"]
+            args = _parse_args()
+            assert args.toolbox_url is None
+            assert args.toolbox_toolset == ""
+        finally:
+            sys.argv = original_argv
+

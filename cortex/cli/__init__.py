@@ -46,6 +46,7 @@ from cortex.cli import (  # noqa: E402
     mejoralo_cmds,  # noqa: E402, F401
     nexus_cmds,  # noqa: E402, F401
     purge,  # noqa: E402, F401
+    reflect_cmds,  # noqa: E402, F401  — Reflection System
     sync_cmds,  # noqa: E402, F401
     time_cmds,  # noqa: E402, F401
     timeline_cmds,  # noqa: E402, F401
