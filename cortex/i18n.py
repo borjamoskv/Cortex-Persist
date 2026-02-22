@@ -6,29 +6,82 @@ Default: English (en)
 Supported: Spanish (es), Basque (eu)
 """
 
+from __future__ import annotations
 
+from collections.abc import Mapping
+from enum import StrEnum
 from functools import lru_cache
-from typing import Final, Mapping
+from typing import Final, Literal
 
 __all__ = [
+    "Lang",
+    "TranslationKey",
     "get_trans",
+    "get_cache_info",
     "get_supported_languages",
     "DEFAULT_LANGUAGE",
     "SUPPORTED_LANGUAGES",
 ]
 
+class Lang(StrEnum):
+    EN = "en"
+    ES = "es"
+    EU = "eu"
+
 # Defaults and supported languages
-DEFAULT_LANGUAGE: Final[str] = "en"
-SUPPORTED_LANGUAGES: Final[frozenset[str]] = frozenset({"en", "es", "eu"})
+DEFAULT_LANGUAGE: Final[Lang] = Lang.EN
+SUPPORTED_LANGUAGES: Final[frozenset[Lang]] = frozenset(Lang)
 
 
-def get_supported_languages() -> frozenset[str]:
+def get_supported_languages() -> frozenset[Lang]:
     """Returns the set of languages officially supported by CORTEX."""
     return SUPPORTED_LANGUAGES
 
 
-# Dictionary of translations
-TRANSLATIONS: Final[Mapping[str, Mapping[str, str]]] = {
+TranslationKey = Literal[
+    "system_operational",
+    "system_healthy",
+    "engine_online",
+    "error_too_many_requests",
+    "error_internal_db",
+    "error_unexpected",
+    "error_unauthorized",
+    "error_not_found",
+    "error_invalid_input",
+    "info_service_desc",
+    "error_missing_auth",
+    "error_invalid_key_format",
+    "error_invalid_revoked_key",
+    "error_missing_permission",
+    "error_fact_not_found",
+    "error_namespace_mismatch",
+    "error_forbidden",
+    "error_json_only",
+    "error_invalid_path_chars",
+    "error_path_workspace",
+    "error_export_failed",
+    "error_status_unavailable",
+    "error_auth_required",
+    "error_daemon_no_data",
+    "error_integrity_check_failed",
+    "error_checkpoint_failed",
+    "error_graph_forbidden",
+    "error_graph_unavailable",
+    "error_agent_registration_failed",
+    "error_agent_internal",
+    "error_agent_not_found",
+    "error_heartbeat_failed",
+    "error_time_summary_failed",
+    "error_time_report_failed",
+    "error_time_history_failed",
+    "error_timing_forbidden",
+    "error_internal_server",
+    "error_internal_voting",
+    "error_deprecation_failed",
+]
+
+# Dictionary of translations — keys are strictly typed via TranslationKey
+TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
     # System Status
     "system_operational": {
         "en": "operational",
@@ -249,32 +302,35 @@ TRANSLATIONS: Final[Mapping[str, Mapping[str, str]]] = {
 }
 
 
-def _normalize_lang(lang: str | None) -> str:
+def _normalize_lang(lang: str | Lang | None) -> Lang:
     """Normalizes the language code, strictly falling back to DEFAULT_LANGUAGE."""
+    if isinstance(lang, Lang):
+        return lang
     if not lang or not isinstance(lang, str):
         return DEFAULT_LANGUAGE
-    
-    # Extract primary language tag safely (RFC 5646)
+
+    # Extract primary language tag (RFC 5646: "es-ES" → "es")
     lang_code = lang.split("-")[0].lower()[:2]
-    
-    if lang_code in SUPPORTED_LANGUAGES:
-        return lang_code
-    return DEFAULT_LANGUAGE
+
+    try:
+        return Lang(lang_code)
+    except ValueError:
+        return DEFAULT_LANGUAGE
 
 
-@lru_cache(maxsize=1024)
-def _cached_trans(key: str, lang_code: str) -> str:
+@lru_cache(maxsize=128)
+def _cached_trans(key: TranslationKey, lang_code: Lang) -> str:
     """Underlying cached translation lookup using normalized language codes."""
     entry = TRANSLATIONS.get(key)
     if not entry:
         return key
 
-    return entry.get(lang_code, entry.get(DEFAULT_LANGUAGE, key))
+    return entry.get(lang_code.value, entry.get(DEFAULT_LANGUAGE.value, key))
 
 
-def get_trans(key: str, lang: str | None = "en") -> str:
+def get_trans(key: TranslationKey, lang: Lang | str | None = Lang.EN) -> str:
     """Retrieve a translation for a given key and language.
-    
+
     Falls back to English if the language or key is missing.
     Protected against LRU cache pollution attacks.
     Cached for high-performance localized responses (Sovereign Level).
@@ -282,4 +338,12 @@ def get_trans(key: str, lang: str | None = "en") -> str:
     if key not in TRANSLATIONS:
         return key
     return _cached_trans(key, _normalize_lang(lang))
+
+
+def get_cache_info():
+    """Expose translation cache statistics for observability.
+
+    Returns an object with hits, misses, maxsize, and currsize attributes.
+    """
+    return _cached_trans.cache_info()
 

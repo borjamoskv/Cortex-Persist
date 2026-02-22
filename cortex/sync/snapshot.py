@@ -78,28 +78,32 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     )
 
     for project, facts in by_project.items():
-        display_name = project.replace("__", "").upper() if project.startswith("__") else project
-        lines.append(f"## {display_name}")
-        lines.append("")
-
-        # Agrupar por tipo dentro del proyecto
-        by_type: dict[str, list] = {}
-        for f in facts:
-            by_type.setdefault(f["type"], []).append(f)
-
-        for ftype, type_facts in by_type.items():
-            lines.append(f"### {ftype.capitalize()} ({len(type_facts)})")
-            lines.append("")
-            for f in type_facts:
-                # Contenido truncado para legibilidad
-                content = f["content"][:200]
-                if len(f["content"]) > 200:
-                    content += "..."
-                lines.append(f"- {content}")
-            lines.append("")
+        lines.extend(_format_project_section(project, facts))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
     logger.info("Snapshot exportado a %s (%d facts)", out_path, len(rows))
     return out_path
+
+
+def _format_project_section(project: str, facts: list[dict]) -> list[str]:
+    """Formatea la sección de un proyecto para el snapshot."""
+    display_name = project.replace("__", "").upper() if project.startswith("__") else project
+    lines = [f"## {display_name}", ""]
+
+    by_type: dict[str, list] = {}
+    for f in facts:
+        by_type.setdefault(f["type"], []).append(f)
+
+    for ftype, type_facts in by_type.items():
+        lines.append(f"### {ftype.capitalize()} ({len(type_facts)})")
+        lines.append("")
+        for f in type_facts:
+            content = f["content"][:200]
+            if len(f["content"]) > 200:
+                content += "..."
+            lines.append(f"- {content}")
+        lines.append("")
+
+    return lines

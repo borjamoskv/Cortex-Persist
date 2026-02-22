@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Play, Pause, FastForward, Rewind, Settings2, Plus, Volume2, Maximize2, Download } from 'lucide-react';
+import { Play, Pause, FastForward, Rewind, Settings2, Plus, Volume2, Download } from 'lucide-react';
 import { useStore } from './store';
 import * as Tone from 'tone';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,7 @@ import { BpmControl } from './components/layout/BpmControl';
 
 // ─── APP ROOT ────────────────────────────────────────────────────────────────
 export default function App() {
-  const { tracks, selectedTrackId, selectTrack, isPlaying, togglePlay, addTrack, zoom, setZoom } = useStore();
+  const { tracks, selectedTrackId, isPlaying, togglePlay, addTrack, zoom, setZoom } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const playheadRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
