@@ -5,11 +5,12 @@ import json
 import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
+
 from cortex.compaction.utils import content_hash, merge_error_contents
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
     from cortex.compactor import CompactionResult
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.merge_errors")
 _LOG_FMT = "Compactor [%s] %s"

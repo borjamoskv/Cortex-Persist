@@ -20,8 +20,9 @@ services:
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       # - GEMINI_API_KEY=${GEMINI_API_KEY}
       # Stripe (for SaaS billing)
-      # - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      # - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_PRICE_TABLE=${STRIPE_PRICE_TABLE}
     volumes:
       - cortex-data:/data
     healthcheck:

@@ -12,14 +12,14 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 
 from cortex.langbase.client import LangbaseClient, LangbaseError
-from cortex.langbase.sync import _fact_to_markdown, sync_to_langbase, enrich_from_langbase
 from cortex.langbase.pipe import _format_facts, run_with_cortex_context
+from cortex.langbase.sync import _fact_to_markdown, enrich_from_langbase, sync_to_langbase
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 

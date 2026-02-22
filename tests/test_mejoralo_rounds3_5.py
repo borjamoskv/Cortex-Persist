@@ -19,10 +19,9 @@ import sqlite3
 # ──────────────────────────────────────────────────────────────────────
 # Round 3 — search.py
 # ──────────────────────────────────────────────────────────────────────
-
-
 import pytest
 import pytest_asyncio
+
 
 class TestSearchDefensiveJson:
     """Test that search functions handle malformed JSON gracefully."""
@@ -71,9 +70,9 @@ class TestSearchDefensiveJson:
     @pytest.mark.asyncio
     async def test_text_search_error_handling(self):
         """text_search returns empty list on DB error, not exception."""
-        from cortex.search import text_search
         from unittest.mock import AsyncMock
-        import sqlite3
+
+        from cortex.search import text_search
 
         mock_conn = AsyncMock()
         mock_conn.execute.side_effect = sqlite3.OperationalError("db error")

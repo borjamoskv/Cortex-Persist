@@ -62,9 +62,9 @@ class TestStoreMany:
     @pytest.mark.asyncio
     async def test_batch_store_returns_ids(self, engine):
         facts = [
-            {"project": "p1", "content": "Fact one"},
-            {"project": "p1", "content": "Fact two"},
-            {"project": "p1", "content": "Fact three"},
+            {"project": "p1", "content": "First fact for batch test store"},
+            {"project": "p1", "content": "Second fact for batch test store"},
+            {"project": "p1", "content": "Third fact for batch test store"},
         ]
         ids = await engine.store_many(facts)
         assert len(ids) == 3
@@ -91,7 +91,7 @@ class TestStoreMany:
         facts = [
             {
                 "project": "p1",
-                "content": "Tagged fact",
+                "content": "Tagged fact for optional field verification",
                 "fact_type": "decision",
                 "tags": ["important"],
                 "confidence": "inferred",
@@ -108,7 +108,7 @@ class TestStoreMany:
     @pytest.mark.asyncio
     async def test_batch_store_is_atomic(self, engine):
         """All facts should be visible after batch store."""
-        facts = [{"project": "batch", "content": f"Fact {i}"} for i in range(10)]
+        facts = [{"project": "batch", "content": f"Batch fact number {i} for atomicity test"} for i in range(10)]
         ids = await engine.store_many(facts)
         assert len(ids) == 10
         recalled = await engine.recall("batch")
@@ -122,10 +122,10 @@ class TestStoreMany:
         a full ROLLBACK — zero partial commits should survive.
         """
         facts = [
-            {"project": "rollback_test", "content": "Fact 0"},
-            {"project": "rollback_test", "content": "Fact 1"},
-            {"project": "", "content": "Bad fact"},  # triggers ValueError
-            {"project": "rollback_test", "content": "Fact 3"},
+            {"project": "rollback_test", "content": "First fact in rollback batch test"},
+            {"project": "rollback_test", "content": "Second fact in rollback batch test"},
+            {"project": "", "content": "Bad fact with empty project"},  # triggers ValueError
+            {"project": "rollback_test", "content": "Fourth fact in rollback batch test"},
         ]
 
         with pytest.raises(ValueError, match="project"):
@@ -152,27 +152,27 @@ class TestStoreMany:
 class TestUpdate:
     @pytest.mark.asyncio
     async def test_update_content(self, engine):
-        original_id = await engine.store("p1", "Original content")
-        new_id = await engine.update(original_id, content="Updated content")
+        original_id = await engine.store("p1", "Original content for update test")
+        new_id = await engine.update(original_id, content="Updated content for update test")
         assert new_id != original_id
 
         facts = await engine.recall("p1")
         assert len(facts) == 1
-        assert facts[0].content == "Updated content"
+        assert facts[0].content == "Updated content for update test"
         assert facts[0].id == new_id
 
     @pytest.mark.asyncio
     async def test_update_tags(self, engine):
-        original_id = await engine.store("p1", "Some fact", tags=["old"])
-        new_id = await engine.update(original_id, tags=["new", "shiny"])
+        original_id = await engine.store("p1", "Some fact for tag update test", tags=["old"])
+        await engine.update(original_id, tags=["new", "shiny"])
 
         facts = await engine.recall("p1")
         assert facts[0].tags == ["new", "shiny"]
 
     @pytest.mark.asyncio
     async def test_update_preserves_history(self, engine):
-        original_id = await engine.store("p1", "V1")
-        await engine.update(original_id, content="V2")
+        original_id = await engine.store("p1", "Version one of content for history")
+        await engine.update(original_id, content="Version two of content for history")
 
         # History should have both versions
         history = await engine.history("p1")
@@ -180,8 +180,8 @@ class TestUpdate:
 
     @pytest.mark.asyncio
     async def test_update_preserves_meta_lineage(self, engine):
-        original_id = await engine.store("p1", "Original", meta={"source": "test"})
-        new_id = await engine.update(original_id, content="Updated")
+        original_id = await engine.store("p1", "Original fact with meta source", meta={"source": "test"})
+        await engine.update(original_id, content="Updated fact with new content")
 
         facts = await engine.recall("p1")
         assert facts[0].meta.get("previous_fact_id") == original_id
@@ -200,15 +200,15 @@ class TestUpdate:
     async def test_update_keeps_unchanged_fields(self, engine):
         original_id = await engine.store(
             "p1",
-            "Content",
+            "Content for unchanged field test",
             fact_type="decision",
             tags=["tag1"],
             source="test",
         )
-        new_id = await engine.update(original_id, tags=["tag2"])
+        await engine.update(original_id, tags=["tag2"])
 
         facts = await engine.recall("p1")
-        assert facts[0].content == "Content"
+        assert facts[0].content == "Content for unchanged field test"
         assert facts[0].fact_type == "decision"
         assert facts[0].tags == ["tag2"]
 

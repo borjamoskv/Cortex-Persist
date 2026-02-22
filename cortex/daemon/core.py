@@ -6,10 +6,11 @@ import json
 import logging
 import signal
 import sqlite3
+import threading
 import time
+from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable
 
 import httpx
 
@@ -65,6 +66,7 @@ class MoskvDaemon:
         self.notify_enabled = notify
         self.config_dir = config_dir
         self._shutdown = False
+        self._stop_event = threading.Event()
 
         file_config = self._load_config()
         resolved_sites = sites or file_config.get("sites", [])
@@ -209,6 +211,7 @@ class MoskvDaemon:
                              alert.project, alert.score, alert.dead_code)
                 try:
                     import subprocess
+
                     from cortex.daemon.notifier import Notifier
                     Notifier.notify(
                         "☢️ MEJORAlo Brutal Mode",
@@ -274,6 +277,7 @@ class MoskvDaemon:
             sig_name = signal.Signals(signum).name
             logger.info("Received %s, shutting down gracefully...", sig_name)
             self._shutdown = True
+            self._stop_event.set()
 
         signal.signal(signal.SIGTERM, _handle_signal)
         signal.signal(signal.SIGINT, _handle_signal)
@@ -282,10 +286,7 @@ class MoskvDaemon:
         try:
             while not self._shutdown:
                 self.check()
-                for _ in range(interval):
-                    if self._shutdown:
-                        break
-                    time.sleep(1)
+                self._stop_event.wait(timeout=interval)
         except KeyboardInterrupt:
             pass
         finally:

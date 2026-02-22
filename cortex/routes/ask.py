@@ -111,7 +111,7 @@ async def ask_cortex(
     # 2. Build context from retrieved facts
     if results:
         context_lines = []
-        for i, r in enumerate(results, 1):
+        for _i, r in enumerate(results, 1):
             context_lines.append(
                 f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
             )

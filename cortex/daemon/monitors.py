@@ -28,8 +28,8 @@ from cortex.daemon.models import (
     DiskAlert,
     EngineHealthAlert,
     GhostAlert,
-    MemoryAlert,
     MejoraloAlert,
+    MemoryAlert,
     SiteStatus,
 )
 

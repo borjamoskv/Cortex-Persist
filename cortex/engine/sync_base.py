@@ -5,8 +5,9 @@ Provides connection management for synchronous operations.
 
 from __future__ import annotations
 
-import sqlite3 as _sqlite3
 import logging
+import sqlite3 as _sqlite3
+
 import sqlite_vec
 
 logger = logging.getLogger("cortex")

@@ -7,8 +7,8 @@ Supports all core operations: store, search, recall, verify, graph.
 from __future__ import annotations
 
 import json
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 

@@ -93,9 +93,9 @@ class MerkleTree:
             # Move to next level
             next_level = []
             for i in range(0, len(current_level), 2):
-                l = current_level[i]
-                r = current_level[i + 1] if i + 1 < len(current_level) else l
-                next_level.append(MerkleNode(hash=self._hash_pair(l.hash, r.hash), left=l, right=r))
+                left = current_level[i]
+                r = current_level[i + 1] if i + 1 < len(current_level) else left
+                next_level.append(MerkleNode(hash=self._hash_pair(left.hash, r.hash), left=left, right=r))
             
             current_level = next_level
             curr_idx //= 2

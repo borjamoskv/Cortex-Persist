@@ -234,10 +234,6 @@ class SAPClient:
         try:
             root = ElementTree.fromstring(resp.text)
             # OData V2 namespace
-            ns = {
-                "edmx": "http://schemas.microsoft.com/ado/2007/06/edmx",
-                "edm": "http://schemas.microsoft.com/ado/2008/09/edm",
-            }
             for entity_type in root.iter("{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"):
                 name = entity_type.attrib.get("Name", "")
                 props = [

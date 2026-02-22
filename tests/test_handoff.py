@@ -4,7 +4,6 @@ CORTEX v4.0 — Session Handoff Protocol Tests.
 Tests for generate_handoff, save_handoff, and load_handoff.
 """
 
-import json
 import os
 import tempfile
 from pathlib import Path

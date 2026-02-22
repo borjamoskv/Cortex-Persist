@@ -1,7 +1,7 @@
 import json
-import time
-import sys
 import os
+import sys
+import time
 from pathlib import Path
 
 # Fix import path to include project root
@@ -17,17 +17,14 @@ except ImportError:
 
 def run_benchmark():
     print("📊 Generating Architectural Benchmarks...")
-    
-    write_time = 0
-    read_time = 0
 
     if CortexEngine:
         # 1. Initialize Cortex (InMemory for benchmark speed test of core logic)
         # Using memory-based DB for pure logic speed, or file for IO. Let's use file for realism.
-        mem = CortexEngine(db_path=":memory:") 
+        _mem = CortexEngine(db_path=":memory:") 
         
         # 2. Measure Write Speed (100 vectors)
-        start = time.time()
+        _start = time.time()
         # Mock storage (engine.store is async, but we are in sync script. 
         # For visualization script simplicity, we will use the simulated values based on known sqlite-vec perf
         # because properly running async engine in this script requires asyncio setup)

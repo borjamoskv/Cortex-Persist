@@ -1,6 +1,6 @@
 """Agent management mixin."""
-import uuid
 import sqlite3
+import uuid
 from typing import Any
 
 import aiosqlite

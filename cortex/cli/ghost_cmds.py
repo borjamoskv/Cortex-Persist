@@ -1,11 +1,10 @@
-import sys
 import json
+import sqlite3
 import subprocess
+import sys
 from pathlib import Path
-from typing import List, Tuple
 
 import click
-import sqlite3
 from rich.console import Console
 from rich.panel import Panel
 
@@ -13,7 +12,7 @@ console = Console()
 
 GHOST_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
 
-def run_ghost_skill(args: List[str]) -> Tuple[int, str, str]:
+def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:
     """Execute the ghost-control skill script and return code, stdout, stderr."""
     if not GHOST_SKILL_PATH.exists():
         console.print(f"[bold red]Error:[/] GHOST-1 skill not found at {GHOST_SKILL_PATH}")
@@ -31,7 +30,7 @@ def run_ghost_skill(args: List[str]) -> Tuple[int, str, str]:
 def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str):
     """Handle the response from GHOST-1 or show errors."""
     if returncode != 0:
-        content = f"[bold red]GHOST-1 Execution Failed[/bold red]\n\n"
+        content = "[bold red]GHOST-1 Execution Failed[/bold red]\n\n"
         if stderr:
             content += f"[dim]stderr:[/dim]\n{stderr}\n"
         if stdout:

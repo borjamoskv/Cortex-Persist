@@ -5,28 +5,26 @@
 
 from __future__ import annotations
 
-import asyncio
 import pytest
 
+from cortex.llm.provider import PROVIDER_PRESETS
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,
     ModelResponse,
-    ThoughtFusion,
     ThinkingHistory,
-    _tokenize,
+    ThoughtFusion,
     _jaccard,
+    _tokenize,
 )
 from cortex.thinking.orchestra import ThoughtOrchestra
 from cortex.thinking.pool import ProviderPool, ThinkingRecord
 from cortex.thinking.presets import (
-    OrchestraConfig,
-    ThinkingMode,
     DEFAULT_ROUTING,
     MODE_SYSTEM_PROMPTS,
+    OrchestraConfig,
+    ThinkingMode,
 )
-from cortex.llm.provider import PROVIDER_PRESETS
-
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -326,7 +324,7 @@ class TestThoughtOrchestra:
 
     def test_resolve_models_with_key(self, monkeypatch):
         monkeypatch.setenv("GROQ_API_KEY", "test-key-123")
-        for name, preset in PROVIDER_PRESETS.items():
+        for _name, preset in PROVIDER_PRESETS.items():
             env_key = preset.get("env_key", "")
             if env_key and env_key != "GROQ_API_KEY":
                 monkeypatch.delenv(env_key, raising=False)

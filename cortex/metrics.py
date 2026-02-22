@@ -12,8 +12,8 @@ and remain queryable during forensic analysis.
 
 import asyncio
 import logging
-import time
 import sqlite3
+import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
@@ -133,18 +133,22 @@ class MetricsRegistry:
     ) -> None:
         """Persist a critical metric event as a ``system_health`` fact."""
         try:
-            fact_meta = {
+            counter_val = self._counters.get(key, 0)
+            fact_meta: dict[str, Any] = {
                 "metric": name,
                 "key": key,
                 "labels": labels or {},
-                "counter_value": self._counters.get(key, 0),
+                "counter_value": counter_val,
             }
             if extra_meta:
                 fact_meta.update(extra_meta)
 
-            content = f"[METRIC] {name}: {self._counters.get(key, 0)}"
-            if labels:
-                content += f" ({', '.join(f'{k}={v}' for k, v in labels.items())})"
+            labels_str = (
+                f" ({', '.join(f'{k}={v}' for k, v in labels.items())})"
+                if labels
+                else ""
+            )
+            content = f"[METRIC] {name}: {counter_val}{labels_str}"
 
             await self._engine.store(
                 project="__system__",

@@ -37,7 +37,7 @@ class TestInt8Quantization:
         restored = dequantize_int8(packed)
 
         # Max absolute error should be < 0.02 for normalized vectors
-        errors = [abs(a - b) for a, b in zip(normalized, restored)]
+        errors = [abs(a - b) for a, b in zip(normalized, restored, strict=True)]
         max_error = max(errors)
         assert max_error < 0.02, f"max error {max_error:.6f} exceeds threshold"
 

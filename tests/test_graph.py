@@ -1,12 +1,12 @@
 """Tests for CORTEX Graph Memory."""
 
+import os
+
 import pytest
 
-import os
 os.environ["CORTEX_GRAPH_BACKEND"] = "sqlite"
 
 from cortex.engine import CortexEngine
-
 from cortex.graph import (
     SQLiteBackend,
     detect_relationships,

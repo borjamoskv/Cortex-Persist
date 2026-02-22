@@ -2,9 +2,10 @@
 Interactive CLI approval logic for SovereignGate.
 """
 import logging
-import time
 import sqlite3
+import time
 from typing import TYPE_CHECKING
+
 from cortex.sovereign_gate import ActionStatus, GateNotApproved, GatePolicy
 
 if TYPE_CHECKING:

@@ -31,7 +31,7 @@ import os
 import time
 from typing import Any
 
-from cortex.llm.provider import LLMProvider, PROVIDER_PRESETS
+from cortex.llm.provider import PROVIDER_PRESETS, LLMProvider
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,

@@ -3,11 +3,11 @@ Staleness pruning strategy for compaction.
 """
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
     from cortex.compactor import CompactionResult
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.staleness")
 _LOG_FMT = "Compactor [%s] %s"
@@ -42,7 +42,7 @@ def find_stale_facts(
     project: str,
     max_age_days: int = 90,
     min_consensus: float = 0.5,
-) -> List[int]:
+) -> list[int]:
     """Find facts older than max_age_days with consensus below min_consensus."""
     conn = engine._get_sync_conn()
     cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()

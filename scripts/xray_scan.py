@@ -93,8 +93,8 @@ def measure_architecture():
         return 1.0
 
     score = 1.0 - (len(files_over_limit) / total_files)
-    for f, l in files_over_limit:
-        print(f"  Architecture Violation: {f} ({l} LOC)")
+    for f, loc in files_over_limit:
+        print(f"  Architecture Violation: {f} ({loc} LOC)")
         score -= 0.1
 
     return max(0.0, score)
@@ -125,8 +125,9 @@ def _validate_with_glm5(suspicious_content, hits):
 
     sys.path.append(os.path.expanduser("~/cortex"))
     try:
-        from cortex.llm.orchestra import ThoughtOrchestra
         import asyncio
+
+        from cortex.llm.orchestra import ThoughtOrchestra
 
         orchestra = ThoughtOrchestra()
         loop = asyncio.get_event_loop()

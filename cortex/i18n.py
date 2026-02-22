@@ -8,16 +8,19 @@ Supported: Spanish (es), Basque (eu)
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from enum import StrEnum
 from functools import lru_cache
-from typing import Final, Literal
+from typing import TYPE_CHECKING, Final, Literal
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "Lang",
     "TranslationKey",
     "get_trans",
     "get_cache_info",
+    "clear_cache",
     "get_supported_languages",
     "DEFAULT_LANGUAGE",
     "SUPPORTED_LANGUAGES",
@@ -346,4 +349,9 @@ def get_cache_info():
     Returns an object with hits, misses, maxsize, and currsize attributes.
     """
     return _cached_trans.cache_info()
+
+
+def clear_cache() -> None:
+    """Reset the translation LRU cache (useful for tests and hot-reload)."""
+    _cached_trans.cache_clear()
 

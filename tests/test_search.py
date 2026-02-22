@@ -31,8 +31,8 @@ async def search_engine():
     await eng.store("alpha", "Python is a great language", fact_type="knowledge", tags=["python"])
     await eng.store("alpha", "Use pytest for testing", fact_type="decision", tags=["testing"])
     await eng.store("beta", "Python supports async/await", fact_type="knowledge", tags=["python"])
-    await eng.store("beta", "Rust is fast", fact_type="knowledge", tags=["rust"])
-    await eng.store("gamma", "Deploy with Docker", fact_type="decision", tags=["devops"])
+    await eng.store("beta", "Rust is a fast systems language", fact_type="knowledge", tags=["rust"])
+    await eng.store("gamma", "Deploy with Docker containers", fact_type="decision", tags=["devops"])
 
     yield eng
     await eng.close()
@@ -71,7 +71,7 @@ class TestTextSearch:
         conn = await search_engine.get_conn()
         # Insert enough data to test the limit
         for i in range(10):
-            await search_engine.store("alpha", f"Extra Python fact {i}", fact_type="knowledge")
+            await search_engine.store("alpha", f"Extra Python knowledge fact number {i}", fact_type="knowledge")
         results = await text_search(conn, "Python", limit=3)
         assert len(results) <= 3
 

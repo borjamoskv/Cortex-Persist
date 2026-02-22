@@ -10,13 +10,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# ─── Fixtures ────────────────────────────────────────────────────────
+import pytest_asyncio
+
 from cortex.engine import CortexEngine
 from cortex.sync import export_to_json, sync_memory
 
-# ─── Fixtures ────────────────────────────────────────────────────────
-
-
-import pytest_asyncio
 
 @pytest_asyncio.fixture
 async def engine(tmp_path):

@@ -85,7 +85,7 @@ def backfill(
         try:
             embeddings = embedder.embed_batch(contents)
 
-            for fact_id, embedding in zip(ids, embeddings):
+            for fact_id, embedding in zip(ids, embeddings, strict=True):
                 try:
                     conn.execute(
                         "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",

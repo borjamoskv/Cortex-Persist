@@ -27,6 +27,9 @@ class FactManager:
     def __init__(self, engine):
         self.engine = engine
 
+    # Minimum content length to prevent garbage facts.
+    MIN_CONTENT_LENGTH = 20
+
     async def store(
         self,
         project: str,
@@ -39,13 +42,41 @@ class FactManager:
         valid_from: str | None = None,
         commit: bool = True,
         tx_id: int | None = None,
+        _skip_dedup: bool = False,
     ) -> int:
         if not project or not project.strip():
             raise ValueError("project cannot be empty")
         if not content or not content.strip():
             raise ValueError("content cannot be empty")
 
+        content = content.strip()
+
+        # Gate 1: Minimum content length
+        if len(content) < self.MIN_CONTENT_LENGTH:
+            raise ValueError(
+                f"content too short ({len(content)} chars, "
+                f"min {self.MIN_CONTENT_LENGTH})"
+            )
+
+        # Gate 2: Sanitize double-prefixed decisions
+        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
+            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
+
+        # Gate 3: Dedup — return existing ID if exact match exists
         conn = await self.engine.get_conn()
+        if not _skip_dedup:
+            cursor = await conn.execute(
+                "SELECT id FROM facts WHERE project = ? AND content = ? "
+                "AND valid_until IS NULL LIMIT 1",
+                (project, content),
+            )
+            existing = await cursor.fetchone()
+            if existing:
+                logger.info(
+                    "Dedup: fact already exists as #%d in %s", existing[0], project
+                )
+                return existing[0]
+
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
         meta_json = json.dumps(meta or {})
@@ -212,6 +243,7 @@ class FactManager:
             confidence=confidence,
             source=source,
             meta=new_meta,
+            _skip_dedup=True,
         )
         await self.deprecate(fact_id, reason=f"updated_by_{new_id}")
         return new_id

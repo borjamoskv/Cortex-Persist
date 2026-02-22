@@ -20,7 +20,6 @@ from typing import Any
 
 import httpx
 
-
 CORTEX_DEFAULT_URL = os.getenv("CORTEX_URL", "http://localhost:8484")
 CORTEX_API_KEY = os.getenv("CORTEX_API_KEY", "")
 

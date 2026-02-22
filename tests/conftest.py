@@ -1,6 +1,8 @@
+
 import pytest
-import os
+
 from cortex import api_state, config
+
 
 @pytest.fixture(autouse=True)
 def reset_cortex_state():

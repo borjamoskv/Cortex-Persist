@@ -5,9 +5,10 @@
 # Escudo Axiomático Soberano. Evalúa el X-Ray Score del repo antes del commit.
 # Si el código < 90/100, la máquina prohíbe el envío al Ledger temporal.
 
-import sys
 import os
 import subprocess
+import sys
+
 
 def run_xray():
     try:

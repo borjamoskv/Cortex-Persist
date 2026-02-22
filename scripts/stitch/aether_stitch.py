@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import time
-import os
 import hashlib
+import os
+import time
 
 # Path of the design tokens (e.g., inside Naroa)
 TOKENS_PATH = os.path.expanduser("~/game/naroa-2026/css/tokens.css")
