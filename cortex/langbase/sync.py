@@ -131,7 +131,7 @@ async def sync_to_langbase(
                 meta={"fact_id": fact.id, "project": project, "type": fact.fact_type},
             )
             synced += 1
-        except (ConnectionError, OSError, RuntimeError) as e:
+        except Exception as e:
             errors += 1
             detail = f"Fact #{fact.id}: {e}"
             error_details.append(detail)

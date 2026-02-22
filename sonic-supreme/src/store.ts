@@ -82,6 +82,10 @@ interface WebAudioStore {
   setMasterVolume: (vol: number) => void;
   setBpm: (bpm: number) => void;
   setZoom: (z: number) => void;
+  
+  // Export
+  isExporting: boolean;
+  exportAudio: () => Promise<void>;
 }
 
 export const useStore = create<WebAudioStore>((set, get) => ({
@@ -307,5 +311,55 @@ export const useStore = create<WebAudioStore>((set, get) => ({
     if (updates.compRatio !== undefined) masterCompressor.ratio.value = updates.compRatio;
     
     return { masterFx: newFx };
-  })
+  }),
+  
+  isExporting: false,
+  exportAudio: async () => {
+    const { tracks } = get();
+    if (tracks.length === 0) return;
+    
+    set({ isExporting: true });
+    
+    try {
+      let maxDuration = 0;
+      tracks.forEach(t => {
+        const end = t.startTime + t.duration;
+        if (end > maxDuration) maxDuration = end;
+      });
+      maxDuration += 2; // reverb/delay tail
+      
+      const recorder = new Tone.Recorder();
+      masterBus.connect(recorder);
+      
+      await Tone.start();
+      recorder.start();
+      
+      const prevPosition = Tone.Transport.seconds;
+      const wasPlaying = get().isPlaying;
+      
+      if (wasPlaying) Tone.Transport.pause();
+      Tone.Transport.seconds = 0;
+      Tone.Transport.start();
+      
+      await new Promise(resolve => setTimeout(resolve, maxDuration * 1000));
+      
+      Tone.Transport.stop();
+      Tone.Transport.seconds = prevPosition;
+      if (wasPlaying) Tone.Transport.start();
+      
+      const recording = await recorder.stop();
+      const url = URL.createObjectURL(recording);
+      
+      const anchor = document.createElement("a");
+      anchor.download = "SonicSupreme_Bounce.webm";
+      anchor.href = url;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      masterBus.disconnect(recorder);
+    } catch (e) {
+      console.error('Export failed:', e);
+    } finally {
+      set({ isExporting: false });
+    }
+  }
 }));

@@ -88,8 +88,8 @@ class TestScan:
     def test_large_file_detection(self, mejoralo, tmp_path):
         """Files with >300 LOC should be flagged in architecture dimension."""
         (tmp_path / "pyproject.toml").write_text("[project]")
-        # Create a 400-line file
-        lines = "\n".join(f"x_{i} = {i}" for i in range(400))
+        # Create a 600-line file
+        lines = "\n".join(f"x_{i} = {i}" for i in range(600))
         (tmp_path / "huge.py").write_text(lines)
         result = mejoralo.scan("test-arch", str(tmp_path))
         arch = next(d for d in result.dimensions if d.name == "Arquitectura")

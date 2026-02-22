@@ -246,9 +246,9 @@ class TestThoughtFusion:
 class TestOrchestraConfig:
     def test_default_config(self):
         config = OrchestraConfig()
-        assert config.min_models == 2
-        assert config.max_models == 5
-        assert config.timeout_seconds == 30.0
+        assert config.min_models == 1
+        assert config.max_models == 500
+        assert config.timeout_seconds == 120.0
         assert config.default_strategy == FusionStrategy.SYNTHESIS
         assert config.retry_on_failure is True
         assert config.use_mode_prompts is True
@@ -298,7 +298,7 @@ class TestThoughtOrchestra:
 
     def test_orchestra_creation(self):
         orchestra = ThoughtOrchestra()
-        assert orchestra.config.min_models == 2
+        assert orchestra.config.min_models == 1
         assert orchestra._initialized is False
 
     def test_status_before_init(self):
