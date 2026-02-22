@@ -126,6 +126,7 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
     # 4. Complexity (indentation depth proxy)
     if not source_files:
         complexity_score = 0
+        complexity_penalty = 0
     else:
         complexity_ratio = complexity_penalties / max(1, total_loc)
         complexity_penalty = min(100, int(complexity_ratio * 100))

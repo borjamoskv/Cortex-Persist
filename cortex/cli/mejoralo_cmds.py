@@ -77,6 +77,31 @@ def mejoralo_record(project, score_before, score_after, actions, db):
         )
         delta = score_after - score_before
         color = "green" if delta > 0 else "red" if delta < 0 else "yellow"
+        
+        # Update mejora_loop_state.json if it exists
+        import json
+        from pathlib import Path
+        from datetime import datetime
+        state_file = Path.home() / ".cortex" / "mejora_loop_state.json"
+        if state_file.exists():
+            try:
+                with open(state_file, "r") as f:
+                    state = json.load(f)
+                if "improvement_history" not in state:
+                    state["improvement_history"] = []
+                state["improvement_history"].append({
+                    "project": project,
+                    "timestamp": datetime.now().isoformat(),
+                    "score_before": score_before,
+                    "score_after": score_after,
+                    "delta": delta
+                })
+                state["improvement_history"] = state["improvement_history"][-100:]
+                with open(state_file, "w") as f:
+                    json.dump(state, f, indent=2, default=str)
+            except Exception:
+                pass
+                
         console.print(
             f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] — "
             f"{score_before} → {score_after} ([{color}]Δ{delta:+d}[/])"
