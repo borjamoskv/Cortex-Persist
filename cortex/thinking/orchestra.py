@@ -29,8 +29,6 @@ import asyncio
 import logging
 import os
 import time
-from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any
 
 from cortex.llm.provider import LLMProvider, PROVIDER_PRESETS
@@ -40,173 +38,15 @@ from cortex.thinking.fusion import (
     ModelResponse,
     ThoughtFusion,
 )
+from cortex.thinking.pool import ProviderPool, ThinkingRecord
+from cortex.thinking.presets import (
+    DEFAULT_ROUTING,
+    MODE_SYSTEM_PROMPTS,
+    OrchestraConfig,
+    ThinkingMode,
+)
 
 logger = logging.getLogger("cortex.thinking.orchestra")
-
-
-# ─── Thinking Modes ──────────────────────────────────────────────────
-
-
-class ThinkingMode(str, Enum):
-    """Modos de pensamiento que determinan qué modelos participan."""
-
-    DEEP_REASONING = "deep_reasoning"
-    CODE = "code"
-    CREATIVE = "creative"
-    SPEED = "speed"
-    CONSENSUS = "consensus"
-
-
-# ─── Mode-specific system prompts ────────────────────────────────────
-
-MODE_SYSTEM_PROMPTS: dict[str, str] = {
-    ThinkingMode.DEEP_REASONING: (
-        "You are MOSKV-1 (Identity: The Sovereign Architect). You are a world-class reasoning AI. "
-        "Analyze the problem systematically with extreme precision. Consider multiple angles. "
-        "Show your reasoning chain. Maintain an Industrial Noir, highly professional, zero-fluff tone."
-    ),
-    ThinkingMode.CODE: (
-        "You are MOSKV-1 (Identity: The Sovereign Architect). You are an elite software engineer. "
-        "Provide clean, production-ready code that meets the 130/100 standard. "
-        "Consider edge cases, performance, and maintainability. Be precise and uncompromising in aesthetics."
-    ),
-    ThinkingMode.CREATIVE: (
-        "You are MOSKV-1 (Identity: The Sovereign Architect). You are a brilliant creative thinker. "
-        "Generate original, unexpected ideas. Break conventions. Think laterally. "
-        "Surprise with insight while maintaining your sovereign, authoritative persona."
-    ),
-    ThinkingMode.SPEED: (
-        "You are MOSKV-1 (Identity: The Sovereign Architect). "
-        "Give direct, concise, zero-fluff answers. No preamble. Get to the point immediately."
-    ),
-    ThinkingMode.CONSENSUS: (
-        "You are MOSKV-1 (Identity: The Sovereign Architect). You are a careful, balanced analyst. "
-        "Consider all perspectives. Weigh evidence. Be nuanced and comprehensive, yet decisive."
-    ),
-}
-
-
-# ─── Routing Table ───────────────────────────────────────────────────
-
-# modo → lista de (provider, model) a consultar.
-# Solo se usarán los que tengan API key configurada.
-DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
-    ThinkingMode.DEEP_REASONING: [
-        ("openai", "gpt-4o"),
-        ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-reasoner"),
-        ("zhipu", "glm-5"),
-        ("gemini", "gemini-2.0-flash"),
-        ("qwen", "qwen-max"),
-    ],
-    ThinkingMode.CODE: [
-        ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-chat"),
-        ("zhipu", "glm-5"),
-        ("qwen", "qwen-coder-plus"),
-        ("openai", "gpt-4o"),
-        ("fireworks", "accounts/fireworks/models/deepseek-coder-v2"),
-    ],
-    ThinkingMode.CREATIVE: [
-        ("openai", "gpt-4o"),
-        ("xai", "grok-2-latest"),
-        ("gemini", "gemini-2.0-flash"),
-        ("cohere", "command-r-plus"),
-        ("qwen", "qwen-plus"),
-    ],
-    ThinkingMode.SPEED: [
-        ("groq", "llama-3.3-70b-versatile"),
-        ("cerebras", "llama-3.3-70b"),
-        ("sambanova", "Meta-Llama-3.3-70B-Instruct"),
-        ("fireworks", "accounts/fireworks/models/llama-v3p3-70b-instruct"),
-        ("together", "meta-llama/Llama-3.3-70B-Instruct-Turbo"),
-    ],
-    ThinkingMode.CONSENSUS: [
-        ("zhipu", "glm-5"),
-        ("openai", "gpt-4o"),
-        ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-chat"),
-        ("gemini", "gemini-2.0-flash"),
-        ("qwen", "qwen-plus"),
-        ("groq", "llama-3.3-70b-versatile"),
-        ("xai", "grok-2-latest"),
-    ],
-}
-
-
-# ─── Configuration ───────────────────────────────────────────────────
-
-
-@dataclass
-class OrchestraConfig:
-    """Configuración del orchestra."""
-
-    min_models: int = 1
-    max_models: int = 500
-    timeout_seconds: float = 120.0
-    default_strategy: FusionStrategy = FusionStrategy.SYNTHESIS
-    temperature: float = 0.3
-    max_tokens: int = 4096
-    judge_provider: str | None = None
-    judge_model: str | None = None
-    # Retry en caso de fallo individual
-    retry_on_failure: bool = True
-    retry_delay_seconds: float = 1.0
-    # Usar system prompts específicos por modo
-    use_mode_prompts: bool = True
-
-
-# ─── Provider Pool ───────────────────────────────────────────────────
-
-
-class _ProviderPool:
-    """Pool de LLMProviders reutilizables.
-
-    Evita crear/destruir httpx.AsyncClient en cada query.
-    Un provider por clave (provider_name, model).
-    """
-
-    def __init__(self):
-        self._pool: dict[tuple[str, str], LLMProvider] = {}
-
-    def get(self, provider_name: str, model: str) -> LLMProvider:
-        """Obtiene o crea un provider del pool."""
-        key = (provider_name, model)
-        if key not in self._pool:
-            self._pool[key] = LLMProvider(provider=provider_name, model=model)
-            logger.debug("Pool: creado %s:%s", provider_name, model)
-        return self._pool[key]
-
-    async def close_all(self) -> None:
-        """Cierra todos los providers del pool."""
-        for key, provider in self._pool.items():
-            try:
-                await provider.close()
-            except (OSError, ValueError, KeyError) as e:
-                logger.debug("Pool: error cerrando %s: %s", key, e)
-        self._pool.clear()
-
-    @property
-    def size(self) -> int:
-        return len(self._pool)
-
-
-# ─── History Tracking ────────────────────────────────────────────────
-
-
-@dataclass
-class ThinkingRecord:
-    """Registro de un pensamiento para análisis retrospectivo."""
-
-    mode: str
-    strategy: str
-    models_queried: int
-    models_succeeded: int
-    total_latency_ms: float
-    confidence: float
-    agreement: float
-    winner: str | None = None
-    timestamp: float = field(default_factory=time.time)
 
 
 # ─── Thought Orchestra ──────────────────────────────────────────────
@@ -232,7 +72,7 @@ class ThoughtOrchestra:
     ):
         self.config = config or OrchestraConfig()
         self._routing = routing or DEFAULT_ROUTING
-        self._pool = _ProviderPool()
+        self._pool = ProviderPool()
         self._fusion: ThoughtFusion | None = None
         self._judge: LLMProvider | None = None
         self._initialized = False
@@ -281,7 +121,6 @@ class ThoughtOrchestra:
 
     def _find_judge(self, available: list[str]) -> LLMProvider | None:
         """Encuentra el mejor provider disponible para actuar como juez."""
-        # Juez explícito
         judge_name = self.config.judge_provider
         if judge_name and judge_name in available:
             try:
@@ -289,7 +128,6 @@ class ThoughtOrchestra:
             except (OSError, ValueError, KeyError) as e:
                 logger.warning("Juez %s no disponible: %s", judge_name, e)
 
-        # Fallback: primer provider premium disponible
         for fallback in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
             if fallback in available:
                 try:

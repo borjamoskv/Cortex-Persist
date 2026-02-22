@@ -112,6 +112,39 @@ def ledger_checkpoint(db):
     asyncio.run(_ledger_checkpoint_async())
 
 
+def _print_chain_report(report: dict) -> None:
+    """Imprime el resultado de verificación de cadena de hashes."""
+    if report["valid"]:
+        console.print(
+            f"[green]✅ Integridad de Cadena de Hashes: OK[/] ({report['votes_checked']} votos)"
+        )
+        return
+
+    console.print("[red]❌ Integridad de Cadena de Hashes: FALLIDA[/]")
+    for v in report["violations"]:
+        console.print(
+            f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}"
+        )
+
+
+def _print_merkle_report(merkle_report: list[dict]) -> None:
+    """Imprime el resultado de verificación de raíces Merkle."""
+    merkle_valid = all(r["valid"] for r in merkle_report)
+    if merkle_valid:
+        console.print(
+            f"[green]✅ Integridad de Raíz Merkle: OK[/] ({len(merkle_report)} puntos de control)"
+        )
+        return
+
+    console.print("[red]❌ Integridad de Raíz Merkle: FALLIDA[/]")
+    for r in merkle_report:
+        if not r["valid"]:
+            console.print(
+                f"  [red]✗[/] ¡Desajuste en Punto de Control {r['checkpoint_id']}! "
+                f"Esperado {r['expected'][:16]}... vs Actual {r['actual'][:16]}..."
+            )
+
+
 @ledger.command("verify")
 @click.option("--db", default=DEFAULT_DB, help="Ruta de la base de datos")
 def ledger_verify(db):
@@ -121,42 +154,19 @@ def ledger_verify(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
+                ledger_inst = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"
                 ):
-                    report = await ledger.verify_chain_integrity()
+                    report = await ledger_inst.verify_chain_integrity()
 
                 with console.status("[bold magenta]Verificando raíces de Merkle...[/]"):
-                    merkle_report = await ledger.verify_merkle_roots()
+                    merkle_report = await ledger_inst.verify_merkle_roots()
 
-                chain_valid = report["valid"]
-                merkle_valid = all(r["valid"] for r in merkle_report)
+                _print_chain_report(report)
+                _print_merkle_report(merkle_report)
 
-                if chain_valid:
-                    console.print(
-                        f"[green]✅ Integridad de Cadena de Hashes: OK[/] ({report['votes_checked']} votos)"
-                    )
-                else:
-                    console.print("[red]❌ Integridad de Cadena de Hashes: FALLIDA[/]")
-                    for v in report["violations"]:
-                        console.print(
-                            f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}"
-                        )
-
-                if merkle_valid:
-                    console.print(
-                        f"[green]✅ Integridad de Raíz Merkle: OK[/] ({len(merkle_report)} puntos de control)"
-                    )
-                else:
-                    console.print("[red]❌ Integridad de Raíz Merkle: FALLIDA[/]")
-                    for r in merkle_report:
-                        if not r["valid"]:
-                            console.print(
-                                f"  [red]✗[/] ¡Desajuste en Punto de Control {r['checkpoint_id']}! Esperado {r['expected'][:16]}... vs Actual {r['actual'][:16]}..."
-                            )
-
-                if not (chain_valid and merkle_valid):
+                if not (report["valid"] and all(r["valid"] for r in merkle_report)):
                     sys.exit(1)
         finally:
             await engine.close()

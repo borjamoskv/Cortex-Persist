@@ -2,12 +2,15 @@
 Tests for cortex.i18n module and API integration.
 """
 
-import pytest
+from typing import get_args
 
 from cortex.i18n import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
     TRANSLATIONS,
+    Lang,
+    TranslationKey,
+    get_cache_info,
     get_supported_languages,
     get_trans,
 )
@@ -68,3 +71,48 @@ class TestGetTrans:
         for key, entry in TRANSLATIONS.items():
             for lang in SUPPORTED_LANGUAGES:
                 assert lang in entry, f"Key '{key}' missing '{lang}' translation"
+
+    # --- Wave 3: Edge Cases ---
+
+    def test_none_lang_falls_back_to_english(self):
+        """None language should fall back to English."""
+        assert get_trans("system_operational", None) == "operational"
+
+    def test_empty_string_lang_falls_back(self):
+        """Empty string language should fall back to English."""
+        assert get_trans("system_operational", "") == "operational"
+
+    def test_lang_enum_direct(self):
+        """Passing Lang enum directly should work."""
+        assert get_trans("system_operational", Lang.ES) == "operativo"
+        assert get_trans("system_operational", Lang.EU) == "martxan"
+        assert get_trans("system_operational", Lang.EN) == "operational"
+
+    def test_format_string_keys_return_template(self):
+        """Keys containing {placeholders} should return the raw template."""
+        result_en = get_trans("error_missing_permission", "en")
+        assert "{permission}" in result_en
+
+        result_es = get_trans("error_fact_not_found", "es")
+        assert "{id}" in result_es
+
+        result_eu = get_trans("error_integrity_check_failed", "eu")
+        assert "{detail}" in result_eu
+
+    def test_translation_key_count_matches_translations(self):
+        """TranslationKey Literal args must match TRANSLATIONS keys exactly."""
+        literal_keys = set(get_args(TranslationKey))
+        translation_keys = set(TRANSLATIONS.keys())
+        assert literal_keys == translation_keys, (
+            f"Mismatch — in Literal but not dict: {literal_keys - translation_keys}, "
+            f"in dict but not Literal: {translation_keys - literal_keys}"
+        )
+
+    def test_cache_info_available(self):
+        """Cache info should be accessible for observability."""
+        # Warm the cache with one call
+        get_trans("system_operational", "en")
+        info = get_cache_info()
+        assert info.hits >= 0
+        assert info.misses >= 0
+        assert info.maxsize == 128

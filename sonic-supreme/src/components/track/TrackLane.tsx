@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useStore, Track as TrackType } from '../../store';
+import { useStore, type Track as TrackType } from '../../store';
 import { WaveformRenderer } from './WaveformRenderer';
 
 export function TrackLane({ track }: { track: TrackType }) {

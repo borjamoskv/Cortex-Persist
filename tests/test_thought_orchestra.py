@@ -17,14 +17,13 @@ from cortex.thinking.fusion import (
     _tokenize,
     _jaccard,
 )
-from cortex.thinking.orchestra import (
+from cortex.thinking.orchestra import ThoughtOrchestra
+from cortex.thinking.pool import ProviderPool, ThinkingRecord
+from cortex.thinking.presets import (
     OrchestraConfig,
     ThinkingMode,
-    ThinkingRecord,
-    ThoughtOrchestra,
     DEFAULT_ROUTING,
     MODE_SYSTEM_PROMPTS,
-    _ProviderPool,
 )
 from cortex.llm.provider import PROVIDER_PRESETS
 
@@ -267,12 +266,12 @@ class TestOrchestraConfig:
 
 class TestProviderPool:
     def test_pool_size_starts_empty(self):
-        pool = _ProviderPool()
+        pool = ProviderPool()
         assert pool.size == 0
 
     @pytest.mark.asyncio
     async def test_pool_close_all_empty(self):
-        pool = _ProviderPool()
+        pool = ProviderPool()
         await pool.close_all()
         assert pool.size == 0
 

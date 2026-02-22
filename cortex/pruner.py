@@ -18,6 +18,15 @@ import aiosqlite
 logger = logging.getLogger("cortex.pruner")
 
 
+def _to_bytes(data: str | bytes | object) -> bytes:
+    """Convierte datos de embedding a bytes para hashing."""
+    if isinstance(data, str):
+        return data.encode("utf-8")
+    if isinstance(data, bytes):
+        return data
+    return json.dumps(data).encode("utf-8")
+
+
 class EmbeddingPrunerMixin:
     """Mixin for CortexEngine that provides embedding lifecycle management.
 
@@ -67,22 +76,9 @@ class EmbeddingPrunerMixin:
                 )
                 return stats
 
-            for row in rows:
-                fact_id = row[0]
-                embedding_data = row[1]
-
+            for fact_id, embedding_data in rows:
                 try:
-                    # Compute hash of the embedding vector
-                    if isinstance(embedding_data, str):
-                        embedding_bytes = embedding_data.encode("utf-8")
-                    elif isinstance(embedding_data, bytes):
-                        embedding_bytes = embedding_data
-                    else:
-                        embedding_bytes = json.dumps(embedding_data).encode("utf-8")
-
-                    vec_hash = hashlib.sha256(embedding_bytes).hexdigest()
-
-                    # Store hash in pruned_embeddings
+                    vec_hash = hashlib.sha256(_to_bytes(embedding_data)).hexdigest()
                     await conn.execute(
                         """
                         INSERT OR IGNORE INTO pruned_embeddings
@@ -91,15 +87,11 @@ class EmbeddingPrunerMixin:
                         """,
                         (fact_id, vec_hash),
                     )
-
-                    # Remove from active embeddings
                     await conn.execute(
                         "DELETE FROM fact_embeddings WHERE fact_id = ?",
                         (fact_id,),
                     )
-
                     stats["pruned_count"] += 1
-
                 except (sqlite3.Error, OSError) as e:
                     logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
                     stats["errors"].append({"fact_id": fact_id, "error": str(e)})

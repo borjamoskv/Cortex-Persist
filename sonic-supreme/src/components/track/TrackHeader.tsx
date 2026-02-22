@@ -1,5 +1,5 @@
 import { GripVertical, Volume2, Trash2 } from 'lucide-react';
-import { useStore, Track as TrackType } from '../../store';
+import { useStore, type Track as TrackType } from '../../store';
 
 export function TrackHeader({ track }: { track: TrackType }) {
   const { updateTrack, removeTrack, selectedTrackId, selectTrack } = useStore();

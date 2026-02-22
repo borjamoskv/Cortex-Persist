@@ -1,4 +1,4 @@
-import { useStore, Track as TrackType } from '../../store';
+import { useStore, type Track as TrackType } from '../../store';
 
 function FxKnob({ label, value, color, onChange }: { label: string; value: number; color: string; onChange: (v: number) => void }) {
   return (
