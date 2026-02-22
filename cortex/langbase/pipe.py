@@ -39,7 +39,7 @@ def _format_facts(facts: list) -> str:
         return "(No relevant facts found in CORTEX memory.)"
 
     lines = []
-    for i, fact in enumerate(facts, 1):
+    for _i, fact in enumerate(facts, 1):
         fact_id = getattr(fact, "fact_id", "?")
         project = getattr(fact, "project", "?")
         score = getattr(fact, "score", 0.0)

@@ -25,8 +25,8 @@ def test_wave6():
     engine.init_db_sync()
 
     print("📝 Storing Facts...")
-    f1 = engine.store_sync("project-x", "Fact 1: Initial state", fact_type="knowledge")
-    f2 = engine.store_sync("project-x", "Fact 2: Second state", fact_type="knowledge")
+    engine.store_sync("project-x", "Fact 1: Initial state", fact_type="knowledge")
+    engine.store_sync("project-x", "Fact 2: Second state", fact_type="knowledge")
 
     # Get tx_ids
     conn = engine._get_sync_conn()

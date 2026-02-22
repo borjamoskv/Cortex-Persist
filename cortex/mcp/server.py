@@ -4,7 +4,6 @@ Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
 
-import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor

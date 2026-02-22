@@ -80,12 +80,12 @@ def mejoralo_record(project, score_before, score_after, actions, db):
         
         # Update mejora_loop_state.json if it exists
         import json
-        from pathlib import Path
         from datetime import datetime
+        from pathlib import Path
         state_file = Path.home() / ".cortex" / "mejora_loop_state.json"
         if state_file.exists():
             try:
-                with open(state_file, "r") as f:
+                with open(state_file) as f:
                     state = json.load(f)
                 if "improvement_history" not in state:
                     state["improvement_history"] = []

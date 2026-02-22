@@ -8,7 +8,6 @@ HST = T_c (Context) + T_d (Design) + T_i (Implementation) + T_b (Debugging) + T_
 
 import random
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass
@@ -24,7 +23,7 @@ class ChronosMetrics:
 class ChronosEngine:
     """Core mathematical engine for CHRONOS-1."""
 
-    COMPLEXITY_MULTIPLIERS: Dict[str, Dict[str, float]] = {
+    COMPLEXITY_MULTIPLIERS: dict[str, dict[str, float]] = {
         "low": {
             "t_c": 1.5,  # 1.5x AI time for context loading
             "t_d": 1.0,  # 1.0x AI time for design
@@ -59,7 +58,7 @@ class ChronosEngine:
         }
     }
 
-    TIPS_POOL: Dict[str, List[str]] = {
+    TIPS_POOL: dict[str, list[str]] = {
         "low": [
             "Para tareas triviales, asegúrate de mantener el 'Context Loading' limpio con buenos READMEs.",
             "Automatiza este tipo de tareas con scripts triviales en lugar de invocaciones complejas LLM.",
@@ -82,7 +81,7 @@ class ChronosEngine:
         ]
     }
 
-    ANTI_TIPS_POOL: Dict[str, List[str]] = {
+    ANTI_TIPS_POOL: dict[str, list[str]] = {
         "low": [
             "Crear una abstracción sobre-ingenierizada para un problema de 3 líneas.",
             "Aplicar arquitecturas God-Mode (Clean Architecture, CQRS) donde bastaba un script secuencial.",

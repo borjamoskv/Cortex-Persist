@@ -15,13 +15,13 @@ from __future__ import annotations
 
 import os
 import sys
+
 import pytest
 
 # Add parent dir so cortex_client is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from cortex_client import CortexMemoryClient
-
 
 CORTEX_URL = os.getenv("CORTEX_URL", "http://localhost:8484")
 INTEGRATION = os.getenv("INTEGRATION_TESTS", "0") == "1"

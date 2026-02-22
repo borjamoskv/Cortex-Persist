@@ -13,9 +13,9 @@ def client(tmp_path_factory):
     """Create test client with isolated temp DB."""
     db_path = str(tmp_path_factory.mktemp("security") / "test_security.db")
 
-    import cortex.config as config_mod
     import cortex.api as api_mod
     import cortex.auth
+    import cortex.config as config_mod
 
     original_config_db = config_mod.DB_PATH
     original_api_db = getattr(api_mod, "DB_PATH", None)

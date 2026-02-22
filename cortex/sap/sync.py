@@ -300,4 +300,3 @@ class SAPSync:
 
 
 # Needed for async detection in _get_sap_facts / _store_fact
-import asyncio  # noqa: E402

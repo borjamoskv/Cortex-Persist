@@ -210,7 +210,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                      )
 
                 # Log transaction
-                tx_id = await self._log_transaction(conn, "consensus", "vote_v2", {"fact_id": fact_id, "agent_id": target_agent_id, "vote": value})
+                await self._log_transaction(conn, "consensus", "vote_v2", {"fact_id": fact_id, "agent_id": target_agent_id, "vote": value})
 
                 # Record in permanent immutable ledger
                 await ledger.append_vote(fact_id, target_agent_id, value, rep, signature)

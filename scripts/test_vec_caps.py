@@ -1,4 +1,5 @@
 import os
+import platform
 import sqlite3
 from pathlib import Path
 
@@ -10,7 +11,6 @@ conn = sqlite3.connect(str(db_path))
 conn.enable_load_extension(True)
 
 # Try to find sqlite-vec extension
-import platform
 
 ext_path = None
 if platform.system() == "Darwin":

@@ -1,7 +1,8 @@
 import pytest
 
-from cortex.engine import CortexEngine
 import cortex.graph.engine
+from cortex.engine import CortexEngine
+
 cortex.graph.engine.GRAPH_BACKEND = "sqlite"
 
 

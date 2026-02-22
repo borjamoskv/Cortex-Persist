@@ -2,13 +2,13 @@ import asyncio
 import uuid
 from pathlib import Path
 
+from cortex.connection_pool import CortexConnectionPool
+from cortex.engine_async import AsyncCortexEngine
+
 
 # Simplified logging for robustness
 def log(msg):
     print(f"\033[1;34m[SOVEREIGN]\033[0m {msg}")
-
-from cortex.connection_pool import CortexConnectionPool
-from cortex.engine_async import AsyncCortexEngine
 
 
 async def simulate_consensus():

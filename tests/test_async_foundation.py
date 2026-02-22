@@ -102,7 +102,7 @@ async def test_pool_concurrency_limit(pool):
             pass  # Success
 
     # Cleanup
-    for ctx, conn in conns:
+    for ctx, _conn in conns:
         await ctx.__aexit__(None, None, None)
 
 

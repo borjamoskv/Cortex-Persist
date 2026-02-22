@@ -43,7 +43,7 @@ class ToolboxConfig:
     )
 
     @classmethod
-    def from_env(cls) -> "ToolboxConfig":
+    def from_env(cls) -> ToolboxConfig:
         """Create config from environment variables."""
         return cls(
             server_url=os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000"),
@@ -64,7 +64,7 @@ class ToolboxBridge:
 
     def __init__(self, config: ToolboxConfig | None = None) -> None:
         self.config = config or ToolboxConfig.from_env()
-        self._client: "ToolboxClient | None" = None
+        self._client: ToolboxClient | None = None
         self._tools: list = []
 
     @property

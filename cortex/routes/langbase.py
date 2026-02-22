@@ -25,7 +25,7 @@ from cortex.config import LANGBASE_API_KEY, LANGBASE_BASE_URL
 from cortex.engine_async import AsyncCortexEngine
 from cortex.langbase.client import LangbaseClient, LangbaseError
 from cortex.langbase.pipe import run_with_cortex_context
-from cortex.langbase.sync import enrich_from_langbase, sync_to_langbase
+from cortex.langbase.sync import sync_to_langbase
 
 logger = logging.getLogger("cortex.routes.langbase")
 

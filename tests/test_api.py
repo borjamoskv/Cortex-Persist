@@ -25,9 +25,9 @@ def client():
             pass
 
     import cortex.api as api_mod
+    import cortex.api_state
     import cortex.auth
     import cortex.config
-    import cortex.api_state
 
     original_db_api = api_mod.DB_PATH
     original_db_config = cortex.config.DB_PATH

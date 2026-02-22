@@ -53,8 +53,9 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
     try:
         meta = {}
         if ai_time is not None and complexity is not None:
-            from cortex.chronos import ChronosEngine
             import dataclasses
+
+            from cortex.chronos import ChronosEngine
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
             console.print(f"[bold cyan]⏳ CHRONOS-1:[/] {metrics.asymmetry_factor:.1f}x asymmetry. {metrics.tip}")

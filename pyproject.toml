@@ -1,6 +1,6 @@
 [project]
 name = "cortex-memory"
-version = "4.0.0"
+version = "4.3.0"
 description = "The Sovereign Ledger for AI Agents — local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults."
 readme = "README.md"
 license = {text = "BSL-1.1"}
@@ -51,8 +51,11 @@ adk = [
 toolbox = [
     "toolbox-core>=0.1.0",
 ]
+billing = [
+    "stripe>=8.0",
+]
 all = [
-    "cortex-memory[api,dev,adk,toolbox]",
+    "cortex-memory[api,dev,adk,toolbox,billing]",
 ]
 
 [project.scripts]

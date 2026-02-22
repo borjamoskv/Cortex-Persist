@@ -14,12 +14,10 @@ Tools:
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 
 if TYPE_CHECKING:
@@ -30,7 +28,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.mcp.trust")
 
 
-def register_trust_tools(mcp: "FastMCP", ctx: "_MCPContext") -> None:
+def register_trust_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register all Trust/Compliance tools on the MCP server."""
 
     _register_audit_trail(mcp, ctx)
@@ -39,7 +37,7 @@ def register_trust_tools(mcp: "FastMCP", ctx: "_MCPContext") -> None:
     _register_decision_lineage(mcp, ctx)
 
 
-def _register_audit_trail(mcp: "FastMCP", ctx: "_MCPContext") -> None:
+def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_audit_trail`` tool."""
 
     @mcp.tool()
@@ -125,7 +123,7 @@ def _register_audit_trail(mcp: "FastMCP", ctx: "_MCPContext") -> None:
         return "\n".join(lines)
 
 
-def _register_verify_fact(mcp: "FastMCP", ctx: "_MCPContext") -> None:
+def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_verify_fact`` tool."""
 
     @mcp.tool()
@@ -218,7 +216,7 @@ def _register_verify_fact(mcp: "FastMCP", ctx: "_MCPContext") -> None:
                 f"Merkle Root:  {merkle_root}",
                 f"Range:        TX #{start} → #{end}",
                 f"Sealed At:    {cp_time}",
-                f"Status:       ✅ Fact included in sealed checkpoint",
+                "Status:       ✅ Fact included in sealed checkpoint",
             ])
         else:
             lines.append("\nMerkle:       ⏳ Not yet included in a checkpoint")
@@ -229,7 +227,7 @@ def _register_verify_fact(mcp: "FastMCP", ctx: "_MCPContext") -> None:
         return "\n".join(lines)
 
 
-def _register_compliance_report(mcp: "FastMCP", ctx: "_MCPContext") -> None:
+def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_compliance_report`` tool."""
 
     @mcp.tool()
@@ -360,7 +358,7 @@ def _register_compliance_report(mcp: "FastMCP", ctx: "_MCPContext") -> None:
         return "\n".join(lines)
 
 
-def _register_decision_lineage(mcp: "FastMCP", ctx: "_MCPContext") -> None:
+def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_decision_lineage`` tool."""
 
     @mcp.tool()

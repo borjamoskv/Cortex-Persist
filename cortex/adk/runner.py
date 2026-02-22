@@ -77,7 +77,7 @@ def run_cli(agent_name: str = "sovereign", model: str | None = None) -> None:
 
     print(f"\n🧠 CORTEX ADK — {agent.name}")
     print(f"   Model: {agent.model}")
-    print(f"   Type 'quit' to exit\n")
+    print("   Type 'quit' to exit\n")
 
     session = session_service.create_session(app_name="cortex", user_id="moskv-1")
 

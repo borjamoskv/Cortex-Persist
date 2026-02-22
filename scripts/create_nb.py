@@ -14,6 +14,7 @@ Output: notebooks/cortex_notebooklm.ipynb
 
 import json
 import textwrap
+from pathlib import Path
 
 
 def cell_md(lines: str):
@@ -386,9 +387,7 @@ notebook = {
     "nbformat_minor": 4,
 }
 
-from pathlib import Path as _Path
-
-out_path = _Path("notebooks/cortex_notebooklm.ipynb")
+out_path = Path("notebooks/cortex_notebooklm.ipynb")
 out_path.parent.mkdir(exist_ok=True)
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(notebook, f, indent=1, ensure_ascii=False)

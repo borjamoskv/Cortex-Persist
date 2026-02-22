@@ -73,7 +73,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
             if "stderr" in result:
                 console.print(f"\n[red]Stderr:[/]\n{result['stderr']}")
     finally:
-        engine.close()
+        engine.close_sync()
 
 
 @launchpad.command("list")
@@ -104,4 +104,4 @@ def mission_list(project, db):
             )
         console.print(table)
     finally:
-        engine.close()
+        engine.close_sync()

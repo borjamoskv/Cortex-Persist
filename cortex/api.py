@@ -17,26 +17,52 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from cortex import __version__, api_state, config
-from cortex.config import ALLOWED_ORIGINS, DB_PATH, RATE_LIMIT, RATE_WINDOW
-from cortex.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.auth import AuthManager
+from cortex.config import ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
 from cortex.engine import CortexEngine
 from cortex.hive import router as hive_router
+from cortex.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.metrics import MetricsMiddleware, metrics
 from cortex.routes import (
     admin as admin_router,
+)
+from cortex.routes import (
     agents as agents_router,
+)
+from cortex.routes import (
     ask as ask_router,
+)
+from cortex.routes import (
     context as context_router,
+)
+from cortex.routes import (
     daemon as daemon_router,
+)
+from cortex.routes import (
     dashboard as dashboard_router,
+)
+from cortex.routes import (
     facts as facts_router,
+)
+from cortex.routes import (
     gate as gate_router,
+)
+from cortex.routes import (
     graph as graph_router,
+)
+from cortex.routes import (
     ledger as ledger_router,
+)
+from cortex.routes import (
     mejoralo as mejoralo_router,
+)
+from cortex.routes import (
     missions as missions_router,
+)
+from cortex.routes import (
     search as search_router,
+)
+from cortex.routes import (
     timing as timing_router,
 )
 from cortex.timing import TimingTracker
@@ -203,7 +229,6 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 
 @app.get("/", tags=["health"])
 async def root_node(request: Request) -> dict:
-    from cortex.i18n import get_trans
 
     # Use DEFAULT_LANGUAGE if no header is provided
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
@@ -219,7 +244,6 @@ async def root_node(request: Request) -> dict:
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     """Simple status check for load balancers."""
-    from cortex.i18n import get_trans
 
     # Use DEFAULT_LANGUAGE if no header is provided
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
@@ -262,3 +286,10 @@ if config.LANGBASE_API_KEY:
 
     app.include_router(langbase_router.router)
     logger.info("Langbase integration enabled")
+
+# Stripe billing (opt-in — only if secret key is configured)
+if config.STRIPE_SECRET_KEY:
+    from cortex.routes import stripe as stripe_router
+
+    app.include_router(stripe_router.router)
+    logger.info("Stripe billing enabled")

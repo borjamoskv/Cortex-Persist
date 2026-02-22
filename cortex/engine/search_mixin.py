@@ -4,7 +4,7 @@ import sqlite3
 from typing import Any
 
 from cortex.graph import extract_entities, get_context_subgraph
-from cortex.search import hybrid_search, semantic_search, text_search
+from cortex.search import hybrid_search, text_search
 
 logger = logging.getLogger("cortex.engine.search")
 

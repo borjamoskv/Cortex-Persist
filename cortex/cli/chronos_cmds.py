@@ -65,4 +65,4 @@ def analyze(ai_time: float, complexity: str) -> None:
 
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise click.Abort()
+        raise click.Abort() from e

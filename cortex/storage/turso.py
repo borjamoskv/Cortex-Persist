@@ -15,7 +15,6 @@ Install:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 logger = logging.getLogger("cortex.storage.turso")
 
@@ -65,7 +64,7 @@ class TursoBackend:
 
             columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
-            return [dict(zip(columns, row)) for row in rows]
+            return [dict(zip(columns, row, strict=False)) for row in rows]
         except (OSError, ValueError) as e:
             logger.error("Turso execute error: %s | SQL: %s", e, sql[:200])
             raise

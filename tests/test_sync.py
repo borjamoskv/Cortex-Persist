@@ -12,7 +12,6 @@ from cortex.engine import CortexEngine
 from cortex.sync import (
     SyncResult,
     WritebackResult,
-    export_snapshot,
     export_to_json,
     sync_memory,
 )

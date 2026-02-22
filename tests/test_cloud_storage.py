@@ -8,9 +8,9 @@ without requiring actual Turso credentials (uses mocking).
 from __future__ import annotations
 
 import os
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
+import pytest
 
 # ─── Storage __init__ Tests ──────────────────────────────────────────
 
@@ -43,7 +43,7 @@ class TestStorageMode:
             assert mode == StorageMode.LOCAL
 
     def test_get_storage_config_local(self):
-        from cortex.storage import get_storage_config, StorageMode
+        from cortex.storage import StorageMode, get_storage_config
 
         with patch.dict(os.environ, {"CORTEX_STORAGE": "local"}):
             config = get_storage_config()
@@ -72,7 +72,7 @@ class TestStorageMode:
                 get_storage_config()
 
     def test_get_storage_config_turso_complete(self):
-        from cortex.storage import get_storage_config, StorageMode
+        from cortex.storage import StorageMode, get_storage_config
 
         with patch.dict(
             os.environ,
@@ -133,8 +133,8 @@ class TestTenantRouter:
 
     def test_router_detects_local_mode(self):
         with patch.dict(os.environ, {"CORTEX_STORAGE": "local"}):
-            from cortex.storage.router import TenantRouter
             from cortex.storage import StorageMode
+            from cortex.storage.router import TenantRouter
 
             router = TenantRouter()
             assert router.mode == StorageMode.LOCAL

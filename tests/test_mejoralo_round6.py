@@ -20,6 +20,7 @@ class TestCLIResourceSafety:
     def _make_mock_engine(self):
         engine = MagicMock()
         engine.close = MagicMock()
+        engine.close_sync = MagicMock()
         return engine
 
     def test_search_calls_close_on_error(self):
@@ -33,7 +34,7 @@ class TestCLIResourceSafety:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["search", "test query"])
+            _result = runner.invoke(cli, ["search", "test query"])
             engine.close.assert_called_once()
 
     def test_recall_calls_close_on_error(self):
@@ -47,7 +48,7 @@ class TestCLIResourceSafety:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["recall", "test-project"])
+            _result = runner.invoke(cli, ["recall", "test-project"])
             engine.close.assert_called_once()
 
     def test_history_calls_close_on_error(self):
@@ -61,7 +62,7 @@ class TestCLIResourceSafety:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["history", "test-project"])
+            _result = runner.invoke(cli, ["history", "test-project"])
             engine.close.assert_called_once()
 
     def test_status_calls_close_on_error(self):
@@ -75,12 +76,13 @@ class TestCLIResourceSafety:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["status"])
+            _result = runner.invoke(cli, ["status"])
             engine.close.assert_called_once()
 
     def test_list_facts_calls_close_on_success(self):
         """list-facts should close engine on normal (empty) completion."""
         engine = self._make_mock_engine()
+        engine.close_sync = MagicMock()
         conn = MagicMock()
         conn.execute.return_value.fetchall.return_value = []
         engine.get_connection.return_value = conn
@@ -91,8 +93,8 @@ class TestCLIResourceSafety:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["list"])
-            engine.close.assert_called_once()
+            _result = runner.invoke(cli, ["list"])
+            engine.close_sync.assert_called_once()
 
 
 # ═══ CLI edit defensive JSON ══════════════════════════════════════
@@ -104,7 +106,7 @@ class TestEditDefensiveJSON:
     def test_edit_handles_corrupt_tags_json(self):
         """edit should not crash if tags JSON is corrupt."""
         engine = MagicMock()
-        engine.close = MagicMock()
+        engine.close_sync = MagicMock()
         conn = MagicMock()
         conn.execute.return_value.fetchone.return_value = (
             "test-project",
@@ -128,12 +130,12 @@ class TestEditDefensiveJSON:
             from cortex.cli import cli
 
             runner = CliRunner()
-            result = runner.invoke(cli, ["edit", "1", "new content"])
+            _result = runner.invoke(cli, ["edit", "1", "new content"])
             engine.store_sync.assert_called_once()
             # tags should be None since JSON was corrupt
             _, kwargs = engine.store_sync.call_args
             assert kwargs.get("tags") is None
-            engine.close.assert_called_once()
+            engine.close_sync.assert_called_once()
 
 
 # ═══ Migration resilience ════════════════════════════════════════

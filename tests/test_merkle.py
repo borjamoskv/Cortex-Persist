@@ -8,11 +8,7 @@ Tests both:
 
 import hashlib
 
-import pytest
-
 # ── consensus/merkle.py ──────────────────────────────────────────────
-
-
 from cortex.consensus.merkle import MerkleTree, compute_merkle_root, verify_merkle_proof
 
 

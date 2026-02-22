@@ -56,7 +56,7 @@ def test_consensus_flow(client):
     # 1. Register agent
     resp = client.post("/v1/agents", json={"name": "test-agent", "agent_type": "ai"})
     assert resp.status_code == 200
-    agent_id = resp.json()["agent_id"]
+    resp.json()["agent_id"]  # verify key exists
 
     # 2. Store fact
     resp = client.post("/v1/facts", json={"project": "test_proj", "content": "The Earth is round"})

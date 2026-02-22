@@ -16,7 +16,7 @@ def time_cmd(project, days, db) -> None:
     """Show time tracking summary."""
     engine = get_engine(db)
     try:
-        engine.init_db()
+        engine.init_db_sync()
         t = get_tracker(engine)
         if days <= 1:
             summary = t.today(project=project)
@@ -46,7 +46,7 @@ def time_cmd(project, days, db) -> None:
                 table.add_row(f"  📄 {entity}", f"{count} hits")
         console.print(table)
     finally:
-        engine.close()
+        engine.close_sync()
 
 
 @cli.command("heartbeat")
@@ -59,7 +59,7 @@ def heartbeat_cmd(project, entity, category, branch, db) -> None:
     """Record an activity heartbeat."""
     engine = get_engine(db)
     try:
-        engine.init_db()
+        engine.init_db_sync()
         t = get_tracker(engine)
         hb_id = t.heartbeat(
             project=project,
@@ -70,4 +70,4 @@ def heartbeat_cmd(project, entity, category, branch, db) -> None:
         t.flush()
         console.print(f"[green]✓[/] Heartbeat [bold]#{hb_id}[/] → [cyan]{project}[/]/{entity}")
     finally:
-        engine.close()
+        engine.close_sync()

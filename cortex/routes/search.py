@@ -2,7 +2,7 @@
 CORTEX v4.0 - Search Router.
 """
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 
 from cortex.api_deps import get_async_engine
 from cortex.auth import AuthResult, require_permission

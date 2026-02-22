@@ -44,7 +44,7 @@ class TestHistogramCap:
 
     def test_histogram_count_survives_eviction(self):
         reg = MetricsRegistry()
-        for i in range(1500):
+        for _ in range(1500):
             reg.observe("test_hist", 1.0)
         assert reg._hist_count["test_hist"] == 1500
         # Deque only holds last 1000

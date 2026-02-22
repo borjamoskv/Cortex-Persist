@@ -58,8 +58,9 @@ class TestADKTools:
 
     def test_adk_store_signature(self):
         """adk_store should accept expected parameters."""
-        from cortex.adk.tools import adk_store
         import inspect
+
+        from cortex.adk.tools import adk_store
 
         sig = inspect.signature(adk_store)
         params = list(sig.parameters.keys())
@@ -71,8 +72,9 @@ class TestADKTools:
 
     def test_adk_search_signature(self):
         """adk_search should accept expected parameters."""
-        from cortex.adk.tools import adk_search
         import inspect
+
+        from cortex.adk.tools import adk_search
 
         sig = inspect.signature(adk_search)
         params = list(sig.parameters.keys())
@@ -82,16 +84,18 @@ class TestADKTools:
 
     def test_adk_status_signature(self):
         """adk_status should accept no parameters."""
-        from cortex.adk.tools import adk_status
         import inspect
+
+        from cortex.adk.tools import adk_status
 
         sig = inspect.signature(adk_status)
         assert len(sig.parameters) == 0
 
     def test_adk_ledger_verify_signature(self):
         """adk_ledger_verify should accept no parameters."""
-        from cortex.adk.tools import adk_ledger_verify
         import inspect
+
+        from cortex.adk.tools import adk_ledger_verify
 
         sig = inspect.signature(adk_ledger_verify)
         assert len(sig.parameters) == 0
@@ -106,8 +110,9 @@ class TestADKTools:
 
     def test_tools_return_dict(self):
         """All tools should have dict return type annotation."""
-        from cortex.adk.tools import ALL_TOOLS
         import inspect
+
+        from cortex.adk.tools import ALL_TOOLS
 
         for tool in ALL_TOOLS:
             sig = inspect.signature(tool)

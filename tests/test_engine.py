@@ -92,16 +92,16 @@ class TestInit:
 @pytest.mark.asyncio
 class TestStore:
     async def test_store_returns_id(self, engine):
-        fact_id = await engine.store("test-project", "Test fact")
+        fact_id = await engine.store("test-project", "Test fact content for engine validation")
         assert fact_id > 0
 
     async def test_store_increments_id(self, engine):
-        id1 = await engine.store("test", "Fact 1")
-        id2 = await engine.store("test", "Fact 2")
+        id1 = await engine.store("test", "First fact for increment test")
+        id2 = await engine.store("test", "Second fact for increment test")
         assert id2 > id1
 
     async def test_store_with_tags(self, engine):
-        await engine.store("test", "Tagged fact", tags=["tag1", "tag2"])
+        await engine.store("test", "Tagged fact for tag verification test", tags=["tag1", "tag2"])
         conn = await engine.get_conn()
         async with conn.execute("SELECT tags FROM facts WHERE id=1") as cursor:
             row = await cursor.fetchone()
@@ -109,7 +109,7 @@ class TestStore:
         assert tags == ["tag1", "tag2"]
 
     async def test_store_creates_transaction(self, engine):
-        await engine.store("test", "Audited fact")
+        await engine.store("test", "Audited fact for transaction test")
         conn = await engine.get_conn()
         async with conn.execute("SELECT * FROM transactions") as cursor:
             tx = await cursor.fetchone()
@@ -118,8 +118,8 @@ class TestStore:
         assert tx[2] == "store"  # action
 
     async def test_transaction_hash_chain(self, engine):
-        await engine.store("test", "Fact 1")
-        await engine.store("test", "Fact 2")
+        await engine.store("test", "First fact for hash chain test")
+        await engine.store("test", "Second fact for hash chain test")
         conn = await engine.get_conn()
         async with conn.execute("SELECT prev_hash, hash FROM transactions ORDER BY id") as cursor:
             txs = await cursor.fetchall()

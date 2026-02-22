@@ -7,14 +7,13 @@ Single-threaded with 2s delays to avoid rate limiting.
 Expected runtime: ~25 min for 700 URLs
 """
 
-import re
-import json
-import time
-import subprocess
-import sys
 import html as html_module
-from pathlib import Path
+import json
+import re
+import subprocess
+import time
 from datetime import datetime
+from pathlib import Path
 
 URLS = """https://basmooy.bandcamp.com
 https://ansome.bandcamp.com
@@ -922,8 +921,8 @@ def generate_report(results, md_path):
         "# 🎛️ Bandcamp Profile Map",
         f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}*",
         "",
-        f"| Metric | Count |",
-        f"|--------|-------|",
+        "| Metric | Count |",
+        "|--------|-------|",
         f"| Total scanned | {len(results)} |",
         f"| Active profiles | {len(ok)} |",
         f"| With emails | {len(with_emails)} |",
@@ -991,7 +990,7 @@ def main():
     urls = get_unique_urls()
     total = len(urls)
 
-    print(f"\n🎛️  Bandcamp Profile Mapper v3.0")
+    print("\n🎛️  Bandcamp Profile Mapper v3.0")
     print(f"   {total} unique URLs — single thread, ~2s/req")
     print(f"   ETA: ~{total * 2.5 / 60:.0f} minutes\n")
 

@@ -56,10 +56,11 @@ def test_cli_chronos_analyze():
 
 import json
 
+
 def test_store_with_chronos(tmp_path):
     """Test storing a fact with CHRONOS auto-injection."""
-    from cortex.engine import CortexEngine
     from cortex.cli.core import store
+    from cortex.engine import CortexEngine
 
     db_path = tmp_path / "test.db"
     

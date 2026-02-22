@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import json
 import logging
-import subprocess
 import sqlite3
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -31,6 +31,46 @@ WEIGHT_RECENT_TX = 0.7
 WEIGHT_HEARTBEAT = 0.95
 WEIGHT_FS_RECENT = 0.4
 WEIGHT_GIT_COMMIT = 0.6
+
+
+# ─── Module-level Helpers ────────────────────────────────────────────
+
+
+def _recency_decay(rank: int, total: int) -> float:
+    """Linear decay: rank 0 = 1.0, rank total-1 = 0.5."""
+    if total <= 1:
+        return 1.0
+    return 1.0 - 0.5 * (rank / (total - 1))
+
+
+def _parse_tx_detail(raw: str | dict | None) -> str:
+    """Extract a short summary from a transaction detail field."""
+    if not raw:
+        return ""
+    try:
+        d = json.loads(raw) if isinstance(raw, str) else raw
+        if isinstance(d, dict):
+            return f" — {d.get('content', '')[:80]}"
+    except (json.JSONDecodeError, TypeError):
+        pass
+    return ""
+
+
+def _infer_project_from_path(path: Path) -> str | None:
+    """Try to infer project name from directory structure."""
+    try:
+        parts = path.resolve().parts
+        # Look for common project indicators
+        for i, part in enumerate(parts):
+            if part in ("projects", "src", "repos", "workspace"):
+                if i + 1 < len(parts):
+                    return parts[i + 1]
+        # Fallback: use parent directory name
+        if path.is_file():
+            return path.parent.name
+        return path.name
+    except (sqlite3.Error, OSError, ValueError):
+        return None
 
 
 class ContextCollector:
@@ -149,14 +189,7 @@ class ContextCollector:
 
         signals = []
         for i, row in enumerate(rows):
-            detail = ""
-            if row[3]:
-                try:
-                    d = json.loads(row[3]) if isinstance(row[3], str) else row[3]
-                    detail = f" — {d.get('content', '')[:80]}" if isinstance(d, dict) else ""
-                except (json.JSONDecodeError, TypeError):
-                    pass
-
+            detail = _parse_tx_detail(row[3])
             signals.append(
                 Signal(
                     source="db:transactions",
@@ -211,7 +244,6 @@ class ContextCollector:
             now_ts = datetime.now(tz=timezone.utc).timestamp()
             for i, f in enumerate(py_files):
                 age_hours = (now_ts - f.stat().st_mtime) / 3600
-                # Only include files modified in last 24h
                 if age_hours > 24:
                     continue
                 mod_time = datetime.fromtimestamp(
@@ -267,30 +299,3 @@ class ContextCollector:
             logger.debug("Could not read git log", exc_info=True)
 
         return signals
-
-
-# ─── Helpers ─────────────────────────────────────────────────────────
-
-
-def _recency_decay(rank: int, total: int) -> float:
-    """Linear decay: rank 0 = 1.0, rank total-1 = 0.5."""
-    if total <= 1:
-        return 1.0
-    return 1.0 - 0.5 * (rank / (total - 1))
-
-
-def _infer_project_from_path(path: Path) -> str | None:
-    """Try to infer project name from directory structure."""
-    try:
-        parts = path.resolve().parts
-        # Look for common project indicators
-        for i, part in enumerate(parts):
-            if part in ("projects", "src", "repos", "workspace"):
-                if i + 1 < len(parts):
-                    return parts[i + 1]
-        # Fallback: use parent directory name
-        if path.is_file():
-            return path.parent.name
-        return path.name
-    except (sqlite3.Error, OSError, ValueError):
-        return None

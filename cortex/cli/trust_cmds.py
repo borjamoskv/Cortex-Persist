@@ -7,14 +7,14 @@ and EU AI Act Article 12 compliance reporting.
 
 import asyncio
 import json
+import sqlite3
 
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import cli, get_engine, DEFAULT_DB
-from cortex.config import DEFAULT_DB_PATH
+from cortex.cli import DEFAULT_DB, cli
 
 console = Console()
 
@@ -242,7 +242,8 @@ def compliance_report(db: str) -> None:
 
     # Compliance checklist
     c1, c2, c3, c4, c5 = total_tx > 0, decisions > 0, chain_ok, checkpoints > 0, len(agents) > 0
-    icon = lambda ok: "[green]✅[/green]" if ok else "[red]❌[/red]"
+    def icon(ok):
+        return "[green]✅[/green]" if ok else "[red]❌[/red]"
 
     checks = Table(title="Compliance Checklist (Art. 12)")
     checks.add_column("Requirement", style="bold")

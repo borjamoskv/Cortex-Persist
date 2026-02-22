@@ -12,9 +12,8 @@ Commands:
   cortex autorouter logs     → Tail al log del daemon
 """
 
-import sys
 import subprocess
-import os
+import sys
 from pathlib import Path
 
 import click

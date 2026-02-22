@@ -40,7 +40,7 @@ _DEFAULT_MODEL = os.environ.get("CORTEX_ADK_MODEL", "gemini-2.0-flash")
 def create_memory_agent(
     model: str | None = None,
     extra_tools: list | None = None,
-) -> "Agent":
+) -> Agent:
     """Create the CORTEX Memory Agent — root agent for sovereign memory ops.
 
     This agent can store facts, search memory, check system status,
@@ -98,7 +98,7 @@ def create_memory_agent(
 def create_analyst_agent(
     model: str | None = None,
     toolbox_tools: list | None = None,
-) -> "Agent":
+) -> Agent:
     """Create the CORTEX Analyst Agent — cross-source analysis sub-agent.
 
     Combines CORTEX search with optional external database tools
@@ -143,7 +143,7 @@ def create_analyst_agent(
 
 def create_guardian_agent(
     model: str | None = None,
-) -> "Agent":
+) -> Agent:
     """Create the CORTEX Guardian Agent — security and integrity sub-agent.
 
     Focused on ledger verification, integrity audits, and system
@@ -189,7 +189,7 @@ def create_guardian_agent(
 def create_cortex_swarm(
     model: str | None = None,
     toolbox_tools: list | None = None,
-) -> "Agent":
+) -> Agent:
     """Create the full CORTEX agent swarm — multi-agent system.
 
     Returns a root agent that can delegate to specialized sub-agents:

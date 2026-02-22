@@ -4,7 +4,6 @@ Configuration, Metrics, Caching, and Connection Pooling.
 """
 
 import asyncio
-import aiosqlite
 import logging
 import os
 import time
@@ -13,6 +12,8 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+
+import aiosqlite
 
 logger = logging.getLogger("cortex.mcp.utils")
 

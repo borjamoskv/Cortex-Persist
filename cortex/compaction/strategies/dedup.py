@@ -4,11 +4,12 @@ Deduplication strategy for compaction.
 import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
+
 from cortex.compaction.utils import content_hash, similarity
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
     from cortex.compactor import CompactionResult
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.dedup")
 _LOG_FMT = "Compactor [%s] %s"

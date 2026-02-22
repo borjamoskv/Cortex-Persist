@@ -1,10 +1,9 @@
-import sys
+import sqlite3
 import subprocess
+import sys
 from pathlib import Path
-from typing import List, Tuple
 
 import click
-import sqlite3
 from rich.console import Console
 
 console = Console()
@@ -12,7 +11,7 @@ console = Console()
 # Path to the Sovereign Singularity Nexus engine
 NEXUS_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "singularity-nexus" / "scripts" / "singularity_engine.py"
 
-def run_nexus_skill(args: List[str]):
+def run_nexus_skill(args: list[str]):
     """Execute the singularity-nexus skill script natively streaming output."""
     if not NEXUS_SKILL_PATH.exists():
         console.print(f"[bold red]Error:[/] Singularity Nexus skill not found at {NEXUS_SKILL_PATH}")

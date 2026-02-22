@@ -14,7 +14,6 @@ from cortex.compactor import (
     get_compaction_stats,
 )
 
-
 _STRATEGY_MAP = {s.value: s for s in CompactionStrategy}
 
 

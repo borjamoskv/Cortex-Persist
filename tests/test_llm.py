@@ -14,7 +14,7 @@ Tests for:
 """
 
 import tempfile
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -28,7 +28,6 @@ cortex.config.DB_PATH = _test_db
 cortex.api.DB_PATH = _test_db
 
 from cortex.api import app
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 

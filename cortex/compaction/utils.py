@@ -4,6 +4,7 @@ Shared utilities for compaction strategies.
 import hashlib
 from difflib import SequenceMatcher
 
+
 def normalize_content(text: str) -> str:
     """Normalize text for comparison: lowercase, strip, collapse whitespace."""
     return " ".join(text.lower().strip().split())

@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from functools import lru_cache
 from typing import Any
 
 from cortex.storage import StorageMode, get_storage_mode
@@ -52,8 +51,8 @@ class TenantRouter:
     async def _get_local_backend(self):
         """Return the shared local SQLite connection pool."""
         if "local" not in self._connections:
-            from cortex.connection_pool import CortexConnectionPool
             from cortex.config import DB_PATH
+            from cortex.connection_pool import CortexConnectionPool
 
             pool = CortexConnectionPool(str(DB_PATH))
             await pool.initialize()
