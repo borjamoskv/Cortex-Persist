@@ -170,7 +170,38 @@ def adk_ledger_verify() -> dict:
         engine.close()
 
 
+# ─── Deprecate ────────────────────────────────────────────────────────
+
+
+def adk_deprecate(
+    fact_id: int,
+    reason: str = "",
+) -> dict:
+    """Deprecate a fact in CORTEX memory.
+
+    Marks a fact as deprecated so it no longer appears in searches.
+    The fact is retained for audit purposes but hidden from active queries.
+
+    Args:
+        fact_id: The numeric ID of the fact to deprecate.
+        reason: Optional reason for deprecation.
+
+    Returns:
+        A dict with status and the deprecated fact ID.
+    """
+    engine = CortexEngine(_get_db_path(), auto_embed=False)
+    try:
+        engine.init_db()
+        engine.deprecate(fact_id, reason=reason or None)
+        return {"status": "success", "fact_id": fact_id, "deprecated": True}
+    except (sqlite3.Error, OSError, RuntimeError, ValueError) as exc:
+        logger.error("ADK deprecate failed: %s", exc)
+        return {"status": "error", "message": str(exc)}
+    finally:
+        engine.close()
+
+
 # ─── Tool Registry ────────────────────────────────────────────────────
 
-ALL_TOOLS = [adk_store, adk_search, adk_status, adk_ledger_verify]
+ALL_TOOLS = [adk_store, adk_search, adk_status, adk_ledger_verify, adk_deprecate]
 """All available CORTEX tools for ADK agents."""

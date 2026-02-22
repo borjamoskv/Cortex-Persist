@@ -22,18 +22,20 @@ class TestADKModuleImport:
         assert hasattr(adk_tools, "adk_search")
         assert hasattr(adk_tools, "adk_status")
         assert hasattr(adk_tools, "adk_ledger_verify")
+        assert hasattr(adk_tools, "adk_deprecate")
         assert hasattr(adk_tools, "ALL_TOOLS")
 
     def test_all_tools_list(self):
         """ALL_TOOLS should contain all 4 tool functions."""
         from cortex.adk.tools import ALL_TOOLS
 
-        assert len(ALL_TOOLS) == 4
+        assert len(ALL_TOOLS) == 5
         names = [f.__name__ for f in ALL_TOOLS]
         assert "adk_store" in names
         assert "adk_search" in names
         assert "adk_status" in names
         assert "adk_ledger_verify" in names
+        assert "adk_deprecate" in names
 
     def test_agents_module_import(self):
         """Agents module should be importable."""
@@ -120,6 +122,17 @@ class TestADKTools:
             assert ret is dict or ret == "dict", (
                 f"{tool.__name__} should return dict, got {ret}"
             )
+
+    def test_adk_deprecate_signature(self):
+        """adk_deprecate should accept expected parameters."""
+        import inspect
+
+        from cortex.adk.tools import adk_deprecate
+
+        sig = inspect.signature(adk_deprecate)
+        params = list(sig.parameters.keys())
+        assert "fact_id" in params
+        assert "reason" in params
 
 
 class TestADKAgentCreation:
