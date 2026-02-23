@@ -73,13 +73,15 @@ def entropy_report():
             )
             for alert in alerts:
                 console.print(
-                    f"  - [bold]{alert['project']}[/]: {alert['message']} (Score: {alert['complexity_score']}/100)"
+                    f"  - [bold]{alert['project']}[/]: {alert['message']} "
+                    f"(Score: {alert['complexity_score']}/100)"
                 )
 
         # Sugerencias si el monitor está deshabilitado
         if "entropy_alerts" not in status_dict:
             console.print(
-                "[dim italic]Nota: El monitor de entropía podría no estar habilitado en la configuración.[/]"
+                "[dim italic]Nota: El monitor de entropía "
+                "podría no estar habilitado en la configuración.[/]"
             )
     except (OSError, ValueError, RuntimeError, KeyError) as e:
         handle_cli_error(e, context="generating entropy report")

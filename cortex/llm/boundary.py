@@ -103,5 +103,6 @@ class ImmuneBoundary:
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(
-            f"Immunity compromised after {max_retries} attempts validating {schema.__name__}. Final error: {last_error}"
+            f"Immunity compromised after {max_retries} attempts "
+            f"validating {schema.__name__}. Final error: {last_error}"
         )
