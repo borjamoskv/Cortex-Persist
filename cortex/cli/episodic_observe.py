@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from pathlib import Path
 
 from rich.panel import Panel
 
@@ -22,12 +23,10 @@ def run_observe(workspace: str, db: str, console) -> None:
 
 
 async def _observe_async(workspace: str, db: str, console) -> None:
-    import os
-
     from cortex.perception import PerceptionPipeline
 
-    workspace_path = os.path.abspath(workspace)
-    if not os.path.exists(workspace_path):
+    workspace_path = Path(workspace).resolve()
+    if not workspace_path.exists():
         console.print(
             Panel(
                 f"[bold red]Workspace no encontrado[/]\n\n"
@@ -49,7 +48,7 @@ async def _observe_async(workspace: str, db: str, console) -> None:
         pipeline = PerceptionPipeline(
             conn=conn,
             session_id=session_id,
-            workspace=workspace_path,
+            workspace=str(workspace_path),
             window_s=300,
             cooldown_s=300,
         )

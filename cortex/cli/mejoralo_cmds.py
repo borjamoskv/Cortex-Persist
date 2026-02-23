@@ -13,6 +13,7 @@ __all__ = [
     "mejoralo_record",
     "mejoralo_scan",
     "mejoralo_ship",
+    "mejoralo_daemon",
 ]
 
 
@@ -79,9 +80,12 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
 
 def _display_scan_result(result):
     """Format and print scan results to the console."""
-    score_style = (
-        "bold green" if result.score >= 80 else "bold yellow" if result.score >= 50 else "bold red"
-    )
+    if result.score >= 80:
+        score_style = "bold green"
+    elif result.score >= 50:
+        score_style = "bold yellow"
+    else:
+        score_style = "bold red"
 
     table = Table(title=f"🔬 X-Ray 13D — {result.project}")
     table.add_column("Dimensión", style="bold", width=15)
@@ -90,7 +94,12 @@ def _display_scan_result(result):
     table.add_column("Hallazgos", width=50)
 
     for d in result.dimensions:
-        d_color = "green" if d.score >= 80 else "yellow" if d.score >= 50 else "red"
+        if d.score >= 80:
+            d_color = "green"
+        elif d.score >= 50:
+            d_color = "yellow"
+        else:
+            d_color = "red"
         findings_str = "; ".join(d.findings[:3]) if d.findings else "—"
         table.add_row(d.name, f"[{d_color}]{d.score}[/]", d.weight, findings_str[:50])
 
@@ -128,7 +137,12 @@ def mejoralo_record(project, score_before, score_after, actions, db):
             actions=list(actions),
         )
         delta = score_after - score_before
-        color = "green" if delta > 0 else "red" if delta < 0 else "yellow"
+        if delta > 0:
+            color = "green"
+        elif delta < 0:
+            color = "red"
+        else:
+            color = "yellow"
 
         # Update mejora_loop_state.json if it exists
         import json
@@ -188,7 +202,12 @@ def mejoralo_history(project, limit, db):
         table.add_column("Acciones", width=40)
         for s in sessions:
             delta = s.get("delta", 0)
-            d_color = "green" if delta and delta > 0 else "red" if delta and delta < 0 else "dim"
+            if delta and delta > 0:
+                d_color = "green"
+            elif delta and delta < 0:
+                d_color = "red"
+            else:
+                d_color = "dim"
 
             s_before = s.get("score_before", "?")
             s_after = s.get("score_after", "?")
@@ -233,3 +252,10 @@ def mejoralo_ship(project, path, db):
             )
     finally:
         engine.close_sync()
+
+
+@mejoralo.command("daemon")
+def mejoralo_daemon():
+    """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
+    from cortex.mejoralo.daemon import main
+    main()

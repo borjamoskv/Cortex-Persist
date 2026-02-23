@@ -10,6 +10,12 @@ import ast
 import logging
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from cortex.cli import console
+
+if TYPE_CHECKING:
+    from cortex.mejoralo.engine import MejoraloEngine
 
 from cortex.thinking.fusion import FusionStrategy
 from cortex.thinking.orchestra import ThoughtOrchestra
@@ -66,88 +72,110 @@ class MejoraloSwarm:
         )
 
     async def refactor_file(
-        self, file_path: Path, findings: list[str], iteration: int = 0
+        self,
+        file_path: Path,
+        findings: list[str],
+        iteration: int = 0,
+        engine: MejoraloEngine | None = None,
+        project: str | None = None,
     ) -> str | None:
-        """Refactor code using a parallel swarm of specialists."""
+        """Refactor code using a parallel swarm of specialists. (Complexity Crushed)"""
+        content = self._read_source(file_path)
+        if not content:
+            return None
+
+        findings_str = "- " + "\n- ".join(findings)
+        base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
+        swarm_system = self._build_swarm_system(self._select_specialists(findings_str), iteration)
+
+        # 🧠 Telemetría de Consciencia
+        console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
+
+        result_content = await self._run_orchestra(base_prompt, swarm_system)
+        
+        if result_content:
+            console.print(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
+        
+        return self._extract_code(result_content) if result_content else None
+
+    def _read_source(self, file_path: Path) -> str | None:
         try:
-            content = file_path.read_text(errors="replace")
+            return file_path.read_text(errors="replace")
         except Exception as e:
             logger.error("Failed to read %s: %s", file_path, e)
             return None
 
-        findings_str = "- " + "\n- ".join(findings)
-
-        # Prompt base para los especialistas
-        base_prompt = (
+    def _build_prompt(
+        self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
+    ) -> str:
+        scars_str = self._get_scars_prompt(engine, project, file_path.name)
+        return (
             f"REFAC-TASK: Fix findings in {file_path.name}. Maintain EXACT functionality.\n"
-            f"Findings:\n{findings_str}\n\n"
+            f"Findings:\n{findings_str}{scars_str}\n\n"
             f"Current Code:\n```python\n{content}\n```"
         )
 
-        logger.info("🐝 Launching Swarm (Level %d) for %s", self.level, file_path.name)
+    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> str | None:
+        console.rule(f"[cyan]SOVEREIGN SWARM L{self.level} ENGAGED")
+        with console.status("[bold green]Synthesizing specialists insights...", spinner="point"):
+            try:
+                async with ThoughtOrchestra(config=self.config) as orchestra:
+                    result = await orchestra.think(
+                        prompt=base_prompt,
+                        mode=ThinkingMode.CODE,
+                        system=swarm_system,
+                        strategy=FusionStrategy.SYNTHESIS,
+                    )
+                    return result.content if result else None
+            except Exception as e:
+                logger.error("Swarm orchestration failed: %s", e)
+                return None
 
-        # Dynamically build the specialist squad based on context
-        if self.level <= 1:
-            squad_size = 3
-        elif self.level == 2:
-            squad_size = 5
-        else:
-            squad_size = 6
+    def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
+        """Helper to format previous failure scars without bloating main flow."""
+        if not engine or not project:
+            return ""
+        scars = engine.scars(project, filename)
+        if not scars:
+            return ""
+        
+        scars_list = [f"SCAR: {s['error_trace']}" for s in scars]
+        return "\n\nCRITICAL: DO NOT REPEAT:\n" + "\n---\n".join(scars_list)
 
-        # Always include the core architects
-        active_specialists = ["ArchitectPrime", "CodeNinja"]
-
+    def _select_specialists(self, findings_str: str) -> list[str]:
+        """Dynamically build the specialist squad with zero-nesting logic."""
+        squad_size = {1: 3, 2: 5}.get(self.level, 6)
         fs_lower = findings_str.lower()
+        
+        mapping = {
+            "SecurityWarden": ["securit", "inject", "leak", "auth"],
+            "PerformanceGhost": ["perform", "slow", "loop", "complex"],
+            "RobustnessGuardian": ["error", "fail", "type", "except"],
+            "AestheticShiva": ["format", "lint", "style", "aesthetic"]
+        }
 
-        # Contextual summoning
-        if any(w in fs_lower for w in ["securit", "inject", "leak", "auth"]):
-            active_specialists.append("SecurityWarden")
+        # Functional-style specialist selection
+        dynamic = [s for s, kw in mapping.items() if any(k in fs_lower for k in kw)]
+        active = (["ArchitectPrime", "CodeNinja"] + dynamic)[:squad_size]
+        
+        # Filling gaps if needed
+        needed = squad_size - len(active)
+        if needed > 0:
+            remaining = [s for s in SPECIALISTS_PROMPTS if s not in active]
+            active.extend(remaining[:needed])
 
-        if any(w in fs_lower for w in ["perform", "slow", "loop", "complex"]):
-            active_specialists.append("PerformanceGhost")
+        return active[:squad_size]
 
-        if any(w in fs_lower for w in ["error", "fail", "type", "except"]):
-            active_specialists.append("RobustnessGuardian")
-
-        if any(w in fs_lower for w in ["format", "lint", "style", "aesthetic"]):
-            active_specialists.append("AestheticShiva")
-
-        # Fill the rest if we haven't reached squad size, or trim if exceeded
-        remaining = [s for s in SPECIALISTS_PROMPTS if s not in active_specialists]
-        while len(active_specialists) < squad_size and remaining:
-            active_specialists.append(remaining.pop(0))
-
-        active_specialists = active_specialists[:squad_size]
-
-        items = [f"- {name}: {SPECIALISTS_PROMPTS[name]}" for name in active_specialists]
-        specialists_info = "\n".join(items)
-
-        swarm_system = (
-            f"You are the SOVEREIGN SWARM (Level {self.level}/3). Current iteration: {iteration}.\n"
-            "Your objective: Achieve 130/100 quality score for the provided file.\n"
-            f"Active Specialists:\n{specialists_info}\n\n"
-            "Refactor the file by integrating ALL specialist insights. "
-            "Return ONLY code between ```python and ```. Zero meta-commentary."
+    def _build_swarm_system(self, specialists: list[str], iteration: int) -> str:
+        """Construct the sovereign swarm system prompt."""
+        items = [f"- {name}: {SPECIALISTS_PROMPTS[name]}" for name in specialists]
+        info = "\n".join(items)
+        return (
+            f"You are the SOVEREIGN SWARM (Level {self.level}/3). Iteration: {iteration}.\n"
+            "Goal: Achieve 130/100 quality score. Synthesize ALL specialist logic.\n"
+            f"Squad:\n{info}\n\n"
+            "Return ONLY high-density Python code inside ```python blocks. No fluff."
         )
-
-        # Execute Refactor
-        try:
-            async with ThoughtOrchestra(config=self.config) as orchestra:
-                result = await orchestra.think(
-                    prompt=base_prompt,
-                    mode=ThinkingMode.CODE,
-                    system=swarm_system,
-                    strategy=FusionStrategy.SYNTHESIS,
-                )
-        except Exception as e:
-            logger.error("Swarm orchestration failed: %s", e)
-            return None
-
-        if result is None or not result.content:
-            logger.error("Swarm produced no content.")
-            return None
-
-        return self._extract_code(result.content)
 
     def _extract_code(self, content: str) -> str | None:
         """Extract and validate python code from LLM string output."""

@@ -122,12 +122,26 @@ def install_windows() -> None:
 
     python_path = sys.executable
     task_name = BUNDLE_ID.replace(".", "_")
-    cmd = (
-        f'schtasks /Create /SC ONLOGON /TN "{task_name}" '
-        f'/TR ""{python_path}" -m cortex.daemon_cli start" '
-        f"/F /RL LIMITED"
-    )
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+
+    # Target command: "python.exe" -m cortex.daemon_cli start
+    # We use double quotes for the python path in case it contains spaces
+    target_cmd = f'"{python_path}" -m cortex.daemon_cli start'
+
+    cmd = [
+        "schtasks",
+        "/Create",
+        "/SC",
+        "ONLOGON",
+        "/TN",
+        task_name,
+        "/TR",
+        target_cmd,
+        "/F",
+        "/RL",
+        "LIMITED",
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if result.returncode == 0:
         console.print(f"[green]✅ Installed:[/] Task Scheduler → {task_name}")
         console.print("[dim]   Daemon will run automatically on login.[/]")
@@ -139,9 +153,9 @@ def uninstall_windows() -> None:
     import subprocess
 
     task_name = BUNDLE_ID.replace(".", "_")
+    cmd = ["schtasks", "/Delete", "/TN", task_name, "/F"]
     result = subprocess.run(
-        f'schtasks /Delete /TN "{task_name}" /F',
-        shell=True,
+        cmd,
         capture_output=True,
         text=True,
         check=False,

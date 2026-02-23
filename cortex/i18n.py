@@ -185,21 +185,29 @@ def _report_missing_key(key: str, lang: Lang) -> None:
     _REPORTED_MISSING.add(signature)
     logger.warning("I18N: Missing translation for key [%s] in [%s]", key, lang.value)
 
-    # 1. Report as Ghost Fact for permanent resolution
+    _report_as_ghost_fact(key, lang)
+    _trigger_adaptive_repair(key, lang)
+
+
+def _report_as_ghost_fact(key: str, lang: Lang) -> None:
+    """Report as Ghost Fact for permanent resolution."""
     try:
         from cortex.facts import store_fact
-
         store_fact(
-            "cortex", f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'", type="ghost"
+            "cortex",
+            f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'",
+            type="ghost"
         )
     except ImportError:
         logger.debug("I18N: Periodic report skipped - cortex.facts not available yet")
 
-    # 2. Adaptive Learning: Trigger background translation if LLM is available
+
+def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
+    """Trigger background translation if LLM is available."""
     try:
         from cortex.llm.manager import LLMManager
     except ImportError:
-        return  # LLM module not available — degrade gracefully
+        return
 
     # Module-level singleton pattern (avoids per-call instantiation)
     if not hasattr(_report_missing_key, "_llm"):
@@ -231,6 +239,7 @@ def _report_missing_key(key: str, lang: Lang) -> None:
         loop.create_task(_repair())
     except RuntimeError:
         threading.Thread(target=asyncio.run, args=(_repair(),), daemon=True).start()
+
 
 
 def get_trans(key: TranslationKey, lang: Lang | str | None = None, **kwargs: Any) -> str:

@@ -138,7 +138,7 @@ class TestCortexMemoryManager:
             session_id="s1",
             token_count=50,
         )
-        ctx = await manager.assemble_context()
+        ctx = await manager.assemble_context(tenant_id="t1", project_id="p1")
         assert len(ctx["working_memory"]) == 1
         assert ctx["working_memory"][0]["content"] == "test context"
         assert ctx["episodic_context"] == []
@@ -151,7 +151,7 @@ class TestCortexMemoryManager:
             session_id="s1",
             token_count=50,
         )
-        ctx = await manager.assemble_context(query="cortex")
+        ctx = await manager.assemble_context(tenant_id="t1", project_id="p1", query="cortex")
         assert "episodic_context" in ctx
         assert "working_memory" in ctx
 
@@ -172,3 +172,15 @@ class TestCortexMemoryManager:
         )
         events = await manager.l3.get_session_events("s1")
         assert events[0].metadata["tool_name"] == "vector_store"
+
+    async def test_semantic_fusion_integration(self, manager):
+        """Verify that assemble_context can trigger Semantic Fusion."""
+        # We need a router/judge for this to take the LLM path,
+        # but even without it, the logic should flow.
+        ctx = await manager.assemble_context(
+            tenant_id="t1",
+            project_id="p1",
+            query="test",
+            fuse_context=True
+        )
+        assert "episodic_context" in ctx

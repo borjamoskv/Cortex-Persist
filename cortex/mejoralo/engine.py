@@ -8,7 +8,7 @@ from cortex.engine import CortexEngine
 
 from .constants import INMEJORABLE_SCORE
 from .heal import heal_project
-from .ledger import get_history, record_session
+from .ledger import get_history, get_scars, record_scar, record_session
 from .models import ScanResult, ShipResult
 from .scan import scan
 from .ship import check_ship_gate
@@ -48,7 +48,7 @@ class MejoraloEngine:
         """
         Trigger the autonomous healing to refactor problematic files, test them and commit.
         """
-        return heal_project(project, path, target_score, scan_result)
+        return heal_project(project, path, target_score, scan_result, engine=self)
 
     def relentless_heal(
         self,
@@ -70,7 +70,7 @@ class MejoraloEngine:
             effective_target,
             scan_result.score,
         )
-        return heal_project(project, path, effective_target, scan_result)
+        return heal_project(project, path, effective_target, scan_result, engine=self)
 
     # ── Fase 6: Ouroboros — Record Session ────────────────────────────
 
@@ -91,6 +91,20 @@ class MejoraloEngine:
     def history(self, project: str, limit: int = 20) -> list[dict[str, Any]]:
         """Retrieve past MEJORAlo sessions from the ledger."""
         return get_history(self.engine, project, limit)
+
+    def record_scar(
+        self,
+        project: str,
+        file_path: str,
+        error_trace: str,
+        diff: str | None = None,
+    ) -> int:
+        """Record a scar (failure point) in the database to prevent regressions."""
+        return record_scar(self.engine, project, file_path, error_trace, diff)
+
+    def scars(self, project: str, file_path: str, limit: int = 5) -> list[dict[str, Any]]:
+        """Retrieve past scars for a particular file."""
+        return get_scars(self.engine, project, file_path, limit)
 
     # ── Fase 7: Ship Gate (7 Seals) ──────────────────────────────────
 

@@ -199,7 +199,12 @@ class EpisodicMemory:
         if search:
             return await self._fts_recall(search, project, limit)
 
-        sql = "SELECT * FROM episodes WHERE 1=1"
+        sql = """
+            SELECT 
+                id, session_id, event_type, content, project, emotion, tags, meta, created_at 
+            FROM episodes 
+            WHERE 1=1
+        """
         params: list[Any] = []
 
         if project:
@@ -223,7 +228,9 @@ class EpisodicMemory:
     async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
         sql = """
-            SELECT e.* FROM episodes e
+            SELECT 
+                e.id, e.session_id, e.event_type, e.content, e.project, e.emotion, e.tags, e.meta, e.created_at 
+            FROM episodes e
             JOIN episodes_fts f ON e.id = f.rowid
             WHERE f.content MATCH ?
         """
@@ -281,7 +288,7 @@ class EpisodicMemory:
     def _row_to_episode(self, row: tuple) -> Episode:
         """Map database raw row to Sovereign Episode Model."""
         # Adjust indices based on your actual table schema
-        # id, session_id, event_type, content, project, emotion, tags, meta, created_at
+        # Order: id, session_id, event_type, content, project, emotion, tags, meta, created_at
         return Episode(
             id=row[0],
             session_id=row[1],
@@ -296,7 +303,13 @@ class EpisodicMemory:
 
     async def get_session_timeline(self, session_id: str) -> list[Episode]:
         """Retrieve chronological history of a specific session."""
-        sql = "SELECT * FROM episodes WHERE session_id = ? ORDER BY created_at ASC"
+        sql = """
+            SELECT 
+                id, session_id, event_type, content, project, emotion, tags, meta, created_at 
+            FROM episodes 
+            WHERE session_id = ? 
+            ORDER BY created_at ASC
+        """
         async with self._conn.execute(sql, (session_id,)) as cursor:
             rows = await cursor.fetchall()
         return [self._row_to_episode(row) for row in rows]

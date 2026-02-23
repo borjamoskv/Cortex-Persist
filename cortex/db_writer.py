@@ -44,6 +44,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sqlite3
+import time
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -87,6 +88,15 @@ class SqliteWriteWorker:
         self._started = False
         self._loop: asyncio.AbstractEventLoop | None = None
         self._write_count: int = 0
+        self._metrics: dict[str, float] = {
+            "avg_wait_ms": 0.0,
+            "avg_exec_ms": 0.0,
+            "total_ops": 0,
+        }
+
+    @property
+    def metrics(self) -> dict[str, float]:
+        return self._metrics.copy()
 
     @property
     def is_running(self) -> bool:
@@ -279,11 +289,7 @@ class SqliteWriteWorker:
         logger.debug("Writer loop started, processing queue")
 
         while True:
-            try:
-                msg = await self._queue.get()
-            except asyncio.CancelledError:
-                raise  # Re-raise to allow proper task cancellation
-
+            msg = await self._queue.get()
             try:
                 should_exit = await self._dispatch_message(msg, conn, loop)
                 if should_exit:
@@ -350,24 +356,32 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         """Process a single write operation in the executor."""
+        start_wait = op.created_at if hasattr(op, "created_at") else time.time()
+        wait_ms = (time.time() - start_wait) * 1000
         try:
+            start_exec = time.time()
             cursor = await loop.run_in_executor(None, lambda: conn.execute(op.sql, op.params))
             # Auto-commit if not inside an explicit transaction
             if not conn.in_transaction:
                 await loop.run_in_executor(None, conn.commit)
+            exec_ms = (time.time() - start_exec) * 1000
+
+            # Update metrics
+            ops = self._metrics["total_ops"]
+            m_wait = self._metrics["avg_wait_ms"]
+            m_exec = self._metrics["avg_exec_ms"]
+
+            # Use weighted moving average to prevent overflow and keep metrics responsive
+            self._metrics["avg_wait_ms"] = (m_wait * ops + wait_ms) / (ops + 1)
+            self._metrics["avg_exec_ms"] = (m_exec * ops + exec_ms) / (ops + 1)
+            self._metrics["total_ops"] += 1
+
             loop.call_soon_threadsafe(op.future.set_result, Ok(cursor.rowcount))
 
             # Periodic WAL checkpoint to prevent unbounded WAL growth
             self._write_count += 1
             if self._write_count >= self._CHECKPOINT_INTERVAL:
-                try:
-                    await loop.run_in_executor(
-                        None, lambda: conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
-                    )
-                    self._write_count = 0
-                    logger.debug("Periodic WAL checkpoint at %d writes", self._CHECKPOINT_INTERVAL)
-                except sqlite3.Error:
-                    pass  # Non-critical: checkpoint will retry next interval
+                await self._maybe_checkpoint(conn, loop)
 
         except sqlite3.Error as e:
             logger.warning("Write failed: %s | SQL: %s", e, op.sql[:100])
@@ -375,3 +389,15 @@ class SqliteWriteWorker:
                 op.future.set_result,
                 Err(f"SQLite write error: {e}"),
             )
+
+    async def _maybe_checkpoint(self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop) -> None:
+        """Perform a WAL checkpoint if the interval has been reached."""
+        try:
+            await loop.run_in_executor(
+                None, lambda: conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
+            )
+            self._write_count = 0
+            logger.debug("Periodic WAL checkpoint at %d writes", self._CHECKPOINT_INTERVAL)
+        except sqlite3.Error as e:
+            logger.debug("WAL checkpoint deferred: %s", e)
+

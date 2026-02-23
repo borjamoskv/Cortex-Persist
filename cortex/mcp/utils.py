@@ -5,12 +5,12 @@ Configuration, Metrics, Caching, and Connection Pooling.
 
 import asyncio
 import logging
-import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import aiosqlite
@@ -99,7 +99,7 @@ class AsyncConnectionPool:
     """Async-aware SQLite connection pool with health checks and timeouts."""
 
     def __init__(self, db_path: str, max_connections: int = 5, acquire_timeout: float = 5.0):
-        self.db_path = os.path.expanduser(db_path)
+        self.db_path = str(Path(db_path).expanduser())
         self.max_connections = max_connections
         self.acquire_timeout = acquire_timeout
         self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue(maxsize=max_connections)

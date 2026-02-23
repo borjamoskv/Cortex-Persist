@@ -167,51 +167,66 @@ class MetricsRegistry:
     def to_prometheus(self) -> str:
         """Render all metrics in Prometheus text exposition format."""
         lines: list[str] = []
+        lines.extend(self._render_counters())
+        lines.extend(self._render_gauges())
+        lines.extend(self._render_histograms())
+        return "\n".join(lines) + "\n"
 
-        # Counters
-        seen_counter_names: set[str] = set()
+    def _render_counters(self) -> list[str]:
+        lines: list[str] = []
+        seen_names: set[str] = set()
         for key, value in sorted(self._counters.items()):
             base_name = key.split("{")[0]
-            if base_name not in seen_counter_names:
+            if base_name not in seen_names:
                 lines.append(f"# TYPE {base_name} counter")
-                seen_counter_names.add(base_name)
+                seen_names.add(base_name)
             lines.append(f"{key} {value}")
+        return lines
 
-        # Gauges
-        seen_gauge_names: set[str] = set()
+    def _render_gauges(self) -> list[str]:
+        lines: list[str] = []
+        seen_names: set[str] = set()
         for key, value in sorted(self._gauges.items()):
             base_name = key.split("{")[0]
-            if base_name not in seen_gauge_names:
+            if base_name not in seen_names:
                 lines.append(f"# TYPE {base_name} gauge")
-                seen_gauge_names.add(base_name)
+                seen_names.add(base_name)
             lines.append(f"{key} {value:.2f}")
+        return lines
 
-        # Histograms → Prometheus summary format (count + sum + quantiles)
-        seen_hist_names: set[str] = set()
+    def _render_histograms(self) -> list[str]:
+        lines: list[str] = []
+        seen_names: set[str] = set()
         for key in sorted(self._histograms):
             base_name = key.split("{")[0]
-            if base_name not in seen_hist_names:
+            if base_name not in seen_names:
                 lines.append(f"# TYPE {base_name} summary")
-                seen_hist_names.add(base_name)
-            count = self._hist_count.get(key, 0)
-            total = self._hist_sum.get(key, 0.0)
-            if count > 0:
-                # Quantile lines (p50, p95, p99)
-                observations = sorted(self._histograms[key])
-                for quantile in (0.5, 0.95, 0.99):
-                    idx = min(int(quantile * len(observations)), len(observations) - 1)
-                    val = observations[idx]
-                    # Embed quantile label into key
-                    if "{" in key:
-                        # key has labels: name{k="v"} → name{k="v",quantile="0.5"}
-                        q_key = key.replace("}", f',quantile="{quantile}"}}')
-                    else:
-                        q_key = f'{key}{{quantile="{quantile}"}}'
-                    lines.append(f"{q_key} {val:.6f}")
-                lines.append(f"{key}_count {count}")
-                lines.append(f"{key}_sum {total:.4f}")
+                seen_names.add(base_name)
 
-        return "\n".join(lines) + "\n"
+            count = self._hist_count.get(key, 0)
+            if count <= 0:
+                continue
+
+            total = self._hist_sum.get(key, 0.0)
+            lines.extend(self._render_quantiles(key, self._histograms[key]))
+            lines.append(f"{key}_count {count}")
+            lines.append(f"{key}_sum {total:.4f}")
+        return lines
+
+    def _render_quantiles(self, key: str, observations: deque[float]) -> list[str]:
+        """Helper to render summary quantiles without deep nesting."""
+        lines = []
+        obs_sorted = sorted(observations)
+        for quantile in (0.5, 0.95, 0.99):
+            idx = min(int(quantile * len(obs_sorted)), len(obs_sorted) - 1)
+            val = obs_sorted[idx]
+            # Embed quantile label into key
+            if "{" in key:
+                q_key = key.replace("}", f',quantile="{quantile}"}}')
+            else:
+                q_key = f'{key}{{quantile="{quantile}"}}'
+            lines.append(f"{q_key} {val:.6f}")
+        return lines
 
     def reset(self) -> None:
         """Reset all metrics."""

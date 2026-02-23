@@ -34,7 +34,7 @@ class ImmuneBoundary:
     @staticmethod
     async def enforce(
         schema: type[T],
-        generation_func: Callable[[], Awaitable[str]],
+        generation_func: Callable[[str | None], Awaitable[str]],
         max_retries: int = 3,
     ) -> T:
         """Fuerza a que el resultado de `generation_func` cumpla el `schema`.
@@ -42,6 +42,7 @@ class ImmuneBoundary:
         Args:
             schema: Modelo Pydantic esperado.
             generation_func: Función asíncrona que retorna JSON crudo.
+                            Recibe el error de validación anterior (o None).
             max_retries: Intentos antes de emitir un CortexError soberano.
 
         Returns:
@@ -49,21 +50,16 @@ class ImmuneBoundary:
 
         Raises:
             CortexError: Si falla la validación después de `max_retries`.
-
-        Future:
-            Accept an optional re-injection callable that feeds last_error back
-            into the prompt for dynamic self-correction between retries.
         """
-        last_error: Exception | None = None
+        last_error_msg: str | None = None
+        last_exception: Exception | None = None
 
         for attempt in range(max_retries):
             try:
-                # El LLM genera la respuesta (posiblemente sucia)
-                raw_output = await generation_func()
+                # El LLM genera la respuesta, posiblemente usando el feedback del error anterior
+                raw_output = await generation_func(last_error_msg)
 
-                # Intentamos parsear usando Pydantic v2 Core (Rust), que es muy rápido y estricto.
-                # Asumimos que raw_output es un string JSON válido o que Pydantic puede coercerlo.
-                # Limpieza básica de bloque de código Markdown si el LLM lo añadió
+                # Limpieza básica de bloques de código Markdown
                 clean_output = raw_output.strip()
                 if clean_output.startswith("```json"):
                     clean_output = clean_output[7:]
@@ -76,33 +72,29 @@ class ImmuneBoundary:
                 return schema.model_validate_json(clean_output)
 
             except ValidationError as e:
-                # El JSON es válido sintácticamente pero no cumple el esquema
-                last_error = e
+                last_exception = e
+                last_error_msg = f"Schema violation: {e.json()}"
                 logger.warning(
-                    "ImmuneBoundary: Schema violation for %s (attempt %d/%d). Errors: %s",
+                    "ImmuneBoundary: Schema violation for %s (attempt %d/%d).",
                     schema.__name__,
                     attempt + 1,
                     max_retries,
-                    e.errors(),
                 )
             except (ValueError, TypeError) as e:
-                # Fallo general (ej. JSON sintácticamente inválido)
-                last_error = e
+                last_exception = e
+                last_error_msg = f"Parsing failure: {str(e)}"
                 logger.warning(
-                    "ImmuneBoundary: Generation/Parsing failure for %s (attempt %d/%d): %s",
+                    "ImmuneBoundary: Parsing failure for %s (attempt %d/%d): %s",
                     schema.__name__,
                     attempt + 1,
                     max_retries,
                     str(e),
                 )
 
-            # Retry: regenerate — assumes temperature > 0 produces different output.
-            # Future enhancement: inject last_error back into prompt for self-correction.
-
         from cortex.errors import CortexError
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(
             f"Immunity compromised after {max_retries} attempts "
-            f"validating {schema.__name__}. Final error: {last_error}"
+            f"validating {schema.__name__}. Final error: {last_exception}"
         )

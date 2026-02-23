@@ -35,9 +35,12 @@ from cortex.api import app
 @pytest.fixture(scope="module")
 def client():
     """Test client with bootstrapped DB."""
-    from cortex.engine import CortexEngine
+    from cortex.auth import reset_auth_manager, get_auth_manager
+    reset_auth_manager()
+    manager = get_auth_manager()
+    manager.initialize_sync()
 
-    CortexEngine(db_path=_test_db).init_db_sync()
+    from cortex.api import app
     with TestClient(app) as c:
         yield c
 
@@ -48,7 +51,7 @@ def api_key(client):
     from cortex.auth import get_auth_manager
 
     manager = get_auth_manager()
-    raw_key, _ = manager.create_key(
+    raw_key, _ = manager.create_key_sync(
         name="test-llm",
         tenant_id="test",
         permissions=["read", "write", "admin"],
@@ -117,7 +120,7 @@ class TestLLMProvider:
         from cortex.llm.provider import LLMProvider
 
         with pytest.raises(ValueError, match="required"):
-            LLMProvider(provider="qwen", api_token="")
+            LLMProvider(provider="qwen", api_key="")
 
     def test_local_providers_no_key_needed(self):
         """Ollama, LM Studio, llama.cpp, vLLM, Jan don't need API keys."""
@@ -148,7 +151,7 @@ class TestLLMProvider:
     def test_preset_with_explicit_key(self):
         from cortex.llm.provider import LLMProvider
 
-        p = LLMProvider(provider="qwen", api_token="test-key-123")
+        p = LLMProvider(provider="qwen", api_key="test-key-123")
         assert p.provider_name == "qwen"
         assert p.model == "qwen-plus"
 

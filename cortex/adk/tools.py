@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Final
 
 from cortex.engine import CortexEngine
@@ -27,11 +27,12 @@ __all__ = [
 
 logger = logging.getLogger("cortex.adk.tools")
 
-_DEFAULT_DB: Final = os.path.expanduser("~/.cortex/cortex.db")
+_DEFAULT_DB: Final = str(Path("~/.cortex/cortex.db").expanduser())
 
 
 def _get_db_path() -> str:
     """Resolve the active CORTEX database path."""
+    import os
     return os.environ.get("CORTEX_DB_PATH", _DEFAULT_DB)
 
 

@@ -21,9 +21,13 @@ from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
 from cortex.memory.working import WorkingMemoryL1
 
 try:
-    from cortex.memory.vector_store import VectorStoreL2
-except ImportError:  # qdrant_client not installed
-    VectorStoreL2 = None  # type: ignore[assignment,misc]
+    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    VectorStoreL2 = SovereignVectorStoreL2
+except ImportError:
+    try:
+        from cortex.memory.vector_store import VectorStoreL2
+    except ImportError:
+        VectorStoreL2 = None  # type: ignore[assignment,misc]
 
 __all__ = [
     "AsyncEncoder",

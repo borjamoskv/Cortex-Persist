@@ -133,12 +133,17 @@ class FederatedEngine:
         async with self._lock:
             count = len(self._shards)
             for tenant_id, engine in self._shards.items():
-                try:
-                    await engine.close()
-                except (sqlite3.Error, OSError, ConnectionError) as e:
-                    logger.warning("Error closing shard '%s': %s", tenant_id, e)
+                await self._close_shard(tenant_id, engine)
             self._shards.clear()
         logger.info("Federation: closed all %d shards", count)
+
+    async def _close_shard(self, tenant_id: str, engine: Any) -> None:
+        """Safely close a single shard."""
+        try:
+            await engine.close()
+        except (sqlite3.Error, OSError, ConnectionError) as e:
+            logger.warning("Error closing shard '%s': %s", tenant_id, e)
+
 
     @staticmethod
     def _sanitize_tenant_id(tenant_id: str) -> str:

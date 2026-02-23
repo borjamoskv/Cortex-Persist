@@ -23,6 +23,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         self,
         project: str,
         content: str,
+        tenant_id: str = "default",
         fact_type: str = "knowledge",
         tags: list[str] | None = None,
         confidence: str = "stated",
@@ -39,6 +40,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 conn,
                 project,
                 content,
+                tenant_id,
                 fact_type,
                 tags,
                 confidence,
@@ -54,6 +56,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 conn,
                 project,
                 content,
+                tenant_id,
                 fact_type,
                 tags,
                 confidence,
@@ -105,6 +108,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         conn: aiosqlite.Connection,
         project: str,
         content: str,
+        tenant_id: str,
         fact_type: str,
         tags: list[str] | None,
         confidence: str,
@@ -128,8 +132,8 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         enc = get_default_encrypter()
 
-        encrypted_content = enc.encrypt_str(content)
-        encrypted_meta = enc.encrypt_json(meta)
+        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+        encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
 
         # Wave 2: Integrity-First. Log transaction before fact storage.
         if tx_id is None:
@@ -138,10 +142,11 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             )
 
         cursor = await conn.execute(
-            "INSERT INTO facts (project, content, fact_type, tags, confidence, "
+            "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at, tx_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
+                tenant_id,
                 project,
                 encrypted_content,
                 fact_type,
@@ -201,7 +206,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
     ) -> int:
         async with self.session() as conn:
             cursor = await conn.execute(
-                "SELECT project, content, fact_type, tags, confidence, source, meta "
+                "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
                 "FROM facts WHERE id = ? AND valid_until IS NULL",
                 (fact_id,),
             )
@@ -211,6 +216,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 raise ValueError(f"Fact {fact_id} not found")
 
             (
+                tenant_id,
                 project,
                 raw_old_content,
                 fact_type,
@@ -224,9 +230,17 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
             enc = get_default_encrypter()
 
-            old_content = enc.decrypt_str(raw_old_content) if raw_old_content else ""
+            old_content = (
+                enc.decrypt_str(raw_old_content, tenant_id=tenant_id)
+                if raw_old_content
+                else ""
+            )
 
-            new_meta = enc.decrypt_json(raw_old_meta_json) if raw_old_meta_json else {}
+            new_meta = (
+                enc.decrypt_json(raw_old_meta_json, tenant_id=tenant_id)
+                if raw_old_meta_json
+                else {}
+            )
             if meta:
                 new_meta.update(meta)
             new_meta["previous_fact_id"] = fact_id
@@ -235,6 +249,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             new_id = await self.store(
                 project=project,
                 content=content if content is not None else old_content,
+                tenant_id=tenant_id,
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),
                 confidence=confidence,

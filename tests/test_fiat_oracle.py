@@ -2,12 +2,9 @@
 Tests for Zero-Trust FiatOracle.
 """
 
-import asyncio
 import json
 import logging
-import time
 from pathlib import Path
-from unittest.mock import AsyncMock
 
 import pytest
 

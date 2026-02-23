@@ -1,7 +1,8 @@
-import os
 import re
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 # Constants
 VENV_DIR = ".venv"
@@ -40,9 +41,11 @@ WEIGHTS = {
 TOTAL_WEIGHT = sum(WEIGHTS.values())
 
 
-def run_command(cmd):
+def run_command(cmd, cwd=None):
+    """Run a command in a cross-platform way."""
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        is_shell = isinstance(cmd, str)
+        result = subprocess.run(cmd, shell=is_shell, capture_output=True, text=True, cwd=cwd)
         return result.returncode, result.stdout, result.stderr
     except (subprocess.SubprocessError, OSError) as e:
         return -1, "", str(e)
@@ -57,15 +60,25 @@ def _should_skip_file(file, extensions):
 
 
 def iter_files(extensions=None):
-    for root, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
-        for file in files:
-            if not _should_skip_file(file, extensions):
-                yield os.path.join(root, file)
+    """Walk through files using pathlib."""
+    for path in Path(".").rglob("*"):
+        if any(part in IGNORED_DIRS for part in path.parts):
+            continue
+        if path.is_file():
+            if not _should_skip_file(path.name, extensions):
+                yield path
 
 
 def measure_integrity():
-    code, _, stderr = run_command(f"{VENV_DIR}/bin/python -m cortex.cli --help")
+    # Detect venv python path (Scripts on Windows, bin on others)
+    python_bin = "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
+    python_path = Path(VENV_DIR) / python_bin
+
+    if not python_path.exists():
+        # Fallback to system python if venv not found (for some local tests)
+        python_path = Path(sys.executable)
+
+    code, _, stderr = run_command([str(python_path), "-m", "cortex.cli", "--help"])
     if code != 0:
         print(f" Integrity Check Failed: {stderr.strip()[:200]}...")
         return 0.0
@@ -78,10 +91,10 @@ def measure_architecture():
     for path in iter_files(extensions=[".py"]):
         total_files += 1
         try:
-            with open(path) as f:
-                lines = sum(1 for _ in f)
-                if lines > 300:
-                    files_over_limit.append((path, lines))
+            content = path.read_text(errors="replace")
+            lines = len(content.splitlines())
+            if lines > 300:
+                files_over_limit.append((path, lines))
         except OSError:
             pass
 
@@ -147,7 +160,7 @@ def _check_line_for_security(line, path, patterns, i):
 def _validate_with_glm5(suspicious_content, hits):
     import sys
 
-    sys.path.append(os.path.expanduser("~/cortex"))
+    sys.path.append(str(Path.home() / "cortex"))
     try:
         import asyncio
 
@@ -191,16 +204,15 @@ def measure_security():
 
     for path in iter_files(extensions=[".py", ".js", ".html", ".ts", ".yml", ".yaml", ".json"]):
         try:
-            with open(path) as f:
-                content = f.read()
-                file_hits = 0
-                for i, line in enumerate(content.split("\n")):
-                    _kill_switch_scan(line, path, i)
-                    file_hits += _check_line_for_security(line, path, patterns, i)
+            content = path.read_text(errors="replace")
+            file_hits = 0
+            for i, line in enumerate(content.splitlines()):
+                _kill_switch_scan(line, path, i)
+                file_hits += _check_line_for_security(line, path, patterns, i)
 
-                if file_hits > 0:
-                    hits += file_hits
-                    suspicious_content.append((path, content))
+            if file_hits > 0:
+                hits += file_hits
+                suspicious_content.append((path, content))
         except OSError:
             pass
 
@@ -218,21 +230,21 @@ def _is_complex_line(line, leading_spaces_limit=16):
 def _check_complexity_in_file(path):
     hits = 0
     try:
-        with open(path) as f:
-            current_func_lines = 0
-            in_func = False
-            for line in f:
-                if _is_complex_line(line):
+        content = path.read_text(errors="replace")
+        current_func_lines = 0
+        in_func = False
+        for line in content.splitlines():
+            if _is_complex_line(line):
+                hits += 1
+            stripped = line.strip()
+            if stripped.startswith("def "):
+                in_func = True
+                current_func_lines = 0
+            elif in_func and stripped:
+                current_func_lines += 1
+                if current_func_lines > 50:
                     hits += 1
-                stripped = line.strip()
-                if stripped.startswith("def "):
-                    in_func = True
-                    current_func_lines = 0
-                elif in_func and stripped:
-                    current_func_lines += 1
-                    if current_func_lines > 50:
-                        hits += 1
-                        in_func = False
+                    in_func = False
     except OSError:
         pass
     return hits
@@ -256,9 +268,8 @@ def measure_psi():
     hits = 0
     for path in iter_files(extensions=[".py", ".md", ".txt"]):
         try:
-            with open(path) as f:
-                content = f.read()
-                hits += sum(content.count(term) for term in psi_terms)
+            content = path.read_text(errors="replace")
+            hits += sum(content.count(term) for term in psi_terms)
         except OSError:
             pass
 

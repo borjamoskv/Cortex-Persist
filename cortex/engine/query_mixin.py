@@ -15,7 +15,7 @@ logger = logging.getLogger("cortex")
 
 # Common column list shared across all fact queries.
 _FACT_COLUMNS = (
-    "f.id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
+    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
     "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
     "f.created_at, f.updated_at, f.tx_id, t.hash"
 )
@@ -26,12 +26,14 @@ class QueryMixin:
     async def search(
         self,
         query: str,
+        tenant_id: str = "default",
         project: str | None = None,
         top_k: int = 5,
         as_of: str | None = None,
         graph_depth: int = 0,
+        fuse: bool = False,
         **kwargs,
-    ) -> list[SearchResult]:
+    ) -> list[SearchResult] | str:
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
 
@@ -44,6 +46,7 @@ class QueryMixin:
                     conn,
                     self._get_embedder().embed(query),
                     top_k,
+                    tenant_id,
                     project,
                     as_of,
                 )
@@ -51,7 +54,9 @@ class QueryMixin:
                 logger.warning("Semantic search failed: %s", e)
 
             if not results:
-                results = await text_search(conn, query, project, limit=top_k, **kwargs)
+                results = await text_search(
+                    conn, query, tenant_id=tenant_id, project=project, limit=top_k, **kwargs
+                )
 
             if results and graph_depth > 0:
                 for res in results:
@@ -62,11 +67,23 @@ class QueryMixin:
                             conn, seeds, depth=graph_depth
                         )
 
+            # Context Fusion Wave
+            if results and fuse:
+                from cortex.thinking.fusion import ContextFusion
+
+                # The engine should provide a fast judge provider via self.provider
+                fuser = ContextFusion(judge_provider=getattr(self, "provider", None))
+                retrieved_dicts = [
+                    {"content": r.content, "score": r.score, "project": r.project} for r in results
+                ]
+                return await fuser.fuse_context(query, retrieved_dicts)
+
             return results
 
     async def recall(
         self,
         project: str,
+        tenant_id: str = "default",
         limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
@@ -74,13 +91,13 @@ class QueryMixin:
             query = f"""
                 SELECT {_FACT_COLUMNS}
                 {_FACT_JOIN}
-                WHERE f.project = ? AND f.valid_until IS NULL
+                WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL
                 ORDER BY (
                     f.consensus_score * 0.8
                     + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2
                 ) DESC, f.fact_type, f.created_at DESC
             """
-            params: list = [project]
+            params: list = [tenant_id, project]
             if limit:
                 query += " LIMIT ?"
                 params.append(limit)
@@ -94,6 +111,7 @@ class QueryMixin:
     async def history(
         self,
         project: str,
+        tenant_id: str = "default",
         as_of: str | None = None,
     ) -> list[Fact]:
         async with self.session() as conn:
@@ -101,23 +119,24 @@ class QueryMixin:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
                 query = (
                     f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                    f"WHERE f.project = ? AND {clause} "
+                    f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
                     "ORDER BY f.valid_from DESC"
                 )
-                cursor = await conn.execute(query, [project] + params)
+                cursor = await conn.execute(query, [tenant_id, project] + params)
             else:
                 query = (
                     f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                    "WHERE f.project = ? "
+                    "WHERE f.tenant_id = ? AND f.project = ? "
                     "ORDER BY f.valid_from DESC"
                 )
-                cursor = await conn.execute(query, (project,))
+                cursor = await conn.execute(query, (tenant_id, project))
             rows = await cursor.fetchall()
             return [self._row_to_fact(row) for row in rows]
 
     async def reconstruct_state(
         self,
         target_tx_id: int,
+        tenant_id: str = "default",
         project: str | None = None,
     ) -> list[Fact]:
         async with self.session() as conn:
@@ -132,11 +151,12 @@ class QueryMixin:
 
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                "WHERE (f.created_at <= ? "
+                "WHERE f.tenant_id = ? "
+                "  AND (f.created_at <= ? "
                 "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
                 "  AND (f.tx_id IS NULL OR f.tx_id <= ?)"
             )
-            params: list = [tx_time, tx_time, target_tx_id]
+            params: list = [tenant_id, tx_time, tx_time, target_tx_id]
             if project:
                 query += " AND f.project = ?"
                 params.append(project)
@@ -148,11 +168,13 @@ class QueryMixin:
     async def time_travel(
         self,
         tx_id: int,
+        tenant_id: str = "default",
         project: str | None = None,
     ) -> list[Fact]:
         async with self.session() as conn:
             clause, params = time_travel_filter(tx_id, table_alias="f")
-            query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE {clause}"
+            query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND {clause}"
+            params = [tenant_id] + params
             if project:
                 query += " AND f.project = ?"
                 params.append(project)
