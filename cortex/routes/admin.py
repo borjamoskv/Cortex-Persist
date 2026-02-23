@@ -1,8 +1,13 @@
 """
-CORTEX v5.0 - Admin Router.
+CORTEX v5.1 — Admin & Governance Router.
+
+High-privilege endpoints for project management, API key governance,
+and session handoff orchestration. Enforces strict RBAC and input validation.
 """
 
 import logging
+import re
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
@@ -11,12 +16,14 @@ from cortex import __version__, api_state
 from cortex.api_deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.engine import CortexEngine
-from cortex.i18n import get_trans
+from cortex.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.models import StatusResponse
 from cortex.sync import export_to_json
 
-router = APIRouter(tags=["admin"])
+router = APIRouter(tags=["governance"])
 logger = logging.getLogger("uvicorn.error")
+
+# ─── Project Management ──────────────────────────────────────────────
 
 
 @router.get("/v1/projects/{project}/export")
@@ -26,17 +33,21 @@ async def export_project(
     path: str | None = Query(None),
     fmt: str = Query("json", alias="format"),
     auth: AuthResult = Depends(require_permission("admin")),
+    engine: CortexEngine = Depends(get_engine),
 ) -> dict:
-    """Export a project to a JSON file (with path validation)."""
-    lang = request.headers.get("Accept-Language", "en")
+    """
+    Sovereign Export: Dumps project memory to a secure JSON artifact.
+    Enforces path incarceration to prevent directory traversal.
+    """
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+
     if fmt != "json":
         raise HTTPException(status_code=400, detail=get_trans("error_json_only", lang))
 
     if path:
-        if any(c in path for c in ("\0", "\r", "\n", "\t")):
+        # Prevent traversal and control character injection
+        if any(c in path for c in ("\0", "\r", "\n", "\t", "..")):
             raise HTTPException(status_code=400, detail=get_trans("error_invalid_path_chars", lang))
-
-        from pathlib import Path
 
         try:
             base_dir = Path.cwd().resolve()
@@ -44,27 +55,34 @@ async def export_project(
             if not str(target_path).startswith(str(base_dir)):
                 raise HTTPException(status_code=400, detail=get_trans("error_path_workspace", lang))
         except (ValueError, RuntimeError):
-            raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang)) from None
+            raise HTTPException(
+                status_code=400, detail=get_trans("error_invalid_input", lang)
+            ) from None
 
     try:
-        # export_to_json is sync, uses its own connection
-        out_path = await run_in_threadpool(export_to_json, api_state.engine, project, path)
-        return {"message": f"Exported project '{project}' to {out_path}", "path": str(out_path)}
-    except (OSError, ValueError, KeyError) as e:
-        logger.error("Export failed: %s", e)
+        # run_in_threadpool used because export_to_json performs synchronous I/O
+        out_path = await run_in_threadpool(export_to_json, engine, project, path)
+        return {
+            "status": "success",
+            "project": project,
+            "artifact": str(out_path),
+            "message": get_trans("info_export_success", lang),
+        }
+    except (OSError, ValueError, KeyError) as exc:
+        logger.error("Sovereign Export Failure: %s", exc)
         raise HTTPException(
             status_code=500, detail=get_trans("error_export_failed", lang)
         ) from None
 
 
 @router.get("/v1/status", response_model=StatusResponse)
-async def status(
+async def get_system_status(
     request: Request,
     auth: AuthResult = Depends(require_permission("read")),
     engine: CortexEngine = Depends(get_engine),
 ) -> StatusResponse:
-    """Get engine status and statistics."""
-    lang = request.headers.get("Accept-Language", "en")
+    """Expose engine diagnostics and memory health metrics."""
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     try:
         stats = engine.stats()
         return StatusResponse(
@@ -77,43 +95,48 @@ async def status(
             transactions=stats["transactions"],
             db_size_mb=stats["db_size_mb"],
         )
-    except (OSError, ValueError, KeyError) as e:
-        logger.error("Status unavailable: %s", e)
+    except Exception as exc:
+        logger.error("Sovereign Diagnostic Failure: %s", exc)
         raise HTTPException(
             status_code=500, detail=get_trans("error_status_unavailable", lang)
         ) from None
 
 
+# ─── API Key Governance ─────────────────────────────────────────────
+
+
 @router.post("/v1/admin/keys")
 async def create_api_key(
     request: Request,
-    name: str = Query(...),
+    name: str = Query(..., min_length=3, max_length=64),
     tenant_id: str = Query("default"),
-    authorization: str = Header(None),
+    authorization: str | None = Header(None),
 ) -> dict:
-    """Create a new API key. First key requires no auth (bootstrap)."""
-    lang = request.headers.get("Accept-Language", "en")
+    """
+    Sovereign Key Provisioning.
+    First key is self-provisioned (bootstrap). Subsequent keys require 'admin' permission.
+    """
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
-    # Finding 9: Validate tenant_id
-    if not tenant_id.isalnum() and "_" not in tenant_id and "-" not in tenant_id:
-        raise HTTPException(
-            status_code=400, detail=get_trans("error_invalid_input", lang)
-        )
+    # Sanitize tenant_id (Alphanumeric + safe separators)
+    if not re.match(r"^[a-z0-9_\-]+$", tenant_id, re.I):
+        raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang))
 
     manager = api_state.auth_manager or get_auth_manager()
-    keys = manager.list_keys()
-    if keys:
-        if not authorization:
+    existing_keys = manager.list_keys()
+
+    if existing_keys:
+        if not authorization or not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail=get_trans("error_auth_required", lang))
-        parts = authorization.split(" ", 1)
-        if len(parts) != 2:
-            raise HTTPException(status_code=401, detail=get_trans("error_invalid_key_format", lang))
-        result = api_state.auth_manager.authenticate(parts[1])
+
+        token = authorization.split(" ", 1)[1]
+        result = manager.authenticate(token)
+
         if not result.authenticated:
-            error_msg = (
-                get_trans("error_invalid_revoked_key", lang) if result.error else result.error
+            raise HTTPException(
+                status_code=401, detail=get_trans("error_invalid_revoked_key", lang)
             )
-            raise HTTPException(status_code=401, detail=error_msg)
+
         if "admin" not in result.permissions:
             detail = get_trans("error_missing_permission", lang).format(permission="admin")
             raise HTTPException(status_code=403, detail=detail)
@@ -123,18 +146,19 @@ async def create_api_key(
         tenant_id=tenant_id,
         permissions=["read", "write", "admin"],
     )
+
     return {
         "key": raw_key,
         "name": api_key.name,
         "prefix": api_key.key_prefix,
         "tenant_id": api_key.tenant_id,
-        "message": "Save this key - it will NOT be shown again.",
+        "message": get_trans("info_key_warning", lang),
     }
 
 
 @router.get("/v1/admin/keys")
 async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))) -> list[dict]:
-    """List all API keys (hashed, never reveals raw key)."""
+    """Expose non-sensitive metadata for all provisioned keys."""
     manager = api_state.auth_manager or get_auth_manager()
     keys = manager.list_keys()
     return [
@@ -152,22 +176,33 @@ async def list_api_keys(auth: AuthResult = Depends(require_permission("admin")))
     ]
 
 
+# ─── Handoff & Continuity ───────────────────────────────────────────
+
+
 @router.post("/v1/handoff")
-async def handoff_generate(
+async def generate_handoff_context(
     request: Request,
     engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
-    """Generate a session handoff with hot context."""
+    """
+    Manifest a session handoff artifact containing hot context and recent episodes.
+    Used for transferring agentic state between platforms (macOS -> Web).
+    """
     from cortex.handoff import generate_handoff, save_handoff
 
-    body = {}
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+
     try:
         body = await request.json()
-    except (OSError, ValueError, KeyError):
-        pass
+    except (ValueError, TypeError):
+        body = {}
 
-    session_meta = body.get("session", None)
-    data = await generate_handoff(engine, session_meta=session_meta)
-    save_handoff(data)
-    return data
+    session_meta = body.get("session")
+    try:
+        data = await generate_handoff(engine, session_meta=session_meta)
+        save_handoff(data)
+        return data
+    except Exception as exc:
+        logger.error("Handoff Generation Failure: %s", exc)
+        raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None

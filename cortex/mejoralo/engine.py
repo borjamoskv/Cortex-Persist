@@ -31,11 +31,13 @@ class MejoraloEngine:
 
     # ── Fase 2: X-Ray 13D Scan ───────────────────────────────────────
 
-    def scan(self, project: str, path: str | Path, deep: bool = False) -> ScanResult:
+    def scan(
+        self, project: str, path: str | Path, deep: bool = False, brutal: bool = False
+    ) -> ScanResult:
         """
         Execute X-Ray 13D scan on a project directory.
         """
-        return scan(project, path, deep)
+        return scan(project, path, deep, brutal)
 
     def heal(
         self, project: str, path: str | Path, target_score: int, scan_result: ScanResult

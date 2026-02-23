@@ -12,6 +12,7 @@ sys.modules["Foundation"] = MagicMock()
 sys.modules["objc"] = MagicMock()
 
 import pytest
+
 from cortex.neural import NeuralIntentEngine
 
 

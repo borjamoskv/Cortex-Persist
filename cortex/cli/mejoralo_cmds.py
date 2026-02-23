@@ -18,11 +18,12 @@ def mejoralo():
 @click.argument("project")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--deep", is_flag=True, help="Activa dimensión Psi + análisis profundo")
+@click.option("--brutal", is_flag=True, help="Intensidad máxima (deep + penalizaciones duplicadas)")
 @click.option(
     "--auto-heal", is_flag=True, help="Intenta curar el código autónomamente si score < 70"
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def mejoralo_scan(project, path, deep, auto_heal, db):
+def mejoralo_scan(project, path, deep, brutal, auto_heal, db):
     """X-Ray 13D — Escaneo multidimensional del proyecto."""
     from cortex.mejoralo import MejoraloEngine
 
@@ -30,31 +31,9 @@ def mejoralo_scan(project, path, deep, auto_heal, db):
     try:
         m = MejoraloEngine(engine)
         with console.status("[bold blue]Ejecutando X-Ray 13D...[/]"):
-            result = m.scan(project, path, deep=deep)
-        if result.score >= 80:
-            score_style = "bold green"
-        elif result.score >= 50:
-            score_style = "bold yellow"
-        else:
-            score_style = "bold red"
-        table = Table(title=f"🔬 X-Ray 13D — {project}")
-        table.add_column("Dimensión", style="bold", width=15)
-        table.add_column("Score", width=8)
-        table.add_column("Peso", width=10)
-        table.add_column("Hallazgos", width=50)
-        for d in result.dimensions:
-            d_color = "green" if d.score >= 80 else "yellow" if d.score >= 50 else "red"
-            findings_str = "; ".join(d.findings[:3]) if d.findings else "—"
-            table.add_row(d.name, f"[{d_color}]{d.score}[/]", d.weight, findings_str[:50])
-        console.print(table)
-        console.print(
-            f"\n  Stack: [cyan]{result.stack}[/] | "
-            f"Archivos: {result.total_files} | "
-            f"LOC: {result.total_loc:,} | "
-            f"Score: [{score_style}]{result.score}/100[/]"
-        )
-        if result.dead_code:
-            console.print("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
+            result = m.scan(project, path, deep=deep, brutal=brutal)
+
+        _display_scan_result(result)
 
         if auto_heal and result.score < 70:
             console.print("\n[yellow]⚠️ Auto-Heal Activado: Score por debajo de 70 detectado.[/]")
@@ -67,6 +46,37 @@ def mejoralo_scan(project, path, deep, auto_heal, db):
                 console.print("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
     finally:
         engine.close_sync()
+
+
+def _display_scan_result(result):
+    """Format and print scan results to the console."""
+    score_style = (
+        "bold green" if result.score >= 80 else "bold yellow" if result.score >= 50 else "bold red"
+    )
+
+    table = Table(title=f"🔬 X-Ray 13D — {result.project}")
+    table.add_column("Dimensión", style="bold", width=15)
+    table.add_column("Score", width=8)
+    table.add_column("Peso", width=10)
+    table.add_column("Hallazgos", width=50)
+
+    for d in result.dimensions:
+        d_color = "green" if d.score >= 80 else "yellow" if d.score >= 50 else "red"
+        findings_str = "; ".join(d.findings[:3]) if d.findings else "—"
+        table.add_row(d.name, f"[{d_color}]{d.score}[/]", d.weight, findings_str[:50])
+
+    console.print(table)
+
+    mode_str = " | [bold red]BRUTAL[/]" if result.brutal else ""
+    console.print(
+        f"\n  Stack: [cyan]{result.stack}[/] | "
+        f"Archivos: {result.total_files} | "
+        f"LOC: {result.total_loc:,} | "
+        f"Score: [{score_style}]{result.score}/100[/]{mode_str}"
+    )
+
+    if result.dead_code:
+        console.print("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
 
 
 @mejoralo.command("record")
@@ -150,7 +160,10 @@ def mejoralo_history(project, limit, db):
         for s in sessions:
             delta = s.get("delta", 0)
             d_color = "green" if delta and delta > 0 else "red" if delta and delta < 0 else "dim"
-            score_str = f"{s.get('score_before', '?')} → {s.get('score_after', '?')}"
+
+            s_before = s.get("score_before", "?")
+            s_after = s.get("score_after", "?")
+            score_str = f"{s_before} → {s_after}"
             actions_str = ", ".join(s.get("actions", [])[:2]) or "—"
             table.add_row(
                 str(s["id"]),

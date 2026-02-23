@@ -114,30 +114,27 @@ async def ask_cortex(
         project=auth.tenant_id or req.project,
     )
 
-    # 2. Build context from retrieved facts
-    if results:
-        context_lines = []
-        for _i, r in enumerate(results, 1):
-            context_lines.append(
-                f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
-            )
-        context = "\n\n".join(context_lines)
-    else:
-        context = "(No facts found matching the query.)"
+    # 2. Build context from retrieved facts (Optimized)
+    context = (
+        "\n\n".join(
+            f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
+            for r in results
+        )
+        if results
+        else "(No facts found matching the query.)"
+    )
 
     # 3. Construct prompt
+    # Note: req.system_prompt allows for dynamic persona shifts; use with caution in multi-tenant envs.
     system = req.system_prompt or CORTEX_SYSTEM_PROMPT
-    prompt = f"""## Retrieved Facts from CORTEX Memory
-
-{context}
-
-## Question
-
-{req.query}
-
-## Instructions
-
-Answer the question above using ONLY the facts provided. Cite [Fact #ID] when referencing specific facts."""
+    prompt = (
+        "## Retrieved Facts from CORTEX Memory\n\n"
+        f"{context}\n\n"
+        "## Question\n\n"
+        f"{req.query}\n\n"
+        "## Instructions\n\n"
+        "Answer the question above using ONLY the facts provided. Cite [Fact #ID] when referencing specific facts."
+    )
 
     # 4. Call LLM
     try:

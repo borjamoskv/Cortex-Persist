@@ -24,6 +24,7 @@ class ScanResult:
     dead_code: bool  # True if score < 50
     total_files: int = 0
     total_loc: int = 0
+    brutal: bool = False
 
 
 @dataclass

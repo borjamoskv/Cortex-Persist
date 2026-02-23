@@ -6,7 +6,6 @@ Provides connection management for synchronous operations.
 from __future__ import annotations
 
 import logging
-import sqlite3 as _sqlite3
 
 import sqlite_vec
 
@@ -19,14 +18,9 @@ class SyncBaseMixin:
     def _get_sync_conn(self):
         """Get a raw sqlite3.Connection for sync callers."""
         if not hasattr(self, "_sync_conn") or self._sync_conn is None:
-            self._sync_conn = _sqlite3.connect(
-                str(self._db_path),
-                timeout=30,
-                check_same_thread=False,
-            )
-            self._sync_conn.execute("PRAGMA journal_mode=WAL")
-            self._sync_conn.execute("PRAGMA synchronous=NORMAL")
-            self._sync_conn.execute("PRAGMA foreign_keys=ON")
+            from cortex.db import connect
+
+            self._sync_conn = connect(str(self._db_path))
             try:
                 self._sync_conn.enable_load_extension(True)
                 sqlite_vec.load(self._sync_conn)

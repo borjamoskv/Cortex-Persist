@@ -42,9 +42,9 @@ def verify_fact(fact_id: int, db: str) -> None:
     Checks SHA-256 hash chain and Merkle checkpoint inclusion.
     Outputs a verification certificate.
     """
-    import sqlite3
+    from cortex.db import connect as db_connect
 
-    conn = sqlite3.connect(db)
+    conn = db_connect(db)
 
     # Get the fact
     fact = conn.execute(
@@ -189,10 +189,11 @@ def compliance_report(db: str) -> None:
     Checks ledger integrity, decision logging, agent traceability,
     and outputs a compliance score (0-5).
     """
-    import sqlite3
     from datetime import datetime, timezone
 
-    conn = sqlite3.connect(db)
+    from cortex.db import connect as db_connect
+
+    conn = db_connect(db)
 
     total_facts = _safe_count(conn, "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
     decisions = _safe_count(
@@ -274,9 +275,9 @@ def compliance_report(db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def audit_trail(project: str, limit: int, db: str) -> None:
     """Generate audit trail of agent decisions with hash verification."""
-    import sqlite3
+    from cortex.db import connect as db_connect
 
-    conn = sqlite3.connect(db)
+    conn = db_connect(db)
 
     conditions = ["f.valid_until IS NULL"]
     params: list = []

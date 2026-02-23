@@ -51,7 +51,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     new_dec = calculate_fact_diff(
         existing,
         dec_candidates,
-        lambda x: f"DECISION: {x.get('decision', str(x))} | RAZON: {x.get('reason', '')}",
+        lambda x: x.get("decision", str(x)),
     )
     for content, dec in new_dec:
         try:

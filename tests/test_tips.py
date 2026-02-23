@@ -76,9 +76,9 @@ class TestTipsEngineStatic:
         assert tip_es.lang == "es"
 
     def test_fallback_to_english(self) -> None:
-        # 'eu' (basque) has no static tips currently, should fallback to 'en'
-        engine_eu = TipsEngine(include_dynamic=False, lang="eu")
-        tip = engine_eu.random()
+        # 'fr' (french) has no static tips currently, should fallback to 'en'
+        engine_fr = TipsEngine(include_dynamic=False, lang="fr")
+        tip = engine_fr.random()
         assert tip.lang == "en"
 
     def test_for_category_with_lang(self) -> None:

@@ -32,9 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.tips")
 
-_ASSET_PATH: Final[str] = os.path.join(
-    os.path.dirname(__file__), "assets", "tips.json"
-)
+_ASSET_PATH: Final[str] = os.path.join(os.path.dirname(__file__), "assets", "tips.json")
 
 
 # ─── Models ──────────────────────────────────────────────────────────

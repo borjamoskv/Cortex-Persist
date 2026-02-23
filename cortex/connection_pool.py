@@ -90,12 +90,10 @@ class CortexConnectionPool:
         except (ImportError, OSError, AttributeError) as e:
             logger.debug(f"sqlite-vec not available for connection: {e}")
 
-        # Critical pragmas for concurrent SQLite
-        await conn.execute("PRAGMA journal_mode=WAL;")
-        await conn.execute("PRAGMA synchronous=NORMAL;")
-        await conn.execute("PRAGMA foreign_keys=ON;")
-        await conn.execute("PRAGMA busy_timeout=5000;")
-        await conn.commit()
+        # Critical pragmas for concurrent SQLite (via centralized factory)
+        from cortex.db import apply_pragmas_async
+
+        await apply_pragmas_async(conn)
         return conn
 
     @asynccontextmanager

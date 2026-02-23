@@ -12,9 +12,10 @@ Endpoints:
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+
+from cortex.api_deps import get_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
-from cortex.api_deps import get_engine
 from cortex.tips import Tip, TipCategory, TipsEngine
 
 router = APIRouter(prefix="/tips", tags=["tips"])

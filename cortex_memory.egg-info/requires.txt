@@ -6,6 +6,10 @@ rich>=13.0
 neo4j>=5.0
 aiosqlite>=0.20.0
 
+[:sys_platform == "darwin"]
+pyobjc-core
+pyobjc-framework-Cocoa
+
 [adk]
 google-adk>=0.5.0
 

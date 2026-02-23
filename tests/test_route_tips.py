@@ -2,9 +2,10 @@
 
 import pytest
 from fastapi.testclient import TestClient
+
 from cortex.api import app
-from cortex.auth import AuthResult, require_auth
 from cortex.api_deps import get_engine
+from cortex.auth import AuthResult, require_auth
 
 client = TestClient(app)
 

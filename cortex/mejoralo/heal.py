@@ -129,7 +129,7 @@ def heal_project(
         # Elegir el archivo con más peso en la caída del score
         sorted_files = sorted(file_issues.items(), key=lambda x: len(x[1]), reverse=True)
         top_file_rel, top_issues = sorted_files[0]
-        
+
         # Limitar issues para no saturar el contexto del LLM
         top_issues = top_issues[:15]
 
@@ -152,7 +152,7 @@ def heal_project(
         # 🔬 Integrity Check
         console.print("  [cyan]🔬 Verificando Integridad Bizantina (pytest)...[/]")
         res = subprocess.run(["pytest"], cwd=path, capture_output=True, text=True)
-        
+
         if res.returncode != 0:
             console.print(f"  [bold red]💥 Regresión detectada en {top_file_rel}! Rollback.[/]")
             subprocess.run(["git", "restore", str(abs_path)], cwd=path, capture_output=True)
@@ -177,13 +177,13 @@ def heal_project(
             cwd=path,
             capture_output=True,
         )
-        
+
         any_success = True
 
         # 🔄 Re-scan para ver el progreso real
         console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
         current_result = scan(project, path)
-        
+
         if current_result.score >= target_score:
             console.print(
                 f"[bold green]✨ META ALCANZADA! Score final: {current_result.score}/100[/]"

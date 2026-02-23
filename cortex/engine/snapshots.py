@@ -1,5 +1,7 @@
+import asyncio
 import json
 import logging
+import re
 import shutil
 import sqlite3
 from dataclasses import dataclass
@@ -11,6 +13,16 @@ import aiosqlite
 from cortex.config import DEFAULT_DB_PATH
 
 logger = logging.getLogger("cortex")
+
+
+def _write_snapshot_meta(meta_path: Path, record: dict) -> None:
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2)
+
+
+def _read_snapshot_meta(meta_file: Path) -> dict:
+    with open(meta_file, encoding="utf-8") as f:
+        return json.load(f)
 
 
 @dataclass
@@ -47,15 +59,19 @@ class SnapshotManager:
         Returns:
             SnapshotRecord containing metadata.
         """
+        # Sanitize name to prevent path traversal or malicious filenames
+        # Allow only alphanumeric, underscores, and dashes
+        safe_name = re.sub(r"[^a-zA-Z0-9_\-]", "_", name)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"cortex_snap_{ts}_{name}.db"
+        filename = f"cortex_snap_{ts}_{safe_name}.db"
         dest_path = self.snapshot_dir / filename
 
         # Use VACUUM INTO for a consistent backup of a live database in WAL mode
         async with aiosqlite.connect(str(self.db_path)) as conn:
             try:
-                # We must escape the path for the SQL statement
-                # SQLite doesn't support parameters for VACUUM INTO
+                # SQLite doesn't support parameters for VACUUM INTO.
+                # Since we sanitized 'name' and we control 'snapshot_dir',
+                # this is now safe from injection.
                 safe_path = str(dest_path).replace("'", "''")
                 await conn.execute(f"VACUUM INTO '{safe_path}'")
                 logger.info("Snapshot created via VACUUM INTO: %s", dest_path)
@@ -68,7 +84,7 @@ class SnapshotManager:
         # We record the metadata in a alongside JSON file
         meta_path = dest_path.with_suffix(".json")
         record = {
-            "name": name,
+            "name": safe_name,
             "tx_id": tx_id,
             "merkle_root": merkle_root,
             "created_at": datetime.now().isoformat(),
@@ -76,13 +92,13 @@ class SnapshotManager:
             "path": str(dest_path),
         }
 
-        # Using standard open since it's just a small JSON meta-file
-        with open(meta_path, "w") as f:
-            json.dump(record, f, indent=2)
+        # Using run_in_executor to avoid blocking the event loop for file I/O
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, _write_snapshot_meta, meta_path, record)
 
         return SnapshotRecord(
             id=0,  # Metadata ID
-            name=name,
+            name=safe_name,
             path=str(dest_path),
             tx_id=tx_id,
             merkle_root=merkle_root,
@@ -92,30 +108,32 @@ class SnapshotManager:
 
     async def list_snapshots(self) -> list[SnapshotRecord]:
         """List all available snapshots in the snapshot directory."""
-        snapshots = []
-        for meta_file in self.snapshot_dir.glob("*.json"):
-            try:
-                # small files, sync is okay
-                with open(meta_file) as f:
-                    data = json.load(f)
-                    # Check if the DB file actually exists
+        # Non-blocking glob/read for metadata
+        loop = asyncio.get_running_loop()
+
+        def _list():
+            snapshots = []
+            for meta_file in self.snapshot_dir.glob("*.json"):
+                try:
+                    data = _read_snapshot_meta(meta_file)
                     db_file = Path(data["path"])
                     if db_file.exists():
                         snapshots.append(
                             SnapshotRecord(
                                 id=0,
                                 name=data["name"],
-                                path=data["path"],
-                                tx_id=data["tx_id"],
-                                merkle_root=data["merkle_root"],
-                                created_at=data["created_at"],
-                                size_mb=data["size_mb"],
+                                path=data.get("path", ""),
+                                tx_id=data.get("tx_id", 0),
+                                merkle_root=data.get("merkle_root", ""),
+                                created_at=data.get("created_at", ""),
+                                size_mb=data.get("size_mb", 0.0),
                             )
                         )
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Failed to load snapshot metadata from %s: %s", meta_file, e)
+                except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
+                    logger.warning("Failed to load snapshot metadata from %s: %s", meta_file, e)
+            return sorted(snapshots, key=lambda s: s.created_at, reverse=True)
 
-        return sorted(snapshots, key=lambda s: s.created_at, reverse=True)
+        return await loop.run_in_executor(None, _list)
 
     async def restore_snapshot(self, tx_id: int) -> bool:
         """Restore the database to a specific snapshot state.

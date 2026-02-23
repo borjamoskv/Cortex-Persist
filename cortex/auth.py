@@ -75,10 +75,9 @@ class AuthManager:
         self._init_schema()
 
     def _get_conn(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path, timeout=10)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        return conn
+        from cortex.db import connect
+
+        return connect(self.db_path, row_factory=sqlite3.Row)
 
     def _init_schema(self) -> None:
         conn = self._get_conn()

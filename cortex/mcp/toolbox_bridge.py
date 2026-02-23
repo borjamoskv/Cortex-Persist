@@ -12,13 +12,14 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+from typing import Any
 
 logger = logging.getLogger("cortex.mcp.toolbox_bridge")
 
 _TOOLBOX_AVAILABLE = False
 try:
     from toolbox_core import ToolboxClient  # type: ignore
+
     _TOOLBOX_AVAILABLE = True
 except ImportError:
     ToolboxClient = None  # type: ignore
@@ -35,7 +36,7 @@ class ToolboxConfig:
     server_url: str = "http://127.0.0.1:5000"
     toolset: str = ""
     timeout_seconds: float = 30.0
-    allowed_server_urls: List[str] = field(
+    allowed_server_urls: list[str] = field(
         default_factory=lambda: ["http://127.0.0.1:5000", "http://localhost:5000"]
     )
 
@@ -45,9 +46,10 @@ class ToolboxConfig:
         allowed_raw = os.environ.get("TOOLBOX_ALLOWED_URLS", "")
         allowed = (
             [url.strip() for url in allowed_raw.split(",")]
-            if allowed_raw else ["http://127.0.0.1:5000", "http://localhost:5000"]
+            if allowed_raw
+            else ["http://127.0.0.1:5000", "http://localhost:5000"]
         )
-        
+
         return cls(
             server_url=os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000"),
             toolset=os.environ.get("TOOLBOX_TOOLSET", ""),
@@ -65,10 +67,10 @@ class ToolboxBridge:
     Centralizes connectivity to external database toolboxes for ADK agents.
     """
 
-    def __init__(self, config: Optional[ToolboxConfig] = None) -> None:
+    def __init__(self, config: ToolboxConfig | None = None) -> None:
         self.config = config or ToolboxConfig.from_env()
-        self._client: Optional[Any] = None
-        self._tools: List[Any] = []
+        self._client: Any | None = None
+        self._tools: list[Any] = []
 
     @property
     def is_available(self) -> bool:
@@ -79,7 +81,7 @@ class ToolboxBridge:
         """Enforce allowlist boundaries for external server connections."""
         url = self.config.server_url.rstrip("/")
         allowed = [u.rstrip("/") for u in self.config.allowed_server_urls]
-        
+
         if url not in allowed:
             logger.critical("Sovereign Security Breach: Rejected unallowed Toolbox URL: %s", url)
             raise ValueError(
@@ -96,11 +98,11 @@ class ToolboxBridge:
 
         try:
             self._client = ToolboxClient(self.config.server_url)
-            
+
             # Load tools (all or specific set)
             load_coro = (
-                self._client.load_toolset(self.config.toolset) 
-                if self.config.toolset 
+                self._client.load_toolset(self.config.toolset)
+                if self.config.toolset
                 else self._client.load_toolset()
             )
             self._tools = await load_coro
@@ -118,12 +120,12 @@ class ToolboxBridge:
             return False
 
     @property
-    def tools(self) -> List[Any]:
+    def tools(self) -> list[Any]:
         """Expose loaded tools for ADK agent consumption."""
         return list(self._tools)
 
     @property
-    def tool_names(self) -> List[str]:
+    def tool_names(self) -> list[str]:
         """Names of tools available on the remote bridge."""
         return [getattr(t, "name", str(t)) for t in self._tools]
 
@@ -146,17 +148,17 @@ class ToolboxBridge:
 
 
 async def create_toolbox_bridge(
-    server_url: Optional[str] = None,
+    server_url: str | None = None,
     toolset: str = "",
 ) -> ToolboxBridge:
     """Sovereign factory for rapid bridge deployment."""
     config = ToolboxConfig.from_env()
-    
+
     if server_url:
         config.server_url = server_url
         if server_url not in config.allowed_server_urls:
             config.allowed_server_urls.append(server_url)
-            
+
     if toolset:
         config.toolset = toolset
 
