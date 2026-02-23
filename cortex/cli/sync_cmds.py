@@ -11,6 +11,13 @@ from rich.panel import Panel
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
+__all__ = [
+    "export",
+    "obsidian",
+    "sync",
+    "writeback",
+]
+
 
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI."""
@@ -92,7 +99,10 @@ def writeback(db) -> None:
                 f"({result.files_skipped} archivos verificados)[/]"
             )
         for err in result.errors:
-            console.print(f"[red]  ✗ {err}[/]")
+            console.print(
+                f"  [red]✗[/] {err}\n"
+                f"    [dim]Verifica permisos del directorio o ejecuta: cortex sync[/dim]"
+            )
     finally:
         # Fix: engine.close is async
         _run_async(engine.close())

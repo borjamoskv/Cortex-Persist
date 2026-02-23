@@ -19,6 +19,8 @@ from cortex.sync.common import (
 from cortex.sync.system import sync_system
 from cortex.temporal import now_iso
 
+__all__ = ['sync_memory']
+
 if TYPE_CHECKING:
     from pathlib import Path
 

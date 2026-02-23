@@ -5,6 +5,8 @@ from cortex.config import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
 from .base import GraphBackend
 
+__all__ = ['Neo4jBackend']
+
 logger = logging.getLogger("cortex.graph.backends")
 
 

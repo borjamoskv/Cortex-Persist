@@ -13,6 +13,8 @@ from __future__ import annotations
 import logging
 import struct
 
+__all__ = ['quantize_int8', 'dequantize_int8', 'compression_ratio']
+
 logger = logging.getLogger("cortex.embeddings.compression")
 
 try:

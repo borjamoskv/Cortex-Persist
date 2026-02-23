@@ -43,6 +43,8 @@ from cortex.daemon.monitors import (
 )
 from cortex.daemon.notifier import Notifier
 
+__all__ = ['MoskvDaemon']
+
 logger = logging.getLogger("moskv-daemon")
 
 

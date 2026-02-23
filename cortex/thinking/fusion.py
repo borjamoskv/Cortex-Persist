@@ -30,6 +30,8 @@ from cortex.thinking.fusion_models import (
     _tokenize,
 )
 
+__all__ = ['ThoughtFusion']
+
 logger = logging.getLogger("cortex.thinking.fusion")
 
 
@@ -187,7 +189,7 @@ class ThoughtFusion:
                 logger.warning(
                     "Judge timeout (attempt %d/%d)", attempt + 1, self.JUDGE_MAX_RETRIES + 1
                 )
-            except (ConnectionError, OSError, RuntimeError) as e:
+            except (OSError, RuntimeError) as e:
                 logger.warning(
                     "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
                 )
@@ -218,7 +220,7 @@ class ThoughtFusion:
                 / 40.0
             )
             return (r, total)
-        except (ConnectionError, OSError, RuntimeError) as e:
+        except (OSError, RuntimeError) as e:
             logger.warning("Score parse failed for %s: %s", r.label, e)
             return (r, 0.5)
 

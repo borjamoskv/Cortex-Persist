@@ -2,14 +2,14 @@
 
 CORTEX (MOSKV-1) está diseñado como un ecosistema soberano, capaz de ejecutarse y operar en cualquier entorno (macOS, Linux y Windows). Esta guía detalla cómo está estructurada la abstracción multiplataforma para asegurar su resiliencia e inmutabilidad.
 
-## 1. El Módulo `cortex.platform`
+## 1. El Módulo `cortex.sys_platform`
 
-Todo el código dependiente de hardware o sistema operativo debe pasar por la nueva capa de abstracción ubicada en `cortex/platform.py`. 
+Todo el código dependiente de hardware o sistema operativo debe pasar por la nueva capa de abstracción ubicada en `cortex/sys_platform.py`. 
 
-**Regla de Oro**: Jamás utilizar comprobaciones OS directas dispersas por el código ni invocar rutas host-specific. Se debe importar `cortex.platform`:
+**Regla de Oro**: Jamás utilizar comprobaciones OS directas dispersas por el código ni invocar rutas host-specific. Se debe importar `cortex.sys_platform`:
 
 ```python
-from cortex.platform import is_macos, is_linux, is_windows, get_cortex_dir
+from cortex.sys_platform import is_macos, is_linux, is_windows, get_cortex_dir
 ```
 
 - **Ejecutables Dinámicos**: En lugar de invocar `/Users/.../.venv/bin/python`, la arquitectura utiliza `get_python_executable()` (o directamente `sys.executable`) para garantizar que los demonios y los _subshells_ generen nodos mule utilizando el binario de Python correcto, sin importar la ruta en la que esté instalado CORTEX.

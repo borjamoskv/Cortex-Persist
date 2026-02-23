@@ -12,6 +12,14 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+__all__ = [
+    "PROGRESS_DESC_FMT",
+    "apotheosis_cmds",
+    "guard_cmd",
+    "manifest_cmd",
+    "nirvana_cmd",
+]
+
 console = Console()
 
 PROGRESS_DESC_FMT = "[progress.description]{task.description}"

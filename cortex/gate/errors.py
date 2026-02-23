@@ -2,6 +2,13 @@
 CORTEX v5.0 — SovereignGate Exceptions.
 """
 
+__all__ = [
+    "GateError",
+    "GateExpired",
+    "GateInvalidSignature",
+    "GateNotApproved",
+]
+
 
 class GateError(Exception):
     """Raised when an action is blocked by the SovereignGate."""

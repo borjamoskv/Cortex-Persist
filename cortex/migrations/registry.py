@@ -19,6 +19,8 @@ from cortex.migrations.mig_ledger import (
     _migration_014_vote_ledger_refinement,
 )
 
+__all__ = ['MIGRATIONS']
+
 MIGRATIONS = [
     (1, "Add updated_at column", _migration_001_add_updated_at),
     (2, "Add performance indexes", _migration_002_add_indexes),

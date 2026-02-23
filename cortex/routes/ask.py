@@ -21,6 +21,16 @@ from cortex.engine_async import AsyncCortexEngine
 from cortex.llm.manager import LLMManager
 from cortex.llm.provider import LLMProvider
 
+__all__ = [
+    "AskRequest",
+    "AskResponse",
+    "AskSource",
+    "CORTEX_SYSTEM_PROMPT",
+    "LLMStatusResponse",
+    "ask_cortex",
+    "llm_status",
+]
+
 logger = logging.getLogger("cortex.routes.ask")
 
 router = APIRouter(tags=["ask"])
@@ -144,7 +154,7 @@ async def ask_cortex(
             temperature=req.temperature,
             max_tokens=req.max_tokens,
         )
-    except (ConnectionError, OSError, RuntimeError) as e:
+    except (OSError, RuntimeError) as e:
         logger.error("LLM completion failed: %s", e)
         return JSONResponse(
             status_code=502,

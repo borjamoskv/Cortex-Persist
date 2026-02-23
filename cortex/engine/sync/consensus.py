@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 
+__all__ = ['SyncConsensusMixin']
+
 logger = logging.getLogger("cortex.engine.sync.consensus")
 
 

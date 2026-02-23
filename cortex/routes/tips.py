@@ -18,6 +18,14 @@ from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
 from cortex.tips import Tip, TipCategory, TipsEngine
 
+__all__ = [
+    "LANG_DESC",
+    "get_tips",
+    "get_tips_by_category",
+    "get_tips_by_project",
+    "list_categories",
+]
+
 router = APIRouter(prefix="/tips", tags=["tips"])
 
 LANG_DESC = "Language code (en, es, eu)"

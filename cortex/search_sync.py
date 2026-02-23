@@ -15,6 +15,14 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 
+__all__ = [
+    "RRF_K",
+    "SyncSearchResult",
+    "hybrid_search_sync",
+    "semantic_search_sync",
+    "text_search_sync",
+]
+
 logger = logging.getLogger("cortex.search_sync")
 
 # RRF smoothing constant (standard value from the RRF paper)

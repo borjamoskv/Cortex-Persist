@@ -1,5 +1,7 @@
 """SQLite Graph Algorithms Mixin."""
 
+__all__ = ['SQLiteAlgorithmsMixin']
+
 
 class SQLiteAlgorithmsMixin:
     """Mixin for graph algorithm operations."""

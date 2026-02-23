@@ -8,7 +8,10 @@ import click
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_fact_not_found
 from cortex.sync import export_to_json
+
+__all__ = ['delete', 'list_facts', 'edit']
 
 
 @cli.command()
@@ -25,7 +28,7 @@ def delete(fact_id, reason, db) -> None:
             (fact_id,),
         ).fetchone()
         if not row:
-            console.print(f"[red]✗ No se encontró fact activo con ID {fact_id}[/]")
+            err_fact_not_found(fact_id)
             return
         console.print(
             f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
@@ -71,7 +74,15 @@ def list_facts(project, fact_type, limit, db) -> None:
             params.append(limit)
         rows = conn.execute(query, params).fetchall()
         if not rows:
-            console.print("[dim]No se encontraron facts activos.[/]")
+            filter_hint = ""
+            if project:
+                filter_hint += f" proyecto='{project}'"
+            if fact_type:
+                filter_hint += f" tipo='{fact_type}'"
+            err_empty_results(
+                f"facts activos{filter_hint}",
+                suggestion="Prueba sin filtros: cortex list",
+            )
             return
         table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")
         table.add_column("ID", style="bold", width=5)
@@ -104,7 +115,7 @@ def edit(fact_id, new_content, db) -> None:
             (fact_id,),
         ).fetchone()
         if not row:
-            console.print(f"[red]✗ No se encontró fact activo con ID {fact_id}[/]")
+            err_fact_not_found(fact_id)
             return
         project, old_content, fact_type, tags_json, confidence, source = row
         try:

@@ -14,6 +14,13 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, get_engine
 
+__all__ = [
+    "context",
+    "history_cmd",
+    "infer_cmd",
+    "signals_cmd",
+]
+
 console = Console()
 
 

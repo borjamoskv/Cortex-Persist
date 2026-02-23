@@ -28,6 +28,8 @@ from typing import Final
 
 import aiosqlite
 
+__all__ = ['connect', 'connect_async', 'apply_pragmas_async']
+
 logger = logging.getLogger("cortex.db")
 
 # ─── Configuration ────────────────────────────────────────────────────

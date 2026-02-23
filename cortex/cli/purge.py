@@ -7,6 +7,13 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
+__all__ = [
+    "purge",
+    "purge_duplicates",
+    "purge_empty",
+    "purge_project",
+]
+
 
 @cli.group()
 def purge():

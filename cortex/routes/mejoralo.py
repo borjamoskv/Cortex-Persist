@@ -21,6 +21,13 @@ from cortex.models import (
     ShipSealModel,
 )
 
+__all__ = [
+    "get_history",
+    "record_session",
+    "scan_project",
+    "ship_gate",
+]
+
 router = APIRouter(prefix="/v1/mejoralo", tags=["mejoralo"])
 
 

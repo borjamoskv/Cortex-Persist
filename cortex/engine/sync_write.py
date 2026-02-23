@@ -13,6 +13,8 @@ import sqlite3
 from cortex.sync.gitops import sync_fact_to_repo
 from cortex.temporal import now_iso
 
+__all__ = ['SyncWriteMixin']
+
 logger = logging.getLogger("cortex")
 
 

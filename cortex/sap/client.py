@@ -14,6 +14,14 @@ from xml.etree import ElementTree
 
 import httpx
 
+__all__ = [
+    "SAPAuthError",
+    "SAPClient",
+    "SAPConfig",
+    "SAPConnectionError",
+    "SAPEntityError",
+]
+
 logger = logging.getLogger("cortex.sap.client")
 
 # ─── Exceptions ──────────────────────────────────────────────────────

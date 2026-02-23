@@ -13,6 +13,8 @@ from enum import Enum
 
 import aiosqlite
 
+__all__ = ['NodeRole', 'RaftNode']
+
 logger = logging.getLogger(__name__)
 
 

@@ -9,6 +9,8 @@ from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
 from cortex.models import SearchRequest, SearchResult
 
+__all__ = ['search_facts', 'search_facts_get']
+
 router = APIRouter(tags=["search"])
 
 

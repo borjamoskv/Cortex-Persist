@@ -6,6 +6,18 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from cortex.cli.errors import err_execution_failed, err_skill_not_found
+
+__all__ = [
+    "NEXUS_SKILL_PATH",
+    "bridge",
+    "ghosts",
+    "nexus_cmds",
+    "pulse",
+    "run_nexus_skill",
+    "sync",
+]
+
 console = Console()
 
 # Path to the Sovereign Singularity Nexus engine
@@ -23,10 +35,7 @@ NEXUS_SKILL_PATH = (
 def run_nexus_skill(args: list[str]):
     """Execute the singularity-nexus skill script natively streaming output."""
     if not NEXUS_SKILL_PATH.exists():
-        console.print(
-            f"[bold red]Error:[/] Singularity Nexus skill not found at {NEXUS_SKILL_PATH}"
-        )
-        sys.exit(1)
+        err_skill_not_found("Singularity Nexus", str(NEXUS_SKILL_PATH))
 
     cmd = ["python3", str(NEXUS_SKILL_PATH)] + args
 
@@ -36,8 +45,7 @@ def run_nexus_skill(args: list[str]):
         result = subprocess.run(cmd, check=False)
         return result.returncode
     except (sqlite3.Error, OSError, RuntimeError) as e:
-        console.print(f"[bold red]Execution Error:[/] {e}")
-        sys.exit(1)
+        err_execution_failed(" ".join(cmd), str(e))
 
 
 @click.group(name="nexus")

@@ -14,6 +14,51 @@ from cortex import __version__
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
 
+def _show_tip(engine=None) -> None:
+    """Show a random contextual tip after CLI operations."""
+    try:
+        from cortex.tips import TipsEngine
+
+        tips_engine = TipsEngine(engine, include_dynamic=engine is not None, lang="es")
+        tip = tips_engine.random()
+        console.print()
+        console.print(
+            Panel(
+                f"[white]{tip.content}[/white]",
+                title=f"[bold cyan]💡 {tip.category.value.upper()}[/bold cyan]",
+                subtitle=f"[dim]{tip.source}[/dim]",
+                border_style="bright_green",
+                padding=(0, 2),
+            )
+        )
+    except (ImportError, RuntimeError, OSError, ValueError):
+        pass  # Tips are non-critical; never break the CLI
+
+
+def _get_tip_text(engine=None) -> str:
+    """Get a short tip string for inline display (spinners, status bars)."""
+    try:
+        from cortex.tips import TipsEngine
+
+        tips_engine = TipsEngine(engine, include_dynamic=False, lang="es")
+        tip = tips_engine.random()
+        return f"[dim bright_green]💡 {tip.content}[/]"
+    except (ImportError, RuntimeError, OSError, ValueError):
+        return ""
+from cortex.cli.errors import err_db_not_found, err_empty_results, handle_cli_error
+
+__all__ = [
+    "history",
+    "init",
+    "migrate",
+    "migrate_graph",
+    "recall",
+    "search",
+    "status",
+    "store",
+]
+
+
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI."""
     return asyncio.run(coro)
@@ -79,6 +124,7 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
             meta=meta if meta else None,
         )
         console.print(f"[green]✓[/] Stored fact [bold]#{fact_id}[/] in [cyan]{project}[/]")
+        _show_tip(engine)
     finally:
         _run_async(engine.close())
 
@@ -92,10 +138,15 @@ def search(query, project, top, db) -> None:
     """Semantic search across CORTEX memory."""
     engine = get_engine(db)
     try:
-        with console.status("[bold blue]Searching...[/]"):
+        tip_text = _get_tip_text(engine)
+        spinner_msg = f"[bold blue]Searching...[/]  {tip_text}" if tip_text else "[bold blue]Searching...[/]"
+        with console.status(spinner_msg):
             results = engine.search_sync(query, project=project, top_k=top)
         if not results:
-            console.print("[yellow]No results found.[/]")
+            err_empty_results(
+                "resultados de búsqueda",
+                suggestion="Prueba con otros términos o sin filtro de proyecto.",
+            )
             return
         table = Table(title=f"🔍 Results for: '{query}'")
         table.add_column("#", style="dim", width=4)
@@ -107,6 +158,7 @@ def search(query, project, top, db) -> None:
             content = r.content[:80] + "..." if len(r.content) > 80 else r.content
             table.add_row(str(r.fact_id), r.project, content, r.fact_type, f"{r.score:.2f}")
         console.print(table)
+        _show_tip(engine)
     finally:
         _run_async(engine.close())
 
@@ -120,7 +172,10 @@ def recall(project, db) -> None:
     try:
         facts = engine.recall_sync(project)
         if not facts:
-            console.print(f"[yellow]No facts found for project '{project}'[/]")
+            err_empty_results(
+                f"facts para '{project}'",
+                suggestion=f"Verifica el nombre del proyecto con: cortex list -p {project}",
+            )
             return
         console.print(
             Panel(
@@ -137,6 +192,7 @@ def recall(project, db) -> None:
             for f in type_facts:
                 tags_str = f" [dim]{', '.join(f.tags)}[/]" if f.tags else ""
                 console.print(f"  [dim]#{f.id}[/] {f.content}{tags_str}")
+        _show_tip(engine)
     finally:
         _run_async(engine.close())
 
@@ -174,10 +230,11 @@ def status(db, json_output) -> None:
     try:
         try:
             s = engine.stats_sync()
-        except (sqlite3.OperationalError, FileNotFoundError) as e:
-            console.print(f"[red]Error: {e}[/]")
-            console.print("[dim]Run 'cortex init' first.[/]")
+        except FileNotFoundError:
+            err_db_not_found(db)
             return
+        except sqlite3.OperationalError as e:
+            handle_cli_error(e, db_path=db, context="consulta de estado")
         if json_output:
             click.echo(json.dumps(s, indent=2))
             return
@@ -255,7 +312,10 @@ def migrate_graph(db) -> None:
                     if processed % 10 == 0:
                         prog_status.update(f"[bold blue]Processed {processed}/{len(facts)}...[/]")
                 except (sqlite3.Error, OSError, RuntimeError) as e:
-                    console.print(f"[red]✗ Failed at fact #{fid}: {e}[/]")
+                    console.print(
+                        f"[red]✗[/] Fact [bold]#{fid}[/] falló: [dim]{e}[/dim] "
+                        f"— continúa con los siguientes."
+                    )
         console.print(
             Panel(
                 f"[bold green]✓ Graph Migration Complete![/]\n"

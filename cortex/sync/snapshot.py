@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 from cortex.sync.common import CORTEX_DIR
 from cortex.temporal import now_iso
 
+__all__ = ['export_snapshot']
+
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
@@ -80,6 +82,9 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     for project, facts in by_project.items():
         lines.extend(_format_project_section(project, facts))
 
+    # ─── Tip del Día ─────────────────────────────────────────────────
+    lines.extend(_generate_tips_section(engine))
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -107,3 +112,27 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
         lines.append("")
 
     return lines
+
+
+def _generate_tips_section(engine: CortexEngine) -> list[str]:
+    """Generate a 'Tip del Día' section for the snapshot with 3 random tips."""
+    try:
+        from cortex.tips import TipsEngine
+
+        tips_engine = TipsEngine(engine, include_dynamic=True, lang="es")
+        lines = [
+            "---",
+            "",
+            "## 💡 Tips del Día",
+            "",
+        ]
+        seen: set[str] = set()
+        for _ in range(3):
+            tip = tips_engine.random()
+            if tip.id not in seen:
+                seen.add(tip.id)
+                lines.append(f"- **[{tip.category.value.upper()}]** {tip.content}")
+        lines.append("")
+        return lines
+    except (ImportError, RuntimeError, OSError, ValueError):
+        return []

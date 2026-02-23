@@ -20,6 +20,8 @@ from cortex.search.utils import (
 )
 from cortex.temporal import build_temporal_filter_params
 
+__all__ = ['text_search', 'text_search_sync']
+
 logger = logging.getLogger("cortex.search.text")
 
 

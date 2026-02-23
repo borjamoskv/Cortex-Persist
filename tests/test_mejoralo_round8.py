@@ -116,11 +116,11 @@ class TestApiStatusErrorHandling:
     def test_status_endpoint_handles_db_error(self, client):
         import inspect
 
-        from cortex.routes.admin import status
+        from cortex.routes.admin import get_system_status
 
-        source = inspect.getsource(status)
+        source = inspect.getsource(get_system_status)
         assert "Exception" in source
-        assert "Status unavailable" in source
+        assert "status_unavailable" in source
 
 
 class TestApiExportFmtParameter:

@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 
 from cortex.compaction.utils import content_hash, merge_error_contents
 
+__all__ = ['execute_merge_errors']
+
 if TYPE_CHECKING:
     from cortex.compactor import CompactionResult
     from cortex.engine import CortexEngine

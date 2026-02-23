@@ -12,7 +12,7 @@ import pytest
 
 from cortex.connection_pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
-from cortex.exceptions import FactNotFound
+from cortex.errors import FactNotFound
 from cortex.schema import ALL_SCHEMA
 
 # Setup simplistic schema for testing

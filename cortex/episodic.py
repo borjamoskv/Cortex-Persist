@@ -25,6 +25,8 @@ from cortex.episodic_base import (
 )
 from cortex.temporal import now_iso
 
+__all__ = ['EpisodicMemory']
+
 if TYPE_CHECKING:
     import aiosqlite
 

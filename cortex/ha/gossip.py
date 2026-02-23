@@ -10,6 +10,8 @@ import random
 
 import aiosqlite
 
+__all__ = ['GossipProtocol']
+
 logger = logging.getLogger(__name__)
 
 

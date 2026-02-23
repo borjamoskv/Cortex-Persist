@@ -11,6 +11,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+__all__ = ['SyncDiff', 'SAPMapper']
+
 logger = logging.getLogger("cortex.sap.mapper")
 
 # SAP OData metadata keys to strip from entity payloads

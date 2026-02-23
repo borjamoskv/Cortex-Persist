@@ -19,6 +19,27 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
+
+__all__ = [
+    "CORTEX_DIR",
+    "DAEMON_SCRIPT",
+    "LOG_FILENAME",
+    "LOG_PATH",
+    "PLIST_NAME",
+    "PLIST_PATH",
+    "autorouter_cmds",
+    "config",
+    "disable_boot",
+    "enable_boot",
+    "history",
+    "logs",
+    "router_status",
+    "start",
+    "stop",
+    "test",
+]
+
 console = Console()
 
 DAEMON_SCRIPT = (
@@ -40,14 +61,12 @@ LOG_PATH = CORTEX_DIR / LOG_FILENAME
 def _run_daemon(args: list[str]) -> int:
     """Ejecuta el daemon script con los argumentos dados."""
     if not DAEMON_SCRIPT.exists():
-        console.print(f"[bold red]Error:[/] AUTOROUTER-1 no encontrado en {DAEMON_SCRIPT}")
-        sys.exit(1)
+        err_skill_not_found("AUTOROUTER-1", str(DAEMON_SCRIPT))
     try:
         result = subprocess.run(["python3", str(DAEMON_SCRIPT)] + args, check=False)
         return result.returncode
     except (OSError, ValueError, KeyError) as e:
-        console.print(f"[bold red]Error de ejecución:[/] {e}")
-        sys.exit(1)
+        err_execution_failed(f"python3 {DAEMON_SCRIPT}", str(e))
 
 
 @click.group(name="autorouter")
@@ -126,8 +145,7 @@ PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / PLIST_NAME
 def enable_boot():
     """Instala AUTOROUTER-1 en launchd para inicio automático en macOS."""
     if sys.platform != "darwin":
-        console.print("[bold red]❌ Error:[/] launchd solo está disponible en macOS.")
-        sys.exit(1)
+        err_platform_unsupported("launchd")
 
     python_path = sys.executable
     script_path = str(DAEMON_SCRIPT)
@@ -191,15 +209,14 @@ def enable_boot():
             else:
                 console.print(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
     except Exception as e:
-        console.print(f"[bold red]❌ Excepción:[/] {e}")
+        err_execution_failed("launchctl bootstrap", str(e))
 
 
 @autorouter_cmds.command(name="disable-boot")
 def disable_boot():
     """Desinstala AUTOROUTER-1 de launchd."""
     if sys.platform != "darwin":
-        console.print("[bold red]❌ Error:[/] launchd solo está disponible en macOS.")
-        sys.exit(1)
+        err_platform_unsupported("launchd")
 
     if not PLIST_PATH.exists():
         console.print("[yellow]⚠️ No hay configuración launchd instalada.[/]")
@@ -221,7 +238,7 @@ def disable_boot():
         console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
         _run_daemon(["--stop"])
     except Exception as e:
-        console.print(f"[bold red]❌ Error:[/] {e}")
+        err_execution_failed("launchctl bootout", str(e))
 
 
 @autorouter_cmds.command()
@@ -231,7 +248,7 @@ def logs():
         console.print(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
         sys.exit(1)
 
-    from cortex.platform import tail_file_command
+    from cortex.sys_platform import tail_file_command
 
     console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:

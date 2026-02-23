@@ -17,6 +17,8 @@ from typing import Any
 
 from cortex.config import FEDERATION_MODE, SHARD_DIR
 
+__all__ = ['FederatedEngine', 'get_engine']
+
 logger = logging.getLogger("cortex.federation")
 
 

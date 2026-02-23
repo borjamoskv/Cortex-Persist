@@ -8,7 +8,7 @@ import time
 
 import pytest
 
-from cortex.sovereign_gate import (
+from cortex.gate import (
     ActionLevel,
     ActionStatus,
     GateError,

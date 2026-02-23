@@ -17,7 +17,7 @@ from cortex.graph.engine import (
     query_entity,
     query_entity_sync,
 )
-from cortex.graph.types import Entity, Ghost, Relationship
+from cortex.graph.models import Entity, Ghost, Relationship
 
 __all__ = [
     "Entity",

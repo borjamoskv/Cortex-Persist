@@ -6,6 +6,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+__all__ = ['StackIntelligence', 'get_stack_intelligence', 'run_cmd']
+
 logger = logging.getLogger("cortex.mejoralo")
 
 

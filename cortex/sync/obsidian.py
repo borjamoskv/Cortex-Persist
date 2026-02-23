@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 
 from cortex.temporal import now_iso
 
+__all__ = ['export_obsidian']
+
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 

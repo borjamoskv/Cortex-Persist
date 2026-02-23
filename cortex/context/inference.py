@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING
 
 from cortex.context.signals import InferenceResult, Signal
 
+__all__ = ['ContextInference']
+
 if TYPE_CHECKING:
     import aiosqlite
 

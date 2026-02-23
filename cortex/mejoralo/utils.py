@@ -6,6 +6,14 @@ from typing import Any
 
 from .constants import STACK_MARKERS
 
+__all__ = [
+    "detect_stack",
+    "get_build_cmd",
+    "get_lint_cmd",
+    "get_test_cmd",
+    "run_quiet",
+]
+
 
 def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""

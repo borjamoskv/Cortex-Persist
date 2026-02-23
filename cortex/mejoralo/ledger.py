@@ -6,6 +6,8 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
+__all__ = ['record_session', 'get_history']
+
 logger = logging.getLogger("cortex.mejoralo")
 
 _VERSION = "8.0"

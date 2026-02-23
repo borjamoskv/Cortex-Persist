@@ -193,5 +193,100 @@
     "en": "Deprecation failed",
     "es": "Deprecación fallida",
     "eu": "Zaharkitzeak huts egin du"
+  },
+  "cli_err_db_not_found_title": {
+    "en": "DB Not Initialized",
+    "es": "DB No Inicializada",
+    "eu": "DB Hasieratu Gabe"
+  },
+  "cli_err_db_not_found_body": {
+    "en": "Database not found\n\n  Path: {path}\n\nHow to fix?\n  Run:  cortex init\n  Or specify a different path:  --db /path/to/cortex.db",
+    "es": "Base de datos no encontrada\n\n  Ruta: {path}\n\n¿Cómo resolverlo?\n  Ejecuta:  cortex init\n  O indica otra ruta con:  --db /ruta/a/cortex.db",
+    "eu": "Datu-basea ez da aurkitu\n\n  Bidea: {path}\n\nNola konpondu?\n  Exekutatu:  cortex init\n  Edo beste bide bat adierazi:  --db /bidea/cortex.db"
+  },
+  "cli_err_db_locked_title": {
+    "en": "DB Locked",
+    "es": "DB Bloqueada",
+    "eu": "DB Blokeatuta"
+  },
+  "cli_err_db_locked_body": {
+    "en": "Database is locked\n\n  Path: {path}\n\nHow to fix?\n  1. Kill other CORTEX processes:  pkill -f 'cortex.cli'\n  2. Check daemon status:  cortex autorouter status\n  3. If persistent, remove lock:  rm {path}-wal {path}-shm",
+    "es": "Base de datos bloqueada\n\n  Ruta: {path}\n\n¿Cómo resolverlo?\n  1. Cierra otros procesos CORTEX:  pkill -f 'cortex.cli'\n  2. Verifica que el daemon no esté corriendo:  cortex autorouter status\n  3. Si persiste, elimina el lock:  rm {path}-wal {path}-shm",
+    "eu": "Datu-basea blokeatuta\n\n  Bidea: {path}\n\nNola konpondu?\n  1. Beste CORTEX prozesuak gelditu:  pkill -f 'cortex.cli'\n  2. Daemon-aren egoera egiaztatu:  cortex autorouter status\n  3. Irauten badu, blokeoa kendu:  rm {path}-wal {path}-shm"
+  },
+  "cli_err_db_corrupted_title": {
+    "en": "DB Corrupted",
+    "es": "DB Corrupta",
+    "eu": "DB Hondatuta"
+  },
+  "cli_err_db_corrupted_body": {
+    "en": "Database is damaged or inconsistent\n\n  Path: {path}\n\nHow to fix?\n  1. Attempt repair:  sqlite3 {path} '.recover' | sqlite3 {path}.recovered\n  2. Restore from snapshot:  cortex sync\n  3. Last resort:  cortex init --force",
+    "es": "Base de datos dañada o inconsistente\n\n  Ruta: {path}\n\n¿Cómo resolverlo?\n  1. Intenta reparar:  sqlite3 {path} '.recover' | sqlite3 {path}.recovered\n  2. Restaura desde snapshot:  cortex sync\n  3. Último recurso:  cortex init --force",
+    "eu": "Datu-basea hondatuta edo inkoherentea\n\n  Bidea: {path}\n\nNola konpondu?\n  1. Konponketa saiatu:  sqlite3 {path} '.recover' | sqlite3 {path}.recovered\n  2. Snapshot-etik berrezarri:  cortex sync\n  3. Azken aukera:  cortex init --force"
+  },
+  "cli_err_fact_not_found_title": {
+    "en": "Fact Not Found",
+    "es": "Fact No Encontrado",
+    "eu": "Gertaera Ez Da Aurkitu"
+  },
+  "cli_err_fact_not_found_body": {
+    "en": "Fact #{id} not found\n\n  The fact does not exist or has been deprecated.\n\nWhat to do?\n  • List active facts:  cortex list\n  • Search by content:  cortex search \"your query\"",
+    "es": "Fact #{id} no encontrado\n\n  El fact no existe o ya fue deprecado.\n\n¿Qué hacer?\n  • Lista facts activos:  cortex list\n  • Busca por contenido:  cortex search \"tu búsqueda\"",
+    "eu": "#{id} gertaera ez da aurkitu\n\n  Gertaera ez da existitzen edo zaharkituta dago.\n\nZer egin?\n  • Gertaera aktiboak zerrendatu:  cortex list\n  • Edukiaren arabera bilatu:  cortex search \"zure bilaketa\""
+  },
+  "cli_err_skill_not_found_title": {
+    "en": "Skill Not Found",
+    "es": "Skill No Encontrado",
+    "eu": "Skill-a Ez Da Aurkitu"
+  },
+  "cli_err_skill_not_found_body": {
+    "en": "Skill '{name}' not found\n\n  Expected path: {path}\n\nHow to fix?\n  1. Verify skill is installed in ~/.gemini/antigravity/skills/\n  2. Reinstall skills:  git pull in antigravity directory\n  3. Check permissions:  ls -la {path}",
+    "es": "Skill '{name}' no encontrado\n\n  Ruta esperada: {path}\n\n¿Cómo resolverlo?\n  1. Verifica que el skill está instalado en ~/.gemini/antigravity/skills/\n  2. Reinstala skills:  git pull en el directorio de antigravity\n  3. Comprueba permisos:  ls -la {path}",
+    "eu": "'{name}' skill-a ez da aurkitu\n\n  Espero zen bidea: {path}\n\nNola konpondu?\n  1. Skill-a instalatuta dagoela egiaztatu ~/.gemini/antigravity/skills/ bidean\n  2. Skills-ak berriz instalatu:  git pull antigravity directorioan\n  3. Baimenak egiaztatu:  ls -la {path}"
+  },
+  "cli_err_execution_failed_title": {
+    "en": "Execution Failed",
+    "es": "Ejecución Fallida",
+    "eu": "Exekuzioak Huts Egin Du"
+  },
+  "cli_err_execution_failed_body": {
+    "en": "Execution error\n\n  Command: {command}\n\nHow to fix?\n  1. Verify Python 3 is available:  python3 --version\n  2. Check dependencies:  pip install -e .\n  3. Review logs:  cat ~/.cortex/router_daemon.log",
+    "es": "Error de ejecución\n\n  Comando: {command}\n\n¿Cómo resolverlo?\n  1. Verifica que Python 3 está disponible:  python3 --version\n  2. Comprueba dependencias:  pip install -e .\n  3. Revisa los logs:  cat ~/.cortex/router_daemon.log",
+    "eu": "Exekuzio errorea\n\n  Komandoa: {command}\n\nNola konpondu?\n  1. Python 3 erabilgarri dagoela egiaztatu:  python3 --version\n  2. Mendekotasunak egiaztatu:  pip install -e .\n  3. Log-ak berrikusi:  cat ~/.cortex/router_daemon.log"
+  },
+  "cli_err_platform_unsupported_title": {
+    "en": "Platform Not Supported",
+    "es": "Plataforma No Soportada",
+    "eu": "Plataforma Ez Da Onartzen"
+  },
+  "cli_err_platform_unsupported_body": {
+    "en": "{feature} is not available\n\n  This feature requires {platform}.\n  Current platform: {current}",
+    "es": "{feature} no disponible\n\n  Esta funcionalidad requiere {platform}.\n  Plataforma actual: {current}",
+    "eu": "{feature} ez dago erabilgarri\n\n  Funtzionalitate honek {platform} behar du.\n  Uneko plataforma: {current}"
+  },
+  "cli_err_empty_results_body": {
+    "en": "No {entity} found.",
+    "es": "No se encontraron {entity}.",
+    "eu": "Ez da {entity} aurkitu."
+  },
+  "cli_err_permission_denied_title": {
+    "en": "Permissions",
+    "es": "Permisos",
+    "eu": "Baimenak"
+  },
+  "cli_err_permission_denied_body": {
+    "en": "Permission denied: {action}\n\nHow to fix?\n  • macOS Accessibility: System Settings → Privacy & Security → Accessibility\n  • File permissions:  chmod -R u+rw ~/.cortex\n  • Disk full?  df -h",
+    "es": "Permiso denegado: {action}\n\n¿Cómo resolverlo?\n  • macOS Accessibility: System Settings → Privacy & Security → Accessibility\n  • Permisos de archivo:  chmod -R u+rw ~/.cortex\n  • ¿Disco lleno?  df -h",
+    "eu": "Baimena ukatuta: {action}\n\nNola konpondu?\n  • macOS Accessibility: System Settings → Privacy & Security → Accessibility\n  • Fitxategi baimenak:  chmod -R u+rw ~/.cortex\n  • Diskoa beteta?  df -h"
+  },
+  "cli_err_unexpected_title": {
+    "en": "Unexpected Error",
+    "es": "Error Inesperado",
+    "eu": "Ustekabeko Errorea"
+  },
+  "cli_err_unexpected_body": {
+    "en": "Unexpected error\n\n  {detail}\n\nIf this persists, run:  cortex status  to verify system health.",
+    "es": "Error inesperado\n\n  {detail}\n\nSi esto persiste, ejecuta:  cortex status  para verificar el estado del sistema.",
+    "eu": "Ustekabeko errorea\n\n  {detail}\n\nHonek irauten badu, exekutatu:  cortex status  sistemaren egoera egiaztatzeko."
   }
 }

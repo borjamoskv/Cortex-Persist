@@ -8,6 +8,22 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from cortex.cli.errors import err_execution_failed, err_skill_not_found
+
+__all__ = [
+    "GHOST_SKILL_PATH",
+    "actions",
+    "eyes",
+    "ghost_cmds",
+    "hand",
+    "handle_ghost_response",
+    "process",
+    "run_ghost_skill",
+    "status",
+    "system",
+    "window",
+]
+
 console = Console()
 
 GHOST_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
@@ -16,8 +32,7 @@ GHOST_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-c
 def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:
     """Execute the ghost-control skill script and return code, stdout, stderr."""
     if not GHOST_SKILL_PATH.exists():
-        console.print(f"[bold red]Error:[/] GHOST-1 skill not found at {GHOST_SKILL_PATH}")
-        sys.exit(1)
+        err_skill_not_found("GHOST-1", str(GHOST_SKILL_PATH))
 
     cmd = ["python3", str(GHOST_SKILL_PATH)] + args
 
@@ -25,8 +40,7 @@ def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         return result.returncode, result.stdout, result.stderr
     except (sqlite3.Error, OSError, RuntimeError) as e:
-        console.print(f"[bold red]Execution Error:[/] {e}")
-        sys.exit(1)
+        err_execution_failed(" ".join(cmd), str(e))
 
 
 def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str):
@@ -75,7 +89,7 @@ def status():
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Status[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def hand(ctx):
     """Mouse and keyboard control (click, type, hotkey)."""
@@ -83,7 +97,7 @@ def hand(ctx):
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Hand[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def eyes(ctx):
     """Screen vision and pixel parsing (screenshot, locate)."""
@@ -91,7 +105,7 @@ def eyes(ctx):
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Eyes[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def process(ctx):
     """Process management (list, kill, find)."""
@@ -99,7 +113,7 @@ def process(ctx):
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Process[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def window(ctx):
     """Window management (list, focus, tile)."""
@@ -107,7 +121,7 @@ def window(ctx):
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Window[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def system(ctx):
     """System state and hardware (volume, brightness, battery)."""
@@ -115,7 +129,7 @@ def system(ctx):
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 System[/bold magenta]")
 
 
-@ghost_cmds.command(context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
+@ghost_cmds.command(context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def actions(ctx):
     """High-level actions (open-app, select-all)."""

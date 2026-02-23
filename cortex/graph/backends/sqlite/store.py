@@ -2,6 +2,8 @@
 
 import aiosqlite
 
+__all__ = ['SQLiteStoreMixin']
+
 
 class SQLiteStoreMixin:
     """Mixin for graph storage operations."""

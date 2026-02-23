@@ -16,6 +16,8 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli
 
+__all__ = ['verify_fact', 'compliance_report', 'audit_trail']
+
 console = Console()
 
 

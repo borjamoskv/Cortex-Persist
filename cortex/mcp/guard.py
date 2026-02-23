@@ -21,6 +21,8 @@ from cortex.config import (
     MCP_MAX_TAGS,
 )
 
+__all__ = ['MCPGuard']
+
 logger = logging.getLogger("cortex.mcp.guard")
 
 # ─── Poisoning Detection Patterns ─────────────────────────────────

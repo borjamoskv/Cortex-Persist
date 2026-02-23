@@ -7,6 +7,8 @@ from rich.panel import Panel
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
+__all__ = ['reflect', 'inject']
+
 
 @cli.command()
 @click.argument("project")

@@ -4,6 +4,8 @@ import hashlib
 from dataclasses import dataclass
 from typing import Optional
 
+__all__ = ['MerkleNode', 'MerkleTree']
+
 
 @dataclass
 class MerkleNode:

@@ -18,8 +18,10 @@ from cortex.mejoralo.constants import (
     SECURITY_PATTERNS,
     SKIP_DIRS,
 )
-from cortex.mejoralo.types import DimensionResult, ScanResult
+from cortex.mejoralo.models import DimensionResult, ScanResult
 from cortex.mejoralo.utils import detect_stack
+
+__all__ = ['scan']
 
 logger = logging.getLogger("cortex.mejoralo")
 

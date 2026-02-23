@@ -33,7 +33,20 @@ from cortex.daemon import (
     DEFAULT_STALE_HOURS,
     MoskvDaemon,
 )
-from cortex.platform import get_service_dir, is_linux, is_macos, is_windows
+from cortex.sys_platform import get_service_dir, is_linux, is_macos, is_windows
+
+__all__ = [
+    "PLIST_SOURCE",
+    "check",
+    "cli",
+    "install",
+    "main",
+    "setup_logging",
+    "start",
+    "status",
+    "uninstall",
+    "version",
+]
 
 console = Console()
 

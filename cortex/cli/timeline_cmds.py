@@ -10,6 +10,15 @@ from rich.table import Table
 from cortex.api_deps import get_engine
 from cortex.cli import DEFAULT_DB, cli, console
 
+__all__ = [
+    "snapshot_create",
+    "snapshot_list",
+    "timeline",
+    "timeline_checkout",
+    "timeline_log",
+    "timeline_snapshot",
+]
+
 
 @cli.group()
 def timeline():

@@ -13,6 +13,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
+__all__ = [
+    "BehavioralSnapshot",
+    "FileEvent",
+    "classify_file",
+    "infer_project_from_path",
+    "should_ignore",
+]
+
 # ─── Constants ───────────────────────────────────────────────────────
 
 DEBOUNCE_SECONDS: Final[float] = 2.0

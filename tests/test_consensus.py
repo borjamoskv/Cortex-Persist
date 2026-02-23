@@ -33,7 +33,7 @@ def client(monkeypatch):
     from cortex.api import app
 
     # Set up some test state
-    monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
+        # monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
     monkeypatch.setattr(cortex.auth, "_auth_manager", None)
 
     # Mock Embedder to avoid model download/hang
@@ -84,14 +84,14 @@ def test_consensus_flow(client):
 
 def test_recall_ordering(client):
     """Test standard recall ordering (score + recency)."""
-    from cortex import api_state
-
-    engine = api_state.engine
-
-    # 1. Store 3 facts
-    engine.store_sync("test_proj", "Fact A")
-    engine.store_sync("test_proj", "Fact B")
-    fid_c = engine.store_sync("test_proj", "Fact C")
+    # Store via API to use the initialized async connection (sync conn is separate)
+    resp_a = client.post("/v1/facts", json={"project": "test_proj", "content": "Fact A"})
+    assert resp_a.status_code == 200
+    resp_b = client.post("/v1/facts", json={"project": "test_proj", "content": "Fact B"})
+    assert resp_b.status_code == 200
+    resp_c = client.post("/v1/facts", json={"project": "test_proj", "content": "Fact C"})
+    assert resp_c.status_code == 200
+    fid_c = resp_c.json()["fact_id"]
 
     # 2. Add some votes to Fact C (Upvote)
     client.post(f"/v1/facts/{fid_c}/vote", json={"value": 1})

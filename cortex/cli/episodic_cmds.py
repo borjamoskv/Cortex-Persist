@@ -17,6 +17,15 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, get_engine
 
+__all__ = [
+    "boot_cmd",
+    "episode",
+    "observe_cmd",
+    "patterns_cmd",
+    "recall_cmd",
+    "record_cmd",
+]
+
 console = Console()
 
 
@@ -370,7 +379,16 @@ async def _observe_async(
 
     workspace_path = os.path.abspath(workspace)
     if not os.path.exists(workspace_path):
-        console.print(f"[red]Error:[/red] Workspace path {workspace_path} does not exist.")
+        console.print(
+            Panel(
+                f"[bold red]Workspace no encontrado[/]\n\n"
+                f"  Ruta: [dim]{workspace_path}[/dim]\n\n"
+                f"[yellow]¿Cómo resolverlo?[/]\n"
+                f"  Usa [cyan]--workspace /ruta/correcta[/cyan] o ejecuta desde el directorio del proyecto.",
+                title="📁 CORTEX — Workspace No Encontrado",
+                border_style="red",
+            )
+        )
         return
 
     engine = get_engine(db)

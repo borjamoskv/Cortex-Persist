@@ -20,6 +20,8 @@ from typing import Any
 
 import httpx
 
+__all__ = ['PROVIDER_CONFIGS', 'APIEmbedder']
+
 logger = logging.getLogger("cortex.embeddings.api")
 
 # ─── Embedding Dimensions ────────────────────────────────────────────

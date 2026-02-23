@@ -7,6 +7,8 @@ from pathlib import Path
 
 from cortex.cli import cli, console
 
+__all__ = ['entropy', 'entropy_install_hook', 'entropy_report']
+
 
 @cli.group()
 def entropy():
