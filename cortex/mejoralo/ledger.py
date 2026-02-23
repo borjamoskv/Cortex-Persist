@@ -1,3 +1,5 @@
+"""MEJORAlo Ledger — session recording and history retrieval."""
+
 import json
 import logging
 from typing import Any
@@ -5,6 +7,8 @@ from typing import Any
 from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.mejoralo")
+
+_VERSION = "8.0"
 
 
 def record_session(
@@ -14,8 +18,7 @@ def record_session(
     score_after: int,
     actions: list[str] | None = None,
 ) -> int:
-    """
-    Record a MEJORAlo audit session in the CORTEX ledger.
+    """Record a MEJORAlo audit session in the CORTEX ledger.
 
     Returns:
         The fact ID of the persisted session record.
@@ -23,18 +26,21 @@ def record_session(
     delta = score_after - score_before
     actions_str = "\n".join(f"  - {a}" for a in (actions or []))
     content = (
-        f"MEJORAlo v7.3: Sesión completada.\n"
+        f"MEJORAlo v{_VERSION}: Sesión completada.\n"
         f"Score: {score_before} → {score_after} (Δ{delta:+d})\n"
         f"Acciones:\n{actions_str}"
         if actions_str
-        else f"MEJORAlo v7.3: Sesión completada. Score: {score_before} → {score_after} (Δ{delta:+d})"
+        else (
+            f"MEJORAlo v{_VERSION}: Sesión completada. "
+            f"Score: {score_before} → {score_after} (Δ{delta:+d})"
+        )
     )
 
     fact_id = engine.store_sync(
         project=project,
         content=content,
         fact_type="decision",
-        tags=["mejoralo", "audit", "v7.3"],
+        tags=["mejoralo", "audit", f"v{_VERSION}"],
         confidence="verified",
         source="cortex-mejoralo",
         meta={
@@ -42,10 +48,13 @@ def record_session(
             "score_after": score_after,
             "delta": delta,
             "actions": actions or [],
-            "version": "7.3",
+            "version": _VERSION,
         },
     )
-    logger.info("Recorded MEJORAlo session #%d for project %s (Δ%+d)", fact_id, project, delta)
+    logger.info(
+        "Recorded MEJORAlo session #%d for project %s (Δ%+d)",
+        fact_id, project, delta,
+    )
     return fact_id
 
 
@@ -64,22 +73,28 @@ def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dic
     finally:
         conn.close()
 
-    results = []
-    for row in rows:
-        meta = {}
-        try:
-            meta = json.loads(row[3]) if row[3] else {}
-        except (json.JSONDecodeError, TypeError):
-            pass
-        results.append(
-            {
-                "id": row[0],
-                "content": row[1],
-                "created_at": row[2],
-                "score_before": meta.get("score_before"),
-                "score_after": meta.get("score_after"),
-                "delta": meta.get("delta"),
-                "actions": meta.get("actions", []),
-            }
-        )
-    return results
+    return [_row_to_session(row) for row in rows]
+
+
+def _row_to_session(row: tuple[Any, ...]) -> dict[str, Any]:
+    """Convert a database row to a session dictionary."""
+    meta = _parse_meta(row[3])
+    return {
+        "id": row[0],
+        "content": row[1],
+        "created_at": row[2],
+        "score_before": meta.get("score_before"),
+        "score_after": meta.get("score_after"),
+        "delta": meta.get("delta"),
+        "actions": meta.get("actions", []),
+    }
+
+
+def _parse_meta(raw: str | None) -> dict[str, Any]:
+    """Safely parse JSON metadata from a row."""
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return {}

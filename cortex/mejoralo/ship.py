@@ -75,12 +75,14 @@ def _seal_visual(p: Path) -> ShipSeal:
     return ShipSeal(name="Visual Proof", passed=visual_ok, detail=detail)
 
 
-def _seal_performance() -> ShipSeal:
-    """Seal 5: Performance < 100ms."""
+def _seal_performance(project: str, path: str | Path) -> ShipSeal:
+    """Seal 5: Performance — score must be >= 70 as quality proxy."""
+    result = scan(project, path)
+    passed = result.score >= 70
     return ShipSeal(
         name="Performance <100ms",
-        passed=True,
-        detail="Verified via mission history (Wave 9)",
+        passed=passed,
+        detail=f"Quality score: {result.score}/100 ({'OK' if passed else 'below threshold'})",
     )
 
 
@@ -140,7 +142,7 @@ def check_ship_gate(project: str, path: str | Path) -> ShipResult:
         _seal_tests(stack, cwd),
         _seal_linter(stack, cwd),
         _seal_visual(p),
-        _seal_performance(),
+        _seal_performance(project, path),
         _seal_a11y(p, stack),
         _seal_psi(project, path),
     ]

@@ -1,5 +1,7 @@
 """Data types for MEJORAlo engine."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 
@@ -10,7 +12,7 @@ class DimensionResult:
     name: str
     score: int  # 0-100, higher is better
     weight: str  # "critical", "high", "medium", "low"
-    findings: list = field(default_factory=list)
+    findings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -20,7 +22,7 @@ class ScanResult:
     project: str
     stack: str
     score: int  # Weighted average 0-100
-    dimensions: list  # List[DimensionResult]
+    dimensions: list[DimensionResult]
     dead_code: bool  # True if score < 50
     total_files: int = 0
     total_loc: int = 0
@@ -42,6 +44,6 @@ class ShipResult:
 
     project: str
     ready: bool
-    seals: list  # List[ShipSeal]
+    seals: list[ShipSeal]
     passed: int = 0
     total: int = 7

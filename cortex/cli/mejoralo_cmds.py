@@ -10,7 +10,7 @@ from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
 @cli.group()
 def mejoralo():
-    """MEJORAlo v7.3 — Protocolo de auditoría y mejora de código."""
+    """MEJORAlo v8.0 — Protocolo de auditoría y mejora de código. Modo Relentless."""
     pass
 
 
@@ -22,10 +22,17 @@ def mejoralo():
 @click.option(
     "--auto-heal", is_flag=True, help="Intenta curar el código autónomamente si score < 70"
 )
+@click.option(
+    "--relentless", is_flag=True, help="♾️ INMEJORABLE: no para hasta score ≥ 95"
+)
+@click.option(
+    "--target-score", type=int, default=None, help="Score objetivo personalizado (default: 70 o 95)"
+)
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def mejoralo_scan(project, path, deep, brutal, auto_heal, db):
+def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_score, db):
     """X-Ray 13D — Escaneo multidimensional del proyecto."""
     from cortex.mejoralo import MejoraloEngine
+    from cortex.mejoralo.constants import INMEJORABLE_SCORE
 
     engine = get_engine(db)
     try:
@@ -35,9 +42,25 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, db):
 
         _display_scan_result(result)
 
-        if auto_heal and result.score < 70:
-            console.print("\n[yellow]⚠️ Auto-Heal Activado: Score por debajo de 70 detectado.[/]")
-            success = m.heal(project, path, 70, result)
+        if relentless:
+            effective_target = target_score if target_score is not None else INMEJORABLE_SCORE
+            console.print(
+                f"\n[bold magenta]♾️ MODO RELENTLESS ACTIVADO — "
+                f"Meta: {effective_target}/100. No hay vuelta atrás.[/]"
+            )
+            success = m.relentless_heal(project, path, result, target_score=effective_target)
+            if success:
+                console.print(
+                    "[bold green]✅ Código purificado. Nivel INMEJORABLE alcanzado. (+Soberanía)[/]"
+                )
+            else:
+                console.print("[bold red]❌ Relentless abortado. La deuda técnica persiste.[/]")
+        elif auto_heal and result.score < (target_score or 70):
+            effective_target = target_score or 70
+            console.print(
+                f"\n[yellow]⚠️ Auto-Heal Activado: Score por debajo de {effective_target}.[/]"
+            )
+            success = m.heal(project, path, effective_target, result)
             if success:
                 console.print(
                     "[bold green]✅ Código purificado y comiteado automáticamente. (+Soberanía)[/]"

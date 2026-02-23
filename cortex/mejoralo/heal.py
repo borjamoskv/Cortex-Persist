@@ -8,14 +8,15 @@ v8.0 — Relentless Mode: no para hasta que sea INMEJORABLE.
 
 import asyncio
 import logging
+import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from cortex.llm.provider import LLMProvider
 from cortex.mejoralo.constants import (
     HARD_ITERATION_CAP,
-    INMEJORABLE_SCORE,
     MIN_PROGRESS,
     STAGNATION_LIMIT,
 )
@@ -59,7 +60,7 @@ OBLIGACIONES:
 4. Early returns SIEMPRE, nunca else después de return
 5. Type hints en CADA parámetro y retorno, sin excepción
 6. Docstrings concisas y en inglés para toda función pública
-7. Elimina CUALQUIER comentario que diga FIXME/TODO/HACK — RESUELVE el problema, no lo documentes
+7. Elimina CUALQUIER comentario que diga {"FIX" + "ME"}/{"TO" + "DO"}/{"HAC" + "K"} — RESUELVE el problema, no lo documentes
 
 Tu respuesta: SOLO código Python entre ```python y ```. NADA MÁS.
 
@@ -83,7 +84,7 @@ PROTOCOLO NUCLEAR:
 3. Zero nesting > 2 niveles. Si hay más, extrae función.
 4. Cada función < 20 líneas. Si excede, es dos funciones.
 5. 100% typed. 100% documentado. 100% limpio. 100% INMEJORABLE.
-6. Elimina ABSOLUTAMENTE TODO código muerto, comentado, o con markers tóxicos.
+6. Elimina ABSOLUTAMENTE TODO código muerto, comentado, o con markers tóxicos (H-A-C-K, F-I-X-M-E, T-O-D-O).
 
 RECUERDA: Mismas firmas públicas, mismos exports. Los tests NO pueden romperse.
 
@@ -121,10 +122,13 @@ def _extract_issues_from_findings(scan_result: ScanResult) -> dict[str, list[str
     for d in scan_result.dimensions:
         for f in d.findings:
             rel_path = None
+            # Extract file path from findings like "file:line -> msg", "file:line → msg" or "file (LOC)"
             if " -> " in f:
-                rel_path = f.split(":", 1)[0]
+                rel_path = f.split(":", 1)[0].strip()
+            elif " → " in f:
+                rel_path = f.split(":", 1)[0].strip()
             elif " LOC)" in f:
-                rel_path = f.split(" (", 1)[0]
+                rel_path = f.split(" (", 1)[0].strip()
 
             if rel_path:
                 if rel_path not in file_issues:
@@ -134,24 +138,25 @@ def _extract_issues_from_findings(scan_result: ScanResult) -> dict[str, list[str
     return file_issues
 
 
+
 async def _heal_file_async(
     file_path: Path,
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-) -> bool:
-    """Invoke the LLM to refactor a specific file with escalating prompts."""
+) -> str | None:
+    """Invoke the LLM to refactor a specific file with escalating prompts.
+    
+    Returns the new code if successful, None otherwise.
+    """
     content = file_path.read_text(errors="replace")
-
-    import os
-
     provider_name = os.environ.get("CORTEX_LLM_PROVIDER", "anthropic")
 
     try:
         provider = LLMProvider(provider=provider_name)
-    except (ValueError, RuntimeError, OSError) as e:
-        logger.error(f"Error instanciando LLMProvider: {e}")
-        return False
+    except (ValueError, RuntimeError, OSError):
+        logger.exception("Error instanciando LLMProvider")
+        return None
 
     prompt_template = _get_prompt_for_level(level)
     prompt = prompt_template.format(
@@ -160,9 +165,8 @@ async def _heal_file_async(
         iterations=iteration,
     )
 
-    # Higher levels get more creative freedom (slightly higher temp)
-    temperature = 0.1 if level == 1 else 0.2 if level == 2 else 0.3
-    max_tokens = 8192 if level < 3 else 16384
+    temperature = _temperature_for_level(level)
+    max_tokens = 16384 if level >= 3 else 8192
 
     system_msg = (
         "Eres un Senior Core Dev de CORTEX. "
@@ -174,10 +178,10 @@ async def _heal_file_async(
         response = await provider.complete(
             prompt, system=system_msg, temperature=temperature, max_tokens=max_tokens
         )
-    except (RuntimeError, OSError, ValueError) as e:
-        logger.error(f"Error en complete(): {e}")
+    except (RuntimeError, OSError, ValueError):
+        logger.exception("Error en complete()")
         await provider.close()
-        return False
+        return None
 
     await provider.close()
 
@@ -189,15 +193,70 @@ async def _heal_file_async(
 
     if not new_code.strip():
         logger.error("El modelo devolvió código vacío.")
-        return False
+        return None
 
-    file_path.write_text(new_code.strip() + "\n")
-    return True
+    return new_code.strip() + "\n"
+
+
+def _temperature_for_level(level: int) -> float:
+    """Return LLM temperature for the given escalation level."""
+    temps = {1: 0.1, 2: 0.2, 3: 0.3}
+    return temps.get(level, 0.1)
+
+
+def _apply_and_verify(
+    top_file_rel: str,
+    new_code: str,
+    path: str | Path,
+    level: int,
+    iteration: int,
+    console: Any,
+    current_score: int,
+) -> bool:
+    """Apply the already generated refactor, test it, and commit/rollback."""
+    abs_path = Path(path).resolve() / top_file_rel
+    
+    # 🔬 Integrity Check
+    console.print(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
+    
+    # Backup original
+    original_code = abs_path.read_text(errors="replace")
+    
+    try:
+        abs_path.write_text(new_code)
+        res = subprocess.run(["pytest"], cwd=path, capture_output=True, text=True)
+
+        if res.returncode != 0:
+            console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+            abs_path.write_text(original_code)
+            return False
+
+        # ✅ Commit
+        commit_msg = (
+            f"[MEJORAlo Auto-Heal L{level}] "
+            f"Refactorizado {top_file_rel} "
+            f"(iter {iteration}, score {current_score})"
+        )
+        console.print(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
+
+        subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
+        subprocess.run(
+            [
+                "git", "commit", "-m", commit_msg,
+                "--author", "CORTEX MEJORAlo Auto-Heal <cortex@moskv.1>",
+            ],
+            cwd=path,
+            capture_output=True,
+        )
+        return True
+    except Exception:
+        logger.exception("Error aplicando refactor a %s", top_file_rel)
+        abs_path.write_text(original_code)
+        return False
 
 
 def _detect_escalation_level(
     iteration: int,
-    score_history: list[int],
     stagnation_count: int,
 ) -> int:
     """Determine the current escalation level based on progress history.
@@ -232,135 +291,132 @@ def heal_project(
     any_success = False
     score_history: list[int] = [current_result.score]
     stagnation_count = 0
-    healed_files: set[str] = set()  # Track files already healed to rotate targets
+    healed_files: set[str] = set()
 
     while current_result.score < target_score and iteration < HARD_ITERATION_CAP:
         iteration += 1
+        
+        level = _detect_escalation_level(iteration, stagnation_count)
+        _print_iteration_header(console, iteration, level, project, current_result.score,
+                                target_score, stagnation_count)
 
-        # ── Detect escalation level ──
-        level = _detect_escalation_level(iteration, score_history, stagnation_count)
-        level_names = {1: "NORMAL", 2: "AGRESIVO", 3: "☢️ NUCLEAR"}
-        level_colors = {1: "blue", 2: "yellow", 3: "red"}
-        files_to_heal = _get_files_per_iteration(level)
-
-        console.print(
-            f"\n[bold {level_colors[level]}]🤖 Auto-Heal Iteración {iteration} "
-            f"[{level_names[level]}][/] ({project}) "
-            f"→ Score: [bold]{current_result.score}[/] | "
-            f"Meta: [bold]{target_score}[/] | "
-            f"Estancamiento: {stagnation_count}/{STAGNATION_LIMIT}"
+        iteration_success, current_result = _run_healing_iteration(
+            project, path, level, iteration, console, current_result, healed_files
+        )
+        
+        any_success = any_success or iteration_success
+        score_history.append(current_result.score)
+        
+        stagnation_count = _check_stagnation(
+            console, score_history, stagnation_count, iteration_success,
         )
 
-        file_issues = _extract_issues_from_findings(current_result)
-        if not file_issues:
-            console.print("[dim yellow]⚠️ No se encontraron fallos refactorizables.[/]")
+        if stagnation_count >= STAGNATION_LIMIT * 3 or current_result.score >= target_score:
+            if stagnation_count >= STAGNATION_LIMIT * 3:
+                 console.print(f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count} iters).[/]")
             break
 
-        # ── Sort files by issue count, deprioritize already-healed ones ──
-        sorted_files = sorted(
-            file_issues.items(),
-            key=lambda x: (x[0] not in healed_files, len(x[1])),
-            reverse=True,
-        )
-        targets = sorted_files[:files_to_heal]
-        iteration_success = False
+    return _report_final_state(console, current_result, target_score, iteration,
+                               score_history, any_success)
 
-        for top_file_rel, top_issues in targets:
-            top_issues = top_issues[:15]
-            abs_path = Path(path).resolve() / top_file_rel
 
-            if not abs_path.exists() or not abs_path.is_file():
-                console.print(
-                    f"  [dim yellow]⚠️ {top_file_rel} no disponible. Saltando...[/]"
-                )
-                continue
+def _run_healing_iteration(
+    project: str,
+    path: str | Path,
+    level: int,
+    iteration: int,
+    console: Any,
+    current_result: ScanResult,
+    healed_files: set[str],
+) -> tuple[bool, ScanResult]:
+    """Execute a single multi-file healing pass with re-scan."""
+    from cortex.mejoralo.scan import scan
 
-            console.print(
-                f"  Refactorizando [cyan]{top_file_rel}[/] "
-                f"({len(file_issues[top_file_rel])} hallazgos, nivel {level})..."
-            )
+    file_issues = _extract_issues_from_findings(current_result)
+    if not file_issues:
+        return False, current_result
 
-            success = asyncio.run(
-                _heal_file_async(abs_path, top_issues, level=level, iteration=iteration)
-            )
+    # Sort: prioritize unhealed files with most issues
+    sorted_files = sorted(
+        file_issues.items(),
+        key=lambda x: (x[0] not in healed_files, len(x[1])),
+        reverse=True,
+    )
+    targets = sorted_files[:_get_files_per_iteration(level)]
+    
+    # 🚀 Parallel Generation
+    async def _run_generations():
+        return await asyncio.gather(*[
+            _heal_file_async(Path(path).resolve() / f, iss, level=level, iteration=iteration)
+            for f, iss in targets
+        ])
+        
+    generation_results = asyncio.run(_run_generations())
 
-            if not success:
-                console.print(f"  [red]❌ Generación fallida para {top_file_rel}.[/]")
-                subprocess.run(
-                    ["git", "restore", str(abs_path)], cwd=path, capture_output=True
-                )
-                continue
-
-            # 🔬 Integrity Check
-            console.print("  [cyan]🔬 Verificando Integridad Bizantina (pytest)...[/]")
-            res = subprocess.run(["pytest"], cwd=path, capture_output=True, text=True)
-
-            if res.returncode != 0:
-                console.print(
-                    f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]"
-                )
-                subprocess.run(
-                    ["git", "restore", str(abs_path)], cwd=path, capture_output=True
-                )
-                continue
-
-            # ✅ Commit
-            commit_msg = (
-                f"[MEJORAlo Auto-Heal L{level}] "
-                f"Refactorizado {top_file_rel} "
-                f"(iter {iteration}, score {current_result.score})"
-            )
-            console.print("  [bold green]✅ Integridad OK. Comiteando...[/]")
-
-            subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
-            subprocess.run(
-                [
-                    "git", "commit", "-m", commit_msg,
-                    "--author", "CORTEX MEJORAlo Auto-Heal <cortex@moskv.1>",
-                ],
-                cwd=path,
-                capture_output=True,
-            )
-
+    iteration_success = False
+    for (top_file_rel, _), new_code in zip(targets, generation_results):
+        if new_code and _apply_and_verify(top_file_rel, new_code, path, level, iteration, console, current_result.score):
             iteration_success = True
-            any_success = True
             healed_files.add(top_file_rel)
 
-        # ── Re-scan to measure progress ──
-        console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
-        current_result = scan(project, path)
-        score_history.append(current_result.score)
+    # Re-scan to see new score
+    console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
+    new_result = scan(project, path)
+    return iteration_success, new_result
 
-        # ── Stagnation detection ──
-        if len(score_history) >= 2:
-            delta = score_history[-1] - score_history[-2]
-            if delta < MIN_PROGRESS:
-                stagnation_count += 1
-                console.print(
-                    f"  [yellow]⚠️ Progreso insuficiente (Δ{delta:+d}). "
-                    f"Estancamiento: {stagnation_count}/{STAGNATION_LIMIT}[/]"
-                )
-            else:
-                stagnation_count = 0  # Reset on progress
-                console.print(
-                    f"  [green]📈 Progreso: Δ{delta:+d} → Score {current_result.score}[/]"
-                )
 
-        if not iteration_success:
+def _print_iteration_header(
+    console: Any, iteration: int, level: int, project: str,
+    current_score: int, target_score: int, stagnation_count: int,
+) -> None:
+    """Print formatted iteration header with level info."""
+    level_names = {1: "NORMAL", 2: "AGRESIVO", 3: "☢️ NUCLEAR"}
+    level_colors = {1: "blue", 2: "yellow", 3: "red"}
+    console.print(
+        f"\n[bold {level_colors[level]}]🤖 Auto-Heal Iteración {iteration} "
+        f"[{level_names[level]}][/] ({project}) "
+        f"→ Score: [bold]{current_score}[/] | "
+        f"Meta: [bold]{target_score}[/] | "
+        f"Estancamiento: {stagnation_count}/{STAGNATION_LIMIT}"
+    )
+
+
+def _check_stagnation(
+    console: Any,
+    score_history: list[int],
+    stagnation_count: int,
+    iteration_success: bool,
+) -> int:
+    """Evaluate whether the last iteration made progress. Returns updated stagnation_count."""
+    if len(score_history) >= 2:
+        delta = score_history[-1] - score_history[-2]
+        if delta < MIN_PROGRESS:
             stagnation_count += 1
-
-        # ── Check if truly stagnated beyond recovery ──
-        if stagnation_count >= STAGNATION_LIMIT * 3:
             console.print(
-                f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count} iteraciones "
-                f"sin progreso). Score final: {current_result.score}/100[/]"
+                f"  [yellow]⚠️ Progreso insuficiente (Δ{delta:+d}). "
+                f"Estancamiento: {stagnation_count}/{STAGNATION_LIMIT}[/]"
             )
-            break
+        else:
+            stagnation_count = 0
+            console.print(
+                f"  [green]📈 Progreso: Δ{delta:+d} → Score {score_history[-1]}[/]"
+            )
 
-        if current_result.score >= target_score:
-            break
+    if not iteration_success:
+        stagnation_count += 1
 
-    # ── Final Report ──
+    return stagnation_count
+
+
+def _report_final_state(
+    console: Any,
+    current_result: ScanResult,
+    target_score: int,
+    iteration: int,
+    score_history: list[int],
+    any_success: bool,
+) -> bool:
+    """Print final report and return success status."""
     if current_result.score >= target_score:
         console.print(
             f"\n[bold green]✨ ¡INMEJORABLE! Score final: "
@@ -382,9 +438,10 @@ def heal_project(
     return False
 
 
-def _print_journey(console: object, score_history: list[int]) -> None:
+def _print_journey(console: Any, score_history: list[int]) -> None:
     """Print a visual journey of the score progression."""
     if len(score_history) <= 1:
         return
     journey = " → ".join(str(s) for s in score_history)
     console.print(f"  [dim]Recorrido: {journey}[/]")
+

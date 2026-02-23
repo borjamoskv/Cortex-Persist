@@ -12,6 +12,8 @@ from cortex.i18n import (
     get_cache_info,
     get_supported_languages,
     get_trans,
+    has_translation,
+    override_locale,
 )
 
 
@@ -106,4 +108,31 @@ class TestGetTrans:
         info = get_cache_info()
         assert info.hits >= 0
         assert info.misses >= 0
-        assert info.maxsize == 2048
+        assert info.maxsize == 4096
+
+    def test_override_locale(self):
+        """Context manager should correctly scope the language."""
+        # Warm cache for base lang
+        assert get_trans("system_operational") == "operational"
+
+        with override_locale("es"):
+            assert get_trans("system_operational") == "operativo"
+            # Explicit call still overrides context
+            assert get_trans("system_operational", "eu") == "martxan"
+
+        # Should restore to default
+        assert get_trans("system_operational") == "operational"
+
+    def test_has_translation(self):
+        """Should correctly detect key existence."""
+        assert has_translation("system_operational") is True
+        assert has_translation("this_is_fake_news_123") is False
+
+    def test_formatting_with_kwargs(self):
+        """Verify dynamic string interpolation."""
+        result = get_trans("error_missing_permission", "en", permission="WRITE")
+        assert result == "Missing permission: WRITE"
+
+        # Spanish
+        result_es = get_trans("error_fact_not_found", "es", id="404")
+        assert result_es == "No se encontró el hecho #404"

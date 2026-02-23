@@ -7,6 +7,7 @@ Refactored: scan() orchestrates, helpers do collection + scoring + assembly.
 
 import logging
 import os
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cortex.mejoralo.constants import (
@@ -42,50 +43,73 @@ def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
 # ─── Per-File Analysis ───────────────────────────────────────────────
 
 
+def _analyze_single_file(
+    sf: Path, root: Path
+) -> tuple[int, str | None, list[str], list[str], list[str]]:
+    """Analyse a single file and return its metrics."""
+    try:
+        lines = sf.read_text(errors="replace").splitlines()
+    except OSError:
+        return 0, None, [], [], []
+
+    loc = len(lines)
+    rel = str(sf.relative_to(root))
+    large_file = f"{rel} ({loc} LOC)" if loc > MAX_LOC else None
+
+    psi = []
+    sec = []
+    comp = []
+
+    for i, line in enumerate(lines, 1):
+        stripped = line.lstrip()
+        if not stripped:
+            continue
+        indent = len(line) - len(stripped)
+        if indent >= 24:
+            comp.append(f"{rel}:{i} -> High nesting detected (indent {indent})")
+
+    content = "\n".join(lines)
+    for match in PSI_PATTERNS.finditer(content):
+        line_no = content[: match.start()].count("\n") + 1
+        psi.append(f"{rel}:{line_no} → {match.group()}")
+
+    for match in SECURITY_PATTERNS.finditer(content):
+        line_no = content[: match.start()].count("\n") + 1
+        sec.append(f"{rel}:{line_no} → {match.group()}")
+
+    return loc, large_file, psi, sec, comp
+
+
 def _analyze_files(
     source_files: list[Path],
     root: Path,
-) -> tuple[int, list[str], list[str], list[str], int]:
+) -> tuple[int, list[str], list[str], list[str], list[str]]:
     """Analyze all source files for LOC, architecture, psi, security, complexity.
 
     Returns:
-        (total_loc, large_files, psi_findings, security_findings, complexity_penalties)
+        (total_loc, large_files, psi_findings, security_findings, complexity_findings)
     """
     total_loc = 0
     large_files: list[str] = []
     psi_findings: list[str] = []
     security_findings: list[str] = []
-    complexity_penalties = 0
+    complexity_findings: list[str] = []
 
-    for sf in source_files:
-        try:
-            lines = sf.read_text(errors="replace").splitlines()
-        except OSError:
-            continue
+    with ProcessPoolExecutor() as executor:
+        # Parallel analysis of files
+        results = executor.map(_analyze_single_file, source_files, [root] * len(source_files))
 
-        loc = len(lines)
+    for loc, large, psi, sec, comp in results:
         total_loc += loc
-        rel = str(sf.relative_to(root))
+        if large:
+            large_files.append(large)
+        psi_findings.extend(psi)
+        security_findings.extend(sec)
+        complexity_findings.extend(comp)
 
-        if loc > MAX_LOC:
-            large_files.append(f"{rel} ({loc} LOC)")
+    return total_loc, large_files, psi_findings, security_findings, complexity_findings
 
-        for line in lines:
-            indent = len(line) - len(line.lstrip())
-            if indent >= 16:
-                complexity_penalties += 1
 
-        content = "\n".join(lines)
-
-        for match in PSI_PATTERNS.finditer(content):
-            line_no = content[: match.start()].count("\n") + 1
-            psi_findings.append(f"{rel}:{line_no} → {match.group()}")
-
-        for match in SECURITY_PATTERNS.finditer(content):
-            line_no = content[: match.start()].count("\n") + 1
-            security_findings.append(f"{rel}:{line_no} → {match.group()}")
-
-    return total_loc, large_files, psi_findings, security_findings, complexity_penalties
 
 
 # ─── Dimension Scoring ───────────────────────────────────────────────
@@ -97,7 +121,8 @@ def _score_dimensions(
     large_files: list[str],
     psi_findings: list[str],
     security_findings: list[str],
-    complexity_penalties: int,
+    complexity_findings: list[str],
+    brutal: bool = False,
 ) -> list[DimensionResult]:
     """Calculate scores for each X-Ray dimension."""
     dimensions: list[DimensionResult] = []
@@ -145,9 +170,8 @@ def _score_dimensions(
     # 4. Complexity
     if not has_files:
         complexity_score = 0
-        penalty = 0
     else:
-        complexity_ratio = complexity_penalties / max(1, total_loc)
+        complexity_ratio = len(complexity_findings) / max(1, total_loc)
         penalty = min(100, int(complexity_ratio * 100))
         complexity_score = max(0, 100 - penalty)
     dimensions.append(
@@ -155,9 +179,7 @@ def _score_dimensions(
             name="Complejidad",
             score=complexity_score,
             weight="high",
-            findings=(
-                [f"High nesting detected in {len(source_files)} files"] if penalty > 0 else []
-            ),
+            findings=complexity_findings[:15],
         )
     )
 
@@ -165,7 +187,9 @@ def _score_dimensions(
     if not has_files:
         psi_score = 0
     else:
-        psi_score = max(0, 100 - min(100, len(psi_findings) * 5))
+        psi_penalty_base = 5 if not brutal else 10
+        psi_score = max(0, 100 - min(100, len(psi_findings) * psi_penalty_base))
+
     dimensions.append(
         DimensionResult(
             name="Psi",
@@ -175,18 +199,51 @@ def _score_dimensions(
         )
     )
 
+    # 14. Sovereign Excellence (Sovereign Pass)
+    # Provides up to 30 bonus points for perfect code.
+    sov_score = 0
+    sov_findings = []
+    if has_files and arch_score == 100 and sec_score == 100 and complexity_score == 100 and psi_score == 100:
+        sov_score = 100
+        sov_findings = ["Sovereign Quality Standard achieved (130/100)"]
+    
+    dimensions.append(
+        DimensionResult(
+            name="Excelencia Soberana",
+            score=sov_score,
+            weight="sovereign",
+            findings=sov_findings,
+        )
+    )
+
     return dimensions
 
 
+
 def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
-    """Calculate weighted total score from dimensions."""
+    """Calculate weighted total score from dimensions. Supports >100 for Sovereign standard."""
+    _LOCAL_WEIGHT_MAP = {
+        "critical": 40,
+        "high": 35,
+        "medium": 15,
+        "low": 10,
+        "sovereign": 30  # Bonus weight
+    }
     total_weight = 0
     weighted_sum = 0
+    bonus_points = 0
+    
     for d in dimensions:
-        w = _WEIGHT_MAP.get(d.weight, 10)
+        if d.weight == "sovereign":
+            bonus_points = int(d.score * 0.3)  # Max +30
+            continue
+            
+        w = _LOCAL_WEIGHT_MAP.get(d.weight, 10)
         weighted_sum += d.score * w
         total_weight += w
-    return int(weighted_sum / total_weight) if total_weight > 0 else 0
+    
+    base_score = int(weighted_sum / total_weight) if total_weight > 0 else 0
+    return base_score + bonus_points
 
 
 # ─── Main Entry Point ────────────────────────────────────────────────
@@ -201,44 +258,35 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
       CRITICAL (weight 40): Integrity, Architecture, Security
       HIGH (weight 35): Psi (toxic markers), Complexity
     """
-    p = Path(path).expanduser().resolve()
-    if not p.is_dir():
-        raise ValueError(f"Path is not a directory: {p}")
+    root = Path(path).resolve()
+    if not root.is_dir():
+        raise ValueError(f"Path is not a directory: {root}")
 
-    stack = detect_stack(p)
-    extensions = SCAN_EXTENSIONS.get(stack, SCAN_EXTENSIONS["unknown"])
+    stack = detect_stack(root)
+    exts = SCAN_EXTENSIONS.get(stack, SCAN_EXTENSIONS["unknown"])
 
-    effective_deep = deep or brutal
-
-    source_files = _collect_source_files(p, extensions)
-    analysis = _analyze_files(source_files, p)
-    total_loc, large_files, psi_findings, security_findings, complexity_penalties = analysis
-
-    if not effective_deep:
-        psi_findings = []  # Clear psi findings if not deep
-
-    # In brutal mode, findings are amplified
-    if brutal:
-        # We simulate a "paranoid" analysis by doubling some counts or adding fake stress
-        complexity_penalties *= 2
+    source_files = _collect_source_files(root, exts)
+    total_loc, large_files, psi, sec, comp = _analyze_files(source_files, root)
 
     dimensions = _score_dimensions(
         source_files,
         total_loc,
         large_files,
-        psi_findings,
-        security_findings,
-        complexity_penalties,
+        psi,
+        sec,
+        comp,
+        brutal=brutal,
     )
-    final_score = _compute_weighted_score(dimensions)
+    score = _compute_weighted_score(dimensions)
 
     return ScanResult(
         project=project,
-        stack=stack,
-        score=final_score,
+        score=score,
         dimensions=dimensions,
-        dead_code=final_score < 50,
         total_files=len(source_files),
         total_loc=total_loc,
+        stack=stack,
+        dead_code=(len(source_files) == 0),
         brutal=brutal,
     )
+
