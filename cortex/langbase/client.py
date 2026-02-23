@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.2 — Langbase HTTP Client.
+"""CORTEX v5.0 — Langbase HTTP Client.
 
 Zero-dependency async client for the Langbase API.
 Handles Pipes, Memory, and Tools endpoints.

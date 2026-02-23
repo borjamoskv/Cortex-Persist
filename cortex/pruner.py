@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Embedding Pruner.
+CORTEX v5.0 — Embedding Pruner.
 
 Manages embedding lifecycle: archives stale embeddings to cold storage
 (hash-only) to prevent unbounded WAL growth under swarm workloads.

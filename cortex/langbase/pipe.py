@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.2 — Langbase Pipe with CORTEX Context.
+"""CORTEX v5.0 — Langbase Pipe with CORTEX Context.
 
 Run Langbase Pipes (AI agents) enriched with CORTEX memory.
 The pipe receives relevant facts as context for grounded answers.

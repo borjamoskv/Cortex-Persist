@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Mission Orchestration Router.
+CORTEX v5.0 — Mission Orchestration Router.
 """
 
 from fastapi import APIRouter, Depends, Query

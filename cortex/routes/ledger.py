@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 - Ledger Router.
+CORTEX v5.0 - Ledger Router.
 Cryptographic integrity verification and checkpointing.
 """
 

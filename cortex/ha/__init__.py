@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — High Availability Layer.
+CORTEX v5.0 — High Availability Layer.
 
 Provides Raft consensus, CRDTs, and Gossip protocols for multi-node clusters.
 """

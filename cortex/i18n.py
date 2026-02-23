@@ -1,17 +1,21 @@
 """
-CORTEX v4.0 — Internationalization Module (i18n).
+CORTEX v5.0 — Internationalization Module (i18n).
 
-Provides multilingual support for the API layer.
+Sovereign-grade multilingual support for the CORTEX ecosystem.
+Optimized for low-latency lookups (LRU) and modular asset management.
+
 Default: English (en)
 Supported: Spanish (es), Basque (eu)
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import os
 from enum import Enum
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -31,25 +35,42 @@ __all__ = [
 
 
 class Lang(str, Enum):
-    """
-    Supported language codes (ISO 639-1).
-    Used as keys in the TRANSLATIONS dictionary and API parameters.
-    """
-
+    """Supported language codes (ISO 639-1)."""
     EN = "en"
     ES = "es"
     EU = "eu"
 
 
-# The default language used when a requested language is not supported or missing.
+# Constants
 DEFAULT_LANGUAGE: Final[Lang] = Lang.EN
-
-# A frozenset of all officially supported languages for O(1) membership testing.
 SUPPORTED_LANGUAGES: Final[frozenset[Lang]] = frozenset(Lang)
-
-# Pre-computed fast lookup map to avoid try-except and loop overheads in hot paths.
-# Maps string codes (e.g., 'en') directly to Lang enum members.
 _LANG_LOOKUP: Final[dict[str, Lang]] = {lang.value: lang for lang in Lang}
+_ASSET_PATH: Final[str] = os.path.join(
+    os.path.dirname(__file__), "assets", "translations.json"
+)
+
+# Shared memory for translations
+_TRANSLATIONS: dict[str, dict[str, str]] = {}
+
+
+def _load_translations() -> dict[str, dict[str, str]]:
+    """Lazy-load translations from disk with atomic assignment."""
+    global _TRANSLATIONS
+    if not _TRANSLATIONS:
+        try:
+            if not os.path.exists(_ASSET_PATH):
+                logger.error("Sovereign Failure: Translation asset missing at %s", _ASSET_PATH)
+                return {}
+            
+            with open(_ASSET_PATH, encoding="utf-8") as f:
+                data = json.load(f)
+                _TRANSLATIONS.clear()
+                _TRANSLATIONS.update(data)
+                logger.debug("I18N: Loaded %d keys from assets", len(_TRANSLATIONS))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.critical("I18N: Failed to load translations: %s", exc)
+            return {}
+    return _TRANSLATIONS
 
 
 def get_supported_languages() -> frozenset[Lang]:
@@ -57,270 +78,76 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-# Type definition for all valid translation keys.
-# Relaxed to str to avoid manual updates; validated at runtime instead.
+# Type definition for lookup keys
 TranslationKey = str
 
-# Dictionary of translations.
-TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
-    # System Status
-    "system_operational": {
-        "en": "operational",
-        "es": "operativo",
-        "eu": "martxan",
-    },
-    "system_healthy": {
-        "en": "healthy",
-        "es": "saludable",
-        "eu": "osasuntsu",
-    },
-    "engine_online": {
-        "en": "online",
-        "es": "en línea",
-        "eu": "konektatuta",
-    },
-    # Errors
-    "error_too_many_requests": {
-        "en": "Too Many Requests. Please slow down.",
-        "es": "Demasiadas solicitudes. Por favor, reduce la velocidad.",
-        "eu": "Eskaera gehiegi. Mesedez, moteldu.",
-    },
-    "error_internal_db": {
-        "en": "Internal database error",
-        "es": "Error interno de base de datos",
-        "eu": "Datu-basearen barne errorea",
-    },
-    "error_unexpected": {
-        "en": "An unexpected server error occurred.",
-        "es": "Ha ocurrido un error inesperado del servidor.",
-        "eu": "Zerbitzariaren ezusteko errorea gertatu da.",
-    },
-    "error_unauthorized": {
-        "en": "Unauthorized access",
-        "es": "Acceso no autorizado",
-        "eu": "Baimenik gabeko sarbidea",
-    },
-    "error_not_found": {
-        "en": "Resource not found",
-        "es": "Recurso no encontrado",
-        "eu": "Baliabidea ez da aurkitu",
-    },
-    "error_invalid_input": {
-        "en": "Invalid input provided",
-        "es": "Entrada no válida",
-        "eu": "Sarrera baliogabea",
-    },
-    # Greetings / Info
-    "info_service_desc": {
-        "en": "Local-first memory infrastructure for AI agents.",
-        "es": "Infraestructura de memoria local-first para agentes de IA.",
-        "eu": "IA agenteentzako tokiko memoria azpiegitura.",
-    },
-    # Auth Errors
-    "error_missing_auth": {
-        "en": "Missing Authorization header",
-        "es": "Falta la cabecera de autorización",
-        "eu": "Baimen goiburua falta da",
-    },
-    "error_invalid_key_format": {
-        "en": "Invalid key format. Use: Bearer <api-key>",
-        "es": "Formato de clave no válido. Usa: Bearer <api-key>",
-        "eu": "Gako formatu baliogabea. Erabili: Bearer <api-key>",
-    },
-    "error_invalid_revoked_key": {
-        "en": "Invalid or revoked key",
-        "es": "Clave no válida o revocada",
-        "eu": "Gako baliogabea edo ezeztatua",
-    },
-    "error_missing_permission": {
-        "en": "Missing permission: {permission}",
-        "es": "Falta permiso: {permission}",
-        "eu": "Baimen hau falta da: {permission}",
-    },
-    # Fact Errors
-    "error_fact_not_found": {
-        "en": "Fact #{id} not found",
-        "es": "No se encontró el hecho #{id}",
-        "eu": "Ez da aurkitu #{id} gertaera",
-    },
-    "error_namespace_mismatch": {
-        "en": "Forbidden: Namespace mismatch",
-        "es": "Prohibido: Conflicto de espacio de nombres",
-        "eu": "Debekatua: Izen-espazio gatazka",
-    },
-    "error_forbidden": {
-        "en": "Forbidden",
-        "es": "Prohibido",
-        "eu": "Debekatua",
-    },
-    # Admin / Path Validation
-    "error_json_only": {
-        "en": "Only JSON format supported via API",
-        "es": "Solo se admite el formato JSON mediante la API",
-        "eu": "JSON formatua bakarrik onartzen da API bidez",
-    },
-    "error_invalid_path_chars": {
-        "en": "Invalid characters in path",
-        "es": "Caracteres no válidos en la ruta",
-        "eu": "Baliogabeko karaktereak bidean",
-    },
-    "error_path_workspace": {
-        "en": "Path must be relative and within the workspace",
-        "es": "La ruta debe ser relativa y dentro del espacio de trabajo",
-        "eu": "Bideak erlatiboa izan behar du eta lan-eremuaren barruan",
-    },
-    "error_export_failed": {
-        "en": "Export failed",
-        "es": "Exportación fallida",
-        "eu": "Esportazioak huts egin du",
-    },
-    "error_status_unavailable": {
-        "en": "Status unavailable",
-        "es": "Estado no disponible",
-        "eu": "Egoera ez dago erabilgarri",
-    },
-    "error_auth_required": {
-        "en": "Auth required",
-        "es": "Se requiere autenticación",
-        "eu": "Autentifikazioa beharrezkoa da",
-    },
-    # Daemon
-    "error_daemon_no_data": {
-        "en": "No data collected by daemons in last hour",
-        "es": "No hay datos recogidos por los demonios en la última hora",
-        "eu": "Deabruek ez dute daturik bildu azken orduan",
-    },
-    # Ledger
-    "error_integrity_check_failed": {
-        "en": "Integrity check failed: {detail}",
-        "es": "Verificación de integridad fallida: {detail}",
-        "eu": "Osotasun egiaztapenak huts egin du: {detail}",
-    },
-    "error_checkpoint_failed": {
-        "en": "Checkpoint failed: {detail}",
-        "es": "Checkpoint fallido: {detail}",
-        "eu": "Checkpoint-ak huts egin du: {detail}",
-    },
-    # Graph
-    "error_graph_forbidden": {
-        "en": "Forbidden: Access to this project is denied",
-        "es": "Prohibido: Acceso denegado a este proyecto",
-        "eu": "Debekatua: Proiektu honetarako sarbidea ukatuta",
-    },
-    "error_graph_unavailable": {
-        "en": "Graph unavailable",
-        "es": "Grafo no disponible",
-        "eu": "Grafoa ez dago erabilgarri",
-    },
-    # Agents
-    "error_agent_registration_failed": {
-        "en": "Failed to retrieve registered agent",
-        "es": "Error al recuperar el agente registrado",
-        "eu": "Erregistratutako agentea berreskuratzeak huts egin du",
-    },
-    "error_agent_internal": {
-        "en": "Internal registration error",
-        "es": "Error interno de registro",
-        "eu": "Erregistroaren barne errorea",
-    },
-    "error_agent_not_found": {
-        "en": "Agent not found",
-        "es": "Agente no encontrado",
-        "eu": "Agentea ez da aurkitu",
-    },
-    # Timing
-    "error_heartbeat_failed": {
-        "en": "Heartbeat failed",
-        "es": "Latido fallido",
-        "eu": "Bihotz-taupadak huts egin du",
-    },
-    "error_time_summary_failed": {
-        "en": "Time summary failed",
-        "es": "Resumen de tiempo fallido",
-        "eu": "Denbora laburpenak huts egin du",
-    },
-    "error_time_report_failed": {
-        "en": "Time report failed",
-        "es": "Informe de tiempo fallido",
-        "eu": "Denbora txostenak huts egin du",
-    },
-    "error_time_history_failed": {
-        "en": "Time history failed",
-        "es": "Historial de tiempo fallido",
-        "eu": "Denbora historiak huts egin du",
-    },
-    "error_timing_forbidden": {
-        "en": "Forbidden: Project mismatch",
-        "es": "Prohibido: Proyecto no coincide",
-        "eu": "Debekatua: Proiektua ez dator bat",
-    },
-    # Facts (remaining hardcoded)
-    "error_internal_server": {
-        "en": "Internal server error",
-        "es": "Error interno del servidor",
-        "eu": "Zerbitzariaren barne errorea",
-    },
-    "error_internal_voting": {
-        "en": "Internal voting error",
-        "es": "Error interno de votación",
-        "eu": "Botaketaren barne errorea",
-    },
-    "error_deprecation_failed": {
-        "en": "Deprecation failed",
-        "es": "Deprecación fallida",
-        "eu": "Zaharkitzeak huts egin du",
-    },
-}
 
-
-def _normalize_lang(lang: str | Lang | None) -> Lang:
-    """Normalizes the language code, strictly falling back to DEFAULT_LANGUAGE without exception overhead."""
+def _normalize_lang(lang: Optional[Union[str, Lang]]) -> Lang:
+    """Fast normalization of language codes with strict fallback."""
     if isinstance(lang, Lang):
         return lang
-    if not isinstance(lang, str) or not lang:
+    if not lang or not isinstance(lang, str):
         return DEFAULT_LANGUAGE
 
-    # Extract primary language tag (RFC 5646: "es-ES" → "es", slice to 2 chars maximum)
-    lang_code = lang.split("-", 1)[0].strip().lower()[:2]
+    # Handle RFC 5646 (e.g. "en-US" -> "en")
+    code = lang.split("-", 1)[0].strip().lower()[:2]
+    return _LANG_LOOKUP.get(code, DEFAULT_LANGUAGE)
 
-    return _LANG_LOOKUP.get(lang_code, DEFAULT_LANGUAGE)
 
-
-@lru_cache(maxsize=1024)
+@lru_cache(maxsize=2048)
 def _cached_trans(key: TranslationKey, lang_code: Lang) -> str:
-    """Underlying cached translation lookup using normalized language codes."""
-    entry = TRANSLATIONS.get(key)
-    if not entry:
+    """Atomic cached lookup for translated strings with sovereign fallbacks."""
+    translations = _load_translations()
+    entry = translations.get(key)
+    
+    if entry is None:
+        logger.warning("I18N: Absolute Missing Key [%s] — No entry found in assets.", key)
         return key
 
-    if lang_code.value not in entry and lang_code != DEFAULT_LANGUAGE:
-        logger.warning(
-            "Falta traducción para la clave '%s' en el idioma '%s'", key, lang_code.value
-        )
+    # Direct lookup with fallback to default language
+    text = entry.get(lang_code.value)
+    if text is None:
+        if lang_code != DEFAULT_LANGUAGE:
+            logger.debug("I18N: Falling back to [%s] for key [%s]", DEFAULT_LANGUAGE.value, key)
+        
+        text = entry.get(DEFAULT_LANGUAGE.value)
+        if text is None:
+            logger.error("I18N: Fatal Missing Key [%s] — Not found even in default language.", key)
+            return key
+    
+    return text
 
-    return entry.get(lang_code.value, entry.get(DEFAULT_LANGUAGE.value, key))
 
-
-def get_trans(key: TranslationKey, lang: Lang | str | None = Lang.EN) -> str:
-    """Retrieve a translation for a given key and language.
-
-    Falls back to English if the language or key is missing.
-    Protected against LRU cache pollution attacks.
-    Cached for high-performance localized responses (Sovereign Level).
+def get_trans(key: TranslationKey, lang: Optional[Union[Lang, str]] = Lang.EN, **kwargs: Any) -> str:
     """
-    if key not in TRANSLATIONS:
-        return key
-    return _cached_trans(key, _normalize_lang(lang))
+    Retrieve a translated string with optional formatting.
+
+    Args:
+        key: The lookup key in translations.json.
+        lang: Desired language (enum or string). Defaults to English.
+        **kwargs: Variables for template substitution (e.g. {id}).
+
+    Returns:
+        The localized and formatted string.
+    """
+    text = _cached_trans(key, _normalize_lang(lang))
+    
+    if kwargs and text != key:
+        try:
+            return text.format(**kwargs)
+        except (KeyError, ValueError) as exc:
+            logger.error("I18N Formatting Error [%s]: %s", key, exc)
+    
+    return text
 
 
 def get_cache_info() -> Any:
-    """Expose translation cache statistics for observability.
-
-    Returns an object with hits, misses, maxsize, and currsize attributes.
-    """
+    """Sovereign observability for translation engine performance."""
     return _cached_trans.cache_info()
 
 
 def clear_cache() -> None:
-    """Reset the translation LRU cache (useful for tests and hot-reload)."""
+    """Hard-reset the translation caches."""
     _cached_trans.cache_clear()
+    global _TRANSLATIONS
+    _TRANSLATIONS = {}

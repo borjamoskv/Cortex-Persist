@@ -6,11 +6,12 @@ Tests for cortex.i18n module and API integration.
 from cortex.i18n import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
-    TRANSLATIONS,
+    _TRANSLATIONS,
     Lang,
     get_cache_info,
     get_supported_languages,
     get_trans,
+    _load_translations,
 )
 
 
@@ -40,17 +41,18 @@ class TestGetTrans:
 
     def test_all_error_keys_exist(self):
         """Every error key must have all 3 languages."""
-        error_keys = [k for k in TRANSLATIONS if k.startswith("error_")]
+        _load_translations()
+        error_keys = [k for k in _TRANSLATIONS if k.startswith("error_")]
         assert len(error_keys) >= 4, f"Expected >=4 error keys, got {error_keys}"
         for key in error_keys:
-            entry = TRANSLATIONS[key]
+            entry = _TRANSLATIONS[key]
             for lang in ("en", "es", "eu"):
                 assert lang in entry, f"Missing '{lang}' translation for '{key}'"
                 assert entry[lang], f"Empty '{lang}' translation for '{key}'"
 
     def test_all_keys_have_english(self):
         """English is the fallback — every key MUST have it."""
-        for key, langs in TRANSLATIONS.items():
+        for key, langs in _TRANSLATIONS.items():
             assert "en" in langs, f"Key '{key}' missing English translation"
 
     def test_default_language_is_english(self):
@@ -66,7 +68,7 @@ class TestGetTrans:
 
     def test_all_keys_cover_all_supported_languages(self):
         """Every translation key should have all supported languages."""
-        for key, entry in TRANSLATIONS.items():
+        for key, entry in _TRANSLATIONS.items():
             for lang in SUPPORTED_LANGUAGES:
                 assert lang in entry, f"Key '{key}' missing '{lang}' translation"
 
@@ -104,4 +106,4 @@ class TestGetTrans:
         info = get_cache_info()
         assert info.hits >= 0
         assert info.misses >= 0
-        assert info.maxsize == 1024
+        assert info.maxsize == 2048

@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Immutable Ledger with Adaptive Checkpointing.
+CORTEX v5.0 — Immutable Ledger with Adaptive Checkpointing.
 
 Cryptographic integrity for the CORTEX transaction ledger using Merkle Trees.
 Enables efficient batch verification and tamper-proof auditing.

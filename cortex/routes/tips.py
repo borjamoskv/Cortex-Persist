@@ -1,4 +1,4 @@
-"""CORTEX v4.3 — TIPS API Routes.
+"""CORTEX v5.0 — TIPS API Routes.
 
 REST endpoints for the TIPS system.
 
@@ -11,8 +11,9 @@ Endpoints:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
-
+from fastapi import APIRouter, Depends, Query
+from cortex.auth import AuthResult, require_permission
+from cortex.engine import CortexEngine
 from cortex.api_deps import get_engine
 from cortex.tips import Tip, TipCategory, TipsEngine
 
@@ -24,15 +25,11 @@ LANG_DESC = "Language code (en, es, eu)"
 _tips_engine: TipsEngine | None = None
 
 
-def _get_tips_engine() -> TipsEngine:
+def _get_tips_engine(engine: CortexEngine) -> TipsEngine:
     """Lazy-init the tips engine with the API's CORTEX engine."""
     global _tips_engine  # noqa: PLW0603
     if _tips_engine is None:
-        try:
-            engine = get_engine()
-            _tips_engine = TipsEngine(engine, include_dynamic=True)
-        except (RuntimeError, OSError, ValueError):
-            _tips_engine = TipsEngine(include_dynamic=False)
+        _tips_engine = TipsEngine(engine, include_dynamic=True)
     return _tips_engine
 
 
@@ -57,9 +54,11 @@ def _tip_to_dict(tip: Tip) -> dict:
 async def get_tips(
     count: int = Query(1, ge=1, le=20, description="Number of tips to return"),
     lang: str = Query("en", description=LANG_DESC),
+    engine: CortexEngine = Depends(get_engine),
+    auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """Get random contextual tips."""
-    tips_engine = _get_tips_engine()
+    tips_engine = _get_tips_engine(engine)
     results = [tips_engine.random(lang=lang) for _ in range(count)]
     return {
         "tips": [_tip_to_dict(t) for t in results],
@@ -71,9 +70,11 @@ async def get_tips(
 @router.get("/categories")
 async def list_categories(
     lang: str = Query("en", description=LANG_DESC),
+    engine: CortexEngine = Depends(get_engine),
+    auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """List all tip categories with counts."""
-    tips_engine = _get_tips_engine()
+    tips_engine = _get_tips_engine(engine)
     all_tips = tips_engine.all_tips(lang=lang)
 
     categories = {}
@@ -94,9 +95,11 @@ async def get_tips_by_category(
     category: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(5, ge=1, le=50),
+    engine: CortexEngine = Depends(get_engine),
+    auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """Get tips filtered by category."""
-    tips_engine = _get_tips_engine()
+    tips_engine = _get_tips_engine(engine)
     results = tips_engine.for_category(category, lang=lang, limit=limit)
     return {
         "category": category,
@@ -111,9 +114,11 @@ async def get_tips_by_project(
     project: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(3, ge=1, le=20),
+    engine: CortexEngine = Depends(get_engine),
+    auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """Get tips scoped to a specific project."""
-    tips_engine = _get_tips_engine()
+    tips_engine = _get_tips_engine(engine)
     results = tips_engine.for_project(project, lang=lang, limit=limit)
     return {
         "project": project,

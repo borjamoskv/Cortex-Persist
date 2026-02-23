@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Gossip Protocol.
+CORTEX v5.0 — Gossip Protocol.
 
 Anti-entropy protocol for syncing state between nodes.
 """

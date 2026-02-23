@@ -1,5 +1,5 @@
 """
-CORTEX v4.3 — Configuration.
+CORTEX v5.0 — Configuration.
 
 Shared settings and paths for the entire codebase.
 Modernized: frozen dataclass with env-var loading + backwards-compat module proxy.

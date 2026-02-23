@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Migration from v3.1 (JSON) to v4.0 (SQLite).
+CORTEX v5.0 — Migration from v3.1 (JSON) to v4.0 (SQLite).
 
 Reads v3.1 files (system.json, projects/*.json, mistakes.jsonl, bridges.jsonl)
 and imports them into the v4.0 database. Non-destructive: never modifies source files.

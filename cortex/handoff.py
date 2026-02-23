@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Session Handoff Protocol.
+CORTEX v5.0 — Session Handoff Protocol.
 
 Generates a compact, relevance-ranked handoff for seamless session continuity.
 Instead of dumping all facts (snapshot), the handoff captures only the hot context:

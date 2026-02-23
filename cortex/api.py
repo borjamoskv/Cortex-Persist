@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — REST API.
+CORTEX v5.0 — REST API.
 
 FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization and routing.
@@ -138,6 +138,38 @@ app = FastAPI(
 # ─── Middleware ──────────────────────────────────────────────────────
 
 
+class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
+    """Prevents large payload attacks by limiting request body size."""
+
+    def __init__(self, app, max_size: int = 1_048_576):  # 1MB default
+        super().__init__(app)
+        self.max_size = max_size
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "POST":
+            content_length = request.headers.get("content-length")
+            if content_length and int(content_length) > self.max_size:
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Payload too large. Max 1MB allowed."},
+                )
+        return await call_next(request)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Injects industry-standard security headers for defense-in-depth."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        # Only add HSTS if it's likely a production/HTTPS or behind a proxy
+        # response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """In-memory rate limiter (Sliding Window, bounded).
 
@@ -155,24 +187,37 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.requests: dict[str, list[float]] = {}
 
     async def dispatch(self, request: Request, call_next):
+        # Finding 5: Differentiate by API Key if present
+        auth_header = request.headers.get("Authorization", "")
+        key_id = "unknown"
+        if auth_header.startswith("Bearer "):
+            # We use the key as the bucket ID. 
+            # Note: We don't authenticate here (that's the router's job), 
+            # we just track usage.
+            key_id = auth_header[7:]
+        
         client_ip = request.client.host if request.client else "unknown"
+        
+        # Priority: Auth Key ID > Client IP
+        traffic_id = f"key:{key_id[:12]}" if key_id != "unknown" else f"ip:{client_ip}"
+        
         now = time.time()
 
-        if client_ip not in self.requests:
-            self.requests[client_ip] = []
+        if traffic_id not in self.requests:
+            self.requests[traffic_id] = []
 
         # Remove timestamps older than window
-        self.requests[client_ip] = [t for t in self.requests[client_ip] if now - t < self.window]
+        self.requests[traffic_id] = [t for t in self.requests[traffic_id] if now - t < self.window]
 
-        if len(self.requests[client_ip]) >= self.limit:
-            logger.warning("Rate limit exceeded for %s", client_ip)
+        if len(self.requests[traffic_id]) >= self.limit:
+            logger.warning("Rate limit exceeded for %s", traffic_id)
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too Many Requests. Please slow down."},
                 headers={"Retry-After": str(self.window)},
             )
 
-        self.requests[client_ip].append(now)
+        self.requests[traffic_id].append(now)
 
         # Bounded eviction — deterministic, not probabilistic
         if len(self.requests) > self.MAX_TRACKED_IPS:
@@ -205,6 +250,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
+app.add_middleware(ContentSizeLimitMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=RATE_LIMIT, window=RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
 

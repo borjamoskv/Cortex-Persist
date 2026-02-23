@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — SovereignGate Core Logic.
+CORTEX v5.0 — SovereignGate Core Logic.
 """
 
 import hashlib

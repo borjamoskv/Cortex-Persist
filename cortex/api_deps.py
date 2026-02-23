@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — API Dependencies.
+CORTEX v5.0 — API Dependencies.
 Shared dependencies for FastAPI routes.
 """
 

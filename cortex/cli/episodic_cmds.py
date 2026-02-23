@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Episodic Memory CLI Commands.
+CORTEX v5.0 — Episodic Memory CLI Commands.
 
 CLI interface for recording, recalling, and analyzing episodic memories.
 """

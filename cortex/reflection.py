@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Reflection Engine.
+CORTEX v5.0 — Reflection Engine.
 
 Automated post-mortem loop + semantic injection for system prompts.
 Transforms static memory into learned intuition by:

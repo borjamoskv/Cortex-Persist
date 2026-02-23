@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Launchpad Orchestration.
+CORTEX v5.0 — Launchpad Orchestration.
 
 Bridge between the Python ledger and the Node.js Swarm engine.
 """

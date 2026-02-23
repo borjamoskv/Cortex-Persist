@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.3 — Thought Orchestra.
+"""CORTEX v5.0 — Thought Orchestra.
 
 N modelos pensando en paralelo con fusión por consenso.
 El cerebro distribuido de CORTEX.
@@ -31,7 +31,7 @@ import os
 import time
 from typing import Any
 
-from cortex.llm.provider import PROVIDER_PRESETS, LLMProvider
+from cortex.llm.provider import LLMProvider, _load_presets
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,
@@ -116,9 +116,10 @@ class ThoughtOrchestra:
     @staticmethod
     def _detect_available_providers() -> list[str]:
         """Detecta providers con API key configurada."""
+        presets = _load_presets()
         return [
             name
-            for name, preset in PROVIDER_PRESETS.items()
+            for name, preset in presets.items()
             if preset.get("env_key") and os.environ.get(preset["env_key"])
         ]
 
@@ -131,10 +132,11 @@ class ThoughtOrchestra:
             except (OSError, ValueError, KeyError) as e:
                 logger.warning("Juez %s no disponible: %s", judge_name, e)
 
+        presets = _load_presets()
         for fallback in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
             if fallback in available:
                 try:
-                    return self._pool.get(fallback, PROVIDER_PRESETS[fallback]["default_model"])
+                    return self._pool.get(fallback, presets[fallback]["default_model"])
                 except (OSError, ValueError, KeyError):
                     continue
         return None
@@ -146,9 +148,10 @@ class ThoughtOrchestra:
         mode_key = ThinkingMode(mode) if isinstance(mode, str) else mode
         candidates = self._routing.get(mode_key, [])
 
+        presets = _load_presets()
         resolved = []
         for provider_name, model in candidates:
-            preset = PROVIDER_PRESETS.get(provider_name)
+            preset = presets.get(provider_name)
             if not preset:
                 continue
             env_key = preset.get("env_key", "")

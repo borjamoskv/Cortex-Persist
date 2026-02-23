@@ -1,4 +1,4 @@
-"""CORTEX v4 — SAP Bidirectional Sync Engine.
+"""CORTEX v5.0 — SAP Bidirectional Sync Engine.
 
 Pulls SAP entities into CORTEX facts and pushes modified facts back to SAP.
 Supports configurable conflict resolution strategies.

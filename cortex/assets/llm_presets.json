@@ -1,0 +1,161 @@
+{
+  "qwen": {
+    "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    "default_model": "qwen-plus",
+    "env_key": "DASHSCOPE_API_KEY",
+    "context_window": 131072
+  },
+  "openai": {
+    "base_url": "https://api.openai.com/v1",
+    "default_model": "gpt-4o-mini",
+    "env_key": "OPENAI_API_KEY",
+    "context_window": 128000
+  },
+  "anthropic": {
+    "base_url": "https://api.anthropic.com/v1",
+    "default_model": "claude-sonnet-4-20250514",
+    "env_key": "ANTHROPIC_API_KEY",
+    "context_window": 200000,
+    "extra_headers": {
+      "anthropic-version": "2023-06-01"
+    }
+  },
+  "gemini": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+    "default_model": "gemini-2.0-flash",
+    "env_key": "GEMINI_API_KEY",
+    "context_window": 1000000
+  },
+  "mistral": {
+    "base_url": "https://api.mistral.ai/v1",
+    "default_model": "mistral-large-latest",
+    "env_key": "MISTRAL_API_KEY",
+    "context_window": 128000
+  },
+  "deepseek": {
+    "base_url": "https://api.deepseek.com/v1",
+    "default_model": "deepseek-chat",
+    "env_key": "DEEPSEEK_API_KEY",
+    "context_window": 128000
+  },
+  "xai": {
+    "base_url": "https://api.x.ai/v1",
+    "default_model": "grok-2-latest",
+    "env_key": "XAI_API_KEY",
+    "context_window": 131072
+  },
+  "cohere": {
+    "base_url": "https://api.cohere.com/compatibility/v1",
+    "default_model": "command-r-plus",
+    "env_key": "COHERE_API_KEY",
+    "context_window": 128000
+  },
+  "zhipu": {
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "default_model": "glm-5",
+    "env_key": "ZHIPU_API_KEY",
+    "context_window": 128000
+  },
+  "openrouter": {
+    "base_url": "https://openrouter.ai/api/v1",
+    "default_model": "qwen/qwen-2.5-72b-instruct",
+    "env_key": "OPENROUTER_API_KEY",
+    "context_window": 131072
+  },
+  "groq": {
+    "base_url": "https://api.groq.com/openai/v1",
+    "default_model": "llama-3.3-70b-versatile",
+    "env_key": "GROQ_API_KEY",
+    "context_window": 131072
+  },
+  "together": {
+    "base_url": "https://api.together.xyz/v1",
+    "default_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "env_key": "TOGETHER_API_KEY",
+    "context_window": 131072
+  },
+  "fireworks": {
+    "base_url": "https://api.fireworks.ai/inference/v1",
+    "default_model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+    "env_key": "FIREWORKS_API_KEY",
+    "context_window": 131072
+  },
+  "deepinfra": {
+    "base_url": "https://api.deepinfra.com/v1/openai",
+    "default_model": "meta-llama/Llama-3.3-70B-Instruct",
+    "env_key": "DEEPINFRA_API_KEY",
+    "context_window": 131072
+  },
+  "anyscale": {
+    "base_url": "https://api.endpoints.anyscale.com/v1",
+    "default_model": "meta-llama/Llama-3.3-70B-Instruct",
+    "env_key": "ANYSCALE_API_KEY",
+    "context_window": 131072
+  },
+  "perplexity": {
+    "base_url": "https://api.perplexity.ai",
+    "default_model": "sonar-pro",
+    "env_key": "PERPLEXITY_API_KEY",
+    "context_window": 200000
+  },
+  "cerebras": {
+    "base_url": "https://api.cerebras.ai/v1",
+    "default_model": "llama-3.3-70b",
+    "env_key": "CEREBRAS_API_KEY",
+    "context_window": 131072
+  },
+  "sambanova": {
+    "base_url": "https://api.sambanova.ai/v1",
+    "default_model": "Meta-Llama-3.3-70B-Instruct",
+    "env_key": "SAMBANOVA_API_KEY",
+    "context_window": 131072
+  },
+  "lepton": {
+    "base_url": "https://llama3-3-70b.lepton.run/api/v1",
+    "default_model": "llama3-3-70b",
+    "env_key": "LEPTON_API_KEY",
+    "context_window": 131072
+  },
+  "hyperbolic": {
+    "base_url": "https://api.hyperbolic.xyz/v1",
+    "default_model": "meta-llama/Llama-3.3-70B-Instruct",
+    "env_key": "HYPERBOLIC_API_KEY",
+    "context_window": 131072
+  },
+  "novita": {
+    "base_url": "https://api.novita.ai/v3/openai",
+    "default_model": "meta-llama/llama-3.3-70b-instruct",
+    "env_key": "NOVITA_API_KEY",
+    "context_window": 131072
+  },
+  "ollama": {
+    "base_url": "http://localhost:11434/v1",
+    "default_model": "qwen2.5",
+    "env_key": "",
+    "context_window": 32768
+  },
+  "lmstudio": {
+    "base_url": "http://localhost:1234/v1",
+    "default_model": "local-model",
+    "env_key": "",
+    "context_window": 32768
+  },
+  "llamacpp": {
+    "base_url": "http://localhost:8080/v1",
+    "default_model": "local-model",
+    "env_key": "",
+    "context_window": 32768
+  },
+  "vllm": {
+    "base_url": "http://localhost:8000/v1",
+    "default_model": "local-model",
+    "env_key": "",
+    "context_window": 32768
+  },
+  "jan": {
+    "base_url": "http://localhost:1337/v1",
+    "default_model": "local-model",
+    "env_key": "",
+    "context_window": 32768
+  }
+}

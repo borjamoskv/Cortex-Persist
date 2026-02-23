@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — High Availability Migrations.
+CORTEX v5.0 — High Availability Migrations.
 """
 
 import logging

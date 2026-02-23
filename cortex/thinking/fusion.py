@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.3 — Thought Fusion Engine.
+"""CORTEX v5.0 — Thought Fusion Engine.
 
 Fusiona N respuestas de diferentes modelos en una respuesta
 superior. Cuatro estrategias disponibles:

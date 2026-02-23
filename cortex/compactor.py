@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Auto-Compaction Engine.
+CORTEX v5.0 — Auto-Compaction Engine.
 
 Fights context rot by deduplicating, consolidating, and pruning stale facts.
 The compactor completes the memory lifecycle trinity:

@@ -1,5 +1,5 @@
 """
-CORTEX v4.3 — MEJORAlo X-Ray Scanner.
+CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 
 Execute X-Ray 13D scan on a project directory.
 Refactored: scan() orchestrates, helpers do collection + scoring + assembly.

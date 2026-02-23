@@ -1,5 +1,5 @@
 """
-CORTEX v4.3 — Stripe Billing Routes.
+CORTEX v5.0 — Stripe Billing Routes.
 
 Full checkout flow: session creation, webhook processing, customer portal.
 Provisions API keys automatically on successful payment.

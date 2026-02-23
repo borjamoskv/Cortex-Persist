@@ -1,4 +1,4 @@
-"""CORTEX v4 — SAP OData Client.
+"""CORTEX v5.0 — SAP OData Client.
 
 Async HTTP client for SAP OData V2 services.
 Handles authentication (Basic/OAuth2), CSRF tokens, and entity CRUD.

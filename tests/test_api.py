@@ -29,13 +29,12 @@ def client():
     import cortex.auth
     import cortex.config
 
-    original_db_api = api_mod.DB_PATH
     original_db_config = cortex.config.DB_PATH
     original_env = os.environ.get("CORTEX_DB")
 
     # Patch DB path everywhere BEFORE lifespan runs
     os.environ["CORTEX_DB"] = _test_db
-    api_mod.DB_PATH = _test_db
+    os.environ["CORTEX_DB"] = _test_db
     cortex.config.DB_PATH = _test_db
     cortex.config.reload()
 
@@ -49,7 +48,6 @@ def client():
             yield c
     finally:
         # Restore originals
-        api_mod.DB_PATH = original_db_api
         cortex.config.DB_PATH = original_db_config
         cortex.config.reload()
 

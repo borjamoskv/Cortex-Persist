@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Neural Hive API.
+CORTEX v5.0 — Neural Hive API.
 
 Endpoints for visualizing the memory graph in 3D.
 """

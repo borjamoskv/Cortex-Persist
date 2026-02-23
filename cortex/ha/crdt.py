@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Conflict-Free Replicated Data Types (CRDTs).
+CORTEX v5.0 — Conflict-Free Replicated Data Types (CRDTs).
 
 Provides data structures for eventual consistency in HA clusters.
 """

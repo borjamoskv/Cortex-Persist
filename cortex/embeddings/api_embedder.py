@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — API-based Embedding Engine.
+CORTEX v5.0 — API-based Embedding Engine.
 
 Uses external APIs (Gemini, OpenAI) for embeddings instead of
 local ONNX. Useful for cloud deployments where you don't want

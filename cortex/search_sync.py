@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Synchronous Search Engine.
+CORTEX v5.0 — Synchronous Search Engine.
 
 Sync equivalents of search.py for use by CortexEngine.search_sync(),
 cortex_bridge.py recall_context, and any sync caller.

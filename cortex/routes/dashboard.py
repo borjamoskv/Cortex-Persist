@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Dashboard Router.
+CORTEX v5.0 — Dashboard Router.
 """
 
 from fastapi import APIRouter, Depends

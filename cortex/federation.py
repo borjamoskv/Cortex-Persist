@@ -1,4 +1,4 @@
-"""CORTEX v4.1 — Federated Engine (Tenant Sharding).
+"""CORTEX v5.0 — Federated Engine (Tenant Sharding).
 
 Routes operations to per-tenant .db files. Each shard is a full CortexEngine.
 A MetaCortex aggregates cross-shard search results via merge-sort on score.

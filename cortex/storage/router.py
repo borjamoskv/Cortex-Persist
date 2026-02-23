@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Tenant Router.
+CORTEX v5.0 — Tenant Router.
 
 Routes requests to the correct database based on tenant_id.
 In local mode: single DB for everything.

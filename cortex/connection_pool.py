@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Async Connection Pool.
+CORTEX v5.0 — Async Connection Pool.
 
 Production-grade asyncio connection pool for SQLite databases.
 Handles connection lifecycle, health checks, and WAL mode optimization.
