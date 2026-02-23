@@ -11,6 +11,8 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
+__all__ = ['DEFAULT_SWARM_PATH', 'MissionOrchestrator']
+
 logger = logging.getLogger("cortex.launchpad")
 
 # Default path to the swarm engine relative to home
@@ -66,7 +68,7 @@ class MissionOrchestrator:
 
         # 3. Execute via SovereignGate (L3 interception)
         try:
-            from cortex.sovereign_gate import ActionLevel, get_gate
+            from cortex.gate import ActionLevel, get_gate
 
             logger.info(f"Executing swarm mission: {' '.join(cmd)}")
 

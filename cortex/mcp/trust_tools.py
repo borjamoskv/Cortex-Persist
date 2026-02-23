@@ -20,6 +20,8 @@ from typing import TYPE_CHECKING
 
 from cortex.engine.ledger import ImmutableLedger
 
+__all__ = ['register_trust_tools']
+
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 

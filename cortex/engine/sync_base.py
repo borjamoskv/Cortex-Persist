@@ -9,6 +9,8 @@ import logging
 
 import sqlite_vec
 
+__all__ = ['SyncBaseMixin']
+
 logger = logging.getLogger("cortex")
 
 

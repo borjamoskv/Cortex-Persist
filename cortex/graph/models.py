@@ -5,6 +5,8 @@ Entities, Relationships, and Ghost definitions.
 
 from dataclasses import dataclass, field
 
+__all__ = ['Entity', 'Relationship', 'Ghost']
+
 
 @dataclass
 class Entity:

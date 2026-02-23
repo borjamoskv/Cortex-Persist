@@ -12,6 +12,8 @@ import aiosqlite
 
 from cortex.config import DEFAULT_DB_PATH
 
+__all__ = ['SnapshotRecord', 'SnapshotManager']
+
 logger = logging.getLogger("cortex")
 
 

@@ -16,6 +16,14 @@ from typing import Any
 
 import httpx
 
+__all__ = [
+    "DEFAULT_BASE_URL",
+    "DEFAULT_TIMEOUT",
+    "LangbaseClient",
+    "LangbaseError",
+    "PIPE_TIMEOUT",
+]
+
 logger = logging.getLogger("cortex.langbase.client")
 
 # Langbase API base

@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+__all__ = ['main']
+
 
 def main():
     print("🛡️  ENTROPY-0: Validando entropía del código...")

@@ -13,6 +13,13 @@ from rich.table import Table
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.tips import Tip, TipCategory, TipsEngine
 
+__all__ = [
+    "tips",
+    "tips_all",
+    "tips_list",
+    "tips_random",
+]
+
 
 def _get_tips_engine(db: str, lang: str = "en") -> TipsEngine:
     """Create a TipsEngine with optional CORTEX backend."""

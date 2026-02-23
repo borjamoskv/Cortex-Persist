@@ -6,6 +6,8 @@ import logging
 
 from cortex.embeddings import LocalEmbedder
 
+__all__ = ['EmbeddingManager']
+
 logger = logging.getLogger("cortex.embeddings.manager")
 
 

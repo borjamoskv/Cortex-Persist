@@ -4,6 +4,39 @@ CORTEX v5.0 — SQLite Schema Definitions.
 All tables, indexes, and virtual tables for the sovereign memory engine.
 """
 
+__all__ = [
+    "ALL_SCHEMA",
+    "CREATE_AGENTS",
+    "CREATE_COMPACTION_LOG",
+    "CREATE_CONTEXT_SNAPSHOTS",
+    "CREATE_CONTEXT_SNAPSHOTS_INDEX",
+    "CREATE_EMBEDDINGS",
+    "CREATE_EPISODES",
+    "CREATE_EPISODES_FTS",
+    "CREATE_EPISODES_INDEXES",
+    "CREATE_FACTS",
+    "CREATE_FACTS_INDEXES",
+    "CREATE_GHOSTS",
+    "CREATE_GHOSTS_INDEX",
+    "CREATE_GRAPH_OUTBOX",
+    "CREATE_GRAPH_OUTBOX_INDEXES",
+    "CREATE_HEARTBEATS",
+    "CREATE_HEARTBEATS_INDEX",
+    "CREATE_META",
+    "CREATE_OUTCOMES",
+    "CREATE_RWC_INDEXES",
+    "CREATE_SESSIONS",
+    "CREATE_TIME_ENTRIES",
+    "CREATE_TIME_ENTRIES_INDEX",
+    "CREATE_TRANSACTIONS",
+    "CREATE_TRANSACTIONS_INDEX",
+    "CREATE_TRUST_EDGES",
+    "CREATE_VOTES",
+    "CREATE_VOTES_V2",
+    "SCHEMA_VERSION",
+    "get_init_meta",
+]
+
 SCHEMA_VERSION = "4.0.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────

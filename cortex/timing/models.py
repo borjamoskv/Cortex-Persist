@@ -5,6 +5,14 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+__all__ = [
+    "DEFAULT_GAP_SECONDS",
+    "Heartbeat",
+    "TimeEntry",
+    "TimeSummary",
+    "classify_entity",
+]
+
 # ─── Activity Classification ─────────────────────────────────────────
 
 CATEGORY_MAP: dict[str, str] = {

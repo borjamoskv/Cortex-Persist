@@ -10,6 +10,17 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+__all__ = [
+    "get_cortex_dir",
+    "get_python_executable",
+    "get_service_dir",
+    "is_linux",
+    "is_macos",
+    "is_windows",
+    "platform_name",
+    "tail_file_command",
+]
+
 # ─── Platform Detection ──────────────────────────────────────────────
 
 

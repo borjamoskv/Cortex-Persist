@@ -21,6 +21,8 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
 from cortex.temporal import now_iso
 
+__all__ = ['TX_BEGIN_IMMEDIATE', 'AsyncCortexEngine']
+
 logger = logging.getLogger("cortex.engine.async")
 
 TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
@@ -133,7 +135,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         fact = await self.get_fact(fact_id)
         if not fact or fact.get("valid_until"):
-            from cortex.exceptions import FactNotFound
+            from cortex.errors import FactNotFound
 
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact

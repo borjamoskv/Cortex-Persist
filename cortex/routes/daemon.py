@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, Request
 from cortex.auth import AuthResult, require_permission
 from cortex.i18n import get_trans
 
+__all__ = ['daemon_status']
+
 router = APIRouter(tags=["daemon"])
 
 

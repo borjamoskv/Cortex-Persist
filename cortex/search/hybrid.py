@@ -18,6 +18,8 @@ from cortex.search.models import SearchResult
 from cortex.search.text import text_search, text_search_sync
 from cortex.search.vector import semantic_search, semantic_search_sync
 
+__all__ = ['hybrid_search', 'hybrid_search_sync']
+
 logger = logging.getLogger("cortex.search.hybrid")
 
 # RRF_K constant governs the impact of low-rank results.

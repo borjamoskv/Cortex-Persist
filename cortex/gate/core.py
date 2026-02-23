@@ -14,8 +14,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from .exceptions import GateError, GateExpired, GateInvalidSignature, GateNotApproved
+from .errors import GateError, GateExpired, GateInvalidSignature, GateNotApproved
 from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
+
+__all__ = ['SovereignGate', 'get_gate', 'reset_gate']
 
 logger = logging.getLogger("cortex.gate")
 _gate_instance: Optional["SovereignGate"] = None

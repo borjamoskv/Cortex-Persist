@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
+__all__ = ['Fact', 'row_to_fact']
+
 
 @dataclass
 class Fact:

@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 
 from cortex.compaction.utils import content_hash, similarity
 
+__all__ = ['execute_dedup', 'find_duplicates']
+
 if TYPE_CHECKING:
     from cortex.compactor import CompactionResult
     from cortex.engine import CortexEngine

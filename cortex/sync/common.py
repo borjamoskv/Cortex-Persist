@@ -11,6 +11,22 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+__all__ = [
+    "AGENT_DIR",
+    "CORTEX_DIR",
+    "MEMORY_DIR",
+    "SYNC_STATE_FILE",
+    "SyncResult",
+    "WritebackResult",
+    "atomic_write",
+    "calculate_fact_diff",
+    "db_content_hash",
+    "file_hash",
+    "get_existing_contents",
+    "load_sync_state",
+    "save_sync_state",
+]
+
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 

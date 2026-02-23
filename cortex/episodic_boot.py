@@ -21,6 +21,13 @@ from typing import TYPE_CHECKING
 from cortex.episodic import Episode, EpisodicMemory, Pattern
 from cortex.temporal import now_iso
 
+__all__ = [
+    "BootPayload",
+    "DEFAULT_LOOKBACK_HOURS",
+    "MAX_BOOT_CHARS",
+    "generate_session_boot",
+]
+
 if TYPE_CHECKING:
     import aiosqlite
 

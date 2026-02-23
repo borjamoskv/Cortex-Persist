@@ -13,6 +13,8 @@ import logging
 import time
 from typing import Any, Final
 
+__all__ = ['TursoBackend']
+
 logger = logging.getLogger("cortex.storage.turso")
 
 # Threshold for "slow" queries in milliseconds

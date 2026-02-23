@@ -14,6 +14,8 @@ import sqlite_vec
 
 from cortex.temporal import now_iso
 
+__all__ = ['SyncCompatMixin']
+
 logger = logging.getLogger("cortex")
 
 

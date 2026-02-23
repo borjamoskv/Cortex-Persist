@@ -13,6 +13,13 @@ from cortex.auth import AuthResult, require_permission
 from cortex.i18n import get_trans
 from cortex.models import HeartbeatRequest, TimeSummaryResponse
 
+__all__ = [
+    "get_time_history",
+    "record_heartbeat",
+    "time_report",
+    "time_today",
+]
+
 router = APIRouter(tags=["timing"])
 logger = logging.getLogger("uvicorn.error")
 

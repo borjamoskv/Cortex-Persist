@@ -16,6 +16,17 @@ from functools import lru_cache
 
 from fastapi import Depends, Header, HTTPException, Request
 
+__all__ = [
+    "APIKey",
+    "AUTH_SCHEMA",
+    "AuthManager",
+    "AuthResult",
+    "SQL_INSERT_KEY",
+    "get_auth_manager",
+    "require_auth",
+    "require_permission",
+]
+
 logger = logging.getLogger(__name__)
 
 # ─── Schema ───────────────────────────────────────────────────────────

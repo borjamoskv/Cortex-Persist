@@ -7,6 +7,8 @@ import uuid
 
 from cortex.metrics import metrics
 
+__all__ = ['ConsensusMixin']
+
 logger = logging.getLogger("cortex")
 
 

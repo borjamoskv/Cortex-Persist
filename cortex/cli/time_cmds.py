@@ -7,6 +7,8 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine, get_tracker
 
+__all__ = ['time_cmd', 'heartbeat_cmd']
+
 
 @cli.command("time")
 @click.option("--project", "-p", default=None, help="Filter by project")

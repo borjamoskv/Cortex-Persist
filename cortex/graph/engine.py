@@ -10,6 +10,20 @@ from cortex.config import GRAPH_BACKEND
 from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
+__all__ = [
+    "detect_relationships",
+    "extract_entities",
+    "find_path",
+    "get_backend",
+    "get_context_subgraph",
+    "get_graph",
+    "get_graph_sync",
+    "process_fact_graph",
+    "process_fact_graph_sync",
+    "query_entity",
+    "query_entity_sync",
+]
+
 logger = logging.getLogger("cortex.graph")
 
 

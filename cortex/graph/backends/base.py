@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 
+__all__ = ['GraphBackend']
+
 
 class GraphBackend(ABC):
     @abstractmethod

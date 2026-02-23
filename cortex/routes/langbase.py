@@ -27,6 +27,16 @@ from cortex.langbase.client import LangbaseClient, LangbaseError
 from cortex.langbase.pipe import run_with_cortex_context
 from cortex.langbase.sync import sync_to_langbase
 
+__all__ = [
+    "MemorySearchRequest",
+    "PipeRunRequest",
+    "SyncRequest",
+    "langbase_memory_search",
+    "langbase_pipe_run",
+    "langbase_status",
+    "langbase_sync",
+]
+
 logger = logging.getLogger("cortex.routes.langbase")
 
 router = APIRouter(prefix="/v1/langbase", tags=["langbase"])

@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 
 from cortex.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
 
+__all__ = ['sync_system']
+
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 

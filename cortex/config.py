@@ -13,6 +13,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+__all__ = [
+    "AGENT_DIR",
+    "CORTEX_DIR",
+    "CortexConfig",
+    "DEFAULT_DB_PATH",
+    "reload",
+]
+
 # ─── Base Paths (constant, never env-overridden) ─────────────────────
 
 CORTEX_DIR = Path.home() / ".cortex"

@@ -9,6 +9,8 @@ from cortex.engine.models import Fact
 from cortex.search import SearchResult, semantic_search, text_search
 from cortex.temporal import build_temporal_filter_params, time_travel_filter
 
+__all__ = ['QueryMixin']
+
 logger = logging.getLogger("cortex")
 
 # Common column list shared across all fact queries.

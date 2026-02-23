@@ -77,7 +77,7 @@ class TestDeleteCommand:
     def test_delete_nonexistent_fact(self, runner, db_path):
         result = runner.invoke(cli, ["delete", "999", "--db", db_path])
         assert result.exit_code == 0
-        assert "No se encontró" in result.output
+        assert "no encontrado" in result.output.lower()
 
     def test_delete_with_reason(self, runner, db_path, monkeypatch, tmp_path):
         monkeypatch.setattr("cortex.sync.MEMORY_DIR", tmp_path / "memory")
@@ -108,7 +108,7 @@ class TestEditCommand:
             cli, ["edit", "999", "New content that is long enough", "--db", db_path]
         )
         assert result.exit_code == 0
-        assert "No se encontró" in result.output
+        assert "no encontrado" in result.output.lower()
 
     def test_edit_preserves_metadata(self, runner, db_path, monkeypatch, tmp_path):
         """Edit should preserve project, type, tags from original."""

@@ -2,6 +2,21 @@
 
 import re
 
+__all__ = [
+    "HARD_ITERATION_CAP",
+    "INMEJORABLE_SCORE",
+    "MAX_LOC",
+    "MIN_PROGRESS",
+    "PSI_PATTERNS",
+    "PSI_TERMS",
+    "SCAN_EXTENSIONS",
+    "SECURITY_PATTERNS",
+    "SEC_TERMS",
+    "SKIP_DIRS",
+    "STACK_MARKERS",
+    "STAGNATION_LIMIT",
+]
+
 STACK_MARKERS = {
     "node": "package.json",
     "python": "pyproject.toml",

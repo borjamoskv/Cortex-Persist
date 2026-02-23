@@ -15,6 +15,8 @@ from typing import Any
 from cortex.sap.client import SAPClient
 from cortex.sap.mapper import SAPMapper
 
+__all__ = ['SAPSyncResult', 'SAPSync']
+
 logger = logging.getLogger("cortex.sap.sync")
 
 

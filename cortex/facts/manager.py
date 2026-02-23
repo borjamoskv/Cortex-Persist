@@ -11,6 +11,8 @@ from cortex.engine.models import Fact, row_to_fact
 from cortex.search import SearchResult, semantic_search, text_search
 from cortex.temporal import build_temporal_filter_params, now_iso
 
+__all__ = ['FactManager']
+
 logger = logging.getLogger("cortex.facts")
 
 _FACT_COLUMNS = (

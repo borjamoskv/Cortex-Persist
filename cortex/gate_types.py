@@ -4,6 +4,13 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
+__all__ = [
+    "ActionLevel",
+    "ActionStatus",
+    "GatePolicy",
+    "PendingAction",
+]
+
 
 class ActionLevel(str, Enum):
     """Consciousness layer action levels."""

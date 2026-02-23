@@ -20,6 +20,15 @@ from cortex.models import (
     VoteV2Request,
 )
 
+__all__ = [
+    "cast_vote",
+    "cast_vote_v2",
+    "deprecate_fact",
+    "list_votes",
+    "recall_facts",
+    "store_fact",
+]
+
 router = APIRouter(tags=["facts"])
 logger = logging.getLogger("uvicorn.error")
 

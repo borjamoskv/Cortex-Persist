@@ -152,7 +152,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.engine.models import Fact
-        from cortex.exceptions import FactNotFound
+        from cortex.errors import FactNotFound
 
         conn = await self.get_conn()
         cursor = await conn.execute(

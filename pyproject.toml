@@ -1,6 +1,6 @@
 [project]
 name = "cortex-memory"
-version = "4.3.0"
+version = "5.1.0"
 description = "The Sovereign Ledger for AI Agents — local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults."
 readme = "README.md"
 license = "MIT"

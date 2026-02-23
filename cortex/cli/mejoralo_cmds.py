@@ -7,6 +7,14 @@ from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 
+__all__ = [
+    "mejoralo",
+    "mejoralo_history",
+    "mejoralo_record",
+    "mejoralo_scan",
+    "mejoralo_ship",
+]
+
 
 @cli.group()
 def mejoralo():

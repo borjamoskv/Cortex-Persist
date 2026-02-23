@@ -5,6 +5,14 @@ Typed error hierarchy to avoid leaking internal DB details
 through API boundaries (Sprint 0 security directive).
 """
 
+__all__ = [
+    "CortexError",
+    "DatabaseTransactionError",
+    "FactNotFound",
+    "ProjectNotFound",
+    "ThreadPoolExhausted",
+]
+
 
 class CortexError(Exception):
     """Base exception for all CORTEX errors."""

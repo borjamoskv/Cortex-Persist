@@ -46,6 +46,8 @@ from cortex.thinking.presets import (
     ThinkingMode,
 )
 
+__all__ = ['ThoughtOrchestra']
+
 logger = logging.getLogger("cortex.thinking.orchestra")
 
 

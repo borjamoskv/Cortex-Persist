@@ -20,6 +20,14 @@ from cortex.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.models import StatusResponse
 from cortex.sync import export_to_json
 
+__all__ = [
+    "create_api_key",
+    "export_project",
+    "generate_handoff_context",
+    "get_system_status",
+    "list_api_keys",
+]
+
 router = APIRouter(tags=["governance"])
 logger = logging.getLogger("uvicorn.error")
 

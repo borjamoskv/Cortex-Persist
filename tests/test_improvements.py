@@ -140,7 +140,7 @@ class TestStoreMany:
 
     def test_database_transaction_error_exists(self):
         """Verify DatabaseTransactionError is importable and properly typed."""
-        from cortex.exceptions import CortexError, DatabaseTransactionError
+        from cortex.errors import CortexError, DatabaseTransactionError
 
         assert issubclass(DatabaseTransactionError, CortexError)
         assert issubclass(DatabaseTransactionError, Exception)

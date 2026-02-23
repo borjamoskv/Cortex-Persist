@@ -12,6 +12,8 @@ from rich.table import Table
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.handoff import generate_handoff, load_handoff, save_handoff
 
+__all__ = ['handoff', 'generate', 'load']
+
 
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI."""

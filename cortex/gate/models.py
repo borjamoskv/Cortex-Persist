@@ -1,39 +1,15 @@
 """
-CORTEX v5.0 — SovereignGate Models.
+CORTEX v5.1 — SovereignGate Models.
 """
 
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import Enum
 from typing import Any
 
+from .enums import ActionLevel, ActionStatus, GatePolicy
 
-class ActionLevel(str, Enum):
-    """Consciousness layer action levels."""
-
-    L1_READ = "L1_READ"
-    L2_PLAN = "L2_PLAN"
-    L3_EXECUTE = "L3_EXECUTE"
-    L4_MUTATE = "L4_MUTATE"
-
-
-class GatePolicy(str, Enum):
-    """Gate enforcement policy."""
-
-    ENFORCE = "enforce"  # Block until approved
-    AUDIT_ONLY = "audit"  # Log but don't block
-    DISABLED = "disabled"  # Transparent passthrough
-
-
-class ActionStatus(str, Enum):
-    """Status of a pending action."""
-
-    PENDING = "pending"
-    APPROVED = "approved"
-    DENIED = "denied"
-    EXPIRED = "expired"
-    EXECUTED = "executed"
+__all__ = ['PendingAction', 'GatePolicy']
 
 
 @dataclass

@@ -20,7 +20,14 @@ from cortex.mejoralo.constants import (
     MIN_PROGRESS,
     STAGNATION_LIMIT,
 )
-from cortex.mejoralo.types import ScanResult
+from cortex.mejoralo.models import ScanResult
+
+__all__ = [
+    "HEAL_PROMPT_AGGRESSIVE",
+    "HEAL_PROMPT_NORMAL",
+    "HEAL_PROMPT_NUCLEAR",
+    "heal_project",
+]
 
 logger = logging.getLogger("cortex.mejoralo.heal")
 

@@ -12,6 +12,13 @@ import aiosqlite
 from cortex.migrations.registry import MIGRATIONS
 from cortex.schema import ALL_SCHEMA
 
+__all__ = [
+    "ensure_migration_table",
+    "get_current_version",
+    "run_migrations",
+    "run_migrations_async",
+]
+
 logger = logging.getLogger("cortex")
 
 

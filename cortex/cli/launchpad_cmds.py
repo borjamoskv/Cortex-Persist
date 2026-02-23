@@ -11,6 +11,8 @@ from rich.table import Table
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.launchpad import MissionOrchestrator
 
+__all__ = ['launchpad', 'mission_launch', 'mission_list']
+
 
 @cli.group()
 def launchpad():

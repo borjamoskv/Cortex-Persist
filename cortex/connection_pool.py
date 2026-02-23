@@ -15,6 +15,8 @@ from contextlib import asynccontextmanager
 
 import aiosqlite
 
+__all__ = ['CortexConnectionPool']
+
 logger = logging.getLogger("cortex.pool")
 
 

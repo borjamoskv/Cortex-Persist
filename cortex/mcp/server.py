@@ -19,6 +19,8 @@ from cortex.mcp.utils import (
     SimpleAsyncCache,
 )
 
+__all__ = ['create_mcp_server', 'run_server']
+
 logger = logging.getLogger("cortex.mcp.server")
 
 _MCP_AVAILABLE = False

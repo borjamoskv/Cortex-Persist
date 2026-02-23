@@ -11,6 +11,8 @@ import aiosqlite
 
 from .base import GraphBackend
 
+__all__ = ['SQLiteBackend']
+
 logger = logging.getLogger("cortex.graph.backends")
 
 

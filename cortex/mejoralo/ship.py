@@ -10,9 +10,11 @@ import os
 from pathlib import Path
 
 from cortex.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
+from cortex.mejoralo.models import ShipResult, ShipSeal
 from cortex.mejoralo.scan import scan
-from cortex.mejoralo.types import ShipResult, ShipSeal
 from cortex.mejoralo.utils import detect_stack, get_build_cmd, get_lint_cmd, get_test_cmd, run_quiet
+
+__all__ = ['check_ship_gate']
 
 logger = logging.getLogger("cortex.mejoralo")
 

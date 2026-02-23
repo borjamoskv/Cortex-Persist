@@ -7,6 +7,8 @@ from typing import Any
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
 
+__all__ = ['SearchMixin']
+
 logger = logging.getLogger("cortex.engine.search")
 
 

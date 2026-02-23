@@ -18,6 +18,8 @@ from typing import Any
 
 from cortex.storage import StorageMode, get_storage_mode
 
+__all__ = ['TenantRouter', 'get_router']
+
 logger = logging.getLogger("cortex.storage.router")
 
 

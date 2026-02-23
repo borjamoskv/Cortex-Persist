@@ -13,6 +13,14 @@ from cortex.cli import DEFAULT_DB, cli, console, get_engine
 # Importe actualizado para Wave 5 Fase 2
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
 
+__all__ = [
+    "ledger",
+    "ledger_checkpoint",
+    "ledger_status",
+    "ledger_verify",
+    "vote",
+]
+
 
 @cli.command()
 @click.argument("fact_id", type=int)

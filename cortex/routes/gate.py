@@ -7,17 +7,25 @@ REST endpoints for remote operator approval of L3 actions.
 from fastapi import APIRouter, Depends, HTTPException
 
 from cortex.auth import require_permission
-from cortex.models import (
-    GateActionResponse,
-    GateApprovalRequest,
-    GateStatusResponse,
-)
-from cortex.sovereign_gate import (
+from cortex.gate import (
     GateError,
     GateExpired,
     GateInvalidSignature,
     get_gate,
 )
+from cortex.models import (
+    GateActionResponse,
+    GateApprovalRequest,
+    GateStatusResponse,
+)
+
+__all__ = [
+    "approve_action",
+    "deny_action",
+    "gate_status",
+    "get_audit_log",
+    "list_pending",
+]
 
 router = APIRouter(prefix="/v1/gate", tags=["sovereign-gate"])
 

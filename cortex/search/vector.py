@@ -14,6 +14,8 @@ import aiosqlite
 from cortex.search.models import SearchResult
 from cortex.temporal import build_temporal_filter_params
 
+__all__ = ['semantic_search', 'semantic_search_sync']
+
 logger = logging.getLogger("cortex.search.vector")
 
 # ─── SQL fragment constants ────────────────────────────────

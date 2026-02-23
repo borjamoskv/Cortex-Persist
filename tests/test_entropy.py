@@ -85,7 +85,7 @@ def test_daemon_alert_entropy_brutal(mock_popen, mock_notify, tmp_path):
     args = mock_popen.call_args[0][0]
     assert "mejoralo" in args
     assert "scan" in args
-    assert "--deep" in args
+    assert "--brutal" in args
 
 
 @patch("cortex.daemon.notifier.Notifier.notify")

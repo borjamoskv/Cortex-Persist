@@ -18,6 +18,8 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
+__all__ = ['MetricsRegistry', 'MetricsMiddleware']
+
 logger = logging.getLogger("cortex")
 
 _HISTOGRAM_MAX_OBSERVATIONS = 1000

@@ -16,6 +16,8 @@ from cortex.timing.models import (
     classify_entity,
 )
 
+__all__ = ['TimingTracker']
+
 logger = logging.getLogger("cortex")
 
 

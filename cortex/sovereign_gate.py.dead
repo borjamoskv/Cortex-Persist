@@ -1,0 +1,44 @@
+"""
+CORTEX — sovereign_gate.py (DEPRECATED).
+
+This module is a backward-compatibility bridge.
+All code has been migrated to the ``cortex.gate`` package.
+
+Import from ``cortex.gate`` instead.
+"""
+
+import warnings as _warnings
+
+_warnings.warn(
+    "cortex.sovereign_gate is deprecated. Use cortex.gate instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+from cortex.gate import (  # noqa: F401, E402
+    ActionLevel,
+    ActionStatus,
+    GateError,
+    GateExpired,
+    GateInvalidSignature,
+    GateNotApproved,
+    GatePolicy,
+    PendingAction,
+    SovereignGate,
+    get_gate,
+    reset_gate,
+)
+
+__all__ = [
+    "ActionLevel",
+    "ActionStatus",
+    "GateError",
+    "GateExpired",
+    "GateInvalidSignature",
+    "GateNotApproved",
+    "GatePolicy",
+    "PendingAction",
+    "SovereignGate",
+    "get_gate",
+    "reset_gate",
+]
