@@ -57,21 +57,16 @@ class SQLiteAlgorithmsMixin:
         """Retrieve a subgraph around seed entities."""
         if not seed_entities:
             return {"nodes": [], "edges": []}
-        nodes = {}
-        edges = []
-        visited_ids = set()
+        nodes: dict[str, dict] = {}
+        edges: list[dict] = []
+        visited_ids: set[int] = set()
 
         placeholders = ",".join(["?"] * len(seed_entities))
         q_init = f"SELECT id, name, entity_type FROM entities WHERE name IN ({placeholders})"
-        if self._is_async:
-            async with self.conn.execute(q_init, seed_entities) as cursor:
-                rows = await cursor.fetchall()
-        else:
-            rows = self.conn.execute(q_init, seed_entities).fetchall()
+        rows = await self._fetch_rows(q_init, seed_entities)
 
         current_layer_ids = []
-        for row in rows:
-            eid, name, etype = row
+        for eid, name, etype in rows:
             nodes[name] = {"id": eid, "type": etype}
             current_layer_ids.append(eid)
             visited_ids.add(eid)
@@ -79,35 +74,45 @@ class SQLiteAlgorithmsMixin:
         for _ in range(depth):
             if not current_layer_ids or len(nodes) >= max_nodes:
                 break
-            phs = ",".join(["?"] * len(current_layer_ids))
-            q_expand = f"""SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight
-                          FROM entity_relations er
-                          JOIN entities e1 ON er.source_entity_id = e1.id
-                          JOIN entities e2 ON er.target_entity_id = e2.id
-                          WHERE er.source_entity_id IN ({phs}) OR er.target_entity_id IN ({phs})"""
-            params = current_layer_ids + current_layer_ids
-            if self._is_async:
-                async with self.conn.execute(q_expand, params) as cursor:
-                    rel_rows = await cursor.fetchall()
-            else:
-                rel_rows = self.conn.execute(q_expand, params).fetchall()
-
-            next_layer_ids = []
-            for s_name, s_type, s_id, t_name, t_type, t_id, r_type, weight in rel_rows:
-                if s_name not in nodes:
-                    nodes[s_name] = {"id": s_id, "type": s_type}
-                    if s_id not in visited_ids:
-                        next_layer_ids.append(s_id)
-                        visited_ids.add(s_id)
-                if t_name not in nodes:
-                    nodes[t_name] = {"id": t_id, "type": t_type}
-                    if t_id not in visited_ids:
-                        next_layer_ids.append(t_id)
-                        visited_ids.add(t_id)
-                edge = {"source": s_name, "target": t_name, "type": r_type, "weight": weight}
-                if edge not in edges:
-                    edges.append(edge)
-            current_layer_ids = next_layer_ids
+            current_layer_ids = await self._expand_subgraph_layer(
+                current_layer_ids, nodes, edges, visited_ids,
+            )
             if len(nodes) >= max_nodes:
                 break
         return {"nodes": [{"name": k, **v} for k, v in nodes.items()], "edges": edges}
+
+    async def _fetch_rows(self, query: str, params: list) -> list:
+        """Execute a query and return all rows, handling async/sync branching."""
+        if self._is_async:
+            async with self.conn.execute(query, params) as cursor:
+                return await cursor.fetchall()
+        return self.conn.execute(query, params).fetchall()
+
+    async def _expand_subgraph_layer(
+        self,
+        current_ids: list[int],
+        nodes: dict[str, dict],
+        edges: list[dict],
+        visited_ids: set[int],
+    ) -> list[int]:
+        """Expand one layer of the subgraph BFS. Returns next layer IDs."""
+        phs = ",".join(["?"] * len(current_ids))
+        q = f"""SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight
+                FROM entity_relations er
+                JOIN entities e1 ON er.source_entity_id = e1.id
+                JOIN entities e2 ON er.target_entity_id = e2.id
+                WHERE er.source_entity_id IN ({phs}) OR er.target_entity_id IN ({phs})"""
+        rel_rows = await self._fetch_rows(q, current_ids + current_ids)
+
+        next_ids: list[int] = []
+        for s_name, s_type, s_id, t_name, t_type, t_id, r_type, weight in rel_rows:
+            for name, ntype, nid in ((s_name, s_type, s_id), (t_name, t_type, t_id)):
+                if name not in nodes:
+                    nodes[name] = {"id": nid, "type": ntype}
+                    if nid not in visited_ids:
+                        next_ids.append(nid)
+                        visited_ids.add(nid)
+            edge = {"source": s_name, "target": t_name, "type": r_type, "weight": weight}
+            if edge not in edges:
+                edges.append(edge)
+        return next_ids

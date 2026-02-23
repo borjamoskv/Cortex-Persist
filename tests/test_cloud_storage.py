@@ -114,7 +114,7 @@ class TestTursoBackend:
         backend.url = "libsql://test.turso.io"
         backend._conn = None
         assert "test.turso.io" in repr(backend)
-        assert "status=idle" in repr(backend)
+        assert "connected=False" in repr(backend)
 
     def test_ensure_conn_raises_when_not_connected(self):
         from cortex.storage.turso import TursoBackend

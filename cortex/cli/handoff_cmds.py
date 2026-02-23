@@ -85,10 +85,26 @@ def load(path, json_output) -> None:
         click.echo(json.dumps(data, indent=2, ensure_ascii=False))
         return
 
-    # Pretty display
+    _display_handoff_summary(data)
+    _display_pending_work(data)
+    _display_section_table(data, "hot_decisions", "\n🔥 Hot Decisions", "content", "Decision", "cyan")
+    _display_section_table(data, "active_ghosts", "\n👻 Active Ghosts", "reference", "Reference", "cyan")
+    _display_section_table(data, "recent_errors", "\n🔴 Recent Errors", "content", "Error", "red")
+
+    active = data.get("active_projects", [])
+    if active:
+        console.print(f"\n[bold green]📂 Active Projects (24h):[/] {', '.join(active)}")
+
+
+def _truncate(text: str, max_len: int = 70) -> str:
+    """Truncate text with ellipsis if it exceeds max_len."""
+    return text[:max_len] + "..." if len(text) > max_len else text
+
+
+def _display_handoff_summary(data: dict) -> None:
+    """Display the handoff header panel."""
     session = data.get("session", {})
     stats = data.get("stats", {})
-
     console.print(
         Panel(
             f"[dim]Generated:[/] {data.get('generated_at', '?')}\n"
@@ -102,50 +118,29 @@ def load(path, json_output) -> None:
         )
     )
 
-    # Pending work
-    pending = session.get("pending_work", [])
+
+def _display_pending_work(data: dict) -> None:
+    """Display pending work items."""
+    pending = data.get("session", {}).get("pending_work", [])
     if pending:
         console.print("\n[bold yellow]⏳ Pending Work[/]")
         for item in pending:
             console.print(f"  • {item}")
 
-    # Hot decisions
-    decisions = data.get("hot_decisions", [])
-    if decisions:
-        table = Table(title="\n🔥 Hot Decisions")
-        table.add_column("#", style="dim", width=4)
-        table.add_column("Project", style="cyan", width=15)
-        table.add_column("Decision", width=55)
-        for d in decisions:
-            content = d["content"][:70] + "..." if len(d["content"]) > 70 else d["content"]
-            table.add_row(str(d["id"]), d["project"], content)
-        console.print(table)
 
-    # Active ghosts
-    ghosts = data.get("active_ghosts", [])
-    if ghosts:
-        table = Table(title="\n👻 Active Ghosts")
-        table.add_column("#", style="dim", width=4)
-        table.add_column("Project", style="cyan", width=15)
-        table.add_column("Reference", width=55)
-        for g in ghosts:
-            ref = g["reference"][:70] + "..." if len(g["reference"]) > 70 else g["reference"]
-            table.add_row(str(g["id"]), g["project"], ref)
-        console.print(table)
+def _display_section_table(
+    data: dict, key: str, title: str, content_field: str, column_name: str, project_style: str,
+) -> None:
+    """Display a section of handoff data as a Rich table."""
+    items = data.get(key, [])
+    if not items:
+        return
+    table = Table(title=title)
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Project", style=project_style, width=15)
+    table.add_column(column_name, width=55)
+    for item in items:
+        text = _truncate(item[content_field])
+        table.add_row(str(item["id"]), item["project"], text)
+    console.print(table)
 
-    # Recent errors
-    errors = data.get("recent_errors", [])
-    if errors:
-        table = Table(title="\n🔴 Recent Errors")
-        table.add_column("#", style="dim", width=4)
-        table.add_column("Project", style="red", width=15)
-        table.add_column("Error", width=55)
-        for e in errors:
-            content = e["content"][:70] + "..." if len(e["content"]) > 70 else e["content"]
-            table.add_row(str(e["id"]), e["project"], content)
-        console.print(table)
-
-    # Active projects
-    active = data.get("active_projects", [])
-    if active:
-        console.print(f"\n[bold green]📂 Active Projects (24h):[/] {', '.join(active)}")

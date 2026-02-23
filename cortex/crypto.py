@@ -22,19 +22,20 @@ class Vault:
 
         if key:
             self._key = key
-        else:
-            # Load from env or generate
-            env_key = os.environ.get("CORTEX_VAULT_KEY")
-            if env_key:
-                try:
-                    self._key = base64.b64decode(env_key)
-                except (OSError, ValueError):
-                    # Fallback if invalid base64? No, invalid key is fatal.
-                    self._key = None  # Or raise
-            else:
-                # For dev/testing, generate one if none exists?
-                # Better: Allow no key (disabled encryption)
-                self._key = None
+            return
+
+        # Load from env or generate
+        env_key = os.environ.get("CORTEX_VAULT_KEY")
+        if not env_key:
+            # For dev/testing, allow no key (disabled encryption)
+            self._key = None
+            return
+
+        try:
+            self._key = base64.b64decode(env_key)
+        except (OSError, ValueError):
+            # Invalid key is fatal.
+            self._key = None
 
     @property
     def is_available(self) -> bool:

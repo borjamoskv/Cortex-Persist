@@ -44,24 +44,9 @@ class SearchMixin:
 
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
-                    # Extract entities from query to use as seeds
-                    entities = extract_entities(query)
-                    seeds = [e["name"] for e in entities]
-
-                    # Also use entities found in the top results content
-                    if not seeds and results:
-                        top_content = " ".join([r.content for r in results[:2]])
-                        top_entities = extract_entities(top_content)
-                        seeds = [e["name"] for e in top_entities]
-
-                    if seeds:
-                        subgraph = await get_context_subgraph(
-                            conn, seeds, depth=graph_depth or 1, max_nodes=50
-                        )
-
-                        # Attach graph context to the top result for UI/Agent visibility
-                        if results and (subgraph.get("nodes") or subgraph.get("edges")):
-                            results[0].context = {"graph": subgraph, "seeds": seeds}
+                    await self._enrich_with_graph_context(
+                        conn, results, query, graph_depth
+                    )
 
                 return results
 
@@ -69,3 +54,21 @@ class SearchMixin:
                 logger.exception(f"Hybrid Graph-RAG search failed: {e}")
                 # Ultimate fallback to basic text search
                 return await text_search(conn, query, project, limit=top_k, as_of=as_of)
+
+    async def _enrich_with_graph_context(self, conn, results: list[Any], query: str, graph_depth: int) -> None:
+        """Helper to enrich search results with graph context."""
+        entities = extract_entities(query)
+        seeds = [e["name"] for e in entities]
+
+        if not seeds and results:
+            top_content = " ".join([r.content for r in results[:2]])
+            top_entities = extract_entities(top_content)
+            seeds = [e["name"] for e in top_entities]
+
+        if seeds:
+            subgraph = await get_context_subgraph(
+                conn, seeds, depth=graph_depth or 1, max_nodes=50
+            )
+
+            if results and (subgraph.get("nodes") or subgraph.get("edges")):
+                results[0].context = {"graph": subgraph, "seeds": seeds}

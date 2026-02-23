@@ -284,7 +284,6 @@ def heal_project(
     Uses escalating strategies: Normal → Aggressive → Nuclear.
     """
     from cortex.cli import console
-    from cortex.mejoralo.scan import scan
 
     current_result = scan_result
     iteration = 0
@@ -354,7 +353,7 @@ def _run_healing_iteration(
     generation_results = asyncio.run(_run_generations())
 
     iteration_success = False
-    for (top_file_rel, _), new_code in zip(targets, generation_results):
+    for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
         if new_code and _apply_and_verify(top_file_rel, new_code, path, level, iteration, console, current_result.score):
             iteration_success = True
             healed_files.add(top_file_rel)

@@ -148,30 +148,32 @@ class SAPSync:
             sap_facts = [f for f in facts if self._fact_matches_entity_set(f, entity_set)]
 
             for fact in sap_facts:
-                try:
-                    entity_data = self.mapper.fact_to_sap(fact)
-                    sap_key = self.mapper.extract_sap_key(fact)
-
-                    if sap_key:
-                        # Extract just the key portion from the URI
-                        key_part = self._extract_key_from_uri(sap_key, entity_set)
-                        if key_part:
-                            await self.client.update_entity(entity_set, key_part, entity_data)
-                            result.pushed += 1
-                        else:
-                            result.errors.append(f"Cannot extract key from URI: {sap_key}")
-                    else:
-                        await self.client.create_entity(entity_set, entity_data)
-                        result.pushed += 1
-
-                except (OSError, ValueError, KeyError) as e:
-                    result.errors.append(f"Push failed for fact #{fact.get('id', '?')}: {e}")
+                await self._push_single_fact(fact, entity_set, result)
 
         except (OSError, ValueError, KeyError) as e:
             result.errors.append(f"Push failed: {e}")
             result.status = "error"
 
         return result
+
+    async def _push_single_fact(self, fact: dict[str, Any], entity_set: str, result: SAPSyncResult) -> None:
+        """Helper to push a single mapped fact back to SAP."""
+        try:
+            entity_data = self.mapper.fact_to_sap(fact)
+            sap_key = self.mapper.extract_sap_key(fact)
+
+            if sap_key:
+                key_part = self._extract_key_from_uri(sap_key, entity_set)
+                if key_part:
+                    await self.client.update_entity(entity_set, key_part, entity_data)
+                    result.pushed += 1
+                else:
+                    result.errors.append(f"Cannot extract key from URI: {sap_key}")
+            else:
+                await self.client.create_entity(entity_set, entity_data)
+                result.pushed += 1
+        except (OSError, ValueError, KeyError) as e:
+            result.errors.append(f"Push failed for fact #{fact.get('id', '?')}: {e}")
 
     async def full_sync(
         self,

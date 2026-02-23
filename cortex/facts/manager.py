@@ -44,35 +44,13 @@ class FactManager:
         tx_id: int | None = None,
         _skip_dedup: bool = False,
     ) -> int:
-        if not project or not project.strip():
-            raise ValueError("project cannot be empty")
-        if not content or not content.strip():
-            raise ValueError("content cannot be empty")
+        content = self._validate_content(project, content, fact_type)
 
-        content = content.strip()
-
-        # Gate 1: Minimum content length
-        if len(content) < self.MIN_CONTENT_LENGTH:
-            raise ValueError(
-                f"content too short ({len(content)} chars, min {self.MIN_CONTENT_LENGTH})"
-            )
-
-        # Gate 2: Sanitize double-prefixed decisions
-        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
-            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
-
-        # Gate 3: Dedup — return existing ID if exact match exists
         conn = await self.engine.get_conn()
         if not _skip_dedup:
-            cursor = await conn.execute(
-                "SELECT id FROM facts WHERE project = ? AND content = ? "
-                "AND valid_until IS NULL LIMIT 1",
-                (project, content),
-            )
-            existing = await cursor.fetchone()
-            if existing:
-                logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
-                return existing[0]
+            existing_id = await self._check_dedup(conn, project, content)
+            if existing_id is not None:
+                return existing_id
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
@@ -82,23 +60,57 @@ class FactManager:
             "INSERT INTO facts (project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at, tx_id) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                project,
-                content,
-                fact_type,
-                tags_json,
-                confidence,
-                ts,
-                source,
-                meta_json,
-                ts,
-                ts,
-                tx_id,
-            ),
+            (project, content, fact_type, tags_json, confidence, ts, source, meta_json, ts, ts, tx_id),
         )
         fact_id = cursor.lastrowid
 
-        # Embedding integration via engine's embedding component
+        await self._post_store_enrichment(conn, fact_id, content, project, ts)
+
+        tx_id = await self.engine._log_transaction(
+            conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
+        )
+        await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (tx_id, fact_id))
+
+        if commit:
+            await conn.commit()
+
+        return fact_id
+
+    def _validate_content(self, project: str, content: str, fact_type: str) -> str:
+        """Validate and sanitize fact content. Returns cleaned content."""
+        if not project or not project.strip():
+            raise ValueError("project cannot be empty")
+        if not content or not content.strip():
+            raise ValueError("content cannot be empty")
+
+        content = content.strip()
+        if len(content) < self.MIN_CONTENT_LENGTH:
+            raise ValueError(
+                f"content too short ({len(content)} chars, min {self.MIN_CONTENT_LENGTH})"
+            )
+
+        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
+            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
+
+        return content
+
+    async def _check_dedup(self, conn: Any, project: str, content: str) -> int | None:
+        """Check for duplicate facts. Returns existing ID or None."""
+        cursor = await conn.execute(
+            "SELECT id FROM facts WHERE project = ? AND content = ? "
+            "AND valid_until IS NULL LIMIT 1",
+            (project, content),
+        )
+        existing = await cursor.fetchone()
+        if existing:
+            logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
+            return existing[0]
+        return None
+
+    async def _post_store_enrichment(
+        self, conn: Any, fact_id: int, content: str, project: str, ts: str,
+    ) -> None:
+        """Run embedding and graph extraction after storing a fact."""
         if self.engine._auto_embed and self.engine._vec_available:
             try:
                 embedding = self.engine.embeddings.embed(content)
@@ -115,16 +127,6 @@ class FactManager:
             await process_fact_graph(conn, fact_id, content, project, ts)
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
-
-        tx_id = await self.engine._log_transaction(
-            conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
-        )
-        await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (tx_id, fact_id))
-
-        if commit:
-            await conn.commit()
-
-        return fact_id
 
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:
