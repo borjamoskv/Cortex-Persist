@@ -5,7 +5,6 @@ FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization and routing.
 """
 
-
 import logging
 import sqlite3
 import time
@@ -64,6 +63,12 @@ from cortex.routes import (
 )
 from cortex.routes import (
     timing as timing_router,
+)
+from cortex.routes import (
+    tips as tips_router,
+)
+from cortex.routes import (
+    translate as translate_router,
 )
 from cortex.timing import TimingTracker
 
@@ -229,7 +234,6 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 
 @app.get("/", tags=["health"])
 async def root_node(request: Request) -> dict:
-
     # Use DEFAULT_LANGUAGE if no header is provided
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
@@ -237,7 +241,7 @@ async def root_node(request: Request) -> dict:
         "service": "cortex",
         "version": __version__,
         "status": get_trans("system_operational", lang),
-        "description": get_trans("info_service_desc", lang)
+        "description": get_trans("info_service_desc", lang),
     }
 
 
@@ -251,7 +255,7 @@ async def health_check(request: Request) -> dict:
     return {
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
-        "version": __version__
+        "version": __version__,
     }
 
 
@@ -269,6 +273,7 @@ app.include_router(search_router.router)
 app.include_router(ask_router.router)
 app.include_router(admin_router.router)
 app.include_router(timing_router.router)
+app.include_router(translate_router.router)
 app.include_router(daemon_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(agents_router.router)
@@ -278,6 +283,7 @@ app.include_router(missions_router.router)
 app.include_router(mejoralo_router.router)
 app.include_router(gate_router.router)
 app.include_router(context_router.router)
+app.include_router(tips_router.router)
 app.include_router(hive_router)
 
 # Langbase integration (opt-in — only if API key is configured)

@@ -25,6 +25,7 @@ logger = logging.getLogger("cortex.engine.async")
 
 TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
 
+
 class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     """
     Native async database engine for CORTEX.
@@ -64,7 +65,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             self._ledger = ImmutableLedger(self._pool)
         return self._ledger
 
-    async def _log_transaction(self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]) -> int:
+    async def _log_transaction(
+        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+    ) -> int:
         dj = canonical_json(detail)
         ts = now_iso()
         async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
@@ -76,16 +79,20 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         cursor = await conn.execute(
             "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
             "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (project, action, dj, th, ts)
+            (project, action, dj, th, ts),
         )
         # Re-calc hash with actual ph from the DB to be absolute
-        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (cursor.lastrowid,)) as c2:
+        async with conn.execute(
+            "SELECT prev_hash FROM transactions WHERE id = ?", (cursor.lastrowid,)
+        ) as c2:
             row = await c2.fetchone()
             actual_ph = row[0] if row else ph
             if actual_ph != ph:
                 # Re-hash if it changed under our feet
                 th = compute_tx_hash(actual_ph, project, action, dj, ts)
-                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, cursor.lastrowid))
+                await conn.execute(
+                    "UPDATE transactions SET hash = ? WHERE id = ?", (th, cursor.lastrowid)
+                )
 
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()
@@ -127,13 +134,16 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         fact = await self.get_fact(fact_id)
         if not fact or fact.get("valid_until"):
             from cortex.exceptions import FactNotFound
+
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
 
     async def get_fact(self, fact_id: int) -> dict[str, Any] | None:
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
-            async with conn.execute(f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE f.id = ?", (fact_id,)) as cursor:
+            async with conn.execute(
+                f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE f.id = ?", (fact_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 if not row:
                     return None
@@ -145,6 +155,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
         """Reconstruct state as of transaction ID."""
         from cortex.temporal import time_travel_filter
+
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             clause, params = time_travel_filter(tx_id, table_alias="f")
@@ -163,7 +174,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                     results.append(d)
                 return results
 
-    async def reconstruct_state(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
+    async def reconstruct_state(
+        self, tx_id: int, project: str | None = None
+    ) -> list[dict[str, Any]]:
         """Alias for time_travel."""
         return await self.time_travel(tx_id, project)
 
@@ -171,10 +184,12 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         """Alias for deprecate (Foundation test parity)."""
         return await self.deprecate(fact_id)
 
-    async def vote(self, fact_id: int, agent: str, value: int, signature: str | None = None) -> float:
+    async def vote(
+        self, fact_id: int, agent: str, value: int, signature: str | None = None
+    ) -> float:
         """Vote with immutable ledger logging and reputation-weighted consensus."""
         if value not in (-1, 0, 1):
-             raise ValueError("Vote must be -1, 0, or 1")
+            raise ValueError("Vote must be -1, 0, or 1")
 
         async with self.session() as conn:
             await conn.execute(TX_BEGIN_IMMEDIATE)
@@ -182,7 +197,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 # 1. Resolve agent_id (agent parameter is the identifier)
                 target_agent_id = agent
 
-                async with conn.execute("SELECT reputation_score FROM agents WHERE id = ?", (target_agent_id,)) as cursor:
+                async with conn.execute(
+                    "SELECT reputation_score FROM agents WHERE id = ?", (target_agent_id,)
+                ) as cursor:
                     row = await cursor.fetchone()
                     if not row:
                         # Auto-register any agent that reaches the engine (trusting caller)
@@ -190,27 +207,39 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                         initial_rep = 1.0 if is_human else 0.5
                         await conn.execute(
                             "INSERT INTO agents (id, name, agent_type, reputation_score, public_key) VALUES (?, ?, ?, ?, '')",
-                            (target_agent_id, target_agent_id.capitalize(), "human" if is_human else "ai", initial_rep)
+                            (
+                                target_agent_id,
+                                target_agent_id.capitalize(),
+                                "human" if is_human else "ai",
+                                initial_rep,
+                            ),
                         )
                         rep = initial_rep
                     else:
                         rep = row[0]
-
 
                 # 2. Append to Immutable Vote Ledger
                 ledger = ImmutableVoteLedger(conn)
 
                 # Record in consensus table for fast score calculation
                 if value == 0:
-                     await conn.execute("DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?", (fact_id, target_agent_id))
+                    await conn.execute(
+                        "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                        (fact_id, target_agent_id),
+                    )
                 else:
-                     await conn.execute(
-                         "INSERT OR REPLACE INTO consensus_votes_v2 (fact_id, agent_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?)",
-                         (fact_id, target_agent_id, value, rep, rep)
-                     )
+                    await conn.execute(
+                        "INSERT OR REPLACE INTO consensus_votes_v2 (fact_id, agent_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?)",
+                        (fact_id, target_agent_id, value, rep, rep),
+                    )
 
                 # Log transaction
-                await self._log_transaction(conn, "consensus", "vote_v2", {"fact_id": fact_id, "agent_id": target_agent_id, "vote": value})
+                await self._log_transaction(
+                    conn,
+                    "consensus",
+                    "vote_v2",
+                    {"fact_id": fact_id, "agent_id": target_agent_id, "vote": value},
+                )
 
                 # Record in permanent immutable ledger
                 await ledger.append_vote(fact_id, target_agent_id, value, rep, signature)
@@ -221,7 +250,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                     "FROM consensus_votes_v2 v "
                     "JOIN agents a ON v.agent_id = a.id "
                     "WHERE v.fact_id = ? AND a.is_active = 1",
-                    (fact_id,)
+                    (fact_id,),
                 ) as cursor:
                     votes = await cursor.fetchall()
 
@@ -242,7 +271,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
                 await conn.execute(
                     "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
-                    (score, conf, fact_id)
+                    (score, conf, fact_id),
                 )
 
                 await conn.commit()
@@ -272,9 +301,13 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         async with self.session() as conn:
             async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
                 total = (await cursor.fetchone())[0]
-            async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL"
+            ) as cursor:
                 active = (await cursor.fetchone())[0]
-            async with conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL") as cursor:
+            async with conn.execute(
+                "SELECT DISTINCT project FROM facts WHERE valid_until IS NULL"
+            ) as cursor:
                 projects = [p[0] for p in await cursor.fetchall()]
             async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
                 tx_count = (await cursor.fetchone())[0]

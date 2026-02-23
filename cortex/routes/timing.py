@@ -44,7 +44,9 @@ async def record_heartbeat(
     except sqlite3.Error as e:
         logger.error("Heartbeat failed: %s", e)
         lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=500, detail=get_trans("error_heartbeat_failed", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_heartbeat_failed", lang)
+        ) from None
 
 
 @router.get("/v1/time/today", response_model=TimeSummaryResponse)
@@ -58,7 +60,10 @@ async def time_today(
     if auth.tenant_id != "default":
         if project and project != auth.tenant_id:
             raise HTTPException(
-                status_code=403, detail=get_trans("error_timing_forbidden", request.headers.get("Accept-Language", "en"))
+                status_code=403,
+                detail=get_trans(
+                    "error_timing_forbidden", request.headers.get("Accept-Language", "en")
+                ),
             )
         project = auth.tenant_id
 
@@ -75,7 +80,12 @@ async def time_today(
         )
     except sqlite3.Error as e:
         logger.error("Time summary failed: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_time_summary_failed", request.headers.get("Accept-Language", "en"))) from None
+        raise HTTPException(
+            status_code=500,
+            detail=get_trans(
+                "error_time_summary_failed", request.headers.get("Accept-Language", "en")
+            ),
+        ) from None
 
 
 @router.get("/v1/time", response_model=TimeSummaryResponse)
@@ -90,7 +100,10 @@ async def time_report(
     if auth.tenant_id != "default":
         if project and project != auth.tenant_id:
             raise HTTPException(
-                status_code=403, detail=get_trans("error_timing_forbidden", request.headers.get("Accept-Language", "en"))
+                status_code=403,
+                detail=get_trans(
+                    "error_timing_forbidden", request.headers.get("Accept-Language", "en")
+                ),
             )
         project = auth.tenant_id
 
@@ -107,7 +120,12 @@ async def time_report(
         )
     except sqlite3.Error as e:
         logger.error("Time report failed: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_time_report_failed", request.headers.get("Accept-Language", "en"))) from None
+        raise HTTPException(
+            status_code=500,
+            detail=get_trans(
+                "error_time_report_failed", request.headers.get("Accept-Language", "en")
+            ),
+        ) from None
 
 
 @router.get("/v1/time/history")
@@ -121,4 +139,9 @@ async def get_time_history(
         return await run_in_threadpool(api_state.tracker.daily, days=days)
     except sqlite3.Error as e:
         logger.error("Time history failed: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_time_history_failed", request.headers.get("Accept-Language", "en"))) from None
+        raise HTTPException(
+            status_code=500,
+            detail=get_trans(
+                "error_time_history_failed", request.headers.get("Accept-Language", "en")
+            ),
+        ) from None

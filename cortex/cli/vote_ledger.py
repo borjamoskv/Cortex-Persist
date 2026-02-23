@@ -122,9 +122,7 @@ def _print_chain_report(report: dict) -> None:
 
     console.print("[red]❌ Integridad de Cadena de Hashes: FALLIDA[/]")
     for v in report["violations"]:
-        console.print(
-            f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}"
-        )
+        console.print(f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}")
 
 
 def _print_merkle_report(merkle_report: list[dict]) -> None:
@@ -154,7 +152,9 @@ def ledger_verify(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                ledger_inst = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
+                ledger_inst = ImmutableVoteLedger(
+                    engine._pool if hasattr(engine, "_pool") else conn
+                )
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"
                 ):

@@ -32,9 +32,7 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
             decisions=decision_list,
             source=source,
         )
-        console.print(
-            f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]"
-        )
+        console.print(f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]")
         if error_list:
             console.print(f"  [red]✗[/] {len(error_list)} error(s) logged")
         if decision_list:

@@ -139,9 +139,7 @@ class TestGenerateReflection:
             summary="Verified that reflection confidence is set correctly",
         )
         conn = engine._get_sync_conn()
-        row = conn.execute(
-            "SELECT confidence FROM facts WHERE id = ?", (fact_id,)
-        ).fetchone()
+        row = conn.execute("SELECT confidence FROM facts WHERE id = ?", (fact_id,)).fetchone()
         assert row[0] == "confirmed"
 
 
@@ -228,6 +226,7 @@ class TestFormatters:
         ]
         output = format_injection_json(learnings)
         import json
+
         data = json.loads(output)
         assert len(data) == 1
         assert data[0]["fact_id"] == 42

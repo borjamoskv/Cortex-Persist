@@ -1,6 +1,7 @@
 """
 Shared utilities for compaction strategies.
 """
+
 import hashlib
 from difflib import SequenceMatcher
 

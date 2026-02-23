@@ -8,6 +8,7 @@
 ![Status](https://img.shields.io/badge/status-production-green.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
 [![Docs](https://img.shields.io/badge/docs-live-brightgreen)](https://borjamoskv.github.io/cortex/)
+[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
 ---
 
@@ -20,6 +21,7 @@ AI agents are making millions of decisions per day. But **who verifies those dec
 - **Letta** manages agent state. But can you generate a compliance report for regulators?
 
 The **EU AI Act (Article 12, enforced August 2026)** requires:
+
 - ✅ Automatic logging of all agent decisions
 - ✅ Tamper-proof storage of decision records
 - ✅ Full traceability and explainability
@@ -111,7 +113,7 @@ uvicorn cortex.api:app --port 8484
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         CORTEX Trust Engine             │
 ├─────────────┬─────────────┬─────────────┤
@@ -124,6 +126,18 @@ uvicorn cortex.api:app --port 8484
 │  REST API (FastAPI) │ MCP Server (stdio) │
 └─────────────────────┴────────────────────┘
 ```
+
+---
+
+## Cross-Platform Architecture
+
+CORTEX is a sovereign agentic OS designed to run natively on any environment without Docker. It supports:
+
+- **macOS** (launchd & osascript)
+- **Linux** (systemd & notify-send)
+- **Windows** (Task Scheduler & PowerShell)
+
+Read the full [Cross-Platform Architecture Guide](docs/cross_platform_guide.md) to understand the underlying implementation and learn how to write OS-agnostic plugins.
 
 ---
 

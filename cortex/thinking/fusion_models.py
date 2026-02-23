@@ -20,15 +20,75 @@ from typing import Any
 # ─── Constantes ──────────────────────────────────────────────────────
 
 # Palabras demasiado comunes para afectar el agreement
-_STOPWORDS = frozenset({
-    "the", "is", "a", "an", "and", "or", "but", "in", "on", "at", "to",
-    "for", "of", "with", "by", "from", "as", "it", "that", "this",
-    "are", "was", "were", "be", "been", "being", "have", "has", "had",
-    "do", "does", "did", "will", "would", "could", "should", "may",
-    "might", "can", "not", "no", "so", "if", "then", "than", "more",
-    "el", "la", "los", "las", "un", "una", "de", "del", "en", "con",
-    "por", "para", "que", "es", "son", "como", "más", "pero", "sin",
-})
+_STOPWORDS = frozenset(
+    {
+        "the",
+        "is",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "as",
+        "it",
+        "that",
+        "this",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "can",
+        "not",
+        "no",
+        "so",
+        "if",
+        "then",
+        "than",
+        "more",
+        "el",
+        "la",
+        "los",
+        "las",
+        "un",
+        "una",
+        "de",
+        "del",
+        "en",
+        "con",
+        "por",
+        "para",
+        "que",
+        "es",
+        "son",
+        "como",
+        "más",
+        "pero",
+        "sin",
+    }
+)
 
 _PUNCT_RE = re.compile(r"[.,!?;:\"'()\[\]{}—–\-/\\<>@#$%^&*~`|+=]")
 
@@ -110,6 +170,7 @@ class FusedThought:
 @dataclass
 class _ModelStats:
     """Estadísticas acumuladas por modelo."""
+
     wins: int = 0
     participations: int = 0
     total_latency_ms: float = 0.0
@@ -175,10 +236,7 @@ def _tokenize(text: str) -> set[str]:
     evitar duplicación.
     """
     cleaned = _PUNCT_RE.sub(" ", text.lower())
-    return {
-        w for w in cleaned.split()
-        if len(w) > 2 and w not in _STOPWORDS
-    }
+    return {w for w in cleaned.split() if len(w) > 2 and w not in _STOPWORDS}
 
 
 def _jaccard(set_a: set[str], set_b: set[str]) -> float:

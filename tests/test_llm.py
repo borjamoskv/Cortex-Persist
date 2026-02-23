@@ -46,6 +46,7 @@ def client():
 def api_key(client):
     """Bootstrap API key programmatically to avoid HTTP auth conflicts."""
     from cortex.auth import get_auth_manager
+
     manager = get_auth_manager()
     raw_key, _ = manager.create_key(
         name="test-llm",

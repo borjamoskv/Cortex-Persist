@@ -150,10 +150,7 @@ class MCPGuard:
         normalized = url.rstrip("/")
         allowed = [u.rstrip("/") for u in cls._ALLOWED_TOOLBOX_URLS]
         if normalized not in allowed:
-            raise ValueError(
-                f"Toolbox URL '{url}' not in allowlist. "
-                f"Allowed: {', '.join(allowed)}"
-            )
+            raise ValueError(f"Toolbox URL '{url}' not in allowlist. Allowed: {', '.join(allowed)}")
 
     @classmethod
     def add_allowed_toolbox_url(cls, url: str) -> None:
@@ -177,10 +174,5 @@ class MCPGuard:
 
         for key, value in parameters.items():
             if isinstance(value, str) and cls.detect_poisoning(value):
-                logger.warning(
-                    "GUARD: Poisoning attempt in external query param %s", key
-                )
-                raise ValueError(
-                    f"parameter '{key}' rejected: suspicious pattern detected"
-                )
-
+                logger.warning("GUARD: Poisoning attempt in external query param %s", key)
+                raise ValueError(f"parameter '{key}' rejected: suspicious pattern detected")

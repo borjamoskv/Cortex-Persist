@@ -24,7 +24,7 @@ import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -33,6 +33,14 @@ logger = logging.getLogger("cortex.compactor")
 
 
 _LOG_FMT = "Compactor [%s] %s"
+
+__all__ = [
+    "CompactionStrategy",
+    "CompactionResult",
+    "compact",
+    "compact_session",
+    "get_compaction_stats",
+]
 
 
 # ─── Strategy Enum ───────────────────────────────────────────────────
@@ -70,7 +78,7 @@ class CompactionResult:
     def reduction(self) -> int:
         return self.original_count - self.compacted_count
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "project": self.project,
             "strategies_applied": self.strategies_applied,
@@ -101,23 +109,30 @@ def _apply_strategies(
     if CompactionStrategy.DEDUP in strategies:
         from cortex.compaction.strategies.dedup import execute_dedup
 
+        prev_count = len(result.deprecated_ids)
         execute_dedup(engine, project, result, dry_run, similarity_threshold)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
     if CompactionStrategy.MERGE_ERRORS in strategies:
         from cortex.compaction.strategies.merge_errors import (
             execute_merge_errors,
         )
 
+        prev_count = len(result.deprecated_ids)
         execute_merge_errors(engine, project, result, dry_run)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
 
     if CompactionStrategy.STALENESS_PRUNE in strategies:
         from cortex.compaction.strategies.staleness import (
             execute_staleness_prune,
         )
 
-        execute_staleness_prune(
-            engine, project, result, dry_run, max_age_days, min_consensus
-        )
+        prev_count = len(result.deprecated_ids)
+        execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
 
 
 def compact(
@@ -143,9 +158,7 @@ def compact(
         (project,),
     ).fetchone()[0]
 
-    result = CompactionResult(
-        project=project, original_count=count_before, dry_run=dry_run
-    )
+    result = CompactionResult(project=project, original_count=count_before, dry_run=dry_run)
 
     _apply_strategies(
         engine,
@@ -215,16 +228,19 @@ def compact_session(
     """
     conn = engine._get_sync_conn()
     rows = conn.execute(
-        "SELECT id, content, fact_type, tags, consensus_score, created_at "
-        "FROM facts WHERE project = ? AND valid_until IS NULL "
-        "ORDER BY "
-        "  CASE fact_type "
-        "    WHEN 'axiom' THEN 0 WHEN 'decision' THEN 1 "
-        "    WHEN 'rule' THEN 2 WHEN 'error' THEN 3 "
-        "    WHEN 'knowledge' THEN 4 WHEN 'ghost' THEN 5 "
-        "    ELSE 6 END, "
-        "  consensus_score DESC, created_at DESC "
-        "LIMIT ?",
+        """
+        SELECT id, content, fact_type, tags, consensus_score, created_at 
+        FROM facts WHERE project = ? AND valid_until IS NULL 
+        ORDER BY 
+          CASE fact_type 
+            WHEN 'axiom' THEN 0 WHEN 'decision' THEN 1 
+            WHEN 'rule' THEN 2 WHEN 'error' THEN 3 
+            WHEN 'knowledge' THEN 4 WHEN 'ghost' THEN 5 
+            WHEN 'intent' THEN 6 WHEN 'schema' THEN 7
+            ELSE 8 END, 
+          consensus_score DESC, created_at DESC 
+        LIMIT ?
+        """,
         (project, max_facts),
     ).fetchall()
 
@@ -238,9 +254,7 @@ def compact_session(
     return _format_session_context(project, by_type)
 
 
-def _format_session_context(
-    project: str, by_type: dict[str, list[tuple]]
-) -> str:
+def _format_session_context(project: str, by_type: dict[str, list[tuple]]) -> str:
     """Format grouped facts into markdown context."""
     lines = [f"# {project}", ""]
 
@@ -256,9 +270,7 @@ def _format_session_context(
     return "\n".join(lines)
 
 
-def _append_type_section(
-    lines: list[str], fact_type: str, facts: list[tuple]
-) -> None:
+def _append_type_section(lines: list[str], fact_type: str, facts: list[tuple]) -> None:
     """Append a fact type section to the output lines."""
     lines.append(f"## {fact_type.capitalize()} ({len(facts)})")
     lines.append("")
@@ -273,7 +285,7 @@ def _append_type_section(
 def get_compaction_stats(
     engine: CortexEngine,
     project: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Get compaction history and statistics."""
     conn = engine._get_sync_conn()
 
@@ -322,7 +334,7 @@ def get_compaction_stats(
 
 
 def _log_compaction(
-    conn,
+    conn: sqlite3.Connection,
     project: str,
     strategies: list[str],
     original_ids: list[int],

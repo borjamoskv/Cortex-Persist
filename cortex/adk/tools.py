@@ -101,13 +101,15 @@ def adk_search(
 
         formatted = []
         for r in results:
-            formatted.append({
-                "fact_id": r.fact_id,
-                "score": round(r.score, 3),
-                "project": r.project,
-                "fact_type": r.fact_type,
-                "content": r.content,
-            })
+            formatted.append(
+                {
+                    "fact_id": r.fact_id,
+                    "score": round(r.score, 3),
+                    "project": r.project,
+                    "fact_type": r.fact_type,
+                    "content": r.content,
+                }
+            )
 
         return {"status": "success", "results": formatted, "count": len(formatted)}
     except (sqlite3.Error, OSError, RuntimeError) as exc:

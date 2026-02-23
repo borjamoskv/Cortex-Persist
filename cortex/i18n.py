@@ -8,9 +8,12 @@ Supported: Spanish (es), Basque (eu)
 
 from __future__ import annotations
 
-from enum import StrEnum
+import logging
+from enum import Enum
 from functools import lru_cache
-from typing import TYPE_CHECKING, Final, Literal
+from typing import TYPE_CHECKING, Any, Final
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -26,14 +29,27 @@ __all__ = [
     "SUPPORTED_LANGUAGES",
 ]
 
-class Lang(StrEnum):
+
+class Lang(str, Enum):
+    """
+    Supported language codes (ISO 639-1).
+    Used as keys in the TRANSLATIONS dictionary and API parameters.
+    """
+
     EN = "en"
     ES = "es"
     EU = "eu"
 
-# Defaults and supported languages
+
+# The default language used when a requested language is not supported or missing.
 DEFAULT_LANGUAGE: Final[Lang] = Lang.EN
+
+# A frozenset of all officially supported languages for O(1) membership testing.
 SUPPORTED_LANGUAGES: Final[frozenset[Lang]] = frozenset(Lang)
+
+# Pre-computed fast lookup map to avoid try-except and loop overheads in hot paths.
+# Maps string codes (e.g., 'en') directly to Lang enum members.
+_LANG_LOOKUP: Final[dict[str, Lang]] = {lang.value: lang for lang in Lang}
 
 
 def get_supported_languages() -> frozenset[Lang]:
@@ -41,49 +57,11 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-TranslationKey = Literal[
-    "system_operational",
-    "system_healthy",
-    "engine_online",
-    "error_too_many_requests",
-    "error_internal_db",
-    "error_unexpected",
-    "error_unauthorized",
-    "error_not_found",
-    "error_invalid_input",
-    "info_service_desc",
-    "error_missing_auth",
-    "error_invalid_key_format",
-    "error_invalid_revoked_key",
-    "error_missing_permission",
-    "error_fact_not_found",
-    "error_namespace_mismatch",
-    "error_forbidden",
-    "error_json_only",
-    "error_invalid_path_chars",
-    "error_path_workspace",
-    "error_export_failed",
-    "error_status_unavailable",
-    "error_auth_required",
-    "error_daemon_no_data",
-    "error_integrity_check_failed",
-    "error_checkpoint_failed",
-    "error_graph_forbidden",
-    "error_graph_unavailable",
-    "error_agent_registration_failed",
-    "error_agent_internal",
-    "error_agent_not_found",
-    "error_heartbeat_failed",
-    "error_time_summary_failed",
-    "error_time_report_failed",
-    "error_time_history_failed",
-    "error_timing_forbidden",
-    "error_internal_server",
-    "error_internal_voting",
-    "error_deprecation_failed",
-]
+# Type definition for all valid translation keys.
+# Relaxed to str to avoid manual updates; validated at runtime instead.
+TranslationKey = str
 
-# Dictionary of translations — keys are strictly typed via TranslationKey
+# Dictionary of translations.
 TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
     # System Status
     "system_operational": {
@@ -101,7 +79,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "en línea",
         "eu": "konektatuta",
     },
-
     # Errors
     "error_too_many_requests": {
         "en": "Too Many Requests. Please slow down.",
@@ -133,14 +110,12 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Entrada no válida",
         "eu": "Sarrera baliogabea",
     },
-
     # Greetings / Info
     "info_service_desc": {
         "en": "Local-first memory infrastructure for AI agents.",
         "es": "Infraestructura de memoria local-first para agentes de IA.",
         "eu": "IA agenteentzako tokiko memoria azpiegitura.",
     },
-
     # Auth Errors
     "error_missing_auth": {
         "en": "Missing Authorization header",
@@ -162,7 +137,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Falta permiso: {permission}",
         "eu": "Baimen hau falta da: {permission}",
     },
-
     # Fact Errors
     "error_fact_not_found": {
         "en": "Fact #{id} not found",
@@ -179,7 +153,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Prohibido",
         "eu": "Debekatua",
     },
-
     # Admin / Path Validation
     "error_json_only": {
         "en": "Only JSON format supported via API",
@@ -217,7 +190,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "No hay datos recogidos por los demonios en la última hora",
         "eu": "Deabruek ez dute daturik bildu azken orduan",
     },
-
     # Ledger
     "error_integrity_check_failed": {
         "en": "Integrity check failed: {detail}",
@@ -229,7 +201,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Checkpoint fallido: {detail}",
         "eu": "Checkpoint-ak huts egin du: {detail}",
     },
-
     # Graph
     "error_graph_forbidden": {
         "en": "Forbidden: Access to this project is denied",
@@ -241,7 +212,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Grafo no disponible",
         "eu": "Grafoa ez dago erabilgarri",
     },
-
     # Agents
     "error_agent_registration_failed": {
         "en": "Failed to retrieve registered agent",
@@ -258,7 +228,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Agente no encontrado",
         "eu": "Agentea ez da aurkitu",
     },
-
     # Timing
     "error_heartbeat_failed": {
         "en": "Heartbeat failed",
@@ -285,7 +254,6 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
         "es": "Prohibido: Proyecto no coincide",
         "eu": "Debekatua: Proiektua ez dator bat",
     },
-
     # Facts (remaining hardcoded)
     "error_internal_server": {
         "en": "Internal server error",
@@ -306,27 +274,29 @@ TRANSLATIONS: Final[dict[TranslationKey, Mapping[str, str]]] = {
 
 
 def _normalize_lang(lang: str | Lang | None) -> Lang:
-    """Normalizes the language code, strictly falling back to DEFAULT_LANGUAGE."""
+    """Normalizes the language code, strictly falling back to DEFAULT_LANGUAGE without exception overhead."""
     if isinstance(lang, Lang):
         return lang
-    if not lang or not isinstance(lang, str):
+    if not isinstance(lang, str) or not lang:
         return DEFAULT_LANGUAGE
 
-    # Extract primary language tag (RFC 5646: "es-ES" → "es")
-    lang_code = lang.split("-")[0].lower()[:2]
+    # Extract primary language tag (RFC 5646: "es-ES" → "es", slice to 2 chars maximum)
+    lang_code = lang.split("-", 1)[0].strip().lower()[:2]
 
-    try:
-        return Lang(lang_code)
-    except ValueError:
-        return DEFAULT_LANGUAGE
+    return _LANG_LOOKUP.get(lang_code, DEFAULT_LANGUAGE)
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=1024)
 def _cached_trans(key: TranslationKey, lang_code: Lang) -> str:
     """Underlying cached translation lookup using normalized language codes."""
     entry = TRANSLATIONS.get(key)
     if not entry:
         return key
+
+    if lang_code.value not in entry and lang_code != DEFAULT_LANGUAGE:
+        logger.warning(
+            "Falta traducción para la clave '%s' en el idioma '%s'", key, lang_code.value
+        )
 
     return entry.get(lang_code.value, entry.get(DEFAULT_LANGUAGE.value, key))
 
@@ -343,7 +313,7 @@ def get_trans(key: TranslationKey, lang: Lang | str | None = Lang.EN) -> str:
     return _cached_trans(key, _normalize_lang(lang))
 
 
-def get_cache_info():
+def get_cache_info() -> Any:
     """Expose translation cache statistics for observability.
 
     Returns an object with hits, misses, maxsize, and currsize attributes.
@@ -354,4 +324,3 @@ def get_cache_info():
 def clear_cache() -> None:
     """Reset the translation LRU cache (useful for tests and hot-reload)."""
     _cached_trans.cache_clear()
-

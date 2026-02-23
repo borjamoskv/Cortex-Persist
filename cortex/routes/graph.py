@@ -37,7 +37,9 @@ async def get_graph(
         return await _get_graph(conn, project, limit)
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_graph_unavailable", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_graph_unavailable", lang)
+        ) from None
 
 
 @router.get("/v1/graph")
@@ -54,4 +56,6 @@ async def get_graph_all(
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)
         lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=500, detail=get_trans("error_graph_unavailable", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_graph_unavailable", lang)
+        ) from None

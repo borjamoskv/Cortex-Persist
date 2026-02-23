@@ -11,18 +11,13 @@ router = APIRouter(tags=["daemon"])
 
 
 @router.get("/v1/daemon/status")
-def daemon_status(
-    request: Request,
-    auth: AuthResult = Depends(require_permission("read"))
-) -> dict:
+def daemon_status(request: Request, auth: AuthResult = Depends(require_permission("read"))) -> dict:
     """Get last daemon watchdog check results."""
     from cortex.daemon import MoskvDaemon
+
     lang = request.headers.get("Accept-Language", "en")
 
     status = MoskvDaemon.load_status()
     if not status:
-        return {
-            "status": "no_data",
-            "message": get_trans("error_daemon_no_data", lang)
-        }
+        return {"status": "no_data", "message": get_trans("error_daemon_no_data", lang)}
     return status

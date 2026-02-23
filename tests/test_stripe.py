@@ -105,7 +105,11 @@ class TestCheckout:
 
         resp = client.post(
             "/v1/stripe/checkout",
-            json={"plan": "pro", "success_url": "https://example.com/success", "cancel_url": "https://example.com/cancel"},
+            json={
+                "plan": "pro",
+                "success_url": "https://example.com/success",
+                "cancel_url": "https://example.com/cancel",
+            },
         )
 
         assert resp.status_code == 200

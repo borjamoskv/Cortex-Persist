@@ -1,6 +1,7 @@
 """
 CORTEX v4.0 — SovereignGate Core Logic.
 """
+
 import hashlib
 import hmac
 import json
@@ -17,7 +18,7 @@ from .exceptions import GateError, GateExpired, GateInvalidSignature, GateNotApp
 from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
 
 logger = logging.getLogger("cortex.gate")
-_gate_instance: Optional['SovereignGate'] = None
+_gate_instance: Optional["SovereignGate"] = None
 
 
 class SovereignGate:
@@ -50,12 +51,12 @@ class SovereignGate:
         self.policy = policy
         self.timeout = timeout
         self._secret = (
-            secret
-            or os.environ.get("CORTEX_GATE_SECRET")
-            or os.environ.get("CORTEX_VAULT_KEY")
+            secret or os.environ.get("CORTEX_GATE_SECRET") or os.environ.get("CORTEX_VAULT_KEY")
         )
         if not self._secret:
-            logger.warning("No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session.")
+            logger.warning(
+                "No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session."
+            )
             self._secret = secrets.token_hex(32)
 
         if isinstance(self._secret, str):

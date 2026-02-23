@@ -96,6 +96,37 @@ class MejoraloAlert:
 
 
 @dataclass
+class EntropyAlert:
+    """Alerta de incremento de complejidad o deuda técnica (ENTROPY-0)."""
+
+    project: str
+    file_path: str
+    complexity_score: int
+    message: str
+
+
+@dataclass
+class PerceptionAlert:
+    """Anomalous or highly confident behavioral pattern detected."""
+
+    project: str
+    intent: str
+    emotion: str
+    confidence: str
+    summary: str
+
+
+@dataclass
+class NeuralIntentAlert:
+    """Zero-latency intent inferred from macOS implicit context."""
+
+    intent: str
+    confidence: str
+    trigger: str
+    summary: str
+
+
+@dataclass
 class DaemonStatus:
     """Full daemon check result — persisted to disk."""
 
@@ -108,6 +139,9 @@ class DaemonStatus:
     engine_alerts: list[EngineHealthAlert] = field(default_factory=list)
     disk_alerts: list[DiskAlert] = field(default_factory=list)
     mejoralo_alerts: list[MejoraloAlert] = field(default_factory=list)
+    entropy_alerts: list[EntropyAlert] = field(default_factory=list)
+    perception_alerts: list[PerceptionAlert] = field(default_factory=list)
+    neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -119,6 +153,9 @@ class DaemonStatus:
             and len(self.cert_alerts) == 0
             and len(self.engine_alerts) == 0
             and len(self.disk_alerts) == 0
+            and len(self.entropy_alerts) == 0
+            and len(self.perception_alerts) == 0
+            and len(self.neural_alerts) == 0
             and len(self.errors) == 0
         )
 
@@ -177,6 +214,34 @@ class DaemonStatus:
                     "total_loc": m.total_loc,
                 }
                 for m in self.mejoralo_alerts
+            ],
+            "entropy_alerts": [
+                {
+                    "project": e.project,
+                    "file_path": e.file_path,
+                    "complexity_score": e.complexity_score,
+                    "message": e.message,
+                }
+                for e in self.entropy_alerts
+            ],
+            "perception_alerts": [
+                {
+                    "project": p.project,
+                    "intent": p.intent,
+                    "emotion": p.emotion,
+                    "confidence": p.confidence,
+                    "summary": p.summary,
+                }
+                for p in self.perception_alerts
+            ],
+            "neural_alerts": [
+                {
+                    "intent": n.intent,
+                    "confidence": n.confidence,
+                    "trigger": n.trigger,
+                    "summary": n.summary,
+                }
+                for n in self.neural_alerts
             ],
             "errors": self.errors,
         }

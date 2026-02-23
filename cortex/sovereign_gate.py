@@ -84,6 +84,12 @@ class PendingAction:
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary for API responses and audit log."""
+
+        def _to_iso(ts: float | None) -> str | None:
+            if not ts:
+                return None
+            return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+
         return {
             "action_id": self.action_id,
             "level": self.level.value,
@@ -91,12 +97,9 @@ class PendingAction:
             "command": self.command,
             "project": self.project,
             "status": self.status.value,
-            "created_at": datetime.fromtimestamp(self.created_at, tz=timezone.utc).isoformat(),
-            "approved_at": (
-                datetime.fromtimestamp(self.approved_at, tz=timezone.utc).isoformat()
-                if self.approved_at
-                else None
-            ),
+            "created_at": _to_iso(self.created_at),
+            "approved_at": _to_iso(self.approved_at),
+            "executed_at": _to_iso(self.executed_at),
             "operator_id": self.operator_id,
         }
 
@@ -138,6 +141,8 @@ class SovereignGate:
     """
 
     DEFAULT_TIMEOUT = 300  # 5 minutes
+    MAX_AUDIT_LOGS = 1000
+    MAX_PENDING_AGE_S = 86400  # 24 hours
 
     def __init__(
         self,
@@ -153,12 +158,12 @@ class SovereignGate:
         self.policy = policy
         self.timeout = timeout
         self._secret = (
-            secret
-            or os.environ.get("CORTEX_GATE_SECRET")
-            or os.environ.get("CORTEX_VAULT_KEY")
+            secret or os.environ.get("CORTEX_GATE_SECRET") or os.environ.get("CORTEX_VAULT_KEY")
         )
         if not self._secret:
-            logger.warning("No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session.")
+            logger.warning(
+                "No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session."
+            )
             self._secret = secrets.token_hex(32)
 
         if isinstance(self._secret, str):
@@ -288,22 +293,33 @@ class SovereignGate:
             return True
 
         # ENFORCE mode — actual interactive prompt
-        print(f"\n{'=' * 60}")
-        print("⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
-        print(f"{'=' * 60}")
-        print(f"  Action:  {action.description}")
-        print(f"  Level:   {action.level.value}")
-        print(f"  Project: {action.project or 'N/A'}")
+        c_cyan = "\033[36m"
+        c_green = "\033[32m"
+        c_red = "\033[31m"
+        c_yellow = "\033[33m"
+        c_reset = "\033[0m"
+        c_bold = "\033[1m"
+
+        print(f"\n{c_cyan}={'=' * 60}{c_reset}")
+        print(f"{c_bold}{c_cyan}⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED{c_reset}")
+        print(f"{c_cyan}={'=' * 60}{c_reset}")
+        print(f"  {c_yellow}Action: {c_reset} {action.description}")
+        print(f"  {c_yellow}Level:  {c_reset} {action.level.value}")
+        print(f"  {c_yellow}Project:{c_reset} {action.project or 'N/A'}")
         if action.command:
             cmd_str = " ".join(action.command)
             if len(cmd_str) > 100:
                 cmd_str = cmd_str[:100] + "..."
-            print(f"  Command: {cmd_str}")
-        print(f"  ID:      {action_id}")
-        print(f"{'=' * 60}")
+            print(f"  {c_yellow}Command:{c_reset} {cmd_str}")
+        print(f"  {c_yellow}ID:     {c_reset} {action_id}")
+        print(f"{c_cyan}={'=' * 60}{c_reset}")
 
         try:
-            response = input("  ¿Aprobar ejecución? [s/N]: ").strip().lower()
+            response = (
+                input(f"  {c_bold}¿Aprobar ejecución? [{c_green}s{c_reset}/{c_red}N{c_reset}]: ")
+                .strip()
+                .lower()
+            )
         except (EOFError, KeyboardInterrupt):
             response = "n"
 
@@ -318,6 +334,7 @@ class SovereignGate:
             action.status = ActionStatus.DENIED
             self._log_audit("ACTION_DENIED", action)
             logger.warning("❌ Gate: Action %s denied by operator", action_id)
+            print(f"\n{c_red}❌ Operación cancelada por el operador.{c_reset}\n")
             raise GateNotApproved(f"Action {action_id} denied by operator")
 
     def deny(self, action_id: str, reason: str = "") -> None:
@@ -375,11 +392,12 @@ class SovereignGate:
 
     def get_status(self) -> dict[str, Any]:
         """Return gate status summary."""
+        from collections import Counter
+
         self._sweep_expired()
-        statuses = {}
-        for a in self._pending.values():
-            s = a.status.value
-            statuses[s] = statuses.get(s, 0) + 1
+
+        statuses = Counter(a.status.value for a in self._pending.values())
+
         return {
             "policy": self.policy.value,
             "timeout_seconds": int(self.timeout),
@@ -401,17 +419,29 @@ class SovereignGate:
         return action
 
     def _sweep_expired(self) -> int:
-        """Mark expired pending actions. Returns count of expired."""
+        """Mark expired pending actions and garbage collect very old ones. Returns count of newly expired."""
         count = 0
-        for action in self._pending.values():
+        now = time.time()
+        to_delete = []
+
+        for key, action in self._pending.items():
+            # Mark as EXPIRED if pending and timeout reached
             if action.status == ActionStatus.PENDING and action.is_expired(self.timeout):
                 action.status = ActionStatus.EXPIRED
                 self._log_audit("ACTION_AUTO_EXPIRED", action)
                 count += 1
+
+            # GC check: remove from memory if older than 24h
+            if now - action.created_at > self.MAX_PENDING_AGE_S:
+                to_delete.append(key)
+
+        for key in to_delete:
+            del self._pending[key]
+
         return count
 
     def _log_audit(self, event: str, action: PendingAction) -> None:
-        """Append to the in-memory audit log."""
+        """Append to the in-memory audit log, enforcing memory bounds."""
         entry = {
             "event": event,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -419,6 +449,9 @@ class SovereignGate:
         }
         self._audit_log.append(entry)
 
+        # Enforce memory bounds
+        if len(self._audit_log) > self.MAX_AUDIT_LOGS:
+            self._audit_log = self._audit_log[-self.MAX_AUDIT_LOGS :]
 
 
 # ─── Singleton Access ─────────────────────────────────────────────────

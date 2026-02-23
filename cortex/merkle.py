@@ -54,13 +54,9 @@ class MerkleTree:
             left = nodes[i]
             # Use same node if odd count (duplicate right sibling)
             right = nodes[i + 1] if i + 1 < len(nodes) else left
-            
+
             next_level.append(
-                MerkleNode(
-                    hash=self._hash_pair(left.hash, right.hash),
-                    left=left,
-                    right=right
-                )
+                MerkleNode(hash=self._hash_pair(left.hash, right.hash), left=left, right=right)
             )
 
         return self._build_tree(next_level)
@@ -95,8 +91,10 @@ class MerkleTree:
             for i in range(0, len(current_level), 2):
                 left = current_level[i]
                 r = current_level[i + 1] if i + 1 < len(current_level) else left
-                next_level.append(MerkleNode(hash=self._hash_pair(left.hash, r.hash), left=left, right=r))
-            
+                next_level.append(
+                    MerkleNode(hash=self._hash_pair(left.hash, r.hash), left=left, right=r)
+                )
+
             current_level = next_level
             curr_idx //= 2
 

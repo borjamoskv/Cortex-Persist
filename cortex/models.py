@@ -15,7 +15,9 @@ class StoreRequest(BaseModel):
         "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
-    source: str | None = Field(None, max_length=200, description="Source of the fact (e.g. agent name)")
+    source: str | None = Field(
+        None, max_length=200, description="Source of the fact (e.g. agent name)"
+    )
     meta: dict | None = Field(None, description="Optional JSON metadata")
 
     @field_validator("project", "content")
@@ -39,8 +41,12 @@ class SearchRequest(BaseModel):
     as_of: str | None = Field(None, description="Temporal filter (ISO 8601)")
     fact_type: str | None = Field(None, description="Filter by fact type")
     tags: list[str] | None = Field(None, description="Filter by tags")
-    graph_depth: int = Field(0, ge=0, le=5, description="Enable Graph-RAG (0=off, >0=depth of context traversal)")
-    include_graph: bool = Field(False, description="Include the localized context subgraph in response")
+    graph_depth: int = Field(
+        0, ge=0, le=5, description="Enable Graph-RAG (0=off, >0=depth of context traversal)"
+    )
+    include_graph: bool = Field(
+        False, description="Include the localized context subgraph in response"
+    )
 
     @field_validator("query")
     @classmethod
@@ -64,7 +70,9 @@ class SearchResult(BaseModel):
     valid_until: str | None = None
     tx_id: int | None = None
     hash: str | None = None
-    context: dict | None = Field(None, description="Graph-RAG context (subgraph or related entities)")
+    context: dict | None = Field(
+        None, description="Graph-RAG context (subgraph or related entities)"
+    )
 
 
 class VoteRequest(BaseModel):

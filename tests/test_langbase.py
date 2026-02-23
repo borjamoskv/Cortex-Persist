@@ -278,10 +278,20 @@ class TestSync:
         """Test syncing CORTEX facts to Langbase Memory."""
         # Mock engine
         engine = AsyncMock()
-        engine.recall = AsyncMock(return_value=[
-            FakeFact(id=1, project="cortex", content="First decision"),
-            FakeFact(id=2, project="cortex", content="Second decision"),
-        ])
+        engine.recall = AsyncMock(
+            return_value=[
+                FakeFact(
+                    id=1,
+                    project="cortex",
+                    content="First decision - padded to satisfy 20 chars min",
+                ),
+                FakeFact(
+                    id=2,
+                    project="cortex",
+                    content="Second decision - padded to satisfy 20 chars min",
+                ),
+            ]
+        )
 
         # Mock client
         client = AsyncMock()
@@ -323,10 +333,12 @@ class TestSync:
         engine.store = AsyncMock(return_value=1)
 
         client = AsyncMock()
-        client.retrieve_memory = AsyncMock(return_value=[
-            {"content": "External knowledge chunk 1", "score": 0.9},
-            {"content": "External knowledge chunk 2", "score": 0.7},
-        ])
+        client.retrieve_memory = AsyncMock(
+            return_value=[
+                {"content": "External knowledge chunk 1", "score": 0.9},
+                {"content": "External knowledge chunk 2", "score": 0.7},
+            ]
+        )
 
         result = await enrich_from_langbase(
             client=client,
@@ -354,8 +366,18 @@ class TestPipe:
     def test_format_facts(self):
         """Test formatting search results into context."""
         facts = [
-            FakeSearchResult(fact_id=1, project="cortex", content="Decision A", score=0.95),
-            FakeSearchResult(fact_id=2, project="cortex", content="Decision B", score=0.80),
+            FakeSearchResult(
+                fact_id=1,
+                project="cortex",
+                content="Decision A - padded to satisfy 20 chars min",
+                score=0.95,
+            ),
+            FakeSearchResult(
+                fact_id=2,
+                project="cortex",
+                content="Decision B - padded to satisfy 20 chars min",
+                score=0.80,
+            ),
         ]
 
         result = _format_facts(facts)
@@ -369,16 +391,20 @@ class TestPipe:
         """Test running a Pipe with CORTEX memory injection."""
         # Mock CORTEX engine
         engine = AsyncMock()
-        engine.search = AsyncMock(return_value=[
-            FakeSearchResult(fact_id=42, project="cortex", content="CORTEX uses vector search"),
-        ])
+        engine.search = AsyncMock(
+            return_value=[
+                FakeSearchResult(fact_id=42, project="cortex", content="CORTEX uses vector search"),
+            ]
+        )
 
         # Mock Langbase client
         client = AsyncMock()
-        client.run_pipe = AsyncMock(return_value={
-            "completion": "Based on the facts, CORTEX uses vector search for semantic retrieval.",
-            "threadId": "t-789",
-        })
+        client.run_pipe = AsyncMock(
+            return_value={
+                "completion": "Based on the facts, CORTEX uses vector search for semantic retrieval.",
+                "threadId": "t-789",
+            }
+        )
 
         result = await run_with_cortex_context(
             client=client,
@@ -446,11 +472,17 @@ class TestErrorHandling:
     async def test_sync_with_upload_errors(self):
         """Test sync continues despite individual upload failures."""
         engine = AsyncMock()
-        engine.recall = AsyncMock(return_value=[
-            FakeFact(id=1, project="test", content="Good fact"),
-            FakeFact(id=2, project="test", content="Bad fact"),
-            FakeFact(id=3, project="test", content="Good fact 2"),
-        ])
+        engine.recall = AsyncMock(
+            return_value=[
+                FakeFact(
+                    id=1, project="test", content="Good fact - padded to satisfy 20 chars min"
+                ),
+                FakeFact(id=2, project="test", content="Bad fact - padded to satisfy 20 chars min"),
+                FakeFact(
+                    id=3, project="test", content="Good fact 2 - padded to satisfy 20 chars min"
+                ),
+            ]
+        )
 
         client = AsyncMock()
         client.create_memory = AsyncMock(return_value={"name": "cortex-test"})

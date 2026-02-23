@@ -143,11 +143,7 @@ class MetricsRegistry:
             if extra_meta:
                 fact_meta.update(extra_meta)
 
-            labels_str = (
-                f" ({', '.join(f'{k}={v}' for k, v in labels.items())})"
-                if labels
-                else ""
-            )
+            labels_str = f" ({', '.join(f'{k}={v}' for k, v in labels.items())})" if labels else ""
             content = f"[METRIC] {name}: {counter_val}{labels_str}"
 
             await self._engine.store(

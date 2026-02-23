@@ -6,6 +6,7 @@ import json
 import logging
 import signal
 import sqlite3
+import sys
 import threading
 import time
 from collections.abc import Callable
@@ -33,8 +34,11 @@ from cortex.daemon.monitors import (
     CertMonitor,
     DiskMonitor,
     EngineHealthCheck,
+    EntropyMonitor,
     GhostWatcher,
     MemorySyncer,
+    NeuralIntentMonitor,
+    PerceptionMonitor,
     SiteMonitor,
 )
 from cortex.daemon.notifier import Notifier
@@ -80,10 +84,35 @@ class MoskvDaemon:
             config_dir / "system.json",
             file_config.get("memory_stale_hours", memory_stale_hours),
         )
+        # Single shared engine instance to prevent memory leaks/pool exhaustion (HIGH-004)
+        try:
+            from cortex.engine import CortexEngine
+
+            self._shared_engine = CortexEngine()
+        except ImportError:
+            self._shared_engine = None
+
         self.auto_mejoralo = AutonomousMejoraloMonitor(
             projects=file_config.get("auto_mejoralo_projects", {}),
             interval_seconds=file_config.get("auto_mejoralo_interval", 1800),
+            engine=self._shared_engine,
         )
+        self.entropy_monitor = EntropyMonitor(
+            projects=file_config.get(
+                "entropy_projects", file_config.get("auto_mejoralo_projects", {})
+            ),
+            interval_seconds=file_config.get("entropy_interval", 1800),
+            threshold=90,
+            engine=self._shared_engine,
+        )
+        self.perception_monitor = PerceptionMonitor(
+            workspace=file_config.get(
+                "watch_path", str(Path.home() / "cortex")
+            ),  # Defaulting to the workspace
+            interval_seconds=file_config.get("perception_interval", 300),
+            engine=self._shared_engine,
+        )
+        self.neural_monitor = NeuralIntentMonitor()
 
         cert_hostnames = [
             h.replace("https://", "").replace("http://", "").split("/")[0]
@@ -138,6 +167,10 @@ class MoskvDaemon:
         self._run_monitor(status, "engine_alerts", self.engine_health, self._alert_engine)
         self._run_monitor(status, "disk_alerts", self.disk_monitor, self._alert_disk)
         self._run_monitor(status, "mejoralo_alerts", self.auto_mejoralo, self._alert_mejoralo)
+        self._run_monitor(status, "entropy_alerts", self.entropy_monitor, self._alert_entropy)
+        self._run_monitor(
+            status, "perception_alerts", self.perception_monitor, self._alert_perception
+        )
 
         self._auto_sync(status)
         self._flush_timer()
@@ -207,31 +240,119 @@ class MoskvDaemon:
     def _alert_mejoralo(self, alerts: list) -> None:
         for alert in alerts:
             if alert.score < 50 and self._should_alert(f"mejoralo:{alert.project}"):
-                logger.warning("Autonomous MEJORAlo scan for %s returned low score: %d/100 (Dead Code: %s)", 
-                             alert.project, alert.score, alert.dead_code)
+                logger.warning(
+                    "Autonomous MEJORAlo scan for %s returned low score: %d/100 (Dead Code: %s)",
+                    alert.project,
+                    alert.score,
+                    alert.dead_code,
+                )
                 try:
                     import subprocess
 
                     from cortex.daemon.notifier import Notifier
+
                     Notifier.notify(
                         "☢️ MEJORAlo Brutal Mode",
                         f"Project {alert.project} score: {alert.score}. Waking up Legion-1 Swarm (400-subagents).",
-                        sound="Basso"
+                        sound="Basso",
                     )
                     path_str = self.auto_mejoralo.projects.get(alert.project, ".")
                     # Dispatch en background (fire and forget)
                     subprocess.Popen(
                         [
-                            "/Users/borjafernandezangulo/cortex/.venv/bin/python",
-                            "-m", "cortex.cli", "mejoralo", "scan",
-                            alert.project, ".", "--deep"
+                            sys.executable,
+                            "-m",
+                            "cortex.cli",
+                            "mejoralo",
+                            "scan",
+                            alert.project,
+                            ".",
+                            "--deep",
+                            "--auto-heal",
                         ],
                         cwd=path_str,
                         stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL
+                        stderr=subprocess.DEVNULL,
                     )
-                except Exception as e:
-                    logger.error("Failed to auto-dispatch Swarm for %s: %s", alert.project, e)
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.exception("Failed to auto-dispatch Swarm for %s: %s", alert.project, e)
+
+    def _alert_entropy(self, alerts: list) -> None:
+        for alert in alerts:
+            if self._should_alert(f"entropy:{alert.project}"):
+                logger.warning(
+                    "ENTROPY-0 ALERTA CRÍTICA: %s tiene complejidad %d/100. %s",
+                    alert.project,
+                    alert.complexity_score,
+                    alert.message,
+                )
+                try:
+                    import subprocess
+
+                    from cortex.daemon.notifier import Notifier
+
+                    if alert.complexity_score < 30:
+                        title = "☢️ PURGA DE ENTROPÍA (Score < 30)"
+                        msg = f"{alert.project}: Invocando /mejoralo --brutal automáticamente."
+                    else:
+                        title = "⚠️ Alerta de Entropía"
+                        msg = f"{alert.project} score {alert.complexity_score}. Cuidado."
+
+                    Notifier.notify(title, msg, sound="Basso")
+
+                    if alert.complexity_score < 30:
+                        path_str = self.entropy_monitor.projects.get(alert.project, ".")
+                        logger.info("Auto-invocando /mejoralo --brutal sobre %s", alert.project)
+                        subprocess.Popen(
+                            [
+                                sys.executable,
+                                "-m",
+                                "cortex.cli",
+                                "mejoralo",
+                                "scan",
+                                alert.project,
+                                ".",
+                                "--deep",
+                                "--auto-heal",
+                            ],
+                            cwd=path_str,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.exception("Failed to execute entropy purge: %s", e)
+
+    def _alert_perception(self, alerts: list) -> None:
+        for alert in alerts:
+            if self._should_alert(f"perception:{alert.project}"):
+                logger.info(
+                    "👁️ Perception Alert for %s: %s (Emotion: %s, Confidence: %s)",
+                    alert.project,
+                    alert.intent,
+                    alert.emotion,
+                    alert.confidence,
+                )
+                try:
+                    from cortex.daemon.notifier import Notifier
+
+                    Notifier.notify(
+                        "👁️ CORTEX Perception", f"{alert.project}: {alert.summary}", sound="Pop"
+                    )
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.exception("Failed to execute perception notification: %s", e)
+
+    def _alert_neural(self, alerts: list) -> None:
+        for alert in alerts:
+            if self._should_alert(f"neural:{alert.intent}"):
+                logger.info(
+                    "🧠 Neural-Bandwidth Sync: %s (Confidence: %s)", alert.intent, alert.confidence
+                )
+                try:
+                    from cortex.daemon.notifier import Notifier
+
+                    Notifier.notify("🧠 Neural Intent Detected", alert.summary, sound="Glass")
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.exception("Failed to execute neural notification: %s", e)
 
     def _flush_timer(self) -> None:
         """Flush accumulated time tracker heartbeats."""
@@ -263,6 +384,7 @@ class MoskvDaemon:
                     wb_result.items_exported,
                 )
             import asyncio
+
             asyncio.run(export_snapshot(engine))
             engine.close_sync()
 
@@ -283,6 +405,13 @@ class MoskvDaemon:
         signal.signal(signal.SIGINT, _handle_signal)
 
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
+
+        # Start fast-polling low-latency loop for Neural Sync
+        neural_thread = threading.Thread(
+            target=self._run_neural_loop, name="NeuralSync", daemon=True
+        )
+        neural_thread.start()
+
         try:
             while not self._shutdown:
                 self.check()
@@ -291,6 +420,18 @@ class MoskvDaemon:
             pass
         finally:
             logger.info("MOSKV-1 Daemon stopped")
+
+    def _run_neural_loop(self) -> None:
+        """Fast polling loop for zero-latency neural intent ingestion."""
+        logger.info("🧠 Neural-Bandwidth Sync thread started (1Hz)")
+        while not self._shutdown:
+            try:
+                alerts = self.neural_monitor.check()
+                if alerts:
+                    self._alert_neural(alerts)
+            except (ValueError, OSError, RuntimeError) as e:
+                logger.debug("Neural loop error: %s", e)
+            self._stop_event.wait(timeout=1.0)
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts (1 per hour per key)."""

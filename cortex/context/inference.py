@@ -23,11 +23,11 @@ logger = logging.getLogger("cortex.context")
 
 # Confidence thresholds (ratio of top project score to second)
 _CONFIDENCE_MAP = [
-    (5.0, "C5"),   # Confirmed — overwhelming evidence
-    (3.0, "C4"),   # Probable — strong signal
-    (1.5, "C3"),   # Inferred — consistent pattern
-    (1.1, "C2"),   # Speculative — weak indicators
-    (0.0, "C1"),   # Hypothesis — no clear winner
+    (5.0, "C5"),  # Confirmed — overwhelming evidence
+    (3.0, "C4"),  # Probable — strong signal
+    (1.5, "C3"),  # Inferred — consistent pattern
+    (1.1, "C2"),  # Speculative — weak indicators
+    (0.0, "C1"),  # Hypothesis — no clear winner
 ]
 
 
@@ -112,8 +112,7 @@ class ContextInference:
         if len(ranked) > 1:
             runner_up = ranked[1][0]
             summary_parts.append(
-                f"Runner-up: {runner_up} (score: {ranked[1][1]:.2f}, "
-                f"ratio: {ratio:.1f}x)."
+                f"Runner-up: {runner_up} (score: {ranked[1][1]:.2f}, ratio: {ratio:.1f}x)."
             )
 
         # Highlight dominant signal types
@@ -168,9 +167,7 @@ class ContextInference:
                     result.signals_used,
                     result.summary,
                     json.dumps([s.to_dict() for s in result.top_signals]),
-                    json.dumps(
-                        [{"project": p, "score": s} for p, s in result.projects_ranked]
-                    ),
+                    json.dumps([{"project": p, "score": s} for p, s in result.projects_ranked]),
                 ),
             )
             await self.conn.commit()
@@ -212,15 +209,17 @@ class ContextInference:
             except (json.JSONDecodeError, TypeError):
                 pass
 
-            results.append({
-                "id": row[0],
-                "active_project": row[1],
-                "confidence": row[2],
-                "signals_used": row[3],
-                "summary": row[4],
-                "top_signals": signals_data,
-                "projects_ranked": projects_data,
-                "created_at": row[7],
-            })
+            results.append(
+                {
+                    "id": row[0],
+                    "active_project": row[1],
+                    "confidence": row[2],
+                    "signals_used": row[3],
+                    "summary": row[4],
+                    "top_signals": signals_data,
+                    "projects_ranked": projects_data,
+                    "created_at": row[7],
+                }
+            )
 
         return results

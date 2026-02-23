@@ -45,15 +45,17 @@ class ImmutableVoteLedger:
     def __init__(self, pool_or_conn):
         self._db = pool_or_conn
 
-    def _compute_hash(self, prev_hash: str, fact_id: int, agent_id: str, vote: int, weight: float, ts: str) -> str:
+    def _compute_hash(
+        self, prev_hash: str, fact_id: int, agent_id: str, vote: int, weight: float, ts: str
+    ) -> str:
         """Cálculo determinista del hash del bloque/voto."""
         payload = f"{prev_hash}:{fact_id}:{agent_id}:{vote}:{weight}:{ts}"
-        return hashlib.sha256(payload.encode('utf-8')).hexdigest()
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     async def _get_conn(self):
         """Helper para obtener una conexión ya sea desde un pool o una conexión existente."""
         if hasattr(self._db, "acquire"):
-             return await self._db.acquire().__aenter__()
+            return await self._db.acquire().__aenter__()
         return self._db
 
     async def _release_conn(self, conn):
@@ -70,7 +72,7 @@ class ImmutableVoteLedger:
         agent_id: str,
         vote: int,
         vote_weight: float = 1.0,
-        signature: str | None = None
+        signature: str | None = None,
     ) -> VoteEntry:
         """
         Añade un voto de forma segura y sellada.
@@ -83,13 +85,13 @@ class ImmutableVoteLedger:
             await conn.execute("BEGIN IMMEDIATE")
 
         try:
-            cursor = await conn.execute(
-                "SELECT hash FROM vote_ledger ORDER BY id DESC LIMIT 1"
-            )
+            cursor = await conn.execute("SELECT hash FROM vote_ledger ORDER BY id DESC LIMIT 1")
             row = await cursor.fetchone()
             prev_hash = row[0] if row else self.GENESIS_HASH
 
-            entry_hash = self._compute_hash(prev_hash, fact_id, agent_id, vote, vote_weight, timestamp)
+            entry_hash = self._compute_hash(
+                prev_hash, fact_id, agent_id, vote, vote_weight, timestamp
+            )
 
             cursor = await conn.execute(
                 """
@@ -97,7 +99,7 @@ class ImmutableVoteLedger:
                 (fact_id, agent_id, vote, vote_weight, prev_hash, hash, timestamp, signature)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (fact_id, agent_id, vote, vote_weight, prev_hash, entry_hash, timestamp, signature)
+                (fact_id, agent_id, vote, vote_weight, prev_hash, entry_hash, timestamp, signature),
             )
 
             vote_id = cursor.lastrowid
@@ -105,13 +107,21 @@ class ImmutableVoteLedger:
             if should_commit:
                 await conn.commit()
 
-            logger.info(f"Voto inmutable sellado: Fact {fact_id} | Agent {agent_id} | Hash {entry_hash[:8]}...")
+            logger.info(
+                f"Voto inmutable sellado: Fact {fact_id} | Agent {agent_id} | Hash {entry_hash[:8]}..."
+            )
             await self._maybe_create_checkpoint(conn)
 
             return VoteEntry(
-                id=vote_id, fact_id=fact_id, agent_id=agent_id,
-                vote=vote, vote_weight=vote_weight, prev_hash=prev_hash,
-                hash=entry_hash, timestamp=timestamp, signature=signature
+                id=vote_id,
+                fact_id=fact_id,
+                agent_id=agent_id,
+                vote=vote,
+                vote_weight=vote_weight,
+                prev_hash=prev_hash,
+                hash=entry_hash,
+                timestamp=timestamp,
+                signature=signature,
             )
         except (sqlite3.Error, OSError) as e:
             if should_commit:
@@ -138,28 +148,32 @@ class ImmutableVoteLedger:
             for row in rows:
                 v_id, p_hash, c_hash, f_id, a_id, v_val, weight, ts = row
                 if p_hash != expected_prev:
-                    violations.append({
-                        "vote_id": v_id,
-                        "type": "CHAIN_BREAK",
-                        "expected_prev": expected_prev,
-                        "actual_prev": p_hash
-                    })
+                    violations.append(
+                        {
+                            "vote_id": v_id,
+                            "type": "CHAIN_BREAK",
+                            "expected_prev": expected_prev,
+                            "actual_prev": p_hash,
+                        }
+                    )
 
                 actual_hash = self._compute_hash(p_hash, f_id, a_id, v_val, weight, ts)
                 if actual_hash != c_hash:
-                    violations.append({
-                        "vote_id": v_id,
-                        "type": "DATA_TAMPERING",
-                        "expected_hash": c_hash,
-                        "actual_hash": actual_hash
-                    })
+                    violations.append(
+                        {
+                            "vote_id": v_id,
+                            "type": "DATA_TAMPERING",
+                            "expected_hash": c_hash,
+                            "actual_hash": actual_hash,
+                        }
+                    )
 
                 expected_prev = c_hash
 
             return {
                 "valid": len(violations) == 0,
                 "violations": violations,
-                "votes_checked": len(rows)
+                "votes_checked": len(rows),
             }
         finally:
             await self._release_conn(conn)
@@ -204,7 +218,7 @@ class ImmutableVoteLedger:
 
         async with conn.execute(
             "SELECT hash, id FROM vote_ledger WHERE id >= ? ORDER BY id LIMIT ?",
-            (start_id, self.MERKLE_BATCH_SIZE)
+            (start_id, self.MERKLE_BATCH_SIZE),
         ) as cursor:
             rows = await cursor.fetchall()
 
@@ -220,7 +234,7 @@ class ImmutableVoteLedger:
         ts = datetime.now(timezone.utc).isoformat()
         await conn.execute(
             "INSERT INTO vote_merkle_roots (vote_start_id, vote_end_id, root_hash, vote_count, created_at) VALUES (?, ?, ?, ?, ?)",
-            (start_id, end_id, root_hash, len(hashes), ts)
+            (start_id, end_id, root_hash, len(hashes), ts),
         )
 
         logger.info(f"Punto de control Merkle creado: {start_id}-{end_id} -> {root_hash}")
@@ -231,26 +245,30 @@ class ImmutableVoteLedger:
         results = []
         conn = await self._get_conn()
         try:
-            async with conn.execute("SELECT id, vote_start_id, vote_end_id, root_hash FROM vote_merkle_roots ORDER BY id") as cursor:
+            async with conn.execute(
+                "SELECT id, vote_start_id, vote_end_id, root_hash FROM vote_merkle_roots ORDER BY id"
+            ) as cursor:
                 checkpoints = await cursor.fetchall()
 
             for cp_id, start, end, stored_root in checkpoints:
                 async with conn.execute(
                     "SELECT hash FROM vote_ledger WHERE id >= ? AND id <= ? ORDER BY id",
-                    (start, end)
+                    (start, end),
                 ) as cursor:
                     hashes = [r[0] for r in await cursor.fetchall()]
 
                 recomputed = compute_merkle_root(hashes)
-                is_valid = (recomputed == stored_root)
+                is_valid = recomputed == stored_root
 
-                results.append({
-                    "checkpoint_id": cp_id,
-                    "range": f"{start}-{end}",
-                    "valid": is_valid,
-                    "expected": stored_root,
-                    "actual": recomputed
-                })
+                results.append(
+                    {
+                        "checkpoint_id": cp_id,
+                        "range": f"{start}-{end}",
+                        "valid": is_valid,
+                        "expected": stored_root,
+                        "actual": recomputed,
+                    }
+                )
 
             return results
         finally:

@@ -127,9 +127,7 @@ class CortexConfig:
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
             LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
-            LANGBASE_BASE_URL=os.environ.get(
-                "LANGBASE_BASE_URL", "https://api.langbase.com/v1"
-            ),
+            LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
             STRIPE_PRICE_TABLE=json.loads(
@@ -137,9 +135,7 @@ class CortexConfig:
             ),
             DEPLOY_MODE="cloud" if storage_mode == "turso" else "local",
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
-            CONTEXT_WORKSPACE_DIR=os.environ.get(
-                "CORTEX_CONTEXT_WORKSPACE", str(Path.home())
-            ),
+            CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
             CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",
         )
 

@@ -234,7 +234,9 @@ class SAPClient:
         try:
             root = ElementTree.fromstring(resp.text)
             # OData V2 namespace
-            for entity_type in root.iter("{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"):
+            for entity_type in root.iter(
+                "{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"
+            ):
                 name = entity_type.attrib.get("Name", "")
                 props = [
                     p.attrib.get("Name", "")
@@ -373,9 +375,7 @@ class SAPClient:
                 if resp.status_code == 403:
                     raise SAPAuthError(f"Forbidden: {resp.text[:200]}")
                 if resp.status_code >= 400:
-                    raise SAPEntityError(
-                        f"SAP error {resp.status_code}: {resp.text[:300]}"
-                    )
+                    raise SAPEntityError(f"SAP error {resp.status_code}: {resp.text[:300]}")
 
                 return resp
 
@@ -385,7 +385,11 @@ class SAPClient:
                 last_error = e
                 if attempt < self.config.max_retries - 1:
                     wait = 2**attempt
-                    logger.warning("SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait)
+                    logger.warning(
+                        "SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait
+                    )
                     await asyncio.sleep(wait)
 
-        raise SAPConnectionError(f"SAP request failed after {self.config.max_retries} retries: {last_error}")
+        raise SAPConnectionError(
+            f"SAP request failed after {self.config.max_retries} retries: {last_error}"
+        )

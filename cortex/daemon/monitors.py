@@ -27,9 +27,12 @@ from cortex.daemon.models import (
     CertAlert,
     DiskAlert,
     EngineHealthAlert,
+    EntropyAlert,
     GhostAlert,
     MejoraloAlert,
     MemoryAlert,
+    NeuralIntentAlert,
+    PerceptionAlert,
     SiteStatus,
 )
 
@@ -39,10 +42,11 @@ logger = logging.getLogger("moskv-daemon")
 class AutonomousMejoraloMonitor:
     """Runs MEJORAlo scan automatically on configured projects."""
 
-    def __init__(self, projects: dict[str, str], interval_seconds: int = 1800):
+    def __init__(self, projects: dict[str, str], interval_seconds: int = 1800, engine=None):
         self.projects = projects
         self.interval_seconds = interval_seconds
         self._last_runs: dict[str, float] = {}
+        self._engine = engine
 
     def check(self) -> list[MejoraloAlert]:
         """Run MEJORAlo scan if interval has elapsed."""
@@ -63,28 +67,84 @@ class AutonomousMejoraloMonitor:
                 path = Path(path_str).expanduser().resolve()
                 if path.exists() and path.is_dir():
                     try:
-                        engine = CortexEngine()
-                        m = MejoraloEngine(engine)
+                        if not self._engine:
+                            self._engine = CortexEngine()
+                        m = MejoraloEngine(self._engine)
                         logger.info("Autonomous MEJORAlo running on %s", project)
                         result = m.scan(project, path)
 
-                        alerts.append(MejoraloAlert(
-                            project=project,
-                            score=result.score,
-                            dead_code=result.dead_code,
-                            total_loc=result.total_loc
-                        ))
+                        alerts.append(
+                            MejoraloAlert(
+                                project=project,
+                                score=result.score,
+                                dead_code=result.dead_code,
+                                total_loc=result.total_loc,
+                            )
+                        )
                         # We also record the session to track historical data if configured,
                         # but for now just returning the alert is safe.
-                        
+
                         self._last_runs[project] = now
-                    except Exception as e:
+                    except (ValueError, OSError, RuntimeError) as e:
                         logger.error("Autonomous MEJORAlo failed on %s: %s", project, e)
-                    finally:
-                        try:
-                            engine.close_sync()
-                        except Exception:
-                            pass
+
+        return alerts
+
+
+class EntropyMonitor:
+    """Escaneo en segundo plano de ENTROPY-0 para deuda técnica (X-Ray 13D)."""
+
+    def __init__(
+        self,
+        projects: dict[str, str],
+        interval_seconds: int = 1800,
+        threshold: int = 90,
+        engine=None,
+    ):
+        self.projects = projects
+        self.interval_seconds = interval_seconds
+        self.threshold = threshold
+        self._last_runs: dict[str, float] = {}
+        self._engine = engine
+
+    def check(self) -> list[EntropyAlert]:
+        """Ejecuta escaneo de entropía y reporta si el score < threshold."""
+        alerts = []
+        if not self.projects:
+            return alerts
+
+        now = time.monotonic()
+        try:
+            from cortex.engine import CortexEngine
+            from cortex.mejoralo import MejoraloEngine
+        except ImportError:
+            return alerts
+
+        for project, path_str in self.projects.items():
+            last_run = self._last_runs.get(project, 0)
+            if now - last_run >= self.interval_seconds:
+                path = Path(path_str).expanduser().resolve()
+                if path.exists() and path.is_dir():
+                    try:
+                        if not self._engine:
+                            self._engine = CortexEngine()
+                        m = MejoraloEngine(self._engine)
+                        logger.debug("ENTROPY-0 scanner over %s", project)
+                        result = m.scan(project, path, deep=False)
+
+                        if result.score < self.threshold:
+                            alerts.append(
+                                EntropyAlert(
+                                    project=project,
+                                    file_path=str(path),
+                                    complexity_score=result.score,
+                                    message=f"Entropía detectada: {result.score}/{self.threshold}",
+                                )
+                            )
+
+                        self._last_runs[project] = now
+                    except (ValueError, OSError, RuntimeError) as e:
+                        logger.error("ENTROPY-0 monitor failed on %s: %s", project, e)
 
         return alerts
 
@@ -203,7 +263,7 @@ class MemorySyncer:
             hours = (now - last).total_seconds() / 3600
             if hours > self.stale_hours:
                 alerts.append(MemoryAlert(file="system.json", last_updated=ts, hours_stale=hours))
-        except (json.JSONDecodeError, OSError, ValueError) as e:
+        except (OSError, ValueError) as e:
             logger.error("Failed to check system.json: %s", e)
         return alerts
 
@@ -237,8 +297,10 @@ class CertMonitor:
                 expires = expires.replace(tzinfo=timezone.utc)
                 days_left = (expires - datetime.now(timezone.utc)).days
                 if days_left < self.warn_days:
-                    return CertAlert(hostname=hostname, expires_at=not_after, days_remaining=days_left)
-        except (ssl.SSLError, OSError) as e:
+                    return CertAlert(
+                        hostname=hostname, expires_at=not_after, days_remaining=days_left
+                    )
+        except OSError as e:
             logger.warning("SSL check failed for %s: %s", hostname, e)
         return None
 
@@ -301,3 +363,105 @@ class DiskMonitor:
                 )
             ]
         return []
+
+
+class PerceptionMonitor:
+    """Monitors real-time file activity to infer behavioral events."""
+
+    def __init__(self, workspace: str, interval_seconds: int = 300, engine=None):
+        self.workspace = workspace
+        self.interval_seconds = interval_seconds
+        self._pipeline = None
+        self._engine = engine
+
+    async def _get_pipeline(self):
+        if not self._pipeline:
+            import uuid
+
+            from cortex.engine import CortexEngine
+            from cortex.perception import PerceptionPipeline
+
+            if not self._engine:
+                self._engine = CortexEngine()
+            conn = await self._engine.get_conn()
+            session_id = f"daemon-{uuid.uuid4().hex[:8]}"
+            self._pipeline = PerceptionPipeline(
+                conn=conn,
+                session_id=session_id,
+                workspace=self.workspace,
+                window_s=self.interval_seconds,
+            )
+            self._pipeline.start()
+        return self._pipeline
+
+    async def check_async(self) -> list[PerceptionAlert]:
+        """Run one check cycle. If we have a snapshot, return it as alert if confident."""
+        alerts = []
+        try:
+            pipeline = await self._get_pipeline()
+            snapshot = await pipeline.tick()
+
+            if snapshot and snapshot.confidence in ("C4", "C5") and snapshot.project:
+                alerts.append(
+                    PerceptionAlert(
+                        project=snapshot.project,
+                        intent=snapshot.intent,
+                        emotion=snapshot.emotion,
+                        confidence=snapshot.confidence,
+                        summary=snapshot.summary,
+                    )
+                )
+        except (ValueError, OSError, RuntimeError) as e:
+            logger.error("PerceptionMonitor failed: %s", e)
+        return alerts
+
+    def check(self) -> list[PerceptionAlert]:
+        """Synchronous wrapper for check_async."""
+        import asyncio
+
+        try:
+            return asyncio.run(self.check_async())
+        except RuntimeError as e:
+            if "running event loop" in str(e):
+                # If already inside an event loop, schedule it in the background
+                if not hasattr(self, "_bg_tasks"):
+                    self._bg_tasks = set()
+                task = asyncio.ensure_future(self.check_async())
+                self._bg_tasks.add(task)
+                task.add_done_callback(self._bg_tasks.discard)
+                return []
+            raise
+
+
+class NeuralIntentMonitor:
+    """Monitors active window and clipboard on macOS for intent inference."""
+
+    def __init__(self):
+        self._engine = None
+
+    def check(self) -> list[NeuralIntentAlert]:
+        alerts = []
+        try:
+            from cortex.neural import NeuralIntentEngine
+            from cortex.platform import is_macos
+
+            if not is_macos():
+                return alerts
+
+            if not self._engine:
+                self._engine = NeuralIntentEngine()
+
+            context, raw_clip = self._engine.read_context()
+            hyp = self._engine.infer_intent(context, raw_clip)
+            if hyp:
+                alerts.append(
+                    NeuralIntentAlert(
+                        intent=hyp.intent,
+                        confidence=hyp.confidence,
+                        trigger=hyp.trigger,
+                        summary=hyp.summary,
+                    )
+                )
+        except (ValueError, OSError, RuntimeError) as e:
+            logger.error("NeuralIntentMonitor failed: %s", e)
+        return alerts

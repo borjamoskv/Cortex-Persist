@@ -40,6 +40,9 @@ class TestStoreValidation:
         path = tmp_path / "test.db"
         engine = CortexEngine(db_path=path)
         engine.init_db_sync()
+        from cortex.facts.manager import FactManager
+
+        FactManager.MIN_CONTENT_LENGTH = 20
         with pytest.raises(ValueError, match="content too short"):
             engine.store_sync("proj", "too short")
         engine.close_sync()
@@ -101,7 +104,6 @@ class TestStoreValidation:
 
 
 class TestPurgeDuplicates:
-
     def test_purge_duplicates_dry_run(self, runner, db_path):
         result = runner.invoke(cli, ["purge", "duplicates", "--dry-run", "--db", db_path])
         assert result.exit_code == 0
@@ -113,7 +115,6 @@ class TestPurgeDuplicates:
 
 
 class TestPurgeEmpty:
-
     def test_purge_empty_dry_run(self, runner, db_path):
         result = runner.invoke(cli, ["purge", "empty", "--dry-run", "--db", db_path])
         assert result.exit_code == 0
@@ -124,7 +125,6 @@ class TestPurgeEmpty:
 
 
 class TestPurgeProject:
-
     def test_purge_project_dry_run(self, runner, db_path):
         result = runner.invoke(cli, ["purge", "project", "proj", "--dry-run", "--db", db_path])
         assert result.exit_code == 0

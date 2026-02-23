@@ -56,8 +56,7 @@ async def generate_handoff(
         decision_rows = await cursor.fetchall()
 
     hot_decisions = [
-        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]}
-        for r in decision_rows
+        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]} for r in decision_rows
     ]
 
     # ── Active Ghosts ─────────────────────────────────────────────────
@@ -71,8 +70,7 @@ async def generate_handoff(
         ghost_rows = await cursor.fetchall()
 
     active_ghosts = [
-        {"id": r[0], "project": r[1], "reference": r[2], "context": r[3]}
-        for r in ghost_rows
+        {"id": r[0], "project": r[1], "reference": r[2], "context": r[3]} for r in ghost_rows
     ]
 
     # ── Recent Errors ─────────────────────────────────────────────────
@@ -86,8 +84,7 @@ async def generate_handoff(
         error_rows = await cursor.fetchall()
 
     recent_errors = [
-        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]}
-        for r in error_rows
+        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]} for r in error_rows
     ]
 
     # ── Active Projects (with activity in last 24h) ───────────────────
@@ -102,9 +99,7 @@ async def generate_handoff(
     active_projects = [r[0] for r in project_rows]
 
     # ── Stats summary ─────────────────────────────────────────────────
-    async with conn.execute(
-        "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL"
-    ) as cursor:
+    async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
         total_active = (await cursor.fetchone())[0]
 
     async with conn.execute(

@@ -171,9 +171,12 @@ class TestRunnerToolboxArgs:
         try:
             sys.argv = [
                 "cortex-adk",
-                "--toolbox-url", "http://my-toolbox:5000",
-                "--toolbox-toolset", "cortex-readonly",
-                "--agent", "analyst",
+                "--toolbox-url",
+                "http://my-toolbox:5000",
+                "--toolbox-toolset",
+                "cortex-readonly",
+                "--agent",
+                "analyst",
             ]
             args = _parse_args()
             assert args.toolbox_url == "http://my-toolbox:5000"
@@ -196,4 +199,3 @@ class TestRunnerToolboxArgs:
             assert args.toolbox_toolset == ""
         finally:
             sys.argv = original_argv
-

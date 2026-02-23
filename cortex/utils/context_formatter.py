@@ -1,6 +1,7 @@
 """
 Context formatting utilities for Cortex sessions.
 """
+
 from collections import defaultdict
 from typing import TYPE_CHECKING
 

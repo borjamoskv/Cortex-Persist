@@ -92,7 +92,9 @@ async def cast_vote(
     try:
         fact = await engine.get_fact(fact_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+            raise HTTPException(
+                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+            )
 
         if fact["project"] != auth.tenant_id:
             raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
@@ -116,7 +118,9 @@ async def cast_vote(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Unexpected error during voting for fact #%d", fact_id)
-        raise HTTPException(status_code=500, detail=get_trans("error_internal_server", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_internal_server", lang)
+        ) from None
 
 
 @router.post("/v1/facts/{fact_id}/vote-v2", response_model=VoteResponse)
@@ -132,7 +136,9 @@ async def cast_vote_v2(
     try:
         fact = await engine.get_fact(fact_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+            raise HTTPException(
+                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+            )
 
         if fact["project"] != auth.tenant_id:
             raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
@@ -159,7 +165,9 @@ async def cast_vote_v2(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("RWC Vote failed")
-        raise HTTPException(status_code=500, detail=get_trans("error_internal_voting", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_internal_voting", lang)
+        ) from None
 
 
 @router.get("/v1/facts/{fact_id}/votes", response_model=list[dict])
@@ -173,7 +181,9 @@ async def list_votes(
     lang = request.headers.get("Accept-Language", "en")
     fact = await engine.get_fact(fact_id)
     if not fact:
-        raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+        raise HTTPException(
+            status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+        )
 
     if fact["project"] != auth.tenant_id:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
@@ -194,7 +204,9 @@ async def deprecate_fact(
     lang = request.headers.get("Accept-Language", "en")
     fact = await engine.get_fact(fact_id)
     if not fact:
-        raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+        raise HTTPException(
+            status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+        )
 
     if fact["project"] != auth.tenant_id:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))

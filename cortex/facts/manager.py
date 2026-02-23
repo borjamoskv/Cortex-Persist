@@ -54,8 +54,7 @@ class FactManager:
         # Gate 1: Minimum content length
         if len(content) < self.MIN_CONTENT_LENGTH:
             raise ValueError(
-                f"content too short ({len(content)} chars, "
-                f"min {self.MIN_CONTENT_LENGTH})"
+                f"content too short ({len(content)} chars, min {self.MIN_CONTENT_LENGTH})"
             )
 
         # Gate 2: Sanitize double-prefixed decisions
@@ -72,9 +71,7 @@ class FactManager:
             )
             existing = await cursor.fetchone()
             if existing:
-                logger.info(
-                    "Dedup: fact already exists as #%d in %s", existing[0], project
-                )
+                logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
                 return existing[0]
 
         ts = valid_from or now_iso()
@@ -132,14 +129,14 @@ class FactManager:
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:
             raise ValueError("Facts list cannot be empty")
-        
+
         # Validation pass before any inserts
         for i, fact in enumerate(facts):
             if "project" not in fact or not fact["project"].strip():
                 raise ValueError(f"Fact at index {i} is missing project")
             if "content" not in fact or not fact["content"].strip():
                 raise ValueError(f"Fact at index {i} is missing content")
-        
+
         conn = await self.engine.get_conn()
         ids = []
         try:
@@ -153,7 +150,7 @@ class FactManager:
                     source=fact.get("source"),
                     meta=fact.get("meta"),
                     valid_from=fact.get("valid_from"),
-                    commit=False
+                    commit=False,
                 )
                 ids.append(fid)
             await conn.commit()
@@ -178,16 +175,17 @@ class FactManager:
                 conn, self.engine.embeddings.embed(query), top_k, project, as_of
             )
             if results:
-                pass # Continue to graph resolution below
+                pass  # Continue to graph resolution below
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Semantic search failed: %s", e)
-        
+
         if not results:
             results = await text_search(conn, query, project, limit=top_k)
 
         graph_depth = kwargs.get("graph_depth", 0)
         if results and graph_depth > 0:
             from cortex.graph import extract_entities, get_context_subgraph
+
             for res in results:
                 entities = extract_entities(res.content)
                 seeds = [e["name"] for e in entities]
@@ -196,9 +194,7 @@ class FactManager:
 
         return results
 
-    async def recall(
-        self, project: str, limit: int | None = None, offset: int = 0
-    ) -> list[Fact]:
+    async def recall(self, project: str, limit: int | None = None, offset: int = 0) -> list[Fact]:
         conn = await self.engine.get_conn()
         query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.project = ? AND f.valid_until IS NULL ORDER BY (f.consensus_score * 0.8 + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, f.fact_type, f.created_at DESC"
         params: list = [project]
@@ -251,7 +247,7 @@ class FactManager:
     async def deprecate(self, fact_id: int, reason: str | None = None) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
-            
+
         conn = await self.engine.get_conn()
         ts = now_iso()
         cursor = await conn.execute(
@@ -294,6 +290,7 @@ class FactManager:
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[Fact]:
         """Reconstruct state as of transaction ID."""
         from cortex.temporal import time_travel_filter
+
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")
         query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE {clause}"

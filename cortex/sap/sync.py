@@ -77,9 +77,7 @@ class SAPSync:
 
         try:
             # Fetch from SAP
-            entities = await self.client.read_entity_set(
-                entity_set, filters=filters, top=top
-            )
+            entities = await self.client.read_entity_set(entity_set, filters=filters, top=top)
             logger.info("Fetched %d entities from SAP/%s", len(entities), entity_set)
 
             # Get existing CORTEX facts for this entity set
@@ -147,10 +145,7 @@ class SAPSync:
 
         try:
             facts = await self._get_sap_facts(project)
-            sap_facts = [
-                f for f in facts
-                if self._fact_matches_entity_set(f, entity_set)
-            ]
+            sap_facts = [f for f in facts if self._fact_matches_entity_set(f, entity_set)]
 
             for fact in sap_facts:
                 try:

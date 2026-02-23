@@ -18,8 +18,11 @@ def mejoralo():
 @click.argument("project")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--deep", is_flag=True, help="Activa dimensión Psi + análisis profundo")
+@click.option(
+    "--auto-heal", is_flag=True, help="Intenta curar el código autónomamente si score < 70"
+)
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def mejoralo_scan(project, path, deep, db):
+def mejoralo_scan(project, path, deep, auto_heal, db):
     """X-Ray 13D — Escaneo multidimensional del proyecto."""
     from cortex.mejoralo import MejoraloEngine
 
@@ -52,6 +55,16 @@ def mejoralo_scan(project, path, deep, db):
         )
         if result.dead_code:
             console.print("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
+
+        if auto_heal and result.score < 70:
+            console.print("\n[yellow]⚠️ Auto-Heal Activado: Score por debajo de 70 detectado.[/]")
+            success = m.heal(project, path, 70, result)
+            if success:
+                console.print(
+                    "[bold green]✅ Código purificado y comiteado automáticamente. (+Soberanía)[/]"
+                )
+            else:
+                console.print("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
     finally:
         engine.close_sync()
 
@@ -77,11 +90,12 @@ def mejoralo_record(project, score_before, score_after, actions, db):
         )
         delta = score_after - score_before
         color = "green" if delta > 0 else "red" if delta < 0 else "yellow"
-        
+
         # Update mejora_loop_state.json if it exists
         import json
         from datetime import datetime
         from pathlib import Path
+
         state_file = Path.home() / ".cortex" / "mejora_loop_state.json"
         if state_file.exists():
             try:
@@ -89,19 +103,21 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                     state = json.load(f)
                 if "improvement_history" not in state:
                     state["improvement_history"] = []
-                state["improvement_history"].append({
-                    "project": project,
-                    "timestamp": datetime.now().isoformat(),
-                    "score_before": score_before,
-                    "score_after": score_after,
-                    "delta": delta
-                })
+                state["improvement_history"].append(
+                    {
+                        "project": project,
+                        "timestamp": datetime.now().isoformat(),
+                        "score_before": score_before,
+                        "score_after": score_after,
+                        "delta": delta,
+                    }
+                )
                 state["improvement_history"] = state["improvement_history"][-100:]
                 with open(state_file, "w") as f:
                     json.dump(state, f, indent=2, default=str)
-            except Exception:
+            except (OSError, ValueError):
                 pass
-                
+
         console.print(
             f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] — "
             f"{score_before} → {score_after} ([{color}]Δ{delta:+d}[/])"

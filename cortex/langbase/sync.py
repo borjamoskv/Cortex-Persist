@@ -93,7 +93,7 @@ async def sync_to_langbase(
             description=f"CORTEX facts from project '{project}' — auto-synced",
         )
         logger.info("Created Langbase memory: %s", mem_name)
-    except (ConnectionError, OSError, RuntimeError) as e:
+    except (OSError, RuntimeError) as e:
         # Memory might already exist — that's fine
         if "already exists" not in str(e).lower() and "409" not in str(e):
             logger.warning("Memory creation note: %s", e)
@@ -130,7 +130,7 @@ async def sync_to_langbase(
                 meta={"fact_id": fact.id, "project": project, "type": fact.fact_type},
             )
             synced += 1
-        except Exception as e:
+        except (ValueError, OSError, RuntimeError) as e:
             errors += 1
             detail = f"Fact #{fact.id}: {e}"
             error_details.append(detail)
@@ -147,7 +147,9 @@ async def sync_to_langbase(
 
     logger.info(
         "Sync to Langbase complete: %d/%d facts → memory '%s'",
-        synced, len(facts), mem_name,
+        synced,
+        len(facts),
+        mem_name,
     )
     return result
 
@@ -199,7 +201,8 @@ async def enrich_from_langbase(
 
     logger.info(
         "Enrichment from Langbase: %d facts stored from memory '%s'",
-        stored, memory_name,
+        stored,
+        memory_name,
     )
     return {
         "stored": stored,

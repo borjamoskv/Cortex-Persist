@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-noir-900: #050505;
+  --color-noir-800: #0a0a0a;
+  --color-noir-700: #141414;
+  --color-accent-lime: #ccff00;
+  --color-accent-violet: #6600ff;
+  --color-accent-yinmn: #2e5090;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #888888;
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-noir-900);
+    --foreground: var(--color-text-primary);
+  }
+  
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  
+  ::selection {
+    background-color: var(--color-accent-lime);
+    color: var(--color-noir-900);
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(20, 20, 20, 0.4);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  .text-glow-lime {
+    text-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
+  }
+}
