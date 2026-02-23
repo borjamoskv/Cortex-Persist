@@ -38,6 +38,12 @@ SECURITY_PATTERNS = re.compile(
 
 MAX_LOC = 500  # Lines of code threshold for architecture dimension
 
+# ─── Relentless Loop Constants ───────────────────────────────────────
+INMEJORABLE_SCORE = 95  # The "inmejorable" threshold — perfection
+STAGNATION_LIMIT = 3  # Consecutive no-progress iterations before escalating
+MIN_PROGRESS = 2  # Minimum score delta to count as progress
+HARD_ITERATION_CAP = 50  # Absolute safety net — never exceed this
+
 # File extensions to scan per stack
 SCAN_EXTENSIONS = {
     "node": {".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"},
