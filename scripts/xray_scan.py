@@ -128,7 +128,8 @@ def _kill_switch_scan(line, path, i):
             print("\n[!] FATAL ERROR: Sovereignty Compromised [!]")
             print(f"CRITICAL LEAK: Matched '{p}' in {path}:{i + 1}")
             print(
-                "ENTROPY-0 KILL SWITCH ENGAGED. Blocking commit/execution to prevent network extraction."
+                "ENTROPY-0 KILL SWITCH ENGAGED. Blocking commit/execution "
+                "to prevent network extraction."
             )
             sys.exit(1)
 

@@ -36,7 +36,8 @@ if platform.system() == "Darwin":
             # Some versions use a specific syntax or shadow tables.
             # Let's check if we can just create a basic index.
             print("Checking index support...")
-            # conn.execute("CREATE INDEX idx_test ON test_vec(embedding)") # This usually fails on virtual tables
+            # Conn.execute("CREATE INDEX idx_test ON test_vec(embedding)")
+            # This usually fails on virtual tables
         except sqlite3.Error as e:
             print(f"Index failed: {e}")
 

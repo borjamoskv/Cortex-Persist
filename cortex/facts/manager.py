@@ -216,7 +216,13 @@ class FactManager:
 
     async def recall(self, project: str, limit: int | None = None, offset: int = 0) -> list[Fact]:
         conn = await self.engine.get_conn()
-        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.project = ? AND f.valid_until IS NULL ORDER BY (f.consensus_score * 0.8 + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, f.fact_type, f.created_at DESC"
+        query = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+            f"WHERE f.project = ? AND f.valid_until IS NULL "
+            f"ORDER BY (f.consensus_score * 0.8 + "
+            f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, "
+            f"f.fact_type, f.created_at DESC"
+        )
         params: list = [project]
         if limit:
             query += " LIMIT ?"
@@ -299,10 +305,16 @@ class FactManager:
         conn = await self.engine.get_conn()
         if as_of:
             clause, params = build_temporal_filter_params(as_of, table_alias="f")
-            query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.project = ? AND {clause} ORDER BY f.valid_from DESC"
+            query = (
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"WHERE f.project = ? AND {clause} ORDER BY f.valid_from DESC"
+            )
             cursor = await conn.execute(query, [project] + params)
         else:
-            query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.project = ? ORDER BY f.valid_from DESC"
+            query = (
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"WHERE f.project = ? ORDER BY f.valid_from DESC"
+            )
             cursor = await conn.execute(query, (project,))
         rows = await cursor.fetchall()
         return [row_to_fact(row) for row in rows]
