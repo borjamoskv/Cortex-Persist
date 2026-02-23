@@ -1,0 +1,182 @@
+# ─────────────────────────────────────────────────────────────
+# Sovereign K8s Deployment — GCP (also usable on AWS/Azure)
+# ─────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cortex
+  labels:
+    app.kubernetes.io/managed-by: sovereign-pipeline
+    security.cortex.io/level: military
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cortex-app
+  namespace: cortex
+  annotations:
+    iam.gke.io/gcp-service-account: cortex-sovereign@PROJECT_ID.iam.gserviceaccount.com
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex-sovereign
+  namespace: cortex
+  labels:
+    app: cortex-sovereign
+    version: v5
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cortex-sovereign
+  template:
+    metadata:
+      labels:
+        app: cortex-sovereign
+        version: v5
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: cortex-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cortex
+          image: gcr.io/PROJECT_ID/cortex-sovereign:latest
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: CORTEX_ENV
+              value: production
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability.svc:4317"
+            - name: VAULT_ADDR
+              value: "https://vault.cortex-sovereign.internal:8200"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: vault-tls
+              mountPath: /etc/tls
+              readOnly: true
+      volumes:
+        - name: vault-tls
+          secret:
+            secretName: cortex-tls
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cortex-api
+  namespace: cortex
+spec:
+  selector:
+    app: cortex-sovereign
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cortex-sovereign-pdb
+  namespace: cortex
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cortex-sovereign
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cortex-sovereign-hpa
+  namespace: cortex
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cortex-sovereign
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-sovereign-netpol
+  namespace: cortex
+spec:
+  podSelector:
+    matchLabels:
+      app: cortex-sovereign
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cortex
+      ports:
+        - port: 8000
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - port: 4317  # OTLP
+    - to: {}
+      ports:
+        - port: 5432  # PostgreSQL / AlloyDB
+        - port: 8200  # Vault

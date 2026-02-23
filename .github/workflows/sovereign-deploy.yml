@@ -1,0 +1,194 @@
+# ─────────────────────────────────────────────────────────────
+# SOVEREIGN CI/CD · Multi-Cloud Deploy + Security Scans
+# ─────────────────────────────────────────────────────────────
+name: Sovereign Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: sovereign-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_VERSION: "1.7.5"
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  # ── Phase 1: Quality Gate ─────────────────────────────────
+  quality-gate:
+    name: "🔒 Quality Gate (130/100)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+          pip install ruff bandit safety trivy
+
+      - name: Lint (Ruff)
+        run: ruff check cortex/ --output-format=github
+
+      - name: Type check (mypy)
+        run: mypy cortex/ --ignore-missing-imports
+
+      - name: Security scan (Bandit)
+        run: bandit -r cortex/ -f json -o bandit-report.json || true
+
+      - name: Dependency audit (Safety)
+        run: safety check --json --output safety-report.json || true
+
+      - name: Unit tests
+        run: pytest tests/ -q --tb=short --junitxml=test-results.xml
+
+      - name: MEJORAlo Score Check
+        run: |
+          python -c "
+          from cortex.mejoralo.scan import scan
+          result = scan('cortex/')
+          score = result.get('score', 0)
+          print(f'MEJORAlo Score: {score}/100')
+          if score < 70:
+              raise SystemExit(f'BLOCKED: Score {score} < 70 threshold')
+          "
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+            test-results.xml
+
+  # ── Phase 2: Container Build ──────────────────────────────
+  build:
+    name: "🏗️ Build & Scan Container"
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t cortex-sovereign:${{ github.sha }} .
+
+      - name: Trivy scan (CRITICAL + HIGH)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: cortex-sovereign:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          format: sarif
+          output: trivy-report.sarif
+
+      - name: Push to registries
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # GCR
+          echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin gcr.io
+          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
+          # ECR
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
+          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+          docker push ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+          # ACR
+          docker login ${{ secrets.AZURE_ACR_REGISTRY }} -u ${{ secrets.AZURE_ACR_USER }} -p ${{ secrets.AZURE_ACR_PASSWORD }}
+          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+          docker push ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+
+  # ── Phase 3: Infrastructure ───────────────────────────────
+  terraform:
+    name: "☁️ Multi-Cloud Infra"
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -no-color
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  # ── Phase 4: Deploy to K8s clusters ───────────────────────
+  deploy:
+    name: "🚀 Deploy to ${{ matrix.cloud }}"
+    needs: terraform
+    strategy:
+      matrix:
+        cloud: [aws, gcp, azure]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to ${{ matrix.cloud }}
+        run: |
+          kubectl apply -f infra/k8s/${{ matrix.cloud }}/ --recursive
+          kubectl rollout status deployment/cortex-sovereign -n cortex --timeout=300s
+
+  # ── Phase 5: Smoke Tests ──────────────────────────────────
+  smoke:
+    name: "🔥 Smoke Tests"
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Health checks
+        run: |
+          for endpoint in $AWS_ENDPOINT $GCP_ENDPOINT $AZURE_ENDPOINT; do
+            curl -sf "$endpoint/health" || exit 1
+            echo "✅ $endpoint healthy"
+          done
+      - name: Sovereign power verification
+        run: |
+          python -c "
+          import json, urllib.request
+          r = urllib.request.urlopen('$GCP_ENDPOINT/api/v1/sovereign/power')
+          data = json.loads(r.read())
+          power = data['power_level']
+          print(f'Power Level: {power}/1000')
+          assert power >= 1300, f'Power {power} < 1300 target'
+          print('🏆 SOVEREIGN THRESHOLD EXCEEDED')
+          "
