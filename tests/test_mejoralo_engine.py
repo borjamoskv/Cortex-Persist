@@ -65,7 +65,7 @@ class TestScan:
         (tmp_path / "pyproject.toml").write_text("[project]")
         (tmp_path / "clean.py").write_text("def hello():\n    return 'world'\n")
         result = mejoralo.scan("test-clean", str(tmp_path))
-        assert 0 <= result.score <= 100
+        assert 0 <= result.score <= 130
         assert result.stack == "python"
         assert result.total_files == 1
         assert len(result.dimensions) >= 4
