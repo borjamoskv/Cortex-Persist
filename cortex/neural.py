@@ -104,7 +104,7 @@ class LinuxWindowSensor(BaseWindowSensor):
             )
             name = result.stdout.strip()
             return name if name else "unknown"
-        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        except (subprocess.TimeoutExpired, OSError):
             return "unknown"
 
 
@@ -171,7 +171,7 @@ class LinuxClipboardSensor(BaseClipboardSensor):
                 )
                 if result.returncode == 0:
                     return result.stdout[:2000]
-            except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            except (subprocess.TimeoutExpired, OSError):
                 continue
         return ""
 
@@ -315,26 +315,40 @@ class NeuralIntentEngine:
 
         self._last_context = context
 
-        for app_re, clip_re, intent, conf, trigger in self._rules:
-            if not app_re.search(context.active_window):
-                continue
-            if not raw_clipboard or not clip_re.search(raw_clipboard):
-                continue
-
-            hyp = NeuralHypothesis(
-                intent=intent,
-                confidence=conf,
-                trigger=trigger,
-                summary=f"Inferred intent '{intent}' ({trigger}) [App: {context.active_window}]",
-            )
-
-            # Deduplicate consecutive identical hypotheses
-            if self._last_hypothesis and self._last_hypothesis.intent == hyp.intent:
-                if (context.timestamp - self._last_hypothesis_timestamp) < 60:
-                    return None
-
-            self._last_hypothesis = hyp
-            self._last_hypothesis_timestamp = context.timestamp
-            return hyp
+        for rule in self._rules:
+            hyp = self._match_rule(rule, context, raw_clipboard)
+            if hyp:
+                return hyp
 
         return None
+
+    def _match_rule(
+        self,
+        rule: tuple[re.Pattern, re.Pattern, str, str, str],
+        context: NeuralContext,
+        raw_clipboard: str,
+    ) -> NeuralHypothesis | None:
+        """Check if a single rule matches the current context."""
+        app_re, clip_re, intent, conf, trigger = rule
+
+        if not app_re.search(context.active_window):
+            return None
+        if not raw_clipboard or not clip_re.search(raw_clipboard):
+            return None
+
+        hyp = NeuralHypothesis(
+            intent=intent,
+            confidence=conf,
+            trigger=trigger,
+            summary=f"Inferred intent '{intent}' ({trigger}) [App: {context.active_window}]",
+        )
+
+        # Deduplicate consecutive identical hypotheses
+        if self._last_hypothesis and self._last_hypothesis.intent == hyp.intent:
+            if (context.timestamp - self._last_hypothesis_timestamp) < 60:
+                return None
+
+        self._last_hypothesis = hyp
+        self._last_hypothesis_timestamp = context.timestamp
+        return hyp
+

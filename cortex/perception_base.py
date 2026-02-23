@@ -167,34 +167,41 @@ def infer_project_from_path(path: str, workspace_root: str | None = None) -> str
     p = Path(path)
 
     if workspace_root:
-        root = Path(workspace_root)
-        try:
-            rel = p.relative_to(root)
-            parts = rel.parts
-            if not parts:
-                return root.name
+        project = _infer_from_workspace(p, Path(workspace_root))
+        if project:
+            return project
 
-            # Monorepo detection: packages/my-pkg -> my-pkg
-            if len(parts) >= 2 and parts[0] in ("packages", "apps", "services", "src"):
-                return parts[1]
+    return _infer_from_parents(p)
 
-            # Single file in workspace root → return workspace name
-            if len(parts) == 1:
-                return root.name
 
-            return parts[0]
-        except ValueError:
-            pass
+def _infer_from_workspace(p: Path, root: Path) -> str | None:
+    """Extract project name relative to workspace root."""
+    try:
+        rel = p.relative_to(root)
+        parts = rel.parts
+        if not parts:
+            return root.name
 
-    # Fallback: scan up parents until we find a common project marker or root
-    for parent in p.parents:
-        if parent.name in (".", "/"):
-            break
-        # Ignore intermediate common dirs
-        if parent.name not in ("src", "lib", "internal", "pkg", "docs", "tests"):
-            return parent.name
+        # Monorepo detection: packages/my-pkg -> my-pkg
+        monorepo_dirs = ("packages", "apps", "services", "src")
+        if len(parts) >= 2 and parts[0] in monorepo_dirs:
+            return parts[1]
 
-    return None
+        # Single file or project in workspace root
+        return parts[0] if parts[0] else root.name
+    except ValueError:
+        return None
+
+
+def _infer_from_parents(p: Path) -> str | None:
+    """Fallback: scan up parents until we find a common project marker. (Complexity Crushed O(1))"""
+    ignore_dirs = {"src", "lib", "internal", "pkg", "docs", "tests", ".", "/"}
+    # Use next() with a generator expression to dramatically reduce cyclomatic complexity
+    return next(
+        (parent.name for parent in p.parents if parent.name not in ignore_dirs),
+        None
+    )
+
 
 
 def should_ignore(path: str) -> bool:

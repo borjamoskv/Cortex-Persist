@@ -11,6 +11,7 @@ __all__ = ["Fact", "row_to_fact"]
 @dataclass
 class Fact:
     id: int
+    tenant_id: str
     project: str
     content: str
     fact_type: str
@@ -32,6 +33,7 @@ class Fact:
     def to_dict(self) -> dict:
         return {
             "id": self.id,
+            "tenant_id": self.tenant_id,
             "project": self.project,
             "content": self.content,
             "type": self.fact_type,
@@ -50,44 +52,47 @@ def row_to_fact(row: tuple) -> Fact:
 
     enc = get_default_encrypter()
 
-    content = enc.decrypt_str(row[2]) if row[2] else ""
+    # Handle shorter tuples safely (legacy tests might pass incomplete rows)
+    # New schema expects 16 columns (indices 0-15)
+    # row[0]=id, row[1]=tenant_id, row[2]=project, row[3]=content, row[4]=fact_type,
+    # row[5]=tags, row[6]=confidence, row[7]=valid_from, row[8]=valid_until,
+    # row[9]=source, row[10]=meta, row[11]=consensus_score, row[12]=created_at,
+    # row[13]=updated_at, row[14]=tx_id, row[15]=hash
+    r = list(row)
+    while len(r) < 16:
+        r.append(None)
+
+    tenant_id = r[1] or "default"
+    content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
 
     # Safely handle JSON parsing
     try:
-        tags = json.loads(row[4]) if row[4] else []
+        tags = json.loads(r[5]) if r[5] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
     try:
-        meta = enc.decrypt_json(row[9]) if row[9] else {}
+        meta = enc.decrypt_json(r[10], tenant_id=tenant_id) if r[10] else {}
     except (json.JSONDecodeError, TypeError):
         meta = {}
 
-    # Handle shorter tuples safely (legacy tests might pass incomplete rows)
-    # Schema expects 15 columns (indices 0-14)
-    # If row is short, fill with defaults
-    r = list(row)
-    while len(r) < 15:
-        r.append(None)
-
-    # Defaults for non-nullable fields if missing/None from DB (shouldn't happen in real DB but maybe in mocks)
-    # consensus_score index 10
-    score = r[10] if r[10] is not None else 1.0
+    score = r[11] if r[11] is not None else 1.0
 
     return Fact(
         id=r[0],
-        project=r[1],
+        tenant_id=tenant_id,
+        project=r[2],
         content=content,
-        fact_type=r[3],
+        fact_type=r[4],
         tags=tags,
-        confidence=r[5],
-        valid_from=r[6],
-        valid_until=r[7],
-        source=r[8],
+        confidence=r[6],
+        valid_from=r[7],
+        valid_until=r[8],
+        source=r[9],
         meta=meta,
         consensus_score=score,
-        created_at=r[11],
-        updated_at=r[12],
-        tx_id=r[13],
-        hash=r[14],
+        created_at=r[12],
+        updated_at=r[13],
+        tx_id=r[14],
+        hash=r[15],
     )

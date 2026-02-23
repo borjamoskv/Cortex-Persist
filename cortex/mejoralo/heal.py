@@ -6,11 +6,15 @@ runs `pytest` to ensure 100% integrity, and automatically commits or rollbacks.
 v8.0 — Relentless Mode: no para hasta que sea INMEJORABLE.
 """
 
+import ast
 import asyncio
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from cortex.mejoralo.engine import MejoraloEngine
 
 from cortex.mejoralo.constants import (
     HARD_ITERATION_CAP,
@@ -32,24 +36,26 @@ logger = logging.getLogger("cortex.mejoralo.heal")
 def _extract_issues_from_findings(scan_result: ScanResult) -> dict[str, list[str]]:
     """Map scan findings to their respective files."""
     file_issues: dict[str, list[str]] = {}
-
     for d in scan_result.dimensions:
         for f in d.findings:
-            rel_path = None
-            # Extract file path from findings like "file:line -> msg" or "file (LOC)"
-            if " -> " in f:
-                rel_path = f.split(":", 1)[0].strip()
-            elif " → " in f:
-                rel_path = f.split(":", 1)[0].strip()
-            elif " LOC)" in f:
-                rel_path = f.split(" (", 1)[0].strip()
-
-            if rel_path:
-                if rel_path not in file_issues:
-                    file_issues[rel_path] = []
-                file_issues[rel_path].append(f"({d.name}) {f}")
-
+            _add_finding_to_issues(file_issues, d.name, f)
     return file_issues
+
+
+def _add_finding_to_issues(file_issues: dict[str, list[str]], dim_name: str, finding: str) -> None:
+    """Helper to register a finding for its target file."""
+    rel_path = _extract_path_from_finding(finding)
+    if rel_path:
+        file_issues.setdefault(rel_path, []).append(f"({dim_name}) {finding}")
+
+
+def _extract_path_from_finding(finding: str) -> str | None:
+    """Extract file relative path from typical MEJORAlo findings."""
+    if " -> " in finding or " → " in finding:
+        return finding.split(":", 1)[0].strip()
+    if " LOC)" in finding:
+        return finding.split(" (", 1)[0].strip()
+    return None
 
 
 async def _heal_file_async(
@@ -57,6 +63,8 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
+    engine: "MejoraloEngine" | None = None,
+    project: str | None = None,
 ) -> str | None:
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
 
@@ -65,7 +73,9 @@ async def _heal_file_async(
     from cortex.mejoralo.swarm import MejoraloSwarm
 
     swarm = MejoraloSwarm(level=level)
-    return await swarm.refactor_file(file_path, findings, iteration=iteration)
+    return await swarm.refactor_file(
+        file_path, findings, iteration=iteration, engine=engine, project=project
+    )
 
 
 def _apply_and_verify(
@@ -76,56 +86,123 @@ def _apply_and_verify(
     iteration: int,
     console: Any,
     current_score: int,
+    engine: "MejoraloEngine" | None = None,
+    project: str | None = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
     abs_path = Path(path).resolve() / top_file_rel
-
-    # 🔬 Integrity Check
     console.print(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
 
-    # Backup original
     try:
         original_code = abs_path.read_text(errors="replace")
     except Exception:
         logger.exception("Failed to read original code for %s", top_file_rel)
         return False
 
+    if not _run_functional_inquisitor(
+        new_code, original_code, top_file_rel, console, engine, project, abs_path
+    ):
+        return False
+
+    abs_path.write_text(new_code)
+    _apply_aesthetic_formatting(abs_path, console)
+
+    if not _run_delta_testing(
+        top_file_rel, path, original_code, abs_path, console, engine, project
+    ):
+        return False
+
+    return _commit_healed_file(
+        abs_path, path, top_file_rel, level, iteration, current_score, console
+    )
+
+
+def _run_functional_inquisitor(
+    new_code: str,
+    original_code: str,
+    top_file_rel: str,
+    console: Any,
+    engine: "MejoraloEngine" | None,
+    project: str | None,
+    abs_path: Path,
+) -> bool:
+    if abs_path.suffix != ".py":
+        return True
+
     try:
-        abs_path.write_text(new_code)
+        old_tree = ast.parse(original_code)
+        new_tree = ast.parse(new_code)
 
-        # 💅 130/100 Aesthetic Enforcement
-        console.print("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
-        subprocess.run(["ruff", "format", str(abs_path)], capture_output=True)
-        subprocess.run(["ruff", "check", "--fix", str(abs_path)], capture_output=True)
+        old_funcs = {n.name for n in ast.walk(old_tree) if isinstance(n, ast.FunctionDef)}
+        new_funcs = {n.name for n in ast.walk(new_tree) if isinstance(n, ast.FunctionDef)}
 
-        # 🎯 Delta-Testing: Run specific test file if possible
-        pytest_cmd = ["pytest"]
-
-        # Try to infer test file path (e.g., cortex/foo.py -> tests/test_foo.py)
-        rel_parts = Path(top_file_rel).parts
-        if len(rel_parts) > 1 and rel_parts[0] == "cortex":
-            inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
-            if inferred_test.exists():
-                console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
-                pytest_cmd.append(str(inferred_test))
-            else:
-                console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
-
-        res = subprocess.run(pytest_cmd, cwd=path, capture_output=True, text=True)
-
-        if res.returncode != 0:
-            console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
-            abs_path.write_text(original_code)
+        deleted = [f for f in old_funcs if not f.startswith("_") and f not in new_funcs]
+        if deleted:
+            console.print(
+                f"  [bold red]🚫 Inquisidor: Eliminación de funciones públicas "
+                f"detectada ({', '.join(deleted)}). BLOQUED.[/]"
+            )
+            if engine and project:
+                engine.record_scar(project, top_file_rel, f"Inquisidor: Eliminó {deleted}")
             return False
+    except SyntaxError:
+        pass
+    return True
 
-        # ✅ Commit
+
+def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
+    console.print("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
+    subprocess.run(["ruff", "format", str(abs_path)], capture_output=True)
+    subprocess.run(["ruff", "check", "--fix", str(abs_path)], capture_output=True)
+
+
+def _run_delta_testing(
+    top_file_rel: str,
+    path: str | Path,
+    original_code: str,
+    abs_path: Path,
+    console: Any,
+    engine: "MejoraloEngine" | None,
+    project: str | None,
+) -> bool:
+    pytest_cmd = ["pytest"]
+    rel_parts = Path(top_file_rel).parts
+
+    if len(rel_parts) > 1 and rel_parts[0] == "cortex":
+        inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
+        if inferred_test.exists():
+            console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
+            pytest_cmd.append(str(inferred_test))
+        else:
+            console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
+
+    res = subprocess.run(pytest_cmd, cwd=path, capture_output=True, text=True)
+    if res.returncode != 0:
+        console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+        if engine and project:
+            error_trace = (res.stdout + "\n" + res.stderr).strip()
+            engine.record_scar(project, top_file_rel, error_trace)
+        abs_path.write_text(original_code)
+        return False
+    return True
+
+
+def _commit_healed_file(
+    abs_path: Path,
+    path: str | Path,
+    top_file_rel: str,
+    level: int,
+    iteration: int,
+    current_score: int,
+    console: Any,
+) -> bool:
+    try:
         commit_msg = (
             f"[MEJORAlo Auto-Heal L{level}] "
             f"Refactorizado {top_file_rel} "
             f"(iter {iteration}, score {current_score})"
         )
         console.print(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
-
         subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
         subprocess.run(
             [
@@ -141,8 +218,7 @@ def _apply_and_verify(
         )
         return True
     except (OSError, subprocess.SubprocessError):
-        logger.exception("Error aplicando refactor a %s", top_file_rel)
-        abs_path.write_text(original_code)
+        logger.exception("Error aplicando commit a %s", top_file_rel)
         return False
 
 
@@ -163,6 +239,7 @@ def heal_project(
     path: str | Path,
     target_score: int,
     scan_result: ScanResult,
+    engine: "MejoraloEngine" | None = None,
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -183,7 +260,7 @@ def heal_project(
         )
 
         iteration_success, current_result = _run_healing_iteration(
-            project, path, level, iteration, console, current_result, healed_files
+            project, path, level, iteration, console, current_result, healed_files, engine=engine
         )
 
         any_success = any_success or iteration_success
@@ -214,6 +291,7 @@ def _run_healing_iteration(
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
+    engine: "MejoraloEngine" | None = None,
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.mejoralo.scan import scan
@@ -222,28 +300,58 @@ def _run_healing_iteration(
     if not file_issues:
         return False, current_result
 
-    # Sort: prioritize unhealed files with most issues
-    sorted_files = sorted(
-        file_issues.items(),
-        key=lambda x: (x[0] not in healed_files, len(x[1])),
-        reverse=True,
-    )
+    # 🔗 Topological Sort: Prioritize leaf nodes (dependencies) to avoid cascading failures
+    sorted_files = _sort_by_topological_order(file_issues, path)
+
+    # Within the topological layer, prioritize unhealed files with most issues
+    # Note: _sort_by_topological_order currently returns a simple list,
+    # but we can refine it if we want parallel layers.
     targets = sorted_files[: _get_files_per_iteration(level)]
 
     # 🚀 Parallel Generation
     async def _run_generations():
         tasks = [
-            _heal_file_async(Path(path).resolve() / f, iss, level=level, iteration=iteration)
+            _heal_file_async(
+                Path(path).resolve() / f,
+                iss,
+                level=level,
+                iteration=iteration,
+                engine=engine,
+                project=project,
+            )
             for f, iss in targets
         ]
         return await asyncio.gather(*tasks)
 
-    generation_results = asyncio.run(_run_generations())
+    try:
+        loop = asyncio.get_running_loop()
+        if loop.is_running():
+            # If we are in an async context, we can't block.
+            # This is a sync-to-async boundary. For now, we use a thread-safe approach or nest sparingly.
+            # In a sovereign environment, we prefer to run on a separate thread to block properly if sync.
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                generation_results = executor.submit(
+                    lambda: asyncio.run(_run_generations())
+                ).result()
+        else:
+            generation_results = asyncio.run(_run_generations())
+    except RuntimeError:
+        generation_results = asyncio.run(_run_generations())
 
     iteration_success = False
     for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
         if new_code and _apply_and_verify(
-            top_file_rel, new_code, path, level, iteration, console, current_result.score
+            top_file_rel,
+            new_code,
+            path,
+            level,
+            iteration,
+            console,
+            current_result.score,
+            engine=engine,
+            project=project,
         ):
             iteration_success = True
             healed_files.add(top_file_rel)
@@ -332,3 +440,63 @@ def _print_journey(console: Any, score_history: list[int]) -> None:
         return
     journey = " → ".join(str(s) for s in score_history)
     console.print(f"  [dim]Recorrido: {journey}[/]")
+
+
+def _sort_by_topological_order(
+    file_issues: dict[str, list[str]], root_path: str | Path
+) -> list[tuple[str, list[str]]]:
+    """Sort target files by dependency (bottom-up)."""
+    import networkx as nx
+
+    G = nx.DiGraph()
+    files = set(file_issues.keys())
+    root = Path(root_path).resolve()
+
+    for rel_path in files:
+        G.add_node(rel_path)
+        deps = _extract_file_dependencies(root / rel_path, files)
+        for d in deps:
+            G.add_edge(rel_path, d)
+
+    try:
+        order = list(reversed(list(nx.topological_sort(G))))
+    except nx.NetworkXUnfeasible:
+        logger.warning("Circular dependencies detected. Falling back to heuristic.")
+        return sorted(file_issues.items(), key=lambda x: len(x[1]), reverse=True)
+
+    return [(f, file_issues[f]) for f in order if f in file_issues]
+
+
+def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
+    """Extract which target files the given file depends on."""
+    if not file_path.exists() or file_path.suffix != ".py":
+        return set()
+
+    deps = set()
+    try:
+        tree = ast.parse(file_path.read_text(errors="replace"))
+        for node in ast.walk(tree):
+            mod = _get_module_name_from_node(node)
+            if mod:
+                _match_module_to_targets(mod, targets, deps)
+    except Exception:
+        pass
+    return deps
+
+
+def _get_module_name_from_node(node: ast.AST) -> str | None:
+    """Helper to extract module true name from AST import node."""
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            return alias.name
+    elif isinstance(node, ast.ImportFrom):
+        return node.module
+    return None
+
+
+def _match_module_to_targets(mod: str, targets: set[str], deps: set[str]) -> None:
+    """Matches an extracted module against targets and registers dependency."""
+    mod_path = mod.replace(".", "/")
+    for t in targets:
+        if t.startswith(mod_path):
+            deps.add(t)

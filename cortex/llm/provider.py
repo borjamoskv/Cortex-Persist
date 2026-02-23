@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any, Final
 
 import httpx
@@ -32,9 +33,8 @@ logger = logging.getLogger("cortex.llm")
 
 # ─── Configuration & Presets ──────────────────────────────────────────
 
-_ASSET_PATH: Final[str] = os.path.join(
-    os.path.dirname(__file__), "..", "assets", "llm_presets.json"
-)
+_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent / "assets" / "llm_presets.json")
+_CONTENT_TYPE_JSON: Final[str] = "application/json"
 
 # Global cache for presets to avoid redundant I/O
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}
@@ -46,12 +46,12 @@ def _load_presets() -> dict[str, dict[str, Any]]:
     if not _PRESETS_CACHE:
         try:
             # Handle absolute path for robustness
-            path = os.path.abspath(_ASSET_PATH)
-            if not os.path.exists(path):
+            path = Path(_ASSET_PATH).resolve()
+            if not path.exists():
                 logger.error("Sovereign Failure: LLM presets missing at %s", path)
                 return {}
 
-            with open(path, encoding="utf-8") as f:
+            with path.open(encoding="utf-8") as f:
                 _PRESETS_CACHE = json.load(f)
                 logger.debug("LLM: Loaded %d presets from assets", len(_PRESETS_CACHE))
         except (json.JSONDecodeError, OSError) as exc:
@@ -84,39 +84,10 @@ class LLMProvider(BaseProvider):
     ):
         presets = _load_presets()
 
-        # ── Custom endpoint: user provides everything ──────────────
         if provider == "custom":
-            self._provider = "custom"
-            self._base_url = base_url or os.environ.get("CORTEX_LLM_BASE_URL", "")
-            self._model = model or os.environ.get("CORTEX_LLM_MODEL", "custom-model")
-            self._api_key = api_key or os.environ.get("CORTEX_LLM_API_KEY", "")
-            self._context_window = 32768
-            self._extra_headers: dict[str, str] = {}
-
-            if not self._base_url:
-                raise ValueError(
-                    "Custom provider requires CORTEX_LLM_BASE_URL or base_url parameter."
-                )
-
-        # ── Preset endpoint ────────────────────────────────────────
+            self._init_custom(api_key, model, base_url)
         elif provider in presets:
-            config = presets[provider]
-            self._provider = provider
-            self._base_url = base_url or config["base_url"]
-            self._model = model or os.environ.get("CORTEX_LLM_MODEL", "") or config["default_model"]
-            self._context_window = config["context_window"]
-            self._extra_headers = config.get("extra_headers", {})
-
-            # Resolve API key
-            env_key = config.get("env_key")
-            if env_key:
-                self._api_key = api_key or os.environ.get(env_key, "")
-                if not self._api_key:
-                    raise ValueError(
-                        f"Environment variable '{env_key}' is required for provider '{provider}'."
-                    )
-            else:
-                self._api_key = api_key or ""
+            self._init_preset(provider, presets[provider], api_key, model, base_url)
 
         else:
             supported = sorted(list(presets.keys()) + ["custom"])
@@ -130,6 +101,62 @@ class LLMProvider(BaseProvider):
             self._base_url,
         )
 
+    def _init_custom(
+        self,
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
+    ) -> None:
+        """Initialize a custom provider configuration."""
+        self._provider = "custom"
+        self._base_url = base_url or os.environ.get("CORTEX_LLM_BASE_URL")
+        self._model = model or os.environ.get("CORTEX_LLM_MODEL", "gpt-4")
+        self._api_key = api_key or os.environ.get("CORTEX_LLM_API_KEY")
+        self._context_window = 128000
+        self._extra_headers = {}
+
+        if not self._base_url:
+            raise ValueError("Custom LLM provider requires CORTEX_LLM_BASE_URL")
+
+    def _init_preset(
+        self,
+        provider: str,
+        preset: dict[str, Any],
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
+    ) -> None:
+        """Initialize from a known provider preset."""
+        self._provider = provider
+        self._base_url = base_url or preset["base_url"]
+        self._model = model or os.environ.get("CORTEX_LLM_MODEL") or preset["default_model"]
+        self._context_window = preset["context_window"]
+        self._extra_headers = preset.get("extra_headers", {})
+        self._api_key = api_key
+
+        # Resolve API key if not explicitly provided
+        env_key = preset.get("env_key") or preset.get("api_key_env")
+        if not self._api_key and env_key:
+            self._api_key = os.environ.get(env_key)
+
+        if not self._api_key:
+            # Some providers like Ollama don't need keys
+            if provider not in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]:
+                msg = f"LLM provider '{provider}' requires an API key "
+                msg += f"(api_key argument or {env_key} env var)"
+                raise ValueError(msg)
+
+
+    def _prepare_request(self) -> tuple[str, dict[str, str]]:
+        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        headers: dict[str, str] = {
+            "Content-Type": _CONTENT_TYPE_JSON,
+            **self._extra_headers,
+        }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+        return url, headers
+
     async def complete(
         self,
         prompt: str,
@@ -138,13 +165,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
-        headers: dict[str, str] = {
-            "Content-Type": "application/json",
-            **self._extra_headers,
-        }
-        if self._api_key:
-            headers["Authorization"] = f"Bearer {self._api_key}"
+        url, headers = self._prepare_request()
 
         payload = {
             "model": self._model,
@@ -173,6 +194,23 @@ class LLMProvider(BaseProvider):
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
+    async def _process_stream_lines(self, response: httpx.Response):
+        """Consume and parse SSE lines from an active HTTP stream."""
+        async for line in response.aiter_lines():
+            if not line or not line.startswith("data: "):
+                continue
+
+            data_str = line[6:].strip()
+            if data_str == "[DONE]":
+                break
+
+            try:
+                data = json.loads(data_str)
+                if delta := data["choices"][0].get("delta", {}).get("content"):
+                    yield delta
+            except (json.JSONDecodeError, KeyError, IndexError):
+                continue
+
     async def stream(
         self,
         prompt: str,
@@ -181,13 +219,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
     ):
         """Stream a chat completion request. Yields text chunks."""
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
-        headers: dict[str, str] = {
-            "Content-Type": "application/json",
-            **self._extra_headers,
-        }
-        if self._api_key:
-            headers["Authorization"] = f"Bearer {self._api_key}"
+        url, headers = self._prepare_request()
 
         payload = {
             "model": self._model,
@@ -203,33 +235,15 @@ class LLMProvider(BaseProvider):
         try:
             async with self._client.stream("POST", url, headers=headers, json=payload) as response:
                 response.raise_for_status()
-                async for line in response.aiter_lines():
-                    if not line or not line.startswith("data: "):
-                        continue
-
-                    data_str = line[6:].strip()
-                    if data_str == "[DONE]":
-                        break
-
-                    try:
-                        data = json.loads(data_str)
-                        if delta := data["choices"][0].get("delta", {}).get("content"):
-                            yield delta
-                    except (json.JSONDecodeError, KeyError, IndexError):
-                        continue
+                async for chunk in self._process_stream_lines(response):
+                    yield chunk
         except httpx.HTTPStatusError as e:
             logger.error("LLM Stream Failure [%s]: %s", self._provider, e.response.text[:500])
             raise
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
-        headers: dict[str, str] = {
-            "Content-Type": "application/json",
-            **self._extra_headers,
-        }
-        if self._api_key:
-            headers["Authorization"] = f"Bearer {self._api_key}"
+        url, headers = self._prepare_request()
 
         payload = {
             "model": self._model,

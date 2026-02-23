@@ -33,6 +33,7 @@ __all__ = [
     "CREATE_TRUST_EDGES",
     "CREATE_VOTES",
     "CREATE_VOTES_V2",
+    "CREATE_TENANTS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
     "SCHEMA_VERSION",
@@ -45,6 +46,7 @@ SCHEMA_VERSION = "5.0.0"
 CREATE_FACTS = """
 CREATE TABLE IF NOT EXISTS facts (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     project     TEXT NOT NULL,
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
@@ -62,6 +64,7 @@ CREATE TABLE IF NOT EXISTS facts (
 """
 
 CREATE_FACTS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_facts_tenant ON facts(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_facts_project ON facts(project);
 CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
@@ -81,6 +84,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS fact_embeddings USING vec0(
 CREATE_SESSIONS = """
 CREATE TABLE IF NOT EXISTS sessions (
     id              TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     date            TEXT NOT NULL,
     focus           TEXT NOT NULL DEFAULT '[]',
     summary         TEXT NOT NULL,
@@ -93,6 +97,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE_TRANSACTIONS = """
 CREATE TABLE IF NOT EXISTS transactions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     project     TEXT NOT NULL,
     action      TEXT NOT NULL,
     detail      TEXT,
@@ -103,6 +108,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 """
 
 CREATE_TRANSACTIONS_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 """
@@ -111,6 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 CREATE_HEARTBEATS = """
 CREATE TABLE IF NOT EXISTS heartbeats (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     project     TEXT NOT NULL,
     entity      TEXT,
     category    TEXT NOT NULL,
@@ -122,6 +129,7 @@ CREATE TABLE IF NOT EXISTS heartbeats (
 """
 
 CREATE_HEARTBEATS_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_hb_tenant ON heartbeats(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_hb_project ON heartbeats(project);
 CREATE INDEX IF NOT EXISTS idx_hb_timestamp ON heartbeats(timestamp);
 CREATE INDEX IF NOT EXISTS idx_hb_category ON heartbeats(category);
@@ -131,6 +139,7 @@ CREATE INDEX IF NOT EXISTS idx_hb_category ON heartbeats(category);
 CREATE_TIME_ENTRIES = """
 CREATE TABLE IF NOT EXISTS time_entries (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     project     TEXT NOT NULL,
     category    TEXT NOT NULL,
     start_time  TEXT NOT NULL,
@@ -143,6 +152,7 @@ CREATE TABLE IF NOT EXISTS time_entries (
 """
 
 CREATE_TIME_ENTRIES_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_te_tenant ON time_entries(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_te_project ON time_entries(project);
 CREATE INDEX IF NOT EXISTS idx_te_start ON time_entries(start_time);
 """
@@ -245,6 +255,7 @@ CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
 CREATE_GHOSTS = """
 CREATE TABLE IF NOT EXISTS ghosts (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     reference       TEXT NOT NULL,
     context         TEXT,
     project         TEXT NOT NULL,
@@ -279,6 +290,7 @@ CREATE TABLE IF NOT EXISTS graph_outbox (
 CREATE_COMPACTION_LOG = """
 CREATE TABLE IF NOT EXISTS compaction_log (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     project         TEXT NOT NULL,
     strategy        TEXT NOT NULL,
     original_ids    TEXT, -- JSON list
@@ -298,6 +310,7 @@ CREATE INDEX IF NOT EXISTS idx_graph_outbox_fact ON graph_outbox(fact_id);
 CREATE_CONTEXT_SNAPSHOTS = """
 CREATE TABLE IF NOT EXISTS context_snapshots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     active_project  TEXT,
     confidence      TEXT NOT NULL,
     signals_used    INTEGER NOT NULL,
@@ -317,6 +330,7 @@ CREATE INDEX IF NOT EXISTS idx_ctx_snap_created ON context_snapshots(created_at)
 CREATE_EPISODES = """
 CREATE TABLE IF NOT EXISTS episodes (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     session_id  TEXT NOT NULL,
     event_type  TEXT NOT NULL,
     content     TEXT NOT NULL,
@@ -329,6 +343,7 @@ CREATE TABLE IF NOT EXISTS episodes (
 """
 
 CREATE_EPISODES_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_ep_tenant ON episodes(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_ep_session ON episodes(session_id);
 CREATE INDEX IF NOT EXISTS idx_ep_project_type ON episodes(project, event_type);
 CREATE INDEX IF NOT EXISTS idx_ep_created ON episodes(created_at);
@@ -359,6 +374,17 @@ CREATE TABLE IF NOT EXISTS threat_intel (
 
 CREATE_THREAT_INTEL_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
+"""
+
+# ─── Tenants (Multi-Tenancy) ─────────────────────────────────────────
+CREATE_TENANTS = """
+CREATE TABLE IF NOT EXISTS tenants (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    config      TEXT NOT NULL DEFAULT '{}',
+    is_active   INTEGER NOT NULL DEFAULT 1,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 
@@ -393,6 +419,7 @@ ALL_SCHEMA = [
     CREATE_EPISODES_FTS,
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
+    CREATE_TENANTS,
 ]
 
 

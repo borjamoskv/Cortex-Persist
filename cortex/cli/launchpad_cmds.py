@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import sqlite3
+from pathlib import Path
 
 import click
 from rich.panel import Panel
@@ -44,7 +44,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
     engine = get_engine(db)
     orchestrator = MissionOrchestrator(engine)
     try:
-        display_goal = goal if goal else f"File: {os.path.basename(mission_file)}"
+        display_goal = goal if goal else f"File: {Path(mission_file).name}"
         with console.status(f"[bold blue]Launching mission in {project}: {display_goal}...[/]"):
             result = orchestrator.launch(
                 project=project,

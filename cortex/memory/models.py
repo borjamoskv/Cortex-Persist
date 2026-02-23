@@ -5,6 +5,7 @@ Tripartite Memory Architecture (KETER-∞ Frontera 2):
 - MemoryEntry: Legacy L2 vector store payload (Qdrant-compatible).
 - MemoryEvent: Pydantic v2 model for L1/L3 interaction events.
 - EpisodicSnapshot: Pydantic v2 model for L2 compressed episodes.
+- CortexFactModel: Zero-Trust L2 Vector Fact for CORTEX v6.
 """
 
 from __future__ import annotations
@@ -14,11 +15,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from cortex.temporal import now_iso
 
-__all__ = ["EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
+__all__ = ["CortexFactModel", "EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
 
 
 # ─── Legacy L2 Payload (Qdrant-compatible) ────────────────────────────
@@ -101,4 +102,49 @@ class EpisodicSnapshot(BaseModel):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp of snapshot creation.",
+    )
+
+
+class CortexFactModel(BaseModel):
+    """Zero-Trust L2 Vector Fact for SQLite-vec in CORTEX v6.
+
+    Designed to completely isolate facts per tenant while allowing
+    cross-project bridges and OUROBOROS entropy tracking.
+    """
+
+    id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        description="Unique identifier for the fact.",
+    )
+    tenant_id: str = Field(..., description="Absolute Zero-Trust Isolation.")
+    project_id: str = Field(..., description="Originating project ID.")
+    content: str = Field(..., description="Raw text content of the fact.")
+    embedding: list[float] = Field(..., description="Vector embedding array.")
+    timestamp: float = Field(
+        default_factory=lambda: datetime.now(timezone.utc).timestamp(),
+        description="Unix timestamp of creation.",
+    )
+
+    # Sovereign Metadata
+    is_diamond: bool = Field(default=False, description="Immune to temporal decay.")
+    is_bridge: bool = Field(default=False, description="Pattern transferred between projects.")
+    confidence: str = Field(default="C5", description="Confidence level [C1-C5].")
+
+    # Entropy and Health (The OUROBOROS engine will update this)
+    success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Optional structured metadata (session_id, tool calls, etc)."
+    )
+
+    @property
+    def age_days(self) -> float:
+        """Calculate fact age in days."""
+        delta = datetime.now(timezone.utc).timestamp() - self.timestamp
+        return max(0.0, delta / 86400.0)
+
+    model_config = ConfigDict(
+        frozen=True,
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
     )

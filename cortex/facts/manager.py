@@ -16,7 +16,7 @@ __all__ = ["FactManager"]
 logger = logging.getLogger("cortex.facts")
 
 _FACT_COLUMNS = (
-    "f.id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
+    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
     "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
     "f.created_at, f.updated_at, f.tx_id, t.hash"
 )
@@ -36,6 +36,7 @@ class FactManager:
         self,
         project: str,
         content: str,
+        tenant_id: str = "default",
         fact_type: str = "knowledge",
         tags: list[str] | None = None,
         confidence: str = "stated",
@@ -50,27 +51,33 @@ class FactManager:
 
         conn = await self.engine.get_conn()
         if not _skip_dedup:
-            existing_id = await self._check_dedup(conn, project, content)
+            existing_id = await self._check_dedup(conn, tenant_id, project, content)
             if existing_id is not None:
                 return existing_id
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
-        meta_json = json.dumps(meta or {})
+
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+        encrypted_meta = enc.encrypt_json(meta or {}, tenant_id=tenant_id)
 
         cursor = await conn.execute(
-            "INSERT INTO facts (project, content, fact_type, tags, confidence, "
+            "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at, tx_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
+                tenant_id,
                 project,
-                content,
+                encrypted_content,
                 fact_type,
                 tags_json,
                 confidence,
                 ts,
                 source,
-                meta_json,
+                encrypted_meta,
                 ts,
                 ts,
                 tx_id,
@@ -108,12 +115,19 @@ class FactManager:
 
         return content
 
-    async def _check_dedup(self, conn: Any, project: str, content: str) -> int | None:
+    async def _check_dedup(
+        self,
+        conn: Any,
+        tenant_id: str,
+        project: str,
+        content: str,
+    ) -> int | None:
         """Check for duplicate facts. Returns existing ID or None."""
         cursor = await conn.execute(
-            "SELECT id FROM facts WHERE project = ? AND content = ? "
+            "SELECT id FROM facts "
+            "WHERE tenant_id = ? AND project = ? AND content = ? "
             "AND valid_until IS NULL LIMIT 1",
-            (project, content),
+            (tenant_id, project, content),
         )
         existing = await cursor.fetchone()
         if existing:
@@ -162,9 +176,11 @@ class FactManager:
         ids = []
         try:
             for fact in facts:
+                tenant_id = fact.get("tenant_id", "default")
                 fid = await self.store(
                     project=fact["project"],
                     content=fact["content"],
+                    tenant_id=tenant_id,
                     fact_type=fact.get("fact_type", "knowledge"),
                     tags=fact.get("tags"),
                     confidence=fact.get("confidence", "stated"),
@@ -183,6 +199,7 @@ class FactManager:
     async def search(
         self,
         query: str,
+        tenant_id: str = "default",
         project: str | None = None,
         top_k: int = 5,
         as_of: str | None = None,
@@ -194,13 +211,13 @@ class FactManager:
         results = []
         try:
             results = await semantic_search(
-                conn, self.engine.embeddings.embed(query), top_k, project, as_of
+                conn, self.engine.embeddings.embed(query), top_k, tenant_id, project, as_of
             )
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Semantic search failed: %s", e)
 
         if not results:
-            results = await text_search(conn, query, project, limit=top_k)
+            results = await text_search(conn, query, tenant_id, project, limit=top_k)
 
         graph_depth = kwargs.get("graph_depth", 0)
         if results and graph_depth > 0:
@@ -214,16 +231,18 @@ class FactManager:
 
         return results
 
-    async def recall(self, project: str, limit: int | None = None, offset: int = 0) -> list[Fact]:
+    async def recall(
+        self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
+    ) -> list[Fact]:
         conn = await self.engine.get_conn()
         query = (
             f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-            f"WHERE f.project = ? AND f.valid_until IS NULL "
+            f"WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
             f"ORDER BY (f.consensus_score * 0.8 + "
             f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, "
             f"f.fact_type, f.created_at DESC"
         )
-        params: list = [project]
+        params: list = [tenant_id, project]
         if limit:
             query += " LIMIT ?"
             params.append(limit)
@@ -237,13 +256,14 @@ class FactManager:
     async def update(
         self,
         fact_id: int,
+        target_tenant_id: str = "default",
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> int:
         conn = await self.engine.get_conn()
         cursor = await conn.execute(
-            "SELECT project, content, fact_type, tags, confidence, source, meta "
+            "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
             "FROM facts WHERE id = ? AND valid_until IS NULL",
             (fact_id,),
         )
@@ -251,17 +271,30 @@ class FactManager:
         if not row:
             raise ValueError(f"Fact {fact_id} not found")
 
-        (project, old_content, fact_type, old_tags_json, confidence, source, old_meta_json) = row
-        new_meta = json.loads(old_meta_json) if old_meta_json else {}
+        # Validate tenant match if target_tenant_id provided
+        (db_tenant, project, old_content, fact_type, old_tags_json,
+         confidence, source, meta_json) = row
+        if target_tenant_id != "default" and db_tenant != target_tenant_id:
+            msg = f"Fact {fact_id} belongs to tenant {db_tenant}, not {target_tenant_id}"
+            raise ValueError(msg)
+
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+        # We need to decrypt content and meta if they were encrypted
+        decrypted_content = enc.decrypt_str(old_content, tenant_id=db_tenant)
+        decrypted_meta = enc.decrypt_json(meta_json, tenant_id=db_tenant) if meta_json else {}
+
+        new_meta = dict(decrypted_meta)
         if meta:
             new_meta.update(meta)
         new_meta["previous_fact_id"] = fact_id
 
         new_id = await self.store(
             project=project,
-            content=content if content is not None else old_content,
+            content=content if content is not None else decrypted_content,
+            tenant_id=db_tenant,
             fact_type=fact_type,
-            tags=tags if tags is not None else json.loads(old_tags_json),
+            tags=tags if tags is not None else json.loads(old_tags_json or "[]"),
             confidence=confidence,
             source=source,
             meta=new_meta,
@@ -301,31 +334,47 @@ class FactManager:
             return True
         return False
 
-    async def history(self, project: str, as_of: str | None = None) -> list[Fact]:
+    async def history(
+        self,
+        project: str,
+        tenant_id: str = "default",
+        as_of: str | None = None,
+    ) -> list[Fact]:
         conn = await self.engine.get_conn()
         if as_of:
             clause, params = build_temporal_filter_params(as_of, table_alias="f")
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                f"WHERE f.project = ? AND {clause} ORDER BY f.valid_from DESC"
+                f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
+                "ORDER BY f.valid_from DESC"
             )
-            cursor = await conn.execute(query, [project] + params)
+            cursor = await conn.execute(query, [tenant_id, project] + params)
         else:
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                f"WHERE f.project = ? ORDER BY f.valid_from DESC"
+                f"WHERE f.tenant_id = ? AND f.project = ? "
+                "ORDER BY f.valid_from DESC"
             )
-            cursor = await conn.execute(query, (project,))
+            cursor = await conn.execute(query, (tenant_id, project))
         rows = await cursor.fetchall()
         return [row_to_fact(row) for row in rows]
 
-    async def time_travel(self, tx_id: int, project: str | None = None) -> list[Fact]:
+    async def time_travel(
+        self,
+        tx_id: int,
+        tenant_id: str = "default",
+        project: str | None = None,
+    ) -> list[Fact]:
         """Reconstruct state as of transaction ID."""
         from cortex.temporal import time_travel_filter
 
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")
-        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE {clause}"
+        query = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+            f"WHERE f.tenant_id = ? AND {clause}"
+        )
+        params = [tenant_id] + params
         if project:
             query += " AND f.project = ?"
             params.append(project)
@@ -334,9 +383,14 @@ class FactManager:
         rows = await cursor.fetchall()
         return [row_to_fact(row) for row in rows]
 
-    async def reconstruct_state(self, tx_id: int, project: str | None = None) -> list[Fact]:
-        """Alias for time_travel."""
-        return await self.time_travel(tx_id, project)
+    async def reconstruct_state(
+        self,
+        tx_id: int,
+        tenant_id: str = "default",
+        project: str | None = None,
+    ) -> list[Fact]:
+        """Alias for time_travel for State Reconstruction Axiom."""
+        return await self.time_travel(tx_id, tenant_id, project)
 
     async def register_ghost(self, reference: str, context: str, project: str) -> int:
         conn = await self.engine.get_conn()
@@ -349,46 +403,48 @@ class FactManager:
 
         ts = now_iso()
         cursor = await conn.execute(
-            "INSERT INTO ghosts (reference, context, project, status, created_at) VALUES (?, ?, ?, 'open', ?)",
+            "INSERT INTO ghosts (reference, context, project, status, created_at) "
+            "VALUES (?, ?, ?, 'open', ?)",
             (reference, context, project, ts),
         )
         ghost_id = cursor.lastrowid
         await conn.commit()
         return ghost_id
 
-    def stats(self) -> dict:
-        conn = self.engine._get_sync_conn()
+    async def stats(self) -> dict:
+        """Async gathering of fact layer statistics with zero blocking."""
+        conn = await self.engine.get_conn()
+        # Optimized parallel counting is possible here if needed,
+        # but few queries are fast enough for sequential async.
+        cursor = await conn.execute("SELECT COUNT(*) FROM facts")
+        total = (await cursor.fetchone())[0]
+
+        cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
+        active = (await cursor.fetchone())[0]
+
+        cursor = await conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
+        projects = [p[0] for p in await cursor.fetchall()]
+
+        cursor = await conn.execute(
+            "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
+        )
+        types = dict(await cursor.fetchall())
+
+        cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
+        tx_count = (await cursor.fetchone())[0]
+
+        db_size = (
+            self.engine._db_path.stat().st_size / (1024 * 1024)
+            if self.engine._db_path.exists()
+            else 0
+        )
+
+        embeddings = 0
         try:
-            cursor = conn.execute("SELECT COUNT(*) FROM facts")
-            total = cursor.fetchone()[0]
-
-            cursor = conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-            active = cursor.fetchone()[0]
-
-            cursor = conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
-            projects = [p[0] for p in cursor.fetchall()]
-
-            cursor = conn.execute(
-                "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
-            )
-            types = dict(cursor.fetchall())
-
-            cursor = conn.execute("SELECT COUNT(*) FROM transactions")
-            tx_count = cursor.fetchone()[0]
-
-            db_size = (
-                self.engine._db_path.stat().st_size / (1024 * 1024)
-                if self.engine._db_path.exists()
-                else 0
-            )
-
-            try:
-                cursor = conn.execute("SELECT COUNT(*) FROM fact_embeddings")
-                embeddings = cursor.fetchone()[0]
-            except (sqlite3.Error, OSError, ValueError):
-                embeddings = 0
-        finally:
-            conn.close()
+            cursor = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
+            embeddings = (await cursor.fetchone())[0]
+        except (sqlite3.Error, OSError, ValueError):
+            pass
 
         return {
             "total_facts": total,

@@ -13,7 +13,7 @@ import pytest
 from cortex.connection_pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 from cortex.errors import FactNotFound
-from cortex.schema import ALL_SCHEMA
+from cortex.schema import get_all_schema
 
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool
@@ -35,7 +35,7 @@ async def pool(temp_db_path):
 
     # Initialize schema manually for tests
     async with aiosqlite.connect(temp_db_path) as conn:
-        for stmt in ALL_SCHEMA:
+        for stmt in get_all_schema():
             if "vec0" in stmt:
                 continue  # Skip vector for now
             await conn.executescript(stmt)
