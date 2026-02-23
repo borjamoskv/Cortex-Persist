@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
+from pathlib import Path
 
 __all__ = [
     "DEFAULT_GAP_SECONDS",
@@ -94,7 +94,7 @@ def classify_entity(entity: str) -> str:
     for keyword, category in ENTITY_KEYWORDS.items():
         if keyword in entity_lower:
             return category
-    ext = os.path.splitext(entity_lower)[1]
+    ext = Path(entity_lower).suffix
     if ext in CATEGORY_MAP:
         return CATEGORY_MAP[ext]
     return "other"

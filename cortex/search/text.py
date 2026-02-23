@@ -30,26 +30,32 @@ _PROJECT_FILTER = " AND f.project = ?"
 async def text_search(
     conn: aiosqlite.Connection,
     query: str,
+    tenant_id: str = "default",
     project: str | None = None,
     fact_type: str | None = None,
     tags: list[str] | None = None,
     limit: int = 20,
     as_of: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
     use_fts = await _has_fts5(conn)
     try:
         if use_fts:
-            rows = await _fts5_search(conn, query, project, fact_type, tags, limit, as_of)
+            rows = await _fts5_search(
+                conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence
+            )
         else:
-            rows = await _like_search(conn, query, project, fact_type, tags, limit, as_of)
+            rows = await _like_search(
+                conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence
+            )
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.error("Text search failed: %s", e)
         return []
     return _rows_to_results(rows, is_fts=use_fts)
 
 
-async def _fts5_search(conn, query, project, fact_type, tags, limit, as_of):
+async def _fts5_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
     fts_query = _sanitize_fts_query(query)
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
@@ -58,9 +64,9 @@ async def _fts5_search(conn, query, project, fact_type, tags, limit, as_of):
                bm25(facts_fts) AS rank
         FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
         LEFT JOIN transactions t ON f.tx_id = t.id
-        WHERE fts.content MATCH ?
+        WHERE f.tenant_id = ? AND fts.content MATCH ?
     """
-    params: list = [fts_query]
+    params: list = [tenant_id, fts_query]
     if as_of:
         clause, t_params = build_temporal_filter_params(as_of, table_alias="f")
         sql += " AND " + clause
@@ -77,21 +83,24 @@ async def _fts5_search(conn, query, project, fact_type, tags, limit, as_of):
         for tag in tags:
             sql += " AND json_extract(f.tags, '$') LIKE ?"
             params.append(f"%{tag}%")
+    if confidence:
+        sql += " AND f.confidence >= ?"
+        params.append(float(confidence))
     sql += " ORDER BY rank ASC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
     return await cursor.fetchall()
 
 
-async def _like_search(conn, query, project, fact_type, tags, limit, as_of):
+async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.meta,
                f.created_at, f.updated_at, f.tx_id, t.hash
         FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id
-        WHERE f.content LIKE ?
+        WHERE f.tenant_id = ? AND f.content LIKE ?
     """
-    params: list = [f"%{query}%"]
+    params: list = [tenant_id, f"%{query}%"]
     if as_of:
         clause, t_params = build_temporal_filter_params(as_of, table_alias="f")
         sql += " AND " + clause
@@ -108,6 +117,9 @@ async def _like_search(conn, query, project, fact_type, tags, limit, as_of):
         for tag in tags:
             sql += " AND json_extract(f.tags, '$') LIKE ?"
             params.append(f"%{tag}%")
+    if confidence:
+        sql += " AND f.confidence >= ?"
+        params.append(float(confidence))
     sql += " ORDER BY f.updated_at DESC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)

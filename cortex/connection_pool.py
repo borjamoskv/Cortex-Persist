@@ -109,45 +109,47 @@ class CortexConnectionPool:
         conn: aiosqlite.Connection | None = None
 
         try:
-            # Try to get from pool without waiting
-            try:
-                conn = self._pool.get_nowait()
-            except asyncio.QueueEmpty:
-                # Create new if allowed (semaphore acquired means we are within limits
-                # IF the pool logic aligns.
-                # Actually, semaphore ensures we don't have more than N *active* users.
-                # But we might have connections in the pool.
-                # If pool is empty, we must create.
-                conn = await self._create_connection()
-                async with self._lock:
-                    self._active_count += 1
+            # 1. Get or create connection
+            conn = await self._get_or_create_conn()
 
-            # Health check
-            if not await self._is_healthy(conn):
-                logger.warning("Connection unhealthy, replacing.")
-                await self._close_conn(conn)
-                conn = await self._create_connection()
-                # _close_conn decrements count, so we need to increment for new one
-                # limiting logic is handled by semaphore mostly.
-                async with self._lock:
-                    self._active_count += 1
+            # 2. Health check and potential replacement
+            conn = await self._ensure_healthy_conn(conn)
 
             yield conn
 
         except (sqlite3.Error, OSError):
-            # If yield fails or setup fails, ensure we cleanup
             if conn:
                 await self._close_conn(conn)
                 conn = None
             raise
 
         finally:
-            # Always release semaphore
             self._semaphore.release()
-
             if conn:
-                # Return to pool
                 await self._pool.put(conn)
+
+    async def _get_or_create_conn(self) -> aiosqlite.Connection:
+        """Get a connection from the pool or create a new one."""
+        try:
+            return self._pool.get_nowait()
+        except asyncio.QueueEmpty:
+            conn = await self._create_connection()
+            async with self._lock:
+                self._active_count += 1
+            return conn
+
+    async def _ensure_healthy_conn(self, conn: aiosqlite.Connection) -> aiosqlite.Connection:
+        """Ensure the connection is healthy, replacing it if necessary."""
+        if await self._is_healthy(conn):
+            return conn
+
+        logger.warning("Connection unhealthy, replacing.")
+        await self._close_conn(conn)
+        new_conn = await self._create_connection()
+        async with self._lock:
+            self._active_count += 1
+        return new_conn
+
 
     async def _is_healthy(self, conn: aiosqlite.Connection) -> bool:
         """Check if connection is alive."""

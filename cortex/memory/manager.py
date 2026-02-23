@@ -22,16 +22,20 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
+import uuid
 from typing import Any
 
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEntry, MemoryEvent
+from cortex.memory.models import CortexFactModel, MemoryEntry, MemoryEvent
 from cortex.memory.working import WorkingMemoryL1
+from cortex.thinking.context_fusion import ContextFusion
 
 try:
-    from cortex.memory.vector_store import VectorStoreL2
-except ImportError:  # qdrant_client not installed
+    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    VectorStoreL2 = SovereignVectorStoreL2
+except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
 
 __all__ = ["CortexMemoryManager"]
@@ -47,13 +51,18 @@ class CortexMemoryManager:
 
     Args:
         l1: Working memory instance.
-        l2: Vector store instance (Qdrant-backed).
+        l2: Vector store instance (sqlite-vec backed).
         l3: Event ledger instance (SQLite-backed).
         encoder: Async embedder for L2 vectorization.
         router: Optional LLM router for semantic compression.
     """
 
-    __slots__ = ("_encoder", "_l1", "_l2", "_l3", "_router", "_background_tasks")
+    __slots__ = (
+        "_encoder", "_l1", "_l2", "_l3", "_router",
+        "_background_tasks", "_max_bg_tasks", "_fusion"
+    )
+
+    DEFAULT_MAX_BG_TASKS: int = 100
 
     def __init__(
         self,
@@ -62,13 +71,18 @@ class CortexMemoryManager:
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
         router: Any | None = None,
+        max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,
     ) -> None:
         self._l1 = l1
         self._l2 = l2
         self._l3 = l3
         self._encoder = encoder
         self._router = router
-        self._background_tasks: set[asyncio.Task] = set()
+        self._background_tasks: set[asyncio.Task[None]] = set()
+        self._max_bg_tasks = max_bg_tasks
+
+        # Semantic Fusion Layer
+        self._fusion = ContextFusion(judge_provider=router)
 
     # ─── Primary API ──────────────────────────────────────────────
 
@@ -78,6 +92,8 @@ class CortexMemoryManager:
         content: str,
         session_id: str,
         token_count: int,
+        tenant_id: str = "default_tenant",
+        project_id: str = "default_project",
         metadata: dict[str, Any] | None = None,
     ) -> MemoryEvent:
         """Process a new interaction through the memory pipeline.
@@ -91,17 +107,23 @@ class CortexMemoryManager:
             content: Raw content.
             session_id: Session identifier.
             token_count: Token count estimate.
+            tenant_id: Zero-Trust boundary isolation ID.
+            project_id: Zero-Trust boundary project ID.
             metadata: Optional structured metadata.
 
         Returns:
             The created MemoryEvent.
         """
+        _meta = metadata or {}
+        _meta["tenant_id"] = tenant_id
+        _meta["project_id"] = project_id
+
         event = MemoryEvent(
             role=role,
             content=content,
             session_id=session_id,
             token_count=token_count,
-            metadata=metadata or {},
+            metadata=_meta,
         )
 
         # 1. Immutable persistence (WAL — ultra-fast)
@@ -110,18 +132,29 @@ class CortexMemoryManager:
         # 2. Working memory update
         overflowed = self._l1.add_event(event)
 
-        # 3. Background compression (non-blocking)
+        # 3. Background compression (non-blocking, bounded queue)
         if overflowed:
-            task = asyncio.create_task(self._compress_and_store(overflowed, session_id))
-            self._background_tasks.add(task)
-            task.add_done_callback(self._background_tasks.discard)
+            if len(self._background_tasks) >= self._max_bg_tasks:
+                logger.warning(
+                    "MemoryManager: Background task queue full (%d). Dropping overflow task.",
+                    self._max_bg_tasks
+                )
+            else:
+                task = asyncio.create_task(
+                    self._compress_and_store(overflowed, session_id, tenant_id, project_id)
+                )
+                self._background_tasks.add(task)
+                task.add_done_callback(self._background_tasks.discard)
 
         return event
 
     async def assemble_context(
         self,
+        tenant_id: str,
+        project_id: str,
         query: str | None = None,
         max_episodes: int = 3,
+        fuse_context: bool = False,
     ) -> dict[str, Any]:
         """Build an optimized context for LLM injection.
 
@@ -129,26 +162,60 @@ class CortexMemoryManager:
         past episodes retrieved via semantic search).
 
         Args:
+            tenant_id: Enforced zero-trust separation.
+            project_id: Enforced zero-trust separation.
             query: Optional search query for L2 retrieval.
             max_episodes: Max past episodes to retrieve.
+            fuse_context: Whether to use Semantic Fusion to distill results.
 
         Returns:
-            Dict with 'working_memory' and 'episodic_context' lists.
+            Dict with 'working_memory' and 'episodic_context' (list or string).
         """
         context: dict[str, Any] = {
             "working_memory": self._l1.get_context(),
             "episodic_context": [],
         }
 
-        if query:
+        retrieved_facts: list[dict[str, Any]] = []
+
+        if query and hasattr(self._l2, "recall_secure"):
             try:
-                episodes = await self._l2.recall(
+                episodes = await self._l2.recall_secure(
+                    tenant_id=tenant_id,
+                    project_id=project_id,
                     query=query,
                     limit=max_episodes,
                 )
-                context["episodic_context"] = episodes
+                retrieved_facts = [
+                    {
+                        "id": ep.id,
+                        "content": ep.content,
+                        "timestamp": ep.timestamp,
+                        "score": getattr(ep, "_recall_score", 0.0),
+                        "metadata": ep.metadata
+                    }
+                    for ep in episodes
+                ]
             except (OSError, RuntimeError, ValueError) as e:
-                logger.warning("L2 recall failed (degrading gracefully): %s", e)
+                logger.warning("L2 secure recall failed: %s", e)
+        elif query:
+            try:
+                retrieved_facts = await self._l2.recall(
+                    query=query,
+                    limit=max_episodes,
+                    project=project_id,
+                )
+            except (OSError, RuntimeError, ValueError) as e:
+                logger.warning("L2 recall fallback failed: %s", e)
+
+        # Apply Semantic Fusion if requested and available
+        if fuse_context and retrieved_facts:
+            context["episodic_context"] = await self._fusion.fuse_context(
+                user_prompt=query or "",
+                retrieved_facts=retrieved_facts
+            )
+        else:
+            context["episodic_context"] = retrieved_facts
 
         return context
 
@@ -158,33 +225,56 @@ class CortexMemoryManager:
         self,
         events: list[MemoryEvent],
         session_id: str,
+        tenant_id: str,
+        project_id: str,
     ) -> None:
-        """Compress overflowed events and store in L2.
-
-        Runs as a background task. When an LLM Router is configured,
-        events are semantically summarized before embedding. Falls
-        back to raw concatenation if no router or on LLM failure.
-        """
+        """Compress overflowed events and store in L2 (v6 sovereign or legacy)."""
         try:
             summary = await self._summarize_events(events)
 
-            entry = MemoryEntry(
-                content=summary,
-                source="episodic",
-                metadata={
-                    "session_id": session_id,
-                    "event_count": len(events),
-                    "linked_events": [e.event_id for e in events],
-                    "compression": "llm" if self._router else "raw",
-                },
-            )
-            await self._l2.memorize(entry)
+            # Check if we are using the Sovereign (v6) Vector Store
+            is_sovereign = self._l2.__class__.__name__ == "SovereignVectorStoreL2"
+
+            if is_sovereign:
+                # v6 Strategy: CortexFactModel (SQLite-Vec)
+                vector = await self._encoder.encode(summary)
+                fact = CortexFactModel(
+                    id=uuid.uuid4().hex,
+                    tenant_id=tenant_id,
+                    project_id=project_id,
+                    content=summary,
+                    embedding=vector,
+                    timestamp=time.time(),
+                    metadata={
+                        "session_id": session_id,
+                        "event_count": len(events),
+                        "linked_events": [e.event_id for e in events],
+                        "compression": "llm" if self._router else "raw",
+                    },
+                )
+                await self._l2.memorize(fact)
+            else:
+                # v5 Strategy: Legacy MemoryEntry (Qdrant)
+                entry = MemoryEntry(
+                    content=summary,
+                    project=project_id,
+                    source="episodic",
+                    metadata={
+                        "session_id": session_id,
+                        "tenant_id": tenant_id,
+                        "event_count": len(events),
+                        "linked_events": [e.event_id for e in events],
+                    },
+                )
+                # Note: Legacy store might not support tenant_id yet
+                await self._l2.memorize(entry)
 
             logger.debug(
-                "Compressed %d events into L2 episode (session=%s, mode=%s)",
+                "Compressed %d events into L2 episode (session=%s, mode=%s, type=%s)",
                 len(events),
                 session_id,
                 "llm" if self._router else "raw",
+                "sovereign" if is_sovereign else "legacy"
             )
         except (OSError, RuntimeError, ValueError, TypeError) as e:
             # Background task — never crash the main loop
@@ -241,10 +331,23 @@ class CortexMemoryManager:
         """Access the event ledger layer."""
         return self._l3
 
-    async def wait_for_background(self) -> None:
-        """Wait for all background compression tasks to complete."""
-        if self._background_tasks:
-            await asyncio.gather(*self._background_tasks, return_exceptions=True)
+    async def wait_for_background(self, timeout: float = 30.0) -> None:
+        """Wait for background tasks to complete with a hard timeout.
+        
+        Essential for clean teardown and stable test environments.
+        """
+        if not self._background_tasks:
+            return
+            
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*self._background_tasks, return_exceptions=True),
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
+            # We don't cancel tasks here to allow them to finish unless it's a shutdown
+            # but we return to prevent blocking the test/caller forever.
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"

@@ -32,10 +32,12 @@ async def hybrid_search(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
+    tenant_id: str = "default",
     project: str | None = None,
     as_of: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """
     Sovereign Hybrid Search: Semantic + Text via RRF.
@@ -45,8 +47,24 @@ async def hybrid_search(
     # Over-fetch by 2x to ensure sufficient overlap for RRF
     fetch_limit = top_k * 2
 
-    sem_task = semantic_search(conn, query_embedding, fetch_limit, project, as_of)
-    txt_task = text_search(conn, query, project, limit=fetch_limit, as_of=as_of)
+    sem_task = semantic_search(
+        conn,
+        query_embedding,
+        top_k=fetch_limit,
+        tenant_id=tenant_id,
+        project=project,
+        as_of=as_of,
+        confidence=confidence,
+    )
+    txt_task = text_search(
+        conn,
+        query,
+        tenant_id=tenant_id,
+        project=project,
+        limit=fetch_limit,
+        as_of=as_of,
+        confidence=confidence,
+    )
 
     try:
         sem_results, txt_results = await asyncio.gather(sem_task, txt_task)

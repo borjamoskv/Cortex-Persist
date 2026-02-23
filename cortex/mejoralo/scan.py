@@ -46,11 +46,48 @@ def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
 # ─── Per-File Analysis ───────────────────────────────────────────────
 
 
-def _analyze_python_nesting(content: str, rel: str) -> list[str]:
-    comp = []
+def _analyze_python_complexity(content: str, rel: str) -> list[str]:
+    findings = []
     try:
         tree = ast.parse(content)
 
+        class McCabeVisitor(ast.NodeVisitor):
+            def __init__(self) -> None:
+                self.complexity = 1  # Base complexity per function/module
+
+            def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+                self._check_complexity(node)
+
+            def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+                self._check_complexity(node)
+
+            def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+                # Calculate McCabe for this scope
+                comp = 1
+                for child in ast.walk(node):
+                    if isinstance(
+                        child,
+                        ast.If
+                        | ast.For
+                        | ast.While
+                        | ast.AsyncFor
+                        | ast.And
+                        | ast.Or
+                        | ast.ExceptHandler
+                        | ast.With
+                        | ast.AsyncWith
+                        | ast.Try,
+                    ):
+                        comp += 1
+
+                if comp > 10:  # Sovereign threshold: 10
+                    findings.append(
+                        f"{rel}:{node.lineno} -> High Complexity ({comp}) in '{node.name}'"
+                    )
+
+        McCabeVisitor().visit(tree)
+
+        # Also check global nesting depth (old NestingVisitor logic improved)
         class NestingVisitor(ast.NodeVisitor):
             def __init__(self) -> None:
                 self.depth = 0
@@ -72,13 +109,12 @@ def _analyze_python_nesting(content: str, rel: str) -> list[str]:
                 )
                 if inc:
                     self.depth += 1
-                    if self.depth >= 8:
+                    if self.depth >= 6:  # Strict sovereign depth: 6
                         line_no = getattr(node, "lineno", "?")
-                        comp.append(
-                            f"{rel}:{line_no} -> High structural nesting (depth {self.depth})"
+                        findings.append(
+                            f"{rel}:{line_no} -> Severe structural nesting "
+                            f"(depth {self.depth})"
                         )
-                        self.depth -= 1
-                        return
                 self.generic_visit(node)
                 if inc:
                     self.depth -= 1
@@ -86,7 +122,7 @@ def _analyze_python_nesting(content: str, rel: str) -> list[str]:
         NestingVisitor().visit(tree)
     except SyntaxError:
         pass
-    return comp
+    return findings
 
 
 def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
@@ -130,9 +166,9 @@ def _analyze_single_file(
     rel = str(sf.relative_to(root))
     large_file = f"{rel} ({loc} LOC)" if loc > MAX_LOC else None
 
-    # 130/100 Sovereign: AST Structural Nesting for Python + Smart Polyglot
+    # 130/100 Sovereign: McCabe + AST Structural Nesting for Python + Smart Polyglot
     if sf.suffix == ".py":
-        comp = _analyze_python_nesting(content, rel)
+        comp = _analyze_python_complexity(content, rel)
     else:
         comp = _analyze_polyglot_nesting(lines, rel)
 

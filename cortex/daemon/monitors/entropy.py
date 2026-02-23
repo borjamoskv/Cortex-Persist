@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from cortex.daemon.models import EntropyAlert
+from cortex.mejoralo import MejoraloEngine
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -33,7 +34,6 @@ class EntropyMonitor:
         project: str,
         path_str: str,
         now: float,
-        mejoralo_engine_cls: Any,
     ) -> EntropyAlert | None:
         last_run = self._last_runs.get(project, 0)
         if now - last_run < self.interval_seconds:
@@ -44,16 +44,32 @@ class EntropyMonitor:
             return None
 
         try:
-            m = mejoralo_engine_cls(engine=self._engine)
+            m = MejoraloEngine(engine=self._engine)
             logger.debug("ENTROPY-0 scanner over %s", project)
-            result = m.scan(path)
+            
+            result = m.scan(project, path)
             self._last_runs[project] = now
+            
+            initial_score = result.score
+            if initial_score < self.threshold and not result.dead_code:
+                logger.warning(
+                    "Entropía CRÍTICA detectada en %s (score %d < %d). INICIANDO PURGA...", 
+                    project, initial_score, self.threshold
+                )
+                if m.relentless_heal(project, path, result, target_score=95):
+                    # Re-escaneo tras curación
+                    result = m.scan(project, path)
+                    logger.info(
+                        "✅ Purga de Entropía completada en %s. Score: %d -> %d",
+                        project, initial_score, result.score
+                    )
+
             if result.score < self.threshold:
                 return EntropyAlert(
                     project=project,
                     file_path=str(path),
                     complexity_score=result.score,
-                    message=f"Entropía detectada: {result.score}/{self.threshold}",
+                    message=f"Entropía residual detectada: {result.score}/{self.threshold}",
                 )
         except (ValueError, OSError, RuntimeError) as e:
             logger.error("ENTROPY-0 monitor failed on %s: %s", project, e)
@@ -68,14 +84,8 @@ class EntropyMonitor:
         alerts: list[EntropyAlert] = []
         now = time.monotonic()
 
-        try:
-            from cortex.engine import CortexEngine  # noqa: F401
-            from cortex.mejoralo import MejoraloEngine
-        except ImportError:
-            return []
-
         for project, path_str in self.projects.items():
-            alert = self._check_project(project, path_str, now, MejoraloEngine)
+            alert = self._check_project(project, path_str, now)
             if alert:
                 alerts.append(alert)
 

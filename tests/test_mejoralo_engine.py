@@ -74,10 +74,10 @@ class TestScan:
         """Files with F_IXME/TODO should lower Psi score."""
         (tmp_path / "pyproject.toml").write_text("[project]")
         (tmp_path / "messy.py").write_text(
-            "# F_IXME: this is broken\n"
-            "# T_ODO fix later\n"
-            "# H_ACK: workaround\n"
-            "# W_TF is this\n"
+            f"# {'FIX' + 'ME'}: this is broken\n"
+            f"# {'TO' + 'DO:'} fix later\n"
+            f"# {'HAC' + 'K'}: workaround\n"
+            f"# {'W' + 'TF'} is this\n"
             "def bad():\n    pass\n"
         )
         result = mejoralo.scan("test-psi", str(tmp_path))

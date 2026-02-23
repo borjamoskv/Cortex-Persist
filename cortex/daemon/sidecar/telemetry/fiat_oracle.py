@@ -30,18 +30,18 @@ class FiatOracle:
         self.engine = engine
         self.interval = interval
         self.running = False
-        
+
         # Operation Citadel: Persistent Queue approach (No Single File Spoilage)
         self.queue_dir = Path("~/.cortex/fiat_queue").expanduser()
         self.queue_dir.mkdir(parents=True, exist_ok=True)
-        
-        self.processed_txs: set[str] = set() # Ephemeral Idempotency memory
+
+        self.processed_txs: set[str] = set()  # Ephemeral Idempotency memory
 
     async def run_loop(self):
         """Main async loop for the sidecar."""
         self.running = True
         logger.info("💸 [FIAT_ORACLE] Activated. Monitoring sovereign capital flow (DEFCON 1).")
-        
+
         while self.running:
             try:
                 await self._check_signals()
@@ -68,12 +68,12 @@ class FiatOracle:
         """
         if not signature:
             return False
-            
+
         # Reconstruct payload to compute hash (excluding the signature itself)
         # Note: In real life we'd use hmac and a real env variable.
         payload_copy = {k: v for k, v in data.items() if k != "signature"}
         payload_str = json.dumps(payload_copy)
-        
+
         expected_hash = hashlib.sha256((payload_str + "SOVEREIGN_KEY_MOCK").encode()).hexdigest()
         return signature == expected_hash
 
@@ -83,14 +83,16 @@ class FiatOracle:
             try:
                 content = tx_file.read_text()
                 data = json.loads(content)
-                
+
                 # 1. Zero-Trust Validation
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
-                    logger.critical(f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}")
-                    tx_file.unlink() # Delete malicious file immediately
+                    logger.critical(
+                        f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}"
+                    )
+                    tx_file.unlink()  # Delete malicious file immediately
                     continue
-                
+
                 # 2. Idempotency Check
                 tx_id = data.get("tx_id")
                 if tx_id in self.processed_txs:
@@ -100,10 +102,10 @@ class FiatOracle:
 
                 # 3. Process & Commit
                 await self._process_transaction(data)
-                
+
                 # 4. Finalize
                 self.processed_txs.add(tx_id)
-                tx_file.unlink() # Cleanup only after successful commit
+                tx_file.unlink()  # Cleanup only after successful commit
 
             except json.JSONDecodeError:
                 logger.error(f"❌ [FIAT_ORACLE] Payload corrupto en {tx_file.name}")
@@ -117,11 +119,13 @@ class FiatOracle:
             try:
                 content = tx_file.read_text()
                 data = json.loads(content)
-                
+
                 # 1. Zero-Trust Validation
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
-                    logger.critical(f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}")
+                    logger.critical(
+                        f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}"
+                    )
                     tx_file.unlink()
                     continue
 
@@ -134,7 +138,7 @@ class FiatOracle:
 
                 # 3. Process & Commit
                 self._process_transaction_sync(data)
-                
+
                 # 4. Finalize
                 self.processed_txs.add(tx_id)
                 tx_file.unlink()
@@ -145,81 +149,95 @@ class FiatOracle:
             except Exception as e:
                 logger.error(f"⚠️ [FIAT_ORACLE] Falla procesando {tx_file.name}: {e}")
 
-    async def _execute_with_backoff(self, payload: dict[str, Any], is_sync: bool = False):
-        """Resilient storage with exponential backoff avoiding 'Database is locked' errors."""
+    async def _execute_with_backoff_async(self, payload: dict[str, Any]) -> None:
+        """Resilient storage with exponential backoff avoiding 'Database is locked' errors (Async)."""
         amount = payload.get("amount", "0")
         currency = payload.get("currency", "EUR")
         source = payload.get("source", "BUNQ_REDIRECT")
         tx_id = payload.get("tx_id", "UNKNOWN")
-        
+
         logger.info(f"💰 [FIAT_STREAM] Detected {amount} {currency} from {source} [TX:{tx_id}]")
-        
+
         meta = {
             "oracle": "fiat_oracle_v1.3.0",
             "amount": amount,
             "currency": currency,
             "provider": "bunq",
-            "tx_id": tx_id
+            "tx_id": tx_id,
         }
 
         last_error = None
         for attempt in range(MAX_RETRIES):
             try:
-                if is_sync:
-                    if hasattr(self.engine, "store"):
-                        self.engine.store(
-                            project="cortex-revenue",
-                            content=f"Received {amount} {currency} via {source}",
-                            fact_type="fiat_transaction",
-                            meta=meta
-                        )
-                else:
-                    if hasattr(self.engine, "store"):
-                        await self.engine.store(
-                            project="cortex-revenue",
-                            content=f"Received {amount} {currency} via {source}",
-                            fact_type="fiat_transaction",
-                            meta=meta
-                        )
-                return # Exito
-            
+                if hasattr(self.engine, "store"):
+                    await self.engine.store(
+                        project="cortex-revenue",
+                        content=f"Received {amount} {currency} via {source}",
+                        fact_type="fiat_transaction",
+                        meta=meta,
+                    )
+                return
             except Exception as e:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
-                logger.error(f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt+1}/{MAX_RETRIES} en {delay:.2f}s")
-                if is_sync:
-                    time.sleep(delay)
-                else:
-                    await asyncio.sleep(delay)
-                    
-        logger.critical(f"💀 [FIAT_ORACLE] Falla catastrófica almacenando TX {tx_id} tras {MAX_RETRIES} intentos.")
+                logger.error(
+                    f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
+                )
+                await asyncio.sleep(delay)
+
+        logger.critical(
+            f"💀 [FIAT_ORACLE] Falla catastrófica almacenando TX {tx_id} tras {MAX_RETRIES} intentos."
+        )
+        raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
+
+    def _execute_with_backoff_sync(self, payload: dict[str, Any]) -> None:
+        """Resilient storage with exponential backoff avoiding 'Database is locked' errors (Sync)."""
+        amount = payload.get("amount", "0")
+        currency = payload.get("currency", "EUR")
+        source = payload.get("source", "BUNQ_REDIRECT")
+        tx_id = payload.get("tx_id", "UNKNOWN")
+
+        logger.info(f"💰 [FIAT_STREAM] Detected {amount} {currency} from {source} [TX:{tx_id}]")
+
+        meta = {
+            "oracle": "fiat_oracle_v1.3.0",
+            "amount": amount,
+            "currency": currency,
+            "provider": "bunq",
+            "tx_id": tx_id,
+        }
+
+        last_error = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                if hasattr(self.engine, "store"):
+                    self.engine.store(
+                        project="cortex-revenue",
+                        content=f"Received {amount} {currency} via {source}",
+                        fact_type="fiat_transaction",
+                        meta=meta,
+                    )
+                return
+            except Exception as e:
+                last_error = e
+                delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
+                logger.error(
+                    f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
+                )
+                time.sleep(delay)
+
+        logger.critical(
+            f"💀 [FIAT_ORACLE] Falla catastrófica almacenando TX {tx_id} tras {MAX_RETRIES} intentos."
+        )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 
     async def _process_transaction(self, data: dict):
         """Store transaction in ledger (Async)."""
-        await self._execute_with_backoff(data, is_sync=False)
+        await self._execute_with_backoff_async(data)
 
     def _process_transaction_sync(self, data: dict):
         """Store transaction in ledger (Sync)."""
-        # Wrapping the async method structure, we use the is_sync flag
-        import threading
-        
-        # Un pequeño hack para usar el backoff sin await en entorno síncrono.
-        # Alternativamente podríamos desplegar un subloop, pero dado que 
-        # MoskvDaemon corre sidecars en un hilo...
-        
-        # Como _execute_with_backoff es async, en la versión síncrona 
-        # lo reconstruimos localmente o invocamos un event loop temporal.
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # Estamos en un thread que ya tiene loop corriendo
-                 asyncio.run_coroutine_threadsafe(self._execute_with_backoff(data, is_sync=False), loop).result()
-            else:
-                loop.run_until_complete(self._execute_with_backoff(data, is_sync=False))
-        except RuntimeError:
-            # No hay loop en este thread
-            asyncio.run(self._execute_with_backoff(data, is_sync=False))
+        self._execute_with_backoff_sync(data)
 
     def stop(self):
         self.running = False

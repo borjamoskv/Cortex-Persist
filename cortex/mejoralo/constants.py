@@ -85,4 +85,12 @@ SKIP_DIRS = {
     "tests",
     "test",
     "scripts",  # Ignore test and script directories for Psis/Security
+    "pydantic-ai",
+    "openclaw-re",
+    "sonic-supreme",
+    "omni-translate-web",
+    "impact-web",
+    "cortex-sovereign-web",
+    "cortex_hive_ui",
+    "sacrificial_project",
 }

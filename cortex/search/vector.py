@@ -8,8 +8,12 @@
 import json
 import logging
 import sqlite3
+from typing import TYPE_CHECKING
 
 import aiosqlite
+
+if TYPE_CHECKING:
+    from cortex.crypto import CortexEncrypter
 
 from cortex.search.models import SearchResult
 from cortex.temporal import build_temporal_filter_params
@@ -27,13 +31,37 @@ async def semantic_search(
     conn: aiosqlite.Connection,
     query_embedding: list[float],
     top_k: int = 5,
+    tenant_id: str = "default",
     project: str | None = None,
     as_of: str | None = None,
     confidence: str | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
+    sql, params = _build_semantic_query(tenant_id, embedding_json, top_k, project, as_of, confidence)
 
+    try:
+        cursor = await conn.execute(sql, params)
+        rows = await cursor.fetchall()
+    except (aiosqlite.Error, sqlite3.Error, ValueError) as e:
+        logger.error("Semantic search failed: %s", e)
+        return []
+
+    from cortex.crypto import get_default_encrypter
+    enc = get_default_encrypter()
+
+    return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]
+
+
+def _build_semantic_query(
+    tenant_id: str,
+    embedding_json: str,
+    top_k: int,
+    project: str | None,
+    as_of: str | None,
+    confidence: str | None,
+) -> tuple[str, list]:
+    """Internal helper to build semantic search SQL."""
     sql = """
         SELECT
             f.id, f.content, f.project, f.fact_type, f.confidence,
@@ -42,11 +70,11 @@ async def semantic_search(
         FROM fact_embeddings AS ve
         JOIN facts AS f ON f.id = ve.fact_id
         LEFT JOIN transactions t ON f.tx_id = t.id
-        WHERE ve.embedding MATCH ?
+        WHERE f.tenant_id = ?
+            AND ve.embedding MATCH ?
             AND k = ?
     """
-
-    params: list = [embedding_json, top_k * 3]
+    params = [tenant_id, embedding_json, top_k * 3]
 
     if project:
         sql += _FILTER_PROJECT
@@ -64,66 +92,53 @@ async def semantic_search(
         params.append(float(confidence))
 
     sql += " ORDER BY ve.distance ASC"
+    return sql, params
+
+
+def _row_to_result(row: tuple, enc: "CortexEncrypter", tenant_id: str) -> SearchResult:
+    """Helper to parse a search result row with decryption and metadata processing."""
+    try:
+        tags = json.loads(row[7]) if row[7] else []
+    except (json.JSONDecodeError, TypeError):
+        tags = []
 
     try:
-        cursor = await conn.execute(sql, params)
-        rows = await cursor.fetchall()
-    except (aiosqlite.Error, sqlite3.Error, ValueError) as e:
-        logger.error("Semantic search failed: %s", e)
-        return []
+        meta = json.loads(row[9]) if row[9] else {}
+    except (json.JSONDecodeError, TypeError):
+        meta = {}
 
-    from cortex.crypto import get_default_encrypter
-
-    enc = get_default_encrypter()
-
-    results = []
-    for row in rows[:top_k]:
+    content = row[1]
+    if content and str(content).startswith(enc.PREFIX):
         try:
-            tags = json.loads(row[7]) if row[7] else []
-        except (json.JSONDecodeError, TypeError):
-            tags = []
+            content = enc.decrypt_str(content, tenant_id=tenant_id)
+        except Exception as e:
+            logger.error(f"Vector content decryption failed for tenant {tenant_id}: {e}")
+
+    if row[9] and str(row[9]).startswith(enc.PREFIX):
         try:
-            meta = json.loads(row[9]) if row[9] else {}
-        except (json.JSONDecodeError, TypeError):
-            meta = {}
+            meta = enc.decrypt_json(row[9], tenant_id=tenant_id)
+        except Exception as e:
+            logger.error(f"Vector meta decryption failed for tenant {tenant_id}: {e}")
 
-        content = row[1]
-        if content and str(content).startswith("v6_aesgcm:"):
-            try:
-                content = enc.decrypt_str(content)
-            except Exception as e:
-                print(f"VECTOR DECRYPT STRING ERROR: {e}")
-                pass
+    score = 1.0 - (row[10] if row[10] else 0.0)
 
-        if row[9] and str(row[9]).startswith("v6_aesgcm:"):
-            try:
-                meta = enc.decrypt_json(row[9])
-            except Exception as e:
-                print(f"VECTOR DECRYPT JSON ERROR: {e}")
-                pass
-
-        score = 1.0 - (row[10] if row[10] else 0.0)
-
-        results.append(
-            SearchResult(
-                fact_id=row[0],
-                content=content,
-                project=row[2],
-                fact_type=row[3],
-                confidence=row[4],
-                valid_from=row[5],
-                valid_until=row[6],
-                tags=tags,
-                source=row[8],
-                meta=meta,
-                score=score,
-                created_at=row[11],
-                updated_at=row[12],
-                tx_id=row[13],
-                hash=row[14],
-            )
-        )
-    return results
+    return SearchResult(
+        fact_id=row[0],
+        content=content,
+        project=row[2],
+        fact_type=row[3],
+        confidence=row[4],
+        valid_from=row[5],
+        valid_until=row[6],
+        tags=tags,
+        source=row[8],
+        meta=meta,
+        score=score,
+        created_at=row[11],
+        updated_at=row[12],
+        tx_id=row[13],
+        hash=row[14],
+    )
 
 
 def semantic_search_sync(

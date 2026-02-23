@@ -18,6 +18,7 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 
 __all__ = ["MIGRATIONS"]
 
@@ -36,4 +37,5 @@ MIGRATIONS = [
     (12, "Add ghosts table", _migration_012_ghosts_table),
     (13, "HA Cluster Nodes", _migration_013_cluster_nodes),
     (14, "Wave 5 Immutable Ledger Refinement", _migration_014_vote_ledger_refinement),
+    (15, "Sovereign Tenant Unification", _migration_015_tenant_unification),
 ]

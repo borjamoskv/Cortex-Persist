@@ -130,6 +130,23 @@ class AuthManager:
         """Initialize the backend schema (async)."""
         await self.backend.initialize()
 
+    def initialize_sync(self) -> None:
+        """Initialize the backend schema (sync)."""
+        coro = self.initialize()
+        try:
+            loop = asyncio.get_running_loop()
+            import threading
+            event = threading.Event()
+
+            async def _wrapper():
+                await coro
+                event.set()
+
+            asyncio.run_coroutine_threadsafe(_wrapper(), loop)
+            event.wait()
+        except RuntimeError:
+            asyncio.run(coro)
+
     @staticmethod
     def _hash_key(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
@@ -326,6 +343,13 @@ def get_auth_manager() -> AuthManager:
     if _auth_manager is None:
         _auth_manager = AuthManager()
     return _auth_manager
+
+
+
+def reset_auth_manager() -> None:
+    """Reset the global AuthManager instance (useful for tests)."""
+    global _auth_manager
+    _auth_manager = None
 
 
 # ─── FastAPI Dependencies ─────────────────────────────────────────────

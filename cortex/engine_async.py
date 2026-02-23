@@ -109,7 +109,8 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
         cursor = await conn.execute(
             "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
+            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions ORDER BY id DESC LIMIT 1), "
+            "'GENESIS'), ?, ?)",
             (project, action, dj, th, ts),
         )
         # Re-calc hash with actual ph from the DB to be absolute
@@ -239,7 +240,8 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         is_human = target_agent_id == "human"
         initial_rep = 1.0 if is_human else 0.5
         await conn.execute(
-            "INSERT INTO agents (id, name, agent_type, reputation_score, public_key) VALUES (?, ?, ?, ?, '')",
+            "INSERT INTO agents (id, name, agent_type, reputation_score, public_key) "
+            "VALUES (?, ?, ?, ?, '')",
             (
                 target_agent_id,
                 target_agent_id.capitalize(),
@@ -282,20 +284,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
                 # 2. Append to Immutable Vote Ledger
                 ledger = ImmutableVoteLedger(conn)
+                await self._store_consensus_vote(conn, fact_id, agent, value, rep)
 
-                # Record in consensus table for fast score calculation
-                if value == 0:
-                    await conn.execute(
-                        "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                        (fact_id, agent),
-                    )
-                else:
-                    await conn.execute(
-                        "INSERT OR REPLACE INTO consensus_votes_v2 (fact_id, agent_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?)",
-                        (fact_id, agent, value, rep, rep),
-                    )
-
-                # Log transaction
+                # 3. Log transaction
                 await self._log_transaction(
                     conn,
                     "consensus",
@@ -303,19 +294,12 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                     {"fact_id": fact_id, "agent_id": agent, "vote": value},
                 )
 
-                # Record in permanent immutable ledger
+                # 4. Record in permanent immutable ledger
                 await ledger.append_vote(fact_id, agent, value, rep, signature)
 
-                # Recalculate score
+                # 5. Recalculate score and update fact
                 score = await self._update_vote_score(conn, fact_id)
-
-                # Update fact confidence
-                if score >= 1.5:
-                    conf = "verified"
-                elif score <= 0.5:
-                    conf = "disputed"
-                else:
-                    conf = "stated"
+                conf = self._resolve_confidence(score)
 
                 await conn.execute(
                     "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
@@ -327,6 +311,31 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             except (sqlite3.Error, OSError, ValueError) as e:
                 await conn.rollback()
                 raise e
+
+    async def _store_consensus_vote(
+        self, conn: aiosqlite.Connection, fact_id: int, agent: str, value: int, rep: float
+    ) -> None:
+        """Helper to store or delete a vote in the consensus table."""
+        if value == 0:
+            await conn.execute(
+                "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                (fact_id, agent),
+            )
+        else:
+            await conn.execute(
+                "INSERT OR REPLACE INTO consensus_votes_v2 "
+                "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?)",
+                (fact_id, agent, value, rep, rep),
+            )
+
+    @staticmethod
+    def _resolve_confidence(score: float) -> str:
+        """Determine confidence label from score."""
+        if score >= 1.5:
+            return "verified"
+        if score <= 0.5:
+            return "disputed"
+        return "stated"
 
     async def get_votes(self, fact_id: int) -> list[dict[str, Any]]:
         """Get all votes for a fact from the canonical v2 table."""

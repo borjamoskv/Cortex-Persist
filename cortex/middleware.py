@@ -12,7 +12,7 @@ import time
 from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -140,59 +140,64 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         client_ip = request.client.host if request.client else "unknown"
 
-        # 1. Hardware-level Blacklist Check (Zero-Trust L3/L4 emulation)
-        pool = getattr(request.app.state, "pool", None)
-        if pool and client_ip != "unknown":
-            try:
-                # Omit async context manager overhead and do a raw lookup
-                async with pool.acquire() as conn:
-                    # Very fast index scan
-                    async with conn.execute(
-                        "SELECT 1 FROM threat_intel WHERE ip_address = ? "
-                        "AND (expires_at IS NULL OR expires_at > ?)",
-                        (client_ip, datetime.now(timezone.utc).isoformat()),
-                    ) as cursor:
-                        if await cursor.fetchone():
-                            logger.warning(
-                                "🛡️ KILL SWITCH ENGAGED: Connection dropped for blacklisted IP: %s",
-                                client_ip,
-                            )
-                            # Radio silence, return 403 instantly
-                            return JSONResponse(status_code=403, content={"error": "Access Denied"})
-            except Exception as e:
-                logger.error("ThreatIntel check failed: %s", e)
+        # 1. Hardware-level Blacklist Check
+        if await self._is_blacklisted(request, client_ip):
+            logger.warning(
+                "🛡️ KILL SWITCH ENGAGED: Connection dropped for blacklisted IP: %s",
+                client_ip,
+            )
+            return JSONResponse(status_code=403, content={"error": "Access Denied"})
 
         # 2. Continue with the request handling
         response = await call_next(request)
 
+        # 3. Anomaly detection and logging
         if response.status_code >= 400:
-            client_ip = request.client.host if request.client else "unknown"
-
-            # Formamos el 'payload' o firma del ataque con metadata vital
-            # Omitimos el body directo aquí para no vaciar el stream, dependemos del endpoint
-            signature = (
-                f"[{request.method}] {request.url.path} "
-                f"| UA: {request.headers.get('user-agent', 'unknown')} "
-                f"| Status: {response.status_code}"
-            )
-
-            event = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "ip_address": client_ip,
-                "status_code": response.status_code,
-                "payload": signature,
-            }
-
-            def _write_log():
-                try:
-                    with open(self.log_path, "a", encoding="utf-8") as f:
-                        f.write(json.dumps(event) + "\n")
-                except OSError:
-                    pass
-
-            # Fricción Asíncrona: no bloqueamos el event loop
-            task = asyncio.create_task(asyncio.to_thread(_write_log))
-            self._bg_tasks.add(task)
-            task.add_done_callback(self._bg_tasks.discard)
+            self._log_security_event(request, response, client_ip)
 
         return response
+
+    async def _is_blacklisted(self, request: Request, client_ip: str) -> bool:
+        """Check if IP is in threat intel database."""
+        if client_ip == "unknown":
+            return False
+
+        pool = getattr(request.app.state, "pool", None)
+        if not pool:
+            return False
+
+        try:
+            async with pool.acquire() as conn:
+                now = datetime.now(timezone.utc).isoformat()
+                sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
+                async with conn.execute(sql, (client_ip, now)) as cursor:
+                    return bool(await cursor.fetchone())
+        except Exception as e:
+            logger.error("ThreatIntel check failed: %s", e)
+            return False
+
+    def _log_security_event(self, request: Request, response: Any, client_ip: str) -> None:
+        """Log suspicious response to firewall log asynchronously."""
+        signature = (
+            f"[{request.method}] {request.url.path} "
+            f"| UA: {request.headers.get('user-agent', 'unknown')} "
+            f"| Status: {response.status_code}"
+        )
+
+        event = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "ip_address": client_ip,
+            "status_code": response.status_code,
+            "payload": signature,
+        }
+
+        def _write():
+            try:
+                with open(self.log_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(event) + "\n")
+            except OSError:
+                pass
+
+        task = asyncio.create_task(asyncio.to_thread(_write))
+        self._bg_tasks.add(task)
+        task.add_done_callback(self._bg_tasks.discard)

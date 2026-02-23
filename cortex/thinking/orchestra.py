@@ -184,6 +184,64 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
                     continue
         return fallbacks
 
+    async def _execute_single_attempt(
+        self,
+        provider_name: str,
+        model: str,
+        prompt: str,
+        system: str,
+        attempt: int,
+        attempts: int,
+    ) -> tuple[ModelResponse | None, str | None]:
+        """Ejecuta un único intento de consulta, manejando fallos y timeouts."""
+        try:
+            provider = self._pool.get(provider_name, model)
+            fallbacks = self._resolve_fallbacks(provider_name)
+
+            router = CortexLLMRouter(primary=provider, fallbacks=fallbacks)
+            cortex_prompt = CortexPrompt(
+                system_instruction=system,
+                working_memory=[{"role": "user", "content": prompt}],
+                temperature=self.config.temperature,
+                max_tokens=self.config.max_tokens,
+            )
+
+            result = await asyncio.wait_for(
+                router.execute_resilient(cortex_prompt),
+                timeout=self.config.timeout_seconds,
+            )
+
+            if result.is_ok():
+                return ModelResponse(
+                    provider=provider_name,
+                    model=model,
+                    content=result.unwrap(),
+                    latency_ms=0.0,  # calculated in caller
+                    token_count=len(result.unwrap().split()),
+                ), None
+
+            last_error = result.error
+            logger.warning(
+                "%s:%s ROP cascade failed (intento %d/%d): %s",
+                provider_name, model, attempt + 1, attempts, last_error,
+            )
+            return None, last_error
+
+        except asyncio.TimeoutError:
+            last_error = f"Timeout ({self.config.timeout_seconds}s)"
+            logger.warning(
+                "%s:%s timeout (intento %d/%d)",
+                provider_name, model, attempt + 1, attempts,
+            )
+            return None, last_error
+        except (OSError, ValueError, KeyError) as e:
+            last_error = str(e)
+            logger.warning(
+                "%s:%s error (intento %d/%d): %s",
+                provider_name, model, attempt + 1, attempts, e,
+            )
+            return None, last_error
+
     async def _query_model(
         self,
         provider_name: str,
@@ -197,67 +255,13 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         attempts = 2 if self.config.retry_on_failure else 1
 
         for attempt in range(attempts):
-            try:
-                provider = self._pool.get(provider_name, model)
+            response, last_error = await self._execute_single_attempt(
+                provider_name, model, prompt, system, attempt, attempts
+            )
 
-                # Resolving fallbacks based on configuration
-                fallbacks = self._resolve_fallbacks(provider_name)
-
-                # Wrap the call with the sovereign router (ROP)
-                router = CortexLLMRouter(primary=provider, fallbacks=fallbacks)
-                cortex_prompt = CortexPrompt(
-                    system_instruction=system,
-                    working_memory=[{"role": "user", "content": prompt}],
-                    temperature=self.config.temperature,
-                    max_tokens=self.config.max_tokens,
-                )
-
-                result = await asyncio.wait_for(
-                    router.execute_resilient(cortex_prompt),
-                    timeout=self.config.timeout_seconds,
-                )
-
-                # ROP: unwrap the Result
-                if result.is_ok():
-                    content = result.unwrap()
-                    latency = (time.monotonic() - start) * 1000
-                    return ModelResponse(
-                        provider=provider_name,
-                        model=model,
-                        content=content,
-                        latency_ms=latency,
-                        token_count=len(content.split()),  # Estimación rough
-                    )
-                # All providers failed via ROP cascade
-                last_error = result.error
-                logger.warning(
-                    "%s:%s ROP cascade failed (intento %d/%d): %s",
-                    provider_name,
-                    model,
-                    attempt + 1,
-                    attempts,
-                    last_error,
-                )
-
-            except asyncio.TimeoutError:
-                last_error = f"Timeout ({self.config.timeout_seconds}s)"
-                logger.warning(
-                    "%s:%s timeout (intento %d/%d)",
-                    provider_name,
-                    model,
-                    attempt + 1,
-                    attempts,
-                )
-            except (OSError, ValueError, KeyError) as e:
-                last_error = str(e)
-                logger.warning(
-                    "%s:%s error (intento %d/%d): %s",
-                    provider_name,
-                    model,
-                    attempt + 1,
-                    attempts,
-                    e,
-                )
+            if response:
+                response.latency_ms = (time.monotonic() - start) * 1000
+                return response
 
             # Esperar antes de retry
             if attempt < attempts - 1:

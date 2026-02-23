@@ -22,6 +22,7 @@ import logging
 from pydantic import BaseModel, Field, ValidationError
 
 from cortex.llm.boundary import ImmuneBoundary
+from cortex.thinking.context_fusion import ContextFusion
 from cortex.thinking.fusion_models import (
     FusedThought,
     FusionStrategy,
@@ -31,7 +32,7 @@ from cortex.thinking.fusion_models import (
     _tokenize,
 )
 
-__all__ = ["ThoughtFusion"]
+__all__ = ["ThoughtFusion", "ContextFusion"]
 
 logger = logging.getLogger("cortex.thinking.fusion")
 
@@ -187,13 +188,17 @@ class ThoughtFusion:
 
     async def _judge_safe(self, prompt: str, system: str, **kwargs) -> str | None:
         """Llama al juez con retries + timeout. Devuelve None si falla."""
+        # Si no hay juez, fallar rápido
+        if self._judge is None:
+            return None
         for attempt in range(self.JUDGE_MAX_RETRIES + 1):
             try:
+                # El proveedor debe soportar el método complete asíncrono
                 return await asyncio.wait_for(
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,
                 )
-            except (OSError, RuntimeError, asyncio.TimeoutError) as e:
+            except (OSError, RuntimeError, asyncio.TimeoutError, AttributeError) as e:
                 logger.warning(
                     "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
                 )

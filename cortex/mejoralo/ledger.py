@@ -6,11 +6,11 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
-__all__ = ["record_session", "get_history"]
+__all__ = ["record_session", "get_history", "record_scar", "get_scars"]
 
 logger = logging.getLogger("cortex.mejoralo")
 
-_VERSION = "8.0"
+_VERSION = "9.0"
 
 
 def record_session(
@@ -78,6 +78,72 @@ def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dic
         conn.close()
 
     return [_row_to_session(row) for row in rows]
+
+
+def record_scar(
+    engine: CortexEngine,
+    project: str,
+    file_path: str,
+    error_trace: str,
+    diff: str | None = None,
+) -> int:
+    """Record a failure (Scar) in the CORTEX ledger to prevent future regressions.
+
+    Returns:
+        The fact ID of the persisted scar record.
+    """
+    content = (
+        f"MEJORAlo v{_VERSION} SCAR en {file_path}:\n\n"
+        f"Error Trace:\n{error_trace}\n\n"
+    )
+    if diff:
+        content += f"AST-Diff causal:\n{diff}"
+
+    fact_id = engine.store_sync(
+        project=project,
+        content=content,
+        fact_type="scar",
+        tags=["mejoralo", "scar", f"v{_VERSION}"],
+        confidence="verified",
+        source="cortex-mejoralo",
+        meta={
+            "file_path": file_path,
+            "error_trace": error_trace,
+            "version": _VERSION,
+        },
+    )
+    logger.info("Recorded SCAR #%d for %s in %s", fact_id, file_path, project)
+    return fact_id
+
+
+def get_scars(
+    engine: CortexEngine, project: str, file_path: str, limit: int = 5
+) -> list[dict[str, Any]]:
+    """Retrieve past SCARs for a particular file."""
+    conn = engine._get_sync_conn()
+    try:
+        rows = conn.execute(
+            "SELECT id, content, created_at, meta "
+            "FROM facts "
+            "WHERE project = ? AND fact_type = 'scar' "
+            "AND json_extract(meta, '$.file_path') = ? "
+            "AND tags LIKE '%mejoralo%' AND valid_until IS NULL "
+            "ORDER BY created_at DESC LIMIT ?",
+            (project, file_path, limit),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return [
+        {
+            "id": row[0],
+            "content": row[1],
+            "created_at": row[2],
+            "file_path": _parse_meta(row[3]).get("file_path"),
+            "error_trace": _parse_meta(row[3]).get("error_trace"),
+        }
+        for row in rows
+    ]
 
 
 def _row_to_session(row: tuple[Any, ...]) -> dict[str, Any]:
