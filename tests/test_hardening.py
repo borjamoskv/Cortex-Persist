@@ -133,9 +133,7 @@ class TestSearchFiltering:
             "/v1/facts", json={"project": "p2", "content": "unique moon"}, headers=auth_headers
         )
 
-        resp = client.post(
-            "/v1/search", json={"query": "unique star"}, headers=auth_headers
-        )
+        resp = client.post("/v1/search", json={"query": "unique star"}, headers=auth_headers)
         assert resp.status_code == 200
         results = resp.json()
         assert len(results) >= 1

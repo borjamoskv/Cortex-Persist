@@ -45,7 +45,12 @@ def init(db) -> None:
 @click.option("--confidence", default="stated", help="Confidence level")
 @click.option("--source", default=None, help="Source of the fact")
 @click.option("--ai-time", type=int, default=None, help="AI generation time")
-@click.option("--complexity", type=click.Choice(["low", "medium", "high", "god", "impossible"]), default=None, help="Task complexity")
+@click.option(
+    "--complexity",
+    type=click.Choice(["low", "medium", "high", "god", "impossible"]),
+    default=None,
+    help="Task complexity",
+)
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store(project, content, fact_type, tags, confidence, source, ai_time, complexity, db) -> None:
     """Store a fact in CORTEX."""
@@ -56,10 +61,13 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
             import dataclasses
 
             from cortex.chronos import ChronosEngine
+
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
-            console.print(f"[bold cyan]⏳ CHRONOS-1:[/] {metrics.asymmetry_factor:.1f}x asymmetry. {metrics.tip}")
-            
+            console.print(
+                f"[bold cyan]⏳ CHRONOS-1:[/] {metrics.asymmetry_factor:.1f}x asymmetry. {metrics.tip}"
+            )
+
         tag_list = [t.strip() for t in tags.split(",")] if tags else None
         fact_id = engine.store_sync(
             project=project,

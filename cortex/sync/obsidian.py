@@ -62,7 +62,7 @@ def _render_frontmatter(data: dict) -> str:
                 lines.append(f"{key}: [{items}]")
             else:
                 lines.append(f"{key}: []")
-        elif isinstance(value, (int, float)):
+        elif isinstance(value, int | float):
             lines.append(f"{key}: {value}")
         elif value is None:
             lines.append(f"{key}: null")
@@ -79,17 +79,19 @@ def _render_fact_note(fact: dict) -> str:
     fact_type = fact["type"]
     emoji = TYPE_EMOJI.get(fact_type, "📝")
 
-    frontmatter = _render_frontmatter({
-        "id": fact["id"],
-        "type": fact_type,
-        "project": fact["project"],
-        "confidence": fact["confidence"],
-        "tags": fact["tags"],
-        "consensus_score": fact.get("consensus_score", 1.0),
-        "created_at": fact["created_at"],
-        "updated_at": fact.get("updated_at"),
-        "active": fact.get("active", True),
-    })
+    frontmatter = _render_frontmatter(
+        {
+            "id": fact["id"],
+            "type": fact_type,
+            "project": fact["project"],
+            "confidence": fact["confidence"],
+            "tags": fact["tags"],
+            "consensus_score": fact.get("consensus_score", 1.0),
+            "created_at": fact["created_at"],
+            "updated_at": fact.get("updated_at"),
+            "active": fact.get("active", True),
+        }
+    )
 
     # Build note body
     lines = [
@@ -110,10 +112,12 @@ def _render_fact_note(fact: dict) -> str:
         tag_links = " · ".join(f"[[{tag}]]" for tag in fact["tags"])
         lines.append(f"**Tags:** {tag_links}")
 
-    lines.extend([
-        f"**Created:** {fact['created_at'][:10]}",
-        "",
-    ])
+    lines.extend(
+        [
+            f"**Created:** {fact['created_at'][:10]}",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -126,11 +130,13 @@ def _render_project_moc(project: str, facts: list[dict]) -> str:
         by_type.setdefault(f["type"], []).append(f)
 
     lines = [
-        _render_frontmatter({
-            "type": "moc",
-            "project": project,
-            "total_facts": len(facts),
-        }),
+        _render_frontmatter(
+            {
+                "type": "moc",
+                "project": project,
+                "total_facts": len(facts),
+            }
+        ),
         "",
         f"# 📂 {project}",
         "",
@@ -184,12 +190,14 @@ def _render_dashboard(
 ) -> str:
     """Render the main CORTEX Dashboard MOC."""
     lines = [
-        _render_frontmatter({
-            "type": "dashboard",
-            "generated": now_iso(),
-            "total_facts": total_facts,
-            "total_projects": len(projects),
-        }),
+        _render_frontmatter(
+            {
+                "type": "dashboard",
+                "generated": now_iso(),
+                "total_facts": total_facts,
+                "total_projects": len(projects),
+            }
+        ),
         "",
         "# 🧠 CORTEX Dashboard",
         "",
@@ -222,18 +230,20 @@ def _parse_fact_rows(rows: list) -> list[dict]:
     """Parse raw DB rows into fact dicts."""
     facts: list[dict] = []
     for row in rows:
-        facts.append({
-            "id": row[0],
-            "project": row[1],
-            "content": row[2],
-            "type": row[3],
-            "tags": json.loads(row[4]) if row[4] else [],
-            "confidence": row[5],
-            "consensus_score": row[6] if row[6] is not None else 1.0,
-            "created_at": row[7] or "",
-            "updated_at": row[8] or "",
-            "active": row[9] is None,
-        })
+        facts.append(
+            {
+                "id": row[0],
+                "project": row[1],
+                "content": row[2],
+                "type": row[3],
+                "tags": json.loads(row[4]) if row[4] else [],
+                "confidence": row[5],
+                "consensus_score": row[6] if row[6] is not None else 1.0,
+                "created_at": row[7] or "",
+                "updated_at": row[8] or "",
+                "active": row[9] is None,
+            }
+        )
     return facts
 
 
@@ -348,4 +358,3 @@ async def export_obsidian(
     )
 
     return stats
-

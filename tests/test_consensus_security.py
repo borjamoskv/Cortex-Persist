@@ -49,7 +49,6 @@ def client():
         except OSError:
             pass
 
-
     # Restore Globals
     api_state.engine = old_engine
     api_state.auth_manager = old_auth

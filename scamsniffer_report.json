@@ -1,0 +1,11 @@
+{
+  "malicious_contracts": [
+    "0x7bdc9ce05dc366f07e0cce077f5203ce834cc04c"
+  ],
+  "malicious_eoa": [
+    "0xb7c8ad2b6fc2ad542fbadde7a9c8491bb7b4cdd5",
+    "0xd0de574c37b6de2ae1a614ffebb939768670cd7f"
+  ],
+  "type": "Wallet Drainer",
+  "notes": "EIP-7702 exploit. See: https://borjamoskv.substack.com/p/take-the-eth-and-run"
+}

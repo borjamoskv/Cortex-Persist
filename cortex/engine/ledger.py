@@ -159,9 +159,7 @@ class ImmutableLedger:
         last_tx = row[0] or 0 if row else 0
 
         # Count pending transactions
-        cursor = conn.execute(
-            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
-        )
+        cursor = conn.execute("SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,))
         row = cursor.fetchone()
         pending = row[0] if row else 0
 

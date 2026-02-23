@@ -23,9 +23,7 @@ try:
     _TOOLBOX_AVAILABLE = True
 except ImportError:
     ToolboxClient = None  # type: ignore
-    logger.debug(
-        "Toolbox SDK not installed. Install with: pip install toolbox-core"
-    )
+    logger.debug("Toolbox SDK not installed. Install with: pip install toolbox-core")
 
 
 # ─── Configuration ────────────────────────────────────────────────────
@@ -78,8 +76,7 @@ class ToolboxBridge:
         allowed = [u.rstrip("/") for u in self.config.allowed_server_urls]
         if url not in allowed:
             raise ValueError(
-                f"Toolbox server URL '{url}' is not in the allowlist. "
-                f"Allowed: {allowed}"
+                f"Toolbox server URL '{url}' is not in the allowlist. Allowed: {allowed}"
             )
 
     async def connect(self) -> bool:

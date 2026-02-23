@@ -278,6 +278,38 @@ CREATE INDEX IF NOT EXISTS idx_ctx_snap_project ON context_snapshots(active_proj
 CREATE INDEX IF NOT EXISTS idx_ctx_snap_created ON context_snapshots(created_at);
 """
 
+# ─── Episodic Memory (Native Persistent Memory) ─────────────────────
+CREATE_EPISODES = """
+CREATE TABLE IF NOT EXISTS episodes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id  TEXT NOT NULL,
+    event_type  TEXT NOT NULL,
+    content     TEXT NOT NULL,
+    project     TEXT,
+    emotion     TEXT DEFAULT 'neutral',
+    tags        TEXT DEFAULT '[]',
+    meta        TEXT DEFAULT '{}',
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_EPISODES_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_ep_session ON episodes(session_id);
+CREATE INDEX IF NOT EXISTS idx_ep_project_type ON episodes(project, event_type);
+CREATE INDEX IF NOT EXISTS idx_ep_created ON episodes(created_at);
+CREATE INDEX IF NOT EXISTS idx_ep_event_type ON episodes(event_type);
+"""
+
+CREATE_EPISODES_FTS = """
+CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
+    content,
+    event_type,
+    project,
+    content='episodes',
+    content_rowid='id'
+);
+"""
+
 
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
@@ -305,8 +337,10 @@ ALL_SCHEMA = [
     CREATE_COMPACTION_LOG,
     CREATE_CONTEXT_SNAPSHOTS,
     CREATE_CONTEXT_SNAPSHOTS_INDEX,
+    CREATE_EPISODES,
+    CREATE_EPISODES_INDEXES,
+    CREATE_EPISODES_FTS,
 ]
-
 
 
 def get_init_meta() -> list[tuple[str, str]]:

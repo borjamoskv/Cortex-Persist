@@ -59,7 +59,10 @@ async def get_ledger_status(
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.exception("Ledger integrity check failed")
         lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=500, detail=get_trans("error_integrity_check_failed", lang).format(detail=str(e))) from None
+        raise HTTPException(
+            status_code=500,
+            detail=get_trans("error_integrity_check_failed", lang).format(detail=str(e)),
+        ) from None
 
 
 @router.post("/checkpoint", response_model=CheckpointResponse)
@@ -85,7 +88,9 @@ async def create_checkpoint(
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.exception("Merkle checkpoint creation failed")
         lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=500, detail=get_trans("error_checkpoint_failed", lang).format(detail=str(e))) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_checkpoint_failed", lang).format(detail=str(e))
+        ) from None
 
 
 @router.get("/verify", response_model=LedgerReportResponse)

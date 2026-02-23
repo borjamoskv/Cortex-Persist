@@ -107,7 +107,7 @@ def _provision_api_key(email: str, plan: str) -> str | None:
                 raw_key[:12],
             )
             return raw_key
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         logger.exception("Failed to provision API key for %s", email)
 
     return None
@@ -177,9 +177,9 @@ async def stripe_webhook(
     # ── Checkout completed → provision API key ──
     if event_type == "checkout.session.completed":
         session = event["data"]["object"]
-        customer_email = session.get("customer_email") or session.get(
-            "customer_details", {}
-        ).get("email", "unknown")
+        customer_email = session.get("customer_email") or session.get("customer_details", {}).get(
+            "email", "unknown"
+        )
         plan = session.get("metadata", {}).get("plan", "pro")
 
         raw_key = _provision_api_key(customer_email, plan)
@@ -210,7 +210,7 @@ async def stripe_webhook(
                         if key.name.startswith("stripe-"):
                             api_state.auth_manager.revoke_key(key.id)
                             logger.info("Revoked key %s for cancelled subscription", key.name)
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to revoke keys for customer %s", customer_id)
 
         return {"status": "revoked", "customer": customer_id}

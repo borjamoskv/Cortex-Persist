@@ -1,3 +1,4 @@
 [console_scripts]
 cortex = cortex.cli:cli
+cortex-adk = cortex.adk.runner:main
 moskv-daemon = cortex.daemon_cli:main

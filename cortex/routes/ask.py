@@ -31,8 +31,10 @@ _llm_manager = LLMManager()
 
 # ─── Request / Response Models ───────────────────────────────────────
 
+
 class AskRequest(BaseModel):
     """RAG query: search CORTEX memory and synthesize an answer."""
+
     query: str = Field(..., min_length=1, max_length=4096, description="Natural language question")
     project: str | None = Field(None, description="Filter by project (optional)")
     k: int = Field(10, ge=1, le=50, description="Number of facts to retrieve")
@@ -43,6 +45,7 @@ class AskRequest(BaseModel):
 
 class AskSource(BaseModel):
     """A source fact that contributed to the answer."""
+
     fact_id: int
     content: str
     score: float
@@ -51,6 +54,7 @@ class AskSource(BaseModel):
 
 class AskResponse(BaseModel):
     """RAG response with answer and sources."""
+
     answer: str
     sources: list[AskSource]
     model: str
@@ -60,6 +64,7 @@ class AskResponse(BaseModel):
 
 class LLMStatusResponse(BaseModel):
     """LLM provider status."""
+
     available: bool
     provider: str
     model: str | None = None
@@ -77,6 +82,7 @@ Respond in the same language as the user's question."""
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────
+
 
 @router.post("/v1/ask", response_model=AskResponse)
 async def ask_cortex(

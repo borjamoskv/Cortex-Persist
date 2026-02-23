@@ -108,7 +108,10 @@ class TestStoreMany:
     @pytest.mark.asyncio
     async def test_batch_store_is_atomic(self, engine):
         """All facts should be visible after batch store."""
-        facts = [{"project": "batch", "content": f"Batch fact number {i} for atomicity test"} for i in range(10)]
+        facts = [
+            {"project": "batch", "content": f"Batch fact number {i} for atomicity test"}
+            for i in range(10)
+        ]
         ids = await engine.store_many(facts)
         assert len(ids) == 10
         recalled = await engine.recall("batch")
@@ -180,7 +183,9 @@ class TestUpdate:
 
     @pytest.mark.asyncio
     async def test_update_preserves_meta_lineage(self, engine):
-        original_id = await engine.store("p1", "Original fact with meta source", meta={"source": "test"})
+        original_id = await engine.store(
+            "p1", "Original fact with meta source", meta={"source": "test"}
+        )
         await engine.update(original_id, content="Updated fact with new content")
 
         facts = await engine.recall("p1")

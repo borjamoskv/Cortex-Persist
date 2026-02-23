@@ -1,5 +1,6 @@
 """SQLite Graph Algorithms Mixin."""
 
+
 class SQLiteAlgorithmsMixin:
     """Mixin for graph algorithm operations."""
 

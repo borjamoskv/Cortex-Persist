@@ -27,7 +27,9 @@ def handoff() -> None:
 @handoff.command("generate")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--pending", "-p", multiple=True, help="Pending work items (repeat for multiple)")
-@click.option("--mood", "-m", default="neutral", help="Session mood (e.g. productive, blocked, exploring)")
+@click.option(
+    "--mood", "-m", default="neutral", help="Session mood (e.g. productive, blocked, exploring)"
+)
 @click.option("--focus", "-f", multiple=True, help="Focus projects (repeat for multiple)")
 @click.option("--out", default=None, help="Output path (default: ~/.cortex/handoff.json)")
 def generate(db, pending, mood, focus, out) -> None:

@@ -1,6 +1,7 @@
 """
 Staleness pruning strategy for compaction.
 """
+
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING

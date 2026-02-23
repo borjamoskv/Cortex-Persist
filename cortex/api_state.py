@@ -3,7 +3,6 @@ CORTEX v4.0 — API State.
 Global instances and shared state for the API layer.
 """
 
-
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
 from cortex.timing import TimingTracker

@@ -94,7 +94,8 @@ async def run_with_cortex_context(
     )
     logger.info(
         "CORTEX search for pipe '%s': %d facts found",
-        pipe_name, len(search_results),
+        pipe_name,
+        len(search_results),
     )
 
     # 2. Build enriched message

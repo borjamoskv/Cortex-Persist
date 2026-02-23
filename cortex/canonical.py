@@ -15,6 +15,8 @@ import hashlib
 import json
 from typing import Any
 
+__all__ = ["canonical_json", "compute_tx_hash", "compute_tx_hash_v1"]
+
 # ─── Canonical JSON ───────────────────────────────────────────────
 
 
@@ -83,4 +85,4 @@ def compute_tx_hash_v1(
     created before the canonical hash migration.
     """
     h_input = f"{prev_hash}:{project}:{action}:{detail_json}:{timestamp}"
-    return hashlib.sha256(h_input.encode()).hexdigest()
+    return hashlib.sha256(h_input.encode("utf-8")).hexdigest()

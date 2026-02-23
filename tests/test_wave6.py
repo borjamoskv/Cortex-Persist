@@ -64,6 +64,7 @@ def test_wave6():
     merkle_root = root_row[0] if root_row else "TEST_ROOT"
 
     import asyncio
+
     sm = SnapshotManager(db_path=db_path)
     snap = asyncio.run(sm.create_snapshot("test_snap", latest_tx, merkle_root))
     print(f"Snapshot created: {snap.name} at {snap.path}")
@@ -78,7 +79,6 @@ def test_wave6():
 
     print("✅ Wave 6 Verification Successful!")
     engine.close_sync()
-
 
     # Cleanup
     if os.path.exists(db_path):

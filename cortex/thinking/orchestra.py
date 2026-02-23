@@ -99,13 +99,15 @@ class ThoughtOrchestra:
 
         logger.info(
             "ThoughtOrchestra: %d providers disponibles: %s",
-            len(available), available,
+            len(available),
+            available,
         )
 
         if len(available) < self.config.min_models:
             logger.warning(
                 "ThoughtOrchestra necesita mínimo %d providers, hay %d.",
-                self.config.min_models, len(available),
+                self.config.min_models,
+                len(available),
             )
 
         self._judge = self._find_judge(available)
@@ -115,7 +117,8 @@ class ThoughtOrchestra:
     def _detect_available_providers() -> list[str]:
         """Detecta providers con API key configurada."""
         return [
-            name for name, preset in PROVIDER_PRESETS.items()
+            name
+            for name, preset in PROVIDER_PRESETS.items()
             if preset.get("env_key") and os.environ.get(preset["env_key"])
         ]
 
@@ -131,18 +134,14 @@ class ThoughtOrchestra:
         for fallback in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
             if fallback in available:
                 try:
-                    return self._pool.get(
-                        fallback, PROVIDER_PRESETS[fallback]["default_model"]
-                    )
+                    return self._pool.get(fallback, PROVIDER_PRESETS[fallback]["default_model"])
                 except (OSError, ValueError, KeyError):
                     continue
         return None
 
     # ── Model Resolution ─────────────────────────────────────────
 
-    def _resolve_models(
-        self, mode: ThinkingMode | str
-    ) -> list[tuple[str, str]]:
+    def _resolve_models(self, mode: ThinkingMode | str) -> list[tuple[str, str]]:
         """Resuelve qué modelos usar para un modo dado."""
         mode_key = ThinkingMode(mode) if isinstance(mode, str) else mode
         candidates = self._routing.get(mode_key, [])
@@ -199,13 +198,20 @@ class ThoughtOrchestra:
                 last_error = f"Timeout ({self.config.timeout_seconds}s)"
                 logger.warning(
                     "%s:%s timeout (intento %d/%d)",
-                    provider_name, model, attempt + 1, attempts,
+                    provider_name,
+                    model,
+                    attempt + 1,
+                    attempts,
                 )
             except (OSError, ValueError, KeyError) as e:
                 last_error = str(e)
                 logger.warning(
                     "%s:%s error (intento %d/%d): %s",
-                    provider_name, model, attempt + 1, attempts, e,
+                    provider_name,
+                    model,
+                    attempt + 1,
+                    attempts,
+                    e,
                 )
 
             # Esperar antes de retry
@@ -269,20 +275,24 @@ class ThoughtOrchestra:
 
         logger.info(
             "🎭 Think [%s] × %d modelos | strategy=%s",
-            mode, len(models), fusion_strategy.value,
+            mode,
+            len(models),
+            fusion_strategy.value,
         )
 
         # Ejecución paralela
         start = time.monotonic()
-        responses = await asyncio.gather(*[
-            self._query_model(p, m, prompt, system) for p, m in models
-        ])
+        responses = await asyncio.gather(
+            *[self._query_model(p, m, prompt, system) for p, m in models]
+        )
         total_ms = (time.monotonic() - start) * 1000
 
         ok_count = sum(1 for r in responses if r.ok)
         logger.info(
             "🎭 Think completado: %.0fms | %d/%d exitosos",
-            total_ms, ok_count, len(responses),
+            total_ms,
+            ok_count,
+            len(responses),
         )
 
         # Fusionar
@@ -293,25 +303,29 @@ class ThoughtOrchestra:
         )
 
         # Metadatos del orchestra
-        result.meta.update({
-            "mode": mode,
-            "total_latency_ms": round(total_ms, 1),
-            "models_queried": len(models),
-            "models_succeeded": ok_count,
-            "pool_size": self._pool.size,
-        })
+        result.meta.update(
+            {
+                "mode": mode,
+                "total_latency_ms": round(total_ms, 1),
+                "models_queried": len(models),
+                "models_succeeded": ok_count,
+                "pool_size": self._pool.size,
+            }
+        )
 
         # Registrar en historial
-        self._history.append(ThinkingRecord(
-            mode=mode,
-            strategy=fusion_strategy.value,
-            models_queried=len(models),
-            models_succeeded=ok_count,
-            total_latency_ms=total_ms,
-            confidence=result.confidence,
-            agreement=result.agreement_score,
-            winner=result.meta.get("winner"),
-        ))
+        self._history.append(
+            ThinkingRecord(
+                mode=mode,
+                strategy=fusion_strategy.value,
+                models_queried=len(models),
+                models_succeeded=ok_count,
+                total_latency_ms=total_ms,
+                confidence=result.confidence,
+                agreement=result.agreement_score,
+                winner=result.meta.get("winner"),
+            )
+        )
 
         return result
 
@@ -369,10 +383,7 @@ class ThoughtOrchestra:
 
         return {
             "initialized": self._initialized,
-            "judge": (
-                f"{self._judge.provider_name}:{self._judge.model}"
-                if self._judge else None
-            ),
+            "judge": (f"{self._judge.provider_name}:{self._judge.model}" if self._judge else None),
             "pool_size": self._pool.size,
             "history_count": len(self._history),
             "modes": mode_status,
@@ -395,10 +406,12 @@ class ThoughtOrchestra:
         avg_confidence = sum(r.confidence for r in self._history) / total
         avg_agreement = sum(r.agreement for r in self._history) / total
         avg_latency = sum(r.total_latency_ms for r in self._history) / total
-        success_rate = sum(
-            r.models_succeeded / r.models_queried
-            for r in self._history if r.models_queried > 0
-        ) / total
+        success_rate = (
+            sum(
+                r.models_succeeded / r.models_queried for r in self._history if r.models_queried > 0
+            )
+            / total
+        )
 
         # Proveedor que más gana
         winner_counts: dict[str, int] = {}

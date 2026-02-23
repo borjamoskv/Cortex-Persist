@@ -246,9 +246,7 @@ class ContextCollector:
                 age_hours = (now_ts - f.stat().st_mtime) / 3600
                 if age_hours > 24:
                     continue
-                mod_time = datetime.fromtimestamp(
-                    f.stat().st_mtime, tz=timezone.utc
-                ).isoformat()
+                mod_time = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc).isoformat()
                 signals.append(
                     Signal(
                         source="fs:recent",

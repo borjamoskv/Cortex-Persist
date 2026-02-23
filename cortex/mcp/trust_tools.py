@@ -142,8 +142,7 @@ def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             # Get the fact
             cursor = await conn.execute(
-                "SELECT id, project, content, fact_type, created_at "
-                "FROM facts WHERE id = ?",
+                "SELECT id, project, content, fact_type, created_at FROM facts WHERE id = ?",
                 (fact_id,),
             )
             fact = await cursor.fetchone()
@@ -209,15 +208,17 @@ def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         if checkpoint:
             cp_id, merkle_root, start, end, cp_time = checkpoint
-            lines.extend([
-                "",
-                "── Merkle Checkpoint ──",
-                f"Checkpoint:   #{cp_id}",
-                f"Merkle Root:  {merkle_root}",
-                f"Range:        TX #{start} → #{end}",
-                f"Sealed At:    {cp_time}",
-                "Status:       ✅ Fact included in sealed checkpoint",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "── Merkle Checkpoint ──",
+                    f"Checkpoint:   #{cp_id}",
+                    f"Merkle Root:  {merkle_root}",
+                    f"Range:        TX #{start} → #{end}",
+                    f"Sealed At:    {cp_time}",
+                    "Status:       ✅ Fact included in sealed checkpoint",
+                ]
+            )
         else:
             lines.append("\nMerkle:       ⏳ Not yet included in a checkpoint")
 
@@ -246,15 +247,12 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         async with ctx.pool.acquire() as conn:
             # Total facts
-            cursor = await conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE deprecated_at IS NULL"
-            )
+            cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE deprecated_at IS NULL")
             total_facts = (await cursor.fetchone())[0]
 
             # Decisions count
             cursor = await conn.execute(
-                "SELECT COUNT(*) FROM facts "
-                "WHERE fact_type = 'decision' AND deprecated_at IS NULL"
+                "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND deprecated_at IS NULL"
             )
             decisions = (await cursor.fetchone())[0]
 
@@ -268,8 +266,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
             # Projects
             cursor = await conn.execute(
-                "SELECT COUNT(DISTINCT project) FROM facts "
-                "WHERE deprecated_at IS NULL"
+                "SELECT COUNT(DISTINCT project) FROM facts WHERE deprecated_at IS NULL"
             )
             projects = (await cursor.fetchone())[0]
 
@@ -289,8 +286,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
             # Oldest and newest fact
             cursor = await conn.execute(
-                "SELECT MIN(created_at), MAX(created_at) FROM facts "
-                "WHERE deprecated_at IS NULL"
+                "SELECT MIN(created_at), MAX(created_at) FROM facts WHERE deprecated_at IS NULL"
             )
             time_range = await cursor.fetchone()
 
@@ -326,25 +322,29 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         if not integrity["valid"]:
             lines.append(f"  ⚠️ Violations:        {len(integrity.get('violations', []))}")
 
-        lines.extend([
-            "",
-            "── 3. Compliance Checklist (Art. 12) ──",
-            f"  [{'✅' if total_tx > 0 else '❌'}] Automatic logging of events (Art. 12.1)",
-            f"  [{'✅' if decisions > 0 else '❌'}] Decision recording (Art. 12.2)",
-            f"  [{'✅' if integrity['valid'] else '❌'}] Tamper-proof storage (Art. 12.3)",
-            f"  [{'✅' if checkpoints > 0 else '❌'}] Periodic integrity verification (Art. 12.4)",
-            f"  [{'✅' if len(agents) > 0 else '⚠️'}] Agent traceability (Art. 12.2d)",
-            "",
-            "── 4. Recommendation ──",
-        ])
+        lines.extend(
+            [
+                "",
+                "── 3. Compliance Checklist (Art. 12) ──",
+                f"  [{'✅' if total_tx > 0 else '❌'}] Automatic logging of events (Art. 12.1)",
+                f"  [{'✅' if decisions > 0 else '❌'}] Decision recording (Art. 12.2)",
+                f"  [{'✅' if integrity['valid'] else '❌'}] Tamper-proof storage (Art. 12.3)",
+                f"  [{'✅' if checkpoints > 0 else '❌'}] Periodic integrity verification (Art. 12.4)",
+                f"  [{'✅' if len(agents) > 0 else '⚠️'}] Agent traceability (Art. 12.2d)",
+                "",
+                "── 4. Recommendation ──",
+            ]
+        )
 
-        score = sum([
-            total_tx > 0,
-            decisions > 0,
-            integrity["valid"],
-            checkpoints > 0,
-            len(agents) > 0,
-        ])
+        score = sum(
+            [
+                total_tx > 0,
+                decisions > 0,
+                integrity["valid"],
+                checkpoints > 0,
+                len(agents) > 0,
+            ]
+        )
 
         if score == 5:
             lines.append("  🟢 COMPLIANT — All Article 12 requirements met.")

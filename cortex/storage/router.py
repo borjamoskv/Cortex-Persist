@@ -101,10 +101,7 @@ class TenantRouter:
         return list(self._connections.keys())
 
     def __repr__(self) -> str:
-        return (
-            f"TenantRouter(mode={self._mode.value}, "
-            f"active_tenants={len(self._connections)})"
-        )
+        return f"TenantRouter(mode={self._mode.value}, active_tenants={len(self._connections)})"
 
 
 # ─── Singleton ────────────────────────────────────────────────────────

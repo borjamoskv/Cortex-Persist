@@ -1,4 +1,5 @@
 """Agent management mixin."""
+
 import sqlite3
 import uuid
 from typing import Any
@@ -9,14 +10,16 @@ import aiosqlite
 class AgentMixin:
     """Mixin for agent management operations."""
 
-    async def register_agent(self, name: str, agent_type: str = "ai", public_key: str = "", tenant_id: str = "default") -> str:
+    async def register_agent(
+        self, name: str, agent_type: str = "ai", public_key: str = "", tenant_id: str = "default"
+    ) -> str:
         agent_id = str(uuid.uuid4())
         async with self.session() as conn:
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 await conn.execute(
                     "INSERT INTO agents (id, name, agent_type, public_key, tenant_id) VALUES (?, ?, ?, ?, ?)",
-                    (agent_id, name, agent_type, public_key, tenant_id)
+                    (agent_id, name, agent_type, public_key, tenant_id),
                 )
                 await conn.commit()
                 return agent_id
@@ -27,13 +30,19 @@ class AgentMixin:
     async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
-            async with conn.execute("SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?", (agent_id,)) as cursor:
+            async with conn.execute(
+                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?",
+                (agent_id,),
+            ) as cursor:
                 row = await cursor.fetchone()
                 return dict(row) if row else None
 
     async def list_agents(self, tenant_id: str) -> list[dict[str, Any]]:
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
-            async with conn.execute("SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE tenant_id = ?", (tenant_id,)) as cursor:
+            async with conn.execute(
+                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE tenant_id = ?",
+                (tenant_id,),
+            ) as cursor:
                 rows = await cursor.fetchall()
                 return [dict(r) for r in rows]

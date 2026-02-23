@@ -14,6 +14,7 @@ def engine_with_graph(tmp_path):
     eng.init_db_sync()
     return eng
 
+
 @pytest.mark.asyncio
 async def test_engine_graph_rag_methods(engine_with_graph):
     engine = engine_with_graph
@@ -42,6 +43,7 @@ async def test_engine_graph_rag_methods(engine_with_graph):
     assert path[0]["target"] == "TypeScript"
     assert path[1]["target"] == "JavaScript"
 
+
 @pytest.mark.asyncio
 async def test_search_with_graph_context(engine_with_graph):
     engine = engine_with_graph
@@ -49,7 +51,7 @@ async def test_search_with_graph_context(engine_with_graph):
 
     # Populate data
     await engine.store(content="React is a UI library.", project=project)
-    await engine.store(content="React uses Vite.", project=project)
+    await engine.store(content="React uses Vite. - padded to satisfy 20 chars min", project=project)
 
     # Search with graph_depth=0 (default)
     results = await engine.search("React", project=project)

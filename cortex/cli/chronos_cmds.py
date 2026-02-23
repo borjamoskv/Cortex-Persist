@@ -12,6 +12,7 @@ from cortex.chronos import ChronosEngine
 
 console = Console()
 
+
 @click.group(name="chronos")
 def chronos_cmds() -> None:
     """CHRONOS-1 — Benchmark of Senior Human Time vs AI Swarm Time."""
@@ -40,11 +41,11 @@ def analyze(ai_time: float, complexity: str) -> None:
     """
     try:
         metrics = ChronosEngine.analyze(ai_time, complexity)
-        
+
         # Formatting
         human_time_str = ChronosEngine.format_time(metrics.human_time_secs)
         ai_time_str = ChronosEngine.format_time(metrics.ai_time_secs)
-        
+
         content = (
             f"\n[cyan]⏱️  Human Senior Time:  [/cyan][white]{human_time_str}[/white]\n"
             f"[magenta]⚡ MOSKV Swarm Time:   [/magenta][white]{ai_time_str}[/white]\n"
@@ -53,14 +54,14 @@ def analyze(ai_time: float, complexity: str) -> None:
             f"💡 [bold yellow]{metrics.tip}[/bold yellow]\n"
             f"⚠️  [dim red]{metrics.anti_tip}[/dim red]"
         )
-        
+
         panel = Panel(
             content,
             title="[bold magenta]🕒 CHRONOS-1 — SENIOR BENCHMARK[/bold magenta]",
             border_style="magenta",
-            expand=False
+            expand=False,
         )
-        
+
         console.print(panel)
 
     except ValueError as e:

@@ -35,14 +35,10 @@ DAEMON_SCRIPT = (
 def _run_daemon(args: list[str]) -> int:
     """Ejecuta el daemon script con los argumentos dados."""
     if not DAEMON_SCRIPT.exists():
-        console.print(
-            f"[bold red]Error:[/] AUTOROUTER-1 no encontrado en {DAEMON_SCRIPT}"
-        )
+        console.print(f"[bold red]Error:[/] AUTOROUTER-1 no encontrado en {DAEMON_SCRIPT}")
         sys.exit(1)
     try:
-        result = subprocess.run(
-            ["python3", str(DAEMON_SCRIPT)] + args, check=False
-        )
+        result = subprocess.run(["python3", str(DAEMON_SCRIPT)] + args, check=False)
         return result.returncode
     except (OSError, ValueError, KeyError) as e:
         console.print(f"[bold red]Error de ejecución:[/] {e}")
@@ -155,12 +151,12 @@ def enable_boot():
 </plist>"""
 
     PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(PLIST_PATH, "w") as f:
         f.write(plist_content)
-    
+
     console.print(f"[cyan]ℹ️ Creado plist en {PLIST_PATH}[/]")
-    
+
     # Cargar en launchd
     try:
         # Descargar primero por si ya existía
@@ -191,7 +187,7 @@ def disable_boot():
         subprocess.run(["launchctl", "unload", str(PLIST_PATH)], capture_output=True)
         PLIST_PATH.unlink()
         console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
-        
+
         # Parar también una posible instancia
         _run_daemon(["--stop"])
     except (OSError, ValueError, KeyError) as e:
@@ -200,15 +196,16 @@ def disable_boot():
 
 @autorouter_cmds.command()
 def logs():
-    """Sigue (tail -f) los logs del daemon en tiempo real."""
+    """Sigue (tail) los logs del daemon en tiempo real."""
     log_file = Path.home() / ".cortex" / "router_daemon.log"
     if not log_file.exists():
         console.print(f"[yellow]⚠️ No se encontró log en {log_file}[/]")
         sys.exit(1)
-        
+
+    from cortex.platform import tail_file_command
+
     console.print(f"[dim]Mostrando logs de: {log_file} (Ctrl+C para salir)[/]")
     try:
-        subprocess.run(["tail", "-f", str(log_file)])
+        subprocess.run(tail_file_command(str(log_file)))
     except KeyboardInterrupt:
         pass
-

@@ -1,6 +1,7 @@
 """
 Interactive CLI approval logic for SovereignGate.
 """
+
 import logging
 import sqlite3
 import time
@@ -24,10 +25,10 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
     # Use private methods or access public API of gate
     # Since we moved this out, we need to access gate._get_action or add a public method
     # Let's assume we can access it via public API or we might need to adjust SovereignGate to expose it
-    # But wait, SovereignGate._get_action is internal. 
+    # But wait, SovereignGate._get_action is internal.
     # Better to add a public method to get action by ID without side effects or use the private one if we are in the same package (python doesn't enforce private)
     # Actually, let's look at how it was used. It was a method on SovereignGate.
-    
+
     # We will access the action via a new public getter or just use the private one for now as we are refactoring.
     try:
         action = gate._get_action(action_id)

@@ -104,12 +104,14 @@ def _score_dimensions(
     has_files = bool(source_files)
 
     # 1. Integrity
-    dimensions.append(DimensionResult(
-        name="Integridad",
-        score=100 if has_files else 0,
-        weight="critical",
-        findings=[] if has_files else ["No se encontraron archivos fuente"],
-    ))
+    dimensions.append(
+        DimensionResult(
+            name="Integridad",
+            score=100 if has_files else 0,
+            weight="critical",
+            findings=[] if has_files else ["No se encontraron archivos fuente"],
+        )
+    )
 
     # 2. Architecture
     if not has_files:
@@ -117,20 +119,28 @@ def _score_dimensions(
     else:
         ratio_ok = 1 - (len(large_files) / len(source_files))
         arch_score = max(0, min(100, int(ratio_ok * 100)))
-    dimensions.append(DimensionResult(
-        name="Arquitectura", score=arch_score, weight="critical",
-        findings=large_files[:10],
-    ))
+    dimensions.append(
+        DimensionResult(
+            name="Arquitectura",
+            score=arch_score,
+            weight="critical",
+            findings=large_files[:10],
+        )
+    )
 
     # 3. Security
     if not has_files:
         sec_score = 0
     else:
         sec_score = max(0, 100 - min(100, len(security_findings) * 15))
-    dimensions.append(DimensionResult(
-        name="Seguridad", score=sec_score, weight="critical",
-        findings=security_findings[:10],
-    ))
+    dimensions.append(
+        DimensionResult(
+            name="Seguridad",
+            score=sec_score,
+            weight="critical",
+            findings=security_findings[:10],
+        )
+    )
 
     # 4. Complexity
     if not has_files:
@@ -140,23 +150,30 @@ def _score_dimensions(
         complexity_ratio = complexity_penalties / max(1, total_loc)
         penalty = min(100, int(complexity_ratio * 100))
         complexity_score = max(0, 100 - penalty)
-    dimensions.append(DimensionResult(
-        name="Complejidad", score=complexity_score, weight="high",
-        findings=(
-            [f"High nesting detected in {len(source_files)} files"]
-            if penalty > 0 else []
-        ),
-    ))
+    dimensions.append(
+        DimensionResult(
+            name="Complejidad",
+            score=complexity_score,
+            weight="high",
+            findings=(
+                [f"High nesting detected in {len(source_files)} files"] if penalty > 0 else []
+            ),
+        )
+    )
 
     # 13. Psi
     if not has_files:
         psi_score = 0
     else:
         psi_score = max(0, 100 - min(100, len(psi_findings) * 5))
-    dimensions.append(DimensionResult(
-        name="Psi", score=psi_score, weight="high",
-        findings=psi_findings[:15],
-    ))
+    dimensions.append(
+        DimensionResult(
+            name="Psi",
+            score=psi_score,
+            weight="high",
+            findings=psi_findings[:15],
+        )
+    )
 
     return dimensions
 
@@ -194,8 +211,12 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
     total_loc, large_files, psi_findings, security_findings, complexity_penalties = analysis
 
     dimensions = _score_dimensions(
-        source_files, total_loc, large_files,
-        psi_findings, security_findings, complexity_penalties,
+        source_files,
+        total_loc,
+        large_files,
+        psi_findings,
+        security_findings,
+        complexity_penalties,
     )
     final_score = _compute_weighted_score(dimensions)
 

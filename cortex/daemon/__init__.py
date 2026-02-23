@@ -20,16 +20,21 @@ from cortex.daemon.models import (  # noqa: F401
     DaemonStatus,
     DiskAlert,
     EngineHealthAlert,
+    EntropyAlert,
     GhostAlert,
+    MejoraloAlert,
     MemoryAlert,
+    PerceptionAlert,
     SiteStatus,
 )
 from cortex.daemon.monitors import (  # noqa: F401
     CertMonitor,
     DiskMonitor,
     EngineHealthCheck,
+    EntropyMonitor,
     GhostWatcher,
     MemorySyncer,
+    PerceptionMonitor,
     SiteMonitor,
 )
 from cortex.daemon.notifier import Notifier  # noqa: F401

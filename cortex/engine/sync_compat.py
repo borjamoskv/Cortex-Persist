@@ -95,11 +95,11 @@ class SyncCompatMixin:
         content = content.strip()
 
         # Gate 1: Minimum content length
-        min_len = 20
+        from cortex.facts.manager import FactManager
+
+        min_len = FactManager.MIN_CONTENT_LENGTH
         if len(content) < min_len:
-            raise ValueError(
-                f"content too short ({len(content)} chars, min {min_len})"
-            )
+            raise ValueError(f"content too short ({len(content)} chars, min {min_len})")
 
         # Gate 2: Sanitize double-prefixed decisions
         if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
@@ -113,9 +113,7 @@ class SyncCompatMixin:
             (project, content),
         ).fetchone()
         if existing:
-            logger.info(
-                "Dedup: fact already exists as #%d in %s", existing[0], project
-            )
+            logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
             return existing[0]
 
         ts = valid_from or now_iso()
@@ -141,6 +139,7 @@ class SyncCompatMixin:
 
         # Log to ledger (sync)
         import hashlib
+
         content_hash = hashlib.sha256(content.encode()).hexdigest()
         self._log_transaction_sync(
             conn, project, "store", {"fact_id": fact_id, "content_hash": content_hash}

@@ -231,12 +231,14 @@ def get_auth_manager() -> AuthManager:
 
 # ─── FastAPI Dependencies ─────────────────────────────────────────────
 
+
 async def require_auth(
     request: Request,
     authorization: str | None = Header(None, description="Bearer <api-key>"),
 ) -> AuthResult:
     """Extract and validate API key from Authorization header with i18n support."""
     from cortex.i18n import get_trans
+
     lang = request.headers.get("Accept-Language", "en")
 
     if not authorization:
@@ -257,12 +259,10 @@ async def require_auth(
 def require_permission(permission: str):
     """Factory for permission-checking dependencies with i18n support."""
 
-    async def checker(
-        request: Request, 
-        auth: AuthResult = Depends(require_auth)
-    ) -> AuthResult:
+    async def checker(request: Request, auth: AuthResult = Depends(require_auth)) -> AuthResult:
         if permission not in auth.permissions:
             from cortex.i18n import get_trans
+
             lang = request.headers.get("Accept-Language", "en")
             detail = get_trans("error_missing_permission", lang).format(permission=permission)
             raise HTTPException(status_code=403, detail=detail)

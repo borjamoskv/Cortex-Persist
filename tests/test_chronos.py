@@ -21,7 +21,7 @@ def test_chronos_engine_math_god():
     """Test the god complexity math."""
     metrics = ChronosEngine.analyze(ai_time_secs=120, complexity="god")
     # God multipliers: 10 + 15 + 5 + 15 + 5 = 50x
-    # 120s * 50 = 6000s = 100 minutes. 
+    # 120s * 50 = 6000s = 100 minutes.
     # Baseline for god is 180 minutes (10800s).
     assert metrics.human_time_secs == 10800
     assert metrics.asymmetry_factor == 90.0
@@ -54,6 +54,7 @@ def test_cli_chronos_analyze():
     # Expect 15s to hit the 180s (3 min) human baseline. 180 / 15 = 12x
     assert "12.0x" in result.output
 
+
 import json
 
 
@@ -63,35 +64,41 @@ def test_store_with_chronos(tmp_path):
     from cortex.engine import CortexEngine
 
     db_path = tmp_path / "test.db"
-    
+
     # Needs to be initialized first
     engine = CortexEngine(str(db_path))
     engine.init_db_sync()
 
     runner = CliRunner()
-    result = runner.invoke(store, [
-        "test_project",
-        "This is a chronos test fact.",
-        "--ai-time", "15",
-        "--complexity", "low",
-        "--db", str(db_path)
-    ])
-    
+    result = runner.invoke(
+        store,
+        [
+            "test_project",
+            "This is a chronos test fact.",
+            "--ai-time",
+            "15",
+            "--complexity",
+            "low",
+            "--db",
+            str(db_path),
+        ],
+    )
+
     assert result.exit_code == 0
     assert "Stored fact #1 in test_project" in result.output
     # Expect 15s low complexity to have 12.0x asymmetry
     assert "12.0x" in result.output
-    
+
     # Verify the database explicitly
     conn = engine._get_sync_conn()
     row = conn.execute("SELECT meta FROM facts WHERE id = 1").fetchone()
     assert row is not None
-    
+
     meta_dict = json.loads(row[0])
     assert "chronos" in meta_dict
     chronos_meta = meta_dict["chronos"]
     assert chronos_meta["ai_time_secs"] == 15
     assert chronos_meta["human_time_secs"] == 180
     assert chronos_meta["asymmetry_factor"] == 180 / 15
-    
+
     engine.close_sync()

@@ -23,7 +23,9 @@ def db_path(tmp_path):
     path = tmp_path / "test.db"
     engine = CortexEngine(db_path=path)
     engine.init_db_sync()
-    engine.store_sync("test-project", "First test fact for CORTEX validation", fact_type="knowledge")
+    engine.store_sync(
+        "test-project", "First test fact for CORTEX validation", fact_type="knowledge"
+    )
     engine.store_sync("test-project", "Second test fact for error tracking", fact_type="error")
     engine.store_sync("other-project", "Third test fact for ghost registering", fact_type="ghost")
     engine.close_sync()
@@ -95,12 +97,16 @@ class TestEditCommand:
         monkeypatch.setattr("cortex.sync.CORTEX_DIR", tmp_path)
         monkeypatch.setattr("cortex.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
-        result = runner.invoke(cli, ["edit", "1", "Updated content here with more detail", "--db", db_path])
+        result = runner.invoke(
+            cli, ["edit", "1", "Updated content here with more detail", "--db", db_path]
+        )
         assert result.exit_code == 0
         assert "editado" in result.output
 
     def test_edit_nonexistent_fact(self, runner, db_path):
-        result = runner.invoke(cli, ["edit", "999", "New content that is long enough", "--db", db_path])
+        result = runner.invoke(
+            cli, ["edit", "999", "New content that is long enough", "--db", db_path]
+        )
         assert result.exit_code == 0
         assert "No se encontró" in result.output
 
@@ -110,7 +116,9 @@ class TestEditCommand:
         monkeypatch.setattr("cortex.sync.CORTEX_DIR", tmp_path)
         monkeypatch.setattr("cortex.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
-        result = runner.invoke(cli, ["edit", "1", "Edited content with extended metadata", "--db", db_path])
+        result = runner.invoke(
+            cli, ["edit", "1", "Edited content with extended metadata", "--db", db_path]
+        )
         assert result.exit_code == 0
 
         # Verify the new fact exists with list

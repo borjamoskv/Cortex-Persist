@@ -1,17 +1,20 @@
 Metadata-Version: 2.4
 Name: cortex-memory
-Version: 4.0.0a1
+Version: 4.3.0
 Summary: The Sovereign Ledger for AI Agents — local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults.
 Author-email: Borja Moskv <borja@moskv.com>
-License: MIT
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/borjamoskv/cortex
+Project-URL: Repository, https://github.com/borjamoskv/cortex
+Project-URL: Issues, https://github.com/borjamoskv/cortex/issues
 Keywords: ai,memory,agents,sovereign,vector-search,sqlite
 Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Developers
-Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3
 Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: sqlite-vec>=0.1.6
 Requires-Dist: sentence-transformers>=3.0
 Requires-Dist: onnxruntime>=1.17
@@ -28,96 +31,158 @@ Requires-Dist: pytest>=8.0; extra == "dev"
 Requires-Dist: pytest-cov>=5.0; extra == "dev"
 Requires-Dist: pytest-asyncio; extra == "dev"
 Requires-Dist: httpx>=0.27; extra == "dev"
+Provides-Extra: adk
+Requires-Dist: google-adk>=0.5.0; extra == "adk"
+Provides-Extra: toolbox
+Requires-Dist: toolbox-core>=0.1.0; extra == "toolbox"
+Provides-Extra: billing
+Requires-Dist: stripe>=8.0; extra == "billing"
 Provides-Extra: all
-Requires-Dist: cortex-memory[api,dev]; extra == "all"
+Requires-Dist: cortex-memory[adk,api,billing,dev,toolbox]; extra == "all"
+Dynamic: license-file
 
-# CORTEX — The Sovereign Ledger for AI Agents
+# CORTEX — Trust Infrastructure for Autonomous AI
 
-> Local-first memory infrastructure with vector search, temporal facts, cryptographic vaults, and a persistent watchdog daemon. Zero network dependencies.
+> **Cryptographic verification, audit trails, and compliance for AI agent memory.**
+> *The layer that proves your agents' decisions are true.*
+
+![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Status](https://img.shields.io/badge/status-production-green.svg)
+![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
+[![Docs](https://img.shields.io/badge/docs-live-brightgreen)](https://borjamoskv.github.io/cortex/)
+
+---
+
+## The Problem
+
+AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
+
+- **Mem0** stores what agents remember. But can you prove the memory wasn't tampered with?
+- **Zep** builds knowledge graphs. But can you audit the chain of reasoning?
+- **Letta** manages agent state. But can you generate a compliance report for regulators?
+
+The **EU AI Act (Article 12, enforced August 2026)** requires:
+- ✅ Automatic logging of all agent decisions
+- ✅ Tamper-proof storage of decision records
+- ✅ Full traceability and explainability
+- ✅ Periodic integrity verification
+
+**Fines: up to €30M or 6% of global revenue.**
+
+## The Solution
+
+CORTEX doesn't replace your memory layer — it **certifies** it.
+
+```
+Your Memory Layer (Mem0 / Zep / Letta / Custom)
+        ↓
+   CORTEX Trust Engine
+        ├── SHA-256 hash-chained ledger
+        ├── Merkle tree checkpoints
+        ├── Reputation-weighted consensus
+        └── EU AI Act compliance reports
+```
+
+### Core Capabilities
+
+| Capability | What It Does | EU AI Act |
+|:---|:---|:---:|
+| 🔗 **Immutable Ledger** | Every fact is hash-chained. Tamper = detectable. | Art. 12.3 |
+| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity | Art. 12.4 |
+| 📋 **Audit Trail** | Timestamped, hash-verified log of all decisions | Art. 12.1 |
+| 🔍 **Decision Lineage** | Trace how an agent arrived at any conclusion | Art. 12.2d |
+| 🤝 **Consensus (RWC)** | Multi-agent verification with reputation scoring | Art. 14 |
+| 📊 **Compliance Report** | One-command regulatory readiness snapshot | Art. 12 |
+| 🧠 **Semantic Search** | Vector + Graph-RAG hybrid retrieval | — |
+| 🏠 **100% Local-First** | SQLite. No cloud. Your data, your machine. | — |
+
+---
 
 ## Quick Start
 
+### Install
+
 ```bash
-# Install (with API server)
-pip install -e ".[all]"
+pip install cortex-memory
+```
 
-# Initialize database
-cortex init
+### Store a Decision & Verify It
 
+```bash
 # Store a fact
-cortex store naroa-web "Uses vanilla JS, no framework, Industrial Noir aesthetic"
+cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
 
-# Semantic search
-cortex search "what framework does naroa use?"
+# Verify its cryptographic integrity
+cortex verify 42
+# → ✅ VERIFIED — Hash chain intact, Merkle sealed
 
-# Recall project context
-cortex recall naroa-web
-
-# Check status
-cortex status
+# Generate compliance report
+cortex compliance-report
+# → Compliance Score: 5/5 — All Article 12 requirements met
 ```
 
-## MOSKV-1 Daemon
-
-Persistent watchdog that runs in the background — monitoring, alerting, remembering.
+### Run as MCP Server (Universal IDE Plugin)
 
 ```bash
-# Run a single check
-moskv-daemon check
-
-# Install as macOS launchd agent (runs every 5 min + on login)
-moskv-daemon install
-
-# Show last check results
-moskv-daemon status
-
-# Remove launchd agent
-moskv-daemon uninstall
+# Works with: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity
+python -m cortex.mcp
 ```
 
-### What it monitors
-
-| Check | Threshold | Alert |
-| :--- | :--- | :--- |
-| **Site Health** | HTTP 4xx/5xx/timeout | macOS notification |
-| **Stale Projects** | No activity >48h in `ghosts.json` | macOS notification |
-| **Memory Freshness** | `system.json` not updated >24h | macOS notification |
-
-## REST API v4.1
+### Run as REST API
 
 ```bash
-# Start server
 uvicorn cortex.api:app --port 8484
-
-# Endpoints
-GET  /v1/status                  # Engine status
-POST /v1/facts                   # Store a fact  
-POST /v1/search                  # Semantic search
-GET  /v1/projects/{project}/facts # Recall project context (with metadata)
-GET  /v1/time/today              # Today's time tracking
-GET  /v1/time/history?days=14    # Time history
-GET  /v1/daemon/status           # Daemon watchdog results
-GET  /dashboard                  # Industrial Noir dashboard UI
 ```
+
+---
+
+## Competitive Landscape
+
+| | **CORTEX** | Mem0 | Zep | Letta | RecordsKeeper | UtopIQ |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Cryptographic Ledger** | ✅ | ❌ | ❌ | ❌ | ✅ (blockchain) | ✅ (blockchain) |
+| **Merkle Checkpoints** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-Agent Consensus** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Local-First** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **No Blockchain Overhead** | ✅ | — | — | — | ❌ | ❌ |
+| **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial | Partial |
+| **Cost** | **Free** | $249/mo | $$$ | Free | $$$ | $$$ |
+
+---
 
 ## Architecture
 
 ```
-SQLite + sqlite-vec (vector search)
-  + Temporal Facts (valid_from/valid_until)
-  + ONNX Embeddings (local, ~5ms/embed)
-  + Hash-Chained Transaction Ledger
-  + Automatic Time Tracking (heartbeats)
-  + Persistent Daemon (launchd)
-  = The Sovereign Ledger
+┌─────────────────────────────────────────┐
+│         CORTEX Trust Engine             │
+├─────────────┬─────────────┬─────────────┤
+│  Facts DB   │  Ledger     │  Consensus  │
+│  (sqlite)   │  (SHA-256)  │  (RWC)      │
+├─────────────┼─────────────┼─────────────┤
+│  Embeddings │  Merkle     │  Reputation  │
+│  (ONNX)     │  (Trees)    │  (Weighted)  │
+├─────────────┴─────────────┴─────────────┤
+│  REST API (FastAPI) │ MCP Server (stdio) │
+└─────────────────────┴────────────────────┘
 ```
 
-## Testing
+---
 
-```bash
-pytest tests/ -v    # 52 tests
-```
+## Integrations
+
+CORTEX plugs into your existing stack:
+
+- **IDEs**: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity (via MCP)
+- **Frameworks**: LangChain, CrewAI, AutoGen, Google ADK
+- **Memory Layers**: Sits on top of Mem0, Zep, Letta as verification layer
+- **Deployment**: Docker, Kubernetes, bare metal, or just `pip install`
+
+---
 
 ## License
 
-MIT
+**Business Source License 1.1** (BSL-1.1).
+Free for non-production and development use. Converts to Apache 2.0 on 2030-01-01.
+See [LICENSE](LICENSE) for details.

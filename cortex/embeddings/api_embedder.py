@@ -28,11 +28,11 @@ logger = logging.getLogger("cortex.embeddings.api")
 PROVIDER_CONFIGS = {
     "gemini": {
         "url": "https://generativelanguage.googleapis.com/v1beta/models/"
-               "text-embedding-004:embedContent",
+        "text-embedding-004:embedContent",
         "dimension": 768,
         "env_key": "GEMINI_API_KEY",
         "batch_url": "https://generativelanguage.googleapis.com/v1beta/models/"
-                     "text-embedding-004:batchEmbedContents",
+        "text-embedding-004:batchEmbedContents",
     },
     "openai": {
         "url": "https://api.openai.com/v1/embeddings",
@@ -58,8 +58,7 @@ class APIEmbedder:
     ):
         if provider not in PROVIDER_CONFIGS:
             raise ValueError(
-                f"Unknown provider '{provider}'. "
-                f"Supported: {list(PROVIDER_CONFIGS.keys())}"
+                f"Unknown provider '{provider}'. Supported: {list(PROVIDER_CONFIGS.keys())}"
             )
 
         self._provider = provider
@@ -89,9 +88,7 @@ class APIEmbedder:
 
         raise ValueError(f"No embed implementation for {self._provider}")
 
-    async def embed_batch(
-        self, texts: list[str], batch_size: int = 32
-    ) -> list[list[float]]:
+    async def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         if not texts:
             return []

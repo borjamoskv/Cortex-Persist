@@ -97,7 +97,6 @@ PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
         "env_key": "ZHIPU_API_KEY",
         "context_window": 128000,
     },
-
     # ── Tier 2: Inference Platforms & Aggregators ───────────────────
     "openrouter": {
         "base_url": "https://openrouter.ai/api/v1",
@@ -171,7 +170,6 @@ PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
         "env_key": "NOVITA_API_KEY",
         "context_window": 131072,
     },
-
     # ── Tier 3: Local / Self-Hosted ────────────────────────────────
     "ollama": {
         "base_url": "http://localhost:11434/v1",
@@ -254,11 +252,7 @@ class LLMProvider:
             config = PROVIDER_PRESETS[provider]
             self._provider = provider
             self._base_url = base_url or config["base_url"]
-            self._model = (
-                model
-                or os.environ.get("CORTEX_LLM_MODEL", "")
-                or config["default_model"]
-            )
+            self._model = model or os.environ.get("CORTEX_LLM_MODEL", "") or config["default_model"]
             self._context_window = config["context_window"]
             self._extra_headers = config.get("extra_headers", {})
 
@@ -276,15 +270,14 @@ class LLMProvider:
 
         else:
             supported = sorted(list(PROVIDER_PRESETS.keys()) + ["custom"])
-            raise ValueError(
-                f"Unknown LLM provider '{provider}'. "
-                f"Supported: {supported}"
-            )
+            raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
         self._client = httpx.AsyncClient(timeout=60.0)
         logger.info(
             "LLM ready: %s (model=%s, url=%s)",
-            self._provider, self._model, self._base_url,
+            self._provider,
+            self._model,
+            self._base_url,
         )
 
     async def complete(
@@ -335,7 +328,8 @@ class LLMProvider:
         except httpx.HTTPStatusError as e:
             logger.error(
                 "LLM API error (%s %s): %s",
-                e.response.status_code, self._provider,
+                e.response.status_code,
+                self._provider,
                 e.response.text[:500],
             )
             raise
