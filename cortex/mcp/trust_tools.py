@@ -276,13 +276,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "WHERE tags LIKE '%agent:%' AND deprecated_at IS NULL"
             )
             agent_rows = await cursor.fetchall()
-            agents = set()
-            for row in agent_rows:
-                if row[0]:
-                    for tag in row[0].split(","):
-                        tag = tag.strip()
-                        if tag.startswith("agent:"):
-                            agents.add(tag)
+            agents = _extract_agents_from_rows(agent_rows)
 
             # Oldest and newest fact
             cursor = await conn.execute(
@@ -461,3 +455,14 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         lines.extend(["", "═" * 40])
         return "\n".join(lines)
+
+
+def _extract_agents_from_rows(agent_rows: list) -> set[str]:
+    agents: set[str] = set()
+    for row in agent_rows:
+        if row[0]:
+            for raw_tag in row[0].split(","):
+                tag = raw_tag.strip()
+                if tag.startswith("agent:"):
+                    agents.add(tag)
+    return agents

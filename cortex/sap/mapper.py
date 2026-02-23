@@ -149,12 +149,7 @@ class SAPMapper:
             if sap_key in cortex_by_key:
                 # Exists in both — check for modification
                 existing = cortex_by_key.pop(sap_key)
-                existing_meta = existing.get("meta") or existing.get("metadata") or {}
-                if isinstance(existing_meta, str):
-                    try:
-                        existing_meta = json.loads(existing_meta)
-                    except json.JSONDecodeError:
-                        existing_meta = {}
+                existing_meta = _parse_meta_str(existing.get("meta") or existing.get("metadata") or {})
 
                 existing_entity = existing_meta.get("sap_entity", {})
                 clean = {k: v for k, v in entity.items() if k not in _SAP_META_KEYS}
@@ -185,3 +180,13 @@ def _entities_differ(a: dict, b: dict) -> bool:
         )
     except (TypeError, ValueError):
         return clean_a != clean_b
+
+
+def _parse_meta_str(meta_obj: Any) -> dict:
+    if isinstance(meta_obj, str):
+        try:
+            return json.loads(meta_obj)
+        except json.JSONDecodeError:
+            return {}
+    return meta_obj
+

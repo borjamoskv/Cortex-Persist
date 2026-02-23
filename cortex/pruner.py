@@ -77,24 +77,7 @@ class EmbeddingPrunerMixin:
                 return stats
 
             for fact_id, embedding_data in rows:
-                try:
-                    vec_hash = hashlib.sha256(_to_bytes(embedding_data)).hexdigest()
-                    await conn.execute(
-                        """
-                        INSERT OR IGNORE INTO pruned_embeddings
-                            (fact_id, hash, dimension, reason)
-                        VALUES (?, ?, 384, 'deprecated')
-                        """,
-                        (fact_id, vec_hash),
-                    )
-                    await conn.execute(
-                        "DELETE FROM fact_embeddings WHERE fact_id = ?",
-                        (fact_id,),
-                    )
-                    stats["pruned_count"] += 1
-                except (sqlite3.Error, OSError) as e:
-                    logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
-                    stats["errors"].append({"fact_id": fact_id, "error": str(e)})
+                await self._prune_single_embedding(conn, fact_id, embedding_data, stats)
 
             await conn.commit()
 
@@ -104,6 +87,28 @@ class EmbeddingPrunerMixin:
             len(stats["errors"]),
         )
         return stats
+
+    async def _prune_single_embedding(self, conn: aiosqlite.Connection, fact_id: int, embedding_data: str | bytes, stats: dict) -> None:
+        """Prunes a single embedding and updates stats."""
+        try:
+            vec_hash = hashlib.sha256(_to_bytes(embedding_data)).hexdigest()
+            await conn.execute(
+                """
+                INSERT OR IGNORE INTO pruned_embeddings
+                    (fact_id, hash, dimension, reason)
+                VALUES (?, ?, 384, 'deprecated')
+                """,
+                (fact_id, vec_hash),
+            )
+            await conn.execute(
+                "DELETE FROM fact_embeddings WHERE fact_id = ?",
+                (fact_id,),
+            )
+            stats["pruned_count"] += 1
+        except (sqlite3.Error, OSError) as e:
+            logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
+            stats["errors"].append({"fact_id": fact_id, "error": str(e)})
+
 
     async def verify_embedding_hash(self, fact_id: int) -> dict | None:
         """Check if a pruned embedding's hash exists and return metadata.

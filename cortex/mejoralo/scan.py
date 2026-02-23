@@ -59,7 +59,7 @@ def _analyze_python_nesting(content: str, rel: str) -> list[str]:
                 ))
                 if inc:
                     self.depth += 1
-                    if self.depth >= 6:
+                    if self.depth >= 7:
                         line_no = getattr(node, "lineno", "?")
                         comp.append(f"{rel}:{line_no} -> High structural nesting (depth {self.depth})")
                         self.depth -= 1
@@ -298,14 +298,23 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
       HIGH (weight 35): Psi (toxic markers), Complexity
     """
     root = Path(path).resolve()
-    if not root.is_dir():
-        raise ValueError(f"Path is not a directory: {root}")
+    if root.is_file():
+        # Single file scan mode
+        source_files = [root]
+        root_dir = root.parent
+    elif root.is_dir():
+        # Directory scan mode
+        root_dir = root
+    else:
+        raise ValueError(f"Path is not a directory or file: {root}")
 
-    stack = detect_stack(root)
+    stack = detect_stack(root_dir)
     exts = SCAN_EXTENSIONS.get(stack, SCAN_EXTENSIONS["unknown"])
 
-    source_files = _collect_source_files(root, exts)
-    total_loc, large_files, psi, sec, comp = _analyze_files(source_files, root)
+    if root.is_dir():
+        source_files = _collect_source_files(root_dir, exts)
+    
+    total_loc, large_files, psi, sec, comp = _analyze_files(source_files, root_dir)
 
     dimensions = _score_dimensions(
         source_files,

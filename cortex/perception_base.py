@@ -140,7 +140,11 @@ def classify_file(path: str) -> str:
     if ext in _EXT_ROLES:
         return _EXT_ROLES[ext]
 
-    # 3. Check exact filenames (Makefile, Dockerfile)
+    # 3. Handle compound config names (.env.local, .env.production)
+    if p.name.startswith(".env"):
+        return "config"
+
+    # 4. Check exact filenames (Makefile, Dockerfile)
     if p.name in _EXT_ROLES:
         return _EXT_ROLES[p.name]
 
@@ -165,6 +169,10 @@ def infer_project_from_path(path: str, workspace_root: str | None = None) -> str
             # Monorepo detection: packages/my-pkg -> my-pkg
             if len(parts) >= 2 and parts[0] in ("packages", "apps", "services", "src"):
                 return parts[1]
+
+            # Single file in workspace root → return workspace name
+            if len(parts) == 1:
+                return root.name
 
             return parts[0]
         except ValueError:
