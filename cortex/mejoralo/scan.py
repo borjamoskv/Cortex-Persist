@@ -59,7 +59,7 @@ def _analyze_python_nesting(content: str, rel: str) -> list[str]:
                 ))
                 if inc:
                     self.depth += 1
-                    if self.depth >= 7:
+                    if self.depth >= 8:
                         line_no = getattr(node, "lineno", "?")
                         comp.append(f"{rel}:{line_no} -> High structural nesting (depth {self.depth})")
                         self.depth -= 1
