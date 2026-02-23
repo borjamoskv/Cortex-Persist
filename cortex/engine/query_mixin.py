@@ -56,7 +56,9 @@ class QueryMixin:
                     entities = extract_entities(res.content)
                     seeds = [e["name"] for e in entities]
                     if seeds:
-                        res.graph_context = await get_context_subgraph(conn, seeds, depth=graph_depth)
+                        res.graph_context = await get_context_subgraph(
+                            conn, seeds, depth=graph_depth
+                        )
 
             return results
 

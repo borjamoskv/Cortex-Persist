@@ -20,13 +20,13 @@ class EmbeddingManager:
     def mode(self) -> str:
         """Return the current embeddings mode (local|api)."""
         from cortex import config
+
         return config.EMBEDDINGS_MODE
 
     @property
     def is_cloud(self) -> bool:
         """Return True if using a cloud/API provider."""
         return self.mode == "api"
-
 
     def _get_embedder(self) -> LocalEmbedder:
         if self._embedder is None:

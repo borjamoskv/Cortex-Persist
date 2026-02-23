@@ -50,8 +50,10 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
         strategy_label = ", ".join(s for s in strategy) if strategy else "all"
 
         if dry_run:
-            console.print(f"[dim]🔍 Dry-run compaction for[/] [bold cyan]{project}[/] "
-                          f"[dim](strategies: {strategy_label})[/]")
+            console.print(
+                f"[dim]🔍 Dry-run compaction for[/] [bold cyan]{project}[/] "
+                f"[dim](strategies: {strategy_label})[/]"
+            )
         else:
             if not force:
                 console.print(
@@ -73,8 +75,10 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
 
         # Display results
         if result.reduction == 0 and not result.details:
-            console.print(f"[green]✓[/] No compaction needed for [bold]{project}[/]. "
-                          f"Memory is clean ({result.original_count} facts).")
+            console.print(
+                f"[green]✓[/] No compaction needed for [bold]{project}[/]. "
+                f"Memory is clean ({result.original_count} facts)."
+            )
             return
 
         panel_lines = [
@@ -82,13 +86,9 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
             f"([green]-{result.reduction}[/])",
         ]
         if result.deprecated_ids:
-            panel_lines.append(
-                f"[bold]Deprecated:[/] {len(result.deprecated_ids)} fact(s)"
-            )
+            panel_lines.append(f"[bold]Deprecated:[/] {len(result.deprecated_ids)} fact(s)")
         if result.new_fact_ids:
-            panel_lines.append(
-                f"[bold]New consolidated:[/] {len(result.new_fact_ids)} fact(s)"
-            )
+            panel_lines.append(f"[bold]New consolidated:[/] {len(result.new_fact_ids)} fact(s)")
         for detail in result.details:
             panel_lines.append(f"  [dim]→ {detail}[/]")
 
@@ -96,11 +96,13 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
         if dry_run:
             title += " (DRY RUN)"
 
-        console.print(Panel(
-            "\n".join(panel_lines),
-            title=title,
-            border_style="cyan" if not dry_run else "yellow",
-        ))
+        console.print(
+            Panel(
+                "\n".join(panel_lines),
+                title=title,
+                border_style="cyan" if not dry_run else "yellow",
+            )
+        )
 
     finally:
         engine.close_sync()

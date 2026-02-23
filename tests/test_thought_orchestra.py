@@ -29,7 +29,9 @@ from cortex.thinking.presets import (
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 
-def _make_responses(contents: list[str], latencies: list[float] | None = None) -> list[ModelResponse]:
+def _make_responses(
+    contents: list[str], latencies: list[float] | None = None
+) -> list[ModelResponse]:
     """Factory para crear listas de ModelResponse."""
     if latencies is None:
         latencies = [100.0 * (i + 1) for i in range(len(contents))]
@@ -88,7 +90,9 @@ class TestTokenization:
 
 class TestModelResponse:
     def test_ok_when_valid(self):
-        r = ModelResponse(provider="openai", model="gpt-4o", content="Hola")
+        r = ModelResponse(
+            provider="openai", model="gpt-4o", content="Hola - padded to satisfy 20 chars min"
+        )
         assert r.ok is True
 
     def test_not_ok_when_error(self):
@@ -100,7 +104,9 @@ class TestModelResponse:
         assert r.ok is False
 
     def test_label(self):
-        r = ModelResponse(provider="openai", model="gpt-4o", content="test")
+        r = ModelResponse(
+            provider="openai", model="gpt-4o", content="test - padded to satisfy 20 chars min"
+        )
         assert r.label == "openai:gpt-4o"
 
 
@@ -110,20 +116,24 @@ class TestModelResponse:
 class TestFusedThought:
     def test_source_count(self):
         thought = FusedThought(
-            content="test",
+            content="test - padded to satisfy 20 chars min",
             strategy=FusionStrategy.MAJORITY,
             confidence=0.8,
             sources=[
-                ModelResponse(provider="a", model="m", content="ok"),
+                ModelResponse(
+                    provider="a", model="m", content="ok - padded to satisfy 20 chars min"
+                ),
                 ModelResponse(provider="b", model="m", content="", error="fail"),
-                ModelResponse(provider="c", model="m", content="ok2"),
+                ModelResponse(
+                    provider="c", model="m", content="ok2 - padded to satisfy 20 chars min"
+                ),
             ],
         )
         assert thought.source_count == 2
 
     def test_fastest_slowest_source(self):
         thought = FusedThought(
-            content="test",
+            content="test - padded to satisfy 20 chars min",
             strategy=FusionStrategy.MAJORITY,
             confidence=0.8,
             sources=_make_responses(["a", "b", "c"], [300.0, 100.0, 200.0]),
@@ -133,7 +143,7 @@ class TestFusedThought:
 
     def test_summary(self):
         thought = FusedThought(
-            content="test",
+            content="test - padded to satisfy 20 chars min",
             strategy=FusionStrategy.MAJORITY,
             confidence=0.85,
             agreement_score=0.72,
@@ -172,14 +182,14 @@ class TestThoughtFusion:
     @pytest.mark.asyncio
     async def test_fuse_majority_picks_most_central(self):
         fusion = ThoughtFusion()
-        responses = _make_responses([
-            "Python es un lenguaje de programación interpretado y dinámico de alto nivel.",
-            "Python es un lenguaje de programación de alto nivel interpretado y potente.",
-            "JavaScript es un lenguaje de scripting para desarrollo web frontend.",
-        ])
-        result = await fusion.fuse(
-            responses, "¿Qué es Python?", strategy=FusionStrategy.MAJORITY
+        responses = _make_responses(
+            [
+                "Python es un lenguaje de programación interpretado y dinámico de alto nivel.",
+                "Python es un lenguaje de programación de alto nivel interpretado y potente.",
+                "JavaScript es un lenguaje de scripting para desarrollo web frontend.",
+            ]
         )
+        result = await fusion.fuse(responses, "¿Qué es Python?", strategy=FusionStrategy.MAJORITY)
         assert "Python" in result.content or "python" in result.content.lower()
 
     @pytest.mark.asyncio
@@ -201,33 +211,37 @@ class TestThoughtFusion:
     @pytest.mark.asyncio
     async def test_agreement_identical(self):
         fusion = ThoughtFusion()
-        responses = _make_responses([
-            "La capital de España es Madrid.",
-            "La capital de España es Madrid.",
-        ])
+        responses = _make_responses(
+            [
+                "La capital de España es Madrid.",
+                "La capital de España es Madrid.",
+            ]
+        )
         agreement = fusion._calculate_agreement(responses)
         assert agreement == 1.0
 
     @pytest.mark.asyncio
     async def test_agreement_different_languages(self):
         fusion = ThoughtFusion()
-        responses = _make_responses([
-            "The quick brown fox jumps over the lazy dog.",
-            "Un rápido zorro marrón salta sobre el perro perezoso.",
-        ])
+        responses = _make_responses(
+            [
+                "The quick brown fox jumps over the lazy dog.",
+                "Un rápido zorro marrón salta sobre el perro perezoso.",
+            ]
+        )
         agreement = fusion._calculate_agreement(responses)
         assert agreement < 0.3
 
     @pytest.mark.asyncio
     async def test_fuse_synthesis_fallback_without_judge(self):
         fusion = ThoughtFusion(judge_provider=None)
-        responses = _make_responses([
-            "Respuesta A con detalles importantes sobre el tema.",
-            "Respuesta B con otra perspectiva relevante y diferente.",
-        ])
-        result = await fusion.fuse(
-            responses, "pregunta", strategy=FusionStrategy.SYNTHESIS
+        responses = _make_responses(
+            [
+                "Respuesta A con detalles importantes sobre el tema.",
+                "Respuesta B con otra perspectiva relevante y diferente.",
+            ]
         )
+        result = await fusion.fuse(responses, "pregunta", strategy=FusionStrategy.SYNTHESIS)
         assert result.content in [r.content for r in responses]
         assert result.confidence > 0
 
@@ -252,7 +266,9 @@ class TestOrchestraConfig:
 
     def test_custom_config(self):
         config = OrchestraConfig(
-            min_models=3, max_models=7, timeout_seconds=60,
+            min_models=3,
+            max_models=7,
+            timeout_seconds=60,
             retry_on_failure=False,
         )
         assert config.min_models == 3
@@ -391,7 +407,7 @@ class TestThinkingHistory:
         h = ThinkingHistory()
         sources = _make_responses(["A wins", "B loses"], [100.0, 200.0])
         result = FusedThought(
-            content="A wins",
+            content="A wins - padded to satisfy 20 chars min",
             strategy=FusionStrategy.MAJORITY,
             confidence=0.8,
             sources=sources,
@@ -413,8 +429,11 @@ class TestThinkingHistory:
             sources = _make_responses(["resp_a", "resp_b"], [100.0, 200.0])
             winner = "provider_0:model_0" if i < 3 else "provider_1:model_1"
             result = FusedThought(
-                content="test", strategy=FusionStrategy.MAJORITY,
-                confidence=0.8, sources=sources, agreement_score=0.5,
+                content="test - padded to satisfy 20 chars min",
+                strategy=FusionStrategy.MAJORITY,
+                confidence=0.8,
+                sources=sources,
+                agreement_score=0.5,
                 meta={"winner": winner},
             )
             h.record(result)
@@ -429,6 +448,7 @@ class TestThinkingHistory:
 
 class _BrokenJudge:
     """Mock judge que siempre falla."""
+
     provider_name = "broken"
     model = "fail-1"
 
@@ -438,6 +458,7 @@ class _BrokenJudge:
 
 class _WorkingJudge:
     """Mock judge que devuelve JSON de scoring."""
+
     provider_name = "mock"
     model = "judge-1"
 
@@ -455,13 +476,13 @@ class TestCircuitBreaker:
         fusion.JUDGE_MAX_RETRIES = 0
         fusion.JUDGE_TIMEOUT_S = 1.0
 
-        responses = _make_responses([
-            "Python es un lenguaje interpretado de alto nivel.",
-            "Python es un lenguaje de programación interpretado.",
-        ])
-        result = await fusion.fuse(
-            responses, "¿Qué es Python?", strategy=FusionStrategy.SYNTHESIS
+        responses = _make_responses(
+            [
+                "Python es un lenguaje interpretado de alto nivel.",
+                "Python es un lenguaje de programación interpretado.",
+            ]
         )
+        result = await fusion.fuse(responses, "¿Qué es Python?", strategy=FusionStrategy.SYNTHESIS)
         # Debería caer a majority como fallback
         assert result.content in [r.content for r in responses]
         assert result.confidence > 0
@@ -469,13 +490,13 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_working_judge_scores_correctly(self):
         fusion = ThoughtFusion(judge_provider=_WorkingJudge())
-        responses = _make_responses([
-            "Respuesta A con contenido relevante.",
-            "Respuesta B con otra perspectiva diferente.",
-        ])
-        result = await fusion.fuse(
-            responses, "test", strategy=FusionStrategy.BEST_OF_N
+        responses = _make_responses(
+            [
+                "Respuesta A con contenido relevante.",
+                "Respuesta B con otra perspectiva diferente.",
+            ]
         )
+        result = await fusion.fuse(responses, "test", strategy=FusionStrategy.BEST_OF_N)
         assert result.strategy == FusionStrategy.BEST_OF_N
         assert result.confidence > 0
         assert "winner" in result.meta
@@ -483,10 +504,11 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_history_records_after_fuse(self):
         fusion = ThoughtFusion()
-        responses = _make_responses([
-            "La capital de España es Madrid.",
-            "La capital de España es Madrid, la ciudad más grande.",
-        ])
+        responses = _make_responses(
+            [
+                "La capital de España es Madrid.",
+                "La capital de España es Madrid, la ciudad más grande.",
+            ]
+        )
         await fusion.fuse(responses, "capital?")
         assert fusion.history.total_fusions >= 1
-

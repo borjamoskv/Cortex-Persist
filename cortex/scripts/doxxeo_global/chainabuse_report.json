@@ -1,0 +1,80 @@
+{
+  "scammer": "Foizur (@arbithumarb)",
+  "addresses": [
+    {
+      "address": "0x701e13e8da8ef04cd40e92f21869932fe5e35555",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x0083022683e56a51ef1199573411ba6c2ab60000",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x54ba52cbd043b0b2e11a6823a910360e31bb2544",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0xEeCAc0ac4143bbfb60a497e43646c0002285902c",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0xf428114411E883F62b9a4007723648a88e7679eE",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x7cd3717264da69a9472d8cd2580e124a57982754",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x79940B12230B7534d934D18DbC7DD84512FC98dE",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x87fce75dcc4cb8e3e4b80dc33b60af97cf53ed5b",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x0000ee5760d1f3556f9c2052f77326e402d10000",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x2CfF890f0378a11913B6129b2e97417A2C302680",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x86a4C6aD2726ac5aef59b35700620aae7d80f982",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x8a7D09167de635332d22b0843bece515da38Dec8",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0xac831A730e34f71f40a8672cf5e5cba29892a07f",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x9e72b4a743f29dbb6a40f00b175525ea3249e4d4",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x7df263b72c722f46ba54589d9e4672642",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0x7bdc9ce05dc366f07e0cce077f5203ce834cc04c",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0xb7c8ad2b6fc2ad542fbadde7a9c8491bb7b4cdd5",
+      "chain": "ETH/BASE/ARB"
+    },
+    {
+      "address": "0xD0De574C37b6de2AE1A614fFEBb939768670CD7F",
+      "chain": "ETH/BASE/ARB"
+    }
+  ],
+  "category": "PHISHING",
+  "description": "Attacker orchestrating EIP-7702 (chainId 0) delegations to drain wallets. Using phishing sites (.vercel.app) to spoof Safe/OpenSea. Full autopsy: https://borjamoskv.substack.com/p/take-the-eth-and-run",
+  "evidence_url": "https://borjamoskv.substack.com/p/take-the-eth-and-run"
+}

@@ -41,9 +41,7 @@ async def export_project(
             base_dir = Path.cwd().resolve()
             target_path = Path(path).resolve()
             if not str(target_path).startswith(str(base_dir)):
-                raise HTTPException(
-                    status_code=400, detail=get_trans("error_path_workspace", lang)
-                )
+                raise HTTPException(status_code=400, detail=get_trans("error_path_workspace", lang))
         except (ValueError, RuntimeError) as e:
             raise HTTPException(status_code=400, detail=f"Invalid path: {e}") from None
 
@@ -53,7 +51,9 @@ async def export_project(
         return {"message": f"Exported project '{project}' to {out_path}", "path": str(out_path)}
     except (OSError, ValueError, KeyError) as e:
         logger.error("Export failed: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_export_failed", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_export_failed", lang)
+        ) from None
 
 
 @router.get("/v1/status", response_model=StatusResponse)
@@ -78,7 +78,9 @@ async def status(
         )
     except (OSError, ValueError, KeyError) as e:
         logger.error("Status unavailable: %s", e)
-        raise HTTPException(status_code=500, detail=get_trans("error_status_unavailable", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_status_unavailable", lang)
+        ) from None
 
 
 @router.post("/v1/admin/keys")
@@ -100,7 +102,9 @@ async def create_api_key(
             raise HTTPException(status_code=401, detail=get_trans("error_invalid_key_format", lang))
         result = api_state.auth_manager.authenticate(parts[1])
         if not result.authenticated:
-            error_msg = get_trans("error_invalid_revoked_key", lang) if result.error else result.error
+            error_msg = (
+                get_trans("error_invalid_revoked_key", lang) if result.error else result.error
+            )
             raise HTTPException(status_code=401, detail=error_msg)
         if "admin" not in result.permissions:
             detail = get_trans("error_missing_permission", lang).format(permission="admin")
@@ -158,4 +162,3 @@ async def handoff_generate(
     data = await generate_handoff(engine, session_meta=session_meta)
     save_handoff(data)
     return data
-

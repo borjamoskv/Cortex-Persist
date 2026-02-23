@@ -56,7 +56,7 @@ class TestSignalDataclass:
         s = Signal(
             source="db:facts",
             signal_type="recent_fact",
-            content="Test content",
+            content="Test content - padded to satisfy 20 chars min",
             project="test-project",
             timestamp="2026-02-20T00:00:00",
             weight=0.8,
@@ -110,7 +110,9 @@ class TestCollector:
     async def test_collect_recent_facts(self, engine_with_data):
         conn = await engine_with_data.get_conn()
         collector = ContextCollector(
-            conn=conn, max_signals=50, git_enabled=False,
+            conn=conn,
+            max_signals=50,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector._collect_recent_facts(limit=10)
@@ -130,7 +132,9 @@ class TestCollector:
     async def test_collect_all_returns_capped(self, engine_with_data):
         conn = await engine_with_data.get_conn()
         collector = ContextCollector(
-            conn=conn, max_signals=5, git_enabled=False,
+            conn=conn,
+            max_signals=5,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()
@@ -139,7 +143,9 @@ class TestCollector:
     async def test_collect_all_sorted_by_weight(self, engine_with_data):
         conn = await engine_with_data.get_conn()
         collector = ContextCollector(
-            conn=conn, max_signals=20, git_enabled=False,
+            conn=conn,
+            max_signals=20,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()
@@ -149,7 +155,9 @@ class TestCollector:
     async def test_empty_db_returns_empty(self, engine):
         conn = await engine.get_conn()
         collector = ContextCollector(
-            conn=conn, max_signals=20, git_enabled=False,
+            conn=conn,
+            max_signals=20,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()
@@ -258,7 +266,9 @@ class TestSnapshotPersistence:
         await conn.commit()
 
         collector = ContextCollector(
-            conn=conn, max_signals=20, git_enabled=False,
+            conn=conn,
+            max_signals=20,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()
@@ -302,7 +312,9 @@ class TestSnapshotPersistence:
     async def test_infer_without_persist(self, engine_with_data):
         conn = await engine_with_data.get_conn()
         collector = ContextCollector(
-            conn=conn, max_signals=20, git_enabled=False,
+            conn=conn,
+            max_signals=20,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()
@@ -323,7 +335,9 @@ class TestFullIntegration:
         conn = await engine_with_data.get_conn()
 
         collector = ContextCollector(
-            conn=conn, max_signals=30, git_enabled=False,
+            conn=conn,
+            max_signals=30,
+            git_enabled=False,
             workspace_dir="/nonexistent",
         )
         signals = await collector.collect_all()

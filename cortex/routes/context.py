@@ -53,12 +53,9 @@ async def infer_context(
         confidence=result.confidence,
         signals_used=result.signals_used,
         summary=result.summary,
-        top_signals=[
-            ContextSignalModel(**s.to_dict()) for s in result.top_signals
-        ],
+        top_signals=[ContextSignalModel(**s.to_dict()) for s in result.top_signals],
         projects_ranked=[
-            ProjectScoreModel(project=p, score=round(s, 4))
-            for p, s in result.projects_ranked
+            ProjectScoreModel(project=p, score=round(s, 4)) for p, s in result.projects_ranked
         ],
     )
 

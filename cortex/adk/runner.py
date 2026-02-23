@@ -101,7 +101,9 @@ async def _connect_toolbox(
         logger.info("Toolbox connected — loaded %d tools: %s", len(bridge.tools), bridge.tool_names)
         return bridge.tools
 
-    logger.warning("Could not connect to Toolbox at %s — running without external DB tools", config.server_url)
+    logger.warning(
+        "Could not connect to Toolbox at %s — running without external DB tools", config.server_url
+    )
     return []
 
 

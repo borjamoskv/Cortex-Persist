@@ -112,7 +112,7 @@ class SyncWriteMixin:
             "source": source,
             "meta": meta or {},
             "created_at": ts,
-            "valid_from": ts
+            "valid_from": ts,
         }
         try:
             sync_fact_to_repo(project, fact_id, fact_data, "upsert")
@@ -210,18 +210,22 @@ class SyncWriteMixin:
                 (fact_id, "deprecate_fact", "pending"),
             )
             conn.commit()
-            
+
             # [GitOps Sync]
             try:
                 sync_fact_to_repo(
                     row[0] if row else "unknown",
                     fact_id,
-                    {"id": fact_id, "valid_until": ts, "meta": {"deprecation_reason": reason or "deprecated"}},
-                    "deprecate"
+                    {
+                        "id": fact_id,
+                        "valid_until": ts,
+                        "meta": {"deprecation_reason": reason or "deprecated"},
+                    },
+                    "deprecate",
                 )
             except (sqlite3.Error, OSError, ValueError) as e:
                 logger.warning("GitOps sync falló para fact %d: %s", fact_id, e)
-                
+
             return True
         return False
 

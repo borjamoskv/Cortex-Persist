@@ -1,4 +1,5 @@
 """Merkle Tree implementation."""
+
 import hashlib
 from dataclasses import dataclass
 from typing import Optional
@@ -7,10 +8,12 @@ from typing import Optional
 @dataclass
 class MerkleNode:
     """A node in the Merkle Tree."""
+
     hash: str
     left: Optional["MerkleNode"] = None
     right: Optional["MerkleNode"] = None
     is_leaf: bool = False
+
 
 class MerkleTree:
     """Merkle tree for batch transaction verification."""

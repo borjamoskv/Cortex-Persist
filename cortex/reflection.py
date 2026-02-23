@@ -215,7 +215,7 @@ def _semantic_arm(
         from cortex.embeddings import LocalEmbedder
 
         embedding = LocalEmbedder().embed(query)
-    except Exception:
+    except (ImportError, RuntimeError, OSError, ValueError):
         logger.warning("Embeddings unavailable, falling back to text-only search")
         return []
 
@@ -251,7 +251,7 @@ def _semantic_arm(
             }
             for row in cursor.fetchall()
         ]
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, OSError) as exc:
         logger.debug("Semantic search failed: %s", exc)
         return []
 
@@ -293,7 +293,7 @@ def _text_arm(
             }
             for row in cursor.fetchall()
         ]
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, OSError) as exc:
         logger.debug("Text search failed: %s", exc)
         return []
 

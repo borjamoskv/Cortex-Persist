@@ -25,6 +25,7 @@ def _run_async(coro):
         loop = asyncio.get_event_loop()
         if loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 return pool.submit(asyncio.run, coro).result()
         return loop.run_until_complete(coro)
@@ -47,8 +48,7 @@ def verify_fact(fact_id: int, db: str) -> None:
 
     # Get the fact
     fact = conn.execute(
-        "SELECT id, project, content, fact_type, created_at, tx_id "
-        "FROM facts WHERE id = ?",
+        "SELECT id, project, content, fact_type, created_at, tx_id FROM facts WHERE id = ?",
         (fact_id,),
     ).fetchone()
 
@@ -62,8 +62,7 @@ def verify_fact(fact_id: int, db: str) -> None:
     tx = None
     if fact_tx_id:
         tx = conn.execute(
-            "SELECT id, hash, prev_hash, action, timestamp "
-            "FROM transactions WHERE id = ?",
+            "SELECT id, hash, prev_hash, action, timestamp FROM transactions WHERE id = ?",
             (fact_tx_id,),
         ).fetchone()
 
@@ -154,8 +153,7 @@ def _safe_count(conn, query: str) -> int:
 def _extract_agents(conn) -> set[str]:
     """Parse agent tags from facts."""
     rows = conn.execute(
-        "SELECT DISTINCT tags FROM facts "
-        "WHERE tags LIKE '%agent:%' AND valid_until IS NULL"
+        "SELECT DISTINCT tags FROM facts WHERE tags LIKE '%agent:%' AND valid_until IS NULL"
     ).fetchall()
     agents: set[str] = set()
     for row in rows:
@@ -179,10 +177,7 @@ def _check_chain_integrity(conn) -> tuple[bool, int]:
         ).fetchall()
     except (sqlite3.Error, OSError, RuntimeError):
         return True, 0
-    violations = sum(
-        1 for i in range(1, len(txs))
-        if txs[i][2] and txs[i][2] != txs[i - 1][1]
-    )
+    violations = sum(1 for i in range(1, len(txs)) if txs[i][2] and txs[i][2] != txs[i - 1][1])
     return violations == 0, violations
 
 
@@ -200,10 +195,14 @@ def compliance_report(db: str) -> None:
     conn = sqlite3.connect(db)
 
     total_facts = _safe_count(conn, "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-    decisions = _safe_count(conn, "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND valid_until IS NULL")
+    decisions = _safe_count(
+        conn, "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND valid_until IS NULL"
+    )
     total_tx = _safe_count(conn, "SELECT COUNT(*) FROM transactions")
     checkpoints = _safe_count(conn, "SELECT COUNT(*) FROM merkle_roots")
-    projects = _safe_count(conn, "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL")
+    projects = _safe_count(
+        conn, "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
+    )
     agents = _extract_agents(conn)
 
     time_range = conn.execute(
@@ -216,11 +215,13 @@ def compliance_report(db: str) -> None:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     console.print()
-    console.print(Panel.fit(
-        "[bold]CORTEX — EU AI Act Compliance Report[/bold]\n"
-        "[dim]Article 12: Record-Keeping Obligations[/dim]",
-        border_style="bright_green" if chain_ok else "red",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold]CORTEX — EU AI Act Compliance Report[/bold]\n"
+            "[dim]Article 12: Record-Keeping Obligations[/dim]",
+            border_style="bright_green" if chain_ok else "red",
+        )
+    )
 
     table = Table(show_header=False)
     table.add_column("Metric", style="bold")
@@ -242,6 +243,7 @@ def compliance_report(db: str) -> None:
 
     # Compliance checklist
     c1, c2, c3, c4, c5 = total_tx > 0, decisions > 0, chain_ok, checkpoints > 0, len(agents) > 0
+
     def icon(ok):
         return "[green]✅[/green]" if ok else "[red]❌[/red]"
 

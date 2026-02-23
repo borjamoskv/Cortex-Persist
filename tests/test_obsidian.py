@@ -43,7 +43,7 @@ class TestSlugify:
 class TestRenderFrontmatter:
     def test_string_values(self):
         result = _render_frontmatter({"key": "value"})
-        assert '---' in result
+        assert "---" in result
         assert 'key: "value"' in result
 
     def test_number_values(self):
@@ -190,9 +190,7 @@ class TestExportObsidian:
     @pytest.mark.asyncio
     async def test_fact_note_files(self, engine, tmp_path):
         """Exported fact notes should exist with correct content."""
-        fact_id = engine.store_sync(
-            "cortex", "Obsidian integration complete", fact_type="decision"
-        )
+        fact_id = engine.store_sync("cortex", "Obsidian integration complete", fact_type="decision")
 
         vault = tmp_path / "vault"
         await export_obsidian(engine, vault)

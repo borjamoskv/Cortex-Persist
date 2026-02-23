@@ -4,7 +4,6 @@ CORTEX v4.0 — MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
-
 from fastapi import APIRouter, Depends, Query
 
 from cortex.api_deps import get_engine

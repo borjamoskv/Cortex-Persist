@@ -1,6 +1,7 @@
 """
 Deduplication strategy for compaction.
 """
+
 import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -48,7 +49,7 @@ def find_duplicates(
     similarity_threshold: float = 0.85,
 ) -> list[list[int]]:
     """Find groups of duplicate/near-duplicate facts.
-    
+
     Returns list of groups where each group is list of fact IDs.
     First ID in each group is canonical (oldest).
     """
@@ -99,7 +100,7 @@ def _find_near_duplicates(
         if row_i[0] in local_seen:
             continue
         group = [row_i[0]]
-        for row_j in remaining[i + 1:]:
+        for row_j in remaining[i + 1 :]:
             if row_j[0] in local_seen:
                 continue
             if row_i[2] != row_j[2]:  # same fact_type only
@@ -131,7 +132,7 @@ def _merge_duplicate_group(
     # Collect all contents for merge
     all_contents = []
     from cortex.compaction.utils import merge_error_contents
-    
+
     for fid in group:
         r = conn.execute("SELECT content FROM facts WHERE id = ?", (fid,)).fetchone()
         if r:

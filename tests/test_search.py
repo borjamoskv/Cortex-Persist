@@ -71,7 +71,9 @@ class TestTextSearch:
         conn = await search_engine.get_conn()
         # Insert enough data to test the limit
         for i in range(10):
-            await search_engine.store("alpha", f"Extra Python knowledge fact number {i}", fact_type="knowledge")
+            await search_engine.store(
+                "alpha", f"Extra Python knowledge fact number {i}", fact_type="knowledge"
+            )
         results = await text_search(conn, "Python", limit=3)
         assert len(results) <= 3
 

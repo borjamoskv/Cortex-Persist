@@ -1,4 +1,5 @@
 """SQLite Graph Store Mixin."""
+
 import aiosqlite
 
 

@@ -104,14 +104,12 @@ def purge_empty(dry_run, db) -> None:
 
         # Also catch very short facts (< 15 chars)
         rows = conn.execute(
-            "SELECT id, content FROM facts "
-            "WHERE length(content) < 15 AND valid_until IS NULL",
+            "SELECT id, content FROM facts WHERE length(content) < 15 AND valid_until IS NULL",
         ).fetchall()
         if rows:
             total += len(rows)
             console.print(
-                f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  "
-                f"Short facts (<15 chars): {len(rows)}"
+                f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {len(rows)}"
             )
             if not dry_run:
                 conn.execute(
@@ -142,8 +140,7 @@ def purge_project(project_name, dry_run, db) -> None:
     try:
         conn = engine._get_sync_conn()
         rows = conn.execute(
-            "SELECT id, fact_type, content FROM facts "
-            "WHERE project = ? AND valid_until IS NULL",
+            "SELECT id, fact_type, content FROM facts WHERE project = ? AND valid_until IS NULL",
             (project_name,),
         ).fetchall()
 
@@ -151,9 +148,7 @@ def purge_project(project_name, dry_run, db) -> None:
             console.print(f"[dim]No active facts in project '{project_name}'.[/]")
             return
 
-        table = Table(
-            title=f"Facts in '{project_name}' ({len(rows)})", border_style="cyan"
-        )
+        table = Table(title=f"Facts in '{project_name}' ({len(rows)})", border_style="cyan")
         table.add_column("ID", style="bold", width=5)
         table.add_column("Type", width=10)
         table.add_column("Content", width=60)
@@ -165,9 +160,7 @@ def purge_project(project_name, dry_run, db) -> None:
         console.print(table)
 
         if dry_run:
-            console.print(
-                f"\n[yellow]DRY RUN:[/] Would deprecate {len(rows)} facts."
-            )
+            console.print(f"\n[yellow]DRY RUN:[/] Would deprecate {len(rows)} facts.")
         else:
             conn.execute(
                 "UPDATE facts SET valid_until = datetime('now'), "
@@ -178,8 +171,7 @@ def purge_project(project_name, dry_run, db) -> None:
             )
             conn.commit()
             console.print(
-                f"\n[green]✓[/] Deprecated {len(rows)} facts "
-                f"in project '{project_name}'."
+                f"\n[green]✓[/] Deprecated {len(rows)} facts in project '{project_name}'."
             )
     finally:
         engine.close_sync()

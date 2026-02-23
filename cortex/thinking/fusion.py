@@ -102,7 +102,8 @@ class ThoughtFusion:
         if failed:
             logger.warning(
                 "Fusión: %d/%d modelos fallaron: %s",
-                len(failed), len(responses),
+                len(failed),
+                len(responses),
                 [(r.provider, r.error) for r in failed],
             )
 
@@ -132,9 +133,7 @@ class ThoughtFusion:
         token_map = {id(r): _tokenize(r.content) for r in valid}
 
         # Calcular acuerdo
-        agreement = self._calculate_agreement_from_tokens(
-            [token_map[id(r)] for r in valid]
-        )
+        agreement = self._calculate_agreement_from_tokens([token_map[id(r)] for r in valid])
 
         # Near-identical → early return con la mejor por latencia
         if agreement > self.NEAR_IDENTICAL_THRESHOLD:
@@ -185,30 +184,39 @@ class ThoughtFusion:
                     timeout=self.JUDGE_TIMEOUT_S,
                 )
             except asyncio.TimeoutError:
-                logger.warning("Judge timeout (attempt %d/%d)", attempt + 1, self.JUDGE_MAX_RETRIES + 1)
+                logger.warning(
+                    "Judge timeout (attempt %d/%d)", attempt + 1, self.JUDGE_MAX_RETRIES + 1
+                )
             except (ConnectionError, OSError, RuntimeError) as e:
-                logger.warning("Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e)
+                logger.warning(
+                    "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
+                )
             if attempt < self.JUDGE_MAX_RETRIES:
-                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2 ** attempt))
+                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt))
         return None
 
     # ── Shared Scoring ───────────────────────────────────────────
 
-    async def _score_response(self, r: ModelResponse, original_prompt: str) -> tuple[ModelResponse, float]:
+    async def _score_response(
+        self, r: ModelResponse, original_prompt: str
+    ) -> tuple[ModelResponse, float]:
         """Puntúa una respuesta individual usando el juez."""
         prompt = f"QUESTION: {original_prompt}\n\nRESPONSE:\n{r.content}"
         raw = await self._judge_safe(
-            prompt=prompt, system=self.SCORING_SYSTEM,
-            temperature=0.0, max_tokens=256,
+            prompt=prompt,
+            system=self.SCORING_SYSTEM,
+            temperature=0.0,
+            max_tokens=256,
         )
         if raw is None:
             return (r, 0.5)
         try:
             clean = re.sub(r"```json?\s*", "", raw.strip()).rstrip("`").strip()
             parsed = json_mod.loads(clean)
-            total = sum(
-                parsed.get(k, 5) for k in ("accuracy", "completeness", "clarity", "depth")
-            ) / 40.0
+            total = (
+                sum(parsed.get(k, 5) for k in ("accuracy", "completeness", "clarity", "depth"))
+                / 40.0
+            )
             return (r, total)
         except (ConnectionError, OSError, RuntimeError) as e:
             logger.warning("Score parse failed for %s: %s", r.label, e)
@@ -261,8 +269,7 @@ class ThoughtFusion:
             r_tokens = token_map[id(r)]
 
             overlaps = [
-                _jaccard(r_tokens, token_map[id(other)])
-                for other in valid if other is not r
+                _jaccard(r_tokens, token_map[id(other)]) for other in valid if other is not r
             ]
             avg_overlap = sum(overlaps) / len(overlaps) if overlaps else 0.0
             length_score = min(len(r.content) / 2000.0, 1.0)
@@ -303,12 +310,13 @@ class ThoughtFusion:
         ]
         judge_prompt = (
             f"ORIGINAL QUESTION:\n{original_prompt}\n\n"
-            f"RESPONSES FROM {len(valid)} MODELS:\n\n"
-            + "\n\n".join(parts)
+            f"RESPONSES FROM {len(valid)} MODELS:\n\n" + "\n\n".join(parts)
         )
         synthesized = await self._judge_safe(
-            prompt=judge_prompt, system=self.SYNTHESIS_SYSTEM,
-            temperature=0.2, max_tokens=4096,
+            prompt=judge_prompt,
+            system=self.SYNTHESIS_SYSTEM,
+            temperature=0.2,
+            max_tokens=4096,
         )
         if synthesized:
             return FusedThought(
@@ -320,9 +328,7 @@ class ThoughtFusion:
                 meta={"judge": self._judge.provider_name + ":" + self._judge.model},
             )
         logger.error("Juez de síntesis falló tras retries — fallback a majority")
-        return self._fuse_majority(
-            valid, all_responses, agreement, FusionStrategy.SYNTHESIS
-        )
+        return self._fuse_majority(valid, all_responses, agreement, FusionStrategy.SYNTHESIS)
 
     # ── BEST_OF_N ─────────────────────────────────────────────────
 
@@ -369,12 +375,13 @@ class ThoughtFusion:
         ]
         judge_prompt = (
             f"ORIGINAL QUESTION:\n{original_prompt}\n\n"
-            f"RESPONSES FROM {len(valid)} MODELS (with quality scores):\n\n"
-            + "\n\n".join(parts)
+            f"RESPONSES FROM {len(valid)} MODELS (with quality scores):\n\n" + "\n\n".join(parts)
         )
         synthesized = await self._judge_safe(
-            prompt=judge_prompt, system=self.WEIGHTED_SYNTHESIS_SYSTEM,
-            temperature=0.2, max_tokens=4096,
+            prompt=judge_prompt,
+            system=self.WEIGHTED_SYNTHESIS_SYSTEM,
+            temperature=0.2,
+            max_tokens=4096,
         )
         if synthesized:
             avg_score = sum(s for _, s in scored) / len(scored)

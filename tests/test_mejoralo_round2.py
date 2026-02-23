@@ -36,6 +36,7 @@ async def test_engine_get_connection(tmp_path):
     engine = CortexEngine(db_path)
     conn = await engine.get_connection()
     import aiosqlite
+
     assert isinstance(conn, aiosqlite.Connection)
     # Check it's the same connection
     assert conn is await engine.get_connection()

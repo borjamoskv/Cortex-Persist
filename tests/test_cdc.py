@@ -10,7 +10,9 @@ async def test_cdc_outbox_flow(tmp_path):
     await engine.init_db()
 
     # 1. Store a fact
-    fact_id = await engine.store(project="test", content="CDC Test Fact")
+    fact_id = await engine.store(
+        project="test", content="CDC Test Fact - padded to satisfy 20 chars min"
+    )
 
     # 2. Check outbox is empty
     conn = await engine.get_conn()
@@ -32,6 +34,7 @@ async def test_cdc_outbox_flow(tmp_path):
     # 5. Process outbox
     # We expect this to return 0 if Neo4j is not running/configured
     from unittest.mock import patch
+
     with patch("cortex.graph.backends.neo4j.Neo4jBackend") as MockBackend:
         # Simulate uninitialized backend
         instance = MockBackend.return_value

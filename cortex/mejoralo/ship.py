@@ -24,7 +24,9 @@ def _seal_build(stack: str, cwd: str) -> ShipSeal:
     """Seal 1: Build Zero-Warning."""
     build_cmd = get_build_cmd(stack)
     if not build_cmd:
-        return ShipSeal(name="Build Zero-Warning", passed=False, detail="No build command for stack")
+        return ShipSeal(
+            name="Build Zero-Warning", passed=False, detail="No build command for stack"
+        )
     result = run_quiet(build_cmd, cwd=cwd)
     return ShipSeal(
         name="Build Zero-Warning",
@@ -106,7 +108,9 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
     return ShipSeal(
         name="A11y 100%",
         passed=len(a11y_findings) == 0,
-        detail=f"Issues: {len(a11y_findings)}" if a11y_findings else "Basic accessibility patterns found",
+        detail=f"Issues: {len(a11y_findings)}"
+        if a11y_findings
+        else "Basic accessibility patterns found",
     )
 
 

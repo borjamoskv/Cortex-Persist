@@ -14,11 +14,11 @@ def dashboard_env(tmp_path):
     os.environ["CORTEX_DB"] = db
     # Force fresh module state by reloading config
     from cortex import config
+
     config.reload()
     yield db
     os.environ.pop("CORTEX_DB", None)
     config.reload()
-
 
 
 @pytest.fixture()
@@ -63,6 +63,7 @@ def test_history_endpoint(client):
     c, api_mod = client
     # Reset AuthManager to pick up test DB
     import cortex.api_state
+
     cortex.api_state.auth_manager = None
 
     # Create an API key for this test
@@ -70,10 +71,9 @@ def test_history_endpoint(client):
     if resp.status_code != 200:
         print(f"DEBUG: admin Key Error: {resp.status_code} - {resp.text}")
         pytest.fail(f"Failed to create key: {resp.text}")
-    
+
     api_key = resp.json()["key"]
     headers = {"Authorization": f"Bearer {api_key}"}
-
 
     resp = c.get("/v1/time/history?days=5", headers=headers)
     assert resp.status_code == 200

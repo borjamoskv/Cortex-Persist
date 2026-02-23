@@ -76,12 +76,14 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
         # We create a transient one or reuse if possible.
         # For CLI usage, a fresh connection is safer to avoid async loop conflict.
         import sqlite3
+
         conn = sqlite3.connect(str(self._db_path), timeout=30)
 
         # Enable vector extension if possible
         try:
             conn.enable_load_extension(True)
             import sqlite_vec
+
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
             self._vec_available = True
@@ -155,8 +157,11 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.engine.models import Fact
         from cortex.exceptions import FactNotFound
+
         conn = await self.get_conn()
-        cursor = await conn.execute(f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,))
+        cursor = await conn.execute(
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
+        )
         row = await cursor.fetchone()
         fact = row_to_fact(row) if row else None
         if not fact or fact.valid_until:
@@ -189,7 +194,6 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
                 continue
             await conn.executescript(stmt)
         await conn.commit()
-
 
         await run_migrations_async(conn)
 
@@ -231,7 +235,6 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
             if actual_ph != ph:
                 th = compute_tx_hash(actual_ph, project, action, dj, ts)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
-
 
         if self._ledger:
             try:

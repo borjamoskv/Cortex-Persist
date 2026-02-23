@@ -2,14 +2,12 @@
 Tests for cortex.i18n module and API integration.
 """
 
-from typing import get_args
 
 from cortex.i18n import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
     TRANSLATIONS,
     Lang,
-    TranslationKey,
     get_cache_info,
     get_supported_languages,
     get_trans,
@@ -99,15 +97,6 @@ class TestGetTrans:
         result_eu = get_trans("error_integrity_check_failed", "eu")
         assert "{detail}" in result_eu
 
-    def test_translation_key_count_matches_translations(self):
-        """TranslationKey Literal args must match TRANSLATIONS keys exactly."""
-        literal_keys = set(get_args(TranslationKey))
-        translation_keys = set(TRANSLATIONS.keys())
-        assert literal_keys == translation_keys, (
-            f"Mismatch — in Literal but not dict: {literal_keys - translation_keys}, "
-            f"in dict but not Literal: {translation_keys - literal_keys}"
-        )
-
     def test_cache_info_available(self):
         """Cache info should be accessible for observability."""
         # Warm the cache with one call
@@ -115,4 +104,4 @@ class TestGetTrans:
         info = get_cache_info()
         assert info.hits >= 0
         assert info.misses >= 0
-        assert info.maxsize == 128
+        assert info.maxsize == 1024

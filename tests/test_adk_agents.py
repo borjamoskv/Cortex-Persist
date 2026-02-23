@@ -119,9 +119,7 @@ class TestADKTools:
         for tool in ALL_TOOLS:
             sig = inspect.signature(tool)
             ret = sig.return_annotation
-            assert ret is dict or ret == "dict", (
-                f"{tool.__name__} should return dict, got {ret}"
-            )
+            assert ret is dict or ret == "dict", f"{tool.__name__} should return dict, got {ret}"
 
     def test_adk_deprecate_signature(self):
         """adk_deprecate should accept expected parameters."""

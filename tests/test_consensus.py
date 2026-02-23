@@ -5,6 +5,7 @@ import pytest
 
 # Integration test for the Consensus System
 
+
 @pytest.fixture(scope="function")
 def client(monkeypatch):
     test_db = "test_consensus_final.db"
@@ -21,6 +22,7 @@ def client(monkeypatch):
     monkeypatch.setenv("CORTEX_DB", test_db)
 
     import cortex.config
+
     monkeypatch.setattr(cortex.config, "DB_PATH", test_db)
 
     # Now import app and state
@@ -83,6 +85,7 @@ def test_consensus_flow(client):
 def test_recall_ordering(client):
     """Test standard recall ordering (score + recency)."""
     from cortex import api_state
+
     engine = api_state.engine
 
     # 1. Store 3 facts
@@ -102,6 +105,7 @@ def test_recall_ordering(client):
 def test_rwc_flow(client):
     """Test Reputation-Weighted Consensus flow."""
     from cortex import api_state
+
     engine = api_state.engine
 
     # 1. Register 2 agents

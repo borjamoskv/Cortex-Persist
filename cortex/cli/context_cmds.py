@@ -62,7 +62,11 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
 
         # Rich output
         confidence_colors = {
-            "C5": "green", "C4": "blue", "C3": "yellow", "C2": "red", "C1": "dim red"
+            "C5": "green",
+            "C4": "blue",
+            "C3": "yellow",
+            "C2": "red",
+            "C1": "dim red",
         }
         color = confidence_colors.get(result.confidence, "white")
 
@@ -137,8 +141,11 @@ async def _signals_async(db: str, as_json: bool):
         table.add_column("Weight", justify="right")
         for s in signals:
             table.add_row(
-                s.source, s.signal_type, s.project or "—",
-                s.content[:50], f"{s.weight:.2f}",
+                s.source,
+                s.signal_type,
+                s.project or "—",
+                s.content[:50],
+                f"{s.weight:.2f}",
             )
         console.print(table)
     finally:

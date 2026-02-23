@@ -6,6 +6,7 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
+from .heal import heal_project
 from .ledger import get_history, record_session
 from .scan import scan
 from .ship import check_ship_gate
@@ -35,6 +36,14 @@ class MejoraloEngine:
         Execute X-Ray 13D scan on a project directory.
         """
         return scan(project, path, deep)
+
+    def heal(
+        self, project: str, path: str | Path, target_score: int, scan_result: ScanResult
+    ) -> bool:
+        """
+        Trigger the autonomous healing to refactor problematic files, test them and commit.
+        """
+        return heal_project(project, path, target_score, scan_result)
 
     # ── Fase 6: Ouroboros — Record Session ────────────────────────────
 

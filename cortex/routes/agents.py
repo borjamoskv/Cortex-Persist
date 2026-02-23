@@ -36,7 +36,9 @@ async def register_agent(
         agent = await engine.get_agent(agent_id)
         if not agent:
             lang = request.headers.get("Accept-Language", "en")
-            raise HTTPException(status_code=500, detail=get_trans("error_agent_registration_failed", lang))
+            raise HTTPException(
+                status_code=500, detail=get_trans("error_agent_registration_failed", lang)
+            )
 
         return AgentResponse(
             agent_id=agent["id"],
@@ -50,7 +52,9 @@ async def register_agent(
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Agent registration failed")
         lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=500, detail=get_trans("error_agent_internal", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_agent_internal", lang)
+        ) from None
 
 
 @router.get("/v1/agents/{agent_id}", response_model=AgentResponse)

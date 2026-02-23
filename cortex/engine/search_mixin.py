@@ -1,4 +1,5 @@
 """Search mixin module."""
+
 import logging
 import sqlite3
 from typing import Any
@@ -27,7 +28,7 @@ class SearchMixin:
                 # 1. Perform Hybrid Search
                 embedder = self._get_embedder()
                 embedding = embedder.embed(query)
-                
+
                 results = await hybrid_search(
                     conn=conn,
                     query=query,
@@ -36,7 +37,7 @@ class SearchMixin:
                     project=project,
                     as_of=as_of,
                 )
-                
+
                 if not results:
                     # Fallback to pure text search if hybrid yields nothing (rare but possible)
                     results = await text_search(conn, query, project, limit=top_k, as_of=as_of)
@@ -46,7 +47,7 @@ class SearchMixin:
                     # Extract entities from query to use as seeds
                     entities = extract_entities(query)
                     seeds = [e["name"] for e in entities]
-                    
+
                     # Also use entities found in the top results content
                     if not seeds and results:
                         top_content = " ".join([r.content for r in results[:2]])
@@ -57,13 +58,10 @@ class SearchMixin:
                         subgraph = await get_context_subgraph(
                             conn, seeds, depth=graph_depth or 1, max_nodes=50
                         )
-                        
+
                         # Attach graph context to the top result for UI/Agent visibility
                         if results and (subgraph.get("nodes") or subgraph.get("edges")):
-                            results[0].context = {
-                                "graph": subgraph,
-                                "seeds": seeds
-                            }
+                            results[0].context = {"graph": subgraph, "seeds": seeds}
 
                 return results
 

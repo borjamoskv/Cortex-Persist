@@ -4,7 +4,6 @@ CORTEX v4.0 — SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
-
 from fastapi import APIRouter, Depends, HTTPException
 
 from cortex.auth import require_permission
