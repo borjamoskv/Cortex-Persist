@@ -136,7 +136,21 @@ def get_existing_contents(
         params.append(fact_type)
 
     rows = conn.execute(query, params).fetchall()
-    return {row[0] for row in rows}
+    result = {row[0] for row in rows}
+
+    # Normalize legacy-prefixed entries for backward-compat dedup.
+    # Old syncs stored "DECISION: X | RAZON: Y"; new syncs store "X".
+    # Both forms must be in the set to prevent re-insertion.
+    normalized: set[str] = set()
+    for c in result:
+        stripped = c
+        if stripped.startswith("DECISION: "):
+            stripped = stripped.replace("DECISION: ", "", 1)
+        if " | RAZON:" in stripped:
+            stripped = stripped.rsplit(" | RAZON:", 1)[0].strip()
+        if stripped != c:
+            normalized.add(stripped)
+    return result | normalized
 
 
 def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:

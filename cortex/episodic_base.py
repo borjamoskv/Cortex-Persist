@@ -8,20 +8,20 @@ Extracted to mitigate LOC bloat and enhance maintainability.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Final, Any
+from typing import Any, Final
 
 # ─── Constants ───────────────────────────────────────────────────────
 
 # Episodic event categories
 EVENT_TYPES: Final[frozenset[str]] = frozenset(
     {
-        "decision",     # Architectural choice, dependency addition, etc.
-        "error",        # Resolved traceback or blocker.
-        "discovery",    # Integration learned, API quirk found.
-        "insight",      # General realization or meta-comment.
-        "milestone",    # Feature completion or ship event.
-        "flow_state",   # Period of high-density productive activity.
-        "blocked",      # Stuck on a bug or missing information.
+        "decision",  # Architectural choice, dependency addition, etc.
+        "error",  # Resolved traceback or blocker.
+        "discovery",  # Integration learned, API quirk found.
+        "insight",  # General realization or meta-comment.
+        "milestone",  # Feature completion or ship event.
+        "flow_state",  # Period of high-density productive activity.
+        "blocked",  # Stuck on a bug or missing information.
     }
 )
 
@@ -43,6 +43,7 @@ EMOTIONS: Final[frozenset[str]] = frozenset(
 @dataclass(slots=True)
 class Episode:
     """A single episodic memory event."""
+
     id: int
     session_id: str
     event_type: str
@@ -71,6 +72,7 @@ class Episode:
 @dataclass(slots=True)
 class Pattern:
     """A recurring theme detected across sessions."""
+
     theme: str
     occurrences: int
     sessions: list[str]

@@ -1,11 +1,11 @@
 """
-CORTEX v5.0 — Episodic Memory Engine.
+CORTEX v5.1 — Episodic Memory Engine.
 
 Persistent native memory: stores timestamped episodic events (decisions,
 errors, discoveries, flow states) across sessions, detects recurring patterns,
-and generates optimized boot payloads for session initialization.
+and provides a temporal context for the sovereign engine.
 
-Eliminates the need for manual context-snapshot.md loading.
+Optimized for algorithmic theme extraction without external LLM dependencies.
 """
 
 from __future__ import annotations
@@ -13,11 +13,16 @@ from __future__ import annotations
 import json
 import logging
 import re
-import sqlite3
 from collections import Counter, defaultdict
-from dataclasses import field
-from typing import TYPE_CHECKING, Any
+from itertools import combinations
+from typing import TYPE_CHECKING, Any, Final
 
+from cortex.episodic_base import (
+    EMOTIONS,
+    EVENT_TYPES,
+    Episode,
+    Pattern,
+)
 from cortex.temporal import now_iso
 
 if TYPE_CHECKING:
@@ -25,16 +30,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.episodic")
 
-from cortex.episodic_base import (
-    EVENT_TYPES,
-    EMOTIONS,
-    Episode,
-    Pattern,
-)
+# ─── Configuration ────────────────────────────────────────────────────
 
-# Stop words for pattern detection
-_STOP_WORDS = frozenset(
-    {
+# Extended stop words for technical context filtering
+_STOP_WORDS: Final[frozenset[str]] = frozenset(
+    [
         "the",
         "a",
         "an",
@@ -51,24 +51,21 @@ _STOP_WORDS = frozenset(
         "do",
         "does",
         "did",
-        "will",
-        "would",
-        "could",
-        "should",
-        "may",
-        "might",
-        "shall",
-        "can",
-        "to",
+        "but",
+        "if",
+        "or",
+        "because",
+        "as",
+        "until",
+        "while",
         "of",
-        "in",
-        "for",
-        "on",
-        "with",
         "at",
         "by",
-        "from",
-        "as",
+        "for",
+        "with",
+        "about",
+        "against",
+        "between",
         "into",
         "through",
         "during",
@@ -76,63 +73,81 @@ _STOP_WORDS = frozenset(
         "after",
         "above",
         "below",
-        "between",
-        "and",
-        "but",
-        "or",
+        "to",
+        "from",
+        "up",
+        "down",
+        "in",
+        "out",
+        "on",
+        "off",
+        "over",
+        "under",
+        "again",
+        "further",
+        "then",
+        "once",
+        "here",
+        "there",
+        "when",
+        "where",
+        "why",
+        "how",
+        "all",
+        "any",
+        "both",
+        "each",
+        "few",
+        "more",
+        "most",
+        "other",
+        "some",
+        "such",
+        "no",
         "nor",
         "not",
-        "no",
+        "only",
+        "own",
+        "same",
         "so",
-        "if",
-        "then",
         "than",
-        "that",
-        "this",
-        "it",
-        "its",
-        "de",
-        "en",
-        "la",
-        "el",
-        "los",
-        "las",
-        "un",
-        "una",
-        "del",
-        "al",
-        "con",
-        "por",
-        "para",
-        "que",
-        "se",
-        "es",
-        "como",
-        "más",
-        "y",
-        "o",
-        "su",
-        "lo",
-    }
+        "too",
+        "very",
+        "can",
+        "will",
+        "just",
+        "should",
+        "now",
+        "actually",
+        "basically",
+        "trying",
+        "fixed",
+        "error",
+        "issue",
+        "problem",
+        "failed",
+        "success",
+        "resolved",
+        "added",
+        "removed",
+    ]
 )
 
-_TOKEN_RE = re.compile(r"[a-záéíóúñ]{3,}", re.IGNORECASE)
-
-
+# Token extraction: Alphanumeric + underscores + hyphens (for code/technical IDs)
+_TOKEN_RE: Final[re.Pattern] = re.compile(r"\b[a-z0-9_\-]{4,}\b", re.IGNORECASE)
 
 
 # ─── Episodic Memory Engine ─────────────────────────────────────────
 
 
 class EpisodicMemory:
-    """Persistent episodic memory for cross-session learning.
-
-    Stores timestamped events, retrieves them by flexible filters,
-    and detects recurring patterns using lightweight token analysis.
+    """
+    Persistent episodic memory for cross-session learning.
+    Analyzes temporal patterns to provide long-term "Sovereign" intuition.
     """
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
-        self.conn = conn
+        self._conn = conn
 
     async def record(
         self,
@@ -142,55 +157,33 @@ class EpisodicMemory:
         project: str | None = None,
         emotion: str = "neutral",
         tags: list[str] | None = None,
-        meta: dict | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
-        """Store an episodic event.
-
-        Args:
-            session_id: Identifier grouping events to a conversation/session.
-            event_type: Classification (decision, error, discovery, etc.).
-            content: What happened — the episodic memory content.
-            project: Associated project name.
-            emotion: Emotional state during the event.
-            tags: Optional tags for categorization.
-            meta: Optional JSON metadata.
-
-        Returns:
-            The ID of the stored episode.
-        """
+        """Store an episodic event with cryptographic intent."""
         if event_type not in EVENT_TYPES:
-            event_type = "insight"  # fallback
-
+            event_type = "insight"
         if emotion not in EMOTIONS:
             emotion = "neutral"
 
+        now = now_iso()
         tags_json = json.dumps(tags or [])
         meta_json = json.dumps(meta or {})
 
-        async with self.conn.execute(
-            """
-            INSERT INTO episodes (session_id, event_type, content, project,
-                                  emotion, tags, meta, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (session_id, event_type, content, project, emotion, tags_json, meta_json, now_iso()),
+        sql = """
+            INSERT INTO episodes (
+                session_id, event_type, content, project, emotion, tags, meta, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        async with self._conn.execute(
+            sql, (session_id, event_type, content, project, emotion, tags_json, meta_json, now)
         ) as cursor:
-            episode_id = cursor.lastrowid
+            rowid = cursor.lastrowid or 0
 
-        # Sync FTS
-        await self.conn.execute(
-            "INSERT INTO episodes_fts(rowid, content, event_type, project) VALUES (?, ?, ?, ?)",
-            (episode_id, content, event_type, project or ""),
+        # Update FTS index (asynchronous)
+        await self._conn.execute(
+            "INSERT INTO episodes_fts(rowid, content) VALUES (?, ?)", (rowid, content)
         )
-        await self.conn.commit()
-
-        logger.info(
-            "Episode recorded: id=%d type=%s project=%s",
-            episode_id,
-            event_type,
-            project,
-        )
-        return episode_id
+        return rowid
 
     async def recall(
         self,
@@ -200,100 +193,48 @@ class EpisodicMemory:
         limit: int = 20,
         search: str | None = None,
     ) -> list[Episode]:
-        """Retrieve episodes with flexible filtering.
-
-        Args:
-            project: Filter by project.
-            event_type: Filter by event type.
-            since: ISO timestamp — only episodes after this time.
-            limit: Maximum results.
-            search: Full-text search query.
-
-        Returns:
-            List of Episode objects, most recent first.
-        """
+        """Retrieve episodes with multi-dimensional filtering."""
         if search:
             return await self._fts_recall(search, project, limit)
 
-        conditions: list[str] = []
-        params: list[str | int] = []
+        sql = "SELECT * FROM episodes WHERE 1=1"
+        params: list[Any] = []
 
         if project:
-            conditions.append("project = ?")
+            sql += " AND project = ?"
             params.append(project)
         if event_type:
-            conditions.append("event_type = ?")
+            sql += " AND event_type = ?"
             params.append(event_type)
         if since:
-            conditions.append("created_at >= ?")
+            sql += " AND created_at >= ?"
             params.append(since)
 
-        where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-        query = f"""
-            SELECT id, session_id, event_type, content, project,
-                   emotion, tags, meta, created_at
-            FROM episodes
-            {where}
-            ORDER BY created_at DESC
-            LIMIT ?
-        """
+        sql += " ORDER BY created_at DESC LIMIT ?"
         params.append(limit)
 
-        async with self.conn.execute(query, params) as cursor:
+        async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
         return [self._row_to_episode(row) for row in rows]
 
-    async def _fts_recall(
-        self,
-        search: str,
-        project: str | None,
-        limit: int,
-    ) -> list[Episode]:
-        """Full-text search recall."""
+    async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
+        """High-performance full-text search across episodes."""
+        sql = """
+            SELECT e.* FROM episodes e
+            JOIN episodes_fts f ON e.id = f.rowid
+            WHERE f.content MATCH ?
+        """
+        params: list[Any] = [search]
+
         if project:
-            query = """
-                SELECT e.id, e.session_id, e.event_type, e.content, e.project,
-                       e.emotion, e.tags, e.meta, e.created_at
-                FROM episodes e
-                JOIN episodes_fts fts ON e.id = fts.rowid
-                WHERE episodes_fts MATCH ? AND e.project = ?
-                ORDER BY rank
-                LIMIT ?
-            """
-            params: list[str | int] = [search, project, limit]
-        else:
-            query = """
-                SELECT e.id, e.session_id, e.event_type, e.content, e.project,
-                       e.emotion, e.tags, e.meta, e.created_at
-                FROM episodes e
-                JOIN episodes_fts fts ON e.id = fts.rowid
-                WHERE episodes_fts MATCH ?
-                ORDER BY rank
-                LIMIT ?
-            """
-            params = [search, limit]
+            sql += " AND e.project = ?"
+            params.append(project)
 
-        try:
-            async with self.conn.execute(query, params) as cursor:
-                rows = await cursor.fetchall()
-            return [self._row_to_episode(row) for row in rows]
-        except sqlite3.OperationalError:
-            logger.debug("FTS query failed, falling back to LIKE", exc_info=True)
-            return await self.recall(project=project, limit=limit)
+        sql += " ORDER BY rank LIMIT ?"
+        params.append(limit)
 
-    async def get_session_timeline(self, session_id: str) -> list[Episode]:
-        """Retrieve all episodes for a session, ordered chronologically."""
-        async with self.conn.execute(
-            """
-            SELECT id, session_id, event_type, content, project,
-                   emotion, tags, meta, created_at
-            FROM episodes
-            WHERE session_id = ?
-            ORDER BY created_at ASC
-            """,
-            (session_id,),
-        ) as cursor:
+        async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
         return [self._row_to_episode(row) for row in rows]
@@ -304,95 +245,62 @@ class EpisodicMemory:
         min_occurrences: int = 3,
         limit: int = 10,
     ) -> list[Pattern]:
-        """Detect recurring themes across sessions.
-
-        Uses lightweight token frequency analysis on episode content.
-        No LLM required — pure algorithmic pattern detection.
-
-        Args:
-            project: Scope patterns to a specific project.
-            min_occurrences: Minimum sessions where a theme must appear.
-            limit: Maximum patterns to return.
-
-        Returns:
-            List of Pattern objects, sorted by occurrence count (desc).
         """
-        conditions: list[str] = []
-        params: list[str | int] = []
-
+        Sovereign Pattern Analysis.
+        Uncovers recurring bottlenecks or successful strategies across sessions.
+        """
+        sql = "SELECT session_id, event_type, content FROM episodes"
+        params: list[Any] = []
         if project:
-            conditions.append("project = ?")
+            sql += " WHERE project = ?"
             params.append(project)
 
-        where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-        query = f"""
-            SELECT session_id, event_type, content
-            FROM episodes
-            {where}
-            ORDER BY created_at DESC
-            LIMIT 500
-        """
-
-        async with self.conn.execute(query, params) as cursor:
+        async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
         if not rows:
             return []
 
+        # Computationally expensive operation — ideally offloaded to thread pool under high load
         return _extract_patterns(rows, min_occurrences, limit)
 
     async def count(self, project: str | None = None) -> int:
-        """Count total episodes, optionally filtered by project."""
+        """Sovereign audit: count total temporal memories."""
+        sql = "SELECT COUNT(*) FROM episodes"
+        params: list[str] = []
         if project:
-            async with self.conn.execute(
-                "SELECT COUNT(*) FROM episodes WHERE project = ?",
-                (project,),
-            ) as cursor:
-                row = await cursor.fetchone()
-        else:
-            async with self.conn.execute("SELECT COUNT(*) FROM episodes") as cursor:
-                row = await cursor.fetchone()
+            sql += " WHERE project = ?"
+            params = [project]
 
-        return row[0] if row else 0
+        async with self._conn.execute(sql, params) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else 0
 
-    @staticmethod
-    def _row_to_episode(row: tuple) -> Episode:
-        """Convert a DB row tuple to an Episode object."""
-        (
-            ep_id,
-            session_id,
-            event_type,
-            content,
-            project,
-            emotion,
-            tags_raw,
-            meta_raw,
-            created_at,
-        ) = row
-
-        try:
-            tags = json.loads(tags_raw) if tags_raw else []
-        except (json.JSONDecodeError, TypeError):
-            tags = []
-        try:
-            meta = json.loads(meta_raw) if meta_raw else {}
-        except (json.JSONDecodeError, TypeError):
-            meta = {}
-
+    def _row_to_episode(self, row: tuple) -> Episode:
+        """Map database raw row to Sovereign Episode Model."""
+        # Adjust indices based on your actual table schema
+        # id, session_id, event_type, content, project, emotion, tags, meta, created_at
         return Episode(
-            id=ep_id,
-            session_id=session_id,
-            event_type=event_type,
-            content=content,
-            project=project,
-            emotion=emotion or "neutral",
-            tags=tags,
-            meta=meta,
-            created_at=created_at,
+            id=row[0],
+            session_id=row[1],
+            event_type=row[2],
+            content=row[3],
+            project=row[4],
+            emotion=row[5],
+            tags=json.loads(row[6]) if row[6] else [],
+            meta=json.loads(row[7]) if row[7] else {},
+            created_at=row[8],
         )
 
+    async def get_session_timeline(self, session_id: str) -> list[Episode]:
+        """Retrieve chronological history of a specific session."""
+        sql = "SELECT * FROM episodes WHERE session_id = ? ORDER BY created_at ASC"
+        async with self._conn.execute(sql, (session_id,)) as cursor:
+            rows = await cursor.fetchall()
+        return [self._row_to_episode(row) for row in rows]
 
-# ─── Pattern Detection (Pure Algorithmic) ────────────────────────────
+
+# ─── Pattern Detection (Advanced Algorithmic) ─────────────────────────
 
 
 def _extract_patterns(
@@ -400,49 +308,56 @@ def _extract_patterns(
     min_occurrences: int,
     limit: int,
 ) -> list[Pattern]:
-    """Extract recurring themes from episode rows using token frequency.
-
-    Groups significant tokens by the sessions they appear in.
-    A theme is "recurring" if the same token cluster appears
-    in >= min_occurrences distinct sessions.
+    """
+    Extract multi-token recurring themes from episode rows.
+    Supports Uni-grams and Bi-grams for technical context capture.
     """
     # token -> set of session_ids
     token_sessions: dict[str, set[str]] = defaultdict(set)
-    # token -> list of event_types
+    # token -> event types
     token_types: dict[str, list[str]] = defaultdict(list)
-    # token -> sample content
+    # token -> samples
     token_samples: dict[str, list[str]] = defaultdict(list)
 
     for session_id, event_type, content in rows:
+        # 1. Uni-grams (Smarter filtering)
         tokens = _extract_tokens(content)
-        for token in tokens:
-            token_sessions[token].add(session_id)
-            token_types[token].append(event_type)
-            if len(token_samples[token]) < 3:
-                snippet = content[:120]
-                if snippet not in token_samples[token]:
-                    token_samples[token].append(snippet)
+
+        # 2. Bi-grams (Combined significant tokens)
+        bigrams = {f"{a} {b}" for a, b in combinations(sorted(tokens), 2)}
+
+        # Merge all candidate themes
+        for candidate in tokens | bigrams:
+            token_sessions[candidate].add(session_id)
+            token_types[candidate].append(event_type)
+            if len(token_samples[candidate]) < 5:
+                snippet = content[:150].strip() + "..."
+                if snippet not in token_samples[candidate]:
+                    token_samples[candidate].append(snippet)
 
     patterns: list[Pattern] = []
-    for token, sessions in token_sessions.items():
+    for theme, sessions in token_sessions.items():
         if len(sessions) >= min_occurrences:
-            type_counts = Counter(token_types[token])
+            type_counts = Counter(token_types[theme])
             top_types = [t for t, _ in type_counts.most_common(3)]
+
             patterns.append(
                 Pattern(
-                    theme=token,
+                    theme=theme,
                     occurrences=len(sessions),
                     sessions=sorted(sessions),
                     event_types=top_types,
-                    sample_content=token_samples[token],
+                    sample_content=token_samples[theme],
                 )
             )
 
-    patterns.sort(key=lambda p: p.occurrences, reverse=True)
+    # Sort by 1. Occurrence frequency 2. Pattern complexity (bi-grams > uni-grams)
+    patterns.sort(key=lambda p: (p.occurrences, " " in p.theme), reverse=True)
     return patterns[:limit]
 
 
 def _extract_tokens(text: str) -> set[str]:
-    """Extract significant tokens from text, ignoring stop words."""
+    """Sovereign tokenization: captures technical IDs, snake_case, and kebab-case."""
     raw = _TOKEN_RE.findall(text.lower())
-    return {t for t in raw if t not in _STOP_WORDS and len(t) >= 4}
+    # Filter by stop words and non-numeric noise
+    return {t for t in raw if t not in _STOP_WORDS and not t.isdigit() and len(t) >= 4}

@@ -14,11 +14,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import time
 from collections import defaultdict
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,18 +24,18 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from cortex.episodic import EpisodicMemory
-from cortex.temporal import now_iso
 from cortex.perception_base import (
     DEBOUNCE_SECONDS,
     INFERENCE_WINDOW_SECONDS,
-    RECORD_COOLDOWN_SECONDS,
     MIN_EVENTS_FOR_INFERENCE,
-    FileEvent,
+    RECORD_COOLDOWN_SECONDS,
     BehavioralSnapshot,
+    FileEvent,
     classify_file,
     infer_project_from_path,
     should_ignore,
 )
+from cortex.temporal import now_iso
 
 if TYPE_CHECKING:
     import aiosqlite

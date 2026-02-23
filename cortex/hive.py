@@ -43,11 +43,9 @@ def get_hive_graph(
     Nodes are facts, links are semantic similarities.
     """
     from cortex.config import DB_PATH
+    from cortex.db import connect
 
-    db_path = DB_PATH
-
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    conn = connect(DB_PATH, row_factory=sqlite3.Row)
 
     try:
         # 1. Fetch recent/important nodes

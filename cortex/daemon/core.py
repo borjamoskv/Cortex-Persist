@@ -134,9 +134,12 @@ class MoskvDaemon:
 
         # Time Tracker (for flushing heartbeats)
         try:
+            from cortex.db import connect
             from cortex.timing import TimingTracker
 
-            self.timing_conn = sqlite3.connect(file_config.get("db_path", str(CORTEX_DB)))
+            self.timing_conn = connect(
+                file_config.get("db_path", str(CORTEX_DB)),
+            )
             self.tracker = TimingTracker(self.timing_conn)
         except (ImportError, sqlite3.Error) as e:
             logger.error("Failed to init TimeTracker: %s", e)
@@ -249,8 +252,6 @@ class MoskvDaemon:
                 try:
                     import subprocess
 
-                    from cortex.daemon.notifier import Notifier
-
                     Notifier.notify(
                         "☢️ MEJORAlo Brutal Mode",
                         f"Project {alert.project} score: {alert.score}. Waking up Legion-1 Swarm (400-subagents).",
@@ -289,8 +290,6 @@ class MoskvDaemon:
                 try:
                     import subprocess
 
-                    from cortex.daemon.notifier import Notifier
-
                     if alert.complexity_score < 30:
                         title = "☢️ PURGA DE ENTROPÍA (Score < 30)"
                         msg = f"{alert.project}: Invocando /mejoralo --brutal automáticamente."
@@ -312,7 +311,7 @@ class MoskvDaemon:
                                 "scan",
                                 alert.project,
                                 ".",
-                                "--deep",
+                                "--brutal",
                                 "--auto-heal",
                             ],
                             cwd=path_str,
@@ -333,8 +332,6 @@ class MoskvDaemon:
                     alert.confidence,
                 )
                 try:
-                    from cortex.daemon.notifier import Notifier
-
                     Notifier.notify(
                         "👁️ CORTEX Perception", f"{alert.project}: {alert.summary}", sound="Pop"
                     )
@@ -348,8 +345,6 @@ class MoskvDaemon:
                     "🧠 Neural-Bandwidth Sync: %s (Confidence: %s)", alert.intent, alert.confidence
                 )
                 try:
-                    from cortex.daemon.notifier import Notifier
-
                     Notifier.notify("🧠 Neural Intent Detected", alert.summary, sound="Glass")
                 except (OSError, ValueError, RuntimeError) as e:
                     logger.exception("Failed to execute neural notification: %s", e)
@@ -367,16 +362,15 @@ class MoskvDaemon:
 
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
+        if not self._shared_engine:
+            return
         try:
-            from cortex.engine import CortexEngine
             from cortex.sync import export_snapshot, export_to_json, sync_memory
 
-            engine = CortexEngine()
-            engine.init_db_sync()
-            sync_result = sync_memory(engine)
+            sync_result = sync_memory(self._shared_engine)
             if sync_result.had_changes:
                 logger.info("Sync automático: %d hechos sincronizados", sync_result.total)
-            wb_result = export_to_json(engine)
+            wb_result = export_to_json(self._shared_engine)
             if wb_result.had_changes:
                 logger.info(
                     "Write-back automático: %d archivos, %d items",
@@ -385,8 +379,7 @@ class MoskvDaemon:
                 )
             import asyncio
 
-            asyncio.run(export_snapshot(engine))
-            engine.close_sync()
+            asyncio.run(export_snapshot(self._shared_engine))
 
         except (sqlite3.Error, OSError, ValueError) as e:
             status.errors.append(f"Memory sync error: {e}")

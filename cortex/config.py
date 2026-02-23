@@ -91,6 +91,16 @@ class CortexConfig:
     CONTEXT_WORKSPACE_DIR: str = ""
     CONTEXT_GIT_ENABLED: bool = True
 
+    @property
+    def PROD(self) -> bool:
+        """Helper to check if we are in cloud/production mode."""
+        return self.DEPLOY_MODE == "cloud"
+
+    @property
+    def IS_PROD(self) -> bool:
+        """Alias for PROD."""
+        return self.PROD
+
     @classmethod
     def from_env(cls) -> CortexConfig:
         """Build configuration from environment variables."""
@@ -153,6 +163,10 @@ def reload() -> None:
     _module = sys.modules[__name__]
     for attr in CortexConfig.__dataclass_fields__:
         setattr(_module, attr, getattr(_cfg, attr))
+
+    # Set properties/helpers
+    _module.PROD = _cfg.PROD
+    _module.IS_PROD = _cfg.IS_PROD
 
 
 # Initialize module-level attributes for backwards compatibility

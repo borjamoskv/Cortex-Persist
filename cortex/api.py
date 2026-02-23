@@ -1,14 +1,17 @@
 """
-CORTEX v5.0 — REST API.
+CORTEX v5.1 — REST API.
 
 FastAPI server exposing the sovereign memory engine.
-Main entry point for initialization and routing.
+Main entry point for initialization, security middleware, and routing.
+Optimized for high-concurrency memory lookups and secure agentic access.
 """
 
 import logging
 import sqlite3
 import time
+from collections import deque
 from contextlib import asynccontextmanager
+from typing import Final
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -74,6 +77,8 @@ from cortex.timing import TimingTracker
 
 logger = logging.getLogger("uvicorn.error")
 
+# ─── Initialization ───────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -81,35 +86,38 @@ async def lifespan(app: FastAPI):
     from cortex.connection_pool import CortexConnectionPool
     from cortex.engine_async import AsyncCortexEngine
 
-    # 1. Legacy Engine first — handles schema creation and migrations
-    db_path = config.DB_PATH  # Read at runtime, not import time
-    logger.info("Starting lifespan with DB_PATH: %s", db_path)
+    db_path = config.DB_PATH
+    logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)
+
+    # 1. Schema & Migrations
     engine = CortexEngine(db_path)
     await engine.init_db()
     auth_manager = AuthManager(db_path)
 
-    # 2. Async pool AFTER schema/migrations exist
+    # 2. Connection Pool & Async Engine
     pool = CortexConnectionPool(db_path)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
 
-    # Sync to cortex.auth so dependencies use the same instance
+    # 3. Global Auth Registration
     import cortex.auth
 
     cortex.auth._auth_manager = auth_manager
 
-    # Timing tracker gets its own connection to avoid SQLite locking issues
-    timing_conn = sqlite3.connect(db_path, timeout=10, check_same_thread=False)
+    # 4. Temporal Tracking
+    from cortex.db import connect as db_connect
+
+    timing_conn = db_connect(db_path)
     tracker = TimingTracker(timing_conn)
 
-    # Store in app state
+    # 5. State Persistence
     app.state.pool = pool
     app.state.async_engine = async_engine
-    app.state.engine = engine  # Kept as 'engine' for legacy routes
+    app.state.engine = engine
     app.state.auth_manager = auth_manager
     app.state.tracker = tracker
 
-    # Backward compatibility for api_state
+    # Global backward compatibility
     api_state.engine = engine
     api_state.auth_manager = auth_manager
     api_state.tracker = tracker
@@ -117,6 +125,7 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        logger.info("Lifespan: Shutting down CORTEX endpoints.")
         await pool.close()
         await engine.close()
         timing_conn.close()
@@ -132,10 +141,12 @@ app = FastAPI(
     "Vector search, temporal facts, cryptographic ledger.",
     version=__version__,
     lifespan=lifespan,
+    docs_url="/docs" if not config.PROD else None,
+    redoc_url="/redoc" if not config.PROD else None,
 )
 
 
-# ─── Middleware ──────────────────────────────────────────────────────
+# ─── Internal Middleware ──────────────────────────────────────────────
 
 
 class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
@@ -165,83 +176,76 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        # Only add HSTS if it's likely a production/HTTPS or behind a proxy
-        # response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Content-Security-Policy"] = "default-src 'self'"
         return response
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """In-memory rate limiter (Sliding Window, bounded).
-
-    Tracks at most ``MAX_TRACKED_IPS`` unique clients.  When the limit
-    is reached, the oldest 20 % of entries are evicted to keep memory
-    usage predictable under DDoS or scanner traffic.
+    """
+    In-memory rate limiter (Sliding Window, bounded).
+    Prioritizes Auth Key IDs over Client IPs for bucket generation.
     """
 
-    MAX_TRACKED_IPS = 10_000
+    MAX_TRACKED_ENTITIES: Final[int] = 10_000
 
     def __init__(self, app, limit: int = 100, window: int = 60):
         super().__init__(app)
         self.limit = limit
         self.window = window
-        self.requests: dict[str, list[float]] = {}
+        self.buckets: dict[str, deque[float]] = {}
 
     async def dispatch(self, request: Request, call_next):
-        # Finding 5: Differentiate by API Key if present
         auth_header = request.headers.get("Authorization", "")
-        key_id = "unknown"
-        if auth_header.startswith("Bearer "):
-            # We use the key as the bucket ID. 
-            # Note: We don't authenticate here (that's the router's job), 
-            # we just track usage.
-            key_id = auth_header[7:]
-        
         client_ip = request.client.host if request.client else "unknown"
-        
-        # Priority: Auth Key ID > Client IP
-        traffic_id = f"key:{key_id[:12]}" if key_id != "unknown" else f"ip:{client_ip}"
-        
+
+        # Priority mapping: Key ID > IP
+        bucket_id = client_ip
+        if auth_header.startswith("Bearer "):
+            bucket_id = f"key:{auth_header[7:19]}"
+
         now = time.time()
 
-        if traffic_id not in self.requests:
-            self.requests[traffic_id] = []
+        if bucket_id not in self.buckets:
+            # Enforce capacity
+            if len(self.buckets) >= self.MAX_TRACKED_ENTITIES:
+                self._evict(now)
+            self.buckets[bucket_id] = deque()
 
-        # Remove timestamps older than window
-        self.requests[traffic_id] = [t for t in self.requests[traffic_id] if now - t < self.window]
+        timestamps = self.buckets[bucket_id]
 
-        if len(self.requests[traffic_id]) >= self.limit:
-            logger.warning("Rate limit exceeded for %s", traffic_id)
+        # Slide window
+        while timestamps and now - timestamps[0] > self.window:
+            timestamps.popleft()
+
+        if len(timestamps) >= self.limit:
+            lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+            logger.warning("Rate limit exceeded for %s", bucket_id)
             return JSONResponse(
                 status_code=429,
-                content={"detail": "Too Many Requests. Please slow down."},
+                content={"detail": get_trans("error_too_many_requests", lang)},
                 headers={"Retry-After": str(self.window)},
             )
 
-        self.requests[traffic_id].append(now)
-
-        # Bounded eviction — deterministic, not probabilistic
-        if len(self.requests) > self.MAX_TRACKED_IPS:
-            self._evict(now)
-
+        timestamps.append(now)
         return await call_next(request)
 
     def _evict(self, now: float) -> None:
-        """Remove stale entries; if still over limit, drop oldest 20 %."""
-        # First pass: remove truly expired IPs
-        expired = [ip for ip, ts in self.requests.items() if not ts or now - ts[-1] > self.window]
-        for ip in expired:
-            del self.requests[ip]
+        """Deterministic eviction of stale or excess buckets."""
+        # 1. Delete truly expired
+        expired = [bid for bid, ts in self.buckets.items() if not ts or now - ts[-1] > self.window]
+        for bid in expired:
+            del self.buckets[bid]
 
-        # Second pass: if still over limit, drop oldest 20 %
-        if len(self.requests) > self.MAX_TRACKED_IPS:
-            by_age = sorted(
-                self.requests.items(),
-                key=lambda kv: kv[1][-1] if kv[1] else 0,
+        # 2. Hard trim if still over capacity (20% reduction)
+        if len(self.buckets) >= self.MAX_TRACKED_ENTITIES:
+            by_recency = sorted(
+                self.buckets.keys(), key=lambda k: self.buckets[k][-1] if self.buckets[k] else 0
             )
-            to_drop = max(1, len(by_age) // 5)
-            for ip, _ in by_age[:to_drop]:
-                del self.requests[ip]
+            for bid in by_recency[: len(by_recency) // 5]:
+                del self.buckets[bid]
 
+
+# ─── Application Configuration ───────────────────────────────────────
 
 app.add_middleware(
     CORSMiddleware,
@@ -266,24 +270,24 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 
 @app.exception_handler(sqlite3.Error)
 async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
-    logger.error("Database error: %s", exc)
-    return JSONResponse(status_code=500, content={"detail": "Internal database error"})
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    logger.error("Sovereign DB Error: %s", exc)
+    return JSONResponse(status_code=500, content={"detail": get_trans("error_internal_db", lang)})
 
 
 @app.exception_handler(Exception)
 async def universal_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    logger.error("Unhandled exception: %s", exc, exc_info=True)
-    return JSONResponse(status_code=500, content={"detail": "An unexpected server error occurred."})
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    logger.error("Unhandled Sovereign Exception: %s", exc, exc_info=True)
+    return JSONResponse(status_code=500, content={"detail": get_trans("error_unexpected", lang)})
 
 
-# ─── Routes ──────────────────────────────────────────────────────────
+# ─── Global Routes ───────────────────────────────────────────────────
 
 
 @app.get("/", tags=["health"])
 async def root_node(request: Request) -> dict:
-    # Use DEFAULT_LANGUAGE if no header is provided
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-
     return {
         "service": "cortex",
         "version": __version__,
@@ -294,11 +298,7 @@ async def root_node(request: Request) -> dict:
 
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
-    """Simple status check for load balancers."""
-
-    # Use DEFAULT_LANGUAGE if no header is provided
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-
     return {
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
@@ -308,13 +308,14 @@ async def health_check(request: Request) -> dict:
 
 @app.get("/metrics", tags=["health"])
 async def get_metrics():
-    """Expose Prometheus metrics."""
     from fastapi.responses import Response
 
     return Response(content=metrics.to_prometheus(), media_type="text/plain")
 
 
-# Include logical routers
+# ─── Router Inclusion ────────────────────────────────────────────────
+
+
 app.include_router(facts_router.router)
 app.include_router(search_router.router)
 app.include_router(ask_router.router)
@@ -333,14 +334,13 @@ app.include_router(context_router.router)
 app.include_router(tips_router.router)
 app.include_router(hive_router)
 
-# Langbase integration (opt-in — only if API key is configured)
+# Extension modules (opt-in)
 if config.LANGBASE_API_KEY:
     from cortex.routes import langbase as langbase_router
 
     app.include_router(langbase_router.router)
     logger.info("Langbase integration enabled")
 
-# Stripe billing (opt-in — only if secret key is configured)
 if config.STRIPE_SECRET_KEY:
     from cortex.routes import stripe as stripe_router
 

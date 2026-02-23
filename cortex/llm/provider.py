@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 import httpx
 
@@ -46,7 +46,7 @@ def _load_presets() -> dict[str, dict[str, Any]]:
             if not os.path.exists(path):
                 logger.error("Sovereign Failure: LLM presets missing at %s", path)
                 return {}
-            
+
             with open(path, encoding="utf-8") as f:
                 _PRESETS_CACHE = json.load(f)
                 logger.debug("LLM: Loaded %d presets from assets", len(_PRESETS_CACHE))
@@ -74,12 +74,12 @@ class LLMProvider:
     def __init__(
         self,
         provider: str = "qwen",
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
     ):
         presets = _load_presets()
-        
+
         # ── Custom endpoint: user provides everything ──────────────
         if provider == "custom":
             self._provider = "custom"
@@ -198,6 +198,6 @@ class LLMProvider:
         return sorted(list(presets.keys()) + ["custom"])
 
     @classmethod
-    def get_preset_info(cls, provider: str) -> Optional[dict[str, Any]]:
+    def get_preset_info(cls, provider: str) -> dict[str, Any] | None:
         """Return preset config for a provider, or None if not found."""
         return _load_presets().get(provider)

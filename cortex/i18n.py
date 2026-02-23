@@ -1,11 +1,9 @@
 """
-CORTEX v5.0 — Internationalization Module (i18n).
+CORTEX v5.1 — Internationalization Module (i18n).
 
 Sovereign-grade multilingual support for the CORTEX ecosystem.
 Optimized for low-latency lookups (LRU) and modular asset management.
-
-Default: English (en)
-Supported: Spanish (es), Basque (eu)
+Provides thread-safe atomic translation loading and fallback hierarchies.
 """
 
 from __future__ import annotations
@@ -13,14 +11,12 @@ from __future__ import annotations
 import json
 import logging
 import os
+import threading
 from enum import Enum
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Final, Optional, Union
+from typing import Any, Final
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping
 
 __all__ = [
     "Lang",
@@ -36,6 +32,7 @@ __all__ = [
 
 class Lang(str, Enum):
     """Supported language codes (ISO 639-1)."""
+
     EN = "en"
     ES = "es"
     EU = "eu"
@@ -45,31 +42,41 @@ class Lang(str, Enum):
 DEFAULT_LANGUAGE: Final[Lang] = Lang.EN
 SUPPORTED_LANGUAGES: Final[frozenset[Lang]] = frozenset(Lang)
 _LANG_LOOKUP: Final[dict[str, Lang]] = {lang.value: lang for lang in Lang}
-_ASSET_PATH: Final[str] = os.path.join(
-    os.path.dirname(__file__), "assets", "translations.json"
-)
+_ASSET_PATH: Final[str] = os.path.join(os.path.dirname(__file__), "assets", "translations.json")
 
-# Shared memory for translations
+# Global holder for loaded translations. Swapped atomically.
 _TRANSLATIONS: dict[str, dict[str, str]] = {}
+_LOAD_LOCK: Final[threading.Lock] = threading.Lock()
 
 
 def _load_translations() -> dict[str, dict[str, str]]:
-    """Lazy-load translations from disk with atomic assignment."""
+    """Lazy-load translations with thread-safe atomic reference swap."""
     global _TRANSLATIONS
-    if not _TRANSLATIONS:
+    if _TRANSLATIONS:
+        return _TRANSLATIONS
+
+    with _LOAD_LOCK:
+        # Double-check pattern
+        if _TRANSLATIONS:
+            return _TRANSLATIONS
+
         try:
-            if not os.path.exists(_ASSET_PATH):
-                logger.error("Sovereign Failure: Translation asset missing at %s", _ASSET_PATH)
+            path = os.path.abspath(_ASSET_PATH)
+            if not os.path.exists(path):
+                logger.error("I18N Sovereign Failure: Asset missing at %s", path)
                 return {}
-            
-            with open(_ASSET_PATH, encoding="utf-8") as f:
+
+            with open(path, encoding="utf-8") as f:
                 data = json.load(f)
+                # We update in-place to preserve references for importers (like unit tests).
+                # This is thread-safe due to _LOAD_LOCK.
                 _TRANSLATIONS.clear()
                 _TRANSLATIONS.update(data)
-                logger.debug("I18N: Loaded %d keys from assets", len(_TRANSLATIONS))
+                logger.debug("I18N: Synchronized %d keys from assets", len(_TRANSLATIONS))
         except (json.JSONDecodeError, OSError) as exc:
-            logger.critical("I18N: Failed to load translations: %s", exc)
+            logger.critical("I18N: Fatal failure loading assets: %s", exc)
             return {}
+
     return _TRANSLATIONS
 
 
@@ -78,76 +85,74 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-# Type definition for lookup keys
 TranslationKey = str
 
 
-def _normalize_lang(lang: Optional[Union[str, Lang]]) -> Lang:
-    """Fast normalization of language codes with strict fallback."""
+def _normalize_lang(lang: str | Lang | None) -> Lang:
+    """Fast normalization of language codes with primary-tag fallback."""
     if isinstance(lang, Lang):
         return lang
     if not lang or not isinstance(lang, str):
         return DEFAULT_LANGUAGE
 
-    # Handle RFC 5646 (e.g. "en-US" -> "en")
-    code = lang.split("-", 1)[0].strip().lower()[:2]
-    return _LANG_LOOKUP.get(code, DEFAULT_LANGUAGE)
+    # Exact match
+    code = lang.lower()
+    if match := _LANG_LOOKUP.get(code):
+        return match
+
+    # Primary tag extraction (e.g. "en-US" -> "en")
+    primary = code.split("-", 1)[0].strip()[:2]
+    return _LANG_LOOKUP.get(primary, DEFAULT_LANGUAGE)
 
 
 @lru_cache(maxsize=2048)
 def _cached_trans(key: TranslationKey, lang_code: Lang) -> str:
-    """Atomic cached lookup for translated strings with sovereign fallbacks."""
+    """Atomic cached lookup with sovereign fallback hierarchy."""
     translations = _load_translations()
     entry = translations.get(key)
-    
+
     if entry is None:
-        logger.warning("I18N: Absolute Missing Key [%s] — No entry found in assets.", key)
+        logger.warning("I18N: Missing key [%s]", key)
         return key
 
-    # Direct lookup with fallback to default language
+    # 1. Primary Language Lookup
     text = entry.get(lang_code.value)
-    if text is None:
-        if lang_code != DEFAULT_LANGUAGE:
-            logger.debug("I18N: Falling back to [%s] for key [%s]", DEFAULT_LANGUAGE.value, key)
-        
-        text = entry.get(DEFAULT_LANGUAGE.value)
-        if text is None:
-            logger.error("I18N: Fatal Missing Key [%s] — Not found even in default language.", key)
-            return key
-    
-    return text
+    if text is not None:
+        return text
+
+    # 2. Sovereign Fallback (to default language)
+    if lang_code != DEFAULT_LANGUAGE:
+        logger.debug("I18N: Key [%s] falling back to default [%s]", key, DEFAULT_LANGUAGE.value)
+        if (text := entry.get(DEFAULT_LANGUAGE.value)) is not None:
+            return text
+
+    logger.error("I18N: Key [%s] found no valid translation in any language.", key)
+    return key
 
 
-def get_trans(key: TranslationKey, lang: Optional[Union[Lang, str]] = Lang.EN, **kwargs: Any) -> str:
+def get_trans(key: TranslationKey, lang: Lang | str | None = Lang.EN, **kwargs: Any) -> str:
     """
-    Retrieve a translated string with optional formatting.
-
-    Args:
-        key: The lookup key in translations.json.
-        lang: Desired language (enum or string). Defaults to English.
-        **kwargs: Variables for template substitution (e.g. {id}).
-
-    Returns:
-        The localized and formatted string.
+    Retrieve localized string formatted with variables.
+    O(1) lookup via LRU. Supports dynamic string interpolation.
     """
     text = _cached_trans(key, _normalize_lang(lang))
-    
+
     if kwargs and text != key:
         try:
             return text.format(**kwargs)
         except (KeyError, ValueError) as exc:
             logger.error("I18N Formatting Error [%s]: %s", key, exc)
-    
+
     return text
 
 
 def get_cache_info() -> Any:
-    """Sovereign observability for translation engine performance."""
+    """Diagnostic observability for translation performance."""
     return _cached_trans.cache_info()
 
 
 def clear_cache() -> None:
-    """Hard-reset the translation caches."""
+    """Hard-reset the translation engine state."""
     _cached_trans.cache_clear()
     global _TRANSLATIONS
     _TRANSLATIONS = {}

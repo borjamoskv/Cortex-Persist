@@ -55,11 +55,13 @@ def seeded_engine(engine: CortexEngine) -> CortexEngine:
         project="test",
         content="The sky is blue - padded to satisfy 20 chars min",
         fact_type="knowledge",
+        _skip_dedup=True,
     )
     engine.store_sync(
         project="test",
         content="The sky is blue - padded to satisfy 20 chars min",
         fact_type="knowledge",
+        _skip_dedup=True,
     )
 
     # 2 near-duplicates
@@ -75,9 +77,24 @@ def seeded_engine(engine: CortexEngine) -> CortexEngine:
     )
 
     # 3 identical errors
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
-    engine.store_sync(project="test", content="Connection timeout to DB", fact_type="error")
+    engine.store_sync(
+        project="test",
+        content="Connection timeout to DB",
+        fact_type="error",
+        _skip_dedup=True,
+    )
+    engine.store_sync(
+        project="test",
+        content="Connection timeout to DB",
+        fact_type="error",
+        _skip_dedup=True,
+    )
+    engine.store_sync(
+        project="test",
+        content="Connection timeout to DB",
+        fact_type="error",
+        _skip_dedup=True,
+    )
 
     # 1 unique fact (should survive compaction)
     engine.store_sync(
@@ -210,11 +227,13 @@ class TestFindDuplicates:
             project="p",
             content="duplicate content - padded to satisfy 20 chars min",
             fact_type="knowledge",
+            _skip_dedup=True,
         )
         engine.store_sync(
             project="p",
             content="duplicate content - padded to satisfy 20 chars min",
             fact_type="knowledge",
+            _skip_dedup=True,
         )
         groups = find_duplicates(engine, "p")
         assert len(groups) == 1

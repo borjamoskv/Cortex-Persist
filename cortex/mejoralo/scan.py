@@ -192,8 +192,10 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
 # ─── Main Entry Point ────────────────────────────────────────────────
 
 
-def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
+def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = False) -> ScanResult:
     """Execute X-Ray 13D scan on a project directory.
+
+    If brutal is True, deep is implied and penalties are more severe.
 
     Dimensions analysed:
       CRITICAL (weight 40): Integrity, Architecture, Security
@@ -206,9 +208,19 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
     stack = detect_stack(p)
     extensions = SCAN_EXTENSIONS.get(stack, SCAN_EXTENSIONS["unknown"])
 
+    effective_deep = deep or brutal
+
     source_files = _collect_source_files(p, extensions)
     analysis = _analyze_files(source_files, p)
     total_loc, large_files, psi_findings, security_findings, complexity_penalties = analysis
+
+    if not effective_deep:
+        psi_findings = []  # Clear psi findings if not deep
+
+    # In brutal mode, findings are amplified
+    if brutal:
+        # We simulate a "paranoid" analysis by doubling some counts or adding fake stress
+        complexity_penalties *= 2
 
     dimensions = _score_dimensions(
         source_files,
@@ -228,4 +240,5 @@ def scan(project: str, path: str | Path, deep: bool = False) -> ScanResult:
         dead_code=final_score < 50,
         total_files=len(source_files),
         total_loc=total_loc,
+        brutal=brutal,
     )

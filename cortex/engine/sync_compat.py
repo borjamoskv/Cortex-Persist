@@ -30,14 +30,9 @@ class SyncCompatMixin:
     def _get_sync_conn(self):
         """Get a raw sqlite3.Connection for sync callers."""
         if not hasattr(self, "_sync_conn") or self._sync_conn is None:
-            self._sync_conn = _sqlite3.connect(
-                str(self._db_path),
-                timeout=30,
-                check_same_thread=False,
-            )
-            self._sync_conn.execute("PRAGMA journal_mode=WAL")
-            self._sync_conn.execute("PRAGMA synchronous=NORMAL")
-            self._sync_conn.execute("PRAGMA foreign_keys=ON")
+            from cortex.db import connect
+
+            self._sync_conn = connect(str(self._db_path))
             try:
                 self._sync_conn.enable_load_extension(True)
                 sqlite_vec.load(self._sync_conn)
@@ -85,6 +80,7 @@ class SyncCompatMixin:
         source=None,
         meta=None,
         valid_from=None,
+        _skip_dedup: bool = False,
     ) -> int:
         """Store a fact synchronously (for sync callers like sync.read)."""
         if not project or not project.strip():
@@ -107,14 +103,15 @@ class SyncCompatMixin:
 
         # Gate 3: Dedup — return existing ID if exact match exists
         conn = self._get_sync_conn()
-        existing = conn.execute(
-            "SELECT id FROM facts WHERE project = ? AND content = ? "
-            "AND valid_until IS NULL LIMIT 1",
-            (project, content),
-        ).fetchone()
-        if existing:
-            logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
-            return existing[0]
+        if not _skip_dedup:
+            existing = conn.execute(
+                "SELECT id FROM facts WHERE project = ? AND content = ? "
+                "AND valid_until IS NULL LIMIT 1",
+                (project, content),
+            ).fetchone()
+            if existing:
+                logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
+                return existing[0]
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])

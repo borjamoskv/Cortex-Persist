@@ -85,7 +85,7 @@ class TestTextSearch:
         # Like search uses default order (updated_at DESC).
         # FTS uses bm25.
         # We just check it has a score.
-        assert isinstance(results[0].score, (int, float))
+        assert isinstance(results[0].score, int | float)
 
     async def test_result_has_tags(self, search_engine):
         conn = await search_engine.get_conn()

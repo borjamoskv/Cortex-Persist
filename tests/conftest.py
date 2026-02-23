@@ -1,6 +1,29 @@
+import subprocess
+
 import pytest
 
 from cortex import api_state, config
+
+
+@pytest.fixture(scope="session", autouse=True)
+def kill_stale_cortex_processes():
+    """Kill stale cortex.cli processes before the test session starts.
+
+    Prevents zombie accumulation from prior conversations/runs that
+    would hold SQLite locks and cause cascade hangs.
+    """
+    subprocess.run(
+        ["pkill", "-f", "cortex.cli store"],
+        capture_output=True,
+        check=False,
+    )
+    subprocess.run(
+        ["pkill", "-f", "cortex.cli export"],
+        capture_output=True,
+        check=False,
+    )
+    yield
+
 
 
 @pytest.fixture(autouse=True)

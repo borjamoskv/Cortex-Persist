@@ -31,6 +31,11 @@ DAEMON_SCRIPT = (
     / "autorouter_daemon.py"
 )
 
+# Constants for file paths
+CORTEX_DIR = Path.home() / ".cortex"
+LOG_FILENAME = "router_daemon.log"
+LOG_PATH = CORTEX_DIR / LOG_FILENAME
+
 
 def _run_daemon(args: list[str]) -> int:
     """Ejecuta el daemon script con los argumentos dados."""
@@ -60,14 +65,14 @@ def start(background):
     """Arrancar el daemon de ruteo cognitivo."""
     if background:
         console.print("[bold cyan]🚀 Arrancando AUTOROUTER-1 en background...[/]")
-        log_file = Path.home() / ".cortex" / "router_daemon.log"
+        CORTEX_DIR.mkdir(parents=True, exist_ok=True)
         subprocess.Popen(
             ["python3", str(DAEMON_SCRIPT)],
-            stdout=open(log_file, "a"),
+            stdout=open(LOG_PATH, "a"),
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
-        console.print(f"[green]✓[/] Daemon arrancado. Log: {log_file}")
+        console.print(f"[green]✓[/] Daemon arrancado. Log: {LOG_PATH}")
     else:
         _run_daemon([])
 
@@ -120,13 +125,14 @@ PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / PLIST_NAME
 @autorouter_cmds.command(name="enable-boot")
 def enable_boot():
     """Instala AUTOROUTER-1 en launchd para inicio automático en macOS."""
-    if not sys.platform == "darwin":
+    if sys.platform != "darwin":
         console.print("[bold red]❌ Error:[/] launchd solo está disponible en macOS.")
         sys.exit(1)
 
     python_path = sys.executable
     script_path = str(DAEMON_SCRIPT)
-    log_path = str(Path.home() / ".cortex" / "router_daemon.log")
+    log_path = str(LOG_PATH)
+    user_id = subprocess.check_output(["id", "-u"], text=True).strip()
 
     plist_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -151,31 +157,47 @@ def enable_boot():
 </plist>"""
 
     PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(PLIST_PATH, "w") as f:
-        f.write(plist_content)
+    PLIST_PATH.write_text(plist_content)
 
     console.print(f"[cyan]ℹ️ Creado plist en {PLIST_PATH}[/]")
 
-    # Cargar en launchd
+    # Cargar en launchd usando bootstrap (moderno)
     try:
-        # Descargar primero por si ya existía
-        subprocess.run(["launchctl", "unload", str(PLIST_PATH)], capture_output=True)
-        # Cargar
-        res = subprocess.run(["launchctl", "load", str(PLIST_PATH)], capture_output=True, text=True)
+        # Intentar bootout previo (limpieza)
+        subprocess.run(
+            ["launchctl", "bootout", f"gui/{user_id}", str(PLIST_PATH)], capture_output=True
+        )
+        # Habilitar y bootstrap
+        subprocess.run(
+            ["launchctl", "enable", f"gui/{user_id}/com.moskv.autorouter"], capture_output=True
+        )
+        res = subprocess.run(
+            ["launchctl", "bootstrap", f"gui/{user_id}", str(PLIST_PATH)],
+            capture_output=True,
+            text=True,
+        )
+
         if res.returncode == 0:
-            console.print("[bold green]✅ AUTOROUTER-1 instalado y arrancado vía launchd.[/]")
-            console.print("[dim]Se iniciará automáticamente al hacer login.[/]")
+            console.print(
+                "[bold green]✅ AUTOROUTER-1 instalado y arrancado vía launchd (bootstrap).[/]"
+            )
         else:
-            console.print(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
-    except (OSError, ValueError, KeyError) as e:
+            # Fallback a load si bootstrap falla (sistemas antiguos)
+            res = subprocess.run(
+                ["launchctl", "load", "-w", str(PLIST_PATH)], capture_output=True, text=True
+            )
+            if res.returncode == 0:
+                console.print("[bold green]✅ AUTOROUTER-1 instalado vía legacy load.[/]")
+            else:
+                console.print(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
+    except Exception as e:
         console.print(f"[bold red]❌ Excepción:[/] {e}")
 
 
 @autorouter_cmds.command(name="disable-boot")
 def disable_boot():
     """Desinstala AUTOROUTER-1 de launchd."""
-    if not sys.platform == "darwin":
+    if sys.platform != "darwin":
         console.print("[bold red]❌ Error:[/] launchd solo está disponible en macOS.")
         sys.exit(1)
 
@@ -183,29 +205,36 @@ def disable_boot():
         console.print("[yellow]⚠️ No hay configuración launchd instalada.[/]")
         return
 
+    user_id = subprocess.check_output(["id", "-u"], text=True).strip()
     try:
+        # Deshabilitar y bootout
+        subprocess.run(
+            ["launchctl", "disable", f"gui/{user_id}/com.moskv.autorouter"], capture_output=True
+        )
+        subprocess.run(
+            ["launchctl", "bootout", f"gui/{user_id}", str(PLIST_PATH)], capture_output=True
+        )
+        # Fallback unload
         subprocess.run(["launchctl", "unload", str(PLIST_PATH)], capture_output=True)
-        PLIST_PATH.unlink()
-        console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
 
-        # Parar también una posible instancia
+        PLIST_PATH.unlink(missing_ok=True)
+        console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
         _run_daemon(["--stop"])
-    except (OSError, ValueError, KeyError) as e:
+    except Exception as e:
         console.print(f"[bold red]❌ Error:[/] {e}")
 
 
 @autorouter_cmds.command()
 def logs():
     """Sigue (tail) los logs del daemon en tiempo real."""
-    log_file = Path.home() / ".cortex" / "router_daemon.log"
-    if not log_file.exists():
-        console.print(f"[yellow]⚠️ No se encontró log en {log_file}[/]")
+    if not LOG_PATH.exists():
+        console.print(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
         sys.exit(1)
 
     from cortex.platform import tail_file_command
 
-    console.print(f"[dim]Mostrando logs de: {log_file} (Ctrl+C para salir)[/]")
+    console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:
-        subprocess.run(tail_file_command(str(log_file)))
+        subprocess.run(tail_file_command(str(LOG_PATH)))
     except KeyboardInterrupt:
         pass

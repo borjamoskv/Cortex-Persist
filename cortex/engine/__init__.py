@@ -71,13 +71,9 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
 
     def _get_sync_conn(self) -> sqlite3.Connection:
         """Protocol requirement for SyncCompatMixin (Sync)."""
-        # This engine legacy wrapper actually uses asyncio for everything,
-        # but SyncCompatMixin needs a raw sqlite3 connection for sync fallback.
-        # We create a transient one or reuse if possible.
-        # For CLI usage, a fresh connection is safer to avoid async loop conflict.
-        import sqlite3
+        from cortex.db import connect
 
-        conn = sqlite3.connect(str(self._db_path), timeout=30)
+        conn = connect(str(self._db_path))
 
         # Enable vector extension if possible
         try:
@@ -111,9 +107,9 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
                 logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
 
-            await self._conn.execute("PRAGMA journal_mode=WAL")
-            await self._conn.execute("PRAGMA synchronous=NORMAL")
-            await self._conn.execute("PRAGMA foreign_keys=ON")
+            from cortex.db import apply_pragmas_async
+
+            await apply_pragmas_async(self._conn)
             return self._conn
 
     def _get_conn(self) -> aiosqlite.Connection:

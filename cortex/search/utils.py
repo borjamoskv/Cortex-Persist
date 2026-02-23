@@ -35,15 +35,15 @@ def _has_fts5_sync(conn: sqlite3.Connection) -> bool:
 
 def _sanitize_fts_query(query: str) -> str:
     """Sanitize user input for FTS5 MATCH syntax with token encapsulation.
-    
+
     Prevents injection of FTS5 operators and ensures tokens are treated as literals.
     """
     if not query:
         return '""'
-    
+
     # Escape quotes and remove potentially problematic characters
     cleaned_query = query.replace('"', '""').replace("'", "")
-    
+
     tokens = cleaned_query.split()
     safe_tokens = []
     for token in tokens:
@@ -51,7 +51,7 @@ def _sanitize_fts_query(query: str) -> str:
         # FTS5 allows "token" for literals. keywords (AND/OR) inside quotes are literals.
         if cleaned := token.strip():
             safe_tokens.append(f'"{cleaned}"')
-            
+
     return " ".join(safe_tokens) if safe_tokens else '""'
 
 
