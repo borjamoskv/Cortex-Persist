@@ -194,14 +194,10 @@ class NeuralIntentEngine:
 
             loaded = []
             for r in data:
+                app_re = re.compile(r["app_re"], re.IGNORECASE)
+                clip_re = re.compile(r["clip_re"], re.IGNORECASE)
                 loaded.append(
-                    (
-                        re.compile(r["app_re"], re.IGNORECASE),
-                        re.compile(r["clip_re"], re.IGNORECASE),
-                        r["intent"],
-                        r["confidence"],
-                        r["trigger_desc"],
-                    )
+                    (app_re, clip_re, r["intent"], r["confidence"], r["trigger_desc"])
                 )
             self._rules = loaded
         except (ValueError, OSError, RuntimeError) as e:
