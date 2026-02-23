@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — SQLite Schema Definitions.
+CORTEX v5.0 — SQLite Schema Definitions.
 
 All tables, indexes, and virtual tables for the sovereign memory engine.
 """

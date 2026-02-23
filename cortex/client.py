@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Python SDK Client.
+CORTEX v5.0 — Python SDK Client.
 
 Simple, ergonomic client for the CORTEX REST API.
 

@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Turso (libSQL) Cloud Backend.
+CORTEX v5.0 — Turso (libSQL) Cloud Backend.
 
 Drop-in replacement for local SQLite. Uses libsql-experimental
 to connect to Turso cloud databases. Same SQL syntax, global edge.

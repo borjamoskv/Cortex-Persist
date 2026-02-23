@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.3 — Fusion Data Models & Utilities.
+"""CORTEX v5.0 — Fusion Data Models & Utilities.
 
 Dataclasses, enums, y utilidades de tokenización compartidas
 por el motor de fusión y otros módulos del paquete thinking.

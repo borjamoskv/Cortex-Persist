@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Merkle Tree Implementation.
+CORTEX v5.0 — Merkle Tree Implementation.
 Standard Merkle Tree for cryptographic verification of transactions.
 """
 

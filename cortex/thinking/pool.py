@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.3 — Provider Pool & History Tracking.
+"""CORTEX v5.0 — Provider Pool & History Tracking.
 
 Infraestructura reutilizable para el orquestador de pensamiento:
 pool de providers LLM y registro de historial.

@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 - Admin Router.
+CORTEX v5.0 - Admin Router.
 """
 
 import logging
@@ -25,6 +25,7 @@ async def export_project(
     request: Request,
     path: str | None = Query(None),
     fmt: str = Query("json", alias="format"),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict:
     """Export a project to a JSON file (with path validation)."""
     lang = request.headers.get("Accept-Language", "en")
@@ -42,8 +43,8 @@ async def export_project(
             target_path = Path(path).resolve()
             if not str(target_path).startswith(str(base_dir)):
                 raise HTTPException(status_code=400, detail=get_trans("error_path_workspace", lang))
-        except (ValueError, RuntimeError) as e:
-            raise HTTPException(status_code=400, detail=f"Invalid path: {e}") from None
+        except (ValueError, RuntimeError):
+            raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang)) from None
 
     try:
         # export_to_json is sync, uses its own connection
@@ -92,6 +93,13 @@ async def create_api_key(
 ) -> dict:
     """Create a new API key. First key requires no auth (bootstrap)."""
     lang = request.headers.get("Accept-Language", "en")
+
+    # Finding 9: Validate tenant_id
+    if not tenant_id.isalnum() and "_" not in tenant_id and "-" not in tenant_id:
+        raise HTTPException(
+            status_code=400, detail=get_trans("error_invalid_input", lang)
+        )
+
     manager = api_state.auth_manager or get_auth_manager()
     keys = manager.list_keys()
     if keys:
@@ -148,6 +156,7 @@ async def list_api_keys(auth: AuthResult = Depends(require_permission("admin")))
 async def handoff_generate(
     request: Request,
     engine: CortexEngine = Depends(get_engine),
+    auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """Generate a session handoff with hot context."""
     from cortex.handoff import generate_handoff, save_handoff

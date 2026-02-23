@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Real-Time Perception Engine.
+CORTEX v5.0 — Real-Time Perception Engine.
 
 Three-layer behavioral perception:
   1. FileActivityObserver — watches workspace via watchdog FSEvents
@@ -27,126 +27,22 @@ from watchdog.observers import Observer
 
 from cortex.episodic import EpisodicMemory
 from cortex.temporal import now_iso
+from cortex.perception_base import (
+    DEBOUNCE_SECONDS,
+    INFERENCE_WINDOW_SECONDS,
+    RECORD_COOLDOWN_SECONDS,
+    MIN_EVENTS_FOR_INFERENCE,
+    FileEvent,
+    BehavioralSnapshot,
+    classify_file,
+    infer_project_from_path,
+    should_ignore,
+)
 
 if TYPE_CHECKING:
     import aiosqlite
 
 logger = logging.getLogger("cortex.perception")
-
-
-# ─── Constants ───────────────────────────────────────────────────────
-
-DEBOUNCE_SECONDS = 2.0
-INFERENCE_WINDOW_SECONDS = 300  # 5 minutes
-RECORD_COOLDOWN_SECONDS = 300  # 1 episode per 5min per project
-MIN_EVENTS_FOR_INFERENCE = 3  # need at least 3 events to infer
-
-# File classification patterns
-_FILE_ROLES: list[tuple[str, re.Pattern]] = [
-    ("test", re.compile(r"(test_|_test\.|spec\.|\.test\.)", re.IGNORECASE)),
-    (
-        "config",
-        re.compile(
-            r"(\.env|config\.|settings\.|\.toml|\.ini|\.ya?ml|Makefile|Dockerfile|(?:\.json$))",
-            re.IGNORECASE,
-        ),
-    ),
-    ("docs", re.compile(r"(\.md$|\.rst$|\.txt$|README|CHANGELOG|docs/)", re.IGNORECASE)),
-    ("asset", re.compile(r"\.(png|jpg|svg|ico|woff|ttf|mp3|mp4|webp)$", re.IGNORECASE)),
-    ("source", re.compile(r"\.(py|ts|tsx|js|jsx|swift|rs|go|css|html)$", re.IGNORECASE)),
-]
-
-# Git/hidden paths to always ignore
-_IGNORE_PATTERNS = re.compile(
-    r"(\.git/|__pycache__|\.pyc$|node_modules/|\.DS_Store|\.venv/|\.pytest_cache)"
-)
-
-
-# ─── Data Models ─────────────────────────────────────────────────────
-
-
-@dataclass
-class FileEvent:
-    """A single file system event after debouncing."""
-
-    path: str
-    event_type: str  # created, modified, deleted, moved
-    role: str  # test, config, docs, asset, source, unknown
-    project: str | None
-    timestamp: float
-
-    @property
-    def basename(self) -> str:
-        return Path(self.path).name
-
-
-@dataclass
-class BehavioralSnapshot:
-    """Inferred user behavior from a window of file events."""
-
-    intent: str  # debugging, deep_work, refactoring, setup, experimenting, documenting, unknown
-    emotion: str  # frustrated, flow, curious, cautious, confident, neutral
-    confidence: str  # C1-C5
-    project: str | None
-    event_count: int
-    window_seconds: float
-    top_files: list[str]
-    summary: str
-    timestamp: str
-
-    def to_dict(self) -> dict:
-        return {
-            "intent": self.intent,
-            "emotion": self.emotion,
-            "confidence": self.confidence,
-            "project": self.project,
-            "event_count": self.event_count,
-            "window_seconds": round(self.window_seconds, 1),
-            "top_files": self.top_files[:5],
-            "summary": self.summary,
-            "timestamp": self.timestamp,
-        }
-
-
-# ─── Layer 1: File Activity Observer ─────────────────────────────────
-
-
-def classify_file(path: str) -> str:
-    """Classify a file path into a role category."""
-    for role, pattern in _FILE_ROLES:
-        if pattern.search(path):
-            return role
-    return "unknown"
-
-
-def infer_project_from_path(path: str, workspace_root: str | None = None) -> str | None:
-    """Infer project name from file path.
-
-    Tries to extract the project directory name from the path,
-    using workspace_root as reference if provided.
-    """
-    p = Path(path)
-
-    if workspace_root:
-        root = Path(workspace_root)
-        try:
-            rel = p.relative_to(root)
-            parts = rel.parts
-            if parts:
-                return parts[0] if len(parts) > 1 else root.name
-        except ValueError:
-            pass
-
-    # Fallback: use parent directory name
-    if p.parent.name and p.parent.name not in (".", "/"):
-        return p.parent.name
-
-    return None
-
-
-def should_ignore(path: str) -> bool:
-    """Check if a path should be ignored."""
-    return bool(_IGNORE_PATTERNS.search(path))
 
 
 class _DebouncedHandler(FileSystemEventHandler):

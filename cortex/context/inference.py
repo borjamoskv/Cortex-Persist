@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Context Inference Engine.
+CORTEX v5.0 — Context Inference Engine.
 
 Multi-signal triangulation to determine the user's current working context.
 Aggregates signals by project, applies weighted scoring, and produces a

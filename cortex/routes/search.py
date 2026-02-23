@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 - Search Router.
+CORTEX v5.0 - Search Router.
 """
 
 from fastapi import APIRouter, Depends, Query

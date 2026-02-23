@@ -1,5 +1,17 @@
-import pytest
+import sys
+from unittest.mock import MagicMock
 
+# Mock PyObjC modules before importing the engine
+mock_appkit = MagicMock()
+mock_appkit.NSWorkspace = MagicMock()
+mock_appkit.NSPasteboard = MagicMock()
+mock_appkit.NSPasteboardTypeString = "public.utf8-plain-text"
+
+sys.modules["AppKit"] = mock_appkit
+sys.modules["Foundation"] = MagicMock()
+sys.modules["objc"] = MagicMock()
+
+import pytest
 from cortex.neural import NeuralIntentEngine
 
 

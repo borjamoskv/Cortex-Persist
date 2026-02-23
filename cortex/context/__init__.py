@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Context Engine.
+CORTEX v5.0 — Context Engine.
 
 Ambient signal collection and multi-signal inference for contextual intelligence.
 """

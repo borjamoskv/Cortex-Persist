@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Raft Consensus Implementation.
+CORTEX v5.0 — Raft Consensus Implementation.
 
 Handles leader election and log replication state.
 """

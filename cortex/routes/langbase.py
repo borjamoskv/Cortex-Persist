@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v4.2 — Langbase Router.
+"""CORTEX v5.0 — Langbase Router.
 
 REST endpoints for Langbase integration:
 - /v1/langbase/pipe/run   — Run Pipe with CORTEX context

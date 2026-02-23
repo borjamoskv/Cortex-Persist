@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Embedded Dashboard.
+CORTEX v5.0 — Embedded Dashboard.
 
 Serves a premium, "Industrial Noir" dashboard UI at /dashboard.
 Loads HTML from templates/dashboard.html — zero frontend build step.

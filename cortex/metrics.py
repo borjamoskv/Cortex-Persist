@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Prometheus Metrics.
+CORTEX v5.0 — Prometheus Metrics.
 
 Lightweight metrics middleware for the CORTEX API.
 No prometheus_client dependency — uses a simple in-memory registry

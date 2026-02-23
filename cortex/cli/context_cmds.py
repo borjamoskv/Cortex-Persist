@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Context Engine CLI Commands.
+CORTEX v5.0 — Context Engine CLI Commands.
 
 CLI interface for ambient context inference and signal inspection.
 """

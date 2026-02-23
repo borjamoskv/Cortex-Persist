@@ -1,5 +1,5 @@
 """
-CORTEX v4.3 — TIPS System.
+CORTEX v5.0 — TIPS System.
 
 Contextual tips engine that surfaces useful knowledge while the agent
 thinks and executes. Combines a static knowledge bank with dynamic
@@ -17,18 +17,24 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
+import os
 import random
 import sqlite3
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.tips")
+
+_ASSET_PATH: Final[str] = os.path.join(
+    os.path.dirname(__file__), "assets", "tips.json"
+)
 
 
 # ─── Models ──────────────────────────────────────────────────────────
@@ -70,176 +76,48 @@ class Tip:
 
 # ─── Static Tips Bank ────────────────────────────────────────────────
 
-_STATIC_TIPS: list[dict] = [
-    # CORTEX
-    {
-        "content": {
-            "en": "Use `cortex search` with natural language — it understands semantic meaning, not just keywords.",
-            "es": "Usa `cortex search` con lenguaje natural; entiende el significado semántico, no solo palabras clave.",
-        },
-        "category": "cortex",
-    },
-    {
-        "content": {
-            "en": "CORTEX stores facts with temporal validity. Use `valid_from` and `valid_until` to time-scope knowledge.",
-            "es": "CORTEX guarda hechos con validez temporal. Usa `valid_from` y `valid_until` para acotar el conocimiento en el tiempo.",
-        },
-        "category": "cortex",
-    },
-    {
-        "content": {
-            "en": "`cortex recall <project>` loads full project context instantly — perfect for resuming work.",
-            "es": "`cortex recall <project>` carga el contexto completo del proyecto al instante: ideal para retomar el trabajo.",
-        },
-        "category": "cortex",
-    },
-    {
-        "content": {
-            "en": "The consensus system lets multiple agents vote on facts. Higher consensus = more trustworthy.",
-            "es": "El sistema de consenso permite que varios agentes voten hechos. A mayor consenso, mayor confiabilidad.",
-        },
-        "category": "cortex",
-    },
-    {
-        "content": {
-            "en": "CORTEX auto-generates embeddings for every fact. Semantic search works out of the box.",
-            "es": "CORTEX genera embeddings para cada hecho automáticamente. La búsqueda semántica funciona de serie.",
-        },
-        "category": "cortex",
-    },
-    {
-        "content": {
-            "en": "The episodic memory system records entire conversation sessions — like a persistent brain.",
-            "es": "El sistema de memoria episódica registra sesiones enteras de conversación, como un cerebro persistente.",
-        },
-        "category": "cortex",
-    },
-    # WORKFLOW
-    {
-        "content": {
-            "en": "Store decisions immediately after making them. Memory is cheaper than reconstruction.",
-            "es": "Guarda las decisiones inmediatamente después de tomarlas. La memoria es más barata que la reconstrucción.",
-        },
-        "category": "workflow",
-    },
-    {
-        "content": {
-            "en": "Tag facts with confidence levels: C5 (confirmed) → C1 (hypothesis). Filter by certainty later.",
-            "es": "Etiqueta hechos con niveles de confianza: C5 (confirmado) → C1 (hipótesis). Filtra por certeza después.",
-        },
-        "category": "workflow",
-    },
-    {
-        "content": {
-            "en": "Ghosts are unfinished work items. Use `cortex ghost list` to track what needs attention.",
-            "es": "Los 'ghosts' son tareas inacabadas. Usa `cortex ghost list` para saber qué necesita atención.",
-        },
-        "category": "workflow",
-    },
-    {
-        "content": {
-            "en": "The MEJORAlo score should be > 70 before shipping. Run `/mejoralo` on any file to check.",
-            "es": "La puntuación MEJORAlo debería ser > 70 antes de publicar. Ejecuta `/mejoralo` en cualquier archivo.",
-        },
-        "category": "workflow",
-    },
-    # PERFORMANCE
-    {
-        "content": {
-            "en": "SQLite WAL mode is enabled by default. This gives you concurrent reads during writes.",
-            "es": "El modo WAL de SQLite está activo por defecto. Permite lecturas concurrentes durante las escrituras.",
-        },
-        "category": "performance",
-    },
-    {
-        "content": {
-            "en": "The compactor merges redundant facts to keep the database lean. Run `cortex compact` periodically.",
-            "es": "El compactador fusiona hechos redundantes para mantener la BD ligera. Ejecuta `cortex compact` a menudo.",
-        },
-        "category": "performance",
-    },
-    # SECURITY
-    {
-        "content": {
-            "en": "Never hardcode API keys. CORTEX loads all secrets from environment variables.",
-            "es": "Nunca pongas claves API a fuego. CORTEX carga todos los secretos desde variables de entorno.",
-        },
-        "category": "security",
-    },
-    {
-        "content": {
-            "en": "The crypto vault encrypts sensitive facts at rest using AES-GCM.",
-            "es": "La bóveda criptográfica encripta hechos sensibles en reposo usando AES-GCM.",
-        },
-        "category": "security",
-    },
-    # PYTHON
-    {
-        "content": {
-            "en": "Use `ruff` for linting — it's 10-100x faster than flake8 and covers more rules.",
-            "es": "Usa `ruff` para el linter: es 10-100 veces más rápido que flake8 y cubre más reglas.",
-        },
-        "category": "python",
-    },
-    # DESIGN
-    {
-        "content": {
-            "en": "Industrial Noir: #0A0A0A backgrounds, #CCFF00 accents, glassmorphism panels. The MOSKV aesthetic.",
-            "es": "Industrial Noir: fondos #0A0A0A, acentos #CCFF00, paneles glassmorphism. La estética MOSKV.",
-        },
-        "category": "design",
-    },
-    # MEMORY
-    {
-        "content": {
-            "en": "CORTEX persists 3 types at session close: decisions, errors, and ghosts. Never lose context.",
-            "es": "CORTEX guarda 3 tipos al cerrar: decisiones, errores y 'ghosts'. No pierdas el contexto.",
-        },
-        "category": "memory",
-    },
-    # META
-    {
-        "content": {
-            "en": "The 130/100 standard: meeting requirements is 100. Anticipating needs you didn't know you had is 130.",
-            "es": "El estándar 130/100: cumplir requisitos es 100. Anticipar necesidades que no sabías que tenías es 130.",
-        },
-        "category": "meta",
-    },
-    {
-        "content": {
-            "en": "Every element must answer 'Why?'. If it has no purpose, delete it.",
-            "es": "Cada elemento debe responder a '¿Por qué?'. Si no tiene propósito, bórralo.",
-        },
-        "category": "meta",
-    },
-]
+_STATIC_TIPS_CACHE: list[Tip] | None = None
 
 
-def _build_static_tips() -> list[Tip]:
-    """Convert raw tip dicts into Tip objects with stable IDs."""
+def _load_static_tips() -> list[Tip]:
+    """Lazy-load static tips from disk and convert to Tip objects."""
+    global _STATIC_TIPS_CACHE
+    if _STATIC_TIPS_CACHE is not None:
+        return _STATIC_TIPS_CACHE
+
     tips: list[Tip] = []
-    for raw in _STATIC_TIPS:
-        content_map = raw["content"]
-        category = TipCategory(raw["category"])
+    try:
+        if not os.path.exists(_ASSET_PATH):
+            logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
+            return []
 
-        # Create a Tip object for each available language
-        for lang, text in content_map.items():
-            # Use English content for stable ID generation across languages if possible
-            # but since we want unique IDs per (tip, lang) pair...
-            tip_id = hashlib.md5(f"{raw['category']}-{text}".encode()).hexdigest()[:8]  # noqa: S324
-            tips.append(
-                Tip(
-                    id=tip_id,
-                    content=text,
-                    category=category,
-                    lang=lang,
-                    source="static",
+        with open(_ASSET_PATH, encoding="utf-8") as f:
+            raw_data = json.load(f)
+
+        for raw in raw_data:
+            content_map = raw["content"]
+            category = TipCategory(raw["category"])
+
+            for lang, text in content_map.items():
+                # Stable ID per (category + content)
+                tip_id = hashlib.md5(f"{raw['category']}-{text}".encode()).hexdigest()[:8]  # noqa: S324
+                tips.append(
+                    Tip(
+                        id=f"stat-{tip_id}",
+                        content=text,
+                        category=category,
+                        lang=lang,
+                        source="static",
+                    )
                 )
-            )
-    return tips
 
+        _STATIC_TIPS_CACHE = tips
+        logger.debug("TIPS: Loaded %d static tips from assets", len(tips))
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.critical("TIPS: Failed to load static tips: %s", exc)
+        return []
 
-STATIC_TIPS: list[Tip] = _build_static_tips()
+    return _STATIC_TIPS_CACHE
 
 
 # ─── Tips Engine ─────────────────────────────────────────────────────
@@ -342,13 +220,14 @@ class TipsEngine:
     def _get_pool(self, lang: str | None = None) -> list[Tip]:
         """Get combined static + dynamic tip pool filtered by language."""
         target_lang = lang or self.lang
+        static_tips = _load_static_tips()
 
         # Filter static pool by language
-        static_pool = [t for t in STATIC_TIPS if t.lang == target_lang]
+        static_pool = [t for t in static_tips if t.lang == target_lang]
 
         # Fallback to English if no tips in requested language
         if not static_pool and target_lang != "en":
-            static_pool = [t for t in STATIC_TIPS if t.lang == "en"]
+            static_pool = [t for t in static_tips if t.lang == "en"]
 
         if not self._include_dynamic:
             return static_pool

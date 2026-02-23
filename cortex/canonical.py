@@ -1,4 +1,4 @@
-"""CORTEX v4.0 — Canonical Hash Construction.
+"""CORTEX v5.0 — Canonical Hash Construction.
 
 Provides deterministic JSON serialization and null-byte separated
 hash computation for the transaction ledger. Hardens against

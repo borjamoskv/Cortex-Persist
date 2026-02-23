@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 - Facts Router.
+CORTEX v5.0 - Facts Router.
 """
 
 import logging

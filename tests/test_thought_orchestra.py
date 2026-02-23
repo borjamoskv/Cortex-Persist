@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.llm.provider import PROVIDER_PRESETS
+from cortex.llm.provider import _load_presets
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,
@@ -329,7 +329,8 @@ class TestThoughtOrchestra:
         assert stats["total_thoughts"] == 0
 
     def test_resolve_models_no_keys(self, monkeypatch):
-        for preset in PROVIDER_PRESETS.values():
+        presets = _load_presets()
+        for preset in presets.values():
             env_key = preset.get("env_key", "")
             if env_key:
                 monkeypatch.delenv(env_key, raising=False)
@@ -339,8 +340,9 @@ class TestThoughtOrchestra:
         assert len(models) == 0
 
     def test_resolve_models_with_key(self, monkeypatch):
+        presets = _load_presets()
         monkeypatch.setenv("GROQ_API_KEY", "test-key-123")
-        for _name, preset in PROVIDER_PRESETS.items():
+        for _name, preset in presets.items():
             env_key = preset.get("env_key", "")
             if env_key and env_key != "GROQ_API_KEY":
                 monkeypatch.delenv(env_key, raising=False)
@@ -352,7 +354,8 @@ class TestThoughtOrchestra:
 
     @pytest.mark.asyncio
     async def test_think_no_models_returns_error(self, monkeypatch):
-        for preset in PROVIDER_PRESETS.values():
+        presets = _load_presets()
+        for preset in presets.values():
             env_key = preset.get("env_key", "")
             if env_key:
                 monkeypatch.delenv(env_key, raising=False)
@@ -363,7 +366,8 @@ class TestThoughtOrchestra:
 
     @pytest.mark.asyncio
     async def test_context_manager(self, monkeypatch):
-        for preset in PROVIDER_PRESETS.values():
+        presets = _load_presets()
+        for preset in presets.values():
             env_key = preset.get("env_key", "")
             if env_key:
                 monkeypatch.delenv(env_key, raising=False)

@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — SovereignGate Exceptions.
+CORTEX v5.0 — SovereignGate Exceptions.
 """
 
 

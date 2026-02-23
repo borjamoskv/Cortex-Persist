@@ -1,5 +1,5 @@
 """
-CORTEX v4.3 — MEJORAlo Ship Gate.
+CORTEX v5.0 — MEJORAlo Ship Gate.
 
 Validates the 7 Seals for production readiness.
 Refactored: each seal is an independent checker function.

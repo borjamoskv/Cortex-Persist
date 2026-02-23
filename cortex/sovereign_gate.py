@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — SovereignGate.
+CORTEX v5.0 — SovereignGate.
 
 L3 Action Interception Middleware.
 Intercepts all L3 (execution-level) actions and requires

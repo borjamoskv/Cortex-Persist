@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Context Engine API Route.
+CORTEX v5.0 — Context Engine API Route.
 
 Endpoints for ambient context inference, raw signals, and snapshot history.
 """

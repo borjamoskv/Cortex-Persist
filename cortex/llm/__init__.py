@@ -1,4 +1,4 @@
-"""CORTEX v4.2 — LLM Provider Module.
+"""CORTEX v5.0 — LLM Provider Module.
 
 OpenAI-compatible LLM integration for context-aware retrieval.
 Supports Qwen (DashScope), OpenRouter, Ollama, and OpenAI.

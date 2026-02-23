@@ -34,56 +34,66 @@ def _has_fts5_sync(conn: sqlite3.Connection) -> bool:
 
 
 def _sanitize_fts_query(query: str) -> str:
-    """Sanitize user input for FTS5 MATCH syntax."""
-    tokens = query.split()
+    """Sanitize user input for FTS5 MATCH syntax with token encapsulation.
+    
+    Prevents injection of FTS5 operators and ensures tokens are treated as literals.
+    """
+    if not query:
+        return '""'
+    
+    # Escape quotes and remove potentially problematic characters
+    cleaned_query = query.replace('"', '""').replace("'", "")
+    
+    tokens = cleaned_query.split()
     safe_tokens = []
     for token in tokens:
-        cleaned = token.replace('"', "").replace("'", "")
-        if cleaned and cleaned.upper() not in ("AND", "OR", "NOT"):
+        # Wrap every token in double quotes to treat it as a literal
+        # FTS5 allows "token" for literals. keywords (AND/OR) inside quotes are literals.
+        if cleaned := token.strip():
             safe_tokens.append(f'"{cleaned}"')
-    return " ".join(safe_tokens) if safe_tokens else f'"{query}"'
+            
+    return " ".join(safe_tokens) if safe_tokens else '""'
+
+
+def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
+    """Parse a single database row into a SearchResult object."""
+    try:
+        row_tags = json.loads(row[7]) if row[7] else []
+    except (json.JSONDecodeError, TypeError):
+        row_tags = []
+
+    try:
+        meta = json.loads(row[9]) if row[9] else {}
+    except (json.JSONDecodeError, TypeError):
+        meta = {}
+
+    if is_fts and len(row) > 14:
+        score = -row[14] if row[14] else 0.5
+    else:
+        score = 0.5
+
+    return SearchResult(
+        fact_id=row[0],
+        content=row[1],
+        project=row[2],
+        fact_type=row[3],
+        confidence=row[4],
+        valid_from=row[5],
+        valid_until=row[6],
+        tags=row_tags,
+        source=row[8],
+        meta=meta,
+        score=score,
+        created_at=row[10] if len(row) > 10 else "unknown",
+        updated_at=row[11] if len(row) > 11 else "unknown",
+        tx_id=row[12] if len(row) > 12 else None,
+        hash=row[13] if len(row) > 13 else None,
+    )
 
 
 def _rows_to_results(rows: list, is_fts: bool = False) -> list[SearchResult]:
     """Convert raw DB rows to SearchResult objects."""
-    results = []
-    for row in rows:
-        try:
-            row_tags = json.loads(row[7]) if row[7] else []
-        except (json.JSONDecodeError, TypeError):
-            row_tags = []
-
-        try:
-            meta = json.loads(row[9]) if row[9] else {}
-        except (json.JSONDecodeError, TypeError):
-            meta = {}
-
-        if is_fts and len(row) > 14:
-            score = -row[14] if row[14] else 0.5
-        else:
-            score = 0.5
-
-        results.append(
-            SearchResult(
-                fact_id=row[0],
-                content=row[1],
-                project=row[2],
-                fact_type=row[3],
-                confidence=row[4],
-                valid_from=row[5],
-                valid_until=row[6],
-                tags=row_tags,
-                source=row[8],
-                meta=meta,
-                score=score,
-                created_at=row[10] if len(row) > 10 else "unknown",
-                updated_at=row[11] if len(row) > 11 else "unknown",
-                tx_id=row[12] if len(row) > 12 else None,
-                hash=row[13] if len(row) > 13 else None,
-            )
-        )
-
-    return results
+    return [_row_to_result(row, is_fts) for row in rows]
 
 
 def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:

@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Episodic Boot Engine.
+CORTEX v5.0 — Episodic Boot Engine.
 
 Generates optimized session boot payloads that replace manual
 context-snapshot.md loading. Combines:

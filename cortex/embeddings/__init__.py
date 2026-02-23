@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Local Embedding Engine.
+CORTEX v5.0 — Local Embedding Engine.
 
 Uses sentence-transformers with ONNX Runtime for zero-network-dependency
 semantic embeddings. Model auto-downloads on first use (~80MB).

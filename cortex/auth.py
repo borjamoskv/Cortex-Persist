@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Authentication & Authorization.
+CORTEX v5.0 — Authentication & Authorization.
 
 API key management with SHA-256 hashing. Keys are stored hashed,
 never in plaintext. Supports scoped permissions per tenant.
@@ -141,10 +141,16 @@ class AuthManager:
     @lru_cache(maxsize=1024)  # noqa: B019
     def authenticate(self, raw_key: str) -> AuthResult:
         """Authenticate a request using an API key (Cached)."""
-        if not raw_key or not raw_key.startswith("ctx_"):
+        is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
+
+        # Finding 4: Always compute a hash to waste CPU time even if format is invalid.
+        # This mitigates early-exit timing leaks.
+        dummy_hash = self._hash_key("ctx_invalid_dummy_key_to_waste_time")
+        key_hash = self._hash_key(raw_key) if is_valid_format else dummy_hash
+
+        if not is_valid_format:
             return AuthResult(authenticated=False, error="Invalid key format")
 
-        key_hash = self._hash_key(raw_key)
         conn = self._get_conn()
         try:
             row = conn.execute(

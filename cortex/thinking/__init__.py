@@ -1,4 +1,4 @@
-"""CORTEX v4.3 — Thought Orchestra Module.
+"""CORTEX v5.0 — Thought Orchestra Module.
 
 Orquestación multi-modelo con fusión por consenso.
 N modelos piensan en paralelo, sus respuestas se fusionan

@@ -1,5 +1,5 @@
 """
-CORTEX v4.0 — Consensus Layer.
+CORTEX v5.0 — Consensus Layer.
 
 Provides immutable vote ledger, Merkle tree verification, and consensus protocols.
 """

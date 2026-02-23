@@ -14,7 +14,7 @@ try:
 except ImportError:
     pass
 
-__version__ = "4.0.0"
+__version__ = "5.0.0"
 __author__ = "Borja Moskv"
 
 from cortex.engine import CortexEngine

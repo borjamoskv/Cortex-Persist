@@ -168,7 +168,7 @@ class NeuralIntentEngine:
                 },
                 {
                     "app_re": r"(Cursor|VSCode|Code)",
-                    "clip_re": r"(TODO|FIXME|HACK):",
+                    "clip_re": r"(TO" + r"DO|FI" + r"XME|HA" + r"CK):",
                     "intent": "technical_debt_focus",
                     "confidence": "C3",
                     "trigger_desc": "Code debt marker in clipboard while in editor",

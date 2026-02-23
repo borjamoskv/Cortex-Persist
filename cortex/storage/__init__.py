@@ -1,5 +1,5 @@
 """
-CORTEX v4.1 — Storage Backend Abstraction.
+CORTEX v5.0 — Storage Backend Abstraction.
 
 Pluggable storage layer: switch between local SQLite and Turso (cloud)
 via environment variable. The engine layer never knows which backend

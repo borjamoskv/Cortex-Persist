@@ -105,60 +105,92 @@ async def _heal_file_async(file_path: Path, findings: list[str]) -> bool:
 def heal_project(
     project: str, path: str | Path, target_score: int, scan_result: ScanResult
 ) -> bool:
-    """Orquesta la autosanación: detecta, reescribe, testea y comitea."""
+    """Orquesta la autosanación: detecta, reescribe, testea y comitea recursivamente."""
     from cortex.cli import console
+    from cortex.mejoralo.scan import scan
 
-    file_issues = _extract_issues_from_findings(scan_result)
+    current_result = scan_result
+    iteration = 0
+    max_iterations = 5  # Seguridad contra bucles infinitos
+    any_success = False
 
-    if not file_issues:
-        console.print("[dim yellow]⚠️ Auto-Heal: Imposible extraer path de los hallazgos.[/]")
+    while current_result.score < target_score and iteration < max_iterations:
+        iteration += 1
+        console.print(
+            f"\n[bold blue]🤖 Auto-Heal Iteración {iteration}/{max_iterations}[/] ({project}) "
+            f"→ Score actual: [bold]{current_result.score}[/] | Meta: [bold]{target_score}[/]"
+        )
+
+        file_issues = _extract_issues_from_findings(current_result)
+        if not file_issues:
+            console.print("[dim yellow]⚠️ Auto-Heal: No se encontraron fallos refactorizables.[/]")
+            break
+
+        # Elegir el archivo con más peso en la caída del score
+        sorted_files = sorted(file_issues.items(), key=lambda x: len(x[1]), reverse=True)
+        top_file_rel, top_issues = sorted_files[0]
+        
+        # Limitar issues para no saturar el contexto del LLM
+        top_issues = top_issues[:15]
+
+        abs_path = Path(path).resolve() / top_file_rel
+        if not abs_path.exists() or not abs_path.is_file():
+            console.print(f"[dim yellow]⚠️ Auto-Heal: {top_file_rel} no disponible. Saltando...[/]")
+            # Eliminar de la lista para la próxima iteración si no avanzamos
+            continue
+
+        console.print(
+            f"  Refactorizando [cyan]{top_file_rel}[/] ({len(file_issues[top_file_rel])} hallazgos)..."
+        )
+
+        success = asyncio.run(_heal_file_async(abs_path, top_issues))
+        if not success:
+            console.print(f"  [red]❌ Generación fallida para {top_file_rel}.[/]")
+            subprocess.run(["git", "restore", str(abs_path)], cwd=path, capture_output=True)
+            continue
+
+        # 🔬 Integrity Check
+        console.print("  [cyan]🔬 Verificando Integridad Bizantina (pytest)...[/]")
+        res = subprocess.run(["pytest"], cwd=path, capture_output=True, text=True)
+        
+        if res.returncode != 0:
+            console.print(f"  [bold red]💥 Regresión detectada en {top_file_rel}! Rollback.[/]")
+            subprocess.run(["git", "restore", str(abs_path)], cwd=path, capture_output=True)
+            continue
+
+        # ✅ Valid and Safe to commit
+        commit_msg = (
+            f"[MEJORAlo Auto-Heal] Refactorizado {top_file_rel} (Score: {current_result.score}→?)"
+        )
+        console.print("  [bold green]✅ Integridad OK. Comiteando...[/]")
+
+        subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
+        subprocess.run(
+            [
+                "git",
+                "commit",
+                "-m",
+                commit_msg,
+                "--author",
+                "CORTEX MEJORAlo Auto-Heal <cortex@moskv.1>",
+            ],
+            cwd=path,
+            capture_output=True,
+        )
+        
+        any_success = True
+
+        # 🔄 Re-scan para ver el progreso real
+        console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
+        current_result = scan(project, path)
+        
+        if current_result.score >= target_score:
+            console.print(
+                f"[bold green]✨ META ALCANZADA! Score final: {current_result.score}/100[/]"
+            )
+            break
+
+    if not any_success and current_result.score < target_score:
         return False
-
-    # Priorizar el archivo con más problemas
-    top_file_rel = sorted(file_issues.items(), key=lambda x: len(x[1]), reverse=True)[0][0]
-    top_issues = file_issues[top_file_rel][:10]  # Take max 10 to not blow up prompt
-
-    abs_path = Path(path).resolve() / top_file_rel
-    if not abs_path.exists() or not abs_path.is_file():
-        console.print(f"[dim yellow]⚠️ Auto-Heal: El archivo {top_file_rel} no es válido.[/]")
-        return False
-
-    console.print(
-        f"[bold blue]🤖 Auto-Heal Iniciado ({project})[/] → Meta: {target_score}/100 | Refactorizando [cyan]{top_file_rel}[/] ({len(file_issues[top_file_rel])} hallazgos)"
-    )
-
-    success = asyncio.run(_heal_file_async(abs_path, top_issues))
-    if not success:
-        console.print("[red]❌ Auto-Heal falló durante la generación de código LLM.[/]")
-        subprocess.run(["git", "restore", str(abs_path)], cwd=path, capture_output=True)
-        return False
-
-    console.print("[cyan]🔬 Verificando Integridad Bizantina (pytest)...[/]")
-    res = subprocess.run(["pytest"], cwd=path, capture_output=True, text=True)
-    if res.returncode != 0:
-        console.print("[bold red]💥 Regresión detectada! (Fallan tests). Ejecutando Rollback.[/]")
-        # Rollback
-        subprocess.run(["git", "restore", str(abs_path)], cwd=path, capture_output=True)
-        return False
-
-    # Valid commit
-    commit_msg = (
-        f"[MEJORAlo Auto-Heal] Refactorizado {top_file_rel} (Score previo: {scan_result.score})"
-    )
-    console.print(f"[bold green]✅ Integridad verificada. Comiteando ({commit_msg})...[/]")
-
-    subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
-    subprocess.run(
-        [
-            "git",
-            "commit",
-            "-m",
-            commit_msg,
-            "--author",
-            "CORTEX MEJORAlo Auto-Heal <cortex@moskv.1>",
-        ],
-        cwd=path,
-        capture_output=True,
-    )
 
     return True

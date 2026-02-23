@@ -1,4 +1,4 @@
-"""CORTEX v4 — Obsidian Vault Export.
+"""CORTEX v5.0 — Obsidian Vault Export.
 
 Exports the entire CORTEX memory as an interconnected Obsidian vault.
 Each fact becomes a Markdown note with YAML frontmatter and [[wikilinks]].
