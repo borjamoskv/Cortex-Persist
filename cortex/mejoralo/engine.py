@@ -6,6 +6,7 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
+from .constants import INMEJORABLE_SCORE
 from .heal import heal_project
 from .ledger import get_history, record_session
 from .scan import scan
@@ -17,7 +18,7 @@ logger = logging.getLogger("cortex.mejoralo")
 
 
 class MejoraloEngine:
-    """MEJORAlo v7.3 engine — native CORTEX integration."""
+    """MEJORAlo v8.0 engine — native CORTEX integration. Relentless mode."""
 
     def __init__(self, engine: CortexEngine):
         self.engine = engine
@@ -46,6 +47,26 @@ class MejoraloEngine:
         Trigger the autonomous healing to refactor problematic files, test them and commit.
         """
         return heal_project(project, path, target_score, scan_result)
+
+    def relentless_heal(
+        self,
+        project: str,
+        path: str | Path,
+        scan_result: ScanResult,
+        target_score: int | None = None,
+    ) -> bool:
+        """
+        INMEJORABLE mode — heal until score >= 95 (or custom target).
+
+        Does NOT stop until the code is inmejorable or stagnation is terminal.
+        Uses escalating strategies: Normal → Aggressive → Nuclear.
+        """
+        effective_target = target_score if target_score is not None else INMEJORABLE_SCORE
+        logger.info(
+            "Relentless heal: %s → target %d (current: %d)",
+            project, effective_target, scan_result.score,
+        )
+        return heal_project(project, path, effective_target, scan_result)
 
     # ── Fase 6: Ouroboros — Record Session ────────────────────────────
 
