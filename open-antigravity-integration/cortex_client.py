@@ -136,13 +136,9 @@ class CortexMemoryClient:
         """Store a ghost (incomplete work marker)."""
         return await self.store_fact(project, content, "ghost", tags)
 
-    async def recall(
-        self, project: str, limit: int = 50
-    ) -> list[dict[str, Any]]:
+    async def recall(self, project: str, limit: int = 50) -> list[dict[str, Any]]:
         """Recall all facts for a project."""
-        resp = await self._client.get(
-            f"/v1/projects/{project}/facts", params={"limit": limit}
-        )
+        resp = await self._client.get(f"/v1/projects/{project}/facts", params={"limit": limit})
         resp.raise_for_status()
         return resp.json()
 
@@ -202,9 +198,7 @@ class CortexMemoryClient:
         resp.raise_for_status()
         return resp.json()
 
-    async def create_api_key(
-        self, name: str, tenant_id: str = "default"
-    ) -> dict[str, Any]:
+    async def create_api_key(self, name: str, tenant_id: str = "default") -> dict[str, Any]:
         """Create a new API key for a workspace/tenant."""
         resp = await self._client.post(
             "/v1/admin/keys",
@@ -215,9 +209,7 @@ class CortexMemoryClient:
 
     # ─── Agent Lifecycle Hooks ───────────────────────────────────────
 
-    async def on_agent_start(
-        self, agent_id: str, project: str, task: str
-    ) -> None:
+    async def on_agent_start(self, agent_id: str, project: str, task: str) -> None:
         """Called when an agent starts a task. Injects relevant context."""
         context = await self.search(task, k=10)
         # The orchestrator should inject these results into the agent prompt
@@ -228,9 +220,7 @@ class CortexMemoryClient:
     ) -> None:
         """Called when an agent completes. Persists learnings."""
         for decision in decisions:
-            await self.store_decision(
-                project, decision, tags=[f"agent:{agent_id}"]
-            )
+            await self.store_decision(project, decision, tags=[f"agent:{agent_id}"])
         await self.store_fact(
             project,
             f"Agent {agent_id} completed: {summary}",
@@ -238,11 +228,10 @@ class CortexMemoryClient:
             tags=[f"agent:{agent_id}", "completion"],
         )
 
-    async def on_agent_error(
-        self, agent_id: str, project: str, error: str
-    ) -> None:
+    async def on_agent_error(self, agent_id: str, project: str, error: str) -> None:
         """Called when an agent encounters an error. Persists for learning."""
         await self.store_error(
-            project, f"Agent {agent_id} error: {error}",
+            project,
+            f"Agent {agent_id} error: {error}",
             tags=[f"agent:{agent_id}", "error"],
         )

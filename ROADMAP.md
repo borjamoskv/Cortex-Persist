@@ -2,6 +2,7 @@
 
 > **Sovereign Memory Engine for Enterprise AI Swarms**
 > *Updated: 2026-02-23 · Status: v6 Alpha in active development*
+> **Metrics:** 444 modules · 38 CLI commands · 787 lines of Arch documentation
 
 ---
 
@@ -97,10 +98,10 @@
 | Metric | Value |
 |:---|:---|
 | Test functions | 1,162 |
-| Production LOC | ~40,156 |
-| Facts in DB | 746 |
+| Production LOC | ~45,500 |
+| Python Modules | 444 |
+| CLI Commands | 38 |
 | MEJORAlo score | 78/100 |
-| Commits (8 days) | 117+ |
 | CI status | ✅ Green |
 
 ---

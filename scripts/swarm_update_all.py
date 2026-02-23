@@ -18,18 +18,16 @@ Características:
   - Log de resultados al final
 """
 
-import os
-import sys
-import time
+import argparse
 import glob
 import shutil
-import argparse
-import traceback
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
-from typing import Literal
+from pathlib import Path
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 try:
@@ -40,16 +38,16 @@ except ImportError:
     sys.exit(1)
 
 # ─── PATHS ───────────────────────────────────────────────────────────────────
-SKILLS_DIR    = Path.home() / ".gemini" / "antigravity" / "skills"
+SKILLS_DIR = Path.home() / ".gemini" / "antigravity" / "skills"
 WORKFLOWS_DIR = Path.home() / "cortex" / ".agent" / "workflows"
-BACKUP_DIR    = Path.home() / ".cortex" / "swarm_backup" / datetime.now().strftime("%Y%m%d_%H%M%S")
-LOG_FILE      = Path.home() / ".cortex" / "swarm_update.log"
+BACKUP_DIR = Path.home() / ".cortex" / "swarm_backup" / datetime.now().strftime("%Y%m%d_%H%M%S")
+LOG_FILE = Path.home() / ".cortex" / "swarm_update.log"
 
 # ─── RATE LIMITS (gemini-2.5-flash free tier) ─────────────────────────────
-RPM_LIMIT     = 10      # requests per minute (conservative)
-DELAY_BETWEEN = 6.5     # seconds between requests (60/RPM + buffer)
-MAX_RETRIES   = 4
-BACKOFF_BASE  = 2.0     # exponential backoff: 2, 4, 8, 16 seconds
+RPM_LIMIT = 10  # requests per minute (conservative)
+DELAY_BETWEEN = 6.5  # seconds between requests (60/RPM + buffer)
+MAX_RETRIES = 4
+BACKOFF_BASE = 2.0  # exponential backoff: 2, 4, 8, 16 seconds
 
 # ─── PROMPTS POR TIPO ────────────────────────────────────────────────────────
 
@@ -103,22 +101,25 @@ REGLAS ESTRICTAS:
 """
 
 # ─── COLORES TERMINAL ────────────────────────────────────────────────────────
-GREEN  = "\033[92m"
-RED    = "\033[91m"
+GREEN = "\033[92m"
+RED = "\033[91m"
 YELLOW = "\033[93m"
-CYAN   = "\033[96m"
-BOLD   = "\033[1m"
-RESET  = "\033[0m"
-DIM    = "\033[2m"
+CYAN = "\033[96m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+DIM = "\033[2m"
+
 
 def c(color: str, text: str) -> str:
     return f"{color}{text}{RESET}"
+
 
 # ─── STATS ───────────────────────────────────────────────────────────────────
 stats = {"ok": 0, "skip": 0, "fail": 0, "total": 0}
 failures: list[tuple[str, str]] = []
 
 # ─── HELPERS ─────────────────────────────────────────────────────────────────
+
 
 def backup_file(path: Path) -> None:
     """Crea backup antes de sobreescribir."""
@@ -139,7 +140,7 @@ def strip_outer_fences(text: str, lang: str = "") -> str:
     text = text.strip()
     for prefix in (f"```{lang}", "```"):
         if text.startswith(prefix):
-            text = text[len(prefix):]
+            text = text[len(prefix) :]
             break
     if text.endswith("```"):
         text = text[:-3]
@@ -164,12 +165,22 @@ def call_gemini(client, prompt: str, content: str, file_label: str) -> str | Non
             return response.text
         except Exception as e:
             err_str = str(e).lower()
-            wait = BACKOFF_BASE ** attempt
+            wait = BACKOFF_BASE**attempt
             if "quota" in err_str or "429" in err_str or "resource_exhausted" in err_str:
-                print(c(YELLOW, f"  ⏳ Rate limit ({attempt}/{MAX_RETRIES}). Esperando {wait:.0f}s..."))
+                print(
+                    c(
+                        YELLOW,
+                        f"  ⏳ Rate limit ({attempt}/{MAX_RETRIES}). Esperando {wait:.0f}s...",
+                    )
+                )
                 time.sleep(wait)
             elif "503" in err_str or "capacity" in err_str:
-                print(c(YELLOW, f"  🌊 Capacidad agotada ({attempt}/{MAX_RETRIES}). Esperando {wait:.0f}s..."))
+                print(
+                    c(
+                        YELLOW,
+                        f"  🌊 Capacidad agotada ({attempt}/{MAX_RETRIES}). Esperando {wait:.0f}s...",
+                    )
+                )
                 time.sleep(wait)
             else:
                 print(c(RED, f"  ❌ Error en {file_label}: {e}"))
@@ -223,7 +234,7 @@ def process_markdown(
 
     backup_file(path)
     path.write_text(new_content, encoding="utf-8")
-    print(c(GREEN, f"  ✅ Actualizado"))
+    print(c(GREEN, "  ✅ Actualizado"))
     log(f"OK {file_type} {path}")
     stats["ok"] += 1
     return True
@@ -244,7 +255,7 @@ def process_python(
 
     # Skip archivos muy pequeños (<50 líneas) — no hay suficiente contexto
     if content.count("\n") < 50:
-        print(c(DIM, f"  ⏭  Skip (< 50 líneas)"))
+        print(c(DIM, "  ⏭  Skip (< 50 líneas)"))
         stats["skip"] += 1
         return True
 
@@ -263,13 +274,14 @@ def process_python(
 
     backup_file(path)
     path.write_text(processed + "\n", encoding="utf-8")
-    print(c(GREEN, f"  ✅ Actualizado"))
+    print(c(GREEN, "  ✅ Actualizado"))
     log(f"OK PY {path}")
     stats["ok"] += 1
     return True
 
 
 # ─── COLLECTORS ──────────────────────────────────────────────────────────────
+
 
 def collect_skills() -> list[Path]:
     return sorted(SKILLS_DIR.glob("*/SKILL.md"))
@@ -296,21 +308,20 @@ def collect_scripts() -> list[Path]:
 
 # ─── MAIN ────────────────────────────────────────────────────────────────────
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="SWARM_UPDATE_ALL — Enjambre Masivo MOSKV-1"
-    )
-    parser.add_argument("--skills",    action="store_true", help="Solo SKILLs")
+    parser = argparse.ArgumentParser(description="SWARM_UPDATE_ALL — Enjambre Masivo MOSKV-1")
+    parser.add_argument("--skills", action="store_true", help="Solo SKILLs")
     parser.add_argument("--workflows", action="store_true", help="Solo Workflows")
-    parser.add_argument("--scripts",   action="store_true", help="Solo Scripts Python")
-    parser.add_argument("--dry-run",   action="store_true", help="Previsualizar sin escribir")
-    parser.add_argument("--limit",     type=int, default=0,  help="Max archivos a procesar (0=todos)")
+    parser.add_argument("--scripts", action="store_true", help="Solo Scripts Python")
+    parser.add_argument("--dry-run", action="store_true", help="Previsualizar sin escribir")
+    parser.add_argument("--limit", type=int, default=0, help="Max archivos a procesar (0=todos)")
     args = parser.parse_args()
 
     # Si no se especifica filtro, actualiza todo
-    do_skills    = args.skills    or not (args.skills or args.workflows or args.scripts)
+    do_skills = args.skills or not (args.skills or args.workflows or args.scripts)
     do_workflows = args.workflows or not (args.skills or args.workflows or args.scripts)
-    do_scripts   = args.scripts   or not (args.skills or args.workflows or args.scripts)
+    do_scripts = args.scripts or not (args.skills or args.workflows or args.scripts)
 
     client = genai.Client()
 
@@ -330,7 +341,7 @@ def main():
             targets.append((p, PYTHON_PROMPT, "🐍 PY"))
 
     if args.limit > 0:
-        targets = targets[:args.limit]
+        targets = targets[: args.limit]
 
     total = len(targets)
     stats["total"] = total
@@ -360,13 +371,13 @@ def main():
     elapsed = time.time() - start_time
     mins, secs = divmod(int(elapsed), 60)
 
-    print(f"\n{'─'*52}")
+    print(f"\n{'─' * 52}")
     print(f"{c(BOLD, '📊 RESULTADOS DEL ENJAMBRE')}")
     print(f"  ✅ OK:      {stats['ok']}")
     print(f"  ⏭  Skip:    {stats['skip']}")
     print(f"  ❌ Fail:    {stats['fail']}")
     print(f"  ⏱  Tiempo:  {mins}m {secs}s")
-    print(f"{'─'*52}")
+    print(f"{'─' * 52}")
 
     if failures:
         print(f"\n{c(RED, '❌ FALLOS:')}")

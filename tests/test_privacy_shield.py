@@ -5,8 +5,6 @@ Verifies that sensitive content gets privacy metadata injected
 at the data ingress point (_store_impl → _apply_privacy_shield).
 """
 
-
-
 from cortex.engine.store_mixin import StoreMixin
 
 

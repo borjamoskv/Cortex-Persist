@@ -13,7 +13,6 @@ from cortex.gateway import (
     GatewayRouter,
 )
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
@@ -28,12 +27,15 @@ def make_engine(
     engine.store = AsyncMock(return_value=store_id)
     engine.search = AsyncMock(return_value=search_results or [])
     engine.recall = AsyncMock(return_value=recall_results or [])
-    engine.stats = AsyncMock(return_value=stats or {
-        "total_facts": 100,
-        "active_facts": 90,
-        "project_count": 5,
-        "db_size_mb": 1.2,
-    })
+    engine.stats = AsyncMock(
+        return_value=stats
+        or {
+            "total_facts": 100,
+            "active_facts": 90,
+            "project_count": 5,
+            "db_size_mb": 1.2,
+        }
+    )
     return engine
 
 
@@ -104,10 +106,12 @@ class TestGatewayRouter:
     async def test_handle_store(self):
         engine = make_engine(store_id=99)
         router = GatewayRouter(engine=engine)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.STORE,
-            payload={"content": "Decision: use Byzantine", "type": "decision"},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.STORE,
+                payload={"content": "Decision: use Byzantine", "type": "decision"},
+            )
+        )
         assert resp.ok
         assert resp.data["fact_id"] == 99
 
@@ -115,10 +119,12 @@ class TestGatewayRouter:
     async def test_handle_store_missing_content(self):
         engine = make_engine()
         router = GatewayRouter(engine=engine)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.STORE,
-            payload={},  # no content
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.STORE,
+                payload={},  # no content
+            )
+        )
         assert not resp.ok
         assert "content" in resp.error
 
@@ -133,10 +139,12 @@ class TestGatewayRouter:
 
         engine = make_engine(search_results=[result])
         router = GatewayRouter(engine=engine)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.SEARCH,
-            payload={"query": "Byzantine", "top_k": 3},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.SEARCH,
+                payload={"query": "Byzantine", "top_k": 3},
+            )
+        )
         assert resp.ok
         assert len(resp.data) == 1
         assert resp.data[0]["score"] >= 0
@@ -145,10 +153,12 @@ class TestGatewayRouter:
     async def test_handle_search_missing_query(self):
         engine = make_engine()
         router = GatewayRouter(engine=engine)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.SEARCH,
-            payload={},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.SEARCH,
+                payload={},
+            )
+        )
         assert not resp.ok
 
     @pytest.mark.asyncio
@@ -156,10 +166,12 @@ class TestGatewayRouter:
         bus = make_bus()
         engine = make_engine()
         router = GatewayRouter(engine=engine, bus=bus)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.EMIT,
-            payload={"severity": "warning", "title": "Test alert", "body": "from test"},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.EMIT,
+                payload={"severity": "warning", "title": "Test alert", "body": "from test"},
+            )
+        )
         assert resp.ok
         bus.emit.assert_called_once()
 
@@ -167,10 +179,12 @@ class TestGatewayRouter:
     async def test_handle_emit_without_bus(self):
         engine = make_engine()
         router = GatewayRouter(engine=engine, bus=None)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.EMIT,
-            payload={"severity": "info", "title": "Test", "body": ""},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.EMIT,
+                payload={"severity": "info", "title": "Test", "body": ""},
+            )
+        )
         assert resp.ok
         assert resp.data["delivered"] is False
 
@@ -199,10 +213,12 @@ class TestGatewayRouter:
         engine = make_engine()
         engine.store = AsyncMock(side_effect=RuntimeError("DB exploded"))
         router = GatewayRouter(engine=engine)
-        resp = await router.handle(make_req(
-            intent=GatewayIntent.STORE,
-            payload={"content": "test"},
-        ))
+        resp = await router.handle(
+            make_req(
+                intent=GatewayIntent.STORE,
+                payload={"content": "test"},
+            )
+        )
         assert not resp.ok
         assert "DB exploded" in resp.error
 
@@ -220,6 +236,7 @@ class TestGatewayRouter:
 class TestTelegramParser:
     def _parse(self, text):
         from cortex.gateway.adapters.telegram import _parse_telegram_message
+
         return _parse_telegram_message(text)
 
     def test_store_command(self):

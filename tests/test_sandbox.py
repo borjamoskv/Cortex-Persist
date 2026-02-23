@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.sandbox import ASTSandbox, ExecResult, SandboxVerdict
+from cortex.sandbox import ASTSandbox, SandboxVerdict
 
 
 @pytest.fixture
@@ -135,7 +135,9 @@ class TestSafeExec:
         assert "hello" in result.stdout
 
     def test_function_execution(self, sandbox: ASTSandbox):
-        code = "def fib(n):\n    if n < 2: return n\n    return fib(n-1) + fib(n-2)\nresult = fib(10)"
+        code = (
+            "def fib(n):\n    if n < 2: return n\n    return fib(n-1) + fib(n-2)\nresult = fib(10)"
+        )
         result = sandbox.safe_exec(code)
         assert result.success is True
         assert result.output["result"] == 55

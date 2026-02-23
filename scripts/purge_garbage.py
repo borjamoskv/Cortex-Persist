@@ -9,7 +9,6 @@ from __future__ import annotations
 import shutil
 import sqlite3
 import sys
-
 from pathlib import Path
 
 from cortex.db import connect as connect_db
@@ -30,9 +29,7 @@ def backup() -> None:
     print(f"✓ Backup created: {BACKUP_PATH}")
 
 
-def purge_by_query(
-    conn: sqlite3.Connection, label: str, query: str, params: tuple = ()
-) -> int:
+def purge_by_query(conn: sqlite3.Connection, label: str, query: str, params: tuple = ()) -> int:
     cursor = conn.execute(query, params)
     count = cursor.rowcount
     if count > 0:
@@ -40,9 +37,7 @@ def purge_by_query(
     return count
 
 
-def fix_by_query(
-    conn: sqlite3.Connection, label: str, query: str, params: tuple = ()
-) -> int:
+def fix_by_query(conn: sqlite3.Connection, label: str, query: str, params: tuple = ()) -> int:
     cursor = conn.execute(query, params)
     count = cursor.rowcount
     if count > 0:

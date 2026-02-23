@@ -42,9 +42,7 @@ TOTAL_WEIGHT = sum(WEIGHTS.values())
 
 def run_command(cmd):
     try:
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         return result.returncode, result.stdout, result.stderr
     except (subprocess.SubprocessError, OSError) as e:
         return -1, "", str(e)
@@ -67,9 +65,7 @@ def iter_files(extensions=None):
 
 
 def measure_integrity():
-    code, _, stderr = run_command(
-        f"{VENV_DIR}/bin/python -m cortex.cli --help"
-    )
+    code, _, stderr = run_command(f"{VENV_DIR}/bin/python -m cortex.cli --help")
     if code != 0:
         print(f" Integrity Check Failed: {stderr.strip()[:200]}...")
         return 0.0
@@ -119,18 +115,21 @@ def _is_false_positive(line, path):
 
 def _kill_switch_scan(line, path, i):
     import sys
+
     fatal_patterns = [
         r"sk-(proj|ant)-[a-zA-Z0-9_\-]{20,}",
         r"xox[baprs]-[0-9a-zA-Z]{10,}",
-        r"AIza[0-9A-Za-z\-_]{35}"
+        r"AIza[0-9A-Za-z\-_]{35}",
     ]
     for p in fatal_patterns:
         if re.search(p, line):
             if _is_false_positive(line, path):
                 continue
             print("\n[!] FATAL ERROR: Sovereignty Compromised [!]")
-            print(f"CRITICAL LEAK: Matched '{p}' in {path}:{i+1}")
-            print("ENTROPY-0 KILL SWITCH ENGAGED. Blocking commit/execution to prevent network extraction.")
+            print(f"CRITICAL LEAK: Matched '{p}' in {path}:{i + 1}")
+            print(
+                "ENTROPY-0 KILL SWITCH ENGAGED. Blocking commit/execution to prevent network extraction."
+            )
             sys.exit(1)
 
 
@@ -139,7 +138,7 @@ def _check_line_for_security(line, path, patterns, i):
         if re.search(p, line, re.IGNORECASE):
             if _is_false_positive(line, path):
                 continue
-            print(f"  Security Risk: {p} in {path}:{i+1}")
+            print(f"  Security Risk: {p} in {path}:{i + 1}")
             return 1
     return 0
 
@@ -163,9 +162,7 @@ def _validate_with_glm5(suspicious_content, hits):
                 f"'VULNERABLE' o 'SAFE'.\n\n{file_cont[:2000]}"
             )
 
-            response = loop.run_until_complete(
-                orchestra.route_async(prompt, task_type="security")
-            )
+            response = loop.run_until_complete(orchestra.route_async(prompt, task_type="security"))
 
             if "VULNERABLE" in response.upper():
                 print(f"  ☢️ [GLM-5] Vulnerabilidad en {file_path}")
@@ -198,9 +195,7 @@ def measure_security():
                 file_hits = 0
                 for i, line in enumerate(content.split("\n")):
                     _kill_switch_scan(line, path, i)
-                    file_hits += _check_line_for_security(
-                        line, path, patterns, i
-                    )
+                    file_hits += _check_line_for_security(line, path, patterns, i)
 
                 if file_hits > 0:
                     hits += file_hits
@@ -307,9 +302,7 @@ def main():
         }
     )
 
-    total_score = sum(
-        scores.get(dim, 0.5) * weight for dim, weight in WEIGHTS.items()
-    )
+    total_score = sum(scores.get(dim, 0.5) * weight for dim, weight in WEIGHTS.items())
 
     for dim, weight in WEIGHTS.items():
         s = scores.get(dim, 0.5)

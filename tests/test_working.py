@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
-
 # Stub qdrant_client before importing cortex.memory (import chain:
 # cortex.memory.__init__ → manager → vector_store → qdrant_client)
 import sys
 from unittest.mock import MagicMock
+
+import pytest
 
 _qd = MagicMock()
 sys.modules["qdrant_client"] = _qd
@@ -15,7 +15,6 @@ sys.modules["qdrant_client.models"] = _qd.models
 
 from cortex.memory.models import MemoryEvent  # noqa: E402
 from cortex.memory.working import DEFAULT_MAX_TOKENS, WorkingMemoryL1
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 

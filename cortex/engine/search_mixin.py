@@ -45,12 +45,11 @@ class SearchMixin:
                 if not results:
                     # Fallback to pure text search if hybrid yields nothing
                     results = await text_search(
-                        self.session(),
+                        conn,
                         query,
                         project,
                         limit=top_k,
                         as_of=as_of,
-                        confidence=confidence,
                     )
 
                 # 2. Enrich with Graph Context if requested
@@ -62,9 +61,7 @@ class SearchMixin:
             except (sqlite3.Error, OSError, RuntimeError) as e:
                 logger.exception(f"Hybrid Graph-RAG search failed: {e}")
                 # Ultimate fallback to basic text search
-                return await text_search(
-                    conn, query, project, limit=top_k, as_of=as_of, confidence=confidence
-                )
+                return await text_search(conn, query, project, limit=top_k, as_of=as_of)
 
     async def _enrich_with_graph_context(
         self, conn, results: list[Any], query: str, graph_depth: int

@@ -20,7 +20,6 @@ from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import EpisodicSnapshot, MemoryEvent
 from cortex.memory.working import WorkingMemoryL1
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
@@ -230,7 +229,7 @@ class TestModels:
 
     def test_memory_event_validation(self):
         """token_count must be >= 0."""
-        with pytest.raises(Exception):  # Pydantic ValidationError
+        with pytest.raises(ValueError):  # Pydantic ValidationError
             MemoryEvent(
                 role="user",
                 content="test",

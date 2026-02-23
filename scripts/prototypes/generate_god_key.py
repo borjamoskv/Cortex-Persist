@@ -19,9 +19,7 @@ def generate_key():
     print(f"🔑 Generating key for: {name}")
 
     try:
-        raw_key, api_key = auth.create_key(
-            name=name, permissions=["read", "write", "admin"]
-        )
+        raw_key, api_key = auth.create_key(name=name, permissions=["read", "write", "admin"])
         print("\n✅ API KEY GENERATED SUCCESSFULLY:")
         print(f"Key: {raw_key}")
         print(f"Prefix: {api_key.key_prefix}")

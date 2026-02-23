@@ -128,9 +128,7 @@ class TestMemoryIntegration:
             agent_id = "test-agent-001"
 
             # Agent starts — gets context
-            context = await client.on_agent_start(
-                agent_id, self.PROJECT, "Implement login page"
-            )
+            context = await client.on_agent_start(agent_id, self.PROJECT, "Implement login page")
             assert isinstance(context, list)
 
             # Agent completes — persists decisions

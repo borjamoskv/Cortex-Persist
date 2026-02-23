@@ -9,6 +9,8 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.temporal import now_iso
 
 __all__ = ["StoreMixin"]
@@ -16,7 +18,7 @@ __all__ = ["StoreMixin"]
 logger = logging.getLogger("cortex")
 
 
-class StoreMixin:
+class StoreMixin(PrivacyMixin, GhostMixin):
     async def store(
         self,
         project: str,
@@ -61,37 +63,6 @@ class StoreMixin:
                 commit,
                 tx_id,
             )
-
-    @staticmethod
-    def _apply_privacy_shield(
-        content: str, project: str, meta: dict[str, Any] | None
-    ) -> dict[str, Any] | None:
-        """Zero-Trust Privacy Shield — classify content before storage.
-
-        If sensitive patterns (API keys, private keys, connection strings)
-        are detected, inject privacy metadata into the fact for audit trail.
-        Degrades gracefully if classifier is not available.
-        """
-        try:
-            from cortex.storage.classifier import classify_content
-
-            sensitivity = classify_content(content)
-            if sensitivity.is_sensitive:
-                logger.warning(
-                    "PRIVACY SHIELD: Sensitive patterns detected (%s) in project [%s]. "
-                    "Fact flagged for audit.",
-                    ", ".join(sensitivity.matches),
-                    project,
-                )
-                privacy_meta = {
-                    "privacy_flagged": True,
-                    "privacy_matches": sensitivity.matches,
-                    "privacy_score": sensitivity.score,
-                }
-                return {**(meta or {}), **privacy_meta}
-        except ImportError:
-            pass  # Classifier not available — degrade gracefully
-        return meta
 
     async def _embed_fact_async(
         self, conn: aiosqlite.Connection, fact_id: int, content: str
@@ -152,7 +123,19 @@ class StoreMixin:
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
-        meta_json = json.dumps(meta or {})
+
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+
+        encrypted_content = enc.encrypt_str(content)
+        encrypted_meta = enc.encrypt_json(meta)
+
+        # Wave 2: Integrity-First. Log transaction before fact storage.
+        if tx_id is None:
+            tx_id = await self._log_transaction(
+                conn, project, "store", {"fact_type": fact_type, "status": "storing"}
+            )
 
         cursor = await conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags, confidence, "
@@ -160,13 +143,13 @@ class StoreMixin:
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 project,
-                content,
+                encrypted_content,
                 fact_type,
                 tags_json,
                 confidence,
                 ts,
                 source,
-                meta_json,
+                encrypted_meta,
                 ts,
                 ts,
                 tx_id,
@@ -174,8 +157,16 @@ class StoreMixin:
         )
         fact_id = cursor.lastrowid
 
+        # Pass fact_id to side effects (except tx log which is already done)
         await self._embed_fact_async(conn, fact_id, content)
-        await self._process_side_effects_async(conn, fact_id, project, content, fact_type, ts)
+
+        # Original process_fact_graph needs the fact_id
+        from cortex.graph import process_fact_graph
+
+        try:
+            await process_fact_graph(conn, fact_id, content, project, ts)
+        except Exception as e:
+            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
         if commit:
             await conn.commit()
@@ -221,15 +212,21 @@ class StoreMixin:
 
             (
                 project,
-                old_content,
+                raw_old_content,
                 fact_type,
                 old_tags_json,
                 confidence,
                 source,
-                old_meta_json,
+                raw_old_meta_json,
             ) = row
 
-            new_meta = json.loads(old_meta_json) if old_meta_json else {}
+            from cortex.crypto import get_default_encrypter
+
+            enc = get_default_encrypter()
+
+            old_content = enc.decrypt_str(raw_old_content) if raw_old_content else ""
+
+            new_meta = enc.decrypt_json(raw_old_meta_json) if raw_old_meta_json else {}
             if meta:
                 new_meta.update(meta)
             new_meta["previous_fact_id"] = fact_id
@@ -294,65 +291,3 @@ class StoreMixin:
             )
             return True
         return False
-
-    async def register_ghost(
-        self,
-        reference: str,
-        context: str,
-        project: str,
-        conn: aiosqlite.Connection | None = None,
-    ) -> int:
-        if conn:
-            return await self._register_ghost_impl(conn, reference, context, project)
-
-        async with self.session() as conn:
-            res = await self._register_ghost_impl(conn, reference, context, project)
-            await conn.commit()
-            return res
-
-    async def _register_ghost_impl(
-        self, conn: aiosqlite.Connection, reference: str, context: str, project: str
-    ) -> int:
-        # Check if exists (idempotency)
-        cursor = await conn.execute(
-            "SELECT id FROM ghosts WHERE reference = ? AND project = ?",
-            (reference, project),
-        )
-        row = await cursor.fetchone()
-        if row:
-            return row[0]
-
-        ts = now_iso()
-        cursor = await conn.execute(
-            "INSERT INTO ghosts "
-            "(reference, context, project, status, created_at) "
-            "VALUES (?, ?, ?, 'open', ?)",
-            (reference, context, project, ts),
-        )
-        return cursor.lastrowid
-
-    async def resolve_ghost(
-        self,
-        ghost_id: int,
-        target_entity_id: int,
-        confidence: float = 1.0,
-        conn: aiosqlite.Connection | None = None,
-    ) -> bool:
-        if conn:
-            return await self._resolve_ghost_impl(conn, ghost_id, target_entity_id, confidence)
-
-        async with self.session() as conn:
-            res = await self._resolve_ghost_impl(conn, ghost_id, target_entity_id, confidence)
-            await conn.commit()
-            return res
-
-    async def _resolve_ghost_impl(
-        self, conn: aiosqlite.Connection, ghost_id: int, target_entity_id: int, confidence: float
-    ) -> bool:
-        ts = now_iso()
-        cursor = await conn.execute(
-            "UPDATE ghosts SET status = 'resolved', target_id = ?, "
-            "confidence = ?, resolved_at = ? WHERE id = ?",
-            (target_entity_id, confidence, ts, ghost_id),
-        )
-        return cursor.rowcount > 0

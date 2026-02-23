@@ -90,8 +90,8 @@ def main():
     print()
 
     # QPS
-    total_time = results['mean_ms'] * results['total_queries'] / 1000
-    qps = results['total_queries'] / total_time if total_time > 0 else 0
+    total_time = results["mean_ms"] * results["total_queries"] / 1000
+    qps = results["total_queries"] / total_time if total_time > 0 else 0
     print(f"⚡ Estimated QPS: {qps:.0f} queries/sec")
     print()
     print("=" * 60)

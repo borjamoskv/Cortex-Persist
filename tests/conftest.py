@@ -1,3 +1,5 @@
+import base64
+import os
 import re
 import subprocess
 
@@ -30,7 +32,10 @@ def _kill_stale_cli_processes() -> None:
     try:
         result = subprocess.run(
             ["ps", "-eo", "pid,etime,args"],
-            capture_output=True, text=True, check=False, timeout=5,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5,
         )
         for line in result.stdout.splitlines():
             if "cortex.cli" not in line or "store" not in line and "export" not in line:
@@ -55,7 +60,6 @@ def kill_stale_cortex_processes():
     yield
 
 
-
 @pytest.fixture(autouse=True)
 def reset_cortex_state():
     """Reset global state and config between every test."""
@@ -76,6 +80,20 @@ def reset_cortex_state():
     config.reload()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def set_test_master_key():
+    import base64
+    import os
+
+    # 32 bytes key base64 encoded
+    key = base64.b64encode(b"test_key_that_must_be_32_bytes_x").decode("utf-8")
+    os.environ["CORTEX_VAULT_KEY"] = key
+    os.environ["CORTEX_TESTING"] = "1"
+    yield
+    os.environ.pop("CORTEX_VAULT_KEY", None)
+    os.environ.pop("CORTEX_TESTING", None)
+
+
 @pytest.fixture(autouse=True)
 def bypass_min_content_length():
     from cortex.facts.manager import FactManager
@@ -84,3 +102,21 @@ def bypass_min_content_length():
     FactManager.MIN_CONTENT_LENGTH = 1
     yield
     FactManager.MIN_CONTENT_LENGTH = original
+
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_master_key():
+    """Ensure a Master Key is available for L3 Ledger encryption during tests."""
+    from cortex.crypto.aes import reset_default_encrypter
+
+    # 32 bytes of zeros in base64
+    test_key = base64.b64encode(b"\x00" * 32).decode("utf-8")
+    os.environ["CORTEX_MASTER_KEY"] = test_key
+
+    # Reset singleton to ensure it picks up the new env var
+    reset_default_encrypter()
+
+    yield
+
+    # We don't necessarily need to unset it, but reset the singleton
+    reset_default_encrypter()

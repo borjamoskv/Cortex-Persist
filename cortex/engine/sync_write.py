@@ -60,15 +60,33 @@ class SyncWriteMixin:
         if not content or not content.strip():
             raise ValueError("content cannot be empty")
 
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+
         conn = self._get_sync_conn()
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
-        meta_json = json.dumps(meta or {})
+
+        encrypted_content = enc.encrypt_str(content)
+        encrypted_meta = enc.encrypt_json(meta or {})
+
         cursor = conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (project, content, fact_type, tags_json, confidence, ts, source, meta_json, ts, ts),
+            (
+                project,
+                encrypted_content,
+                fact_type,
+                tags_json,
+                confidence,
+                ts,
+                source,
+                encrypted_meta,
+                ts,
+                ts,
+            ),
         )
         fact_id = cursor.lastrowid
         if self._auto_embed and self._vec_available:

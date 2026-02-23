@@ -1,27 +1,30 @@
 """Tests for Dimension 1: SQLite Extreme Topology."""
 
 import sqlite3
-import pytest
 import tempfile
-import aiosqlite
 from pathlib import Path
 
+import aiosqlite
+import pytest
+
+from cortex.connection_pool import CortexConnectionPool
 from cortex.db import (
     connect,
     connect_writer,
-    connect_async,
 )
 from cortex.db_writer import SqliteWriteWorker
-from cortex.connection_pool import CortexConnectionPool
+
 
 @pytest.fixture
 def temp_db():
     with tempfile.NamedTemporaryFile(suffix=".db") as f:
         yield f.name
 
+
 def get_pragma(conn, pragma_name):
     # Depending on async/sync and dictionary vs tuple row
     return conn.execute(f"PRAGMA {pragma_name}").fetchone()[0]
+
 
 async def get_pragma_async(conn, pragma_name):
     async with conn.execute(f"PRAGMA {pragma_name}") as cursor:
@@ -37,12 +40,14 @@ def test_mmap_pragma_set(temp_db):
     assert mmap_size > 0
     conn.close()
 
+
 def test_wal_autocheckpoint_disabled_on_writer(temp_db):
     """Verify PRAGMA wal_autocheckpoint = 0 on writer connection."""
     conn = connect_writer(temp_db)
     wal_ac = get_pragma(conn, "wal_autocheckpoint")
     assert wal_ac == 0
     conn.close()
+
 
 def test_read_only_sync(temp_db):
     """Verify read_only sync connection rejects writes."""
@@ -55,6 +60,7 @@ def test_read_only_sync(temp_db):
     with pytest.raises(sqlite3.OperationalError, match="attempt to write a readonly database"):
         conn_ro.execute("INSERT INTO foo VALUES (1)")
     conn_ro.close()
+
 
 @pytest.mark.asyncio
 async def test_read_only_pool_rejects_writes(temp_db):
@@ -75,6 +81,7 @@ async def test_read_only_pool_rejects_writes(temp_db):
 
     await pool.close()
 
+
 @pytest.mark.asyncio
 async def test_writer_checkpoints_on_stop(temp_db):
     """Verify SqliteWriteWorker runs checkpoint before closing."""
@@ -86,7 +93,7 @@ async def test_writer_checkpoints_on_stop(temp_db):
 
     writer = SqliteWriteWorker(temp_db)
     await writer.start()
-    
+
     # Write some data
     await writer.execute("INSERT INTO foo VALUES (1)")
     await writer.execute("INSERT INTO foo VALUES (2)")
@@ -104,6 +111,7 @@ async def test_writer_checkpoints_on_stop(temp_db):
         size_after = wal_path.stat().st_size
         assert size_after < size_before or size_after == 0
 
+
 @pytest.mark.asyncio
 async def test_manual_checkpoint(temp_db):
     """Verify manual checkpoint method on SqliteWriteWorker."""
@@ -115,7 +123,7 @@ async def test_manual_checkpoint(temp_db):
 
     writer = SqliteWriteWorker(temp_db)
     await writer.start()
-    
+
     await writer.execute("INSERT INTO foo VALUES (1)")
     await writer.execute("INSERT INTO foo VALUES (2)")
 

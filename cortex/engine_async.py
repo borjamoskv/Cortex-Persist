@@ -148,6 +148,10 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             query += " LIMIT ?"
             params.append(limit)
 
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute(query, params) as cursor:
@@ -155,8 +159,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 results = []
                 for row in rows:
                     d = dict(row)
+                    d["content"] = enc.decrypt_str(d["content"])
                     d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                    d["meta"] = json.loads(d["meta"]) if d.get("meta") else {}
+                    d["meta"] = enc.decrypt_json(d["meta"])
                     results.append(d)
                 return results
 
@@ -178,9 +183,15 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 row = await cursor.fetchone()
                 if not row:
                     return None
+
+                from cortex.crypto import get_default_encrypter
+
+                enc = get_default_encrypter()
+
                 d = dict(row)
+                d["content"] = enc.decrypt_str(d["content"])
                 d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                d["meta"] = json.loads(d["meta"]) if d.get("meta") else {}
+                d["meta"] = enc.decrypt_json(d["meta"])
                 return d
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:

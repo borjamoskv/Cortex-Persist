@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
-import pytest
-
 from cortex.cli.core import _detect_agent_source
 
 
@@ -59,10 +57,16 @@ class TestDetectAgentSource:
     def test_term_program_cursor_fallback(self):
         """TERM_PROGRAM containing 'cursor' maps to agent:cursor."""
         clean_env = {
-            k: v for k, v in os.environ.items()
-            if k not in {
-                "CORTEX_SOURCE", "GEMINI_AGENT", "CURSOR_SESSION_ID",
-                "CLAUDE_CODE_AGENT", "WINDSURF_SESSION", "COPILOT_AGENT",
+            k: v
+            for k, v in os.environ.items()
+            if k
+            not in {
+                "CORTEX_SOURCE",
+                "GEMINI_AGENT",
+                "CURSOR_SESSION_ID",
+                "CLAUDE_CODE_AGENT",
+                "WINDSURF_SESSION",
+                "COPILOT_AGENT",
                 "KIMI_SESSION_ID",
             }
         }
@@ -73,10 +77,16 @@ class TestDetectAgentSource:
     def test_term_program_vscode_fallback(self):
         """TERM_PROGRAM containing 'vscode' maps to ide:vscode."""
         clean_env = {
-            k: v for k, v in os.environ.items()
-            if k not in {
-                "CORTEX_SOURCE", "GEMINI_AGENT", "CURSOR_SESSION_ID",
-                "CLAUDE_CODE_AGENT", "WINDSURF_SESSION", "COPILOT_AGENT",
+            k: v
+            for k, v in os.environ.items()
+            if k
+            not in {
+                "CORTEX_SOURCE",
+                "GEMINI_AGENT",
+                "CURSOR_SESSION_ID",
+                "CLAUDE_CODE_AGENT",
+                "WINDSURF_SESSION",
+                "COPILOT_AGENT",
                 "KIMI_SESSION_ID",
             }
         }
@@ -87,11 +97,18 @@ class TestDetectAgentSource:
     def test_no_markers_returns_cli(self):
         """When no env markers present, returns 'cli'."""
         clean_env = {
-            k: v for k, v in os.environ.items()
-            if k not in {
-                "CORTEX_SOURCE", "GEMINI_AGENT", "CURSOR_SESSION_ID",
-                "CLAUDE_CODE_AGENT", "WINDSURF_SESSION", "COPILOT_AGENT",
-                "KIMI_SESSION_ID", "TERM_PROGRAM",
+            k: v
+            for k, v in os.environ.items()
+            if k
+            not in {
+                "CORTEX_SOURCE",
+                "GEMINI_AGENT",
+                "CURSOR_SESSION_ID",
+                "CLAUDE_CODE_AGENT",
+                "WINDSURF_SESSION",
+                "COPILOT_AGENT",
+                "KIMI_SESSION_ID",
+                "TERM_PROGRAM",
             }
         }
         with patch.dict(os.environ, clean_env, clear=True):
@@ -100,11 +117,18 @@ class TestDetectAgentSource:
     def test_empty_cortex_source_ignored(self):
         """Empty CORTEX_SOURCE string is treated as unset."""
         clean_env = {
-            k: v for k, v in os.environ.items()
-            if k not in {
-                "CORTEX_SOURCE", "GEMINI_AGENT", "CURSOR_SESSION_ID",
-                "CLAUDE_CODE_AGENT", "WINDSURF_SESSION", "COPILOT_AGENT",
-                "KIMI_SESSION_ID", "TERM_PROGRAM",
+            k: v
+            for k, v in os.environ.items()
+            if k
+            not in {
+                "CORTEX_SOURCE",
+                "GEMINI_AGENT",
+                "CURSOR_SESSION_ID",
+                "CLAUDE_CODE_AGENT",
+                "WINDSURF_SESSION",
+                "COPILOT_AGENT",
+                "KIMI_SESSION_ID",
+                "TERM_PROGRAM",
             }
         }
         clean_env["CORTEX_SOURCE"] = ""

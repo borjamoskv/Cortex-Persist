@@ -225,15 +225,28 @@ class MemoryPressureMonitor:
         if self._running:
             return
         self._running = True
-        lp = loop or asyncio.get_event_loop()
+        try:
+            lp = loop or asyncio.get_running_loop()
+        except RuntimeError:
+            lp = asyncio.get_event_loop()  # Fallback for start-from-thread cases
+
         self._task = lp.create_task(self._loop(), name="memory-pressure-sidecar")
         logger.info("MemoryPressureMonitor started (interval=%.1fs)", self.interval)
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Cancel the task and shut down the thread pool. Idempotent."""
+        if not self._running and (self._task is None or self._task.done()):
+            return
+
         self._running = False
         if self._task and not self._task.done():
             self._task.cancel()
+            try:
+                # Give it a moment to finish cleanup
+                await asyncio.wait_for(self._task, timeout=1.0)
+            except (asyncio.CancelledError, asyncio.TimeoutError):
+                pass
+
         self._executor.shutdown(wait=False, cancel_futures=True)
         logger.info("MemoryPressureMonitor stopped")
 
@@ -247,10 +260,15 @@ class MemoryPressureMonitor:
     async def _loop(self) -> None:
         while self._running:
             try:
-                await self._tick()
+                try:
+                    await self._tick()
+                except asyncio.CancelledError:
+                    raise
+                except Exception as e:
+                    logger.error("Sample loop crashed: %s", e)
             except asyncio.CancelledError:
                 self._running = False
-                raise
+                raise  # Re-raise to allow task to be cleanly cancelled
             except Exception as exc:  # noqa: BLE001 — top-level resilience
                 logger.exception("MemoryPressureSidecar tick error: %s", exc)
             try:

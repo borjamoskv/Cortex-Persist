@@ -67,6 +67,9 @@ from cortex.routes import (
     search as search_router,
 )
 from cortex.routes import (
+    telemetry as telemetry_router,
+)
+from cortex.routes import (
     timing as timing_router,
 )
 from cortex.routes import (
@@ -108,7 +111,8 @@ async def lifespan(app: FastAPI):
     # 1. Schema & Migrations
     engine = CortexEngine(db_path)
     await engine.init_db()
-    auth_manager = AuthManager(db_path)
+    auth_manager = AuthManager()  # Use dynamic backend selection based on config
+    await auth_manager.initialize()
 
     # 2. Connection Pool & Async Engine
     # IMPORTANT: The pool must allow writes (read_only=False) because AsyncCortexEngine uses it
@@ -152,6 +156,7 @@ async def lifespan(app: FastAPI):
         logger.info("Lifespan: Shutting down CORTEX endpoints.")
         await pool.close()
         await engine.close()
+        await auth_manager.close()
         timing_conn.close()
         cortex.auth._auth_manager = None
         api_state.engine = None
@@ -271,6 +276,7 @@ app.include_router(mejoralo_router.router)
 app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
+app.include_router(telemetry_router.router)
 app.include_router(hive_router)
 
 # Gateway — Universal Intelligence Entry Point

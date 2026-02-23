@@ -37,9 +37,13 @@ class CortexConfig:
 
     # Database
     DB_PATH: str = ""
+    PG_URL: str = ""  # PostgreSQL/AlloyDB URL for v6 L3
 
     # Security
     ALLOWED_ORIGINS: list[str] = field(default_factory=list)
+
+    # Boot Mode (v6)
+    RUNBOOT_MODE: str = "local"  # local | cloud
 
     # Rate Limiting
     RATE_LIMIT: int = 300
@@ -79,6 +83,8 @@ class CortexConfig:
     # L2 Vector Store
     VECTOR_STORE_PATH: str = ""
     VECTOR_STORE_MODE: str = "local"  # local | remote
+    QDRANT_CLOUD_URL: str = ""
+    QDRANT_API_KEY: str = ""
 
     # LLM Provider
     LLM_PROVIDER: str = ""
@@ -124,6 +130,8 @@ class CortexConfig:
         storage_mode = os.environ.get("CORTEX_STORAGE", "local")
         return cls(
             DB_PATH=os.environ.get("CORTEX_DB", str(DEFAULT_DB_PATH)),
+            PG_URL=os.environ.get("CORTEX_PG_URL", ""),
+            RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
                 "CORTEX_ALLOWED_ORIGINS",
                 "http://localhost:3000,http://localhost:5173",
@@ -153,6 +161,8 @@ class CortexConfig:
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
             VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
+            QDRANT_CLOUD_URL=os.environ.get("QDRANT_CLOUD_URL", ""),
+            QDRANT_API_KEY=os.environ.get("QDRANT_API_KEY", ""),
             LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", ""),
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
@@ -164,7 +174,7 @@ class CortexConfig:
             STRIPE_PRICE_TABLE=json.loads(
                 os.environ.get("STRIPE_PRICE_TABLE", '{"pro": "", "team": ""}')
             ),
-            DEPLOY_MODE="cloud" if storage_mode == "turso" else "local",
+            DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
             CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
             CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",

@@ -84,69 +84,67 @@ class SecurityMonitor:
 
         try:
             store = await self._get_store()
-
             for event in events:
-                # payload might be complex, we extract the signature or raw string
-                payload = event.get("payload", "")
-                ip_address = event.get("ip_address", "0.0.0.0")
-                timestamp = event.get("timestamp", datetime.now(timezone.utc).isoformat())
-
-                if not payload:
-                    continue
-
-                # Query L2 vector store for structurally/semantically similar attacks
-                results = await store.recall(
-                    query=payload,
-                    limit=1,
-                    score_threshold=self.threshold,
-                )
-
-                if results:
-                    top_match = results[0]
-                    similarity = top_match["score"]
-                    summary = top_match.get("content", "Unknown historical attack pattern")
-
-                    # C5 confidence if > 0.95, C4 if > 0.85 etc.
-                    confidence = "C5" if similarity > 0.92 else "C4"
-
-                    alerts.append(
-                        SecurityAlert(
-                            ip_address=ip_address,
-                            payload=payload[:100] + "..." if len(payload) > 100 else payload,
-                            similarity_score=similarity,
-                            confidence=confidence,
-                            summary=f"Matches known vector: {summary[:50]}",
-                            timestamp=timestamp,
-                        )
-                    )
+                alert = await self._process_single_event(store, event)
+                if alert:
+                    alerts.append(alert)
 
             if alerts:
                 c5_alerts = [a for a in alerts if a.confidence == "C5"]
                 if c5_alerts:
-                    # Persistimos la IP en la Blacklist Metal-Layer (threat_intel)
-                    db_path = config.DB_PATH
-                    try:
-                        async with await connect_async(db_path) as conn:
-                            for alert in c5_alerts:
-                                try:
-                                    await conn.execute(
-                                        "INSERT INTO threat_intel (ip_address, reason, confidence) VALUES (?, ?, ?)",
-                                        (alert.ip_address, alert.summary, alert.confidence),
-                                    )
-                                except sqlite3.IntegrityError:
-                                    pass  # Ya estaba bloqueada
-                            await conn.commit()
-                            logger.error(
-                                "🔥 KILL SWITCH ARMADO. Blacklisted %d IPs originarias del ataque.",
-                                len(c5_alerts),
-                            )
-                    except Exception as e:
-                        logger.error("Failed to save threat intel to DB: %s", e)
-
+                    await self._blacklist_ips(c5_alerts)
         except Exception as e:
             logger.error("SecurityMonitor check_async failed: %s", e)
-
         return alerts
+
+    async def _process_single_event(
+        self, store: VectorStoreL2, event: dict[str, Any]
+    ) -> SecurityAlert | None:
+        """Process a single event and return an alert if a threat is detected."""
+        payload = event.get("payload", "")
+        if not payload:
+            return None
+
+        # Query L2 vector store for structurally/semantically similar attacks
+        results = await store.recall(query=payload, limit=1, score_threshold=self.threshold)
+        if not results:
+            return None
+
+        top_match = results[0]
+        similarity = top_match["score"]
+        summary = top_match.get("content", "Unknown historical attack pattern")
+        confidence = "C5" if similarity > 0.92 else "C4"
+
+        return SecurityAlert(
+            ip_address=event.get("ip_address", "0.0.0.0"),
+            payload=payload[:100] + "..." if len(payload) > 100 else payload,
+            similarity_score=similarity,
+            confidence=confidence,
+            summary=f"Matches known vector: {summary[:50]}",
+            timestamp=event.get("timestamp", datetime.now(timezone.utc).isoformat()),
+        )
+
+    async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
+        """Persist C5 alerts to the threat_intel blacklist."""
+        db_path = config.DB_PATH
+        try:
+            async with await connect_async(db_path) as conn:
+                for alert in alerts:
+                    await self._save_threat(conn, alert)
+                await conn.commit()
+                logger.error("🔥 KILL SWITCH: Blacklisted %d IPs.", len(alerts))
+        except Exception:
+            logger.error("Failed to save threat intel to DB")
+
+    async def _save_threat(self, conn: Any, alert: SecurityAlert) -> None:
+        """Save a single threat to the DB."""
+        try:
+            await conn.execute(
+                "INSERT INTO threat_intel (ip_address, reason, confidence) VALUES (?, ?, ?)",
+                (alert.ip_address, alert.summary, alert.confidence),
+            )
+        except sqlite3.IntegrityError:
+            pass
 
     def check(self) -> list[SecurityAlert]:
         """Synchronous wrapper for check_async."""

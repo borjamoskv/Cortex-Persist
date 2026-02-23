@@ -16,7 +16,7 @@ Covers:
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -28,13 +28,14 @@ from cortex.daemon.sidecar.compaction_monitor import (
 )
 from cortex.daemon.sidecar.compaction_monitor import monitor as _mod
 
-
 # ─── MemorySnapshot ───────────────────────────────────────────────────────────
 
 
 class TestMemorySnapshot:
     def test_free_ratio_healthy(self):
-        snap = MemorySnapshot(system_available_bytes=7_000_000_000, system_total_bytes=16_000_000_000)
+        snap = MemorySnapshot(
+            system_available_bytes=7_000_000_000, system_total_bytes=16_000_000_000
+        )
         assert snap.free_ratio == pytest.approx(7 / 16, rel=1e-3)
 
     def test_free_ratio_no_data_returns_safe_default(self):
@@ -80,9 +81,11 @@ class TestMemoryPressureAlert:
         assert "200.0MB" in alert.message
 
     def test_message_contains_ratios(self):
-        alert = MemoryPressureAlert(reason="low", snapshot=self._snap(sys_pct=0.10, malloc_pct=0.05), threshold_name="t")
+        alert = MemoryPressureAlert(
+            reason="low", snapshot=self._snap(sys_pct=0.10, malloc_pct=0.05), threshold_name="t"
+        )
         assert "10.0%" in alert.message  # sys_free ratio
-        assert "5.0%" in alert.message   # malloc_free ratio
+        assert "5.0%" in alert.message  # malloc_free ratio
 
 
 # ─── Backward-compat alias ────────────────────────────────────────────────────
@@ -99,41 +102,43 @@ class TestMemoryPressureMonitorLifecycle:
     def _make(self, **kw) -> MemoryPressureMonitor:
         return MemoryPressureMonitor(interval=0.05, **kw)
 
-    def test_start_sets_running(self):
+    @pytest.mark.asyncio
+    async def test_start_sets_running(self):
         mon = self._make()
-        loop = asyncio.new_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             mon.start(loop=loop)
             assert mon._running is True
         finally:
-            mon.stop()
-            loop.close()
+            await mon.stop()
 
-    def test_stop_clears_running(self):
+    @pytest.mark.asyncio
+    async def test_stop_clears_running(self):
         mon = self._make()
-        loop = asyncio.new_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             mon.start(loop=loop)
-            mon.stop()
+            await mon.stop()
             assert mon._running is False
         finally:
-            loop.close()
+            pass
 
-    def test_double_start_is_idempotent(self):
+    @pytest.mark.asyncio
+    async def test_double_start_is_idempotent(self):
         mon = self._make()
-        loop = asyncio.new_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             mon.start(loop=loop)
             task1 = mon._task
             mon.start(loop=loop)
             assert mon._task is task1  # same task, no duplicate
         finally:
-            mon.stop()
-            loop.close()
+            await mon.stop()
 
-    def test_stop_without_start_is_safe(self):
+    @pytest.mark.asyncio
+    async def test_stop_without_start_is_safe(self):
         mon = self._make()
-        mon.stop()  # must not raise
+        await mon.stop()  # must not raise
 
 
 # ─── sample() ────────────────────────────────────────────────────────────────
@@ -147,7 +152,7 @@ class TestSample:
             snap = await mon.sample()
             assert isinstance(snap, MemorySnapshot)
         finally:
-            mon.stop()
+            await mon.stop()
 
 
 # ─── _tick pressure detection ────────────────────────────────────────────────
@@ -196,9 +201,13 @@ class TestTickAlerts:
         async def _cb(a: MemoryPressureAlert) -> None:
             dispatched.append(a)
 
-        mon = MemoryPressureMonitor(alert_callback=_cb, sys_free_threshold=0.10, malloc_free_threshold=0.05)
+        mon = MemoryPressureMonitor(
+            alert_callback=_cb, sys_free_threshold=0.10, malloc_free_threshold=0.05
+        )
         loop = asyncio.get_running_loop()
-        with patch.object(loop, "run_in_executor", side_effect=_make_executor_mock(self._healthy_snap())):
+        with patch.object(
+            loop, "run_in_executor", side_effect=_make_executor_mock(self._healthy_snap())
+        ):
             await mon._tick()
 
         assert dispatched == []
@@ -212,7 +221,9 @@ class TestTickAlerts:
 
         mon = MemoryPressureMonitor(alert_callback=_cb)
         loop = asyncio.get_running_loop()
-        with patch.object(loop, "run_in_executor", side_effect=_make_executor_mock(self._low_sys_snap())):
+        with patch.object(
+            loop, "run_in_executor", side_effect=_make_executor_mock(self._low_sys_snap())
+        ):
             await mon._tick()
 
         assert len(dispatched) >= 1
@@ -227,7 +238,9 @@ class TestTickAlerts:
 
         mon = MemoryPressureMonitor(alert_callback=_cb, malloc_free_threshold=0.10)
         loop = asyncio.get_running_loop()
-        with patch.object(loop, "run_in_executor", side_effect=_make_executor_mock(self._low_malloc_snap())):
+        with patch.object(
+            loop, "run_in_executor", side_effect=_make_executor_mock(self._low_malloc_snap())
+        ):
             await mon._tick()
 
         malloc_alerts = [a for a in dispatched if a.threshold_name == "malloc_free"]
@@ -267,4 +280,6 @@ class TestLegionDispatch:
             with caplog.at_level(logging.WARNING, logger="compaction-sidecar"):
                 await mon._dispatch(alert)
 
-        assert any("legion" in r.message.lower() for r in caplog.records if r.levelno == logging.WARNING)
+        assert any(
+            "legion" in r.message.lower() for r in caplog.records if r.levelno == logging.WARNING
+        )

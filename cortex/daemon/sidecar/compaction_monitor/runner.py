@@ -32,13 +32,13 @@ except ImportError:
 # Local imports
 from .circuit_breaker import circuit_breaker
 from .memory_wrapper import get_mallinfo2, malloc_trim
-from .pressure_watcher import start_pressure_watcher
+from .monitor import MemoryPressureMonitor
 
 LOGGER = logging.getLogger("compaction_sidecar")
 logging.basicConfig(level=logging.INFO)
 
 
-async def compaction_job(ctx: Any) -> None:
+async def compaction_job(ctx: Any = None) -> None:
     """Job executed when memory pressure is high.
 
     It collects detailed arena stats, attempts to trim the heap and logs the outcome.
@@ -57,43 +57,90 @@ async def compaction_job(ctx: Any) -> None:
         LOGGER.exception("Compaction job failed: %s", exc)
 
 
-async def shutdown(signal, loop):
+async def shutdown(sig, loop, monitor: MemoryPressureMonitor | None = None):
     """Cleanup tasks on termination signals."""
-    LOGGER.info(f"Received exit signal {signal.name}...")
+    LOGGER.info(f"Received exit signal {sig.name}...")
+    if monitor:
+        await monitor.stop()
+
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-    [task.cancel() for task in tasks]
+    for task in tasks:
+        task.cancel()
+
     await asyncio.gather(*tasks, return_exceptions=True)
     loop.stop()
 
 
 async def main() -> None:
     loop = asyncio.get_running_loop()
-    for s in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(s, lambda s=s: asyncio.create_task(shutdown(s, loop)))
 
-    # Start pressure watcher (runs in background)
-    watcher_task = asyncio.create_task(start_pressure_watcher(compaction_job))
+    # Initialize Monitor (Nivel 130/100)
+    monitor = MemoryPressureMonitor(
+        interval=int(os.getenv("PSI_WATCH_INTERVAL", "5")),
+        # Use a safe default for sys_free_threshold (e.g. 15% free)
+        sys_free_threshold=float(os.getenv("PSI_PRESSURE_THRESHOLD", "15")) / 100.0,
+        alert_callback=lambda alert: compaction_job(None),
+        use_legion=True,
+    )
+
+    # State for cleanup
+    arq_pool = None
+
+    async def _shutdown_handler(sig):
+        """Internal helper to bridge signal to shutdown."""
+        nonlocal arq_pool
+        if arq_pool:
+            await arq_pool.close()
+        await shutdown(sig, loop, monitor)
+
+    for s in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(s, lambda s=s: asyncio.create_task(_shutdown_handler(s)))
+
+    # Start the monitor
+    monitor.start(loop=loop)
 
     # Set up ARQ worker if available
     if RedisSettings is not None:
-        redis = RedisSettings(
+        redis_settings = RedisSettings(
             host=os.getenv("REDIS_HOST", "localhost"), port=int(os.getenv("REDIS_PORT", "6379"))
         )
 
         # Register the job
-        async def startup(ctx):
-            ctx["queue"] = await create_pool(redis)
+        async def on_startup(ctx):
+            nonlocal arq_pool
+            arq_pool = await create_pool(redis_settings)
+            ctx["queue"] = arq_pool
+            LOGGER.info("ARQ Worker initialized with Redis pool.")
 
-        worker = Worker([compaction_job], redis_settings=redis, on_startup=startup)
-        worker_task = asyncio.create_task(worker.run())
-        await asyncio.gather(watcher_task, worker_task)
+        async def on_shutdown(ctx):
+            LOGGER.info("ARQ Worker shutting down...")
+            if "queue" in ctx:
+                await ctx["queue"].close()
+
+        worker = Worker(
+            functions=[compaction_job],
+            redis_settings=redis_settings,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+        )
+        try:
+            await worker.run()
+        except asyncio.CancelledError:
+            LOGGER.info("Worker execution cancelled.")
+            raise
     else:
-        # Fallback: run watcher only; it will invoke compaction_job directly
-        await watcher_task
+        # Fallback: keep the loop alive since monitor runs as a background task
+        try:
+            while True:
+                await asyncio.sleep(3600)
+        except asyncio.CancelledError:
+            LOGGER.info("Main loop cancelled.")
+            await monitor.stop()
+            raise
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, asyncio.CancelledError):
         pass

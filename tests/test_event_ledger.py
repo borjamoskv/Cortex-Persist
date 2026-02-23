@@ -15,7 +15,6 @@ import pytest
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
 
-
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
 

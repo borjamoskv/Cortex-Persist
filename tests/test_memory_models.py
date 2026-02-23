@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import sys
 import uuid
 from datetime import datetime, timezone
-
-import sys
 from unittest.mock import MagicMock
 
 import pytest
@@ -16,7 +15,6 @@ sys.modules["qdrant_client"] = _qd
 sys.modules["qdrant_client.models"] = _qd.models
 
 from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent  # noqa: E402
-
 
 # ─── MemoryEntry (dataclass) ──────────────────────────────────────────
 
@@ -99,9 +97,7 @@ class TestMemoryEvent:
         assert event.timestamp.tzinfo == timezone.utc
 
     def test_metadata_defaults_to_empty(self):
-        event = MemoryEvent(
-            role="user", content="x", token_count=1, session_id="s1"
-        )
+        event = MemoryEvent(role="user", content="x", token_count=1, session_id="s1")
         assert event.metadata == {}
 
     def test_custom_metadata(self):
@@ -115,10 +111,8 @@ class TestMemoryEvent:
         assert event.metadata["tool"] == "search"
 
     def test_negative_tokens_rejected(self):
-        with pytest.raises(Exception):  # Pydantic validation error
-            MemoryEvent(
-                role="user", content="x", token_count=-1, session_id="s1"
-            )
+        with pytest.raises(ValueError):  # Pydantic validation error
+            MemoryEvent(role="user", content="x", token_count=-1, session_id="s1")
 
     def test_event_id_uniqueness(self):
         a = MemoryEvent(role="user", content="a", token_count=1, session_id="s1")
@@ -139,16 +133,12 @@ class TestEpisodicSnapshot:
         assert len(snap.vector_embedding) == 384
 
     def test_auto_generated_fields(self):
-        snap = EpisodicSnapshot(
-            summary="snapshot", vector_embedding=[0.0] * 384
-        )
+        snap = EpisodicSnapshot(summary="snapshot", vector_embedding=[0.0] * 384)
         uuid.UUID(snap.snapshot_id)
         assert isinstance(snap.created_at, datetime)
 
     def test_linked_events_default_empty(self):
-        snap = EpisodicSnapshot(
-            summary="test", vector_embedding=[0.0] * 384
-        )
+        snap = EpisodicSnapshot(summary="test", vector_embedding=[0.0] * 384)
         assert snap.linked_events == []
 
     def test_custom_linked_events(self):

@@ -104,36 +104,36 @@ def test_path_traversal_export(client):
         "Path must be relative",
         "Invalid path",
         "Invalid characters",
-        "ruta",          # Spanish
-        "workspace",     # English path-workspace
+        "ruta",  # Spanish
+        "workspace",  # English path-workspace
     )
     assert any(msg in detail for msg in valid_messages), f"Unexpected error: {detail}"
-
 
 
 @pytest.mark.asyncio
 async def test_snapshot_path_sanitization(tmp_path):
     """Test that snapshot names are sanitized against path traversal."""
     from cortex.engine.snapshots import SnapshotManager
-    
+
     db_path = tmp_path / "test.db"
     db_path.touch()
-    
+
     sm = SnapshotManager(db_path=db_path)
     # Ensure snapshot_dir exists
     sm.snapshot_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Malicious name with path traversal
     malicious_name = "../../../etc/passwd"
-    
+
     # We use a dummy tx_id and merkle root
     snap = await sm.create_snapshot(malicious_name, 0, "root")
-    
+
     # The name should be sanitized
     assert ".." not in snap.name
     assert "/" not in snap.name
     assert "etc_passwd" in snap.name or "____etc_passwd" in snap.name
-    
+
     # Cleanup
     import shutil
+
     shutil.rmtree(sm.snapshot_dir)

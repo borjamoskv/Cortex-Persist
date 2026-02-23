@@ -15,9 +15,9 @@ CODEX_PATH = "CODEX.md"
 
 
 async def seed_codex():
-    api_token= os.environ.get("CORTEX_API_KEY")
+    api_token = os.environ.get("CORTEX_API_KEY")
     # Force IPv4 to avoid [::1] connection refusal on macOS
-    client = AsyncCortexClient(api_token=api_key, base_url="http://127.0.0.1:8000")
+    client = AsyncCortexClient(api_token=api_token, base_url="http://127.0.0.1:8000")
 
     # Wait for connection
     try:

@@ -13,7 +13,6 @@ import pytest
 from cortex.memory.models import MemoryEvent
 from cortex.memory.working import DEFAULT_MAX_TOKENS, WorkingMemoryL1
 
-
 # ─── Helpers ──────────────────────────────────────────────────────────
 
 

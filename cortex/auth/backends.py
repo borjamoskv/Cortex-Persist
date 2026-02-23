@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 import logging
-import sqlite3
 from abc import ABC, abstractmethod
 from typing import Any
+
+import aiosqlite
 
 # We keep the core dataclasses here to avoid circular imports if auth.py uses this
 # But for now, let's assume those stay in auth.py and this file imports them if needed.
@@ -64,7 +65,10 @@ class BaseAuthBackend(ABC):
 
 
 class SQLiteAuthBackend(BaseAuthBackend):
-    """Legacy-compatible SQLite backend for CORTEX v5.0+."""
+    """Async-first SQLite backend for CORTEX.
+
+    Uses aiosqlite to prevent event loop blocking.
+    """
 
     def __init__(self, db_path: str):
         self.db_path = db_path
@@ -72,28 +76,30 @@ class SQLiteAuthBackend(BaseAuthBackend):
     async def initialize(self) -> None:
         from cortex.auth import AUTH_SCHEMA
 
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
-            conn.executescript(AUTH_SCHEMA)
-            conn.commit()
+            await conn.executescript(AUTH_SCHEMA)
+            await conn.commit()
         finally:
-            conn.close()
+            await conn.close()
 
-    def _get_conn(self) -> sqlite3.Connection:
-        from cortex.db import connect
+    async def _get_conn_async(self) -> aiosqlite.Connection:
+        from cortex.db import connect_async
 
-        return connect(self.db_path, row_factory=sqlite3.Row)
+        return await connect_async(self.db_path)
 
     async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
-            row = conn.execute(
+            conn.row_factory = aiosqlite.Row
+            cursor = await conn.execute(
                 "SELECT * FROM api_keys WHERE key_hash = ? AND is_active = 1",
                 (key_hash,),
-            ).fetchone()
+            )
+            row = await cursor.fetchone()
             return dict(row) if row else None
         finally:
-            conn.close()
+            await conn.close()
 
     async def store_key(
         self,
@@ -108,51 +114,53 @@ class SQLiteAuthBackend(BaseAuthBackend):
         from cortex.auth import SQL_INSERT_KEY
 
         args = (name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit)
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
-            cursor = conn.execute(SQL_INSERT_KEY, args)
-            conn.commit()
+            cursor = await conn.execute(SQL_INSERT_KEY, args)
+            await conn.commit()
             return cursor.lastrowid
         finally:
-            conn.close()
+            await conn.close()
 
     async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
+            conn.row_factory = aiosqlite.Row
             if tenant_id:
-                rows = conn.execute(
+                cursor = await conn.execute(
                     "SELECT * FROM api_keys WHERE tenant_id = ? ORDER BY created_at DESC",
                     (tenant_id,),
-                ).fetchall()
+                )
             else:
-                rows = conn.execute("SELECT * FROM api_keys ORDER BY created_at DESC").fetchall()
+                cursor = await conn.execute("SELECT * FROM api_keys ORDER BY created_at DESC")
+            rows = await cursor.fetchall()
             return [dict(r) for r in rows]
         finally:
-            conn.close()
+            await conn.close()
 
     async def revoke_key(self, key_id: int | str) -> bool:
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
-            cursor = conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
-            conn.commit()
+            cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
+            await conn.commit()
             return cursor.rowcount > 0
         finally:
-            conn.close()
+            await conn.close()
 
     async def update_last_used(self, key_id: int | str) -> None:
         from datetime import datetime, timezone
 
-        conn = self._get_conn()
+        conn = await self._get_conn_async()
         try:
-            conn.execute(
+            await conn.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
                 (datetime.now(timezone.utc).isoformat(), key_id),
             )
-            conn.commit()
-        except sqlite3.OperationalError as e:
-            logger.debug("Could not update last_used (DB busy: %s), skipping", e)
+            await conn.commit()
+        except Exception as e:
+            logger.debug("Could not update last_used (async): %s", e)
         finally:
-            conn.close()
+            await conn.close()
 
 
 class AlloyDBAuthBackend(BaseAuthBackend):

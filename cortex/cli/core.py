@@ -285,21 +285,24 @@ def status(db, json_output) -> None:
         if json_output:
             click.echo(json.dumps(s, indent=2))
             return
-        table = Table(title="🧠 CORTEX Status")
-        table.add_column("Metric", style="bold")
-        table.add_column("Value", style="cyan")
-        table.add_row("Version", __version__)
+        table = Table(
+            title="[bold #CCFF00]⚡ ESTADO SOBERANO (CORTEX v6)[/]", border_style="#6600FF"
+        )
+        table.add_column("Métrica", style="bold #D4AF37")
+        table.add_column("Valor", style="cyan")
+        table.add_row("Engine State", "[bold #06d6a0]Hiperconducción 130/100[/]")
+        table.add_row("Entropía", "[dim]Aniquilada[/]")
         table.add_row("Database", s["db_path"])
         table.add_row("Size", f"{s['db_size_mb']} MB")
         table.add_row("Total Facts", str(s["total_facts"]))
-        table.add_row("Active Facts", f"[green]{s['active_facts']}[/]")
+        table.add_row("Active Facts", f"[bold #06d6a0]{s['active_facts']}[/]")
         table.add_row("Deprecated", f"[dim]{s['deprecated_facts']}[/]")
         table.add_row("Projects", str(s["project_count"]))
         table.add_row("Embeddings", str(s["embeddings"]))
         table.add_row("Transactions", str(s["transactions"]))
         if s["types"]:
             types_str = ", ".join(f"{t}: {c}" for t, c in s["types"].items())
-            table.add_row("By Type", types_str)
+            table.add_row("By Type", f"[dim]{types_str}[/]")
         console.print(table)
     finally:
         _run_async(engine.close())

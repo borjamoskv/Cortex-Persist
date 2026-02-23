@@ -34,7 +34,6 @@ from cortex.memory.manager import CortexMemoryManager  # noqa: E402
 from cortex.memory.vector_store import VectorStoreL2  # noqa: E402
 from cortex.memory.working import WorkingMemoryL1  # noqa: E402
 
-
 # ─── Mock Embedder ────────────────────────────────────────────────────
 
 
@@ -108,7 +107,10 @@ class TestCortexMemoryManager:
     async def test_process_interaction_fills_l1(self, manager):
         """Events should appear in L1 working memory."""
         await manager.process_interaction(
-            role="user", content="hello", session_id="s1", token_count=50,
+            role="user",
+            content="hello",
+            session_id="s1",
+            token_count=50,
         )
         assert manager.l1.event_count == 1
         assert manager.l1.current_tokens == 50
@@ -131,7 +133,10 @@ class TestCortexMemoryManager:
     async def test_assemble_context_returns_working_memory(self, manager):
         """assemble_context without query returns L1 only."""
         await manager.process_interaction(
-            role="user", content="test context", session_id="s1", token_count=50,
+            role="user",
+            content="test context",
+            session_id="s1",
+            token_count=50,
         )
         ctx = await manager.assemble_context()
         assert len(ctx["working_memory"]) == 1
@@ -141,7 +146,10 @@ class TestCortexMemoryManager:
     async def test_assemble_context_with_query(self, manager):
         """assemble_context with query key present."""
         await manager.process_interaction(
-            role="user", content="cortex system", session_id="s1", token_count=50,
+            role="user",
+            content="cortex system",
+            session_id="s1",
+            token_count=50,
         )
         ctx = await manager.assemble_context(query="cortex")
         assert "episodic_context" in ctx

@@ -45,6 +45,8 @@ from cortex.daemon.monitors import (
     SecurityMonitor,
     SiteMonitor,
 )
+from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
+from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 __all__ = ["MoskvDaemon"]
 
@@ -131,6 +133,31 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
             threshold=file_config.get("security_threshold", 0.85),
         )
+
+        try:
+            from cortex.connection_pool import CortexConnectionPool
+            from cortex.daemon.sidecar.telemetry import ASTOracle
+            from cortex.engine_async import AsyncCortexEngine
+
+            db_path = file_config.get("db_path", str(CORTEX_DB))
+            pool = CortexConnectionPool(db_path)
+            self._async_engine = AsyncCortexEngine(pool=pool, db_path=db_path)
+            self.ast_oracle = ASTOracle(
+                engine=self._async_engine,
+                watch_dir=Path(file_config.get("watch_path", str(CORTEX_DIR))),
+            )
+            self.fiat_oracle = FiatOracle(
+                engine=self._shared_engine,
+                interval=file_config.get("fiat_interval", 30.0),
+            )
+            self.sentinel_oracle = SentinelMonitor(
+                check_interval=file_config.get("sentinel_interval", 60),
+            )
+        except ImportError:
+            self._async_engine = None
+            self.ast_oracle = None
+            self.fiat_oracle = None
+            self.sentinel_oracle = None
 
         cert_hostnames = [
             h.replace("https://", "").replace("http://", "").split("/")[0]
@@ -327,6 +354,30 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             target=self._run_neural_loop, name="NeuralSync", daemon=True
         )
         neural_thread.start()
+        self._threads.append(neural_thread)
+
+        if self.ast_oracle:
+            t = threading.Thread(target=self._run_ast_oracle_loop, name="ASTOracle", daemon=True)
+            t.start()
+            self._threads.append(t)
+
+        if self.fiat_oracle:
+            t = threading.Thread(
+                target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
+            )
+            t.start()
+            self._threads.append(t)
+
+        if getattr(self, "sentinel_oracle", None):
+            t = threading.Thread(
+                target=self._run_sentinel_oracle_loop,
+                name="SentinelOracle",
+                daemon=True,
+            )
+            t.start()
+            self._threads.append(t)
+
+        logger.info("Daemon started with %d threads", len(self._threads))
 
         try:
             while not self._shutdown:
@@ -348,6 +399,36 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             except (ValueError, OSError, RuntimeError) as e:
                 logger.debug("Neural loop error: %s", e)
             self._stop_event.wait(timeout=1.0)
+
+    def _run_ast_oracle_loop(self) -> None:
+        """Runs the AST Oracle event loop for live AST mutation interception."""
+        import asyncio
+
+        logger.info("👁️ AST Oracle thread started (FSEvents)")
+
+        async def _lifecycle():
+            # Run the observer until shutdown is flagged
+            task = asyncio.create_task(self.ast_oracle.start())
+            while not self._shutdown:
+                await asyncio.sleep(1.0)
+            await self.ast_oracle.stop()
+            await task
+
+        try:
+            asyncio.run(_lifecycle())
+        except Exception as e:
+            logger.error("AST Oracle loop error: %s", e)
+
+    def _run_sentinel_oracle_loop(self) -> None:
+        """Runs the Sentinel Oracle polling loop."""
+        import asyncio
+
+        logger.info("🛡️ CORTEX Sentinel Oracle thread started")
+        try:
+            # We are running this in a new thread, so asyncio.run is perfect.
+            asyncio.run(self.sentinel_oracle.run_loop())
+        except Exception as e:
+            logger.error("Sentinel Oracle loop error: %s", e)
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts (1 per hour per key)."""

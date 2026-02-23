@@ -1,9 +1,10 @@
+from unittest.mock import Mock
 
 import pytest
+from fastapi import Request
+
 from cortex.auth import AuthResult, require_permission
 from cortex.auth.rbac import Permission
-from fastapi import Request
-from unittest.mock import Mock
 
 
 @pytest.mark.asyncio
@@ -27,6 +28,7 @@ async def test_rbac_permission_enum():
     # 3. Viewer should NOT have MANAGE_KEYS
     checker_manage = require_permission(Permission.MANAGE_KEYS)
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await checker_manage(mock_request, auth_viewer)
     assert exc.value.status_code == 403
@@ -45,5 +47,6 @@ async def test_legacy_string_permission():
 
     checker_fail = require_permission("missing_perm")
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException):
         await checker_fail(mock_request, auth)
