@@ -1,1 +1,1 @@
-"""CORTEX Sovereign Initialization."""
+"""Sovereign package."""
