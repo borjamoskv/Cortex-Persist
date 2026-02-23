@@ -5,6 +5,7 @@ Execute X-Ray 13D scan on a project directory.
 Refactored: scan() orchestrates, helpers do collection + scoring + assembly.
 """
 
+import ast
 import logging
 import os
 from concurrent.futures import ProcessPoolExecutor
@@ -43,12 +44,55 @@ def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
 # ─── Per-File Analysis ───────────────────────────────────────────────
 
 
+def _analyze_python_nesting(content: str, rel: str) -> list[str]:
+    comp = []
+    try:
+        tree = ast.parse(content)
+        class NestingVisitor(ast.NodeVisitor):
+            def __init__(self) -> None:
+                self.depth = 0
+            def visit(self, node: ast.AST) -> None:
+                inc = isinstance(node, (
+                    ast.If, ast.For, ast.While, ast.Try, ast.With,
+                    ast.AsyncFor, ast.AsyncWith, ast.FunctionDef,
+                    ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler
+                ))
+                if inc:
+                    self.depth += 1
+                    if self.depth >= 6:
+                        line_no = getattr(node, "lineno", "?")
+                        comp.append(f"{rel}:{line_no} -> High structural nesting (depth {self.depth})")
+                        self.depth -= 1
+                        return
+                self.generic_visit(node)
+                if inc:
+                    self.depth -= 1
+        NestingVisitor().visit(tree)
+    except SyntaxError:
+        pass
+    return comp
+
+def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
+    comp = []
+    for i, line in enumerate(lines, 1):
+        stripped = line.lstrip()
+        if not stripped or stripped.startswith(("#", "//", "/*", "*", '"""', "'''", "]", "}", ")")):
+            continue
+        indent = len(line) - len(stripped)
+        if indent >= 24 and any(stripped.startswith(kw) for kw in (
+            "if ", "for ", "while ", "class ", "def ", "function ",
+            "try", "catch", "else", "switch ", "with "
+        )):
+            comp.append(f"{rel}:{i} -> High nesting detected (indent {indent})")
+    return comp
+
 def _analyze_single_file(
     sf: Path, root: Path
 ) -> tuple[int, str | None, list[str], list[str], list[str]]:
     """Analyse a single file and return its metrics."""
     try:
-        lines = sf.read_text(errors="replace").splitlines()
+        content = sf.read_text(errors="replace")
+        lines = content.splitlines()
     except OSError:
         return 0, None, [], [], []
 
@@ -56,19 +100,14 @@ def _analyze_single_file(
     rel = str(sf.relative_to(root))
     large_file = f"{rel} ({loc} LOC)" if loc > MAX_LOC else None
 
+    # 130/100 Sovereign: AST Structural Nesting for Python + Smart Polyglot
+    if sf.suffix == ".py":
+        comp = _analyze_python_nesting(content, rel)
+    else:
+        comp = _analyze_polyglot_nesting(lines, rel)
+
     psi = []
     sec = []
-    comp = []
-
-    for i, line in enumerate(lines, 1):
-        stripped = line.lstrip()
-        if not stripped:
-            continue
-        indent = len(line) - len(stripped)
-        if indent >= 24:
-            comp.append(f"{rel}:{i} -> High nesting detected (indent {indent})")
-
-    content = "\n".join(lines)
     for match in PSI_PATTERNS.finditer(content):
         line_no = content[: match.start()].count("\n") + 1
         psi.append(f"{rel}:{line_no} → {match.group()}")
