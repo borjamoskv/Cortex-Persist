@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sqlite3
 
 import click
 from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 from cortex.handoff import generate_handoff, load_handoff, save_handoff
 
-__all__ = ['handoff', 'generate', 'load']
+__all__ = ["handoff", "generate", "load"]
 
 
 def _run_async(coro):
@@ -65,6 +67,8 @@ def generate(db, pending, mood, focus, out) -> None:
                 border_style="cyan",
             )
         )
+    except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:
+        handle_cli_error(e, db_path=db, context="generating handoff")
     finally:
         _run_async(engine.close())
 
@@ -80,7 +84,7 @@ def load(path, json_output) -> None:
     data = load_handoff(path=target)
 
     if data is None:
-        console.print("[yellow]No handoff found. Run 'cortex handoff generate' first.[/]")
+        err_empty_results("handoff", suggestion="Run 'cortex handoff generate' first.")
         return
 
     if json_output:
@@ -89,8 +93,12 @@ def load(path, json_output) -> None:
 
     _display_handoff_summary(data)
     _display_pending_work(data)
-    _display_section_table(data, "hot_decisions", "\n🔥 Hot Decisions", "content", "Decision", "cyan")
-    _display_section_table(data, "active_ghosts", "\n👻 Active Ghosts", "reference", "Reference", "cyan")
+    _display_section_table(
+        data, "hot_decisions", "\n🔥 Hot Decisions", "content", "Decision", "cyan"
+    )
+    _display_section_table(
+        data, "active_ghosts", "\n👻 Active Ghosts", "reference", "Reference", "cyan"
+    )
     _display_section_table(data, "recent_errors", "\n🔴 Recent Errors", "content", "Error", "red")
 
     active = data.get("active_projects", [])
@@ -131,7 +139,12 @@ def _display_pending_work(data: dict) -> None:
 
 
 def _display_section_table(
-    data: dict, key: str, title: str, content_field: str, column_name: str, project_style: str,
+    data: dict,
+    key: str,
+    title: str,
+    content_field: str,
+    column_name: str,
+    project_style: str,
 ) -> None:
     """Display a section of handoff data as a Rich table."""
     items = data.get(key, [])
@@ -145,4 +158,3 @@ def _display_section_table(
         text = _truncate(item[content_field])
         table.add_row(str(item["id"]), item["project"], text)
     console.print(table)
-

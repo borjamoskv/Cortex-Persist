@@ -11,7 +11,7 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
-__all__ = ['DEFAULT_SWARM_PATH', 'MissionOrchestrator']
+__all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 
 logger = logging.getLogger("cortex.launchpad")
 

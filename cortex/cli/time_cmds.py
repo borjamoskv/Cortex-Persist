@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import click
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine, get_tracker
+from cortex.cli.errors import err_empty_results, handle_cli_error
 
-__all__ = ['time_cmd', 'heartbeat_cmd']
+__all__ = ["time_cmd", "heartbeat_cmd"]
 
 
 @cli.command("time")
@@ -27,7 +30,7 @@ def time_cmd(project, days, db) -> None:
             summary = t.report(project=project, days=days)
             title = f"⏱ Last {days} Days"
         if summary.total_seconds == 0:
-            console.print("[yellow]No time tracked yet.[/]")
+            err_empty_results("time tracked")
             return
         table = Table(title=title)
         table.add_column("Metric", style="bold")
@@ -47,6 +50,8 @@ def time_cmd(project, days, db) -> None:
             for entity, count in summary.top_entities[:5]:
                 table.add_row(f"  📄 {entity}", f"{count} hits")
         console.print(table)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="fetching time report")
     finally:
         engine.close_sync()
 
@@ -71,5 +76,7 @@ def heartbeat_cmd(project, entity, category, branch, db) -> None:
         )
         t.flush()
         console.print(f"[green]✓[/] Heartbeat [bold]#{hb_id}[/] → [cyan]{project}[/]/{entity}")
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="recording heartbeat")
     finally:
         engine.close_sync()

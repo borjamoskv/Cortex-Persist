@@ -208,7 +208,7 @@ def enable_boot():
                 console.print("[bold green]✅ AUTOROUTER-1 instalado vía legacy load.[/]")
             else:
                 console.print(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         err_execution_failed("launchctl bootstrap", str(e))
 
 
@@ -237,7 +237,7 @@ def disable_boot():
         PLIST_PATH.unlink(missing_ok=True)
         console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
         _run_daemon(["--stop"])
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         err_execution_failed("launchctl bootout", str(e))
 
 

@@ -9,7 +9,7 @@ function FxKnob({ label, value, color, onChange }: { label: string; value: numbe
       </div>
       <div className="h-1 bg-black rounded-full relative">
         <div className="absolute h-full rounded-full" style={{ width: `${value * 100}%`, backgroundColor: color, boxShadow: `0 0 4px ${color}80` }} />
-        <input type="range" min="0" max="1" step="0.01" value={value} onChange={e => onChange(parseFloat(e.target.value))} className="absolute inset-0 w-full opacity-0 cursor-ew-resize" />
+        <input type="range" min="0" max="1" step="0.01" value={value} onChange={e => onChange(parseFloat(e.target.value))} className="absolute inset-0 w-full opacity-0 cursor-ew-resize" aria-label={label} />
       </div>
     </div>
   );

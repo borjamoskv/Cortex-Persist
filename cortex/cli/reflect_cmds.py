@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 import click
 from rich.panel import Panel
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 
-__all__ = ['reflect', 'inject']
+__all__ = ["reflect", "inject"]
 
 
 @cli.command()
@@ -39,6 +42,8 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
             console.print(f"  [red]✗[/] {len(error_list)} error(s) logged")
         if decision_list:
             console.print(f"  [blue]→[/] {len(decision_list)} decision(s) logged")
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="storing reflection")
     finally:
         engine.close_sync()
 
@@ -87,6 +92,8 @@ def inject(project, hint, top_k, fmt, db) -> None:
                     )
                 )
             else:
-                console.print("[dim]No prior reflections found for this context.[/]")
+                err_empty_results("prior reflections")
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="injecting reflections")
     finally:
         engine.close_sync()

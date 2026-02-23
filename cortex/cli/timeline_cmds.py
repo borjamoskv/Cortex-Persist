@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import sqlite3
 
 import click
 from rich.table import Table
 
 from cortex.api_deps import get_engine
 from cortex.cli import DEFAULT_DB, cli, console
+from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = [
     "snapshot_create",
@@ -42,7 +44,7 @@ def timeline_log(limit, db):
             )
             rows = await cursor.fetchall()
             if not rows:
-                console.print("[yellow]No transactions found.[/]")
+                err_empty_results("transactions")
                 return
             table = Table(title="📜 Transaction Ledger")
             table.add_column("TX ID", style="bold", width=8)
@@ -53,6 +55,8 @@ def timeline_log(limit, db):
             for row in rows:
                 table.add_row(f"#{row[0]}", row[1], row[2], row[3][:12] + "...", row[4])
             console.print(table)
+        except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:
+            handle_cli_error(e, db_path=db, context="fetching timeline log")
         finally:
             await engine.close()
 
@@ -72,7 +76,7 @@ def timeline_checkout(tx_id, project, db):
             with console.status(f"[bold blue]Reconstructing state at TX #{tx_id}...[/]"):
                 facts = await engine.reconstruct_state(tx_id, project=project)
             if not facts:
-                console.print(f"[yellow]No active facts at TX #{tx_id}.[/]")
+                err_empty_results(f"active facts at TX #{tx_id}")
                 return
             title = f"🕰 State at TX #{tx_id}"
             if project:
@@ -92,6 +96,8 @@ def timeline_checkout(tx_id, project, db):
                     f"{f.consensus_score:.2f}",
                 )
             console.print(table)
+        except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:
+            handle_cli_error(e, db_path=db, context="reconstructing state")
         finally:
             await engine.close()
 
@@ -116,7 +122,6 @@ def snapshot_create(name, db):
         engine = get_engine(db)
         try:
             conn = await engine.get_conn()
-            # ledger = ImmutableLedger(conn) # Unused but for context
             cursor = await conn.execute("SELECT id FROM transactions ORDER BY id DESC LIMIT 1")
             latest_tx = await cursor.fetchone()
             tx_id = latest_tx[0] if latest_tx else 0
@@ -134,6 +139,8 @@ def snapshot_create(name, db):
             console.print(f"  [dim]Path:[/] {snap.path}")
             console.print(f"  [dim]TX ID:[/] {snap.tx_id}")
             console.print(f"  [dim]Size:[/] {snap.size_mb} MB")
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="creating snapshot")
         finally:
             await engine.close()
 
@@ -148,20 +155,23 @@ def snapshot_list(db):
     async def _snapshot_list_async():
         from cortex.engine.snapshots import SnapshotManager
 
-        sm = SnapshotManager(db_path=db)
-        snaps = await sm.list_snapshots()
-        if not snaps:
-            console.print("[yellow]No snapshots found.[/]")
-            return
-        table = Table(title="💾 CORTEX Snapshots")
-        table.add_column("Name", style="bold", width=20)
-        table.add_column("TX ID", style="cyan", width=8)
-        table.add_column("Created At", width=20)
-        table.add_column("Size", width=10)
-        for s in snaps:
-            table.add_row(
-                s.name, str(s.tx_id), s.created_at[:19].replace("T", " "), f"{s.size_mb} MB"
-            )
-        console.print(table)
+        try:
+            sm = SnapshotManager(db_path=db)
+            snaps = await sm.list_snapshots()
+            if not snaps:
+                err_empty_results("snapshots")
+                return
+            table = Table(title="💾 CORTEX Snapshots")
+            table.add_column("Name", style="bold", width=20)
+            table.add_column("TX ID", style="cyan", width=8)
+            table.add_column("Created At", width=20)
+            table.add_column("Size", width=10)
+            for s in snaps:
+                table.add_row(
+                    s.name, str(s.tx_id), s.created_at[:19].replace("T", " "), f"{s.size_mb} MB"
+                )
+            console.print(table)
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="listing snapshots")
 
     asyncio.run(_snapshot_list_async())

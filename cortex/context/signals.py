@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-__all__ = ['Signal', 'InferenceResult']
+__all__ = ["Signal", "InferenceResult"]
 
 
 @dataclass

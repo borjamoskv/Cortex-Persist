@@ -32,6 +32,7 @@ export function BpmControl() {
       <input
         autoFocus
         className="w-14 text-center font-mono text-sm font-bold bg-black border border-[var(--color-cyber-lime)] text-white rounded outline-none"
+        aria-label="BPM value"
         value={draft}
         onChange={e => setDraft(e.target.value)}
         onBlur={() => {

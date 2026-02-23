@@ -210,7 +210,7 @@ class TestDaemonStatus:
 
 
 class TestSiteMonitorRetry:
-    @patch("cortex.daemon.time.sleep")  # skip real sleep
+    @patch("cortex.daemon.monitors.network.time.sleep")  # skip real sleep
     @patch("httpx.get")
     def test_retry_on_timeout_then_success(self, mock_get, mock_sleep):
         """First call times out, second succeeds."""
@@ -224,7 +224,7 @@ class TestSiteMonitorRetry:
         assert results[0].healthy is True
         assert mock_get.call_count == 2
 
-    @patch("cortex.daemon.time.sleep")
+    @patch("cortex.daemon.monitors.network.time.sleep")
     @patch("httpx.get")
     def test_all_retries_fail(self, mock_get, mock_sleep):
         """Both attempts fail — returns unhealthy."""

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-__all__ = ['get_dashboard_html']
+__all__ = ["get_dashboard_html"]
 
 _TEMPLATE_DIR = Path(__file__).parent / "templates"
 _DASHBOARD_CACHE: str | None = None

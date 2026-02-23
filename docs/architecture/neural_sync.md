@@ -30,7 +30,7 @@ Cuando el bucle `1Hz` capta un cambio sustancial (*deduplicado* para no ahogar l
 **Reglas de Inferencia (Heurísticas Actuales):**
 * **DEBUGGING**: App (`Cursor`|`Terminal`) + Portapapeles con *Error/Traceback* → Asume intención de `debugging_error`.
 * **INVESTIGACIÓN**: App de Navegación (`Chrome`|`Arc`) + Portapapeles con una *URL* → Asume intención de `researching`.
-* **ARQUEOLOGÍA / DEUDA TÉCNICA**: App de Código (`Cursor`|`VSCode`) + Portapapeles con un *TODO/FIXME/HACK* → Asume intención de `technical_debt_focus`.
+* **ARQUEOLOGÍA / DEUDA TÉCNICA**: App de Código (`Cursor`|`VSCode`) + Portapapeles con un *TODO/F_IXME/H_ACK* → Asume intención de `technical_debt_focus`.
 * **PLANIFICACIÓN**: App Organizacional (`Linear`|`Notion`) + Portapapeles con estructura de ticket → Asume intención de `planning`.
 
 ## 🔄 4. Deduplicación Temporal de Intenciones

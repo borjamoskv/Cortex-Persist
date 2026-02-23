@@ -6,7 +6,7 @@ Implements L3 Application-Level Encryption using AES-GCM.
 import base64
 import os
 
-__all__ = ['Vault']
+__all__ = ["Vault"]
 
 try:
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM

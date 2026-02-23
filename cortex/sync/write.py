@@ -18,12 +18,35 @@ from cortex.sync.common import (
 )
 from cortex.temporal import now_iso
 
-__all__ = ['export_to_json']
+__all__ = ["export_to_json"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.sync")
+
+
+def _writeback_if_changed(
+    engine: CortexEngine,
+    fact_type: str,
+    wb_fn,
+    result: WritebackResult,
+    wb_hashes: dict,
+    hash_key: str | None = None,
+    hash_value: str | None = None,
+) -> None:
+    """Hash-check and writeback a single fact type."""
+    key = hash_key or fact_type
+    try:
+        computed = hash_value or db_content_hash(engine, fact_type)
+        if computed != wb_hashes.get(key):
+            wb_fn(engine, result)
+            wb_hashes[key] = computed
+        else:
+            result.files_skipped += 1
+    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
+        result.errors.append(f"{key}: {e}")
+        logger.exception("Write-back %s failed", key)
 
 
 def export_to_json(engine: CortexEngine) -> WritebackResult:
@@ -32,12 +55,6 @@ def export_to_json(engine: CortexEngine) -> WritebackResult:
     Reconstruye los archivos JSON originales a partir del estado actual
     de la base de datos CORTEX. Usa detección de cambios por SHA-256
     y escritura atómica para prevenir corrupción.
-
-    Archivos generados:
-    - ghosts.json     ← facts tipo 'ghost'
-    - system.json     ← facts tipo 'knowledge' + 'decision'
-    - mistakes.jsonl  ← facts tipo 'error'
-    - bridges.jsonl   ← facts tipo 'bridge'
 
     Returns:
         WritebackResult con estadísticas.
@@ -48,55 +65,27 @@ def export_to_json(engine: CortexEngine) -> WritebackResult:
 
     MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ── 1. Ghosts → ghosts.json ──────────────────────────────────
-    try:
-        db_hash = db_content_hash(engine, "ghost")
-        if db_hash != wb_hashes.get("ghost"):
-            _writeback_ghosts(engine, result)
-            wb_hashes["ghost"] = db_hash
-        else:
-            result.files_skipped += 1
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"ghost: {e}")
-        logger.exception("Write-back ghosts failed")
+    _writeback_if_changed(engine, "ghost", _writeback_ghosts, result, wb_hashes)
 
-    # ── 2. System (knowledge + decisions) → system.json ──────────
+    # System uses combined hash of knowledge + decisions
     try:
         k_hash = db_content_hash(engine, "knowledge")
         d_hash = db_content_hash(engine, "decision")
-        combined_hash = hashlib.sha256(f"{k_hash}:{d_hash}".encode()).hexdigest()
-        if combined_hash != wb_hashes.get("system"):
-            _writeback_system(engine, result)
-            wb_hashes["system"] = combined_hash
-        else:
-            result.files_skipped += 1
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"system: {e}")
-        logger.exception("Write-back system failed")
+        combined = hashlib.sha256(f"{k_hash}:{d_hash}".encode()).hexdigest()
+    except (sqlite3.Error, OSError):
+        combined = None
+    _writeback_if_changed(
+        engine,
+        "knowledge",
+        _writeback_system,
+        result,
+        wb_hashes,
+        hash_key="system",
+        hash_value=combined,
+    )
 
-    # ── 3. Mistakes → mistakes.jsonl ─────────────────────────────
-    try:
-        db_hash = db_content_hash(engine, "error")
-        if db_hash != wb_hashes.get("error"):
-            _writeback_mistakes(engine, result)
-            wb_hashes["error"] = db_hash
-        else:
-            result.files_skipped += 1
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"error: {e}")
-        logger.exception("Write-back mistakes failed")
-
-    # ── 4. Bridges → bridges.jsonl ───────────────────────────────
-    try:
-        db_hash = db_content_hash(engine, "bridge")
-        if db_hash != wb_hashes.get("bridge"):
-            _writeback_bridges(engine, result)
-            wb_hashes["bridge"] = db_hash
-        else:
-            result.files_skipped += 1
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"bridge: {e}")
-        logger.exception("Write-back bridges failed")
+    _writeback_if_changed(engine, "error", _writeback_mistakes, result, wb_hashes)
+    _writeback_if_changed(engine, "bridge", _writeback_bridges, result, wb_hashes)
 
     # Guardar hashes para la próxima ejecución
     state["writeback_hashes"] = wb_hashes

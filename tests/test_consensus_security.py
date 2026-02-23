@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import pytest
@@ -58,8 +59,8 @@ def client():
 def test_consensus_tenant_isolation(client):
     # 1. Create two tenants using AuthManager directly
     am = api_state.auth_manager
-    raw_key1, _ = am.create_key("T1", "tenant1", ["read", "write"])
-    raw_key2, _ = am.create_key("T2", "tenant2", ["read", "write"])
+    raw_key1, _ = am.create_key_sync("T1", tenant_id="tenant1", permissions=["read", "write"])
+    raw_key2, _ = am.create_key_sync("T2", tenant_id="tenant2", permissions=["read", "write"])
 
     # 2. Tenant 1 stores a fact
     resp = client.post(
@@ -95,7 +96,9 @@ def test_consensus_tenant_isolation(client):
 
 def test_vote_validation(client):
     am = api_state.auth_manager
-    raw_key1, _ = am.create_key("T1", "tenant1", ["read", "write"])
+    raw_key1, _ = asyncio.run(
+        am.create_key("T1", tenant_id="tenant1", permissions=["read", "write"])
+    )
 
     resp = client.post(
         "/v1/facts",

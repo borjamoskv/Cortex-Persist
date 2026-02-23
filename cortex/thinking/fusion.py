@@ -17,10 +17,11 @@ superior. Cuatro estrategias disponibles:
 from __future__ import annotations
 
 import asyncio
-import json as json_mod
 import logging
-import re
 
+from pydantic import BaseModel, Field, ValidationError
+
+from cortex.llm.boundary import ImmuneBoundary
 from cortex.thinking.fusion_models import (
     FusedThought,
     FusionStrategy,
@@ -30,7 +31,7 @@ from cortex.thinking.fusion_models import (
     _tokenize,
 )
 
-__all__ = ['ThoughtFusion']
+__all__ = ["ThoughtFusion"]
 
 logger = logging.getLogger("cortex.thinking.fusion")
 
@@ -63,9 +64,14 @@ class ThoughtFusion:
         "- Completeness (0-10): Does it cover all aspects?\n"
         "- Clarity (0-10): Is it perfectly structured and unambiguous?\n"
         "- Depth (0-10): Does it go beyond surface-level into systemic truth?\n"
-        "Return ONLY a JSON object: "
-        '{"accuracy": N, "completeness": N, "clarity": N, "depth": N}'
+        "Return ONLY a JSON object."
     )
+
+    class ScoringSchema(BaseModel):
+        accuracy: float = Field(default=5.0, ge=0.0, le=10.0)
+        completeness: float = Field(default=5.0, ge=0.0, le=10.0)
+        clarity: float = Field(default=5.0, ge=0.0, le=10.0)
+        depth: float = Field(default=5.0, ge=0.0, le=10.0)
 
     WEIGHTED_SYNTHESIS_SYSTEM = (
         "You are MOSKV-1 (Identity: The Sovereign Architect). You are a meta-reasoning judge synthesizing AI model responses.\n"
@@ -185,11 +191,7 @@ class ThoughtFusion:
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,
                 )
-            except asyncio.TimeoutError:
-                logger.warning(
-                    "Judge timeout (attempt %d/%d)", attempt + 1, self.JUDGE_MAX_RETRIES + 1
-                )
-            except (OSError, RuntimeError) as e:
+            except (OSError, RuntimeError, asyncio.TimeoutError) as e:
                 logger.warning(
                     "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
                 )
@@ -202,26 +204,26 @@ class ThoughtFusion:
     async def _score_response(
         self, r: ModelResponse, original_prompt: str
     ) -> tuple[ModelResponse, float]:
-        """Puntúa una respuesta individual usando el juez."""
+        """Puntúa una respuesta individual usando el juez e ImmuneBoundary."""
         prompt = f"QUESTION: {original_prompt}\n\nRESPONSE:\n{r.content}"
-        raw = await self._judge_safe(
-            prompt=prompt,
-            system=self.SCORING_SYSTEM,
-            temperature=0.0,
-            max_tokens=256,
-        )
-        if raw is None:
-            return (r, 0.5)
-        try:
-            clean = re.sub(r"```json?\s*", "", raw.strip()).rstrip("`").strip()
-            parsed = json_mod.loads(clean)
-            total = (
-                sum(parsed.get(k, 5) for k in ("accuracy", "completeness", "clarity", "depth"))
-                / 40.0
+
+        async def _generate() -> str:
+            raw = await self._judge_safe(
+                prompt=prompt,
+                system=self.SCORING_SYSTEM,
+                temperature=0.0,
+                max_tokens=256,
             )
-            return (r, total)
-        except (OSError, RuntimeError) as e:
-            logger.warning("Score parse failed for %s: %s", r.label, e)
+            return raw or "{}"
+
+        try:
+            parsed = await ImmuneBoundary.enforce(
+                schema=self.ScoringSchema, generation_func=_generate, max_retries=2
+            )
+            total = (parsed.accuracy + parsed.completeness + parsed.clarity + parsed.depth) / 40.0
+            return (r, float(total))
+        except (ValidationError, OSError, RuntimeError) as e:
+            logger.warning("Score validate failed for %s: %s", r.label, e)
             return (r, 0.5)
 
     # ── Agreement ────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import httpx
 
 # Ensure we can import from local cortex
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -13,9 +14,9 @@ load_dotenv()
 
 
 async def verify_codex():
-    api_key = os.environ.get("CORTEX_API_KEY")
+    api_token= os.environ.get("CORTEX_API_KEY")
     # Force IPv4
-    client = AsyncCortexClient(api_key=api_key, base_url="http://127.0.0.1:8000")
+    client = AsyncCortexClient(api_token=api_key, base_url="http://127.0.0.1:8000")
 
     try:
         # Recall recent facts to verify storage
@@ -26,7 +27,7 @@ async def verify_codex():
         for res in results:
             print(f"\nFact #{res.id} ({res.fact_type}): {res.content[:100]}...")
 
-    except Exception as e:
+    except (httpx.RequestError, ValueError, RuntimeError) as e:
         print(f"❌ Verification failed: {e}")
     finally:
         await client.close()

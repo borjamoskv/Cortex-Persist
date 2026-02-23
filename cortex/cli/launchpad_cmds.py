@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import os
+import sqlite3
 
 import click
 from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 from cortex.launchpad import MissionOrchestrator
 
-__all__ = ['launchpad', 'mission_launch', 'mission_list']
+__all__ = ["launchpad", "mission_launch", "mission_list"]
 
 
 @cli.group()
@@ -36,8 +38,9 @@ def launchpad():
 def mission_launch(project, goal, mission_file, formation, agents, db):
     """Launch a new swarm mission. Provide a goal or a mission file."""
     if not goal and not mission_file:
-        console.print("[red]Error: You must provide either a goal or a mission file (--file).[/]")
+        err_validation("goal", "You must provide either a goal or a mission file (--file).")
         return
+
     engine = get_engine(db)
     orchestrator = MissionOrchestrator(engine)
     try:
@@ -74,6 +77,8 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
             )
             if "stderr" in result:
                 console.print(f"\n[red]Stderr:[/]\n{result['stderr']}")
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="launching mission")
     finally:
         engine.close_sync()
 
@@ -88,7 +93,7 @@ def mission_list(project, db):
     try:
         missions = orchestrator.list_missions(project=project)
         if not missions:
-            console.print("[yellow]No missions found in the ledger.[/]")
+            err_empty_results("missions in the ledger")
             return
         table = Table(title="🐝 Swarm Mission History")
         table.add_column("ID", style="bold", width=6)
@@ -105,5 +110,7 @@ def mission_list(project, db):
                 m["created_at"],
             )
         console.print(table)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="listing missions")
     finally:
         engine.close_sync()

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
 from typing import Any
 from xml.etree import ElementTree
 
@@ -24,45 +23,13 @@ __all__ = [
 
 logger = logging.getLogger("cortex.sap.client")
 
-# ─── Exceptions ──────────────────────────────────────────────────────
-
-
-class SAPConnectionError(Exception):
-    """Failed to connect to SAP system."""
-
-
-class SAPAuthError(Exception):
-    """SAP authentication failed."""
-
-
-class SAPEntityError(Exception):
-    """SAP entity operation failed."""
-
-
-# ─── Configuration ───────────────────────────────────────────────────
-
-
-@dataclass
-class SAPConfig:
-    """SAP OData connection configuration."""
-
-    base_url: str
-    auth_type: str = "basic"  # basic | oauth2
-    username: str = ""
-    password: str = ""
-    client: str = ""  # SAP client number (e.g. "100")
-    oauth_token_url: str = ""
-    oauth_client_id: str = ""
-    oauth_client_secret: str = ""
-    timeout: int = 30
-    max_retries: int = 3
-    headers: dict[str, str] = field(default_factory=dict)
-
-    @property
-    def base_url_normalized(self) -> str:
-        """Return base URL without trailing slash."""
-        return self.base_url.rstrip("/")
-
+# Re-export from models for backwards compatibility
+from cortex.sap.models import (  # noqa: E402
+    SAPAuthError,
+    SAPConfig,
+    SAPConnectionError,
+    SAPEntityError,
+)
 
 # ─── Client ──────────────────────────────────────────────────────────
 
@@ -338,8 +305,18 @@ class SAPClient:
 
         try:
             return resp.json()
-        except (ConnectionError, OSError, RuntimeError):
+        except (OSError, RuntimeError):
             return {"raw": resp.text[:500]}
+
+    @staticmethod
+    def _check_response_status(resp: httpx.Response) -> None:
+        """Raise typed error for non-success HTTP status codes."""
+        if resp.status_code == 401:
+            raise SAPAuthError("Authentication expired — reconnect required")
+        if resp.status_code == 403:
+            raise SAPAuthError(f"Forbidden: {resp.text[:200]}")
+        if resp.status_code >= 400:
+            raise SAPEntityError(f"SAP error {resp.status_code}: {resp.text[:300]}")
 
     async def _raw_request(
         self,
@@ -378,18 +355,12 @@ class SAPClient:
                     headers=headers,
                 )
 
-                if resp.status_code == 401:
-                    raise SAPAuthError("Authentication expired — reconnect required")
-                if resp.status_code == 403:
-                    raise SAPAuthError(f"Forbidden: {resp.text[:200]}")
-                if resp.status_code >= 400:
-                    raise SAPEntityError(f"SAP error {resp.status_code}: {resp.text[:300]}")
-
+                self._check_response_status(resp)
                 return resp
 
             except (SAPAuthError, SAPEntityError):
                 raise
-            except (ConnectionError, OSError, RuntimeError) as e:
+            except (OSError, RuntimeError) as e:
                 last_error = e
                 if attempt < self.config.max_retries - 1:
                     wait = 2**attempt

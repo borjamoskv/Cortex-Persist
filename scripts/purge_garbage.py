@@ -9,17 +9,20 @@ from __future__ import annotations
 import shutil
 import sqlite3
 import sys
+
 from pathlib import Path
 
-DB_PATH = Path.home() / ".cortex" / "cortex.db"
-BACKUP_PATH = DB_PATH.with_suffix(".db.backup-pre-purge")
+from cortex.db import connect as connect_db
+
+DB_PATH = Path("~/.cortex/cortex.db").expanduser()
+BACKUP_PATH = Path("~/.cortex/cortex_backup.db").expanduser()
 
 
 def connect() -> sqlite3.Connection:
     if not DB_PATH.exists():
         print(f"✗ Database not found: {DB_PATH}")
         sys.exit(1)
-    return sqlite3.connect(str(DB_PATH))
+    return connect_db(str(DB_PATH))
 
 
 def backup() -> None:
@@ -201,4 +204,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (OSError, RuntimeError, sqlite3.Error) as e:
+        print(f"❌ Critical error: {e}")
+        sys.exit(1)

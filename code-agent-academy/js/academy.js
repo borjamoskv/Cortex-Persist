@@ -45,12 +45,12 @@ function initRoster() {
 function renderRoster() {
     const container = document.querySelector('.panel-content.scrollable');
     if (!container) return;
-    container.innerHTML = '';
+    container.textContent = '';
 
     CODERS.forEach(coder => {
         const card = document.createElement('div');
         card.className = `agent-card ${coder.status === 'Refactoring' ? 'active-agent' : ''}`;
-        card.innerHTML = `
+        card.textContent = `
             <div class="agent-rank">${coder.rank}</div>
             <div class="agent-info">
                 <h3>${coder.name}</h3>
@@ -67,12 +67,12 @@ function renderRoster() {
 function initArchitects() {
     const container = document.querySelector('.professors-list');
     if (!container) return;
-    container.innerHTML = '';
+    container.textContent = '';
 
     ARCHITECTS.forEach(arch => {
         const item = document.createElement('div');
         item.className = 'professor-item';
-        item.innerHTML = `
+        item.textContent = `
             <div class="prof-avatar">📐</div>
             <div class="prof-info">
                 <h4>${arch.name}</h4>

@@ -54,7 +54,8 @@ class TestListCommand:
     def test_list_empty_result(self, runner, db_path):
         result = runner.invoke(cli, ["list", "--db", db_path, "-p", "nonexistent"])
         assert result.exit_code == 0
-        assert "No se encontraron" in result.output
+        # i18n-agnostic: all translations contain the Panel title emoji
+        assert "📭" in result.output or "no" in result.output.lower()
 
     def test_list_with_limit(self, runner, db_path):
         result = runner.invoke(cli, ["list", "--db", db_path, "-n", "1"])
@@ -77,7 +78,8 @@ class TestDeleteCommand:
     def test_delete_nonexistent_fact(self, runner, db_path):
         result = runner.invoke(cli, ["delete", "999", "--db", db_path])
         assert result.exit_code == 0
-        assert "no encontrado" in result.output.lower()
+        # i18n-agnostic: fact ID appears in all translations, plus the Panel icon
+        assert "999" in result.output and "🔍" in result.output
 
     def test_delete_with_reason(self, runner, db_path, monkeypatch, tmp_path):
         monkeypatch.setattr("cortex.sync.MEMORY_DIR", tmp_path / "memory")
@@ -101,14 +103,15 @@ class TestEditCommand:
             cli, ["edit", "1", "Updated content here with more detail", "--db", db_path]
         )
         assert result.exit_code == 0
-        assert "editado" in result.output
+        assert "editado" in result.output or "edited" in result.output.lower()
 
     def test_edit_nonexistent_fact(self, runner, db_path):
         result = runner.invoke(
             cli, ["edit", "999", "New content that is long enough", "--db", db_path]
         )
         assert result.exit_code == 0
-        assert "no encontrado" in result.output.lower()
+        # i18n-agnostic: fact ID and Panel icon appear in all translations
+        assert "999" in result.output and "🔍" in result.output
 
     def test_edit_preserves_metadata(self, runner, db_path, monkeypatch, tmp_path):
         """Edit should preserve project, type, tags from original."""

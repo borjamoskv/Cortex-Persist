@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import sqlite3
 
@@ -12,6 +11,8 @@ from rich.table import Table
 
 from cortex import __version__
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_db_not_found, err_empty_results, handle_cli_error
+from cortex.event_loop import sovereign_run
 
 
 def _show_tip(engine=None) -> None:
@@ -45,7 +46,7 @@ def _get_tip_text(engine=None) -> str:
         return f"[dim bright_green]💡 {tip.content}[/]"
     except (ImportError, RuntimeError, OSError, ValueError):
         return ""
-from cortex.cli.errors import err_db_not_found, err_empty_results, handle_cli_error
+
 
 __all__ = [
     "history",
@@ -60,8 +61,46 @@ __all__ = [
 
 
 def _run_async(coro):
-    """Helper to run async coroutines from sync CLI."""
-    return asyncio.run(coro)
+    """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
+    return sovereign_run(coro)
+
+
+def _detect_agent_source() -> str:
+    """Auto-detect the AI agent calling CORTEX from environment.
+
+    Priority order:
+    1. CORTEX_SOURCE env var (explicit override)
+    2. Known IDE/agent environment markers
+    3. Fallback to 'cli'
+    """
+    import os
+
+    # Explicit override takes priority
+    explicit = os.environ.get("CORTEX_SOURCE")
+    if explicit:
+        return explicit
+
+    # Detect by known environment markers
+    markers = [
+        ("GEMINI_AGENT", "agent:gemini"),
+        ("CURSOR_SESSION_ID", "agent:cursor"),
+        ("CLAUDE_CODE_AGENT", "agent:claude-code"),
+        ("WINDSURF_SESSION", "agent:windsurf"),
+        ("COPILOT_AGENT", "agent:copilot"),
+        ("KIMI_SESSION_ID", "agent:kimi"),
+    ]
+    for env_var, source_name in markers:
+        if os.environ.get(env_var):
+            return source_name
+
+    # Check terminal program as fallback hint
+    term = os.environ.get("TERM_PROGRAM", "")
+    if "cursor" in term.lower():
+        return "agent:cursor"
+    if "vscode" in term.lower():
+        return "ide:vscode"
+
+    return "cli"
 
 
 @cli.command()
@@ -99,6 +138,10 @@ def init(db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store(project, content, fact_type, tags, confidence, source, ai_time, complexity, db) -> None:
     """Store a fact in CORTEX."""
+    # Auto-detect source from environment when not provided
+    if not source:
+        source = _detect_agent_source()
+
     engine = get_engine(db)
     try:
         meta = {}
@@ -123,7 +166,9 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
             source=source,
             meta=meta if meta else None,
         )
-        console.print(f"[green]✓[/] Stored fact [bold]#{fact_id}[/] in [cyan]{project}[/]")
+        console.print(
+            f"[green]✓[/] Stored fact [bold]#{fact_id}[/] in [cyan]{project}[/] [dim](source: {source})[/]"
+        )
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -139,7 +184,9 @@ def search(query, project, top, db) -> None:
     engine = get_engine(db)
     try:
         tip_text = _get_tip_text(engine)
-        spinner_msg = f"[bold blue]Searching...[/]  {tip_text}" if tip_text else "[bold blue]Searching...[/]"
+        spinner_msg = (
+            f"[bold blue]Searching...[/]  {tip_text}" if tip_text else "[bold blue]Searching...[/]"
+        )
         with console.status(spinner_msg):
             results = engine.search_sync(query, project=project, top_k=top)
         if not results:

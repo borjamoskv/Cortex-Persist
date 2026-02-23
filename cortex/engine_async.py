@@ -11,6 +11,7 @@ import aiosqlite
 from cortex.canonical import canonical_json, compute_tx_hash
 from cortex.connection_pool import CortexConnectionPool
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.db_writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.ledger import ImmutableLedger
@@ -19,9 +20,10 @@ from cortex.engine.search_mixin import SearchMixin
 # Mixins
 from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
+from cortex.result import Err, Ok, Result
 from cortex.temporal import now_iso
 
-__all__ = ['TX_BEGIN_IMMEDIATE', 'AsyncCortexEngine']
+__all__ = ["TX_BEGIN_IMMEDIATE", "AsyncCortexEngine"]
 
 logger = logging.getLogger("cortex.engine.async")
 
@@ -41,15 +43,42 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     )
     FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
 
-    def __init__(self, pool: CortexConnectionPool, db_path: str):
+    def __init__(
+        self,
+        pool: CortexConnectionPool,
+        db_path: str,
+        writer: SqliteWriteWorker | None = None,
+    ):
         self._pool = pool
         self._db_path = Path(db_path)
+        self._writer = writer
         self._embedder: LocalEmbedder | None = None
         self._ledger: ImmutableLedger | None = None
 
         # Mixin configuration
         self._auto_embed = True
         self._vec_available = True  # Assuming local vector availability
+
+    @property
+    def writer(self) -> SqliteWriteWorker | None:
+        """Access the sovereign write worker (Single Writer Queue)."""
+        return self._writer
+
+    async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
+        """Execute a write via the sovereign writer if available, else via pool.
+
+        Returns Result[int, str] — Ok(rowcount) or Err(message).
+        """
+        if self._writer and self._writer.is_running:
+            return await self._writer.execute(sql, params)
+        # Fallback: direct pool write (legacy path)
+        try:
+            async with self.session() as conn:
+                cursor = await conn.execute(sql, params)
+                await conn.commit()
+                return Ok(cursor.rowcount)
+        except (sqlite3.Error, OSError) as e:
+            return Err(f"Pool write error: {e}")
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
@@ -289,21 +318,15 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 raise e
 
     async def get_votes(self, fact_id: int) -> list[dict[str, Any]]:
+        """Get all votes for a fact from the canonical v2 table."""
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
-            v2_query = """SELECT 'v2' as type, v.vote, v.agent_id as agent, v.created_at, a.reputation_score
-                          FROM consensus_votes_v2 v
-                          JOIN agents a ON v.agent_id = a.id
-                          WHERE v.fact_id = ?"""
-            legacy_query = """SELECT 'legacy' as type, vote, agent, timestamp as created_at, 0.0 as reputation_score
-                              FROM consensus_votes
-                              WHERE fact_id = ?"""
-            results = []
-            async with conn.execute(v2_query, (fact_id,)) as cursor:
-                results.extend([dict(r) for r in await cursor.fetchall()])
-            async with conn.execute(legacy_query, (fact_id,)) as cursor:
-                results.extend([dict(r) for r in await cursor.fetchall()])
-            return results
+            query = """SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score
+                       FROM consensus_votes_v2 v
+                       JOIN agents a ON v.agent_id = a.id
+                       WHERE v.fact_id = ?"""
+            async with conn.execute(query, (fact_id,)) as cursor:
+                return [dict(r) for r in await cursor.fetchall()]
 
     async def stats(self) -> dict[str, Any]:
         async with self.session() as conn:

@@ -18,7 +18,7 @@ from cortex.search.models import SearchResult
 from cortex.search.text import text_search, text_search_sync
 from cortex.search.vector import semantic_search, semantic_search_sync
 
-__all__ = ['hybrid_search', 'hybrid_search_sync']
+__all__ = ["hybrid_search", "hybrid_search_sync"]
 
 logger = logging.getLogger("cortex.search.hybrid")
 
@@ -36,6 +36,7 @@ async def hybrid_search(
     as_of: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """
     Sovereign Hybrid Search: Semantic + Text via RRF.
@@ -50,7 +51,7 @@ async def hybrid_search(
 
     try:
         sem_results, txt_results = await asyncio.gather(sem_task, txt_task)
-    except Exception as exc:
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
         logger.error("Hybrid branch search failed: %s", exc)
         # Fallback to empty if both fail, or partial if one survives (non-gather approach would be needed)
         # But here we want atomicity or failure.
@@ -106,11 +107,14 @@ def hybrid_search_sync(
     project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2
-    sem_results = semantic_search_sync(conn, query_embedding, fetch_limit, project)
-    txt_results = text_search_sync(conn, query, project, limit=fetch_limit)
+    sem_results = semantic_search_sync(
+        conn, query_embedding, fetch_limit, project, confidence=confidence
+    )
+    txt_results = text_search_sync(conn, query, project, limit=fetch_limit, confidence=confidence)
 
     total_w = vector_weight + text_weight
     w_vec = vector_weight / total_w

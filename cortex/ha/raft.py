@@ -13,7 +13,7 @@ from enum import Enum
 
 import aiosqlite
 
-__all__ = ['NodeRole', 'RaftNode']
+__all__ = ["NodeRole", "RaftNode"]
 
 logger = logging.getLogger(__name__)
 
@@ -97,11 +97,9 @@ class RaftNode:
         self.voted_for = self.node_id
         self.last_heartbeat = time.monotonic()
 
-        _votes_received = 1  # Vote for self
-
-        # In a real implementation, we would send RequestVote RPCs to peers here.
-        # For now, we simulate a single-node cluster wins immediately if no peers,
-        # or just log the attempt for multi-node checks.
+        # In a real implementation, we would send RequestVote RPCs to peers
+        # and track votes_received. For now, we simulate a single-node cluster
+        # wins immediately if no peers, or just log the attempt for multi-node.
 
         if not self.peers:
             logger.info("No peers. Self-electing as LEADER.")

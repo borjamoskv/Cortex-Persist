@@ -43,7 +43,7 @@ def _migration_010_immutable_ledger(conn: sqlite3.Connection):
             started_at      TEXT NOT NULL,
             completed_at    TEXT NOT NULL
         );
-        
+
         CREATE TABLE IF NOT EXISTS audit_exports (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             export_type     TEXT NOT NULL,
@@ -81,10 +81,10 @@ def _migration_011_link_facts_to_tx(conn: sqlite3.Connection):
     # 3. Best effort: Try to backfill tx_id using created_at/timestamp
     # This matches the fact's created_at with the transaction's timestamp (approximate)
     conn.execute("""
-        UPDATE facts 
+        UPDATE facts
         SET tx_id = (
-            SELECT id FROM transactions 
-            WHERE transactions.timestamp <= facts.created_at 
+            SELECT id FROM transactions
+            WHERE transactions.timestamp <= facts.created_at
             ORDER BY transactions.timestamp DESC, transactions.id DESC LIMIT 1
         )
         WHERE tx_id IS NULL

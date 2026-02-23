@@ -47,11 +47,11 @@ class TestClientConstruction:
         assert client.base_url == "http://my-cortex:9999"
 
     def test_api_key_header(self):
-        client = CortexMemoryClient(api_key="test-key-123")
+        client = CortexMemoryClient(api_token="test-key-123")
         assert client._headers["Authorization"] == "Bearer test-key-123"
 
     def test_no_api_key(self):
-        client = CortexMemoryClient(api_key="")
+        client = CortexMemoryClient(api_token="")
         assert "Authorization" not in client._headers
 
     def test_trailing_slash_stripped(self):

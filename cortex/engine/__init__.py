@@ -3,27 +3,23 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
 
 import aiosqlite
 import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.embeddings import LocalEmbedder
-from cortex.engine.consensus_mixin import ConsensusMixin
 from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN, QueryMixin
-from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
 from cortex.engine.sync_compat import SyncCompatMixin
 from cortex.engine.sync_ops import SyncOpsMixin
 from cortex.metrics import metrics
-from cortex.migrations.core import run_migrations, run_migrations_async
+from cortex.migrations.core import run_migrations_async
 from cortex.schema import get_init_meta
 from cortex.temporal import now_iso
 
@@ -51,6 +47,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
+        self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
 
         # Composition layers
         self.facts = FactManager(self)
@@ -151,7 +148,6 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
-        from cortex.engine.models import Fact
         from cortex.errors import FactNotFound
 
         conn = await self.get_conn()
@@ -181,11 +177,11 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
         from cortex.engine.ledger import ImmutableLedger
-        from cortex.schema import ALL_SCHEMA
+        from cortex.schema import get_all_schema
 
         conn = await self.get_conn()
 
-        for stmt in ALL_SCHEMA:
+        for stmt in get_all_schema():
             if "USING vec0" in stmt and not self._vec_available:
                 continue
             await conn.executescript(stmt)
@@ -201,6 +197,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
         await conn.commit()
 
         self._ledger = ImmutableLedger(conn)
+        await self._init_memory_subsystem(conn)
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
 
@@ -306,9 +303,66 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
     def _row_to_fact(row) -> Fact:
         return row_to_fact(row)
 
+    # ─── Memory Subsystem (Frontera 2) ────────────────────────────
+
+    async def _init_memory_subsystem(self, conn: aiosqlite.Connection) -> None:
+        """Initialize the Tripartite Cognitive Memory Architecture.
+
+        L1 (Working Memory) + L3 (Event Ledger) always available.
+        L2 (Vector Store) optional — requires qdrant_client.
+        """
+        from cortex.memory.ledger import EventLedgerL3
+        from cortex.memory.working import WorkingMemoryL1
+
+        l1 = WorkingMemoryL1()
+        l3 = EventLedgerL3(conn)
+        await l3.ensure_table()
+
+        # L2: Optional — Qdrant may not be installed
+        l2 = None
+        encoder = None
+        try:
+            from cortex.memory.encoder import AsyncEncoder
+            from cortex.memory.vector_store import VectorStoreL2
+
+            vector_path = self._db_path.parent / "vectors"
+            encoder = AsyncEncoder(self._get_embedder())
+            l2 = VectorStoreL2(encoder=encoder, db_path=vector_path)
+            logger.info("Memory L2 (VectorStore) initialized at %s", vector_path)
+        except (ImportError, OSError, RuntimeError) as e:
+            logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
+
+        if l2 and encoder:
+            from cortex.memory.manager import CortexMemoryManager
+
+            self._memory_manager = CortexMemoryManager(
+                l1=l1,
+                l2=l2,
+                l3=l3,
+                encoder=encoder,
+            )
+        else:
+            # Minimal manager: store a reference to L1+L3 for basic ops
+            self._memory_manager = None
+            self._memory_l1 = l1
+            self._memory_l3 = l3
+
+        logger.info(
+            "Memory subsystem: %s",
+            "full (L1+L2+L3)" if self._memory_manager else "partial (L1+L3)",
+        )
+
+    @property
+    def memory(self):
+        """Access the cognitive memory manager (None if not initialized)."""
+        return self._memory_manager
+
     # ─── Lifecycle ────────────────────────────────────────────────
 
     async def close(self):
+        if self._memory_manager:
+            await self._memory_manager.wait_for_background()
+            self._memory_manager = None
         if self._conn:
             await self._conn.close()
             self._conn = None

@@ -5,7 +5,7 @@ Regex patterns and signal words for graph analysis.
 
 import re
 
-__all__ = ['ENTITY_PATTERNS', 'RELATION_SIGNALS', 'COMMON_WORDS']
+__all__ = ["ENTITY_PATTERNS", "RELATION_SIGNALS", "COMMON_WORDS"]
 
 # ─── Entity Type Patterns ───────────────────────────────────────────
 

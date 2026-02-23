@@ -4,11 +4,12 @@ ENTROPY-0: El Guardián de la Deuda Técnica.
 Este hook de pre-commit aborta el commit si la puntuación de MEJORAlo cae por debajo de 90.
 """
 
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
 
-__all__ = ['main']
+__all__ = ["main"]
 
 
 def main():
@@ -50,7 +51,7 @@ def main():
     except ImportError:
         print("⚠️  Advertencia: Cortex no está disponible en este entorno. Omitiendo.")
         sys.exit(0)
-    except Exception as e:
+    except (RuntimeError, ValueError, sqlite3.Error) as e:
         print(f"❌ Error al ejecutar MEJORAlo: {e}")
         sys.exit(1)
 

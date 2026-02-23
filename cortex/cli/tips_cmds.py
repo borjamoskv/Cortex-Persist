@@ -6,11 +6,14 @@ Designed to display during agent thinking pauses.
 
 from __future__ import annotations
 
+import sqlite3
+
 import click
 from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 from cortex.tips import Tip, TipCategory, TipsEngine
 
 __all__ = [
@@ -54,34 +57,36 @@ def tips(
     lang: str | None,
 ) -> None:
     """💡 TIPS — Contextual tips and insights from CORTEX."""
-    # Simple auto-detect: if not provided, check OS/env or default to ES for this session
-    # but for a general tool, we usually default to EN unless specified.
-    # However, since the user ASKED for Spanish, I'll default to ES if lang is None
-    # but a better way is to keep EN as system default and let user override.
-    # Actually, I'll check Lang enum or default to 'en'
-    final_lang = lang or "es"  # Prioritize Spanish as requested by the user
+    try:
+        final_lang = lang or "es"  # Prioritize Spanish as requested by the user
 
-    if ctx.invoked_subcommand is not None:
-        ctx.ensure_object(dict)
-        ctx.obj["db"] = db
-        ctx.obj["lang"] = final_lang
-        return
+        if ctx.invoked_subcommand is not None:
+            ctx.ensure_object(dict)
+            ctx.obj["db"] = db
+            ctx.obj["lang"] = final_lang
+            return
 
-    tips_engine = _get_tips_engine(db, lang=final_lang)
+        tips_engine = _get_tips_engine(db, lang=final_lang)
 
-    if category:
-        results = tips_engine.for_category(category, limit=count)
-    elif project:
-        results = tips_engine.for_project(project, limit=count)
-    else:
-        results = [tips_engine.random() for _ in range(count)]
+        if category:
+            results = tips_engine.for_category(category, limit=count)
+        elif project:
+            results = tips_engine.for_project(project, limit=count)
+        else:
+            try:
+                results = [tips_engine.random() for _ in range(count)]
+            except ValueError:
+                err_empty_results("tips for the given filters")
+                return
 
-    if not results:
-        console.print("[dim]No tips found for the given filters.[/dim]")
-        return
+        if not results:
+            err_empty_results("tips for the given filters")
+            return
 
-    for tip in results:
-        _render_tip(tip)
+        for tip in results:
+            _render_tip(tip)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="fetching tips")
 
 
 # ─── Subcommands ─────────────────────────────────────────────────────
@@ -93,25 +98,28 @@ def tips_list(ctx: click.Context) -> None:
     """List all tip categories and counts."""
     db = ctx.obj["db"]
     lang = ctx.obj["lang"]
-    tips_engine = _get_tips_engine(db, lang=lang)
+    try:
+        tips_engine = _get_tips_engine(db, lang=lang)
 
-    table = Table(
-        title=f"💡 TIPS Categories ({lang})",
-        title_style="bold cyan",
-        show_lines=False,
-    )
-    table.add_column("Category", style="bold green")
-    table.add_column("Count", justify="right", style="cyan")
+        table = Table(
+            title=f"💡 TIPS Categories ({lang})",
+            title_style="bold cyan",
+            show_lines=False,
+        )
+        table.add_column("Category", style="bold green")
+        table.add_column("Count", justify="right", style="cyan")
 
-    all_tips = tips_engine.all_tips()
-    for cat in TipCategory:
-        cat_count = sum(1 for t in all_tips if t.category == cat)
-        if cat_count > 0:
-            table.add_row(cat.value, str(cat_count))
+        all_tips = tips_engine.all_tips()
+        for cat in TipCategory:
+            cat_count = sum(1 for t in all_tips if t.category == cat)
+            if cat_count > 0:
+                table.add_row(cat.value, str(cat_count))
 
-    table.add_section()
-    table.add_row("[bold]TOTAL[/bold]", f"[bold]{len(all_tips)}[/bold]")
-    console.print(table)
+        table.add_section()
+        table.add_row("[bold]TOTAL[/bold]", f"[bold]{len(all_tips)}[/bold]")
+        console.print(table)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="listing tip categories")
 
 
 @tips.command(name="all")
@@ -126,36 +134,39 @@ def tips_all(ctx: click.Context, category: str | None) -> None:
     """Show all available tips."""
     db = ctx.obj["db"]
     lang = ctx.obj["lang"]
-    tips_engine = _get_tips_engine(db, lang=lang)
+    try:
+        tips_engine = _get_tips_engine(db, lang=lang)
 
-    if category:
-        all_tips = tips_engine.for_category(category, limit=100)
-    else:
-        all_tips = tips_engine.all_tips()
+        if category:
+            all_tips = tips_engine.for_category(category, limit=100)
+        else:
+            all_tips = tips_engine.all_tips()
 
-    if not all_tips:
-        console.print("[dim]No tips available.[/dim]")
-        return
+        if not all_tips:
+            err_empty_results("tips")
+            return
 
-    table = Table(
-        title=f"💡 All TIPS ({lang})",
-        title_style="bold cyan",
-        show_lines=True,
-    )
-    table.add_column("#", style="dim", width=4)
-    table.add_column("Category", style="bold green", width=14)
-    table.add_column("Tip", ratio=1)
-    table.add_column("Source", style="dim", width=8)
-
-    for idx, tip in enumerate(all_tips, 1):
-        table.add_row(
-            str(idx),
-            tip.category.value,
-            tip.content,
-            tip.source,
+        table = Table(
+            title=f"💡 All TIPS ({lang})",
+            title_style="bold cyan",
+            show_lines=True,
         )
+        table.add_column("#", style="dim", width=4)
+        table.add_column("Category", style="bold green", width=14)
+        table.add_column("Tip", ratio=1)
+        table.add_column("Source", style="dim", width=8)
 
-    console.print(table)
+        for idx, tip in enumerate(all_tips, 1):
+            table.add_row(
+                str(idx),
+                tip.category.value,
+                tip.content,
+                tip.source,
+            )
+
+        console.print(table)
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="fetching all tips")
 
 
 @tips.command(name="random")
@@ -165,13 +176,16 @@ def tips_random(ctx: click.Context, count: int) -> None:
     """Show random tips (great for thinking pauses)."""
     db = ctx.obj["db"]
     lang = ctx.obj["lang"]
-    tips_engine = _get_tips_engine(db, lang=lang)
+    try:
+        tips_engine = _get_tips_engine(db, lang=lang)
 
-    console.print()
-    for _ in range(count):
-        tip = tips_engine.random()
-        _render_tip(tip)
-    console.print()
+        console.print()
+        for _ in range(count):
+            tip = tips_engine.random()
+            _render_tip(tip)
+        console.print()
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="fetching random tips")
 
 
 # ─── Rendering ───────────────────────────────────────────────────────

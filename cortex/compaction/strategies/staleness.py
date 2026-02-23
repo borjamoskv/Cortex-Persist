@@ -6,7 +6,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
-__all__ = ['execute_staleness_prune', 'find_stale_facts']
+__all__ = ["execute_staleness_prune", "find_stale_facts"]
 
 if TYPE_CHECKING:
     from cortex.compactor import CompactionResult

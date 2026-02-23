@@ -8,7 +8,11 @@ All messages are internationalized via cortex.i18n (en/es/eu).
 
 from __future__ import annotations
 
+import json
+import os
 import sys
+from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import NoReturn
 
 from rich.panel import Panel
@@ -17,6 +21,52 @@ from rich.panel import Panel
 # as regular output (important for Click test runner capture).
 from cortex.cli import console
 from cortex.i18n import get_trans
+
+__all__ = [
+    "err_db_corrupted",
+    "err_db_locked",
+    "err_db_not_found",
+    "err_empty_results",
+    "err_execution_failed",
+    "err_fact_not_found",
+    "err_network",
+    "err_permission_denied",
+    "err_platform",
+    "err_platform_unsupported",
+    "err_skill_not_found",
+    "err_unexpected",
+    "err_validation",
+    "handle_cli_error",
+    "ErrorCode",
+    "CortexErrorStruct",
+    "classify_error",
+]
+
+# ─── Data Structures ─────────────────────────────────────────────────
+
+
+class ErrorCode(str, Enum):
+    DB_NOT_FOUND = "ERR_DB_NOT_FOUND"
+    DB_LOCKED = "ERR_DB_LOCKED"
+    DB_CORRUPTED = "ERR_DB_CORRUPTED"
+    FACT_NOT_FOUND = "ERR_FACT_NOT_FOUND"
+    SKILL_NOT_FOUND = "ERR_SKILL_NOT_FOUND"
+    EXECUTION_FAILED = "ERR_EXECUTION_FAILED"
+    PLATFORM_UNSUPPORTED = "ERR_PLATFORM_UNSUPPORTED"
+    EMPTY_RESULTS = "ERR_EMPTY_RESULTS"
+    PERMISSION_DENIED = "ERR_PERMISSION_DENIED"
+    NETWORK_ERROR = "ERR_NETWORK_ERROR"
+    VALIDATION_ERROR = "ERR_VALIDATION_ERROR"
+    UNEXPECTED = "ERR_UNEXPECTED"
+
+
+@dataclass
+class CortexErrorStruct:
+    code: ErrorCode
+    message: str
+    detail: str = ""
+    hint: str = ""
+    http_status: int = 500
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────
@@ -110,6 +160,11 @@ def err_platform_unsupported(feature: str, required_platform: str = "macOS") -> 
     sys.exit(1)
 
 
+def err_platform(detail: str) -> NoReturn:
+    """Generic environmental/platform requirement failed."""
+    err_unexpected(detail, hint="Verifica los requisitos del sistema o del repositorio Git.")
+
+
 def err_empty_results(entity: str, suggestion: str = "") -> None:
     """No results found for a search/query operation."""
     body = _t("cli_err_empty_results_body", entity=entity)
@@ -157,11 +212,11 @@ def err_unexpected(detail: str, hint: str = "") -> NoReturn:
     sys.exit(1)
 
 
-# ─── Smart Error Handler ─────────────────────────────────────────────
+# ─── Smart Error Handler & Classifier ────────────────────────────────
 
 
-def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> NoReturn:
-    """Smart error router — classifies exceptions and shows the right message."""
+def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> CortexErrorStruct:
+    """Classify a raw Python Exception into a guaranteed CortexError schema without side effects."""
     import sqlite3
 
     error_str = str(e)
@@ -169,44 +224,105 @@ def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> N
 
     # SQLite lock
     if isinstance(e, sqlite3.OperationalError) and "locked" in error_str.lower():
-        err_db_locked(db_path, error_str)
+        return CortexErrorStruct(
+            code=ErrorCode.DB_LOCKED,
+            message=_t("cli_err_db_locked_title"),
+            detail=error_str,
+            http_status=409,  # Conflict
+        )
 
     # SQLite corruption
     if isinstance(e, sqlite3.DatabaseError) and (
         "corrupt" in error_str.lower() or "malformed" in error_str.lower()
     ):
-        err_db_corrupted(db_path, error_str)
+        return CortexErrorStruct(
+            code=ErrorCode.DB_CORRUPTED,
+            message=_t("cli_err_db_corrupted_title"),
+            detail=error_str,
+            http_status=500,
+        )
 
-    # File not found (DB or other)
+    # File not found
     if isinstance(e, FileNotFoundError):
         if db_path and "cortex" in error_str.lower():
-            err_db_not_found(db_path)
-        err_unexpected(f"Archivo no encontrado{ctx_prefix}: {error_str}")
+            return CortexErrorStruct(
+                code=ErrorCode.DB_NOT_FOUND,
+                message=_t("cli_err_db_not_found_title"),
+                detail=error_str,
+                http_status=404,
+            )
+        return CortexErrorStruct(
+            code=ErrorCode.UNEXPECTED,
+            message=f"Archivo no encontrado{ctx_prefix}",
+            detail=error_str,
+            http_status=404,
+        )
 
     # Permission errors
     if isinstance(e, PermissionError):
-        err_permission_denied(context or "operación", error_str)
+        return CortexErrorStruct(
+            code=ErrorCode.PERMISSION_DENIED,
+            message=_t("cli_err_permission_denied_title"),
+            detail=error_str,
+            http_status=403,
+        )
 
     # SQLite generic
     if isinstance(e, sqlite3.Error):
-        err_unexpected(
-            f"Error de base de datos{ctx_prefix}: {error_str}",
+        return CortexErrorStruct(
+            code=ErrorCode.UNEXPECTED,
+            message=f"Error de base de datos{ctx_prefix}",
+            detail=error_str,
             hint="Prueba con `cortex init` o revisa la integridad con `cortex verify 1`.",
+            http_status=500,
         )
 
     # OS errors
     if isinstance(e, OSError):
-        err_unexpected(
-            f"Error del sistema{ctx_prefix}: {error_str}",
+        return CortexErrorStruct(
+            code=ErrorCode.UNEXPECTED,
+            message=f"Error del sistema{ctx_prefix}",
+            detail=error_str,
             hint="Verifica permisos y espacio en disco.",
+            http_status=500,
         )
 
     # Runtime generic
-    if isinstance(e, (RuntimeError, ValueError)):
-        err_unexpected(
-            f"Error{ctx_prefix}: {error_str}",
+    if isinstance(e, RuntimeError | ValueError):
+        return CortexErrorStruct(
+            code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
+            message=f"Error{ctx_prefix}",
+            detail=error_str,
             hint="Revisa los parámetros de entrada.",
+            http_status=400 if isinstance(e, ValueError) else 500,
         )
 
     # Catch-all
-    err_unexpected(f"{type(e).__name__}{ctx_prefix}: {error_str}")
+    return CortexErrorStruct(
+        code=ErrorCode.UNEXPECTED,
+        message=f"{type(e).__name__}{ctx_prefix}",
+        detail=error_str,
+        http_status=500,
+    )
+
+
+def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> NoReturn:
+    """Smart error router — classifies exceptions and shows the right message or JSON output."""
+    struct = classify_error(e, db_path=db_path, context=context)
+
+    # If JSON output is requested (e.g., by SDKs or other tools via env var)
+    if os.environ.get("CORTEX_JSON_OUTPUT") == "1":
+        console.print(json.dumps({"status": "error", "error": asdict(struct)}))
+        sys.exit(1)
+
+    # Otherwise, fallback to the standard rich console display
+    if struct.code == ErrorCode.DB_LOCKED:
+        err_db_locked(db_path, struct.detail)
+    elif struct.code == ErrorCode.DB_CORRUPTED:
+        err_db_corrupted(db_path, struct.detail)
+    elif struct.code == ErrorCode.DB_NOT_FOUND:
+        err_db_not_found(db_path)
+    elif struct.code == ErrorCode.PERMISSION_DENIED:
+        err_permission_denied(context or "operación", struct.detail)
+    else:
+        err_unexpected(struct.detail or struct.message, struct.hint)

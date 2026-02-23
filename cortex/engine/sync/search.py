@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 
-__all__ = ['SyncSearchMixin']
+__all__ = ["SyncSearchMixin"]
 
 logger = logging.getLogger("cortex.engine.sync.search")
 

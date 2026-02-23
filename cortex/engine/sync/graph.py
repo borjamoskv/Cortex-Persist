@@ -6,7 +6,7 @@ import logging
 
 from cortex.temporal import now_iso
 
-__all__ = ['SyncGraphMixin']
+__all__ = ["SyncGraphMixin"]
 
 logger = logging.getLogger("cortex.engine.sync.graph")
 

@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 import aiosqlite
 
-__all__ = ['EmbeddingPrunerMixin']
+__all__ = ["EmbeddingPrunerMixin"]
 
 logger = logging.getLogger("cortex.pruner")
 
@@ -90,7 +90,9 @@ class EmbeddingPrunerMixin:
         )
         return stats
 
-    async def _prune_single_embedding(self, conn: aiosqlite.Connection, fact_id: int, embedding_data: str | bytes, stats: dict) -> None:
+    async def _prune_single_embedding(
+        self, conn: aiosqlite.Connection, fact_id: int, embedding_data: str | bytes, stats: dict
+    ) -> None:
         """Prunes a single embedding and updates stats."""
         try:
             vec_hash = hashlib.sha256(_to_bytes(embedding_data)).hexdigest()
@@ -110,7 +112,6 @@ class EmbeddingPrunerMixin:
         except (sqlite3.Error, OSError) as e:
             logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
             stats["errors"].append({"fact_id": fact_id, "error": str(e)})
-
 
     async def verify_embedding_hash(self, fact_id: int) -> dict | None:
         """Check if a pruned embedding's hash exists and return metadata.

@@ -15,7 +15,7 @@ from typing import Any
 from cortex.sap.client import SAPClient
 from cortex.sap.mapper import SAPMapper
 
-__all__ = ['SAPSyncResult', 'SAPSync']
+__all__ = ["SAPSyncResult", "SAPSync"]
 
 logger = logging.getLogger("cortex.sap.sync")
 
@@ -158,7 +158,9 @@ class SAPSync:
 
         return result
 
-    async def _push_single_fact(self, fact: dict[str, Any], entity_set: str, result: SAPSyncResult) -> None:
+    async def _push_single_fact(
+        self, fact: dict[str, Any], entity_set: str, result: SAPSyncResult
+    ) -> None:
         """Helper to push a single mapped fact back to SAP."""
         try:
             entity_data = self.mapper.fact_to_sap(fact)

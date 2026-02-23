@@ -93,7 +93,7 @@ def _generate_api_key(email: str, plan: str) -> str:
     return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
 
 
-def _provision_api_key(email: str, plan: str) -> str | None:
+async def _provision_api_key(email: str, plan: str) -> str | None:
     """Create an API key in CORTEX AuthManager. Returns raw key or None."""
     raw_key = _generate_api_key(email, plan)
     plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
@@ -102,7 +102,7 @@ def _provision_api_key(email: str, plan: str) -> str | None:
         from cortex import api_state
 
         if api_state.auth_manager:
-            api_state.auth_manager.create_key(
+            await api_state.auth_manager.create_key(
                 name=f"stripe-{email}",
                 tenant_id=email,
                 permissions=plan_cfg["permissions"],
@@ -121,20 +121,19 @@ def _provision_api_key(email: str, plan: str) -> str | None:
     return None
 
 
-def _revoke_keys_for_email(email: str) -> None:
+async def _revoke_keys_for_email(email: str) -> None:
     """Find and revoke Stripe API keys for an email."""
     try:
         from cortex import api_state
 
         if api_state.auth_manager:
-            keys = api_state.auth_manager.list_keys(tenant_id=email)
+            keys = await api_state.auth_manager.list_keys(tenant_id=email)
             for key in keys:
                 if key.name.startswith("stripe-"):
-                    api_state.auth_manager.revoke_key(key.id)
+                    await api_state.auth_manager.revoke_key(key.id)
                     logger.info("Revoked key %s for cancelled subscription", key.name)
     except (RuntimeError, ValueError, OSError):
         logger.exception("Failed to revoke keys for email %s", email)
-
 
 
 # ─── Routes ──────────────────────────────────────────────────────────
@@ -206,7 +205,7 @@ async def stripe_webhook(
         )
         plan = session.get("metadata", {}).get("plan", "pro")
 
-        raw_key = _provision_api_key(customer_email, plan)
+        raw_key = await _provision_api_key(customer_email, plan)
 
         return {
             "status": "provisioned",
@@ -226,7 +225,7 @@ async def stripe_webhook(
             email = customer.get("email", "")
 
             if email:
-                _revoke_keys_for_email(email)
+                await _revoke_keys_for_email(email)
         except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to process revoked subscription for customer %s", customer_id)
 

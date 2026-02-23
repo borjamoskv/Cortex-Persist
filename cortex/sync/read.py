@@ -19,7 +19,7 @@ from cortex.sync.common import (
 from cortex.sync.system import sync_system
 from cortex.temporal import now_iso
 
-__all__ = ['sync_memory']
+__all__ = ["sync_memory"]
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,6 +27,25 @@ if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.sync")
+
+
+def _sync_file(
+    engine: CortexEngine,
+    path: Path,
+    state_key: str,
+    state: dict,
+    sync_fn,
+    result: SyncResult,
+) -> None:
+    """Hash-check a single file and sync it if changed."""
+    try:
+        fhash = file_hash(path)
+        if fhash and fhash != state.get(state_key):
+            sync_fn(engine, path, result)
+            state[state_key] = fhash
+    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
+        result.errors.append(f"{path.name}: {e}")
+        logger.error("Syncing %s failed: %s", path.name, e)
 
 
 def sync_memory(engine: CortexEngine) -> SyncResult:
@@ -48,49 +67,12 @@ def sync_memory(engine: CortexEngine) -> SyncResult:
         result.errors.append(f"Directorio de memoria no encontrado: {MEMORY_DIR}")
         return result
 
-    # ── 1. Sincronizar ghosts.json ───────────────────────────────
-    ghosts_file = MEMORY_DIR / "ghosts.json"
-    try:
-        ghosts_hash = file_hash(ghosts_file)
-        if ghosts_hash and ghosts_hash != state.get("ghosts_hash"):
-            _sync_ghosts(engine, ghosts_file, result)
-            state["ghosts_hash"] = ghosts_hash
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"ghosts.json: {e}")
-        logger.error("Syncing ghosts failed: %s", e)
-
-    # ── 2. Sincronizar system.json (conocimiento global) ─────────
-    system_file = MEMORY_DIR / "system.json"
-    try:
-        system_hash = file_hash(system_file)
-        if system_hash and system_hash != state.get("system_hash"):
-            sync_system(engine, system_file, result)
-            state["system_hash"] = system_hash
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"system.json: {e}")
-        logger.error("Syncing system failed: %s", e)
-
-    # ── 3. Sincronizar mistakes.jsonl (errores) ──────────────────
-    mistakes_file = MEMORY_DIR / "mistakes.jsonl"
-    try:
-        mistakes_hash = file_hash(mistakes_file)
-        if mistakes_hash and mistakes_hash != state.get("mistakes_hash"):
-            _sync_mistakes(engine, mistakes_file, result)
-            state["mistakes_hash"] = mistakes_hash
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"mistakes.jsonl: {e}")
-        logger.error("Syncing mistakes failed: %s", e)
-
-    # ── 4. Sincronizar bridges.jsonl (conexiones entre proyectos)
-    bridges_file = MEMORY_DIR / "bridges.jsonl"
-    try:
-        bridges_hash = file_hash(bridges_file)
-        if bridges_hash and bridges_hash != state.get("bridges_hash"):
-            _sync_bridges(engine, bridges_file, result)
-            state["bridges_hash"] = bridges_hash
-    except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
-        result.errors.append(f"bridges.jsonl: {e}")
-        logger.error("Syncing bridges failed: %s", e)
+    _sync_file(engine, MEMORY_DIR / "ghosts.json", "ghosts_hash", state, _sync_ghosts, result)
+    _sync_file(engine, MEMORY_DIR / "system.json", "system_hash", state, sync_system, result)
+    _sync_file(
+        engine, MEMORY_DIR / "mistakes.jsonl", "mistakes_hash", state, _sync_mistakes, result
+    )
+    _sync_file(engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result)
 
     # Guardar estado para la próxima ejecución
     state["last_sync"] = result.synced_at

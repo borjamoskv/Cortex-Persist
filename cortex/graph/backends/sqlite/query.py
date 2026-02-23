@@ -1,6 +1,6 @@
 """SQLite Graph Query Mixin."""
 
-__all__ = ['SQLiteQueryMixin']
+__all__ = ["SQLiteQueryMixin"]
 
 
 class SQLiteQueryMixin:
@@ -61,8 +61,8 @@ class SQLiteQueryMixin:
         total_rels = 0
         if project:
             q_ent_count = "SELECT COUNT(*) FROM entities WHERE project = ?"
-            q_rel_count = """SELECT COUNT(*) FROM entity_relations er 
-                             JOIN entities e ON er.source_entity_id = e.id 
+            q_rel_count = """SELECT COUNT(*) FROM entity_relations er
+                             JOIN entities e ON er.source_entity_id = e.id
                              WHERE e.project = ?"""
             if self._is_async:
                 async with self.conn.execute(q_ent_count, (project,)) as cursor:
@@ -179,8 +179,8 @@ class SQLiteQueryMixin:
             "mentions": row[4],
         }
 
-        q_conn = """SELECT e.name, e.entity_type, er.relation_type, er.weight 
-                   FROM entity_relations er 
+        q_conn = """SELECT e.name, e.entity_type, er.relation_type, er.weight
+                   FROM entity_relations er
                    JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
                    WHERE er.source_entity_id = ? OR er.target_entity_id = ?
                    ORDER BY er.weight DESC LIMIT 20"""
@@ -215,7 +215,7 @@ class SQLiteQueryMixin:
             "mentions": row[4],
         }
         connections = self.conn.execute(
-            """SELECT e.name, e.entity_type, er.relation_type, er.weight FROM entity_relations er 
+            """SELECT e.name, e.entity_type, er.relation_type, er.weight FROM entity_relations er
                JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
                WHERE er.source_entity_id = ? OR er.target_entity_id = ? ORDER BY er.weight DESC LIMIT 20""",
             (row[0], row[0], row[0]),

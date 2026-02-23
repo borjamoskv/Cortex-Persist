@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 import time
 from typing import Any, Final
 
-__all__ = ['TursoBackend']
+__all__ = ["TursoBackend"]
 
 logger = logging.getLogger("cortex.storage.turso")
 
@@ -55,8 +56,8 @@ class TursoBackend:
                 libsql.connect, self.url, auth_token=self.auth_token
             )
             logger.info("Turso: Connection established successfully.")
-        except Exception as e:
-            logger.error("Turso: Failed to connect: %s", e)
+        except (sqlite3.Error, RuntimeError, OSError) as exc:
+            logger.error("Turso: Failed to connect: %s", exc)
             raise
 
     def _ensure_conn(self):
@@ -80,8 +81,8 @@ class TursoBackend:
             columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
             return [dict(zip(columns, row, strict=False)) for row in rows]
-        except Exception as e:
-            logger.error("Turso Query Error: %s | Query: %s", e, sql[:500])
+        except (sqlite3.Error, RuntimeError) as exc:
+            logger.error("Turso Query Error: %s | Query: %s", exc, sql[:500])
             raise
 
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
@@ -95,8 +96,8 @@ class TursoBackend:
                 return cursor.lastrowid or 0
 
             return await asyncio.to_thread(_insert)
-        except Exception as e:
-            logger.error("Turso Insert Error: %s", e)
+        except (sqlite3.Error, RuntimeError, OSError) as exc:
+            logger.error("Turso Insert Error: %s", exc)
             raise
 
     async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
@@ -115,13 +116,13 @@ class TursoBackend:
                     for params in params_list:
                         self._conn.execute(sql, params)
                     self._conn.commit()
-                except Exception:
+                except (sqlite3.Error, RuntimeError, OSError):
                     self._conn.rollback()
                     raise
 
             await asyncio.to_thread(_exec_many)
-        except Exception as e:
-            logger.error("Turso Batch Error (size=%d): %s", len(params_list), e)
+        except (sqlite3.Error, RuntimeError, OSError) as exc:
+            logger.error("Turso Batch Error (size=%d): %s", len(params_list), exc)
             raise
 
     async def executescript(self, script: str) -> None:
@@ -139,13 +140,13 @@ class TursoBackend:
                     for stmt in statements:
                         self._conn.execute(stmt)
                     self._conn.commit()
-                except Exception:
+                except (sqlite3.Error, RuntimeError, OSError):
                     self._conn.rollback()
                     raise
 
             await asyncio.to_thread(_exec_script)
-        except Exception as e:
-            logger.error("Turso Script Error (%d stmts): %s", len(statements), e)
+        except (sqlite3.Error, RuntimeError, OSError) as exc:
+            logger.error("Turso Script Error (%d stmts): %s", len(statements), exc)
             raise
 
     async def commit(self) -> None:
@@ -159,8 +160,8 @@ class TursoBackend:
             try:
                 await asyncio.to_thread(self._conn.close)
                 logger.debug("Turso: Connection closed cleanly.")
-            except Exception as e:
-                logger.warning("Turso: Unclean disconnect: %s", e)
+            except (sqlite3.Error, RuntimeError) as exc:
+                logger.warning("Turso: Unclean disconnect: %s", exc)
             finally:
                 self._conn = None
 
@@ -169,7 +170,7 @@ class TursoBackend:
         try:
             result = await self.execute("SELECT 1 AS ok")
             return len(result) > 0 and result[0].get("ok") == 1
-        except Exception:
+        except (sqlite3.Error, RuntimeError, OSError):
             return False
 
     @staticmethod

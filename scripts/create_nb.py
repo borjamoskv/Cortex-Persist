@@ -86,7 +86,7 @@ cells.append(
         try:
             n = conn.execute(q).fetchone()[0]
             print(f"  {name:20s} → {n:,}")
-        except Exception:
+        except sqlite3.Error:
             print(f"  {name:20s} → (tabla no existe)")
 """)
 )
@@ -108,7 +108,7 @@ cells.append(
         df_entities  = pd.read_sql_query("SELECT * FROM entities", conn)
         df_relations = pd.read_sql_query("SELECT * FROM entity_relations", conn)
         print(f"  Entidades: {len(df_entities)}, Relaciones: {len(df_relations)}")
-    except Exception:
+    except sqlite3.Error:
         df_entities = pd.DataFrame()
         df_relations = pd.DataFrame()
         print("  ⚠️ Tablas entities/entity_relations no encontradas")
@@ -292,7 +292,7 @@ cells.append(
                             tag_list = json.loads(tags) if isinstance(tags, str) else tags
                             if tag_list:
                                 line += f" `{', '.join(tag_list)}`"
-                        except Exception:
+                        except ValueError:
                             pass
                     doc.append(line + "\\n")
                 doc.append("\\n")

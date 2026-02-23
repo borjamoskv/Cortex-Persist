@@ -23,6 +23,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from cortex.db import connect as connect_db  # noqa: E402
 from cortex.embeddings import LocalEmbedder  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -52,7 +53,7 @@ def backfill(
     """Backfill embeddings for all facts missing them."""
     import sqlite_vec
 
-    conn = sqlite3.connect(db_path)
+    conn = connect_db(db_path)
     conn.enable_load_extension(True)
     sqlite_vec.load(conn)
     conn.enable_load_extension(False)
@@ -106,7 +107,7 @@ def backfill(
                 skipped,
                 rate,
             )
-        except Exception as e:
+        except (sqlite3.Error, ValueError, RuntimeError) as e:
             logger.error("  Batch %d failed: %s", i // batch_size, e)
             skipped += len(batch)
 

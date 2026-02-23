@@ -11,7 +11,7 @@ from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
 from cortex.sync import export_to_json
 
-__all__ = ['delete', 'list_facts', 'edit']
+__all__ = ["delete", "list_facts", "edit"]
 
 
 @cli.command()

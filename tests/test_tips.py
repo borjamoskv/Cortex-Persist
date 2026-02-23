@@ -36,6 +36,18 @@ class TestTipModel:
         assert "[python]" in formatted
         assert "Do X" in formatted
 
+    def test_format_without_category(self) -> None:
+        tip = Tip(id="t2", content="Do Y", category=TipCategory.CORTEX)
+        formatted = tip.format(with_category=False)
+        assert "💡" in formatted
+        assert "[cortex]" not in formatted
+        assert "Do Y" in formatted
+
+    def test_tip_is_frozen(self) -> None:
+        tip = Tip(id="t3", content="Immutable", category=TipCategory.META)
+        with pytest.raises(AttributeError):
+            tip.content = "Changed"  # type: ignore[misc]
+
 
 # ─── Static Tips Bank Tests ─────────────────────────────────────────
 
@@ -92,6 +104,43 @@ class TestTipsEngineStatic:
         all_en = self.engine_en.all_tips()
         for t in all_en:
             assert t.lang == "en"
+
+    def test_for_category_invalid_returns_empty(self) -> None:
+        result = self.engine_en.for_category("nonexistent_category")
+        assert result == []
+
+    def test_categories_property(self) -> None:
+        cats = self.engine_en.categories
+        assert "cortex" in cats
+        assert "workflow" in cats
+        assert len(cats) == len(TipCategory)
+
+    def test_count_property(self) -> None:
+        count = self.engine_en.count
+        assert count > 0
+        assert count == len(self.engine_en.all_tips())
+
+    def test_reset_shown(self) -> None:
+        engine = TipsEngine(include_dynamic=False, lang="en")
+        # Show some tips
+        for _ in range(3):
+            engine.random()
+        assert len(engine._shown_ids) == 3
+        engine.reset_shown()
+        assert len(engine._shown_ids) == 0
+
+    def test_random_avoids_repeats(self) -> None:
+        engine = TipsEngine(include_dynamic=False, lang="en")
+        total = engine.count
+        seen: set[str] = set()
+        # Draw all tips — each should be unique
+        for _ in range(total):
+            tip = engine.random()
+            assert tip.id not in seen, f"Repeat tip {tip.id} before full cycle"
+            seen.add(tip.id)
+        # Next draw resets and succeeds without error
+        tip = engine.random()
+        assert tip.id in seen  # Must be a recycled tip
 
 
 # ─── TipsEngine Tests (Dynamic with Mock DB) ────────────────────────

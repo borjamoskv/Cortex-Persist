@@ -1,6 +1,6 @@
 """SQLite Graph Algorithms Mixin."""
 
-__all__ = ['SQLiteAlgorithmsMixin']
+__all__ = ["SQLiteAlgorithmsMixin"]
 
 
 class SQLiteAlgorithmsMixin:
@@ -77,7 +77,10 @@ class SQLiteAlgorithmsMixin:
             if not current_layer_ids or len(nodes) >= max_nodes:
                 break
             current_layer_ids = await self._expand_subgraph_layer(
-                current_layer_ids, nodes, edges, visited_ids,
+                current_layer_ids,
+                nodes,
+                edges,
+                visited_ids,
             )
             if len(nodes) >= max_nodes:
                 break

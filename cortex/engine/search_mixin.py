@@ -7,7 +7,7 @@ from typing import Any
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
 
-__all__ = ['SearchMixin']
+__all__ = ["SearchMixin"]
 
 logger = logging.getLogger("cortex.engine.search")
 
@@ -23,6 +23,7 @@ class SearchMixin:
         as_of: str | None = None,
         graph_depth: int = 0,
         include_graph: bool = False,
+        confidence: str | None = None,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
         async with self.session() as conn:
@@ -38,26 +39,36 @@ class SearchMixin:
                     top_k=top_k,
                     project=project,
                     as_of=as_of,
+                    confidence=confidence,
                 )
 
                 if not results:
-                    # Fallback to pure text search if hybrid yields nothing (rare but possible)
-                    results = await text_search(conn, query, project, limit=top_k, as_of=as_of)
+                    # Fallback to pure text search if hybrid yields nothing
+                    results = await text_search(
+                        self.session(),
+                        query,
+                        project,
+                        limit=top_k,
+                        as_of=as_of,
+                        confidence=confidence,
+                    )
 
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
-                    await self._enrich_with_graph_context(
-                        conn, results, query, graph_depth
-                    )
+                    await self._enrich_with_graph_context(conn, results, query, graph_depth)
 
                 return results
 
             except (sqlite3.Error, OSError, RuntimeError) as e:
                 logger.exception(f"Hybrid Graph-RAG search failed: {e}")
                 # Ultimate fallback to basic text search
-                return await text_search(conn, query, project, limit=top_k, as_of=as_of)
+                return await text_search(
+                    conn, query, project, limit=top_k, as_of=as_of, confidence=confidence
+                )
 
-    async def _enrich_with_graph_context(self, conn, results: list[Any], query: str, graph_depth: int) -> None:
+    async def _enrich_with_graph_context(
+        self, conn, results: list[Any], query: str, graph_depth: int
+    ) -> None:
         """Helper to enrich search results with graph context."""
         entities = extract_entities(query)
         seeds = [e["name"] for e in entities]
@@ -68,9 +79,7 @@ class SearchMixin:
             seeds = [e["name"] for e in top_entities]
 
         if seeds:
-            subgraph = await get_context_subgraph(
-                conn, seeds, depth=graph_depth or 1, max_nodes=50
-            )
+            subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth or 1, max_nodes=50)
 
             if results and (subgraph.get("nodes") or subgraph.get("edges")):
                 results[0].context = {"graph": subgraph, "seeds": seeds}

@@ -10,7 +10,7 @@ import sqlite3
 
 from cortex.engine.models import Fact
 
-__all__ = ['SyncReadMixin']
+__all__ = ["SyncReadMixin"]
 
 logger = logging.getLogger("cortex")
 

@@ -11,7 +11,7 @@ import aiosqlite
 
 from cortex.temporal import now_iso
 
-__all__ = ['StoreMixin']
+__all__ = ["StoreMixin"]
 
 logger = logging.getLogger("cortex")
 
@@ -62,6 +62,73 @@ class StoreMixin:
                 tx_id,
             )
 
+    @staticmethod
+    def _apply_privacy_shield(
+        content: str, project: str, meta: dict[str, Any] | None
+    ) -> dict[str, Any] | None:
+        """Zero-Trust Privacy Shield — classify content before storage.
+
+        If sensitive patterns (API keys, private keys, connection strings)
+        are detected, inject privacy metadata into the fact for audit trail.
+        Degrades gracefully if classifier is not available.
+        """
+        try:
+            from cortex.storage.classifier import classify_content
+
+            sensitivity = classify_content(content)
+            if sensitivity.is_sensitive:
+                logger.warning(
+                    "PRIVACY SHIELD: Sensitive patterns detected (%s) in project [%s]. "
+                    "Fact flagged for audit.",
+                    ", ".join(sensitivity.matches),
+                    project,
+                )
+                privacy_meta = {
+                    "privacy_flagged": True,
+                    "privacy_matches": sensitivity.matches,
+                    "privacy_score": sensitivity.score,
+                }
+                return {**(meta or {}), **privacy_meta}
+        except ImportError:
+            pass  # Classifier not available — degrade gracefully
+        return meta
+
+    async def _embed_fact_async(
+        self, conn: aiosqlite.Connection, fact_id: int, content: str
+    ) -> None:
+        """Generate and store embedding for a fact asynchronously."""
+        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
+            try:
+                embedding = self._get_embedder().embed(content)
+                await conn.execute(
+                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
+                    (fact_id, json.dumps(embedding)),
+                )
+            except (sqlite3.Error, OSError, ValueError) as e:
+                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+
+    async def _process_side_effects_async(
+        self,
+        conn: aiosqlite.Connection,
+        fact_id: int,
+        project: str,
+        content: str,
+        fact_type: str,
+        ts: str,
+    ) -> None:
+        """Process side effects: transactions and graph extraction."""
+        from cortex.graph import process_fact_graph
+
+        try:
+            await process_fact_graph(conn, fact_id, content, project, ts)
+        except (sqlite3.Error, OSError, ValueError) as e:
+            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
+
+        new_tx_id = await self._log_transaction(
+            conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
+        )
+        await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (new_tx_id, fact_id))
+
     async def _store_impl(
         self,
         conn: aiosqlite.Connection,
@@ -80,6 +147,8 @@ class StoreMixin:
             raise ValueError("project cannot be empty")
         if not content or not content.strip():
             raise ValueError("content cannot be empty")
+
+        meta = self._apply_privacy_shield(content, project, meta)
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
@@ -105,27 +174,8 @@ class StoreMixin:
         )
         fact_id = cursor.lastrowid
 
-        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
-            try:
-                embedding = self._get_embedder().embed(content)
-                await conn.execute(
-                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, json.dumps(embedding)),
-                )
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
-
-        from cortex.graph import process_fact_graph
-
-        try:
-            await process_fact_graph(conn, fact_id, content, project, ts)
-        except (sqlite3.Error, OSError, ValueError) as e:
-            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
-
-        new_tx_id = await self._log_transaction(
-            conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
-        )
-        await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (new_tx_id, fact_id))
+        await self._embed_fact_async(conn, fact_id, content)
+        await self._process_side_effects_async(conn, fact_id, project, content, fact_type, ts)
 
         if commit:
             await conn.commit()

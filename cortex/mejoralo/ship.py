@@ -14,7 +14,7 @@ from cortex.mejoralo.models import ShipResult, ShipSeal
 from cortex.mejoralo.scan import scan
 from cortex.mejoralo.utils import detect_stack, get_build_cmd, get_lint_cmd, get_test_cmd, run_quiet
 
-__all__ = ['check_ship_gate']
+__all__ = ["check_ship_gate"]
 
 logger = logging.getLogger("cortex.mejoralo")
 

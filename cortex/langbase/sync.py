@@ -15,11 +15,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-__all__ = ['sync_to_langbase', 'enrich_from_langbase']
+__all__ = ["sync_to_langbase", "enrich_from_langbase"]
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine
     from cortex.langbase.client import LangbaseClient
+
+from cortex.langbase.client import LangbaseError  # noqa: E402
 
 logger = logging.getLogger("cortex.langbase.sync")
 
@@ -132,7 +134,7 @@ async def sync_to_langbase(
                 meta={"fact_id": fact.id, "project": project, "type": fact.fact_type},
             )
             synced += 1
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError, LangbaseError) as e:
             errors += 1
             detail = f"Fact #{fact.id}: {e}"
             error_details.append(detail)

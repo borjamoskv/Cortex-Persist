@@ -21,7 +21,7 @@ from cortex.config import (
     MCP_MAX_TAGS,
 )
 
-__all__ = ['MCPGuard']
+__all__ = ["MCPGuard"]
 
 logger = logging.getLogger("cortex.mcp.guard")
 
@@ -97,12 +97,7 @@ class MCPGuard:
             )
 
         # Tags
-        if tags:
-            if len(tags) > cls.max_tags_count:
-                raise ValueError(f"too many tags ({len(tags)} > {cls.max_tags_count})")
-            for tag in tags:
-                if not isinstance(tag, str) or len(tag) > 128:
-                    raise ValueError(f"invalid tag: {tag!r}")
+        cls._validate_tags(tags)
 
         # Poisoning check
         if cls.detect_poisoning(content):
@@ -113,6 +108,17 @@ class MCPGuard:
             raise ValueError(
                 "content rejected: suspicious pattern detected (possible data poisoning)"
             )
+
+    @classmethod
+    def _validate_tags(cls, tags: list[str] | None) -> None:
+        """Validate tag list against hard limits."""
+        if not tags:
+            return
+        if len(tags) > cls.max_tags_count:
+            raise ValueError(f"too many tags ({len(tags)} > {cls.max_tags_count})")
+        for tag in tags:
+            if not isinstance(tag, str) or len(tag) > 128:
+                raise ValueError(f"invalid tag: {tag!r}")
 
     @classmethod
     def validate_search(cls, query: str) -> None:

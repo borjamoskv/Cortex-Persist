@@ -2,7 +2,7 @@
 
 import aiosqlite
 
-__all__ = ['SQLiteStoreMixin']
+__all__ = ["SQLiteStoreMixin"]
 
 
 class SQLiteStoreMixin:

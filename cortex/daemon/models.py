@@ -12,6 +12,8 @@ __all__ = [
     "CORTEX_DB",
     "CORTEX_DIR",
     "CertAlert",
+    "CloudSyncAlert",
+    "CompactionAlert",
     "DEFAULT_CERT_WARN_DAYS",
     "DEFAULT_COOLDOWN",
     "DEFAULT_DISK_WARN_MB",
@@ -31,6 +33,7 @@ __all__ = [
     "PerceptionAlert",
     "RETRY_BACKOFF",
     "STATUS_FILE",
+    "SecurityAlert",
     "SiteStatus",
 ]
 
@@ -125,6 +128,16 @@ class MejoraloAlert:
 
 
 @dataclass
+class CompactionAlert:
+    """Alert triggered when a project undergoes autonomous compaction."""
+
+    project: str
+    reduction: int
+    deprecated: int
+    message: str
+
+
+@dataclass
 class EntropyAlert:
     """Alerta de incremento de complejidad o deuda técnica (ENTROPY-0)."""
 
@@ -132,6 +145,16 @@ class EntropyAlert:
     file_path: str
     complexity_score: int
     message: str
+
+
+@dataclass
+class CloudSyncAlert:
+    """Alert triggered on successful edge sync to Turso."""
+
+    synced_count: int
+    last_id: int
+    message: str
+    latency_ms: float
 
 
 @dataclass
@@ -143,6 +166,18 @@ class PerceptionAlert:
     emotion: str
     confidence: str
     summary: str
+
+
+@dataclass
+class SecurityAlert:
+    """Security anomaly detected (fraud attempt, payload mutation, bot)."""
+
+    ip_address: str
+    payload: str
+    similarity_score: float
+    confidence: str
+    summary: str
+    timestamp: str
 
 
 @dataclass
@@ -169,8 +204,11 @@ class DaemonStatus:
     disk_alerts: list[DiskAlert] = field(default_factory=list)
     mejoralo_alerts: list[MejoraloAlert] = field(default_factory=list)
     entropy_alerts: list[EntropyAlert] = field(default_factory=list)
+    compaction_alerts: list[CompactionAlert] = field(default_factory=list)
+    cloud_sync_alerts: list[CloudSyncAlert] = field(default_factory=list)
     perception_alerts: list[PerceptionAlert] = field(default_factory=list)
     neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
+    security_alerts: list[SecurityAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -183,8 +221,11 @@ class DaemonStatus:
             and len(self.engine_alerts) == 0
             and len(self.disk_alerts) == 0
             and len(self.entropy_alerts) == 0
+            and len(self.compaction_alerts) == 0
+            and len(self.cloud_sync_alerts) == 0
             and len(self.perception_alerts) == 0
             and len(self.neural_alerts) == 0
+            and len(self.security_alerts) == 0
             and len(self.errors) == 0
         )
 
@@ -253,6 +294,24 @@ class DaemonStatus:
                 }
                 for e in self.entropy_alerts
             ],
+            "compaction_alerts": [
+                {
+                    "project": c.project,
+                    "reduction": c.reduction,
+                    "deprecated": c.deprecated,
+                    "message": c.message,
+                }
+                for c in self.compaction_alerts
+            ],
+            "cloud_sync_alerts": [
+                {
+                    "synced_count": s.synced_count,
+                    "last_id": s.last_id,
+                    "message": s.message,
+                    "latency_ms": round(s.latency_ms, 2),
+                }
+                for s in self.cloud_sync_alerts
+            ],
             "perception_alerts": [
                 {
                     "project": p.project,
@@ -271,6 +330,17 @@ class DaemonStatus:
                     "summary": n.summary,
                 }
                 for n in self.neural_alerts
+            ],
+            "security_alerts": [
+                {
+                    "ip_address": s.ip_address,
+                    "payload": s.payload,
+                    "similarity_score": round(s.similarity_score, 4),
+                    "confidence": s.confidence,
+                    "summary": s.summary,
+                    "timestamp": s.timestamp,
+                }
+                for s in self.security_alerts
             ],
             "errors": self.errors,
         }

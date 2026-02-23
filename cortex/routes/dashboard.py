@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 from cortex.auth import AuthResult, require_permission
 
-__all__ = ['dashboard']
+__all__ = ["dashboard"]
 
 router = APIRouter(tags=["dashboard"])
 

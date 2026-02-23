@@ -9,7 +9,7 @@ HST = T_c (Context) + T_d (Design) + T_i (Implementation) + T_b (Debugging) + T_
 import random
 from dataclasses import dataclass
 
-__all__ = ['ChronosMetrics', 'ChronosEngine']
+__all__ = ["ChronosMetrics", "ChronosEngine"]
 
 
 @dataclass

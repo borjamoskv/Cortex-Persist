@@ -18,7 +18,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ['MetricsRegistry', 'MetricsMiddleware']
+__all__ = ["MetricsRegistry", "MetricsMiddleware"]
 
 logger = logging.getLogger("cortex")
 
@@ -186,7 +186,7 @@ class MetricsRegistry:
                 seen_gauge_names.add(base_name)
             lines.append(f"{key} {value:.2f}")
 
-        # Histograms (simplified: sum + count)
+        # Histograms → Prometheus summary format (count + sum + quantiles)
         seen_hist_names: set[str] = set()
         for key in sorted(self._histograms):
             base_name = key.split("{")[0]
@@ -196,9 +196,20 @@ class MetricsRegistry:
             count = self._hist_count.get(key, 0)
             total = self._hist_sum.get(key, 0.0)
             if count > 0:
+                # Quantile lines (p50, p95, p99)
+                observations = sorted(self._histograms[key])
+                for quantile in (0.5, 0.95, 0.99):
+                    idx = min(int(quantile * len(observations)), len(observations) - 1)
+                    val = observations[idx]
+                    # Embed quantile label into key
+                    if "{" in key:
+                        # key has labels: name{k="v"} → name{k="v",quantile="0.5"}
+                        q_key = key.replace("}", f',quantile="{quantile}"}}')
+                    else:
+                        q_key = f'{key}{{quantile="{quantile}"}}'
+                    lines.append(f"{q_key} {val:.6f}")
                 lines.append(f"{key}_count {count}")
                 lines.append(f"{key}_sum {total:.4f}")
-                lines.append(f"{key}_avg {total / count:.4f}")
 
         return "\n".join(lines) + "\n"
 

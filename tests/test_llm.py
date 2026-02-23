@@ -117,7 +117,7 @@ class TestLLMProvider:
         from cortex.llm.provider import LLMProvider
 
         with pytest.raises(ValueError, match="required"):
-            LLMProvider(provider="qwen", api_key="")
+            LLMProvider(provider="qwen", api_token="")
 
     def test_local_providers_no_key_needed(self):
         """Ollama, LM Studio, llama.cpp, vLLM, Jan don't need API keys."""
@@ -148,7 +148,7 @@ class TestLLMProvider:
     def test_preset_with_explicit_key(self):
         from cortex.llm.provider import LLMProvider
 
-        p = LLMProvider(provider="qwen", api_key="test-key-123")
+        p = LLMProvider(provider="qwen", api_token="test-key-123")
         assert p.provider_name == "qwen"
         assert p.model == "qwen-plus"
 

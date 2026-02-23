@@ -14,7 +14,7 @@ from pathlib import Path
 
 from cortex.engine import CortexEngine
 
-__all__ = ['migrate_v31_to_v40']
+__all__ = ["migrate_v31_to_v40"]
 
 logger = logging.getLogger("cortex.migrate")
 

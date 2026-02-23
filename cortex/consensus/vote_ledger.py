@@ -16,7 +16,7 @@ import aiosqlite
 
 from cortex.consensus.merkle import MerkleTree, compute_merkle_root
 
-__all__ = ['VoteEntry', 'ImmutableVoteLedger']
+__all__ = ["VoteEntry", "ImmutableVoteLedger"]
 
 logger = logging.getLogger("cortex.consensus.ledger")
 
@@ -97,7 +97,7 @@ class ImmutableVoteLedger:
 
             cursor = await conn.execute(
                 """
-                INSERT INTO vote_ledger 
+                INSERT INTO vote_ledger
                 (fact_id, agent_id, vote, vote_weight, prev_hash, hash, timestamp, signature)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,

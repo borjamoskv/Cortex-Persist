@@ -19,7 +19,7 @@ from cortex.models import (
     ProjectScoreModel,
 )
 
-__all__ = ['infer_context', 'list_signals', 'context_history']
+__all__ = ["infer_context", "list_signals", "context_history"]
 
 router = APIRouter(prefix="/v1/context", tags=["context"])
 logger = logging.getLogger("uvicorn.error")

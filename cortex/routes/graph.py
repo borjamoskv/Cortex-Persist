@@ -15,7 +15,7 @@ from cortex.engine import CortexEngine
 from cortex.graph import get_graph as _get_graph
 from cortex.i18n import get_trans
 
-__all__ = ['get_graph', 'get_graph_all']
+__all__ = ["get_graph", "get_graph_all"]
 
 router = APIRouter(tags=["graph"])
 logger = logging.getLogger("uvicorn.error")

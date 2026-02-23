@@ -6,7 +6,7 @@ Provides Merkle tree computation and verification for ledger checkpoints.
 
 import hashlib
 
-__all__ = ['compute_merkle_root', 'verify_merkle_proof', 'MerkleTree']
+__all__ = ["compute_merkle_root", "verify_merkle_proof", "MerkleTree"]
 
 
 def compute_merkle_root(hashes: list[str]) -> str:

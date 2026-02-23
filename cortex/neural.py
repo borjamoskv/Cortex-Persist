@@ -93,12 +93,34 @@ class MacOSWindowSensor(BaseWindowSensor):
 
 class LinuxWindowSensor(BaseWindowSensor):
     def get_active_window(self) -> str:
-        return "unknown"  # Fallback for now
+        try:
+            import subprocess
+
+            result = subprocess.run(
+                ["xdotool", "getactivewindow", "getwindowname"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
+            name = result.stdout.strip()
+            return name if name else "unknown"
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            return "unknown"
 
 
 class WindowsWindowSensor(BaseWindowSensor):
     def get_active_window(self) -> str:
-        return "unknown"  # Fallback for now
+        try:
+            import ctypes
+
+            user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+            hwnd = user32.GetForegroundWindow()
+            length = user32.GetWindowTextLengthW(hwnd)
+            buf = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buf, length + 1)
+            return buf.value if buf.value else "unknown"
+        except (AttributeError, OSError, ValueError):
+            return "unknown"
 
 
 def get_window_sensor() -> BaseWindowSensor:
@@ -134,12 +156,44 @@ class MacOSClipboardSensor(BaseClipboardSensor):
 
 class LinuxClipboardSensor(BaseClipboardSensor):
     def get_clipboard(self) -> str:
-        return ""  # Fallback
+        for cmd in (
+            ["xclip", "-selection", "clipboard", "-o"],
+            ["xsel", "--clipboard", "--output"],
+        ):
+            try:
+                import subprocess
+
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                )
+                if result.returncode == 0:
+                    return result.stdout[:2000]
+            except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+                continue
+        return ""
 
 
 class WindowsClipboardSensor(BaseClipboardSensor):
     def get_clipboard(self) -> str:
-        return ""  # Fallback
+        try:
+            import ctypes
+
+            user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+            if not user32.OpenClipboard(0):
+                return ""
+            try:
+                handle = user32.GetClipboardData(13)  # CF_UNICODETEXT
+                if not handle:
+                    return ""
+                data = ctypes.c_wchar_p(handle)
+                return (data.value or "")[:2000]
+            finally:
+                user32.CloseClipboard()
+        except (AttributeError, OSError, ValueError):
+            return ""
 
 
 def get_clipboard_sensor() -> BaseClipboardSensor:
@@ -171,7 +225,10 @@ class NeuralIntentEngine:
             default_rules = [
                 {
                     "app_re": r"(Cursor|VSCode|Code|iTerm|Terminal|Ghostty)",
-                    "clip_re": r"(Traceback \(most recent call last\):|Error:|Exception:|FATAL:|panic:)",
+                    "clip_re": (
+                        r"(Traceback \(most recent call last\):"
+                        r"|Error:|Exception:|FATAL:|panic:)"
+                    ),
                     "intent": "debugging_error",
                     "confidence": "C4",
                     "trigger_desc": "Error trace in clipboard while in dev environment",
@@ -213,9 +270,7 @@ class NeuralIntentEngine:
             for r in data:
                 app_re = re.compile(r["app_re"], re.IGNORECASE)
                 clip_re = re.compile(r["clip_re"], re.IGNORECASE)
-                loaded.append(
-                    (app_re, clip_re, r["intent"], r["confidence"], r["trigger_desc"])
-                )
+                loaded.append((app_re, clip_re, r["intent"], r["confidence"], r["trigger_desc"]))
             self._rules = loaded
         except (ValueError, OSError, RuntimeError) as e:
             logger.error("Failed to load neural rules: %s", e)

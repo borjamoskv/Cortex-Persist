@@ -20,9 +20,11 @@ from cortex.search.utils import (
 )
 from cortex.temporal import build_temporal_filter_params
 
-__all__ = ['text_search', 'text_search_sync']
+__all__ = ["text_search", "text_search_sync"]
 
 logger = logging.getLogger("cortex.search.text")
+
+_PROJECT_FILTER = " AND f.project = ?"
 
 
 async def text_search(
@@ -66,7 +68,7 @@ async def _fts5_search(conn, query, project, fact_type, tags, limit, as_of):
     else:
         sql += " AND f.valid_until IS NULL"
     if project:
-        sql += " AND f.project = ?"
+        sql += _PROJECT_FILTER
         params.append(project)
     if fact_type:
         sql += " AND f.fact_type = ?"
@@ -97,7 +99,7 @@ async def _like_search(conn, query, project, fact_type, tags, limit, as_of):
     else:
         sql += " AND f.valid_until IS NULL"
     if project:
-        sql += " AND f.project = ?"
+        sql += _PROJECT_FILTER
         params.append(project)
     if fact_type:
         sql += " AND f.fact_type = ?"
@@ -131,12 +133,15 @@ def text_search_sync(
             """
             params: list = [fts_query]
             if project:
-                sql += " AND f.project = ?"
+                sql += _PROJECT_FILTER
                 params.append(project)
             sql += " ORDER BY rank ASC LIMIT ?"
             params.append(limit)
         else:
-            sql = "SELECT id, content, project, fact_type, confidence, source, tags FROM facts WHERE content LIKE ? AND valid_until IS NULL"
+            sql = (
+                "SELECT id, content, project, fact_type, confidence, source, tags "
+                "FROM facts WHERE content LIKE ? AND valid_until IS NULL"
+            )
             params = [f"%{query}%"]
             if project:
                 sql += " AND project = ?"

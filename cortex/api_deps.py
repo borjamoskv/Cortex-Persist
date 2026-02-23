@@ -9,7 +9,7 @@ from cortex.engine import CortexEngine
 from cortex.engine_async import AsyncCortexEngine
 from cortex.timing import TimingTracker
 
-__all__ = ['get_engine', 'get_async_engine', 'get_tracker']
+__all__ = ["get_engine", "get_async_engine", "get_tracker"]
 
 
 def get_engine(request: Request) -> CortexEngine:
