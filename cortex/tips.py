@@ -83,38 +83,27 @@ def _load_static_tips() -> list[Tip]:
     if _STATIC_TIPS_CACHE is not None:
         return _STATIC_TIPS_CACHE
 
-    tips: list[Tip] = []
-    try:
-        if not os.path.exists(_ASSET_PATH):
-            logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
-            return []
+    if not os.path.exists(_ASSET_PATH):
+        logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
+        return []
 
+    try:
         with open(_ASSET_PATH, encoding="utf-8") as f:
             raw_data = json.load(f)
-
-        for raw in raw_data:
-            content_map = raw["content"]
-            category = TipCategory(raw["category"])
-
-            for lang, text in content_map.items():
-                # Stable ID per (category + content)
-                tip_id = hashlib.md5(f"{raw['category']}-{text}".encode()).hexdigest()[:8]  # noqa: S324
-                tips.append(
-                    Tip(
-                        id=f"stat-{tip_id}",
-                        content=text,
-                        category=category,
-                        lang=lang,
-                        source="static",
-                    )
-                )
-
-        _STATIC_TIPS_CACHE = tips
-        logger.debug("TIPS: Loaded %d static tips from assets", len(tips))
     except (json.JSONDecodeError, OSError) as exc:
         logger.critical("TIPS: Failed to load static tips: %s", exc)
         return []
 
+    tips: list[Tip] = []
+    for raw in raw_data:
+        cat_name = raw["category"]
+        category = TipCategory(cat_name)
+        for lang, text in raw["content"].items():
+            tip_id = hashlib.md5(f"{cat_name}-{text}".encode()).hexdigest()[:8]  # noqa: S324
+            tips.append(Tip(f"stat-{tip_id}", text, category, lang, "static"))
+
+    _STATIC_TIPS_CACHE = tips
+    logger.debug("TIPS: Loaded %d static tips from assets", len(tips))
     return _STATIC_TIPS_CACHE
 
 
@@ -277,16 +266,16 @@ class TipsEngine:
                 tip_content = content[:200].rstrip()
                 if len(content) > 200:
                     tip_content += "…"
-                tips.append(
-                    Tip(
-                        id=f"dec-{fact_id}",
-                        content=f"Past decision ({project}): {tip_content}",
-                        category=TipCategory.MEMORY,
-                        source="memory",
-                        project=project,
-                        relevance=0.8,
-                    )
+                
+                new_tip = Tip(
+                    id=f"dec-{fact_id}",
+                    content=f"Past decision ({project}): {tip_content}",
+                    category=TipCategory.MEMORY,
+                    source="memory",
+                    project=project,
+                    relevance=0.8,
                 )
+                tips.append(new_tip)
         except sqlite3.OperationalError:
             pass  # Table may not exist in test DBs
         return tips
@@ -311,16 +300,16 @@ class TipsEngine:
                 tip_content = content[:200].rstrip()
                 if len(content) > 200:
                     tip_content += "…"
-                tips.append(
-                    Tip(
-                        id=f"err-{fact_id}",
-                        content=f"Lesson learned ({project}): {tip_content}",
-                        category=TipCategory.DEBUGGING,
-                        source="memory",
-                        project=project,
-                        relevance=0.9,
-                    )
+                
+                new_tip = Tip(
+                    id=f"err-{fact_id}",
+                    content=f"Lesson learned ({project}): {tip_content}",
+                    category=TipCategory.DEBUGGING,
+                    source="memory",
+                    project=project,
+                    relevance=0.9,
                 )
+                tips.append(new_tip)
         except sqlite3.OperationalError:
             pass
         return tips
@@ -345,16 +334,16 @@ class TipsEngine:
                 tip_content = content[:200].rstrip()
                 if len(content) > 200:
                     tip_content += "…"
-                tips.append(
-                    Tip(
-                        id=f"pat-{fact_id}",
-                        content=f"Pattern ({project}): {tip_content}",
-                        category=TipCategory.ARCHITECTURE,
-                        source="memory",
-                        project=project,
-                        relevance=0.7,
-                    )
+                
+                new_tip = Tip(
+                    id=f"pat-{fact_id}",
+                    content=f"Pattern ({project}): {tip_content}",
+                    category=TipCategory.ARCHITECTURE,
+                    source="memory",
+                    project=project,
+                    relevance=0.7,
                 )
+                tips.append(new_tip)
         except sqlite3.OperationalError:
             pass
         return tips

@@ -38,6 +38,11 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
 CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON api_keys(tenant_id);
 """
 
+SQL_INSERT_KEY = """
+    INSERT INTO api_keys (name, key_hash, key_prefix, tenant_id, permissions, rate_limit)
+    VALUES (?, ?, ?, ?, ?, ?)
+"""
+
 
 @dataclass
 class APIKey:
@@ -109,15 +114,10 @@ class AuthManager:
         key_hash = self._hash_key(raw_key)
         key_prefix = raw_key[:12]
 
+        args = (name, key_hash, key_prefix, tenant_id, json.dumps(permissions), rate_limit)
         conn = self._get_conn()
         try:
-            cursor = conn.execute(
-                """
-                INSERT INTO api_keys (name, key_hash, key_prefix, tenant_id, permissions, rate_limit)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (name, key_hash, key_prefix, tenant_id, json.dumps(permissions), rate_limit),
-            )
+            cursor = conn.execute(SQL_INSERT_KEY, args)
             conn.commit()
             key_id = cursor.lastrowid
 
@@ -160,15 +160,7 @@ class AuthManager:
             if not row:
                 return AuthResult(authenticated=False, error="Invalid or revoked key")
 
-            # Update last_used (best-effort — don't fail auth if DB is busy)
-            try:
-                conn.execute(
-                    "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                    (datetime.now(timezone.utc).isoformat(), row["id"]),
-                )
-                conn.commit()
-            except sqlite3.OperationalError:
-                logger.debug("Could not update last_used (DB busy), skipping")
+            self._update_last_used(conn, row["id"])
 
             return AuthResult(
                 authenticated=True,
@@ -178,6 +170,17 @@ class AuthManager:
             )
         finally:
             conn.close()
+
+    def _update_last_used(self, conn: sqlite3.Connection, key_id: int) -> None:
+        """Update last_used timestamp (best-effort)."""
+        try:
+            conn.execute(
+                "UPDATE api_keys SET last_used = ? WHERE id = ?",
+                (datetime.now(timezone.utc).isoformat(), key_id),
+            )
+            conn.commit()
+        except sqlite3.OperationalError:
+            logger.debug("Could not update last_used (DB busy), skipping")
 
     def revoke_key(self, key_id: int) -> bool:
         """Revoke an API key by ID."""
