@@ -16,6 +16,8 @@ from typing import Any
 
 logger = logging.getLogger("cortex.mcp.toolbox_bridge")
 
+DEFAULT_SERVER_URL = "http://127.0.0.1:5000"
+
 _TOOLBOX_AVAILABLE = False
 try:
     from toolbox_core import ToolboxClient  # type: ignore
@@ -33,11 +35,11 @@ except ImportError:
 class ToolboxConfig:
     """Configuration for connecting to an MCP Toolbox server."""
 
-    server_url: str = "http://127.0.0.1:5000"
+    server_url: str = DEFAULT_SERVER_URL
     toolset: str = ""
     timeout_seconds: float = 30.0
     allowed_server_urls: list[str] = field(
-        default_factory=lambda: ["http://127.0.0.1:5000", "http://localhost:5000"]
+        default_factory=lambda: [DEFAULT_SERVER_URL, "http://localhost:5000"]
     )
 
     @classmethod
@@ -47,11 +49,11 @@ class ToolboxConfig:
         allowed = (
             [url.strip() for url in allowed_raw.split(",")]
             if allowed_raw
-            else ["http://127.0.0.1:5000", "http://localhost:5000"]
+            else [DEFAULT_SERVER_URL, "http://localhost:5000"]
         )
 
         return cls(
-            server_url=os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000"),
+            server_url=os.environ.get("TOOLBOX_URL", DEFAULT_SERVER_URL),
             toolset=os.environ.get("TOOLBOX_TOOLSET", ""),
             timeout_seconds=float(os.environ.get("TOOLBOX_TIMEOUT", "30")),
             allowed_server_urls=allowed,
@@ -85,7 +87,7 @@ class ToolboxBridge:
         if url not in allowed:
             logger.critical("Sovereign Security Breach: Rejected unallowed Toolbox URL: %s", url)
             raise ValueError(
-                f"External URL '{url}' not in TOOLBOX_ALLOWED_URLS. For security, update configuration."
+                f"External URL '{url}' not in the allowlist. For security, update TOOLBOX_ALLOWED_URLS."
             )
 
     async def connect(self) -> bool:
@@ -113,7 +115,7 @@ class ToolboxBridge:
                 len(self._tools),
             )
             return True
-        except (ConnectionError, OSError, RuntimeError) as exc:
+        except (ConnectionError, RuntimeError) as exc:
             logger.error("Toolbox Sync: [FAILED] %s | Error: %s", self.config.server_url, exc)
             self._client = None
             self._tools = []
@@ -134,13 +136,13 @@ class ToolboxBridge:
         if self._client:
             try:
                 await self._client.close()
-            except (ConnectionError, OSError):
+            except ConnectionError:
                 pass
         self._client = None
         self._tools = []
 
     def __repr__(self) -> str:
-        status = "ACTIVE" if self._client else "IDLE"
+        status = "connected" if self._client else "disconnected"
         return f"ToolboxBridge(status={status}, tools={len(self._tools)}, url={self.config.server_url})"
 
 

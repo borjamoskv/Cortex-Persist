@@ -186,4 +186,4 @@ class TursoBackend:
         return f"{base_url}-{tenant_id}"
 
     def __repr__(self) -> str:
-        return f"<TursoBackend url={self.url!r} status={'connected' if self._conn else 'idle'}>"
+        return f"<TursoBackend url={self.url!r} connected={self._conn is not None}>"
