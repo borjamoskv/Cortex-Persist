@@ -62,10 +62,30 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
     except (json.JSONDecodeError, TypeError):
         row_tags = []
 
-    try:
-        meta = json.loads(row[9]) if row[9] else {}
-    except (json.JSONDecodeError, TypeError):
-        meta = {}
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
+    content = row[1]
+    if content and content.startswith("v6_aesgcm:"):
+        try:
+            content = enc.decrypt_str(content)
+        except Exception as e:
+            print(f"DECRYPT STRING ERROR: {e}")
+            pass
+
+    meta = {}
+    if row[9] and str(row[9]).startswith("v6_aesgcm:"):
+        try:
+            meta = enc.decrypt_json(row[9])
+        except Exception as e:
+            print(f"DECRYPT JSON ERROR: {e}")
+            pass
+    elif row[9]:
+        try:
+            meta = json.loads(row[9])
+        except (json.JSONDecodeError, TypeError):
+            pass
 
     if is_fts and len(row) > 14:
         score = -row[14] if row[14] else 0.5
@@ -74,7 +94,7 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
 
     return SearchResult(
         fact_id=row[0],
-        content=row[1],
+        content=content,
         project=row[2],
         fact_type=row[3],
         confidence=row[4],
@@ -108,9 +128,20 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
     else:
         score = 0.5
 
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
+    content = row[1]
+    if content and str(content).startswith("v6_aesgcm:"):
+        try:
+            content = enc.decrypt_string(content)
+        except Exception:
+            pass
+
     return SearchResult(
         fact_id=row[0],
-        content=row[1],
+        content=content,
         project=row[2],
         fact_type=row[3],
         confidence=row[4],

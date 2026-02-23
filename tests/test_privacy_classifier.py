@@ -118,9 +118,7 @@ class TestMultiplePatterns:
 
     def test_multiple_detections(self):
         stripe_token = "".join(["s", "k", "_", "l", "i", "v", "e", "_"]) + "X" * 24
-        r = classify_content(
-            f"AKIAIOSFODNN7EXAMPLE1 and {stripe_token}"
-        )
+        r = classify_content(f"AKIAIOSFODNN7EXAMPLE1 and {stripe_token}")
         assert "aws_key" in r.matches
         assert "stripe_key" in r.matches
         assert len(r.matches) >= 2

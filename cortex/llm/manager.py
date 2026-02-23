@@ -97,6 +97,25 @@ class LLMManager:
             max_tokens=max_tokens,
         )
 
+    async def stream(
+        self,
+        prompt: str,
+        system: str = "You are a helpful assistant.",
+        temperature: float = 0.3,
+        max_tokens: int = 2048,
+    ):
+        """Stream via the active provider. Yields text chunks."""
+        p = self._get_provider()
+        if p is None:
+            return
+        async for chunk in p.stream(
+            prompt=prompt,
+            system=system,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        ):
+            yield chunk
+
     async def close(self) -> None:
         """Shut down the provider client."""
         if self._provider is not None:

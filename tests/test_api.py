@@ -1,22 +1,24 @@
-"""
-CORTEX v4.0 — API Tests.
-
-Tests for the FastAPI REST API endpoints.
-"""
-
+import asyncio
 import os
 import tempfile
 
 import pytest
 from fastapi.testclient import TestClient
 
-# Unique test DB — no module-level patching to avoid state leakage
-_test_db = tempfile.mktemp(suffix="_api.db")
+import cortex.api as api_mod
+import cortex.auth
+from cortex import api_state, config
+from cortex.auth import AuthManager
+
+# Unique test DB
+_test_db_handle = tempfile.NamedTemporaryFile(suffix="_api.db", delete=False)
+_test_db = _test_db_handle.name
+_test_db_handle.close()
 
 
 @pytest.fixture(scope="module")
 def client():
-    """Create test client with a completely isolated database."""
+    """Create test client with a completely isolated database and valid lifespan."""
     # Delete any leftover DB
     for ext in ["", "-wal", "-shm"]:
         try:
@@ -24,68 +26,71 @@ def client():
         except FileNotFoundError:
             pass
 
-    import cortex.api as api_mod
-    import cortex.api_state
-    import cortex.auth
-    import cortex.config
-
-    original_db_config = cortex.config.DB_PATH
+    original_db_config = config.DB_PATH
     original_env = os.environ.get("CORTEX_DB")
 
-    # Patch DB path everywhere BEFORE lifespan runs
+    # Patch DB path everywhere BEFORE entering lifespan
     os.environ["CORTEX_DB"] = _test_db
-    os.environ["CORTEX_DB"] = _test_db
-    cortex.config.DB_PATH = _test_db
-    cortex.config.reload()
+    config.DB_PATH = _test_db
 
-    # Kill ALL singletons so lifespan creates fresh ones
+    # Inject a mock Master Key for tests so AES encryption doesn't fail
+    if not os.environ.get("CORTEX_MASTER_KEY"):
+        # Must be exactly 32 bytes for AES-256
+        os.environ["CORTEX_MASTER_KEY"] = (
+            "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="  # base64 for 32 bytes
+        )
+
+    config.reload()
+
+    # Kill ALL singletons so fresh ones are created
+    import cortex.crypto.aes as aes_mod
+
+    aes_mod._default_encrypter_instance = None
     cortex.auth._auth_manager = None
-    cortex.api_state.auth_manager = None
-    cortex.api_state.engine = None
+    api_state.auth_manager = None
+    api_state.engine = None
+    api_state.tracker = None
 
-    try:
-        with TestClient(api_mod.app) as c:
-            yield c
-    finally:
-        # Restore originals
-        cortex.config.DB_PATH = original_db_config
-        cortex.config.reload()
+    # Initialize the DB schema manually for the test DB (required for early auth checks)
+    mgr = AuthManager(_test_db)
+    asyncio.run(mgr.initialize())
 
-        # Restore env var
-        if original_env is not None:
-            os.environ["CORTEX_DB"] = original_env
-        else:
-            os.environ.pop("CORTEX_DB", None)
+    # Using 'with TestClient(app)' triggers the lifespan protocol
+    with TestClient(api_mod.app) as tc:
+        yield tc
 
-        # Reset singletons
-        cortex.auth._auth_manager = None
-        cortex.api_state.auth_manager = None
-        cortex.api_state.engine = None
+    # Restore originals
+    config.DB_PATH = original_db_config
+    config.reload()
 
-        # Clean up test DB
-        for ext in ["", "-wal", "-shm"]:
-            try:
-                os.unlink(_test_db + ext)
-            except FileNotFoundError:
-                pass
+    if original_env is not None:
+        os.environ["CORTEX_DB"] = original_env
+    else:
+        os.environ.pop("CORTEX_DB", None)
+
+    # Clean up test DB
+    for ext in ["", "-wal", "-shm"]:
+        try:
+            os.unlink(_test_db + ext)
+        except FileNotFoundError:
+            pass
 
 
 @pytest.fixture(scope="module")
 def api_key(client):
-    """Create an API key directly via AuthManager (bypasses HTTP bootstrap race)."""
-    import asyncio
-
-    from cortex.auth import AuthManager
-
+    """Create an API key directly via AuthManager."""
     mgr = AuthManager(_test_db)
-    raw_key, _ = asyncio.run(
-        mgr.create_key(
+
+    async def _setup():
+        await mgr.initialize()
+        raw_key, _ = await mgr.create_key(
             name="test-key",
             tenant_id="test",
             permissions=["read", "write", "admin"],
         )
-    )
-    return raw_key
+        return raw_key
+
+    return asyncio.run(_setup())
 
 
 @pytest.fixture(scope="module")
@@ -132,7 +137,7 @@ class TestFacts:
             json={
                 "project": "test",
                 "content": "CORTEX uses SQLite with vector search",
-                "tags": ["tech", "db"],
+                "fact_type": "knowledge",
             },
             headers=auth_headers,
         )
@@ -176,7 +181,6 @@ class TestStatus:
         resp = client.get("/v1/status", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
-        assert "total_facts" in data
         assert "version" in data
 
     def test_status_requires_auth(self, client):

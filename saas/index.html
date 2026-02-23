@@ -213,37 +213,19 @@ results = client.search(<span class="str">"database choice"</span>)</code></pre>
         </div>
     </footer>
 
-    <!-- Stripe Integration (replace with real keys) -->
+    <!-- Sovereign Payment Integration (bunq.me fiat bridge) -->
     <script>
-        // Stripe Checkout redirect — replace PRICE_IDs with your Stripe dashboard values
-        const STRIPE_CONFIG = {
-            publishableKey: 'pk_live_REPLACE_ME',  // Your Stripe publishable key
-            prices: {
-                pro: 'price_REPLACE_ME_PRO',       // $29/mo price ID from Stripe
-                team: 'price_REPLACE_ME_TEAM',      // $99/mo price ID from Stripe
-            }
-        };
-
         document.querySelectorAll('[data-plan]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+            btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const plan = btn.dataset.plan;
-                const priceId = STRIPE_CONFIG.prices[plan];
-
-                if (priceId.includes('REPLACE_ME')) {
-                    alert('Stripe not configured yet. Set up your price IDs in the HTML.');
-                    return;
-                }
-
-                // Redirect to Stripe Checkout
-                const stripe = Stripe(STRIPE_CONFIG.publishableKey);
-                const { error } = await stripe.redirectToCheckout({
-                    lineItems: [{ price: priceId, quantity: 1 }],
-                    mode: 'subscription',
-                    successUrl: globalThis.location.origin + '/success',
-                    cancelUrl: globalThis.location.origin + '#pricing',
-                });
-                if (error) console.error(error);
+                const amount = plan === 'pro' ? '29' : '99';
+                
+                btn.innerText = "Redirecting...";
+                btn.style.opacity = "0.7";
+                btn.style.pointerEvents = "none";
+                
+                globalThis.location.href = `https://bunq.me/cortex/${amount}`;
             });
         });
 
@@ -312,23 +294,17 @@ results = client.search(<span class="str">"database choice"</span>)</code></pre>
             targetY = mouseY * .001;
 
             particles.forEach((particle, i) => {
-                let { t, factor, speed, xFactor, yFactor, zFactor } = particle;
-                
-                // Add smoothed mouse movement
-                particle.mx += (targetX - particle.mx) * 0.02;
-                particle.my += (targetY - particle.my) * 0.02;
-                
                 particle.t += speed / 2;
-                t = particle.t;
+                const tCurrent = particle.t;
                 
-                const a = Math.cos(t) + Math.sin(t * 1) / 10;
-                const b = Math.sin(t) + Math.cos(t * 2) / 10;
-                const s = Math.cos(t);
+                const a = Math.cos(tCurrent) + Math.sin(tCurrent * 1) / 10;
+                const b = Math.sin(tCurrent) + Math.cos(tCurrent * 2) / 10;
+                const s = Math.cos(tCurrent);
 
                 dummy.position.set(
-                    (particle.mx * 50) * a + xFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
-                    (particle.my * 50) * b + yFactor + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
-                    (particle.my * 50) * b + zFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
+                    (particle.mx * 50) * a + xFactor + Math.cos((tCurrent / 10) * factor) + (Math.sin(tCurrent * 1) * factor) / 10,
+                    (particle.my * 50) * b + yFactor + Math.sin((tCurrent / 10) * factor) + (Math.cos(tCurrent * 2) * factor) / 10,
+                    (particle.my * 50) * b + zFactor + Math.cos((tCurrent / 10) * factor) + (Math.sin(tCurrent * 3) * factor) / 10
                 );
                 dummy.scale.set(s, s, s);
                 dummy.rotation.set(s * 5, s * 5, s * 5);

@@ -59,7 +59,7 @@ def mock_transport():
 @pytest.fixture
 def client(mock_transport):
     """Create a LangbaseClient with a mock transport."""
-    c = LangbaseClient(api_token="lb_test_key_123", base_url="https://api.langbase.com/v1")
+    c = LangbaseClient(api_key="lb_test_key_123", base_url="https://api.langbase.com/v1")
     # Replace the internal httpx client with our mocked one
     c._client = httpx.AsyncClient(
         transport=mock_transport,
@@ -103,11 +103,11 @@ class TestLangbaseClient:
     def test_init_requires_api_key(self):
         """Client creation fails without API key."""
         with pytest.raises(ValueError, match="LANGBASE_API_KEY"):
-            LangbaseClient(api_token="")
+            LangbaseClient(api_key="")
 
     def test_init_with_key(self):
         """Client creation succeeds with API key."""
-        c = LangbaseClient(api_token="lb_test_123")
+        c = LangbaseClient(api_key="lb_test_123")
         assert c._api_key == "lb_test_123"
 
     @pytest.mark.asyncio

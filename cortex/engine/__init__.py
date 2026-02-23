@@ -14,10 +14,12 @@ import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.embeddings import LocalEmbedder
+from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
 from cortex.engine.sync_compat import SyncCompatMixin
 from cortex.engine.sync_ops import SyncOpsMixin
+from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.metrics import metrics
 from cortex.migrations.core import run_migrations_async
 from cortex.schema import get_init_meta
@@ -31,7 +33,7 @@ from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(SyncCompatMixin, SyncOpsMixin):
+class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
@@ -93,7 +95,9 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
             if self._conn is not None:
                 return self._conn
 
-            self._conn = await aiosqlite.connect(str(self._db_path), timeout=30)
+            from cortex.db import connect_async
+
+            self._conn = await connect_async(str(self._db_path))
 
             try:
                 await self._conn.enable_load_extension(True)
@@ -104,9 +108,6 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
                 logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
 
-            from cortex.db import apply_pragmas_async
-
-            await apply_pragmas_async(self._conn)
             return self._conn
 
     def _get_conn(self) -> aiosqlite.Connection:
@@ -197,100 +198,9 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
         await conn.commit()
 
         self._ledger = ImmutableLedger(conn)
-        await self._init_memory_subsystem(conn)
+        await self._init_memory_subsystem(self._db_path, conn)
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
-
-    # ─── Transaction Ledger ───────────────────────────────────────
-
-    async def _log_transaction(self, conn, project, action, detail) -> int:
-        from cortex.canonical import canonical_json, compute_tx_hash
-
-        dj = canonical_json(detail)
-        ts = now_iso()
-        cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
-        prev = await cursor.fetchone()
-        ph = prev[0] if prev else "GENESIS"
-        th = compute_tx_hash(ph, project, action, dj, ts)
-
-        c = await conn.execute(
-            "INSERT INTO transactions "
-            "(project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (project, action, dj, th, ts),
-        )
-        tx_id = c.lastrowid
-
-        # Re-verify and update hash if prev_hash was different from our lookup
-        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as cur:
-            row = await cur.fetchone()
-            actual_ph = row[0] if row else ph
-            if actual_ph != ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
-                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
-
-        if self._ledger:
-            try:
-                self._ledger.record_write()
-                await self._ledger.create_checkpoint_async()
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
-                logger.warning("Auto-checkpoint failed: %s", e)
-                metrics.inc(
-                    "cortex_ledger_checkpoint_failures_total",
-                    meta={"error": str(e)},
-                )
-
-        return tx_id
-
-    async def verify_ledger(self) -> dict:
-        if not self._ledger:
-            from cortex.engine.ledger import ImmutableLedger
-
-            self._ledger = ImmutableLedger(await self.get_conn())
-        return await self._ledger.verify_integrity_async()
-
-    async def process_graph_outbox_async(self, limit: int = 10) -> int:
-        from cortex.graph.backends.neo4j import Neo4jBackend
-
-        conn = await self.get_conn()
-        async with conn.execute(
-            "SELECT id, fact_id, action FROM graph_outbox WHERE status = 'pending' LIMIT ?",
-            (limit,),
-        ) as cursor:
-            events = await cursor.fetchall()
-
-        if not events:
-            return 0
-
-        processed_count = 0
-        try:
-            neo4j = Neo4jBackend()
-            if not neo4j._initialized:
-                return 0
-        except ImportError:
-            return 0
-
-        for event_id, fact_id, action in events:
-            try:
-                success = False
-                if action == "deprecate_fact":
-                    success = await neo4j.delete_fact_elements(fact_id)
-
-                status = "processed" if success else "failed"
-                await conn.execute(
-                    "UPDATE graph_outbox SET status = ?, processed_at = ?, retry_count = retry_count + 1 WHERE id = ?",
-                    (status, now_iso(), event_id),
-                )
-                processed_count += 1
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
-                logger.error("Failed to process CDC event %d: %s", event_id, e)
-                await conn.execute(
-                    "UPDATE graph_outbox SET status = 'failed', retry_count = retry_count + 1 WHERE id = ?",
-                    (event_id,),
-                )
-
-        await conn.commit()
-        return processed_count
 
     # ─── Helpers ──────────────────────────────────────────────────
 
@@ -302,60 +212,6 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
     @staticmethod
     def _row_to_fact(row) -> Fact:
         return row_to_fact(row)
-
-    # ─── Memory Subsystem (Frontera 2) ────────────────────────────
-
-    async def _init_memory_subsystem(self, conn: aiosqlite.Connection) -> None:
-        """Initialize the Tripartite Cognitive Memory Architecture.
-
-        L1 (Working Memory) + L3 (Event Ledger) always available.
-        L2 (Vector Store) optional — requires qdrant_client.
-        """
-        from cortex.memory.ledger import EventLedgerL3
-        from cortex.memory.working import WorkingMemoryL1
-
-        l1 = WorkingMemoryL1()
-        l3 = EventLedgerL3(conn)
-        await l3.ensure_table()
-
-        # L2: Optional — Qdrant may not be installed
-        l2 = None
-        encoder = None
-        try:
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.vector_store import VectorStoreL2
-
-            vector_path = self._db_path.parent / "vectors"
-            encoder = AsyncEncoder(self._get_embedder())
-            l2 = VectorStoreL2(encoder=encoder, db_path=vector_path)
-            logger.info("Memory L2 (VectorStore) initialized at %s", vector_path)
-        except (ImportError, OSError, RuntimeError) as e:
-            logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
-
-        if l2 and encoder:
-            from cortex.memory.manager import CortexMemoryManager
-
-            self._memory_manager = CortexMemoryManager(
-                l1=l1,
-                l2=l2,
-                l3=l3,
-                encoder=encoder,
-            )
-        else:
-            # Minimal manager: store a reference to L1+L3 for basic ops
-            self._memory_manager = None
-            self._memory_l1 = l1
-            self._memory_l3 = l3
-
-        logger.info(
-            "Memory subsystem: %s",
-            "full (L1+L2+L3)" if self._memory_manager else "partial (L1+L3)",
-        )
-
-    @property
-    def memory(self):
-        """Access the cognitive memory manager (None if not initialized)."""
-        return self._memory_manager
 
     # ─── Lifecycle ────────────────────────────────────────────────
 

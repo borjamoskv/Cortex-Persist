@@ -63,13 +63,16 @@ MEM0_BENCHMARKS = {
 
 # ── Benchmark helpers ──────────────────────────────────────────────────────
 
+
 def timer(func):
     """Mide tiempo de ejecución en ms."""
+
     async def wrapper(*args, **kwargs):
         start = time.perf_counter()
         result = await func(*args, **kwargs)
         elapsed_ms = (time.perf_counter() - start) * 1000
         return result, elapsed_ms
+
     return wrapper
 
 
@@ -94,6 +97,7 @@ async def measure_latency(coro_factory, iterations=10):
 
 # ── Main benchmark ─────────────────────────────────────────────────────────
 
+
 async def run_benchmark(iterations: int = 50):
     """Ejecuta el benchmark completo de CORTEX."""
 
@@ -101,11 +105,13 @@ async def run_benchmark(iterations: int = 50):
     tmp_dir = tempfile.mkdtemp(prefix="cortex_bench_")
     db_path = os.path.join(tmp_dir, "benchmark.db")
 
-    console.print(Panel(
-        "[bold cyan]🧠 CORTEX Benchmark Suite[/]\n"
-        f"[dim]Iterations: {iterations} | DB: {db_path}[/]",
-        box=box.DOUBLE,
-    ))
+    console.print(
+        Panel(
+            "[bold cyan]🧠 CORTEX Benchmark Suite[/]\n"
+            f"[dim]Iterations: {iterations} | DB: {db_path}[/]",
+            box=box.DOUBLE,
+        )
+    )
 
     # ── Setup engine ───────────────────────────────────────────────────
     console.print("\n[yellow]⏳ Inicializando engine...[/]")
@@ -136,7 +142,9 @@ async def run_benchmark(iterations: int = 50):
 
     embedder = engine._get_embedder()
     embed_stats = await measure_latency(
-        lambda: asyncio.to_thread(embedder.embed, "This is a test sentence for benchmarking embedding speed"),
+        lambda: asyncio.to_thread(
+            embedder.embed, "This is a test sentence for benchmarking embedding speed"
+        ),
         iterations=min(iterations, 100),
     )
     results["embedding"] = embed_stats
@@ -146,6 +154,7 @@ async def run_benchmark(iterations: int = 50):
     console.print("[yellow]📊 Benchmark: Store (escritura)...[/]")
 
     store_counter = [0]
+
     async def do_store():
         store_counter[0] += 1
         await engine.store(
@@ -199,11 +208,11 @@ async def run_benchmark(iterations: int = 50):
         ledger = engine._get_ledger()
         async with pool.acquire() as conn:
             # Try different method signatures
-            if hasattr(ledger, 'verify_chain_async'):
+            if hasattr(ledger, "verify_chain_async"):
                 ledger_ok = await ledger.verify_chain_async(conn)
-            elif hasattr(ledger, 'verify_async'):
+            elif hasattr(ledger, "verify_async"):
                 ledger_ok = await ledger.verify_async(conn)
-            elif hasattr(ledger, 'verify'):
+            elif hasattr(ledger, "verify"):
                 ledger_ok = ledger.verify(conn)
             else:
                 # Fall back to engine-level verify
@@ -255,32 +264,70 @@ async def run_benchmark(iterations: int = 50):
     # Store latency
     cortex_store = store_stats["median_ms"]
     mem0_store = MEM0_BENCHMARKS["store_latency_ms"]["value"]
-    store_advantage = f"[green]{((mem0_store - cortex_store) / mem0_store * 100):.0f}% más rápido[/]" if cortex_store < mem0_store else f"[red]{((cortex_store - mem0_store) / mem0_store * 100):.0f}% más lento[/]"
-    table.add_row("Store (escritura)", f"{cortex_store:.1f}ms", f"~{mem0_store}ms (cloud)", store_advantage)
+    store_advantage = (
+        f"[green]{((mem0_store - cortex_store) / mem0_store * 100):.0f}% más rápido[/]"
+        if cortex_store < mem0_store
+        else f"[red]{((cortex_store - mem0_store) / mem0_store * 100):.0f}% más lento[/]"
+    )
+    table.add_row(
+        "Store (escritura)", f"{cortex_store:.1f}ms", f"~{mem0_store}ms (cloud)", store_advantage
+    )
 
     # Search latency
     cortex_search = search_stats["median_ms"]
     mem0_search = MEM0_BENCHMARKS["search_latency_ms"]["value"]
-    search_advantage = f"[green]{((mem0_search - cortex_search) / mem0_search * 100):.0f}% más rápido[/]" if cortex_search < mem0_search else f"[red]{((cortex_search - mem0_search) / mem0_search * 100):.0f}% más lento[/]"
-    table.add_row("Search (semántica)", f"{cortex_search:.1f}ms", f"~{mem0_search}ms (cloud)", search_advantage)
+    search_advantage = (
+        f"[green]{((mem0_search - cortex_search) / mem0_search * 100):.0f}% más rápido[/]"
+        if cortex_search < mem0_search
+        else f"[red]{((cortex_search - mem0_search) / mem0_search * 100):.0f}% más lento[/]"
+    )
+    table.add_row(
+        "Search (semántica)",
+        f"{cortex_search:.1f}ms",
+        f"~{mem0_search}ms (cloud)",
+        search_advantage,
+    )
 
     # Embedding
     cortex_embed = embed_stats["median_ms"]
     mem0_embed = MEM0_BENCHMARKS["embedding_latency_ms"]["value"]
-    embed_advantage = f"[green]{((mem0_embed - cortex_embed) / mem0_embed * 100):.0f}% más rápido[/]" if cortex_embed < mem0_embed else f"[red]{((cortex_embed - mem0_embed) / mem0_embed * 100):.0f}% más lento[/]"
-    table.add_row("Embedding", f"{cortex_embed:.1f}ms (ONNX local)", f"~{mem0_embed}ms (API cloud)", embed_advantage)
+    embed_advantage = (
+        f"[green]{((mem0_embed - cortex_embed) / mem0_embed * 100):.0f}% más rápido[/]"
+        if cortex_embed < mem0_embed
+        else f"[red]{((cortex_embed - mem0_embed) / mem0_embed * 100):.0f}% más lento[/]"
+    )
+    table.add_row(
+        "Embedding",
+        f"{cortex_embed:.1f}ms (ONNX local)",
+        f"~{mem0_embed}ms (API cloud)",
+        embed_advantage,
+    )
 
     # Feature comparison
     table.add_section()
-    table.add_row("☁️  Cloud dependency", "[green]NO (local-first)[/]", "[red]SÍ (cloud)[/]", "[green]CORTEX[/]")
-    table.add_row("🔒 Soberanía de datos", "[green]TOTAL[/]", "[red]Cloud de terceros[/]", "[green]CORTEX[/]")
-    table.add_row("🔐 Ledger criptográfico", "[green]SHA-256 chain[/]", "[red]No[/]", "[green]CORTEX[/]")
+    table.add_row(
+        "☁️  Cloud dependency",
+        "[green]NO (local-first)[/]",
+        "[red]SÍ (cloud)[/]",
+        "[green]CORTEX[/]",
+    )
+    table.add_row(
+        "🔒 Soberanía de datos", "[green]TOTAL[/]", "[red]Cloud de terceros[/]", "[green]CORTEX[/]"
+    )
+    table.add_row(
+        "🔐 Ledger criptográfico", "[green]SHA-256 chain[/]", "[red]No[/]", "[green]CORTEX[/]"
+    )
     table.add_row("🕸️  Graph RAG", "[green]Sí[/]", "[red]No[/]", "[green]CORTEX[/]")
     table.add_row("⏰ Hechos temporales", "[green]Sí[/]", "[red]No[/]", "[green]CORTEX[/]")
     table.add_row("🤝 MCP nativo", "[green]Sí[/]", "[red]No[/]", "[green]CORTEX[/]")
     table.add_row("🗳️  Consenso distribuido", "[green]RWC[/]", "[red]No[/]", "[green]CORTEX[/]")
     table.add_row("📦 Compactación", "[green]Sí[/]", "[red]No[/]", "[green]CORTEX[/]")
-    table.add_row("🌍 GDPR-ready", "[green]Datos locales[/]", "[yellow]Depende del plan[/]", "[green]CORTEX[/]")
+    table.add_row(
+        "🌍 GDPR-ready",
+        "[green]Datos locales[/]",
+        "[yellow]Depende del plan[/]",
+        "[green]CORTEX[/]",
+    )
 
     table.add_section()
     table.add_row("⭐ GitHub Stars", "0 (nuevo)", "47.6K", "[yellow]Mem0[/]")
@@ -291,22 +338,26 @@ async def run_benchmark(iterations: int = 50):
     console.print(table)
 
     # ── Storage summary ────────────────────────────────────────────────
-    console.print(f"\n[dim]📁 DB: {results['storage']['total_kb']}KB para {store_counter[0]} hechos ({results['storage']['bytes_per_fact']:.0f} bytes/hecho)[/]")
+    console.print(
+        f"\n[dim]📁 DB: {results['storage']['total_kb']}KB para {store_counter[0]} hechos ({results['storage']['bytes_per_fact']:.0f} bytes/hecho)[/]"
+    )
 
     # ── Resumen ────────────────────────────────────────────────────────
-    console.print(Panel(
-        f"[bold green]Resumen:[/]\n"
-        f"  • Store:  {cortex_store:.1f}ms (vs Mem0 ~{mem0_store}ms)\n"
-        f"  • Search: {cortex_search:.1f}ms (vs Mem0 ~{mem0_search}ms)\n"
-        f"  • Embed:  {cortex_embed:.1f}ms local (vs Mem0 ~{mem0_embed}ms cloud)\n"
-        f"  • Ledger: {'✅ Íntegro' if ledger_ok else '❌ Corrupto'} ({ledger_ms:.0f}ms)\n"
-        f"  • Hechos: {store_counter[0]} | DB: {results['storage']['total_kb']}KB\n"
-        f"\n[bold cyan]CORTEX es local, soberano y verificable.[/]\n"
-        f"[bold cyan]Mem0 tiene comunidad y funding.[/]\n"
-        f"[bold yellow]La tecnología está. Falta el mundo.[/]",
-        title="🧠 CORTEX Benchmark Results",
-        box=box.DOUBLE,
-    ))
+    console.print(
+        Panel(
+            f"[bold green]Resumen:[/]\n"
+            f"  • Store:  {cortex_store:.1f}ms (vs Mem0 ~{mem0_store}ms)\n"
+            f"  • Search: {cortex_search:.1f}ms (vs Mem0 ~{mem0_search}ms)\n"
+            f"  • Embed:  {cortex_embed:.1f}ms local (vs Mem0 ~{mem0_embed}ms cloud)\n"
+            f"  • Ledger: {'✅ Íntegro' if ledger_ok else '❌ Corrupto'} ({ledger_ms:.0f}ms)\n"
+            f"  • Hechos: {store_counter[0]} | DB: {results['storage']['total_kb']}KB\n"
+            f"\n[bold cyan]CORTEX es local, soberano y verificable.[/]\n"
+            f"[bold cyan]Mem0 tiene comunidad y funding.[/]\n"
+            f"[bold yellow]La tecnología está. Falta el mundo.[/]",
+            title="🧠 CORTEX Benchmark Results",
+            box=box.DOUBLE,
+        )
+    )
 
     # Cleanup pool
     await pool.close()
@@ -318,7 +369,9 @@ async def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="CORTEX Benchmark Suite")
-    parser.add_argument("--iterations", "-n", type=int, default=50, help="Número de iteraciones por benchmark")
+    parser.add_argument(
+        "--iterations", "-n", type=int, default=50, help="Número de iteraciones por benchmark"
+    )
     parser.add_argument("--export", "-e", type=str, default=None, help="Exportar resultados a JSON")
     args = parser.parse_args()
 
@@ -334,7 +387,9 @@ async def main():
         "current_mb": round(current / 1024 / 1024, 2),
         "peak_mb": round(peak / 1024 / 1024, 2),
     }
-    console.print(f"[dim]🧠 RAM: {results['memory']['current_mb']}MB actual / {results['memory']['peak_mb']}MB pico[/]")
+    console.print(
+        f"[dim]🧠 RAM: {results['memory']['current_mb']}MB actual / {results['memory']['peak_mb']}MB pico[/]"
+    )
 
     if args.export:
         with open(args.export, "w") as f:

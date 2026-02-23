@@ -66,18 +66,18 @@ class TestPrometheusPercentiles:
         output = reg.to_prometheus()
         lines = output.strip().split("\n")
 
-        quantile_lines = [l for l in lines if "quantile=" in l]
+        quantile_lines = [line for line in lines if "quantile=" in line]
         assert len(quantile_lines) == 3
 
         # p50 ~ 0.5, p95 ~ 0.95, p99 ~ 0.99
         for line in quantile_lines:
             parts = line.split()
             value = float(parts[1])
-            if '0.5' in parts[0]:
+            if "0.5" in parts[0]:
                 assert 0.45 <= value <= 0.55, f"p50 out of range: {value}"
-            elif '0.95' in parts[0]:
+            elif "0.95" in parts[0]:
                 assert 0.90 <= value <= 1.0, f"p95 out of range: {value}"
-            elif '0.99' in parts[0]:
+            elif "0.99" in parts[0]:
                 assert 0.95 <= value <= 1.01, f"p99 out of range: {value}"
 
     def test_counter_and_gauge_unaffected(self):

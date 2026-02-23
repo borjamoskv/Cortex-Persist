@@ -1,10 +1,12 @@
-import pytest
-from cortex.memory.manager import CortexMemoryManager
-from cortex.memory.working import WorkingMemoryL1
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.vector_store import VectorStoreL2
-from cortex.memory.encoder import AsyncEncoder
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.ledger import EventLedgerL3
+from cortex.memory.manager import CortexMemoryManager
+from cortex.memory.vector_store import VectorStoreL2
+from cortex.memory.working import WorkingMemoryL1
 
 
 @pytest.fixture
@@ -27,7 +29,7 @@ async def test_tenant_isolation_in_ledger(mock_deps):
         content="Sensitive info for A",
         session_id="session-1",
         token_count=10,
-        tenant_id="tenant-A"
+        tenant_id="tenant-A",
     )
 
     # Verify L3 append received the tenant_id
@@ -46,8 +48,4 @@ async def test_tenant_isolation_in_recall(mock_deps):
     await manager.assemble_context(query="some query", tenant_id="tenant-B")
 
     # Verification complete.
-    l2.recall.assert_called_once_with(
-        query="some query",
-        limit=3,
-        tenant_id="tenant-B"
-    )
+    l2.recall.assert_called_once_with(query="some query", limit=3, tenant_id="tenant-B")

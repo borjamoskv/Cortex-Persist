@@ -179,28 +179,34 @@ class MejoraloSwarm:
         try:
             async with ThoughtOrchestra(config=self.config) as orchestra:
                 for fp in file_paths:
-                    try:
-                        content = fp.read_text(errors="replace")
-                        prompt = (
-                            f"Perform a deep semantic audit for {fp.name}. "
-                            f"Identify 3-5 critical issues.\n\nCode:\n{content}"
-                        )
-                        system = (
-                            "You are the Sovereign Swarm Auditor. "
-                            "MEMBER: ArchitectPrime (Focus: Structure), "
-                            "SecurityWarden (Focus: Safety). "
-                            "Identify high-impact architectural and logic bugs. Zero fluff."
-                        )
-                        result = await orchestra.think(
-                            prompt, mode=ThinkingMode.CODE, system=system
-                        )
-                        if result and result.content:
-                            for line in result.content.splitlines():
-                                clean = line.strip().lstrip("-*•0123456789. ")
-                                if clean and len(clean) > 10:
-                                    findings.append(f"{fp.name} → {clean}")
-                    except Exception as e:
-                        logger.error("Audit failed for %s: %s", fp.name, e)
+                    file_findings = await self._audit_single_file(orchestra, fp)
+                    findings.extend(file_findings)
         except Exception as e:
             logger.error("Audit orchestra failed: %s", e)
+        return findings
+
+    async def _audit_single_file(self, orchestra: ThoughtOrchestra, fp: Path) -> list[str]:
+        """Audit a single file and return findings."""
+        findings = []
+        try:
+            content = fp.read_text(errors="replace")
+            prompt = (
+                f"Perform a deep semantic audit for {fp.name}. "
+                f"Identify 3-5 critical issues.\n\nCode:\n{content}"
+            )
+            system = (
+                "You are the Sovereign Swarm Auditor. "
+                "MEMBER: ArchitectPrime (Focus: Structure), "
+                "SecurityWarden (Focus: Safety). "
+                "Identify high-impact architectural and logic bugs. Zero fluff."
+            )
+            result = await orchestra.think(prompt, mode=ThinkingMode.CODE, system=system)
+            if not result or not result.content:
+                return []
+            for line in result.content.splitlines():
+                clean = line.strip().lstrip("-*•0123456789. ")
+                if clean and len(clean) > 10:
+                    findings.append(f"{fp.name} → {clean}")
+        except Exception as e:
+            logger.error("Audit failed for %s: %s", fp.name, e)
         return findings

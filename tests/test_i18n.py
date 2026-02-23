@@ -2,7 +2,6 @@
 Tests for cortex.i18n module and API integration.
 """
 
-
 from cortex import i18n
 from cortex.i18n import (
     DEFAULT_LANGUAGE,

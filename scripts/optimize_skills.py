@@ -1,10 +1,9 @@
-import os
 import glob
 from pathlib import Path
-import yaml
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -17,19 +16,20 @@ REGLA 4: Aplica "Zero Fluff" y la filosofía "130/100".
 REGLA 5: Responde SOLAMENTE con el contenido Markdown procesado, absolutamente NADA más. Sin bloques delimitadores (como ```markdown) al principio y al final si no son parte original.
 """
 
+
 def optimize_skills():
     client = genai.Client()
-    skills_dir = Path.home() / '.gemini' / 'antigravity' / 'skills'
+    skills_dir = Path.home() / ".gemini" / "antigravity" / "skills"
     skill_files = glob.glob(f"{skills_dir}/*/SKILL.md")
-    
+
     for file_path in skill_files:
         print(f"Optimizing {file_path}...")
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Separar frontmatter
-        if content.startswith('---'):
-            parts = content.split('---', 2)
+        if content.startswith("---"):
+            parts = content.split("---", 2)
             if len(parts) >= 3:
                 frontmatter = parts[1]
                 body = parts[2]
@@ -42,18 +42,18 @@ def optimize_skills():
 
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model="gemini-2.5-flash",
                 contents=[
                     types.Part.from_text(text=SYSTEM_PROMPT),
-                    types.Part.from_text(text=body)
-                ]
+                    types.Part.from_text(text=body),
+                ],
             )
-            
+
             optimized_body = response.text.strip()
             # Quitamos los backticks delimitadores si el LLM los añadió erróneamente
-            if optimized_body.startswith('```markdown'):
+            if optimized_body.startswith("```markdown"):
                 optimized_body = optimized_body[11:].strip()
-            if optimized_body.endswith('```'):
+            if optimized_body.endswith("```"):
                 optimized_body = optimized_body[:-3].strip()
 
             new_content = ""
@@ -61,12 +61,13 @@ def optimize_skills():
                 new_content += f"---{frontmatter}---\n"
             new_content += optimized_body + "\n"
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
             print(f"✅ Optimized {file_path}")
 
         except Exception as e:
             print(f"❌ Error optimizing {file_path}: {e}")
+
 
 if __name__ == "__main__":
     optimize_skills()

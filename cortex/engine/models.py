@@ -46,6 +46,12 @@ class Fact:
 
 
 def row_to_fact(row: tuple) -> Fact:
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
+    content = enc.decrypt_str(row[2]) if row[2] else ""
+
     # Safely handle JSON parsing
     try:
         tags = json.loads(row[4]) if row[4] else []
@@ -53,7 +59,7 @@ def row_to_fact(row: tuple) -> Fact:
         tags = []
 
     try:
-        meta = json.loads(row[9]) if row[9] else {}
+        meta = enc.decrypt_json(row[9]) if row[9] else {}
     except (json.JSONDecodeError, TypeError):
         meta = {}
 
@@ -71,7 +77,7 @@ def row_to_fact(row: tuple) -> Fact:
     return Fact(
         id=r[0],
         project=r[1],
-        content=r[2],
+        content=content,
         fact_type=r[3],
         tags=tags,
         confidence=r[5],

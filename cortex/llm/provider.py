@@ -173,6 +173,54 @@ class LLMProvider(BaseProvider):
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
+    async def stream(
+        self,
+        prompt: str,
+        system: str = "You are a helpful assistant.",
+        temperature: float = 0.3,
+        max_tokens: int = 2048,
+    ):
+        """Stream a chat completion request. Yields text chunks."""
+        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        headers: dict[str, str] = {
+            "Content-Type": "application/json",
+            **self._extra_headers,
+        }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+
+        payload = {
+            "model": self._model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+
+        try:
+            async with self._client.stream("POST", url, headers=headers, json=payload) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if not line or not line.startswith("data: "):
+                        continue
+
+                    data_str = line[6:].strip()
+                    if data_str == "[DONE]":
+                        break
+
+                    try:
+                        data = json.loads(data_str)
+                        if delta := data["choices"][0].get("delta", {}).get("content"):
+                            yield delta
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue
+        except httpx.HTTPStatusError as e:
+            logger.error("LLM Stream Failure [%s]: %s", self._provider, e.response.text[:500])
+            raise
+
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
         url = f"{self._base_url.rstrip('/')}/chat/completions"

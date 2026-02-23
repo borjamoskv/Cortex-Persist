@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -24,9 +23,7 @@ async def writer(db_path: str):
     w = SqliteWriteWorker(db_path)
     await w.start()
     # Create test table
-    result = await w.execute(
-        "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, val TEXT)"
-    )
+    result = await w.execute("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, val TEXT)")
     assert isinstance(result, Ok)
     yield w
     await w.stop()
@@ -67,18 +64,14 @@ class TestLifecycle:
 class TestWrites:
     @pytest.mark.asyncio
     async def test_single_insert(self, writer: SqliteWriteWorker):
-        result = await writer.execute(
-            "INSERT INTO test (val) VALUES (?)", ("hello",)
-        )
+        result = await writer.execute("INSERT INTO test (val) VALUES (?)", ("hello",))
         assert isinstance(result, Ok)
         assert result.value >= 0  # rowcount
 
     @pytest.mark.asyncio
     async def test_multiple_inserts(self, writer: SqliteWriteWorker):
         for i in range(50):
-            result = await writer.execute(
-                "INSERT INTO test (val) VALUES (?)", (f"item-{i}",)
-            )
+            result = await writer.execute("INSERT INTO test (val) VALUES (?)", (f"item-{i}",))
             assert isinstance(result, Ok)
 
     @pytest.mark.asyncio
@@ -101,9 +94,7 @@ class TestTransactions:
             assert isinstance(r2, Ok)
 
     @pytest.mark.asyncio
-    async def test_transaction_rollback_on_exception(
-        self, writer: SqliteWriteWorker
-    ):
+    async def test_transaction_rollback_on_exception(self, writer: SqliteWriteWorker):
         with pytest.raises(ValueError):
             async with writer.transaction() as tx:
                 await tx.execute("INSERT INTO test (val) VALUES (?)", ("will_rollback",))
@@ -111,10 +102,7 @@ class TestTransactions:
 
     @pytest.mark.asyncio
     async def test_execute_many(self, writer: SqliteWriteWorker):
-        ops = [
-            ("INSERT INTO test (val) VALUES (?)", (f"batch-{i}",))
-            for i in range(10)
-        ]
+        ops = [("INSERT INTO test (val) VALUES (?)", (f"batch-{i}",)) for i in range(10)]
         result = await writer.execute_many(ops)
         assert isinstance(result, Ok)
         assert result.value == 10
@@ -128,8 +116,7 @@ class TestConcurrency:
     async def test_concurrent_writes_serialized(self, writer: SqliteWriteWorker):
         """100 concurrent writes should all succeed without BUSY errors."""
         tasks = [
-            writer.execute("INSERT INTO test (val) VALUES (?)", (f"conc-{i}",))
-            for i in range(100)
+            writer.execute("INSERT INTO test (val) VALUES (?)", (f"conc-{i}",)) for i in range(100)
         ]
         results = await asyncio.gather(*tasks)
         ok_count = sum(1 for r in results if isinstance(r, Ok))

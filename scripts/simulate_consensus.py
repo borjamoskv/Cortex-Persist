@@ -29,6 +29,7 @@ async def simulate_consensus():
     # Init Schema (Minimal for sim)
     async with engine.session() as conn:
         from cortex.schema import ALL_SCHEMA
+
         # Join all schema parts into one script
         full_schema = "\n".join(ALL_SCHEMA)
         await conn.executescript(full_schema)
@@ -43,22 +44,18 @@ async def simulate_consensus():
             project="simulation",
             content="God Mode is operational within the Sovereign Gate.",
             fact_type="principle",
-            tags=["law", "core", "verification"]
+            tags=["law", "core", "verification"],
         )
         print(f"👉 Fact ID: {fact_id} created.")
 
         # 4. Register Agents
-        agents = {
-            "agent_a": 0.8,
-            "agent_b": 0.2,
-            "agent_c": 0.5
-        }
+        agents = {"agent_a": 0.8, "agent_b": 0.2, "agent_c": 0.5}
 
         async with engine.session() as conn:
             for name, score in agents.items():
                 await conn.execute(
                     "INSERT INTO agents (id, public_key, name, agent_type, reputation_score) VALUES (?, 'dummy_pk_' || ?, ?, 'ai', ?)",
-                    (name, name, name.upper(), score)
+                    (name, name, name.upper(), score),
                 )
             await conn.commit()
         log("Agents Registered.")
@@ -83,16 +80,18 @@ async def simulate_consensus():
             print(f"📊 Final Score: {fact['consensus_score']}")
             print(f"🏷️  Confidence: {fact['confidence']}")
 
-            if fact['confidence'] != "verified":
+            if fact["confidence"] != "verified":
                 print("\033[1;31m❌ FAILURE: Fact should be verified (Score > 1.5)\033[0m")
             else:
                 print("\033[1;32m✅ SUCCESS: Consensus Reached in God Mode.\033[0m")
         else:
-             print("\033[1;31m❌ FAILURE: Fact not found.\033[0m")
+            print("\033[1;31m❌ FAILURE: Fact not found.\033[0m")
 
         # 7. Audit
         async with engine.session() as conn:
-            async with conn.execute("SELECT hash, action, detail FROM transactions ORDER BY id") as cursor:
+            async with conn.execute(
+                "SELECT hash, action, detail FROM transactions ORDER BY id"
+            ) as cursor:
                 rows = await cursor.fetchall()
                 print("\n📜 Immutable Ledger Trail:")
                 for r in rows:
@@ -108,6 +107,7 @@ async def simulate_consensus():
                 db_path.unlink()
             except OSError:
                 print(f"⚠️ Warning: Could not delete {db_path} (still locked?)")
+
 
 if __name__ == "__main__":
     asyncio.run(simulate_consensus())

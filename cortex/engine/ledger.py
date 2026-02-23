@@ -201,16 +201,23 @@ class ImmutableLedger:
     async def verify_integrity_async(self) -> dict:
         """Verify hash chain continuity and Merkle checkpoints (async)."""
         violations = []
+        tx_count = 0
 
         async with self.pool.acquire() as conn:
-            # 1. Verify Hash Chain
+            # 1. Verify Hash Chain (Chunked to avoid OOM)
             cursor = await conn.execute(
                 "SELECT id, prev_hash, hash, project, action, detail, timestamp FROM transactions ORDER BY id"
             )
-            txs = await cursor.fetchall()
 
             current_prev = "GENESIS"
-            for tx_id, p_hash, c_hash, proj, act, detail, ts in txs:
+            while True:
+                tx = await cursor.fetchone()
+                if not tx:
+                    break
+
+                tx_id, p_hash, c_hash, proj, act, detail, ts = tx
+                tx_count += 1
+
                 if p_hash != current_prev:
                     violations.append(
                         {
@@ -276,6 +283,6 @@ class ImmutableLedger:
             return {
                 "valid": not violations,
                 "violations": violations,
-                "tx_checked": len(txs),
+                "tx_checked": tx_count,
                 "roots_checked": len(roots),
             }

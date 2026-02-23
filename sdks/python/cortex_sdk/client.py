@@ -16,6 +16,7 @@ from typing import Any
 @dataclass
 class Fact:
     """A single fact returned from CORTEX."""
+
     id: int
     project: str
     content: str
@@ -32,6 +33,7 @@ class Fact:
 @dataclass
 class LedgerReport:
     """Cryptographic ledger verification result."""
+
     valid: bool
     violations: list[str] = field(default_factory=list)
     tx_checked: int = 0
@@ -41,6 +43,7 @@ class LedgerReport:
 
 class CortexError(Exception):
     """Base exception for CORTEX SDK errors."""
+
     def __init__(self, status: int, message: str):
         self.status = status
         self.message = message
@@ -64,7 +67,9 @@ class Cortex:
         [Fact(id=42, content='user likes techno', ...)]
     """
 
-    def __init__(self, base_url: str = "http://localhost:8000", api_key: str = "", timeout: int = 30):
+    def __init__(
+        self, base_url: str = "http://localhost:8000", api_key: str = "", timeout: int = 30
+    ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout = timeout

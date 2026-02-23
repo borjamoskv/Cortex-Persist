@@ -10,6 +10,7 @@ import logging
 import sqlite3
 
 from cortex.engine.models import Fact
+from cortex.engine.sync_ghost_mixin import SyncGhostMixin
 from cortex.temporal import now_iso
 
 __all__ = ["SyncOpsMixin"]
@@ -17,7 +18,7 @@ __all__ = ["SyncOpsMixin"]
 logger = logging.getLogger("cortex")
 
 
-class SyncOpsMixin:
+class SyncOpsMixin(SyncGhostMixin):
     """Advanced synchronous operations for CortexEngine.
 
     Requires ``_get_sync_conn()`` from ``SyncCompatMixin``.
@@ -270,41 +271,3 @@ class SyncOpsMixin:
             "db_path": str(self._db_path),
             "db_size_mb": round(db_size, 2),
         }
-
-    # ─── Ghosts ─────────────────────────────────────────────────
-
-    def register_ghost_sync(self, reference: str, context: str, project: str) -> int:
-        """Register a ghost synchronously."""
-        conn = self._get_sync_conn()
-        cursor = conn.execute(
-            "SELECT id FROM ghosts WHERE reference = ? AND project = ?",
-            (reference, project),
-        )
-        row = cursor.fetchone()
-        if row:
-            return row[0]
-
-        ts = now_iso()
-        cursor = conn.execute(
-            "INSERT INTO ghosts "
-            "(reference, context, project, status, created_at) "
-            "VALUES (?, ?, ?, 'open', ?)",
-            (reference, context, project, ts),
-        )
-        ghost_id = cursor.lastrowid
-        conn.commit()
-        return ghost_id
-
-    def resolve_ghost_sync(
-        self, ghost_id: int, target_entity_id: int, confidence: float = 1.0
-    ) -> bool:
-        """Resolve a ghost synchronously."""
-        conn = self._get_sync_conn()
-        ts = now_iso()
-        cursor = conn.execute(
-            "UPDATE ghosts SET status = 'resolved', target_id = ?, "
-            "confidence = ?, resolved_at = ? WHERE id = ?",
-            (target_entity_id, confidence, ts, ghost_id),
-        )
-        conn.commit()
-        return cursor.rowcount > 0

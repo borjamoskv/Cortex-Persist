@@ -121,7 +121,7 @@ uvicorn cortex.api:app --port 8484
 ```
 ┌──────────────────────────────────────────────┐
 │              INTERFACES                       │
-│  CLI (27 cmds)  REST API  MCP  GraphQL(soon) │
+│  CLI (38 cmds)  REST API  MCP  GraphQL(soon) │
 ├──────────────────────────────────────────────┤
 │         TRUST GATEWAY (v6)                   │
 │  RBAC (4 roles)  │  Privacy Shield           │
@@ -167,11 +167,10 @@ uvicorn cortex.api:app --port 8484
 | Metric | Value |
 |:---|:---|
 | Test functions | **1,162** |
-| Production LOC | **~40,156** |
-| Commits (8 days) | **117+** |
-| Facts in memory | **746** |
+| Production LOC | **~45,500** |
+| Python Modules | **444** |
 | MEJORAlo score | **78/100** |
-| Python version | **3.14** |
+| Python version | **3.10+** |
 
 ---
 

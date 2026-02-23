@@ -8,7 +8,6 @@ import pytest
 
 from cortex.result import Err, Ok, safe, safe_async
 
-
 # ─── Ok Tests ─────────────────────────────────────────────────────────
 
 

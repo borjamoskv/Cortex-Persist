@@ -28,6 +28,8 @@ dependencies = [
     "qdrant-client>=1.12",
     "pyobjc-core; sys_platform == 'darwin'",
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
+    "keyring>=25.7.0",
+    "cryptography>=46.0.5",
 ]
 
 [project.urls]

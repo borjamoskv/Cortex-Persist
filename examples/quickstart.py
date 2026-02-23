@@ -26,6 +26,7 @@ for r in results:
 # 3. Ask with RAG (requires LLM provider configured)
 try:
     import httpx
+
     resp = httpx.post(
         "http://localhost:8000/v1/ask",
         json={"query": "What is CORTEX?", "k": 5},

@@ -9,10 +9,11 @@ POST /v1/ask — Search facts → synthesize with LLM → return answer.
 Gracefully returns 503 if no LLM provider is configured.
 """
 
+import json
 import logging
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from cortex.api_deps import get_async_engine
@@ -143,7 +144,8 @@ async def ask_cortex(
         "## Question\n\n"
         f"{req.query}\n\n"
         "## Instructions\n\n"
-        "Answer the question above using ONLY the facts provided. Cite [Fact #ID] when referencing specific facts."
+        "Answer the question above using ONLY the facts provided. "
+        "Cite [Fact #ID] when referencing specific facts."
     )
 
     # 4. Call LLM
@@ -186,6 +188,75 @@ async def ask_cortex(
         provider=provider.provider_name if provider else "unknown",
         facts_found=len(results),
     )
+
+
+@router.post("/v1/ask/stream")
+async def ask_stream(
+    req: AskRequest,
+    auth: AuthResult = Depends(require_permission("read")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
+):
+    """Streaming RAG endpoint: search → synthesize → stream answer.
+
+    Yields SSE 'data: ' events containing text chunks.
+    """
+    if not _llm_manager.available:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "No LLM provider configured."},
+        )
+
+    # 1. Search CORTEX memory
+    results = await engine.search(
+        query=req.query,
+        top_k=req.k,
+        project=auth.tenant_id or req.project,
+    )
+
+    # 2. Build context
+    context = (
+        "\n\n".join(
+            f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
+            for r in results
+        )
+        if results
+        else "(No facts found matching the query.)"
+    )
+
+    # 3. Construct prompt
+    system = req.system_prompt or CORTEX_SYSTEM_PROMPT
+    prompt = (
+        "## Retrieved Facts from CORTEX Memory\n\n"
+        f"{context}\n\n"
+        "## Question\n\n"
+        f"{req.query}\n\n"
+        "## Instructions\n\n"
+        "Answer the question above using ONLY the facts provided. Cite [Fact #ID] when referencing specific facts."
+    )
+
+    async def event_generator():
+        # First send the sources as a metadata event (optional but useful)
+        sources_data = [
+            {"id": r.fact_id, "score": float(r.score), "project": r.project} for r in results
+        ]
+        yield f"data: {json.dumps({'type': 'sources', 'data': sources_data})}\n\n"
+
+        # Then stream the text
+        try:
+            async for chunk in _llm_manager.stream(
+                prompt=prompt,
+                system=system,
+                temperature=req.temperature,
+                max_tokens=req.max_tokens,
+            ):
+                yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
+        except Exception as e:
+            logger.error("Streaming failed: %s", e)
+            yield f"data: {json.dumps({'type': 'error', 'data': str(e)})}\n\n"
+
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @router.get("/v1/llm/status", response_model=LLMStatusResponse)

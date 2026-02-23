@@ -72,7 +72,9 @@ class TestWBFTAgreement:
         """3 models giving similar responses → all trusted, high confidence."""
         responses = [
             _make_response("openai", "gpt-4o", "Python is a programming language"),
-            _make_response("anthropic", "claude", "Python is a general-purpose programming language"),
+            _make_response(
+                "anthropic", "claude", "Python is a general-purpose programming language"
+            ),
             _make_response("gemini", "2.0-flash", "Python is a popular programming language"),
         ]
         verdict = wbft.evaluate(responses)
@@ -84,15 +86,18 @@ class TestWBFTAgreement:
         """2 agree, 1 diverges → outlier detected."""
         responses = [
             _make_response(
-                "openai", "gpt-4o",
+                "openai",
+                "gpt-4o",
                 "Machine learning uses neural networks and gradient descent for optimization",
             ),
             _make_response(
-                "anthropic", "claude",
+                "anthropic",
+                "claude",
                 "Machine learning uses neural networks for training models with gradient descent",
             ),
             _make_response(
-                "deepseek", "v3",
+                "deepseek",
+                "v3",
                 "The weather in Tokyo is sunny with temperatures around 25 degrees Celsius",
             ),
         ]
@@ -119,7 +124,9 @@ class TestWBFTAgreement:
         responses = [
             _make_response("openai", "gpt-4o", "Rust is a systems programming language"),
             _make_response("anthropic", "claude", "Rust is a systems-level programming language"),
-            _make_response("gemini", "2.0-flash", "Rust is a compiled systems programming language"),
+            _make_response(
+                "gemini", "2.0-flash", "Rust is a compiled systems programming language"
+            ),
             _make_response("deepseek", "v3", "Rust is a fast systems programming language"),
             _make_response("xai", "grok-2", "The recipe for chocolate cake requires cocoa"),
         ]
@@ -136,16 +143,20 @@ class TestWBFTWithHistory:
         history = ThinkingHistory()
         # Record openai as consistent winner
         for _ in range(10):
-            history.record(FusedThought(
-                content="test",
-                strategy=FusionStrategy.MAJORITY,
-                confidence=0.9,
-                sources=[
-                    ModelResponse(provider="openai", model="gpt-4o", content="win", latency_ms=100),
-                    ModelResponse(provider="bad", model="v1", content="lose", latency_ms=200),
-                ],
-                meta={"winner": "openai:gpt-4o"},
-            ))
+            history.record(
+                FusedThought(
+                    content="test",
+                    strategy=FusionStrategy.MAJORITY,
+                    confidence=0.9,
+                    sources=[
+                        ModelResponse(
+                            provider="openai", model="gpt-4o", content="win", latency_ms=100
+                        ),
+                        ModelResponse(provider="bad", model="v1", content="lose", latency_ms=200),
+                    ],
+                    meta={"winner": "openai:gpt-4o"},
+                )
+            )
 
         responses = [
             _make_response("openai", "gpt-4o", "Correct answer about quantum computing"),
@@ -177,7 +188,9 @@ class TestWBFTEdgeCases:
         """With 2 agreeing models, both should be trusted."""
         responses = [
             _make_response("openai", "gpt-4o", "TypeScript adds static types to JavaScript"),
-            _make_response("anthropic", "claude", "TypeScript provides static typing for JavaScript"),
+            _make_response(
+                "anthropic", "claude", "TypeScript provides static typing for JavaScript"
+            ),
         ]
         verdict = wbft.evaluate(responses)
         assert verdict.trusted_count == 2

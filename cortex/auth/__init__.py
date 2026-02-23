@@ -111,32 +111,33 @@ class AuthManager:
 
             backend = SQLiteAuthBackend(backend)
         elif backend is None:
-            from cortex.auth.backends import SQLiteAuthBackend
-            from cortex.config import DB_PATH
+            from cortex.config import DB_PATH, PG_URL, RUNBOOT_MODE
 
-            backend = SQLiteAuthBackend(DB_PATH)
+            if RUNBOOT_MODE == "cloud" and PG_URL:
+                from cortex.auth.backends import AlloyDBAuthBackend
+
+                logger.info("AuthManager: Using Cloud Sovereign (PostgreSQL) backend")
+                backend = AlloyDBAuthBackend(PG_URL)
+            else:
+                from cortex.auth.backends import SQLiteAuthBackend
+
+                logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
+                backend = SQLiteAuthBackend(DB_PATH)
         self.backend = backend
         self._background_tasks: set[asyncio.Task] = set()
-        # Auto-initialize schema for sync backends (SQLite)
-        self._init_backend_sync()
 
-    def _init_backend_sync(self) -> None:
-        """Initialize backend schema synchronously (safe for SQLite)."""
-        from cortex.auth.backends import SQLiteAuthBackend
-
-        if isinstance(self.backend, SQLiteAuthBackend):
-            from cortex.auth import AUTH_SCHEMA
-
-            conn = self.backend._get_conn()
-            try:
-                conn.executescript(AUTH_SCHEMA)
-                conn.commit()
-            finally:
-                conn.close()
+    async def initialize(self) -> None:
+        """Initialize the backend schema (async)."""
+        await self.backend.initialize()
 
     @staticmethod
     def _hash_key(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
+
+    async def close(self) -> None:
+        """Close the backend connections."""
+        if hasattr(self.backend, "close"):
+            await self.backend.close()
 
     async def create_key(
         self,
@@ -192,17 +193,40 @@ class AuthManager:
         Handles both 'no event loop' and 'inside existing loop' cases.
         """
         coro = self.create_key(
-            name, tenant_id=tenant_id, role=role,
-            permissions=permissions, rate_limit=rate_limit,
+            name,
+            tenant_id=tenant_id,
+            role=role,
+            permissions=permissions,
+            rate_limit=rate_limit,
         )
         try:
-            asyncio.get_running_loop()
+            loop = asyncio.get_running_loop()
         except RuntimeError:
             return asyncio.run(coro)
-        # Inside existing loop — run in a thread-safe way
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            return pool.submit(asyncio.run, coro).result()
+
+        # Inside existing loop (e.g. FastAPI/TestClient)
+        # We MUST block the current thread until the coro is done.
+        # We use a thread-safe way to run the coro and a threading event to wait.
+        import threading
+
+        res = []
+        err = []
+        event = threading.Event()
+
+        async def _wrapper():
+            try:
+                res.append(await coro)
+            except Exception as e:
+                err.append(e)
+            finally:
+                event.set()
+
+        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
+        event.wait()
+
+        if err:
+            raise err[0]
+        return res[0]
 
     def authenticate(self, raw_key: str) -> AuthResult:
         """Synchronous wrapper for authentication.
@@ -214,8 +238,26 @@ class AuthManager:
         except RuntimeError:
             return asyncio.run(self.authenticate_async(raw_key))
 
-        # If we are in an event loop, we must run it correctly
-        return asyncio.run_coroutine_threadsafe(self.authenticate_async(raw_key), loop).result()
+        import threading
+
+        res = []
+        err = []
+        event = threading.Event()
+
+        async def _wrapper():
+            try:
+                res.append(await self.authenticate_async(raw_key))
+            except Exception as e:
+                err.append(e)
+            finally:
+                event.set()
+
+        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
+        event.wait()
+
+        if err:
+            raise err[0]
+        return res[0]
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
         """Fully async authentication."""

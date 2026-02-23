@@ -13,7 +13,6 @@ from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import MemoryEntry
 from cortex.memory.vector_store import VectorStoreL2
 
-
 # ─── Mock Embedder ────────────────────────────────────────────────────
 
 
@@ -115,12 +114,8 @@ class TestVectorStoreL2:
 
     async def test_recall_filters_by_project(self, store):
         """Project filter should only return matching entries."""
-        await store.memorize(
-            MemoryEntry(content="Auth flow redesign", project="naroa")
-        )
-        await store.memorize(
-            MemoryEntry(content="Auth middleware refactor", project="cortex")
-        )
+        await store.memorize(MemoryEntry(content="Auth flow redesign", project="naroa"))
+        await store.memorize(MemoryEntry(content="Auth middleware refactor", project="cortex"))
 
         results = await store.recall("authentication", project="cortex")
         for r in results:
@@ -128,10 +123,7 @@ class TestVectorStoreL2:
 
     async def test_memorize_batch(self, store):
         """Batch insert should store all entries."""
-        entries = [
-            MemoryEntry(content=f"Memory entry {i}", project="test")
-            for i in range(10)
-        ]
+        entries = [MemoryEntry(content=f"Memory entry {i}", project="test") for i in range(10)]
         count = await store.memorize_batch(entries)
         assert count == 10
 

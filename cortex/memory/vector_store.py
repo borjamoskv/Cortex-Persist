@@ -54,12 +54,13 @@ class VectorStoreL2:
         encoder: AsyncEncoder,
         db_path: str | Path = "~/.cortex/vectors",
         url: str | None = None,
+        api_key: str | None = None,
     ) -> None:
         self._encoder = encoder
         resolved = str(Path(db_path).expanduser()) if not url else None
 
         if url:
-            self._client = AsyncQdrantClient(url=url)
+            self._client = AsyncQdrantClient(url=url, api_key=api_key)
             logger.info("VectorStoreL2 connected to remote Qdrant: %s", url)
         else:
             self._client = AsyncQdrantClient(path=resolved)

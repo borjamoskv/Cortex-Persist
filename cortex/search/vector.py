@@ -72,20 +72,42 @@ async def semantic_search(
         logger.error("Semantic search failed: %s", e)
         return []
 
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
     results = []
     for row in rows[:top_k]:
         try:
             tags = json.loads(row[7]) if row[7] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+        try:
             meta = json.loads(row[9]) if row[9] else {}
         except (json.JSONDecodeError, TypeError):
-            tags, meta = [], {}
+            meta = {}
+
+        content = row[1]
+        if content and str(content).startswith("v6_aesgcm:"):
+            try:
+                content = enc.decrypt_str(content)
+            except Exception as e:
+                print(f"VECTOR DECRYPT STRING ERROR: {e}")
+                pass
+
+        if row[9] and str(row[9]).startswith("v6_aesgcm:"):
+            try:
+                meta = enc.decrypt_json(row[9])
+            except Exception as e:
+                print(f"VECTOR DECRYPT JSON ERROR: {e}")
+                pass
 
         score = 1.0 - (row[10] if row[10] else 0.0)
 
         results.append(
             SearchResult(
                 fact_id=row[0],
-                content=row[1],
+                content=content,
                 project=row[2],
                 fact_type=row[3],
                 confidence=row[4],
@@ -140,17 +162,29 @@ def semantic_search_sync(
         logger.error("Semantic search sync failed: %s", e)
         return []
 
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
     results = []
     for row in rows[:top_k]:
         try:
             tags = json.loads(row[6]) if row[6] else []
         except (json.JSONDecodeError, TypeError):
             tags = []
+
+        content = row[1]
+        if content and str(content).startswith("v6_aesgcm:"):
+            try:
+                content = enc.decrypt_string(content)
+            except Exception:
+                pass
+
         score = 1.0 - (row[7] if row[7] else 0.0)
         results.append(
             SearchResult(
                 fact_id=row[0],
-                content=row[1],
+                content=content,
                 project=row[2],
                 fact_type=row[3],
                 confidence=row[4],

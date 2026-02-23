@@ -11,7 +11,6 @@ from cortex.notifications.adapters.base import BaseAdapter
 from cortex.notifications.bus import NotificationBus, reset_notification_bus
 from cortex.notifications.events import CortexEvent, EventSeverity
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
@@ -187,9 +186,7 @@ class TestTelegramAdapter:
             mock_client = AsyncMock()
             mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=False)
-            mock_client.post = AsyncMock(
-                return_value=AsyncMock(status_code=200, text="ok")
-            )
+            mock_client.post = AsyncMock(return_value=AsyncMock(status_code=200, text="ok"))
             await adapter.send(make_event(severity=EventSeverity.ERROR))
             mock_client.post.assert_called_once()
             call_kwargs = mock_client.post.call_args[1]
