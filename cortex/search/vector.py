@@ -14,7 +14,7 @@ import aiosqlite
 from cortex.search.models import SearchResult
 from cortex.temporal import build_temporal_filter_params
 
-__all__ = ['semantic_search', 'semantic_search_sync']
+__all__ = ["semantic_search", "semantic_search_sync"]
 
 logger = logging.getLogger("cortex.search.vector")
 
@@ -29,6 +29,7 @@ async def semantic_search(
     top_k: int = 5,
     project: str | None = None,
     as_of: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
@@ -57,6 +58,10 @@ async def semantic_search(
         params.extend(t_params)
     else:
         sql += _FILTER_ACTIVE
+
+    if confidence:
+        sql += " AND f.confidence >= ?"
+        params.append(float(confidence))
 
     sql += " ORDER BY ve.distance ASC"
 
@@ -104,6 +109,7 @@ def semantic_search_sync(
     query_embedding: list[float],
     top_k: int = 5,
     project: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Vector KNN search (sync)."""
     embedding_json = json.dumps(query_embedding)
@@ -122,6 +128,9 @@ def semantic_search_sync(
     if project:
         sql += _FILTER_PROJECT
         params.append(project)
+    if confidence:
+        sql += " AND f.confidence >= ?"
+        params.append(float(confidence))
     sql += " ORDER BY ve.distance ASC"
 
     try:

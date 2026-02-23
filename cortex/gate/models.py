@@ -9,7 +9,7 @@ from typing import Any
 
 from .enums import ActionLevel, ActionStatus, GatePolicy
 
-__all__ = ['PendingAction', 'GatePolicy']
+__all__ = ["PendingAction", "GatePolicy"]
 
 
 @dataclass

@@ -73,13 +73,17 @@ def client():
 @pytest.fixture(scope="module")
 def api_key(client):
     """Create an API key directly via AuthManager (bypasses HTTP bootstrap race)."""
+    import asyncio
+
     from cortex.auth import AuthManager
 
     mgr = AuthManager(_test_db)
-    raw_key, _ = mgr.create_key(
-        name="test-key",
-        tenant_id="test",
-        permissions=["read", "write", "admin"],
+    raw_key, _ = asyncio.run(
+        mgr.create_key(
+            name="test-key",
+            tenant_id="test",
+            permissions=["read", "write", "admin"],
+        )
     )
     return raw_key
 

@@ -33,11 +33,13 @@ __all__ = [
     "CREATE_TRUST_EDGES",
     "CREATE_VOTES",
     "CREATE_VOTES_V2",
+    "CREATE_THREAT_INTEL",
+    "CREATE_THREAT_INTEL_INDEXES",
     "SCHEMA_VERSION",
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "4.0.0"
+SCHEMA_VERSION = "5.0.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -343,6 +345,22 @@ CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
 );
 """
 
+# ─── Threat Intelligence (Blacklist) ─────────────────────────────────
+CREATE_THREAT_INTEL = """
+CREATE TABLE IF NOT EXISTS threat_intel (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip_address  TEXT NOT NULL UNIQUE,
+    reason      TEXT NOT NULL,
+    confidence  TEXT NOT NULL DEFAULT 'C5',
+    expires_at  TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_THREAT_INTEL_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
+"""
+
 
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
@@ -373,7 +391,17 @@ ALL_SCHEMA = [
     CREATE_EPISODES,
     CREATE_EPISODES_INDEXES,
     CREATE_EPISODES_FTS,
+    CREATE_THREAT_INTEL,
+    CREATE_THREAT_INTEL_INDEXES,
 ]
+
+
+# Late import to avoid circular dependency (auth imports from config)
+def get_all_schema() -> list[str]:
+    """Return ALL_SCHEMA + AUTH_SCHEMA (avoids circular import)."""
+    from cortex.auth import AUTH_SCHEMA
+
+    return ALL_SCHEMA + [AUTH_SCHEMA]
 
 
 def get_init_meta() -> list[tuple[str, str]]:

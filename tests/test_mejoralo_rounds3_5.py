@@ -186,15 +186,17 @@ class TestDaemonNotifierMethod:
     """daemon.py must use Notifier.notify(), not .send()."""
 
     def test_no_notifier_send_calls(self):
-        """Verify that Notifier.send() is never called in daemon core."""
+        """Verify that Notifier.send() is never called in daemon core or alerts."""
         import inspect
 
-        from cortex.daemon import core
+        from cortex.daemon import alerts, core
 
-        source = inspect.getsource(core)
-        assert "Notifier.send(" not in source
+        core_source = inspect.getsource(core)
+        alerts_source = inspect.getsource(alerts)
+        combined = core_source + alerts_source
+        assert "Notifier.send(" not in combined
         # Verify the correct method IS used (e.g. alert_site_down)
-        assert "Notifier.alert_" in source
+        assert "Notifier.alert_" in combined
 
 
 # ──────────────────────────────────────────────────────────────────────

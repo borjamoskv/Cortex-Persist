@@ -480,7 +480,7 @@ class TestCortexClient:
     def test_client_headers(self):
         from cortex.client import CortexClient
 
-        client = CortexClient("http://fake:9999", api_key="test-key")
+        client = CortexClient("http://fake:9999", api_token="test-key")
         headers = client._headers()
         assert headers["Authorization"] == "Bearer test-key"
         client.close()
@@ -489,7 +489,7 @@ class TestCortexClient:
         from cortex.client import CortexClient
 
         with patch.dict(os.environ, {}, clear=True):
-            client = CortexClient("http://fake:9999", api_key=None)
+            client = CortexClient("http://fake:9999", api_token=None)
             headers = client._headers()
             assert "Authorization" not in headers
             client.close()

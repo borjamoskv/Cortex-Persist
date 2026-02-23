@@ -8,7 +8,7 @@
  */
 
 const BASE_URL = "http://localhost:8000";
-const API_KEY = "your_key";
+const API_KEY = "<YOUR_API_KEY>";
 
 const headers = {
   "Content-Type": "application/json",

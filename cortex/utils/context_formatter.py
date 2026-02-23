@@ -5,7 +5,7 @@ Context formatting utilities for Cortex sessions.
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-__all__ = ['compact_session']
+__all__ = ["compact_session"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

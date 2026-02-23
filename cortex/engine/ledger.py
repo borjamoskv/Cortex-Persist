@@ -24,7 +24,7 @@ from cortex.canonical import compute_tx_hash, compute_tx_hash_v1
 from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
 from cortex.merkle import MerkleTree
 
-__all__ = ['ImmutableLedger']
+__all__ = ["ImmutableLedger"]
 
 logger = logging.getLogger("cortex")
 

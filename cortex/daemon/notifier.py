@@ -14,7 +14,7 @@ import subprocess
 from cortex.daemon.models import GhostAlert, MemoryAlert, SiteStatus
 from cortex.sys_platform import is_linux, is_macos, is_windows
 
-__all__ = ['Notifier']
+__all__ = ["Notifier"]
 
 logger = logging.getLogger("moskv-daemon")
 

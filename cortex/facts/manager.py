@@ -11,7 +11,7 @@ from cortex.engine.models import Fact, row_to_fact
 from cortex.search import SearchResult, semantic_search, text_search
 from cortex.temporal import build_temporal_filter_params, now_iso
 
-__all__ = ['FactManager']
+__all__ = ["FactManager"]
 
 logger = logging.getLogger("cortex.facts")
 
@@ -62,7 +62,19 @@ class FactManager:
             "INSERT INTO facts (project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at, tx_id) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (project, content, fact_type, tags_json, confidence, ts, source, meta_json, ts, ts, tx_id),
+            (
+                project,
+                content,
+                fact_type,
+                tags_json,
+                confidence,
+                ts,
+                source,
+                meta_json,
+                ts,
+                ts,
+                tx_id,
+            ),
         )
         fact_id = cursor.lastrowid
 
@@ -110,7 +122,12 @@ class FactManager:
         return None
 
     async def _post_store_enrichment(
-        self, conn: Any, fact_id: int, content: str, project: str, ts: str,
+        self,
+        conn: Any,
+        fact_id: int,
+        content: str,
+        project: str,
+        ts: str,
     ) -> None:
         """Run embedding and graph extraction after storing a fact."""
         if self.engine._auto_embed and self.engine._vec_available:
@@ -174,12 +191,11 @@ class FactManager:
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
         conn = await self.engine.get_conn()
+        results = []
         try:
             results = await semantic_search(
                 conn, self.engine.embeddings.embed(query), top_k, project, as_of
             )
-            if results:
-                pass  # Continue to graph resolution below
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Semantic search failed: %s", e)
 

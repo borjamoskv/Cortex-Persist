@@ -12,7 +12,7 @@ import sqlite3
 from cortex.engine.models import Fact
 from cortex.temporal import now_iso
 
-__all__ = ['SyncOpsMixin']
+__all__ = ["SyncOpsMixin"]
 
 logger = logging.getLogger("cortex")
 

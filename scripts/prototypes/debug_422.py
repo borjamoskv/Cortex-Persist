@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 _test_db = tempfile.mktemp(suffix=".db")
 os.environ["CORTEX_DB"] = _test_db
 
-from cortex.api import app
+from cortex.api import app  # noqa: E402
 
 with TestClient(app) as client:
     # Bootstrap API key

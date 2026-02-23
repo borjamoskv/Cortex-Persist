@@ -31,7 +31,7 @@ async def temp_db_path():
 
 @pytest.fixture
 async def pool(temp_db_path):
-    pool = CortexConnectionPool(temp_db_path, min_connections=2, max_connections=4)
+    pool = CortexConnectionPool(temp_db_path, min_connections=2, max_connections=4, read_only=False)
 
     # Initialize schema manually for tests
     async with aiosqlite.connect(temp_db_path) as conn:

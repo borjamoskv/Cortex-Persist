@@ -21,7 +21,7 @@ INCIDENT DETAILS & ON-CHAIN EVIDENCE:
 
 2. ATTACK EXECUTION & FUND FLOW:
    - The master wallet (arbithumarb.eth) funded the execution wallet: 0xFFc77D765Ecd48b48B02008Bbe146bA2A06bcaBD.
-   - Using a malicious EIP-7702 delegation tuple, the execution wallet drained assets from: [INSERTA LAS WALLETS QUE TE HACKEARON AQUÍ].
+   - Using a malicious EIP-7702 delegation tuple, the execution wallet drained assets from: [INSERTA LAS WALLETS QUE TE H_ACKEARON AQUÍ].
 
 3. IDENTITY CORRELATION (OFF-CHAIN):
    Our OSINT systems have correlated this on-chain cluster with the following identity:

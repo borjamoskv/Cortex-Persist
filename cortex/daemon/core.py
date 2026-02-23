@@ -6,7 +6,6 @@ import json
 import logging
 import signal
 import sqlite3
-import sys
 import threading
 import time
 from collections.abc import Callable
@@ -15,6 +14,8 @@ from pathlib import Path
 
 import httpx
 
+from cortex.daemon.alerts import AlertHandlerMixin
+from cortex.daemon.healing import HealingMixin
 from cortex.daemon.models import (
     AGENT_DIR,
     CONFIG_FILE,
@@ -32,6 +33,8 @@ from cortex.daemon.models import (
 from cortex.daemon.monitors import (
     AutonomousMejoraloMonitor,
     CertMonitor,
+    CloudSyncMonitor,
+    CompactionMonitor,
     DiskMonitor,
     EngineHealthCheck,
     EntropyMonitor,
@@ -39,16 +42,18 @@ from cortex.daemon.monitors import (
     MemorySyncer,
     NeuralIntentMonitor,
     PerceptionMonitor,
+    SecurityMonitor,
     SiteMonitor,
 )
-from cortex.daemon.notifier import Notifier
 
-__all__ = ['MoskvDaemon']
+__all__ = ["MoskvDaemon"]
 
 logger = logging.getLogger("moskv-daemon")
 
+MAX_CONSECUTIVE_FAILURES = 3
 
-class MoskvDaemon:
+
+class MoskvDaemon(AlertHandlerMixin, HealingMixin):
     """MOSKV-1 persistent watchdog.
 
     Orchestrates all monitors and sends alerts.
@@ -73,6 +78,8 @@ class MoskvDaemon:
         self.config_dir = config_dir
         self._shutdown = False
         self._stop_event = threading.Event()
+        self._failure_counts: dict[str, int] = {}
+        self._healed_total: int = 0
 
         file_config = self._load_config()
         resolved_sites = sites or file_config.get("sites", [])
@@ -107,6 +114,11 @@ class MoskvDaemon:
             threshold=90,
             engine=self._shared_engine,
         )
+        self.compaction_monitor = CompactionMonitor(
+            projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
+            interval_seconds=file_config.get("compaction_interval", 28800),
+            engine=self._shared_engine,
+        )
         self.perception_monitor = PerceptionMonitor(
             workspace=file_config.get(
                 "watch_path", str(Path.home() / "cortex")
@@ -115,6 +127,10 @@ class MoskvDaemon:
             engine=self._shared_engine,
         )
         self.neural_monitor = NeuralIntentMonitor()
+        self.security_monitor = SecurityMonitor(
+            log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
+            threshold=file_config.get("security_threshold", 0.85),
+        )
 
         cert_hostnames = [
             h.replace("https://", "").replace("http://", "").split("/")[0]
@@ -129,6 +145,10 @@ class MoskvDaemon:
         self.disk_monitor = DiskMonitor(
             Path(file_config.get("watch_path", str(CORTEX_DIR))),
             file_config.get("disk_warn_mb", DEFAULT_DISK_WARN_MB),
+        )
+        self.cloud_sync_monitor = CloudSyncMonitor(
+            interval_seconds=file_config.get("cloud_sync_interval", 15),
+            engine=self._shared_engine,
         )
 
         self._last_alerts: dict[str, float] = {}
@@ -174,7 +194,17 @@ class MoskvDaemon:
         self._run_monitor(status, "mejoralo_alerts", self.auto_mejoralo, self._alert_mejoralo)
         self._run_monitor(status, "entropy_alerts", self.entropy_monitor, self._alert_entropy)
         self._run_monitor(
+            status, "compaction_alerts", self.compaction_monitor, self._alert_compaction
+        )
+        self._run_monitor(
             status, "perception_alerts", self.perception_monitor, self._alert_perception
+        )
+        self._run_monitor(status, "security_alerts", self.security_monitor, self._alert_security)
+        self._run_monitor(
+            status,
+            "cloud_sync_alerts",
+            self.cloud_sync_monitor,
+            self._alert_cloud_sync,
         )
 
         self._auto_sync(status)
@@ -203,153 +233,44 @@ class MoskvDaemon:
         method: str = "check",
     ) -> None:
         """Run a single monitor, store results, and fire alerts."""
+        monitor_name = type(monitor).__name__
         try:
             results = getattr(monitor, method)()
             if isinstance(results, list):
                 setattr(status, attr, results)
             alert_fn(results)
-        except (httpx.HTTPError, OSError, ValueError, sqlite3.Error) as e:
-            status.errors.append(f"{type(monitor).__name__} error: {e}")
-            logger.exception("%s failed", type(monitor).__name__)
+            # Reset failure counter on success
+            self._failure_counts.pop(monitor_name, None)
+        except (httpx.HTTPError, OSError, ValueError, sqlite3.Error, RuntimeError, TypeError) as e:
+            status.errors.append(f"{monitor_name} error: {e}")
+            logger.exception("%s failed", monitor_name)
+            count = self._failure_counts.get(monitor_name, 0) + 1
+            self._failure_counts[monitor_name] = count
+            if count >= MAX_CONSECUTIVE_FAILURES:
+                self._heal_monitor(attr, monitor_name)
+                self._failure_counts.pop(monitor_name, None)
 
-    def _alert_sites(self, sites: list) -> None:
-        for site in sites:
-            if not site.healthy and self._should_alert(f"site:{site.url}"):
-                Notifier.alert_site_down(site)
+    #   _alert_sites, _alert_ghosts, _alert_memory, _alert_certs,
+    #   _alert_engine, _alert_disk, _alert_mejoralo, _alert_entropy,
+    #   _dispatch_warm_repair, _alert_perception, _alert_neural, _alert_compaction
 
-    def _alert_ghosts(self, ghosts: list) -> None:
-        for ghost in ghosts:
-            if self._should_alert(f"ghost:{ghost.project}"):
-                Notifier.alert_stale_project(ghost)
+    def _alert_compaction(self, alerts: list) -> None:
+        """Handler para CompactionAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"compaction:{a.project}"
+            if self._should_alert(key):
+                self._terminal_notify("Compaction completed", a.message)
+                self._last_alerts[key] = time.monotonic()
 
-    def _alert_memory(self, alerts: list) -> None:
-        for alert in alerts:
-            if self._should_alert(f"memory:{alert.file}"):
-                logger.warning("Memory file %s is stale", alert.file)
-
-    def _alert_certs(self, certs: list) -> None:
-        for cert in certs:
-            if self._should_alert(f"cert:{cert.hostname}"):
-                logger.warning("SSL certificate for %s expiring soon", cert.hostname)
-
-    def _alert_engine(self, alerts: list) -> None:
-        for eh in alerts:
-            if self._should_alert(f"engine:{eh.issue}"):
-                logger.warning("CORTEX Engine alert for %s", eh.issue)
-
-    def _alert_disk(self, alerts: list) -> None:
-        for da in alerts:
-            if self._should_alert(f"disk:{da.path}"):
-                logger.warning("Disk space low on %s", da.path)
-
-    def _alert_mejoralo(self, alerts: list) -> None:
-        for alert in alerts:
-            if alert.score < 50 and self._should_alert(f"mejoralo:{alert.project}"):
-                logger.warning(
-                    "Autonomous MEJORAlo scan for %s returned low score: %d/100 (Dead Code: %s)",
-                    alert.project,
-                    alert.score,
-                    alert.dead_code,
-                )
-                try:
-                    import subprocess
-
-                    Notifier.notify(
-                        "☢️ MEJORAlo Brutal Mode",
-                        f"Project {alert.project} score: {alert.score}. Waking up Legion-1 Swarm (400-subagents).",
-                        sound="Basso",
-                    )
-                    path_str = self.auto_mejoralo.projects.get(alert.project, ".")
-                    # Dispatch en background (fire and forget)
-                    subprocess.Popen(
-                        [
-                            sys.executable,
-                            "-m",
-                            "cortex.cli",
-                            "mejoralo",
-                            "scan",
-                            alert.project,
-                            ".",
-                            "--deep",
-                            "--auto-heal",
-                        ],
-                        cwd=path_str,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                    )
-                except (OSError, ValueError, RuntimeError) as e:
-                    logger.exception("Failed to auto-dispatch Swarm for %s: %s", alert.project, e)
-
-    def _alert_entropy(self, alerts: list) -> None:
-        for alert in alerts:
-            if self._should_alert(f"entropy:{alert.project}"):
-                logger.warning(
-                    "ENTROPY-0 ALERTA CRÍTICA: %s tiene complejidad %d/100. %s",
-                    alert.project,
-                    alert.complexity_score,
-                    alert.message,
-                )
-                try:
-                    import subprocess
-
-                    if alert.complexity_score < 30:
-                        title = "☢️ PURGA DE ENTROPÍA (Score < 30)"
-                        msg = f"{alert.project}: Invocando /mejoralo --brutal automáticamente."
-                    else:
-                        title = "⚠️ Alerta de Entropía"
-                        msg = f"{alert.project} score {alert.complexity_score}. Cuidado."
-
-                    Notifier.notify(title, msg, sound="Basso")
-
-                    if alert.complexity_score < 30:
-                        path_str = self.entropy_monitor.projects.get(alert.project, ".")
-                        logger.info("Auto-invocando /mejoralo --brutal sobre %s", alert.project)
-                        subprocess.Popen(
-                            [
-                                sys.executable,
-                                "-m",
-                                "cortex.cli",
-                                "mejoralo",
-                                "scan",
-                                alert.project,
-                                ".",
-                                "--brutal",
-                                "--auto-heal",
-                            ],
-                            cwd=path_str,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL,
-                        )
-                except (OSError, ValueError, RuntimeError) as e:
-                    logger.exception("Failed to execute entropy purge: %s", e)
-
-    def _alert_perception(self, alerts: list) -> None:
-        for alert in alerts:
-            if self._should_alert(f"perception:{alert.project}"):
-                logger.info(
-                    "👁️ Perception Alert for %s: %s (Emotion: %s, Confidence: %s)",
-                    alert.project,
-                    alert.intent,
-                    alert.emotion,
-                    alert.confidence,
-                )
-                try:
-                    Notifier.notify(
-                        "👁️ CORTEX Perception", f"{alert.project}: {alert.summary}", sound="Pop"
-                    )
-                except (OSError, ValueError, RuntimeError) as e:
-                    logger.exception("Failed to execute perception notification: %s", e)
-
-    def _alert_neural(self, alerts: list) -> None:
-        for alert in alerts:
-            if self._should_alert(f"neural:{alert.intent}"):
-                logger.info(
-                    "🧠 Neural-Bandwidth Sync: %s (Confidence: %s)", alert.intent, alert.confidence
-                )
-                try:
-                    Notifier.notify("🧠 Neural Intent Detected", alert.summary, sound="Glass")
-                except (OSError, ValueError, RuntimeError) as e:
-                    logger.exception("Failed to execute neural notification: %s", e)
+    def _alert_cloud_sync(self, alerts: list) -> None:
+        """Handler for CloudSyncAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.debug(a.message)
+            logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
 
     def _flush_timer(self) -> None:
         """Flush accumulated time tracker heartbeats."""

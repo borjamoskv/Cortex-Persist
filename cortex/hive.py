@@ -58,9 +58,9 @@ def get_hive_graph(
         # 1. Fetch recent/important nodes
         cursor = conn.execute(
             """
-            SELECT id, content, project, fact_type, created_at 
-            FROM facts 
-            ORDER BY created_at DESC 
+            SELECT id, content, project, fact_type, created_at
+            FROM facts
+            ORDER BY created_at DESC
             LIMIT ?
             """,
             (limit,),

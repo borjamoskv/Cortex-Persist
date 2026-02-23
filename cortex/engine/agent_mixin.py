@@ -6,7 +6,7 @@ from typing import Any
 
 import aiosqlite
 
-__all__ = ['AgentMixin']
+__all__ = ["AgentMixin"]
 
 
 class AgentMixin:

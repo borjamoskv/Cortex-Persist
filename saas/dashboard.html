@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — CORTEX Soberano</title>
+    <link rel="stylesheet" href="saas.css">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+        }
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+        #sidebar {
+            width: var(--sidebar-width);
+            border-right: 1px solid var(--border);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            background: rgba(5,5,5,0.8);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+        #content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 0;
+            transition: color 0.3s;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent);
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.3s var(--spring-snappy);
+        }
+        .card:hover {
+            border-color: rgba(204, 255, 0, 0.2);
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+        }
+        .card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .card-value {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .graph-viz {
+            height: 400px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-top: 32px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .badge-private {
+            background: rgba(204, 255, 0, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <aside id="sidebar">
+        <div class="logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">CORTEX</span>
+        </div>
+        <nav>
+            <a href="#" class="nav-item active">● Overview</a>
+            <a href="#" class="nav-item">○ Memory Grafo</a>
+            <a href="#" class="nav-item">○ Ghosts <span class="badge-private">12</span></a>
+            <a href="#" class="nav-item">○ Privacy Audit</a>
+            <div style="margin-top: 40px; font-size: 0.65rem; color: #444; letter-spacing: 1px;">SOVEREIGN TIER</div>
+            <a href="#" class="nav-item">○ API Keys</a>
+            <a href="#" class="nav-item">○ Billing</a>
+            <a href="#" class="nav-item">○ Settings</a>
+        </nav>
+    </aside>
+    <main id="content">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h1 style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px;">Control Room</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 0.8rem; color: var(--text-dim);">TENANT: <span style="color: var(--text);">borja-moskv</span></span>
+                <span class="status-dot"></span>
+            </div>
+        </header>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">MEMORIA TOTAL <span>LIVE</span></div>
+                <div class="card-value">12,482 <span style="font-size: 0.9rem; color: var(--text-dim); font-weight: 400;">facts</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">LATENCIA MEDIA <span>GLOBAL</span></div>
+                <div class="card-value">4.2 <span style="font-size: 0.9rem; color: var(--text-dim); font-weight: 400;">ms</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">BLOQUEADO POR PRIVACIDAD <span>SAFE</span></div>
+                <div class="card-value">142 <span style="font-size: 0.9rem; color: var(--text-dim); font-weight: 400;">leaks prevented</span></div>
+            </div>
+        </div>
+
+        <div class="graph-viz">
+            <canvas id="cortex-graph" style="width: 100%; height: 100%;"></canvas>
+            <div style="position: absolute; top: 20px; left: 20px; font-family: var(--mono); font-size: 0.7rem; color: var(--accent);">NEURAL_MESH_ACTIVE / RELIK_V5</div>
+        </div>
+
+        <section style="margin-top: 48px;">
+            <h2 style="text-align: left; font-size: 1rem; margin-bottom: 24px;">Fantasmas Recientes</h2>
+            <div style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                    <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                        <th style="padding: 12px 20px; color: var(--text-dim);">REFERENCIA</th>
+                        <th style="padding: 12px 20px; color: var(--text-dim);">PROYECTO</th>
+                        <th style="padding: 12px 20px; color: var(--text-dim);">ESTADO</th>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px 20px; font-family: var(--mono);">T_ODO: Implementar Auth</td>
+                        <td style="padding: 12px 20px;">nexus-core</td>
+                        <td style="padding: 12px 20px; color: var(--accent);">OPEN</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 20px; font-family: var(--mono);">F_IXME: Latencia en sync</td>
+                        <td style="padding: 12px 20px;">cortex-daemon</td>
+                        <td style="padding: 12px 20px; color: var(--accent);">OPEN</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Simple placeholder for the graph viz
+        const ctx = document.getElementById('cortex-graph');
+        // Future: Full 3D Force-Directed Graph using Three.js or D3
+    </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ from .scan import scan
 from .ship import check_ship_gate
 from .utils import detect_stack
 
-__all__ = ['MejoraloEngine']
+__all__ = ["MejoraloEngine"]
 
 logger = logging.getLogger("cortex.mejoralo")
 
@@ -66,7 +66,9 @@ class MejoraloEngine:
         effective_target = target_score if target_score is not None else INMEJORABLE_SCORE
         logger.info(
             "Relentless heal: %s → target %d (current: %d)",
-            project, effective_target, scan_result.score,
+            project,
+            effective_target,
+            scan_result.score,
         )
         return heal_project(project, path, effective_target, scan_result)
 

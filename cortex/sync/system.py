@@ -9,12 +9,42 @@ from typing import TYPE_CHECKING
 
 from cortex.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
 
-__all__ = ['sync_system']
+__all__ = ["sync_system"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.sync")
+
+
+def _sync_fact_list(
+    engine: CortexEngine,
+    existing: set,
+    candidates: list,
+    fact_type: str,
+    content_fn,
+    tags_fn,
+    result: SyncResult,
+    confidence: str = "stated",
+) -> None:
+    """Sync a list of candidate facts to the DB, deduplicating against existing."""
+    new_items = calculate_fact_diff(existing, candidates, content_fn)
+    for content, item in new_items:
+        try:
+            engine.store_sync(
+                project="__system__",
+                content=content,
+                fact_type=fact_type,
+                tags=tags_fn(item),
+                confidence=confidence,
+                source="sync-agent-memory",
+                valid_from=item.get("added") or item.get("date"),
+                meta=item,
+            )
+            result.facts_synced += 1
+            existing.add(content)
+        except (OSError, ValueError, KeyError) as e:
+            result.errors.append(f"Error system {fact_type}: {e}")
 
 
 def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
@@ -25,52 +55,31 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
         result.errors.append(f"Error leyendo system.json: {e}")
         return
 
-    # Obtener contenidos existentes para dedup
     existing = get_existing_contents(engine, "__system__")
 
     # knowledge_global
-    kb_candidates = data.get("knowledge_global", [])
-    new_kb = calculate_fact_diff(existing, kb_candidates, lambda x: x.get("content", str(x)))
-    for content, kb in new_kb:
-        try:
-            engine.store_sync(
-                project="__system__",
-                content=content,
-                fact_type="knowledge",
-                tags=["sistema", kb.get("topic", "general")],
-                confidence=kb.get("confidence", "stated"),
-                source="sync-agent-memory",
-                valid_from=kb.get("added") or kb.get("date"),
-                meta=kb,
-            )
-            result.facts_synced += 1
-            existing.add(content)
-        except (OSError, ValueError, KeyError) as e:
-            result.errors.append(f"Error system knowledge: {e}")
+    _sync_fact_list(
+        engine,
+        existing,
+        data.get("knowledge_global", []),
+        "knowledge",
+        lambda x: x.get("content", str(x)),
+        lambda x: ["sistema", x.get("topic", "general")],
+        result,
+        confidence="stated",
+    )
 
     # decisions_global
-    dec_candidates = data.get("decisions_global", [])
-    new_dec = calculate_fact_diff(
+    _sync_fact_list(
+        engine,
         existing,
-        dec_candidates,
+        data.get("decisions_global", []),
+        "decision",
         lambda x: x.get("decision", str(x)),
+        lambda x: ["sistema", "decision-global", x.get("topic", "")],
+        result,
+        confidence="verified",
     )
-    for content, dec in new_dec:
-        try:
-            engine.store_sync(
-                project="__system__",
-                content=content,
-                fact_type="decision",
-                tags=["sistema", "decision-global", dec.get("topic", "")],
-                confidence="verified",
-                source="sync-agent-memory",
-                valid_from=dec.get("date"),
-                meta=dec,
-            )
-            result.facts_synced += 1
-            existing.add(content)
-        except (OSError, ValueError, KeyError) as e:
-            result.errors.append(f"Error system decision: {e}")
 
     # Ecosistema
     eco = data.get("ecosystem", {})

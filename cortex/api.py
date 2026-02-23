@@ -8,15 +8,11 @@ Optimized for high-concurrency memory lookups and secure agentic access.
 
 import logging
 import sqlite3
-import time
-from collections import deque
 from contextlib import asynccontextmanager
-from typing import Final
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from cortex import __version__, api_state, config
 from cortex.auth import AuthManager
@@ -25,6 +21,12 @@ from cortex.engine import CortexEngine
 from cortex.hive import router as hive_router
 from cortex.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.metrics import MetricsMiddleware, metrics
+from cortex.middleware import (
+    ContentSizeLimitMiddleware,
+    RateLimitMiddleware,
+    SecurityFraudMiddleware,
+    SecurityHeadersMiddleware,
+)
 from cortex.routes import (
     admin as admin_router,
 )
@@ -78,6 +80,7 @@ from cortex.timing import TimingTracker
 __all__ = [
     "ContentSizeLimitMiddleware",
     "RateLimitMiddleware",
+    "SecurityFraudMiddleware",
     "SecurityHeadersMiddleware",
     "get_metrics",
     "health_check",
@@ -108,7 +111,9 @@ async def lifespan(app: FastAPI):
     auth_manager = AuthManager(db_path)
 
     # 2. Connection Pool & Async Engine
-    pool = CortexConnectionPool(db_path)
+    # IMPORTANT: The pool must allow writes (read_only=False) because AsyncCortexEngine uses it
+    # for facts insertion.
+    pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
 
@@ -135,6 +140,12 @@ async def lifespan(app: FastAPI):
     api_state.auth_manager = auth_manager
     api_state.tracker = tracker
 
+    # 6. Notification Bus — wire adapters from config
+    from cortex.notifications.setup import setup_notifications
+
+    notification_bus = setup_notifications(config)
+    api_state.notification_bus = notification_bus
+
     try:
         yield
     finally:
@@ -146,6 +157,7 @@ async def lifespan(app: FastAPI):
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
+        api_state.notification_bus = None
 
 
 app = FastAPI(
@@ -162,100 +174,7 @@ app = FastAPI(
 # ─── Internal Middleware ──────────────────────────────────────────────
 
 
-class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
-    """Prevents large payload attacks by limiting request body size."""
-
-    def __init__(self, app, max_size: int = 1_048_576):  # 1MB default
-        super().__init__(app)
-        self.max_size = max_size
-
-    async def dispatch(self, request: Request, call_next):
-        if request.method == "POST":
-            content_length = request.headers.get("content-length")
-            if content_length and int(content_length) > self.max_size:
-                return JSONResponse(
-                    status_code=413,
-                    content={"detail": "Payload too large. Max 1MB allowed."},
-                )
-        return await call_next(request)
-
-
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Injects industry-standard security headers for defense-in-depth."""
-
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["X-Content-Security-Policy"] = "default-src 'self'"
-        return response
-
-
-class RateLimitMiddleware(BaseHTTPMiddleware):
-    """
-    In-memory rate limiter (Sliding Window, bounded).
-    Prioritizes Auth Key IDs over Client IPs for bucket generation.
-    """
-
-    MAX_TRACKED_ENTITIES: Final[int] = 10_000
-
-    def __init__(self, app, limit: int = 100, window: int = 60):
-        super().__init__(app)
-        self.limit = limit
-        self.window = window
-        self.buckets: dict[str, deque[float]] = {}
-
-    async def dispatch(self, request: Request, call_next):
-        auth_header = request.headers.get("Authorization", "")
-        client_ip = request.client.host if request.client else "unknown"
-
-        # Priority mapping: Key ID > IP
-        bucket_id = client_ip
-        if auth_header.startswith("Bearer "):
-            bucket_id = f"key:{auth_header[7:19]}"
-
-        now = time.time()
-
-        if bucket_id not in self.buckets:
-            # Enforce capacity
-            if len(self.buckets) >= self.MAX_TRACKED_ENTITIES:
-                self._evict(now)
-            self.buckets[bucket_id] = deque()
-
-        timestamps = self.buckets[bucket_id]
-
-        # Slide window
-        while timestamps and now - timestamps[0] > self.window:
-            timestamps.popleft()
-
-        if len(timestamps) >= self.limit:
-            lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-            logger.warning("Rate limit exceeded for %s", bucket_id)
-            return JSONResponse(
-                status_code=429,
-                content={"detail": get_trans("error_too_many_requests", lang)},
-                headers={"Retry-After": str(self.window)},
-            )
-
-        timestamps.append(now)
-        return await call_next(request)
-
-    def _evict(self, now: float) -> None:
-        """Deterministic eviction of stale or excess buckets."""
-        # 1. Delete truly expired
-        expired = [bid for bid, ts in self.buckets.items() if not ts or now - ts[-1] > self.window]
-        for bid in expired:
-            del self.buckets[bid]
-
-        # 2. Hard trim if still over capacity (20% reduction)
-        if len(self.buckets) >= self.MAX_TRACKED_ENTITIES:
-            by_recency = sorted(
-                self.buckets.keys(), key=lambda k: self.buckets[k][-1] if self.buckets[k] else 0
-            )
-            for bid in by_recency[: len(by_recency) // 5]:
-                del self.buckets[bid]
+# Middlewares imported from cortex.middleware
 
 
 # ─── Application Configuration ───────────────────────────────────────
@@ -267,6 +186,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
+app.add_middleware(SecurityFraudMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=RATE_LIMIT, window=RATE_WINDOW)
@@ -291,7 +211,13 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
 @app.exception_handler(Exception)
 async def universal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-    logger.error("Unhandled Sovereign Exception: %s", exc, exc_info=True)
+    logger.error(
+        "Sovereign Critical Error | Path: %s | Method: %s | Exc: %s",
+        request.url.path,
+        request.method,
+        exc,
+        exc_info=True,
+    )
     return JSONResponse(status_code=500, content={"detail": get_trans("error_unexpected", lang)})
 
 
@@ -346,6 +272,17 @@ app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
 app.include_router(hive_router)
+
+# Gateway — Universal Intelligence Entry Point
+from cortex.gateway.adapters import (  # noqa: E402
+    rest_router as gateway_rest_router,
+)
+from cortex.gateway.adapters import (  # noqa: E402
+    telegram_router as gateway_telegram_router,
+)
+
+app.include_router(gateway_rest_router)
+app.include_router(gateway_telegram_router)
 
 # Extension modules (opt-in)
 if config.LANGBASE_API_KEY:

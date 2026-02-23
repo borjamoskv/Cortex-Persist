@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-__all__ = ['CORTEX_CONTEXT_TEMPLATE', 'run_with_cortex_context', 'create_cortex_pipe']
+__all__ = ["CORTEX_CONTEXT_TEMPLATE", "run_with_cortex_context", "create_cortex_pipe"]
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine

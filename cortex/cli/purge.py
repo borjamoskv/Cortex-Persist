@@ -15,6 +15,26 @@ __all__ = [
 ]
 
 
+def _purge_short_facts(conn, dry_run: bool) -> int:
+    """Purge or preview purging of very short facts (< 15 chars)."""
+    rows = conn.execute(
+        "SELECT id, content FROM facts WHERE length(content) < 15 AND valid_until IS NULL",
+    ).fetchall()
+    if not rows:
+        return 0
+
+    count = len(rows)
+    console.print(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}")
+    if not dry_run:
+        conn.execute(
+            "UPDATE facts SET valid_until = datetime('now'), "
+            "meta = json_set(COALESCE(meta, '{}'), "
+            "'$.deprecation_reason', 'purge-too-short') "
+            "WHERE length(content) < 15 AND valid_until IS NULL",
+        )
+    return count
+
+
 @cli.group()
 def purge():
     """Purge garbage facts from CORTEX."""
@@ -109,22 +129,8 @@ def purge_empty(dry_run, db) -> None:
                         (pattern,),
                     )
 
-        # Also catch very short facts (< 15 chars)
-        rows = conn.execute(
-            "SELECT id, content FROM facts WHERE length(content) < 15 AND valid_until IS NULL",
-        ).fetchall()
-        if rows:
-            total += len(rows)
-            console.print(
-                f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {len(rows)}"
-            )
-            if not dry_run:
-                conn.execute(
-                    "UPDATE facts SET valid_until = datetime('now'), "
-                    "meta = json_set(COALESCE(meta, '{}'), "
-                    "'$.deprecation_reason', 'purge-too-short') "
-                    "WHERE length(content) < 15 AND valid_until IS NULL",
-                )
+        # Catch very short facts (< 15 chars)
+        total += _purge_short_facts(conn, dry_run)
 
         if total == 0:
             console.print("[green]✓[/] No empty/garbage facts found.")

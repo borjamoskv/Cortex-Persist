@@ -58,6 +58,7 @@ from cortex.cli.context_cmds import context  # noqa: E402
 from cortex.cli.entropy_cmds import entropy  # noqa: E402
 from cortex.cli.launchpad_cmds import launchpad  # noqa: E402
 from cortex.cli.mejoralo_cmds import mejoralo  # noqa: E402
+from cortex.cli.swarm_cmds import swarm  # noqa: E402
 
 # ─── Registro de comandos ───────────────────────────────────────────────
 from cortex.cli.time_cmds import heartbeat_cmd, time_cmd  # noqa: E402
@@ -75,6 +76,7 @@ cli.add_command(mejoralo)
 cli.add_command(context)
 cli.add_command(entropy)
 cli.add_command(tips)
+cli.add_command(swarm)
 from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa: E402
 from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402
 from cortex.cli.episodic_cmds import episode  # noqa: E402

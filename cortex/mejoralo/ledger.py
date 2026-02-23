@@ -6,7 +6,7 @@ from typing import Any
 
 from cortex.engine import CortexEngine
 
-__all__ = ['record_session', 'get_history']
+__all__ = ["record_session", "get_history"]
 
 logger = logging.getLogger("cortex.mejoralo")
 
@@ -55,7 +55,9 @@ def record_session(
     )
     logger.info(
         "Recorded MEJORAlo session #%d for project %s (Δ%+d)",
-        fact_id, project, delta,
+        fact_id,
+        project,
+        delta,
     )
     return fact_id
 

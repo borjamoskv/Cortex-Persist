@@ -34,7 +34,7 @@ def gate():
     """Create a gate in ENFORCE mode with a known secret."""
     return SovereignGate(
         policy=GatePolicy.ENFORCE,
-        secret="test-secret-key",
+        sec_val="test-secret-key",
         timeout=10,
     )
 
@@ -44,7 +44,7 @@ def audit_gate():
     """Create a gate in AUDIT_ONLY mode."""
     return SovereignGate(
         policy=GatePolicy.AUDIT_ONLY,
-        secret="test-secret-key",
+        sec_val="test-secret-key",
         timeout=10,
     )
 
@@ -54,7 +54,7 @@ def disabled_gate():
     """Create a gate in DISABLED mode."""
     return SovereignGate(
         policy=GatePolicy.DISABLED,
-        secret="test-secret-key",
+        sec_val="test-secret-key",
         timeout=10,
     )
 
@@ -123,7 +123,7 @@ class TestExpiry:
         # Create gate with very short timeout
         short_gate = SovereignGate(
             policy=GatePolicy.ENFORCE,
-            secret="test-secret",
+            sec_val="test-secret",
             timeout=0.01,  # 10ms
         )
         action = short_gate.request_approval(ActionLevel.L3_EXECUTE, "Test")
@@ -134,7 +134,7 @@ class TestExpiry:
     def test_sweep_marks_expired_actions(self, gate):
         short_gate = SovereignGate(
             policy=GatePolicy.ENFORCE,
-            secret="test-secret",
+            sec_val="test-secret",
             timeout=0.01,
         )
         short_gate.request_approval(ActionLevel.L3_EXECUTE, "A")

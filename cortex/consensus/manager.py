@@ -7,7 +7,7 @@ import uuid
 
 from cortex.metrics import metrics
 
-__all__ = ['ConsensusManager']
+__all__ = ["ConsensusManager"]
 
 logger = logging.getLogger("cortex.consensus")
 

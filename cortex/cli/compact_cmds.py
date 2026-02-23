@@ -14,9 +14,41 @@ from cortex.compactor import (
     get_compaction_stats,
 )
 
-__all__ = ['compact_cmd', 'compact_status', 'compact_session_cmd']
+__all__ = ["compact_cmd", "compact_status", "compact_session_cmd"]
 
 _STRATEGY_MAP = {s.value: s for s in CompactionStrategy}
+
+
+def _display_compaction_result(project: str, result, dry_run: bool) -> None:
+    if result.reduction == 0 and not result.details:
+        console.print(
+            f"[green]✓[/] No compaction needed for [bold]{project}[/]. "
+            f"Memory is clean ({result.original_count} facts)."
+        )
+        return
+
+    panel_lines = [
+        f"[bold]Facts:[/] {result.original_count} → {result.compacted_count} "
+        f"([green]-{result.reduction}[/])",
+    ]
+    if result.deprecated_ids:
+        panel_lines.append(f"[bold]Deprecated:[/] {len(result.deprecated_ids)} fact(s)")
+    if result.new_fact_ids:
+        panel_lines.append(f"[bold]New consolidated:[/] {len(result.new_fact_ids)} fact(s)")
+    for detail in result.details:
+        panel_lines.append(f"  [dim]→ {detail}[/]")
+
+    title = "🗜️ Compaction Result"
+    if dry_run:
+        title += " (DRY RUN)"
+
+    console.print(
+        Panel(
+            "\n".join(panel_lines),
+            title=title,
+            border_style="cyan" if not dry_run else "yellow",
+        )
+    )
 
 
 @cli.command()
@@ -49,7 +81,7 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
     try:
         # Parse strategies
         strategies = [_STRATEGY_MAP[s] for s in strategy] if strategy else None
-        strategy_label = ", ".join(s for s in strategy) if strategy else "all"
+        strategy_label = ", ".join(strategy) if strategy else "all"
 
         if dry_run:
             console.print(
@@ -76,35 +108,7 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
         )
 
         # Display results
-        if result.reduction == 0 and not result.details:
-            console.print(
-                f"[green]✓[/] No compaction needed for [bold]{project}[/]. "
-                f"Memory is clean ({result.original_count} facts)."
-            )
-            return
-
-        panel_lines = [
-            f"[bold]Facts:[/] {result.original_count} → {result.compacted_count} "
-            f"([green]-{result.reduction}[/])",
-        ]
-        if result.deprecated_ids:
-            panel_lines.append(f"[bold]Deprecated:[/] {len(result.deprecated_ids)} fact(s)")
-        if result.new_fact_ids:
-            panel_lines.append(f"[bold]New consolidated:[/] {len(result.new_fact_ids)} fact(s)")
-        for detail in result.details:
-            panel_lines.append(f"  [dim]→ {detail}[/]")
-
-        title = "🗜️ Compaction Result"
-        if dry_run:
-            title += " (DRY RUN)"
-
-        console.print(
-            Panel(
-                "\n".join(panel_lines),
-                title=title,
-                border_style="cyan" if not dry_run else "yellow",
-            )
-        )
+        _display_compaction_result(project, result, dry_run)
 
     finally:
         engine.close_sync()

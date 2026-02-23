@@ -15,7 +15,6 @@ Commands:
 from __future__ import annotations
 
 import logging
-import shutil
 import sys
 from pathlib import Path
 
@@ -264,12 +263,18 @@ def version() -> None:
 @cli.command()
 def install() -> None:
     """Install daemon as a system service (launchd / systemd / Task Scheduler)."""
+    from cortex.daemon_platform import (
+        install_linux,
+        install_macos,
+        install_windows,
+    )
+
     if is_macos():
-        _install_macos()
+        install_macos()
     elif is_linux():
-        _install_linux()
+        install_linux()
     elif is_windows():
-        _install_windows()
+        install_windows()
     else:
         console.print(f"[red]❌ Unsupported platform: {sys.platform}[/]")
         sys.exit(1)
@@ -278,120 +283,21 @@ def install() -> None:
 @cli.command()
 def uninstall() -> None:
     """Remove daemon system service."""
+    from cortex.daemon_platform import (
+        uninstall_linux,
+        uninstall_macos,
+        uninstall_windows,
+    )
+
     if is_macos():
-        _uninstall_macos()
+        uninstall_macos()
     elif is_linux():
-        _uninstall_linux()
+        uninstall_linux()
     elif is_windows():
-        _uninstall_windows()
+        uninstall_windows()
     else:
         console.print(f"[red]❌ Unsupported platform: {sys.platform}[/]")
         sys.exit(1)
-
-
-# ─── Platform-specific install/uninstall ─────────────────────────────
-
-
-def _install_macos() -> None:
-    if not PLIST_SOURCE.exists():
-        console.print(f"[red]❌ Plist not found: {PLIST_SOURCE}[/]")
-        sys.exit(1)
-    dest = _get_plist_dest()
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(PLIST_SOURCE, dest)
-    console.print(f"[green]✅ Installed:[/] {dest}")
-    import subprocess
-
-    subprocess.run(["launchctl", "load", str(dest)], check=False)
-    console.print(f"[green]✅ Loaded:[/] {BUNDLE_ID}")
-    console.print("[dim]   Daemon will run every 5 minutes and on login.[/]")
-
-
-def _uninstall_macos() -> None:
-    import subprocess
-
-    dest = _get_plist_dest()
-    if dest.exists():
-        subprocess.run(["launchctl", "unload", str(dest)], check=False)
-        dest.unlink()
-        console.print(f"[green]✅ Removed:[/] {BUNDLE_ID}")
-    else:
-        console.print("[yellow]No launchd agent installed.[/]")
-
-
-def _install_linux() -> None:
-    unit_path = _get_systemd_unit()
-    unit_path.parent.mkdir(parents=True, exist_ok=True)
-    python_path = sys.executable
-    unit_content = f"""[Unit]
-Description=MOSKV-1 CORTEX Daemon
-After=network.target
-
-[Service]
-Type=simple
-ExecStart={python_path} -m cortex.daemon_cli start
-Restart=on-failure
-RestartSec=30
-
-[Install]
-WantedBy=default.target
-"""
-    unit_path.write_text(unit_content)
-    console.print(f"[green]✅ Installed:[/] {unit_path}")
-    import subprocess
-
-    subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
-    subprocess.run(["systemctl", "--user", "enable", "--now", BUNDLE_ID], check=False)
-    console.print(f"[green]✅ Enabled:[/] {BUNDLE_ID}")
-    console.print("[dim]   Daemon will run automatically on login.[/]")
-
-
-def _uninstall_linux() -> None:
-    import subprocess
-
-    unit_path = _get_systemd_unit()
-    if unit_path.exists():
-        subprocess.run(["systemctl", "--user", "disable", "--now", BUNDLE_ID], check=False)
-        unit_path.unlink()
-        subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
-        console.print(f"[green]✅ Removed:[/] {BUNDLE_ID}")
-    else:
-        console.print("[yellow]No systemd unit installed.[/]")
-
-
-def _install_windows() -> None:
-    import subprocess
-
-    python_path = sys.executable
-    task_name = BUNDLE_ID.replace(".", "_")
-    cmd = (
-        f'schtasks /Create /SC ONLOGON /TN "{task_name}" '
-        f'/TR ""{python_path}" -m cortex.daemon_cli start" '
-        f"/F /RL LIMITED"
-    )
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    if result.returncode == 0:
-        console.print(f"[green]✅ Installed:[/] Task Scheduler → {task_name}")
-        console.print("[dim]   Daemon will run automatically on login.[/]")
-    else:
-        console.print(f"[red]❌ Failed:[/] {result.stderr.strip()}")
-
-
-def _uninstall_windows() -> None:
-    import subprocess
-
-    task_name = BUNDLE_ID.replace(".", "_")
-    result = subprocess.run(
-        f'schtasks /Delete /TN "{task_name}" /F',
-        shell=True,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if result.returncode == 0:
-        console.print(f"[green]✅ Removed:[/] {task_name}")
-    else:
-        console.print("[yellow]No scheduled task found.[/]")
 
 
 def main() -> None:

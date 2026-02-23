@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ['SyncDiff', 'SAPMapper']
+__all__ = ["SyncDiff", "SAPMapper"]
 
 logger = logging.getLogger("cortex.sap.mapper")
 
@@ -151,7 +151,9 @@ class SAPMapper:
             if sap_key in cortex_by_key:
                 # Exists in both — check for modification
                 existing = cortex_by_key.pop(sap_key)
-                existing_meta = _parse_meta_str(existing.get("meta") or existing.get("metadata") or {})
+                existing_meta = _parse_meta_str(
+                    existing.get("meta") or existing.get("metadata") or {}
+                )
 
                 existing_entity = existing_meta.get("sap_entity", {})
                 clean = {k: v for k, v in entity.items() if k not in _SAP_META_KEYS}
@@ -191,4 +193,3 @@ def _parse_meta_str(meta_obj: Any) -> dict:
         except json.JSONDecodeError:
             return {}
     return meta_obj
-

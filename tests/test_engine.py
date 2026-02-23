@@ -81,7 +81,7 @@ class TestInit:
             "SELECT value FROM cortex_meta WHERE key='schema_version'"
         ) as cursor:
             version = await cursor.fetchone()
-        assert version[0] == "4.0.0"
+        assert version[0] == "5.0.0"
 
     async def test_init_idempotent(self, engine):
         """Calling init_db twice should not error."""

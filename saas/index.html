@@ -24,7 +24,7 @@
                 <a href="#compare">vs Mem0</a>
                 <a href="#pricing">Pricing</a>
                 <a href="site/" class="nav-docs">Docs</a>
-                <a href="https://github.com/borjamoskv/cortex" class="nav-github" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://github.com/borjamoskv/cortex" class="nav-github" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
             <a href="#pricing" class="nav-cta">Get Started</a>
         </div>
@@ -182,7 +182,7 @@ results = client.search(<span class="str">"database choice"</span>)</code></pre>
                     <li>Full source code</li>
                     <li>Community support</li>
                 </ul>
-                <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline plan-btn" target="_blank">View on GitHub</a>
+                <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline plan-btn" target="_blank" rel="noopener noreferrer">View on GitHub</a>
             </div>
         </div>
     </section>
@@ -193,7 +193,7 @@ results = client.search(<span class="str">"database choice"</span>)</code></pre>
         <p>3 lines of code. 5 minutes to deploy. Infinite context.</p>
         <div class="cta-actions">
             <a href="#pricing" class="btn btn-primary btn-lg">Start Free →</a>
-            <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline btn-lg" target="_blank">⭐ Star on GitHub</a>
+            <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline btn-lg" target="_blank" rel="noopener noreferrer">⭐ Star on GitHub</a>
         </div>
     </section>
 
@@ -240,8 +240,8 @@ results = client.search(<span class="str">"database choice"</span>)</code></pre>
                 const { error } = await stripe.redirectToCheckout({
                     lineItems: [{ price: priceId, quantity: 1 }],
                     mode: 'subscription',
-                    successUrl: window.location.origin + '/success',
-                    cancelUrl: window.location.origin + '#pricing',
+                    successUrl: globalThis.location.origin + '/success',
+                    cancelUrl: globalThis.location.origin + '#pricing',
                 });
                 if (error) console.error(error);
             });

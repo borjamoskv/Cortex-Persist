@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 
 import aiosqlite
 
-__all__ = ['CortexConnectionPool']
+__all__ = ["CortexConnectionPool"]
 
 logger = logging.getLogger("cortex.pool")
 
@@ -38,11 +38,13 @@ class CortexConnectionPool:
         min_connections: int = 2,
         max_connections: int = 10,
         max_idle_time: float = 300.0,
+        read_only: bool = True,
     ):
         self.db_path = db_path
         self.min_connections = min_connections
         self.max_connections = max_connections
         self.max_idle_time = max_idle_time
+        self.read_only = read_only
 
         self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue()
         self._active_count = 0
@@ -93,9 +95,15 @@ class CortexConnectionPool:
             logger.debug(f"sqlite-vec not available for connection: {e}")
 
         # Critical pragmas for concurrent SQLite (via centralized factory)
-        from cortex.db import apply_pragmas_async
+        if self.read_only:
+            from cortex.db import apply_pragmas_async_readonly
 
-        await apply_pragmas_async(conn)
+            await apply_pragmas_async_readonly(conn)
+        else:
+            from cortex.db import apply_pragmas_async
+
+            await apply_pragmas_async(conn)
+
         return conn
 
     @asynccontextmanager

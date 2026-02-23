@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — TIPS System.
+CORTEX v5.1 — TIPS System.
 
 Contextual tips engine that surfaces useful knowledge while the agent
 thinks and executes. Combines a static knowledge bank with dynamic
@@ -19,22 +19,23 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
 import random
 import sqlite3
+import threading
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Final
+from pathlib import Path
+from typing import TYPE_CHECKING, Final, NamedTuple
 
-__all__ = ['TipCategory', 'Tip', 'TipsEngine']
+__all__ = ["TipCategory", "Tip", "TipsEngine"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.tips")
 
-_ASSET_PATH: Final[str] = os.path.join(os.path.dirname(__file__), "assets", "tips.json")
+_ASSET_PATH: Final[Path] = Path(__file__).parent / "assets" / "tips.json"
 
 
 # ─── Models ──────────────────────────────────────────────────────────
@@ -76,37 +77,64 @@ class Tip:
 
 # ─── Static Tips Bank ────────────────────────────────────────────────
 
+_static_lock = threading.Lock()
 _STATIC_TIPS_CACHE: list[Tip] | None = None
 
 
 def _load_static_tips() -> list[Tip]:
-    """Lazy-load static tips from disk and convert to Tip objects."""
-    global _STATIC_TIPS_CACHE
+    """Lazy-load static tips from disk. Thread-safe."""
+    global _STATIC_TIPS_CACHE  # noqa: PLW0603
+
+    # Fast-path: already loaded.
     if _STATIC_TIPS_CACHE is not None:
         return _STATIC_TIPS_CACHE
 
-    if not os.path.exists(_ASSET_PATH):
-        logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
-        return []
+    with _static_lock:
+        # Double-check after acquiring lock.
+        if _STATIC_TIPS_CACHE is not None:
+            return _STATIC_TIPS_CACHE
 
-    try:
-        with open(_ASSET_PATH, encoding="utf-8") as f:
-            raw_data = json.load(f)
-    except (json.JSONDecodeError, OSError) as exc:
-        logger.critical("TIPS: Failed to load static tips: %s", exc)
-        return []
+        if not _ASSET_PATH.exists():
+            logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
+            return []
 
-    tips: list[Tip] = []
-    for raw in raw_data:
-        cat_name = raw["category"]
-        category = TipCategory(cat_name)
-        for lang, text in raw["content"].items():
-            tip_id = hashlib.md5(f"{cat_name}-{text}".encode()).hexdigest()[:8]  # noqa: S324
-            tips.append(Tip(f"stat-{tip_id}", text, category, lang, "static"))
+        try:
+            raw_data = json.loads(_ASSET_PATH.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.critical("TIPS: Failed to load static tips: %s", exc)
+            return []
 
-    _STATIC_TIPS_CACHE = tips
-    logger.debug("TIPS: Loaded %d static tips from assets", len(tips))
-    return _STATIC_TIPS_CACHE
+        tips: list[Tip] = []
+        for raw in raw_data:
+            cat_name = raw["category"]
+            category = TipCategory(cat_name)
+            for lang, text in raw["content"].items():
+                tip_id = hashlib.md5(f"{cat_name}-{text}".encode()).hexdigest()[:8]  # noqa: S324
+                tips.append(Tip(f"stat-{tip_id}", text, category, lang, "static"))
+
+        _STATIC_TIPS_CACHE = tips
+        logger.debug("TIPS: Loaded %d static tips from assets", len(tips))
+        return _STATIC_TIPS_CACHE
+
+
+# ─── Mining Spec ─────────────────────────────────────────────────────
+
+
+class _MiningSpec(NamedTuple):
+    """Configuration for a dynamic mining query."""
+
+    fact_type: str
+    id_prefix: str
+    category: TipCategory
+    label: str  # Human label for tip content
+    limit_divisor: int  # max_dynamic // divisor = per-type limit
+
+
+_MINING_SPECS: Final[tuple[_MiningSpec, ...]] = (
+    _MiningSpec("decision", "dec", TipCategory.MEMORY, "Past decision", 1),
+    _MiningSpec("error", "err", TipCategory.DEBUGGING, "Lesson learned", 2),
+    _MiningSpec("bridge", "pat", TipCategory.ARCHITECTURE, "Pattern", 4),
+)
 
 
 # ─── Tips Engine ─────────────────────────────────────────────────────
@@ -118,6 +146,17 @@ class TipsEngine:
     Merges static tips with dynamic insights from CORTEX memory.
     Thread-safe, lightweight, and designed for real-time use.
     """
+
+    __slots__ = (
+        "_engine",
+        "lang",
+        "_include_dynamic",
+        "_max_dynamic",
+        "_cache_ttl",
+        "_dynamic_cache",
+        "_cache_ts",
+        "_shown_ids",
+    )
 
     def __init__(
         self,
@@ -140,8 +179,14 @@ class TipsEngine:
     # ─── Public API ──────────────────────────────────────────────
 
     def random(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
-        """Get a random tip. Avoids repeats until all tips have been shown."""
+        """Get a random tip. Avoids repeats until all tips have been shown.
+
+        Raises ``ValueError`` if no tips are available in the requested language.
+        """
         pool = self._get_pool(lang=lang or self.lang)
+        if not pool:
+            raise ValueError(f"No tips available for lang='{lang or self.lang}'")
+
         if exclude_shown:
             available = [t for t in pool if t.id not in self._shown_ids]
             if not available:
@@ -149,6 +194,7 @@ class TipsEngine:
                 available = pool
         else:
             available = pool
+
         tip = random.choice(available)  # noqa: S311
         self._shown_ids.add(tip.id)
         return tip
@@ -236,118 +282,66 @@ class TipsEngine:
 
         tips: list[Tip] = []
         try:
-            # En v4.x, el engine usa conexiones asíncronas o sesiones síncronas.
-            # Accedemos a la conexión síncrona de compatibilidad si está disponible.
             conn = self._engine._get_sync_conn()
-            tips.extend(self._mine_decisions(conn))
-            tips.extend(self._mine_errors(conn))
-            tips.extend(self._mine_patterns(conn))
+            for spec in _MINING_SPECS:
+                limit = max(1, self._max_dynamic // spec.limit_divisor)
+                tips.extend(self._mine_facts(conn, spec, limit))
         except (sqlite3.Error, AttributeError, RuntimeError) as exc:
             logger.debug("Optional dynamic tips mining skipped: %s", exc)
 
         self._dynamic_cache = tips[: self._max_dynamic]
 
-    def _mine_decisions(self, conn: sqlite3.Connection) -> list[Tip]:
-        """Extract tips from recent decisions."""
-        tips: list[Tip] = []
-        try:
-            rows = conn.execute(
-                """
-                SELECT id, project, content
-                FROM facts
-                WHERE fact_type = 'decision'
-                  AND deprecated = 0
-                ORDER BY created_at DESC
-                LIMIT ?
-                """,
-                (self._max_dynamic,),
-            ).fetchall()
-            for row in rows:
-                fact_id, project, content = row[0], row[1], row[2]
-                # Truncate long decisions into tip-friendly form
-                tip_content = content[:200].rstrip()
-                if len(content) > 200:
-                    tip_content += "…"
-                
-                new_tip = Tip(
-                    id=f"dec-{fact_id}",
-                    content=f"Past decision ({project}): {tip_content}",
-                    category=TipCategory.MEMORY,
-                    source="memory",
-                    project=project,
-                    relevance=0.8,
-                )
-                tips.append(new_tip)
-        except sqlite3.OperationalError:
-            pass  # Table may not exist in test DBs
-        return tips
+    @staticmethod
+    def _mine_facts(
+        conn: sqlite3.Connection,
+        spec: _MiningSpec,
+        limit: int,
+    ) -> list[Tip]:
+        """Generic fact miner — extracts tips from any fact_type."""
+        from cortex.storage.classifier import classify_content
 
-    def _mine_errors(self, conn: sqlite3.Connection) -> list[Tip]:
-        """Extract 'did you know' tips from past errors (lessons learned)."""
         tips: list[Tip] = []
         try:
+            # Over-fetch by 3x to compensate for tips rejected by the Privacy Firewall
             rows = conn.execute(
                 """
                 SELECT id, project, content
                 FROM facts
-                WHERE fact_type = 'error'
+                WHERE fact_type = ?
                   AND deprecated = 0
                 ORDER BY created_at DESC
                 LIMIT ?
                 """,
-                (self._max_dynamic // 2,),
+                (spec.fact_type, limit * 3),
             ).fetchall()
-            for row in rows:
-                fact_id, project, content = row[0], row[1], row[2]
-                tip_content = content[:200].rstrip()
-                if len(content) > 200:
-                    tip_content += "…"
-                
-                new_tip = Tip(
-                    id=f"err-{fact_id}",
-                    content=f"Lesson learned ({project}): {tip_content}",
-                    category=TipCategory.DEBUGGING,
-                    source="memory",
-                    project=project,
-                    relevance=0.9,
-                )
-                tips.append(new_tip)
-        except sqlite3.OperationalError:
-            pass
-        return tips
 
-    def _mine_patterns(self, conn: sqlite3.Connection) -> list[Tip]:
-        """Extract insights from frequently used patterns/bridges."""
-        tips: list[Tip] = []
-        try:
-            rows = conn.execute(
-                """
-                SELECT id, project, content
-                FROM facts
-                WHERE fact_type = 'bridge'
-                  AND deprecated = 0
-                ORDER BY created_at DESC
-                LIMIT ?
-                """,
-                (self._max_dynamic // 4,),
-            ).fetchall()
-            for row in rows:
-                fact_id, project, content = row[0], row[1], row[2]
+            for fact_id, project, content in rows:
+                if len(tips) >= limit:
+                    break
+
+                # 🛡️ PRIVACY FIREWALL (KETER-∞) 🛡️
+                # Drop facts that contain secrets, API keys, or platform tokens
+                if classify_content(content).is_sensitive:
+                    continue
+
                 tip_content = content[:200].rstrip()
                 if len(content) > 200:
                     tip_content += "…"
-                
-                new_tip = Tip(
-                    id=f"pat-{fact_id}",
-                    content=f"Pattern ({project}): {tip_content}",
-                    category=TipCategory.ARCHITECTURE,
-                    source="memory",
-                    project=project,
-                    relevance=0.7,
+
+                tips.append(
+                    Tip(
+                        id=f"{spec.id_prefix}-{fact_id}",
+                        content=f"{spec.label} ({project}): {tip_content}",
+                        category=spec.category,
+                        source="memory",
+                        project=project,
+                        relevance=0.8,
+                    )
                 )
-                tips.append(new_tip)
-        except sqlite3.OperationalError:
-            pass
+        except (sqlite3.OperationalError, ImportError) as exc:
+            logger.debug(
+                "Mining %s skipped (table missing or dependency err): %s", spec.fact_type, exc
+            )
         return tips
 
     # ─── Convenience ─────────────────────────────────────────────

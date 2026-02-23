@@ -103,7 +103,7 @@ async def get_system_status(
             transactions=stats["transactions"],
             db_size_mb=stats["db_size_mb"],
         )
-    except Exception as exc:
+    except (RuntimeError, ValueError, KeyError, OSError) as exc:
         logger.error("Sovereign Diagnostic Failure: %s", exc)
         raise HTTPException(
             status_code=500, detail=get_trans("error_status_unavailable", lang)
@@ -131,7 +131,7 @@ async def create_api_key(
         raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang))
 
     manager = api_state.auth_manager or get_auth_manager()
-    existing_keys = manager.list_keys()
+    existing_keys = await manager.list_keys()
 
     if existing_keys:
         if not authorization or not authorization.startswith("Bearer "):
@@ -149,7 +149,7 @@ async def create_api_key(
             detail = get_trans("error_missing_permission", lang).format(permission="admin")
             raise HTTPException(status_code=403, detail=detail)
 
-    raw_key, api_key = manager.create_key(
+    raw_key, api_key = await manager.create_key(
         name=name,
         tenant_id=tenant_id,
         permissions=["read", "write", "admin"],
@@ -211,6 +211,6 @@ async def generate_handoff_context(
         data = await generate_handoff(engine, session_meta=session_meta)
         save_handoff(data)
         return data
-    except Exception as exc:
+    except (RuntimeError, ValueError, KeyError, OSError) as exc:
         logger.error("Handoff Generation Failure: %s", exc)
         raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None

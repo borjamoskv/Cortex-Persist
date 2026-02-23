@@ -32,12 +32,14 @@ import time
 from typing import Any
 
 from cortex.llm.provider import LLMProvider, _load_presets
+from cortex.llm.router import CortexLLMRouter, CortexPrompt
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,
     ModelResponse,
     ThoughtFusion,
 )
+from cortex.thinking.orchestra_introspection import OrchestraIntrospectionMixin
 from cortex.thinking.pool import ProviderPool, ThinkingRecord
 from cortex.thinking.presets import (
     DEFAULT_ROUTING,
@@ -45,8 +47,9 @@ from cortex.thinking.presets import (
     OrchestraConfig,
     ThinkingMode,
 )
+from cortex.thinking.semantic_router import SemanticRouter
 
-__all__ = ['ThoughtOrchestra']
+__all__ = ["ThoughtOrchestra"]
 
 logger = logging.getLogger("cortex.thinking.orchestra")
 
@@ -54,7 +57,7 @@ logger = logging.getLogger("cortex.thinking.orchestra")
 # ─── Thought Orchestra ──────────────────────────────────────────────
 
 
-class ThoughtOrchestra:
+class ThoughtOrchestra(OrchestraIntrospectionMixin):
     """N modelos pensando en paralelo con fusión por consenso.
 
     Crea instancias de LLMProvider via pool reutilizable.
@@ -77,6 +80,7 @@ class ThoughtOrchestra:
         self._pool = ProviderPool()
         self._fusion: ThoughtFusion | None = None
         self._judge: LLMProvider | None = None
+        self._semantic_router = SemanticRouter()
         self._initialized = False
         self._history: list[ThinkingRecord] = []
         self._available_cache: list[str] | None = None
@@ -166,6 +170,20 @@ class ThoughtOrchestra:
 
     # ── Query with Retry ──────────────────────────────────────────
 
+    def _resolve_fallbacks(self, primary_provider_name: str) -> list[Any]:
+        """Resuelve la lista de fallbacks excluyendo al primario."""
+        fallbacks = []
+        available = self._available_cache or self._detect_available_providers()
+        for fb_name in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
+            if fb_name in available and fb_name != primary_provider_name:
+                try:
+                    presets = _load_presets()
+                    fb_model = presets[fb_name]["default_model"]
+                    fallbacks.append(self._pool.get(fb_name, fb_model))
+                except (OSError, ValueError, KeyError):
+                    continue
+        return fallbacks
+
     async def _query_model(
         self,
         provider_name: str,
@@ -181,22 +199,44 @@ class ThoughtOrchestra:
         for attempt in range(attempts):
             try:
                 provider = self._pool.get(provider_name, model)
-                content = await asyncio.wait_for(
-                    provider.complete(
-                        prompt=prompt,
-                        system=system,
-                        temperature=self.config.temperature,
-                        max_tokens=self.config.max_tokens,
-                    ),
+
+                # Resolving fallbacks based on configuration
+                fallbacks = self._resolve_fallbacks(provider_name)
+
+                # Wrap the call with the sovereign router (ROP)
+                router = CortexLLMRouter(primary=provider, fallbacks=fallbacks)
+                cortex_prompt = CortexPrompt(
+                    system_instruction=system,
+                    working_memory=[{"role": "user", "content": prompt}],
+                    temperature=self.config.temperature,
+                    max_tokens=self.config.max_tokens,
+                )
+
+                result = await asyncio.wait_for(
+                    router.execute_resilient(cortex_prompt),
                     timeout=self.config.timeout_seconds,
                 )
-                latency = (time.monotonic() - start) * 1000
-                return ModelResponse(
-                    provider=provider_name,
-                    model=model,
-                    content=content,
-                    latency_ms=latency,
-                    token_count=len(content.split()),  # Estimación rough
+
+                # ROP: unwrap the Result
+                if result.is_ok():
+                    content = result.unwrap()
+                    latency = (time.monotonic() - start) * 1000
+                    return ModelResponse(
+                        provider=provider_name,
+                        model=model,
+                        content=content,
+                        latency_ms=latency,
+                        token_count=len(content.split()),  # Estimación rough
+                    )
+                # All providers failed via ROP cascade
+                last_error = result.error
+                logger.warning(
+                    "%s:%s ROP cascade failed (intento %d/%d): %s",
+                    provider_name,
+                    model,
+                    attempt + 1,
+                    attempts,
+                    last_error,
                 )
 
             except asyncio.TimeoutError:
@@ -253,6 +293,17 @@ class ThoughtOrchestra:
             FusedThought con respuesta fusionada, confidence, y metadatos.
         """
         self._initialize()
+
+        # Auto-routing: classify prompt semantically
+        if mode == "auto":
+            route = self._semantic_router.classify(prompt)
+            mode = route.mode.value
+            logger.info(
+                "🧭 SemanticRouter: auto → %s (confidence=%.2f, %s)",
+                mode,
+                route.confidence,
+                route.reason,
+            )
 
         models = self._resolve_models(mode)
 
@@ -334,107 +385,12 @@ class ThoughtOrchestra:
 
         return result
 
-    # ── Convenience Methods ───────────────────────────────────────
-
-    async def quick_think(self, prompt: str) -> str:
-        """Pensamiento rápido. Retorna solo el contenido."""
-        thought = await self.think(prompt, mode="speed", strategy="majority")
-        return thought.content
-
-    async def deep_think(self, prompt: str) -> FusedThought:
-        """Razonamiento profundo con síntesis."""
-        return await self.think(prompt, mode="deep_reasoning", strategy="synthesis")
-
-    async def code_think(self, prompt: str) -> FusedThought:
-        """Análisis de código con best-of-n."""
-        return await self.think(prompt, mode="code", strategy="best_of_n")
-
-    async def creative_think(self, prompt: str) -> FusedThought:
-        """Pensamiento creativo con weighted synthesis."""
-        return await self.think(prompt, mode="creative", strategy="weighted_synthesis")
-
-    async def consensus_think(self, prompt: str) -> FusedThought:
-        """Máximo consenso — todos los modelos con síntesis."""
-        return await self.think(prompt, mode="consensus", strategy="synthesis")
-
     # ── Cleanup ───────────────────────────────────────────────────
 
     async def close(self) -> None:
         """Cerrar todas las conexiones del pool."""
         await self._pool.close_all()
 
-    # ── Introspection ────────────────────────────────────────────
-
-    @property
-    def available_modes(self) -> list[str]:
-        """Modos con al menos 1 modelo configurado."""
-        return [m.value for m in ThinkingMode if self._resolve_models(m)]
-
-    @property
-    def history(self) -> list[ThinkingRecord]:
-        """Historial de pensamientos (más reciente al final)."""
-        return self._history
-
-    def status(self) -> dict[str, Any]:
-        """Estado completo del orchestra."""
-        mode_status = {}
-        for mode in ThinkingMode:
-            models = self._resolve_models(mode)
-            mode_status[mode.value] = {
-                "models": [f"{p}:{m}" for p, m in models],
-                "count": len(models),
-                "ready": len(models) >= self.config.min_models,
-            }
-
-        return {
-            "initialized": self._initialized,
-            "judge": (f"{self._judge.provider_name}:{self._judge.model}" if self._judge else None),
-            "pool_size": self._pool.size,
-            "history_count": len(self._history),
-            "modes": mode_status,
-            "config": {
-                "min_models": self.config.min_models,
-                "max_models": self.config.max_models,
-                "timeout_seconds": self.config.timeout_seconds,
-                "default_strategy": self.config.default_strategy.value,
-                "retry_on_failure": self.config.retry_on_failure,
-                "use_mode_prompts": self.config.use_mode_prompts,
-            },
-        }
-
-    def stats(self) -> dict[str, Any]:
-        """Estadísticas agregadas del historial."""
-        if not self._history:
-            return {"total_thoughts": 0}
-
-        total = len(self._history)
-        avg_confidence = sum(r.confidence for r in self._history) / total
-        avg_agreement = sum(r.agreement for r in self._history) / total
-        avg_latency = sum(r.total_latency_ms for r in self._history) / total
-        success_rate = (
-            sum(
-                r.models_succeeded / r.models_queried for r in self._history if r.models_queried > 0
-            )
-            / total
-        )
-
-        # Proveedor que más gana
-        winner_counts: dict[str, int] = {}
-        for r in self._history:
-            if r.winner:
-                provider = r.winner.split(":")[0]
-                winner_counts[provider] = winner_counts.get(provider, 0) + 1
-        top_winner = max(winner_counts, key=winner_counts.get) if winner_counts else None
-
-        return {
-            "total_thoughts": total,
-            "avg_confidence": round(avg_confidence, 3),
-            "avg_agreement": round(avg_agreement, 3),
-            "avg_latency_ms": round(avg_latency, 1),
-            "model_success_rate": round(success_rate, 3),
-            "top_winning_provider": top_winner,
-            "mode_distribution": {
-                mode: sum(1 for r in self._history if r.mode == mode)
-                for mode in {r.mode for r in self._history}
-            },
-        }
+    # Convenience and introspection methods provided by OrchestraIntrospectionMixin:
+    #   quick_think, deep_think, code_think, creative_think, consensus_think,
+    #   available_modes (property), history (property), status(), stats()

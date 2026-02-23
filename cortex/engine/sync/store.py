@@ -9,7 +9,7 @@ import sqlite3
 from cortex.engine.models import Fact
 from cortex.temporal import build_temporal_filter_params, now_iso
 
-__all__ = ['SyncStoreMixin']
+__all__ = ["SyncStoreMixin"]
 
 logger = logging.getLogger("cortex.engine.sync.store")
 

@@ -6,13 +6,14 @@ CLI interface for ambient context inference and signal inspection.
 
 import asyncio
 import json
+import sqlite3
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, get_engine
+from cortex.cli import DEFAULT_DB, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = [
     "context",
@@ -20,8 +21,6 @@ __all__ = [
     "infer_cmd",
     "signals_cmd",
 ]
-
-console = Console()
 
 
 @click.group()
@@ -36,7 +35,10 @@ def context():
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 def infer_cmd(db: str, persist: bool, as_json: bool):
     """Infer current working context from ambient signals."""
-    asyncio.run(_infer_async(db, persist, as_json))
+    try:
+        asyncio.run(_infer_async(db, persist, as_json))
+    except (sqlite3.Error, OSError, ValueError, RuntimeError, ImportError) as e:
+        handle_cli_error(e, db_path=db, context="inferring context")
 
 
 async def _infer_async(db: str, persist: bool, as_json: bool):
@@ -112,7 +114,10 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 def signals_cmd(db: str, as_json: bool):
     """Show raw ambient signals."""
-    asyncio.run(_signals_async(db, as_json))
+    try:
+        asyncio.run(_signals_async(db, as_json))
+    except (sqlite3.Error, OSError, ValueError, RuntimeError, ImportError) as e:
+        handle_cli_error(e, db_path=db, context="fetching signals")
 
 
 async def _signals_async(db: str, as_json: bool):
@@ -137,7 +142,7 @@ async def _signals_async(db: str, as_json: bool):
             return
 
         if not signals:
-            console.print("[dim]No signals detected.[/dim]")
+            err_empty_results("detected signals")
             return
 
         table = Table(title=f"🔊 Ambient Signals ({len(signals)})", show_header=True)
@@ -165,7 +170,10 @@ async def _signals_async(db: str, as_json: bool):
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 def history_cmd(db: str, limit: int, as_json: bool):
     """Show past context inference snapshots."""
-    asyncio.run(_history_async(db, limit, as_json))
+    try:
+        asyncio.run(_history_async(db, limit, as_json))
+    except (sqlite3.Error, OSError, ValueError, RuntimeError, ImportError) as e:
+        handle_cli_error(e, db_path=db, context="fetching context history")
 
 
 async def _history_async(db: str, limit: int, as_json: bool):
@@ -184,7 +192,7 @@ async def _history_async(db: str, limit: int, as_json: bool):
             return
 
         if not snapshots:
-            console.print("[dim]No context snapshots found.[/dim]")
+            err_empty_results("context snapshots")
             return
 
         table = Table(title=f"📸 Context Snapshots ({len(snapshots)})", show_header=True)

@@ -76,6 +76,10 @@ class CortexConfig:
     EMBEDDINGS_PROVIDER: str = "gemini"
     EMBEDDINGS_DIMENSION: int = 384
 
+    # L2 Vector Store
+    VECTOR_STORE_PATH: str = ""
+    VECTOR_STORE_MODE: str = "local"  # local | remote
+
     # LLM Provider
     LLM_PROVIDER: str = ""
     LLM_MODEL: str = ""
@@ -90,6 +94,11 @@ class CortexConfig:
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
     STRIPE_PRICE_TABLE: dict[str, str] = field(default_factory=dict)
+
+    # Notifications
+    TELEGRAM_TOKEN: str = ""
+    TELEGRAM_CHAT_ID: str = ""
+    NOTIFICATIONS_MIN_SEVERITY: str = "warning"  # debug|info|warning|error|critical
 
     # Deployment
     DEPLOY_MODE: str = "local"
@@ -140,6 +149,10 @@ class CortexConfig:
             EMBEDDINGS_MODE=os.environ.get("CORTEX_EMBEDDINGS", "local"),
             EMBEDDINGS_PROVIDER=os.environ.get("CORTEX_EMBEDDINGS_PROVIDER", "gemini"),
             EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "384")),
+            VECTOR_STORE_PATH=os.environ.get(
+                "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
+            ),
+            VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
             LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", ""),
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
@@ -155,6 +168,9 @@ class CortexConfig:
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
             CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
             CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",
+            TELEGRAM_TOKEN=os.environ.get("CORTEX_TELEGRAM_TOKEN", ""),
+            TELEGRAM_CHAT_ID=os.environ.get("CORTEX_TELEGRAM_CHAT_ID", ""),
+            NOTIFICATIONS_MIN_SEVERITY=os.environ.get("CORTEX_NOTIFY_MIN_SEVERITY", "warning"),
         )
 
 

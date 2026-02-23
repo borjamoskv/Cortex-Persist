@@ -24,7 +24,9 @@ from typing import Any, Final
 
 import httpx
 
-__all__ = ['LLMProvider']
+from cortex.llm.router import BaseProvider, CortexPrompt
+
+__all__ = ["LLMProvider"]
 
 logger = logging.getLogger("cortex.llm")
 
@@ -61,7 +63,7 @@ def _load_presets() -> dict[str, dict[str, Any]]:
 # ─── Implementation ───────────────────────────────────────────────────
 
 
-class LLMProvider:
+class LLMProvider(BaseProvider):
     """Universal OpenAI-compatible async LLM client.
 
     Works with ANY endpoint that speaks the OpenAI chat completions
@@ -170,6 +172,49 @@ class LLMProvider:
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             raise ValueError(f"Unexpected response format from {self._provider}") from e
+
+    async def invoke(self, prompt: CortexPrompt) -> str:
+        """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
+        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        headers: dict[str, str] = {
+            "Content-Type": "application/json",
+            **self._extra_headers,
+        }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+
+        payload = {
+            "model": self._model,
+            "messages": prompt.to_openai_messages(),
+            "temperature": prompt.temperature,
+            "max_tokens": prompt.max_tokens,
+        }
+
+        try:
+            response = await self._client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "LLM API Failure [%s %s]: %s",
+                e.response.status_code,
+                self._provider,
+                e.response.text[:500],
+            )
+            from cortex.errors import CortexError
+
+            raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
+        except (KeyError, IndexError, json.JSONDecodeError) as e:
+            logger.error("LLM Parse Error [%s]: %s", self._provider, e)
+            from cortex.errors import CortexError
+
+            raise CortexError(f"Unexpected JSON format from {self._provider}") from e
+
+    @property
+    def model_name(self) -> str:
+        """Active model name."""
+        return self._model
 
     @property
     def model(self) -> str:

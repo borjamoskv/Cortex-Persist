@@ -69,8 +69,8 @@ a:hover { opacity: 0.7; }
 #nav.scrolled {
     padding: 16px 32px;
     background: rgba(5, 5, 5, 0.65);
-    backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     border-bottom: 1px solid var(--border);
 }
 
@@ -88,6 +88,7 @@ a:hover { opacity: 0.7; }
     font-size: 1.4rem; 
     background: linear-gradient(135deg, var(--accent), var(--yinmn));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 12px var(--accent-glow));
 }
@@ -135,6 +136,7 @@ a:hover { opacity: 0.7; }
     background: rgba(255,255,255,0.03); 
     border: 1px solid var(--border); 
     color: var(--text);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px); 
 }
 .btn-outline:active { transform: scale(0.96); }
@@ -163,6 +165,7 @@ a:hover { opacity: 0.7; }
     background: rgba(204, 255, 0, 0.05);
     border: 1px solid rgba(204, 255, 0, 0.2);
     border-radius: 100px; margin-bottom: 40px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     box-shadow: 0 0 20px rgba(204, 255, 0, 0.05);
 }
@@ -182,6 +185,7 @@ a:hover { opacity: 0.7; }
     letter-spacing: -3px; margin-bottom: 32px;
     background: linear-gradient(180deg, #FFFFFF 0%, #888888 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
 }
@@ -200,8 +204,8 @@ a:hover { opacity: 0.7; }
     max-width: 680px; width: 100%;
     text-align: left; margin-bottom: 56px;
     overflow: hidden;
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05) inset;
     transform: perspective(1000px) rotateX(2deg);
     transition: transform 0.5s var(--spring-fluid), box-shadow 0.5s var(--spring-fluid);
@@ -278,6 +282,7 @@ h2 {
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 48px 32px;
     transition: all 0.4s var(--spring-fluid);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     display: flex; flex-direction: column;
 }
@@ -313,6 +318,7 @@ h2 {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 32px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
@@ -353,6 +359,7 @@ h2 {
     border-radius: var(--radius); padding: 40px 32px;
     position: relative; display: flex; flex-direction: column;
     transition: all 0.4s var(--spring-fluid);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 .plan:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-8px); }

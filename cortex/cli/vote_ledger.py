@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import sqlite3
 import sys
 
 import click
 from rich.panel import Panel
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 
 # Importe actualizado para Wave 5 Fase 2
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
@@ -38,7 +40,7 @@ def vote(fact_id, value, agent, db) -> None:
                 ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
 
                 if value not in [1, -1]:
-                    console.print("[red]✗ El voto debe ser 1 (verificar) o -1 (disputar)[/]")
+                    err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
                     return
 
                 # Peso 10.0 para votos humanos
@@ -49,6 +51,8 @@ def vote(fact_id, value, agent, db) -> None:
                     f"[green]✓[/] El agente [bold]{agent}[/] votó {value} en el hecho [bold]#{fact_id}[/].\n"
                     f"   [dim]Hash: {entry.hash[:16]}...[/]"
                 )
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="casting vote")
         finally:
             await engine.close()
 
@@ -87,6 +91,8 @@ def ledger_status(db):
                         border_style="cyan",
                     )
                 )
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="fetching ledger status")
         finally:
             await engine.close()
 
@@ -113,11 +119,46 @@ def ledger_checkpoint(db):
                         f"[green]✅ Punto de control creado con éxito.[/] Raíz: [bold]{root}[/]"
                     )
                 else:
-                    console.print("[yellow]⚠ No hay votos nuevos para auditar.[/]")
+                    err_empty_results("votos nuevos para auditar")
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="creating ledger checkpoint")
         finally:
             await engine.close()
 
     asyncio.run(_ledger_checkpoint_async())
+
+
+@ledger.command("verify")
+@click.option("--db", default=DEFAULT_DB, help="Ruta de la base de datos")
+def ledger_verify(db):
+    """Verifica la integridad criptográfica del registro de votos."""
+
+    async def _ledger_verify_async():
+        engine = get_engine(db)
+        try:
+            async with engine.session() as conn:
+                ledger_inst = ImmutableVoteLedger(
+                    engine._pool if hasattr(engine, "_pool") else conn
+                )
+                with console.status(
+                    "[bold blue]Verificando la cadena de hashes del registro...[/]"
+                ):
+                    report = await ledger_inst.verify_chain_integrity()
+
+                with console.status("[bold magenta]Verificando raíces de Merkle...[/]"):
+                    merkle_report = await ledger_inst.verify_merkle_roots()
+
+                _print_chain_report(report)
+                _print_merkle_report(merkle_report)
+
+                if not (report["valid"] and all(r["valid"] for r in merkle_report)):
+                    sys.exit(1)
+        except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+            handle_cli_error(e, db_path=db, context="verifying ledger")
+        finally:
+            await engine.close()
+
+    asyncio.run(_ledger_verify_async())
 
 
 def _print_chain_report(report: dict) -> None:
@@ -149,34 +190,3 @@ def _print_merkle_report(merkle_report: list[dict]) -> None:
                 f"  [red]✗[/] ¡Desajuste en Punto de Control {r['checkpoint_id']}! "
                 f"Esperado {r['expected'][:16]}... vs Actual {r['actual'][:16]}..."
             )
-
-
-@ledger.command("verify")
-@click.option("--db", default=DEFAULT_DB, help="Ruta de la base de datos")
-def ledger_verify(db):
-    """Verifica la integridad criptográfica del registro de votos."""
-
-    async def _ledger_verify_async():
-        engine = get_engine(db)
-        try:
-            async with engine.session() as conn:
-                ledger_inst = ImmutableVoteLedger(
-                    engine._pool if hasattr(engine, "_pool") else conn
-                )
-                with console.status(
-                    "[bold blue]Verificando la cadena de hashes del registro...[/]"
-                ):
-                    report = await ledger_inst.verify_chain_integrity()
-
-                with console.status("[bold magenta]Verificando raíces de Merkle...[/]"):
-                    merkle_report = await ledger_inst.verify_merkle_roots()
-
-                _print_chain_report(report)
-                _print_merkle_report(merkle_report)
-
-                if not (report["valid"] and all(r["valid"] for r in merkle_report)):
-                    sys.exit(1)
-        finally:
-            await engine.close()
-
-    asyncio.run(_ledger_verify_async())

@@ -1,11 +1,11 @@
 # CORTEX — Trust Infrastructure for Autonomous AI
 
-> **Cryptographic verification, audit trails, and compliance for AI agent memory.**
+> **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
 > *The layer that proves your agents' decisions are true.*
 
 ![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-production-green.svg)
+![Status](https://img.shields.io/badge/status-v6%20alpha-orange.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
 [![Docs](https://img.shields.io/badge/docs-live-brightgreen)](https://borjamoskv.github.io/cortex/)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
@@ -17,7 +17,7 @@
 AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
 
 - **Mem0** stores what agents remember. But can you prove the memory wasn't tampered with?
-- **Zep** builds knowledge graphs. But can you audit the chain of reasoning?
+- **Zep** builds knowledge graphs. But can you audit the full chain of reasoning?
 - **Letta** manages agent state. But can you generate a compliance report for regulators?
 
 The **EU AI Act (Article 12, enforced August 2026)** requires:
@@ -36,10 +36,12 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ```
 Your Memory Layer (Mem0 / Zep / Letta / Custom)
         ↓
-   CORTEX Trust Engine
+   CORTEX Trust Engine v6
         ├── SHA-256 hash-chained ledger
         ├── Merkle tree checkpoints
-        ├── Reputation-weighted consensus
+        ├── Reputation-weighted WBFT consensus
+        ├── Privacy Shield (11-pattern secret detection)
+        ├── AST Sandbox (safe LLM code execution)
         └── EU AI Act compliance reports
 ```
 
@@ -47,14 +49,16 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
 
 | Capability | What It Does | EU AI Act |
 |:---|:---|:---:|
-| 🔗 **Immutable Ledger** | Every fact is hash-chained. Tamper = detectable. | Art. 12.3 |
+| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. | Art. 12.3 |
 | 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity | Art. 12.4 |
 | 📋 **Audit Trail** | Timestamped, hash-verified log of all decisions | Art. 12.1 |
 | 🔍 **Decision Lineage** | Trace how an agent arrived at any conclusion | Art. 12.2d |
-| 🤝 **Consensus (RWC)** | Multi-agent verification with reputation scoring | Art. 14 |
+| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant verification | Art. 14 |
 | 📊 **Compliance Report** | One-command regulatory readiness snapshot | Art. 12 |
-| 🧠 **Semantic Search** | Vector + Graph-RAG hybrid retrieval | — |
-| 🏠 **100% Local-First** | SQLite. No cloud. Your data, your machine. | — |
+| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger | — |
+| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret patterns | — |
+| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. | — |
+| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (v6) | — |
 
 ---
 
@@ -69,7 +73,7 @@ pip install cortex-memory
 ### Store a Decision & Verify It
 
 ```bash
-# Store a fact
+# Store a fact (auto-detects AI agent source)
 cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
 
 # Verify its cryptographic integrity
@@ -79,6 +83,22 @@ cortex verify 42
 # Generate compliance report
 cortex compliance-report
 # → Compliance Score: 5/5 — All Article 12 requirements met
+```
+
+### Multi-Tenant (v6)
+
+```python
+from cortex import CortexEngine
+
+engine = CortexEngine()
+
+# All operations are now tenant-scoped
+await engine.store_fact(
+    content="Approved loan application #443",
+    fact_type="decision",
+    project="fintech-agent",
+    tenant_id="enterprise-customer-a"
+)
 ```
 
 ### Run as MCP Server (Universal IDE Plugin)
@@ -96,48 +116,62 @@ uvicorn cortex.api:app --port 8484
 
 ---
 
-## Competitive Landscape
+## Architecture (v6 Sovereign Cloud)
 
-| | **CORTEX** | Mem0 | Zep | Letta | RecordsKeeper | UtopIQ |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Cryptographic Ledger** | ✅ | ❌ | ❌ | ❌ | ✅ (blockchain) | ✅ (blockchain) |
-| **Merkle Checkpoints** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Multi-Agent Consensus** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Local-First** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **No Blockchain Overhead** | ✅ | — | — | — | ❌ | ❌ |
-| **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial | Partial |
-| **Cost** | **Free** | $249/mo | $$$ | Free | $$$ | $$$ |
-
----
-
-## Architecture
-
-```text
-┌─────────────────────────────────────────┐
-│         CORTEX Trust Engine             │
-├─────────────┬─────────────┬─────────────┤
-│  Facts DB   │  Ledger     │  Consensus  │
-│  (sqlite)   │  (SHA-256)  │  (RWC)      │
-├─────────────┼─────────────┼─────────────┤
-│  Embeddings │  Merkle     │  Reputation  │
-│  (ONNX)     │  (Trees)    │  (Weighted)  │
-├─────────────┴─────────────┴─────────────┤
-│  REST API (FastAPI) │ MCP Server (stdio) │
-└─────────────────────┴────────────────────┘
+```
+┌──────────────────────────────────────────────┐
+│              INTERFACES                       │
+│  CLI (27 cmds)  REST API  MCP  GraphQL(soon) │
+├──────────────────────────────────────────────┤
+│         TRUST GATEWAY (v6)                   │
+│  RBAC (4 roles)  │  Privacy Shield           │
+│  API Keys + JWT  │  SecurityHeadersMiddleware │
+├──────────────────────────────────────────────┤
+│         COGNITIVE MEMORY                     │
+│  L1: Redis / Working Memory (sliding window) │
+│  L2: Qdrant / sqlite-vec (384-dim vectors)   │
+│  L3: AlloyDB / SQLite (hash-chained ledger)  │
+├──────────────────────────────────────────────┤
+│         TRUST LAYER                          │
+│  SHA-256 Ledger  │  Merkle Trees             │
+│  WBFT Consensus  │  AST Sandbox              │
+├──────────────────────────────────────────────┤
+│         PLATFORM SERVICES                    │
+│  Self-Healing Daemon  │  Notification Bus    │
+│  Compaction Sidecar   │  EdgeSyncMonitor     │
+└──────────────────────────────────────────────┘
 ```
 
 ---
 
-## Cross-Platform Architecture
+## Competitive Landscape
 
-CORTEX is a sovereign agentic OS designed to run natively on any environment without Docker. It supports:
+| | **CORTEX** | Mem0 | Zep | Letta | RecordsKeeper |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| **Cryptographic Ledger** | ✅ | ❌ | ❌ | ❌ | ✅ (blockchain) |
+| **Merkle Checkpoints** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-Agent Consensus** | ✅ WBFT | ❌ | ❌ | ❌ | ❌ |
+| **Privacy Shield** | ✅ 11 patterns | ❌ | ❌ | ❌ | ❌ |
+| **AST Sandbox** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Local-First** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **No Blockchain Overhead** | ✅ | — | — | — | ❌ |
+| **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-Tenant (v6)** | ✅ | ❌ | ✅ | ❌ | ❌ |
+| **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial |
+| **Cost** | **Free** | $249/mo | $$$ | Free | $$$ |
 
-- **macOS** (launchd & osascript)
-- **Linux** (systemd & notify-send)
-- **Windows** (Task Scheduler & PowerShell)
+---
 
-Read the full [Cross-Platform Architecture Guide](docs/cross_platform_guide.md) to understand the underlying implementation and learn how to write OS-agnostic plugins.
+## Stats (2026-02-23)
+
+| Metric | Value |
+|:---|:---|
+| Test functions | **1,162** |
+| Production LOC | **~40,156** |
+| Commits (8 days) | **117+** |
+| Facts in memory | **746** |
+| MEJORAlo score | **78/100** |
+| Python version | **3.14** |
 
 ---
 
@@ -146,9 +180,23 @@ Read the full [Cross-Platform Architecture Guide](docs/cross_platform_guide.md) 
 CORTEX plugs into your existing stack:
 
 - **IDEs**: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity (via MCP)
-- **Frameworks**: LangChain, CrewAI, AutoGen, Google ADK
+- **Agent Frameworks**: LangChain, CrewAI, AutoGen, Google ADK
 - **Memory Layers**: Sits on top of Mem0, Zep, Letta as verification layer
-- **Deployment**: Docker, Kubernetes, bare metal, or just `pip install`
+- **Databases**: SQLite (local), AlloyDB, PostgreSQL, Turso (edge)
+- **Vector Stores**: sqlite-vec (local), Qdrant (self-hosted or cloud)
+- **Deployment**: Docker, Kubernetes (Helm coming Q2 2026), bare metal, `pip install`
+
+---
+
+## Cross-Platform
+
+CORTEX runs natively on any environment without Docker:
+
+- **macOS** (launchd & osascript notifications)
+- **Linux** (systemd & notify-send)
+- **Windows** (Task Scheduler & PowerShell)
+
+See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
 
 ---
 
@@ -157,3 +205,7 @@ CORTEX plugs into your existing stack:
 **Business Source License 1.1** (BSL-1.1).
 Free for non-production and development use. Converts to Apache 2.0 on 2030-01-01.
 See [LICENSE](LICENSE) for details.
+
+---
+
+*Built by [Borja Moskv](https://github.com/borjamoskv) · Powered by MOSKV-1 v5 (Antigravity)*

@@ -81,6 +81,55 @@ def detect_relationships(content: str, entities: list[dict]) -> list[dict]:
     return relationships
 
 
+async def _upsert_entity(conn, ent: dict, project: str, timestamp: str) -> int:
+    """Upsert a single entity, returning its ID."""
+    cursor = await conn.execute(
+        "SELECT id, mention_count FROM entities WHERE name = ? AND project = ?",
+        (ent["name"], project),
+    )
+    row = await cursor.fetchone()
+    if row:
+        entity_id, count = row
+        await conn.execute(
+            "UPDATE entities SET mention_count = ?, last_seen = ? WHERE id = ?",
+            (count + 1, timestamp, entity_id),
+        )
+        return entity_id
+    cursor = await conn.execute(
+        "INSERT INTO entities "
+        "(name, entity_type, project, first_seen, last_seen, mention_count) "
+        "VALUES (?, ?, ?, ?, ?, 1)",
+        (ent["name"], ent["entity_type"], project, timestamp, timestamp),
+    )
+    return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def _upsert_relation(
+    conn, sid: int, tid: int, relation_type: str, timestamp: str, fact_id: int
+) -> None:
+    """Upsert a single relation between two entities."""
+    cursor = await conn.execute(
+        "SELECT id, weight FROM entity_relations "
+        "WHERE source_entity_id = ? AND target_entity_id = ?",
+        (sid, tid),
+    )
+    row = await cursor.fetchone()
+    if row:
+        rel_id, weight = row
+        await conn.execute(
+            "UPDATE entity_relations SET weight = ?, relation_type = ? WHERE id = ?",
+            (weight + 0.5, relation_type, rel_id),
+        )
+    else:
+        await conn.execute(
+            "INSERT INTO entity_relations "
+            "(source_entity_id, target_entity_id, relation_type, "
+            "weight, first_seen, source_fact_id) "
+            "VALUES (?, ?, ?, 1.0, ?, ?)",
+            (sid, tid, relation_type, timestamp, fact_id),
+        )
+
+
 async def process_fact_graph(
     conn, fact_id: int, content: str, project: str, timestamp: str
 ) -> tuple[int, int]:
@@ -97,52 +146,13 @@ async def process_fact_graph(
     try:
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            cursor = await conn.execute(
-                "SELECT id, mention_count FROM entities WHERE name = ? AND project = ?",
-                (ent["name"], project),
-            )
-            row = await cursor.fetchone()
-            if row:
-                entity_id, count = row
-                await conn.execute(
-                    "UPDATE entities SET mention_count = ?, last_seen = ? WHERE id = ?",
-                    (count + 1, timestamp, entity_id),
-                )
-            else:
-                cursor = await conn.execute(
-                    "INSERT INTO entities "
-                    "(name, entity_type, project, first_seen, last_seen, mention_count) "
-                    "VALUES (?, ?, ?, ?, ?, 1)",
-                    (ent["name"], ent["entity_type"], project, timestamp, timestamp),
-                )
-                entity_id = cursor.lastrowid
-            entity_ids[ent["name"]] = entity_id
+            entity_ids[ent["name"]] = await _upsert_entity(conn, ent, project, timestamp)
 
         for rel in relationships:
             sid = entity_ids.get(rel["source_name"])
             tid = entity_ids.get(rel["target_name"])
-            if not sid or not tid:
-                continue
-            cursor = await conn.execute(
-                "SELECT id, weight FROM entity_relations "
-                "WHERE source_entity_id = ? AND target_entity_id = ?",
-                (sid, tid),
-            )
-            row = await cursor.fetchone()
-            if row:
-                rel_id, weight = row
-                await conn.execute(
-                    "UPDATE entity_relations SET weight = ?, relation_type = ? WHERE id = ?",
-                    (weight + 0.5, rel["relation_type"], rel_id),
-                )
-            else:
-                await conn.execute(
-                    "INSERT INTO entity_relations "
-                    "(source_entity_id, target_entity_id, relation_type, "
-                    "weight, first_seen, source_fact_id) "
-                    "VALUES (?, ?, ?, 1.0, ?, ?)",
-                    (sid, tid, rel["relation_type"], timestamp, fact_id),
-                )
+            if sid and tid:
+                await _upsert_relation(conn, sid, tid, rel["relation_type"], timestamp, fact_id)
 
         # Neo4j dual-write (sync, external service)
         if GRAPH_BACKEND == "neo4j":

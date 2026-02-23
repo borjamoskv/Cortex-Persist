@@ -20,7 +20,7 @@ from typing import Any
 
 import httpx
 
-__all__ = ['PROVIDER_CONFIGS', 'APIEmbedder']
+__all__ = ["PROVIDER_CONFIGS", "APIEmbedder"]
 
 logger = logging.getLogger("cortex.embeddings.api")
 
@@ -90,7 +90,7 @@ class APIEmbedder:
 
         raise ValueError(f"No embed implementation for {self._provider}")
 
-    async def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+    async def embed_batch(self, texts: list[str], _batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         if not texts:
             return []

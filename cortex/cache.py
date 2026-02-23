@@ -11,7 +11,7 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Generic, TypeVar
 
-__all__ = ['T', 'CacheEvent', 'TieredCache']
+__all__ = ["T", "CacheEvent", "TieredCache"]
 
 T = TypeVar("T")
 

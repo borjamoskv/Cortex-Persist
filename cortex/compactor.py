@@ -95,6 +95,51 @@ class CompactionResult:
 # ─── Main Entry Point ───────────────────────────────────────────────
 
 
+def _apply_dedup_strategy(
+    engine: CortexEngine,
+    project: str,
+    result: CompactionResult,
+    dry_run: bool,
+    similarity_threshold: float,
+) -> None:
+    from cortex.compaction.strategies.dedup import execute_dedup
+
+    prev_count = len(result.deprecated_ids)
+    execute_dedup(engine, project, result, dry_run, similarity_threshold)
+    if len(result.deprecated_ids) > prev_count:
+        result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
+
+
+def _apply_merge_errors_strategy(
+    engine: CortexEngine,
+    project: str,
+    result: CompactionResult,
+    dry_run: bool,
+) -> None:
+    from cortex.compaction.strategies.merge_errors import execute_merge_errors
+
+    prev_count = len(result.deprecated_ids)
+    execute_merge_errors(engine, project, result, dry_run)
+    if len(result.deprecated_ids) > prev_count:
+        result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
+
+
+def _apply_staleness_strategy(
+    engine: CortexEngine,
+    project: str,
+    result: CompactionResult,
+    dry_run: bool,
+    max_age_days: int,
+    min_consensus: float,
+) -> None:
+    from cortex.compaction.strategies.staleness import execute_staleness_prune
+
+    prev_count = len(result.deprecated_ids)
+    execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
+    if len(result.deprecated_ids) > prev_count:
+        result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
+
+
 def _apply_strategies(
     engine: CortexEngine,
     project: str,
@@ -107,32 +152,13 @@ def _apply_strategies(
 ) -> None:
     """Execute selected compaction strategies."""
     if CompactionStrategy.DEDUP in strategies:
-        from cortex.compaction.strategies.dedup import execute_dedup
-
-        prev_count = len(result.deprecated_ids)
-        execute_dedup(engine, project, result, dry_run, similarity_threshold)
-        if len(result.deprecated_ids) > prev_count:
-            result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
+        _apply_dedup_strategy(engine, project, result, dry_run, similarity_threshold)
 
     if CompactionStrategy.MERGE_ERRORS in strategies:
-        from cortex.compaction.strategies.merge_errors import (
-            execute_merge_errors,
-        )
-
-        prev_count = len(result.deprecated_ids)
-        execute_merge_errors(engine, project, result, dry_run)
-        if len(result.deprecated_ids) > prev_count:
-            result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
+        _apply_merge_errors_strategy(engine, project, result, dry_run)
 
     if CompactionStrategy.STALENESS_PRUNE in strategies:
-        from cortex.compaction.strategies.staleness import (
-            execute_staleness_prune,
-        )
-
-        prev_count = len(result.deprecated_ids)
-        execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
-        if len(result.deprecated_ids) > prev_count:
-            result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
+        _apply_staleness_strategy(engine, project, result, dry_run, max_age_days, min_consensus)
 
 
 def compact(
@@ -229,16 +255,16 @@ def compact_session(
     conn = engine._get_sync_conn()
     rows = conn.execute(
         """
-        SELECT id, content, fact_type, tags, consensus_score, created_at 
-        FROM facts WHERE project = ? AND valid_until IS NULL 
-        ORDER BY 
-          CASE fact_type 
-            WHEN 'axiom' THEN 0 WHEN 'decision' THEN 1 
-            WHEN 'rule' THEN 2 WHEN 'error' THEN 3 
-            WHEN 'knowledge' THEN 4 WHEN 'ghost' THEN 5 
+        SELECT id, content, fact_type, tags, consensus_score, created_at
+        FROM facts WHERE project = ? AND valid_until IS NULL
+        ORDER BY
+          CASE fact_type
+            WHEN 'axiom' THEN 0 WHEN 'decision' THEN 1
+            WHEN 'rule' THEN 2 WHEN 'error' THEN 3
+            WHEN 'knowledge' THEN 4 WHEN 'ghost' THEN 5
             WHEN 'intent' THEN 6 WHEN 'schema' THEN 7
-            ELSE 8 END, 
-          consensus_score DESC, created_at DESC 
+            ELSE 8 END,
+          consensus_score DESC, created_at DESC
         LIMIT ?
         """,
         (project, max_facts),

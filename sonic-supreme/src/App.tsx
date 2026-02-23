@@ -100,7 +100,7 @@ export default function App() {
             Tone.Transport.seconds = 0;
             setDisplayTime('0:00.00');
             if (isPlaying) togglePlay();
-          }} className="hover:text-[var(--color-cyber-lime)] transition-colors text-gray-500">
+          }} className="hover:text-[var(--color-cyber-lime)] transition-colors text-gray-500" title="Rewind">
             <Rewind size={18} />
           </button>
 
@@ -114,7 +114,7 @@ export default function App() {
             {isPlaying ? <Pause size={20} className="fill-current" /> : <Play size={20} className="fill-current ml-0.5" />}
           </button>
 
-          <button className="hover:text-[var(--color-cyber-lime)] transition-colors text-gray-500">
+          <button className="hover:text-[var(--color-cyber-lime)] transition-colors text-gray-500" title="Fast Forward">
             <FastForward size={18} />
           </button>
 
@@ -131,7 +131,7 @@ export default function App() {
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2 bg-[#1A1A1A] px-3 py-1.5 rounded-full border border-white/5">
             <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold">ZOOM</span>
-            <input type="range" min="10" max="200" value={zoom} onChange={e => setZoom(parseFloat(e.target.value))} className="w-20 opacity-80 hover:opacity-100 transition-opacity" />
+            <input type="range" min="10" max="200" value={zoom} onChange={e => setZoom(parseFloat(e.target.value))} className="w-20 opacity-80 hover:opacity-100 transition-opacity" aria-label="Zoom level" />
           </div>
           <button
             onClick={useStore.getState().exportAudio}
@@ -149,6 +149,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setShowMasterFx(v => !v)}
+            title="Master Effects"
             className={`p-2 rounded-full transition-all ${showMasterFx ? 'bg-[var(--color-cyber-violet)]/20 text-[var(--color-cyber-violet)]' : 'hover:bg-white/5 text-gray-500'}`}
           >
             <Settings2 size={16} />
@@ -185,7 +186,7 @@ export default function App() {
           </div>
 
           <div className="absolute bottom-0 w-full p-4 border-t border-white/5 bg-[#111] backdrop-blur-md">
-            <input type="file" accept="audio/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+            <input type="file" accept="audio/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} aria-label="Upload audio file" />
             <button
               onClick={() => fileInputRef.current?.click()}
               className="w-full py-2.5 border border-[var(--color-cyber-lime)]/30 text-[var(--color-cyber-lime)] hover:bg-[var(--color-cyber-lime)]/10 hover:shadow-[0_0_20px_rgba(204,255,0,0.15)] hover:border-[var(--color-cyber-lime)] rounded font-mono text-xs uppercase tracking-widest transition-all flex items-center justify-center space-x-2"

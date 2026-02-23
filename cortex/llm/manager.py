@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 import os
 
-__all__ = ['LLMManager']
+__all__ = ["LLMManager"]
 
 logger = logging.getLogger("cortex.llm.manager")
 

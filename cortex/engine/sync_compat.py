@@ -14,7 +14,7 @@ import sqlite_vec
 
 from cortex.temporal import now_iso
 
-__all__ = ['SyncCompatMixin']
+__all__ = ["SyncCompatMixin"]
 
 logger = logging.getLogger("cortex")
 
@@ -51,10 +51,10 @@ class SyncCompatMixin:
     def init_db_sync(self) -> None:
         """Initialize database schema (sync version)."""
         from cortex.migrations.core import run_migrations
-        from cortex.schema import ALL_SCHEMA
+        from cortex.schema import get_all_schema
 
         conn = self._get_sync_conn()
-        for stmt in ALL_SCHEMA:
+        for stmt in get_all_schema():
             if "USING vec0" in stmt and not self._vec_available:
                 continue
             conn.executescript(stmt)
@@ -72,6 +72,66 @@ class SyncCompatMixin:
 
     # ─── Store ──────────────────────────────────────────────────
 
+    def _validate_store_args(self, project: str, content: str, fact_type: str) -> str:
+        """Validate input arguments for synchronous storage."""
+        if not project or not project.strip():
+            raise ValueError("project cannot be empty")
+        if not content or not content.strip():
+            raise ValueError("content cannot be empty")
+
+        content = content.strip()
+        from cortex.facts.manager import FactManager
+
+        min_len = FactManager.MIN_CONTENT_LENGTH
+        if len(content) < min_len:
+            raise ValueError(f"content too short ({len(content)} chars, min {min_len})")
+
+        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
+            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
+
+        return content
+
+    def _embed_fact_sync(self, conn: _sqlite3.Connection, fact_id: int, content: str) -> None:
+        """Generate and store embedding for a fact synchronously."""
+        if not self._auto_embed or not self._vec_available:
+            return
+        try:
+            embedding = self._get_embedder().embed(content)
+            conn.execute(
+                "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
+                (fact_id, json.dumps(embedding)),
+            )
+        except (_sqlite3.Error, OSError, ValueError) as e:
+            logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+
+    def _process_side_effects_sync(
+        self,
+        conn: _sqlite3.Connection,
+        fact_id: int,
+        project: str,
+        content: str,
+        ts: str,
+    ) -> None:
+        """Process side effects: transactions, CDC encole, and graph extraction."""
+        import hashlib
+
+        content_hash = hashlib.sha256(content.encode()).hexdigest()
+        self._log_transaction_sync(
+            conn, project, "store", {"fact_id": fact_id, "content_hash": content_hash}
+        )
+
+        conn.execute(
+            "INSERT INTO graph_outbox (fact_id, action, status) VALUES (?, ?, ?)",
+            (fact_id, "store_fact", "pending"),
+        )
+
+        try:
+            from cortex.graph import process_fact_graph_sync
+
+            process_fact_graph_sync(conn, fact_id, content, project, ts)
+        except (_sqlite3.Error, OSError, ValueError) as e:
+            logger.warning("Graph extraction sync failed for fact %d: %s", fact_id, e)
+
     def store_sync(
         self,
         project: str,
@@ -85,26 +145,9 @@ class SyncCompatMixin:
         _skip_dedup: bool = False,
     ) -> int:
         """Store a fact synchronously (for sync callers like sync.read)."""
-        if not project or not project.strip():
-            raise ValueError("project cannot be empty")
-        if not content or not content.strip():
-            raise ValueError("content cannot be empty")
-
-        content = content.strip()
-
-        # Gate 1: Minimum content length
-        from cortex.facts.manager import FactManager
-
-        min_len = FactManager.MIN_CONTENT_LENGTH
-        if len(content) < min_len:
-            raise ValueError(f"content too short ({len(content)} chars, min {min_len})")
-
-        # Gate 2: Sanitize double-prefixed decisions
-        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
-            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
-
-        # Gate 3: Dedup — return existing ID if exact match exists
+        content = self._validate_store_args(project, content, fact_type)
         conn = self._get_sync_conn()
+
         if not _skip_dedup:
             existing = conn.execute(
                 "SELECT id FROM facts WHERE project = ? AND content = ? "
@@ -118,6 +161,7 @@ class SyncCompatMixin:
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
         meta_json = json.dumps(meta or {})
+
         cursor = conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags, confidence, "
             "valid_from, source, meta, created_at, updated_at) "
@@ -125,40 +169,12 @@ class SyncCompatMixin:
             (project, content, fact_type, tags_json, confidence, ts, source, meta_json, ts, ts),
         )
         fact_id = cursor.lastrowid
-        if self._auto_embed and self._vec_available:
-            try:
-                embedding = self._get_embedder().embed(content)
-                conn.execute(
-                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, json.dumps(embedding)),
-                )
-            except (_sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+
+        self._embed_fact_sync(conn, fact_id, content)
         conn.commit()
 
-        # Log to ledger (sync)
-        import hashlib
-
-        content_hash = hashlib.sha256(content.encode()).hexdigest()
-        self._log_transaction_sync(
-            conn, project, "store", {"fact_id": fact_id, "content_hash": content_hash}
-        )
-
-        # CDC: Encole for Neo4j sync
-        conn.execute(
-            "INSERT INTO graph_outbox (fact_id, action, status) VALUES (?, ?, ?)",
-            (fact_id, "store_fact", "pending"),
-        )
+        self._process_side_effects_sync(conn, fact_id, project, content, ts)
         conn.commit()
-
-        # Graph extraction (sync)
-        try:
-            from cortex.graph import process_fact_graph_sync
-
-            process_fact_graph_sync(conn, fact_id, content, project, ts)
-            conn.commit()
-        except (_sqlite3.Error, OSError, ValueError) as e:
-            logger.warning("Graph extraction sync failed for fact %d: %s", fact_id, e)
 
         return fact_id
 

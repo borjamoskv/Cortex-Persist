@@ -12,7 +12,7 @@ import os
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, Final
 
 from cortex.engine import CortexEngine
 
@@ -27,7 +27,7 @@ __all__ = [
 
 logger = logging.getLogger("cortex.adk.tools")
 
-_DEFAULT_DB = os.path.expanduser("~/.cortex/cortex.db")
+_DEFAULT_DB: Final = os.path.expanduser("~/.cortex/cortex.db")
 
 
 def _get_db_path() -> str:
@@ -89,7 +89,7 @@ def adk_store(
                 source=source or None,
             )
             return {"status": "success", "fact_id": fact_id, "project": project}
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Store failed: {exc}"}
 
 
@@ -135,7 +135,7 @@ def adk_search(
             ]
 
             return {"status": "success", "results": formatted, "count": len(formatted)}
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Search failed: {exc}"}
 
 
@@ -153,7 +153,7 @@ def adk_status() -> dict[str, Any]:
         with _sovereign_engine() as engine:
             stats = engine.stats()
             return {"status": "success", **stats}
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Status retrieval failed: {exc}"}
 
 
@@ -182,7 +182,7 @@ def adk_ledger_verify() -> dict[str, Any]:
                 "roots_checked": report.get("roots_checked", 0),
                 "violations": report.get("violations", []),
             }
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Ledger verification failed: {exc}"}
 
 
@@ -210,7 +210,7 @@ def adk_deprecate(
         with _sovereign_engine() as engine:
             engine.deprecate(fact_id, reason=reason or None)
             return {"status": "success", "fact_id": fact_id, "deprecated": True}
-    except Exception as exc:
+    except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Deprecation failed: {exc}"}
 
 

@@ -21,7 +21,7 @@ from cortex.mejoralo.constants import (
 from cortex.mejoralo.models import DimensionResult, ScanResult
 from cortex.mejoralo.utils import detect_stack
 
-__all__ = ['scan']
+__all__ = ["scan"]
 
 logger = logging.getLogger("cortex.mejoralo")
 
@@ -50,29 +50,44 @@ def _analyze_python_nesting(content: str, rel: str) -> list[str]:
     comp = []
     try:
         tree = ast.parse(content)
+
         class NestingVisitor(ast.NodeVisitor):
             def __init__(self) -> None:
                 self.depth = 0
+
             def visit(self, node: ast.AST) -> None:
-                inc = isinstance(node, (
-                    ast.If, ast.For, ast.While, ast.Try, ast.With,
-                    ast.AsyncFor, ast.AsyncWith, ast.FunctionDef,
-                    ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler
-                ))
+                inc = isinstance(
+                    node,
+                    ast.If
+                    | ast.For
+                    | ast.While
+                    | ast.Try
+                    | ast.With
+                    | ast.AsyncFor
+                    | ast.AsyncWith
+                    | ast.FunctionDef
+                    | ast.AsyncFunctionDef
+                    | ast.ClassDef
+                    | ast.ExceptHandler,
+                )
                 if inc:
                     self.depth += 1
                     if self.depth >= 8:
                         line_no = getattr(node, "lineno", "?")
-                        comp.append(f"{rel}:{line_no} -> High structural nesting (depth {self.depth})")
+                        comp.append(
+                            f"{rel}:{line_no} -> High structural nesting (depth {self.depth})"
+                        )
                         self.depth -= 1
                         return
                 self.generic_visit(node)
                 if inc:
                     self.depth -= 1
+
         NestingVisitor().visit(tree)
     except SyntaxError:
         pass
     return comp
+
 
 def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
     comp = []
@@ -81,12 +96,25 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
         if not stripped or stripped.startswith(("#", "//", "/*", "*", '"""', "'''", "]", "}", ")")):
             continue
         indent = len(line) - len(stripped)
-        if indent >= 24 and any(stripped.startswith(kw) for kw in (
-            "if ", "for ", "while ", "class ", "def ", "function ",
-            "try", "catch", "else", "switch ", "with "
-        )):
+        if indent >= 24 and any(
+            stripped.startswith(kw)
+            for kw in (
+                "if ",
+                "for ",
+                "while ",
+                "class ",
+                "def ",
+                "function ",
+                "try",
+                "catch",
+                "else",
+                "switch ",
+                "with ",
+            )
+        ):
             comp.append(f"{rel}:{i} -> High nesting detected (indent {indent})")
     return comp
+
 
 def _analyze_single_file(
     sf: Path, root: Path
@@ -149,8 +177,6 @@ def _analyze_files(
         complexity_findings.extend(comp)
 
     return total_loc, large_files, psi_findings, security_findings, complexity_findings
-
-
 
 
 # ─── Dimension Scoring ───────────────────────────────────────────────
@@ -244,10 +270,16 @@ def _score_dimensions(
     # Provides up to 30 bonus points for perfect code.
     sov_score = 0
     sov_findings = []
-    if has_files and arch_score == 100 and sec_score == 100 and complexity_score == 100 and psi_score == 100:
+    if (
+        has_files
+        and arch_score == 100
+        and sec_score == 100
+        and complexity_score == 100
+        and psi_score == 100
+    ):
         sov_score = 100
         sov_findings = ["Sovereign Quality Standard achieved (130/100)"]
-    
+
     dimensions.append(
         DimensionResult(
             name="Excelencia Soberana",
@@ -260,7 +292,6 @@ def _score_dimensions(
     return dimensions
 
 
-
 def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
     """Calculate weighted total score from dimensions. Supports >100 for Sovereign standard."""
     _LOCAL_WEIGHT_MAP = {
@@ -268,21 +299,21 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
         "high": 35,
         "medium": 15,
         "low": 10,
-        "sovereign": 30  # Bonus weight
+        "sovereign": 30,  # Bonus weight
     }
     total_weight = 0
     weighted_sum = 0
     bonus_points = 0
-    
+
     for d in dimensions:
         if d.weight == "sovereign":
             bonus_points = int(d.score * 0.3)  # Max +30
             continue
-            
+
         w = _LOCAL_WEIGHT_MAP.get(d.weight, 10)
         weighted_sum += d.score * w
         total_weight += w
-    
+
     base_score = int(weighted_sum / total_weight) if total_weight > 0 else 0
     return base_score + bonus_points
 
@@ -315,7 +346,7 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
 
     if root.is_dir():
         source_files = _collect_source_files(root_dir, exts)
-    
+
     total_loc, large_files, psi, sec, comp = _analyze_files(source_files, root_dir)
 
     dimensions = _score_dimensions(
@@ -339,4 +370,3 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
         dead_code=(len(source_files) == 0),
         brutal=brutal,
     )
-

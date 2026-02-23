@@ -10,7 +10,7 @@ from cortex.engine import CortexEngine
 from cortex.launchpad import MissionOrchestrator
 from cortex.models import MissionLaunchRequest, MissionResponse
 
-__all__ = ['launch_mission', 'list_missions']
+__all__ = ["launch_mission", "list_missions"]
 
 router = APIRouter(prefix="/v1/missions", tags=["missions"])
 

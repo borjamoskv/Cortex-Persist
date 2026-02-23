@@ -11,7 +11,7 @@ import io
 import json
 from typing import TYPE_CHECKING
 
-__all__ = ['export_facts']
+__all__ = ["export_facts"]
 
 if TYPE_CHECKING:
     from cortex.engine import Fact

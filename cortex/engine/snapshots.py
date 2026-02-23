@@ -12,7 +12,7 @@ import aiosqlite
 
 from cortex.config import DEFAULT_DB_PATH
 
-__all__ = ['SnapshotRecord', 'SnapshotManager']
+__all__ = ["SnapshotRecord", "SnapshotManager"]
 
 logger = logging.getLogger("cortex")
 
@@ -38,6 +38,48 @@ class SnapshotRecord:
     merkle_root: str
     created_at: str
     size_mb: float
+
+
+def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:
+    try:
+        data = _read_snapshot_meta(meta_file)
+        db_file = Path(data["path"])
+        if db_file.exists():
+            return SnapshotRecord(
+                id=0,
+                name=data["name"],
+                path=data.get("path", ""),
+                tx_id=data.get("tx_id", 0),
+                merkle_root=data.get("merkle_root", ""),
+                created_at=data.get("created_at", ""),
+                size_mb=data.get("size_mb", 0.0),
+            )
+    except (OSError, ValueError, KeyError) as e:
+        logger.warning("Failed to load snapshot metadata from %s: %s", meta_file, e)
+    return None
+
+
+def _list_snapshots_sync(snapshot_dir: Path) -> list[SnapshotRecord]:
+    snapshots = []
+    for meta_file in snapshot_dir.glob("*.json"):
+        record = _parse_snapshot_meta(meta_file)
+        if record:
+            snapshots.append(record)
+    return sorted(snapshots, key=lambda s: s.created_at, reverse=True)
+
+
+def _restore_db_files_sync(snap_path: Path, target_path: Path) -> bool:
+    backup_path = target_path.with_suffix(".db.bak")
+    shutil.copy2(target_path, backup_path)
+    try:
+        shutil.copy2(snap_path, target_path)
+        for wal_file in target_path.parent.glob(f"{target_path.name}-*"):
+            wal_file.unlink()
+        return True
+    except (OSError, ValueError) as e:
+        logger.error("Failed to restore snapshot: %s", e)
+        shutil.copy2(backup_path, target_path)
+        return False
 
 
 class SnapshotManager:
@@ -110,32 +152,8 @@ class SnapshotManager:
 
     async def list_snapshots(self) -> list[SnapshotRecord]:
         """List all available snapshots in the snapshot directory."""
-        # Non-blocking glob/read for metadata
         loop = asyncio.get_running_loop()
-
-        def _list():
-            snapshots = []
-            for meta_file in self.snapshot_dir.glob("*.json"):
-                try:
-                    data = _read_snapshot_meta(meta_file)
-                    db_file = Path(data["path"])
-                    if db_file.exists():
-                        snapshots.append(
-                            SnapshotRecord(
-                                id=0,
-                                name=data["name"],
-                                path=data.get("path", ""),
-                                tx_id=data.get("tx_id", 0),
-                                merkle_root=data.get("merkle_root", ""),
-                                created_at=data.get("created_at", ""),
-                                size_mb=data.get("size_mb", 0.0),
-                            )
-                        )
-                except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
-                    logger.warning("Failed to load snapshot metadata from %s: %s", meta_file, e)
-            return sorted(snapshots, key=lambda s: s.created_at, reverse=True)
-
-        return await loop.run_in_executor(None, _list)
+        return await loop.run_in_executor(None, _list_snapshots_sync, self.snapshot_dir)
 
     async def restore_snapshot(self, tx_id: int) -> bool:
         """Restore the database to a specific snapshot state.
@@ -151,17 +169,7 @@ class SnapshotManager:
         snap = snapshots[0]
         logger.info("Restoring snapshot from %s", snap.path)
 
-        # Backup current DB before overwrite
-        backup_path = self.db_path.with_suffix(".db.bak")
-        shutil.copy2(self.db_path, backup_path)
-
-        try:
-            shutil.copy2(snap.path, self.db_path)
-            # We may need to remove WAL files as well
-            for wal_file in self.db_path.parent.glob(f"{self.db_path.name}-*"):
-                wal_file.unlink()
-            return True
-        except (sqlite3.Error, OSError, ValueError) as e:
-            logger.error("Failed to restore snapshot: %s", e)
-            shutil.copy2(backup_path, self.db_path)
-            return False
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None, _restore_db_files_sync, Path(snap.path), self.db_path
+        )

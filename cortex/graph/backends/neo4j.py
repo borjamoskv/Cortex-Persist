@@ -5,7 +5,7 @@ from cortex.config import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
 from .base import GraphBackend
 
-__all__ = ['Neo4jBackend']
+__all__ = ["Neo4jBackend"]
 
 logger = logging.getLogger("cortex.graph.backends")
 
@@ -194,22 +194,8 @@ class Neo4jBackend(GraphBackend):
         if not self._initialized:
             return {"entities": [], "relationships": []}
 
-        # Basic CYPHER expansion
-        # LIMIT is hard to apply to nodes globally in expansion with plain Cypher without APOC,
-        # but we can try a variable length match
-        _query = f"""
-        MATCH (s:Entity) WHERE s.name IN $seeds
-        CALL {{
-            WITH s
-            MATCH (s)-[r*1..{depth}]-(m:Entity)
-            RETURN m, r
-            LIMIT {max_nodes}
-        }}
-        RETURN s, m, r
-        """
-        # Note: The above query is approximate and might return multiple rows per path.
+        # Simpler expansion approach: iterative neighbor discovery
         # A proper subgraph query usually requires APOC or multiple steps.
-        # We'll use a simpler expansion for now: get neighbors
 
         entities_map = {}
         relationships_list = []

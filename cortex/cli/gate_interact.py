@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from cortex.gate import ActionStatus, GateNotApproved, GatePolicy
 
-__all__ = ['approve_interactive']
+__all__ = ["approve_interactive"]
 
 if TYPE_CHECKING:
     from cortex.gate import SovereignGate

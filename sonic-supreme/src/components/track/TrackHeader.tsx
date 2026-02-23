@@ -21,6 +21,7 @@ export function TrackHeader({ track }: { track: TrackType }) {
             onChange={e => updateTrack(track.id, { name: e.target.value })}
             onClick={e => e.stopPropagation()}
             className="font-bold text-xs text-gray-100 truncate w-28 bg-transparent outline-none border-b border-transparent focus:border-white/20 tracking-wide"
+            aria-label="Track name"
           />
         </div>
         <div className="flex space-x-1 items-center">
@@ -35,6 +36,7 @@ export function TrackHeader({ track }: { track: TrackType }) {
           <button
             onClick={e => { e.stopPropagation(); removeTrack(track.id); }}
             className="w-6 h-6 rounded flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 ml-0.5"
+            title="Delete track"
           >
             <Trash2 size={11} />
           </button>
@@ -46,7 +48,7 @@ export function TrackHeader({ track }: { track: TrackType }) {
           <span className="text-[9px] font-mono text-gray-500 font-bold w-4">PAN</span>
           <div className="flex-1 h-1 bg-[#0A0A0A] rounded-full overflow-hidden relative">
             <div className="absolute h-full w-[1px] bg-gray-600 left-1/2 transform -translate-x-1/2 z-10" />
-            <input type="range" min="-1" max="1" step="0.01" value={track.pan} onChange={e => updateTrack(track.id, { pan: parseFloat(e.target.value) })} className="absolute inset-0 w-full opacity-0 cursor-ew-resize z-20" />
+            <input type="range" min="-1" max="1" step="0.01" value={track.pan} onChange={e => updateTrack(track.id, { pan: parseFloat(e.target.value) })} className="absolute inset-0 w-full opacity-0 cursor-ew-resize z-20" aria-label="Pan" />
             <div className="h-full absolute rounded-full pointer-events-none" style={{
               backgroundColor: track.color,
               left: track.pan < 0 ? `${(track.pan + 1) * 50}%` : '50%',
@@ -61,7 +63,7 @@ export function TrackHeader({ track }: { track: TrackType }) {
           <Volume2 size={9} className="text-gray-500 w-4 flex-shrink-0" />
           <div className="flex-1 h-1.5 bg-[#0A0A0A] rounded-full relative">
             <div className="h-full rounded-full transition-all duration-75" style={{ width: `${track.volume * 100}%`, backgroundColor: track.color, boxShadow: `0 0 6px ${track.color}60` }} />
-            <input type="range" min="0" max="1" step="0.01" value={track.volume} onChange={e => updateTrack(track.id, { volume: parseFloat(e.target.value) })} className="absolute inset-0 w-full opacity-0 cursor-ew-resize" />
+            <input type="range" min="0" max="1" step="0.01" value={track.volume} onChange={e => updateTrack(track.id, { volume: parseFloat(e.target.value) })} className="absolute inset-0 w-full opacity-0 cursor-ew-resize" aria-label="Volume" />
           </div>
           <span className="text-[8px] font-mono text-gray-600 w-6 text-right">{Math.round(track.volume * 100)}</span>
         </div>

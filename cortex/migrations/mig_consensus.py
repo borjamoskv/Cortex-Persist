@@ -54,7 +54,7 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
     # Use hex(randomblob(16)) for a simple unique ID
     conn.execute("""
         INSERT INTO agents (id, public_key, name, agent_type, reputation_score)
-        SELECT 
+        SELECT
             lower(hex(randomblob(16))),
             '',
             agent,
@@ -67,10 +67,10 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
     # 3. Migrate existing votes to v2
     conn.execute("""
         INSERT INTO consensus_votes_v2 (
-            fact_id, agent_id, vote, vote_weight, 
+            fact_id, agent_id, vote, vote_weight,
             agent_rep_at_vote, created_at
         )
-        SELECT 
+        SELECT
             v.fact_id,
             a.id,
             v.vote,
@@ -80,7 +80,7 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
         FROM consensus_votes v
         JOIN agents a ON v.agent = a.name
         WHERE NOT EXISTS (
-            SELECT 1 FROM consensus_votes_v2 v2 
+            SELECT 1 FROM consensus_votes_v2 v2
             WHERE v2.fact_id = v.fact_id AND v2.agent_id = a.id
         );
     """)

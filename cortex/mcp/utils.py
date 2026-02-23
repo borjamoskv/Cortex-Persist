@@ -117,6 +117,7 @@ class AsyncConnectionPool:
                 for _ in range(self.max_connections):
                     conn = await aiosqlite.connect(self.db_path, timeout=30.0)
                     from cortex.db import apply_pragmas_async
+
                     await apply_pragmas_async(conn)
                     # Quick health check
                     async with conn.execute("SELECT 1") as cursor:
@@ -148,6 +149,7 @@ class AsyncConnectionPool:
                 logger.warning("Reviving stale database connection")
                 conn = await aiosqlite.connect(self.db_path, timeout=30.0)
                 from cortex.db import apply_pragmas_async
+
                 await apply_pragmas_async(conn)
 
             yield conn

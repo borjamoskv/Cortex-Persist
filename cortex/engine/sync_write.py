@@ -13,7 +13,7 @@ import sqlite3
 from cortex.sync.gitops import sync_fact_to_repo
 from cortex.temporal import now_iso
 
-__all__ = ['SyncWriteMixin']
+__all__ = ["SyncWriteMixin"]
 
 logger = logging.getLogger("cortex")
 
@@ -25,10 +25,10 @@ class SyncWriteMixin:
         """Initialize database schema (sync version)."""
         from cortex.engine import get_init_meta
         from cortex.migrations.core import run_migrations
-        from cortex.schema import ALL_SCHEMA
+        from cortex.schema import get_all_schema
 
         conn = self._get_sync_conn()
-        for stmt in ALL_SCHEMA:
+        for stmt in get_all_schema():
             if "USING vec0" in stmt and not self._vec_available:
                 continue
             conn.executescript(stmt)

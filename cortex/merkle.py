@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 
-__all__ = ['MerkleNode', 'MerkleTree']
+__all__ = ["MerkleNode", "MerkleTree"]
 
 
 @dataclass

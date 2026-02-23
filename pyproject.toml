@@ -25,6 +25,7 @@ dependencies = [
     "rich>=13.0",
     "neo4j>=5.0",
     "aiosqlite>=0.20.0",
+    "qdrant-client>=1.12",
     "pyobjc-core; sys_platform == 'darwin'",
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
 ]

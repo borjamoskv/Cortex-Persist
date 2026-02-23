@@ -30,9 +30,7 @@ def mejoralo():
 @click.option(
     "--auto-heal", is_flag=True, help="Intenta curar el código autónomamente si score < 70"
 )
-@click.option(
-    "--relentless", is_flag=True, help="♾️ INMEJORABLE: no para hasta score ≥ 95"
-)
+@click.option("--relentless", is_flag=True, help="♾️ INMEJORABLE: no para hasta score ≥ 95")
 @click.option(
     "--target-score", type=int, default=None, help="Score objetivo personalizado (default: 70 o 95)"
 )

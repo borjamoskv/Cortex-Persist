@@ -21,7 +21,7 @@ export function MasterFxDrawer({ onClose }: { onClose: () => void }) {
           {([['LOW', 'eqLow'], ['MID', 'eqMid'], ['HIGH', 'eqHigh']] as const).map(([lbl, key]) => (
             <div key={key} className="flex flex-col items-center space-y-1">
               <span className="text-[8px] font-mono text-gray-500">{lbl}</span>
-              <input type="range" min="-20" max="20" step="0.5" value={masterFx[key]} onChange={e => updateMasterFx({ [key]: parseFloat(e.target.value) })} className="w-16 h-1" />
+              <input type="range" min="-20" max="20" step="0.5" value={masterFx[key]} onChange={e => updateMasterFx({ [key]: parseFloat(e.target.value) })} className="w-16 h-1" aria-label={lbl} />
               <span className="text-[8px] font-mono text-gray-400">{masterFx[key] > 0 ? '+' : ''}{masterFx[key].toFixed(1)}dB</span>
             </div>
           ))}
@@ -34,12 +34,12 @@ export function MasterFxDrawer({ onClose }: { onClose: () => void }) {
           <span className="text-[9px] font-mono text-[var(--color-cyber-violet)] uppercase tracking-widest font-bold">COMP</span>
           <div className="flex flex-col items-center space-y-1">
             <span className="text-[8px] font-mono text-gray-500">THRESH</span>
-            <input type="range" min="-60" max="0" step="0.5" value={masterFx.compThreshold} onChange={e => updateMasterFx({ compThreshold: parseFloat(e.target.value) })} className="w-20 h-1" />
+            <input type="range" min="-60" max="0" step="0.5" value={masterFx.compThreshold} onChange={e => updateMasterFx({ compThreshold: parseFloat(e.target.value) })} className="w-20 h-1" aria-label="Compressor Threshold" />
             <span className="text-[8px] font-mono text-gray-400">{masterFx.compThreshold.toFixed(1)}dB</span>
           </div>
           <div className="flex flex-col items-center space-y-1">
             <span className="text-[8px] font-mono text-gray-500">RATIO</span>
-            <input type="range" min="1" max="20" step="0.5" value={masterFx.compRatio} onChange={e => updateMasterFx({ compRatio: parseFloat(e.target.value) })} className="w-16 h-1" />
+            <input type="range" min="1" max="20" step="0.5" value={masterFx.compRatio} onChange={e => updateMasterFx({ compRatio: parseFloat(e.target.value) })} className="w-16 h-1" aria-label="Compressor Ratio" />
             <span className="text-[8px] font-mono text-gray-400">{masterFx.compRatio.toFixed(1)}:1</span>
           </div>
         </div>

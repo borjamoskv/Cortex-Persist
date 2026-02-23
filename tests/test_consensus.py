@@ -1,3 +1,4 @@
+import asyncio
 import os
 import unittest.mock as mock
 
@@ -33,7 +34,7 @@ def client(monkeypatch):
     from cortex.api import app
 
     # Set up some test state
-        # monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
+    # monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
     monkeypatch.setattr(cortex.auth, "_auth_manager", None)
 
     # Mock Embedder to avoid model download/hang
@@ -44,10 +45,12 @@ def client(monkeypatch):
         instance.dimension = 384
 
         with TestClient(app) as c:
-            raw_key, _ = api_state.auth_manager.create_key(
-                "api_agent",
-                tenant_id="test_proj",
-                permissions=["read", "write", "admin"],
+            raw_key, _ = asyncio.run(
+                api_state.auth_manager.create_key(
+                    "api_agent",
+                    tenant_id="test_proj",
+                    permissions=["read", "write", "admin"],
+                )
             )
             c.headers = {"Authorization": f"Bearer {raw_key}"}
             yield c
