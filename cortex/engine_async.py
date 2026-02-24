@@ -160,9 +160,10 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 results = []
                 for row in rows:
                     d = dict(row)
-                    d["content"] = enc.decrypt_str(d["content"])
+                    t_id = d.get("tenant_id", "default")
+                    d["content"] = enc.decrypt_str(d["content"], tenant_id=t_id)
                     d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                    d["meta"] = enc.decrypt_json(d["meta"])
+                    d["meta"] = enc.decrypt_json(d["meta"], tenant_id=t_id)
                     results.append(d)
                 return results
 
@@ -190,9 +191,10 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 enc = get_default_encrypter()
 
                 d = dict(row)
-                d["content"] = enc.decrypt_str(d["content"])
+                t_id = d.get("tenant_id", "default")
+                d["content"] = enc.decrypt_str(d["content"], tenant_id=t_id)
                 d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                d["meta"] = enc.decrypt_json(d["meta"])
+                d["meta"] = enc.decrypt_json(d["meta"], tenant_id=t_id)
                 return d
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:

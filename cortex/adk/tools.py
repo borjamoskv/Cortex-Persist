@@ -152,7 +152,7 @@ def adk_status() -> dict[str, Any]:
     """
     try:
         with _sovereign_engine() as engine:
-            stats = engine.stats()
+            stats = engine.stats_sync()
             return {"status": "success", **stats}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Status retrieval failed: {exc}"}
