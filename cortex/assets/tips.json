@@ -49,6 +49,38 @@
   },
   {
     "content": {
+      "en": "Use `cortex export <project>` to snapshot your entire project knowledge base as JSON.",
+      "es": "Usa `cortex export <project>` para tomar un snapshot completo de tu base de conocimiento en JSON.",
+      "eu": "Erabili `cortex export <project>` proiektuaren ezagutza-oinarri osoa JSON gisa gordetzeko."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "Trust scores propagate transitively: if A trusts B and B trusts C, A partially trusts C.",
+      "es": "Los trust scores se propagan transitivamente: si A confía en B y B en C, A confía parcialmente en C.",
+      "eu": "Konfiantza puntuazioak maila anitzetan hedatzen dira: A B-n konfiatzen bada eta B C-n, A partzialki C-n konfiatzen da."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "Merkle audit trails make CORTEX tamper-evident: any mutation in the fact chain is cryptographically detectable.",
+      "es": "Los Merkle audit trails hacen que CORTEX sea resistente a manipulaciones: cualquier mutación en la cadena de hechos es detectable criptográficamente.",
+      "eu": "Merkle audit trailsek CORTEXa manipulazioekiko erresistente egiten dute: gertaera katean edozein mutazio kriptografikoki detektagarria da."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "Circuit breakers in CORTEX automatically halt runaway agents before they damage shared state.",
+      "es": "Los circuit breakers de CORTEX detienen automáticamente agentes descontrolados antes de que dañen el estado compartido.",
+      "eu": "CORTEXen circuit breakerrek automatikoki gelditzen dituzte erabiltzen ari diren agenteak egoera partekatua kaltetu aurretik."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
       "en": "Store decisions immediately after making them. Memory is cheaper than reconstruction.",
       "es": "Guarda las decisiones inmediatamente después de tomarlas. La memoria es más barata que la reconstrucción.",
       "eu": "Gorde erabakiak hartu bezain laster. Memoria berritzea baino merkeagoa da."
@@ -81,6 +113,30 @@
   },
   {
     "content": {
+      "en": "A bridge fact connects two projects: 'Pattern X from ProjectA works in ProjectB with adaptation Y'. Store it.",
+      "es": "Un fact de tipo bridge conecta dos proyectos: 'El patrón X de ProyectoA funciona en ProyectoB con la adaptación Y'. Guárdalo.",
+      "eu": "Bridge motako fact batek bi proiektu lotzen ditu: 'X eredua ProiektuAtik ProiektuBn funtzionatzen du Y egokitzapenarekin'. Gorde ezazu."
+    },
+    "category": "workflow"
+  },
+  {
+    "content": {
+      "en": "Mid-session checkpoint: if a major decision happened in the last 20 minutes, persist it NOW. Don't wait for session end.",
+      "es": "Checkpoint a mitad de sesión: si hubo una decisión importante en los últimos 20 minutos, guárdala AHORA. No esperes al cierre.",
+      "eu": "Saioaren erdiko kontrolpuntua: azken 20 minutuetan erabaki garrantzitsurik gertatu bada, gorde ORAIN. Ez utzi saioaren amaierara."
+    },
+    "category": "workflow"
+  },
+  {
+    "content": {
+      "en": "Ghosts that block other work cost 10x more than ones that don't. Classify them as 'blocking' immediately.",
+      "es": "Los ghosts que bloquean otro trabajo cuestan 10x más que los que no bloquean. Clasifícalos como 'blocking' inmediatamente.",
+      "eu": "Beste lana blokeatzen duten ghostek 10x gehiago kostatzen dira blokeatzen ez dutenak baino. Sailkatu 'blocking' gisa berehala."
+    },
+    "category": "workflow"
+  },
+  {
+    "content": {
       "en": "SQLite WAL mode is enabled by default. This gives you concurrent reads during writes.",
       "es": "El modo WAL de SQLite está activo por defecto. Permite lecturas concurrentes durante las escrituras.",
       "eu": "SQLite WAL modua gainean dago lehenetsita. Honek idazketan zehar irakurketa konkurrenteak ahalbidetzen ditu."
@@ -92,6 +148,22 @@
       "en": "The compactor merges redundant facts to keep the database lean. Run `cortex compact` periodically.",
       "es": "El compactador fusiona hechos redundantes para mantener la BD ligera. Ejecuta `cortex compact` a menudo.",
       "eu": "Konpaktatzaileak gertaera erredundanteak batzen ditu DBa arin mantentzeko. Exekutatu `cortex compact` aldian-aldian."
+    },
+    "category": "performance"
+  },
+  {
+    "content": {
+      "en": "Embeddings are generated lazily on first search. Pre-warm them for latency-sensitive deployments.",
+      "es": "Los embeddings se generan de forma lazy en la primera búsqueda. Pre-calcúlalos en deployments sensibles a la latencia.",
+      "eu": "Embedding-ak lehen bilaketan modu lazean sortzen dira. Aurrez kalkulatu latentziaren aldeko deploymentetan."
+    },
+    "category": "performance"
+  },
+  {
+    "content": {
+      "en": "Cache your `TipsEngine` instance — initializing it on every request wastes cycles and misses the shown-tips dedup.",
+      "es": "Cachea tu instancia de `TipsEngine` — inicializarla en cada request desperdicia ciclos y pierde la deduplicación de tips mostrados.",
+      "eu": "Cachetu ezazu `TipsEngine` instantzia — requesteko inicializatzeak zikloak alperrik galtzen ditu eta erakutsitako tipsen dedup galtzen da."
     },
     "category": "performance"
   },
@@ -113,6 +185,30 @@
   },
   {
     "content": {
+      "en": "Rate limiting on admin routes is per-IP with token buckets. Customize `max_requests` per deployment risk profile.",
+      "es": "El rate limiting en rutas admin es por IP con token buckets. Personaliza `max_requests` según el perfil de riesgo de cada deployment.",
+      "eu": "Rate limitinga admin bideetan IP bakoitzeko token bucket-ekin da. Pertsonalizatu `max_requests` deployment arrisku-profilearen arabera."
+    },
+    "category": "security"
+  },
+  {
+    "content": {
+      "en": "Every admin action is audit-logged with method, path, IP, and user-agent. Check `cortex.admin.middleware` logs.",
+      "es": "Cada acción de admin queda registrada en el audit log con método, ruta, IP y user-agent. Consulta los logs de `cortex.admin.middleware`.",
+      "eu": "Admin ekintza bakoitza audit log-ean erregistratzen da metodo, bide, IP eta user-agent-arekin. Kontsultatu `cortex.admin.middleware` log-ak."
+    },
+    "category": "security"
+  },
+  {
+    "content": {
+      "en": "The Privacy Firewall screens dynamic tips before display. API keys and secrets never leak into tip content.",
+      "es": "El Privacy Firewall examina los tips dinámicos antes de mostrarlos. Las claves API y secretos jamás se filtran al contenido de los tips.",
+      "eu": "Privacy Firewallak tips dinamikoak erakutsi aurretik aztertzen ditu. API gakoak eta sekretuak inoiz ez dira tipsen edukian agertzen."
+    },
+    "category": "security"
+  },
+  {
+    "content": {
       "en": "Use `ruff` for linting — it's 10-100x faster than flake8 and covers more rules.",
       "es": "Usa `ruff` para el linter: es 10-100 veces más rápido que flake8 y cubre más reglas.",
       "eu": "Erabili `ruff` linter gisa: flake8 baino 10-100 aldiz azkarragoa da eta arau gehiago hartzen ditu barne."
@@ -121,9 +217,65 @@
   },
   {
     "content": {
+      "en": "Use `from __future__ import annotations` in every module — defers type eval and removes circular import headaches.",
+      "es": "Usa `from __future__ import annotations` en cada módulo — aplaza la evaluación de tipos y evita importaciones circulares.",
+      "eu": "Erabili `from __future__ import annotations` modulu guztietan — tipo-ebaluazioa atzeratzen du eta inportazio zirkularren buruhausteak ekiditen ditu."
+    },
+    "category": "python"
+  },
+  {
+    "content": {
+      "en": "`dataclass(frozen=True, slots=True)` is 2-3x faster than a regular dataclass for read-heavy objects like Tip.",
+      "es": "`dataclass(frozen=True, slots=True)` es 2-3x más rápido que un dataclass normal para objetos de solo lectura como Tip.",
+      "eu": "`dataclass(frozen=True, slots=True)` 2-3 aldiz azkarragoa da irakurketa-astunentzako objektuentzat, Tip bezalakoak, dataclass normal bat baino."
+    },
+    "category": "python"
+  },
+  {
+    "content": {
+      "en": "Never use `except Exception: pass`. Use `except Exception: log.debug(...)` so you can see what's silenced.",
+      "es": "Nunca uses `except Exception: pass`. Usa `except Exception: log.debug(...)` para ver qué se silencia.",
+      "eu": "Inoiz ez erabili `except Exception: pass`. Erabili `except Exception: log.debug(...)` zer ixiltzen den ikusteko."
+    },
+    "category": "debugging"
+  },
+  {
+    "content": {
+      "en": "Use `pytest -x --tb=short` during active development: fast failure + readable traces = faster iteration.",
+      "es": "Usa `pytest -x --tb=short` durante desarrollo activo: fallo rápido + trazas legibles = iteración más rápida.",
+      "eu": "Erabili `pytest -x --tb=short` garapen aktiboan: porrot azkarra + arrasto irakurgarriak = iterazio azkarragoa."
+    },
+    "category": "debugging"
+  },
+  {
+    "content": {
+      "en": "`git bisect` is the fastest way to find which commit introduced a regression. Start with `git bisect start HEAD <last-good>`.",
+      "es": "`git bisect` es la forma más rápida de encontrar qué commit introdujo una regresión. Empieza con `git bisect start HEAD <último-bueno>`.",
+      "eu": "`git bisect` erregresio bat zein commitek sartu zuen aurkitzeko modurik azkarrena da. Hasi `git bisect start HEAD <azken-ona>`-rekin."
+    },
+    "category": "git"
+  },
+  {
+    "content": {
+      "en": "Use `git stash push -m 'description'` instead of unnamed stashes. Future you will thank present you.",
+      "es": "Usa `git stash push -m 'descripción'` en vez de stashes sin nombre. El tú del futuro te lo agradecerá.",
+      "eu": "Erabili `git stash push -m 'deskribapena'` izenik gabeko stashen ordez. Etorkizuneko zuk eskertu egingo dizu."
+    },
+    "category": "git"
+  },
+  {
+    "content": {
       "en": "Industrial Noir: #0A0A0A backgrounds, #CCFF00 accents, glassmorphism panels. The MOSKV aesthetic.",
       "es": "Industrial Noir: fondos #0A0A0A, acentos #CCFF00, paneles glassmorphism. La estética MOSKV.",
       "eu": "Industrial Noir: #0A0A0A fondoak, #CCFF00 azentuak, glassmorphism panelak. MOSKV estetika."
+    },
+    "category": "design"
+  },
+  {
+    "content": {
+      "en": "Micro-animations under 200ms feel snappy. Over 300ms feel laggy. 200-300ms is the sweet spot for spring transitions.",
+      "es": "Las micro-animaciones de menos de 200ms se sienten rápidas. Las de más de 300ms se sienten lentas. 200-300ms es el punto dulce para springs.",
+      "eu": "200ms azpiko mikro-animazioak lastegiak iruditzen dira. 300ms gainekoak motelak. 200-300ms spring trantsizioetarako puntu gozoa da."
     },
     "category": "design"
   },
@@ -150,5 +302,165 @@
       "eu": "Elementu bakoitzak 'Zergatik?' galderari erantzun behar dio. Propositurik ez badu, ezabatu."
     },
     "category": "meta"
+  },
+  {
+    "content": {
+      "en": "The 5 Whys: ask 'why' 5 times before accepting the first explanation. Root cause lives deeper than symptoms.",
+      "es": "Los 5 Porqués: pregunta 'por qué' 5 veces antes de aceptar la primera explicación. La causa raíz vive más profundo que los síntomas.",
+      "eu": "5 Zergatiak: galdetu 'zergatik' 5 aldiz lehen azalpena onartu aurretik. Erro-kausa sintotak baino sakonago bizi da."
+    },
+    "category": "meta"
+  },
+  {
+    "content": {
+      "en": "Complexity without value is entropy. Every abstraction must pay for itself in maintainability.",
+      "es": "La complejidad sin valor es entropía. Cada abstracción debe pagar su propio precio en mantenibilidad.",
+      "eu": "Baliorik gabeko konplexutasuna entropia da. Abstrakzio bakoitzak bere prezioa ordaindu behar du mantengarritasunean."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Dependency injection beats global state every time. CORTEX uses FastAPI's `Depends()` throughout — follow the pattern.",
+      "es": "La inyección de dependencias gana al estado global siempre. CORTEX usa `Depends()` de FastAPI en todo — sigue el patrón.",
+      "eu": "Dependentzia injekzioak egoera globalari irabazten dio beti. CORTEXek FastAPI-ren `Depends()` erabiltzen du osoan — jarraitu eredua."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "CortexEngine is the single source of truth for all data operations. Never bypass it with direct SQL in routes.",
+      "es": "CortexEngine es la única fuente de verdad para todas las operaciones de datos. Nunca la bypasees con SQL directo en las rutas.",
+      "eu": "CortexEngine eragiketa guztietarako egia-iturri bakarra da. Inoiz ez saihestatu SQL zuzenarekin bideetan."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Probe pattern for health checks: each subsystem probe is isolated. One failing probe doesn't crash all others.",
+      "es": "Patrón probe para health checks: cada probe de subsistema está aislada. Una probe fallida no rompe las demás.",
+      "eu": "Proba eredua osasun-egiaztatzetarako: azpisistema proba bakoitza isolatuta dago. Porrot egindako probak ez du besteak apurtzen."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Keep your LLM system prompt under 2000 tokens. Beyond that, attention dilution starts hurting instruction following.",
+      "es": "Mantén tu system prompt de LLM por debajo de 2000 tokens. Más allá, la dilución de atención empieza a perjudicar el seguimiento de instrucciones.",
+      "eu": "Mantendu zure LLM system promptaren azpian 2000 token. Hortik gora, arreta dilusioak argibideen jarraipenari kalte egiten hasten zaio."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Format Python exceptions as `raise X(...) from None` in API routes to prevent leaking internal tracebacks to clients.",
+      "es": "Formatear excepciones Python como `raise X(...) from None` en rutas API previene filtrar tracebacks internos a los clientes.",
+      "eu": "Python salbuespenak `raise X(...) from None` gisa formateatzea API bideetan barne trasezak bezeroei filtratzea ekiditen du."
+    },
+    "category": "python"
+  },
+  {
+    "content": {
+      "en": "Slow import? Use `importlib.import_module()` inside the function body to defer it to call time.",
+      "es": "¿Importación lenta? Usa `importlib.import_module()` dentro del cuerpo de la función para diferirla al momento de llamada.",
+      "eu": "Inportazio motela? Erabili `importlib.import_module()` funtzioaren gorputzaren barruan deia egiteko momentura atzeratzeko."
+    },
+    "category": "performance"
+  },
+  {
+    "content": {
+      "en": "The 'Handoff' endpoint serializes live agent state to JSON. Call it before switching platforms — never lose mid-session context.",
+      "es": "El endpoint 'Handoff' serializa el estado vivo del agente a JSON. Llámalo antes de cambiar de plataforma — nunca pierdas el contexto a mitad de sesión.",
+      "eu": "Handoff endpoint-ak agente-egoera bizirik JSON-era serializatzen du. Deitu plataformaz aldatu aurretik — inoiz ez galdu saioaren erdiko testuingurua."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "CORTEX CLI speaks 3 languages (en, es, eu). Set `CORTEX_LANG=es` env var to make it permanent.",
+      "es": "El CLI de CORTEX habla 3 idiomas (en, es, eu). Establece `CORTEX_LANG=es` como variable de entorno para hacerlo permanente.",
+      "eu": "CORTEX CLI-ak 3 hizkuntza hitz egiten ditu (en, es, eu). Ezarri `CORTEX_LANG=es` ingurune-aldagai gisa iraunkortzeko."
+    },
+    "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "Type-check your fact types: 'decision', 'error', 'ghost', 'bridge', 'knowledge', 'world-model'. Wrong types are silently stored but never surfaced correctly.",
+      "es": "Verifica el tipo de tus hechos: 'decision', 'error', 'ghost', 'bridge', 'knowledge', 'world-model'. Los tipos incorrectos se guardan en silencio pero nunca se recuperan correctamente.",
+      "eu": "Egiaztatu zure gertaeren motak: 'decision', 'error', 'ghost', 'bridge', 'knowledge', 'world-model'. Mota okerrak isiltasunean gordetzen dira baina inoiz ez dira behar bezala berreskuratzen."
+    },
+    "category": "memory"
+  },
+  {
+    "content": {
+      "en": "Memory is only as good as its retrieval. Don't just store — describe facts with enough context to find them 6 months later.",
+      "es": "La memoria es tan buena como su recuperación. No solo guardes — describe hechos con suficiente contexto para encontrarlos 6 meses después.",
+      "eu": "Memoria berreskuratzea bezain ona da. Ez soilik gorde — deskribatu gertaerak 6 hilabete geroago aurkitzeko adina testuingururekin."
+    },
+    "category": "memory"
+  },
+  {
+    "content": {
+      "en": "Pattern: if you find yourself explaining the same thing twice, it's a 'knowledge' fact. Store it once, recall forever.",
+      "es": "Patrón: si te encuentras explicando lo mismo dos veces, es un hecho de tipo 'knowledge'. Guárdalo una vez, recupéralo siempre.",
+      "eu": "Eredua: zuk zeuk gauza bera bi aldiz azaltzen baduzu euren burua, 'knowledge' gertaera da. Gorde behin, berreskuratu beti."
+    },
+    "category": "memory"
+  },
+  {
+    "content": {
+      "en": "Use `cortex search --type decision` to find prior architectural choices before making new ones. Decision archaeology prevents repeating mistakes.",
+      "es": "Usa `cortex search --type decision` para encontrar decisiones arquitectónicas anteriores antes de tomar nuevas. La arqueología de decisiones previene repetir errores.",
+      "eu": "Erabili `cortex search --type decision` aurreko arkitektura-erabakiak aurkitzeko berriak hartu aurretik. Erabakien arkeologiak akatsak errepikatzea ekiditen du."
+    },
+    "category": "workflow"
+  },
+  {
+    "content": {
+      "en": "Bridge detection: if you solved problem X in project A and are now solving similar X in project B — store a bridge fact NOW.",
+      "es": "Detección de bridge: si resolviste el problema X en el proyecto A y ahora resuelves un X similar en el proyecto B — guarda un hecho de tipo bridge AHORA.",
+      "eu": "Bridge detekzioa: A proiektuan X arazoa konpondu bazenuen eta orain B proiektuan antzeko X bat konpontzen ari bazara — gorde bridge gertaera ORAIN."
+    },
+    "category": "workflow"
+  },
+  {
+    "content": {
+      "en": "The `SelfHealingHook` increments failure counters per endpoint. Wire these to your Prometheus/StatsD for real-time alerting.",
+      "es": "El `SelfHealingHook` incrementa contadores de fallo por endpoint. Conéctalos a tu Prometheus/StatsD para alertas en tiempo real.",
+      "eu": "SelfHealingHook-ek porrot kontadoreak endpoint bakoitzeko handitzen ditu. Lotu itzazu zure Prometheus/StatsD-ra denbora errealeko alertetarako."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "The `AuditLogger` middleware captures every admin action. Feed its output to a SIEM for compliance.",
+      "es": "El middleware `AuditLogger` captura cada acción de admin. Alimenta su salida a un SIEM para cumplimiento.",
+      "eu": "AuditLogger middlewareak admin ekintza bakoitza kapturatzen du. Bere irteera SIEM batera elikatu betetzeko."
+    },
+    "category": "security"
+  },
+  {
+    "content": {
+      "en": "async def + await in FastAPI routes means the event loop stays responsive while I/O happens. Never block with time.sleep().",
+      "es": "async def + await en rutas FastAPI significa que el event loop sigue respondiendo mientras ocurre I/O. Nunca bloquees con time.sleep().",
+      "eu": "async def + await FastAPI bideetan event loopak I/O gertatzen den bitartean erantzuten jarraitzen duela esan nahi du. Inoiz ez blokeatu time.sleep()-ekin."
+    },
+    "category": "python"
+  },
+  {
+    "content": {
+      "en": "Use `run_in_threadpool()` in FastAPI for blocking operations like file I/O. It uses the default thread pool without blocking the event loop.",
+      "es": "Usa `run_in_threadpool()` en FastAPI para operaciones bloqueantes como I/O de archivos. Usa el thread pool sin bloquear el event loop.",
+      "eu": "Erabili `run_in_threadpool()` FastAPI-n fitxategi I/O bezalako blokeo-eragiketentzat. Thread pool-a erabiltzen du event loopa blokeatu gabe."
+    },
+    "category": "python"
+  },
+  {
+    "content": {
+      "en": "Trust Score is not just a number — it's a composite of: source reliability × freshness × consensus × confidence. Weight them by use case.",
+      "es": "El Trust Score no es solo un número — es un compuesto de: fiabilidad de la fuente × frescura × consenso × confianza. Pondera según el caso de uso.",
+      "eu": "Trust Score ez da zenbaki bat soilik — iturriaren fidagarritasuna × frescura × adostasuna × konfiantza konbinazio bat da. Pisatu erabilera-kasuaren arabera."
+    },
+    "category": "cortex"
   }
 ]

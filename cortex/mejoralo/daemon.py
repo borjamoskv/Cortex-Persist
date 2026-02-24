@@ -51,7 +51,7 @@ class MejoraloDaemon:
         self._running = False
         self._loop_task: asyncio.Task | None = None
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the evolutionary loop."""
         if self._running:
             return
@@ -61,28 +61,29 @@ class MejoraloDaemon:
         )
         self._loop_task = asyncio.create_task(self._main_loop())
 
-    async def stop(self):
-        """Graceful shutdown."""
+    async def stop(self) -> None:
+        """Graceful shutdown with proper CancelledError propagation."""
         self._running = False
         if self._loop_task:
             self._loop_task.cancel()
             try:
                 await self._loop_task
             except asyncio.CancelledError:
-                pass
+                pass  # expected — task was cancelled by us
+            self._loop_task = None
         logger.info("Sovereign Daemon: Ouroboros cycle paused.")
 
-    async def _main_loop(self):
+    async def _main_loop(self) -> None:
         """Primary execution cycle."""
         while self._running:
-            start_time = time.time()
+            start_time = time.monotonic()
             try:
                 await self._execute_cycle()
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError) as e:
                 logger.error("Daemon cycle failure: %s", e, exc_info=True)
                 self.metrics.increment("mejoralo_daemon_errors")
 
-            elapsed = time.time() - start_time
+            elapsed = time.monotonic() - start_time
             sleep_time = max(0, self.scan_interval - elapsed)
 
             if self._running:
@@ -146,7 +147,7 @@ class MejoraloDaemon:
                 )
                 report = await orchestra.think(prompt, mode=ThinkingMode.DEEP_REASONING)
                 return f"{context}\n\n[OUROBOROS CAUSAL DEBT ANALYSIS]\n{report.content}"
-        except Exception as e:
+        except (RuntimeError, ImportError, OSError) as e:
             logger.error("OUROBOROS-∞ Causal Analysis failed: %s", e)
             return context
 
@@ -175,7 +176,7 @@ class MejoraloDaemon:
                     confidence="verified",
                     tags=["ouroboros", "evolution"],
                 )
-        except Exception as e:
+        except (RuntimeError, ImportError, OSError) as e:
             logger.error("OUROBOROS-∞ Pattern Absorption failed: %s", e)
 
 
@@ -185,14 +186,25 @@ async def run_daemon_cli():
     path = Path.cwd()
 
     daemon = MejoraloDaemon(project, path)
+    _stop = asyncio.Event()
 
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, lambda: asyncio.create_task(daemon.stop()))
+        loop.add_signal_handler(
+            sig,
+            lambda: asyncio.ensure_future(
+                _shutdown(daemon, _stop)
+            ),
+        )
 
     await daemon.start()
-    while daemon._running:
-        await asyncio.sleep(1)
+    await _stop.wait()  # block until signal fires — zero CPU
+
+
+async def _shutdown(daemon: MejoraloDaemon, stop_event: asyncio.Event) -> None:
+    """Coordinated graceful shutdown for the daemon CLI."""
+    await daemon.stop()
+    stop_event.set()
 
 
 if __name__ == "__main__":

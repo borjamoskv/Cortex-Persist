@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -126,7 +127,7 @@ class SOC2EvidenceCollector:
             # Checkpoint count
             try:
                 cp_count = conn.execute("SELECT COUNT(*) FROM merkle_roots").fetchone()[0]
-            except Exception:
+            except (sqlite3.OperationalError, sqlite3.DatabaseError):
                 cp_count = 0
 
             # Last transaction
@@ -142,7 +143,7 @@ class SOC2EvidenceCollector:
                     if rows[i][2] != rows[i + 1][1]:
                         chain_ok = False
                         break
-            except Exception:
+            except (sqlite3.OperationalError, sqlite3.DatabaseError):
                 chain_ok = False
 
             return {
@@ -184,7 +185,7 @@ class SOC2EvidenceCollector:
                     "SELECT name, applied_at FROM schema_migrations ORDER BY applied_at"
                 ).fetchall()
                 migration_log = [{"name": m[0], "applied_at": m[1]} for m in migrations]
-            except Exception:
+            except (sqlite3.OperationalError, sqlite3.DatabaseError):
                 migration_log = []
 
             return {

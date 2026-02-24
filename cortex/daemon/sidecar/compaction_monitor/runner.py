@@ -59,7 +59,7 @@ async def compaction_job(ctx: Any = None) -> None:
 
 async def shutdown(sig, loop, monitor: MemoryPressureMonitor | None = None):
     """Cleanup tasks on termination signals."""
-    LOGGER.info(f"Received exit signal {sig.name}...")
+    LOGGER.info("Received exit signal %s...", sig.name)
     if monitor:
         await monitor.stop()
 
@@ -129,14 +129,21 @@ async def main() -> None:
             LOGGER.info("Worker execution cancelled.")
             raise
     else:
-        # Fallback: keep the loop alive since monitor runs as a background task
+        # Fallback: keep the loop alive until stop signal arrives.
+        # Using an Event is instantaneously responsive to SIGINT/SIGTERM,
+        # unlike sleep(3600) which would block shutdown for up to an hour.
+        _stop_event = asyncio.Event()
+
+        for s in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(s, _stop_event.set)
+
         try:
-            while True:
-                await asyncio.sleep(3600)
+            await _stop_event.wait()
         except asyncio.CancelledError:
             LOGGER.info("Main loop cancelled.")
-            await monitor.stop()
             raise
+        finally:
+            await monitor.stop()
 
 
 if __name__ == "__main__":

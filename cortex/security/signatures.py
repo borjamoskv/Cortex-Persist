@@ -11,6 +11,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import logging
+import os
 from typing import Any
 
 from cryptography.exceptions import InvalidSignature
@@ -33,6 +34,10 @@ __all__ = [
 ]
 
 logger = logging.getLogger("cortex.security.signatures")
+
+_KEYRING_SERVICE = "cortex_v6"
+_KEYRING_PRIVKEY = "ed25519_private_key"
+_KEYRING_PUBKEY = "ed25519_public_key"
 
 
 class SignatureVerificationError(Exception):
@@ -178,22 +183,35 @@ def get_default_signer() -> Ed25519Signer | None:
     """Get the default signer, loading from keyring if available.
 
     Returns None if no signing key is configured — signing is optional.
+    Falls back to CORTEX_ED25519_PRIVATE_KEY env var for CI environments.
     """
     global _default_signer
     if _default_signer is not None:
         return _default_signer
 
-    try:
-        import keyring
+    priv_b64: str | None = None
 
-        priv_b64 = keyring.get_password("cortex", "ed25519_private_key")
-        if priv_b64:
+    # Try OS keyring first (skip in testing)
+    if not os.environ.get("CORTEX_TESTING"):
+        try:
+            import keyring
+
+            priv_b64 = keyring.get_password(_KEYRING_SERVICE, _KEYRING_PRIVKEY)
+        except (ImportError, OSError, ValueError) as exc:
+            logger.debug("Keyring Ed25519 key not available: %s", exc)
+
+    # Env var fallback for CI/CD
+    if not priv_b64:
+        priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
+
+    if priv_b64:
+        try:
             priv_bytes = base64.b64decode(priv_b64)
             _default_signer = Ed25519Signer(private_key_bytes=priv_bytes)
-            logger.info("Ed25519 signer loaded from keyring")
+            logger.info("Ed25519 signer loaded")
             return _default_signer
-    except Exception as exc:
-        logger.debug("Keyring Ed25519 key not available: %s", exc)
+        except (ValueError, Exception) as exc:
+            logger.warning("Failed to load Ed25519 key: %s", exc)
 
     return None
 
@@ -211,13 +229,13 @@ def configure_signer(private_key_bytes: bytes) -> Ed25519Signer:
         import keyring
 
         priv_b64 = base64.b64encode(private_key_bytes).decode("ascii")
-        keyring.set_password("cortex", "ed25519_private_key", priv_b64)
+        keyring.set_password(_KEYRING_SERVICE, _KEYRING_PRIVKEY, priv_b64)
 
         pub_b64 = signer.public_key_b64
         if pub_b64:
-            keyring.set_password("cortex", "ed25519_public_key", pub_b64)
+            keyring.set_password(_KEYRING_SERVICE, _KEYRING_PUBKEY, pub_b64)
         logger.info("Ed25519 keypair stored in OS keyring")
-    except Exception as exc:
+    except (ImportError, OSError, ValueError) as exc:
         logger.warning("Could not persist key to keyring: %s", exc)
 
     return signer

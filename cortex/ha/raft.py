@@ -58,35 +58,59 @@ class RaftNode:
         self._running = False
         self._election_task: asyncio.Task | None = None
         self._heartbeat_task: asyncio.Task | None = None
+        self._heartbeat_event = asyncio.Event()  # signals arrival of heartbeat
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the Raft node lifecycle."""
         self._running = True
         self._election_task = asyncio.create_task(self._election_loop())
-        logger.info(f"RaftNode {self.node_id} started as FOLLOWER")
+        logger.info("RaftNode %s started as FOLLOWER", self.node_id)
 
-    async def stop(self):
-        """Stop the Raft node."""
+    async def stop(self) -> None:
+        """Stop the Raft node gracefully, awaiting task termination."""
         self._running = False
-        if self._election_task:
-            self._election_task.cancel()
-        if self._heartbeat_task:
-            self._heartbeat_task.cancel()
-        logger.info(f"RaftNode {self.node_id} stopped")
+        self._heartbeat_event.set()  # unblock election_loop if sleeping
+        for task in (self._election_task, self._heartbeat_task):
+            if task and not task.done():
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+        self._election_task = None
+        self._heartbeat_task = None
+        logger.info("RaftNode %s stopped", self.node_id)
 
     async def _election_loop(self):
-        """Monitor heartbeat and trigger elections."""
-        while self._running:
-            timeout = random.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
-            await asyncio.sleep(0.1)  # check interval
+        """Monitor heartbeat and trigger elections using event-driven sleep.
 
+        Instead of polling every 0.1s, we sleep exactly until the randomised
+        election timeout expires.  A heartbeat arrival wakes us early via
+        _heartbeat_event, resetting the wait so we never start a spurious
+        election while the leader is healthy.
+        """
+        while self._running:
             if self.role == NodeRole.LEADER:
+                # Leaders don't need election timeouts; yield and re-check.
+                await asyncio.sleep(self.HEARTBEAT_INTERVAL)
                 continue
 
-            elapsed = time.monotonic() - self.last_heartbeat
-            if elapsed > timeout:
+            timeout = random.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
+            self._heartbeat_event.clear()
+            try:
+                # Wake early if a heartbeat arrives; otherwise fire election.
+                await asyncio.wait_for(
+                    self._heartbeat_event.wait(),
+                    timeout=timeout,
+                )
+                # Heartbeat received before timeout — loop back and reset.
+            except asyncio.TimeoutError:
+                elapsed = time.monotonic() - self.last_heartbeat
                 logger.warning(
-                    f"Election timeout ({elapsed:.2f}s)! Starting election for term {self.current_term + 1}"
+                    "Election timeout (%.2fs > %.2fs). Starting election for term %d",
+                    elapsed,
+                    timeout,
+                    self.current_term + 1,
                 )
                 await self._start_election()
 
@@ -106,25 +130,24 @@ class RaftNode:
             await self._become_leader()
             return
 
-        # Stub: Request votes from peers (via HTTP/RPC)
-        # ...
+        # TODO(raft): RequestVote RPC to peers; await majority → _become_leader()
 
-        # If majority received:
-        # await self._become_leader()
-
-    async def _become_leader(self):
+    async def _become_leader(self) -> None:
         """Transition to Leader role."""
         if self.role == NodeRole.LEADER:
-            return
+            return  # idempotent guard
 
         self.role = NodeRole.LEADER
         self.leader_id = self.node_id
-        logger.info(f"Node {self.node_id} is now LEADER (Term {self.current_term})")
+        logger.info(
+            "Node %s is now LEADER (Term %d)",
+            self.node_id,
+            self.current_term,
+        )
 
         if self.state_callback:
             await self.state_callback(self.role)
 
-        # Start heartbeat loop
         self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
 
     async def _heartbeat_loop(self):
@@ -142,11 +165,12 @@ class RaftNode:
         """Update last_seen_at in cluster_nodes table."""
         try:
             await self.conn.execute(
-                "UPDATE cluster_nodes SET last_seen_at = datetime('now'), raft_role = ? WHERE node_id = ?",
+                "UPDATE cluster_nodes SET last_seen_at = datetime('now'), "
+                "raft_role = ? WHERE node_id = ?",
                 (self.role.value, self.node_id),
             )
             await self.conn.commit()
-        except (ConnectionError, OSError, RuntimeError) as e:
+        except (OSError, RuntimeError) as e:
             logger.error("Failed to update last_seen: %s", e)
 
     async def receive_heartbeat(self, leader_id: str, term: int):
@@ -156,4 +180,4 @@ class RaftNode:
             self.leader_id = leader_id
             self.role = NodeRole.FOLLOWER
             self.last_heartbeat = time.monotonic()
-            # logger.debug(f"Received heartbeat from {leader_id}")
+            self._heartbeat_event.set()  # wake election_loop immediately

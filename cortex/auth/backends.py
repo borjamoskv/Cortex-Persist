@@ -157,7 +157,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
                 (datetime.now(timezone.utc).isoformat(), key_id),
             )
             await conn.commit()
-        except Exception as e:
+        except (aiosqlite.Error, OSError) as e:
             logger.debug("Could not update last_used (async): %s", e)
         finally:
             await conn.close()

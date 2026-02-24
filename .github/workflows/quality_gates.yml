@@ -1,0 +1,95 @@
+# CORTEX Quality Gates — 7-seal CI enforcement
+# Leap 1: Makes guards mandatory via CI, not discipline
+
+name: "🔒 Quality Gates"
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gates:
+    name: "7 Seals"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install CORTEX + dev deps
+        run: |
+          pip install -e ".[dev]" --quiet
+
+      # ─── Gate 1: Lint ─────────────────────────────────────────
+      - name: "🔍 Gate 1: Lint (Ruff)"
+        run: ruff check cortex/ --output-format=github
+
+      # ─── Gate 2: Type Check ───────────────────────────────────
+      - name: "🔍 Gate 2: Type Check (mypy)"
+        run: |
+          pip install mypy --quiet
+          mypy cortex/ --ignore-missing-imports --no-error-summary || true
+        continue-on-error: true  # Warning-only for now
+
+      # ─── Gate 3: Security Scan ────────────────────────────────
+      - name: "🔍 Gate 3: Security Scan (bandit)"
+        run: |
+          pip install bandit --quiet
+          bandit -r cortex/ -c pyproject.toml --severity-level medium -f json -o bandit-report.json || true
+          bandit -r cortex/ -c pyproject.toml --severity-level high
+
+      # ─── Gate 4: Test Coverage ────────────────────────────────
+      - name: "🔍 Gate 4: Tests + Coverage"
+        run: |
+          python -m pytest tests/ \
+            --cov=cortex \
+            --cov-fail-under=70 \
+            --tb=short \
+            -x -q \
+            --timeout=60
+
+      # ─── Gate 5: Ledger Integrity ─────────────────────────────
+      - name: "🔍 Gate 5: Ledger Integrity"
+        run: |
+          python -c "
+          from cortex.engine import CortexEngine
+          import asyncio
+          async def check():
+              engine = CortexEngine(':memory:', auto_embed=False)
+              await engine.init_db()
+              print('✅ Ledger schema initialized successfully')
+              await engine.close()
+          asyncio.run(check())
+          "
+
+      # ─── Gate 6: Connection Guard ─────────────────────────────
+      - name: "🔍 Gate 6: Connection Guard"
+        run: python -m cortex.database.connection_guard --root cortex
+
+      # ─── Gate 7: Prompt Size Check ────────────────────────────
+      - name: "🔍 Gate 7: Prompt Size (warning only)"
+        run: |
+          if [ -f "SYSTEM_PROMPT.md" ]; then
+            TOKENS=$(wc -w < SYSTEM_PROMPT.md)
+            echo "System prompt: $TOKENS words"
+            if [ "$TOKENS" -gt 500 ]; then
+              echo "⚠️  WARNING: System prompt is $TOKENS words (target: <200 tokens)"
+            else
+              echo "✅ System prompt is within target"
+            fi
+          else
+            echo "ℹ️  No SYSTEM_PROMPT.md found (expected in Leap 2)"
+          fi
+        continue-on-error: true
