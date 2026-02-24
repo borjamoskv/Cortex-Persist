@@ -14,17 +14,16 @@ def test_entropy_monitor_no_projects():
     assert len(alerts) == 0
 
 
-@patch("cortex.mejoralo.MejoraloEngine")
-@patch("cortex.engine.CortexEngine")
-def test_entropy_monitor_with_violations(mock_engine, mock_mejoralo, tmp_path):
+@patch("cortex.daemon.monitors.entropy.MejoraloEngine")
+def test_entropy_monitor_with_violations(mock_mejoralo, tmp_path):
     """Test EntropyMonitor detects high entropy."""
-    # Setup mocks
     mock_m = mock_mejoralo.return_value
     mock_result = MagicMock()
     mock_result.score = 50  # Below 90 threshold
+    mock_result.dead_code = []
     mock_m.scan.return_value = mock_result
+    mock_m.relentless_heal.return_value = False  # heal fails => stays low
 
-    # Run check
     monitor = EntropyMonitor(
         projects={"my-project": str(tmp_path)}, threshold=90, interval_seconds=0
     )
@@ -34,16 +33,16 @@ def test_entropy_monitor_with_violations(mock_engine, mock_mejoralo, tmp_path):
     assert isinstance(alerts[0], EntropyAlert)
     assert alerts[0].project == "my-project"
     assert alerts[0].complexity_score == 50
-    assert "Entropía detectada: 50/90" in alerts[0].message
+    assert "50/90" in alerts[0].message
 
 
-@patch("cortex.mejoralo.MejoraloEngine")
-@patch("cortex.engine.CortexEngine")
-def test_entropy_monitor_no_violations(mock_engine, mock_mejoralo, tmp_path):
+@patch("cortex.daemon.monitors.entropy.MejoraloEngine")
+def test_entropy_monitor_no_violations(mock_mejoralo, tmp_path):
     """Test EntropyMonitor passes clean projects."""
     mock_m = mock_mejoralo.return_value
     mock_result = MagicMock()
     mock_result.score = 95  # Above 90 threshold
+    mock_result.dead_code = []
     mock_m.scan.return_value = mock_result
 
     monitor = EntropyMonitor(

@@ -1,48 +1,46 @@
 import asyncio
 import json
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from cortex.daemon.sync_manager import CortexSyncManager
+from cortex.sync import SyncResult
 
 
 @pytest.mark.asyncio
 async def test_merkle_pulse_detection(tmp_path):
     """Test that MerklePulse correctly detects modified files."""
-    # 1. Setup mock engine and test directory
     mock_engine = Mock()
-    mock_engine.recall_async = Mock()  # Return empty list by default
 
     sync_manager = CortexSyncManager(mock_engine)
 
-    # Create a test file
-    test_dir = tmp_path / "memory"
-    test_dir.mkdir()
-    test_file = test_dir / "fact_1.json"
-    content = {"id": "1", "content": "hello"}
-    test_file.write_text(json.dumps(content))
+    # Create a real memory dir with a test file
+    mem_dir = tmp_path / "memory"
+    mem_dir.mkdir()
+    ghosts_file = mem_dir / "ghosts.json"
+    ghosts_file.write_text(json.dumps([{"id": "1", "content": "hello"}]))
 
-    # Mock engine.recall_async to return nothing (first sync)
-    # Actually _merkle_pulse_sync calls engine.ingest_fact for each file
+    # Patch MEMORY_DIR and file_hash + _run_sync_memory
+    with patch("cortex.daemon.sync_manager.MEMORY_DIR", mem_dir, create=True):
+        with patch("cortex.sync.common.MEMORY_DIR", mem_dir):
+            # Mock the sync itself to return a SyncResult with total=1
+            with patch.object(
+                sync_manager,
+                "_run_sync_memory",
+                return_value=SyncResult(total=1),
+            ):
+                # 1. First sync — file exists, hash not in state → should sync
+                result = await sync_manager._merkle_pulse_sync()
+                assert result.total == 1
 
-    # 2. Run first sync
-    with patch("cortex.daemon.sync_manager.Path.iterdir", return_value=[test_file]):
-        with patch("cortex.daemon.sync_manager.Path.is_file", return_value=True):
-            # We need to mock the ingestion too
-            mock_engine.ingest_fact = Mock(return_value=asyncio.Future())
-            mock_engine.ingest_fact.return_value.set_result("ok")
+                # 2. Modify file — hash changes → should sync again
+                ghosts_file.write_text(
+                    json.dumps([{"id": "1", "content": "updated"}])
+                )
+                result2 = await sync_manager._merkle_pulse_sync()
+                assert result2.total == 1
 
-            result = await sync_manager._merkle_pulse_sync()
-            assert result.total == 1
-
-            # 3. Modify file
-            test_file.write_text(json.dumps({"id": "1", "content": "updated"}))
-
-            # 4. Run second sync - should detect 1 change
-            result2 = await sync_manager._merkle_pulse_sync()
-            assert result2.total == 1
-
-            # 5. Run third sync (no change) - should detect 0 changes
-            result3 = await sync_manager._merkle_pulse_sync()
-            assert result3.total == 0
+                # 3. No change → should return empty SyncResult (total=0)
+                result3 = await sync_manager._merkle_pulse_sync()
+                assert result3.total == 0

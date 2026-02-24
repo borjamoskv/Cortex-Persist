@@ -83,12 +83,12 @@ class TestStoreValidation:
 
     @pytest.mark.asyncio
     async def test_store_empty_content(self, engine):
-        with pytest.raises(ValueError, match="content cannot be empty"):
+        with pytest.raises(ValueError, match="content too short"):
             await engine.store("test-project", "")
 
     @pytest.mark.asyncio
     async def test_store_whitespace_content(self, engine):
-        with pytest.raises(ValueError, match="content cannot be empty"):
+        with pytest.raises(ValueError, match="content too short"):
             await engine.store("test-project", "   ")
 
 
@@ -97,12 +97,12 @@ class TestSearchValidation:
 
     @pytest.mark.asyncio
     async def test_search_empty_query(self, engine):
-        with pytest.raises(ValueError, match="query cannot be empty"):
+        with pytest.raises(ValueError, match="text cannot be empty"):
             await engine.search("")
 
     @pytest.mark.asyncio
     async def test_search_whitespace_query(self, engine):
-        with pytest.raises(ValueError, match="query cannot be empty"):
+        with pytest.raises(ValueError, match="text cannot be empty"):
             await engine.search("   ")
 
 
