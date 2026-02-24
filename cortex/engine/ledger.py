@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
 
 from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
-from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
+from cortex import config
 from cortex.consensus.merkle import MerkleTree
 
 __all__ = ["ImmutableLedger"]
@@ -37,7 +37,7 @@ class ImmutableLedger:
     periods (swarm bursts) and returns to normal during calm periods.
     """
 
-    CHECKPOINT_BATCH_SIZE = CHECKPOINT_MAX  # Legacy compat (class attribute)
+    CHECKPOINT_BATCH_SIZE = config.CHECKPOINT_MAX  # Legacy compat (class attribute)
     WRITE_RATE_WINDOW = 60  # seconds
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
@@ -57,8 +57,8 @@ class ImmutableLedger:
         recent = sum(1 for t in self._write_timestamps if t > cutoff)
         rate = recent / self.WRITE_RATE_WINDOW
         if rate > self.HIGH_WRITE_THRESHOLD:
-            return CHECKPOINT_MIN
-        return CHECKPOINT_MAX
+            return config.CHECKPOINT_MIN
+        return config.CHECKPOINT_MAX
 
     async def compute_merkle_root_async(
         self, start_id: int, end_id: int, conn=None

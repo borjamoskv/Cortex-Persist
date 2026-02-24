@@ -110,79 +110,78 @@ async def deep_health_check(
     overall_healthy = True
     start = time.monotonic()
 
+    def _record(name: str, status: str, healthy: bool, **details):
+        nonlocal overall_healthy
+        overall_healthy = overall_healthy and healthy
+        checks[name] = {"status": status, **details}
+
     # 1. Database connectivity
     try:
-        conn = engine._get_conn()
-        conn.execute("SELECT 1").fetchone()
-        checks["database"] = {"status": "ok", "detail": "SELECT 1 succeeded"}
+        engine._get_conn().execute("SELECT 1").fetchone()
+        _record("database", "ok", True, detail="SELECT 1 succeeded")
     except Exception as e:
-        checks["database"] = {"status": "degraded", "detail": str(e)}
-        overall_healthy = False
+        _record("database", "degraded", False, detail=str(e))
 
     # 2. Schema version alignment
     try:
-        conn = engine._get_conn()
-        row = conn.execute(
+        row = engine._get_conn().execute(
             "SELECT value FROM cortex_meta WHERE key = 'schema_version'"
         ).fetchone()
         db_version = row[0] if row else "unknown"
         if db_version == SCHEMA_VERSION:
-            checks["schema"] = {
-                "status": "ok",
-                "version": db_version,
-            }
+            _record("schema", "ok", True, version=db_version)
         else:
-            checks["schema"] = {
-                "status": "drift",
-                "expected": SCHEMA_VERSION,
-                "actual": db_version,
-            }
-            overall_healthy = False
+            _record("schema", "drift", False, expected=SCHEMA_VERSION, actual=db_version)
     except Exception as e:
-        checks["schema"] = {"status": "error", "detail": str(e)}
-        overall_healthy = False
+        _record("schema", "error", False, detail=str(e))
 
     # 3. Ledger integrity (pending uncheckpointed transactions)
     try:
         conn = engine._get_conn()
         last_cp = conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots").fetchone()
-        last_tx = last_cp[0] or 0 if last_cp else 0
+        last_tx = last_cp[0] if last_cp else 0
         pending_row = conn.execute(
             "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
         ).fetchone()
         pending = pending_row[0] if pending_row else 0
-        checks["ledger"] = {
-            "status": "ok" if pending < 1000 else "warning",
-            "pending_uncheckpointed": pending,
-            "last_checkpoint_tx": last_tx,
-        }
-        if pending >= 1000:
-            overall_healthy = False
+
+        healthy = pending < 1000
+        _record(
+            "ledger",
+            "ok" if healthy else "warning",
+            healthy,
+            pending_uncheckpointed=pending,
+            last_checkpoint_tx=last_tx,
+        )
     except Exception as e:
-        checks["ledger"] = {"status": "error", "detail": str(e)}
+        _record("ledger", "error", False, detail=str(e))
 
     # 4. FTS5 search index
     try:
-        conn = engine._get_conn()
-        conn.execute("SELECT COUNT(*) FROM episodes_fts").fetchone()
-        checks["search_fts"] = {"status": "ok", "detail": "episodes_fts accessible"}
+        engine._get_conn().execute("SELECT COUNT(*) FROM episodes_fts").fetchone()
+        _record("search_fts", "ok", True, detail="episodes_fts accessible")
     except Exception as e:
-        checks["search_fts"] = {"status": "degraded", "detail": str(e)}
+        _record("search_fts", "degraded", False, detail=str(e))
 
     # 5. Pool status (if async pool is available)
     try:
         pool = request.app.state.pool
-        checks["pool"] = {
-            "status": "ok",
-            "active_connections": pool._active_count,
-            "max_connections": pool.max_connections,
-            "utilization": f"{(pool._active_count / pool.max_connections) * 100:.0f}%",
-        }
-    except Exception:
-        checks["pool"] = {"status": "unavailable", "detail": "pool not in app state"}
+        max_c = getattr(pool, "max_connections", 0)
+        pct = (pool._active_count / max_c) * 100 if max_c else 0
+        _record(
+            "pool",
+            "ok",
+            True,
+            active_connections=getattr(pool, "_active_count", 0),
+            max_connections=max_c,
+            utilization=f"{pct:.0f}%",
+        )
+    except AttributeError:
+        _record("pool", "unavailable", True, detail="pool not in app state")
+    except Exception as e:
+        _record("pool", "error", False, detail=str(e))
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
-
 
     result = {
         "status": "healthy" if overall_healthy else "degraded",
@@ -194,7 +193,6 @@ async def deep_health_check(
 
     if not overall_healthy:
         from fastapi.responses import JSONResponse
-
         return JSONResponse(content=result, status_code=503)
 
     return result

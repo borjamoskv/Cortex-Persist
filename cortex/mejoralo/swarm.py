@@ -146,6 +146,7 @@ class MejoraloSwarm:
         """Dynamically build the specialist squad with zero-nesting logic."""
         squad_size = {1: 3, 2: 5}.get(self.level, 6)
         fs_lower = findings_str.lower()
+        findings_count = findings_str.count("\n-") + (1 if findings_str.startswith("-") else 0)
         
         mapping = {
             "SecurityWarden": ["securit", "inject", "leak", "auth"],
@@ -158,6 +159,14 @@ class MejoraloSwarm:
         dynamic = [s for s, kw in mapping.items() if any(k in fs_lower for k in kw)]
         active = (["ArchitectPrime", "CodeNinja"] + dynamic)[:squad_size]
         
+        # Disentimiento Obligatorio: Inject Devil's Advocate for complex tasks
+        if findings_count > 3 or self.level >= 2:
+            if "DevilsAdvocate" not in active:
+                if len(active) == squad_size:
+                    active[-1] = "DevilsAdvocate"
+                else:
+                    active.append("DevilsAdvocate")
+
         # Filling gaps if needed
         needed = squad_size - len(active)
         if needed > 0:
@@ -170,9 +179,14 @@ class MejoraloSwarm:
         """Construct the sovereign swarm system prompt."""
         items = [f"- {name}: {SPECIALISTS_PROMPTS[name]}" for name in specialists]
         info = "\n".join(items)
+        consensus_rule = (
+            "You must reach a Byzantine Consensus. If DevilsAdvocate is present, you MUST overcome "
+            "their veto with irrefutable logic before returning the final implementation."
+        ) if "DevilsAdvocate" in specialists else "Synthesize ALL specialist logic."
+        
         return (
             f"You are the SOVEREIGN SWARM (Level {self.level}/3). Iteration: {iteration}.\n"
-            "Goal: Achieve 130/100 quality score. Synthesize ALL specialist logic.\n"
+            f"Goal: Achieve 130/100 quality score. {consensus_rule}\n"
             f"Squad:\n{info}\n\n"
             "Return ONLY high-density Python code inside ```python blocks. No fluff."
         )

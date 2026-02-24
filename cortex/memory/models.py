@@ -73,6 +73,7 @@ class MemoryEvent(BaseModel):
     content: str = Field(description="Raw content of the interaction.")
     token_count: int = Field(ge=0, description="Token count estimate.")
     session_id: str = Field(description="Session identifier linking related events.")
+    tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
     metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Optional structured metadata (tool calls, emotions, tags).",
@@ -99,6 +100,7 @@ class EpisodicSnapshot(BaseModel):
         description="Event IDs from L3 compressed into this episode.",
     )
     session_id: str = Field(default="", description="Originating session.")
+    tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp of snapshot creation.",

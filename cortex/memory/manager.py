@@ -122,6 +122,7 @@ class CortexMemoryManager:
             role=role,
             content=content,
             session_id=session_id,
+            tenant_id=tenant_id,
             token_count=token_count,
             metadata=_meta,
         )
@@ -203,7 +204,7 @@ class CortexMemoryManager:
                 retrieved_facts = await self._l2.recall(
                     query=query,
                     limit=max_episodes,
-                    project=project_id,
+                    tenant_id=tenant_id,
                 )
             except (OSError, RuntimeError, ValueError) as e:
                 logger.warning("L2 recall fallback failed: %s", e)
