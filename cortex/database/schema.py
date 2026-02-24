@@ -11,6 +11,7 @@ __all__ = [
     "CREATE_CONTEXT_SNAPSHOTS",
     "CREATE_CONTEXT_SNAPSHOTS_INDEX",
     "CREATE_EMBEDDINGS",
+    "CREATE_SPECULAR_EMBEDDINGS",
     "CREATE_EPISODES",
     "CREATE_EPISODES_FTS",
     "CREATE_EPISODES_INDEXES",
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS facts (
     source      TEXT,
     meta        TEXT DEFAULT '{}',
     consensus_score REAL DEFAULT 1.0,
+    hash        TEXT,
     signature   TEXT,
     signer_pubkey TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
@@ -79,6 +81,14 @@ CREATE_EMBEDDINGS = """
 CREATE VIRTUAL TABLE IF NOT EXISTS fact_embeddings USING vec0(
     fact_id INTEGER PRIMARY KEY,
     embedding FLOAT[384]
+);
+"""
+
+# ─── Specular Memory (HDC 8k) ────────────────────────────────────────
+CREATE_SPECULAR_EMBEDDINGS = """
+CREATE VIRTUAL TABLE IF NOT EXISTS specular_embeddings USING vec0(
+    fact_id INTEGER PRIMARY KEY,
+    embedding FLOAT[8000]
 );
 """
 
@@ -401,6 +411,7 @@ ALL_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
     CREATE_EMBEDDINGS,
+    CREATE_SPECULAR_EMBEDDINGS,
     CREATE_SESSIONS,
     CREATE_TRANSACTIONS,
     CREATE_TRANSACTIONS_INDEX,

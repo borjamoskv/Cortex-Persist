@@ -27,6 +27,7 @@ import uuid
 from typing import Any
 
 from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import CortexFactModel, MemoryEntry, MemoryEvent
 from cortex.memory.working import WorkingMemoryL1
@@ -63,6 +64,8 @@ class CortexMemoryManager:
         "_l1",
         "_l2",
         "_l3",
+        "_hdc",
+        "_hdc_encoder",
         "_router",
         "_background_tasks",
         "_max_bg_tasks",
@@ -77,6 +80,8 @@ class CortexMemoryManager:
         l2: VectorStoreL2,
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
+        hdc_l2: HDCVectorStoreL2 | None = None,
+        hdc_encoder: HDCEncoder | None = None,
         router: Any | None = None,
         max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,
     ) -> None:
@@ -84,6 +89,8 @@ class CortexMemoryManager:
         self._l2 = l2
         self._l3 = l3
         self._encoder = encoder
+        self._hdc = hdc_l2
+        self._hdc_encoder = hdc_encoder
         self._router = router
         self._background_tasks: set[asyncio.Task[None]] = set()
         self._max_bg_tasks = max_bg_tasks
@@ -154,7 +161,40 @@ class CortexMemoryManager:
                 self._background_tasks.add(task)
                 task.add_done_callback(self._background_tasks.discard)
 
-        return event
+    async def store(
+        self,
+        tenant_id: str,
+        project_id: str,
+        content: str,
+        fact_type: str = "general",
+        metadata: dict[str, Any] | None = None,
+    ) -> str:
+        """Directly persist a high-value fact to L2 memory layers.
+
+        Bypasses the L1 working memory buffer. Useful for errors,
+        decisions, and formal proof counterexamples.
+        """
+        fact_id = uuid.uuid4().hex
+        vector = await self._encoder.encode(content)
+        fact = CortexFactModel(
+            id=fact_id,
+            tenant_id=tenant_id,
+            project_id=project_id,
+            content=content,
+            embedding=vector,
+            timestamp=time.time(),
+            metadata=metadata or {},
+        )
+        
+        # Store in Sovereign L2
+        if self._l2:
+            await self._l2.memorize(fact)
+            
+        # Store in HDC L2 (Vector Alpha/Gamma)
+        if self._hdc:
+            await self._hdc.memorize(fact, fact_type=fact_type)
+            
+        return fact_id
 
     async def assemble_context(
         self,
@@ -164,67 +204,125 @@ class CortexMemoryManager:
         max_episodes: int = 3,
         fuse_context: bool = False,
     ) -> dict[str, Any]:
-        """Build an optimized context for LLM injection.
+        """Build an optimized context for LLM injection."""
+        # 1. Working Memory (L1)
+        working_set = self._l1.get_context()
 
-        Combines L1 (recent working memory) with L2 (relevant
-        past episodes retrieved via semantic search).
+        # 2. Episodic Retrieval (L2 + HDC)
+        episodic_facts = await self._retrieve_episodic_context(
+            tenant_id, project_id, query, max_episodes
+        )
 
-        Args:
-            tenant_id: Enforced zero-trust separation.
-            project_id: Enforced zero-trust separation.
-            query: Optional search query for L2 retrieval.
-            max_episodes: Max past episodes to retrieve.
-            fuse_context: Whether to use Semantic Fusion to distill results.
-
-        Returns:
-            Dict with 'working_memory' and 'episodic_context' (list or string).
-        """
+        # 3. Context Construction
         context: dict[str, Any] = {
-            "working_memory": self._l1.get_context(),
-            "episodic_context": [],
+            "working_memory": working_set,
+            "episodic_context": episodic_facts,
         }
 
-        retrieved_facts: list[dict[str, Any]] = []
+        # 4. Optional Semantic Fusion
+        if fuse_context and episodic_facts:
+            context["episodic_context"] = await self._fusion.fuse_context(
+                user_prompt=query or "",
+                retrieved_facts=episodic_facts
+            )
 
-        if query and hasattr(self._l2, "recall_secure"):
-            try:
-                episodes = await self._l2.recall_secure(
+        return context
+
+    async def _retrieve_episodic_context(
+        self, tenant_id: str, project_id: str, query: str | None, max_episodes: int
+    ) -> list[dict[str, Any]]:
+        """Retrieve and fuse facts from all available L2 layers."""
+        if not query:
+            return []
+
+        dense_results: list[CortexFactModel] = []
+        hdc_results: list[CortexFactModel] = []
+
+        # HDC (Vector Alpha + Vector Gamma Inhibition)
+        if self._hdc:
+            hdc_results = await self._fetch_hdc_results(tenant_id, project_id, query, max_episodes)
+
+        # Dense (Legacy Fallback)
+        if not hdc_results and self._l2:
+            dense_results = await self._fetch_dense_results(tenant_id, project_id, query, max_episodes)
+
+        # Fusion
+        if hdc_results and dense_results:
+            return self._apply_rrf(dense_results, hdc_results, limit=max_episodes)
+        elif hdc_results:
+            return [self._fact_to_dict(f) for f in hdc_results[:max_episodes]]
+        else:
+            return [self._fact_to_dict(f) for f in dense_results[:max_episodes]]
+
+    async def _fetch_hdc_results(
+        self, tenant_id: str, project_id: str, query: str, max_episodes: int
+    ) -> list[CortexFactModel]:
+        try:
+            toxic_ids = await self._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)
+            return await self._hdc.recall_secure(
+                tenant_id=tenant_id,
+                project_id=project_id,
+                query=query,
+                limit=max_episodes * 2,
+                inhibit_ids=toxic_ids,
+            )
+        except (OSError, RuntimeError, ValueError) as e:
+            logger.warning("HDC recall failed: %s", e)
+            return []
+
+    async def _fetch_dense_results(
+        self, tenant_id: str, project_id: str, query: str, max_episodes: int
+    ) -> list[CortexFactModel]:
+        try:
+            if hasattr(self._l2, "recall_secure"):
+                return await self._l2.recall_secure(
                     tenant_id=tenant_id,
                     project_id=project_id,
                     query=query,
                     limit=max_episodes,
                 )
-                retrieved_facts = [
-                    {
-                        "id": ep.id,
-                        "content": ep.content,
-                        "timestamp": ep.timestamp,
-                        "score": getattr(ep, "_recall_score", 0.0),
-                        "metadata": ep.metadata,
-                    }
-                    for ep in episodes
-                ]
-            except (OSError, RuntimeError, ValueError) as e:
-                logger.warning("L2 secure recall failed: %s", e)
-        elif query:
-            try:
-                retrieved_facts = await self._l2.recall(
-                    query=query,
-                    limit=max_episodes,
-                    tenant_id=tenant_id,
-                )
-            except (OSError, RuntimeError, ValueError) as e:
-                logger.warning("L2 recall fallback failed: %s", e)
-
-        # Apply Semantic Fusion if requested and available
-        if fuse_context and retrieved_facts:
-            context["episodic_context"] = await self._fusion.fuse_context(
-                user_prompt=query or "", retrieved_facts=retrieved_facts
+            return await self._l2.recall(
+                query=query, limit=max_episodes, tenant_id=tenant_id
             )
-        else:
-            context["episodic_context"] = retrieved_facts
+        except (OSError, RuntimeError, ValueError) as e:
+            logger.warning("Dense L2 recall failed: %s", e)
+            return []
 
-        return context
+
+    def _apply_rrf(
+        self,
+        dense: list[CortexFactModel],
+        hdc: list[CortexFactModel],
+        limit: int = 3,
+        k: int = 60,
+    ) -> list[dict[str, Any]]:
+        """Apply Reciprocal Rank Fusion to merge dense and HDC results."""
+        scores: dict[str, float] = {}
+        facts: dict[str, CortexFactModel] = {}
+
+        for rank, fact in enumerate(dense):
+            scores[fact.id] = scores.get(fact.id, 0.0) + 1.0 / (k + rank + 1)
+            facts[fact.id] = fact
+
+        for rank, fact in enumerate(hdc):
+            scores[fact.id] = scores.get(fact.id, 0.0) + 1.0 / (k + rank + 1)
+            facts[fact.id] = fact
+
+        # Sort by RRF score
+        sorted_ids = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
+
+        return [self._fact_to_dict(facts[fid], rrf_score=scores[fid]) for fid in sorted_ids[:limit]]
+
+    @staticmethod
+    def _fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
+        """Convert a fact model to a context-ready dict."""
+        return {
+            "id": fact.id,
+            "content": fact.content,
+            "timestamp": fact.timestamp,
+            "score": rrf_score if rrf_score is not None else getattr(fact, "_recall_score", 0.0),
+            "metadata": fact.metadata,
+        }
 
     # ─── Background Compression ───────────────────────────────────
 
@@ -260,6 +358,10 @@ class CortexMemoryManager:
                     },
                 )
                 await self._l2.memorize(fact)
+
+                # Vector Alpha: Dual-write to HDC if enabled
+                if self._hdc:
+                    await self._hdc.memorize(fact)
             else:
                 # v5 Strategy: Legacy MemoryEntry (Qdrant)
                 entry = MemoryEntry(
@@ -273,15 +375,15 @@ class CortexMemoryManager:
                         "linked_events": [e.event_id for e in events],
                     },
                 )
-                # Note: Legacy store might not support tenant_id yet
                 await self._l2.memorize(entry)
 
             logger.debug(
-                "Compressed %d events into L2 episode (session=%s, mode=%s, type=%s)",
+                "Compressed %d events into L2 episode (session=%s, mode=%s, type=%s, hdc=%s)",
                 len(events),
                 session_id,
                 "llm" if self._router else "raw",
                 "sovereign" if is_sovereign else "legacy",
+                "active" if self._hdc else "inactive",
             )
         except (OSError, RuntimeError, ValueError, TypeError) as e:
             # Background task — never crash the main loop
@@ -319,6 +421,28 @@ class CortexMemoryManager:
             logger.warning("LLM compression error: %s — falling back to raw", e)
 
         return raw_text
+
+    def get_context_vector(self) -> Any | None:
+        """Return the current context as a bundled hypervector (Vector Alpha)."""
+        if not self._hdc_encoder:
+            return None
+
+        events = list(self._l1._buffer)
+        if not events:
+            return None
+
+        # Bundle recent interaction hypervectors
+        hvs = [self._hdc_encoder.encode_text(e.content) for e in events]
+
+        from cortex.memory.hdc.algebra import bundle
+
+        try:
+            if len(hvs) == 1:
+                return hvs[0]
+            return bundle(*hvs)
+        except Exception as e:
+            logger.warning("Context vector bundling failed: %s", e)
+            return None
 
     @staticmethod
     def _raw_concat(events: list[MemoryEvent]) -> str:

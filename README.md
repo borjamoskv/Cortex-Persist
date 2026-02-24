@@ -7,7 +7,7 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-v7.0%20alpha-orange.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
@@ -42,8 +42,10 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ```
 Your Memory Layer (Mem0 / Zep / Letta / Custom)
         ↓
-   CORTEX Trust Engine v8
-        ├── SHA-256 hash-chained ledger
+   CORTEX Trust Engine v7
+        ├── 🧬 Biological Core (Autopoiesis/Endocrine)
+        ├── 🛡️ Zero-Trust Guards (Connection/Storage)
+        ├── 🔗 SHA-256 hash-chained ledger
         ├── Merkle tree checkpoints
         ├── Reputation-weighted WBFT consensus
         ├── Privacy Shield (11-pattern secret detection)
@@ -62,6 +64,7 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
 | 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant verification | Art. 14 |
 | 📊 **Compliance Report** | One-command regulatory readiness snapshot | Art. 12 |
 | 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger | — |
+| 🧬 **Biological Core** | Autopoiesis + Endocrine + Circadian Cycles | — |
 | 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret patterns | — |
 | 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. | — |
 | ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (v6) | — |
@@ -146,6 +149,7 @@ block-beta
     L1["L1: Redis / Working Memory"]
     L2["L2: Qdrant / sqlite-vec (384-dim)"]
     L3["L3: AlloyDB / SQLite (hash-chained)"]
+    Bio["🧬 Biological: Autopoietic Core"]
   end
 
   block:TRUST["⛓️ TRUST LAYER"]

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.sync")
 
 
-def _writeback_if_changed(
+async def _writeback_if_changed(
     engine: CortexEngine,
     fact_type: str,
     wb_fn,
@@ -38,9 +38,9 @@ def _writeback_if_changed(
     """Hash-check and writeback a single fact type."""
     key = hash_key or fact_type
     try:
-        computed = hash_value or db_content_hash(engine, fact_type)
+        computed = hash_value or await db_content_hash(engine, fact_type)
         if computed != wb_hashes.get(key):
-            wb_fn(engine, result)
+            await wb_fn(engine, result)
             wb_hashes[key] = computed
         else:
             result.files_skipped += 1
@@ -49,32 +49,24 @@ def _writeback_if_changed(
         logger.exception("Write-back %s failed", key)
 
 
-def export_to_json(engine: CortexEngine) -> WritebackResult:
-    """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth).
-
-    Reconstruye los archivos JSON originales a partir del estado actual
-    de la base de datos CORTEX. Usa detección de cambios por SHA-256
-    y escritura atómica para prevenir corrupción.
-
-    Returns:
-        WritebackResult con estadísticas.
-    """
+async def export_to_json(engine: CortexEngine) -> WritebackResult:
+    """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
     result = WritebackResult()
     state = load_sync_state()
     wb_hashes = state.get("writeback_hashes", {})
 
     MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 
-    _writeback_if_changed(engine, "ghost", _writeback_ghosts, result, wb_hashes)
+    await _writeback_if_changed(engine, "ghost", _writeback_ghosts, result, wb_hashes)
 
     # System uses combined hash of knowledge + decisions
     try:
-        k_hash = db_content_hash(engine, "knowledge")
-        d_hash = db_content_hash(engine, "decision")
+        k_hash = await db_content_hash(engine, "knowledge")
+        d_hash = await db_content_hash(engine, "decision")
         combined = hashlib.sha256(f"{k_hash}:{d_hash}".encode()).hexdigest()
     except (sqlite3.Error, OSError):
         combined = None
-    _writeback_if_changed(
+    await _writeback_if_changed(
         engine,
         "knowledge",
         _writeback_system,
@@ -84,8 +76,8 @@ def export_to_json(engine: CortexEngine) -> WritebackResult:
         hash_value=combined,
     )
 
-    _writeback_if_changed(engine, "error", _writeback_mistakes, result, wb_hashes)
-    _writeback_if_changed(engine, "bridge", _writeback_bridges, result, wb_hashes)
+    await _writeback_if_changed(engine, "error", _writeback_mistakes, result, wb_hashes)
+    await _writeback_if_changed(engine, "bridge", _writeback_bridges, result, wb_hashes)
 
     # Guardar hashes para la próxima ejecución
     state["writeback_hashes"] = wb_hashes
@@ -104,14 +96,15 @@ def export_to_json(engine: CortexEngine) -> WritebackResult:
     return result
 
 
-def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
+async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye ghosts.json desde facts tipo 'ghost'."""
-    conn = engine._get_sync_conn()
-    rows = conn.execute(
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
         "SELECT project, meta FROM facts "
         "WHERE fact_type = 'ghost' AND valid_until IS NULL "
         "ORDER BY project"
-    ).fetchall()
+    )
+    rows = await cursor.fetchall()
 
     ghosts = {}
     for row in rows:
@@ -127,9 +120,9 @@ def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
     logger.info("Write-back ghosts: %d proyectos", len(ghosts))
 
 
-def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
+async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye system.json desde facts tipo 'knowledge' y 'decision'."""
-    conn = engine._get_sync_conn()
+    conn = await engine.get_conn()
 
     # Leer system.json existente para preservar estructura
     system_path = MEMORY_DIR / "system.json"
@@ -142,11 +135,12 @@ def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
         system_data = {}
 
     # Knowledge global — reconstruir desde DB
-    k_rows = conn.execute(
+    cursor = await conn.execute(
         "SELECT content, tags, confidence, valid_from, meta FROM facts "
         "WHERE project = '__system__' AND fact_type = 'knowledge' "
         "AND valid_until IS NULL ORDER BY id"
-    ).fetchall()
+    )
+    k_rows = await cursor.fetchall()
 
     knowledge_list = []
     for row in k_rows:
@@ -162,11 +156,12 @@ def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
         )
 
     # Decisions global — reconstruir desde DB
-    d_rows = conn.execute(
+    cursor = await conn.execute(
         "SELECT content, meta FROM facts "
         "WHERE project = '__system__' AND fact_type = 'decision' "
         "AND valid_until IS NULL ORDER BY id"
-    ).fetchall()
+    )
+    d_rows = await cursor.fetchall()
 
     decisions_list = []
     for row in d_rows:
@@ -194,13 +189,14 @@ def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
     )
 
 
-def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
+async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye mistakes.jsonl desde facts tipo 'error'."""
-    conn = engine._get_sync_conn()
-    rows = conn.execute(
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
         "SELECT project, content, tags, valid_from, meta FROM facts "
         "WHERE fact_type = 'error' AND valid_until IS NULL ORDER BY id"
-    ).fetchall()
+    )
+    rows = await cursor.fetchall()
 
     lines = []
     for row in rows:
@@ -224,13 +220,14 @@ def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
     logger.info("Write-back mistakes: %d errores", len(lines))
 
 
-def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> None:
+async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye bridges.jsonl desde facts tipo 'bridge'."""
-    conn = engine._get_sync_conn()
-    rows = conn.execute(
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
         "SELECT content, tags, valid_from, meta FROM facts "
         "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
-    ).fetchall()
+    )
+    rows = await cursor.fetchall()
 
     lines = []
     for row in rows:
