@@ -22,7 +22,7 @@ _STRATEGY_MAP = {s.value: s for s in CompactionStrategy}
 def _display_compaction_result(project: str, result, dry_run: bool) -> None:
     if result.reduction == 0 and not result.details:
         console.print(
-            f"[green]✓[/] No compaction needed for [bold]{project}[/]. "
+            f"[[noir.cyber]✓[/]] No compaction needed for [[noir.yinmn]{project}[/]]. "
             f"Memory is clean ({result.original_count} facts)."
         )
         return
@@ -61,17 +61,18 @@ def _display_compaction_result(project: str, result, dry_run: bool) -> None:
     help="Strategies to apply (default: all). Can be specified multiple times.",
 )
 @click.option("--dry-run", is_flag=True, help="Preview without executing.")
+@click.option("--background", "-b", is_flag=True, help="Dispatch Void-Omega Compaction async in the background.")
 @click.option(
     "--threshold",
     "-t",
-    default=0.85,
+    default=0.70,
     type=float,
-    help="Similarity threshold for dedup (0.0–1.0).",
+    help="Similarity threshold for dedup (0.0–1.0). Default is more aggressive for Void-Omega.",
 )
 @click.option("--max-age", default=90, type=int, help="Days threshold for staleness.")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt.")
 @click.option("--db", default=DEFAULT_DB, help="Database path.")
-def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> None:
+def compact_cmd(project, strategy, dry_run, background, threshold, max_age, force, db) -> None:
     """Run auto-compaction on a project's facts.
 
     Deduplicates, consolidates errors, and prunes stale facts.
@@ -88,15 +89,37 @@ def compact_cmd(project, strategy, dry_run, threshold, max_age, force, db) -> No
                 f"[dim]🔍 Dry-run compaction for[/] [bold cyan]{project}[/] "
                 f"[dim](strategies: {strategy_label})[/]"
             )
-        else:
-            if not force:
-                console.print(
-                    f"[yellow]⚠ Compacting[/] [bold]{project}[/] "
-                    f"[dim](strategies: {strategy_label})[/]"
-                )
-                if not click.confirm("Proceed?"):
-                    console.print("[dim]Aborted.[/]")
-                    return
+        if not dry_run and not force:
+            console.print(
+                f"[yellow]⚠ Compacting[/] [bold]{project}[/] "
+                f"[dim](strategies: {strategy_label})[/]"
+            )
+            if not click.confirm("Proceed?"):
+                console.print("[dim]Aborted.[/]")
+                return
+
+        if not dry_run and background:
+            import subprocess
+            import sys
+            
+            cmd = [
+                sys.executable,
+                "-m", "cortex.cli",
+                "compact", project,
+                "--force",
+                "--threshold", str(threshold)
+            ]
+            if strategy:
+                for s in strategy:
+                    cmd.extend(["--strategy", s])
+            
+            # Run detached process
+            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            console.print(
+                f"[[noir.cyber]✓[/]] Dispatched Void-Omega Compaction to background "
+                f"for [[noir.yinmn]{project}[/]]."
+            )
+            return
 
         result = compact(
             engine,

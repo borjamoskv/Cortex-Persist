@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.sync")
 
 
-def _sync_fact_list(
+async def _sync_fact_list(
     engine: CortexEngine,
     existing: set,
     candidates: list,
@@ -31,7 +31,7 @@ def _sync_fact_list(
     new_items = calculate_fact_diff(existing, candidates, content_fn)
     for content, item in new_items:
         try:
-            engine.store_sync(
+            await engine.store(
                 project="__system__",
                 content=content,
                 fact_type=fact_type,
@@ -47,7 +47,7 @@ def _sync_fact_list(
             result.errors.append(f"Error system {fact_type}: {e}")
 
 
-def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
+async def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza system.json — conocimiento global y decisiones."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -55,10 +55,10 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
         result.errors.append(f"Error leyendo system.json: {e}")
         return
 
-    existing = get_existing_contents(engine, "__system__")
+    existing = await get_existing_contents(engine, "__system__")
 
     # knowledge_global
-    _sync_fact_list(
+    await _sync_fact_list(
         engine,
         existing,
         data.get("knowledge_global", []),
@@ -70,7 +70,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     )
 
     # decisions_global
-    _sync_fact_list(
+    await _sync_fact_list(
         engine,
         existing,
         data.get("decisions_global", []),
@@ -91,7 +91,7 @@ def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
         )
         if eco_content not in existing:
             try:
-                engine.store_sync(
+                await engine.store(
                     project="__system__",
                     content=eco_content,
                     fact_type="knowledge",

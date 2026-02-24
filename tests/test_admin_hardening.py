@@ -134,7 +134,7 @@ class TestSelfHealingHook:
     def test_status_failure_triggers_heal(self, client):
         """When get_system_status raises, the hook should be triggered."""
         with patch("cortex.routes.middleware.SelfHealingHook.trigger") as mock_trigger:
-            with patch("cortex.routes.admin.CortexEngine.stats_sync", side_effect=RuntimeError("boom")):
+            with patch("cortex.routes.admin.CortexEngine.stats", side_effect=RuntimeError("boom")):
                 resp = client.get(
                     "/v1/status",
                     headers={"Authorization": "Bearer fake-key-that-wont-auth"},

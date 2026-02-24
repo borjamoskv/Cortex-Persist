@@ -4,10 +4,10 @@
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-abyssal-900: #0A0A0A;
-  --color-abyssal-800: #111111;
-  --color-abyssal-700: #1A1A1A;
-  --color-abyssal-600: #2A2A2A;
+  --color-abyssal-900: #050505; /* Blacker than black */
+  --color-abyssal-800: #0a0a0a;
+  --color-abyssal-700: #111111;
+  --color-abyssal-600: #1a1a1a;
   --color-cyber-lime: #CCFF00;
   --color-cyber-violet: #6600FF;
   --color-industrial-gold: #D4AF37;
@@ -18,8 +18,10 @@
 
   --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 7s ease-in-out infinite 2s;
   --animate-grid-fade: grid-fade 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-scanline: scanline 8s linear infinite;
 }
 
 @keyframes pulse-slow {
@@ -47,6 +49,11 @@
   50% { transform: scale(1.05); }
 }
 
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
 /* Global Industrial Noir Aesthetics */
 @layer base {
   html {
@@ -69,11 +76,15 @@
 
 @layer utilities {
   .glass {
-    @apply bg-abyssal-800/60 backdrop-blur-xl border border-white/5;
+    @apply bg-abyssal-800/40 backdrop-blur-2xl border border-white/[0.03];
   }
 
   .glass-strong {
-    @apply bg-abyssal-700/80 backdrop-blur-2xl border border-white/10;
+    @apply bg-abyssal-700/60 backdrop-blur-3xl border border-white/[0.06];
+  }
+  
+  .glass-pill {
+    @apply bg-abyssal-900/60 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
   }
 
   .glow-lime {
@@ -113,7 +124,32 @@
 
   /* Dot grid background */
   .dot-grid {
-    background-image: radial-gradient(rgba(250, 250, 250, 0.06) 1px, transparent 1px);
-    background-size: 32px 32px;
+    background-image: radial-gradient(rgba(250, 250, 250, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  
+  /* Immersive Elements */
+  .text-watermark {
+    @apply font-sans font-black tracking-[-0.05em] select-none pointer-events-none;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.03);
+    line-height: 0.8;
+  }
+  
+  .crt-scanline {
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 51%);
+    background-size: 100% 4px;
+    z-index: 50;
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+  }
+  
+  .crt-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+    z-index: 49;
   }
 }

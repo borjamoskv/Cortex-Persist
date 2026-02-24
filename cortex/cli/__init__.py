@@ -6,13 +6,27 @@ Re-exports the main CLI group and shared utilities.
 
 import click
 from rich.console import Console
+from rich.theme import Theme
 
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine import CortexEngine
 from cortex.timing import TimingTracker
 
-console = Console()
+cortex_theme = Theme({
+    "info": "dim cyan",
+    "warning": "magenta",
+    "danger": "bold red",
+    "success": "bold green",
+    "noir.bg": "on #0A0A0A",
+    "noir.abyssal": "#1A1A1A",
+    "noir.cyber": "bold #CCFF00",
+    "noir.gold": "bold #D4AF37",
+    "noir.violet": "bold #6600FF",
+    "noir.yinmn": "bold #2E5090",
+})
+
+console = Console(theme=cortex_theme)
 DEFAULT_DB = str(DEFAULT_DB_PATH)
 
 
@@ -123,6 +137,7 @@ from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa
 from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
 from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
+from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402
 from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402
 from cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402
 from cortex.cli.purge import purge as purge_cmd  # noqa: E402
@@ -132,6 +147,7 @@ cli.add_command(nexus_cli, name="nexus")
 cli.add_command(autorouter_cli, name="autorouter")
 cli.add_command(apotheosis_cli, name="apotheosis")
 cli.add_command(keter_cli, name="keter")
+cli.add_command(sovereign_cli, name="sovereign")
 cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
 cli.add_command(prompt_group, name="prompt")

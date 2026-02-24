@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 
 import click
@@ -14,6 +15,10 @@ from cortex.sync import export_to_json
 __all__ = ["delete", "list_facts", "edit"]
 
 
+def _run_async(coro):
+    return asyncio.run(coro)
+
+
 @cli.command()
 @click.argument("fact_id", type=int)
 @click.option("--reason", "-r", default=None, help="Razón de la eliminación")
@@ -22,21 +27,19 @@ def delete(fact_id, reason, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
     engine = get_engine(db)
     try:
-        conn = engine._get_sync_conn()
-        row = conn.execute(
-            "SELECT project, content, fact_type FROM facts WHERE id = ? AND valid_until IS NULL",
-            (fact_id,),
-        ).fetchone()
-        if not row:
+        try:
+            fact = _run_async(engine.retrieve(fact_id))
+        except Exception:
             err_fact_not_found(fact_id)
             return
+
         console.print(
             f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
-            f"[cyan]{row[0]}[/] ({row[2]}) — {row[1][:80]}..."
+            f"[cyan]{fact.project}[/] ({fact.fact_type}) — {fact.content[:80]}..."
         )
-        success = engine.deprecate_sync(fact_id, reason or "deleted-via-cli")
+        success = _run_async(engine.deprecate(fact_id, reason or "deleted-via-cli"))
         if success:
-            wb = export_to_json(engine)
+            wb = _run_async(export_to_json(engine))
             console.print(
                 f"[green]✓[/] Fact #{fact_id} deprecado. "
                 f"Write-back: {wb.files_written} archivos actualizados."
@@ -44,7 +47,7 @@ def delete(fact_id, reason, db) -> None:
         else:
             console.print(f"[red]✗ No se pudo deprecar fact #{fact_id}[/]")
     finally:
-        engine.close_sync()
+        _run_async(engine.close())
 
 
 @cli.command("list")
@@ -56,23 +59,28 @@ def list_facts(project, fact_type, limit, db) -> None:
     """Listar facts activos (tabulado)."""
     engine = get_engine(db)
     try:
-        conn = engine._get_sync_conn()
-        query = """
-            SELECT id, project, content, fact_type, tags, created_at
-            FROM facts WHERE valid_until IS NULL
-        """
-        params = []
-        if project:
-            query += " AND project = ?"
-            params.append(project)
-        if fact_type:
-            query += " AND fact_type = ?"
-            params.append(fact_type)
-        query += " ORDER BY project, fact_type, id"
-        if limit:
-            query += " LIMIT ?"
-            params.append(limit)
-        rows = conn.execute(query, params).fetchall()
+        async def __get_rows():
+            conn = await engine.get_conn()
+            query = """
+                SELECT id, project, content, fact_type, tags, created_at
+                FROM facts WHERE valid_until IS NULL
+            """
+            params = []
+            if project:
+                query += " AND project = ?"
+                params.append(project)
+            if fact_type:
+                query += " AND fact_type = ?"
+                params.append(fact_type)
+            query += " ORDER BY project, fact_type, id"
+            if limit:
+                query += " LIMIT ?"
+                params.append(limit)
+            cursor = await conn.execute(query, params)
+            return await cursor.fetchall()
+            
+        rows = _run_async(__get_rows())
+        
         if not rows:
             filter_hint = ""
             if project:
@@ -97,7 +105,7 @@ def list_facts(project, fact_type, limit, db) -> None:
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
         console.print(table)
     finally:
-        engine.close_sync()
+        _run_async(engine.close())
 
 
 @cli.command()
@@ -108,35 +116,27 @@ def edit(fact_id, new_content, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
     engine = get_engine(db)
     try:
-        conn = engine._get_sync_conn()
-        row = conn.execute(
-            "SELECT project, content, fact_type, tags, confidence, source FROM facts "
-            "WHERE id = ? AND valid_until IS NULL",
-            (fact_id,),
-        ).fetchone()
-        if not row:
+        try:
+            fact = _run_async(engine.retrieve(fact_id))
+        except Exception:
             err_fact_not_found(fact_id)
             return
-        project, old_content, fact_type, tags_json, confidence, source = row
-        try:
-            tags = json.loads(tags_json) if tags_json else None
-        except (json.JSONDecodeError, TypeError):
-            tags = None
-        engine.deprecate_sync(fact_id, "edited → new version")
-        new_id = engine.store_sync(
-            project=project,
+
+        _run_async(engine.deprecate(fact_id, "edited → new version"))
+        new_id = _run_async(engine.store(
+            project=fact.project,
             content=new_content,
-            fact_type=fact_type,
-            tags=tags,
-            confidence=confidence,
-            source=source or "edit-via-cli",
-        )
-        wb = export_to_json(engine)
+            fact_type=fact.fact_type,
+            tags=fact.tags,
+            confidence=fact.confidence,
+            source=fact.source or "edit-via-cli",
+        ))
+        wb = _run_async(export_to_json(engine))
         console.print(
             f"[green]✓[/] Fact #{fact_id} → #{new_id} editado.\n"
-            f"  [dim]Antes:[/] {old_content[:60]}...\n"
+            f"  [dim]Antes:[/] {fact.content[:60]}...\n"
             f"  [bold]Ahora:[/] {new_content[:60]}...\n"
             f"  Write-back: {wb.files_written} archivos actualizados."
         )
     finally:
-        engine.close_sync()
+        _run_async(engine.close())

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.sync")
 
 
-def _sync_file(
+async def _sync_file(
     engine: CortexEngine,
     path: Path,
     state_key: str,
@@ -41,25 +41,15 @@ def _sync_file(
     try:
         fhash = file_hash(path)
         if fhash and fhash != state.get(state_key):
-            sync_fn(engine, path, result)
+            await sync_fn(engine, path, result)
             state[state_key] = fhash
     except (sqlite3.Error, json.JSONDecodeError, OSError) as e:
         result.errors.append(f"{path.name}: {e}")
         logger.error("Syncing %s failed: %s", path.name, e)
 
 
-def sync_memory(engine: CortexEngine) -> SyncResult:
-    """Sincroniza ~/.agent/memory/ → CORTEX DB.
-
-    Solo importa archivos que han cambiado desde la última sincronización.
-    Usa hashes SHA-256 para detectar cambios. Idempotente y no destructivo.
-
-    Args:
-        engine: Instancia inicializada de CortexEngine.
-
-    Returns:
-        SyncResult con estadísticas de la sincronización.
-    """
+async def sync_memory(engine: CortexEngine) -> SyncResult:
+    """Sincroniza ~/.agent/memory/ → CORTEX DB."""
     result = SyncResult(synced_at=now_iso())
     state = load_sync_state()
 
@@ -67,12 +57,12 @@ def sync_memory(engine: CortexEngine) -> SyncResult:
         result.errors.append(f"Directorio de memoria no encontrado: {MEMORY_DIR}")
         return result
 
-    _sync_file(engine, MEMORY_DIR / "ghosts.json", "ghosts_hash", state, _sync_ghosts, result)
-    _sync_file(engine, MEMORY_DIR / "system.json", "system_hash", state, sync_system, result)
-    _sync_file(
+    await _sync_file(engine, MEMORY_DIR / "ghosts.json", "ghosts_hash", state, _sync_ghosts, result)
+    await _sync_file(engine, MEMORY_DIR / "system.json", "system_hash", state, sync_system, result)
+    await _sync_file(
         engine, MEMORY_DIR / "mistakes.jsonl", "mistakes_hash", state, _sync_mistakes, result
     )
-    _sync_file(engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result)
+    await _sync_file(engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result)
 
     # Guardar estado para la próxima ejecución
     state["last_sync"] = result.synced_at
@@ -92,7 +82,7 @@ def sync_memory(engine: CortexEngine) -> SyncResult:
     return result
 
 
-def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
+async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza ghosts.json — estado actual de cada proyecto fantasma."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -101,13 +91,13 @@ def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
         return
 
     # Deprecar ghosts anteriores (son snapshots temporales)
-    conn = engine._get_sync_conn()
+    conn = await engine.get_conn()
     try:
-        conn.execute(
+        await conn.execute(
             "UPDATE facts SET valid_until = ? WHERE fact_type = 'ghost' AND valid_until IS NULL",
             (result.synced_at,),
         )
-        conn.commit()
+        await conn.commit()
     except sqlite3.Error as e:
         result.errors.append(f"Error deprecando ghosts antiguos: {e}")
 
@@ -120,7 +110,7 @@ def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             f"Bloqueado: {ghost_data.get('blocked_by', 'no')}"
         )
         try:
-            engine.store_sync(
+            await engine.store(
                 project=project_name,
                 content=content,
                 fact_type="ghost",
@@ -135,9 +125,9 @@ def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
             result.errors.append(f"Error sincronizando ghost {project_name}: {e}")
 
 
-def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None:
+async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza mistakes.jsonl — memoria de errores."""
-    existing = get_existing_contents(engine, None, fact_type="error")
+    existing = await get_existing_contents(engine, None, fact_type="error")
     lines = [
         json.loads(line)
         for line in path.read_text(encoding="utf-8").strip().splitlines()
@@ -154,7 +144,7 @@ def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None
     new_mistakes = calculate_fact_diff(existing, lines, generate_content)
     for content, m in new_mistakes:
         try:
-            engine.store_sync(
+            await engine.store(
                 project=m.get("project", "__system__"),
                 content=content,
                 fact_type="error",
@@ -170,9 +160,9 @@ def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None
             result.errors.append(f"Error sync mistake: {e}")
 
 
-def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
+async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza bridges.jsonl — conexiones entre proyectos."""
-    existing = get_existing_contents(engine, "__bridges__", fact_type="bridge")
+    existing = await get_existing_contents(engine, "__bridges__", fact_type="bridge")
     lines = [
         json.loads(line)
         for line in path.read_text(encoding="utf-8").strip().splitlines()
@@ -189,7 +179,7 @@ def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     new_bridges = calculate_fact_diff(existing, lines, generate_content)
     for content, b in new_bridges:
         try:
-            engine.store_sync(
+            await engine.store(
                 project="__bridges__",
                 content=content,
                 fact_type="bridge",

@@ -83,7 +83,7 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
         lines.extend(_format_project_section(project, facts))
 
     # ─── Tip del Día ─────────────────────────────────────────────────
-    lines.extend(_generate_tips_section(engine))
+    lines.extend(await _generate_tips_section(engine))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -94,7 +94,9 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
 
 def _format_project_section(project: str, facts: list[dict]) -> list[str]:
     """Formatea la sección de un proyecto para el snapshot."""
-    display_name = project.replace("__", "").upper() if project.startswith("__") else project
+    display_name = (
+        project.replace("__", "").upper() if project.startswith("__") else project
+    )
     lines = [f"## {display_name}", ""]
 
     by_type: dict[str, list] = {}
@@ -114,7 +116,7 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
     return lines
 
 
-def _generate_tips_section(engine: CortexEngine) -> list[str]:
+async def _generate_tips_section(engine: CortexEngine) -> list[str]:
     """Generate a 'Tip del Día' section for the snapshot with 3 random tips."""
     try:
         from cortex.cli.tips import TipsEngine
@@ -128,7 +130,7 @@ def _generate_tips_section(engine: CortexEngine) -> list[str]:
         ]
         seen: set[str] = set()
         for _ in range(3):
-            tip = tips_engine.random()
+            tip = await tips_engine.random()
             if tip.id not in seen:
                 seen.add(tip.id)
                 lines.append(f"- **[{tip.category.value.upper()}]** {tip.content}")
