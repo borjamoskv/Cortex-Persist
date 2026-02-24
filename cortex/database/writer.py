@@ -390,14 +390,13 @@ class SqliteWriteWorker:
                 Err(f"SQLite write error: {e}"),
             )
 
-    async def _maybe_checkpoint(self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop) -> None:
+    async def _maybe_checkpoint(
+        self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop
+    ) -> None:
         """Perform a WAL checkpoint if the interval has been reached."""
         try:
-            await loop.run_in_executor(
-                None, lambda: conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
-            )
+            await loop.run_in_executor(None, lambda: conn.execute("PRAGMA wal_checkpoint(PASSIVE)"))
             self._write_count = 0
             logger.debug("Periodic WAL checkpoint at %d writes", self._CHECKPOINT_INTERVAL)
         except sqlite3.Error as e:
             logger.debug("WAL checkpoint deferred: %s", e)
-

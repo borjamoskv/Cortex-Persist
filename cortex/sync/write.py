@@ -8,6 +8,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING
 
+from cortex.memory.temporal import now_iso
 from cortex.sync.common import (
     MEMORY_DIR,
     WritebackResult,
@@ -16,7 +17,6 @@ from cortex.sync.common import (
     load_sync_state,
     save_sync_state,
 )
-from cortex.memory.temporal import now_iso
 
 __all__ = ["export_to_json"]
 

@@ -7,6 +7,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING
 
+from cortex.memory.temporal import now_iso
 from cortex.sync.common import (
     MEMORY_DIR,
     SyncResult,
@@ -17,7 +18,6 @@ from cortex.sync.common import (
     save_sync_state,
 )
 from cortex.sync.system import sync_system
-from cortex.memory.temporal import now_iso
 
 __all__ = ["sync_memory"]
 

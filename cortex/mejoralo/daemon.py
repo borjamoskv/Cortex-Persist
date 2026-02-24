@@ -11,8 +11,8 @@ import asyncio
 import logging
 import signal
 import time
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from cortex.cli import get_engine
 from cortex.mejoralo.canary import CanaryMonitor
@@ -43,6 +43,7 @@ class MejoraloDaemon:
 
         # 🛡️ Sovereign Security & Context
         from cortex.config import DEFAULT_DB_PATH
+
         self.cortex_engine = get_engine(db_path or DEFAULT_DB_PATH)
         self.engine = MejoraloEngine(engine=self.cortex_engine)
         self.canary = CanaryMonitor(self.base_path)
@@ -56,8 +57,7 @@ class MejoraloDaemon:
             return
         self._running = True
         logger.info(
-            "☠️ MEJORAlo Daemon started for project '%s' at %s",
-            self.project, self.base_path
+            "☠️ MEJORAlo Daemon started for project '%s' at %s", self.project, self.base_path
         )
         self._loop_task = asyncio.create_task(self._main_loop())
 
@@ -102,14 +102,14 @@ class MejoraloDaemon:
             return
 
         logger.warning(
-            "🚨 Quality Breach (%d < %d). Fetching context...",
-            result.score, self.target_score
+            "🚨 Quality Breach (%d < %d). Fetching context...", result.score, self.target_score
         )
 
         # 4. Memory/KI Context Fusion + Causal Analysis
         fused_context = await self.fusion.fuse_context(
             query=" ".join([d.name for d in result.dimensions if d.score < 7])
-            if any(d.score < 7 for d in result.dimensions) else "refactoring"
+            if any(d.score < 7 for d in result.dimensions)
+            else "refactoring"
         )
         fused_context = await self._ouroboros_analyze(result, fused_context)
 
@@ -173,7 +173,7 @@ class MejoraloDaemon:
                     fact_type="decision",
                     source="ouroboros-daemon",
                     confidence="verified",
-                    tags=["ouroboros", "evolution"]
+                    tags=["ouroboros", "evolution"],
                 )
         except Exception as e:
             logger.error("OUROBOROS-∞ Pattern Absorption failed: %s", e)

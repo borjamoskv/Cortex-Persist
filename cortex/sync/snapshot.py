@@ -7,8 +7,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.sync.common import CORTEX_DIR
 from cortex.memory.temporal import now_iso
+from cortex.sync.common import CORTEX_DIR
 
 __all__ = ["export_snapshot"]
 

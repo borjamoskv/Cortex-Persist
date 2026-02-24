@@ -5,21 +5,25 @@ High-privilege endpoints for project management, API key governance,
 and session handoff orchestration. Enforces strict RBAC and input validation.
 """
 
+from __future__ import annotations
+
 import logging
 import re
+import time
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 
-from cortex import __version__
 import cortex.api.state as api_state
+from cortex import __version__
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.engine import CortexEngine
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.types.models import StatusResponse
 from cortex.utils.export import export_facts
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 __all__ = [
     "create_api_key",
@@ -32,6 +36,22 @@ __all__ = [
 router = APIRouter(tags=["governance"])
 logger = logging.getLogger("uvicorn.error")
 
+
+# ─── Shared Helpers ──────────────────────────────────────────────────
+
+_DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
+_TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
+
+
+def _get_lang(request: Request) -> str:
+    """Extract Accept-Language from request with fallback."""
+    return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+
+
+def _get_auth_manager():
+    """Resolve the active auth manager singleton."""
+    return api_state.auth_manager or get_auth_manager()
+
 # ─── Project Management ──────────────────────────────────────────────
 
 
@@ -43,38 +63,23 @@ async def export_project(
     fmt: str = Query("json", alias="format"),
     auth: AuthResult = Depends(require_permission("admin")),
     engine: CortexEngine = Depends(get_engine),
-) -> dict:
+) -> dict[str, str]:
     """
     Sovereign Export: Dumps project memory to a secure JSON artifact.
     Enforces path incarceration to prevent directory traversal.
     """
-    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    lang = _get_lang(request)
 
     if fmt != "json":
         raise HTTPException(status_code=400, detail=get_trans("error_json_only", lang))
 
-    if path:
-        # Prevent traversal and control character injection
-        if any(c in path for c in ("\0", "\r", "\n", "\t", "..")):
-            raise HTTPException(status_code=400, detail=get_trans("error_invalid_path_chars", lang))
-
-        try:
-            base_dir = Path.cwd().resolve()
-            target_path = Path(path).resolve()
-            if not str(target_path).startswith(str(base_dir)):
-                raise HTTPException(status_code=400, detail=get_trans("error_path_workspace", lang))
-        except (ValueError, RuntimeError):
-            raise HTTPException(
-                status_code=400, detail=get_trans("error_invalid_input", lang)
-            ) from None
+    target_file = _validate_export_path(path, project, lang)
 
     try:
         facts = engine.search(project=project, limit=100000)
         content = export_facts(facts, fmt="json")
 
-        target_file = Path(path).resolve() if path else Path.cwd() / f"{project}_export.json"
-
-        def _write_export():
+        def _write_export() -> Path:
             target_file.parent.mkdir(parents=True, exist_ok=True)
             target_file.write_text(content, encoding="utf-8")
             return target_file
@@ -93,96 +98,59 @@ async def export_project(
         ) from None
 
 
+def _validate_export_path(path: str | None, project: str, lang: str) -> Path:
+    """Validate and resolve export path with traversal protection."""
+    if not path:
+        return Path.cwd() / f"{project}_export.json"
+
+    if any(c in path for c in _DANGEROUS_PATH_CHARS) or ".." in path:
+        raise HTTPException(status_code=400, detail=get_trans("error_invalid_path_chars", lang))
+
+    try:
+        base_dir = Path.cwd().resolve()
+        target_path = Path(path).resolve()
+        if not str(target_path).startswith(str(base_dir)):
+            raise HTTPException(status_code=400, detail=get_trans("error_path_workspace", lang))
+        return target_path
+    except (ValueError, RuntimeError):
+        raise HTTPException(
+            status_code=400, detail=get_trans("error_invalid_input", lang)
+        ) from None
+
+
 @router.get("/v1/health/deep", tags=["health"])
 async def deep_health_check(
     request: Request,
     engine: CortexEngine = Depends(get_engine),
-) -> dict:
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict[str, Any]:
     """Deep Health Check — probes all CORTEX subsystems.
 
     Returns 200 if all checks pass, 503 if any subsystem is degraded.
     Designed for Kubernetes liveness/readiness probes and Enterprise monitoring.
     """
-    import time
     from cortex.database.schema import SCHEMA_VERSION
 
-    checks: dict[str, dict] = {}
-    overall_healthy = True
     start = time.monotonic()
+    checks: dict[str, dict[str, Any]] = {}
+    overall_healthy = True
 
-    def _record(name: str, status: str, healthy: bool, **details):
-        nonlocal overall_healthy
+    conn = engine._get_conn()
+    probes = _build_health_probes(conn, request, SCHEMA_VERSION)
+
+    for name, probe in probes.items():
+        try:
+            status, healthy, details = probe()
+        except AttributeError:
+            status, healthy, details = (
+                "unavailable", True, {"detail": f"{name} not in app state"}
+            )
+        except (OSError, RuntimeError, ValueError) as e:
+            status, healthy, details = "error", False, {"detail": str(e)}
         overall_healthy = overall_healthy and healthy
         checks[name] = {"status": status, **details}
 
-    # 1. Database connectivity
-    try:
-        engine._get_conn().execute("SELECT 1").fetchone()
-        _record("database", "ok", True, detail="SELECT 1 succeeded")
-    except Exception as e:
-        _record("database", "degraded", False, detail=str(e))
-
-    # 2. Schema version alignment
-    try:
-        row = engine._get_conn().execute(
-            "SELECT value FROM cortex_meta WHERE key = 'schema_version'"
-        ).fetchone()
-        db_version = row[0] if row else "unknown"
-        if db_version == SCHEMA_VERSION:
-            _record("schema", "ok", True, version=db_version)
-        else:
-            _record("schema", "drift", False, expected=SCHEMA_VERSION, actual=db_version)
-    except Exception as e:
-        _record("schema", "error", False, detail=str(e))
-
-    # 3. Ledger integrity (pending uncheckpointed transactions)
-    try:
-        conn = engine._get_conn()
-        last_cp = conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots").fetchone()
-        last_tx = last_cp[0] if last_cp else 0
-        pending_row = conn.execute(
-            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
-        ).fetchone()
-        pending = pending_row[0] if pending_row else 0
-
-        healthy = pending < 1000
-        _record(
-            "ledger",
-            "ok" if healthy else "warning",
-            healthy,
-            pending_uncheckpointed=pending,
-            last_checkpoint_tx=last_tx,
-        )
-    except Exception as e:
-        _record("ledger", "error", False, detail=str(e))
-
-    # 4. FTS5 search index
-    try:
-        engine._get_conn().execute("SELECT COUNT(*) FROM episodes_fts").fetchone()
-        _record("search_fts", "ok", True, detail="episodes_fts accessible")
-    except Exception as e:
-        _record("search_fts", "degraded", False, detail=str(e))
-
-    # 5. Pool status (if async pool is available)
-    try:
-        pool = request.app.state.pool
-        max_c = getattr(pool, "max_connections", 0)
-        pct = (pool._active_count / max_c) * 100 if max_c else 0
-        _record(
-            "pool",
-            "ok",
-            True,
-            active_connections=getattr(pool, "_active_count", 0),
-            max_connections=max_c,
-            utilization=f"{pct:.0f}%",
-        )
-    except AttributeError:
-        _record("pool", "unavailable", True, detail="pool not in app state")
-    except Exception as e:
-        _record("pool", "error", False, detail=str(e))
-
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
-
     result = {
         "status": "healthy" if overall_healthy else "degraded",
         "version": __version__,
@@ -193,9 +161,70 @@ async def deep_health_check(
 
     if not overall_healthy:
         from fastapi.responses import JSONResponse
+
         return JSONResponse(content=result, status_code=503)
 
     return result
+
+
+def _build_health_probes(
+    conn: Any, request: Request, schema_version: str
+) -> dict[str, Any]:
+    """Build the probe registry for deep health check."""
+
+    def _probe_database() -> tuple[str, bool, dict[str, str]]:
+        conn.execute("SELECT 1").fetchone()
+        return "ok", True, {"detail": "SELECT 1 succeeded"}
+
+    def _probe_schema() -> tuple[str, bool, dict[str, str]]:
+        row = conn.execute(
+            "SELECT value FROM cortex_meta WHERE key = 'schema_version'"
+        ).fetchone()
+        db_ver = row[0] if row else "unknown"
+        if db_ver == schema_version:
+            return "ok", True, {"version": db_ver}
+        return "drift", False, {"expected": schema_version, "actual": db_ver}
+
+    def _probe_ledger() -> tuple[str, bool, dict[str, Any]]:
+        last_cp = conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots").fetchone()
+        last_tx = last_cp[0] if last_cp else 0
+        pending_row = conn.execute(
+            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
+        ).fetchone()
+        pending = pending_row[0] if pending_row else 0
+        healthy = pending < 1000
+        return (
+            "ok" if healthy else "warning",
+            healthy,
+            {"pending_uncheckpointed": pending, "last_checkpoint_tx": last_tx},
+        )
+
+    def _probe_fts() -> tuple[str, bool, dict[str, str]]:
+        conn.execute("SELECT COUNT(*) FROM episodes_fts").fetchone()
+        return "ok", True, {"detail": "episodes_fts accessible"}
+
+    def _probe_pool() -> tuple[str, bool, dict[str, Any]]:
+        pool = request.app.state.pool
+        max_c = getattr(pool, "max_connections", 0)
+        active = getattr(pool, "_active_count", 0)
+        pct = (active / max_c) * 100 if max_c else 0
+        return (
+            "ok",
+            True,
+            {
+                "active_connections": active,
+                "max_connections": max_c,
+                "utilization": f"{pct:.0f}%",
+            },
+        )
+
+    return {
+        "database": _probe_database,
+        "schema": _probe_schema,
+        "ledger": _probe_ledger,
+        "search_fts": _probe_fts,
+        "pool": _probe_pool,
+    }
 
 
 @router.get("/v1/status", response_model=StatusResponse)
@@ -205,7 +234,7 @@ async def get_system_status(
     engine: CortexEngine = Depends(get_engine),
 ) -> StatusResponse:
     """Expose engine diagnostics and memory health metrics."""
-    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    lang = _get_lang(request)
     try:
         stats = engine.stats_sync()
         return StatusResponse(
@@ -239,13 +268,12 @@ async def create_api_key(
     Sovereign Key Provisioning.
     First key is self-provisioned (bootstrap). Subsequent keys require 'admin' permission.
     """
-    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    lang = _get_lang(request)
 
-    # Sanitize tenant_id (Alphanumeric + safe separators)
-    if not re.match(r"^[a-z0-9_\-]+$", tenant_id, re.I):
+    if not _TENANT_PATTERN.match(tenant_id):
         raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang))
 
-    manager = api_state.auth_manager or get_auth_manager()
+    manager = _get_auth_manager()
     existing_keys = await manager.list_keys()
 
     if existing_keys:
@@ -282,7 +310,7 @@ async def create_api_key(
 @router.get("/v1/admin/keys")
 async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))) -> list[dict]:
     """Expose non-sensitive metadata for all provisioned keys."""
-    manager = api_state.auth_manager or get_auth_manager()
+    manager = _get_auth_manager()
     keys = await manager.list_keys()
     return [
         {
@@ -314,7 +342,7 @@ async def generate_handoff_context(
     """
     from cortex.agents.handoff import generate_handoff, save_handoff
 
-    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    lang = _get_lang(request)
 
     try:
         body = await request.json()

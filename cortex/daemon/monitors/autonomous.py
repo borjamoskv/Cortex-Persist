@@ -51,19 +51,21 @@ class AutonomousMejoraloMonitor:
         try:
             m = MejoraloEngine(engine=self._engine)
             logger.info("🐝 Autonomous scan sequence inició for %s", project)
-            
+
             result = m.scan(project, path, deep=True, brutal=True)
             self._last_runs[project] = now
             self._stats["scans"] += 1
-            
+
             initial_score = result.score
-            
+
             # 2. Heurística de Auto-Curación (Sovereignty)
             threshold = self.auto_heal_threshold or 70
             if initial_score < threshold and not result.dead_code:
                 logger.warning(
-                    "🚨 Quality Breach: %s score %d < %d. Triggering heal...", 
-                    project, initial_score, threshold
+                    "🚨 Quality Breach: %s score %d < %d. Triggering heal...",
+                    project,
+                    initial_score,
+                    threshold,
                 )
                 if m.relentless_heal(project, path, result, target_score=100):
                     self._stats["heals"] += 1
@@ -71,7 +73,9 @@ class AutonomousMejoraloMonitor:
                     result = m.scan(project, path, deep=True)
                     logger.info(
                         "✅ Auto-curación completed for %s. Score: %d -> %d",
-                        project, initial_score, result.score
+                        project,
+                        initial_score,
+                        result.score,
                     )
 
             return MejoraloAlert(

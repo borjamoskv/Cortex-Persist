@@ -150,7 +150,6 @@ class CortexConnectionPool:
             self._active_count += 1
         return new_conn
 
-
     async def _is_healthy(self, conn: aiosqlite.Connection) -> bool:
         """Check if connection is alive."""
         try:

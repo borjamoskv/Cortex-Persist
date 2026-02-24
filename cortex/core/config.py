@@ -13,7 +13,6 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 # ─── Base Paths (constant, never env-overridden) ─────────────────────
 
 CORTEX_DIR = Path.home() / ".cortex"

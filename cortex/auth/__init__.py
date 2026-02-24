@@ -136,6 +136,7 @@ class AuthManager:
         try:
             loop = asyncio.get_running_loop()
             import threading
+
             event = threading.Event()
 
             async def _wrapper():
@@ -343,7 +344,6 @@ def get_auth_manager() -> AuthManager:
     if _auth_manager is None:
         _auth_manager = AuthManager()
     return _auth_manager
-
 
 
 def reset_auth_manager() -> None:

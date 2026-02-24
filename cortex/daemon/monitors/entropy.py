@@ -46,22 +46,26 @@ class EntropyMonitor:
         try:
             m = MejoraloEngine(engine=self._engine)
             logger.debug("ENTROPY-0 scanner over %s", project)
-            
+
             result = m.scan(project, path)
             self._last_runs[project] = now
-            
+
             initial_score = result.score
             if initial_score < self.threshold and not result.dead_code:
                 logger.warning(
-                    "Entropía CRÍTICA detectada en %s (score %d < %d). INICIANDO PURGA...", 
-                    project, initial_score, self.threshold
+                    "Entropía CRÍTICA detectada en %s (score %d < %d). INICIANDO PURGA...",
+                    project,
+                    initial_score,
+                    self.threshold,
                 )
                 if m.relentless_heal(project, path, result, target_score=95):
                     # Re-escaneo tras curación
                     result = m.scan(project, path)
                     logger.info(
                         "✅ Purga de Entropía completada en %s. Score: %d -> %d",
-                        project, initial_score, result.score
+                        project,
+                        initial_score,
+                        result.score,
                     )
 
             if result.score < self.threshold:

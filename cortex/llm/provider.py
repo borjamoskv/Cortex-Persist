@@ -146,7 +146,6 @@ class LLMProvider(BaseProvider):
                 msg += f"(api_key argument or {env_key} env var)"
                 raise ValueError(msg)
 
-
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
         url = f"{self._base_url.rstrip('/')}/chat/completions"
         headers: dict[str, str] = {

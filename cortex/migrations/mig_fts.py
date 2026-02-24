@@ -1,4 +1,3 @@
-import json
 import logging
 import sqlite3
 
@@ -25,21 +24,19 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
 
         # 3. Create the new standalone FTS5 table
         conn.execute(
-            "CREATE VIRTUAL TABLE facts_fts USING fts5("
-            "    content, project, tags, fact_type"
-            ")"
+            "CREATE VIRTUAL TABLE facts_fts USING fts5(    content, project, tags, fact_type)"
         )
         logger.info("Migration 017: Recreated facts_fts as a standard FTS5 table")
 
         # 4. Repopulate facts_fts with decrypted content
         enc = get_default_encrypter()
-        
+
         # Read all valid facts
         cursor = conn.execute(
             "SELECT id, content, project, tags, fact_type, tenant_id FROM facts WHERE valid_until IS NULL"
         )
         rows = cursor.fetchall()
-        
+
         insert_count = 0
         for row in rows:
             fact_id, content_enc, project, tags_str, fact_type, tenant_id = row
@@ -47,14 +44,18 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
                 content_dec = enc.decrypt_str(content_enc, tenant_id=tenant_id)
                 conn.execute(
                     "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
-                    (fact_id, content_dec, project, tags_str, fact_type)
+                    (fact_id, content_dec, project, tags_str, fact_type),
                 )
                 insert_count += 1
             except Exception as e:
-                logger.warning(f"Migration 017: Failed to decrypt or insert fact {fact_id} into FTS: {e}")
-                
-        logger.info(f"Migration 017: Successfully repopulated facts_fts with {insert_count} decrypted facts")
-        
+                logger.warning(
+                    f"Migration 017: Failed to decrypt or insert fact {fact_id} into FTS: {e}"
+                )
+
+        logger.info(
+            f"Migration 017: Successfully repopulated facts_fts with {insert_count} decrypted facts"
+        )
+
     except sqlite3.OperationalError as e:
         logger.warning(f"Migration 017: Operational error during FTS decoupling: {e}")
         raise

@@ -94,8 +94,7 @@ class CortexEncrypter:
             return plaintext.decode("utf-8")
         except InvalidKey as e:
             raise ValueError(
-                f"Decryption failed for tenant '{tenant_id}'. "
-                "Possible cross-tenant access attempt."
+                f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt."
             ) from e
         except Exception as e:
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e

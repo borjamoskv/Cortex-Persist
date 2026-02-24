@@ -6,9 +6,7 @@ logger = logging.getLogger("cortex")
 
 def _migration_016_add_fact_hash(conn: sqlite3.Connection):
     """Add hash column to facts table for deduplication (Wave 4: Global Integrity)."""
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(facts)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(facts)").fetchall()}
     if "hash" not in columns:
         conn.execute("ALTER TABLE facts ADD COLUMN hash TEXT")
         logger.info("Migration 016: Added 'hash' column to facts")

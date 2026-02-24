@@ -50,10 +50,7 @@ def export_openapi_spec(
         encoding="utf-8",
     )
 
-    endpoint_count = sum(
-        len(methods)
-        for methods in spec.get("paths", {}).values()
-    )
+    endpoint_count = sum(len(methods) for methods in spec.get("paths", {}).values())
     logger.info(
         "OpenAPI spec exported: %s (%d endpoints, %d schemas)",
         output_path,

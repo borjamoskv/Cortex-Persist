@@ -3,8 +3,8 @@
 from cortex.core.config import (
     AGENT_DIR,
     CORTEX_DIR,
-    CortexConfig,
     DEFAULT_DB_PATH,
+    CortexConfig,
     reload,
 )
 

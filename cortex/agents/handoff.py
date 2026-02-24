@@ -13,8 +13,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.sync.common import CORTEX_DIR, atomic_write
 from cortex.memory.temporal import now_iso
+from cortex.sync.common import CORTEX_DIR, atomic_write
 
 __all__ = [
     "DEFAULT_HANDOFF_PATH",

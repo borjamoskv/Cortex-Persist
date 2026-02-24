@@ -10,8 +10,8 @@ from starlette.concurrency import run_in_threadpool
 
 import cortex.api.state as api_state
 from cortex.auth import AuthResult, require_permission
-from cortex.utils.i18n import get_trans
 from cortex.types.models import HeartbeatRequest, TimeSummaryResponse
+from cortex.utils.i18n import get_trans
 
 __all__ = [
     "get_time_history",

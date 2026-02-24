@@ -23,11 +23,23 @@ __all__ = [
 _PROJECT_RE: Final = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-\.]{0,127}$")
 _TENANT_RE: Final = re.compile(r"^[a-z0-9_\-]{1,64}$", re.IGNORECASE)
 
-ALLOWED_FACT_TYPES: Final = frozenset({
-    "knowledge", "decision", "error", "rule", "axiom",
-    "schema", "idea", "ghost", "bridge", "pattern",
-    "episode", "metric", "config",
-})
+ALLOWED_FACT_TYPES: Final = frozenset(
+    {
+        "knowledge",
+        "decision",
+        "error",
+        "rule",
+        "axiom",
+        "schema",
+        "idea",
+        "ghost",
+        "bridge",
+        "pattern",
+        "episode",
+        "metric",
+        "config",
+    }
+)
 
 # Characters that should never appear in any user input
 _DANGEROUS_CHARS: Final = frozenset({"\x00", "\r", "\n", "\t", "\x1b"})
@@ -110,9 +122,7 @@ def sanitize_query(query: str) -> str:
     query = "".join(c for c in query if c not in _DANGEROUS_CHARS)
 
     if len(query) > MAX_QUERY_LENGTH:
-        raise ValueError(
-            f"Query too long ({len(query)} chars, max {MAX_QUERY_LENGTH})"
-        )
+        raise ValueError(f"Query too long ({len(query)} chars, max {MAX_QUERY_LENGTH})")
 
     return query
 
@@ -126,8 +136,7 @@ def validate_fact_type(fact_type: str) -> str:
     fact_type = fact_type.strip().lower()
     if fact_type not in ALLOWED_FACT_TYPES:
         raise ValueError(
-            f"Invalid fact_type: '{fact_type}'. "
-            f"Allowed: {', '.join(sorted(ALLOWED_FACT_TYPES))}"
+            f"Invalid fact_type: '{fact_type}'. Allowed: {', '.join(sorted(ALLOWED_FACT_TYPES))}"
         )
     return fact_type
 

@@ -9,8 +9,8 @@ import sqlite3
 
 import aiosqlite
 
-from cortex.migrations.registry import MIGRATIONS
 from cortex.database.schema import get_all_schema
+from cortex.migrations.registry import MIGRATIONS
 
 __all__ = [
     "ensure_migration_table",
@@ -138,7 +138,9 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
     await conn.commit()
 
 
-async def _apply_migration_async(conn: aiosqlite.Connection, version: int, description: str, func) -> bool:
+async def _apply_migration_async(
+    conn: aiosqlite.Connection, version: int, description: str, func
+) -> bool:
     """Apply a single migration asynchronously."""
     logger.info("Applying async migration %d: %s", version, description)
     try:
@@ -154,4 +156,3 @@ async def _apply_migration_async(conn: aiosqlite.Connection, version: int, descr
         logger.error("Migration %d failed: %s", version, e)
         await conn.rollback()
         return False
-

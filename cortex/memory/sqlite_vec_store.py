@@ -123,16 +123,22 @@ class SovereignVectorStoreL2:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    fact.id, fact.tenant_id, fact.project_id, fact.content,
-                    fact.timestamp, int(fact.is_diamond), int(fact.is_bridge),
-                    fact.confidence, fact.success_rate, json.dumps(fact.metadata)
-                )
+                    fact.id,
+                    fact.tenant_id,
+                    fact.project_id,
+                    fact.content,
+                    fact.timestamp,
+                    int(fact.is_diamond),
+                    int(fact.is_bridge),
+                    fact.confidence,
+                    fact.success_rate,
+                    json.dumps(fact.metadata),
+                ),
             )
             rowid = cursor.lastrowid
 
             cursor.execute(
-                "INSERT INTO vec_facts(rowid, embedding) VALUES (?, ?)",
-                (rowid, embedding_bytes)
+                "INSERT INTO vec_facts(rowid, embedding) VALUES (?, ?)", (rowid, embedding_bytes)
             )
             conn.commit()
 
@@ -165,7 +171,7 @@ class SovereignVectorStoreL2:
             ORDER BY final_score DESC
             LIMIT ?
             """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit)
+            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit),
         )
 
         rows = cursor.fetchall()
@@ -179,7 +185,7 @@ class SovereignVectorStoreL2:
             v_cursor.execute(
                 "SELECT embedding FROM vec_facts WHERE rowid = "
                 "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                (row["id"],)
+                (row["id"],),
             )
             v_row = v_cursor.fetchone()
             emb = np.frombuffer(v_row["embedding"], dtype=np.float32).tolist() if v_row else []
@@ -195,7 +201,7 @@ class SovereignVectorStoreL2:
                 is_bridge=bool(row["is_bridge"]),
                 confidence=row["confidence"],
                 success_rate=row["success_rate"],
-                metadata=json.loads(row["metadata"]) if row["metadata"] else {}
+                metadata=json.loads(row["metadata"]) if row["metadata"] else {},
             )
             object.__setattr__(fact, "_recall_score", score)
             final_facts.append(fact)
@@ -211,10 +217,7 @@ class SovereignVectorStoreL2:
     ) -> list[CortexFactModel]:
         """Backward-compatible recall for legacy callers. Maps to recall_secure."""
         return await self.recall_secure(
-            tenant_id=tenant_id,
-            project_id=project or "default",
-            query=query,
-            limit=limit
+            tenant_id=tenant_id, project_id=project or "default", query=query, limit=limit
         )
 
     async def close(self) -> None:
@@ -223,4 +226,3 @@ class SovereignVectorStoreL2:
                 self._conn.close()
                 self._conn = None
                 self._ready = False
-

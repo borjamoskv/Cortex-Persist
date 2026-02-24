@@ -7,12 +7,12 @@
 
 import json
 import sqlite3
+from typing import Any
 
 import aiosqlite
 
-from typing import Any
-from cortex.search.models import SearchResult
 from cortex.crypto.aes import CortexEncrypter
+from cortex.search.models import SearchResult
 
 V6_PREFIX = CortexEncrypter.PREFIX
 
@@ -69,6 +69,7 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
       14: bm25(facts_fts) AS rank  [FTS only]
     """
     from cortex.crypto import get_default_encrypter
+
     enc = get_default_encrypter()
 
     fact_id = row[0]
@@ -156,14 +157,9 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
         score = 0.5
 
     from cortex.crypto import get_default_encrypter
-    enc = get_default_encrypter()
 
-    content = row[1]
-    if content and str(content).startswith(V6_PREFIX):
-        try:
-            content = enc.decrypt_str(content)
-        except Exception:
-            pass
+    enc = get_default_encrypter()
+    content = _decrypt_row_content(row[1], "default", enc)
 
     return SearchResult(
         fact_id=row[0],

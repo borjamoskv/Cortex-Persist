@@ -15,8 +15,8 @@ import aiosqlite
 if TYPE_CHECKING:
     from cortex.crypto import CortexEncrypter
 
-from cortex.search.models import SearchResult
 from cortex.memory.temporal import build_temporal_filter_params
+from cortex.search.models import SearchResult
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
@@ -38,7 +38,9 @@ async def semantic_search(
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
-    sql, params = _build_semantic_query(tenant_id, embedding_json, top_k, project, as_of, confidence)
+    sql, params = _build_semantic_query(
+        tenant_id, embedding_json, top_k, project, as_of, confidence
+    )
 
     try:
         cursor = await conn.execute(sql, params)
@@ -48,6 +50,7 @@ async def semantic_search(
         return []
 
     from cortex.crypto import get_default_encrypter
+
     enc = get_default_encrypter()
 
     return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]

@@ -34,6 +34,7 @@ from cortex.thinking.context_fusion import ContextFusion
 
 try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
@@ -58,8 +59,14 @@ class CortexMemoryManager:
     """
 
     __slots__ = (
-        "_encoder", "_l1", "_l2", "_l3", "_router",
-        "_background_tasks", "_max_bg_tasks", "_fusion"
+        "_encoder",
+        "_l1",
+        "_l2",
+        "_l3",
+        "_router",
+        "_background_tasks",
+        "_max_bg_tasks",
+        "_fusion",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -138,7 +145,7 @@ class CortexMemoryManager:
             if len(self._background_tasks) >= self._max_bg_tasks:
                 logger.warning(
                     "MemoryManager: Background task queue full (%d). Dropping overflow task.",
-                    self._max_bg_tasks
+                    self._max_bg_tasks,
                 )
             else:
                 task = asyncio.create_task(
@@ -193,7 +200,7 @@ class CortexMemoryManager:
                         "content": ep.content,
                         "timestamp": ep.timestamp,
                         "score": getattr(ep, "_recall_score", 0.0),
-                        "metadata": ep.metadata
+                        "metadata": ep.metadata,
                     }
                     for ep in episodes
                 ]
@@ -212,8 +219,7 @@ class CortexMemoryManager:
         # Apply Semantic Fusion if requested and available
         if fuse_context and retrieved_facts:
             context["episodic_context"] = await self._fusion.fuse_context(
-                user_prompt=query or "",
-                retrieved_facts=retrieved_facts
+                user_prompt=query or "", retrieved_facts=retrieved_facts
             )
         else:
             context["episodic_context"] = retrieved_facts
@@ -275,7 +281,7 @@ class CortexMemoryManager:
                 len(events),
                 session_id,
                 "llm" if self._router else "raw",
-                "sovereign" if is_sovereign else "legacy"
+                "sovereign" if is_sovereign else "legacy",
             )
         except (OSError, RuntimeError, ValueError, TypeError) as e:
             # Background task — never crash the main loop
@@ -342,12 +348,12 @@ class CortexMemoryManager:
             return
 
         import os
+
         _testing = os.environ.get("CORTEX_TESTING")
 
         try:
             await asyncio.wait_for(
-                asyncio.gather(*self._background_tasks, return_exceptions=True),
-                timeout=timeout
+                asyncio.gather(*self._background_tasks, return_exceptions=True), timeout=timeout
             )
         except asyncio.TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)

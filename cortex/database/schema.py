@@ -40,7 +40,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.0.0"
+SCHEMA_VERSION = "5.1.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS facts (
     source      TEXT,
     meta        TEXT DEFAULT '{}',
     consensus_score REAL DEFAULT 1.0,
+    signature   TEXT,
+    signer_pubkey TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     tx_id       INTEGER REFERENCES transactions(id)
@@ -385,6 +387,12 @@ CREATE TABLE IF NOT EXISTS tenants (
     is_active   INTEGER NOT NULL DEFAULT 1,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
+"""
+
+# ─── Signature Migration (add columns to existing facts tables) ──────
+MIGRATE_ADD_SIGNATURE_COLUMNS = """
+ALTER TABLE facts ADD COLUMN signature TEXT;
+ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 """
 
 

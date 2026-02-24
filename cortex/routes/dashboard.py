@@ -11,8 +11,8 @@ __all__ = ["router", "get_dashboard_html"]
 
 
 def get_dashboard_html() -> str:
-    '''Return the HTML payload for the dashboard.'''
-    return r'''
+    """Return the HTML payload for the dashboard."""
+    return r"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -37,7 +37,8 @@ def get_dashboard_html() -> str:
         <div id="app"></div>
     </body>
     </html>
-    '''
+    """
+
 
 router = APIRouter(tags=["dashboard"])
 

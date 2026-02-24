@@ -56,8 +56,12 @@ nav:
       - Security: security.md
   - Tutorials:
       - Memory for LangChain Agents: tutorials/langchain.md
+      - Multi-Agent Consensus: tutorials/consensus.md
       - Time-Travel Debugging: tutorials/temporal.md
       - Site Monitoring Daemon: tutorials/daemon.md
+  - Project:
+      - FAQ: faq.md
+      - Changelog: changelog.md
 
 markdown_extensions:
   - pymdownx.highlight:

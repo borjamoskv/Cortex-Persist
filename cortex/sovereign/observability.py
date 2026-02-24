@@ -3,20 +3,22 @@
 Provides OpenTelemetry instrumentation, custom metrics, and
 the power-level calculation that targets 1300/1000.
 """
+
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Power-level scoring (target: 1300/1000)
 # ---------------------------------------------------------------------------
 
+
 class Dimension(Enum):
     """The 13 sovereign dimensions (from MEJORAlo X-Ray 13D)."""
+
     INTEGRITY = "integrity"
     ARCHITECTURE = "architecture"
     SECURITY = "security"
@@ -35,8 +37,8 @@ class Dimension(Enum):
 @dataclass
 class DimensionScore:
     dimension: Dimension
-    raw: float          # 0-100
-    multiplier: float   # 130/100 multiplier applied per dimension
+    raw: float  # 0-100
+    multiplier: float  # 130/100 multiplier applied per dimension
     weighted: float = 0.0
 
     def __post_init__(self) -> None:
@@ -46,7 +48,8 @@ class DimensionScore:
 @dataclass
 class PowerLevel:
     """Aggregate sovereign power level across all dimensions."""
-    dimensions: List[DimensionScore] = field(default_factory=list)
+
+    dimensions: list[DimensionScore] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
 
     @property
@@ -73,7 +76,7 @@ class PowerLevel:
         base = len(self.dimensions) * 100  # "theoretical max" baseline
         return int((self.weighted_total / base) * 1000)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "power_level": self.power,
             "raw_total": self.raw_total,
@@ -91,12 +94,12 @@ class PowerLevel:
         }
 
 
-def compute_power(scores: Dict[str, float], multiplier: float = 1.3) -> PowerLevel:
+def compute_power(scores: dict[str, float], multiplier: float = 1.3) -> PowerLevel:
     """Compute power level from a dict of dimension → raw score.
 
     The default ``multiplier`` of 1.3 implements the 130/100 standard.
     """
-    dims: List[DimensionScore] = []
+    dims: list[DimensionScore] = []
     for dim in Dimension:
         raw = scores.get(dim.value, 0.0)
         dims.append(DimensionScore(dimension=dim, raw=raw, multiplier=multiplier))
@@ -119,14 +122,14 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
     global _tracer, _meter
 
     try:
-        from opentelemetry import trace, metrics
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.metrics import MeterProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
-        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry import metrics, trace
         from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
         from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
         resource = Resource.create({"service.name": service_name})
 
@@ -154,7 +157,7 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
         print("[observability] OpenTelemetry packages not installed — running without telemetry")
 
 
-_latest_power: Optional[PowerLevel] = None
+_latest_power: PowerLevel | None = None
 
 
 def record_power(power: PowerLevel) -> None:
@@ -166,6 +169,7 @@ def record_power(power: PowerLevel) -> None:
 def _power_gauge_callback(_options: Any) -> Any:
     """Observable gauge callback for sovereign power."""
     from opentelemetry.metrics import Observation
+
     if _latest_power is not None:
         yield Observation(_latest_power.power, {"version": "v5"})
 
@@ -174,15 +178,17 @@ def _power_gauge_callback(_options: Any) -> Any:
 # Security scanner integration
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SecurityReport:
     """Results of an automated security scan."""
+
     critical: int = 0
     high: int = 0
     medium: int = 0
     low: int = 0
     passed: bool = True
-    details: List[str] = field(default_factory=list)
+    details: list[str] = field(default_factory=list)
 
     @property
     def total(self) -> int:
@@ -191,7 +197,8 @@ class SecurityReport:
 
 def run_security_scans(target: str = "cortex/") -> SecurityReport:
     """Run Bandit + Safety scans and return a consolidated report."""
-    import subprocess, json
+    import json
+    import subprocess
 
     report = SecurityReport()
 
@@ -199,7 +206,9 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
     try:
         result = subprocess.run(
             ["bandit", "-r", target, "-f", "json", "-q"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True,
+            text=True,
+            timeout=120,
         )
         data = json.loads(result.stdout) if result.stdout else {}
         for issue in data.get("results", []):
@@ -218,7 +227,9 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
     try:
         result = subprocess.run(
             ["safety", "check", "--json"],
-            capture_output=True, text=True, timeout=60,
+            capture_output=True,
+            text=True,
+            timeout=60,
         )
         vulns = json.loads(result.stdout) if result.stdout else []
         report.critical += len(vulns)

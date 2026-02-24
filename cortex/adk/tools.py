@@ -33,6 +33,7 @@ _DEFAULT_DB: Final = str(Path("~/.cortex/cortex.db").expanduser())
 def _get_db_path() -> str:
     """Resolve the active CORTEX database path."""
     import os
+
     return os.environ.get("CORTEX_DB_PATH", _DEFAULT_DB)
 
 
