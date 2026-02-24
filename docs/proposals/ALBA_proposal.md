@@ -120,7 +120,7 @@ $ cortex compliance-report
 
 - **Fundador:** Borja Fernandez — 15+ años en arquitectura de software
 - **Tecnología:** CORTEX v4.3 — motor de memoria con ledger criptográfico
-- **Licencia:** BSL-1.1 (Business Source License)
+- **Licencia:** Apache 2.0
 - **Stack:** Python, SQLite, SHA-256, Merkle Trees, FastAPI
 
 ---

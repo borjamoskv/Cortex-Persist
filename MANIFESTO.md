@@ -55,4 +55,4 @@ We don't want to be the biggest. We want to be the most trusted.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv). Licensed under BSL-1.1.*
+*Built by [Borja Moskv](https://github.com/borjamoskv). Licensed under Apache 2.0.*

@@ -4,7 +4,7 @@
 > Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
 > *The layer that proves your agents' decisions are true.*
 
-![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v8.0%20alpha-orange.svg)
 ![Tests](https://img.shields.io/badge/tests-1162%2B%20passing-brightgreen.svg)

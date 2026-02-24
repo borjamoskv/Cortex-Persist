@@ -37,20 +37,18 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ## Licensing
 
-### Why BSL 1.1 and not Apache 2.0?
+### Why Apache 2.0?
 
-The **Business Source License 1.1** is the same license used by [CockroachDB](https://github.com/cockroachdb/cockroach), [Sentry](https://github.com/getsentry/sentry), and [MariaDB](https://mariadb.com/bsl-faq-mariadb/). It works like this:
+CORTEX is licensed under the **Apache License 2.0** — one of the most permissive and widely adopted open-source licenses. This means:
 
-- ✅ **Free for development, testing, and non-production use**
-- ✅ **Free for internal tools** (not offered as a service to third parties)
-- ✅ **Automatically converts to Apache 2.0 in 2030**
-- ❌ You cannot resell CORTEX as a hosted service without a commercial license
-
-This protects the project while keeping it effectively open-source for 99% of users.
+- ✅ **Free for any use** — commercial, personal, enterprise, SaaS
+- ✅ **Modify and redistribute** without restrictions
+- ✅ **No copyleft obligations** — no requirement to open-source your code
+- ✅ **Patent protection** — contributors grant patent rights
 
 ### Can I use CORTEX in my company?
 
-Yes. BSL 1.1 allows all internal use. You only need a commercial license if you're offering CORTEX to third parties as a service (e.g., "Trust-as-a-Service" built on CORTEX).
+Yes. Apache 2.0 allows unrestricted commercial use. Build products, SaaS services, or internal tools — no separate license needed.
 
 ---
 

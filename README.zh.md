@@ -5,7 +5,7 @@
 > **为 AI 代理记忆提供密码学验证、审计追踪和欧盟 AI 法案合规支持。**
 > *证明你的代理决策可信的那一层。*
 
-![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
@@ -225,7 +225,7 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 
 ## 许可证
 
-**Business Source License 1.1** (BSL-1.1)。
+**Apache License 2.0** — 任何用途均免费。
 非生产和开发用途免费。2030 年 1 月 1 日自动转换为 Apache 2.0。
 详情见 [LICENSE](LICENSE)。
 

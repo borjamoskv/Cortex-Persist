@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0
 **Date:** February 20, 2026
-**System:** CORTEX Trust Engine v4.3 (BSL-1.1)
+**System:** CORTEX Trust Engine v0.3.0-beta (Apache-2.0)
 
 ---
 
