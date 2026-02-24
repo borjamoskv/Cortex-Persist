@@ -3,7 +3,7 @@
 # CORTEX — Trust Infrastructure for Autonomous AI
 
 > **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
-> *The layer that proves your agents' decisions are true.*
+> *CORTEX is to AI memory what SSL/TLS is to web communications.*
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)

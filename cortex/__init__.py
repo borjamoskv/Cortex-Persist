@@ -19,4 +19,18 @@ __author__ = "Borja Moskv"
 
 from cortex.engine import CortexEngine
 
+# Experimental modules (optional — not part of core package)
+try:
+    from .experimental import (  # noqa: F401
+        autopoiesis,
+        circadian_cycle,
+        digital_endocrine,
+        epigenetic_memory,
+        strategic_disobedience,
+        zero_prompting,
+    )
+except ImportError:
+    pass
+
 __all__ = ["CortexEngine", "__version__"]
+
