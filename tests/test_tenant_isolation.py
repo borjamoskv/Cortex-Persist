@@ -126,8 +126,8 @@ class TestTenantIsolationSearch:
             tenant_id="tenant-y",
         )
 
-        contents_x = [r["content"] for r in results_x]
-        contents_y = [r["content"] for r in results_y]
+        contents_x = [r.content for r in results_x]
+        contents_y = [r.content for r in results_y]
 
         assert any("React" in c for c in contents_x)
         assert not any("Vue" in c for c in contents_x)

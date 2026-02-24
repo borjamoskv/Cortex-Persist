@@ -16,6 +16,22 @@ from cortex.routes.stripe import (
     _generate_api_key,
 )
 
+
+# ─── Helpers ─────────────────────────────────────────────────────────
+
+
+def _make_mock_stripe() -> MagicMock:
+    """Create a MagicMock stripe module with real exception classes."""
+    mock = MagicMock()
+    # The route handlers use `except stripe.StripeError` — Python requires
+    # these to be actual exception *classes*, not MagicMock objects.
+    mock.StripeError = type("StripeError", (Exception,), {})
+    mock.SignatureVerificationError = type(
+        "SignatureVerificationError", (mock.StripeError,), {}
+    )
+    return mock
+
+
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
@@ -47,7 +63,7 @@ def client(_stripe_env):
     if not stripe_paths:
         app.include_router(stripe_router)
 
-    return TestClient(app)
+    return TestClient(app, raise_server_exceptions=False)
 
 
 # ─── Plan Config ─────────────────────────────────────────────────────
@@ -96,7 +112,7 @@ class TestKeyGeneration:
 class TestCheckout:
     @patch("cortex.routes.stripe._get_stripe")
     def test_checkout_creates_session(self, mock_get_stripe, client):
-        mock_stripe = MagicMock()
+        mock_stripe = _make_mock_stripe()
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/test_session",
             id="cs_test_123",
@@ -119,7 +135,7 @@ class TestCheckout:
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_checkout_invalid_plan(self, mock_get_stripe, client):
-        mock_get_stripe.return_value = MagicMock()
+        mock_get_stripe.return_value = _make_mock_stripe()
 
         resp = client.post(
             "/v1/stripe/checkout",
@@ -131,7 +147,7 @@ class TestCheckout:
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_checkout_default_plan(self, mock_get_stripe, client):
-        mock_stripe = MagicMock()
+        mock_stripe = _make_mock_stripe()
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/default",
             id="cs_default",
@@ -153,7 +169,7 @@ class TestWebhook:
     @patch("cortex.routes.stripe._provision_api_key")
     @patch("cortex.routes.stripe._get_stripe")
     def test_webhook_checkout_completed(self, mock_get_stripe, mock_provision, client):
-        mock_stripe = MagicMock()
+        mock_stripe = _make_mock_stripe()
         mock_stripe.Webhook.construct_event.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -180,11 +196,11 @@ class TestWebhook:
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_webhook_invalid_signature(self, mock_get_stripe, client):
-        mock_stripe = MagicMock()
-        # Create a proper exception class for SignatureVerificationError
-        sig_error = type("SignatureVerificationError", (Exception,), {})
-        mock_stripe.SignatureVerificationError = sig_error
-        mock_stripe.Webhook.construct_event.side_effect = sig_error("bad sig")
+        mock_stripe = _make_mock_stripe()
+        # Use the real exception class we set up on the mock
+        mock_stripe.Webhook.construct_event.side_effect = (
+            mock_stripe.SignatureVerificationError("bad sig")
+        )
         mock_get_stripe.return_value = mock_stripe
 
         resp = client.post(
@@ -197,7 +213,7 @@ class TestWebhook:
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_webhook_ignores_unknown_events(self, mock_get_stripe, client):
-        mock_stripe = MagicMock()
+        mock_stripe = _make_mock_stripe()
         mock_stripe.Webhook.construct_event.return_value = {
             "type": "invoice.paid",
             "data": {"object": {}},
@@ -220,7 +236,7 @@ class TestWebhook:
 class TestPortal:
     @patch("cortex.routes.stripe._get_stripe")
     def test_portal_creates_session(self, mock_get_stripe, client):
-        mock_stripe = MagicMock()
+        mock_stripe = _make_mock_stripe()
         mock_stripe.billing_portal.Session.create.return_value = SimpleNamespace(
             url="https://billing.stripe.com/session/test",
         )
