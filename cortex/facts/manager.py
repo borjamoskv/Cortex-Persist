@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import sqlite3
 from typing import Any
 
 from cortex.engine.models import Fact, row_to_fact
-from cortex.search import SearchResult, semantic_search, text_search
 from cortex.memory.temporal import build_temporal_filter_params, now_iso
 
 __all__ = ["FactManager"]
@@ -30,7 +28,7 @@ class FactManager:
         self.engine = engine
 
     # Minimum content length to prevent garbage facts.
-    MIN_CONTENT_LENGTH = 20
+    MIN_CONTENT_LENGTH = 10
 
     async def store(
         self,
@@ -45,121 +43,32 @@ class FactManager:
         valid_from: str | None = None,
         commit: bool = True,
         tx_id: int | None = None,
-        _skip_dedup: bool = False,
     ) -> int:
-        content = self._validate_content(project, content, fact_type)
-
-        conn = await self.engine.get_conn()
-        if not _skip_dedup:
-            existing_id = await self._check_dedup(conn, tenant_id, project, content)
-            if existing_id is not None:
-                return existing_id
-
-        ts = valid_from or now_iso()
-        tags_json = json.dumps(tags or [])
-
-        from cortex.crypto import get_default_encrypter
-
-        enc = get_default_encrypter()
-        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
-        encrypted_meta = enc.encrypt_json(meta or {}, tenant_id=tenant_id)
-
-        cursor = await conn.execute(
-            "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
-            "valid_from, source, meta, created_at, updated_at, tx_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                tenant_id,
-                project,
-                encrypted_content,
-                fact_type,
-                tags_json,
-                confidence,
-                ts,
-                source,
-                encrypted_meta,
-                ts,
-                ts,
-                tx_id,
-            ),
-        )
-        fact_id = cursor.lastrowid
-
-        await self._post_store_enrichment(conn, fact_id, content, project, ts)
-
-        tx_id = await self.engine._log_transaction(
-            conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
-        )
-        await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (tx_id, fact_id))
-
-        if commit:
-            await conn.commit()
-
-        return fact_id
-
-    def _validate_content(self, project: str, content: str, fact_type: str) -> str:
-        """Validate and sanitize fact content. Returns cleaned content."""
-        if not project or not project.strip():
-            raise ValueError("project cannot be empty")
-        if not content or not content.strip():
-            raise ValueError("content cannot be empty")
-
-        content = content.strip()
-        if len(content) < self.MIN_CONTENT_LENGTH:
+        """Sovereign Store: Delegates to engine with pre-validation."""
+        # Manager-specific validation
+        if len(content.strip()) < self.MIN_CONTENT_LENGTH:
             raise ValueError(
-                f"content too short ({len(content)} chars, min {self.MIN_CONTENT_LENGTH})"
+                f"content too short ({len(content.strip())} chars, min {self.MIN_CONTENT_LENGTH})"
             )
 
-        if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
-            content = content.replace("DECISION: DECISION:", "DECISION:", 1)
+        from cortex.engine.store_mixin import StoreMixin
 
-        return content
-
-    async def _check_dedup(
-        self,
-        conn: Any,
-        tenant_id: str,
-        project: str,
-        content: str,
-    ) -> int | None:
-        """Check for duplicate facts. Returns existing ID or None."""
-        cursor = await conn.execute(
-            "SELECT id FROM facts "
-            "WHERE tenant_id = ? AND project = ? AND content = ? "
-            "AND valid_until IS NULL LIMIT 1",
-            (tenant_id, project, content),
+        conn = await self.engine.get_conn()
+        return await StoreMixin._store_impl(
+            self.engine,
+            conn,
+            project,
+            content,
+            tenant_id,
+            fact_type,
+            tags,
+            confidence,
+            source,
+            meta,
+            valid_from,
+            commit,
+            tx_id,
         )
-        existing = await cursor.fetchone()
-        if existing:
-            logger.info("Dedup: fact already exists as #%d in %s", existing[0], project)
-            return existing[0]
-        return None
-
-    async def _post_store_enrichment(
-        self,
-        conn: Any,
-        fact_id: int,
-        content: str,
-        project: str,
-        ts: str,
-    ) -> None:
-        """Run embedding and graph extraction after storing a fact."""
-        if self.engine._auto_embed and self.engine._vec_available:
-            try:
-                embedding = self.engine.embeddings.embed(content)
-                await conn.execute(
-                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, json.dumps(embedding)),
-                )
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
-
-        from cortex.graph import process_fact_graph
-
-        try:
-            await process_fact_graph(conn, fact_id, content, project, ts)
-        except (sqlite3.Error, OSError, ValueError) as e:
-            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:
@@ -204,32 +113,22 @@ class FactManager:
         top_k: int = 5,
         as_of: str | None = None,
         **kwargs,
-    ) -> list[SearchResult]:
-        if not query or not query.strip():
-            raise ValueError("query cannot be empty")
-        conn = await self.engine.get_conn()
-        results = []
-        try:
-            results = await semantic_search(
-                conn, self.engine.embeddings.embed(query), top_k, tenant_id, project, as_of
-            )
-        except (sqlite3.Error, OSError, ValueError) as e:
-            logger.warning("Semantic search failed: %s", e)
+    ) -> list:
+        """Sovereign Search: Calls SearchMixin.search directly.
 
-        if not results:
-            results = await text_search(conn, query, tenant_id, project, limit=top_k)
+        Avoids CortexEngine override recursion.
+        """
+        from cortex.engine.search_mixin import SearchMixin
 
-        graph_depth = kwargs.get("graph_depth", 0)
-        if results and graph_depth > 0:
-            from cortex.graph import extract_entities, get_context_subgraph
-
-            for res in results:
-                entities = extract_entities(res.content)
-                seeds = [e["name"] for e in entities]
-                if seeds:
-                    res.graph_context = await get_context_subgraph(conn, seeds, depth=graph_depth)
-
-        return results
+        return await SearchMixin.search(
+            self.engine,
+            query=query,
+            tenant_id=tenant_id,
+            project=project,
+            top_k=top_k,
+            as_of=as_of,
+            **kwargs,
+        )
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
@@ -256,83 +155,21 @@ class FactManager:
     async def update(
         self,
         fact_id: int,
-        target_tenant_id: str = "default",
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> int:
-        conn = await self.engine.get_conn()
-        cursor = await conn.execute(
-            "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
-            "FROM facts WHERE id = ? AND valid_until IS NULL",
-            (fact_id,),
+        """Sovereign Update: Calls StoreMixin.update directly on the engine."""
+        from cortex.engine.store_mixin import StoreMixin
+
+        return await StoreMixin.update(
+            self.engine, fact_id=fact_id, content=content, tags=tags, meta=meta
         )
-        row = await cursor.fetchone()
-        if not row:
-            raise ValueError(f"Fact {fact_id} not found")
-
-        # Validate tenant match if target_tenant_id provided
-        (db_tenant, project, old_content, fact_type, old_tags_json,
-         confidence, source, meta_json) = row
-        if target_tenant_id != "default" and db_tenant != target_tenant_id:
-            msg = f"Fact {fact_id} belongs to tenant {db_tenant}, not {target_tenant_id}"
-            raise ValueError(msg)
-
-        from cortex.crypto import get_default_encrypter
-        enc = get_default_encrypter()
-        # We need to decrypt content and meta if they were encrypted
-        decrypted_content = enc.decrypt_str(old_content, tenant_id=db_tenant)
-        decrypted_meta = enc.decrypt_json(meta_json, tenant_id=db_tenant) if meta_json else {}
-
-        new_meta = dict(decrypted_meta)
-        if meta:
-            new_meta.update(meta)
-        new_meta["previous_fact_id"] = fact_id
-
-        new_id = await self.store(
-            project=project,
-            content=content if content is not None else decrypted_content,
-            tenant_id=db_tenant,
-            fact_type=fact_type,
-            tags=tags if tags is not None else json.loads(old_tags_json or "[]"),
-            confidence=confidence,
-            source=source,
-            meta=new_meta,
-            _skip_dedup=True,
-        )
-        await self.deprecate(fact_id, reason=f"updated_by_{new_id}")
-        return new_id
 
     async def deprecate(self, fact_id: int, reason: str | None = None) -> bool:
-        if not isinstance(fact_id, int) or fact_id <= 0:
-            raise ValueError("Invalid fact_id")
-
-        conn = await self.engine.get_conn()
-        ts = now_iso()
-        cursor = await conn.execute(
-            "UPDATE facts SET valid_until = ?, updated_at = ?, "
-            "meta = json_set(COALESCE(meta, '{}'), '$.deprecation_reason', ?) "
-            "WHERE id = ? AND valid_until IS NULL",
-            (ts, ts, reason or "deprecated", fact_id),
-        )
-
-        if cursor.rowcount > 0:
-            cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
-            row = await cursor.fetchone()
-            await self.engine._log_transaction(
-                conn,
-                row[0] if row else "unknown",
-                "deprecate",
-                {"fact_id": fact_id, "reason": reason},
-            )
-            # CDC: Encole for Neo4j sync
-            await conn.execute(
-                "INSERT INTO graph_outbox (fact_id, action, status) VALUES (?, ?, ?)",
-                (fact_id, "deprecate_fact", "pending"),
-            )
-            await conn.commit()
-            return True
-        return False
+        """Sovereign Deprecation: Calls StoreMixin.deprecate directly on the engine."""
+        from cortex.engine.store_mixin import StoreMixin
+        return await StoreMixin.deprecate(self.engine, fact_id=fact_id, reason=reason)
 
     async def history(
         self,
