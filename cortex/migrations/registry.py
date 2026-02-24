@@ -19,6 +19,8 @@ from cortex.migrations.mig_ledger import (
     _migration_014_vote_ledger_refinement,
 )
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
+from cortex.migrations.mig_hash import _migration_016_add_fact_hash
+from cortex.migrations.mig_fts import _migration_017_fts_decouple
 
 __all__ = ["MIGRATIONS"]
 
@@ -38,4 +40,6 @@ MIGRATIONS = [
     (13, "HA Cluster Nodes", _migration_013_cluster_nodes),
     (14, "Wave 5 Immutable Ledger Refinement", _migration_014_vote_ledger_refinement),
     (15, "Sovereign Tenant Unification", _migration_015_tenant_unification),
+    (16, "Add hash column to facts for dedup", _migration_016_add_fact_hash),
+    (17, "Decouple FTS from facts table and use plaintext", _migration_017_fts_decouple),
 ]

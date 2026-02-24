@@ -53,30 +53,7 @@ def _migration_005_fts5_setup(conn: sqlite3.Connection):
     """Setup FTS5 virtual table for high-performance text search."""
     conn.execute(
         "CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5("
-        "    content, project, tags, fact_type,"
-        "    content='facts', content_rowid='id'"
+        "    content, project, tags, fact_type"
         ")"
     )
-    # Rebuild FTS index from existing facts
-    conn.execute("INSERT INTO facts_fts(facts_fts) VALUES('rebuild')")
-
-    # Triggers to keep FTS5 in sync with facts table
-    conn.executescript("""
-        CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts BEGIN
-            INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-            VALUES (new.id, new.content, new.project, new.tags, new.fact_type);
-        END;
-
-        CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
-            INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type)
-            VALUES ('delete', old.id, old.content, old.project, old.tags, old.fact_type);
-        END;
-
-        CREATE TRIGGER IF NOT EXISTS facts_au AFTER UPDATE ON facts BEGIN
-            INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type)
-            VALUES ('delete', old.id, old.content, old.project, old.tags, old.fact_type);
-            INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-            VALUES (new.id, new.content, new.project, new.tags, new.fact_type);
-        END;
-    """)
-    logger.info("Migration 005: Initialized FTS5 search table with sync triggers")
+    logger.info("Migration 005: Initialized FTS5 search table")

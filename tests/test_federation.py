@@ -105,7 +105,7 @@ class TestTenantIdSanitization:
 class TestEngineFactory:
     """Tests for get_engine() factory function."""
 
-    @patch("cortex.federation.FEDERATION_MODE", "single")
+    @patch("cortex.federation.main.FEDERATION_MODE", "single")
     def test_single_mode_returns_cortex_engine(self):
         """Single mode should return standard CortexEngine."""
         engine = get_engine(auto_embed=False)
@@ -113,7 +113,7 @@ class TestEngineFactory:
 
         assert isinstance(engine, CortexEngine)
 
-    @patch("cortex.federation.FEDERATION_MODE", "federated")
+    @patch("cortex.federation.main.FEDERATION_MODE", "federated")
     def test_federated_mode_returns_federated_engine(self):
         """Federated mode should return FederatedEngine."""
         engine = get_engine(auto_embed=False)

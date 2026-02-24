@@ -24,16 +24,16 @@ def dashboard_env(tmp_path):
 @pytest.fixture()
 def client(dashboard_env):
     # Import here so CORTEX_DB env is set before the module-level DB_PATH reads it
-    # We need to patch the DB_PATH directly since it's read at import time
     import cortex.api.core as api_mod
+    from cortex import config
 
-    original_db = api_mod.DB_PATH
-    api_mod.DB_PATH = dashboard_env
+    original_db = config.DB_PATH
+    config.DB_PATH = dashboard_env
     try:
         with TestClient(api_mod.app) as c:
             yield c, api_mod
     finally:
-        api_mod.DB_PATH = original_db
+        config.DB_PATH = original_db
 
 
 def test_daily_method(client):
@@ -64,7 +64,7 @@ def test_history_endpoint(client):
     # Reset AuthManager to pick up test DB
     import cortex.api.state as api_state
 
-    cortex.api_state.auth_manager = None
+    api_state.auth_manager = None
 
     # Create an API key for this test
     resp = c.post("/v1/admin/keys?name=test-key&tenant_id=test")

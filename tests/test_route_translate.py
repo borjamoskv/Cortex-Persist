@@ -40,7 +40,7 @@ def auth_headers(client: TestClient) -> dict[str, str]:
     from cortex.auth import AuthManager
 
     mgr = AuthManager(_test_db)
-    raw_key, _ = mgr.create_key(
+    raw_key, _ = mgr.create_key_sync(
         name="test-translate-key",
         tenant_id="test",
         permissions=["read", "write"],
