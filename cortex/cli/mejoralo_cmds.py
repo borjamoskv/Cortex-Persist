@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli import DEFAULT_DB, cli, console, get_engine, close_engine_sync
 
 __all__ = [
     "mejoralo",
@@ -75,7 +75,7 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
             else:
                 console.print("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 def _display_scan_result(result):
@@ -176,7 +176,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
             f"{score_before} → {score_after} ([{color}]Δ{delta:+d}[/])"
         )
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @mejoralo.command("history")
@@ -222,7 +222,7 @@ def mejoralo_history(project, limit, db):
             )
         console.print(table)
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @mejoralo.command("ship")
@@ -251,7 +251,7 @@ def mejoralo_ship(project, path, db):
                 f"  [bold red]⛔ NOT READY — {result.passed}/{result.total} sellos aprobados[/]"
             )
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @mejoralo.command("daemon")
