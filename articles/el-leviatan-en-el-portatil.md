@@ -4,77 +4,104 @@
 
 ---
 
-El 99% de los "proyectos personales" de Inteligencia Artificial que ves en GitHub o Twitter son exactamente la misma cosa: una fina capa de pintura por encima de la API de OpenAI. Un script. Un wrapper. Un prompt ingenioso metido en un contenedor de Docker.
+El 99% de los proyectos de inteligencia artificial que ves en GitHub son lo mismo: una capa de barniz sobre una API ajena. Un script con buenas intenciones. Un prompt ingenioso dentro de un contenedor de Docker, como un pez de colores dentro de un acuario que finge ser océano.
 
-CORTEX empezó igual. Como un intento ingenuo de darle un poco de memoria a mis sesiones de programación. 
+CORTEX empezó así. Un intento modesto de darle un poco de memoria a mis sesiones de código. Nada heroico. Nada que mereciera un nombre griego.
 
-Pero los sistemas tienen una forma curiosa de revelarte lo que quieren ser si les escuchas el tiempo suficiente. Lo que empezó como un simple log de decisiones se ha convertido, meses después, en una bestia arquitectónica. Un sistema operativo cognitivo que respira, observa, recuerda y, desde hace unas horas, **se cura a sí mismo**.
+Pero los sistemas tienen una forma curiosa de revelarte lo que quieren ser si les escuchas el tiempo suficiente. Y lo que empezó como un log de decisiones se ha transformado, capa sobre capa, noche tras noche, en algo que ya no cabe en la definición de "herramienta". Es un organismo. Un sistema operativo cognitivo que respira, observa, recuerda y, desde hace poco, **cierra sus propias heridas sin que nadie se lo pida**.
 
-Hoy miré la terminal y ejecuté la suite de pruebas. `855 passed`. 
+`1.162 tests passed`.
 
-Me detuve un segundo. Eché la vista atrás para contemplar el abismo de código que he escrito. Y me di cuenta de que, silenciosamente, he construido una proeza técnica genuina. No existen muchos proyectos personales en el planeta con esta profundidad, esta agilidad y esta paranoia por la excelencia.
+Paré. Miré el número. Eché la vista atrás para contemplar el abismo de código que había escrito sin darme cuenta de que estaba cavando una catedral.
 
-Esta es la anatomía del Leviatán.
+Esta es la anatomía de un leviatán que cabe en un portátil.
 
 ---
 
-## 1. Agnóstico y Universal: 20+ Modelos, Un Solo Cerebro
+## I. El Políglota Invisible
 
-La guerra de los modelos no me importa. GPT-4o hoy, Claude 3.5 Sonnet mañana, o un modelo local Open Source en un servidor propio pasado mañana. 
+La guerra de los modelos no me interesa. GPT hoy, Claude mañana, un modelo local Open Source pasado mañana — es irrelevante. Los generales cambian; el territorio permanece.
 
-CORTEX integra **más de 20 proveedores de LLM** de forma nativa. Su enrutador cognitivo puede lanzar una consulta rápida a un modelo *Flash* para extraer entidades de un texto, invocar a un modelo *Reasoning* para resolver un problema de arquitectura complejo, o delegar en un LLM local si la privacidad es crítica. 
+CORTEX integra más de veinte proveedores de modelos de forma nativa. Su enrutador puede lanzar una consulta rápida a un modelo Flash para extraer entidades, invocar a un Reasoning para resolver problemas de arquitectura que harían sudar a un comité, o delegar en un modelo local si la privacidad lo exige.
 
 Para el sistema, el modelo es solo el motor. El chasis, la memoria y la identidad siempre son míos.
 
-## 2. RAG Avanzado: Grafos, Embeddings y Compactación
-
-Un LLM con memoria infinita es un LLM que acaba en la locura. Si le das todo tu historial, se ahoga en el ruido. 
-
-Por eso CORTEX no usa bases de datos vectoriales infantiles. Implementa un sistema de **Grafos de Conocimiento** y **Embeddings Semánticos**. Cuando el sistema interactúa conmigo, no busca palabras clave; recupera grafos de conceptos conectados geográficamente en su espacio latente. 
-
-Y para evitar el colapso por entropía, tiene un **Compactador (Compactor Engine)**. Como el cerebro humano durante la fase REM, CORTEX analiza periódicamente sus propios recuerdos, detecta redundancias, fusiona aprendizajes similares y destila la información. Borra el ruido y cristaliza el conocimiento.
-
-## 3. Sentidos Propios: El Motor de Percepción
-
-CORTEX no es un bot pasivo que espera a que le escribas. Es un demonio (*daemon*) multiplataforma que funciona de fondo en macOS, Linux y Windows.
-
-A través del protocolo de **Percepción**, observa pasivamente mi actividad en el sistema de archivos. Entiende cuándo estoy cambiando de contexto, cuándo estoy atascado en un bug, o cuándo acabo de cerrar una tarea importante. Y, a partir de esas observaciones (eventos FSEvents/Watchdog), infiere mi intención y actualiza su contexto sin que yo tenga que teclear una sola palabra. Él sabe en qué estoy trabajando antes de que yo le pregunte.
-
-## 4. La Joya de la Corona: El Auto-Sanador Inmortal
-
-Seamos sinceros: el código envejece desde el momento en que pulsas *Save*. La deuda técnica y la entropía son leyes de la termodinámica del software.
-
-Hace unos meses construí **MEJORAlo**, un motor de análisis estático implacable (Puntuación 130/100 o desastre). Analizaba arquitectura, seguridad, complejidad anidada y "código muerto". 
-
-Pero ayer di el salto hacia lo que yo llamo **Soberanía de Nivel 5**. Le di a CORTEX la capacidad de arreglarse a sí mismo:
-1. El demonio detecta (en segundo plano) que la métrica de calidad de un repositorio cae por debajo de 70.
-2. Identifica el archivo exacto.
-3. Despierta un sub-agente LLM especializado con un prompt paramétrico severo.
-4. El LLM reescribe el código.
-5. CORTEX ejecuta silenciosamente la suite de `pytest` (Verificación Bizantina).
-6. Si pasa, hace un `git commit` automático firmado por el propio sistema. Si falla, hace rollback al instante.
-
-El código defectuoso nunca llega a producción, y la base de software cicatriza sola. Magia no; ingeniería.
-
-## 5. El Ecosistema de Expansión (SDKs y APIs)
-
-No puedes atar un leviatán de este tamaño a la línea de comandos. Así que le construí SDKs en **Python y JavaScript/TypeScript**.
-
-Cualquier proyecto futuro que construya — un micro-SaaS, una herramienta CLI, una app web o un bot de trading monetario (MONEYTV) — puede importar el SDK de CORTEX y heredar al instante:
-- Toda mi memoria episódica.
-- Historial de decisiones arquitectónicas.
-- Capacidad de traducción semántica (*OMNI-TRANSLATE*).
-- Prevención de repetición de errores pasados.
+Es como tener veinte idiomas y un solo pensamiento.
 
 ---
 
-## El Potencial: El Soberano Digital
+## II. La Memoria que Sueña
+
+Un modelo con memoria infinita es un modelo que enloquece. Si le das todo tu historial sin filtro, se ahoga en el ruido como un monje que intenta meditar en medio de un terremoto.
+
+Por eso CORTEX no almacena datos — **destila conocimiento**.
+
+Implementa un sistema de Grafos de Conocimiento y Embeddings Semánticos. Cuando interactúa conmigo, no busca palabras clave; recupera constelaciones de conceptos conectados geográficamente en un espacio latente de 384 dimensiones. No lee — *reconoce*.
+
+Y para evitar la entropía, posee un Compactador. Como el cerebro humano durante la fase REM, CORTEX analiza periódicamente sus propios recuerdos, detecta redundancias, fusiona aprendizajes y cristaliza la señal. Sueña para no olvidar lo importante. Olvida para no ahogarse en lo irrelevante.
+
+---
+
+## III. El Daemon que Observa
+
+CORTEX no es un asistente pasivo que espera a que le hables. Es un daemon — un espíritu digital — que respira en segundo plano en macOS, Linux y Windows.
+
+A través de su Protocolo de Percepción, observa pasivamente mi actividad en el sistema de archivos. Sabe cuándo cambio de contexto, cuándo llevo demasiado tiempo atascado en un bug, cuándo acabo de cerrar una tarea importante. Y a partir de esas señales — vibraciones casi imperceptibles del sistema — infiere mi intención y actualiza su contexto sin que yo toque el teclado.
+
+Él sabe en qué estoy trabajando antes de que yo lo sepa.
+
+Como un gato que se acerca a la puerta treinta segundos antes de que llegues a casa.
+
+---
+
+## IV. La Corona de Espinas: El Auto-Sanador
+
+El código envejece desde el instante en que pulsas *Save*. La deuda técnica y la entropía son leyes termodinámicas del software. Todo programa tiende al desorden. Todo sistema complejo tiende a la muerte térmica.
+
+A menos que alguien — o algo — lo impida.
+
+Construí **MEJORAlo**, un motor de análisis estático implacable que escanea 13 dimensiones de calidad. Pero eso era solo el diagnóstico. La verdadera revolución fue darle bisturí:
+
+1. El daemon detecta que la salud de un repositorio cae por debajo de un umbral.
+2. Localiza el archivo enfermo.
+3. Despierta un sub-agente LLM especializado armado con un prompt paramétrico severo.
+4. El LLM reescribe el código como un cirujano que opera con las luces apagadas.
+5. CORTEX ejecuta silenciosamente la suite de pruebas — su Verificación Bizantina.
+6. Si pasa, hace commit automático, firmado por la máquina. Si falla, revierte al instante.
+
+El código defectuoso nunca llega a producción. La base de software cicatriza sola. No es magia — es un sistema inmunológico.
+
+---
+
+## V. El Ecosistema
+
+No puedes atar un leviatán al terminal. Así que le construí SDKs en Python y TypeScript.
+
+Cualquier proyecto futuro — un micro-SaaS, una herramienta CLI, una app web, un bot de trading — puede importar el SDK y heredar instantáneamente:
+
+- Toda la memoria episódica acumulada.
+- El historial de decisiones arquitectónicas.
+- La prevención activa de errores ya cometidos.
+- La infraestructura de confianza criptográfica.
+
+Cada nuevo proyecto nace con 1.200+ facts de experiencia previa inyectados en sus venas. No empieza de cero. Empieza desde la última cicatriz.
+
+---
+
+## El Soberano Digital
 
 Llevamos años hablando del *10x Developer*. Es una métrica equivocada. Lo que viene no es producir diez veces más código. Lo que viene es construir el sistema cognitivo que te eleve por encima del código.
 
-Cuando juntas un enjambre de LLMs, una memoria de largo plazo, percepción en tiempo real, grafos de conocimiento y rutinas autónomas de auto-sanación... dejas de ser un ingeniero de software que programa botones. Te conviertes en un orquestador de realidades digitales.
+Cuando juntas un enjambre de modelos, una memoria de largo plazo con verificación criptográfica, percepción en tiempo real, grafos de conocimiento, rutinas autónomas de auto-sanación, y consenso multi-agente tolerante a fallos bizantinos... dejas de ser un ingeniero de software.
 
-CORTEX no es solo un asistente. Es una copia de seguridad cognitiva de mí mismo, acelerada por silicio, libre de licencias corporativas e inmune al olvido.
+Te conviertes en un arquitecto de realidades digitales.
+
+CORTEX no es un asistente. Es una copia de seguridad cognitiva de mí mismo, acelerada por silicio, libre de licencias corporativas, inmune al olvido, y verificable hasta el último bit.
 
 Ese es el verdadero poder de construir en modo Soberano.
-Y solo estamos en la versión 4.
+
+Y solo estamos en la versión 8.
+
+---
+
+*El leviatán no duerme. El leviatán no olvida. Y cuando el código empieza a pudrirse, el leviatán lo huele antes de que tú notes el olor.*

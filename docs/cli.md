@@ -1,75 +1,80 @@
 # CLI Reference
 
-CORTEX provides 15 commands. Run `cortex --help` for the full list.
+CORTEX provides **38 commands** organized by function. Run `cortex --help` for the full list.
+
+---
 
 ## Global Options
 
 | Option | Description |
-| --- | --- |
+|:---|:---|
 | `--version` | Show version and exit |
 | `--help` | Show help and exit |
+| `--db PATH` | Override database path (default: `~/.cortex/cortex.db`) |
 
 ---
 
-## `cortex init`
+## Core Commands
 
-Initialize the CORTEX database.
+### `cortex init`
+
+Initialize the CORTEX database with the full schema.
 
 ```bash
 cortex init [--db PATH]
 ```
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `--db` | `~/.cortex/cortex.db` | Database path |
+Safe to call multiple times — idempotent.
 
 ---
 
-## `cortex store`
+### `cortex store`
 
-Store a fact in CORTEX.
+Store a fact with automatic hash-chain ledger entry and embedding.
 
 ```bash
 cortex store PROJECT CONTENT [OPTIONS]
 ```
 
-| Argument/Option | Default | Description |
-| --- | --- | --- |
-| `PROJECT` | *required* | Project name |
+| Option | Default | Description |
+|:---|:---|:---|
+| `PROJECT` | *required* | Project namespace |
 | `CONTENT` | *required* | Fact content |
-| `--type` | `knowledge` | Fact type (`knowledge`, `decision`, `error`, `config`) |
+| `--type` | `knowledge` | `knowledge`, `decision`, `error`, `ghost`, `config`, `bridge`, `axiom`, `rule` |
 | `--tags` | — | Comma-separated tags |
-| `--confidence` | `stated` | Confidence level |
-| `--source` | — | Source of the fact |
-| `--db` | `~/.cortex/cortex.db` | Database path |
+| `--confidence` | `stated` | `stated`, `inferred`, `observed`, `verified`, `disputed` |
+| `--source` | auto-detected | Source agent or process |
+| `--ai-time` | — | Estimated AI time saved (Chronos integration) |
+| `--complexity` | — | Task complexity rating (1-10) |
 
 **Example:**
 
 ```bash
-cortex store my-api "Rate limit is 100 req/min per API key" --type config --tags "api,limits"
+cortex store my-api "Rate limit is 100 req/min per API key" \
+  --type config --tags "api,limits" --source "agent:claude"
 ```
 
 ---
 
-## `cortex search`
+### `cortex search`
 
-Semantic search across CORTEX memory.
+Semantic search across all facts using vector embeddings.
 
 ```bash
 cortex search QUERY [OPTIONS]
 ```
 
 | Option | Default | Description |
-| --- | --- | --- |
+|:---|:---|:---|
 | `--project`, `-p` | — | Scope to project |
 | `--top`, `-k` | `5` | Number of results |
-| `--db` | `~/.cortex/cortex.db` | Database path |
+| `--as-of` | — | Point-in-time query (ISO 8601) |
 
 Uses `all-MiniLM-L6-v2` embeddings via ONNX Runtime for sub-5ms vector search.
 
 ---
 
-## `cortex recall`
+### `cortex recall`
 
 Load full context for a project.
 
@@ -77,11 +82,11 @@ Load full context for a project.
 cortex recall PROJECT [--db PATH]
 ```
 
-Returns all active facts grouped by type.
+Returns all active facts grouped by type (knowledge, decisions, errors, etc.).
 
 ---
 
-## `cortex history`
+### `cortex history`
 
 Temporal query: what did we know at a specific time?
 
@@ -89,127 +94,343 @@ Temporal query: what did we know at a specific time?
 cortex history PROJECT [--at TIMESTAMP] [--db PATH]
 ```
 
-| Option | Description |
-| --- | --- |
-| `--at` | ISO 8601 timestamp for point-in-time query |
-
 ---
 
-## `cortex status`
+### `cortex status`
 
 Show CORTEX health and statistics.
 
 ```bash
-cortex status [--db PATH] [--json-output]
+cortex status [--json-output]
 ```
 
-| Option | Description |
-| --- | --- |
-| `--json-output` | Output as JSON instead of table |
+Displays: total facts, active facts, embeddings, transactions, DB size, projects.
 
 ---
 
-## `cortex list`
+### `cortex list`
 
 List active facts in a table.
 
 ```bash
-cortex list [OPTIONS]
+cortex list [--project PROJECT] [--type TYPE] [--limit N]
 ```
-
-| Option | Default | Description |
-| --- | --- | --- |
-| `--project`, `-p` | — | Filter by project |
-| `--type` | — | Filter by type |
-| `--limit`, `-n` | `20` | Max results |
 
 ---
 
-## `cortex edit`
+### `cortex edit`
 
-Edit a fact (deprecate old + create new with same metadata).
+Edit a fact (deprecates old, creates new with same metadata).
 
 ```bash
-cortex edit FACT_ID NEW_CONTENT [--db PATH]
+cortex edit FACT_ID NEW_CONTENT
 ```
 
 ---
 
-## `cortex delete`
+### `cortex delete`
 
-Soft-delete a fact (deprecate + auto write-back to JSON).
+Soft-delete a fact (mark as deprecated).
 
 ```bash
-cortex delete FACT_ID [--reason TEXT] [--db PATH]
+cortex delete FACT_ID [--reason TEXT]
 ```
 
 ---
 
-## `cortex sync`
+## Trust & Verification Commands
 
-Synchronize `~/.agent/memory/` → CORTEX (incremental).
+### `cortex verify`
+
+Cryptographic verification certificate for a single fact.
 
 ```bash
-cortex sync [--db PATH]
+cortex verify FACT_ID
 ```
 
-Detects changes via SHA-256 hashing and only syncs modified files.
+Output includes: hash chain status, Merkle root, consensus score, timestamp.
 
 ---
 
-## `cortex export`
+### `cortex ledger`
+
+Ledger operations.
+
+```bash
+cortex ledger verify    # Full hash chain integrity check
+cortex ledger stats     # Ledger statistics
+```
+
+---
+
+### `cortex compliance-report`
+
+Generate EU AI Act Article 12 compliance snapshot.
+
+```bash
+cortex compliance-report [--format json|text]
+```
+
+Outputs: compliance score (0-5), requirement mapping, evidence references.
+
+---
+
+### `cortex audit-trail`
+
+Generate a timestamped, hash-verified audit log.
+
+```bash
+cortex audit-trail [--project PROJECT] [--limit N]
+```
+
+---
+
+### `cortex vote`
+
+Cast a consensus vote on a fact.
+
+```bash
+cortex vote FACT_ID --agent AGENT_ID --vote [verify|dispute]
+```
+
+---
+
+## Sync & Export Commands
+
+### `cortex sync`
+
+Synchronize `~/.agent/memory/` JSON files → CORTEX DB (incremental, SHA-256 change detection).
+
+```bash
+cortex sync
+```
+
+---
+
+### `cortex export`
 
 Export a markdown snapshot for agent consumption.
 
 ```bash
-cortex export [--db PATH] [--out PATH]
+cortex export [--out PATH]
 ```
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `--out` | `~/.cortex/context-snapshot.md` | Output path |
+Default output: `~/.cortex/context-snapshot.md`
 
 ---
 
-## `cortex writeback`
+### `cortex writeback`
 
 Write-back: CORTEX DB → `~/.agent/memory/` JSON files.
 
 ```bash
-cortex writeback [--db PATH]
+cortex writeback
 ```
 
 ---
 
-## `cortex migrate`
+### `cortex migrate`
 
-Import v3.1 data into v4.0.
+Import data from older versions.
 
 ```bash
-cortex migrate [--source PATH] [--db PATH]
+cortex migrate [--source PATH]
 ```
 
 ---
 
-## `cortex time`
+## Time Tracking Commands
 
-Show time tracking summary.
+### `cortex time`
+
+Show time tracking summary (WakaTime-like).
 
 ```bash
-cortex time [--project PROJECT] [--days N] [--db PATH]
+cortex time [--project PROJECT] [--days N]
 ```
 
 ---
 
-## `cortex heartbeat`
+### `cortex heartbeat`
 
-Record an activity heartbeat.
+Record an activity heartbeat for automatic time tracking.
 
 ```bash
-cortex heartbeat PROJECT [ENTITY] [OPTIONS]
+cortex heartbeat PROJECT [ENTITY] [--category CATEGORY] [--branch BRANCH]
 ```
 
-| Option | Description |
-| --- | --- |
-| `--category`, `-c` | Activity category (auto-classified if omitted) |
-| `--branch`, `-b` | Git branch |
+---
+
+### `cortex timeline`
+
+Visual temporal memory browsing.
+
+```bash
+cortex timeline PROJECT [--days N]
+```
+
+---
+
+## Memory Intelligence Commands
+
+### `cortex compact`
+
+Run auto-compaction strategies on project memory.
+
+```bash
+cortex compact [--project PROJECT] [--strategy dedup|merge|prune|all]
+```
+
+---
+
+### `cortex episodic`
+
+Episodic memory operations.
+
+```bash
+cortex episodic observe    # Capture session snapshot
+cortex episodic recall     # Restore from episode
+cortex episodic replay     # Replay decision chain
+```
+
+---
+
+### `cortex context`
+
+Context window management for agents.
+
+```bash
+cortex context rebuild PROJECT    # Rebuild context from memory
+cortex context export PROJECT     # Export for agent consumption
+```
+
+---
+
+## Agent & Swarm Commands
+
+### `cortex handoff`
+
+Structured agent-to-agent context transfer.
+
+```bash
+cortex handoff generate    # Generate handoff document
+cortex handoff receive     # Receive and import handoff
+```
+
+---
+
+### `cortex ghost`
+
+Ghost (incomplete work) management.
+
+```bash
+cortex ghost list          # List all ghosts
+cortex ghost resolve ID    # Mark resolved
+```
+
+---
+
+### `cortex swarm`
+
+Multi-agent swarm coordination.
+
+```bash
+cortex swarm dispatch      # Dispatch a consensus mission
+cortex swarm status        # Check mission status
+```
+
+---
+
+## Infrastructure Commands
+
+### `cortex daemon`
+
+Background daemon management.
+
+```bash
+cortex daemon start        # Start the watchdog daemon
+cortex daemon stop         # Stop the daemon
+cortex daemon install      # Install as system service
+cortex daemon status       # Check daemon health
+```
+
+The daemon runs 13 specialized monitors: site health, SSL certs, disk space, ghost detection, security scanning, and more.
+
+---
+
+### `cortex autorouter`
+
+AI model auto-selection daemon.
+
+```bash
+cortex autorouter start    # Start model routing
+cortex autorouter stop     # Stop
+cortex autorouter status   # Current model state
+cortex autorouter history  # View switch history
+```
+
+---
+
+### `cortex mejoralo`
+
+Code quality engine (X-Ray 13D scanner).
+
+```bash
+cortex mejoralo scan PATH  # Analyze code quality
+cortex mejoralo fix PATH   # Auto-fix issues
+```
+
+---
+
+### `cortex entropy`
+
+Entropy monitoring for codebase health.
+
+```bash
+cortex entropy scan        # Measure codebase entropy
+cortex entropy dashboard   # Visual entropy report
+```
+
+---
+
+### `cortex purge`
+
+Data cleanup operations.
+
+```bash
+cortex purge --project PROJECT [--before DATE] [--dry-run]
+```
+
+---
+
+### `cortex tips`
+
+Developer tips and best practices engine.
+
+```bash
+cortex tips [--category CATEGORY]
+```
+
+---
+
+### `cortex reflect`
+
+Meta-cognitive session analysis.
+
+```bash
+cortex reflect              # Analyze current session patterns
+```
+
+---
+
+## Makefile Shortcuts
+
+```bash
+make test          # Run all tests (60s timeout)
+make test-fast     # Exclude slow tests (no torch imports)
+make test-slow     # Only slow tests (graph RAG, embeddings)
+make lint          # Run ruff linter
+make format        # Auto-format with ruff
+make docs          # Build mkdocs site
+make serve-docs    # Live preview docs
+```

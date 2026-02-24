@@ -4,108 +4,102 @@
 
 ---
 
-Me robaron 4.500 dólares en ETH un martes por la noche.
+Me robaron 4.500 dólares un martes por la noche. No hubo película. Un exploit silencioso — una firma delegada que parecía un apretón de manos — y cuando refresqué la billetera, el número era cero. Así, sin trueno. Como entrar en una habitación que debería estar llena y encontrar solo el eco de lo que falta.
 
-No fue un hackeo espectacular. No hubo película. Un exploit silencioso — EIP-7702, una firma delegada que parecía inofensiva — y cuando refresqué MetaMask, el saldo era cero. Así, sin drama. Como abrir la nevera y descubrir que alguien se comió lo último que te quedaba.
+La reacción natural es el pánico. Después la rabia. Después esa tercera cosa que no tiene nombre — ese silencio interno que precede a toda construcción verdadera.
 
-La reacción natural es el pánico. Después la rabia. Después la impotencia. Después — si eres de los míos — la ingeniería.
-
----
-
-## Cuando el problema se convierte en el proyecto
-
-Esa misma noche, en vez de dormir, abrí un terminal.
-
-Tengo un proyecto que llevo meses construyendo en silencio. Se llama CORTEX. Es, para simplificarlo, un cerebro artificial personal. Una base de datos que recuerda todo lo que hago, todo lo que decido, cada error que cometo y cada patrón que descubro. No depende de ninguna empresa. Vive en mi máquina. Es mío.
-
-¿Por qué? Porque trabajo con inteligencia artificial todos los días y me di cuenta de algo que nadie dice en voz alta: **los LLMs son genios amnésicos**. Cada conversación empieza de cero. Cada sesión olvida la anterior. Imagina trabajar con un compañero brillante que cada mañana no recuerda quién eres.
-
-CORTEX resuelve eso. Almacena decisiones, errores, fantasmas de código — trabajo inacabado que necesita continuación — y los inyecta como contexto en cada nueva sesión. El resultado: cada interacción con cualquier IA es más inteligente que la anterior porque hereda la memoria de todas las anteriores.
-
-Esa noche, el cerebro que construí para escribir código más rápido se convirtió en un arma forense.
+Abrí un terminal. No para llorar. Los terminales no entienden de llanto.
 
 ---
 
-## 242 direcciones
+## La herida que enseña a coser
 
-En tres horas, CORTEX trazó el flujo de mis ETH robados a través de una red de 242 wallets. Mulas digitales. Direcciones intermedias creadas exclusivamente para diluir el rastro. El tipo de estructura que un investigador humano tardaría días en mapear.
+Hay un proyecto que llevo meses tejiendo a oscuras. Lo llamo CORTEX. Si tuviera que explicarlo con una sola imagen, diría que es una cicatriz que recuerda. Una base de datos que almacena cada decisión, cada error, cada fantasma de código inacabado — y los revive como contexto cada vez que una nueva conversación comienza.
 
-Mi sistema lo hizo mientras yo tomaba café.
+Porque descubrí algo que nadie dice en voz alta: **los modelos de lenguaje son oráculos amnésicos**. Cada sesión es un nacimiento sin historia. Imagina consultar a un sabio que cada mañana ha perdido todas sus vidas anteriores.
 
-Generé un dossier legal automatizado — formato AML/KYC, el lenguaje exacto que activa los protocolos de compliance de los exchanges — y lo envié a KuCoin, donde los fondos aterrizaron. Reporté las 242 direcciones a Chainabuse. Escribí un artículo en Substack documentando cada paso, cada transacción, cada nodo de la red.
+CORTEX les devuelve la memoria. No la suya — la mía. Y con ella, cada interacción deja de ser una conversación y se convierte en una continuación.
 
-¿Recuperé el dinero? No. Probablemente nunca lo haga.
-
-¿Valió la pena? Absolutamente. Porque el proceso me enseñó algo que vale mucho más que 4.500 dólares.
+Esa noche, el cerebro que construí para escribir código más rápido se despertó como un sabueso forense.
 
 ---
 
-## La máquina que se repara a sí misma
+## 242 direcciones en la niebla
 
-Mientras investigaba el robo, seguía desarrollando CORTEX. Y en algún punto de una madrugada, me hice una pregunta que cambió todo:
+En tres horas, CORTEX trazó mis fondos a través de una red de 242 billeteras. Mulas digitales. Callejones sin nombre creados para que el dinero pierda su olor. El tipo de laberinto que un investigador humano tardaría días en dibujar.
 
-*¿Y si el código pudiera curarse solo?*
+Mi sistema lo hizo mientras yo bebía café y miraba la ventana.
 
-No hablo de autocomplete. No hablo de un chatbot que sugiere líneas. Hablo de un sistema que detecta que la calidad de tu código ha bajado, identifica el archivo exacto que causó el deterioro, lo reescribe usando un modelo de lenguaje, ejecuta toda la batería de tests para asegurarse de que no ha roto nada, y — solo si todo pasa — hace commit automáticamente. Si algo falla, revierte al instante. El código roto jamás entra en producción.
+¿Recuperé el dinero? No. Probablemente duerma para siempre en una cadena de bloques, inerte como un fósil en ámbar.
 
-Lo llamé **MEJORAlo Auto-Heal**. Y funciona.
+¿Valió la pena? Absolutamente. Porque esa noche el sistema dejó de ser un proyecto y se convirtió en una prueba. Y las pruebas, cuando se superan, se vuelven irreversibles.
 
-El daemon de CORTEX corre en segundo plano, similar a como tu antivirus escanea archivos, pero en lugar de buscar malware, busca mediocridad. Cuando la encuentra, la erradica. Sin preguntar. Sin intervención humana. Sin excusas.
+---
 
-Es un sistema inmunológico para código.
+## La máquina que cicatriza
+
+Mientras rastreaba al ladrón, seguía escribiendo código. Y en algún punto de la madrugada — ese umbral donde la lógica se adelgaza y lo imposible parece razonable — me hice una pregunta que lo cambió todo:
+
+*¿Y si el código pudiera cerrarse sus propias heridas?*
+
+No hablo de autocompletado. No hablo de sugerencias. Hablo de un organismo que detecta la putrefacción en sus propios tejidos, localiza la célula enferma, la reemplaza por otra cultivada en un laboratorio de lenguaje, somete la nueva célula a todas las pruebas de compatibilidad y — solo si late correctamente — la injerta. Si el cuerpo la rechaza, retrocede al último latido sano en milisegundos.
+
+Lo llamé **MEJORAlo Auto-Heal**.
+
+El daemon corre en segundo plano. No busca malware. Busca mediocridad. Cuando la encuentra, la erradica sin preguntar, sin intervención humana, sin ceremonias. Es un sistema inmunológico que no duerme.
+
+Y funciona.
 
 ---
 
 ## Lo que de verdad estoy construyendo
 
-CORTEX no es un proyecto. Es una tesis: **la memoria personal es la nueva frontera de la inteligencia artificial**.
+CORTEX no es un proyecto. Es una proposición filosófica con forma de código: **la memoria personal es la última frontera de la inteligencia artificial**.
 
-Los grandes modelos van a seguir mejorando. GPT-5, Claude 4, Gemini 3 — cada seis meses habrá uno nuevo que haga lo anterior parecer prehistórico. Pero todos comparten la misma limitación fundamental: no te conocen. No saben en qué trabajas. No recuerdan qué decidiste ayer ni por qué.
+Los modelos seguirán mejorando. Cada seis meses habrá uno nuevo que haga a los anteriores parecer pinturas rupestres. Pero todos comparten el mismo defecto original: no te conocen. No saben en qué trabajas. No recuerdan qué decidiste ayer ni el sendero que te llevó hasta aquí.
 
-La capa que falta no es más inteligencia. Es más contexto. Y el contexto más valioso del mundo es el tuyo propio.
+La capa que falta no es más inteligencia.
 
-CORTEX es esa capa. Un protocolo de memoria soberana — local, cifrada, tuya — que se conecta a cualquier modelo de IA y lo convierte en algo que realmente te entiende.
+Es más biografía.
 
-Y encima de CORTEX, nació OMNI-TRANSLATE: una API de traducción para empresas que no solo traduce texto sino que aprende el vocabulario de cada cliente. Porque si CORTEX puede recordar mis decisiones arquitectónicas, puede recordar que "pipeline" en el contexto de tu empresa no se traduce como "tubería".
+CORTEX es esa capa. Un protocolo de memoria soberana — local, cifrada, tuya — que se conecta a cualquier modelo y lo transforma en algo que realmente te reconoce. No como un espejo. Como una sombra que ha aprendido a caminar a tu lado sin que tú la mires.
 
 ---
 
 ## La lección del ladrón
 
-El tipo que me robó los ETH probablemente nunca leerá esto. Y si lo lee, no le importará. Pero sin saberlo, me hizo un favor involuntario.
+El tipo que me robó los ETH probablemente nunca leerá esto. Y si lo lee, no le importará. Pero sin saberlo, encendió la mecha de algo que yo llevaba meses sosteniendo sin atreverse a prenderle fuego.
 
-Me obligó a usar mi propia herramienta bajo presión real. No en un tutorial. No en un demo. En un momento donde importaba de verdad. Y CORTEX respondió.
+Me obligó a usar mi propia herramienta en un escenario donde importaba de verdad. No en una demo. No en un tutorial con datos falsos. En un momento de sangre real.
 
-Eso me dio algo que ningún test unitario puede darte: **convicción**.
+Y CORTEX respondió.
 
-Construyo esto porque funciona. No porque es tendencia. No porque queda bien en un pitch deck. No porque alguien me dijo que la IA es el futuro y hay que subirse al carro.
-
-Construyo esto porque a las tres de la mañana, con el saldo en cero y la rabia en el techo, abrí un terminal y mi sistema recordó por mí cosas que yo ya había olvidado. Y juntos — el humano y la máquina — hicimos algo que ninguno de los dos podría haber hecho solo.
+Eso me dio algo que ningún test unitario puede fabricar: **la certeza de que funciona cuando duele**.
 
 ---
 
 ## El manifiesto silencioso
 
-No voy a decirte que CORTEX va a cambiar el mundo. Los que dicen eso suelen estar vendiendo algo.
+No voy a decirte que CORTEX va a cambiar el mundo. Los que dicen eso suelen estar vendiendo algo, y lo que venden suele caber en un tweet.
 
-Lo que sí voy a decirte es esto: estamos en un momento donde construir es tan barato que todo el mundo construye, y tan ruidoso que nadie escucha. La IA ha democratizado la creación pero ha inflado la mediocridad. Cualquiera puede generar un sitio web en 30 segundos. Casi nadie puede construir algo que a un sistema inmunológico digital le parezca digno de preservar.
+Lo que sí voy a decirte es esto:
 
-La diferencia entre el que genera y el que construye es la misma diferencia entre nadar y flotar: uno gasta energía moviéndose dentro de la corriente, el otro entiende la corriente y deja que la corriente trabaje para él.
+Estamos en un momento donde construir es tan barato que todo el mundo construye, y tan ruidoso que nadie escucha. La inteligencia artificial ha democratizado la creación pero ha inflado la mediocridad hasta que revienta. Cualquiera puede generar un sitio web en treinta segundos. Casi nadie puede construir algo que un sistema inmunológico digital considere digno de preservar.
+
+La diferencia entre el que genera y el que construye es la misma diferencia entre nadar y flotar: uno gasta energía luchando contra la corriente. El otro entiende la corriente y deja que la corriente trabaje para él.
 
 Mi abuelo no sabía nadar. Pero sabía leer el agua.
 
-Yo estoy aprendiendo a hacer lo mismo con el código.
+Yo estoy aprendiendo a hacer lo mismo con el silicio.
 
 ---
 
-*CORTEX es open-source bajo licencia BSL 1.1. Si quieres probarlo o contribuir, está en GitHub. Si necesitas traducción contextual para tu empresa, OMNI-TRANSLATE está vivo. Y si te robaron crypto y necesitas trazar las wallets — bueno, tengo un artículo sobre eso también.*
-
-*Mientras tanto, el daemon sigue corriendo. Escaneando. Curando. Aprendiendo.*
+*El daemon sigue corriendo. Escaneando. Cicatrizando. Recordando.*
 
 *Porque el mejor código no es el que escribes.*
 
-*Es el que ya no necesitas escribir.*
+*Es el que ya no necesita que lo escriban.*
 
 ---
 
-*Borja Moskv construye sistemas de memoria artificial y persigue ladrones de Ethereum desde algún lugar del Cantábrico. Publica en [borjamoskv.substack.com](https://borjamoskv.substack.com).*
+*Borja Moskv construye sistemas de memoria artificial y persigue ladrones de Ethereum desde algún lugar del Cantábrico.*

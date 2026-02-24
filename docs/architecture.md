@@ -1,75 +1,79 @@
-# CORTEX Architecture
+# Architecture
 
-> The Sovereign Ledger for AI Agents — v4.3.0 "THE SOUL"
+> **CORTEX Trust Engine v8 — Sovereign Cloud**
+
+---
 
 ## System Overview
 
-CORTEX is a **local-first memory engine** that provides persistent, temporal, and cryptographically verifiable facts for AI agents. It combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, and multi-agent consensus — all running on SQLite without cloud dependencies.
+CORTEX is a **trust infrastructure engine** that provides cryptographic verification, immutable audit trails, and regulatory compliance for AI agent memory. It combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
 ```mermaid
 graph TB
     subgraph Interfaces
-        CLI["CLI<br/>15+ commands"]
-        API["REST API<br/>FastAPI + 41 endpoints"]
+        CLI["CLI<br/>38 commands"]
+        API["REST API<br/>FastAPI"]
         MCP["MCP Server<br/>Model Context Protocol"]
-        Dashboard["Dashboard<br/>Industrial Noir UI"]
+        GraphQL["GraphQL<br/>(coming Q2)"]
+    end
+
+    subgraph Gateway["Trust Gateway"]
+        Auth["Auth Manager<br/>HMAC-SHA256 + RBAC"]
+        Privacy["Privacy Shield<br/>11 secret patterns"]
+        RateLimit["Rate Limiter<br/>Sliding window"]
+        Security["Security Headers<br/>CSP, HSTS"]
     end
 
     subgraph Engine["Core Engine"]
         CortexEngine["CortexEngine<br/>(Composite Orchestrator)"]
-        AsyncEngine["AsyncCortexEngine<br/>(Native Async)"]
+        AsyncEngine["AsyncCortexEngine<br/>(Native Async + Pool)"]
         FactManager["FactManager"]
         EmbeddingManager["EmbeddingManager"]
         ConsensusManager["ConsensusManager"]
     end
 
-    subgraph Storage
-        SQLite[("SQLite 3.42+")]
-        Vec["sqlite-vec<br/>FLOAT[384]"]
-        Ledger["Hash-Chained<br/>Transactions"]
-        Merkle["Merkle Tree<br/>Checkpoints"]
+    subgraph Memory["Tripartite Memory"]
+        L1["L1: Working Memory<br/>Redis / In-Memory"]
+        L2["L2: Vector Memory<br/>sqlite-vec / Qdrant"]
+        L3["L3: Episodic Ledger<br/>SQLite / AlloyDB"]
     end
 
-    subgraph Intelligence
-        Embedder["ONNX Embedder<br/>all-MiniLM-L6-v2"]
-        Search["Semantic Search"]
-        Graph["Knowledge Graph<br/>SQLite / Neo4j"]
-        Compactor["Auto-Compaction<br/>Dedup + Merge + Prune"]
+    subgraph Trust["Trust Layer"]
+        Ledger["SHA-256 Hash Chain"]
+        Merkle["Merkle Tree Checkpoints"]
+        Consensus["WBFT Consensus"]
+        Sandbox["AST Sandbox"]
     end
 
-    subgraph Infrastructure
-        Auth["Auth Manager<br/>HMAC-SHA256 Keys"]
-        Daemon["MOSKV-1 Daemon<br/>Persistent Watchdog"]
-        Sync["Sync Engine<br/>JSON ↔ DB"]
+    subgraph Services["Platform Services"]
+        Daemon["Self-Healing Daemon<br/>13 monitors"]
+        Compactor["Compaction Sidecar"]
+        Sync["Sync Engine"]
+        Notifications["Notification Bus"]
         Timing["Time Tracker"]
-        i18n["i18n<br/>en/es/eu"]
     end
 
     CLI --> CortexEngine
-    API --> AsyncEngine
+    API --> Gateway --> AsyncEngine
     MCP --> AsyncEngine
-    Dashboard --> API
 
     CortexEngine --> FactManager
     CortexEngine --> EmbeddingManager
     CortexEngine --> ConsensusManager
     AsyncEngine --> FactManager
 
-    FactManager --> SQLite
+    FactManager --> L3
+    EmbeddingManager --> L2
+    ConsensusManager --> L3
+    L1 --> L2 --> L3
+
     FactManager --> Ledger
-    EmbeddingManager --> Embedder
-    Embedder --> Vec
-    ConsensusManager --> SQLite
-
-    Search --> Vec
-    Graph --> SQLite
-    Compactor --> SQLite
     Ledger --> Merkle
+    ConsensusManager --> Consensus
 
-    API --> Auth
     Daemon --> CortexEngine
+    Compactor --> L3
     Sync --> CortexEngine
-    Timing --> SQLite
 ```
 
 ---
@@ -90,10 +94,11 @@ Every piece of knowledge is a **Fact**. Facts are immutable records with tempora
 | `confidence` | TEXT | `stated`, `inferred`, `observed`, `verified`, `disputed` |
 | `valid_from` | DATETIME | When the fact became true |
 | `valid_until` | DATETIME | When deprecated (NULL = active) |
-| `source` | TEXT | Origin agent or process |
+| `source` | TEXT | Origin agent or process (auto-detected) |
 | `meta` | JSON | Arbitrary metadata |
 | `consensus_score` | REAL | Weighted agreement (default 1.0) |
-| `tx_id` | INTEGER | Foreign key to the transaction that created it |
+| `tx_id` | INTEGER | FK to creating transaction |
+| `tenant_id` | TEXT | Multi-tenant scope |
 
 ### Temporal Queries
 
@@ -118,17 +123,21 @@ This creates a **tamper-evident audit trail**. `verify_ledger()` walks the chain
 
 ### Merkle Tree Checkpoints
 
-Periodically, the ledger creates Merkle tree checkpoints from batches of fact hashes: these enable O(log N) integrity verification and efficient synchronization between nodes.
+Periodically, the ledger creates Merkle tree checkpoints from batches of fact hashes. These enable:
+- **O(log N) integrity verification**
+- **Efficient synchronization** between nodes
+- **Batch proof generation** for compliance audits
 
-### Multi-Agent Consensus
+### Multi-Agent Consensus (WBFT)
 
-Facts can be **verified** or **disputed** by multiple agents. The consensus system:
+CORTEX implements **Weighted Byzantine Fault Tolerance**:
 
-1. Tracks reputation scores per agent (0.0–1.0)
+1. Tracks reputation scores per agent (0.0–1.0) with decay
 2. Weighs votes by agent reputation
-3. Updates `consensus_score` on each fact
-4. Auto-registers any authenticated agent during voting
-5. Stores votes in an immutable vote ledger
+3. Domain-specific vote multipliers
+4. Updates `consensus_score` on each fact
+5. Elder Council verdict for edge cases without quorum
+6. Immutable vote ledger for audit
 
 ---
 
@@ -136,87 +145,71 @@ Facts can be **verified** or **disputed** by multiple agents. The consensus syst
 
 ### Engine Layer
 
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `engine/__init__.py` | `CortexEngine` | Composite orchestrator (sync + async). Entry point for all operations. |
-| `engine_async.py` | `AsyncCortexEngine` | Native async engine for the REST API. Connection-pooled. |
-| `engine/store_mixin.py` | `StoreMixin` | `store()`, `store_many()`, `deprecate()`, `update()` |
-| `engine/query_mixin.py` | `QueryMixin` | `search()`, `recall()`, `history()` |
-| `engine/consensus_mixin.py` | `ConsensusMixin` | `vote()`, `get_votes()` |
-| `engine/sync_compat.py` | `SyncCompatMixin` | Synchronous fallbacks for CLI usage |
-| `engine/ledger.py` | `ImmutableLedger` | Hash chain + Merkle tree management |
-| `engine/snapshots.py` | `SnapshotManager` | Database snapshot creation and restoration |
-| `engine/models.py` | `Fact`, `row_to_fact` | Data model and row mapping |
+| Module | Purpose |
+|:---|:---|
+| `engine/__init__.py` | `CortexEngine` — Composite orchestrator (sync + async) |
+| `engine_async.py` | `AsyncCortexEngine` — Native async for REST API |
+| `engine/store_mixin.py` | `store()`, `store_many()`, `deprecate()`, `update()` |
+| `engine/query_mixin.py` | `search()`, `recall()`, `history()` |
+| `engine/consensus_mixin.py` | `vote()`, `get_votes()` |
+| `engine/sync_compat.py` | Synchronous fallbacks for CLI |
+| `engine/ledger.py` | Hash chain + Merkle tree management |
+| `engine/snapshots.py` | Database snapshot creation/restoration |
+| `engine/models.py` | `Fact` data model and row mapping |
 
 ### API Layer
 
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `api.py` | `app` | FastAPI application with CORS, rate limiting, metrics |
-| `api_deps.py` | Dependency injection | Provides `AsyncCortexEngine` to route handlers |
-| `api_state.py` | Global state | Singleton references to engine and auth manager |
-| `routes/facts.py` | CRUD + Voting | Store, recall, deprecate, vote on facts |
-| `routes/search.py` | Search endpoints | GET/POST semantic search with project filtering |
-| `routes/admin.py` | Key management | Bootstrap and manage API keys |
-| `routes/stripe.py` | Billing | Stripe webhook handler for SaaS subscriptions |
-| `models.py` | Pydantic models | Request/response schemas with validation |
-| `auth.py` | `AuthManager` | HMAC-SHA256 API key authentication + RBAC |
-| `i18n.py` | `get_trans()` | Translations (en/es/eu) for error messages |
+| Module | Purpose |
+|:---|:---|
+| `api/` | FastAPI application with CORS, rate limiting, security headers |
+| `routes/facts.py` | CRUD + Voting endpoints |
+| `routes/search.py` | Semantic + Graph-RAG search |
+| `routes/admin.py` | API key management + system status |
+| `routes/stripe.py` | Stripe webhook handler for billing |
+| `auth/` | HMAC-SHA256 authentication + RBAC |
+| `gate/` | Rate limiting, validation, request filtering |
 
 ### Search & Embeddings
 
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `embeddings/__init__.py` | `LocalEmbedder` | ONNX-optimized `all-MiniLM-L6-v2` (384-dim) |
-| `embeddings/api_embedder.py` | `APIEmbedder` | Cloud embeddings via Gemini/OpenAI APIs |
-| `embeddings/manager.py` | `EmbeddingManager` | Mode-aware switcher (`local` / `api`) |
-| `search/` | Search package | Advanced semantic search with graph context |
-| `search_sync.py` | Sync search | Synchronous search fallback for CLI |
+| Module | Purpose |
+|:---|:---|
+| `embeddings/__init__.py` | ONNX-optimized MiniLM-L6-v2 (384-dim) |
+| `embeddings/api_embedder.py` | Cloud embeddings (Gemini/OpenAI) |
+| `embeddings/manager.py` | Mode-aware switcher (`local` / `api`) |
+| `search/` | Advanced semantic search with graph context |
 
 ### Memory Intelligence
 
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `compactor.py` | Auto-Compaction | Dedup (SHA-256 + Levenshtein), error merge, staleness prune |
-| `compaction/` | Compaction package | Advanced compaction strategies |
-| `compression.py` | Storage optimization | Fact compression for snapshots |
-| `pruner.py` | Embedding pruner | Removes orphaned embeddings |
-| `graph/` | Knowledge Graph | Entity-relation extraction, path finding, subgraph context |
+| Module | Purpose |
+|:---|:---|
+| `compaction/` | Dedup (SHA-256 + Levenshtein), merge, prune |
+| `graph/` | Knowledge graph (SQLite + Neo4j), RAG |
+| `memory/` | Memory management and lifecycle |
+| `episodic/` | Session snapshots, boot-time recall |
+| `thinking/` | Thought Orchestra, semantic routing |
+
+### Trust & Security
+
+| Module | Purpose |
+|:---|:---|
+| `crypto/` | AES-256-GCM vault for secrets |
+| `consensus/` | WBFT consensus, reputation, vote ledger |
+| `compliance/` | EU AI Act compliance report generation |
+| `audit/` | Audit trail generation |
 
 ### Infrastructure
 
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `config.py` | Configuration | Centralized env-var loading with `reload()` |
-| `schema.py` | Database schema | All `CREATE TABLE` statements + `ALL_SCHEMA` list |
-| `migrations/` | Schema migrations | Versioned database migrations |
-| `canonical.py` | Canonical JSON | Deterministic JSON serialization for hashing |
-| `temporal.py` | Time utilities | ISO 8601 helpers, timezone-aware timestamps |
-| `metrics.py` | Observability | Prometheus-compatible metrics collection |
-| `crypto.py` | Cryptography | AES-256-GCM vault for secrets |
-| `cache.py` | LRU Cache | Thread-safe caching layer |
-| `exceptions.py` | Custom errors | `FactNotFound`, `LedgerCorrupted`, etc. |
-
-### Background Services
-
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `daemon/` | MOSKV-1 Daemon | Site monitoring, ghost detection, cert checks, disk alerts |
-| `sync/` | Sync Engine | Bidirectional JSON ↔ DB synchronization |
-| `timing/` | Time Tracker | Heartbeat-based developer time tracking |
-| `chronos.py` | Chronos | Advanced temporal analysis |
-
-### External Integrations
-
-| Module | Path | Purpose |
-|:---|:---|:---|
-| `mcp/` | MCP Server | Model Context Protocol for Claude/Cursor |
-| `langbase/` | Langbase | LLM pipe integration |
-| `llm/` | LLM providers | Multi-provider LLM support |
-| `sovereign_gate.py` | Sovereign Gate | HMAC-authenticated internal gateway |
-| `gate/` | Gate package | Rate limiting, validation, request filtering |
-| `federation.py` | Federation | Multi-node shard distribution |
-| `storage/` | Storage backends | Local SQLite + Turso cloud backend |
+| Module | Purpose |
+|:---|:---|
+| `daemon/` | Self-healing watchdog (13 monitors) |
+| `notifications/` | Telegram + macOS notification bus |
+| `sync/` | JSON ↔ DB bidirectional sync |
+| `timing/` | Heartbeat-based time tracking |
+| `telemetry/` | OpenTelemetry-compatible span tracing |
+| `mcp/` | Model Context Protocol server |
+| `cli/` | 38 CLI commands via Click |
+| `migrations/` | Versioned schema migrations |
+| `storage/` | SQLite + Turso storage backends |
 
 ---
 
@@ -229,6 +222,7 @@ sequenceDiagram
     participant Client
     participant API
     participant Auth
+    participant Privacy
     participant Engine
     participant Embedder
     participant SQLite
@@ -237,7 +231,9 @@ sequenceDiagram
     Client->>API: POST /v1/facts
     API->>Auth: Validate Bearer token
     Auth-->>API: AuthResult (tenant_id, permissions)
-    API->>Engine: store(project, content, ...)
+    API->>Privacy: Scan content for secrets
+    Privacy-->>API: OK (or flag)
+    API->>Engine: store(project, content, tenant_id, ...)
     Engine->>SQLite: INSERT INTO facts
     Engine->>Embedder: embed(content)
     Embedder->>SQLite: INSERT INTO fact_embeddings
@@ -245,7 +241,7 @@ sequenceDiagram
     Ledger->>SQLite: INSERT INTO transactions (hash-chained)
     Ledger->>SQLite: Merkle checkpoint (if batch full)
     Engine-->>API: fact_id
-    API-->>Client: 200 {fact_id, project}
+    API-->>Client: 200 {fact_id, project, tx_hash}
 ```
 
 ### Semantic Search
@@ -257,68 +253,42 @@ sequenceDiagram
     participant Engine
     participant Embedder
     participant Vec
+    participant Graph
 
-    Client->>API: POST /v1/search {query, project}
-    API->>Engine: search(query, project)
+    Client->>API: POST /v1/search {query, include_graph}
+    API->>Engine: search(query, project, tenant_id)
     Engine->>Embedder: embed(query)
     Embedder-->>Engine: query_vector[384]
-    Engine->>Vec: SELECT ... WHERE vec_distance_cosine(embedding, ?) < threshold
+    Engine->>Vec: Cosine similarity search
     Vec-->>Engine: matching fact_ids + scores
+    opt Graph-RAG enabled
+        Engine->>Graph: get_context_subgraph(fact_ids)
+        Graph-->>Engine: related entities
+    end
     Engine-->>API: ranked results
-    API-->>Client: 200 [{content, score, ...}]
+    API-->>Client: 200 [{content, score, graph_context}]
 ```
 
----
+### Verify Integrity
 
-## Security Model
+```mermaid
+sequenceDiagram
+    participant User
+    participant CLI
+    participant Ledger
+    participant Merkle
+    participant DB
 
-| Layer | Mechanism |
-|:---|:---|
-| **Authentication** | HMAC-SHA256 API keys with prefix-based lookup |
-| **Authorization** | RBAC with `read`, `write`, `admin` permissions |
-| **Tenant Isolation** | All queries scoped by `tenant_id` from auth token |
-| **Data Integrity** | SHA-256 hash-chained transaction ledger |
-| **Secrets** | AES-256-GCM encrypted vault (`crypto.py`) |
-| **Rate Limiting** | Sliding window with bounded eviction (per IP) |
-| **Input Validation** | Pydantic models with `max_length` constraints |
-| **CORS** | Explicit origin allowlist (no wildcards) |
-
----
-
-## Configuration
-
-All settings are loaded from environment variables via `cortex/config.py`. Call `config.reload()` to refresh at runtime (essential for test isolation).
-
-| Variable | Default | Description |
-|:---|:---|:---|
-| `CORTEX_DB` | `~/.cortex/cortex.db` | Database path |
-| `CORTEX_ALLOWED_ORIGINS` | `localhost:3000,5173` | CORS origins |
-| `CORTEX_RATE_LIMIT` | `300` | Requests per window |
-| `CORTEX_RATE_WINDOW` | `60` | Window in seconds |
-| `CORTEX_EMBEDDINGS` | `local` | `local` or `api` |
-| `CORTEX_EMBEDDINGS_PROVIDER` | `gemini` | API provider |
-| `CORTEX_STORAGE` | `local` | `local` or `turso` |
-| `CORTEX_GRAPH_BACKEND` | `sqlite` | `sqlite` or `neo4j` |
-| `CORTEX_POOL_SIZE` | `5` | Connection pool size |
-
-See `.env.example` for the complete list.
-
----
-
-## Testing
-
-```bash
-# All tests (676 tests, 60s timeout)
-make test
-
-# Fast tests only (no torch imports)
-make test-fast
-
-# Slow tests (graph RAG, embeddings)
-make test-slow
+    User->>CLI: cortex verify 42
+    CLI->>DB: SELECT fact + transaction
+    CLI->>Ledger: Recompute hash chain
+    Ledger->>DB: Walk transactions (prev_hash → hash)
+    Ledger-->>CLI: Chain integrity status
+    CLI->>Merkle: Check Merkle inclusion
+    Merkle->>DB: Verify against stored root
+    Merkle-->>CLI: Merkle proof status
+    CLI-->>User: ✅ VERIFIED or ❌ TAMPERED
 ```
-
-**Isolation**: Tests use `config.reload()` + autouse fixtures in `tests/conftest.py` to ensure zero state leakage between tests.
 
 ---
 
@@ -328,11 +298,11 @@ make test-slow
 erDiagram
     FACTS ||--o| FACT_EMBEDDINGS : "has vector"
     FACTS ||--o{ TRANSACTIONS : "tracked by"
-    FACTS ||--o{ CONSENSUS_VOTES : "voted on"
-    FACTS ||--o{ CONSENSUS_VOTES_V2 : "RWC voted"
+    FACTS ||--o{ CONSENSUS_VOTES_V2 : "voted on"
     AGENTS ||--o{ CONSENSUS_VOTES_V2 : "casts"
     AGENTS ||--o{ TRUST_EDGES : "trusts"
     HEARTBEATS }o--|| TIME_ENTRIES : "flushed to"
+    FACTS ||--o{ DECISION_EDGES : "linked by"
 
     FACTS {
         int id PK
@@ -345,6 +315,9 @@ erDiagram
         datetime valid_until
         real consensus_score
         int tx_id FK
+        text tenant_id
+        text source
+        text meta
     }
     FACT_EMBEDDINGS {
         int fact_id FK
@@ -358,6 +331,14 @@ erDiagram
         text prev_hash
         text hash
         datetime timestamp
+        text tenant_id
+    }
+    MERKLE_ROOTS {
+        int id PK
+        text root_hash
+        int tx_start
+        int tx_end
+        datetime created_at
     }
     AGENTS {
         text id PK
@@ -374,30 +355,64 @@ erDiagram
         int vote
         real vote_weight
         real agent_rep_at_vote
+        text domain
+    }
+    API_KEYS {
+        int id PK
+        text name
+        text key_hash
+        text prefix
+        text tenant_id
+        text permissions
+        boolean revoked
     }
     COMPACTION_LOG {
         int id PK
         text project
         text strategy
-        text original_ids
         int facts_before
         int facts_after
+    }
+    INTEGRITY_CHECKS {
+        int id PK
+        text check_type
+        boolean passed
+        text details
+        datetime checked_at
     }
 ```
 
 ---
 
-## Deployment
+## Security Model
 
-### Development
+| Layer | Mechanism |
+|:---|:---|
+| **Authentication** | HMAC-SHA256 API keys with prefix lookup |
+| **Authorization** | RBAC: `SYSTEM`, `ADMIN`, `AGENT`, `VIEWER` |
+| **Tenant Isolation** | All queries scoped by `tenant_id` |
+| **Data Integrity** | SHA-256 hash chain + Merkle trees |
+| **Privacy** | 11-pattern secret detection at ingress |
+| **Secrets** | AES-256-GCM encrypted vault |
+| **Code Safety** | AST Sandbox for LLM-generated code |
+| **Rate Limiting** | Sliding window per IP |
+| **Headers** | CSP, HSTS, X-Frame-Options, X-XSS-Protection |
+
+---
+
+## Testing
+
 ```bash
-pip install -e ".[dev]"
-uvicorn cortex.api:app --reload --port 8484
+# All tests (1,162+ functions, 60s timeout)
+make test
+
+# Fast tests only (no torch imports)
+make test-fast
+
+# Slow tests (graph RAG, embeddings)
+make test-slow
 ```
 
-### Production (Docker)
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
+**Isolation**: Tests use `config.reload()` + autouse fixtures for zero state leakage.
 
-Uses Caddy as TLS reverse proxy with security headers (HSTS, X-Frame-Options, CSP).
+**Coverage**: 1,162+ test functions covering engine, API, CLI, consensus, search, and security.

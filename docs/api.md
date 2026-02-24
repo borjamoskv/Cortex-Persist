@@ -1,38 +1,86 @@
 # REST API Reference
 
-CORTEX exposes a FastAPI-based REST API on port `8742`.
+CORTEX exposes a versioned FastAPI-based REST API.
 
-## Start the server
+---
+
+## Start the Server
 
 ```bash
 pip install cortex-memory[api]
-uvicorn cortex.api:app --host 0.0.0.0 --port 8742
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
-The interactive OpenAPI docs are available at `http://localhost:8742/docs`.
+Interactive OpenAPI docs: `http://localhost:8484/docs`
+
+Full OpenAPI spec: [`openapi.yaml`](https://github.com/borjamoskv/cortex/blob/main/openapi.yaml) (70.5 KB)
 
 ---
 
 ## Authentication
 
-Some endpoints require an API key via the `X-API-Key` header. Keys are SHA-256 hashed before storage.
+API keys are managed via the admin endpoint. Keys are SHA-256 hashed before storage and support RBAC with 4 roles.
 
 ```bash
-# Create a key via the API
-curl -X POST http://localhost:8742/auth/keys \
-  -H "Content-Type: application/json" \
-  -d '{"name": "my-client", "permissions": ["read", "write"]}'
+# Bootstrap: create first key (no auth required)
+curl -X POST "http://localhost:8484/v1/admin/keys?name=my-client&tenant_id=default"
+
+# Subsequent requests use Bearer auth
+curl -H "Authorization: Bearer ctx_xxxxxxxxxx" http://localhost:8484/v1/status
+```
+
+### RBAC Roles
+
+| Role | Permissions |
+|:---|:---|
+| `SYSTEM` | Full access |
+| `ADMIN` | `read`, `write`, `manage:keys`, `system:config` |
+| `AGENT` | `read`, `write` |
+| `VIEWER` | `read` only |
+
+---
+
+## Health & Monitoring
+
+### `GET /health`
+
+Simple status check for load balancers.
+
+```json
+{"status": "ok", "version": "8.0.0a1"}
+```
+
+### `GET /metrics`
+
+Prometheus-compatible metrics (p50/p95/p99 latencies, fact counts, consensus stats).
+
+### `GET /v1/status`
+
+Engine statistics and health.
+
+```json
+{
+  "version": "8.0.0a1",
+  "db_path": "/Users/you/.cortex/cortex.db",
+  "db_size_mb": 2.4,
+  "total_facts": 150,
+  "active_facts": 142,
+  "deprecated_facts": 8,
+  "project_count": 5,
+  "embeddings": 142,
+  "transactions": 158
+}
 ```
 
 ---
 
-## Endpoints
+## Facts
 
-### `POST /store`
+### `POST /v1/facts`
 
-Store a fact.
+Store a fact (scoped to authenticated tenant).
 
-**Request body:**
+**Request:**
 
 ```json
 {
@@ -55,20 +103,37 @@ Store a fact.
 }
 ```
 
+### `GET /v1/projects/{project}/facts`
+
+Recall facts for a project with tenant isolation.
+
+| Parameter | Type | Description |
+|:---|:---|:---|
+| `project` | path | Project name |
+| `limit` | query | Max results (1-1000) |
+
+### `DELETE /v1/facts/{fact_id}`
+
+Soft-deprecate a fact (mark as invalid). The fact remains in the ledger for audit purposes.
+
 ---
 
-### `POST /search`
+## Search
 
-Semantic search.
+### `POST /v1/search`
 
-**Request body:**
+Semantic + Graph-RAG search across facts (scoped to tenant).
+
+**Request:**
 
 ```json
 {
   "query": "sorted set implementation",
   "project": null,
   "top_k": 5,
-  "as_of": null
+  "as_of": null,
+  "include_graph": false,
+  "graph_depth": 0
 }
 ```
 
@@ -89,57 +154,78 @@ Semantic search.
 }
 ```
 
+### `GET /v1/search`
+
+Same as POST, but via query parameters: `?query=...&k=5&as_of=...&include_graph=true`
+
 ---
 
-### `GET /recall/{project}`
+## Ask (RAG)
 
-Load all active facts for a project.
+### `POST /v1/ask`
 
-**Response:**
+RAG endpoint: search → synthesize → answer. Searches CORTEX memory for relevant facts, then uses the configured LLM to produce a grounded answer.
+
+**Request:**
 
 ```json
 {
+  "question": "What database does our API use?",
   "project": "my-project",
-  "facts": [...],
-  "count": 15
+  "top_k": 5
 }
 ```
-
----
-
-### `GET /status`
-
-System health and statistics.
 
 **Response:**
 
 ```json
 {
-  "version": "0.1.0",
-  "db_path": "/Users/you/.cortex/cortex.db",
-  "db_size_mb": 2.4,
-  "total_facts": 150,
-  "active_facts": 142,
-  "deprecated_facts": 8,
-  "project_count": 5,
-  "embeddings": 142,
-  "transactions": 158
+  "answer": "Based on your project's memory, your API uses Redis...",
+  "sources": [
+    {"fact_id": 42, "content": "...", "score": 0.89}
+  ]
 }
 ```
 
+Returns `503` if no LLM provider is configured.
+
+### `GET /v1/llm/status`
+
+Check which LLM provider is active and list supported providers.
+
 ---
 
-### `GET /dashboard`
+## Consensus
 
-Embedded Industrial Noir dashboard with Chart.js visualizations.
+### `POST /v1/facts/{fact_id}/vote`
+
+Cast a consensus vote (verify/dispute) on a fact.
+
+**Request:**
+
+```json
+{
+  "agent_id": "agent:claude",
+  "vote": 1,
+  "domain": "general"
+}
+```
+
+### `POST /v1/facts/{fact_id}/vote-v2`
+
+Cast a reputation-weighted consensus vote (RWC).
+
+### `GET /v1/facts/{fact_id}/votes`
+
+Retrieve all votes for a specific fact.
 
 ---
 
-### `POST /heartbeat`
+## Time Tracking
 
-Record an activity heartbeat for time tracking.
+### `POST /v1/heartbeat`
 
-**Request body:**
+Record an activity heartbeat for automatic time tracking.
 
 ```json
 {
@@ -150,47 +236,109 @@ Record an activity heartbeat for time tracking.
 }
 ```
 
+### `GET /v1/time/today`
+
+Get today's time tracking summary (optional project filter).
+
+### `GET /v1/time`
+
+Get time tracking report for the last N days (`?days=7`).
+
+### `GET /v1/time/history`
+
+Get daily time history.
+
 ---
 
-### `GET /time`
+## Admin
 
-Time tracking summary.
+### `POST /v1/admin/keys`
 
-**Query parameters:**
+Create a new API key. First key requires no auth (bootstrap).
 
-| Parameter | Default | Description |
-| --- | --- | --- |
-| `project` | — | Filter by project |
-| `days` | `1` | Number of days |
+| Parameter | Type | Description |
+|:---|:---|:---|
+| `name` | query | Key name (required) |
+| `tenant_id` | query | Tenant scope (default: `default`) |
+
+### `GET /v1/admin/keys`
+
+List all API keys (hashed — never reveals raw key).
+
+### `POST /v1/handoff`
+
+Generate a session handoff document with hot context.
+
+### `GET /v1/projects/{project}/export`
+
+Export a project to JSON (`?format=json`) or other formats.
 
 ---
 
-### `POST /deprecate/{fact_id}`
+## Knowledge Graph
 
-Soft-delete a fact.
+### `POST /v1/graph`
 
-**Query parameters:**
+Query the knowledge graph (entity-relation).
 
-| Parameter | Description |
-| --- | --- |
-| `reason` | Reason for deprecation |
+### `GET /v1/graph/patterns`
+
+Get detected graph patterns.
+
+---
+
+## Security Middleware
+
+All API responses include:
+
+| Header | Value |
+|:---|:---|
+| `Content-Security-Policy` | `default-src 'self'` |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-XSS-Protection` | `1; mode=block` |
+
+Rate limiting: **300 requests per 60-second window** per IP (configurable).
+
+Content size limit enforced to prevent DoS.
 
 ---
 
 ## Error Handling
 
-| Status | Meaning |
-| --- | --- |
-| `200` | Success |
-| `401` | Missing or invalid API key |
-| `404` | Resource not found |
-| `422` | Validation error (e.g., empty project name) |
-| `500` | Internal server error |
-
-All errors return:
+All errors follow a consistent format:
 
 ```json
 {
   "detail": "Error description"
 }
 ```
+
+| Status | Meaning |
+|:---|:---|
+| `200` | Success |
+| `401` | Missing or invalid API key |
+| `403` | Insufficient permissions |
+| `404` | Resource not found |
+| `422` | Validation error |
+| `429` | Rate limit exceeded |
+| `500` | Internal server error |
+| `503` | Service unavailable (e.g., no LLM configured) |
+
+---
+
+## Multi-Tenant Usage
+
+When using API keys with `tenant_id`, all operations are automatically scoped:
+
+```bash
+# Create a tenant-scoped key
+curl -X POST "http://localhost:8484/v1/admin/keys?name=tenant-a&tenant_id=enterprise-a"
+
+# All subsequent requests with this key only see tenant-a data
+curl -H "Authorization: Bearer ctx_tenant_a_key" \
+  http://localhost:8484/v1/search?query=hello
+```
+
+Tenants are cryptographically isolated at all memory layers (L1, L2, L3).
