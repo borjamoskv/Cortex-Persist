@@ -101,7 +101,7 @@ class MejoraloSwarm:
     def _read_source(self, file_path: Path) -> str | None:
         try:
             return file_path.read_text(errors="replace")
-        except Exception as e:
+        except OSError as e:
             logger.error("Failed to read %s: %s", file_path, e)
             return None
 
@@ -127,7 +127,7 @@ class MejoraloSwarm:
                         strategy=FusionStrategy.SYNTHESIS,
                     )
                     return result.content if result else None
-            except Exception as e:
+            except (OSError, RuntimeError, ValueError) as e:
                 logger.error("Swarm orchestration failed: %s", e)
                 return None
 
@@ -227,7 +227,7 @@ class MejoraloSwarm:
                 for fp in file_paths:
                     file_findings = await self._audit_single_file(orchestra, fp)
                     findings.extend(file_findings)
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.error("Audit orchestra failed: %s", e)
         return findings
 
@@ -253,6 +253,6 @@ class MejoraloSwarm:
                 clean = line.strip().lstrip("-*•0123456789. ")
                 if clean and len(clean) > 10:
                     findings.append(f"{fp.name} → {clean}")
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.error("Audit failed for %s: %s", fp.name, e)
         return findings

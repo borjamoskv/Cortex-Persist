@@ -83,8 +83,8 @@ class MissionOrchestrator:
             gate.approve_interactive(action.action_id)
 
             # Close connection to avoid locking if subprocess tries to write to the same DB
-            # Use sync close
-            self.engine.close_sync()
+            import asyncio
+            asyncio.run(self.engine.close())
 
             result = gate.execute_subprocess(
                 action.action_id,
