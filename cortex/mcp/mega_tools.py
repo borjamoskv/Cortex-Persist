@@ -100,10 +100,9 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             # Query ledger for mutation history
             query = """
-                SELECT count(*) as tx_count, min(created_at) as start_date, max(created_at) as last_date
-                FROM transactions t
-                JOIN facts f ON t.fact_id = f.id
-                WHERE f.project = ? OR ? = ''
+                SELECT count(*) as tx_count, min(timestamp) as start_date, max(timestamp) as last_date
+                FROM transactions
+                WHERE project = ? OR ? = ''
             """
             cursor = await conn.execute(query, (project, project))
             stats = await cursor.fetchone()
