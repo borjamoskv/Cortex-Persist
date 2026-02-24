@@ -89,6 +89,17 @@ class SyncWriteMixin:
             ),
         )
         fact_id = cursor.lastrowid
+
+        # FTS always stores plaintext for search
+        try:
+            conn.execute(
+                "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (fact_id, content, project, tags_json, fact_type),
+            )
+        except (sqlite3.Error, OSError) as e:
+            logger.warning("FTS insert failed for fact %d: %s", fact_id, e)
+
         if self._auto_embed and self._vec_available:
             try:
                 embedding = self._get_embedder().embed(content)

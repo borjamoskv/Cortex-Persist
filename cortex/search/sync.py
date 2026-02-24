@@ -99,10 +99,22 @@ def semantic_search_sync(
 
         # Convert distance to similarity score (1 - distance for cosine)
         score = max(0.0, 1.0 - (row[7] if row[7] else 0.0))
+
+        # Decrypt encrypted content
+        content = row[1] or ""
+        if content and str(content).startswith("v6_aesgcm:"):
+            try:
+                from cortex.crypto import get_default_encrypter
+
+                enc = get_default_encrypter()
+                content = enc.decrypt_str(content) or content
+            except Exception:
+                pass
+
         results.append(
             SyncSearchResult(
                 fact_id=row[0],
-                content=row[1],
+                content=content,
                 project=row[2],
                 fact_type=row[3],
                 confidence=row[4],
@@ -193,9 +205,20 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
     else:
         score = 0.5
 
+    # Decrypt encrypted content
+    content = row[1] or ""
+    if content and str(content).startswith("v6_aesgcm:"):
+        try:
+            from cortex.crypto import get_default_encrypter
+
+            enc = get_default_encrypter()
+            content = enc.decrypt_str(content) or content
+        except Exception:
+            pass
+
     return SyncSearchResult(
         fact_id=row[0],
-        content=row[1],
+        content=content,
         project=row[2],
         fact_type=row[3],
         confidence=row[4],

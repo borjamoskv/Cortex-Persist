@@ -173,15 +173,15 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         # We decoupled `facts_fts` from triggers to store plaintext metadata.
         # Now we insert FTS records manually in the application code.
-        if hasattr(self, "_auto_embed") and self._auto_embed: # This condition seems incorrect for FTS, but following instruction.
-            try:
-                await conn.execute(
-                    "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (fact_id, content, project, tags_json, fact_type),
-                )
-            except Exception as e:
-                logging.getLogger("cortex").warning(f"Failed to update FTS for fact {fact_id}: {e}")
+        # FTS always stores plaintext for search (separate from auto_embed).
+        try:
+            await conn.execute(
+                "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (fact_id, content, project, tags_json, fact_type),
+            )
+        except Exception as e:
+            logging.getLogger("cortex").warning(f"Failed to update FTS for fact {fact_id}: {e}")
 
         # Pass fact_id to side effects (except tx log which is already done)
         await self._embed_fact_async(conn, fact_id, content)
