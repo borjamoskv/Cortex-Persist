@@ -1,20 +1,32 @@
 [project]
 name = "cortex-memory"
-version = "5.1.0"
-description = "The Sovereign Ledger for AI Agents — local-first memory infrastructure with vector search, temporal facts, and cryptographic vaults."
+version = "8.0.0a1"
+description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
 readme = "README.md"
-license = "MIT"
+license = "BSL-1.1"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
     {name = "Borja Moskv", email = "borja@moskv.com"},
 ]
-keywords = ["ai", "memory", "agents", "sovereign", "vector-search", "sqlite"]
+keywords = [
+    "ai", "memory", "agents", "trust", "compliance",
+    "eu-ai-act", "cryptographic-ledger", "audit-trail",
+    "vector-search", "sqlite", "mcp", "multi-tenant",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Database",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -33,9 +45,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/borjamoskv/cortex"
+Homepage = "https://cortexpersist.com"
+Documentation = "https://cortexpersist.dev"
 Repository = "https://github.com/borjamoskv/cortex"
 Issues = "https://github.com/borjamoskv/cortex/issues"
+Changelog = "https://github.com/borjamoskv/cortex/releases"
 [project.optional-dependencies]
 api = [
     "fastapi>=0.110",

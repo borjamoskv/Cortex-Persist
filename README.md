@@ -5,9 +5,10 @@
 
 ![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v6%20alpha-orange.svg)
+![Status](https://img.shields.io/badge/status-v8.0%20alpha-orange.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
-[![Docs](https://img.shields.io/badge/docs-live-brightgreen)](https://borjamoskv.github.io/cortex/)
+[![Docs](https://img.shields.io/badge/docs-cortexpersist.dev-brightgreen)](https://cortexpersist.dev)
+[![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
 ---
@@ -36,7 +37,7 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ```
 Your Memory Layer (Mem0 / Zep / Letta / Custom)
         ↓
-   CORTEX Trust Engine v6
+   CORTEX Trust Engine v8
         ├── SHA-256 hash-chained ledger
         ├── Merkle tree checkpoints
         ├── Reputation-weighted WBFT consensus
@@ -85,7 +86,7 @@ cortex compliance-report
 # → Compliance Score: 5/5 — All Article 12 requirements met
 ```
 
-### Multi-Tenant (v6)
+### Multi-Tenant (v8)
 
 ```python
 from cortex import CortexEngine
@@ -116,7 +117,7 @@ uvicorn cortex.api:app --port 8484
 
 ---
 
-## Architecture (v6 Sovereign Cloud)
+## Architecture (v8 — Sovereign Cloud)
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -162,14 +163,13 @@ uvicorn cortex.api:app --port 8484
 
 ---
 
-## Stats (2026-02-23)
+## Stats (2026-02-24)
 
 | Metric | Value |
 |:---|:---|
-| Test functions | **1,162** |
+| Test functions | **1,162+** |
 | Production LOC | **~45,500** |
 | Python Modules | **444** |
-| MEJORAlo score | **78/100** |
 | Python version | **3.10+** |
 
 ---
@@ -207,4 +207,4 @@ See [LICENSE](LICENSE) for details.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv) · Powered by MOSKV-1 v5 (Antigravity)*
+*Built by [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com)*

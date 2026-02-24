@@ -3,42 +3,33 @@
 ## Supported Versions
 
 | Version | Supported          |
-|---------|--------------------|
-| 4.x     | ✅ Active support  |
-| 3.x     | ⚠️ Security fixes only |
-| < 3.0   | ❌ End of life     |
+|:--------|:------------------:|
+| 8.x     | ✅ Active          |
+| < 8.0   | ❌ No longer       |
 
 ## Reporting a Vulnerability
 
-**Do NOT open a public GitHub issue for security vulnerabilities.**
+**Do NOT open a public issue for security vulnerabilities.**
 
-Instead, please email **borjamoskv@gmail.com** with:
+Email: **security@cortexpersist.com**
 
-1. Description of the vulnerability
-2. Steps to reproduce
-3. Potential impact assessment
-4. Suggested fix (if any)
+You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
-We will acknowledge receipt within **48 hours** and provide a timeline for resolution within **5 business days**.
+## Security Features
 
-## Security Architecture
+CORTEX is built security-first:
 
-### Authentication
-- API key authentication via `X-API-Key` header
-- Tenant isolation via `X-Tenant-ID` header
-- Permission-based access control (`read`, `write`, `admin`)
+- **SHA-256 hash-chained ledger** — tamper-evident fact storage
+- **Merkle tree checkpoints** — batch integrity verification
+- **Privacy Shield** — 11-pattern secret detection at ingress
+- **AST Sandbox** — safe LLM code execution without `eval()`
+- **RBAC** — 4-role access control (admin, editor, viewer, auditor)
+- **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
+- **Input Sanitization** — all user inputs validated and escaped
 
-### Data Protection
-- All data encrypted at rest (SQLite with WAL mode)
-- TLS 1.3 enforced in production deployments
-- API keys are hashed, never stored in plaintext
-- No telemetry or data collection — fully sovereign
+## Threat Model
 
-### Supply Chain
-- Dependencies pinned in `pyproject.toml`
-- Automated dependency auditing via CI/CD
-- No runtime network calls except to configured LLM providers
-
-## Disclosure Policy
-
-We follow [responsible disclosure](https://en.wikipedia.org/wiki/Responsible_disclosure). Security researchers who report valid vulnerabilities will be credited in the CHANGELOG (with permission).
+CORTEX assumes:
+- The local SQLite database is as secure as the host filesystem
+- Network APIs require authentication (API keys or JWT)
+- Multi-tenant deployments enforce strict tenant isolation
