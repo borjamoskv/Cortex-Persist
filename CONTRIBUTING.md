@@ -1,45 +1,118 @@
 # Contributing to CORTEX
 
-Thank you for your interest in contributing to CORTEX! 🚀
+Thank you for your interest in CORTEX! We welcome contributions of all kinds.
 
-## Quick Start
+## Development Setup
 
 ```bash
+# Clone the repo
 git clone https://github.com/borjamoskv/cortex.git
 cd cortex
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+# .venv\Scripts\activate   # Windows
+
+# Install with dev dependencies
+pip install -e ".[all]"
+
+# Verify setup
+pytest tests/ -v --tb=short -x
 ```
 
-## Development Rules
+## Running the Test Suite
 
-1. **All facts are hash-chained.** Never bypass the ledger.
-2. **Tests are mandatory.** No PR merges without passing CI.
-3. **Privacy Shield is sacred.** Never weaken secret detection patterns.
-4. **Local-first always.** Every feature must work with SQLite alone.
+```bash
+# Full suite (1,276+ tests)
+pytest tests/ -v --tb=short
 
-## Pull Request Process
+# Single file
+pytest tests/test_engine.py -v
 
-1. Fork the repo and create your branch from `main`
-2. Add tests for any new functionality
-3. Ensure `pytest` passes with no failures
-4. Update documentation if needed
-5. Submit PR using the template
+# With coverage
+pytest tests/ --cov=cortex --cov-report=term-missing
 
-## Code Style
+# Fast smoke test
+pytest tests/ -x --timeout=30
+```
 
-- **Formatter**: Ruff (`ruff format`)
-- **Linter**: Ruff (`ruff check`)
-- **Line length**: 100 characters
-- **Type hints**: Required for all public APIs
+## Code Quality
 
-## Architecture
+We use **Ruff** for linting and formatting:
 
-See the [README](README.md) for the architecture diagram. Key principle:
+```bash
+# Check
+ruff check cortex/ tests/
+ruff format --check cortex/ tests/
 
-> Every layer trusts nothing. Verify everything.
+# Auto-fix
+ruff check --fix cortex/ tests/
+ruff format cortex/ tests/
+```
+
+## Making Changes
+
+1. **Fork** the repository
+2. **Create a branch**: `git checkout -b feature/my-change`
+3. **Make your changes** — keep commits focused and atomic
+4. **Add tests** for new functionality
+5. **Run the full test suite** to confirm nothing is broken
+6. **Submit a Pull Request** against `master`
+
+### Commit Message Convention
+
+```
+<type>: <short description>
+
+Types: feat, fix, docs, test, refactor, ci, chore
+```
+
+Examples:
+- `feat: add graph-based memory traversal`
+- `fix: correct Merkle checkpoint hash calculation`
+- `docs: expand privacy shield documentation`
+
+## Pull Request Guidelines
+
+- PRs should target `master`
+- Ensure CI passes (lint + tests + security audit)
+- Include a description of **what** changed and **why**
+- Link related issues with `Closes #123`
+
+## Architecture Overview
+
+```
+cortex/
+├── api.py              # FastAPI REST endpoints
+├── cli/                # Click-based CLI (38 commands)
+├── engine.py           # Core CortexEngine
+├── audit/              # Immutable ledger & Merkle trees
+├── consensus/          # WBFT multi-agent consensus
+├── gate/               # Trust Gateway (RBAC, Privacy Shield)
+├── search/             # Vector + semantic search
+├── sovereign/          # Self-healing daemon & observability
+├── storage/            # SQLite, AlloyDB, Turso backends
+└── mcp/                # Model Context Protocol server
+```
+
+For detailed architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Creating a Plugin
+
+Use the scaffold generator:
+
+```bash
+python scripts/create_plugin.py my-plugin --description "Does something cool"
+```
+
+This generates a complete working plugin with manifest, API spec, Dockerfile, tests, and docs.
+
+## Questions?
+
+- Open a [GitHub Discussion](https://github.com/borjamoskv/cortex/discussions)
+- Email: borja@moskv.com
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the BSL-1.1 license.
+By contributing, you agree that your contributions will be licensed under BSL-1.1.
