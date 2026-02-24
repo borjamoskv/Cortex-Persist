@@ -47,15 +47,47 @@ class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Injects industry-standard security headers for defense-in-depth."""
+    """Injects industry-standard security headers for defense-in-depth.
+
+    Headers applied:
+        - Content-Security-Policy: restricts resource loading (replaces deprecated X-CSP)
+        - Strict-Transport-Security: enforces HTTPS for 1 year with includeSubDomains
+        - X-Content-Type-Options: prevents MIME sniffing
+        - X-Frame-Options: prevents clickjacking
+        - Referrer-Policy: limits referrer leakage
+        - Permissions-Policy: disables dangerous browser APIs
+        - Cross-Origin-Opener-Policy: isolates browsing context
+        - Cache-Control: no-store on sensitive paths
+    """
+
+    # Paths that MUST NOT be cached (contain auth tokens, secrets, PII)
+    _SENSITIVE_PREFIXES = ("/v1/admin", "/v1/handoff", "/v1/status", "/v1/facts")
 
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
+
+        # Core headers (OWASP recommended)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        )
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains; preload"
+        )
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["X-Content-Security-Policy"] = "default-src 'self'"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), payment=()"
+        )
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+
+        # Sensitive path protection — never cache auth/admin responses
+        if any(request.url.path.startswith(p) for p in self._SENSITIVE_PREFIXES):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+            response.headers["Pragma"] = "no-cache"
+
         return response
 
 
