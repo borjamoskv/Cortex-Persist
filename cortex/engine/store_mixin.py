@@ -72,9 +72,13 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             )
 
     async def _embed_fact_async(
-        self, conn: aiosqlite.Connection, fact_id: int, content: str
+        self, conn: aiosqlite.Connection, fact_id: int, project: str, content: str
     ) -> None:
-        """Generate and store embedding for a fact asynchronously."""
+        """Generate and store embedding for a fact asynchronously.
+
+        Now supports G10 Specular Memory (HDC-Native).
+        """
+        # 1. Legacy Vector Store (L2 Dense)
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
             try:
                 embedding = self._get_embedder().embed(content)
@@ -84,6 +88,55 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 )
             except (sqlite3.Error, OSError, ValueError) as e:
                 logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+
+        # 2. Vector Alpha (G10 Specular Memory)
+        mm = getattr(self, "_memory_manager", None)
+        if mm and hasattr(mm, "get_context_vector") and mm._hdc_encoder:
+            try:
+                # Calculate Fact Hypervector (F)
+                fact_hv = mm._hdc_encoder.encode_text(content)
+
+                # Calculate Context Hypervector (C)
+                context_hv = mm.get_context_vector()
+
+                # Specular Memory Axiom: I = F ⊗ C
+                # (In bipolar HDC, unbind is bind)
+                if context_hv is not None:
+                    from cortex.memory.hdc.algebra import bind
+                    import numpy as np
+
+                    intent_hv = bind(fact_hv, context_hv)
+
+                    # Store as float32 for sqlite-vec compatibility (as in HDC store.py)
+                    specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
+
+                    await conn.execute(
+                        "INSERT INTO specular_embeddings (fact_id, embedding) VALUES (?, ?)",
+                        (fact_id, specular_bytes),
+                    )
+                    logger.debug("Specular Memory indexed for fact %d", fact_id)
+
+                    # 3. Synchronize with Vector Alpha (HDC Store)
+                    if mm._hdc:
+                        # Construct a minimal model for the HDC store
+                        from cortex.memory.models import CortexFactModel
+                        # Fetch tenant/project if not available
+                        # Usually we're in a store context
+                        # For now, we assume we have enough to construct a fact for indexing
+                        fact = CortexFactModel(
+                            id=str(fact_id),
+                            tenant_id=getattr(self, "_tenant_id", "default"),
+                            project_id=project,
+                            content=content,
+                            embedding=fact_hv.tolist(),
+                            specular_embedding=intent_hv.tolist()
+                        )
+                        # We need some info from the engine state.
+                        # Actually, let's just use the fact_id as ID.
+                        await mm._hdc.memorize(fact)
+                        logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)
+            except Exception as e:
+                logger.warning("Specular Memory indexing failed for fact %d: %s", fact_id, e)
 
     async def _process_side_effects_async(
         self,
@@ -215,7 +268,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
 
         # Pass fact_id to side effects (except tx log which is already done)
-        await self._embed_fact_async(conn, fact_id, content)
+        await self._embed_fact_async(conn, fact_id, project, content)
 
         # Original process_fact_graph needs the fact_id
         from cortex.graph import process_fact_graph

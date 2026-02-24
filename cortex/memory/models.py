@@ -138,6 +138,10 @@ class CortexFactModel(BaseModel):
         default_factory=dict,
         description="Optional structured metadata (session_id, tool calls, etc).",
     )
+    specular_embedding: list[int] | None = Field(
+        default=None,
+        description="HDC Specular Memory (intent trace) bipolar hypervector.",
+    )
 
     @property
     def age_days(self) -> float:

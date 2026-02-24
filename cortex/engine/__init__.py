@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,8 +18,6 @@ from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
 from cortex.engine.store_mixin import StoreMixin
-from cortex.engine.sync_compat import SyncCompatMixin
-from cortex.engine.sync_ops import SyncOpsMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
@@ -33,7 +30,7 @@ from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin):
+class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
@@ -63,29 +60,10 @@ class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, Trans
         yield conn
 
     def _get_embedder(self) -> LocalEmbedder:
-        """Protocol requirement for SearchMixin (Sync/Async)."""
+        """Protocol requirement for SearchMixin."""
         if self._embedder is None:
             self._embedder = LocalEmbedder()
         return self._embedder
-
-    def _get_sync_conn(self) -> sqlite3.Connection:
-        """Protocol requirement for SyncCompatMixin (Sync)."""
-        from cortex.database.core import connect
-
-        conn = connect(str(self._db_path))
-
-        # Enable vector extension if possible
-        try:
-            conn.enable_load_extension(True)
-            import sqlite_vec
-
-            conn.load_extension(sqlite_vec.loadable_path())
-            conn.enable_load_extension(False)
-            self._vec_available = True
-        except (OSError, AttributeError):
-            pass
-
-        return conn
 
     # ─── Connection ───────────────────────────────────────────────
 
@@ -170,8 +148,8 @@ class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, Trans
     async def vote(self, *args, **kwargs):
         return await self.consensus.vote(*args, **kwargs)
 
-    def stats(self):
-        return self.facts.stats()
+    async def stats(self):
+        return await self.facts.stats()
 
     # ─── Schema ───────────────────────────────────────────────────
 
@@ -205,6 +183,7 @@ class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, Trans
     # ─── Helpers ──────────────────────────────────────────────────
 
     def export_snapshot(self, out_path: str | Path) -> str:
+        # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.sync.snapshot import export_snapshot
 
         return export_snapshot(self, out_path)
@@ -222,7 +201,6 @@ class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, Trans
         if self._conn:
             await self._conn.close()
             self._conn = None
-        self.close_sync()
         self._ledger = None
 
     async def __aenter__(self):

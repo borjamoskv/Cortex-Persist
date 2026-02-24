@@ -1,9 +1,9 @@
-# CORTEX v6 — Sovereign Cloud Architecture
+# CORTEX v7 — Evolución Autopoiética
 
-> **Version:** 6.0.0 · **Codename:** *Sovereign Cloud*
-> **Updated:** 2026-02-23 · **Author:** MOSKV-1 v5 (Antigravity)
-> **Status:** Active development — Phase 1 foundation complete, Phase 2 in progress
-> **Codebase:** 303 Python modules · ~45,500 LOC · Apache 2.0
+> **Version:** 7.0.0 · **Codename:** *Autopoiesis*
+> **Updated:** 2026-02-24 · **Author:** MOSKV-1 v5 (Antigravity)
+> **Status:** Active development — Biological core integration
+> **Codebase:** 306 Python modules · ~46,200 LOC · Apache 2.0
 
 ---
 
@@ -20,16 +20,17 @@
 │                              SECURITY PERIMETER                                  │
 │                                                                                  │
 │   API Key Auth (auth/__init__.py)          RBAC Engine (auth/rbac.py)            │
-│   SovereignGate (gate/core.py)             ContentSizeLimitMiddleware            │
+│   SovereignGate (gate/core.py)             ConnectionGuard (db.py interceptor)   │
+│   StorageGuard (middleware)                ContentSizeLimitMiddleware            │
 │   SecurityHeadersMiddleware                RateLimitMiddleware                    │
 │   SecurityFraudMiddleware                  SecurityAuditMiddleware                │
 │   MetricsMiddleware                                                              │
 ├──────────────┬───────────────────────────────────────────────────────────────────┤
 │ ORCHESTRATION│                AGENT INTELLIGENCE                                 │
 │              │                                                                   │
-│ ThoughtOrch. │   Legion Formation Engine        Semantic Router                  │
-│ LLM Router   │   WBFT Consensus Engine          Fusion Engine                    │
-│ MemoryManager│   Agent Mixin (provenance)        MEJORAlo Engine                 │
+│ ThoughtOrch. │   Autopoietic Engine (experimental)  Digital Endocrine Core       │
+│ LLM Router   │   Legion Formation Engine            Semantic Router              │
+│ MemoryManager│   WBFT Consensus Engine              MEJORAlo Engine              │
 ├──────────────┴───────────────────────────────────────────────────────────────────┤
 │                              DOMAIN CORE                                         │
 │                                                                                  │
@@ -104,7 +105,23 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
 
 ---
 
-## 2. Tripartite Cognitive Memory (L1 → L2 → L3)
+## 2. Biological Core — Organic Proactivity
+
+The v7 architecture introduces a "bio-silicon" layer that manages the system's internal drive and health:
+
+### 2.1 Autopoietic Core (`experimental/autopoiesis.py`)
+- **Responsibility**: Autonomous state regeneration.
+- **Mechanism**: Periodic "cell" checks on stored facts and ghosts. Triggers auto-healing for inconsistent or stale states.
+- **Entropy Control**: Directly counteract architectural drift without user intervention.
+
+### 2.2 Digital Endocrine System (`experimental/digital_endocrine.py`)
+- **Responsibility**: Attention scale and swarm "mood".
+- **Signals**: Derived from `PerceptionMonitor` and `NeuralIntentMonitor`.
+- **Regulation**: Throttles or amplifies agent proactivity based on global cognitive load.
+
+### 2.3 Circadian Rhythms (`experimental/circadian_cycle.py`)
+- **Responsibility**: Temporal resource optimization.
+- **Phase**: Sleep (Deep Cleanup / Compaction) | Wake (High-Frequency Neural Poll).
 
 Three hierarchical memory layers operate as a unified cognitive stack, orchestrated by `CortexMemoryManager` (`memory/manager.py`):
 

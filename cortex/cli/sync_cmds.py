@@ -29,8 +29,8 @@ def _run_async(coro):
 def sync(db) -> None:
     """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
     engine = get_engine(db)
-    engine.init_db_sync()
     try:
+        _run_async(engine.init_db())
         with console.status("[bold blue]Sincronizando memoria...[/]"):
             # Fix: Wrap async call
             result = _run_async(sync_memory(engine))
@@ -64,8 +64,8 @@ def sync(db) -> None:
 def export(db, out) -> None:
     """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
     engine = get_engine(db)
-    engine.init_db_sync()
     try:
+        _run_async(engine.init_db())
         out_path = Path(out).expanduser()
         # Fix: Wrap async call
         _run_async(export_snapshot(engine, out_path))
@@ -81,7 +81,8 @@ def writeback(db) -> None:
     """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
     engine = get_engine(db)
     try:
-        result = export_to_json(engine)
+        _run_async(engine.init_db())
+        result = _run_async(export_to_json(engine))
         if result.had_changes:
             console.print(
                 Panel(
@@ -118,8 +119,8 @@ def writeback(db) -> None:
 def obsidian(db, out) -> None:
     """Exportar CORTEX como vault de Obsidian con notas interconectadas."""
     engine = get_engine(db)
-    engine.init_db_sync()
     try:
+        _run_async(engine.init_db())
         out_path = Path(out).expanduser()
         with console.status("[bold blue]Generando vault Obsidian...[/]"):
             stats = _run_async(export_obsidian(engine, out_path))

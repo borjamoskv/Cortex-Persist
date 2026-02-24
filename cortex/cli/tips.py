@@ -16,6 +16,7 @@ Usage:
 
 from __future__ import annotations
 
+import aiosqlite
 import hashlib
 import json
 import logging
@@ -178,12 +179,9 @@ class TipsEngine:
 
     # ─── Public API ──────────────────────────────────────────────
 
-    def random(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
-        """Get a random tip. Avoids repeats until all tips have been shown.
-
-        Raises ``ValueError`` if no tips are available in the requested language.
-        """
-        pool = self._get_pool(lang=lang or self.lang)
+    async def random(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
+        """Get a random tip. Avoids repeats until all tips have been shown."""
+        pool = await self._get_pool(lang=lang or self.lang)
         if not pool:
             raise ValueError(f"No tips available for lang='{lang or self.lang}'")
 
@@ -199,7 +197,7 @@ class TipsEngine:
         self._shown_ids.add(tip.id)
         return tip
 
-    def for_category(
+    async def for_category(
         self,
         category: str | TipCategory,
         *,
@@ -213,18 +211,15 @@ class TipsEngine:
                 category = TipCategory(category.lower())
             except ValueError:
                 return []
-        pool = self._get_pool(lang=target_lang)
+        pool = await self._get_pool(lang=target_lang)
         matching = [t for t in pool if t.category == category]
         random.shuffle(matching)
         return matching[:limit]
 
-    def for_project(self, project: str, *, lang: str | None = None, limit: int = 3) -> list[Tip]:
-        """Get tips scoped to a specific project.
-
-        Combines project-specific dynamic tips with general tips.
-        """
+    async def for_project(self, project: str, *, lang: str | None = None, limit: int = 3) -> list[Tip]:
+        """Get tips scoped to a specific project."""
         target_lang = lang or self.lang
-        pool = self._get_pool(lang=target_lang)
+        pool = await self._get_pool(lang=target_lang)
         project_tips = [t for t in pool if t.project == project]
         general_tips = [t for t in pool if t.project is None]
 
@@ -236,23 +231,22 @@ class TipsEngine:
             result.extend(general_tips[:remaining])
         return result
 
-    def all_tips(self, *, lang: str | None = None) -> list[Tip]:
+    async def all_tips(self, *, lang: str | None = None) -> list[Tip]:
         """Return all available tips (static + dynamic)."""
-        return self._get_pool(lang=lang or self.lang)
+        return await self._get_pool(lang=lang or self.lang)
 
     @property
     def categories(self) -> list[str]:
         """List all available categories."""
         return [c.value for c in TipCategory]
 
-    @property
-    def count(self) -> int:
+    async def count(self) -> int:
         """Total number of available tips in current language."""
-        return len(self._get_pool(lang=self.lang))
+        return len(await self._get_pool(lang=self.lang))
 
     # ─── Dynamic Tips from CORTEX Memory ─────────────────────────
 
-    def _get_pool(self, lang: str | None = None) -> list[Tip]:
+    async def _get_pool(self, lang: str | None = None) -> list[Tip]:
         """Get combined static + dynamic tip pool filtered by language."""
         target_lang = lang or self.lang
         static_tips = _load_static_tips()
@@ -269,12 +263,12 @@ class TipsEngine:
 
         now = time.monotonic()
         if now - self._cache_ts > self._cache_ttl:
-            self._refresh_dynamic()
+            await self._refresh_dynamic()
             self._cache_ts = now
 
         return static_pool + self._dynamic_cache
 
-    def _refresh_dynamic(self) -> None:
+    async def _refresh_dynamic(self) -> None:
         """Mine CORTEX memory for dynamic tips."""
         if self._engine is None:
             self._dynamic_cache = []
@@ -282,18 +276,18 @@ class TipsEngine:
 
         tips: list[Tip] = []
         try:
-            conn = self._engine._get_sync_conn()
+            conn = await self._engine.get_conn()
             for spec in _MINING_SPECS:
                 limit = max(1, self._max_dynamic // spec.limit_divisor)
-                tips.extend(self._mine_facts(conn, spec, limit))
+                tips.extend(await self._mine_facts(conn, spec, limit))
         except (sqlite3.Error, AttributeError, RuntimeError) as exc:
             logger.debug("Optional dynamic tips mining skipped: %s", exc)
 
         self._dynamic_cache = tips[: self._max_dynamic]
 
     @staticmethod
-    def _mine_facts(
-        conn: sqlite3.Connection,
+    async def _mine_facts(
+        conn: aiosqlite.Connection,
         spec: _MiningSpec,
         limit: int,
     ) -> list[Tip]:
@@ -303,17 +297,18 @@ class TipsEngine:
         tips: list[Tip] = []
         try:
             # Over-fetch by 3x to compensate for tips rejected by the Privacy Firewall
-            rows = conn.execute(
+            cursor = await conn.execute(
                 """
                 SELECT id, project, content
                 FROM facts
                 WHERE fact_type = ?
-                  AND deprecated = 0
+                  AND valid_until IS NULL
                 ORDER BY created_at DESC
                 LIMIT ?
                 """,
                 (spec.fact_type, limit * 3),
-            ).fetchall()
+            )
+            rows = await cursor.fetchall()
 
             for fact_id, project, content in rows:
                 if len(tips) >= limit:
