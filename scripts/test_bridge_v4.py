@@ -1,8 +1,9 @@
 import asyncio
+import os
 import sys
 
 # Add swarm path to sys.path
-sys.path.append("/Users/borjafernandezangulo/game/moskv-swarm")
+sys.path.append(os.path.expanduser("~/game/moskv-swarm"))
 
 from utils.cortex_bridge import CortexMemoryBridge
 
