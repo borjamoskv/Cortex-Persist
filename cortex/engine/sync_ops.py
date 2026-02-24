@@ -11,7 +11,7 @@ import sqlite3
 
 from cortex.engine.models import Fact
 from cortex.engine.sync_ghost_mixin import SyncGhostMixin
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["SyncOpsMixin"]
 
@@ -79,7 +79,7 @@ class SyncOpsMixin(SyncGhostMixin):
 
     def _log_transaction_sync(self, conn, project, action, detail) -> int:
         """Synchronous version of _log_transaction."""
-        from cortex.canonical import canonical_json, compute_tx_hash
+        from cortex.utils.canonical import canonical_json, compute_tx_hash
 
         dj = canonical_json(detail)
         ts = now_iso()
@@ -206,7 +206,7 @@ class SyncOpsMixin(SyncGhostMixin):
     ) -> list[Fact]:
         """Synchronous version of history."""
         from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
-        from cortex.temporal import build_temporal_filter_params
+        from cortex.memory.temporal import build_temporal_filter_params
 
         conn = self._get_sync_conn()
         if as_of:

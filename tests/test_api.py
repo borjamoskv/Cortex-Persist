@@ -5,9 +5,9 @@ import tempfile
 import pytest
 from fastapi.testclient import TestClient
 
-import cortex.api as api_mod
+import cortex.api.core as api_mod
 import cortex.auth
-from cortex import api_state, config
+from cortex import config; import cortex.api.state as api_state
 from cortex.auth import AuthManager
 
 # Unique test DB

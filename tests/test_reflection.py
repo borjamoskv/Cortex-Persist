@@ -12,7 +12,7 @@ from click.testing import CliRunner
 
 from cortex.cli import cli
 from cortex.engine import CortexEngine
-from cortex.reflection import (
+from cortex.thinking.reflection import (
     InjectedLearning,
     Reflection,
     format_injection_json,

@@ -13,7 +13,7 @@ sys.modules["objc"] = MagicMock()
 
 import pytest
 
-from cortex.neural import NeuralIntentEngine
+from cortex.agents.neural import NeuralIntentEngine
 
 
 class MockActiveWindowSensor:

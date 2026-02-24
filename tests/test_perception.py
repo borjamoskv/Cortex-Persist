@@ -241,7 +241,7 @@ class TestBehavioralInference:
 @pytest.mark.asyncio
 class TestPerceptionRecorder:
     async def test_record_high_confidence(self, engine):
-        from cortex.episodic import EpisodicMemory
+        from cortex.episodic.main import EpisodicMemory
 
         conn = await engine.get_conn()
         recorder = PerceptionRecorder(conn, "test-session", cooldown_s=0)

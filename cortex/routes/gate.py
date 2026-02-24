@@ -13,7 +13,7 @@ from cortex.gate import (
     GateInvalidSignature,
     get_gate,
 )
-from cortex.models import (
+from cortex.types.models import (
     GateActionResponse,
     GateApprovalRequest,
     GateStatusResponse,

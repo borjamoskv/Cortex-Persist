@@ -11,7 +11,7 @@ import tempfile
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.search_sync import (
+from cortex.search.sync import (
     SyncSearchResult,
     hybrid_search_sync,
     semantic_search_sync,

@@ -99,7 +99,7 @@ async def _provision_api_key(email: str, plan: str) -> str | None:
     plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
 
     try:
-        from cortex import api_state
+        import cortex.api.state as api_state
 
         if api_state.auth_manager:
             await api_state.auth_manager.create_key(
@@ -124,7 +124,7 @@ async def _provision_api_key(email: str, plan: str) -> str | None:
 async def _revoke_keys_for_email(email: str) -> None:
     """Find and revoke Stripe API keys for an email."""
     try:
-        from cortex import api_state
+        import cortex.api.state as api_state
 
         if api_state.auth_manager:
             keys = await api_state.auth_manager.list_keys(tenant_id=email)

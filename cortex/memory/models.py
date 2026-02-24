@@ -17,7 +17,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["CortexFactModel", "EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
 

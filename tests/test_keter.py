@@ -9,7 +9,7 @@ from cortex.engine.keter import (
     IntentAlchemist,
     KeterEngine,
 )
-from cortex.errors import CortexError
+from cortex.utils.errors import CortexError
 
 
 @pytest.fixture

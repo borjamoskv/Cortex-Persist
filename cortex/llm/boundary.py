@@ -91,7 +91,7 @@ class ImmuneBoundary:
                     str(e),
                 )
 
-        from cortex.errors import CortexError
+        from cortex.utils.errors import CortexError
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(

@@ -190,7 +190,7 @@ class TestAPIErrorHandling:
         """ValueError exception handler returns HTTP 422."""
         import asyncio
 
-        from cortex.api import value_error_handler
+        from cortex.api.core import value_error_handler
 
         request = MagicMock()
         exc = ValueError("invalid input")
@@ -201,7 +201,7 @@ class TestAPIErrorHandling:
 
     def test_app_has_rate_limiter(self):
         """API should have rate limiting middleware."""
-        from cortex.api import app
+        from cortex.api.core import app
 
         middleware_classes = [
             m.cls.__name__ if hasattr(m, "cls") else type(m).__name__ for m in app.user_middleware
@@ -219,7 +219,7 @@ class TestAsyncClientParity:
         """AsyncCortexClient._request should handle transport and JSON errors."""
         import inspect
 
-        from cortex.async_client import AsyncCortexClient
+        from cortex.api.async_client import AsyncCortexClient
 
         source = inspect.getsource(AsyncCortexClient._request)
         assert "httpx.HTTPError" in source
@@ -228,7 +228,7 @@ class TestAsyncClientParity:
 
     def test_async_client_context_manager(self):
         """AsyncCortexClient should support async context manager."""
-        from cortex.async_client import AsyncCortexClient
+        from cortex.api.async_client import AsyncCortexClient
 
         assert hasattr(AsyncCortexClient, "__aenter__")
         assert hasattr(AsyncCortexClient, "__aexit__")

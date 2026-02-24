@@ -12,7 +12,7 @@ import logging
 import subprocess
 
 from cortex.daemon.models import GhostAlert, MemoryAlert, SiteStatus
-from cortex.sys_platform import is_linux, is_macos, is_windows
+from cortex.platform.sys import is_linux, is_macos, is_windows
 
 __all__ = ["Notifier"]
 

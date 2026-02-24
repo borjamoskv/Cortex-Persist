@@ -18,8 +18,8 @@ class NeuralIntentMonitor:
     def check(self) -> list[NeuralIntentAlert]:
         alerts: list[NeuralIntentAlert] = []
         try:
-            from cortex.neural import NeuralIntentEngine
-            from cortex.sys_platform import is_macos
+            from cortex.agents.neural import NeuralIntentEngine
+            from cortex.platform.sys import is_macos
 
             if not is_macos():
                 return []

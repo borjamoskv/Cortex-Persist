@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.console import Console
 
 from cortex.daemon import BUNDLE_ID
-from cortex.sys_platform import get_service_dir
+from cortex.platform.sys import get_service_dir
 
 __all__ = [
     "install_macos",

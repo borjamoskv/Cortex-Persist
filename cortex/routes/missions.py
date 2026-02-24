@@ -4,11 +4,11 @@ CORTEX v5.0 — Mission Orchestration Router.
 
 from fastapi import APIRouter, Depends, Query
 
-from cortex.api_deps import get_engine
+from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
-from cortex.launchpad import MissionOrchestrator
-from cortex.models import MissionLaunchRequest, MissionResponse
+from cortex.launchpad.main import MissionOrchestrator
+from cortex.types.models import MissionLaunchRequest, MissionResponse
 
 __all__ = ["launch_mission", "list_missions"]
 

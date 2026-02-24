@@ -43,7 +43,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.metrics import MetricsRegistry
+    from cortex.telemetry.metrics import MetricsRegistry
 
 __all__ = ["traced", "SpanContext", "Span", "TraceCollector", "collector"]
 

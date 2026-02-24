@@ -135,7 +135,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         )
 
         try:
-            from cortex.connection_pool import CortexConnectionPool
+            from cortex.database.pool import CortexConnectionPool
             from cortex.daemon.sidecar.telemetry import ASTOracle
             from cortex.engine_async import AsyncCortexEngine
 
@@ -183,7 +183,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         # Time Tracker (for flushing heartbeats)
         try:
-            from cortex.db import connect
+            from cortex.database.core import connect
             from cortex.timing import TimingTracker
 
             self.timing_conn = connect(

@@ -334,18 +334,18 @@ def get_compaction_stats(
     total_deprecated = 0
 
     for row in rows:
-        original_ids = json.loads(row[3]) if row[3] else []
+        original_ids = json.loads(row[4]) if row[4] else []
         total_deprecated += len(original_ids)
         history.append(
             {
                 "id": row[0],
-                "project": row[1],
-                "strategy": row[2],
+                "project": row[2],
+                "strategy": row[3],
                 "deprecated_count": len(original_ids),
-                "new_fact_id": row[4],
-                "facts_before": row[5],
-                "facts_after": row[6],
-                "timestamp": row[7],
+                "new_fact_id": row[5],
+                "facts_before": row[6],
+                "facts_after": row[7],
+                "timestamp": row[8],
             }
         )
 

@@ -12,7 +12,7 @@ from cortex.compaction.utils import content_hash, merge_error_contents
 __all__ = ["execute_merge_errors"]
 
 if TYPE_CHECKING:
-    from cortex.compactor import CompactionResult
+    from cortex.compaction.compactor import CompactionResult
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.merge_errors")

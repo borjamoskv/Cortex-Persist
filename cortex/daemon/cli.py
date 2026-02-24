@@ -32,7 +32,7 @@ from cortex.daemon import (
     DEFAULT_STALE_HOURS,
     MoskvDaemon,
 )
-from cortex.sys_platform import get_service_dir, is_linux, is_macos, is_windows
+from cortex.platform.sys import get_service_dir, is_linux, is_macos, is_windows
 
 __all__ = [
     "PLIST_SOURCE",
@@ -263,7 +263,7 @@ def version() -> None:
 @cli.command()
 def install() -> None:
     """Install daemon as a system service (launchd / systemd / Task Scheduler)."""
-    from cortex.daemon_platform import (
+    from cortex.daemon.platform import (
         install_linux,
         install_macos,
         install_windows,
@@ -283,7 +283,7 @@ def install() -> None:
 @cli.command()
 def uninstall() -> None:
     """Remove daemon system service."""
-    from cortex.daemon_platform import (
+    from cortex.daemon.platform import (
         uninstall_linux,
         uninstall_macos,
         uninstall_windows,

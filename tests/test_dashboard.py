@@ -25,7 +25,7 @@ def dashboard_env(tmp_path):
 def client(dashboard_env):
     # Import here so CORTEX_DB env is set before the module-level DB_PATH reads it
     # We need to patch the DB_PATH directly since it's read at import time
-    import cortex.api as api_mod
+    import cortex.api.core as api_mod
 
     original_db = api_mod.DB_PATH
     api_mod.DB_PATH = dashboard_env
@@ -62,7 +62,7 @@ def test_daily_method(client):
 def test_history_endpoint(client):
     c, api_mod = client
     # Reset AuthManager to pick up test DB
-    import cortex.api_state
+    import cortex.api.state as api_state
 
     cortex.api_state.auth_manager = None
 

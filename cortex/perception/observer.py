@@ -13,7 +13,7 @@ from collections.abc import Callable
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from cortex.perception_base import (
+from cortex.perception.base import (
     DEBOUNCE_SECONDS,
     FileEvent,
     classify_file,

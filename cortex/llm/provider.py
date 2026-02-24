@@ -264,12 +264,12 @@ class LLMProvider(BaseProvider):
                 self._provider,
                 e.response.text[:500],
             )
-            from cortex.errors import CortexError
+            from cortex.utils.errors import CortexError
 
             raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
-            from cortex.errors import CortexError
+            from cortex.utils.errors import CortexError
 
             raise CortexError(f"Unexpected JSON format from {self._provider}") from e
 

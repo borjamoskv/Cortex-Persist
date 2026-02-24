@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from cortex.sync.common import CORTEX_DIR, atomic_write
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = [
     "DEFAULT_HANDOFF_PATH",

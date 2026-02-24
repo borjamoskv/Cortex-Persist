@@ -22,7 +22,7 @@ __all__ = ["reflect", "inject"]
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def reflect(project, summary, errors, decisions, source, db) -> None:
     """Store a post-mortem reflection for the current session."""
-    from cortex.reflection import generate_reflection
+    from cortex.thinking.reflection import generate_reflection
 
     engine = get_engine(db)
     try:
@@ -62,7 +62,7 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def inject(project, hint, top_k, fmt, db) -> None:
     """Retrieve relevant past learnings for system_prompt injection."""
-    from cortex.reflection import (
+    from cortex.thinking.reflection import (
         format_injection_json,
         format_injection_markdown,
         inject_reflections,

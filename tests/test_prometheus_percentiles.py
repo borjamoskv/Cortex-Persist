@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from cortex.metrics import MetricsRegistry
+from cortex.telemetry.metrics import MetricsRegistry
 
 
 class TestPrometheusPercentiles:

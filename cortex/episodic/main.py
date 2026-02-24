@@ -17,13 +17,13 @@ from collections import Counter, defaultdict
 from itertools import combinations
 from typing import TYPE_CHECKING, Any, Final
 
-from cortex.episodic_base import (
+from cortex.episodic.base import (
     EMOTIONS,
     EVENT_TYPES,
     Episode,
     Pattern,
 )
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["EpisodicMemory"]
 

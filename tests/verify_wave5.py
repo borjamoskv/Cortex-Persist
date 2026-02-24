@@ -10,7 +10,7 @@ async def verify_ledger_api():
     print("--- Verifying Ledger API & Metrics ---")
     from fastapi.testclient import TestClient
 
-    from cortex.api import app
+    from cortex.api.core import app
 
     client = TestClient(app)
 

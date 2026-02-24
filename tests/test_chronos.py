@@ -1,7 +1,7 @@
 import pytest
 from click.testing import CliRunner
 
-from cortex.chronos import ChronosEngine
+from cortex.timing.chronos import ChronosEngine
 from cortex.cli.chronos_cmds import analyze
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from cortex import config
 from cortex.daemon.models import SecurityAlert
-from cortex.db import connect_async
+from cortex.database.core import connect_async
 
 logger = logging.getLogger("moskv-daemon")
 

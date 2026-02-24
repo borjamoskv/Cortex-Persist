@@ -41,7 +41,7 @@ class CompactionMonitor:
             return None
 
         try:
-            from cortex.compactor import compact
+            from cortex.compaction.compactor import compact
 
             logger.info("Autonomous Compaction (REM Sleep) running on %s", project)
 

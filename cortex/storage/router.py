@@ -72,7 +72,7 @@ class TenantRouter:
         """Return the shared local SQLite connection pool."""
         if "local" not in self._connections:
             from cortex.config import DB_PATH
-            from cortex.connection_pool import CortexConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(str(DB_PATH))
             await pool.initialize()

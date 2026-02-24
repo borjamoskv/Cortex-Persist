@@ -9,7 +9,7 @@ from rich.panel import Panel
 
 from cortex.cli.core import _run_async
 from cortex.engine.keter import KeterEngine
-from cortex.errors import CortexError
+from cortex.utils.errors import CortexError
 
 console = Console()
 

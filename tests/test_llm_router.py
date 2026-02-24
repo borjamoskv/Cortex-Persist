@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from cortex.llm.router import BaseProvider, CortexLLMRouter, CortexPrompt
-from cortex.result import Err, Ok
+from cortex.utils.result import Err, Ok
 
 # ─── Mock Providers ───────────────────────────────────────────────────
 

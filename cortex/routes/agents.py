@@ -7,11 +7,11 @@ import sqlite3
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
-from cortex.i18n import get_trans
-from cortex.models import AgentRegisterRequest, AgentResponse
+from cortex.utils.i18n import get_trans
+from cortex.types.models import AgentRegisterRequest, AgentResponse
 
 __all__ = ["register_agent", "get_agent", "list_agents"]
 

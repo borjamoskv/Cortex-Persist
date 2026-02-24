@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from cortex.daemon_cli import cli
+from cortex.daemon.cli import cli
 
 
 @pytest.fixture

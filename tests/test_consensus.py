@@ -30,8 +30,8 @@ def client(monkeypatch):
     from fastapi.testclient import TestClient
 
     import cortex.auth
-    from cortex import api_state
-    from cortex.api import app
+    import cortex.api.state as api_state
+    from cortex.api.core import app
 
     # Set up some test state
     # monkeypatch.setattr(cortex.api, "DB_PATH", test_db)
@@ -107,7 +107,7 @@ def test_recall_ordering(client):
 
 def test_rwc_flow(client):
     """Test Reputation-Weighted Consensus flow."""
-    from cortex import api_state
+    import cortex.api.state as api_state
 
     engine = api_state.engine
 

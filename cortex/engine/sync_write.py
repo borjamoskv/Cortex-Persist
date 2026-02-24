@@ -11,7 +11,7 @@ import logging
 import sqlite3
 
 from cortex.sync.gitops import sync_fact_to_repo
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["SyncWriteMixin"]
 
@@ -25,7 +25,7 @@ class SyncWriteMixin:
         """Initialize database schema (sync version)."""
         from cortex.engine import get_init_meta
         from cortex.migrations.core import run_migrations
-        from cortex.schema import get_all_schema
+        from cortex.database.schema import get_all_schema
 
         conn = self._get_sync_conn()
         for stmt in get_all_schema():
@@ -183,7 +183,7 @@ class SyncWriteMixin:
 
     def _log_transaction_sync(self, conn, project, action, detail) -> int:
         """Synchronous version of _log_transaction."""
-        from cortex.canonical import canonical_json, compute_tx_hash
+        from cortex.utils.canonical import canonical_json, compute_tx_hash
 
         dj = canonical_json(detail)
         ts = now_iso()

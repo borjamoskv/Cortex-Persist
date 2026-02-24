@@ -63,7 +63,7 @@ def verify_fact(fact_id: int, db: str) -> None:
     Outputs a verification certificate.
     """
     from cortex.cli.errors import err_fact_not_found, handle_cli_error
-    from cortex.db import connect as db_connect
+    from cortex.database.core import connect as db_connect
 
     conn = None
     try:
@@ -206,7 +206,7 @@ def compliance_report(db: str) -> None:
     from datetime import datetime, timezone
 
     from cortex.cli.errors import handle_cli_error
-    from cortex.db import connect as db_connect
+    from cortex.database.core import connect as db_connect
 
     conn = None
     try:
@@ -299,7 +299,7 @@ def compliance_report(db: str) -> None:
 def audit_trail(project: str, limit: int, db: str) -> None:
     """Generate audit trail of agent decisions with hash verification."""
     from cortex.cli.errors import err_empty_results, handle_cli_error
-    from cortex.db import connect as db_connect
+    from cortex.database.core import connect as db_connect
 
     conn = None
     try:

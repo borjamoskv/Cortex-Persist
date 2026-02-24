@@ -17,6 +17,6 @@ async def dashboard(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> str:
     """Serve the embedded memory dashboard."""
-    from cortex.dashboard import get_dashboard_html
+    from cortex.routes.dashboard import get_dashboard_html
 
     return get_dashboard_html()

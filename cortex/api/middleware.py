@@ -18,7 +18,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 logger = logging.getLogger("uvicorn.error")
 

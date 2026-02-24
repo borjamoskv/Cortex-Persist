@@ -14,14 +14,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from cortex import __version__, api_state, config
+from cortex import __version__, config; import cortex.api.state as api_state
 from cortex.auth import AuthManager
 from cortex.config import ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
 from cortex.engine import CortexEngine
-from cortex.hive import router as hive_router
-from cortex.i18n import DEFAULT_LANGUAGE, get_trans
-from cortex.metrics import MetricsMiddleware, metrics
-from cortex.middleware import (
+from cortex.hive.main import router as hive_router
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.telemetry.metrics import MetricsMiddleware, metrics
+from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
@@ -102,7 +102,7 @@ logger = logging.getLogger("uvicorn.error")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
-    from cortex.connection_pool import CortexConnectionPool
+    from cortex.database.pool import CortexConnectionPool
     from cortex.engine_async import AsyncCortexEngine
 
     db_path = config.DB_PATH
@@ -127,7 +127,7 @@ async def lifespan(app: FastAPI):
     cortex.auth._auth_manager = auth_manager
 
     # 4. Temporal Tracking
-    from cortex.db import connect as db_connect
+    from cortex.database.core import connect as db_connect
 
     timing_conn = db_connect(db_path)
     tracker = TimingTracker(timing_conn)

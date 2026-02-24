@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 __all__ = ["execute_staleness_prune", "find_stale_facts"]
 
 if TYPE_CHECKING:
-    from cortex.compactor import CompactionResult
+    from cortex.compaction.compactor import CompactionResult
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.staleness")

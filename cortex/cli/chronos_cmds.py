@@ -8,7 +8,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.chronos import ChronosEngine
+from cortex.timing.chronos import ChronosEngine
 
 __all__ = ["chronos_cmds", "analyze"]
 

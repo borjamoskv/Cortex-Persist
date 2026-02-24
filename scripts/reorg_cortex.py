@@ -74,9 +74,7 @@ for old_file, new_file in MOVES.items():
     new_module = "cortex." + new_file.replace(".py", "").replace("/", ".")
     IMPORT_MAPPINGS[old_module] = new_module
 
-# Add manual deleted proxy replacements
-IMPORT_MAPPINGS["cortex.engine"] = "cortex.engine.core"
-# Wait, cortex.engine IS A DIRECTORY in git. So cortex.engine shouldn't be mapped.
+# Engine mapping is strictly left alone
 
 def safe_replace(content: str) -> str:
     # Sort by length to avoid partial replacement (e.g. cortex.episodic before cortex.episodic_boot)
@@ -149,6 +147,13 @@ def execute_moves():
             continue
             
         dst = cortex_root / new_file
+        
+        if dst.exists():
+            # Already moved. Source is a backwards-compatible stump. Safe to delete.
+            src.unlink()
+            print(f"Removed backward-compatibility stump {old_file} (dst already exists)")
+            continue
+
         dst.parent.mkdir(parents=True, exist_ok=True)
         
         init_file = dst.parent / "__init__.py"

@@ -9,7 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from cortex.engine_async import AsyncCortexEngine
 
 logger = logging.getLogger("cortex.api.telemetry")

@@ -18,11 +18,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.connection_pool import CortexConnectionPool
+    from cortex.database.pool import CortexConnectionPool
 
-from cortex.canonical import compute_tx_hash, compute_tx_hash_v1
+from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 from cortex.config import CHECKPOINT_MAX, CHECKPOINT_MIN
-from cortex.merkle import MerkleTree
+from cortex.consensus.merkle import MerkleTree
 
 __all__ = ["ImmutableLedger"]
 
@@ -73,7 +73,7 @@ class ImmutableLedger:
                 return None
 
             tree = MerkleTree(hashes)
-            return tree.get_root()
+            return tree.root
 
     async def create_checkpoint_async(self) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
@@ -139,7 +139,7 @@ class ImmutableLedger:
         if not hashes:
             return None
         tree = MerkleTree(hashes)
-        return tree.get_root()
+        return tree.root
 
     def create_checkpoint_sync(self, conn=None) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions synchronously."""

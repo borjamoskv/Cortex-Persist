@@ -12,7 +12,7 @@ import sqlite3 as _sqlite3
 
 import sqlite_vec
 
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["SyncCompatMixin"]
 
@@ -32,7 +32,7 @@ class SyncCompatMixin:
     def _get_sync_conn(self):
         """Get a raw sqlite3.Connection for sync callers."""
         if not hasattr(self, "_sync_conn") or self._sync_conn is None:
-            from cortex.db import connect
+            from cortex.database.core import connect
 
             self._sync_conn = connect(str(self._db_path))
             try:
@@ -51,7 +51,7 @@ class SyncCompatMixin:
     def init_db_sync(self) -> None:
         """Initialize database schema (sync version)."""
         from cortex.migrations.core import run_migrations
-        from cortex.schema import get_all_schema
+        from cortex.database.schema import get_all_schema
 
         conn = self._get_sync_conn()
         for stmt in get_all_schema():
@@ -187,7 +187,7 @@ class SyncCompatMixin:
         top_k: int = 5,
     ) -> list:
         """Semantic vector search with text fallback (sync)."""
-        from cortex.search_sync import (
+        from cortex.search.sync import (
             semantic_search_sync,
             text_search_sync,
         )
@@ -222,7 +222,7 @@ class SyncCompatMixin:
         text_weight: float = 0.4,
     ) -> list:
         """Hybrid search combining semantic + text via RRF (sync)."""
-        from cortex.search_sync import hybrid_search_sync, text_search_sync
+        from cortex.search.sync import hybrid_search_sync, text_search_sync
 
         if not query or not query.strip():
             raise ValueError("query cannot be empty")

@@ -6,7 +6,7 @@ import sqlite3
 
 import pytest
 
-from cortex.tips import (
+from cortex.cli.tips import (
     Tip,
     TipCategory,
     TipsEngine,

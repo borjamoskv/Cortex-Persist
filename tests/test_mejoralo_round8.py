@@ -11,7 +11,7 @@ from collections import deque
 
 import pytest
 
-from cortex.metrics import _HISTOGRAM_MAX_OBSERVATIONS, MetricsRegistry
+from cortex.telemetry.metrics import _HISTOGRAM_MAX_OBSERVATIONS, MetricsRegistry
 
 # ─── Metrics: Histogram Cap ──────────────────────────────────────────
 
@@ -87,14 +87,14 @@ class TestAsyncClientExport:
     def test_export_signature_uses_fmt(self):
         import inspect
 
-        from cortex.async_client import AsyncCortexClient
+        from cortex.api.async_client import AsyncCortexClient
 
         sig = inspect.signature(AsyncCortexClient.export)
         assert "fmt" in sig.parameters
         assert "format" not in sig.parameters
 
     def test_async_client_all_exports(self):
-        from cortex.async_client import __all__
+        from cortex.api.async_client import __all__
 
         assert "AsyncCortexClient" in __all__
 
@@ -109,7 +109,7 @@ class TestApiStatusErrorHandling:
     def client(self):
         from fastapi.testclient import TestClient
 
-        from cortex.api import app
+        from cortex.api.core import app
 
         return TestClient(app)
 

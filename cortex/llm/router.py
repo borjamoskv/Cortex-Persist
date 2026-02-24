@@ -18,7 +18,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
 
-from cortex.result import Err, Ok, Result
+from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.llm.router")
 

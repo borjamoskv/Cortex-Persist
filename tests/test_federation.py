@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from cortex.federation import FederatedEngine, get_engine
+from cortex.federation.main import FederatedEngine, get_engine
 
 
 class TestFederatedEngine:

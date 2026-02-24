@@ -11,7 +11,7 @@ import aiosqlite
 
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.privacy_mixin import PrivacyMixin
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["StoreMixin"]
 

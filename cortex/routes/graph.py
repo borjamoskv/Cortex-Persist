@@ -9,11 +9,11 @@ import sqlite3
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from cortex.api_deps import get_engine
+from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
 from cortex.graph import get_graph as _get_graph
-from cortex.i18n import get_trans
+from cortex.utils.i18n import get_trans
 
 __all__ = ["get_graph", "get_graph_all"]
 

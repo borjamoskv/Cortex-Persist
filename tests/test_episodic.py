@@ -11,7 +11,7 @@ import tempfile
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.episodic import (
+from cortex.episodic.main import (
     Episode,
     EpisodicMemory,
     _extract_tokens,
@@ -259,7 +259,7 @@ class TestTokenExtraction:
 @pytest.mark.asyncio
 class TestBootPayload:
     async def test_generate_boot_empty_db(self, engine):
-        from cortex.episodic_boot import generate_session_boot
+        from cortex.episodic.boot import generate_session_boot
 
         conn = await engine.get_conn()
         payload = await generate_session_boot(conn)
@@ -270,7 +270,7 @@ class TestBootPayload:
         assert payload.patterns == []
 
     async def test_generate_boot_with_data(self, engine, populated_memory):
-        from cortex.episodic_boot import generate_session_boot
+        from cortex.episodic.boot import generate_session_boot
 
         conn = await engine.get_conn()
         payload = await generate_session_boot(conn, project_hint="cortex")
@@ -279,7 +279,7 @@ class TestBootPayload:
         assert len(payload.episodes) > 0
 
     async def test_boot_to_markdown(self, engine, populated_memory):
-        from cortex.episodic_boot import generate_session_boot
+        from cortex.episodic.boot import generate_session_boot
 
         conn = await engine.get_conn()
         payload = await generate_session_boot(conn, project_hint="cortex")
@@ -290,7 +290,7 @@ class TestBootPayload:
         assert "Recent Memory" in md
 
     async def test_boot_to_dict(self, engine, populated_memory):
-        from cortex.episodic_boot import generate_session_boot
+        from cortex.episodic.boot import generate_session_boot
 
         conn = await engine.get_conn()
         payload = await generate_session_boot(conn, project_hint="cortex")

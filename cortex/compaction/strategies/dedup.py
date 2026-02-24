@@ -11,7 +11,7 @@ from cortex.compaction.utils import content_hash, similarity
 __all__ = ["execute_dedup", "find_duplicates"]
 
 if TYPE_CHECKING:
-    from cortex.compactor import CompactionResult
+    from cortex.compaction.compactor import CompactionResult
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.dedup")

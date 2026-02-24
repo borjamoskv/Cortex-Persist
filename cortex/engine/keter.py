@@ -10,7 +10,7 @@ import random
 from abc import ABC, abstractmethod
 from typing import Any, Final
 
-from cortex.errors import CortexError
+from cortex.utils.errors import CortexError
 
 logger = logging.getLogger(__name__)
 

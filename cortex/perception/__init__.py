@@ -12,7 +12,7 @@ Re-exports all public symbols for backward-compatible imports.
 from cortex.perception.inference import compute_event_stats, infer_behavior
 from cortex.perception.observer import FileActivityObserver
 from cortex.perception.pipeline import PerceptionPipeline, PerceptionRecorder
-from cortex.perception_base import (
+from cortex.perception.base import (
     BehavioralSnapshot,
     FileEvent,
     classify_file,

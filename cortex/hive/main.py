@@ -50,7 +50,7 @@ def get_hive_graph(
     Nodes are facts, links are semantic similarities.
     """
     from cortex.config import DB_PATH
-    from cortex.db import connect
+    from cortex.database.core import connect
 
     conn = connect(DB_PATH, row_factory=sqlite3.Row)
 

@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.canonical import canonical_json, compute_tx_hash, compute_tx_hash_v1
-from cortex.temporal import time_travel_filter
+from cortex.utils.canonical import canonical_json, compute_tx_hash, compute_tx_hash_v1
+from cortex.memory.temporal import time_travel_filter
 
 # ─── Canonical JSON ──────────────────────────────────────────────
 

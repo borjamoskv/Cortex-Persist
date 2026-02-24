@@ -2,8 +2,8 @@
 Tests for cortex.i18n module and API integration.
 """
 
-from cortex import i18n
-from cortex.i18n import (
+import cortex.utils.i18n as i18n
+from cortex.utils.i18n import (
     DEFAULT_LANGUAGE,
     SUPPORTED_LANGUAGES,
     Lang,

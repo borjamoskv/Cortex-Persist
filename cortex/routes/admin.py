@@ -12,12 +12,12 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 
-from cortex import __version__, api_state
-from cortex.api_deps import get_engine
+from cortex import __version__; import cortex.api.state as api_state
+from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.engine import CortexEngine
-from cortex.i18n import DEFAULT_LANGUAGE, get_trans
-from cortex.models import StatusResponse
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.types.models import StatusResponse
 from cortex.sync import export_to_json
 
 __all__ = [
@@ -92,7 +92,7 @@ async def get_system_status(
     """Expose engine diagnostics and memory health metrics."""
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     try:
-        stats = engine.stats()
+        stats = engine.stats_sync()
         return StatusResponse(
             version=__version__,
             total_facts=stats["total_facts"],
@@ -197,7 +197,7 @@ async def generate_handoff_context(
     Manifest a session handoff artifact containing hot context and recent episodes.
     Used for transferring agentic state between platforms (macOS -> Web).
     """
-    from cortex.handoff import generate_handoff, save_handoff
+    from cortex.agents.handoff import generate_handoff, save_handoff
 
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 

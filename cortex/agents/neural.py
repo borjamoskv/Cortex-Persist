@@ -16,7 +16,7 @@ import re
 import time
 from dataclasses import dataclass
 
-from cortex.sys_platform import get_cortex_dir, is_linux, is_macos, is_windows
+from cortex.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
 
 __all__ = [
     "BaseClipboardSensor",

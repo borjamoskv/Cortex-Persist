@@ -17,7 +17,7 @@ from pathlib import Path
 from cortex.cli import get_engine
 from cortex.mejoralo.canary import CanaryMonitor
 from cortex.mejoralo.engine import MejoraloEngine
-from cortex.metrics import MetricsRegistry
+from cortex.telemetry.metrics import MetricsRegistry
 from cortex.thinking.context_fusion import ContextFusion
 
 logger = logging.getLogger("cortex.mejoralo.daemon")

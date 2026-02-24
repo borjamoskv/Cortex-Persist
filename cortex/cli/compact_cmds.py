@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
-from cortex.compactor import (
+from cortex.compaction.compactor import (
     CompactionStrategy,
     compact,
     compact_session,

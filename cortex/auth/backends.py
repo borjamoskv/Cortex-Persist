@@ -84,7 +84,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def _get_conn_async(self) -> aiosqlite.Connection:
-        from cortex.db import connect_async
+        from cortex.database.core import connect_async
 
         return await connect_async(self.db_path)
 
