@@ -1,6 +1,6 @@
-site_name: CORTEX
-site_description: Local-first sovereign memory infrastructure for AI agents
-site_url: https://borjamoskv.github.io/cortex
+site_name: CORTEX Documentation
+site_description: Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
+site_url: https://cortexpersist.dev
 repo_url: https://github.com/borjamoskv/cortex
 repo_name: borjamoskv/cortex
 
@@ -24,10 +24,13 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
     - search.highlight
     - search.suggest
     - content.code.copy
     - content.tabs.link
+    - toc.follow
   icon:
     repo: fontawesome/brands/github
 
@@ -36,16 +39,25 @@ nav:
   - Getting Started:
       - Quickstart: quickstart.md
       - Installation: installation.md
+      - Configuration: configuration.md
   - Reference:
       - Architecture: architecture.md
-      - Developer Guide: developer-guide.md
-      - CLI: cli.md
+      - API Classes: reference.md
+      - CLI Reference: cli.md
       - REST API: api.md
+      - MCP Server: mcp.md
+      - SDKs: sdks.md
+  - Guides:
+      - Developer Guide: developer-guide.md
+      - Deployment: deployment.md
+      - Cross-Platform: cross_platform_guide.md
+  - Compliance & Security:
+      - EU AI Act Compliance: compliance.md
+      - Security: security.md
   - Tutorials:
       - Memory for LangChain Agents: tutorials/langchain.md
       - Time-Travel Debugging: tutorials/temporal.md
       - Site Monitoring Daemon: tutorials/daemon.md
-
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -62,6 +74,17 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - tables
+  - toc:
+      permalink: true
 
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_source: false
+            show_root_heading: true
+            show_category_heading: true
+            show_signature_annotations: true

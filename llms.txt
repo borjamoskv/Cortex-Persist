@@ -4,44 +4,67 @@
 
 ## What is CORTEX?
 
-CORTEX is a local-first trust engine that provides cryptographic verification, immutable audit trails, and regulatory compliance reports for AI agent decisions. It sits on top of any memory layer (Mem0, Zep, Letta, or custom) and proves that agent memories are tamper-proof and auditable.
+CORTEX is a trust engine that provides cryptographic verification, immutable audit trails, and regulatory compliance for AI agent decisions. It sits on top of any memory layer (Mem0, Zep, Letta, or custom) and proves that agent memories are tamper-proof and auditable. Local-first by default, cloud-ready for enterprise.
 
 ## Core Architecture
 
-- **Storage**: SQLite 3.42+ with sqlite-vec extension (384-dim embeddings)
-- **Integrity**: SHA-256 hash-chained transaction ledger + Merkle tree checkpoints
-- **Consensus**: Reputation-weighted multi-agent verification (RWC)
-- **Search**: Hybrid semantic (vector) + full-text + Graph-RAG retrieval
+- **Tripartite Memory**: L1 Working (Redis/in-memory) → L2 Vector (sqlite-vec/Qdrant, 384-dim MiniLM) → L3 Episodic Ledger (SQLite/AlloyDB)
+- **Trust Layer**: SHA-256 hash-chained transaction ledger + Merkle tree checkpoints + WBFT multi-agent consensus
+- **Privacy Shield**: 11-pattern secret detection at ingress (GitHub tokens, JWT, SSH keys, etc.)
+- **AST Sandbox**: Safe LLM code execution without eval()
+- **Search**: Hybrid semantic (vector) + knowledge graph (RAG) retrieval
 - **API**: FastAPI REST + MCP (Model Context Protocol) server
-- **Security**: AES-256-GCM vaults, multi-tenant isolation, rate limiting
+- **Security**: AES-256-GCM vaults, RBAC (4 roles), multi-tenant isolation, rate limiting, security headers
 
-## Key Endpoints
+## Key Endpoints (REST API v1)
 
 - POST /v1/facts — Store a fact with cryptographic ledger entry
 - POST /v1/search — Semantic + Graph-RAG search
 - POST /v1/ask — RAG synthesis (search → LLM → answer)
 - GET /v1/status — Engine statistics
-- POST /v1/missions/dispatch — Multi-agent consensus mission
+- POST /v1/facts/{id}/vote-v2 — Reputation-weighted consensus vote
+- GET /v1/admin/keys — API key management
+- POST /v1/heartbeat — Activity time tracking
+- GET /v1/time — Time tracking reports
+- GET /health — Load balancer health check
+- GET /metrics — Prometheus metrics
 
-## MCP Tools (CORTEX Trust Engine)
+## MCP Tools (Model Context Protocol)
 
 - cortex_store — Store facts with automatic hash chaining
 - cortex_search — Hybrid semantic search
 - cortex_status — System health and metrics
 - cortex_ledger_verify — Full ledger integrity check
-- cortex_audit_trail — Generate EU AI Act compliant audit log
+- cortex_audit_trail — EU AI Act compliant audit log
 - cortex_verify_fact — Cryptographic verification certificate for a single fact
 - cortex_compliance_report — Article 12 compliance snapshot with score
 - cortex_decision_lineage — Trace decision chains for explainability
+
+## CLI (38 commands)
+
+Core: init, store, search, recall, history, status, list, edit, delete
+Trust: verify, ledger, compliance-report, audit-trail, vote
+Sync: sync, export, writeback, migrate
+Time: time, heartbeat, timeline
+Memory: compact, episodic, context, ghost
+Agent: handoff, swarm
+Infra: daemon, autorouter, mejoralo, entropy, purge, tips, reflect
 
 ## EU AI Act Alignment (Article 12)
 
 - Art. 12.1: Automatic event logging ✅ (transaction ledger)
 - Art. 12.2: Decision recording ✅ (fact storage with provenance)
-- Art. 12.3: Tamper-proof storage ✅ (SHA-256 hash chain)
-- Art. 12.4: Periodic verification ✅ (Merkle checkpoints)
-- Art. 12.2d: Agent traceability ✅ (tag-based agent tracking)
+- Art. 12.3: Tamper-proof storage ✅ (SHA-256 hash chain + Merkle)
+- Art. 12.4: Periodic verification ✅ (Merkle checkpoints + integrity_checks table)
+- Art. 12.2d: Agent traceability ✅ (source auto-detection + consensus votes)
+
+## Stats (2026-02-24)
+
+- 1,162+ test functions
+- ~45,500 production LOC
+- 444 Python modules
+- 38 CLI commands
 
 ## License
 
-BSL-1.1. Free for non-production use. Apache 2.0 after 2030-01-01.
+BSL-1.1. Free for non-production use. Converts to Apache 2.0 on 2030-01-01.
