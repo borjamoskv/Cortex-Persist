@@ -1,64 +1,45 @@
 # Contributing to CORTEX
 
-Thank you for your interest in contributing to CORTEX! 🧠
+Thank you for your interest in contributing to CORTEX! 🚀
 
-## How to Contribute
-
-### Reporting Bugs
-
-1. Open an [issue](../../issues) with the title `[BUG] short description`.
-2. Include: Python version, CORTEX version, OS.
-3. Steps to reproduce the bug.
-4. Expected output vs actual output.
-
-### Proposing Features
-
-1. Open an [issue](../../issues) with the title `[FEATURE] short description`.
-2. Explain the use case.
-3. If possible, include an example of the desired API.
-
-### Pull Requests
-
-1. Fork the repo.
-2. Create a branch: `git checkout -b feature/my-feature`.
-3. Make your changes.
-4. Run tests: `pytest tests/ -v`.
-5. Commit with a descriptive message.
-6. Push and open a PR.
-
-### Code Style
-
-- Python 3.10+
-- Formatter: [Ruff](https://docs.astral.sh/ruff/)
-- Line length: 100
-- Type hints ensuring compatibility
-- Docstrings for public functions
-
-### Development Setup
+## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/borjamoskv/cortex.git
 cd cortex
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# Install with dev dependencies
-pip install -e ".[all]"
-
-# Run tests
-pytest tests/ -v
-
-# Run benchmark
-python scripts/benchmark.py --iterations 10
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest
 ```
 
-## Code of Conduct
+## Development Rules
 
-Be respectful. Period. We do not tolerate any form of harassment or discrimination.
+1. **All facts are hash-chained.** Never bypass the ledger.
+2. **Tests are mandatory.** No PR merges without passing CI.
+3. **Privacy Shield is sacred.** Never weaken secret detection patterns.
+4. **Local-first always.** Every feature must work with SQLite alone.
+
+## Pull Request Process
+
+1. Fork the repo and create your branch from `main`
+2. Add tests for any new functionality
+3. Ensure `pytest` passes with no failures
+4. Update documentation if needed
+5. Submit PR using the template
+
+## Code Style
+
+- **Formatter**: Ruff (`ruff format`)
+- **Linter**: Ruff (`ruff check`)
+- **Line length**: 100 characters
+- **Type hints**: Required for all public APIs
+
+## Architecture
+
+See the [README](README.md) for the architecture diagram. Key principle:
+
+> Every layer trusts nothing. Verify everything.
 
 ## License
 
-By contributing, you accept that your code will be distributed under the [BSL 1.1](LICENSE).
+By contributing, you agree that your contributions will be licensed under the BSL-1.1 license.
