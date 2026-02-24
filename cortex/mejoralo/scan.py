@@ -46,80 +46,87 @@ def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
 # ─── Per-File Analysis ───────────────────────────────────────────────
 
 
+_COMPLEXITY_NODES = (
+    ast.If,
+    ast.For,
+    ast.While,
+    ast.AsyncFor,
+    ast.And,
+    ast.Or,
+    ast.ExceptHandler,
+    ast.With,
+    ast.AsyncWith,
+    ast.Try,
+)
+
+_NESTING_NODES = (
+    ast.If,
+    ast.For,
+    ast.While,
+    ast.Try,
+    ast.With,
+    ast.AsyncFor,
+    ast.AsyncWith,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+    ast.ExceptHandler,
+)
+
+
+class McCabeVisitor(ast.NodeVisitor):
+    def __init__(self, rel: str, findings: list[str]) -> None:
+        self.complexity = 1  # Base complexity per function/module
+        self.rel = rel
+        self.findings = findings
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._check_complexity(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._check_complexity(node)
+
+    def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        # Calculate McCabe for this scope
+        comp = 1
+        for child in ast.walk(node):
+            if isinstance(child, _COMPLEXITY_NODES):
+                comp += 1
+
+        if comp > 10:  # Sovereign threshold: 10
+            self.findings.append(
+                f"{self.rel}:{node.lineno} -> High Complexity ({comp}) in '{node.name}'"
+            )
+
+
+class NestingVisitor(ast.NodeVisitor):
+    def __init__(self, rel: str, findings: list[str]) -> None:
+        self.depth = 0
+        self.rel = rel
+        self.findings = findings
+
+    def visit(self, node: ast.AST) -> None:
+        inc = isinstance(node, _NESTING_NODES)
+        if inc:
+            self.depth += 1
+            if self.depth >= 6:  # Strict sovereign depth: 6
+                line_no = getattr(node, "lineno", "?")
+                self.findings.append(
+                    f"{self.rel}:{line_no} -> Severe structural nesting (depth {self.depth})"
+                )
+
+        self.generic_visit(node)
+
+        if inc:
+            self.depth -= 1
+
+
 def _analyze_python_complexity(content: str, rel: str) -> list[str]:
-    findings = []
+    findings: list[str] = []
     try:
         tree = ast.parse(content)
-
-        class McCabeVisitor(ast.NodeVisitor):
-            def __init__(self) -> None:
-                self.complexity = 1  # Base complexity per function/module
-
-            def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-                self._check_complexity(node)
-
-            def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-                self._check_complexity(node)
-
-            def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
-                # Calculate McCabe for this scope
-                comp = 1
-                for child in ast.walk(node):
-                    if isinstance(
-                        child,
-                        ast.If
-                        | ast.For
-                        | ast.While
-                        | ast.AsyncFor
-                        | ast.And
-                        | ast.Or
-                        | ast.ExceptHandler
-                        | ast.With
-                        | ast.AsyncWith
-                        | ast.Try,
-                    ):
-                        comp += 1
-
-                if comp > 10:  # Sovereign threshold: 10
-                    findings.append(
-                        f"{rel}:{node.lineno} -> High Complexity ({comp}) in '{node.name}'"
-                    )
-
-        McCabeVisitor().visit(tree)
-
-        # Also check global nesting depth (old NestingVisitor logic improved)
-        class NestingVisitor(ast.NodeVisitor):
-            def __init__(self) -> None:
-                self.depth = 0
-
-            def visit(self, node: ast.AST) -> None:
-                inc = isinstance(
-                    node,
-                    ast.If
-                    | ast.For
-                    | ast.While
-                    | ast.Try
-                    | ast.With
-                    | ast.AsyncFor
-                    | ast.AsyncWith
-                    | ast.FunctionDef
-                    | ast.AsyncFunctionDef
-                    | ast.ClassDef
-                    | ast.ExceptHandler,
-                )
-                if inc:
-                    self.depth += 1
-                    if self.depth >= 6:  # Strict sovereign depth: 6
-                        line_no = getattr(node, "lineno", "?")
-                        findings.append(
-                            f"{rel}:{line_no} -> Severe structural nesting "
-                            f"(depth {self.depth})"
-                        )
-                self.generic_visit(node)
-                if inc:
-                    self.depth -= 1
-
-        NestingVisitor().visit(tree)
+        McCabeVisitor(rel, findings).visit(tree)
+        NestingVisitor(rel, findings).visit(tree)
     except SyntaxError:
         pass
     return findings
