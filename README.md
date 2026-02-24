@@ -1,9 +1,11 @@
+🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
+
 # CORTEX — Trust Infrastructure for Autonomous AI
 
 > **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
 > *The layer that proves your agents' decisions are true.*
 
-![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
@@ -223,8 +225,7 @@ See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
 
 ## License
 
-**Business Source License 1.1** (BSL-1.1).
-Free for non-production and development use. Converts to Apache 2.0 on 2030-01-01.
+**Apache License 2.0** — Free for any use, commercial or non-commercial.
 See [LICENSE](LICENSE) for details.
 
 ---
