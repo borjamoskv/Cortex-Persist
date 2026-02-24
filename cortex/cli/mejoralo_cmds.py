@@ -258,4 +258,5 @@ def mejoralo_ship(project, path, db):
 def mejoralo_daemon():
     """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
     from cortex.mejoralo.daemon import main
+
     main()

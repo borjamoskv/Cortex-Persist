@@ -9,9 +9,6 @@ Three-layer behavioral perception:
 Re-exports all public symbols for backward-compatible imports.
 """
 
-from cortex.perception.inference import compute_event_stats, infer_behavior
-from cortex.perception.observer import FileActivityObserver
-from cortex.perception.pipeline import PerceptionPipeline, PerceptionRecorder
 from cortex.perception.base import (
     BehavioralSnapshot,
     FileEvent,
@@ -19,6 +16,9 @@ from cortex.perception.base import (
     infer_project_from_path,
     should_ignore,
 )
+from cortex.perception.inference import compute_event_stats, infer_behavior
+from cortex.perception.observer import FileActivityObserver
+from cortex.perception.pipeline import PerceptionPipeline, PerceptionRecorder
 
 __all__ = [
     "BehavioralSnapshot",

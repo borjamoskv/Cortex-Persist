@@ -167,13 +167,22 @@ class FactManager:
         from cortex.engine.store_mixin import StoreMixin
 
         return await StoreMixin.update(
-            self.engine, fact_id=fact_id, content=content, tags=tags, meta=meta,
+            self.engine,
+            fact_id=fact_id,
+            content=content,
+            tags=tags,
+            meta=meta,
         )
 
-    async def deprecate(self, fact_id: int, reason: str | None = None, conn: Any | None = None, **kwargs) -> bool:
+    async def deprecate(
+        self, fact_id: int, reason: str | None = None, conn: Any | None = None, **kwargs
+    ) -> bool:
         """Sovereign Deprecation: Calls StoreMixin.deprecate directly on the engine."""
         from cortex.engine.store_mixin import StoreMixin
-        return await StoreMixin.deprecate(self.engine, fact_id=fact_id, reason=reason, conn=conn, **kwargs)
+
+        return await StoreMixin.deprecate(
+            self.engine, fact_id=fact_id, reason=reason, conn=conn, **kwargs
+        )
 
     async def history(
         self,
@@ -211,10 +220,7 @@ class FactManager:
 
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")
-        query = (
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-            f"WHERE f.tenant_id = ? AND {clause}"
-        )
+        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND {clause}"
         params = [tenant_id] + params
         if project:
             query += " AND f.project = ?"

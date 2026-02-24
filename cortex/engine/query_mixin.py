@@ -6,8 +6,8 @@ import logging
 import sqlite3
 
 from cortex.engine.models import Fact
-from cortex.search import SearchResult, semantic_search, text_search
 from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
+from cortex.search import SearchResult, semantic_search, text_search
 
 __all__ = ["QueryMixin"]
 

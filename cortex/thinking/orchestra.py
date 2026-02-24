@@ -223,7 +223,11 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             last_error = result.error
             logger.warning(
                 "%s:%s ROP cascade failed (intento %d/%d): %s",
-                provider_name, model, attempt + 1, attempts, last_error,
+                provider_name,
+                model,
+                attempt + 1,
+                attempts,
+                last_error,
             )
             return None, last_error
 
@@ -231,14 +235,21 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             last_error = f"Timeout ({self.config.timeout_seconds}s)"
             logger.warning(
                 "%s:%s timeout (intento %d/%d)",
-                provider_name, model, attempt + 1, attempts,
+                provider_name,
+                model,
+                attempt + 1,
+                attempts,
             )
             return None, last_error
         except (OSError, ValueError, KeyError) as e:
             last_error = str(e)
             logger.warning(
                 "%s:%s error (intento %d/%d): %s",
-                provider_name, model, attempt + 1, attempts, e,
+                provider_name,
+                model,
+                attempt + 1,
+                attempts,
+                e,
             )
             return None, last_error
 

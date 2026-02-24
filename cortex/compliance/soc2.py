@@ -38,6 +38,7 @@ class SOC2EvidenceCollector:
 
     def _connect(self):
         from cortex.database.core import connect
+
         return connect(self.db_path)
 
     def _now_iso(self) -> str:
@@ -50,14 +51,10 @@ class SOC2EvidenceCollector:
         conn = self._connect()
         try:
             # Total keys
-            total = conn.execute(
-                "SELECT COUNT(*) FROM api_keys"
-            ).fetchone()[0]
+            total = conn.execute("SELECT COUNT(*) FROM api_keys").fetchone()[0]
 
             # Active vs revoked
-            active = conn.execute(
-                "SELECT COUNT(*) FROM api_keys WHERE is_active = 1"
-            ).fetchone()[0]
+            active = conn.execute("SELECT COUNT(*) FROM api_keys WHERE is_active = 1").fetchone()[0]
 
             # Keys with admin permission
             admin_keys = conn.execute(
@@ -65,9 +62,7 @@ class SOC2EvidenceCollector:
             ).fetchone()[0]
 
             # Last key activity
-            last_used = conn.execute(
-                "SELECT MAX(last_used) FROM api_keys"
-            ).fetchone()[0]
+            last_used = conn.execute("SELECT MAX(last_used) FROM api_keys").fetchone()[0]
 
             return {
                 "control": "CC6.1",
@@ -98,9 +93,7 @@ class SOC2EvidenceCollector:
                 "SELECT COUNT(*) FROM facts WHERE meta LIKE '%privacy_flagged%'"
             ).fetchone()[0]
 
-            total_facts = conn.execute(
-                "SELECT COUNT(*) FROM facts"
-            ).fetchone()[0]
+            total_facts = conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
 
             return {
                 "control": "CC6.7",
@@ -128,29 +121,22 @@ class SOC2EvidenceCollector:
         conn = self._connect()
         try:
             # Transaction count
-            tx_count = conn.execute(
-                "SELECT COUNT(*) FROM transactions"
-            ).fetchone()[0]
+            tx_count = conn.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
 
             # Checkpoint count
             try:
-                cp_count = conn.execute(
-                    "SELECT COUNT(*) FROM merkle_roots"
-                ).fetchone()[0]
+                cp_count = conn.execute("SELECT COUNT(*) FROM merkle_roots").fetchone()[0]
             except Exception:
                 cp_count = 0
 
             # Last transaction
-            last_tx = conn.execute(
-                "SELECT MAX(timestamp) FROM transactions"
-            ).fetchone()[0]
+            last_tx = conn.execute("SELECT MAX(timestamp) FROM transactions").fetchone()[0]
 
             # Hash chain integrity (sample last 10)
             chain_ok = True
             try:
                 rows = conn.execute(
-                    "SELECT id, hash, prev_hash FROM transactions "
-                    "ORDER BY id DESC LIMIT 10"
+                    "SELECT id, hash, prev_hash FROM transactions ORDER BY id DESC LIMIT 10"
                 ).fetchall()
                 for i in range(len(rows) - 1):
                     if rows[i][2] != rows[i + 1][1]:
@@ -197,9 +183,7 @@ class SOC2EvidenceCollector:
                 migrations = conn.execute(
                     "SELECT name, applied_at FROM schema_migrations ORDER BY applied_at"
                 ).fetchall()
-                migration_log = [
-                    {"name": m[0], "applied_at": m[1]} for m in migrations
-                ]
+                migration_log = [{"name": m[0], "applied_at": m[1]} for m in migrations]
             except Exception:
                 migration_log = []
 
@@ -264,9 +248,7 @@ def collect_soc2_evidence(
         encoding="utf-8",
     )
 
-    compliant = sum(
-        1 for c in report["controls"] if c["status"] == "compliant"
-    )
+    compliant = sum(1 for c in report["controls"] if c["status"] == "compliant")
     total = len(report["controls"])
     logger.info(
         "SOC 2 evidence collected: %s (%d/%d controls compliant)",

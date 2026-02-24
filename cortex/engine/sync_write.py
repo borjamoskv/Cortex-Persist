@@ -10,8 +10,8 @@ import json
 import logging
 import sqlite3
 
-from cortex.sync.gitops import sync_fact_to_repo
 from cortex.memory.temporal import now_iso
+from cortex.sync.gitops import sync_fact_to_repo
 
 __all__ = ["SyncWriteMixin"]
 
@@ -23,9 +23,9 @@ class SyncWriteMixin:
 
     def init_db_sync(self) -> None:
         """Initialize database schema (sync version)."""
+        from cortex.database.schema import get_all_schema
         from cortex.engine import get_init_meta
         from cortex.migrations.core import run_migrations
-        from cortex.database.schema import get_all_schema
 
         conn = self._get_sync_conn()
         for stmt in get_all_schema():

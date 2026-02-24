@@ -20,9 +20,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
 
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 from cortex import config
 from cortex.consensus.merkle import MerkleTree
+from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 
 __all__ = ["ImmutableLedger"]
 
@@ -60,9 +60,7 @@ class ImmutableLedger:
             return config.CHECKPOINT_MIN
         return config.CHECKPOINT_MAX
 
-    async def compute_merkle_root_async(
-        self, start_id: int, end_id: int, conn=None
-    ) -> str | None:
+    async def compute_merkle_root_async(self, start_id: int, end_id: int, conn=None) -> str | None:
         """Compute Merkle root for a range of transactions (async).
 
         Args:
@@ -71,6 +69,7 @@ class ImmutableLedger:
             conn: Optional existing connection. If provided, reuses it
                   to avoid double-acquisition deadlocks (D004).
         """
+
         async def _compute(c):
             cursor = await c.execute(
                 "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",

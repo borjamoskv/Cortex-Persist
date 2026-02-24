@@ -144,7 +144,6 @@ class FederatedEngine:
         except (sqlite3.Error, OSError, ConnectionError) as e:
             logger.warning("Error closing shard '%s': %s", tenant_id, e)
 
-
     @staticmethod
     def _sanitize_tenant_id(tenant_id: str) -> str:
         """Sanitize tenant_id for safe filesystem usage.

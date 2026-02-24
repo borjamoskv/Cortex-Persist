@@ -136,7 +136,7 @@ class CortexFactModel(BaseModel):
     success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
     metadata: dict[str, Any] = Field(
         default_factory=dict,
-        description="Optional structured metadata (session_id, tool calls, etc)."
+        description="Optional structured metadata (session_id, tool calls, etc).",
     )
 
     @property

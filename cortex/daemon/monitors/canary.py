@@ -43,7 +43,7 @@ class CanaryMonitor:
                     "# CORTEX SOVEREIGN CANARY\n"
                     "# DO NOT TOUCH. Unauthorized access triggers LOCKDOWN.\n"
                     f"STRIKE_KEY={os.urandom(16).hex()}\n",
-                    encoding="utf-8"
+                    encoding="utf-8",
                 )
             # Initialize stats with current access/mod time
             try:
@@ -106,6 +106,7 @@ class CanaryMonitor:
     def check(self) -> list[SecurityAlert]:
         """Síncrono para el loop del daemon."""
         import asyncio
+
         try:
             return asyncio.run(self.check_async())
         except RuntimeError:

@@ -197,11 +197,7 @@ def _infer_from_parents(p: Path) -> str | None:
     """Fallback: scan up parents until we find a common project marker. (Complexity Crushed O(1))"""
     ignore_dirs = {"src", "lib", "internal", "pkg", "docs", "tests", ".", "/"}
     # Use next() with a generator expression to dramatically reduce cyclomatic complexity
-    return next(
-        (parent.name for parent in p.parents if parent.name not in ignore_dirs),
-        None
-    )
-
+    return next((parent.name for parent in p.parents if parent.name not in ignore_dirs), None)
 
 
 def should_ignore(path: str) -> bool:

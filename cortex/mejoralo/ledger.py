@@ -92,10 +92,7 @@ def record_scar(
     Returns:
         The fact ID of the persisted scar record.
     """
-    content = (
-        f"MEJORAlo v{_VERSION} SCAR en {file_path}:\n\n"
-        f"Error Trace:\n{error_trace}\n\n"
-    )
+    content = f"MEJORAlo v{_VERSION} SCAR en {file_path}:\n\nError Trace:\n{error_trace}\n\n"
     if diff:
         content += f"AST-Diff causal:\n{diff}"
 

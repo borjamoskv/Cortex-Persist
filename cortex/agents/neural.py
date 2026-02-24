@@ -351,4 +351,3 @@ class NeuralIntentEngine:
         self._last_hypothesis = hyp
         self._last_hypothesis_timestamp = context.timestamp
         return hyp
-

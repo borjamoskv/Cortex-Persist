@@ -32,7 +32,9 @@ class CloudSyncMonitor:
         self._turso: TursoBackend | None = None
 
         if config.TURSO_DATABASE_URL and config.TURSO_AUTH_TOKEN:
-            self._turso = TursoBackend(url=config.TURSO_DATABASE_URL, auth_token=config.TURSO_AUTH_TOKEN)
+            self._turso = TursoBackend(
+                url=config.TURSO_DATABASE_URL, auth_token=config.TURSO_AUTH_TOKEN
+            )
 
     def _ensure_remote_table(self):
         """Ensure the 'transactions' table exists on the edge."""

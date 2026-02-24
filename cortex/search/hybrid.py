@@ -127,12 +127,8 @@ def hybrid_search_sync(
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2
-    sem_results = semantic_search_sync(
-        conn, query_embedding, fetch_limit, project
-    )
-    txt_results = text_search_sync(
-        conn, query, project, limit=fetch_limit
-    )
+    sem_results = semantic_search_sync(conn, query_embedding, fetch_limit, project)
+    txt_results = text_search_sync(conn, query, project, limit=fetch_limit)
 
     total_w = vector_weight + text_weight
     w_vec = vector_weight / total_w

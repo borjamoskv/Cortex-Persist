@@ -4,6 +4,12 @@
 > Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
 > *The layer that proves your agents' decisions are true.*
 
+![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Status](https://img.shields.io/badge/status-v8.0%20alpha-orange.svg)
+![Tests](https://img.shields.io/badge/tests-1162%2B%20passing-brightgreen.svg)
+![LOC](https://img.shields.io/badge/LOC-45.5K-informational.svg)
+
 ---
 
 ## Why CORTEX?
@@ -59,6 +65,20 @@ cortex verify 1
 
 ---
 
+## Project Stats
+
+| Metric | Value |
+|:---|:---|
+| Production LOC | **~45,500** |
+| Test functions | **1,162+** |
+| Python modules | **444** |
+| CLI commands | **38** |
+| Daemon monitors | **13** |
+| Privacy patterns | **11** |
+| Time from zero to v8 | **9 days** |
+
+---
+
 ## Documentation
 
 | Section | Description |
@@ -69,12 +89,15 @@ cortex verify 1
 | [CLI Reference](cli.md) | All 38 commands documented |
 | [REST API](api.md) | Versioned REST endpoints |
 | [MCP Server](mcp.md) | Model Context Protocol integration |
+| [Python API Reference](reference.md) | Auto-generated from source |
 | [SDKs](sdks.md) | Python and JavaScript SDKs |
 | [Developer Guide](developer-guide.md) | Contributing and extending CORTEX |
 | [EU AI Act Compliance](compliance.md) | Article 12 mapping |
 | [Security](security.md) | Threat model and security features |
 | [Deployment](deployment.md) | Docker, Kubernetes, bare metal |
 | [Configuration](configuration.md) | Environment variables reference |
+| [FAQ](faq.md) | Common questions, answered honestly |
+| [Changelog](changelog.md) | Version history and release notes |
 
 ---
 

@@ -8,9 +8,8 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.utils.canonical import canonical_json, compute_tx_hash
-from cortex.database.pool import CortexConnectionPool
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.database.pool import CortexConnectionPool
 from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
@@ -20,8 +19,9 @@ from cortex.engine.search_mixin import SearchMixin
 # Mixins
 from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
-from cortex.utils.result import Err, Ok, Result
 from cortex.memory.temporal import now_iso
+from cortex.utils.canonical import canonical_json, compute_tx_hash
+from cortex.utils.result import Err, Ok, Result
 
 __all__ = ["TX_BEGIN_IMMEDIATE", "AsyncCortexEngine"]
 

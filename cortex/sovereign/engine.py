@@ -4,14 +4,16 @@ Replaces the synchronous ``sovereign_engine.py`` prototype with a
 production-grade async pipeline that coordinates all MOSKV-1 skills,
 multi-cloud deployment, observability, and auto-optimisation.
 """
+
 from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from cortex.sovereign.observability import (
     Dimension,
@@ -26,16 +28,17 @@ from cortex.sovereign.observability import (
 # Pipeline phases
 # ---------------------------------------------------------------------------
 
+
 class Phase(Enum):
-    FABRICATION = auto()      # aether-1
-    ORCHESTRATION = auto()    # keter-omega
-    SWARM = auto()            # legion-1
-    OPTIMISATION = auto()     # ouroboros-infinity
-    SECURITY = auto()         # boveda-1, vault integration
-    OBSERVABILITY = auto()    # telemetry, dashboards
-    EXPERIENCE = auto()       # impactv-1, stitch, AR/VR
-    DEPLOYMENT = auto()       # multi-cloud terraform
-    VERIFICATION = auto()     # mejoralo, qa, smoke tests
+    FABRICATION = auto()  # aether-1
+    ORCHESTRATION = auto()  # keter-omega
+    SWARM = auto()  # legion-1
+    OPTIMISATION = auto()  # ouroboros-infinity
+    SECURITY = auto()  # boveda-1, vault integration
+    OBSERVABILITY = auto()  # telemetry, dashboards
+    EXPERIENCE = auto()  # impactv-1, stitch, AR/VR
+    DEPLOYMENT = auto()  # multi-cloud terraform
+    VERIFICATION = auto()  # mejoralo, qa, smoke tests
 
 
 @dataclass
@@ -43,16 +46,17 @@ class PipelineResult:
     phase: Phase
     success: bool
     duration_ms: float
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class SovereignContext:
     """Shared context threaded through every pipeline phase."""
+
     project_root: Path = Path.cwd()
     environment: str = "production"
-    power: Optional[PowerLevel] = None
-    results: List[PipelineResult] = field(default_factory=list)
+    power: PowerLevel | None = None
+    results: list[PipelineResult] = field(default_factory=list)
     started_at: float = field(default_factory=time.time)
 
     @property
@@ -67,7 +71,7 @@ class SovereignContext:
 SKILLS_ROOT = Path.home() / ".gemini" / "antigravity" / "skills"
 
 
-def discover_skills() -> Dict[str, Path]:
+def discover_skills() -> dict[str, Path]:
     """Map skill-name → directory for every skill that has a SKILL.md."""
     if not SKILLS_ROOT.exists():
         return {}
@@ -81,6 +85,7 @@ def discover_skills() -> Dict[str, Path]:
 # ---------------------------------------------------------------------------
 # Phase executors
 # ---------------------------------------------------------------------------
+
 
 async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
     """Phase 1 — Invoke aether-1 to materialise artefacts."""
@@ -168,7 +173,7 @@ async def _phase_stub(phase: Phase, ctx: SovereignContext) -> PipelineResult:
 # Main pipeline
 # ---------------------------------------------------------------------------
 
-PHASE_EXECUTORS: Dict[Phase, Callable] = {
+PHASE_EXECUTORS: dict[Phase, Callable] = {
     Phase.FABRICATION: _phase_fabrication,
     Phase.SECURITY: _phase_security,
     Phase.OBSERVABILITY: _phase_observability,
@@ -177,7 +182,7 @@ PHASE_EXECUTORS: Dict[Phase, Callable] = {
 
 
 async def run_pipeline(
-    project_root: Optional[Path] = None,
+    project_root: Path | None = None,
     environment: str = "production",
 ) -> SovereignContext:
     """Execute the full sovereign pipeline, returning the enriched context."""

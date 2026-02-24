@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v6.x (Sovereign Cloud)
+## [Unreleased] — v0.4.x
 
 ### In Progress
 - GraphQL API (`/graphql`) — cross-language integration layer
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [6.0.0-alpha] — 2026-02-23
+## [0.3.0-beta] — 2026-02-23
 
 ### Architecture
 - **Multi-Tenancy**: Cryptographic data isolation at L1/L2/L3 — `tenant_id` enforced at all memory layers
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [5.1.0] — 2026-02-23
+## [0.2.2-alpha] — 2026-02-23
 
 ### Added
 - **Sidecar Compaction Monitor** (`daemon/sidecar/`): Production-grade, independently deployable memory compaction service with ARQ, uvloop, malloc_trim, cgroups v2 PSI, circuit breaker, zero-trust sandboxing, and standalone Dockerfile
@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [5.0.0] — 2026-02-22
+## [0.2.1-alpha] — 2026-02-22
 
 ### Added
 - **Weighted Byzantine Fault Tolerance (WBFT)**: Full Byzantine consensus with reputation decay, domain-specific vote multipliers, `_verdict_without_quorum` Elder Council
@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [4.2.0] — 2026-02-21
+## [0.2.0-alpha] — 2026-02-21
 
 ### Added
 - **MEJORAlo v9.0 Engine** (`mejoralo/`): X-Ray 13D autonomous code quality scanner + 4-wave healing protocol
@@ -112,7 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [4.1.0] — 2026-02-20
+## [0.1.1-alpha] — 2026-02-20
 
 ### Added
 - **Reputation-Weighted Consensus v2** (`consensus_votes_v2` table): Dual-table architecture with backward compat
@@ -127,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [4.0.0] — 2026-02-18
+## [0.1.0-alpha] — 2026-02-18
 
 ### Added
 - **Sovereign Engine**: New `CortexEngine` with modular mixin architecture (Store, Query, Consensus)

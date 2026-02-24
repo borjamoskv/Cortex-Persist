@@ -22,6 +22,7 @@ from cortex.memory.working import WorkingMemoryL1
 
 try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     try:

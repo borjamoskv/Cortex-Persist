@@ -10,8 +10,10 @@ from cortex.migrations.mig_consensus import (
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
+from cortex.migrations.mig_fts import _migration_017_fts_decouple
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
+from cortex.migrations.mig_hash import _migration_016_add_fact_hash
 from cortex.migrations.mig_ledger import (
     _migration_010_immutable_ledger,
     _migration_011_link_facts_to_tx,
@@ -19,8 +21,6 @@ from cortex.migrations.mig_ledger import (
     _migration_014_vote_ledger_refinement,
 )
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
-from cortex.migrations.mig_hash import _migration_016_add_fact_hash
-from cortex.migrations.mig_fts import _migration_017_fts_decouple
 
 __all__ = ["MIGRATIONS"]
 

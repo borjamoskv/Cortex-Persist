@@ -50,8 +50,8 @@ class SyncCompatMixin:
 
     def init_db_sync(self) -> None:
         """Initialize database schema (sync version)."""
-        from cortex.migrations.core import run_migrations
         from cortex.database.schema import get_all_schema
+        from cortex.migrations.core import run_migrations
 
         conn = self._get_sync_conn()
         for stmt in get_all_schema():

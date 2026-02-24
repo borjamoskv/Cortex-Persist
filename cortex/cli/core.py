@@ -128,7 +128,18 @@ def init(db) -> None:
     "--type",
     "fact_type",
     type=click.Choice(
-        ["knowledge", "decision", "ghost", "preference", "identity", "issue", "error", "bridge", "world-model", "counterfactual"]
+        [
+            "knowledge",
+            "decision",
+            "ghost",
+            "preference",
+            "identity",
+            "issue",
+            "error",
+            "bridge",
+            "world-model",
+            "counterfactual",
+        ]
     ),
     default="knowledge",
     help="Fact type (includes world-model for simulated consequences)",

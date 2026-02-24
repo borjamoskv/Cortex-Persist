@@ -59,7 +59,9 @@ class ContextFusion:
             except (OSError, RuntimeError, asyncio.TimeoutError, AttributeError) as e:
                 logger.warning(
                     "ContextFusion error (attempt %d/%d): %s",
-                    attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
+                    attempt + 1,
+                    self.JUDGE_MAX_RETRIES + 1,
+                    e,
                 )
             if attempt < self.JUDGE_MAX_RETRIES:
                 await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt))
@@ -75,12 +77,11 @@ class ContextFusion:
             return "\n".join(f.get("content", "") for f in retrieved_facts)
 
         parts = [
-            f"--- FACT {i+1} (score: {f.get('score', 0):.2f}) ---\n{f.get('content', '')}"
+            f"--- FACT {i + 1} (score: {f.get('score', 0):.2f}) ---\n{f.get('content', '')}"
             for i, f in enumerate(retrieved_facts)
         ]
         judge_prompt = (
-            f"LATEST USER PROMPT:\n{user_prompt}\n\n"
-            f"RAW RETRIEVED FACTS:\n" + "\n\n".join(parts)
+            f"LATEST USER PROMPT:\n{user_prompt}\n\nRAW RETRIEVED FACTS:\n" + "\n\n".join(parts)
         )
         synthesized = await self._judge_safe(
             prompt=judge_prompt,

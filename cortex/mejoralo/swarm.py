@@ -92,10 +92,10 @@ class MejoraloSwarm:
         console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
 
         result_content = await self._run_orchestra(base_prompt, swarm_system)
-        
+
         if result_content:
             console.print(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
-        
+
         return self._extract_code(result_content) if result_content else None
 
     def _read_source(self, file_path: Path) -> str | None:
@@ -138,7 +138,7 @@ class MejoraloSwarm:
         scars = engine.scars(project, filename)
         if not scars:
             return ""
-        
+
         scars_list = [f"SCAR: {s['error_trace']}" for s in scars]
         return "\n\nCRITICAL: DO NOT REPEAT:\n" + "\n---\n".join(scars_list)
 
@@ -147,18 +147,18 @@ class MejoraloSwarm:
         squad_size = {1: 3, 2: 5}.get(self.level, 6)
         fs_lower = findings_str.lower()
         findings_count = findings_str.count("\n-") + (1 if findings_str.startswith("-") else 0)
-        
+
         mapping = {
             "SecurityWarden": ["securit", "inject", "leak", "auth"],
             "PerformanceGhost": ["perform", "slow", "loop", "complex"],
             "RobustnessGuardian": ["error", "fail", "type", "except"],
-            "AestheticShiva": ["format", "lint", "style", "aesthetic"]
+            "AestheticShiva": ["format", "lint", "style", "aesthetic"],
         }
 
         # Functional-style specialist selection
         dynamic = [s for s, kw in mapping.items() if any(k in fs_lower for k in kw)]
         active = (["ArchitectPrime", "CodeNinja"] + dynamic)[:squad_size]
-        
+
         # Disentimiento Obligatorio: Inject Devil's Advocate for complex tasks
         if findings_count > 3 or self.level >= 2:
             if "DevilsAdvocate" not in active:
@@ -180,10 +180,14 @@ class MejoraloSwarm:
         items = [f"- {name}: {SPECIALISTS_PROMPTS[name]}" for name in specialists]
         info = "\n".join(items)
         consensus_rule = (
-            "You must reach a Byzantine Consensus. If DevilsAdvocate is present, you MUST overcome "
-            "their veto with irrefutable logic before returning the final implementation."
-        ) if "DevilsAdvocate" in specialists else "Synthesize ALL specialist logic."
-        
+            (
+                "You must reach a Byzantine Consensus. If DevilsAdvocate is present, you MUST overcome "
+                "their veto with irrefutable logic before returning the final implementation."
+            )
+            if "DevilsAdvocate" in specialists
+            else "Synthesize ALL specialist logic."
+        )
+
         return (
             f"You are the SOVEREIGN SWARM (Level {self.level}/3). Iteration: {iteration}.\n"
             f"Goal: Achieve 130/100 quality score. {consensus_rule}\n"

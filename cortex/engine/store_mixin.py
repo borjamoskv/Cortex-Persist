@@ -135,6 +135,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         tags_json = json.dumps(tags or [])
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
 
         encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
@@ -147,12 +148,27 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             )
 
         from cortex.utils.canonical import compute_fact_hash
+
         f_hash = compute_fact_hash(content)
+
+        # Ed25519 digital signature (optional — non-blocking)
+        sig_b64: str | None = None
+        pub_b64: str | None = None
+        try:
+            from cortex.security.signatures import get_default_signer
+
+            signer = get_default_signer()
+            if signer and signer.can_sign:
+                sig_b64 = signer.sign(content, f_hash)
+                pub_b64 = signer.public_key_b64
+        except Exception as e:
+            logger.debug("Fact signing skipped: %s", e)
 
         cursor = await conn.execute(
             "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
-            "valid_from, source, meta, hash, created_at, updated_at, tx_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "valid_from, source, meta, hash, signature, signer_pubkey, "
+            "created_at, updated_at, tx_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 tenant_id,
                 project,
@@ -164,6 +180,8 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 source,
                 encrypted_meta,
                 f_hash,
+                sig_b64,
+                pub_b64,
                 ts,
                 ts,
                 tx_id,
@@ -252,9 +270,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             enc = get_default_encrypter()
 
             old_content = (
-                enc.decrypt_str(raw_old_content, tenant_id=tenant_id)
-                if raw_old_content
-                else ""
+                enc.decrypt_str(raw_old_content, tenant_id=tenant_id) if raw_old_content else ""
             )
 
             new_meta = (
@@ -317,6 +333,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
             except Exception as e:
                 import logging
+
                 logging.getLogger("cortex").warning(f"Failed to remove FTS for fact {fact_id}: {e}")
 
             cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
@@ -373,6 +390,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         # So we should compare by hash!
 
         from cortex.utils.canonical import compute_fact_hash
+
         f_hash = compute_fact_hash(content)
 
         cursor = await conn.execute(

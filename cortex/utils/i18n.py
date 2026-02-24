@@ -193,10 +193,9 @@ def _report_as_ghost_fact(key: str, lang: Lang) -> None:
     """Report as Ghost Fact for permanent resolution."""
     try:
         from cortex.facts import store_fact
+
         store_fact(
-            "cortex",
-            f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'",
-            type="ghost"
+            "cortex", f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'", type="ghost"
         )
     except ImportError:
         logger.debug("I18N: Periodic report skipped - cortex.facts not available yet")
@@ -239,7 +238,6 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
         loop.create_task(_repair())
     except RuntimeError:
         threading.Thread(target=asyncio.run, args=(_repair(),), daemon=True).start()
-
 
 
 def get_trans(key: TranslationKey, lang: Lang | str | None = None, **kwargs: Any) -> str:
