@@ -122,6 +122,19 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         commit: bool,
         tx_id: int | None,
     ) -> int:
+        # ── Leap 1 Guard: Mandatory pre-store validation ──────────
+        from cortex.engine.storage_guard import StorageGuard
+
+        StorageGuard.validate(
+            project=project,
+            content=content,
+            fact_type=fact_type,
+            source=source,
+            confidence=confidence,
+            tags=tags,
+            meta=meta,
+        )
+        # ──────────────────────────────────────────────────────────
         content = self._validate_content(project, content, fact_type)
 
         # check for duplicates if NOT an internal update
@@ -161,7 +174,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             if signer and signer.can_sign:
                 sig_b64 = signer.sign(content, f_hash)
                 pub_b64 = signer.public_key_b64
-        except Exception as e:
+        except (ImportError, ValueError, OSError) as e:
             logger.debug("Fact signing skipped: %s", e)
 
         cursor = await conn.execute(
@@ -198,8 +211,8 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 "VALUES (?, ?, ?, ?, ?)",
                 (fact_id, content, project, tags_json, fact_type),
             )
-        except Exception as e:
-            logging.getLogger("cortex").warning(f"Failed to update FTS for fact {fact_id}: {e}")
+        except (sqlite3.Error, aiosqlite.Error) as e:
+            logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
 
         # Pass fact_id to side effects (except tx log which is already done)
         await self._embed_fact_async(conn, fact_id, content)
@@ -209,7 +222,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         try:
             await process_fact_graph(conn, fact_id, content, project, ts)
-        except Exception as e:
+        except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
             logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
         if commit:
@@ -331,10 +344,8 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         if cursor.rowcount > 0:
             try:
                 await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-            except Exception as e:
-                import logging
-
-                logging.getLogger("cortex").warning(f"Failed to remove FTS for fact {fact_id}: {e}")
+            except (sqlite3.Error, aiosqlite.Error) as e:
+                logger.warning("Failed to remove FTS for fact %d: %s", fact_id, e)
 
             cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
             row = await cursor.fetchone()

@@ -42,6 +42,7 @@ nav:
       - Configuration: configuration.md
   - Reference:
       - Architecture: architecture.md
+      - Operating Axioms: operating-axioms.md
       - API Classes: reference.md
       - CLI Reference: cli.md
       - REST API: api.md

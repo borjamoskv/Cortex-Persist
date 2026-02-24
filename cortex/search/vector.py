@@ -114,14 +114,14 @@ def _row_to_result(row: tuple, enc: "CortexEncrypter", tenant_id: str) -> Search
     if content and str(content).startswith(enc.PREFIX):
         try:
             content = enc.decrypt_str(content, tenant_id=tenant_id)
-        except Exception as e:
-            logger.error(f"Vector content decryption failed for tenant {tenant_id}: {e}")
+        except (ValueError, OSError) as e:
+            logger.error("Vector content decryption failed for tenant %s: %s", tenant_id, e)
 
     if row[9] and str(row[9]).startswith(enc.PREFIX):
         try:
             meta = enc.decrypt_json(row[9], tenant_id=tenant_id)
-        except Exception as e:
-            logger.error(f"Vector meta decryption failed for tenant {tenant_id}: {e}")
+        except (ValueError, OSError) as e:
+            logger.error("Vector meta decryption failed for tenant %s: %s", tenant_id, e)
 
     score = 1.0 - (row[10] if row[10] else 0.0)
 
@@ -192,10 +192,10 @@ def semantic_search_sync(
             tags = []
 
         content = row[1]
-        if content and str(content).startswith("v6_aesgcm:"):
+        if content and str(content).startswith(enc.PREFIX):
             try:
                 content = enc.decrypt_string(content)
-            except Exception:
+            except (ValueError, OSError):
                 pass
 
         score = 1.0 - (row[7] if row[7] else 0.0)

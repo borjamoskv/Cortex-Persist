@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
@@ -23,6 +24,7 @@ import cortex.api.state as api_state
 from cortex import __version__
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
+from cortex.database.schema import SCHEMA_VERSION
 from cortex.engine import CortexEngine
 from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
 from cortex.types.models import (
@@ -115,8 +117,16 @@ def _validate_export_path(path: str | None, project: str, lang: str) -> Path:
 ProbeResult = tuple[str, bool, dict[str, str | int | float]]
 
 
+def _get_raw_conn(engine: CortexEngine) -> object:
+    """Isolate private access to engine's raw connection.
+
+    Keeps the coupling to ``_get_conn`` in a single place.
+    """
+    return engine._get_conn()  # noqa: SLF001
+
+
 def _build_health_probes(
-    conn: object, request: Request, schema_version: str
+    conn: object, request: Request, schema_version: str,
 ) -> dict[str, object]:
     """Build the probe registry for deep health check.
 
@@ -130,31 +140,39 @@ def _build_health_probes(
 
     def _probe_schema() -> ProbeResult:
         row = conn.execute(  # type: ignore[union-attr]
-            "SELECT value FROM cortex_meta WHERE key = 'schema_version'"
+            "SELECT value FROM cortex_meta "
+            "WHERE key = 'schema_version'",
         ).fetchone()
         db_ver = row[0] if row else "unknown"
         if db_ver == schema_version:
             return "ok", True, {"version": db_ver}
-        return "drift", False, {"expected": schema_version, "actual": db_ver}
+        return (
+            "drift", False,
+            {"expected": schema_version, "actual": db_ver},
+        )
 
     def _probe_ledger() -> ProbeResult:
         last_cp = conn.execute(  # type: ignore[union-attr]
-            "SELECT MAX(tx_end_id) FROM merkle_roots"
+            "SELECT MAX(tx_end_id) FROM merkle_roots",
         ).fetchone()
         last_tx = last_cp[0] if last_cp else 0
         pending_row = conn.execute(  # type: ignore[union-attr]
-            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
+            "SELECT COUNT(*) FROM transactions WHERE id > ?",
+            (last_tx,),
         ).fetchone()
         pending = pending_row[0] if pending_row else 0
         healthy = pending < _LEDGER_LAG_THRESHOLD
         return (
             "ok" if healthy else "warning",
             healthy,
-            {"pending_uncheckpointed": pending, "last_checkpoint_tx": last_tx},
+            {"pending_uncheckpointed": pending,
+             "last_checkpoint_tx": last_tx},
         )
 
     def _probe_fts() -> ProbeResult:
-        conn.execute("SELECT COUNT(*) FROM episodes_fts").fetchone()  # type: ignore[union-attr]
+        conn.execute(  # type: ignore[union-attr]
+            "SELECT COUNT(*) FROM episodes_fts",
+        ).fetchone()
         return "ok", True, {"detail": "episodes_fts accessible"}
 
     def _probe_pool() -> ProbeResult:
@@ -165,11 +183,9 @@ def _build_health_probes(
         return (
             "ok",
             True,
-            {
-                "active_connections": active,
-                "max_connections": max_c,
-                "utilization": f"{pct:.0f}%",
-            },
+            {"active_connections": active,
+             "max_connections": max_c,
+             "utilization": f"{pct:.0f}%"},
         )
 
     return {
@@ -179,6 +195,35 @@ def _build_health_probes(
         "search_fts": _probe_fts,
         "pool": _probe_pool,
     }
+
+
+async def _verify_admin_auth(
+    authorization: str | None, manager: object, lang: str,
+) -> None:
+    """Validate that the caller has 'admin' permission.
+
+    Raises HTTPException (401/403) on failure.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail=get_trans("error_auth_required", lang),
+        )
+
+    token = authorization.split(" ", 1)[1]
+    result = await manager.authenticate_async(token)  # type: ignore[union-attr]
+
+    if not result.authenticated:
+        raise HTTPException(
+            status_code=401,
+            detail=get_trans("error_invalid_revoked_key", lang),
+        )
+
+    if "admin" not in result.permissions:
+        detail = get_trans(
+            "error_missing_permission", lang,
+        ).format(permission="admin")
+        raise HTTPException(status_code=403, detail=detail)
 
 
 # ─── Project Management ──────────────────────────────────────────────
@@ -205,7 +250,9 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = engine.search(project=project, limit=_MAX_EXPORT_FACTS)
+        facts = await run_in_threadpool(
+            engine.search, project=project, limit=_MAX_EXPORT_FACTS,
+        )
         content = export_facts(facts, fmt="json")
 
         def _write_export() -> Path:
@@ -214,24 +261,35 @@ async def export_project(
             return target_file
 
         out_path = await run_in_threadpool(_write_export)
-        logger.info("Export completed: project=%s path=%s", project, out_path)
+        logger.info(
+            "Export completed: project=%s path=%s", project, out_path,
+        )
         return ExportResponse(
             project=project,
             artifact=str(out_path),
             message=get_trans("info_export_success", lang),
         )
-    except (OSError, ValueError, KeyError) as exc:
-        logger.error("Export failure: project=%s error=%s", project, exc)
-        SelfHealingHook.trigger(exc, {"endpoint": "export_project", "project": project})
+    except (OSError, ValueError) as exc:
+        logger.error(
+            "Export failure: project=%s error=%s", project, exc,
+        )
+        SelfHealingHook.trigger(
+            exc, {"endpoint": "export_project", "project": project},
+        )
         raise HTTPException(
-            status_code=500, detail=get_trans("error_export_failed", lang)
+            status_code=500,
+            detail=get_trans("error_export_failed", lang),
         ) from None
 
 
 # ─── Health & Diagnostics ────────────────────────────────────────────
 
 
-@router.get("/v1/health/deep", tags=["health"], response_model=DeepHealthResponse)
+@router.get(
+    "/v1/health/deep",
+    tags=["health"],
+    response_model=DeepHealthResponse,
+)
 async def deep_health_check(
     request: Request,
     engine: CortexEngine = Depends(get_engine),
@@ -240,28 +298,47 @@ async def deep_health_check(
     """Deep Health Check — probes all CORTEX subsystems.
 
     Returns 200 if all checks pass, 503 if any subsystem is degraded.
-    Designed for Kubernetes liveness/readiness probes and Enterprise monitoring.
+    Designed for Kubernetes liveness/readiness probes.
     """
-    from cortex.database.schema import SCHEMA_VERSION
-
     start = time.monotonic()
-    checks: dict[str, HealthCheckDetail] = {}
-    overall_healthy = True
 
-    conn = engine._get_conn()
+    conn = _get_raw_conn(engine)
     probes = _build_health_probes(conn, request, SCHEMA_VERSION)
 
-    for name, probe in probes.items():
-        try:
-            status, healthy, details = probe()  # type: ignore[misc]
-        except AttributeError:
-            status, healthy, details = (
-                "unavailable", True, {"detail": f"{name} not configured"}
+    def _run_probes() -> tuple[dict[str, HealthCheckDetail], bool]:
+        """Execute all probes off the event loop."""
+        _checks: dict[str, HealthCheckDetail] = {}
+        _healthy = True
+        for name, probe in probes.items():
+            try:
+                status, ok, details = probe()  # type: ignore[misc]
+            except AttributeError:
+                status, ok, details = (
+                    "unavailable", True,
+                    {"detail": f"{name} not configured"},
+                )
+            except (OSError, RuntimeError, ValueError) as e:
+                status, ok, details = (
+                    "error", False, {"detail": str(e)},
+                )
+            _healthy = _healthy and ok
+            _checks[name] = HealthCheckDetail(
+                status=status, **details,
             )
-        except (OSError, RuntimeError, ValueError) as e:
-            status, healthy, details = "error", False, {"detail": str(e)}
-        overall_healthy = overall_healthy and healthy
-        checks[name] = HealthCheckDetail(status=status, **details)
+        return _checks, _healthy
+
+    try:
+        checks, overall_healthy = await run_in_threadpool(
+            _run_probes,
+        )
+    except (OSError, RuntimeError) as exc:
+        logger.error("Deep health check failure: %s", exc)
+        SelfHealingHook.trigger(
+            exc, {"endpoint": "deep_health_check"},
+        )
+        raise HTTPException(
+            status_code=503, detail="Health check failed",
+        ) from None
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     result = DeepHealthResponse(
@@ -273,12 +350,9 @@ async def deep_health_check(
     )
 
     if not overall_healthy:
-        from fastapi.responses import JSONResponse
-
         return JSONResponse(  # type: ignore[return-value]
-            content=result.model_dump(), status_code=503
+            content=result.model_dump(), status_code=503,
         )
-
     return result
 
 
@@ -340,20 +414,7 @@ async def create_api_key(
     existing_keys = await manager.list_keys()
 
     if existing_keys:
-        if not authorization or not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail=get_trans("error_auth_required", lang))
-
-        token = authorization.split(" ", 1)[1]
-        result = await manager.authenticate_async(token)
-
-        if not result.authenticated:
-            raise HTTPException(
-                status_code=401, detail=get_trans("error_invalid_revoked_key", lang)
-            )
-
-        if "admin" not in result.permissions:
-            detail = get_trans("error_missing_permission", lang).format(permission="admin")
-            raise HTTPException(status_code=403, detail=detail)
+        await _verify_admin_auth(authorization, manager, lang)
 
     raw_key, api_key = await manager.create_key(
         name=name,
@@ -361,7 +422,10 @@ async def create_api_key(
         permissions=["read", "write", "admin"],
     )
 
-    logger.info("API key created: name=%s tenant=%s prefix=%s", name, tenant_id, api_key.key_prefix)
+    logger.info(
+        "API key created: name=%s tenant=%s prefix=%s",
+        name, tenant_id, api_key.key_prefix,
+    )
 
     return ApiKeyResponse(
         key=raw_key,
