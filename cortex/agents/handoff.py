@@ -58,7 +58,7 @@ async def generate_handoff(
 
     # ── Hot Decisions (last N, ordered by recency) ────────────────────
     async with conn.execute(
-        "SELECT id, project, content, created_at "
+        "SELECT id, project, content, created_at, tenant_id "
         "FROM facts "
         "WHERE fact_type = 'decision' AND valid_until IS NULL "
         "ORDER BY created_at DESC LIMIT ?",
@@ -66,8 +66,18 @@ async def generate_handoff(
     ) as cursor:
         decision_rows = await cursor.fetchall()
 
+    from cortex.crypto import get_default_encrypter
+
+    enc = get_default_encrypter()
+
     hot_decisions = [
-        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]} for r in decision_rows
+        {
+            "id": r[0],
+            "project": r[1],
+            "content": enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else "",
+            "created_at": r[3],
+        }
+        for r in decision_rows
     ]
 
     # ── Active Ghosts ─────────────────────────────────────────────────
@@ -86,7 +96,7 @@ async def generate_handoff(
 
     # ── Recent Errors ─────────────────────────────────────────────────
     async with conn.execute(
-        "SELECT id, project, content, created_at "
+        "SELECT id, project, content, created_at, tenant_id "
         "FROM facts "
         "WHERE fact_type IN ('error', 'mistake') AND valid_until IS NULL "
         "ORDER BY created_at DESC LIMIT ?",
@@ -95,7 +105,13 @@ async def generate_handoff(
         error_rows = await cursor.fetchall()
 
     recent_errors = [
-        {"id": r[0], "project": r[1], "content": r[2], "created_at": r[3]} for r in error_rows
+        {
+            "id": r[0],
+            "project": r[1],
+            "content": enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else "",
+            "created_at": r[3],
+        }
+        for r in error_rows
     ]
 
     # ── Active Projects (with activity in last 24h) ───────────────────

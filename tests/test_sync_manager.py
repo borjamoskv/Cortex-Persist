@@ -28,7 +28,7 @@ async def test_merkle_pulse_detection(tmp_path):
             with patch.object(
                 sync_manager,
                 "_run_sync_memory",
-                return_value=SyncResult(total=1),
+                return_value=SyncResult(facts_synced=1),
             ):
                 # 1. First sync — file exists, hash not in state → should sync
                 result = await sync_manager._merkle_pulse_sync()

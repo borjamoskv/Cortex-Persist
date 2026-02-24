@@ -7,6 +7,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  attestations: write
 
 jobs:
   publish:
@@ -21,4 +22,19 @@ jobs:
           python-version: "3.13"
       - run: pip install build
       - run: python -m build
-      - uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Sign artifacts with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: dist/*
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-dist
+          path: |
+            dist/*
+            dist/*.sigstore.json
