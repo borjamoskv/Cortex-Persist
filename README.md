@@ -5,7 +5,7 @@
 
 ![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v8.0%20alpha-orange.svg)
+![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
@@ -122,29 +122,48 @@ uvicorn cortex.api:app --port 8484
 
 ## Architecture (v8 — Sovereign Cloud)
 
+```mermaid
+block-beta
+  columns 1
+
+  block:INTERFACES["🖥️ INTERFACES"]
+    CLI["CLI (38 cmds)"]
+    API["REST API (55+ endpoints)"]
+    MCP["MCP Server"]
+    GraphQL["GraphQL (soon)"]
+  end
+
+  block:GATEWAY["🔐 TRUST GATEWAY"]
+    RBAC["RBAC (4 roles)"]
+    Privacy["Privacy Shield"]
+    Auth["API Keys + JWT"]
+    Security["Security Middleware"]
+  end
+
+  block:MEMORY["🧠 COGNITIVE MEMORY"]
+    L1["L1: Redis / Working Memory"]
+    L2["L2: Qdrant / sqlite-vec (384-dim)"]
+    L3["L3: AlloyDB / SQLite (hash-chained)"]
+  end
+
+  block:TRUST["⛓️ TRUST LAYER"]
+    Ledger["SHA-256 Ledger"]
+    Merkle["Merkle Trees"]
+    WBFT["WBFT Consensus"]
+    Sandbox["AST Sandbox"]
+  end
+
+  block:PLATFORM["⚙️ PLATFORM SERVICES"]
+    Daemon["Self-Healing Daemon"]
+    Notifications["Notification Bus"]
+    Compaction["Compaction Sidecar"]
+    EdgeSync["EdgeSyncMonitor"]
+  end
+
+  INTERFACES --> GATEWAY --> MEMORY --> TRUST --> PLATFORM
 ```
-┌──────────────────────────────────────────────┐
-│              INTERFACES                       │
-│  CLI (38 cmds)  REST API  MCP  GraphQL(soon) │
-├──────────────────────────────────────────────┤
-│         TRUST GATEWAY (v6)                   │
-│  RBAC (4 roles)  │  Privacy Shield           │
-│  API Keys + JWT  │  SecurityHeadersMiddleware │
-├──────────────────────────────────────────────┤
-│         COGNITIVE MEMORY                     │
-│  L1: Redis / Working Memory (sliding window) │
-│  L2: Qdrant / sqlite-vec (384-dim vectors)   │
-│  L3: AlloyDB / SQLite (hash-chained ledger)  │
-├──────────────────────────────────────────────┤
-│         TRUST LAYER                          │
-│  SHA-256 Ledger  │  Merkle Trees             │
-│  WBFT Consensus  │  AST Sandbox              │
-├──────────────────────────────────────────────┤
-│         PLATFORM SERVICES                    │
-│  Self-Healing Daemon  │  Notification Bus    │
-│  Compaction Sidecar   │  EdgeSyncMonitor     │
-└──────────────────────────────────────────────┘
-```
+
+> 📐 Full architecture details in [ARCHITECTURE.md](ARCHITECTURE.md) and [docs](https://cortexpersist.dev/architecture/).
 
 ---
 
