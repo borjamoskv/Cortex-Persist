@@ -18,6 +18,9 @@ class MemoryMixin:
 
         L1 (Working Memory) + L3 (Event Ledger) always available.
         L2 (Vector Store) optional — requires qdrant_client.
+
+        When auto_embed=False (e.g. tests), L2 initialization is skipped entirely
+        to avoid loading the ML model (~30s penalty per test).
         """
         from cortex.memory.ledger import EventLedgerL3
         from cortex.memory.working import WorkingMemoryL1
@@ -25,6 +28,16 @@ class MemoryMixin:
         l1 = WorkingMemoryL1()
         l3 = EventLedgerL3(conn)
         await l3.ensure_table()
+
+        # CORTOCIRCUITO: si auto_embed=False, no intentar L2 ni cargar embedder
+        # Esto evita instanciar LocalEmbedder (carga modelo ML) innecesariamente.
+        auto_embed = getattr(self, "_auto_embed", True)
+        if not auto_embed:
+            self._memory_manager = None
+            self._memory_l1 = l1
+            self._memory_l3 = l3
+            logger.debug("Memory subsystem: lite (L1+L3 only, auto_embed=False)")
+            return
 
         # L2: Optional — Qdrant may not be installed
         l2 = None
