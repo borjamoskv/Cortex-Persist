@@ -333,12 +333,16 @@ class CortexMemoryManager:
 
     async def wait_for_background(self, timeout: float = 30.0) -> None:
         """Wait for background tasks to complete with a hard timeout.
-        
+
         Essential for clean teardown and stable test environments.
+        In test mode (CORTEX_TESTING=1), tasks are actively cancelled on timeout.
         """
         if not self._background_tasks:
             return
-            
+
+        import os
+        _testing = os.environ.get("CORTEX_TESTING")
+
         try:
             await asyncio.wait_for(
                 asyncio.gather(*self._background_tasks, return_exceptions=True),
@@ -346,8 +350,12 @@ class CortexMemoryManager:
             )
         except asyncio.TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
-            # We don't cancel tasks here to allow them to finish unless it's a shutdown
-            # but we return to prevent blocking the test/caller forever.
+            if _testing:
+                # In test mode: cancel pending tasks aggressively to prevent event loop leaks
+                for task in list(self._background_tasks):
+                    if not task.done():
+                        task.cancel()
+                self._background_tasks.clear()
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"

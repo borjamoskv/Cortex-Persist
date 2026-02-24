@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 
 import cortex.api.core as api_mod
 import cortex.auth
-from cortex import config; import cortex.api.state as api_state
+from cortex import config
+import cortex.api.state as api_state
 from cortex.auth import AuthManager
 
 # Unique test DB
@@ -125,7 +126,9 @@ class TestAuth:
 
     def test_good_key_accepted(self, client, auth_headers):
         resp = client.post(
-            "/v1/facts", json={"project": "test", "content": "hello"}, headers=auth_headers
+            "/v1/facts",
+            json={"project": "test", "content": "This is a valid test fact for auth verification."},
+            headers=auth_headers,
         )
         assert resp.status_code == 200
 

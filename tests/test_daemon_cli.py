@@ -43,7 +43,7 @@ class TestCliBasic:
 
 class TestCliStatus:
     def test_status_no_data(self, runner):
-        with patch("cortex.daemon_cli.MoskvDaemon.load_status", return_value=None):
+        with patch("cortex.daemon.cli.MoskvDaemon.load_status", return_value=None):
             result = runner.invoke(cli, ["status"])
             assert result.exit_code == 1
             assert "No daemon status" in result.output
@@ -61,7 +61,7 @@ class TestCliStatus:
             "disk_alerts": [],
             "errors": [],
         }
-        with patch("cortex.daemon_cli.MoskvDaemon.load_status", return_value=mock_status):
+        with patch("cortex.daemon.cli.MoskvDaemon.load_status", return_value=mock_status):
             result = runner.invoke(cli, ["status"])
             assert result.exit_code == 0
             assert "Last Status" in result.output
@@ -75,7 +75,7 @@ class TestCliCheck:
         """Check with all healthy systems exits 0."""
         from cortex.daemon import DaemonStatus, SiteStatus
 
-        mock_daemon = patch("cortex.daemon_cli._build_daemon")
+        mock_daemon = patch("cortex.daemon.cli._build_daemon")
         with mock_daemon as m:
             daemon = m.return_value
             daemon.check.return_value = DaemonStatus(
@@ -91,7 +91,7 @@ class TestCliCheck:
         """Check with issues exits 1."""
         from cortex.daemon import DaemonStatus, SiteStatus
 
-        mock_daemon = patch("cortex.daemon_cli._build_daemon")
+        mock_daemon = patch("cortex.daemon.cli._build_daemon")
         with mock_daemon as m:
             daemon = m.return_value
             daemon.check.return_value = DaemonStatus(
@@ -107,7 +107,7 @@ class TestCliCheck:
         """Check with empty sites shows config hint."""
         from cortex.daemon import DaemonStatus
 
-        mock_daemon = patch("cortex.daemon_cli._build_daemon")
+        mock_daemon = patch("cortex.daemon.cli._build_daemon")
         with mock_daemon as m:
             daemon = m.return_value
             daemon.check.return_value = DaemonStatus(

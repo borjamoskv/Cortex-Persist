@@ -10,7 +10,11 @@ import sqlite3
 
 import aiosqlite
 
+from typing import Any
 from cortex.search.models import SearchResult
+from cortex.crypto.aes import CortexEncrypter
+
+V6_PREFIX = CortexEncrypter.PREFIX
 
 
 async def _has_fts5(conn: aiosqlite.Connection) -> bool:
@@ -56,59 +60,82 @@ def _sanitize_fts_query(query: str) -> str:
 
 
 def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
-    """Parse a single database row into a SearchResult object."""
-    try:
-        row_tags = json.loads(row[7]) if row[7] else []
-    except (json.JSONDecodeError, TypeError):
-        row_tags = []
+    """Parse a database row into a SearchResult object with decryption logic.
 
+    Column order from _fts5_search / _like_search:
+      0: f.id, 1: f.content, 2: f.project, 3: f.fact_type, 4: f.confidence,
+      5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.meta,
+      10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: t.hash,
+      14: bm25(facts_fts) AS rank  [FTS only]
+    """
     from cortex.crypto import get_default_encrypter
-
     enc = get_default_encrypter()
 
-    content = row[1]
-    if content and content.startswith("v6_aesgcm:"):
-        try:
-            content = enc.decrypt_str(content)
-        except Exception as e:
-            print(f"DECRYPT STRING ERROR: {e}")
-            pass
+    fact_id = row[0]
+    tenant_id = "default"
 
-    meta = {}
-    if row[9] and str(row[9]).startswith("v6_aesgcm:"):
-        try:
-            meta = enc.decrypt_json(row[9])
-        except Exception as e:
-            print(f"DECRYPT JSON ERROR: {e}")
-            pass
-    elif row[9]:
-        try:
-            meta = json.loads(row[9])
-        except (json.JSONDecodeError, TypeError):
-            pass
+    # Decrypt Content
+    content = _decrypt_row_content(row[1], tenant_id, enc)
 
+    # Process Tags (index 7)
+    try:
+        tags = json.loads(row[7]) if row[7] else []
+    except (json.JSONDecodeError, TypeError):
+        tags = []
+
+    # Meta (index 9)
+    meta = _parse_row_meta(row[9], tenant_id, enc)
+
+    # Scoring — FTS has rank at index 14
+    score = 0.0
     if is_fts and len(row) > 14:
-        score = -row[14] if row[14] else 0.5
-    else:
-        score = 0.5
+        score = row[14] if row[14] is not None else 0.0
 
     return SearchResult(
-        fact_id=row[0],
+        fact_id=fact_id,
         content=content,
         project=row[2],
         fact_type=row[3],
         confidence=row[4],
-        valid_from=row[5],
+        valid_from=row[5] or "",
         valid_until=row[6],
-        tags=row_tags,
+        tags=tags,
         source=row[8],
         meta=meta,
         score=score,
-        created_at=row[10] if len(row) > 10 else "unknown",
-        updated_at=row[11] if len(row) > 11 else "unknown",
-        tx_id=row[12] if len(row) > 12 else None,
-        hash=row[13] if len(row) > 13 else None,
+        created_at=row[10] or "",
+        updated_at=row[11] or "",
+        tx_id=row[12],
+        hash=row[13],
     )
+
+
+def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
+    """Helper to decrypt fact content if prefixed."""
+    if content and str(content).startswith(V6_PREFIX):
+        try:
+            return enc.decrypt_str(content, tenant_id=tenant_id)
+        except Exception:
+            pass
+    return content or ""
+
+
+def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
+    """Helper to parse and decrypt fact metadata."""
+    if not meta_raw:
+        return {}
+
+    meta_str = str(meta_raw)
+    if meta_str.startswith(V6_PREFIX):
+        try:
+            return enc.decrypt_json(meta_raw, tenant_id=tenant_id) or {}
+        except Exception:
+            return {}
+
+    try:
+        return json.loads(meta_str) if meta_str else {}
+    except (json.JSONDecodeError, TypeError):
+        return {}
 
 
 def _rows_to_results(rows: list, is_fts: bool = False) -> list[SearchResult]:
@@ -129,13 +156,12 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
         score = 0.5
 
     from cortex.crypto import get_default_encrypter
-
     enc = get_default_encrypter()
 
     content = row[1]
-    if content and str(content).startswith("v6_aesgcm:"):
+    if content and str(content).startswith(V6_PREFIX):
         try:
-            content = enc.decrypt_string(content)
+            content = enc.decrypt_str(content)
         except Exception:
             pass
 

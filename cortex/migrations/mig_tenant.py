@@ -10,10 +10,11 @@ def _migration_015_tenant_unification(conn: sqlite3.Connection):
     DYNAMIC DETECTION: Instead of hardcoding, we introspect the schema
     and apply the tenant column to any table that doesn't have it.
     """
-    # Get all user tables
+    # Get all user tables, excluding sqlite internals and FTS virtual/shadow tables
     cursor = conn.execute(
         "SELECT name FROM sqlite_master WHERE type='table' "
-        "AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'facts_fts%'"
+        "AND name NOT LIKE 'sqlite_%' "
+        "AND name NOT LIKE '%_fts%'"
     )
     all_tables = [row[0] for row in cursor.fetchall()]
 

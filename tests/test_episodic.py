@@ -32,6 +32,9 @@ async def engine():
     await eng.close()
     if os.path.exists(db_path):
         os.unlink(db_path)
+    for ext in ["-wal", "-shm"]:
+        if os.path.exists(db_path + ext):
+            os.unlink(db_path + ext)
 
 
 @pytest.fixture

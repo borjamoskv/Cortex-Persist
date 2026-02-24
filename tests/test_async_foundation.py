@@ -5,6 +5,7 @@ Verifies CortexConnectionPool and AsyncCortexEngine.
 
 import asyncio
 import os
+import sqlite3
 import tempfile
 
 import aiosqlite
@@ -13,7 +14,7 @@ import pytest
 from cortex.database.pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 from cortex.utils.errors import FactNotFound
-from cortex.database.schema import get_all_schema
+from cortex.migrations.core import run_migrations_async
 
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool
@@ -32,16 +33,12 @@ async def temp_db_path():
 @pytest.fixture
 async def pool(temp_db_path):
     pool = CortexConnectionPool(temp_db_path, min_connections=2, max_connections=4, read_only=False)
-
-    # Initialize schema manually for tests
-    async with aiosqlite.connect(temp_db_path) as conn:
-        for stmt in get_all_schema():
-            if "vec0" in stmt:
-                continue  # Skip vector for now
-            await conn.executescript(stmt)
-        await conn.commit()
-
     await pool.initialize()
+
+    # Initialize schema using migrations to ensure all columns (like hash) are present
+    async with pool.acquire() as conn:
+        await run_migrations_async(conn)
+
     yield pool
     await pool.close()
 
@@ -49,7 +46,8 @@ async def pool(temp_db_path):
 @pytest.fixture
 async def engine(pool, temp_db_path):
     e = AsyncCortexEngine(pool, temp_db_path)
-    e._auto_embed = False  # Disable embeddings for tests
+    # Enable auto_embed to allow semantic search since text_search won't work on AES encrypted content
+    e._auto_embed = True
     return e
 
 

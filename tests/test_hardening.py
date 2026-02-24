@@ -40,8 +40,8 @@ def client():
 
     # Nuke auth singletons completely to force bootstrap mode
     cortex.auth._auth_manager = None
-    cortex.api_state.auth_manager = None
-    cortex.api_state.engine = None
+    api_state.auth_manager = None
+    api_state.engine = None
 
     try:
         with TestClient(api_mod.app) as c:
@@ -60,8 +60,8 @@ def client():
 
         # Reset singletons
         cortex.auth._auth_manager = None
-        cortex.api_state.auth_manager = None
-        cortex.api_state.engine = None
+        api_state.auth_manager = None
+        api_state.engine = None
 
         # Clean up test DB
         for ext in ["", "-wal", "-shm"]:

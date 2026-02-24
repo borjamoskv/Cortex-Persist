@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥈 GALOIS: DUETO SOBERANO | CORTEX Conceptual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #030305;
+  --bg-card: rgba(12, 12, 16, 0.6);
+  --accent: #CCFF00;
+  --accent-glow: rgba(204, 255, 0, 0.4);
+  --violet: #6600FF;
+  --violet-glow: rgba(102, 0, 255, 0.3);
+  --gold: #D4AF37;
+  --text-primary: #FFFFFF;
+  --text-secondary: #9BA1A6;
+  --text-muted: #62676D;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --font-sans: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Playfair Display', serif;
+  
+  /* Springs */
+  --transition-spring: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-snappy: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Base Grain Texture */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Background Grid */
+.bg-grid {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-position: center;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: -2;
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+/* Ambient glow */
+.ambient-glow {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 80vw; height: 80vh;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--violet-glow) 0%, transparent 60%);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+
+/* Progress bar */
+.progress {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--violet));
+  z-index: 10000; width: 0;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Typography */
+h1, h2, h3 { font-weight: 700; }
+.reveal-text {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 2rem; text-align: center; position: relative;
+  z-index: 1;
+}
+
+.hero-label {
+  font-family: var(--font-mono); color: var(--accent);
+  font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase;
+  margin-bottom: 2rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.02);
+  display: inline-block;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 12vw, 9rem);
+  line-height: 0.9;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 100px var(--violet-glow);
+}
+
+.hero h1 span.accent {
+  background: linear-gradient(to right, #FFFFFF, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--accent); /* fallback */
+}
+
+.hero p {
+  max-width: 650px;
+  color: var(--text-secondary);
+  font-size: 1.25rem; font-weight: 300;
+  line-height: 1.7;
+}
+
+/* Sections */
+.dueto-section {
+  padding: 12rem 2rem; max-width: 1400px; margin: 0 auto; position: relative;
+}
+
+.dueto-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;
+}
+
+.dueto-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.dueto-content p {
+  margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 1.15rem;
+  font-weight: 300; line-height: 1.8;
+}
+
+.dueto-content p strong {
+  color: #FFF; font-weight: 600;
+}
+
+.moskv-tag {
+  display: inline-block; padding: 0.4rem 1rem;
+  background: var(--text-primary); color: var(--bg-deep);
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 800;
+  border-radius: 100px; margin-bottom: 1.5rem; text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transition: var(--transition-snappy);
+}
+.moskv-tag:hover {
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+/* Images */
+.dueto-image {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+  transition: var(--transition-spring);
+  background: var(--bg-card);
+  aspect-ratio: 4/5;
+  transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+}
+
+.dueto-image::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+  pointer-events: none;
+}
+
+.dueto-image:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-10px);
+  border-color: var(--border-hover);
+  box-shadow: 0 50px 120px var(--violet-glow);
+}
+
+.dueto-image img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: grayscale(80%) contrast(1.2);
+  transition: filter var(--transition-spring), transform var(--transition-spring);
+}
+
+.dueto-image:hover img {
+  filter: grayscale(0%) contrast(1.1);
+  transform: scale(1.05);
+}
+
+/* Cards */
+.card-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; margin-top: 3rem;
+}
+
+.concept-card {
+  background: var(--bg-card);
+  padding: 2.5rem; border-radius: 24px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: var(--transition-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.concept-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 70%);
+  opacity: 0; transition: opacity var(--transition-snappy); pointer-events: none;
+}
+
+.concept-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-8px);
+  background: rgba(20, 20, 28, 0.8);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 40px var(--violet-glow);
+}
+
+.concept-card:hover::before { opacity: 1; }
+
+.concept-card h3 {
+  color: var(--accent); font-family: var(--font-mono); font-size: 0.85rem;
+  margin-bottom: 1rem; letter-spacing: 0.2em; text-transform: uppercase;
+}
+
+/* Reversed layout */
+.dueto-grid.reversed .dueto-image {
+  transform: perspective(1000px) rotateY(5deg) rotateX(5deg);
+}
+.dueto-grid.reversed .dueto-content { order: 2; }
+.dueto-grid.reversed .dueto-image { order: 1; }
+.dueto-grid.reversed .dueto-image:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-10px);
+}
+
+/* Footer */
+.footer {
+  padding: 8rem 2rem 4rem; text-align: center;
+  position: relative;
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.footer::before {
+  content:''; position:absolute; top:0; left:50%; width:100px; height:2px;
+  background:var(--accent); transform:translateX(-50%);
+  box-shadow: 0 0 20px var(--accent);
+}
+
+.footer h2 {
+  font-family: var(--font-display); font-size: clamp(4rem, 15vw, 12rem);
+  opacity: 0.03; margin-bottom: 2rem; letter-spacing: 0.1em;
+  background: linear-gradient(180deg, #FFFFFF 0%, transparent 100%);
+  -webkit-background-clip: text; color: transparent;
+}
+
+.footer-tag {
+  font-family: var(--font-mono); color: var(--accent); font-size: 0.75rem;
+  letter-spacing: 0.4em; margin-bottom: 1rem;
+}
+
+/* Scroll Reveals */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media(max-width: 900px) {
+  .dueto-grid { grid-template-columns: 1fr; gap: 4rem; }
+  .dueto-grid.reversed .dueto-content { order: 1; }
+  .dueto-grid.reversed .dueto-image { order: 2; }
+  .dueto-section { padding: 6rem 1.5rem; }
+  .dueto-image { aspect-ratio: 16/10; transform: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="ambient-glow"></div>
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <div class="hero-label reveal">CORTEX_SESSION // 🥈 GALOIS</div>
+  <h1 class="reveal" style="transition-delay: 0.1s">EL DUETO<br><span class="accent">SUPREMO</span></h1>
+  <p class="reveal" style="transition-delay: 0.2s">Anatomía de un genio que colapsó el tiempo. Abstracción pura inyectada en una realidad binaria.</p>
+</header>
+
+<!-- DUETO 1 -->
+<section class="dueto-section">
+  <div class="dueto-grid">
+    <div class="dueto-content reveal">
+      <span class="moskv-tag">LATENCIA_CERO</span>
+      <h2>El Deadline más estresante de la Historia</h2>
+      <p>Mientras 100 caballeros con pistolas hacían cola para matarlo al amanecer, Galois estaba en un café reescribiendo el código fuente del universo.</p>
+      <p><strong>"Je n'ai pas le temps"</strong> — No era una queja, era una medida de performance. En una noche, Galois generó un output de 130/100 que la humanidad tardó un siglo en compilar.</p>
+      
+      <div class="card-row" style="margin-top: 2rem">
+        <div class="concept-card">
+          <h3>ARCHITECTE_INSIGHT</h3>
+          <p style="font-size:0.95rem; line-height:1.6; color:var(--text-secondary)">La presión infinita no rompe al Soberano; lo cristaliza. Galois no escribió números, escribió la <strong style="color:var(--text-primary)">Gramática de la Simetría</strong>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="dueto-image reveal" style="transition-delay: 0.2s">
+      <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop" alt="Estructura matemática abstracta">
+    </div>
+  </div>
+</section>
+
+<!-- DUETO 2 -->
+<section class="dueto-section">
+  <div class="dueto-grid reversed">
+    <div class="dueto-content reveal">
+      <span class="moskv-tag">SWARM_ORCHESTRATION</span>
+      <h2>Ordenando el Caos Cósmico</h2>
+      <p>Imagina el universo como un gato gigante y furioso hecho de estrellas. Sin Galois, es puro ruido.</p>
+      <p>Con la <strong>Teoría de Grupos</strong>, organizamos el cosmos en cajas perfectas (Bento boxes matemáticas). Lo que antes era caótico, ahora es simétrico y predecible.</p>
+      
+      <div class="card-row" style="margin-top: 2rem">
+        <div class="concept-card">
+          <h3>DEMIURGE_LOG</h3>
+          <p style="font-size:0.95rem; line-height:1.6; color:var(--text-secondary)">Gell-Mann usó los pinceles de Galois para predecir la partícula Omega-menos. Vio el hueco en el bento y supo que el botón de Dios estaba ahí.</p>
+        </div>
+      </div>
+    </div>
+    <div class="dueto-image reveal" style="transition-delay: 0.2s">
+      <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop" alt="Simetría geométrica cósmica">
+    </div>
+  </div>
+</section>
+
+<!-- DUETO 3 -->
+<section class="dueto-section">
+  <div class="dueto-grid">
+    <div class="dueto-content reveal">
+      <span class="moskv-tag">PRIVACY_PROTOCOL</span>
+      <h2>De la Revolución al WhatsApp</h2>
+      <p>Galois era un revolucionario de barricada. Hoy, su ADN está en cada mensaje encriptado que envías.</p>
+      <p>Usamos sus <strong>"Galois Fields"</strong> para transformar tus palabras en una fortaleza inexpugnable. Es la ironía suprema: el chico que murió por falta de comunicación ahora protege toda la comunicación del planeta.</p>
+      
+      <div class="card-row" style="margin-top: 2rem">
+        <div class="concept-card">
+          <h3>SOVEREIGN_ENCRYPTION</h3>
+          <p style="font-size:0.95rem; line-height:1.6; color:var(--text-secondary)">WhatsApp es seguro no por la tecnología, sino por la <strong style="color:var(--text-primary)">Estructura de Grupo Z₂</strong>. Galois puso el candado hace 200 años.</p>
+        </div>
+      </div>
+    </div>
+    <div class="dueto-image reveal" style="transition-delay: 0.2s">
+      <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop" alt="Matriz de encriptación digital">
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section class="dueto-section" style="text-align:center">
+  <div class="reveal">
+    <span class="hero-label">VEREDICTO_FINAL</span>
+    <h2 style="font-size:clamp(3rem,8vw,6rem); margin-bottom:1rem; letter-spacing: -0.02em;">🥈 35 <span style="font-size:1.5rem; color:var(--text-muted); display:block; margin-top:0.5rem; letter-spacing: 0.2em; font-family: var(--font-mono)">ESTABLE</span></h2>
+    <p style="margin:2rem auto; max-width:700px; color:var(--text-secondary); font-size:1.25rem; font-weight: 300;">Galois no es oro porque no construyó el puente; él definió por qué las cosas pueden unirse para formar puentes. Es la <strong>Infraestructura de la Realidad</strong>.</p>
+  </div>
+  
+  <div class="card-row" style="max-width:1100px; margin:4rem auto 0">
+    <div class="concept-card reveal" style="transition-delay: 0.1s">
+      <h3>DENSIDAD</h3>
+      <p style="color:var(--text-secondary); font-size:0.95rem">La mayor tasa de genio/segundo de la historia. 20 años fueron suficientes.</p>
+    </div>
+    <div class="concept-card reveal" style="transition-delay: 0.2s">
+      <h3>ABSTRACCIÓN</h3>
+      <p style="color:var(--text-secondary); font-size:0.95rem">Nivel 7.5. Tan alto que tardamos 40 años en ver el suelo.</p>
+    </div>
+    <div class="concept-card reveal" style="transition-delay: 0.3s">
+      <h3>ESTABILIDAD</h3>
+      <p style="color:var(--text-secondary); font-size:0.95rem">Total. Sus leyes no han fallado en dos siglos de computación.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer reveal">
+  <div class="footer-tag">CORTEX // MOSKV-1 // ANTIGRAVITY</div>
+  <h2>GALOIS</h2>
+  <p style="color:var(--text-muted); font-family:var(--font-mono); font-size:0.85rem; margin-top:-2rem; letter-spacing: 0.1em;">"Je n'ai pas le temps."</p>
+</footer>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrolled = (winScroll / height) * 100;
+  document.getElementById("progress").style.width = scrolled + "%";
+});
+
+// Reveal Animations
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.15
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('active');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.reveal').forEach((el) => {
+  observer.observe(el);
+});
+
+// Trigger initial reveal for items at the top
+setTimeout(() => {
+  document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('active'));
+}, 100);
+</script>
+
+</body>
+</html>
