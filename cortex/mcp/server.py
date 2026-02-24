@@ -11,8 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 from cortex.mcp.guard import MCPGuard
-from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.mega_tools import register_mega_tools
+from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,
