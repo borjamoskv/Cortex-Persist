@@ -21,6 +21,7 @@ from cortex.mejoralo.constants import (
     MIN_PROGRESS,
     STAGNATION_LIMIT,
 )
+from cortex.mejoralo.deps import sort_by_topological_order
 from cortex.mejoralo.heal_prompts import (
     get_files_per_iteration as _get_files_per_iteration,
 )
@@ -301,7 +302,7 @@ def _run_healing_iteration(
         return False, current_result
 
     # 🔗 Topological Sort: Prioritize leaf nodes (dependencies) to avoid cascading failures
-    sorted_files = _sort_by_topological_order(file_issues, path)
+    sorted_files = sort_by_topological_order(file_issues, path)
 
     # Within the topological layer, prioritize unhealed files with most issues
     # Note: _sort_by_topological_order currently returns a simple list,
@@ -327,8 +328,10 @@ def _run_healing_iteration(
         loop = asyncio.get_running_loop()
         if loop.is_running():
             # If we are in an async context, we can't block.
-            # This is a sync-to-async boundary. For now, we use a thread-safe approach or nest sparingly.
-            # In a sovereign environment, we prefer to run on a separate thread to block properly if sync.
+            # This is a sync-to-async boundary. For now, we use a thread-safe
+            # approach or nest sparingly.
+            # In a sovereign environment, we prefer to run on a separate thread
+            # to block properly if sync.
             import concurrent.futures
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -440,63 +443,3 @@ def _print_journey(console: Any, score_history: list[int]) -> None:
         return
     journey = " → ".join(str(s) for s in score_history)
     console.print(f"  [dim]Recorrido: {journey}[/]")
-
-
-def _sort_by_topological_order(
-    file_issues: dict[str, list[str]], root_path: str | Path
-) -> list[tuple[str, list[str]]]:
-    """Sort target files by dependency (bottom-up)."""
-    import networkx as nx
-
-    G = nx.DiGraph()
-    files = set(file_issues.keys())
-    root = Path(root_path).resolve()
-
-    for rel_path in files:
-        G.add_node(rel_path)
-        deps = _extract_file_dependencies(root / rel_path, files)
-        for d in deps:
-            G.add_edge(rel_path, d)
-
-    try:
-        order = list(reversed(list(nx.topological_sort(G))))
-    except nx.NetworkXUnfeasible:
-        logger.warning("Circular dependencies detected. Falling back to heuristic.")
-        return sorted(file_issues.items(), key=lambda x: len(x[1]), reverse=True)
-
-    return [(f, file_issues[f]) for f in order if f in file_issues]
-
-
-def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
-    """Extract which target files the given file depends on."""
-    if not file_path.exists() or file_path.suffix != ".py":
-        return set()
-
-    deps = set()
-    try:
-        tree = ast.parse(file_path.read_text(errors="replace"))
-        for node in ast.walk(tree):
-            mod = _get_module_name_from_node(node)
-            if mod:
-                _match_module_to_targets(mod, targets, deps)
-    except Exception:
-        pass
-    return deps
-
-
-def _get_module_name_from_node(node: ast.AST) -> str | None:
-    """Helper to extract module true name from AST import node."""
-    if isinstance(node, ast.Import):
-        for alias in node.names:
-            return alias.name
-    elif isinstance(node, ast.ImportFrom):
-        return node.module
-    return None
-
-
-def _match_module_to_targets(mod: str, targets: set[str], deps: set[str]) -> None:
-    """Matches an extracted module against targets and registers dependency."""
-    mod_path = mod.replace(".", "/")
-    for t in targets:
-        if t.startswith(mod_path):
-            deps.add(t)
