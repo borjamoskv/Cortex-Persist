@@ -46,7 +46,8 @@ def main():
         # Mejoralo.scan devuelve un ScoreTracker u objeto con .score
         # Escaneamos el directorio raíz completo para asegurar integridad.
         result = m.scan(project_name, str(Path.cwd()), deep=False)
-        engine.close_sync()
+        import asyncio
+        asyncio.run(engine.close())
 
     except ImportError:
         print("⚠️  Advertencia: Cortex no está disponible en este entorno. Omitiendo.")

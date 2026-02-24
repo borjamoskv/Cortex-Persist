@@ -17,20 +17,41 @@ except ImportError:
 __version__ = "0.3.0b1"
 __author__ = "Borja Moskv"
 
-from cortex.engine import CortexEngine
+# Lazy imports — CortexEngine and experimental modules load on first access
+_LAZY_IMPORTS = {
+    "CortexEngine": "cortex.engine",
+}
 
-# Experimental modules (optional — not part of core package)
-try:
-    from .experimental import (  # noqa: F401
-        autopoiesis,
-        circadian_cycle,
-        digital_endocrine,
-        epigenetic_memory,
-        strategic_disobedience,
-        zero_prompting,
-    )
-except ImportError:
-    pass
+_EXPERIMENTAL_MODULES = (
+    "autopoiesis",
+    "circadian_cycle",
+    "digital_endocrine",
+    "epigenetic_memory",
+    "strategic_disobedience",
+    "zero_prompting",
+)
+
+
+def __getattr__(name: str):
+    if name in _LAZY_IMPORTS:
+        import importlib
+
+        mod = importlib.import_module(_LAZY_IMPORTS[name])
+        attr = getattr(mod, name)
+        globals()[name] = attr  # Cache for subsequent access
+        return attr
+    if name in _EXPERIMENTAL_MODULES:
+        try:
+            import importlib
+
+            mod = importlib.import_module(f"cortex.experimental.{name}")
+            globals()[name] = mod
+            return mod
+        except ImportError as err:
+            raise AttributeError(f"module 'cortex' has no attribute {name!r}") from err
+    raise AttributeError(f"module 'cortex' has no attribute {name!r}")
+
 
 __all__ = ["CortexEngine", "__version__"]
+
 

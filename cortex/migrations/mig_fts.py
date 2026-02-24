@@ -47,7 +47,7 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
                     (fact_id, content_dec, project, tags_str, fact_type),
                 )
                 insert_count += 1
-            except Exception as e:
+            except (ValueError, TypeError, OSError) as e:
                 logger.warning(
                     f"Migration 017: Failed to decrypt or insert fact {fact_id} into FTS: {e}"
                 )
