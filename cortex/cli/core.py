@@ -12,6 +12,7 @@ from rich.table import Table
 from cortex import __version__
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_db_not_found, err_empty_results, handle_cli_error
+from cortex.cli.slow_tip import with_slow_tips
 from cortex.events.loop import sovereign_run
 
 
@@ -207,12 +208,9 @@ def search(query, project, top, db) -> None:
     """Semantic search across CORTEX memory."""
     engine = get_engine(db)
     try:
-        tip_text = _get_tip_text(engine)
-        spinner_msg = (
-            f"[bold blue]Searching...[/]  {tip_text}" if tip_text else "[bold blue]Searching...[/]"
-        )
-        with console.status(spinner_msg):
-            results = engine.search_sync(query, project=project, top_k=top)
+        with with_slow_tips("Buscando en CORTEX…", threshold=2.0, interval=8.0, engine=engine):
+            with console.status("[bold blue]Searching...[/]"):
+                results = engine.search_sync(query, project=project, top_k=top)
         if not results:
             err_empty_results(
                 "resultados de búsqueda",
@@ -241,7 +239,8 @@ def recall(project, db) -> None:
     """Load full context for a project."""
     engine = get_engine(db)
     try:
-        facts = engine.recall_sync(project)
+        with with_slow_tips(f"Cargando contexto de {project}…", threshold=2.0, engine=engine):
+            facts = engine.recall_sync(project)
         if not facts:
             err_empty_results(
                 f"facts para '{project}'",
@@ -378,18 +377,19 @@ def migrate_graph(db) -> None:
         facts = conn.execute("SELECT id, content, project, created_at FROM facts").fetchall()
         console.print(f"[bold blue]Migrating {len(facts)} facts to Graph Memory...[/]")
         processed = 0
-        with console.status("[bold blue]Processing...[/]") as prog_status:
-            for fid, content, project, ts in facts:
-                try:
-                    process_fact_graph(conn, fid, content, project, ts)
-                    processed += 1
-                    if processed % 10 == 0:
-                        prog_status.update(f"[bold blue]Processed {processed}/{len(facts)}...[/]")
-                except (sqlite3.Error, OSError, RuntimeError) as e:
-                    console.print(
-                        f"[red]✗[/] Fact [bold]#{fid}[/] falló: [dim]{e}[/dim] "
-                        f"— continúa con los siguientes."
-                    )
+        with with_slow_tips("Migrando grafo de memoria…", threshold=3.0, interval=10.0):
+            with console.status("[bold blue]Processing...[/]") as prog_status:
+                for fid, content, project, ts in facts:
+                    try:
+                        process_fact_graph(conn, fid, content, project, ts)
+                        processed += 1
+                        if processed % 10 == 0:
+                            prog_status.update(f"[bold blue]Processed {processed}/{len(facts)}...[/]")
+                    except (sqlite3.Error, OSError, RuntimeError) as e:
+                        console.print(
+                            f"[red]✗[/] Fact [bold]#{fid}[/] falló: [dim]{e}[/dim] "
+                            f"— continúa con los siguientes."
+                        )
         console.print(
             Panel(
                 f"[bold green]✓ Graph Migration Complete![/]\n"
@@ -400,3 +400,4 @@ def migrate_graph(db) -> None:
         )
     finally:
         _run_async(engine.close())
+

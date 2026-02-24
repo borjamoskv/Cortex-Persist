@@ -50,6 +50,7 @@ from cortex.cli import (  # noqa: E402
     launchpad_cmds,  # noqa: E402, F401
     mejoralo_cmds,  # noqa: E402, F401
     nexus_cmds,  # noqa: E402, F401
+    prompt_cmds,  # noqa: E402, F401  — Prompt generation
     purge,  # noqa: E402, F401
     reflect_cmds,  # noqa: E402, F401  — Reflection System
     sync_cmds,  # noqa: E402, F401
@@ -123,6 +124,7 @@ from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
 from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
 from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402
+from cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402
 from cortex.cli.purge import purge as purge_cmd  # noqa: E402
 
 cli.add_command(ghost_cli, name="ghost")
@@ -132,6 +134,7 @@ cli.add_command(apotheosis_cli, name="apotheosis")
 cli.add_command(keter_cli, name="keter")
 cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
+cli.add_command(prompt_group, name="prompt")
 
 
 @cli.command("observe")
