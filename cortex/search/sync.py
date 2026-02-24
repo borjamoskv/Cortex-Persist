@@ -108,7 +108,7 @@ def semantic_search_sync(
 
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
-            except Exception:
+            except (ValueError, OSError):
                 pass
 
         results.append(
@@ -213,7 +213,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
-        except Exception:
+        except (ValueError, OSError):
             pass
 
     return SyncSearchResult(

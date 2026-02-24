@@ -61,7 +61,7 @@ class SearchMixin:
 
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
-                    await self._enrich_with_graph_context(conn, results, query, graph_depth)
+                    await SearchMixin._enrich_with_graph_context(self, conn, results, query, graph_depth)
 
                 return results
 
@@ -95,4 +95,4 @@ class SearchMixin:
             subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth or 1, max_nodes=50)
 
             if results and (subgraph.get("nodes") or subgraph.get("edges")):
-                results[0].context = {"graph": subgraph, "seeds": seeds}
+                results[0].graph_context = {"graph": subgraph, "seeds": seeds}

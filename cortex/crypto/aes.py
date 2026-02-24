@@ -3,8 +3,11 @@ CORTEX v6 — AES-256-GCM Envelope Encryption.
 Application-level encryption for L3 Ledgers.
 """
 
+from __future__ import annotations
+
 import base64
 import json
+import logging
 import os
 from typing import Any
 
@@ -12,6 +15,11 @@ from cryptography.exceptions import InvalidKey
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+logger = logging.getLogger("cortex.crypto")
+
+_NONCE_LENGTH = 12  # 96-bit nonce for GCM
+_KEY_LENGTH = 32  # 256-bit AES key
 
 
 class CortexEncrypter:
@@ -21,9 +29,9 @@ class CortexEncrypter:
 
     PREFIX = "v6_aesgcm:"
 
-    def __init__(self, master_key: bytes | None):
-        if master_key is not None and len(master_key) != 32:
-            raise ValueError("AES-256 requires a 32-byte master key.")
+    def __init__(self, master_key: bytes | None) -> None:
+        if master_key is not None and len(master_key) != _KEY_LENGTH:
+            raise ValueError(f"AES-256 requires a {_KEY_LENGTH}-byte master key.")
         self._master_key = master_key
         # Cache of derived keys per tenant
         self._tenant_keys: dict[str, bytes] = {}
@@ -43,7 +51,7 @@ class CortexEncrypter:
 
         hkdf = HKDF(
             algorithm=hashes.SHA256(),
-            length=32,
+            length=_KEY_LENGTH,
             salt=b"cortex_v6_tenant_isolation_salt",
             info=tenant_id.encode("utf-8"),
         )
@@ -62,7 +70,7 @@ class CortexEncrypter:
 
         key = self._get_tenant_key(tenant_id)
         aesgcm = AESGCM(key)
-        nonce = os.urandom(12)
+        nonce = os.urandom(_NONCE_LENGTH)
         ciphertext = aesgcm.encrypt(nonce, data.encode("utf-8"), None)
 
         # We prepend a clear v6 prefix so we can detect it on decrypt
@@ -85,8 +93,8 @@ class CortexEncrypter:
         try:
             raw_b64 = encrypted_data[len(self.PREFIX) :]
             combined = base64.b64decode(raw_b64)
-            nonce = combined[:12]
-            ciphertext = combined[12:]
+            nonce = combined[:_NONCE_LENGTH]
+            ciphertext = combined[_NONCE_LENGTH:]
 
             key = self._get_tenant_key(tenant_id)
             aesgcm = AESGCM(key)
@@ -96,7 +104,7 @@ class CortexEncrypter:
             raise ValueError(
                 f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt."
             ) from e
-        except Exception as e:
+        except (ValueError, TypeError, base64.binascii.Error) as e:
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
     def encrypt_json(self, data: dict[str, Any] | None, tenant_id: str = "default") -> str | None:
@@ -115,6 +123,7 @@ class CortexEncrypter:
         try:
             return json.loads(plain)
         except json.JSONDecodeError:
+            logger.warning("decrypt_json: invalid JSON after decryption, returning empty dict")
             return {}
 
 
