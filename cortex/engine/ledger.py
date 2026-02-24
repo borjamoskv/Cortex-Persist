@@ -60,10 +60,19 @@ class ImmutableLedger:
             return CHECKPOINT_MIN
         return CHECKPOINT_MAX
 
-    async def compute_merkle_root_async(self, start_id: int, end_id: int) -> str | None:
-        """Compute Merkle root for a range of transactions (async)."""
-        async with self.pool.acquire() as conn:
-            cursor = await conn.execute(
+    async def compute_merkle_root_async(
+        self, start_id: int, end_id: int, conn=None
+    ) -> str | None:
+        """Compute Merkle root for a range of transactions (async).
+
+        Args:
+            start_id: First transaction ID in range (inclusive).
+            end_id: Last transaction ID in range (inclusive).
+            conn: Optional existing connection. If provided, reuses it
+                  to avoid double-acquisition deadlocks (D004).
+        """
+        async def _compute(c):
+            cursor = await c.execute(
                 "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
                 (start_id, end_id),
             )
@@ -71,9 +80,13 @@ class ImmutableLedger:
             hashes = [row[0] for row in rows]
             if not hashes:
                 return None
-
             tree = MerkleTree(hashes)
             return tree.root
+
+        if conn is not None:
+            return await _compute(conn)
+        async with self.pool.acquire() as acquired_conn:
+            return await _compute(acquired_conn)
 
     async def create_checkpoint_async(self) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
@@ -108,10 +121,8 @@ class ImmutableLedger:
 
             end_id = end_row[0]
 
-            # Compute Merkle Root (uses its own acquisition, but we are inside one here)
-            # Actually, compute_merkle_root_async should probably take a conn to avoid deadlocks/extra overhead
-            # But since pool is async, it's fine.
-            root_hash = await self.compute_merkle_root_async(start_id, end_id)
+            # D004 FIX: Pass existing conn to avoid double pool acquisition
+            root_hash = await self.compute_merkle_root_async(start_id, end_id, conn=conn)
 
             if not root_hash:
                 return None
@@ -251,7 +262,7 @@ class ImmutableLedger:
 
             for m_id, r_hash, start, end in roots:
                 # We reuse the same compute method
-                computed_r = await self.compute_merkle_root_async(start, end)
+                computed_r = await self.compute_merkle_root_async(start, end, conn=conn)
                 if computed_r != r_hash:
                     violations.append(
                         {

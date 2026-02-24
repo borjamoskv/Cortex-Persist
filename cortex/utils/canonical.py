@@ -15,7 +15,7 @@ import hashlib
 import json
 from typing import Any
 
-__all__ = ["canonical_json", "compute_tx_hash", "compute_tx_hash_v1"]
+__all__ = ["canonical_json", "compute_tx_hash", "compute_tx_hash_v1", "compute_fact_hash"]
 
 # ─── Canonical JSON ───────────────────────────────────────────────
 
@@ -86,3 +86,8 @@ def compute_tx_hash_v1(
     """
     h_input = f"{prev_hash}:{project}:{action}:{detail_json}:{timestamp}"
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
+
+
+def compute_fact_hash(content: str) -> str:
+    """Compute deterministic SHA-256 hash for fact content."""
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()

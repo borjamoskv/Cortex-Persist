@@ -19,11 +19,11 @@ from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
 from cortex.engine.sync_compat import SyncCompatMixin
 from cortex.engine.sync_ops import SyncOpsMixin
+from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.telemetry.metrics import metrics
 from cortex.migrations.core import run_migrations_async
 from cortex.database.schema import get_init_meta
-from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex")
 
@@ -33,7 +33,7 @@ from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin):
+class CortexEngine(StoreMixin, SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(

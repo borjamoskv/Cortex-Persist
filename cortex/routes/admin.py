@@ -12,13 +12,14 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 
-from cortex import __version__; import cortex.api.state as api_state
+from cortex import __version__
+import cortex.api.state as api_state
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.engine import CortexEngine
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.types.models import StatusResponse
-from cortex.sync import export_to_json
+from cortex.utils.export import export_facts
 
 __all__ = [
     "create_api_key",
@@ -68,8 +69,17 @@ async def export_project(
             ) from None
 
     try:
-        # run_in_threadpool used because export_to_json performs synchronous I/O
-        out_path = await run_in_threadpool(export_to_json, engine, project, path)
+        facts = engine.search(project=project, limit=100000)
+        content = export_facts(facts, fmt="json")
+
+        target_file = Path(path).resolve() if path else Path.cwd() / f"{project}_export.json"
+
+        def _write_export():
+            target_file.parent.mkdir(parents=True, exist_ok=True)
+            target_file.write_text(content, encoding="utf-8")
+            return target_file
+
+        out_path = await run_in_threadpool(_write_export)
         return {
             "status": "success",
             "project": project,
@@ -81,6 +91,113 @@ async def export_project(
         raise HTTPException(
             status_code=500, detail=get_trans("error_export_failed", lang)
         ) from None
+
+
+@router.get("/v1/health/deep", tags=["health"])
+async def deep_health_check(
+    request: Request,
+    engine: CortexEngine = Depends(get_engine),
+) -> dict:
+    """Deep Health Check — probes all CORTEX subsystems.
+
+    Returns 200 if all checks pass, 503 if any subsystem is degraded.
+    Designed for Kubernetes liveness/readiness probes and Enterprise monitoring.
+    """
+    import time
+    from cortex.database.schema import SCHEMA_VERSION
+
+    checks: dict[str, dict] = {}
+    overall_healthy = True
+    start = time.monotonic()
+
+    # 1. Database connectivity
+    try:
+        conn = engine._get_conn()
+        conn.execute("SELECT 1").fetchone()
+        checks["database"] = {"status": "ok", "detail": "SELECT 1 succeeded"}
+    except Exception as e:
+        checks["database"] = {"status": "degraded", "detail": str(e)}
+        overall_healthy = False
+
+    # 2. Schema version alignment
+    try:
+        conn = engine._get_conn()
+        row = conn.execute(
+            "SELECT value FROM cortex_meta WHERE key = 'schema_version'"
+        ).fetchone()
+        db_version = row[0] if row else "unknown"
+        if db_version == SCHEMA_VERSION:
+            checks["schema"] = {
+                "status": "ok",
+                "version": db_version,
+            }
+        else:
+            checks["schema"] = {
+                "status": "drift",
+                "expected": SCHEMA_VERSION,
+                "actual": db_version,
+            }
+            overall_healthy = False
+    except Exception as e:
+        checks["schema"] = {"status": "error", "detail": str(e)}
+        overall_healthy = False
+
+    # 3. Ledger integrity (pending uncheckpointed transactions)
+    try:
+        conn = engine._get_conn()
+        last_cp = conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots").fetchone()
+        last_tx = last_cp[0] or 0 if last_cp else 0
+        pending_row = conn.execute(
+            "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
+        ).fetchone()
+        pending = pending_row[0] if pending_row else 0
+        checks["ledger"] = {
+            "status": "ok" if pending < 1000 else "warning",
+            "pending_uncheckpointed": pending,
+            "last_checkpoint_tx": last_tx,
+        }
+        if pending >= 1000:
+            overall_healthy = False
+    except Exception as e:
+        checks["ledger"] = {"status": "error", "detail": str(e)}
+
+    # 4. FTS5 search index
+    try:
+        conn = engine._get_conn()
+        conn.execute("SELECT COUNT(*) FROM episodes_fts").fetchone()
+        checks["search_fts"] = {"status": "ok", "detail": "episodes_fts accessible"}
+    except Exception as e:
+        checks["search_fts"] = {"status": "degraded", "detail": str(e)}
+
+    # 5. Pool status (if async pool is available)
+    try:
+        pool = request.app.state.pool
+        checks["pool"] = {
+            "status": "ok",
+            "active_connections": pool._active_count,
+            "max_connections": pool.max_connections,
+            "utilization": f"{(pool._active_count / pool.max_connections) * 100:.0f}%",
+        }
+    except Exception:
+        checks["pool"] = {"status": "unavailable", "detail": "pool not in app state"}
+
+    elapsed_ms = round((time.monotonic() - start) * 1000, 1)
+
+
+    result = {
+        "status": "healthy" if overall_healthy else "degraded",
+        "version": __version__,
+        "schema_version": SCHEMA_VERSION,
+        "checks": checks,
+        "latency_ms": elapsed_ms,
+    }
+
+    if not overall_healthy:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(content=result, status_code=503)
+
+    return result
 
 
 @router.get("/v1/status", response_model=StatusResponse)
@@ -138,7 +255,7 @@ async def create_api_key(
             raise HTTPException(status_code=401, detail=get_trans("error_auth_required", lang))
 
         token = authorization.split(" ", 1)[1]
-        result = manager.authenticate(token)
+        result = await manager.authenticate_async(token)
 
         if not result.authenticated:
             raise HTTPException(
@@ -168,7 +285,7 @@ async def create_api_key(
 async def list_api_keys(auth: AuthResult = Depends(require_permission("admin"))) -> list[dict]:
     """Expose non-sensitive metadata for all provisioned keys."""
     manager = api_state.auth_manager or get_auth_manager()
-    keys = manager.list_keys()
+    keys = await manager.list_keys()
     return [
         {
             "id": k.id,
