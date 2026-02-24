@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from cortex.crypto import CortexEncrypter
 
 from cortex.search.models import SearchResult
-from cortex.temporal import build_temporal_filter_params
+from cortex.memory.temporal import build_temporal_filter_params
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 

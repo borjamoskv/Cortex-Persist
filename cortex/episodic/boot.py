@@ -19,8 +19,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Final
 
-from cortex.episodic import Episode, EpisodicMemory, Pattern
-from cortex.temporal import now_iso
+from cortex.episodic.main import Episode, EpisodicMemory, Pattern
+from cortex.memory.temporal import now_iso
 
 __all__ = [
     "BootPayload",

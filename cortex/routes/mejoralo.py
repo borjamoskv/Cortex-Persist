@@ -6,11 +6,11 @@ API endpoints for the MEJORAlo v7.3 protocol.
 
 from fastapi import APIRouter, Depends, Query
 
-from cortex.api_deps import get_engine
+from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
 from cortex.mejoralo import MejoraloEngine
-from cortex.models import (
+from cortex.types.models import (
     DimensionResultModel,
     MejoraloScanRequest,
     MejoraloScanResponse,

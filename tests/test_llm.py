@@ -19,7 +19,7 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-import cortex.api
+import cortex.api.core
 import cortex.config
 
 # Set test DB path
@@ -27,7 +27,7 @@ _test_db = tempfile.mktemp(suffix=".db")
 cortex.config.DB_PATH = _test_db
 cortex.api.DB_PATH = _test_db
 
-from cortex.api import app
+from cortex.api.core import app
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 
@@ -40,7 +40,7 @@ def client():
     manager = get_auth_manager()
     manager.initialize_sync()
 
-    from cortex.api import app
+    from cortex.api.core import app
     with TestClient(app) as c:
         yield c
 

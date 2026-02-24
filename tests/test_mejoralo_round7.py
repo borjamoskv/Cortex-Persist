@@ -168,28 +168,28 @@ class TestExportEdgeCases:
 
     def test_export_unsupported_format(self):
         """export_facts should raise ValueError for unknown format."""
-        from cortex.export import export_facts
+        from cortex.utils.export import export_facts
 
         with pytest.raises(ValueError, match="Unsupported"):
             export_facts([], fmt="xml")
 
     def test_export_csv_empty(self):
         """export_facts CSV with empty list returns empty string."""
-        from cortex.export import export_facts
+        from cortex.utils.export import export_facts
 
         result = export_facts([], fmt="csv")
         assert result == ""
 
     def test_export_json_empty(self):
         """export_facts JSON with empty list returns valid JSON."""
-        from cortex.export import export_facts
+        from cortex.utils.export import export_facts
 
         result = export_facts([], fmt="json")
         assert json.loads(result) == []
 
     def test_export_format_normalization(self):
         """export_facts should normalize format string."""
-        from cortex.export import export_facts
+        from cortex.utils.export import export_facts
 
         result = export_facts([], fmt="  JSON  ")
         assert json.loads(result) == []
@@ -203,7 +203,7 @@ class TestTemporalModule:
 
     def test_now_iso_format(self):
         """now_iso should return valid ISO 8601."""
-        from cortex.temporal import now_iso
+        from cortex.memory.temporal import now_iso
 
         ts = now_iso()
         assert "T" in ts
@@ -211,13 +211,13 @@ class TestTemporalModule:
 
     def test_is_valid_at_active_fact(self):
         """Active fact (no valid_until) should be valid."""
-        from cortex.temporal import is_valid_at
+        from cortex.memory.temporal import is_valid_at
 
         assert is_valid_at("2024-01-01T00:00:00+00:00", None) is True
 
     def test_is_valid_at_deprecated_fact(self):
         """Deprecated fact should not be valid at current time."""
-        from cortex.temporal import is_valid_at
+        from cortex.memory.temporal import is_valid_at
 
         assert (
             is_valid_at(
@@ -229,7 +229,7 @@ class TestTemporalModule:
 
     def test_build_temporal_filter_current(self):
         """build_temporal_filter_params(None) returns valid_until IS NULL."""
-        from cortex.temporal import build_temporal_filter_params
+        from cortex.memory.temporal import build_temporal_filter_params
 
         clause, params = build_temporal_filter_params(None)
         assert "valid_until IS NULL" in clause
@@ -237,7 +237,7 @@ class TestTemporalModule:
 
     def test_build_temporal_filter_as_of(self):
         """build_temporal_filter_params with date returns parameterized clause."""
-        from cortex.temporal import build_temporal_filter_params
+        from cortex.memory.temporal import build_temporal_filter_params
 
         clause, params = build_temporal_filter_params("2024-06-01T00:00:00")
         assert "valid_from <= ?" in clause
@@ -252,7 +252,7 @@ class TestMetricsModule:
 
     def test_counter_increment(self):
         """Counter should increment correctly."""
-        from cortex.metrics import MetricsRegistry
+        from cortex.telemetry.metrics import MetricsRegistry
 
         reg = MetricsRegistry()
         reg.inc("test_counter")
@@ -262,7 +262,7 @@ class TestMetricsModule:
 
     def test_gauge_set(self):
         """Gauge should be settable."""
-        from cortex.metrics import MetricsRegistry
+        from cortex.telemetry.metrics import MetricsRegistry
 
         reg = MetricsRegistry()
         reg.set_gauge("test_gauge", 42.5)
@@ -271,7 +271,7 @@ class TestMetricsModule:
 
     def test_reset_clears_all(self):
         """Reset should clear all metrics."""
-        from cortex.metrics import MetricsRegistry
+        from cortex.telemetry.metrics import MetricsRegistry
 
         reg = MetricsRegistry()
         reg.inc("counter")

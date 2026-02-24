@@ -290,7 +290,7 @@ class CortexMemoryManager:
         # Semantic compression via CortexLLMRouter
         try:
             from cortex.llm.router import CortexPrompt
-            from cortex.result import Ok
+            from cortex.utils.result import Ok
 
             prompt = CortexPrompt(
                 system_instruction=(

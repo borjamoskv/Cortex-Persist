@@ -10,12 +10,12 @@ from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
 
-from cortex.perception_base import (
+from cortex.perception.base import (
     MIN_EVENTS_FOR_INFERENCE,
     BehavioralSnapshot,
     FileEvent,
 )
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["compute_event_stats", "infer_behavior"]
 

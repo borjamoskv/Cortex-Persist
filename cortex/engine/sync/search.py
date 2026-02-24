@@ -18,7 +18,7 @@ class SyncSearchMixin:
         top_k: int = 5,
     ) -> list:
         """Semantic vector search with text fallback (sync)."""
-        from cortex.search_sync import (
+        from cortex.search.sync import (
             semantic_search_sync,
             text_search_sync,
         )
@@ -53,7 +53,7 @@ class SyncSearchMixin:
         text_weight: float = 0.4,
     ) -> list:
         """Hybrid search combining semantic + text via RRF (sync)."""
-        from cortex.search_sync import hybrid_search_sync, text_search_sync
+        from cortex.search.sync import hybrid_search_sync, text_search_sync
 
         if not query or not query.strip():
             raise ValueError("query cannot be empty")

@@ -5,7 +5,8 @@ import subprocess
 
 import pytest
 
-from cortex import api_state, config
+import cortex.api.state as api_state
+from cortex import config
 
 # Minimum age (seconds) before a cortex.cli process is considered a zombie.
 _ZOMBIE_AGE_THRESHOLD = 10

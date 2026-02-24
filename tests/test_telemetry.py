@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from cortex.telemetry import Span, SpanContext, TraceCollector, collector, traced
+from cortex.telemetry.core import Span, SpanContext, TraceCollector, collector, traced
 
 
 @pytest.fixture(autouse=True)

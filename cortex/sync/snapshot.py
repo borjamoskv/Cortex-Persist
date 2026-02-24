@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from cortex.sync.common import CORTEX_DIR
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["export_snapshot"]
 
@@ -117,7 +117,7 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
 def _generate_tips_section(engine: CortexEngine) -> list[str]:
     """Generate a 'Tip del Día' section for the snapshot with 3 random tips."""
     try:
-        from cortex.tips import TipsEngine
+        from cortex.cli.tips import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=True, lang="es")
         lines = [

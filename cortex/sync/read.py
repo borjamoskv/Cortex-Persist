@@ -17,7 +17,7 @@ from cortex.sync.common import (
     save_sync_state,
 )
 from cortex.sync.system import sync_system
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["sync_memory"]
 

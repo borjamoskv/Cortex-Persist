@@ -360,7 +360,7 @@ async def require_auth(
     authorization: str | None = Header(None, description="Bearer <api-key>"),
 ) -> AuthResult:
     """Extract and validate API key from Authorization header with i18n support."""
-    from cortex.i18n import get_trans
+    from cortex.utils.i18n import get_trans
 
     lang = request.headers.get("Accept-Language", "en")
 
@@ -398,7 +398,7 @@ def require_permission(permission: str | Permission):
             has_perm = True
 
         if not has_perm:
-            from cortex.i18n import get_trans
+            from cortex.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             perm_name = permission.name if isinstance(permission, Permission) else permission
@@ -419,7 +419,7 @@ async def require_consensus(
     Used for 'Sovereign Gate' high-stakes authorizations.
     """
     if engine is None:
-        from cortex.api_deps import get_async_engine
+        from cortex.api.deps import get_async_engine
 
         # Manual resolution if not injected
         async for e in get_async_engine():
@@ -458,7 +458,7 @@ def require_verified_permission(permission: str, min_consensus: float = 1.6):
     ) -> AuthResult:
         # 1. Standard RBAC check
         if permission not in auth.permissions:
-            from cortex.i18n import get_trans
+            from cortex.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             detail = get_trans("error_missing_permission", lang).format(permission=permission)
@@ -468,7 +468,7 @@ def require_verified_permission(permission: str, min_consensus: float = 1.6):
         # For now, it checks for a fact stating permission granted
         claim = f"Permission {permission} granted to {auth.key_name or auth.tenant_id}"
 
-        from cortex.api_deps import get_async_engine
+        from cortex.api.deps import get_async_engine
 
         async for engine in get_async_engine():
             has_consensus = await require_consensus(claim, min_score=min_consensus, engine=engine)

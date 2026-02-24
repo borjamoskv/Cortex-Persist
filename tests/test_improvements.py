@@ -17,8 +17,8 @@ import pytest_asyncio
 import sqlite_vec
 
 from cortex.engine import CortexEngine
-from cortex.export import export_facts
-from cortex.metrics import MetricsRegistry
+from cortex.utils.export import export_facts
+from cortex.telemetry.metrics import MetricsRegistry
 from cortex.migrations import (
     ensure_migration_table,
     get_current_version,
@@ -140,7 +140,7 @@ class TestStoreMany:
 
     def test_database_transaction_error_exists(self):
         """Verify DatabaseTransactionError is importable and properly typed."""
-        from cortex.errors import CortexError, DatabaseTransactionError
+        from cortex.utils.errors import CortexError, DatabaseTransactionError
 
         assert issubclass(DatabaseTransactionError, CortexError)
         assert issubclass(DatabaseTransactionError, Exception)
@@ -461,24 +461,24 @@ class TestCortexClient:
     """Test client methods without live server (mocked requests)."""
 
     def test_client_import(self):
-        from cortex.client import CortexClient, CortexError
+        from cortex.api.client import CortexClient, CortexError
 
         assert CortexClient is not None
         assert CortexError is not None
 
     def test_async_client_import(self):
-        from cortex.async_client import AsyncCortexClient
+        from cortex.api.async_client import AsyncCortexClient
 
         assert AsyncCortexClient is not None
 
     def test_client_context_manager(self):
-        from cortex.client import CortexClient
+        from cortex.api.client import CortexClient
 
         with CortexClient("http://fake:9999") as client:
             assert client is not None
 
     def test_client_headers(self):
-        from cortex.client import CortexClient
+        from cortex.api.client import CortexClient
 
         client = CortexClient("http://fake:9999", api_key="test-key")
         headers = client._headers()
@@ -486,7 +486,7 @@ class TestCortexClient:
         client.close()
 
     def test_client_no_key(self):
-        from cortex.client import CortexClient
+        from cortex.api.client import CortexClient
 
         with patch.dict(os.environ, {}, clear=True):
             client = CortexClient("http://fake:9999", api_key=None)
@@ -495,7 +495,7 @@ class TestCortexClient:
             client.close()
 
     def test_cortex_error(self):
-        from cortex.client import CortexError
+        from cortex.api.client import CortexError
 
         err = CortexError(404, "Not found")
         assert err.status_code == 404

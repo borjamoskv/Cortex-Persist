@@ -5,7 +5,7 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 
-from cortex.api import app
+from cortex.api.core import app
 
 _test_db = tempfile.mktemp(suffix="_translate.db")
 

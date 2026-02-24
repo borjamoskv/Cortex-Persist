@@ -8,7 +8,7 @@ import sqlite3
 import click
 from rich.table import Table
 
-from cortex.api_deps import get_engine
+from cortex.api.deps import get_engine
 from cortex.cli import DEFAULT_DB, cli, console
 from cortex.cli.errors import err_empty_results, handle_cli_error
 

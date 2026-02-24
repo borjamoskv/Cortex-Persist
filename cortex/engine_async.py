@@ -8,10 +8,10 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.canonical import canonical_json, compute_tx_hash
-from cortex.connection_pool import CortexConnectionPool
+from cortex.utils.canonical import canonical_json, compute_tx_hash
+from cortex.database.pool import CortexConnectionPool
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
-from cortex.db_writer import SqliteWriteWorker
+from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.ledger import ImmutableLedger
@@ -20,8 +20,8 @@ from cortex.engine.search_mixin import SearchMixin
 # Mixins
 from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
-from cortex.result import Err, Ok, Result
-from cortex.temporal import now_iso
+from cortex.utils.result import Err, Ok, Result
+from cortex.memory.temporal import now_iso
 
 __all__ = ["TX_BEGIN_IMMEDIATE", "AsyncCortexEngine"]
 
@@ -170,7 +170,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         fact = await self.get_fact(fact_id)
         if not fact or fact.get("valid_until"):
-            from cortex.errors import FactNotFound
+            from cortex.utils.errors import FactNotFound
 
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
@@ -197,7 +197,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
         """Reconstruct state as of transaction ID."""
-        from cortex.temporal import time_travel_filter
+        from cortex.memory.temporal import time_travel_filter
 
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row

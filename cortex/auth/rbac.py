@@ -8,7 +8,7 @@ multi-tenancy and agentic sovereignty.
 import logging
 from enum import Enum
 
-from cortex.errors import PermissionDeniedError
+from cortex.utils.errors import PermissionDeniedError
 
 logger = logging.getLogger("cortex.auth.rbac")
 

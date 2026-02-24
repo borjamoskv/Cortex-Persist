@@ -19,7 +19,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.config import LANGBASE_API_KEY, LANGBASE_BASE_URL
 from cortex.engine_async import AsyncCortexEngine

@@ -38,7 +38,7 @@ class Lang(str, Enum):
 DEFAULT_LANGUAGE: Final[Lang] = Lang.EN
 SUPPORTED_LANGUAGES: Final[frozenset[Lang]] = frozenset(Lang)
 _LANG_LOOKUP: Final[dict[str, Lang]] = {lang.value: lang for lang in Lang}
-_ASSET_PATH: Final[Path] = Path(__file__).parent / "assets" / "translations.json"
+_ASSET_PATH: Final[Path] = Path(__file__).parent.parent / "assets" / "translations.json"
 
 # Global holder for loaded translations. Swapped atomically.
 _TRANSLATIONS: LocaleData = {}

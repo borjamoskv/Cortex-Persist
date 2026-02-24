@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import uuid
 
-from cortex.metrics import metrics
+from cortex.telemetry.metrics import metrics
 
 __all__ = ["ConsensusManager"]
 

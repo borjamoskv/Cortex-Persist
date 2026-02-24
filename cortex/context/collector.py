@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from cortex.context.signals import Signal
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = [
     "ContextCollector",

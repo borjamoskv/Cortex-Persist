@@ -101,14 +101,14 @@ class TestDashboardXss:
 
     def test_sanitize_function_exists(self):
         """Dashboard JS must contain a sanitize() function."""
-        from cortex.dashboard import get_dashboard_html
+        from cortex.routes.dashboard import get_dashboard_html
 
         html = get_dashboard_html()
         assert "function sanitize(str)" in html
 
     def test_search_results_use_sanitize(self):
         """Search results must be rendered through sanitize()."""
-        from cortex.dashboard import get_dashboard_html
+        from cortex.routes.dashboard import get_dashboard_html
 
         html = get_dashboard_html()
         assert "sanitize(item.content)" in html
@@ -127,7 +127,7 @@ class TestApiValueErrorHandler:
 
     def test_value_error_handler_registered(self):
         """Check that the ValueError handler is registered on the app."""
-        from cortex.api import app
+        from cortex.api.core import app
 
         handlers = app.exception_handlers
         assert ValueError in handlers
@@ -274,7 +274,7 @@ class TestClientErrorHandling:
     """CortexClient should handle edge cases in HTTP responses."""
 
     def test_cortex_error_has_status_and_detail(self):
-        from cortex.client import CortexError
+        from cortex.api.client import CortexError
 
         err = CortexError(422, "project cannot be empty")
         assert err.status_code == 422
@@ -282,7 +282,7 @@ class TestClientErrorHandling:
         assert "project cannot be empty" in str(err)
 
     def test_cortex_error_zero_status_for_connection_errors(self):
-        from cortex.client import CortexError
+        from cortex.api.client import CortexError
 
         err = CortexError(0, "Connection error: timeout")
         assert err.status_code == 0

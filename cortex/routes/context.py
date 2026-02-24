@@ -8,12 +8,12 @@ import logging
 
 from fastapi import APIRouter, Depends, Query, Request
 
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.context.collector import ContextCollector
 from cortex.context.inference import ContextInference
 from cortex.engine_async import AsyncCortexEngine
-from cortex.models import (
+from cortex.types.models import (
     ContextSignalModel,
     ContextSnapshotResponse,
     ProjectScoreModel,

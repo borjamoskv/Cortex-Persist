@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from cortex.result import Err, Ok, safe, safe_async
+from cortex.utils.result import Err, Ok, safe, safe_async
 
 # ─── Ok Tests ─────────────────────────────────────────────────────────
 

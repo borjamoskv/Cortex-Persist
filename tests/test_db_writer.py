@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.db_writer import SqliteWriteWorker
-from cortex.result import Err, Ok
+from cortex.database.writer import SqliteWriteWorker
+from cortex.utils.result import Err, Ok
 
 
 @pytest.fixture

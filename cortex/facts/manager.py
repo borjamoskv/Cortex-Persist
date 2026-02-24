@@ -9,7 +9,7 @@ from typing import Any
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.search import SearchResult, semantic_search, text_search
-from cortex.temporal import build_temporal_filter_params, now_iso
+from cortex.memory.temporal import build_temporal_filter_params, now_iso
 
 __all__ = ["FactManager"]
 
@@ -366,7 +366,7 @@ class FactManager:
         project: str | None = None,
     ) -> list[Fact]:
         """Reconstruct state as of transaction ID."""
-        from cortex.temporal import time_travel_filter
+        from cortex.memory.temporal import time_travel_filter
 
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")

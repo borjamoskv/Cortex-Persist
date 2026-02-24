@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from cortex.event_loop import get_loop_info, install_uvloop, sovereign_run
+from cortex.events.loop import get_loop_info, install_uvloop, sovereign_run
 
 
 class TestInstallUvloop:

@@ -10,10 +10,10 @@ import tempfile
 import aiosqlite
 import pytest
 
-from cortex.connection_pool import CortexConnectionPool
+from cortex.database.pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
-from cortex.errors import FactNotFound
-from cortex.schema import get_all_schema
+from cortex.utils.errors import FactNotFound
+from cortex.database.schema import get_all_schema
 
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool

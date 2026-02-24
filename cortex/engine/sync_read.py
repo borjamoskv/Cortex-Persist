@@ -28,7 +28,7 @@ class SyncReadMixin:
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
 
-        from cortex.search_sync import (
+        from cortex.search.sync import (
             semantic_search_sync,
             text_search_sync,
         )
@@ -60,7 +60,7 @@ class SyncReadMixin:
         text_weight: float = 0.4,
     ) -> list:
         """Hybrid search combining semantic + text via RRF (sync)."""
-        from cortex.search_sync import hybrid_search_sync, text_search_sync
+        from cortex.search.sync import hybrid_search_sync, text_search_sync
 
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
@@ -166,7 +166,7 @@ class SyncReadMixin:
     ) -> list[Fact]:
         """Synchronous version of history."""
         from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
-        from cortex.temporal import build_temporal_filter_params
+        from cortex.memory.temporal import build_temporal_filter_params
 
         conn = self._get_sync_conn()
         if as_of:

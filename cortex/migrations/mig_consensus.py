@@ -36,7 +36,7 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
     """Implement Reputation-Weighted Consensus (RWC) with agents and v2 votes."""
     # 1. Create tables (using scripts from schema.py)
     # Note: These are 'IF NOT EXISTS' so safe to run even if schema.py were applied
-    from cortex.schema import (
+    from cortex.database.schema import (
         CREATE_AGENTS,
         CREATE_OUTCOMES,
         CREATE_RWC_INDEXES,

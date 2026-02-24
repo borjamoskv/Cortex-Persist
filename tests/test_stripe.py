@@ -37,7 +37,7 @@ def _stripe_env(monkeypatch):
 @pytest.fixture
 def client(_stripe_env):
     """TestClient with Stripe routes enabled."""
-    from cortex.api import app
+    from cortex.api.core import app
 
     # Force-register stripe router for testing (may already be registered)
     from cortex.routes.stripe import router as stripe_router

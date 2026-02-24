@@ -26,7 +26,7 @@ from cortex.compaction.utils import (
 from cortex.compaction.utils import (
     similarity as _similarity,
 )
-from cortex.compactor import (
+from cortex.compaction.compactor import (
     CompactionResult,
     CompactionStrategy,
     compact,

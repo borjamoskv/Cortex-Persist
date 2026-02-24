@@ -20,7 +20,7 @@ class SyncBaseMixin:
     def _get_sync_conn(self):
         """Get a raw sqlite3.Connection for sync callers."""
         if not hasattr(self, "_sync_conn") or self._sync_conn is None:
-            from cortex.db import connect
+            from cortex.database.core import connect
 
             self._sync_conn = connect(str(self._db_path))
             try:

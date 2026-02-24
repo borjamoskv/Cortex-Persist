@@ -12,8 +12,8 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from cortex.episodic import EpisodicMemory
-from cortex.perception_base import (
+from cortex.episodic.main import EpisodicMemory
+from cortex.perception.base import (
     INFERENCE_WINDOW_SECONDS,
     MIN_EVENTS_FOR_INFERENCE,
     RECORD_COOLDOWN_SECONDS,

@@ -10,7 +10,7 @@ import sqlite3
 import aiosqlite
 
 from cortex.migrations.registry import MIGRATIONS
-from cortex.schema import get_all_schema
+from cortex.database.schema import get_all_schema
 
 __all__ = [
     "ensure_migration_table",

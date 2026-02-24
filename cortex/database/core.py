@@ -35,7 +35,7 @@ from typing import Final
 
 import aiosqlite
 
-from cortex.errors import DBLockError
+from cortex.utils.errors import DBLockError
 
 __all__ = [
     "connect",

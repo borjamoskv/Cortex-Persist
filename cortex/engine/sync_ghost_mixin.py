@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.ghosts")
 

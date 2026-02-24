@@ -20,10 +20,10 @@ from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
 from cortex.engine.sync_compat import SyncCompatMixin
 from cortex.engine.sync_ops import SyncOpsMixin
 from cortex.engine.transaction_mixin import TransactionMixin
-from cortex.metrics import metrics
+from cortex.telemetry.metrics import metrics
 from cortex.migrations.core import run_migrations_async
-from cortex.schema import get_init_meta
-from cortex.temporal import now_iso
+from cortex.database.schema import get_init_meta
+from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex")
 
@@ -70,7 +70,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin)
 
     def _get_sync_conn(self) -> sqlite3.Connection:
         """Protocol requirement for SyncCompatMixin (Sync)."""
-        from cortex.db import connect
+        from cortex.database.core import connect
 
         conn = connect(str(self._db_path))
 
@@ -95,7 +95,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin)
             if self._conn is not None:
                 return self._conn
 
-            from cortex.db import connect_async
+            from cortex.database.core import connect_async
 
             self._conn = await connect_async(str(self._db_path))
 
@@ -149,7 +149,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin)
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
-        from cortex.errors import FactNotFound
+        from cortex.utils.errors import FactNotFound
 
         conn = await self.get_conn()
         cursor = await conn.execute(
@@ -178,7 +178,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin, MemoryMixin, TransactionMixin)
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
         from cortex.engine.ledger import ImmutableLedger
-        from cortex.schema import get_all_schema
+        from cortex.database.schema import get_all_schema
 
         conn = await self.get_conn()
 

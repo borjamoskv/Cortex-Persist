@@ -24,8 +24,8 @@ def client():
         except FileNotFoundError:
             pass
 
-    import cortex.api as api_mod
-    import cortex.api_state
+    import cortex.api.core as api_mod
+    import cortex.api.state as api_state
     import cortex.auth
     import cortex.config
 

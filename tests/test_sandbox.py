@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.sandbox import ASTSandbox, SandboxVerdict
+from cortex.utils.sandbox import ASTSandbox, SandboxVerdict
 
 
 @pytest.fixture

@@ -11,10 +11,10 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from cortex.result import Result
+from cortex.utils.result import Result
 
 if TYPE_CHECKING:
-    from cortex.db_writer import SqliteWriteWorker
+    from cortex.database.writer import SqliteWriteWorker
 
 __all__ = [
     "TransactionProxy",

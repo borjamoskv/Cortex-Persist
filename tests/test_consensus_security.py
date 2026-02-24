@@ -6,11 +6,11 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 import cortex.auth
-from cortex import api_state, config
-from cortex.api import app
+from cortex import config; import cortex.api.state as api_state
+from cortex.api.core import app
 from cortex.auth import AuthManager
-from cortex.connection_pool import CortexConnectionPool
-from cortex.db import connect as db_connect
+from cortex.database.pool import CortexConnectionPool
+from cortex.database.core import connect as db_connect
 from cortex.engine import CortexEngine
 from cortex.engine_async import AsyncCortexEngine
 from cortex.timing import TimingTracker

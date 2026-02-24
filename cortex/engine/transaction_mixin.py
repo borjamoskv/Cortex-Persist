@@ -8,7 +8,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.transactions")
 
@@ -19,7 +19,7 @@ class TransactionMixin:
     async def _log_transaction(
         self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
     ) -> int:
-        from cortex.canonical import canonical_json, compute_tx_hash
+        from cortex.utils.canonical import canonical_json, compute_tx_hash
 
         dj = canonical_json(detail)
         ts = now_iso()
@@ -51,7 +51,7 @@ class TransactionMixin:
                 await self._ledger.create_checkpoint_async()
             except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
                 logger.warning("Auto-checkpoint failed: %s", e)
-                from cortex.metrics import metrics
+                from cortex.telemetry.metrics import metrics
 
                 metrics.inc(
                     "cortex_ledger_checkpoint_failures_total",

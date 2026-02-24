@@ -14,10 +14,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
-from cortex.api_deps import get_engine
+from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
-from cortex.tips import Tip, TipCategory, TipsEngine
+from cortex.cli.tips import Tip, TipCategory, TipsEngine
 
 __all__ = [
     "LANG_DESC",

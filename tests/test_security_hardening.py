@@ -13,7 +13,7 @@ def client(tmp_path_factory):
     """Create test client with isolated temp DB."""
     db_path = str(tmp_path_factory.mktemp("security") / "test_security.db")
 
-    import cortex.api as api_mod
+    import cortex.api.core as api_mod
     import cortex.auth
     import cortex.config as config_mod
 
@@ -61,7 +61,7 @@ def test_cors_preflight(client):
 
 def test_sql_injection_temporal(client):
     """Test SQL injection in temporal filter."""
-    from cortex.api import app
+    from cortex.api.core import app
     from cortex.auth import AuthResult, require_auth
 
     def mock_auth():
@@ -82,7 +82,7 @@ def test_sql_injection_temporal(client):
 
 def test_path_traversal_export(client):
     """Test path traversal in export."""
-    from cortex.api import app
+    from cortex.api.core import app
     from cortex.auth import AuthResult, require_auth
 
     def mock_admin_auth():

@@ -18,7 +18,7 @@ from typing import Any
 
 import httpx
 
-from cortex.client import CortexError, Fact
+from cortex.api.client import CortexError, Fact
 
 __all__ = ["AsyncCortexClient"]
 

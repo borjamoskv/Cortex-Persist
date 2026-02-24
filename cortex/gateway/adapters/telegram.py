@@ -179,7 +179,7 @@ async def telegram_webhook(
     # Validate secret token if configured
     import os
 
-    from cortex import api_state
+    import cortex.api.state as api_state
 
     expected_secret = os.environ.get("CORTEX_TELEGRAM_WEBHOOK_SECRET", "")
     if expected_secret and not hmac.compare_digest(

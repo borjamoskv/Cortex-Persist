@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.handoff import generate_handoff, load_handoff, save_handoff
+from cortex.agents.handoff import generate_handoff, load_handoff, save_handoff
 
 
 @pytest.fixture

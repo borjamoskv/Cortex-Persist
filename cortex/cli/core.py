@@ -12,13 +12,13 @@ from rich.table import Table
 from cortex import __version__
 from cortex.cli import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_db_not_found, err_empty_results, handle_cli_error
-from cortex.event_loop import sovereign_run
+from cortex.events.loop import sovereign_run
 
 
 def _show_tip(engine=None) -> None:
     """Show a random contextual tip after CLI operations."""
     try:
-        from cortex.tips import TipsEngine
+        from cortex.cli.tips import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=engine is not None, lang="es")
         tip = tips_engine.random()
@@ -39,7 +39,7 @@ def _show_tip(engine=None) -> None:
 def _get_tip_text(engine=None) -> str:
     """Get a short tip string for inline display (spinners, status bars)."""
     try:
-        from cortex.tips import TipsEngine
+        from cortex.cli.tips import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=False, lang="es")
         tip = tips_engine.random()
@@ -148,7 +148,7 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
         if ai_time is not None and complexity is not None:
             import dataclasses
 
-            from cortex.chronos import ChronosEngine
+            from cortex.timing.chronos import ChronosEngine
 
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
