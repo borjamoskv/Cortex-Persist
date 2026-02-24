@@ -10,14 +10,19 @@ from pydantic import BaseModel, Field, field_validator
 __all__ = [
     "AgentRegisterRequest",
     "AgentResponse",
+    "ApiKeyListItem",
+    "ApiKeyResponse",
     "CheckpointResponse",
     "ContextSignalModel",
     "ContextSnapshotResponse",
+    "DeepHealthResponse",
     "DimensionResultModel",
+    "ExportResponse",
     "FactResponse",
     "GateActionResponse",
     "GateApprovalRequest",
     "GateStatusResponse",
+    "HealthCheckDetail",
     "HeartbeatRequest",
     "LedgerReportResponse",
     "MejoraloScanRequest",
@@ -176,6 +181,65 @@ class StatusResponse(BaseModel):
     embeddings: int
     transactions: int
     db_size_mb: float
+
+
+class ExportResponse(BaseModel):
+    """Response for project memory export."""
+
+    status: str = "success"
+    project: str
+    artifact: str
+    message: str
+
+
+class HealthCheckDetail(BaseModel):
+    """Single health probe result."""
+
+    status: str
+    detail: str | None = None
+    version: str | None = None
+    expected: str | None = None
+    actual: str | None = None
+    pending_uncheckpointed: int | None = None
+    last_checkpoint_tx: int | None = None
+    active_connections: int | None = None
+    max_connections: int | None = None
+    utilization: str | None = None
+
+    model_config = {"extra": "allow"}
+
+
+class DeepHealthResponse(BaseModel):
+    """Structured deep health check response."""
+
+    status: str  # "healthy" | "degraded"
+    version: str
+    schema_version: str
+    checks: dict[str, HealthCheckDetail]
+    latency_ms: float
+
+
+class ApiKeyResponse(BaseModel):
+    """Response after creating an API key."""
+
+    key: str
+    name: str
+    prefix: str
+    tenant_id: str
+    message: str
+
+
+class ApiKeyListItem(BaseModel):
+    """Non-sensitive API key metadata."""
+
+    id: str
+    name: str
+    prefix: str
+    tenant_id: str
+    permissions: list[str]
+    is_active: bool
+    created_at: str
+    last_used: str | None = None
 
 
 class HeartbeatRequest(BaseModel):

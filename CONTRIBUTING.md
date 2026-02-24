@@ -115,4 +115,4 @@ This generates a complete working plugin with manifest, API spec, Dockerfile, te
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under BSL-1.1.
+By contributing, you agree that your contributions will be licensed under Apache License 2.0.

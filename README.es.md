@@ -5,7 +5,7 @@
 > **Verificación criptográfica, trazabilidad de auditoría y cumplimiento del EU AI Act para la memoria de agentes IA.**
 > *La capa que demuestra que las decisiones de tus agentes son verdaderas.*
 
-![License](https://img.shields.io/badge/license-BSL%201.1-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
@@ -225,7 +225,7 @@ Consulta la [Guía de Arquitectura Multiplataforma](docs/cross_platform_guide.md
 
 ## Licencia
 
-**Business Source License 1.1** (BSL-1.1).
+**Apache License 2.0** — Libre para cualquier uso, comercial o no comercial.
 Uso gratuito para desarrollo y entornos no productivos. Se convierte en Apache 2.0 el 01-01-2030.
 Consulta [LICENSE](LICENSE) para más detalles.
 

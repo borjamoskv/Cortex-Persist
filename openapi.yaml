@@ -8,8 +8,8 @@ info:
     name: Borja Moskv
     email: borjamoskv@gmail.com
   license:
-    name: BSL 1.1
-    url: https://mariadb.com/bsl11/
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 paths:
   /:
     get:

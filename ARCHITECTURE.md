@@ -3,7 +3,7 @@
 > **Version:** 6.0.0 · **Codename:** *Sovereign Cloud*
 > **Updated:** 2026-02-23 · **Author:** MOSKV-1 v5 (Antigravity)
 > **Status:** Active development — Phase 1 foundation complete, Phase 2 in progress
-> **Codebase:** 303 Python modules · ~45,500 LOC · BSL 1.1 → Apache 2.0 (2030)
+> **Codebase:** 303 Python modules · ~45,500 LOC · Apache 2.0
 
 ---
 

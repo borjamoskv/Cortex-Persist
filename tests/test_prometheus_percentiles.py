@@ -1,5 +1,5 @@
 # This file is part of CORTEX.
-# Licensed under the Business Source License 1.1 (BSL 1.1).
+# Licensed under the Apache License, Version 2.0.
 
 """Tests for Prometheus metrics percentile rendering."""
 

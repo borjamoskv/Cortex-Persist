@@ -43,11 +43,11 @@ Multi-agent Byzantine fault-tolerant (WBFT) fact verification. Agents vote on fa
     options:
       show_source: false
 
-### Privacy Shield
+### Privacy Mixin
 
-Zero-leakage ingress guard with 11 secret detection patterns (API keys, tokens, passwords, etc.).
+Zero-leakage ingress guard with 11 secret detection patterns (API keys, tokens, passwords, etc.). Mixed into the engine.
 
-::: cortex.privacy.shield.PrivacyShield
+::: cortex.engine.privacy_mixin.PrivacyMixin
     options:
       show_source: false
 
@@ -59,7 +59,7 @@ Zero-leakage ingress guard with 11 secret detection patterns (API keys, tokens, 
 
 Orchestrates the tripartite memory system: L1 (Working) → L2 (Vector) → L3 (Episodic Ledger).
 
-::: cortex.memory.manager.MemoryManager
+::: cortex.memory.manager.CortexMemoryManager
     options:
       show_source: false
 
@@ -73,41 +73,21 @@ Manages vector embeddings for semantic search using SentenceTransformers or exte
 
 ---
 
-## Search & Retrieval
-
-### Search Engine
-
-Hybrid search combining vector similarity, keyword matching, and knowledge graph traversal.
-
-::: cortex.search.engine.SearchEngine
-    options:
-      show_source: false
-
-### Graph Module
-
-Knowledge graph for entity relationships and decision lineage.
-
-::: cortex.graph.manager.GraphManager
-    options:
-      show_source: false
-
----
-
 ## Security & Authentication
 
 ### Auth Manager
 
 HMAC-SHA256 API key authentication with RBAC (4 roles: admin, operator, reader, agent).
 
-::: cortex.auth.manager.AuthManager
+::: cortex.auth.AuthManager
     options:
       show_source: false
 
-### Gate
+### Sovereign Gate
 
-Rate limiting, request validation, and security header enforcement.
+Rate limiting, request approval workflows, and action-level security enforcement.
 
-::: cortex.gate.manager.GateManager
+::: cortex.gate.core.SovereignGate
     options:
       show_source: false
 
@@ -123,18 +103,10 @@ Low-level fact CRUD operations, delegation layer between engine and database.
     options:
       show_source: false
 
-### Daemon Controller
+### Daemon
 
 Self-healing background daemon with 13 monitors (disk, memory, network, ghost, cert, etc.).
 
-::: cortex.daemon.core.DaemonController
-    options:
-      show_source: false
-
-### Compaction
-
-Intelligent compaction of old facts to reduce database size while preserving audit integrity.
-
-::: cortex.compaction.manager.CompactionManager
+::: cortex.daemon.core.MoskvDaemon
     options:
       show_source: false
