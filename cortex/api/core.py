@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 
 from cortex import __version__, config; import cortex.api.state as api_state
 from cortex.auth import AuthManager
-from cortex.config import ALLOWED_ORIGINS, RATE_LIMIT, RATE_WINDOW
+
 from cortex.engine import CortexEngine
 from cortex.hive.main import router as hive_router
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
@@ -186,7 +186,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=config.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
@@ -194,7 +194,7 @@ app.add_middleware(
 app.add_middleware(SecurityFraudMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(RateLimitMiddleware, limit=RATE_LIMIT, window=RATE_WINDOW)
+app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
 
 

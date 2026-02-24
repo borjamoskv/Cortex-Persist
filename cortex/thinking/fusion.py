@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -214,7 +215,7 @@ class ThoughtFusion:
         """Puntúa una respuesta individual usando el juez e ImmuneBoundary."""
         prompt = f"QUESTION: {original_prompt}\n\nRESPONSE:\n{r.content}"
 
-        async def _generate() -> str:
+        async def _generate(*args: Any, **kwargs: Any) -> str:
             raw = await self._judge_safe(
                 prompt=prompt,
                 system=self.SCORING_SYSTEM,

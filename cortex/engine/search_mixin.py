@@ -25,6 +25,7 @@ class SearchMixin:
         graph_depth: int = 0,
         include_graph: bool = False,
         confidence: str | None = None,
+        **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
         async with self.session() as conn:
@@ -42,6 +43,7 @@ class SearchMixin:
                     project=project,
                     as_of=as_of,
                     confidence=confidence,
+                    **kwargs,
                 )
 
                 if not results:
@@ -53,6 +55,8 @@ class SearchMixin:
                         project=project,
                         limit=top_k,
                         as_of=as_of,
+                        confidence=confidence,
+                        **kwargs,
                     )
 
                 # 2. Enrich with Graph Context if requested
@@ -64,7 +68,7 @@ class SearchMixin:
             except (sqlite3.Error, OSError, RuntimeError) as e:
                 logger.exception(f"Hybrid Graph-RAG search failed: {e}")
                 # Ultimate fallback to basic text search
-                return await text_search(conn, query, tenant_id, project, limit=top_k, as_of=as_of)
+                return await text_search(conn, query, tenant_id, project, limit=top_k, as_of=as_of, confidence=confidence, **kwargs)
 
     async def _enrich_with_graph_context(
         self, conn, results: list[Any], query: str, graph_depth: int

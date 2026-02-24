@@ -7,7 +7,7 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex.config import TURSO_AUTH_TOKEN, TURSO_DATABASE_URL
+from cortex import config
 from cortex.daemon.models import CloudSyncAlert
 from cortex.storage.turso import TursoBackend
 
@@ -31,8 +31,8 @@ class CloudSyncMonitor:
         self._batch_size = batch_size
         self._turso: TursoBackend | None = None
 
-        if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
-            self._turso = TursoBackend(url=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN)
+        if config.TURSO_DATABASE_URL and config.TURSO_AUTH_TOKEN:
+            self._turso = TursoBackend(url=config.TURSO_DATABASE_URL, auth_token=config.TURSO_AUTH_TOKEN)
 
     def _ensure_remote_table(self):
         """Ensure the 'transactions' table exists on the edge."""

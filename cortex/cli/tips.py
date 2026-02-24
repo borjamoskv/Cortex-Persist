@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.tips")
 
-_ASSET_PATH: Final[Path] = Path(__file__).parent / "assets" / "tips.json"
+_ASSET_PATH: Final[Path] = Path(__file__).parent.parent / "assets" / "tips.json"
 
 
 # ─── Models ──────────────────────────────────────────────────────────

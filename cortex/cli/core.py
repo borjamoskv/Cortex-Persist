@@ -124,9 +124,22 @@ def init(db) -> None:
 @cli.command()
 @click.argument("project")
 @click.argument("content")
-@click.option("--type", "fact_type", default="knowledge", help="Fact type")
+@click.option(
+    "--type",
+    "fact_type",
+    type=click.Choice(
+        ["knowledge", "decision", "ghost", "preference", "identity", "issue", "error", "bridge", "world-model", "counterfactual"]
+    ),
+    default="knowledge",
+    help="Fact type (includes world-model for simulated consequences)",
+)
 @click.option("--tags", default=None, help="Comma-separated tags")
-@click.option("--confidence", default="stated", help="Confidence level")
+@click.option(
+    "--confidence",
+    type=click.Choice(["C1", "C2", "C3", "C4", "C5", "stated", "inferred"]),
+    default="stated",
+    help="Confidence level (C1=Hypothesis -> C5=Confirmed)",
+)
 @click.option("--source", default=None, help="Source of the fact")
 @click.option("--ai-time", type=int, default=None, help="AI generation time")
 @click.option(
@@ -137,7 +150,7 @@ def init(db) -> None:
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store(project, content, fact_type, tags, confidence, source, ai_time, complexity, db) -> None:
-    """Store a fact in CORTEX."""
+    """Store a fact in CORTEX. Incorporates certainty and counterfactuals."""
     # Auto-detect source from environment when not provided
     if not source:
         source = _detect_agent_source()

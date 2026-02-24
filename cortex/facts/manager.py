@@ -43,6 +43,8 @@ class FactManager:
         valid_from: str | None = None,
         commit: bool = True,
         tx_id: int | None = None,
+        conn: Any | None = None,
+        **kwargs,
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
         # Manager-specific validation
@@ -53,7 +55,7 @@ class FactManager:
 
         from cortex.engine.store_mixin import StoreMixin
 
-        conn = await self.engine.get_conn()
+        conn = conn or await self.engine.get_conn()
         return await StoreMixin._store_impl(
             self.engine,
             conn,
@@ -158,18 +160,20 @@ class FactManager:
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
+        conn: Any | None = None,
+        **kwargs,
     ) -> int:
         """Sovereign Update: Calls StoreMixin.update directly on the engine."""
         from cortex.engine.store_mixin import StoreMixin
 
         return await StoreMixin.update(
-            self.engine, fact_id=fact_id, content=content, tags=tags, meta=meta
+            self.engine, fact_id=fact_id, content=content, tags=tags, meta=meta,
         )
 
-    async def deprecate(self, fact_id: int, reason: str | None = None) -> bool:
+    async def deprecate(self, fact_id: int, reason: str | None = None, conn: Any | None = None, **kwargs) -> bool:
         """Sovereign Deprecation: Calls StoreMixin.deprecate directly on the engine."""
         from cortex.engine.store_mixin import StoreMixin
-        return await StoreMixin.deprecate(self.engine, fact_id=fact_id, reason=reason)
+        return await StoreMixin.deprecate(self.engine, fact_id=fact_id, reason=reason, conn=conn, **kwargs)
 
     async def history(
         self,
