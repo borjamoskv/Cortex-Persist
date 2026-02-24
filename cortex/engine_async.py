@@ -15,6 +15,7 @@ from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.ledger import ImmutableLedger
 from cortex.engine.search_mixin import SearchMixin
+from cortex.cuatrida.models import Dimension
 
 # Mixins
 from cortex.engine.store_mixin import StoreMixin
@@ -55,9 +56,14 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         self._embedder: LocalEmbedder | None = None
         self._ledger: ImmutableLedger | None = None
 
-        # Mixin configuration
-        self._auto_embed = True
-        self._vec_available = True  # Assuming local vector availability
+        # Dimension A-D: The Cuátrida Entity
+        from cortex.cuatrida.orchestrator import CuatridaOrchestrator
+        self._cuatrida = CuatridaOrchestrator(self)
+
+    @property
+    def cuatrida(self) -> Any:
+        """Access the Cuátrida Orchestrator (Dimensions A-D)."""
+        return self._cuatrida
 
     @property
     def writer(self) -> SqliteWriteWorker | None:
@@ -76,6 +82,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             async with self.session() as conn:
                 cursor = await conn.execute(sql, params)
                 await conn.commit()
+                # Return lastrowid for inserts to support tx_id tracking
+                if sql.strip().upper().startswith("INSERT"):
+                    return Ok(cursor.lastrowid)
                 return Ok(cursor.rowcount)
         except (sqlite3.Error, OSError) as e:
             return Err(f"Pool write error: {e}")
@@ -128,6 +137,17 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()
+
+        # Cuátrida Hook: Dimension B (Temporal Sovereignty)
+        if self._cuatrida:
+            await self._cuatrida.log_decision(
+                project=project,
+                intent=action,
+                dimension=Dimension.TEMPORAL_SOVEREIGNTY,
+                metadata={"tx_id": tx_id, "detail": detail},
+                conn=conn
+            )
+
         return tx_id
 
     # store() and deprecate() are now provided by StoreMixin

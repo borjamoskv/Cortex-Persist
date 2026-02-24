@@ -108,7 +108,7 @@ async def test_consensus_tenant_isolation(client):
     # 1. Tenant 1 stores a fact
     resp = await client.post(
         "/v1/facts",
-        json={"project": "tenant1", "content": "Fact from T1"},
+        json={"project": "tenant1", "content": "Fact from T1 is long enough now", "source": "api"},
         headers={"Authorization": f"Bearer {raw_key1}"},
     )
     assert resp.status_code == 200, f"Setup failed: {resp.text}"
@@ -147,7 +147,7 @@ async def test_vote_validation(client):
 
     resp = await client.post(
         "/v1/facts",
-        json={"project": "tenant1", "content": "Fact from T1"},
+        json={"project": "tenant1", "content": "Fact from T1 is long enough now", "source": "api"},
         headers={"Authorization": f"Bearer {raw_key1}"},
     )
     assert resp.status_code == 200

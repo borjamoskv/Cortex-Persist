@@ -365,7 +365,7 @@ async def get_system_status(
     """Expose engine diagnostics and memory health metrics."""
     lang = _get_lang(request)
     try:
-        stats = engine.stats_sync()
+        stats = await engine.stats()
         return StatusResponse(
             version=__version__,
             total_facts=stats["total_facts"],

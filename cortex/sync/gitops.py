@@ -34,7 +34,7 @@ def _load_knowledge(json_path: Path) -> dict:
     return {"facts": []}
 
 
-def sync_fact_to_repo(
+async def sync_fact_to_repo(
     project: str, fact_id: int, fact_data: dict[str, Any], action: str = "upsert"
 ) -> bool:
     """
@@ -121,7 +121,7 @@ def _render_snapshot(cortex_dir: Path, facts_list: list[dict[str, Any]], project
     md_path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def export_gitops_memory(engine, project: str) -> bool:
+async def export_gitops_memory(engine, project: str) -> bool:
     """Regenera la carpeta .cortex/ y los archivos knowledge.json y context-snapshot.md desde SQLite."""
     repo_path = _locate_repo_root(project)
     if not repo_path:
@@ -132,7 +132,7 @@ def export_gitops_memory(engine, project: str) -> bool:
     json_path = cortex_dir / "knowledge.json"
 
     try:
-        facts = engine.recall_sync(project)
+        facts = await engine.recall(project)
         import dataclasses
 
         facts_list = []

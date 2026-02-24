@@ -140,9 +140,9 @@ class SlowOpTipEmitter:
             console.print(
                 Panel(
                     f"[white]{tip.content}[/white]",
-                    title=f"[bold cyan]💡 {tip.category.value.upper()}[/bold cyan]",
+                    title=f"[[noir.cyber]💡 {tip.category.value.upper()}[/]]",
                     subtitle=f"[dim]mientras esperas · {tip.source}[/dim]",
-                    border_style="bright_green",
+                    border_style="noir.yinmn",
                     padding=(0, 2),
                 )
             )
@@ -213,7 +213,7 @@ def slow_tips_spinner(
 
         from cortex.cli import console
 
-        spin = Spinner(spinner, text=Text(f" {label}", style="bold cyan"))
+        spin = Spinner(spinner, text=Text(f" {label}", style="noir.violet"))
 
         emitter = SlowOpTipEmitter(
             label,

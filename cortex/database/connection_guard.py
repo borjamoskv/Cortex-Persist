@@ -27,6 +27,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset({
     "cortex/engine/sync_compat.py",
     "cortex/database/connection_guard.py",
     "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
+    "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
     "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
 })
 
