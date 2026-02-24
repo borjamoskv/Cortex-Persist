@@ -1,7 +1,9 @@
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
+
 from cortex.mcp.server import create_mcp_server
 from cortex.mcp.utils import MCPServerConfig
+
 
 @pytest.fixture
 def mcp_server():
@@ -50,7 +52,6 @@ async def test_temporal_nexus_output(mcp_server):
     # just accepting that in unit tests we might need a better fixture.
     
     # I'll try to use the actual engine init if I can.
-    from cortex.database.schema import get_all_schema
     
     # We'll just skip the temporal nexus DB call for now if it's too hard to init,
     # or I will just use a try-except in the tool itself to be more "130/100" resilient.
