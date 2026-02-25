@@ -86,7 +86,7 @@ Es *selección brutal*.
 
 ## La ecuación que nadie te enseña
 
-En la universidad me enseñaron que el valor se crea produciendo.
+Me dijeron que el valor se crea produciendo.
 
 En la vida aprendí que el valor se crea **eliminando**.
 
