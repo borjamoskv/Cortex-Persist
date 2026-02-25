@@ -148,7 +148,7 @@ Mira el cielo un momento — lleva ahí toda tu vida y hoy quizás sea la primer
 
 Y flota.
 
-La marea se encarga del resto. Y mi abuelo, el gran (gigante diria YO) Pablo Lucas, sabía nadar y nacío en Burgos. Alucina.
+La marea se encarga del resto. Y mi abuelo, el gran (gigante diria YO) Pablo Lucas, sabía nadar y nacío en Burgos. Alucina. Eso si que es CONTEXTO.
 
 ---
 
