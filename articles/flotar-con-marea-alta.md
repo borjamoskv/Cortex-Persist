@@ -148,7 +148,7 @@ Mira el cielo un momento — lleva ahí toda tu vida y hoy quizás sea la primer
 
 Y flota.
 
-La marea se encarga del resto.
+La marea se encarga del resto. Y mi abuelo sabía nadar y vivía en Uribarri.
 
 ---
 
