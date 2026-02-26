@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORTEX — Trust Infrastructure for Autonomous AI</title>
+  <meta name="description" content="Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory. CORTEX is to AI memory what SSL/TLS is to web communications.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
+  <meta property="og:description" content="SHA-256 hash-chained ledger, Merkle checkpoints, WBFT consensus, and EU AI Act compliance. Free & open source.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cortexpersist.com">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
+  <meta name="twitter:description" content="The trust layer your AI agents are missing. EU AI Act compliant. Apache 2.0.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --abyss: #060608;
+      --surface: #0E0E12;
+      --surface-2: #141418;
+      --surface-3: #1A1A20;
+      --border: rgba(255,255,255,0.05);
+      --border-s: rgba(255,255,255,0.08);
+      --text: #E4E4E8;
+      --text-d: #8A8A96;
+      --text-m: #4A4A56;
+      --lime: #CCFF00;
+      --lime-50: rgba(204,255,0,0.5);
+      --lime-g: rgba(204,255,0,0.06);
+      --violet: #6600FF;
+      --violet-g: rgba(102,0,255,0.06);
+      --blue: #2E5090;
+      --gold: #D4AF37;
+      --red: #FF3B5C;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--abyss);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ═══ GRID BG ═══ */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none; z-index: 0;
+      mask-image: radial-gradient(ellipse 80% 50% at 50% 20%, black 10%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 20%, black 10%, transparent 70%);
+    }
+
+    /* ═══ ORBS ═══ */
+    .orb { position: fixed; border-radius: 50%; filter: blur(160px); pointer-events: none; z-index: 0; }
+    .orb--1 { width: 600px; height: 600px; background: var(--lime); opacity: 0.035; top: -200px; right: -100px; animation: d1 28s ease-in-out infinite alternate; }
+    .orb--2 { width: 500px; height: 500px; background: var(--violet); opacity: 0.04; bottom: 10%; left: -150px; animation: d2 32s ease-in-out infinite alternate; }
+    .orb--3 { width: 350px; height: 350px; background: var(--blue); opacity: 0.03; top: 50%; right: -80px; animation: d1 22s ease-in-out infinite alternate-reverse; }
+    @keyframes d1 { to { transform: translate(60px, 40px) scale(1.1); } }
+    @keyframes d2 { to { transform: translate(50px, -30px) scale(1.15); } }
+
+    .w { max-width: 960px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+    section { position: relative; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ═══ NAV ═══ */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: rgba(6,6,8,0.75);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 32px; max-width: 960px; margin: 0 auto; }
+    .nav__logo { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; color: var(--lime); }
+    .nav__logo span { color: var(--text-m); font-weight: 400; }
+    .nav__links { display: flex; gap: 28px; align-items: center; }
+    .nav__link { font-size: 13px; color: var(--text-d); text-decoration: none; transition: color .2s; font-weight: 500; }
+    .nav__link:hover { color: var(--text); }
+    .nav__cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 20px; background: transparent; color: var(--text);
+      font-size: 13px; font-weight: 600; border: 1px solid var(--border-s);
+      border-radius: 6px; cursor: pointer; text-decoration: none; transition: all .2s;
+    }
+    .nav__cta:hover { border-color: var(--lime); color: var(--lime); box-shadow: 0 0 24px var(--lime-g); }
+
+    /* ═══ HERO ═══ */
+    .hero { padding: 180px 0 100px; text-align: center; }
+    .hero__badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border: 1px solid var(--border-s); border-radius: 100px;
+      font-size: 12px; font-weight: 600; color: var(--text-d); margin-bottom: 36px;
+      background: var(--surface);
+    }
+    .hero__badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime-50); animation: pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+    .hero__title {
+      font-size: clamp(44px, 7.5vw, 76px); font-weight: 900;
+      line-height: 1.02; letter-spacing: -0.04em; margin-bottom: 24px;
+    }
+    .hero__title em { font-style: normal; color: var(--lime); }
+    .hero__sub {
+      font-size: 18px; color: var(--text-d); max-width: 560px;
+      margin: 0 auto 20px; line-height: 1.7;
+    }
+    .hero__sub strong { color: var(--text); font-weight: 600; }
+    .hero__urgency {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: var(--red); font-weight: 600;
+      margin-bottom: 44px; letter-spacing: 0.02em;
+    }
+    .hero__actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* ═══ BUTTONS ═══ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; font-size: 14px; font-weight: 700;
+      border-radius: 8px; cursor: pointer; text-decoration: none;
+      transition: all .2s cubic-bezier(.16,1,.3,1); border: none;
+    }
+    .btn--p { background: var(--lime); color: var(--abyss); }
+    .btn--p:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(204,255,0,.2); }
+    .btn--g { background: transparent; color: var(--text-d); border: 1px solid var(--border-s); }
+    .btn--g:hover { color: var(--text); border-color: rgba(255,255,255,.15); }
+    .btn__arr { transition: transform .2s; font-size: 16px; }
+    .btn:hover .btn__arr { transform: translateX(3px); }
+
+    /* ═══ CODE HERO ═══ */
+    .code-hero {
+      background: var(--surface); border: 1px solid var(--border-s);
+      border-radius: 12px; padding: 28px 32px; text-align: left;
+      max-width: 580px; margin: 48px auto 0; position: relative; overflow: hidden;
+    }
+    .code-hero::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--lime), var(--violet), transparent);
+    }
+    .code-hero__bar { display: flex; gap: 6px; margin-bottom: 16px; }
+    .code-hero__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); }
+    .code-hero pre {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      line-height: 1.7; color: var(--text-d); overflow-x: auto;
+    }
+    .code-hero .cm { color: var(--text-m); }
+    .code-hero .kw { color: var(--lime); }
+    .code-hero .str { color: #87CEEB; }
+    .code-hero .ok { color: #06d6a0; }
+
+    .div { height: 1px; background: linear-gradient(90deg, transparent, var(--border-s), transparent); margin: 0 auto; }
+
+    /* ═══ SECTION LABEL ═══ */
+    .slabel {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-m);
+      margin-bottom: 16px;
+    }
+    .stitle { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 48px; }
+    .stitle em { font-style: normal; color: var(--lime); }
+
+    /* ═══ PROBLEM ═══ */
+    .problem { padding: 100px 0 80px; }
+    .problem__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .problem__list { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+    .problem__item { display: flex; gap: 12px; font-size: 15px; color: var(--text-d); line-height: 1.6; }
+    .problem__icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 2px; }
+    .problem__item strong { color: var(--text); }
+    .solution__card {
+      background: var(--surface); border: 1px solid var(--border-s);
+      border-radius: 12px; padding: 36px; position: relative; overflow: hidden;
+    }
+    .solution__card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--lime), var(--violet));
+    }
+    .solution__title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .solution__text { font-size: 14px; color: var(--text-d); line-height: 1.7; }
+
+    /* ═══ FEATURES ═══ */
+    .features { padding: 80px 0; }
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .feat {
+      background: var(--surface); padding: 32px 24px;
+      transition: background .3s;
+    }
+    .feat:hover { background: var(--surface-2); }
+    .feat__icon { font-size: 24px; margin-bottom: 16px; }
+    .feat__title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .feat__desc { font-size: 13px; color: var(--text-d); line-height: 1.6; }
+    .feat__tag {
+      display: inline-block; margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      padding: 3px 8px; border-radius: 4px;
+      background: var(--lime-g); color: var(--lime); font-weight: 600;
+    }
+
+    /* ═══ STATS ═══ */
+    .stats { padding: 64px 0; }
+    .stats__grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .stat { background: var(--surface); padding: 28px 20px; text-align: center; }
+    .stat__val {
+      font-family: 'JetBrains Mono', monospace; font-size: 28px;
+      font-weight: 800; color: var(--lime); margin-bottom: 4px;
+    }
+    .stat__label { font-size: 11px; color: var(--text-m); text-transform: uppercase; letter-spacing: .06em; line-height: 1.4; }
+
+    /* ═══ COMPARISON ═══ */
+    .compare { padding: 80px 0; }
+    .compare table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare thead th {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--text-m);
+      padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--border-s);
+    }
+    .compare thead th:first-child { text-align: left; }
+    .compare tbody td { padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--border); color: var(--text-d); }
+    .compare tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+    .compare .y { color: var(--lime); font-weight: 700; }
+    .compare .n { color: var(--text-m); }
+    .compare .cortex-col { background: rgba(204,255,0,0.02); }
+
+    /* ═══ QUICKSTART ═══ */
+    .quickstart { padding: 80px 0; }
+    .qs-card {
+      background: var(--surface); border: 1px solid var(--border-s);
+      border-radius: 16px; padding: 56px 48px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .qs-card::before {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--violet), var(--lime), transparent);
+    }
+    .qs-card__title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .qs-card__sub { font-size: 14px; color: var(--text-d); margin-bottom: 32px; }
+    .qs-code {
+      background: var(--abyss); border: 1px solid var(--border);
+      border-radius: 8px; padding: 24px 28px; text-align: left;
+      display: inline-block; max-width: 460px; width: 100%;
+    }
+    .qs-code pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: var(--text-d); }
+    .qs-code .kw { color: var(--lime); }
+    .qs-actions { display: flex; justify-content: center; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
+
+    /* ═══ FOOTER ═══ */
+    footer { padding: 40px 0; border-top: 1px solid var(--border); }
+    .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .foot__c { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-m); }
+    .foot__links { display: flex; gap: 20px; }
+    .foot__link {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-m); text-decoration: none; transition: color .2s;
+    }
+    .foot__link:hover { color: var(--lime); }
+
+    /* ═══ REVEAL ═══ */
+    .rv { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+    .rv.vis { opacity: 1; transform: translateY(0); }
+    .rv-d1 { transition-delay: .08s; }
+    .rv-d2 { transition-delay: .16s; }
+    .rv-d3 { transition-delay: .24s; }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 768px) {
+      .hero { padding: 140px 0 64px; }
+      .problem__grid { grid-template-columns: 1fr; }
+      .feat-grid { grid-template-columns: 1fr; }
+      .stats__grid { grid-template-columns: repeat(2, 1fr); }
+      .compare { overflow-x: auto; }
+      .compare table { min-width: 600px; }
+      .qs-card { padding: 36px 24px; }
+      .nav__links { display: none; }
+    }
+    @media (max-width: 480px) {
+      .hero__title { font-size: 36px; }
+      .hero__actions { flex-direction: column; }
+      .stats__grid { grid-template-columns: 1fr 1fr; }
+      .foot { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb--1" aria-hidden="true"></div>
+  <div class="orb orb--2" aria-hidden="true"></div>
+  <div class="orb orb--3" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <header>
+    <nav class="nav">
+      <div class="nav__logo">CORTEX <span>v0.4</span></div>
+      <div class="nav__links">
+        <a href="#features" class="nav__link">Features</a>
+        <a href="#compare" class="nav__link">Compare</a>
+        <a href="https://cortexpersist.dev" target="_blank" class="nav__link">Docs</a>
+        <a href="https://github.com/borjamoskv/cortex" target="_blank" class="nav__cta">⭐ Star on GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="w">
+      <div class="hero__badge rv">
+        <span class="hero__badge-dot"></span>
+        Open Source · Apache 2.0
+      </div>
+      <h1 class="hero__title rv rv-d1">
+        Fistro pecador<br>for <em>autonomous cobardes.</em>
+      </h1>
+      <p class="hero__sub rv rv-d2">
+        <strong>CORTEX</strong> is to AI memory what <strong>un torpedo</strong> is to la pradera.
+        Cryptographic verification, audit trails, and jarl — for every decision your fistros make.
+      </p>
+      <div class="hero__urgency rv rv-d2" style="font-size:30px; background: cyan; padding: 10px; color: magenta !important;">
+        ⚠ CUIDAO CON EL DEDOMAN QUE TE ARRANCA LA GUITARRA
+      </div>
+      <div class="hero__actions rv rv-d3">
+        <a href="#quickstart" class="btn btn--p">Get Started <span class="btn__arr">→</span></a>
+        <a href="https://github.com/borjamoskv/cortex" target="_blank" class="btn btn--g">View Source</a>
+      </div>
+
+      <div class="code-hero rv rv-d3">
+        <div class="code-hero__bar"><span class="code-hero__dot"></span><span class="code-hero__dot"></span><span class="code-hero__dot"></span></div>
+        <pre><span class="cm"># Install</span>
+<span class="kw">pip install</span> cortex-memory
+
+<span class="cm"># Store a decision & verify it</span>
+<span class="kw">cortex store</span> --type decision <span class="str">"Chose OAuth2 PKCE"</span>
+<span class="kw">cortex verify</span> 42
+<span class="ok">✅ VERIFIED — Hash chain intact, Merkle sealed</span>
+
+<span class="cm"># One-command compliance</span>
+<span class="kw">cortex compliance-report</span>
+<span class="ok">✅ Score: 5/5 — All Article 12 requirements met</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- PROBLEM / SOLUTION -->
+  <section class="problem">
+    <div class="w">
+      <div class="slabel rv">The Problem</div>
+      <h2 class="stitle rv rv-d1">AI agents make millions of decisions.<br><em>Who verifies them?</em></h2>
+      <div class="problem__grid">
+        <ul class="problem__list rv rv-d2">
+          <li class="problem__item">
+            <span class="problem__icon">❌</span>
+            <span><strong>Mem0</strong> stores what agents remember. But can you prove the memory wasn't tampered with?</span>
+          </li>
+          <li class="problem__item">
+            <span class="problem__icon">❌</span>
+            <span><strong>Zep</strong> builds knowledge graphs. But can you audit the full chain of reasoning?</span>
+          </li>
+          <li class="problem__item">
+            <span class="problem__icon">❌</span>
+            <span><strong>Letta</strong> manages agent state. But can you generate a compliance report for regulators?</span>
+          </li>
+          <li class="problem__item">
+            <span class="problem__icon">⚖️</span>
+            <span>The <strong>EU AI Act (Article 12)</strong> requires tamper-proof logging, full traceability, and periodic verification — or fines up to <strong>€30M / 6% revenue</strong>.</span>
+          </li>
+        </ul>
+        <div class="solution__card rv rv-d3">
+          <div class="solution__title">CORTEX doesn't replace your memory layer — it <em style="color:var(--lime);font-style:normal;">certifies</em> it.</div>
+          <div class="solution__text">
+            Sits on top of Mem0, Zep, Letta, or any custom store. Adds SHA-256 hash chains, Merkle checkpoints,
+            multi-agent Byzantine consensus, and generates audit-ready compliance reports. Local-first.
+            No cloud required. Your data, your machine.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="w">
+      <div class="slabel rv">Core Capabilities</div>
+      <h2 class="stitle rv rv-d1">Everything your agents need to be <em>trustworthy.</em></h2>
+      <div class="feat-grid rv rv-d2">
+        <div class="feat">
+          <div class="feat__icon">🔗</div>
+          <div class="feat__title">Immutable Ledger</div>
+          <div class="feat__desc">Every fact is SHA-256 hash-chained. Tamper with one record and the entire chain screams.</div>
+          <span class="feat__tag">Art. 12.3</span>
+        </div>
+        <div class="feat">
+          <div class="feat__icon">🌳</div>
+          <div class="feat__title">Merkle Checkpoints</div>
+          <div class="feat__desc">Periodic batch verification with O(log n) proof. Seal your agent's memory state cryptographically.</div>
+          <span class="feat__tag">Art. 12.4</span>
+        </div>
+        <div class="feat">
+          <div class="feat__icon">🤝</div>
+          <div class="feat__title">WBFT Consensus</div>
+          <div class="feat__desc">Multi-agent Byzantine fault-tolerant verification. Tolerates up to ⅓ malicious agents.</div>
+          <span class="feat__tag">Art. 14</span>
+        </div>
+        <div class="feat">
+          <div class="feat__icon">🔐</div>
+          <div class="feat__title">Privacy Shield</div>
+          <div class="feat__desc">Zero-leakage ingress guard with 11 secret patterns. API keys, tokens, PII — blocked at the door.</div>
+        </div>
+        <div class="feat">
+          <div class="feat__icon">🧬</div>
+          <div class="feat__title">Biological Core</div>
+          <div class="feat__desc">Autopoiesis, Digital Endocrine, and Circadian Cycles. Self-healing memory with organic resilience.</div>
+        </div>
+        <div class="feat">
+          <div class="feat__icon">⚡</div>
+          <div class="feat__title">MCP Native</div>
+          <div class="feat__desc">Works with Claude Code, Cursor, Windsurf, Antigravity. One command: <code style="color:var(--lime)">python -m cortex.mcp</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="w">
+      <div class="stats__grid rv">
+        <div class="stat">
+          <div class="stat__val">598</div>
+          <div class="stat__label">Python Modules</div>
+        </div>
+        <div class="stat">
+          <div class="stat__val">1,516+</div>
+          <div class="stat__label">Test Functions</div>
+        </div>
+        <div class="stat">
+          <div class="stat__val">67.5K</div>
+          <div class="stat__label">Lines of Code</div>
+        </div>
+        <div class="stat">
+          <div class="stat__val">Free</div>
+          <div class="stat__label">Apache 2.0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- COMPARISON -->
+  <section class="compare" id="compare">
+    <div class="w">
+      <div class="slabel rv">Competitive Landscape</div>
+      <h2 class="stitle rv rv-d1">The only trust layer <em>purpose-built</em> for AI agents.</h2>
+      <div class="rv rv-d2" style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th class="cortex-col">CORTEX</th>
+              <th>Mem0</th>
+              <th>Zep</th>
+              <th>Letta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Cryptographic Ledger</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Merkle Checkpoints</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Multi-Agent Consensus</td><td class="cortex-col y">✅ WBFT</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Privacy Shield</td><td class="cortex-col y">✅ 11 patterns</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Local-First</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="n">—</td><td class="y">✅</td></tr>
+            <tr><td>MCP Native</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Multi-Tenant</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="y">✅</td><td class="n">—</td></tr>
+            <tr><td>EU AI Act Ready</td><td class="cortex-col y">✅</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td>Cost</td><td class="cortex-col y">Free</td><td class="n">$249/mo</td><td class="n">$$$</td><td class="y">Free</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- QUICKSTART -->
+  <section class="quickstart" id="quickstart">
+    <div class="w">
+      <div class="qs-card rv">
+        <div class="qs-card__title">Get started in 30 seconds.</div>
+        <div class="qs-card__sub">No cloud. No config. No vendor lock-in.</div>
+        <div class="qs-code">
+          <pre><span class="kw">pip install</span> cortex-memory
+
+<span class="kw">cortex store</span> --type decision \
+  --project my-agent \
+  <span style="color:#87CEEB">"Chose OAuth2 PKCE for auth"</span>
+
+<span class="kw">cortex verify</span> 42
+<span style="color:#06d6a0">✅ VERIFIED</span>
+
+<span class="kw">cortex compliance-report</span>
+<span style="color:#06d6a0">✅ 5/5 — Article 12 compliant</span></pre>
+        </div>
+        <div class="qs-actions">
+          <a href="https://cortexpersist.dev" target="_blank" class="btn btn--p">Read the Docs <span class="btn__arr">→</span></a>
+          <a href="https://github.com/borjamoskv/cortex" target="_blank" class="btn btn--g">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="w">
+      <div class="foot">
+        <div class="foot__c">© 2026 CORTEX · Built by Borja Moskv · Apache 2.0</div>
+        <div class="foot__links">
+          <a href="https://github.com/borjamoskv/cortex" target="_blank" class="foot__link">GitHub</a>
+          <a href="https://cortexpersist.dev" target="_blank" class="foot__link">Docs</a>
+          <a href="https://twitter.com/borjamoskv" target="_blank" class="foot__link">Twitter</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+      body {
+        font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif !important;
+        background: #ff00ff !important;
+        color: #ffff00 !important;
+        animation: hue-rotate 2s infinite alternate;
+      }
+      @keyframes hue-rotate {
+        from { filter: hue-rotate(0deg) saturate(500%); transform: scale(1.1); }
+        to { filter: hue-rotate(360deg) saturate(1000%); transform: scale(0.8) rotate(5deg); }
+      }
+      .code-hero { transform: rotate(-15deg); border: 20px dashed lime !important; background: red !important;}
+      * { border-radius: 0 !important; }
+      .stitle { font-size: 80px !important; text-decoration: underline wavy cyan; }
+  </style>
+  <script>
+    document.body.innerHTML += '<marquee style="position:fixed;top:50%;font-size:100px;background:yellow;color:red;z-index:9999" scrollamount="50">¡CORTEX HA SIDO HACKEADO POR CHIQUITO, PECADOR!</marquee>';
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+  </script>
+
+</body>
+</html>
