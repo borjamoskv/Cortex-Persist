@@ -8,16 +8,16 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.songlines.economy import ThermalEconomy
 from cortex.songlines.emitter import ResonanceEmitter
 from cortex.songlines.sensor import TopographicSensor
-from cortex.songlines.economy import ThermalEconomy
 
 logger = logging.getLogger("cortex.ghosts")
 
 
 class GhostMixin:
     """Logic for managing ghost facts (mentions of entities not yet stored).
-    
+
     NOW POWERED BY: Distributed Songlines (The Ghost Field).
     Ghosts live as radioactive traces on the filesystem, not in a central DB.
     """
@@ -37,7 +37,7 @@ class GhostMixin:
         conn: aiosqlite.Connection | None = None,
     ) -> str:
         """Embed a ghost trace on a file.
-        
+
         Args:
             reference: The entity name/id being ghosted.
             context: Semantic context (intent).
@@ -47,7 +47,7 @@ class GhostMixin:
         # 1. Enforce Thermal Economy
         root = Path.cwd()
         self._economy.validate_emission(root)
-        
+
         # 2. Determine target file (default to some manifest if not provided)
         if not target_file:
             target_file = root / ".cortex_field"
@@ -55,17 +55,16 @@ class GhostMixin:
                 target_file.touch()
         else:
             target_file = Path(target_file)
-            
+
         # 3. Embed the resonance
         self._emitter.embed_ghost(
-            target_file=target_file,
-            intent=f"{reference}: {context}",
-            project=project
+            target_file=target_file, intent=f"{reference}: {context}", project=project
         )
-        
-        # Return a hash-based ghost ID (compatible with old int return where possible, 
+
+        # Return a hash-based ghost ID (compatible with old int return where possible,
         # but songlines use string IDs)
         import hashlib
+
         return hashlib.sha256(f"{reference}:{project}".encode()).hexdigest()[:16]
 
     async def list_active_ghosts(self, root_dir: Path | None = None) -> list[dict[str, Any]]:
@@ -82,18 +81,18 @@ class GhostMixin:
         """Resolve a ghost by erasing its trace from the physical landscape."""
         root = root_dir or Path.cwd()
         active = self._sensor.scan_field(root)
-        
+
         found = False
         for ghost in active:
-            if ghost['id'] == ghost_id:
-                source = Path(ghost['source_file'])
+            if ghost["id"] == ghost_id:
+                source = Path(ghost["source_file"])
                 attr_name = f"user.cortex.ghost.{ghost_id}"
                 self._sensor._delete_xattr(source, attr_name)
                 # Also check manifest fallback if needed
                 self._resolve_manifest_fallback(source, attr_name)
                 found = True
                 logger.info(f"Resolved ghost {ghost_id} on {source.name}")
-        
+
         return found
 
     def _resolve_manifest_fallback(self, source: Path, attr_name: str):
@@ -101,13 +100,14 @@ class GhostMixin:
         if manifest.exists():
             try:
                 import json
-                with open(manifest, 'r') as f:
+
+                with open(manifest) as f:
                     data = json.load(f)
                 if source.name in data and attr_name in data[source.name]:
                     del data[source.name][attr_name]
                     if not data[source.name]:
                         del data[source.name]
-                    with open(manifest, 'w') as f:
+                    with open(manifest, "w") as f:
                         json.dump(data, f, indent=2)
-            except Exception:
-                pass
+            except (json.JSONDecodeError, OSError) as e:
+                logger.debug("Failed to update manifest fallback: %s", e)

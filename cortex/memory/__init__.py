@@ -14,10 +14,21 @@ Usage::
 
 """
 
+from cortex.memory.consolidation import SilentEngram, SystemsConsolidator
 from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.engrams import CortexSemanticEngram
+from cortex.memory.frequency import (
+    BIFTRouter,
+    ContinuousMemorySystem,
+    MemoryFrequency,
+    RetrievalBand,
+)
+from cortex.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
+from cortex.memory.resonance import AdaptiveResonanceGate
+from cortex.memory.sparse import MushroomBodyEncoder
 from cortex.memory.working import WorkingMemoryL1
 
 try:
@@ -31,12 +42,23 @@ except ImportError:
         VectorStoreL2 = None  # type: ignore[assignment,misc]
 
 __all__ = [
+    "AdaptiveResonanceGate",
     "AsyncEncoder",
+    "BIFTRouter",
+    "ContinuousMemorySystem",
     "CortexMemoryManager",
+    "CortexSemanticEngram",
+    "DynamicSynapseUpdate",
+    "EntropyPruner",
     "EpisodicSnapshot",
     "EventLedgerL3",
     "MemoryEntry",
     "MemoryEvent",
+    "MemoryFrequency",
+    "MushroomBodyEncoder",
+    "RetrievalBand",
+    "SilentEngram",
+    "SystemsConsolidator",
     "VectorStoreL2",
     "WorkingMemoryL1",
 ]

@@ -18,6 +18,7 @@ import logging
 from collections import deque
 from typing import Final
 
+from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
 
 __all__ = ["WorkingMemoryL1"]
@@ -35,14 +36,19 @@ class WorkingMemoryL1:
                     when this limit is exceeded.
     """
 
-    __slots__ = ("_buffer", "_current_tokens", "_max_tokens")
+    __slots__ = ("_buffer", "_current_tokens", "_max_tokens", "_guardrail")
 
-    def __init__(self, max_tokens: int = DEFAULT_MAX_TOKENS) -> None:
+    def __init__(
+        self,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        guardrail: SessionGuardrail | None = None,
+    ) -> None:
         if max_tokens <= 0:
             raise ValueError(f"max_tokens must be positive, got {max_tokens}")
         self._max_tokens = max_tokens
         self._buffer: deque[MemoryEvent] = deque()
         self._current_tokens = 0
+        self._guardrail = guardrail
 
     # ─── Core Operations ──────────────────────────────────────────
 
@@ -51,7 +57,19 @@ class WorkingMemoryL1:
 
         Returns:
             List of evicted events (empty if no overflow).
+
+        Raises:
+            RuntimeError: If the session guardrail rejects the event.
         """
+        # Session-level budget check (if guardrail attached)
+        if self._guardrail is not None:
+            if not self._guardrail.consume(event.token_count):
+                msg = (
+                    f"Session budget exhausted "
+                    f"({self._guardrail.consumed}/{self._guardrail.max_tokens} tokens)"
+                )
+                raise RuntimeError(msg)
+
         self._buffer.append(event)
         self._current_tokens += event.token_count
 
