@@ -18,6 +18,7 @@ logger = logging.getLogger("cortex.verification.verifier")
 @dataclass(frozen=True)
 class VerificationResult:
     """Outcome of a formal verification attempt."""
+
     is_valid: bool
     violations: list[dict[str, Any]] = field(default_factory=list)
     proof_certificate: str | None = None
@@ -26,7 +27,7 @@ class VerificationResult:
 
 class SovereignVerifier:
     """Formal Verification Gate for OUROBOROS mutations.
-    
+
     Translates Python mutations into SMT constraints and checks them
     against the 7 Sovereign Safety Invariants.
     """
@@ -42,13 +43,14 @@ class SovereignVerifier:
         self._solver.reset()
         _ctx = context or {}
         file_path = _ctx.get("file_path", "unknown")
-        
+
         logger.info("Verifying mutation for %s...", file_path)
-        
+
         # 1. AST-based Heuristic Extraction
         from cortex.verification.extractor import extract_constraints
+
         findings = extract_constraints(code)
-        
+
         if findings:
             violations = []
             for f in findings:
@@ -56,24 +58,17 @@ class SovereignVerifier:
                 # Match find to concrete SafetyInvariant
                 matching = [inv for inv in self.invariants if inv.id == inv_id]
                 inv_name = matching[0].name if matching else inv_id
-                
-                violations.append({
-                    "id": inv_id,
-                    "name": inv_name,
-                    "message": f["message"]
-                })
-            
+
+                violations.append({"id": inv_id, "name": inv_name, "message": f["message"]})
+
             return VerificationResult(
                 is_valid=False,
                 violations=violations,
-                counterexample={"findings": findings, "file": file_path}
+                counterexample={"findings": findings, "file": file_path},
             )
 
         # 2. Potential Z3 SMT check (Advanced Phase 2)
         # In a full-blown RSI, we would unroll loops and check SAT.
         # For this version, if no AST heuristics triggered, we consider it safe.
 
-        return VerificationResult(
-            is_valid=True,
-            proof_certificate="Z3_UNSAT_BY_AST_PROXIMAL"
-        )
+        return VerificationResult(is_valid=True, proof_certificate="Z3_UNSAT_BY_AST_PROXIMAL")
