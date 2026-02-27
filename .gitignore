@@ -98,3 +98,29 @@ notebooklm_sources/
 # Misc
 site/
 static-analysis.datadog.yml
+
+# UI Prototypes & Subprojects
+blind-pilot/
+blue/
+comienzos-clone/
+cortex-persist-slogan/
+cycle-of-pain/
+docs-ui/
+economia-humor/
+filete-cumbia/
+gordacorp-immersive/
+gordacorp-remotion/
+landing-apotheosis/
+liquid-glass/
+manteca-web/
+notch-control-2026/
+remotion-factory/
+sap-audit-ui/
+sonic-supreme/
+sovereign_agent/
+xokas-elevator/
+
+# Local Scratch / State
+.mejoralo/
+*.out
+*.html
