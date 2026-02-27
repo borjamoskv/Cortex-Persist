@@ -23,7 +23,7 @@ def client(tmp_path_factory):
     config_mod.DB_PATH = db_path
     if hasattr(api_mod, "DB_PATH"):
         api_mod.DB_PATH = db_path
-    cortex.auth._auth_manager = None
+    cortex.auth.manager._auth_manager = None
 
     try:
         with TestClient(api_mod.app) as c:
@@ -32,7 +32,7 @@ def client(tmp_path_factory):
         config_mod.DB_PATH = original_config_db
         if original_api_db is not None:
             api_mod.DB_PATH = original_api_db
-        cortex.auth._auth_manager = None
+        cortex.auth.manager._auth_manager = None
 
 
 def test_cors_preflight(client):

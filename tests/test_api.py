@@ -6,9 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 import cortex.api.core as api_mod
+import cortex.api.state as api_state
 import cortex.auth
 from cortex import config
-import cortex.api.state as api_state
 from cortex.auth import AuthManager
 
 # Unique test DB
@@ -47,7 +47,7 @@ def client():
     import cortex.crypto.aes as aes_mod
 
     aes_mod._default_encrypter_instance = None
-    cortex.auth._auth_manager = None
+    cortex.auth.manager._auth_manager = None
     api_state.auth_manager = None
     api_state.engine = None
     api_state.tracker = None

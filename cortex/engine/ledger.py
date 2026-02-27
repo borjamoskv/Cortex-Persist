@@ -45,6 +45,19 @@ class ImmutableLedger:
         self.pool = pool
         self._write_timestamps: deque[float] = deque(maxlen=5000)
 
+    import contextlib
+
+    @contextlib.asynccontextmanager
+    async def _acquire_conn(self):
+        if hasattr(self.pool, "acquire"):
+            async with self.pool.acquire() as conn:
+                yield conn
+        elif hasattr(self.pool, "get_conn"):
+            conn = await self.pool.get_conn()
+            yield conn
+        else:
+            yield self.pool
+
     def record_write(self) -> None:
         """Call on every transaction to track write rate."""
         self._write_timestamps.append(time.monotonic())
@@ -84,14 +97,14 @@ class ImmutableLedger:
 
         if conn is not None:
             return await _compute(conn)
-        async with self.pool.acquire() as acquired_conn:
+        async with self._acquire_conn() as acquired_conn:
             return await _compute(acquired_conn)
 
     async def create_checkpoint_async(self) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
         batch_size = self.adaptive_batch_size
 
-        async with self.pool.acquire() as conn:
+        async with self._acquire_conn() as conn:
             # Find last checkpointed transaction
             cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
             row = await cursor.fetchone()
@@ -213,7 +226,7 @@ class ImmutableLedger:
         violations = []
         tx_count = 0
 
-        async with self.pool.acquire() as conn:
+        async with self._acquire_conn() as conn:
             # 1. Verify Hash Chain (Chunked to avoid OOM)
             cursor = await conn.execute(
                 "SELECT id, prev_hash, hash, project, action, detail, timestamp FROM transactions ORDER BY id"

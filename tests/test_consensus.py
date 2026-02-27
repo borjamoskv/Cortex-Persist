@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest.mock as mock
 
@@ -23,21 +24,21 @@ async def client(monkeypatch):
     monkeypatch.setenv("CORTEX_DB", test_db)
 
     import cortex.config
-    from cortex.database.pool import CortexConnectionPool
-    from cortex.engine_async import AsyncCortexEngine
-    from cortex.engine import CortexEngine
     from cortex.database.core import connect as db_connect
+    from cortex.database.pool import CortexConnectionPool
+    from cortex.engine import CortexEngine
+    from cortex.engine_async import AsyncCortexEngine
     from cortex.timing import TimingTracker
 
     monkeypatch.setattr(cortex.config, "DB_PATH", test_db)
 
     # Now import app and state
-    import cortex.auth
     import cortex.api.state as api_state
+    import cortex.auth
     from cortex.api.core import app
 
     # Set up some test state
-    monkeypatch.setattr(cortex.auth, "_auth_manager", None)
+    monkeypatch.setattr(cortex.auth.manager, "_auth_manager", None)
 
     # Mock Embedder to avoid model download/hang
     with mock.patch("cortex.embeddings.LocalEmbedder") as mock_embedder:
@@ -111,21 +112,21 @@ async def test_consensus_flow(client):
         },
     )
     if resp.status_code != 200:
-        print(f"DEBUG 422 validation: {resp.text}")
+        pytest.fail(f"Store returned {resp.status_code}: {resp.text}")
     assert resp.status_code == 200
     fact_id = resp.json()["fact_id"]
 
     # 3. Upvote
     resp = await client.post(f"/v1/facts/{fact_id}/vote", json={"value": 1})
     if resp.status_code != 200:
-        print(f"DEBUG VOTE1: {resp.text}")
+        pytest.fail(f"Vote returned {resp.status_code}: {resp.text}")
     assert resp.status_code == 200
     assert resp.json()["new_consensus_score"] > 1.0
 
     # 4. Downvote
     resp = await client.post(f"/v1/facts/{fact_id}/vote", json={"value": -1})
     if resp.status_code != 200:
-        print(f"DEBUG VOTE2: {resp.text}")
+        pytest.fail(f"Vote returned {resp.status_code}: {resp.text}")
     assert resp.status_code == 200
     assert resp.json()["new_consensus_score"] < 1.0
 
