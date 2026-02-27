@@ -86,6 +86,11 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
                 logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
 
+            # Ensure memory subsystem is initialized (L1/L2/L3)
+            # This is critical for Active Forgetting (Thalamus Gate)
+            if self._memory_manager is None:
+                await self._init_memory_subsystem(self._db_path, self._conn)
+
             return self._conn
 
     def _get_conn(self) -> aiosqlite.Connection:
@@ -95,6 +100,20 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     def get_connection(self) -> aiosqlite.Connection:
         return self.get_conn()
+
+    def _get_sync_conn(self):
+        """Devuelve una conexión síncrona para procesos bloqueantes."""
+        from cortex.database.core import connect
+        import sqlite3
+
+        conn = connect(str(self._db_path), row_factory=sqlite3.Row)
+        conn.enable_load_extension(True)
+        try:
+            conn.load_extension(sqlite_vec.loadable_path())
+        except AttributeError:
+            pass
+        conn.enable_load_extension(False)
+        return conn
 
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 

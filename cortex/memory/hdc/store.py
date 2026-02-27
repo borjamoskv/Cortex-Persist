@@ -12,8 +12,8 @@ import json
 import logging
 import sqlite3
 import time
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -119,9 +119,7 @@ class HDCVectorStoreL2:
                 "CREATE INDEX IF NOT EXISTS idx_tenant_proj ON "
                 "hdc_facts_meta(tenant_id, project_id)"
             )
-            self._conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_bridge ON hdc_facts_meta(is_bridge)"
-            )
+            self._conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON hdc_facts_meta(is_bridge)")
 
             self._conn.commit()
             self._ready = True
@@ -196,7 +194,7 @@ class HDCVectorStoreL2:
         inhibit_ids: list[str] | None = None,
     ) -> list[CortexFactModel]:
         """Recuperación particionada Zero-Trust con Inhibición de Vectores Tóxicos.
-        
+
         Args:
             tenant_id: Boundary isolation.
             project_id: Project scope.
@@ -209,25 +207,13 @@ class HDCVectorStoreL2:
 
         # Query encoding
         query_hv = self._encoder.encode_fact(
-            content=query,
-            fact_type=fact_type,
-            project_id=project_id
+            content=query, fact_type=fact_type, project_id=project_id
         )
         embedding_bytes = np.array(query_hv, dtype=np.float32).tobytes()
         now = time.time()
 
         # Retrieve toxic vectors if inhibit_ids are provided
-        toxic_hvs = []
-        if inhibit_ids:
-            cursor = conn.cursor()
-            placeholders = ",".join(["?"] * len(inhibit_ids))
-            cursor.execute(
-                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "
-                f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
-                inhibit_ids
-            )
-            for v_row in cursor.fetchall():
-                toxic_hvs.append(np.frombuffer(v_row["embedding"], dtype=np.float32))
+        toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)
 
         cursor = conn.cursor()
         cursor.execute(
@@ -251,68 +237,95 @@ class HDCVectorStoreL2:
         final_facts = []
 
         for row in rows:
-            score = row["final_score"]
-            emb_f32 = None
-
-            # Fetch embedding for inhibition check and models
-            v_cursor = conn.cursor()
-            v_cursor.execute("SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],))
-            v_row = v_cursor.fetchone()
-            if v_row:
-                emb_f32 = np.frombuffer(v_row["embedding"], dtype=np.float32)
-
-            # APPLY INHIBITION (Vector Gamma)
-            if toxic_hvs and emb_f32 is not None:
-                # print(f"DEBUG: Checking inhibition for {row['id']} against {len(toxic_hvs)} toxic vectors")
-                for thv in toxic_hvs:
-                    # Normalized dot product for bipolar vectors in float space
-                    interference = np.dot(emb_f32, thv) / self._encoder.dimension
-                    # print(f"DEBUG: Interference with toxic vector: {interference:.4f}")
-                    if interference > 0.05:  # EXTREMELY LOW THRESHOLD FOR DEBUGGING
-                        score *= (1.0 - (interference * 2.0))
-                        score = max(0.01, score)
-                        logger.info("☢️ Vector Gamma: Inhibition applied to %s (interference: %.2f)", row["id"], interference)
-
-            # Revert float32 back to int8
-            emb_int8 = []
-            if emb_f32 is not None:
-                emb_int8_arr = np.sign(emb_f32).astype(np.int8)
-                emb_int8_arr[emb_int8_arr == 0] = 1
-                emb_int8 = emb_int8_arr.tolist()
-
-            # Retrieve specular embedding
-            specular_emb = None
-            s_cursor = conn.cursor()
-            s_cursor.execute("SELECT embedding FROM hdc_specular_vec_facts WHERE rowid = ?", (row["rowid"],))
-            s_row = s_cursor.fetchone()
-            if s_row:
-                s_emb_f32 = np.frombuffer(s_row["embedding"], dtype=np.float32)
-                s_emb_int8 = np.sign(s_emb_f32).astype(np.int8)
-                s_emb_int8[s_emb_int8 == 0] = 1
-                specular_emb = s_emb_int8.tolist()
-
-            fact = CortexFactModel(
-                id=row["id"],
-                tenant_id=row["tenant_id"],
-                project_id=row["project_id"],
-                content=row["content"],
-                embedding=emb_int8,
-                timestamp=row["timestamp"],
-                is_diamond=bool(row["is_diamond"]),
-                is_bridge=bool(row["is_bridge"]),
-                confidence=row["confidence"],
-                success_rate=row["success_rate"],
-                metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-                specular_embedding=specular_emb,
-            )
-
-            object.__setattr__(fact, "_recall_score", score)
-            object.__setattr__(fact, "_fact_type", row["fact_type"])
+            fact = self._process_hdc_fact_row(conn, row, toxic_hvs)
             final_facts.append(fact)
 
         # Re-sort and limit after inhibition
         final_facts.sort(key=lambda x: getattr(x, "_recall_score", 0.0), reverse=True)
         return final_facts[:limit]
+
+    def _fetch_toxic_hvs(
+        self, conn: sqlite3.Connection, inhibit_ids: list[str] | None
+    ) -> list[np.ndarray]:
+        """Fetch toxic vectors for inhibition."""
+        toxic_hvs = []
+        if inhibit_ids:
+            cursor = conn.cursor()
+            placeholders = ",".join(["?"] * len(inhibit_ids))
+            cursor.execute(
+                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "
+                f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
+                inhibit_ids,
+            )
+            for v_row in cursor.fetchall():
+                toxic_hvs.append(np.frombuffer(v_row["embedding"], dtype=np.float32))
+        return toxic_hvs
+
+    def _process_hdc_fact_row(
+        self, conn: sqlite3.Connection, row: sqlite3.Row, toxic_hvs: list[np.ndarray]
+    ) -> CortexFactModel:
+        """Process a single row from the HDC recall query."""
+        score = row["final_score"]
+        emb_f32 = None
+
+        # Fetch embedding for inhibition check and models
+        v_cursor = conn.cursor()
+        v_cursor.execute("SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],))
+        v_row = v_cursor.fetchone()
+        if v_row:
+            emb_f32 = np.frombuffer(v_row["embedding"], dtype=np.float32)
+
+        # APPLY INHIBITION (Vector Gamma)
+        if toxic_hvs and emb_f32 is not None:
+            for thv in toxic_hvs:
+                interference = np.dot(emb_f32, thv) / self._encoder.dimension
+                if interference > 0.05:
+                    score *= 1.0 - (interference * 2.0)
+                    score = max(0.01, score)
+                    logger.info(
+                        "☢️ Vector Gamma: Inhibition applied to %s (interference: %.2f)",
+                        row["id"],
+                        interference,
+                    )
+
+        # Revert float32 back to int8
+        emb_int8 = []
+        if emb_f32 is not None:
+            emb_int8_arr = np.sign(emb_f32).astype(np.int8)
+            emb_int8_arr[emb_int8_arr == 0] = 1
+            emb_int8 = emb_int8_arr.tolist()
+
+        # Retrieve specular embedding
+        specular_emb = None
+        s_cursor = conn.cursor()
+        s_cursor.execute(
+            "SELECT embedding FROM hdc_specular_vec_facts WHERE rowid = ?", (row["rowid"],)
+        )
+        s_row = s_cursor.fetchone()
+        if s_row:
+            s_emb_f32 = np.frombuffer(s_row["embedding"], dtype=np.float32)
+            s_emb_int8 = np.sign(s_emb_f32).astype(np.int8)
+            s_emb_int8[s_emb_int8 == 0] = 1
+            specular_emb = s_emb_int8.tolist()
+
+        fact = CortexFactModel(
+            id=row["id"],
+            tenant_id=row["tenant_id"],
+            project_id=row["project_id"],
+            content=row["content"],
+            embedding=emb_int8,
+            timestamp=row["timestamp"],
+            is_diamond=bool(row["is_diamond"]),
+            is_bridge=bool(row["is_bridge"]),
+            confidence=row["confidence"],
+            success_rate=row["success_rate"],
+            metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+            specular_embedding=specular_emb,
+        )
+
+        object.__setattr__(fact, "_recall_score", score)
+        object.__setattr__(fact, "_fact_type", row["fact_type"])
+        return fact
 
     async def recall(
         self,
@@ -323,10 +336,7 @@ class HDCVectorStoreL2:
     ) -> list[CortexFactModel]:
         """Backward-compatible recall."""
         return await self.recall_secure(
-            tenant_id=tenant_id,
-            project_id=project or "default",
-            query=query,
-            limit=limit
+            tenant_id=tenant_id, project_id=project or "default", query=query, limit=limit
         )
 
     async def get_toxic_ids(self, tenant_id: str, project_id: str, limit: int = 10) -> list[str]:

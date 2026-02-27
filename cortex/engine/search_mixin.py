@@ -61,7 +61,9 @@ class SearchMixin:
 
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
-                    await SearchMixin._enrich_with_graph_context(self, conn, results, query, graph_depth)
+                    await SearchMixin._enrich_with_graph_context(
+                        self, conn, results, query, graph_depth
+                    )
 
                 return results
 

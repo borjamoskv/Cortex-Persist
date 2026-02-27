@@ -31,6 +31,7 @@ class MemoryMixin:
 
         # v7 (G10): HDC is opt-in by default.
         import os
+
         use_hdc = os.environ.get("CORTEX_HDC") == "1"
 
         # CORTOCIRCUITO: si auto_embed=False, no intentar L2 ni cargar embedder
