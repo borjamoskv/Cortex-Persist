@@ -5,7 +5,6 @@ Verifies CortexConnectionPool and AsyncCortexEngine.
 
 import asyncio
 import os
-import sqlite3
 import tempfile
 
 import aiosqlite
@@ -13,8 +12,8 @@ import pytest
 
 from cortex.database.pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
-from cortex.utils.errors import FactNotFound
 from cortex.migrations.core import run_migrations_async
+from cortex.utils.errors import FactNotFound
 
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool

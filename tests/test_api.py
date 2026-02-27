@@ -127,7 +127,11 @@ class TestAuth:
     def test_good_key_accepted(self, client, auth_headers):
         resp = client.post(
             "/v1/facts",
-            json={"project": "test", "content": "This is a valid test fact for auth verification."},
+            json={
+                "project": "test",
+                "content": "This is a valid test fact for auth verification.",
+                "source": "cli",
+            },
             headers=auth_headers,
         )
         assert resp.status_code == 200
@@ -141,6 +145,7 @@ class TestFacts:
                 "project": "test",
                 "content": "CORTEX uses SQLite with vector search",
                 "fact_type": "knowledge",
+                "source": "cli",
             },
             headers=auth_headers,
         )
@@ -157,7 +162,13 @@ class TestFacts:
 
     def test_deprecate(self, client, auth_headers):
         store_resp = client.post(
-            "/v1/facts", json={"project": "demo", "content": "temporary fact"}, headers=auth_headers
+            "/v1/facts",
+            json={
+                "project": "demo",
+                "content": "temporary fact",
+                "source": "cli",
+            },
+            headers=auth_headers,
         )
         fact_id = store_resp.json()["fact_id"]
 

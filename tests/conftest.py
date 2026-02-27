@@ -97,8 +97,8 @@ def set_test_master_key():
 
 @pytest.fixture(autouse=True)
 def bypass_min_content_length():
-    from cortex.facts.manager import FactManager
     from cortex.engine.store_mixin import StoreMixin
+    from cortex.facts.manager import FactManager
 
     orig_fm = FactManager.MIN_CONTENT_LENGTH
     orig_sm = StoreMixin.MIN_CONTENT_LENGTH

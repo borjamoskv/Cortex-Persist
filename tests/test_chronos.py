@@ -1,8 +1,8 @@
 import pytest
 from click.testing import CliRunner
 
-from cortex.timing.chronos import ChronosEngine
 from cortex.cli.chronos_cmds import analyze
+from cortex.timing.chronos import ChronosEngine
 
 
 def test_chronos_engine_math_low():
@@ -61,6 +61,7 @@ import json
 def test_store_with_chronos(tmp_path):
     """Test storing a fact with CHRONOS auto-injection."""
     from cortex.cli.core import store
+
     from cortex.engine import CortexEngine
 
     db_path = tmp_path / "test.db"
