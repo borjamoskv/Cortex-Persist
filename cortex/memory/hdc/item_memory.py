@@ -124,7 +124,9 @@ class ItemMemory:
         """
         return self._get_or_create(f"project:{project}")
 
-    def nearest(self, query_hv: HVType, candidates: list[str] | None = None, top_k: int = 1) -> list[tuple[str, float]]:
+    def nearest(
+        self, query_hv: HVType, candidates: list[str] | None = None, top_k: int = 1
+    ) -> list[tuple[str, float]]:
         """Find the nearest symbols to a query hypervector.
 
         Args:

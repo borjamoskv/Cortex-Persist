@@ -35,29 +35,40 @@ class GuardViolation(Exception):
 
 # ─── Allowed Values ────────────────────────────────────────────────
 
-_ALLOWED_FACT_TYPES: frozenset[str] = frozenset({
-    "knowledge",
-    "decision",
-    "error",
-    "ghost",
-    "bridge",
-    "preference",
-    "identity",
-    "issue",
-    "world-model",
-    "counterfactual",
-    "rule",
-    "axiom",
-    "schema",
-    "idea",
-    "evolution",
-    "test",
-})
+_ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
+    {
+        "knowledge",
+        "decision",
+        "error",
+        "ghost",
+        "bridge",
+        "preference",
+        "identity",
+        "issue",
+        "world-model",
+        "counterfactual",
+        "rule",
+        "axiom",
+        "schema",
+        "idea",
+        "evolution",
+        "test",
+        "system_health",
+    }
+)
 
-_ALLOWED_CONFIDENCE: frozenset[str] = frozenset({
-    "C1", "C2", "C3", "C4", "C5",
-    "stated", "inferred",
-})
+_ALLOWED_CONFIDENCE: frozenset[str] = frozenset(
+    {
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "stated",
+        "inferred",
+        "verified",
+    }
+)
 
 _MAX_PROJECT_LENGTH = 256
 _MAX_CONTENT_LENGTH = 100_000
@@ -121,7 +132,10 @@ class StorageGuard:
 
         logger.debug(
             "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",
-            project, fact_type, source, len(content),
+            project,
+            fact_type,
+            source,
+            len(content),
         )
 
     @classmethod
