@@ -30,11 +30,9 @@ if not logger.handlers:
     try:
         _AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         _handler = logging.FileHandler(_AUDIT_LOG_PATH, encoding="utf-8")
-        _handler.setFormatter(
-            logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-        )
+        _handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
         logger.addHandler(_handler)
-    except Exception as e:
+    except OSError as e:
         # Fallback to standard logging if file is inaccessible
         logger.error("Failed to initialize audit log file: %s", e)
 
