@@ -144,7 +144,7 @@ def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[SovereignAgent], i
 
             return agents, cycle
 
-        except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+        except (OSError, KeyError, ValueError, TypeError) as e:
             logger.error("❌ Fallo al leer %s: %s", target.name, e)
             continue  # Probar con el siguiente backup
 
