@@ -3,7 +3,7 @@ CORTEX v6 — Infinite Minds Manager.
 
 Orchestrator for KETER-∞ Swarm architectures.
 Implements Zero-Copy Semantics via Temporal Projection Matrices (Deltas).
-Avoids cloning the Vector Database per agent; instead, each agent gets a 
+Avoids cloning the Vector Database per agent; instead, each agent gets a
 O(1) refractive lens over the master topology.
 """
 
@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.swarm.infinite_minds")
 
 class AgentMind:
     """A sovereign refractive lens over the master semantic space.
-    
+
     Instead of owning a physical copy of the Vector Database, an AgentMind
     owns a 'Semantic Bias' (delta tensor representation) that alters how
     queries map into the master topology.
@@ -30,8 +30,8 @@ class AgentMind:
     __slots__ = ("agent_id", "semantic_bias", "tenant_id", "project_id", "_space")
 
     def __init__(
-        self, 
-        agent_id: str, 
+        self,
+        agent_id: str,
         space: DynamicSemanticSpace,
         tenant_id: str,
         project_id: str,
@@ -51,16 +51,16 @@ class AgentMind:
         words = context_str.split()
         if len(words) > 3:
             self.semantic_bias = " ".join(words[:3]) + " "
-        
+
     async def think(self, query: str, limit: int = 5) -> list[Any]:
         """Perform a biased recall over the shared DynamicSemanticSpace.
-        
+
         The query is refracted through the agent's semantic_bias.
         Also triggers the Hebbian Read-as-Rewrite pulse autonomously.
         """
         # The agent's reality is skewed by its bias
         refracted_query = f"{self.semantic_bias}{query}".strip()
-        
+
         # O(1) Zero-Copy Read + Hebbian Rewrite
         return await self._space.recall_and_pulse(
             tenant_id=self.tenant_id,
@@ -68,14 +68,14 @@ class AgentMind:
             query=refracted_query,
             limit=limit,
             # Agents with deeper context exert stronger gravitational pull
-            pulse_delta=0.02 if self.semantic_bias else 0.005
+            pulse_delta=0.02 if self.semantic_bias else 0.005,
         )
 
 
 class InfiniteMindsManager:
     """The KETER-∞ Orchestrator for divergent agent minds.
-    
-    Manages a swarm of AgentMinds operating concurrently over the same 
+
+    Manages a swarm of AgentMinds operating concurrently over the same
     physical infrastructure with zero I/O friction.
     """
 
@@ -100,7 +100,7 @@ class InfiniteMindsManager:
 
     async def convergence_pulse(self) -> None:
         """Force a synchronization wave across all minds.
-        
+
         If multiple minds have converged on similar semantic biases,
         this method detects consensus and hardcodes the bridge.
         """

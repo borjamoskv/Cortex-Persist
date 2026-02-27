@@ -134,8 +134,12 @@ def inject_reflections(
     Returns:
         List of InjectedLearning, ordered by relevance score (desc).
     """
-    conn = engine._get_sync_conn()
+    import sqlite3 as _sqlite3
+
+    conn = _sqlite3.connect(str(engine._db_path))
+    conn.row_factory = _sqlite3.Row
     results = _hybrid_search_learnable(conn, context_hint, project, top_k)
+    conn.close()
 
     learnings = []
     for row in results:

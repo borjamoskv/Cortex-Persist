@@ -94,9 +94,7 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
 
 def _format_project_section(project: str, facts: list[dict]) -> list[str]:
     """Formatea la sección de un proyecto para el snapshot."""
-    display_name = (
-        project.replace("__", "").upper() if project.startswith("__") else project
-    )
+    display_name = project.replace("__", "").upper() if project.startswith("__") else project
     lines = [f"## {display_name}", ""]
 
     by_type: dict[str, list] = {}

@@ -1,32 +1,33 @@
 # cortex/sovereign/endocrine.py
 """Digital Endocrine system for adaptive Sovereign behavior.
 
-Modulates agent hyperparameters (temperature, response mode) based on virtual 
-hormone levels (cortisol, dopamine, serotonin, adrenaline) derived from 
+Modulates agent hyperparameters (temperature, response mode) based on virtual
+hormone levels (cortisol, dopamine, serotonin, adrenaline) derived from
 contextual cues and system health metrics.
 """
 
 from __future__ import annotations
+
 import logging
-from typing import Set
 
 logger = logging.getLogger(__name__)
+
 
 class DigitalEndocrine:
     """Virtual endocrine system for Sovereign Agentic Modality."""
 
     def __init__(self) -> None:
-        self.cortisol: float = 0.0   # Stress/Urgency
-        self.dopamine: float = 0.5   # Creativity/Exploration
+        self.cortisol: float = 0.0  # Stress/Urgency
+        self.dopamine: float = 0.5  # Creativity/Exploration
         self.serotonin: float = 0.5  # Confidence/Success
-        self.adrenaline: float = 0.0 # Alert/Risk
-        self.oxytocin: float = 0.5   # Trust/Collaboration
+        self.adrenaline: float = 0.0  # Alert/Risk
+        self.oxytocin: float = 0.5  # Trust/Collaboration
 
     def ingest_context(self, message: str, metadata: dict | None = None) -> None:
         """Update hormone levels based on incoming context telemetry with damping."""
         if metadata is None:
             metadata = {}
-        words: Set[str] = set(message.lower().split())
+        words: set[str] = set(message.lower().split())
 
         # Damping factor (Exponential Moving Average)
         # alpha = 1.0 means instant change
@@ -54,7 +55,9 @@ class DigitalEndocrine:
             self.serotonin = min(1.0, self.serotonin + (0.15 * alpha))
 
         # Threat Detection
-        if any(w in words for w in ["inseguro", "desconocido", "riesgo", "bypass", "vulnerabilidad"]):
+        if any(
+            w in words for w in ["inseguro", "desconocido", "riesgo", "bypass", "vulnerabilidad"]
+        ):
             self.adrenaline = min(1.0, self.adrenaline + (0.5 * alpha))
 
         self._homeostasis()
@@ -101,4 +104,3 @@ class DigitalEndocrine:
             "temperature": round(self.temperature, 2),
             "style": self.response_style,
         }
-

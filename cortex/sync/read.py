@@ -62,7 +62,9 @@ async def sync_memory(engine: CortexEngine) -> SyncResult:
     await _sync_file(
         engine, MEMORY_DIR / "mistakes.jsonl", "mistakes_hash", state, _sync_mistakes, result
     )
-    await _sync_file(engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result)
+    await _sync_file(
+        engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result
+    )
 
     # Guardar estado para la próxima ejecución
     state["last_sync"] = result.synced_at

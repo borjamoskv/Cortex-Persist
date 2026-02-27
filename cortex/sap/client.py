@@ -330,6 +330,11 @@ class SAPClient:
         if not self._http:
             raise SAPConnectionError("Client not connected — call connect() first")
 
+        headers = await self._build_request_headers(method, json_data)
+        return await self._perform_retry_loop(method, url, params, json_data, headers)
+
+    async def _build_request_headers(self, method: str, json_data: dict | None) -> dict[str, str]:
+        """Build the complete headers dictionary for the request."""
         auth_headers = await self._build_auth_headers()
         headers = {
             **auth_headers,
@@ -338,15 +343,28 @@ class SAPClient:
         }
 
         # Add CSRF for write operations
-        if method in ("POST", "PUT", "PATCH", "DELETE") and self._csrf_token:
+        if method in {"POST", "PUT", "PATCH", "DELETE"} and self._csrf_token:
             headers["x-csrf-token"] = self._csrf_token
 
         if json_data is not None:
             headers["Content-Type"] = "application/json"
 
+        return headers
+
+    async def _perform_retry_loop(
+        self,
+        method: str,
+        url: str,
+        params: dict[str, str] | None,
+        json_data: dict | None,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        """Execute the request with backoff retry logic."""
         last_error: Exception | None = None
+
         for attempt in range(self.config.max_retries):
             try:
+                # self._http is guaranteed non-None by _raw_request
                 resp = await self._http.request(
                     method,
                     url,
@@ -354,21 +372,23 @@ class SAPClient:
                     json=json_data,
                     headers=headers,
                 )
-
                 self._check_response_status(resp)
                 return resp
-
             except (SAPAuthError, SAPEntityError):
                 raise
             except (OSError, RuntimeError) as e:
                 last_error = e
-                if attempt < self.config.max_retries - 1:
-                    wait = 2**attempt
-                    logger.warning(
-                        "SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait
-                    )
-                    await asyncio.sleep(wait)
+                await self._handle_retry_wait(attempt)
 
         raise SAPConnectionError(
             f"SAP request failed after {self.config.max_retries} retries: {last_error}"
         )
+
+    async def _handle_retry_wait(self, attempt: int) -> None:
+        """Wait before retrying, unless it's the last attempt."""
+        if attempt >= self.config.max_retries - 1:
+            return
+
+        wait = 2**attempt
+        logger.warning("SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait)
+        await asyncio.sleep(wait)
