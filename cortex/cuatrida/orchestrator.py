@@ -41,14 +41,16 @@ class CuatridaOrchestrator:
         # Dimension B: Hook into CORTEX ledger.
         # Use provided connection if available to stay in the same transaction.
         if conn:
-            from cortex.utils.canonical import canonical_json, compute_tx_hash
             from cortex.memory.temporal import now_iso
+            from cortex.utils.canonical import canonical_json, compute_tx_hash
 
             dj = canonical_json(metadata)
             ts = now_iso()
 
             # Previous hash from chain
-            async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+            async with conn.execute(
+                "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
+            ) as cursor:
                 prev = await cursor.fetchone()
                 ph = prev[0] if prev else "GENESIS"
 
@@ -99,8 +101,8 @@ class CuatridaOrchestrator:
             metadata={
                 "score": scan_result.score,
                 "honorable": is_honorable,
-                "total_loc": scan_result.total_loc
-            }
+                "total_loc": scan_result.total_loc,
+            },
         )
         return is_honorable
 
@@ -121,13 +123,10 @@ class CuatridaOrchestrator:
             metadata={
                 "cost_tokens": cost_tokens,
                 "instant_respect": current_respect,
-                "cumulative_respect": self.metrics.computational_respect
-            }
+                "cumulative_respect": self.metrics.computational_respect,
+            },
         )
-        logger.info(
-            f"Oracle Ritual Completed. Respect: "
-            f"{self.metrics.computational_respect:.2f}"
-        )
+        logger.info(f"Oracle Ritual Completed. Respect: {self.metrics.computational_respect:.2f}")
         return self.metrics.computational_respect
 
     async def zero_friction_sync(self, project: str) -> dict[str, Any]:
@@ -135,7 +134,9 @@ class CuatridaOrchestrator:
         Dimension A: Zero-Friction Sync.
         Interfaces with ghost-control to ensure the system is in a pre-cognitive state.
         """
-        ghost_path = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
+        ghost_path = (
+            Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
+        )
         latency = 0.0
         status = "unknown"
 
@@ -146,7 +147,7 @@ class CuatridaOrchestrator:
                     ["python3", str(ghost_path), "status"],
                     capture_output=True,
                     timeout=2.0,
-                    check=False
+                    check=False,
                 )
                 latency = (datetime.now() - start).total_seconds() * 1000
                 status = "active"
@@ -155,19 +156,17 @@ class CuatridaOrchestrator:
 
         self.metrics.latency_ms = latency
         # Finitud density increases as latency decreases below 100ms
-        self.metrics.finitud_density = max(
-            0.1, min(1.0, 1.0 - (latency / 500.0))
-        )
+        self.metrics.finitud_density = max(0.1, min(1.0, 1.0 - (latency / 500.0)))
 
         metadata = {
             "latency_ms": latency,
             "status": status,
-            "density": self.metrics.finitud_density
+            "density": self.metrics.finitud_density,
         }
         await self.log_decision(
             project=project,
             intent="Zero-Friction State Synchronization",
             dimension=Dimension.ZERO_FRICTION,
-            metadata=metadata
+            metadata=metadata,
         )
         return metadata

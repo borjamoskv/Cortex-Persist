@@ -19,35 +19,34 @@ logger = logging.getLogger("cortex.compaction.merge_errors")
 _LOG_FMT = "Compactor [%s] %s"
 
 
-def execute_merge_errors(
+async def execute_merge_errors(
     engine: "CortexEngine",
     project: str,
     result: "CompactionResult",
     dry_run: bool,
 ) -> None:
     """Execute the MERGE_ERRORS strategy."""
-    conn = engine._get_sync_conn()
-    error_rows = conn.execute(
-        "SELECT id, content, tags, confidence, source "
-        "FROM facts WHERE project = ? AND fact_type = 'error' "
-        "AND valid_until IS NULL ORDER BY created_at ASC",
-        (project,),
-    ).fetchall()
 
-    if len(error_rows) <= 1:
+    # Use public API to recall decrypted facts
+    all_facts = await engine.facts.recall(project=project)
+
+    # Filter error facts
+    error_facts = [f for f in all_facts if f.fact_type == "error"]
+
+    if len(error_facts) <= 1:
         return
 
     # Group by content hash
-    hash_groups: dict[str, list[tuple]] = defaultdict(list)
-    for row in error_rows:
-        hash_groups[content_hash(row[1])].append(row)
+    hash_groups: dict[str, list] = defaultdict(list)
+    for fact in error_facts:
+        hash_groups[content_hash(fact.content)].append(fact)
 
     merged_count = 0
     for group in hash_groups.values():
         if len(group) <= 1:
             continue
         if not dry_run:
-            _merge_error_group(engine, project, group, result)
+            await _merge_error_group(engine, project, group, result)
         merged_count += len(group)
 
     if merged_count > 0:
@@ -58,32 +57,30 @@ def execute_merge_errors(
         logger.info(_LOG_FMT, project, detail)
 
 
-def _merge_error_group(
+async def _merge_error_group(
     engine: "CortexEngine",
     project: str,
-    group: list[tuple],
+    group: list,
     result: "CompactionResult",
 ) -> None:
     """Merge a single group of identical error facts."""
+    # Ensure deterministic ordering by ID to keep the oldest as canonical
+    group.sort(key=lambda x: x.id)
     canonical = group[0]
-    contents = [r[1] for r in group]
+    contents = [f.content for f in group]
     merged_content = merge_error_contents(contents)
 
-    try:
-        tags = json.loads(canonical[2]) if canonical[2] else None
-    except (json.JSONDecodeError, TypeError):
-        tags = None
-
-    new_id = engine.store_sync(
+    new_id = await engine.store(
         project=project,
         content=merged_content,
+        tenant_id=canonical.tenant_id,
         fact_type="error",
-        tags=tags,
-        confidence=canonical[3] or "stated",
+        tags=canonical.tags,
+        confidence=canonical.confidence,
         source="compactor:merge_errors",
     )
     result.new_fact_ids.append(new_id)
 
-    for row in group:
-        engine.deprecate_sync(row[0], f"compacted:merge_errors→#{new_id}")
-        result.deprecated_ids.append(row[0])
+    for fact in group:
+        await engine.deprecate(fact.id, f"compacted:merge_errors→#{new_id}")
+        result.deprecated_ids.append(fact.id)

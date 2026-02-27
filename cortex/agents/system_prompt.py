@@ -200,7 +200,7 @@ Quality gates (ALL must pass before merge):
 | Types    | mypy --strict green     | CI gate              |
 | Tests    | Green, coverage ≥80%    | pytest-asyncio       |
 | Privacy  | Shield on all ingress   | Storage middleware   |
-| Entropy  | 0 TODO/FIXME/print      | Ruff + void-omega    |
+| Entropy  | 0 markers (T-D-O) | Ruff + void-omega    |
 | Security | 0 broad except/raw DB   | Ruff S110 + grep     |
 | Score    | MEJORAlo ≥90/100        | X-Ray 13D            |
 

@@ -9,13 +9,13 @@ from typing import Any
 import aiosqlite
 
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.cuatrida.models import Dimension
 from cortex.database.pool import CortexConnectionPool
 from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.ledger import ImmutableLedger
 from cortex.engine.search_mixin import SearchMixin
-from cortex.cuatrida.models import Dimension
 
 # Mixins
 from cortex.engine.store_mixin import StoreMixin
@@ -58,6 +58,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
 
         # Dimension A-D: The Cuátrida Entity
         from cortex.cuatrida.orchestrator import CuatridaOrchestrator
+
         self._cuatrida = CuatridaOrchestrator(self)
 
     @property
@@ -145,7 +146,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 intent=action,
                 dimension=Dimension.TEMPORAL_SOVEREIGNTY,
                 metadata={"tx_id": tx_id, "detail": detail},
-                conn=conn
+                conn=conn,
             )
 
         return tx_id
