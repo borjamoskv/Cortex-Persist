@@ -194,59 +194,71 @@ class Neo4jBackend(GraphBackend):
         if not self._initialized:
             return {"entities": [], "relationships": []}
 
-        # Simpler expansion approach: iterative neighbor discovery
-        # A proper subgraph query usually requires APOC or multiple steps.
-
         entities_map = {}
         relationships_list = []
 
         with self.driver.session() as session:
             # 1. Get seeds
-            result = session.run(
-                "MATCH (n:Entity) WHERE n.name IN $seeds RETURN n", seeds=seed_entities
-            )
-            for record in result:
-                node = record["n"]
-                entities_map[node.id] = {
-                    "id": node.id,
-                    "name": node["name"],
-                    "type": node.get("type"),
-                    "project": node.get("project"),
-                }
+            self._fetch_seeds(session, seed_entities, entities_map)
 
             # 2. Expand (simple 1-hop for now to be safe, or 2-hop loop)
             current_ids = list(entities_map.keys())
             for _ in range(depth):
                 if not current_ids:
                     break
-                q_expand = f"""
-                MATCH (a)-[r]-(b)
-                WHERE id(a) IN $ids
-                RETURN a, r, b
-                LIMIT {max_nodes}
-                """
-                res = session.run(q_expand, ids=current_ids)
-                next_ids = []
-                for rec in res:
-                    a, r, b = rec["a"], rec["r"], rec["b"]
-                    if b.id not in entities_map and len(entities_map) < max_nodes:
-                        entities_map[b.id] = {
-                            "id": b.id,
-                            "name": b["name"],
-                            "type": b.get("type"),
-                            "project": b.get("project"),
-                        }
-                        next_ids.append(b.id)
-
-                    if a.id in entities_map and b.id in entities_map:
-                        relationships_list.append(
-                            {
-                                "source": a["name"],
-                                "target": b["name"],
-                                "relation": r.type,
-                                "weight": r.get("weight", 1.0),
-                            }
-                        )
-                current_ids = next_ids
+                current_ids = self._expand_subgraph(
+                    session, current_ids, entities_map, relationships_list, max_nodes
+                )
 
         return {"entities": list(entities_map.values()), "relationships": relationships_list}
+
+    def _fetch_seeds(self, session, seed_entities: list[str], entities_map: dict) -> None:
+        result = session.run(
+            "MATCH (n:Entity) WHERE n.name IN $seeds RETURN n", seeds=seed_entities
+        )
+        for record in result:
+            node = record["n"]
+            entities_map[node.id] = {
+                "id": node.id,
+                "name": node["name"],
+                "type": node.get("type"),
+                "project": node.get("project"),
+            }
+
+    def _expand_subgraph(
+        self,
+        session,
+        current_ids: list,
+        entities_map: dict,
+        relationships_list: list,
+        max_nodes: int,
+    ) -> list:
+        q_expand = f"""
+        MATCH (a)-[r]-(b)
+        WHERE id(a) IN $ids
+        RETURN a, r, b
+        LIMIT {max_nodes}
+        """
+        res = session.run(q_expand, ids=current_ids)
+        next_ids = []
+        for rec in res:
+            a, r, b = rec["a"], rec["r"], rec["b"]
+            if b.id not in entities_map and len(entities_map) < max_nodes:
+                entities_map[b.id] = {
+                    "id": b.id,
+                    "name": b["name"],
+                    "type": b.get("type"),
+                    "project": b.get("project"),
+                }
+                next_ids.append(b.id)
+
+            if a.id in entities_map and b.id in entities_map:
+                relationships_list.append(
+                    {
+                        "source": a["name"],
+                        "target": b["name"],
+                        "relation": r.type,
+                        "weight": r.get("weight", 1.0),
+                    }
+                )
+        return next_ids

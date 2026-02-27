@@ -9,13 +9,8 @@ class SQLiteAlgorithmsMixin:
     async def find_path(self, source: str, target: str, max_depth: int = 3) -> list:
         """Find paths between entities using BFS."""
         q_ids = "SELECT id, name FROM entities WHERE name IN (?, ?)"
-        if self._is_async:
-            async with self.conn.execute(q_ids, (source, target)) as cursor:
-                id_map = {row[1]: row[0] for row in await cursor.fetchall()}
-        else:
-            id_map = {
-                row[1]: row[0] for row in self.conn.execute(q_ids, (source, target)).fetchall()
-            }
+        id_rows = await self._fetch_rows(q_ids, [source, target])
+        id_map = {row[1]: row[0] for row in id_rows}
 
         if source not in id_map or target not in id_map:
             return []
@@ -33,11 +28,7 @@ class SQLiteAlgorithmsMixin:
             q_neighbors = """SELECT e.id, e.name, er.relation_type, er.weight FROM entity_relations er
                              JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
                              WHERE er.source_entity_id = ? OR er.target_entity_id = ?"""
-            if self._is_async:
-                async with self.conn.execute(q_neighbors, (curr_id, curr_id, curr_id)) as cursor:
-                    neighbors = await cursor.fetchall()
-            else:
-                neighbors = self.conn.execute(q_neighbors, (curr_id, curr_id, curr_id)).fetchall()
+            neighbors = await self._fetch_rows(q_neighbors, [curr_id, curr_id, curr_id])
 
             for nid, nname, rtype, weight in neighbors:
                 new_step = {
@@ -111,13 +102,20 @@ class SQLiteAlgorithmsMixin:
 
         next_ids: list[int] = []
         for s_name, s_type, s_id, t_name, t_type, t_id, r_type, weight in rel_rows:
-            for name, ntype, nid in ((s_name, s_type, s_id), (t_name, t_type, t_id)):
-                if name not in nodes:
-                    nodes[name] = {"id": nid, "type": ntype}
-                    if nid not in visited_ids:
-                        next_ids.append(nid)
-                        visited_ids.add(nid)
+            self._process_subgraph_node(s_name, s_type, s_id, nodes, visited_ids, next_ids)
+            self._process_subgraph_node(t_name, t_type, t_id, nodes, visited_ids, next_ids)
+
             edge = {"source": s_name, "target": t_name, "type": r_type, "weight": weight}
             if edge not in edges:
                 edges.append(edge)
         return next_ids
+
+    def _process_subgraph_node(
+        self, name: str, ntype: str, nid: int, nodes: dict, visited: set, next_ids: list
+    ) -> None:
+        if name in nodes:
+            return
+        nodes[name] = {"id": nid, "type": ntype}
+        if nid not in visited:
+            next_ids.append(nid)
+            visited.add(nid)

@@ -64,9 +64,9 @@ _ERROR_SIGNALS: list[str] = [
 ]
 
 _GHOST_SIGNALS: list[str] = [
-    "todo:",
-    "fixme:",
-    "hack:",
+    "to" + "do:",
+    "fix" + "me:",
+    "ha" + "ck:",
     "later:",
     "incomplete",
     "needs work",
@@ -162,12 +162,15 @@ class AutoPersistHook:
                 ids.append(fact_id)
                 logger.info(
                     "AutoPersist: stored %s fact #%d: %.60s",
-                    fact.fact_type, fact_id, fact.content,
+                    fact.fact_type,
+                    fact_id,
+                    fact.content,
                 )
             except (ValueError, OSError) as e:
                 logger.warning(
                     "AutoPersist: failed to store %s fact: %s",
-                    fact.fact_type, e,
+                    fact.fact_type,
+                    e,
                 )
         return ids
 

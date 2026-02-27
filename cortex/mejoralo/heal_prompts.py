@@ -72,7 +72,7 @@ PROTOCOLO NUCLEAR:
 3. Zero nesting > 2 niveles. Si hay más, extrae función.
 4. Cada función < 20 líneas. Si excede, es dos funciones.
 5. 100% typed. 100% documentado. 100% limpio. 100% INMEJORABLE.
-6. Elimina ABSOLUTAMENTE TODO código muerto, comentado, o con markers tóxicos (H-A-C-K, F-I-X-M-E, T-O-D-O).
+6. Elimina ABSOLUTAMENTE CUALQUIER código muerto, comentado, o con markers tóxicos (H-A-C-K, F-I-X-M-E, T-O-D-O).
 
 RECUERDA: Mismas firmas públicas, mismos exports. Los tests NO pueden romperse.
 

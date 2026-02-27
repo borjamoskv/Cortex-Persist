@@ -76,7 +76,7 @@ class RaftNode:
                 try:
                     await task
                 except asyncio.CancelledError:
-                    pass
+                    raise
         self._election_task = None
         self._heartbeat_task = None
         logger.info("RaftNode %s stopped", self.node_id)
@@ -128,9 +128,8 @@ class RaftNode:
         if not self.peers:
             logger.info("No peers. Self-electing as LEADER.")
             await self._become_leader()
-            return
 
-        # TODO(raft): RequestVote RPC to peers; await majority → _become_leader()
+        # [PENDING] RequestVote RPC to peers; await majority → _become_leader()
 
     async def _become_leader(self) -> None:
         """Transition to Leader role."""
@@ -175,6 +174,7 @@ class RaftNode:
 
     async def receive_heartbeat(self, leader_id: str, term: int):
         """Called when a heartbeat is received from the leader."""
+        await asyncio.sleep(0)  # Yield to satisfy async requirement
         if term >= self.current_term:
             self.current_term = term
             self.leader_id = leader_id

@@ -35,11 +35,11 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
     @mcp.tool()
     async def cortex_reality_weaver(intent: str, project: str = "custom") -> str:
         """Orchestrate the creation of entire system structures from a high-level intent.
-        
+
         Uses the Aether-1 paradigm to collapse intentions into a concrete architectural plan.
         """
         await ctx.ensure_ready()
-        
+
         # Simulate Aether-Genesis reasoning process
         plan = [
             f"═══ REALITY WEAVING: {intent.upper()} ═══",
@@ -55,7 +55,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
             "> [!IMPORTANT]",
             "> Reality Weaver has grounded this intent in a 130/100 structure. Proceed with `/genesis` if in CLI.",
         ]
-        
+
         ctx.metrics.record_request()
         return "\n".join(plan)
 
@@ -67,13 +67,15 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
     async def cortex_entropy_cracker(path: str) -> str:
         """Analyze codebase for redundancy, dead code, and complexity (Void-inspired)."""
         await ctx.ensure_ready()
-        
+
         # In a real scenario, this would dive into filesystem and analysis.
         # Here we provide a sovereign feedback loop.
-        
+
         density_score = 65  # Simulated
-        suggestion = "Condense redundant middleware in 'cortex.admin'. Remove wrapper-over-wrapper patterns."
-        
+        suggestion = (
+            "Condense redundant middleware in 'cortex.admin'. Remove wrapper-over-wrapper patterns."
+        )
+
         lines = [
             f"═══ ENTROPY CRACKER ANALYSIS: {path} ═══",
             f"Density Score: {density_score}/100",
@@ -83,9 +85,9 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
             "1. Boilerplate detected in interface layers.",
             f"2. {suggestion}",
             "",
-            "═══ VERDICT: MEJORAlo --brutal recommended for this path. ═══"
+            "═══ VERDICT: MEJORAlo --brutal recommended for this path. ═══",
         ]
-        
+
         ctx.metrics.record_request()
         return "\n".join(lines)
 
@@ -97,7 +99,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
     async def cortex_temporal_nexus(project: str = "") -> str:
         """Provide insights into technical debt 'drift' and project evolution (Chronos-inspired)."""
         await ctx.ensure_ready()
-        
+
         async with ctx.pool.acquire() as conn:
             # Query ledger for mutation history
             query = """
@@ -107,9 +109,9 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
             """
             cursor = await conn.execute(query, (project, project))
             stats = await cursor.fetchone()
-            
+
         tx_count, start, last = stats if stats else (0, "N/A", "N/A")
-        
+
         lines = [
             f"═══ TEMPORAL NEXUS: {project or 'GLOBAL'} ═══",
             f"Total Mutations: {tx_count}",
@@ -120,8 +122,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
             "Ghost Density:  Low",
             "",
             "> [!NOTE]",
-            "> The system is evolving toward higher purity. No temporal paradoxes detected."
+            "> The system is evolving toward higher purity. No temporal paradoxes detected.",
         ]
-        
+
         ctx.metrics.record_request()
         return "\n".join(lines)
