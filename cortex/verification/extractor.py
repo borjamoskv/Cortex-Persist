@@ -31,7 +31,7 @@ class SMTModelExtractor(ast.NodeVisitor):
             name = node.func.attr
             if name in {"delete", "remove", "drop_table"}:
                 self._add_violation("I2", f"Prohibited method call: {name}")
-        
+
         elif isinstance(node.func, ast.Name):
             if node.func.id == "eval":
                 self._add_violation("I7", "Prohibited use of 'eval' prevents termination analysis.")
@@ -42,17 +42,14 @@ class SMTModelExtractor(ast.NodeVisitor):
         """Check for I5/I7 (Unbounded Collections / Termination)."""
         # Simplistic check: is it iterating over a high-risk collection without a limit?
         logger.debug("Checking loop termination for node %s", node.iter)
-        
+
         # In a real Z3 extractor, we would assert a variant decreases.
         # Here we flag suspicious loops for a fallback manual check or tighter Z3 bounding.
-        
+
         self.generic_visit(node)
 
     def _add_violation(self, invariant_id: str, message: str) -> None:
-        self.findings.append({
-            "invariant_id": invariant_id,
-            "message": message
-        })
+        self.findings.append({"invariant_id": invariant_id, "message": message})
 
 
 def extract_constraints(code: str) -> list[dict[str, Any]]:
@@ -61,7 +58,4 @@ def extract_constraints(code: str) -> list[dict[str, Any]]:
         extractor = SMTModelExtractor(code)
         return extractor.analyze()
     except SyntaxError as e:
-        return [{
-            "invariant_id": "SYNTAX",
-            "message": f"Code parsing failed: {e}"
-        }]
+        return [{"invariant_id": "SYNTAX", "message": f"Code parsing failed: {e}"}]

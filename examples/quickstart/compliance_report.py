@@ -47,7 +47,7 @@ async def main() -> None:
     print("\n2️⃣  Generating EU AI Act compliance report...\n")
     report = await engine.compliance_report(project="fintech-agent")
 
-    print(f"   🏛️  EU AI Act Article 12 Compliance")
+    print("   🏛️  EU AI Act Article 12 Compliance")
     print(f"   {'=' * 40}")
     print(f"   Score:         {report.get('score', 'N/A')}/5")
     print(f"   Status:        {report.get('status', 'unknown')}")
@@ -56,13 +56,13 @@ async def main() -> None:
 
     checks = report.get("checks", {})
     if checks:
-        print(f"\n   Requirements:")
+        print("\n   Requirements:")
         for check, passed in checks.items():
             icon = "✅" if passed else "❌"
             print(f"     {icon} {check}")
 
     # --- Step 3: Verify data integrity ---
-    print(f"\n3️⃣  Verifying ledger integrity...")
+    print("\n3️⃣  Verifying ledger integrity...")
     integrity = await engine.verify_integrity(project="fintech-agent")
     icon = "✅" if integrity.get("valid", False) else "❌"
     print(f"   {icon} Ledger: {integrity.get('status', 'unknown')}")

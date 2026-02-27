@@ -10,8 +10,8 @@ from typing import NamedTuple
 
 class InvariantSeverity(Enum):
     CRITICAL = "critical"  # Immediate rollback, high-level alert
-    WARNING = "warning"    # Log and notify, but may allow with caution
-    INFO = "info"          # Best practice recommendation
+    WARNING = "warning"  # Log and notify, but may allow with caution
+    INFO = "info"  # Best practice recommendation
 
 
 class SafetyInvariant(NamedTuple):
