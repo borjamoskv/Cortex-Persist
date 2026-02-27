@@ -5,9 +5,10 @@ Zero-Debt & Zero-Trust Enforcement Protocol (v6.0 Sovereign Standard)
 """
 import os
 import re
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 from rich.console import Console
 from rich.panel import Panel
 
@@ -27,6 +28,9 @@ BLOCKED_PATTERNS = {
 
 # File extensions where TODO/FIXME checks are skipped (prose, not code).
 PROSE_EXTENSIONS = {".md", ".txt", ".rst", ".adoc"}
+
+# Paths where print() is legitimate (CLI output, tests, scripts).
+PRINT_ALLOWED_PREFIXES = ("cortex/cli/", "tests/", "scripts/", "examples/")
 
 # Operational Dirt: File names/paths that should never be tracked directly.
 BLOCKED_PATHS = {
@@ -94,6 +98,9 @@ def main():
     errors_found = False
 
     for file in staged_files:
+        # Self-exclusion: don't scan the hook's own source
+        if file == "scripts/zero_debt.py":
+            continue
         # 2. Operational Dirt Check (Ignoring .gitignore rules by brute-force addition)
         if any(dirt in file for dirt in BLOCKED_PATHS):
             print_violation_panel(
@@ -119,6 +126,9 @@ def main():
             for rule_name, pattern in BLOCKED_PATTERNS.items():
                 # Skip TODO/FIXME/DEBUG checks in prose files (markdown, etc.)
                 if is_prose and rule_name in ("TODO_OR_FIXME", "DEBUG_PRINT"):
+                    continue
+                # Skip DEBUG_PRINT in CLI, tests, scripts (print is legitimate there)
+                if rule_name == "DEBUG_PRINT" and any(file.startswith(p) for p in PRINT_ALLOWED_PREFIXES):
                     continue
                 if pattern.search(line):
                     print_violation_panel(
