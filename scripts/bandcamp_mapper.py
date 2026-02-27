@@ -5,8 +5,7 @@ import json
 import re
 import subprocess
 import time
-from datetime import datetime
-from pathlib import Path
+from typing import List, Dict, Any, Optional
 
 URLS = """https://basmooy.bandcamp.com
 https://ansome.bandcamp.com
@@ -713,8 +712,7 @@ https://baileyibbs.bandcamp.com
 https://kosh212.bandcamp.com
 https://customizedculturerecordings.bandcamp.com"""
 
-
-def get_unique_urls():
+def get_unique_urls() -> List[str]:
     urls = [u.strip() for u in URLS.strip().split("\n") if u.strip()]
     seen = set()
     unique = []
@@ -725,8 +723,7 @@ def get_unique_urls():
             unique.append(url.strip())
     return unique
 
-
-def curl_get_html(url):
+def curl_get_html(url: str) -> (int, str):
     try:
         result = subprocess.run(
             [
@@ -762,8 +759,7 @@ def curl_get_html(url):
     except Exception:
         return 0, ""
 
-
-def curl_post_api(band_id):
+def curl_post_api(band_id: int) -> Optional[Dict[str, Any]]:
     try:
         result = subprocess.run(
             [
@@ -791,8 +787,7 @@ def curl_post_api(band_id):
         pass
     return None
 
-
-def extract_band_id(body):
+def extract_band_id(body: str) -> Optional[int]:
     m = re.search(r'data-band="([^"]+)"', body)
     if m:
         decoded = html_module.unescape(m.group(1))
@@ -815,8 +810,7 @@ def extract_band_id(body):
 
     return None
 
-
-def extract_emails(text):
+def extract_emails(text: str) -> List[str]:
     pattern = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
     emails = re.findall(pattern, text)
     blacklist = [
@@ -835,8 +829,7 @@ def extract_emails(text):
     ]
     return list(set(e for e in emails if not any(b in e.lower() for b in blacklist)))
 
-
-def process_url(url, idx, total):
+def process_url(url: str, idx: int, total: int) -> Dict[str, Any]:
     slug = url.replace("https://", "").replace(".bandcamp.com", "").rstrip("/")
     result = {
         "url": url,
@@ -897,9 +890,3 @@ def process_url(url, idx, total):
     name_lower = (result["name"] or "").lower()
     if any(kw in name_lower for kw in ["records", "recordings"]):
         result["is_label"] = True
-
-    if result["bio"]:
-        result["emails"].extend(extract_emails(result["bio"]))
-
-    for site in result["sites"]:
-        for field in [site.get("url", ""), site.get("title", "")
