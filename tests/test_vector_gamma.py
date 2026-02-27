@@ -4,16 +4,16 @@ Tests the HDC Inhibitory Recall loop, ensuring that formal violations
 actively suppress similar patterns in future recall attempts.
 """
 
+
 import pytest
-import asyncio
-from typing import Any
+
+from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2, ItemMemory
-from cortex.memory.models import CortexFactModel
+from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.working import WorkingMemoryL1
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.encoder import AsyncEncoder
 from cortex.verification.counterexample import learn_from_failure
+
 
 @pytest.fixture
 async def memory_components(tmp_path):
@@ -59,7 +59,6 @@ async def test_inhibitory_recall_suppression(memory_components):
     )
 
     # 2. Store a "toxic" pattern (a violation)
-    toxic_content = "Allow tenant A to read sensitive data from tenant B without keys."
     # Simulate a formal failure that records this
     await learn_from_failure(
         memory_manager=manager,

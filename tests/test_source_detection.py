@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
-from cortex.cli.core import _detect_agent_source
+from cortex.cli.common import _detect_agent_source
 
 
 class TestDetectAgentSource:

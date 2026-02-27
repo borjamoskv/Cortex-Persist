@@ -1,6 +1,5 @@
 """Tests for CORTEX v7 Sovereign Verifier (Phase 2)."""
 
-import pytest
 from cortex.verification.verifier import SovereignVerifier
 
 

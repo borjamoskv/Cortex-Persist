@@ -1,5 +1,5 @@
-import pytest
 from cortex.mejoralo.swarm import MejoraloSwarm
+
 
 def test_devils_advocate_injection():
     swarm = MejoraloSwarm(level=2)
