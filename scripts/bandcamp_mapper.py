@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Bandcamp Profile Mapper v3.0 — THROTTLED + WORKING
-Uses curl (bypasses bot detection) + Bandcamp Mobile API.
-Single-threaded with 2s delays to avoid rate limiting.
-
-Expected runtime: ~25 min for 700 URLs
-"""
 
 import html as html_module
 import json
@@ -734,7 +727,6 @@ def get_unique_urls():
 
 
 def curl_get_html(url):
-    """Fetch page via curl with proper Sec-Fetch headers."""
     try:
         result = subprocess.run(
             [
@@ -772,7 +764,6 @@ def curl_get_html(url):
 
 
 def curl_post_api(band_id):
-    """Call Bandcamp mobile API for band details."""
     try:
         result = subprocess.run(
             [
@@ -802,8 +793,6 @@ def curl_post_api(band_id):
 
 
 def extract_band_id(body):
-    """Extract band_id from HTML body (handles &quot; encoding)."""
-    # data-band="..." contains HTML-encoded JSON
     m = re.search(r'data-band="([^"]+)"', body)
     if m:
         decoded = html_module.unescape(m.group(1))
@@ -812,12 +801,10 @@ def extract_band_id(body):
             return data.get("id")
         except json.JSONDecodeError:
             pass
-        # Fallback: regex the decoded string
         m2 = re.search(r'"id"\s*:\s*(\d+)', decoded)
         if m2:
             return int(m2.group(1))
 
-    # Fallback patterns
     m = re.search(r"&quot;id&quot;:(\d+)", body)
     if m:
         return int(m.group(1))
@@ -830,7 +817,6 @@ def extract_band_id(body):
 
 
 def extract_emails(text):
-    """Find email addresses in text."""
     pattern = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
     emails = re.findall(pattern, text)
     blacklist = [
@@ -851,7 +837,6 @@ def extract_emails(text):
 
 
 def process_url(url, idx, total):
-    """Full pipeline for one URL."""
     slug = url.replace("https://", "").replace(".bandcamp.com", "").rstrip("/")
     result = {
         "url": url,
@@ -867,7 +852,6 @@ def process_url(url, idx, total):
         "discography_count": 0,
     }
 
-    # Phase 1: Get HTML page + extract band_id
     status_code, body = curl_get_html(url)
 
     if status_code == 404 or "doesn't exist" in body:
@@ -888,10 +872,8 @@ def process_url(url, idx, total):
 
     result["band_id"] = band_id
 
-    # Brief pause before API call
     time.sleep(0.5)
 
-    # Phase 2: Call mobile API
     details = curl_post_api(band_id)
     if not details:
         result["status"] = "api_error"
@@ -903,194 +885,21 @@ def process_url(url, idx, total):
     result["location"] = details.get("location")
     result["bio"] = (details.get("bio") or "")[:500] or None
 
-    # External links
     sites = details.get("sites", [])
     if sites:
         result["sites"] = [{"url": s.get("url", ""), "title": s.get("title", "")} for s in sites]
 
-    # Artists = label
     if details.get("artists"):
         result["is_label"] = True
 
-    # Discography
     result["discography_count"] = len(details.get("discography", []))
 
-    # Detect labels from name
     name_lower = (result["name"] or "").lower()
     if any(kw in name_lower for kw in ["records", "recordings"]):
         result["is_label"] = True
 
-    # Extract emails
     if result["bio"]:
         result["emails"].extend(extract_emails(result["bio"]))
 
     for site in result["sites"]:
-        for field in [site.get("url", ""), site.get("title", "")]:
-            if "mailto:" in field:
-                email = field.replace("mailto:", "").split("?")[0].strip()
-                if "@" in email:
-                    result["emails"].append(email)
-            result["emails"].extend(extract_emails(field))
-
-    result["emails"] = list(set(result["emails"]))
-
-    # Log
-    loc = f" ({result['location']})" if result["location"] else ""
-    sites_n = f" 🔗{len(result['sites'])}" if result["sites"] else ""
-    email_str = f" 📧 {', '.join(result['emails'])}" if result["emails"] else ""
-    label_str = " 🏷️" if result["is_label"] else ""
-    print(f"  [{idx}/{total}] ✅ {result['name'] or slug}{loc}{label_str}{sites_n}{email_str}")
-
-    return result
-
-
-def generate_report(results, md_path):
-    """Generate Markdown report."""
-    ok = [r for r in results if r["status"] == "ok"]
-    not_found = [r for r in results if r["status"] == "not_found"]
-    errors = [r for r in results if r["status"] not in ("ok", "not_found")]
-    with_emails = [r for r in ok if r["emails"]]
-    with_sites = [r for r in ok if r["sites"]]
-
-    lines = [
-        "# 🎛️ Bandcamp Profile Map",
-        f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}*",
-        "",
-        "| Metric | Count |",
-        "|--------|-------|",
-        f"| Total scanned | {len(results)} |",
-        f"| Active profiles | {len(ok)} |",
-        f"| With emails | {len(with_emails)} |",
-        f"| With ext links | {len(with_sites)} |",
-        f"| Not found | {len(not_found)} |",
-        f"| Errors | {len(errors)} |",
-        "",
-        "---",
-        "",
-    ]
-
-    if with_emails:
-        lines.append("## 📧 PROFILES WITH EMAIL")
-        lines.append("")
-        for i, r in enumerate(sorted(with_emails, key=lambda x: (x["name"] or "").lower()), 1):
-            name = r["name"] or r["slug"]
-            lines.append(f"### {i}. {name}")
-            lines.append(f"- **Location:** {r['location'] or '—'}")
-            lines.append(f"- **Bandcamp:** {r['url']}")
-            for e in r["emails"]:
-                lines.append(f"- **📧 Email:** `{e}`")
-            for s in r["sites"]:
-                lines.append(f"- **🔗** [{s['title']}]({s['url']})")
-            if r["bio"]:
-                lines.append(f"- **Bio:** {r['bio'][:200]}")
-            lines.append("")
-        lines.append("---\n")
-
-    lines.append("## 🔗 ALL PROFILES WITH EXTERNAL LINKS")
-    lines.append("")
-    lines.append("| # | Name | Location | Links | Bandcamp |")
-    lines.append("|---|------|----------|-------|----------|")
-    for i, r in enumerate(sorted(with_sites, key=lambda x: (x["name"] or "").lower()), 1):
-        name = r["name"] or r["slug"]
-        loc = r["location"] or "—"
-        link_list = ", ".join(f"[{s['title']}]({s['url']})" for s in r["sites"][:3])
-        lines.append(f"| {i} | **{name}** | {loc} | {link_list} | [🔗]({r['url']}) |")
-    lines.append("")
-
-    lines.append("## 📋 ALL ACTIVE PROFILES")
-    lines.append("")
-    lines.append("| # | Name | Location | Releases | Bandcamp |")
-    lines.append("|---|------|----------|----------|----------|")
-    for i, r in enumerate(sorted(ok, key=lambda x: (x["name"] or "").lower()), 1):
-        lines.append(
-            f"| {i} | **{r['name'] or r['slug']}** | {r['location'] or '—'} | {r['discography_count']} | [🔗]({r['url']}) |"
-        )
-    lines.append("")
-
-    if not_found:
-        lines.append("## ❌ NOT FOUND\n")
-        for r in sorted(not_found, key=lambda x: x["slug"]):
-            lines.append(f"- `{r['slug']}`")
-        lines.append("")
-
-    if errors:
-        lines.append("## ⚠️ ERRORS\n")
-        for r in sorted(errors, key=lambda x: x["slug"]):
-            lines.append(f"- `{r['slug']}` — {r['status']}")
-        lines.append("")
-
-    with open(md_path, "w") as f:
-        f.write("\n".join(lines))
-
-
-def main():
-    urls = get_unique_urls()
-    total = len(urls)
-
-    print("\n🎛️  Bandcamp Profile Mapper v3.0")
-    print(f"   {total} unique URLs — single thread, ~2s/req")
-    print(f"   ETA: ~{total * 2.5 / 60:.0f} minutes\n")
-
-    output_dir = Path(__file__).parent.parent / "data"
-    output_dir.mkdir(exist_ok=True)
-    json_path = output_dir / "bandcamp_profiles.json"
-    md_path = output_dir / "bandcamp_profiles.md"
-
-    # Resume support: load existing results
-    existing = {}
-    if json_path.exists():
-        try:
-            with open(json_path) as f:
-                prev = json.load(f)
-            for r in prev:
-                if r.get("status") == "ok":
-                    existing[r["url"].lower().rstrip("/")] = r
-            if existing:
-                print(f"   💾 Resuming: {len(existing)} previously OK results loaded\n")
-        except Exception:
-            pass
-
-    results = []
-    for i, url in enumerate(urls, 1):
-        url_key = url.lower().rstrip("/")
-        if url_key in existing:
-            results.append(existing[url_key])
-            r = existing[url_key]
-            email_str = f" 📧 {', '.join(r['emails'])}" if r.get("emails") else ""
-            print(f"  [{i}/{total}] 💾 {r.get('name', r['slug'])} (cached){email_str}")
-            continue
-
-        result = process_url(url, i, total)
-        results.append(result)
-
-        # Save progress every 50 URLs
-        if i % 50 == 0:
-            with open(json_path, "w") as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
-            print(f"  --- 💾 Progress saved ({i}/{total}) ---")
-
-        # Throttle: 2s between page fetches
-        time.sleep(2)
-
-    # Final save
-    results.sort(key=lambda x: x["slug"])
-    with open(json_path, "w") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
-
-    generate_report(results, md_path)
-
-    ok_count = sum(1 for r in results if r["status"] == "ok")
-    email_count = sum(1 for r in results if r.get("emails"))
-    sites_count = sum(1 for r in results if r.get("sites"))
-
-    print(f"\n{'=' * 50}")
-    print(f"  ✅ Active: {ok_count}/{total}")
-    print(f"  📧 With emails: {email_count}")
-    print(f"  🔗 With ext links: {sites_count}")
-    print(f"  💾 JSON: {json_path}")
-    print(f"  📝 Report: {md_path}")
-    print(f"{'=' * 50}\n")
-
-
-if __name__ == "__main__":
-    main()
+        for field in [site.get("url", ""), site.get("title", "")
