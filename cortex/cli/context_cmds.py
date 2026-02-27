@@ -12,7 +12,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, console, get_engine
+from cortex.cli.common import DEFAULT_DB, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = [

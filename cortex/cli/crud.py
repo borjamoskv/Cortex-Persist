@@ -8,7 +8,7 @@ import json
 import click
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
 from cortex.sync import export_to_json
 
@@ -59,6 +59,7 @@ def list_facts(project, fact_type, limit, db) -> None:
     """Listar facts activos (tabulado)."""
     engine = get_engine(db)
     try:
+
         async def __get_rows():
             conn = await engine.get_conn()
             query = """
@@ -78,9 +79,9 @@ def list_facts(project, fact_type, limit, db) -> None:
                 params.append(limit)
             cursor = await conn.execute(query, params)
             return await cursor.fetchall()
-            
+
         rows = _run_async(__get_rows())
-        
+
         if not rows:
             filter_hint = ""
             if project:
@@ -123,14 +124,16 @@ def edit(fact_id, new_content, db) -> None:
             return
 
         _run_async(engine.deprecate(fact_id, "edited → new version"))
-        new_id = _run_async(engine.store(
-            project=fact.project,
-            content=new_content,
-            fact_type=fact.fact_type,
-            tags=fact.tags,
-            confidence=fact.confidence,
-            source=fact.source or "edit-via-cli",
-        ))
+        new_id = _run_async(
+            engine.store(
+                project=fact.project,
+                content=new_content,
+                fact_type=fact.fact_type,
+                tags=fact.tags,
+                confidence=fact.confidence,
+                source=fact.source or "edit-via-cli",
+            )
+        )
         wb = _run_async(export_to_json(engine))
         console.print(
             f"[green]✓[/] Fact #{fact_id} → #{new_id} editado.\n"

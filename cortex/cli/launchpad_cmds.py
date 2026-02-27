@@ -9,7 +9,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 from cortex.launchpad.main import MissionOrchestrator
 
@@ -80,7 +80,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="launching mission")
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @launchpad.command("list")
@@ -113,4 +113,4 @@ def mission_list(project, db):
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="listing missions")
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)

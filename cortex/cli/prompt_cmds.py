@@ -20,7 +20,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from cortex.cli import cli, console
+from cortex.cli.common import cli, console
 
 __all__ = ["prompt"]
 
@@ -56,8 +56,7 @@ def _count_test_functions(root: Path) -> int:
     for p in root.rglob("test_*.py"):
         try:
             count += sum(
-                1 for line in p.open("r", errors="replace")
-                if line.lstrip().startswith("def test_")
+                1 for line in p.open("r", errors="replace") if line.lstrip().startswith("def test_")
             )
         except OSError:
             pass
@@ -68,6 +67,7 @@ def _count_rest_endpoints(root: Path) -> int:
     """Count FastAPI route decorators (@router.get/post/put/delete/patch)."""
     count = 0
     import re
+
     pattern = re.compile(r"@\w*router\.(get|post|put|delete|patch|head|options)\(")
     for p in root.rglob("*.py"):
         if "tests" in p.parts or ".venv" in p.parts:
@@ -83,6 +83,7 @@ def _count_cli_commands(root: Path) -> int:
     """Count @cli.command() and @<group>.command() decorators."""
     count = 0
     import re
+
     pattern = re.compile(r"@\w+\.command\(")
     for p in root.rglob("*.py"):
         if "tests" in p.parts or ".venv" in p.parts:
@@ -98,6 +99,7 @@ def _count_secret_patterns() -> int:
     """Count patterns in the Privacy Shield classifier."""
     try:
         from cortex.storage.classifier import SECRET_PATTERNS
+
         return len(SECRET_PATTERNS)
     except ImportError:
         return 25
@@ -107,8 +109,7 @@ def _git_tag() -> str:
     """Return the latest git tag or 'v0.3.0-beta'."""
     try:
         result = subprocess.run(
-            ["git", "describe", "--tags", "--abbrev=0"],
-            capture_output=True, text=True, timeout=3
+            ["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True, timeout=3
         )
         return result.stdout.strip() or "v0.3.0-beta"
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
@@ -211,6 +212,7 @@ def prompt_generate(variant: str, out: str | None) -> None:
     else:
         # short/medium don't embed stats yet — but show accurate pattern count
         from cortex.agents.system_prompt import SYSTEM_PROMPT_MEDIUM, SYSTEM_PROMPT_SHORT
+
         patterns = _count_secret_patterns()
         base = SYSTEM_PROMPT_SHORT if variant == "short" else SYSTEM_PROMPT_MEDIUM
         text = base.replace("25 secret-detection patterns", f"{patterns} secret-detection patterns")
