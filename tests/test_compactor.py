@@ -2,7 +2,7 @@
 Tests for cortex.compactor — Auto-Compaction Engine.
 
 Covers all strategies: DEDUP, MERGE_ERRORS, STALENESS_PRUNE.
-Also tests session compaction, stats, and the complete compact() pipeline.
+Also tests session compaction, stats, and the complete await compact() pipeline.
 """
 
 from __future__ import annotations
@@ -39,72 +39,73 @@ from cortex.engine import CortexEngine
 
 
 @pytest.fixture
-def engine(tmp_path: Path) -> CortexEngine:
+async def engine(tmp_path: Path) -> CortexEngine:
     """Create a CortexEngine with a fresh temp database."""
     db_path = tmp_path / "test_compactor.db"
     eng = CortexEngine(db_path=db_path, auto_embed=False)
-    eng.init_db_sync()
+    await eng.init_db()
     return eng
 
 
 @pytest.fixture
-def seeded_engine(engine: CortexEngine) -> CortexEngine:
+async def seeded_engine(engine: CortexEngine) -> CortexEngine:
     """Engine with pre-loaded facts for compaction testing."""
     # 2 exact duplicates
-    engine.store_sync(
-        project="test",
-        content="The sky is blue - padded to satisfy 20 chars min",
-        fact_type="knowledge",
-        _skip_dedup=True,
-    )
-    engine.store_sync(
-        project="test",
-        content="The sky is blue - padded to satisfy 20 chars min",
-        fact_type="knowledge",
-        _skip_dedup=True,
+    conn = await engine.get_conn()
+    stmt = (
+        "INSERT INTO facts (tenant_id, project, content, fact_type, source, "
+        "confidence, created_at, updated_at, valid_from, tags) "
+        "VALUES ('default', 'test', ?, 'knowledge', 'test', "
+        "'verified', datetime('now'), datetime('now'), datetime('now'), '[]')"
     )
 
+    from cortex.crypto import get_default_encrypter
+    enc = get_default_encrypter()
+
+    enc_content1 = enc.encrypt_str("The sky is blue - padded to satisfy 20 chars min", "default")
+    await conn.execute(stmt, (enc_content1,))
+    await conn.execute(stmt, (enc_content1,))
+    
+    await conn.commit()
+
     # 2 near-duplicates
-    engine.store_sync(
+    await engine.store(
+        source="test",
         project="test",
         content="Python is great for scripting",
         fact_type="knowledge",
     )
-    engine.store_sync(
+    await engine.store(
+        source="test",
         project="test",
         content="Python is great for scripting tasks",
         fact_type="knowledge",
     )
 
     # 3 identical errors
-    engine.store_sync(
-        project="test",
-        content="Connection timeout to DB",
-        fact_type="error",
-        _skip_dedup=True,
+    enc_err = enc.encrypt_str("Connection timeout to DB", "default")
+    stmt_err = (
+        "INSERT INTO facts (tenant_id, project, content, fact_type, source, "
+        "confidence, created_at, updated_at, valid_from, tags) "
+        "VALUES ('default', 'test', ?, 'error', 'test', "
+        "'verified', datetime('now'), datetime('now'), datetime('now'), '[]')"
     )
-    engine.store_sync(
-        project="test",
-        content="Connection timeout to DB",
-        fact_type="error",
-        _skip_dedup=True,
-    )
-    engine.store_sync(
-        project="test",
-        content="Connection timeout to DB",
-        fact_type="error",
-        _skip_dedup=True,
-    )
+    await conn.execute(stmt_err, (enc_err,))
+    await conn.execute(stmt_err, (enc_err,))
+    await conn.execute(stmt_err, (enc_err,))
+    await conn.commit()
 
     # 1 unique fact (should survive compaction)
-    engine.store_sync(
+    await engine.store(
+        source="test",
         project="test",
         content="CORTEX uses SQLite for storage",
         fact_type="decision",
     )
 
     # 1 fact in a different project (should not be affected)
-    engine.store_sync(
+    await engine.store(
+        source="test",
         project="other",
         content="The sky is blue - padded to satisfy 20 chars min",
         fact_type="knowledge",
@@ -177,11 +178,11 @@ class TestMergeErrorContents:
 
 
 class TestCompactionResult:
-    def test_reduction(self):
+    async def test_reduction(self):
         r = CompactionResult(project="x", original_count=10, compacted_count=7)
         assert r.reduction == 3
 
-    def test_to_dict(self):
+    async def test_to_dict(self):
         r = CompactionResult(project="x", original_count=5, compacted_count=3)
         d = r.to_dict()
         assert d["project"] == "x"
@@ -193,12 +194,12 @@ class TestCompactionResult:
 
 
 class TestCompactionStrategy:
-    def test_all_strategies(self):
+    async def test_all_strategies(self):
         all_strats = CompactionStrategy.all()
         assert len(all_strats) == 3
         assert CompactionStrategy.DEDUP in all_strats
 
-    def test_string_value(self):
+    async def test_string_value(self):
         assert CompactionStrategy.DEDUP.value == "dedup"
 
 
@@ -206,66 +207,78 @@ class TestCompactionStrategy:
 
 
 class TestFindDuplicates:
-    def test_no_facts(self, engine: CortexEngine):
-        assert find_duplicates(engine, "empty_project") == []
+    async def test_no_facts(self, engine: CortexEngine):
+        assert await find_duplicates(engine, "empty_project") == []
 
-    def test_no_duplicates(self, engine: CortexEngine):
-        engine.store_sync(
+    async def test_no_duplicates(self, engine: CortexEngine):
+        await engine.store(
+            source="test",
             project="p",
             content="The quantum state of a neutron star collapse",
             fact_type="knowledge",
         )
-        engine.store_sync(
+        await engine.store(
+            source="test",
             project="p",
             content="Recipe for making sourdough bread from scratch",
             fact_type="knowledge",
         )
-        assert find_duplicates(engine, "p") == []
+        assert await find_duplicates(engine, "p") == []
 
-    def test_exact_duplicates(self, engine: CortexEngine):
-        engine.store_sync(
-            project="p",
-            content="duplicate content - padded to satisfy 20 chars min",
-            fact_type="knowledge",
-            _skip_dedup=True,
+    async def test_exact_duplicates(self, engine: CortexEngine):
+        # Use raw SQL to insert exact duplicates (bypasses dedup guard)
+        conn = await engine.get_conn()
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        enc_content = enc.encrypt_str(
+            "duplicate content - padded to satisfy 20 chars min", "default"
         )
-        engine.store_sync(
-            project="p",
-            content="duplicate content - padded to satisfy 20 chars min",
-            fact_type="knowledge",
-            _skip_dedup=True,
+        stmt = (
+            "INSERT INTO facts (tenant_id, project, content, fact_type, source, "
+            "confidence, created_at, updated_at, valid_from, tags) "
+            "VALUES ('default', 'p', ?, 'knowledge', 'test', "
+            "'stated', datetime('now'), datetime('now'), datetime('now'), '[]')"
         )
-        groups = find_duplicates(engine, "p")
+        await conn.execute(stmt, (enc_content,))
+        await conn.execute(stmt, (enc_content,))
+        await conn.commit()
+
+        groups = await find_duplicates(engine, "p")
         assert len(groups) == 1
         assert len(groups[0]) == 2
 
-    def test_near_duplicates(self, engine: CortexEngine):
-        engine.store_sync(
+    async def test_near_duplicates(self, engine: CortexEngine):
+        await engine.store(
+            source="test",
             project="p",
             content="This is a long sentence about testing",
             fact_type="knowledge",
         )
-        engine.store_sync(
+        await engine.store(
+            source="test",
             project="p",
             content="This is a long sentence about testing things",
             fact_type="knowledge",
         )
-        groups = find_duplicates(engine, "p", similarity_threshold=0.85)
+        groups = await find_duplicates(engine, "p", similarity_threshold=0.85)
         assert len(groups) >= 1
 
-    def test_project_isolation(self, engine: CortexEngine):
-        engine.store_sync(
+    async def test_project_isolation(self, engine: CortexEngine):
+        await engine.store(
+            source="test",
             project="a",
             content="same content - padded to satisfy 20 chars min",
             fact_type="knowledge",
         )
-        engine.store_sync(
+        await engine.store(
+            source="test",
             project="b",
             content="same content - padded to satisfy 20 chars min",
             fact_type="knowledge",
         )
         # Should not find cross-project duplicates
-        groups = find_duplicates(engine, "a")
+        groups = await find_duplicates(engine, "a")
         assert len(groups) == 0
 
 
@@ -273,15 +286,16 @@ class TestFindDuplicates:
 
 
 class TestFindStaleFacts:
-    def test_no_stale(self, engine: CortexEngine):
-        engine.store_sync(
+    async def test_no_stale(self, engine: CortexEngine):
+        await engine.store(
+            source="test",
             project="p",
             content="fresh fact - padded to satisfy 20 chars min",
             fact_type="knowledge",
         )
-        assert find_stale_facts(engine, "p", max_age_days=90) == []
+        assert await find_stale_facts(engine, "p", max_age_days=90) == []
 
-    def test_finds_stale(self, engine: CortexEngine):
+    async def test_finds_stale(self, engine: CortexEngine):
         # Insert a fact with old timestamp directly
         conn = engine._get_sync_conn()
         old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
@@ -292,10 +306,10 @@ class TestFindStaleFacts:
         )
         conn.commit()
 
-        stale = find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
+        stale = await find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
         assert len(stale) == 1
 
-    def test_high_consensus_not_stale(self, engine: CortexEngine):
+    async def test_high_consensus_not_stale(self, engine: CortexEngine):
         conn = engine._get_sync_conn()
         old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
         conn.execute(
@@ -313,7 +327,7 @@ class TestFindStaleFacts:
         )
         conn.commit()
 
-        stale = find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
+        stale = await find_stale_facts(engine, "p", max_age_days=90, min_consensus=0.5)
         assert len(stale) == 0
 
 
@@ -321,13 +335,13 @@ class TestFindStaleFacts:
 
 
 class TestCompact:
-    def test_empty_project(self, engine: CortexEngine):
-        result = compact(engine, "nonexistent")
+    async def test_empty_project(self, engine: CortexEngine):
+        result = await compact(engine, "nonexistent")
         assert result.reduction == 0
         assert result.details == []
 
-    def test_dry_run(self, seeded_engine: CortexEngine):
-        result = compact(seeded_engine, "test", dry_run=True)
+    async def test_dry_run(self, seeded_engine: CortexEngine):
+        result = await compact(seeded_engine, "test", dry_run=True)
         assert result.dry_run is True
         # Dry run should not deprecate anything
         conn = seeded_engine._get_sync_conn()
@@ -336,8 +350,8 @@ class TestCompact:
         ).fetchone()[0]
         assert active == 8  # all originals still active
 
-    def test_dedup_only(self, seeded_engine: CortexEngine):
-        result = compact(
+    async def test_dedup_only(self, seeded_engine: CortexEngine):
+        result = await compact(
             seeded_engine,
             "test",
             strategies=[CompactionStrategy.DEDUP],
@@ -347,8 +361,8 @@ class TestCompact:
         # Canonical facts should survive
         assert result.compacted_count < result.original_count
 
-    def test_merge_errors_only(self, seeded_engine: CortexEngine):
-        result = compact(
+    async def test_merge_errors_only(self, seeded_engine: CortexEngine):
+        result = await compact(
             seeded_engine,
             "test",
             strategies=[CompactionStrategy.MERGE_ERRORS],
@@ -356,7 +370,7 @@ class TestCompact:
         assert "merge_errors" in result.strategies_applied
         assert len(result.new_fact_ids) >= 1  # consolidated error created
 
-    def test_staleness_prune(self, engine: CortexEngine):
+    async def test_staleness_prune(self, engine: CortexEngine):
         conn = engine._get_sync_conn()
         old_date = (datetime.now(timezone.utc) - timedelta(days=120)).isoformat()
         conn.execute(
@@ -374,7 +388,7 @@ class TestCompact:
         )
         conn.commit()
 
-        result = compact(
+        result = await compact(
             engine,
             "p",
             strategies=[CompactionStrategy.STALENESS_PRUNE],
@@ -383,14 +397,14 @@ class TestCompact:
         assert "staleness_prune" in result.strategies_applied
         assert result.reduction >= 1
 
-    def test_full_pipeline(self, seeded_engine: CortexEngine):
-        result = compact(seeded_engine, "test")
+    async def test_full_pipeline(self, seeded_engine: CortexEngine):
+        result = await compact(seeded_engine, "test")
         assert result.project == "test"
         assert result.reduction > 0
         assert len(result.strategies_applied) > 0
 
-    def test_project_isolation(self, seeded_engine: CortexEngine):
-        compact(seeded_engine, "test")
+    async def test_project_isolation(self, seeded_engine: CortexEngine):
+        await compact(seeded_engine, "test")
         # Other project should be unaffected
         conn = seeded_engine._get_sync_conn()
         other_active = conn.execute(
@@ -398,8 +412,8 @@ class TestCompact:
         ).fetchone()[0]
         assert other_active == 1
 
-    def test_deprecated_facts_exist(self, seeded_engine: CortexEngine):
-        compact(seeded_engine, "test")
+    async def test_deprecated_facts_exist(self, seeded_engine: CortexEngine):
+        await compact(seeded_engine, "test")
         conn = seeded_engine._get_sync_conn()
         deprecated = conn.execute(
             "SELECT COUNT(*) FROM facts WHERE project = 'test' AND valid_until IS NOT NULL"
@@ -411,19 +425,28 @@ class TestCompact:
 
 
 class TestCompactSession:
-    def test_empty_project(self, engine: CortexEngine):
-        output = compact_session(engine, "empty")
+    async def test_empty_project(self, engine: CortexEngine):
+        output = await compact_session(engine, "empty")
         assert "No active facts" in output
 
-    def test_generates_markdown(self, seeded_engine: CortexEngine):
-        output = compact_session(seeded_engine, "test")
+    async def test_generates_markdown(self, seeded_engine: CortexEngine):
+        output = await compact_session(seeded_engine, "test")
         assert "# test" in output
         assert "##" in output
 
-    def test_max_facts_limit(self, engine: CortexEngine):
+    async def test_max_facts_limit(self, engine: CortexEngine):
+        # Use raw SQL to insert many facts (avoids anomaly detector)
+        conn = await engine.get_conn()
+        stmt = (
+            "INSERT INTO facts (tenant_id, project, content, fact_type, source, "
+            "confidence, created_at, updated_at, valid_from, tags) "
+            "VALUES ('default', 'p', ?, 'knowledge', 'test', "
+            "'stated', datetime('now'), datetime('now'), datetime('now'), '[]')"
+        )
         for i in range(20):
-            engine.store_sync(project="p", content=f"Fact number {i}", fact_type="knowledge")
-        output = compact_session(engine, "p", max_facts=5)
+            await conn.execute(stmt, (f"Fact number {i} padded for length",))
+        await conn.commit()
+        output = await compact_session(engine, "p", max_facts=5)
         # Should contain markdown but limited content
         assert "# p" in output
 
@@ -432,20 +455,20 @@ class TestCompactSession:
 
 
 class TestGetCompactionStats:
-    def test_no_history(self, engine: CortexEngine):
-        stats = get_compaction_stats(engine)
+    async def test_no_history(self, engine: CortexEngine):
+        stats = await get_compaction_stats(engine)
         assert stats["total_compactions"] == 0
 
-    def test_after_compaction(self, seeded_engine: CortexEngine):
-        compact(seeded_engine, "test")
-        stats = get_compaction_stats(seeded_engine)
+    async def test_after_compaction(self, seeded_engine: CortexEngine):
+        await compact(seeded_engine, "test")
+        stats = await get_compaction_stats(seeded_engine)
         assert stats["total_compactions"] >= 1
         assert stats["total_deprecated"] > 0
 
-    def test_project_filter(self, seeded_engine: CortexEngine):
-        compact(seeded_engine, "test")
-        stats = get_compaction_stats(seeded_engine, project="test")
+    async def test_project_filter(self, seeded_engine: CortexEngine):
+        await compact(seeded_engine, "test")
+        stats = await get_compaction_stats(seeded_engine, project="test")
         assert stats["total_compactions"] >= 1
 
-        stats_other = get_compaction_stats(seeded_engine, project="nonexistent")
+        stats_other = await get_compaction_stats(seeded_engine, project="nonexistent")
         assert stats_other["total_compactions"] == 0

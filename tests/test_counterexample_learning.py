@@ -5,11 +5,13 @@ as episodic facts in semantic memory.
 """
 
 import os
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from cortex.verification.counterexample import learn_from_failure
-from cortex.verification.verifier import SovereignVerifier
+
+import pytest
+
 from cortex.engine.keter import FormalVerificationGate
+from cortex.verification.counterexample import learn_from_failure
+
 
 @pytest.mark.asyncio
 async def test_learn_from_failure_persistence():

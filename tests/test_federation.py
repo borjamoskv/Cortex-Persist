@@ -46,8 +46,8 @@ class TestFederatedEngine:
         """Facts stored in one tenant should not leak to another."""
         engine = FederatedEngine(shard_dir=tmp_path, auto_embed=False)
 
-        await engine.store("tenant-a", "project-a", "Secret fact A")
-        await engine.store("tenant-b", "project-b", "Secret fact B")
+        await engine.store("tenant-a", "project-a", "Secret fact A", source="api")
+        await engine.store("tenant-b", "project-b", "Secret fact B", source="api")
 
         facts_a = await engine.recall("tenant-a", "project-a")
         facts_b = await engine.recall("tenant-b", "project-b")

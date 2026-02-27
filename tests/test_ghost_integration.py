@@ -1,7 +1,9 @@
 import asyncio
+
 import pytest
-from pathlib import Path
+
 from cortex.engine.ghost_mixin import GhostMixin
+
 
 class MockEngine(GhostMixin):
     def __init__(self):
