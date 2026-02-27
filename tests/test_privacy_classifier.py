@@ -6,7 +6,6 @@ Covers all 25 pattern categories across 4 severity tiers.
 
 from cortex.storage.classifier import DataSensitivity, classify_content
 
-
 # ── Tier 0: Clean Content ─────────────────────────────────────────────
 
 

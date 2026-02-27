@@ -11,7 +11,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 import textwrap
 from pathlib import Path
 
@@ -288,9 +287,9 @@ def main() -> None:
 
     print(f"\n✅ Plugin scaffolded at: {plugin_dir}")
     print(f"\n   cd {plugin_dir}")
-    print("   docker build -t cortex-plugin-{} .".format(_slug(args.name)))
-    print("   docker run -p 8080:8080 cortex-plugin-{}".format(_slug(args.name)))
-    print(f"\n   Files created:")
+    print(f"   docker build -t cortex-plugin-{_slug(args.name)} .")
+    print(f"   docker run -p 8080:8080 cortex-plugin-{_slug(args.name)}")
+    print("\n   Files created:")
     for f in sorted(plugin_dir.rglob("*")):
         if f.is_file():
             print(f"     {f.relative_to(plugin_dir)}")
