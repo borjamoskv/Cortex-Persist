@@ -47,6 +47,7 @@ def main():
         # Escaneamos el directorio raíz completo para asegurar integridad.
         result = m.scan(project_name, str(Path.cwd()), deep=False)
         import asyncio
+
         asyncio.run(engine.close())
 
     except ImportError:

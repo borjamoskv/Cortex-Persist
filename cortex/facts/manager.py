@@ -47,7 +47,24 @@ class FactManager:
         **kwargs,
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
-        # Manager-specific validation
+        conn = conn or await self.engine.get_conn()
+
+        # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
+        if (
+            hasattr(self.engine, "memory")
+            and self.engine.memory
+            and hasattr(self.engine.memory, "thalamus")
+        ):
+            should_process, action, _ = await self.engine.memory.thalamus.filter(
+                content=content, project_id=project, tenant_id=tenant_id, fact_type=fact_type
+            )
+            if not should_process:
+                from cortex.routes.notch_ws import notify_notch_pruning
+
+                await notify_notch_pruning()
+                raise ValueError(f"Thalamus: Fact rejected ({action})")
+
+        # Fallback to local validation
         if len(content.strip()) < self.MIN_CONTENT_LENGTH:
             raise ValueError(
                 f"content too short ({len(content.strip())} chars, min {self.MIN_CONTENT_LENGTH})"
@@ -55,7 +72,6 @@ class FactManager:
 
         from cortex.engine.store_mixin import StoreMixin
 
-        conn = conn or await self.engine.get_conn()
         return await StoreMixin._store_impl(
             self.engine,
             conn,

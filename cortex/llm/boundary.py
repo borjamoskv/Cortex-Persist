@@ -23,6 +23,18 @@ logger = logging.getLogger("cortex.llm.boundary")
 T = TypeVar("T", bound=BaseModel)
 
 
+def _clean_llm_json(raw: str) -> str:
+    """Extrae JSON puro de una respuesta con formato Markdown."""
+    clean = raw.strip()
+    if clean.startswith("```json"):
+        clean = clean[7:]
+    elif clean.startswith("```"):
+        clean = clean[3:]
+    if clean.endswith("```"):
+        clean = clean[:-3]
+    return clean.strip()
+
+
 class ImmuneBoundary:
     """Barrera estricta de validación para salidas LLM.
 
@@ -58,17 +70,7 @@ class ImmuneBoundary:
             try:
                 # El LLM genera la respuesta, posiblemente usando el feedback del error anterior
                 raw_output = await generation_func(last_error_msg)
-
-                # Limpieza básica de bloques de código Markdown
-                clean_output = raw_output.strip()
-                if clean_output.startswith("```json"):
-                    clean_output = clean_output[7:]
-                elif clean_output.startswith("```"):
-                    clean_output = clean_output[3:]
-                if clean_output.endswith("```"):
-                    clean_output = clean_output[:-3]
-                clean_output = clean_output.strip()
-
+                clean_output = _clean_llm_json(raw_output)
                 return schema.model_validate_json(clean_output)
 
             except ValidationError as e:

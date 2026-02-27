@@ -192,9 +192,7 @@ async def run_daemon_cli():
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(
             sig,
-            lambda: asyncio.ensure_future(
-                _shutdown(daemon, _stop)
-            ),
+            lambda: asyncio.ensure_future(_shutdown(daemon, _stop)),
         )
 
     await daemon.start()

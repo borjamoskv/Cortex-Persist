@@ -126,7 +126,9 @@ def _get_raw_conn(engine: CortexEngine) -> object:
 
 
 def _build_health_probes(
-    conn: object, request: Request, schema_version: str,
+    conn: object,
+    request: Request,
+    schema_version: str,
 ) -> dict[str, object]:
     """Build the probe registry for deep health check.
 
@@ -140,14 +142,14 @@ def _build_health_probes(
 
     def _probe_schema() -> ProbeResult:
         row = conn.execute(  # type: ignore[union-attr]
-            "SELECT value FROM cortex_meta "
-            "WHERE key = 'schema_version'",
+            "SELECT value FROM cortex_meta WHERE key = 'schema_version'",
         ).fetchone()
         db_ver = row[0] if row else "unknown"
         if db_ver == schema_version:
             return "ok", True, {"version": db_ver}
         return (
-            "drift", False,
+            "drift",
+            False,
             {"expected": schema_version, "actual": db_ver},
         )
 
@@ -165,8 +167,7 @@ def _build_health_probes(
         return (
             "ok" if healthy else "warning",
             healthy,
-            {"pending_uncheckpointed": pending,
-             "last_checkpoint_tx": last_tx},
+            {"pending_uncheckpointed": pending, "last_checkpoint_tx": last_tx},
         )
 
     def _probe_fts() -> ProbeResult:
@@ -183,9 +184,7 @@ def _build_health_probes(
         return (
             "ok",
             True,
-            {"active_connections": active,
-             "max_connections": max_c,
-             "utilization": f"{pct:.0f}%"},
+            {"active_connections": active, "max_connections": max_c, "utilization": f"{pct:.0f}%"},
         )
 
     return {
@@ -198,7 +197,9 @@ def _build_health_probes(
 
 
 async def _verify_admin_auth(
-    authorization: str | None, manager: object, lang: str,
+    authorization: str | None,
+    manager: object,
+    lang: str,
 ) -> None:
     """Validate that the caller has 'admin' permission.
 
@@ -221,7 +222,8 @@ async def _verify_admin_auth(
 
     if "admin" not in result.permissions:
         detail = get_trans(
-            "error_missing_permission", lang,
+            "error_missing_permission",
+            lang,
         ).format(permission="admin")
         raise HTTPException(status_code=403, detail=detail)
 
@@ -251,7 +253,9 @@ async def export_project(
 
     try:
         facts = await run_in_threadpool(
-            engine.search, project=project, limit=_MAX_EXPORT_FACTS,
+            engine.search,
+            project=project,
+            limit=_MAX_EXPORT_FACTS,
         )
         content = export_facts(facts, fmt="json")
 
@@ -262,7 +266,9 @@ async def export_project(
 
         out_path = await run_in_threadpool(_write_export)
         logger.info(
-            "Export completed: project=%s path=%s", project, out_path,
+            "Export completed: project=%s path=%s",
+            project,
+            out_path,
         )
         return ExportResponse(
             project=project,
@@ -271,10 +277,13 @@ async def export_project(
         )
     except (OSError, ValueError) as exc:
         logger.error(
-            "Export failure: project=%s error=%s", project, exc,
+            "Export failure: project=%s error=%s",
+            project,
+            exc,
         )
         SelfHealingHook.trigger(
-            exc, {"endpoint": "export_project", "project": project},
+            exc,
+            {"endpoint": "export_project", "project": project},
         )
         raise HTTPException(
             status_code=500,
@@ -314,16 +323,20 @@ async def deep_health_check(
                 status, ok, details = probe()  # type: ignore[misc]
             except AttributeError:
                 status, ok, details = (
-                    "unavailable", True,
+                    "unavailable",
+                    True,
                     {"detail": f"{name} not configured"},
                 )
             except (OSError, RuntimeError, ValueError) as e:
                 status, ok, details = (
-                    "error", False, {"detail": str(e)},
+                    "error",
+                    False,
+                    {"detail": str(e)},
                 )
             _healthy = _healthy and ok
             _checks[name] = HealthCheckDetail(
-                status=status, **details,
+                status=status,
+                **details,
             )
         return _checks, _healthy
 
@@ -334,10 +347,12 @@ async def deep_health_check(
     except (OSError, RuntimeError) as exc:
         logger.error("Deep health check failure: %s", exc)
         SelfHealingHook.trigger(
-            exc, {"endpoint": "deep_health_check"},
+            exc,
+            {"endpoint": "deep_health_check"},
         )
         raise HTTPException(
-            status_code=503, detail="Health check failed",
+            status_code=503,
+            detail="Health check failed",
         ) from None
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
@@ -351,7 +366,8 @@ async def deep_health_check(
 
     if not overall_healthy:
         return JSONResponse(  # type: ignore[return-value]
-            content=result.model_dump(), status_code=503,
+            content=result.model_dump(),
+            status_code=503,
         )
     return result
 
@@ -424,7 +440,9 @@ async def create_api_key(
 
     logger.info(
         "API key created: name=%s tenant=%s prefix=%s",
-        name, tenant_id, api_key.key_prefix,
+        name,
+        tenant_id,
+        api_key.key_prefix,
     )
 
     return ApiKeyResponse(
@@ -489,6 +507,4 @@ async def generate_handoff_context(
     except (RuntimeError, ValueError, KeyError, OSError) as exc:
         logger.error("Handoff failure: %s", exc)
         SelfHealingHook.trigger(exc, {"endpoint": "generate_handoff_context"})
-        raise HTTPException(
-            status_code=500, detail=get_trans("error_unexpected", lang)
-        ) from None
+        raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None

@@ -133,11 +133,7 @@ async def _upsert_relation(
 async def process_fact_graph(
     conn, fact_id: int, content: str, project: str, timestamp: str
 ) -> tuple[int, int]:
-    """Process a fact for graph extraction (async).
-
-    Entity extraction and relationship detection are CPU-bound (regex),
-    so they run synchronously. Only the DB writes use await.
-    """
+    """Process a fact for graph extraction (async)."""
     entities = extract_entities(content)
     if not entities:
         return 0, 0
@@ -154,19 +150,22 @@ async def process_fact_graph(
             if sid and tid:
                 await _upsert_relation(conn, sid, tid, rel["relation_type"], timestamp, fact_id)
 
-        # Neo4j dual-write (sync, external service)
-        if GRAPH_BACKEND == "neo4j":
-            try:
-                neo = Neo4jBackend()
-                for ent in entities:
-                    neo.upsert_entity(ent["name"], ent["entity_type"], project, timestamp)
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Neo4j dual-write failed: %s", e)
-
+        _neo4j_dual_write(entities, project, timestamp)
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.warning("Graph processing failed for fact %d: %s", fact_id, e)
         return 0, 0
+
+
+def _neo4j_dual_write(entities: list[dict], project: str, timestamp: str) -> None:
+    if GRAPH_BACKEND != "neo4j":
+        return
+    try:
+        neo = Neo4jBackend()
+        for ent in entities:
+            neo.upsert_entity(ent["name"], ent["entity_type"], project, timestamp)
+    except (sqlite3.Error, OSError, ValueError) as e:
+        logger.warning("Neo4j dual-write failed: %s", e)
 
 
 def process_fact_graph_sync(

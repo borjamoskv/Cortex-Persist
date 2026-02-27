@@ -106,6 +106,18 @@ class AsyncConnectionPool:
         self._initialized = False
         self._lock = asyncio.Lock()
 
+    async def _create_connection(self) -> aiosqlite.Connection:
+        import aiosqlite
+
+        from cortex.database.core import apply_pragmas_async
+
+        conn = await aiosqlite.connect(self.db_path, timeout=30.0)
+        await apply_pragmas_async(conn)
+        # Quick health check
+        async with conn.execute("SELECT 1") as cursor:
+            await cursor.fetchone()
+        return conn
+
     async def initialize(self) -> bool:
         """Initialize the pool with validated connections."""
         async with self._lock:
@@ -115,13 +127,7 @@ class AsyncConnectionPool:
             logger.debug("Initializing connection pool for %s", self.db_path)
             try:
                 for _ in range(self.max_connections):
-                    conn = await aiosqlite.connect(self.db_path, timeout=30.0)
-                    from cortex.database.core import apply_pragmas_async
-
-                    await apply_pragmas_async(conn)
-                    # Quick health check
-                    async with conn.execute("SELECT 1") as cursor:
-                        await cursor.fetchone()
+                    conn = await self._create_connection()
                     await self._pool.put(conn)
                 self._initialized = True
                 return True
@@ -141,29 +147,34 @@ class AsyncConnectionPool:
             logger.error("Connection pool exhausted (timeout after %ss)", self.acquire_timeout)
             raise RuntimeError("Database connection timed out") from None
 
+        conn = await self._verify_or_replace_connection(conn)
+
         try:
-            # Verify connection is still alive
-            try:
-                await conn.execute("SELECT 1")
-            except (OSError, ValueError, KeyError):
-                logger.warning("Reviving stale database connection")
-                conn = await aiosqlite.connect(self.db_path, timeout=30.0)
-                from cortex.database.core import apply_pragmas_async
-
-                await apply_pragmas_async(conn)
-
             yield conn
         finally:
             if conn:
                 await self._pool.put(conn)
+
+    async def _verify_or_replace_connection(
+        self, conn: aiosqlite.Connection
+    ) -> aiosqlite.Connection:
+        try:
+            await conn.execute("SELECT 1")
+            return conn
+        except (OSError, ValueError, KeyError):
+            logger.warning("Reviving stale database connection")
+            return await self._create_connection()
+
+    async def _close_single_connection(self, conn: aiosqlite.Connection) -> None:
+        try:
+            await conn.close()
+        except (OSError, ValueError, KeyError):
+            pass
 
     async def close(self):
         """Cleanly close all connections in the pool."""
         async with self._lock:
             while not self._pool.empty():
                 conn = await self._pool.get()
-                try:
-                    await conn.close()
-                except (OSError, ValueError, KeyError):
-                    pass
+                await self._close_single_connection(conn)
             self._initialized = False
