@@ -108,7 +108,7 @@ async def test_engine_crud(engine):
     print("\n--- Starting Engine CRUD test ---")
     # Store
     print("Storing fact...")
-    fid = await engine.store("test-proj", "Hello Async World", fact_type="test")
+    fid = await engine.store("test-proj", "Hello Async World", fact_type="test", source="cli")
     assert fid > 0
     print(f"Fact stored with ID: {fid}")
 
