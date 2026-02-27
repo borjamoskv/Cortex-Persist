@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.core import _run_async
+from cortex.cli.common import _run_async
 from cortex.engine.keter import KeterEngine
 from cortex.utils.errors import CortexError
 
@@ -64,7 +64,7 @@ def sovereign_cmds() -> None:
 def sovereign_status_cmd() -> None:
     """Muestra el estado del DigitalEndocrine y el PowerLevel."""
     from cortex.sovereign.endocrine import DigitalEndocrine
-    from cortex.sovereign.observability import compute_power, Dimension
+    from cortex.sovereign.observability import Dimension, compute_power
 
     endocrine = DigitalEndocrine()
     # Mocking dimension scores for status display
@@ -75,7 +75,7 @@ def sovereign_status_cmd() -> None:
     console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.temperature:.2f}[/]")
     console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.response_style}[/]")
     console.print(f"⚡  [bold]Power:[/][cyan] {power.power}/1000[/]")
-    
+
     hormones = endocrine.to_dict()["hormones"]
     h_str = " | ".join([f"{k.capitalize()}: {v:.2f}" for k, v in hormones.items()])
     console.print(f"\n🧪 [dim]{h_str}[/]")
@@ -88,15 +88,15 @@ def sovereign_ignite_cmd(env: str) -> None:
     from cortex.sovereign.engine import run_pipeline
 
     console.print(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
-    
+
     try:
         ctx = _run_async(run_pipeline(environment=env))
-        
+
         console.print("\n[bold]Fases del Pipeline:[/]")
         for r in ctx.results:
             status = "[green]✓[/]" if r.success else "[red]✗[/]"
             console.print(f"  {status} {r.phase.name:<20} [dim]{r.duration_ms:>8.1f}ms[/]")
-            
+
         if ctx.power:
             console.print(f"\n[bold gold1]🌌 POWER LEVEL ALCANZADO: {ctx.power.power}[/]")
             if ctx.power.power >= 1300:

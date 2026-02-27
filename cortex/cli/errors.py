@@ -19,7 +19,7 @@ from rich.panel import Panel
 
 # Re-use the shared CLI console so errors appear in the same stream
 # as regular output (important for Click test runner capture).
-from cortex.cli import console
+from cortex.cli.common import console
 from cortex.utils.i18n import get_trans
 
 __all__ = [
@@ -217,21 +217,50 @@ def err_unexpected(detail: str, hint: str = "") -> NoReturn:
 
 def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> CortexErrorStruct:
     """Classify a raw Python Exception into a guaranteed CortexError schema without side effects."""
-    import sqlite3
 
     error_str = str(e)
     ctx_prefix = f" durante {context}" if context else ""
 
-    # SQLite lock
+    sqlite_struct = _classify_sqlite_error(e, error_str, ctx_prefix)
+    if sqlite_struct:
+        return sqlite_struct
+
+    os_struct = _classify_os_error(e, error_str, ctx_prefix, db_path)
+    if os_struct:
+        return os_struct
+
+    # Runtime generic
+    if isinstance(e, RuntimeError | ValueError):
+        return CortexErrorStruct(
+            code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
+            message=f"Error{ctx_prefix}",
+            detail=error_str,
+            hint="Revisa los parámetros de entrada.",
+            http_status=400 if isinstance(e, ValueError) else 500,
+        )
+
+    # Catch-all
+    return CortexErrorStruct(
+        code=ErrorCode.UNEXPECTED,
+        message=f"{type(e).__name__}{ctx_prefix}",
+        detail=error_str,
+        http_status=500,
+    )
+
+
+def _classify_sqlite_error(
+    e: Exception, error_str: str, ctx_prefix: str
+) -> CortexErrorStruct | None:
+    import sqlite3
+
     if isinstance(e, sqlite3.OperationalError) and "locked" in error_str.lower():
         return CortexErrorStruct(
             code=ErrorCode.DB_LOCKED,
             message=_t("cli_err_db_locked_title"),
             detail=error_str,
-            http_status=409,  # Conflict
+            http_status=409,
         )
 
-    # SQLite corruption
     if isinstance(e, sqlite3.DatabaseError) and (
         "corrupt" in error_str.lower() or "malformed" in error_str.lower()
     ):
@@ -242,7 +271,21 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
             http_status=500,
         )
 
-    # File not found
+    if isinstance(e, sqlite3.Error):
+        return CortexErrorStruct(
+            code=ErrorCode.UNEXPECTED,
+            message=f"Error de base de datos{ctx_prefix}",
+            detail=error_str,
+            hint="Prueba con `cortex init` o revisa la integridad con `cortex verify 1`.",
+            http_status=500,
+        )
+
+    return None
+
+
+def _classify_os_error(
+    e: Exception, error_str: str, ctx_prefix: str, db_path: str
+) -> CortexErrorStruct | None:
     if isinstance(e, FileNotFoundError):
         if db_path and "cortex" in error_str.lower():
             return CortexErrorStruct(
@@ -258,7 +301,6 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
             http_status=404,
         )
 
-    # Permission errors
     if isinstance(e, PermissionError):
         return CortexErrorStruct(
             code=ErrorCode.PERMISSION_DENIED,
@@ -267,17 +309,6 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
             http_status=403,
         )
 
-    # SQLite generic
-    if isinstance(e, sqlite3.Error):
-        return CortexErrorStruct(
-            code=ErrorCode.UNEXPECTED,
-            message=f"Error de base de datos{ctx_prefix}",
-            detail=error_str,
-            hint="Prueba con `cortex init` o revisa la integridad con `cortex verify 1`.",
-            http_status=500,
-        )
-
-    # OS errors
     if isinstance(e, OSError):
         return CortexErrorStruct(
             code=ErrorCode.UNEXPECTED,
@@ -286,6 +317,8 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
             hint="Verifica permisos y espacio en disco.",
             http_status=500,
         )
+
+    return None
 
     # Runtime generic
     if isinstance(e, RuntimeError | ValueError):

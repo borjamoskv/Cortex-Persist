@@ -6,7 +6,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.compaction.compactor import (
     CompactionStrategy,
     compact,
@@ -61,7 +61,12 @@ def _display_compaction_result(project: str, result, dry_run: bool) -> None:
     help="Strategies to apply (default: all). Can be specified multiple times.",
 )
 @click.option("--dry-run", is_flag=True, help="Preview without executing.")
-@click.option("--background", "-b", is_flag=True, help="Dispatch Void-Omega Compaction async in the background.")
+@click.option(
+    "--background",
+    "-b",
+    is_flag=True,
+    help="Dispatch Void-Omega Compaction async in the background.",
+)
 @click.option(
     "--threshold",
     "-t",
@@ -91,8 +96,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
             )
         if not dry_run and not force:
             console.print(
-                f"[yellow]⚠ Compacting[/] [bold]{project}[/] "
-                f"[dim](strategies: {strategy_label})[/]"
+                f"[yellow]⚠ Compacting[/] [bold]{project}[/] [dim](strategies: {strategy_label})[/]"
             )
             if not click.confirm("Proceed?"):
                 console.print("[dim]Aborted.[/]")
@@ -101,18 +105,21 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
         if not dry_run and background:
             import subprocess
             import sys
-            
+
             cmd = [
                 sys.executable,
-                "-m", "cortex.cli",
-                "compact", project,
+                "-m",
+                "cortex.cli",
+                "compact",
+                project,
                 "--force",
-                "--threshold", str(threshold)
+                "--threshold",
+                str(threshold),
             ]
             if strategy:
                 for s in strategy:
                     cmd.extend(["--strategy", s])
-            
+
             # Run detached process
             subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             console.print(
@@ -134,7 +141,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
         _display_compaction_result(project, result, dry_run)
 
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @cli.command("compact-status")
@@ -178,7 +185,7 @@ def compact_status(project, db) -> None:
             console.print(table)
 
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @cli.command("compact-session")
@@ -197,4 +204,4 @@ def compact_session_cmd(project, max_facts, db) -> None:
         output = compact_session(engine, project, max_facts=max_facts)
         console.print(output)
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)

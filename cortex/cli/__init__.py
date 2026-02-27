@@ -9,72 +9,44 @@ from rich.console import Console
 from rich.theme import Theme
 
 from cortex import __version__
-from cortex.config import DEFAULT_DB_PATH
-from cortex.engine import CortexEngine
-from cortex.timing import TimingTracker
 
-cortex_theme = Theme({
-    "info": "dim cyan",
-    "warning": "magenta",
-    "danger": "bold red",
-    "success": "bold green",
-    "noir.bg": "on #0A0A0A",
-    "noir.abyssal": "#1A1A1A",
-    "noir.cyber": "bold #CCFF00",
-    "noir.gold": "bold #D4AF37",
-    "noir.violet": "bold #6600FF",
-    "noir.yinmn": "bold #2E5090",
-})
-
-console = Console(theme=cortex_theme)
-DEFAULT_DB = str(DEFAULT_DB_PATH)
-
-
-def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
-    """Create an engine instance."""
-    return CortexEngine(db_path=db)
-
-
-def get_tracker(engine: CortexEngine) -> TimingTracker:
-    """Create a timing tracker from an engine."""
-    return TimingTracker(engine._get_conn())
-
-
-# ─── Main Group ──────────────────────────────────────────────────
-
-
-@click.group()
-@click.version_option(__version__, prog_name="cortex")
-def cli() -> None:
-    """CORTEX — Trust Infrastructure for Autonomous AI."""
-    pass
-
-
+# Registrar submódulos
 # ─── Registrar todos los sub-módulos ───────────────────────────────────
 from cortex.cli import (  # noqa: E402
     chronos_cmds,  # noqa: E402, F401
     compact_cmds,  # noqa: E402, F401
     context_cmds,  # noqa: E402, F401
-    core,  # noqa: E402, F401
     crud,  # noqa: E402, F401
     entropy_cmds,  # noqa: E402, F401
     episodic_cmds,  # noqa: E402, F401
     episodic_observe,  # noqa: E402, F401
     handoff_cmds,  # noqa: E402, F401
+    init_cmds,
     launchpad_cmds,  # noqa: E402, F401
     mejoralo_cmds,  # noqa: E402, F401
+    memory_cmds,
     nexus_cmds,  # noqa: E402, F401
-    prompt_cmds,  # noqa: E402, F401  — Prompt generation
+    prompt_cmds,  # noqa: E402, F401
     purge,  # noqa: E402, F401
-    reflect_cmds,  # noqa: E402, F401  — Reflection System
+    reflect_cmds,  # noqa: E402, F401
+    status_cmds,
     sync_cmds,  # noqa: E402, F401
     time_cmds,  # noqa: E402, F401
     timeline_cmds,  # noqa: E402, F401
-    tips_cmds,  # noqa: E402, F401  — TIPS System
-    trust_cmds,  # noqa: E402, F401  — Trust & Compliance
+    tips_cmds,  # noqa: E402, F401
+    trust_cmds,  # noqa: E402, F401
     vote_ledger,  # noqa: E402, F401
 )
 from cortex.cli.chronos_cmds import chronos_cmds as chronos_cli  # noqa: E402
+from cortex.cli.common import (
+    DEFAULT_DB,
+    cli,
+    close_engine_sync,
+    console,
+    cortex_theme,
+    get_engine,
+    get_tracker,
+)
 from cortex.cli.compact_cmds import (  # noqa: E402
     compact_cmd,
     compact_session_cmd,
@@ -107,6 +79,9 @@ from cortex.cli.trust_cmds import (  # noqa: E402
     verify_fact,
 )
 from cortex.cli.vote_ledger import ledger  # noqa: E402
+from cortex.config import DEFAULT_DB_PATH
+from cortex.engine import CortexEngine
+from cortex.timing import TimingTracker
 
 cli.add_command(time_cmd, name="time")
 cli.add_command(heartbeat_cmd, name="heartbeat")
@@ -151,6 +126,12 @@ cli.add_command(sovereign_cli, name="sovereign")
 cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
 cli.add_command(prompt_group, name="prompt")
+
+from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
+from cortex.cli.security_cmds import security_cli  # noqa: E402
+
+cli.add_command(agent_cli, name="agent")
+cli.add_command(security_cli, name="security")
 
 
 @cli.command("observe")

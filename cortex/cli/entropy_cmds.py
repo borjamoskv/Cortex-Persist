@@ -5,7 +5,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from cortex.cli import cli, console
+from cortex.cli.common import cli, console
 from cortex.cli.errors import err_empty_results, err_platform, handle_cli_error
 
 __all__ = ["entropy", "entropy_install_hook", "entropy_report"]
