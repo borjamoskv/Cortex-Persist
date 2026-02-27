@@ -107,7 +107,7 @@ class CortexMemoryManager:
         # Semaphore/Space for Hebbian learning if L2 is available
         self._dynamic_space = DynamicSemanticSpace(self._l2) if self._l2 else None
         if self._dynamic_space:
-            self._dynamic_space.hebbian_daemon.start()
+            self._dynamic_space.semantic_mutator.start()
 
         # Semantic Fusion Layer
         self._fusion = ContextFusion(judge_provider=router)
@@ -175,6 +175,8 @@ class CortexMemoryManager:
                 self._background_tasks.add(task)
                 task.add_done_callback(self._background_tasks.discard)
 
+        return event
+
     async def store(
         self,
         tenant_id: str,
@@ -190,10 +192,7 @@ class CortexMemoryManager:
         """
         # Pre-filtering Gate: Active Forgetting (#350/100 Standard)
         should_process, action, patch = await self.thalamus.filter(
-            content=content,
-            project_id=project_id,
-            tenant_id=tenant_id,
-            fact_type=fact_type
+            content=content, project_id=project_id, tenant_id=tenant_id, fact_type=fact_type
         )
 
         if not should_process:
@@ -213,15 +212,15 @@ class CortexMemoryManager:
             timestamp=time.time(),
             metadata=metadata or {},
         )
-        
+
         # Store in Sovereign L2
         if self._l2:
             await self._l2.memorize(fact)
-            
+
         # Store in HDC L2 (Vector Alpha/Gamma)
         if self._hdc:
             await self._hdc.memorize(fact, fact_type=fact_type)
-            
+
         return fact_id
 
     async def assemble_context(
@@ -250,8 +249,7 @@ class CortexMemoryManager:
         # 4. Optional Semantic Fusion
         if fuse_context and episodic_facts:
             context["episodic_context"] = await self._fusion.fuse_context(
-                user_prompt=query or "",
-                retrieved_facts=episodic_facts
+                user_prompt=query or "", retrieved_facts=episodic_facts
             )
 
         return context
@@ -272,7 +270,9 @@ class CortexMemoryManager:
 
         # Dense (Legacy Fallback)
         if not hdc_results and self._l2:
-            dense_results = await self._fetch_dense_results(tenant_id, project_id, query, max_episodes)
+            dense_results = await self._fetch_dense_results(
+                tenant_id, project_id, query, max_episodes
+            )
 
         # Fusion
         if hdc_results and dense_results:
@@ -303,7 +303,7 @@ class CortexMemoryManager:
     ) -> list[CortexFactModel]:
         try:
             if hasattr(self._l2, "recall_secure"):
-                # Use DynamicSemanticSpace to apply O(1) Read-as-Rewrite 
+                # Use DynamicSemanticSpace to apply O(1) Read-as-Rewrite
                 # instead of passive querying, if available.
                 if self._dynamic_space:
                     return await self._dynamic_space.recall_and_pulse(
@@ -318,13 +318,10 @@ class CortexMemoryManager:
                     query=query,
                     limit=max_episodes,
                 )
-            return await self._l2.recall(
-                query=query, limit=max_episodes, tenant_id=tenant_id
-            )
+            return await self._l2.recall(query=query, limit=max_episodes)
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("Dense L2 recall failed: %s", e)
             return []
-
 
     def _apply_rrf(
         self,
@@ -477,7 +474,7 @@ class CortexMemoryManager:
             if len(hvs) == 1:
                 return hvs[0]
             return bundle(*hvs)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning("Context vector bundling failed: %s", e)
             return None
 
@@ -519,11 +516,14 @@ class CortexMemoryManager:
         except asyncio.TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
             if _testing:
-                # In test mode: cancel pending tasks aggressively to prevent event loop leaks
-                for task in list(self._background_tasks):
-                    if not task.done():
-                        task.cancel()
-                self._background_tasks.clear()
+                self._cancel_background_tasks()
+
+    def _cancel_background_tasks(self) -> None:
+        """Cancel pending tasks aggressively to prevent event loop leaks (testing mode)."""
+        for task in list(self._background_tasks):
+            if not task.done():
+                task.cancel()
+        self._background_tasks.clear()
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"
