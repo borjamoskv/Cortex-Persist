@@ -7,7 +7,7 @@ import sqlite3
 import click
 from rich.panel import Panel
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = ["reflect", "inject"]
@@ -45,7 +45,7 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="storing reflection")
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)
 
 
 @cli.command()
@@ -96,4 +96,4 @@ def inject(project, hint, top_k, fmt, db) -> None:
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="injecting reflections")
     finally:
-        engine.close_sync()
+        close_engine_sync(engine)

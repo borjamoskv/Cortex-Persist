@@ -9,7 +9,7 @@ import sys
 import click
 from rich.panel import Panel
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 
 # Importe actualizado para Wave 5 Fase 2

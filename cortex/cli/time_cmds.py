@@ -7,7 +7,7 @@ import sqlite3
 import click
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine, get_tracker
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine, get_tracker
 from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = ["time_cmd", "heartbeat_cmd"]
@@ -32,28 +32,32 @@ def time_cmd(project, days, db) -> None:
         if summary.total_seconds == 0:
             err_empty_results("time tracked")
             return
-        table = Table(title=title)
-        table.add_column("Metric", style="bold")
-        table.add_column("Value", style="cyan")
-        table.add_row("Total", summary.format_duration(summary.total_seconds))
-        table.add_row("Entries", str(summary.entries))
-        table.add_row("Heartbeats", str(summary.heartbeats))
-        if summary.by_category:
-            for cat, secs in sorted(summary.by_category.items(), key=lambda x: -x[1]):
-                table.add_row(f"  {cat}", summary.format_duration(secs))
-        if summary.by_project:
-            table.add_row("", "")
-            for proj, secs in sorted(summary.by_project.items(), key=lambda x: -x[1]):
-                table.add_row(f"  📁 {proj}", summary.format_duration(secs))
-        if summary.top_entities:
-            table.add_row("", "")
-            for entity, count in summary.top_entities[:5]:
-                table.add_row(f"  📄 {entity}", f"{count} hits")
-        console.print(table)
+        _render_time_summary(summary, title)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="fetching time report")
     finally:
         engine.close_sync()
+
+
+def _render_time_summary(summary, title: str) -> None:
+    table = Table(title=title)
+    table.add_column("Metric", style="bold")
+    table.add_column("Value", style="cyan")
+    table.add_row("Total", summary.format_duration(summary.total_seconds))
+    table.add_row("Entries", str(summary.entries))
+    table.add_row("Heartbeats", str(summary.heartbeats))
+    if summary.by_category:
+        for cat, secs in sorted(summary.by_category.items(), key=lambda x: -x[1]):
+            table.add_row(f"  {cat}", summary.format_duration(secs))
+    if summary.by_project:
+        table.add_row("", "")
+        for proj, secs in sorted(summary.by_project.items(), key=lambda x: -x[1]):
+            table.add_row(f"  📁 {proj}", summary.format_duration(secs))
+    if summary.top_entities:
+        table.add_row("", "")
+        for entity, count in summary.top_entities[:5]:
+            table.add_row(f"  📄 {entity}", f"{count} hits")
+    console.print(table)
 
 
 @cli.command("heartbeat")

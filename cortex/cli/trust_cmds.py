@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli
+from cortex.cli.common import DEFAULT_DB, cli
 
 __all__ = ["verify_fact", "compliance_report", "audit_trail"]
 
@@ -51,6 +51,32 @@ def _find_transaction(conn, fact_id: int, fact_tx_id: int | None):
             (fact_id,),
         ).fetchone()
     return tx
+
+
+def _verify_chain_link(conn, tx_id: int, prev_hash: str | None) -> tuple[bool, str]:
+    if not prev_hash:
+        return True, "[green]✅ Valid[/green]"
+
+    prev_tx = conn.execute(
+        "SELECT hash FROM transactions WHERE id = ?",
+        (tx_id - 1,),
+    ).fetchone()
+    
+    if prev_tx and prev_tx[0] != prev_hash:
+        return False, "[red]❌ BROKEN — prev_hash mismatch[/red]"
+    return True, "[green]✅ Valid[/green]"
+
+
+def _check_merkle(conn, tx_id: int):
+    try:
+        return conn.execute(
+            "SELECT id, root_hash, tx_start_id, tx_end_id, created_at "
+            "FROM merkle_roots "
+            "WHERE tx_start_id <= ? AND tx_end_id >= ? LIMIT 1",
+            (tx_id, tx_id),
+        ).fetchone()
+    except (sqlite3.Error, OSError, RuntimeError):
+        return None
 
 
 @cli.command("verify")
@@ -96,64 +122,49 @@ def verify_fact(fact_id: int, db: str) -> None:
 
         tx_id, tx_hash, prev_hash, _action, _tx_time = tx
 
-        # Verify chain
-        chain_valid = True
-        chain_msg = "[green]✅ Valid[/green]"
+        chain_valid, chain_msg = _verify_chain(conn, tx_id, prev_hash)
+        checkpoint = _check_merkle(conn, tx_id)
 
-        if prev_hash:
-            prev_tx = conn.execute(
-                "SELECT hash FROM transactions WHERE id = ?",
-                (tx_id - 1,),
-            ).fetchone()
-            if prev_tx and prev_tx[0] != prev_hash:
-                chain_valid = False
-                chain_msg = "[red]❌ BROKEN — prev_hash mismatch[/red]"
-
-        # Check if the fact is in a Merkle checkpoint
-        try:
-            checkpoint = conn.execute(
-                "SELECT id, root_hash, tx_start_id, tx_end_id, created_at "
-                "FROM merkle_roots "
-                "WHERE tx_start_id <= ? AND tx_end_id >= ? LIMIT 1",
-                (tx_id, tx_id),
-            ).fetchone()
-        except (sqlite3.Error, OSError, RuntimeError):
-            checkpoint = None
-
-        # Build certificate
-        table = Table(title="CORTEX Verification Certificate", show_header=False)
-        table.add_column("Field", style="bold")
-        table.add_column("Value")
-        table.add_row("Fact ID", f"#{fid}")
-        table.add_row("Project", proj)
-        table.add_row("Type", ftype)
-        table.add_row("Created", created)
-        table.add_row("Content", content[:200])
-        table.add_row("", "")
-        table.add_row("TX Hash", tx_hash[:32] + "…")
-        table.add_row("Prev Hash", (prev_hash or "genesis")[:32] + "…")
-        table.add_row("Chain Link", chain_msg)
-
-        if checkpoint:
-            cp_id, merkle_root, start, end, cp_time = checkpoint
-            table.add_row("", "")
-            table.add_row("Merkle Root", merkle_root[:32] + "…")
-            table.add_row("Checkpoint", f"#{cp_id} (TX #{start}→#{end})")
-            table.add_row("Sealed", cp_time)
-            table.add_row("Merkle Status", "[green]✅ Included in sealed checkpoint[/green]")
-        else:
-            table.add_row("Merkle", "[yellow]⏳ Not yet checkpointed[/yellow]")
-
-        overall = (
-            "[green]✅ VERIFIED[/green]" if chain_valid else "[red]❌ INTEGRITY VIOLATION[/red]"
-        )
-        console.print(table)
-        console.print(Panel(overall, title="Verdict"))
+        _render_verification_certificate(fact, tx, chain_valid, chain_msg, checkpoint)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="verifying fact")
     finally:
         if conn:
             conn.close()
+
+
+def _render_verification_certificate(
+    fact: tuple, tx: tuple, chain_valid: bool, chain_msg: str, checkpoint: tuple | None
+) -> None:
+    fid, proj, content, ftype, created, fact_tx_id = fact
+    tx_id, tx_hash, prev_hash, _action, _tx_time = tx
+
+    table = Table(title="CORTEX Verification Certificate", show_header=False)
+    table.add_column("Field", style="bold")
+    table.add_column("Value")
+    table.add_row("Fact ID", f"#{fid}")
+    table.add_row("Project", proj)
+    table.add_row("Type", ftype)
+    table.add_row("Created", created)
+    table.add_row("Content", content[:200])
+    table.add_row("", "")
+    table.add_row("TX Hash", tx_hash[:32] + "…")
+    table.add_row("Prev Hash", (prev_hash or "genesis")[:32] + "…")
+    table.add_row("Chain Link", chain_msg)
+
+    if checkpoint:
+        cp_id, merkle_root, start, end, cp_time = checkpoint
+        table.add_row("", "")
+        table.add_row("Merkle Root", merkle_root[:32] + "…")
+        table.add_row("Checkpoint", f"#{cp_id} (TX #{start}→#{end})")
+        table.add_row("Sealed", cp_time)
+        table.add_row("Merkle Status", "[green]✅ Included in sealed checkpoint[/green]")
+    else:
+        table.add_row("Merkle", "[yellow]⏳ Not yet checkpointed[/yellow]")
+
+    overall = "[green]✅ VERIFIED[/green]" if chain_valid else "[red]❌ INTEGRITY VIOLATION[/red]"
+    console.print(table)
+    console.print(Panel(overall, title="Verdict"))
 
 
 def _safe_count(conn, query: str) -> int:

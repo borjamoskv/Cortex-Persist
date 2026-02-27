@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
