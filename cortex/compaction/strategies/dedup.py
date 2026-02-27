@@ -18,7 +18,7 @@ logger = logging.getLogger("cortex.compaction.dedup")
 _LOG_FMT = "Compactor [%s] %s"
 
 
-def execute_dedup(
+async def execute_dedup(
     engine: "CortexEngine",
     project: str,
     result: "CompactionResult",
@@ -26,17 +26,16 @@ def execute_dedup(
     threshold: float,
 ) -> None:
     """Execute the DEDUP strategy."""
-    dup_groups = find_duplicates(engine, project, threshold)
+    dup_groups = await find_duplicates(engine, project, threshold)
     if not dup_groups:
         return
 
     result.strategies_applied.append("dedup")
-    conn = engine._get_sync_conn()
 
     for group in dup_groups:
         canonical_id = group[0]
         if not dry_run:
-            _merge_duplicate_group(engine, conn, canonical_id, group)
+            await _merge_duplicate_group(engine, project, canonical_id, group)
             result.deprecated_ids.extend(group[1:])
 
     total_removed = sum(len(g) - 1 for g in dup_groups)
@@ -45,7 +44,7 @@ def execute_dedup(
     logger.info(_LOG_FMT, project, detail)
 
 
-def find_duplicates(
+async def find_duplicates(
     engine: "CortexEngine",
     project: str,
     similarity_threshold: float = 0.85,
@@ -55,16 +54,13 @@ def find_duplicates(
     Returns list of groups where each group is list of fact IDs.
     First ID in each group is canonical (oldest).
     """
-    conn = engine._get_sync_conn()
-    rows = conn.execute(
-        "SELECT id, content, fact_type, created_at "
-        "FROM facts WHERE project = ? AND valid_until IS NULL "
-        "ORDER BY created_at ASC",
-        (project,),
-    ).fetchall()
+    facts = await engine.facts.recall(project=project)
 
-    if not rows:
+    if not facts:
         return []
+
+    # Map to tuples (id, content, fact_type, created_at) to reuse existing logic
+    rows = [(f.id, f.content, f.fact_type, f.created_at) for f in facts]
 
     exact_groups, seen = _find_exact_duplicates(rows)
     near_groups = _find_near_duplicates(rows, seen, similarity_threshold)
@@ -117,39 +113,38 @@ def _find_near_duplicates(
     return groups
 
 
-def _merge_duplicate_group(
+async def _merge_duplicate_group(
     engine: "CortexEngine",
-    conn,
+    project: str,
     canonical_id: int,
     group: list[int],
 ) -> None:
     """Merge a single duplicate group: deprecate duplicates, update canonical."""
-    row = conn.execute(
-        "SELECT content, fact_type FROM facts WHERE id = ?",
-        (canonical_id,),
-    ).fetchone()
-    if not row:
+    facts = await engine.facts.recall(project=project)
+
+    if not facts:
         return
 
-    # Collect all contents for merge
-    all_contents = []
+    # Create mapping of id to content
+    fact_map = {f.id: f for f in facts}
+
+    canonical_fact = fact_map.get(canonical_id)
+    if not canonical_fact:
+        return
+
     from cortex.compaction.utils import merge_error_contents
 
-    for fid in group:
-        r = conn.execute("SELECT content FROM facts WHERE id = ?", (fid,)).fetchone()
-        if r:
-            all_contents.append(r[0])
+    all_contents = [fact_map[fid].content for fid in group if fid in fact_map]
 
     # Deprecate duplicates (not canonical)
     for dup_id in group[1:]:
-        engine.deprecate_sync(dup_id, f"compacted:dedup→#{canonical_id}")
+        await engine.deprecate(dup_id, f"compacted:dedup→#{canonical_id}")
 
     # Update canonical if content changed after merge (only for errors usually)
-    if row[1] == "error" and len(all_contents) > 1:
+    if canonical_fact.fact_type == "error" and len(all_contents) > 1:
         merged = merge_error_contents(all_contents)
-        if merged != row[0]:
-            conn.execute(
-                "UPDATE facts SET content = ?, updated_at = datetime('now') WHERE id = ?",
-                (merged, canonical_id),
+        if merged != canonical_fact.content:
+            await engine.update(
+                canonical_id,
+                content=merged,
             )
-            conn.commit()

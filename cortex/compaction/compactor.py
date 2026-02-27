@@ -21,12 +21,13 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    import aiosqlite
+
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compactor")
@@ -110,37 +111,7 @@ def _apply_dedup_strategy(
         result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
 
-def _apply_merge_errors_strategy(
-    engine: CortexEngine,
-    project: str,
-    result: CompactionResult,
-    dry_run: bool,
-) -> None:
-    from cortex.compaction.strategies.merge_errors import execute_merge_errors
-
-    prev_count = len(result.deprecated_ids)
-    execute_merge_errors(engine, project, result, dry_run)
-    if len(result.deprecated_ids) > prev_count:
-        result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
-
-
-def _apply_staleness_strategy(
-    engine: CortexEngine,
-    project: str,
-    result: CompactionResult,
-    dry_run: bool,
-    max_age_days: int,
-    min_consensus: float,
-) -> None:
-    from cortex.compaction.strategies.staleness import execute_staleness_prune
-
-    prev_count = len(result.deprecated_ids)
-    execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
-    if len(result.deprecated_ids) > prev_count:
-        result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
-
-
-def _apply_strategies(
+async def _apply_strategies(
     engine: CortexEngine,
     project: str,
     strategies: list[CompactionStrategy],
@@ -152,16 +123,31 @@ def _apply_strategies(
 ) -> None:
     """Execute selected compaction strategies."""
     if CompactionStrategy.DEDUP in strategies:
-        _apply_dedup_strategy(engine, project, result, dry_run, similarity_threshold)
+        from cortex.compaction.strategies.dedup import execute_dedup
+
+        prev_count = len(result.deprecated_ids)
+        await execute_dedup(engine, project, result, dry_run, similarity_threshold)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
     if CompactionStrategy.MERGE_ERRORS in strategies:
-        _apply_merge_errors_strategy(engine, project, result, dry_run)
+        from cortex.compaction.strategies.merge_errors import execute_merge_errors
+
+        prev_count = len(result.deprecated_ids)
+        await execute_merge_errors(engine, project, result, dry_run)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
 
     if CompactionStrategy.STALENESS_PRUNE in strategies:
-        _apply_staleness_strategy(engine, project, result, dry_run, max_age_days, min_consensus)
+        from cortex.compaction.strategies.staleness import execute_staleness_prune
+
+        prev_count = len(result.deprecated_ids)
+        await execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
 
 
-def compact(
+async def compact(
     engine: CortexEngine,
     project: str,
     strategies: list[CompactionStrategy] | None = None,
@@ -178,15 +164,16 @@ def compact(
     if strategies is None:
         strategies = CompactionStrategy.all()
 
-    conn = engine._get_sync_conn()
-    count_before = conn.execute(
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
-    ).fetchone()[0]
+    )
+    count_before = (await cursor.fetchone())[0]
 
     result = CompactionResult(project=project, original_count=count_before, dry_run=dry_run)
 
-    _apply_strategies(
+    await _apply_strategies(
         engine,
         project,
         strategies,
@@ -198,15 +185,16 @@ def compact(
     )
 
     # Final count
-    count_after = conn.execute(
+    cursor = await conn.execute(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
-    ).fetchone()[0]
+    )
+    count_after = (await cursor.fetchone())[0]
     result.compacted_count = count_after
 
     # Log compaction
-    if not dry_run and result.deprecated_ids:
-        _log_compaction(
+    if not dry_run and (result.deprecated_ids or result.new_fact_ids):
+        await _log_compaction(
             conn,
             project=project,
             strategies=list(result.strategies_applied),
@@ -242,61 +230,53 @@ _TYPE_ORDER = [
 ]
 
 
-def compact_session(
+async def compact_session(
     engine: CortexEngine,
     project: str,
     max_facts: int = 50,
 ) -> str:
     """Prepare compressed context string for LLM re-injection.
 
-    Selects most relevant active facts, groups by type,
-    produces dense markdown summary.
+    Instead of sending 500 facts to the LLM, we send a categorized,
+    compacted view.
     """
-    conn = engine._get_sync_conn()
-    rows = conn.execute(
-        """
-        SELECT id, content, fact_type, tags, consensus_score, created_at
-        FROM facts WHERE project = ? AND valid_until IS NULL
-        ORDER BY
-          CASE fact_type
-            WHEN 'axiom' THEN 0 WHEN 'decision' THEN 1
-            WHEN 'rule' THEN 2 WHEN 'error' THEN 3
-            WHEN 'knowledge' THEN 4 WHEN 'ghost' THEN 5
-            WHEN 'intent' THEN 6 WHEN 'schema' THEN 7
-            ELSE 8 END,
-          consensus_score DESC, created_at DESC
-        LIMIT ?
-        """,
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
+        "SELECT fact_type, content, consensus_score, created_at "
+        "FROM facts "
+        "WHERE project = ? AND valid_until IS NULL "
+        "ORDER BY (consensus_score * 0.7 + "
+        "(1.0 / (1.0 + (julianday('now') - julianday(created_at)))) * 0.3) DESC "
+        "LIMIT ?",
         (project, max_facts),
-    ).fetchall()
+    )
+    rows = await cursor.fetchall()
 
     if not rows:
-        return f"# {project}\n\nNo active facts.\n"
+        return f"No active facts for project '{project}'."
 
-    by_type: dict[str, list[tuple]] = defaultdict(list)
+    grouped: dict[str, list[Any]] = {t: [] for t in _TYPE_ORDER}
+    grouped["other"] = []
+
     for row in rows:
-        by_type[row[2]].append(row)
+        ftype = row[0]
+        if ftype in grouped:
+            grouped[ftype].append(row)
+        else:
+            grouped["other"].append(row)
 
-    return _format_session_context(project, by_type)
+    lines = [f"# {project} — Active Memory State", ""]
+    for ftype in _TYPE_ORDER:
+        if grouped[ftype]:
+            _append_type_section(lines, ftype, grouped[ftype])
 
-
-def _format_session_context(project: str, by_type: dict[str, list[tuple]]) -> str:
-    """Format grouped facts into markdown context."""
-    lines = [f"# {project}", ""]
-
-    for ft in _TYPE_ORDER:
-        if ft in by_type:
-            _append_type_section(lines, ft, by_type[ft])
-
-    # Remaining types not in the predefined order
-    for ft, facts in by_type.items():
-        if ft not in _TYPE_ORDER:
-            _append_type_section(lines, ft, facts)
+    if grouped["other"]:
+        _append_type_section(lines, "other", grouped["other"])
 
     return "\n".join(lines)
 
 
-def _append_type_section(lines: list[str], fact_type: str, facts: list[tuple]) -> None:
+def _append_type_section(lines: list[str], fact_type: str, facts: list[Any]) -> None:
     """Append a fact type section to the output lines."""
     lines.append(f"## {fact_type.capitalize()} ({len(facts)})")
     lines.append("")
@@ -308,16 +288,17 @@ def _append_type_section(lines: list[str], fact_type: str, facts: list[tuple]) -
 # ─── Stats ───────────────────────────────────────────────────────────
 
 
-def get_compaction_stats(
+async def get_compaction_stats(
     engine: CortexEngine,
     project: str | None = None,
 ) -> dict[str, Any]:
     """Get compaction history and statistics."""
-    conn = engine._get_sync_conn()
+    conn = await engine.get_conn()
 
-    table_exists = conn.execute(
+    cursor = await conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name='compaction_log'"
-    ).fetchone()
+    )
+    table_exists = await cursor.fetchone()
 
     if not table_exists:
         return {"total_compactions": 0, "total_deprecated": 0, "history": []}
@@ -329,7 +310,8 @@ def get_compaction_stats(
         params.append(project)
     query += " ORDER BY timestamp DESC LIMIT 20"
 
-    rows = conn.execute(query, params).fetchall()
+    cursor = await conn.execute(query, params)
+    rows = await cursor.fetchall()
     history = []
     total_deprecated = 0
 
@@ -359,8 +341,8 @@ def get_compaction_stats(
 # ─── Internal ────────────────────────────────────────────────────────
 
 
-def _log_compaction(
-    conn: sqlite3.Connection,
+async def _log_compaction(
+    conn: aiosqlite.Connection,
     project: str,
     strategies: list[str],
     original_ids: list[int],
@@ -370,7 +352,7 @@ def _log_compaction(
 ) -> None:
     """Log a compaction event to the compaction_log table."""
     try:
-        conn.execute(
+        await conn.execute(
             "INSERT INTO compaction_log "
             "(project, strategy, original_ids, new_fact_id, facts_before, facts_after) "
             "VALUES (?, ?, ?, ?, ?, ?)",
@@ -383,6 +365,6 @@ def _log_compaction(
                 facts_after,
             ),
         )
-        conn.commit()
+        await conn.commit()
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.warning("Failed to log compaction: %s", e)
