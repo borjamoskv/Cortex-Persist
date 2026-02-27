@@ -30,15 +30,19 @@ from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import CortexFactModel, MemoryEntry, MemoryEvent
+from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
+from cortex.routes.notch_ws import notify_notch_pruning
 from cortex.thinking.context_fusion import ContextFusion
 
 try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    from cortex.memory.semantic_ram import DynamicSemanticSpace
 
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
+    DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 
 __all__ = ["CortexMemoryManager"]
 
@@ -70,6 +74,8 @@ class CortexMemoryManager:
         "_background_tasks",
         "_max_bg_tasks",
         "_fusion",
+        "_dynamic_space",
+        "thalamus",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -92,8 +98,16 @@ class CortexMemoryManager:
         self._hdc = hdc_l2
         self._hdc_encoder = hdc_encoder
         self._router = router
-        self._background_tasks: set[asyncio.Task[None]] = set()
+        self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
+
+        # 350/100 Standard: Active Forgetting Gate
+        self.thalamus = ThalamusGate(self)
+
+        # Semaphore/Space for Hebbian learning if L2 is available
+        self._dynamic_space = DynamicSemanticSpace(self._l2) if self._l2 else None
+        if self._dynamic_space:
+            self._dynamic_space.hebbian_daemon.start()
 
         # Semantic Fusion Layer
         self._fusion = ContextFusion(judge_provider=router)
@@ -174,7 +188,21 @@ class CortexMemoryManager:
         Bypasses the L1 working memory buffer. Useful for errors,
         decisions, and formal proof counterexamples.
         """
-        fact_id = uuid.uuid4().hex
+        # Pre-filtering Gate: Active Forgetting (#350/100 Standard)
+        should_process, action, patch = await self.thalamus.filter(
+            content=content,
+            project_id=project_id,
+            tenant_id=tenant_id,
+            fact_type=fact_type
+        )
+
+        if not should_process:
+            logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
+            # Manifest as shockwave in Notch
+            await notify_notch_pruning()
+            return f"filtered:{action}"
+
+        fact_id = str(uuid.uuid4())
         vector = await self._encoder.encode(content)
         fact = CortexFactModel(
             id=fact_id,
@@ -275,6 +303,15 @@ class CortexMemoryManager:
     ) -> list[CortexFactModel]:
         try:
             if hasattr(self._l2, "recall_secure"):
+                # Use DynamicSemanticSpace to apply O(1) Read-as-Rewrite 
+                # instead of passive querying, if available.
+                if self._dynamic_space:
+                    return await self._dynamic_space.recall_and_pulse(
+                        tenant_id=tenant_id,
+                        project_id=project_id,
+                        query=query,
+                        limit=max_episodes,
+                    )
                 return await self._l2.recall_secure(
                     tenant_id=tenant_id,
                     project_id=project_id,
