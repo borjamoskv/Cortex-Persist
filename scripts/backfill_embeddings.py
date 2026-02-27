@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from cortex.db import connect as connect_db  # noqa: E402
+
 from cortex.embeddings import LocalEmbedder  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")

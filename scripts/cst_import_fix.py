@@ -1,5 +1,6 @@
 import os
 import pathlib
+
 import libcst as cst
 from libcst.matchers import *
 
@@ -118,7 +119,7 @@ class ImportFixer(cst.CSTTransformer):
         return updated_node.with_changes(names=tuple(new_names))
 
 def process_file(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         code = f.read()
     
     try:
@@ -137,7 +138,6 @@ def process_file(path):
         print(f"Fixed imports in {path}")
 
 if __name__ == "__main__":
-    import sys
     base = pathlib.Path(__file__).parent.parent
     for d in [base / "cortex", base / "tests"]:
         for root, _, files in os.walk(d):

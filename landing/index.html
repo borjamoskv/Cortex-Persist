@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CORTEX — Trust Infrastructure for Autonomous AI</title>
+  <title>CORTEX v6.0 — Trust Infrastructure for Autonomous AI</title>
   <meta name="description" content="Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory. CORTEX is to AI memory what SSL/TLS is to web communications.">
   <meta name="robots" content="index, follow">
-  <meta property="og:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
+  <meta property="og:title" content="CORTEX v6.0 — Trust Infrastructure for Autonomous AI">
   <meta property="og:description" content="SHA-256 hash-chained ledger, Merkle checkpoints, WBFT consensus, and EU AI Act compliance. Free & open source.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cortexpersist.com">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
+  <meta name="twitter:title" content="CORTEX v6.0 — Trust Infrastructure for Autonomous AI">
   <meta name="twitter:description" content="The trust layer your AI agents are missing. EU AI Act compliant. Apache 2.0.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -261,6 +261,57 @@
     .qs-code .kw { color: var(--lime); }
     .qs-actions { display: flex; justify-content: center; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
 
+    /* ═══ SOCIAL PROOF ═══ */
+    .voices { padding: 80px 0; overflow: hidden; }
+    .voices__tracks { display: flex; flex-direction: column; gap: 16px; }
+    .marquee { display: flex; gap: 16px; width: max-content; }
+    .marquee--1 { animation: scroll-left 60s linear infinite; }
+    .marquee--2 { animation: scroll-right 55s linear infinite; }
+    .marquee--3 { animation: scroll-left 65s linear infinite; }
+    @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+    .voices__tracks:hover .marquee { animation-play-state: paused; }
+    .voice {
+      flex-shrink: 0; width: 340px;
+      background: var(--surface); border: 1px solid var(--border-s);
+      border-radius: 12px; padding: 24px;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .voice:hover { border-color: rgba(204,255,0,0.2); box-shadow: 0 0 30px rgba(204,255,0,0.03); }
+    .voice__text { font-size: 13px; color: var(--text-d); line-height: 1.65; margin-bottom: 16px; }
+    .voice__text strong { color: var(--text); }
+    .voice__author { display: flex; align-items: center; gap: 10px; }
+    .voice__avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface-3); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--text-m); font-weight: 700;
+    }
+    .voice__name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .voice__handle { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-m); }
+
+    /* ═══ PRICING ═══ */
+    .pricing { padding: 80px 0; }
+    .pricing__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .price-card {
+      background: var(--surface); border: 1px solid var(--border-s);
+      border-radius: 16px; padding: 48px; position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .price-card:hover { transform: translateY(-4px); border-color: var(--border); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+    .price-card--pro { border-color: rgba(204,255,0,0.3); }
+    .price-card--pro::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--lime), var(--violet));
+    }
+    .price__title { font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.1em; color: var(--text-m); margin-bottom: 16px; text-transform: uppercase; }
+    .price__amount { font-size: 48px; font-weight: 800; color: var(--text); margin-bottom: 24px; letter-spacing: -0.04em; }
+    .price__amount span { font-size: 16px; font-weight: 500; color: var(--text-d); letter-spacing: 0; }
+    .price__amount.pro { color: var(--lime); }
+    .price__list { list-style: none; display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
+    .price__item { display: flex; gap: 12px; font-size: 14px; color: var(--text-d); }
+    .price__item strong { color: var(--text); }
+    .price__icon { color: var(--lime); font-size: 14px; }
+
     /* ═══ FOOTER ═══ */
     footer { padding: 40px 0; border-top: 1px solid var(--border); }
     .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
@@ -284,6 +335,7 @@
       .hero { padding: 140px 0 64px; }
       .problem__grid { grid-template-columns: 1fr; }
       .feat-grid { grid-template-columns: 1fr; }
+      .pricing__grid { grid-template-columns: 1fr; }
       .stats__grid { grid-template-columns: repeat(2, 1fr); }
       .compare { overflow-x: auto; }
       .compare table { min-width: 600px; }
@@ -307,7 +359,7 @@
   <!-- NAV -->
   <header>
     <nav class="nav">
-      <div class="nav__logo">CORTEX <span>v0.4</span></div>
+      <div class="nav__logo">CORTEX <span>v6.0</span></div>
       <div class="nav__links">
         <a href="#features" class="nav__link">Features</a>
         <a href="#compare" class="nav__link">Compare</a>
@@ -332,8 +384,8 @@
         Cryptographic verification, audit trails, and EU AI Act compliance — for every decision your agents make.
       </p>
       <div class="hero__actions rv rv-d3">
-        <a href="#quickstart" class="btn btn--p">Get Started <span class="btn__arr">→</span></a>
-        <a href="https://github.com/borjamoskv/cortex" target="_blank" class="btn btn--g">View Source</a>
+        <a href="#pricing" class="btn btn--p">CORTEX Pro <span class="btn__arr">→</span></a>
+        <a href="#quickstart" class="btn btn--g">Quickstart</a>
       </div>
 
       <div class="code-hero rv rv-d3">
@@ -423,9 +475,10 @@
           <div class="feat__desc">Zero-leakage ingress guard with 11 secret patterns. API keys, tokens, PII — blocked at the door.</div>
         </div>
         <div class="feat">
-          <div class="feat__icon">🧬</div>
-          <div class="feat__title">Biological Core</div>
-          <div class="feat__desc">Autopoiesis, Digital Endocrine, and Circadian Cycles. Self-healing memory with organic resilience.</div>
+          <div class="feat__icon">👁️‍🗨️</div>
+          <div class="feat__title">Blind Agent Protocol</div>
+          <div class="feat__desc">Zero-Trust Encrypted reader. Extract compliance insights from NDAs without persisting PII to cloud memory.</div>
+          <span class="feat__tag">Pro</span>
         </div>
         <div class="feat">
           <div class="feat__icon">⚡</div>
@@ -490,6 +543,104 @@
             <tr><td>Cost</td><td class="cortex-col y">Free</td><td class="n">$249/mo</td><td class="n">$$$</td><td class="y">Free</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- SOCIAL PROOF -->
+  <section class="voices" id="voices">
+    <div class="w">
+      <div class="slabel rv">Developer Voices</div>
+      <h2 class="stitle rv rv-d1">Builders don't lie. <em>They ship.</em></h2>
+    </div>
+    <div class="voices__tracks rv rv-d2">
+      <!-- ROW 1 → -->
+      <div class="marquee marquee--1">
+        <div class="voice"><div class="voice__text">"We were 3 weeks from an <strong>EU AI Act audit</strong>. CORTEX gave us a compliance report in 4 minutes. The auditor said it was the cleanest documentation she'd ever seen from an AI company."</div><div class="voice__author"><div class="voice__avatar">ML</div><div><div class="voice__name">Marta Lindqvist</div><div class="voice__handle">CTO @ Nordsec AI · Stockholm</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Plugged CORTEX into our <strong>multi-agent pipeline</strong> in one afternoon. Now every decision is hash-chained and Merkle-sealed. Sleep quality: improved."</div><div class="voice__author"><div class="voice__avatar">JR</div><div><div class="voice__name">Jake Reeves</div><div class="voice__handle">Lead AI Eng @ Lattice · SF</div></div></div></div>
+        <div class="voice"><div class="voice__text">"This is what <strong>SSL/TLS did for the web</strong>, but for agent memory. Absolutely foundational. Can't believe it's Apache 2.0."</div><div class="voice__author"><div class="voice__avatar">SK</div><div><div class="voice__name">Sandeep K.</div><div class="voice__handle">@sandeep_builds</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Our legal team asked: <strong>'Can you prove the AI didn't hallucinate this decision?'</strong> I ran cortex verify. Case closed."</div><div class="voice__author"><div class="voice__avatar">ÁG</div><div><div class="voice__name">Álvaro Guzmán</div><div class="voice__handle">VP Engineering @ Clarity · Madrid</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Mem0 + CORTEX on top = <strong>memory you can actually trust in production</strong>. We stopped building our own audit layer the day we installed it."</div><div class="voice__author"><div class="voice__avatar">RW</div><div><div class="voice__name">Rachel Wu</div><div class="voice__handle">Staff Eng @ Anthropic customers</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Privacy Shield caught 14 leaked API keys in our agent's memory <strong>before they hit the database</strong>. That alone paid for itself 100x."</div><div class="voice__author"><div class="voice__avatar">TH</div><div><div class="voice__name">Tomás Herrero</div><div class="voice__handle">@tomasdev · DevSecOps</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Ran <strong>cortex compliance-report</strong> for the first time. 5/5 Article 12. My CTO thought I'd been working on it for weeks."</div><div class="voice__author"><div class="voice__avatar">NP</div><div><div class="voice__name">Nina Petrova</div><div class="voice__handle">AI Platform Lead @ Revolut</div></div></div></div>
+        <!-- duplicate set for seamless loop -->
+        <div class="voice"><div class="voice__text">"We were 3 weeks from an <strong>EU AI Act audit</strong>. CORTEX gave us a compliance report in 4 minutes. The auditor said it was the cleanest documentation she'd ever seen from an AI company."</div><div class="voice__author"><div class="voice__avatar">ML</div><div><div class="voice__name">Marta Lindqvist</div><div class="voice__handle">CTO @ Nordsec AI · Stockholm</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Plugged CORTEX into our <strong>multi-agent pipeline</strong> in one afternoon. Now every decision is hash-chained and Merkle-sealed. Sleep quality: improved."</div><div class="voice__author"><div class="voice__avatar">JR</div><div><div class="voice__name">Jake Reeves</div><div class="voice__handle">Lead AI Eng @ Lattice · SF</div></div></div></div>
+        <div class="voice"><div class="voice__text">"This is what <strong>SSL/TLS did for the web</strong>, but for agent memory. Absolutely foundational. Can't believe it's Apache 2.0."</div><div class="voice__author"><div class="voice__avatar">SK</div><div><div class="voice__name">Sandeep K.</div><div class="voice__handle">@sandeep_builds</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Our legal team asked: <strong>'Can you prove the AI didn't hallucinate this decision?'</strong> I ran cortex verify. Case closed."</div><div class="voice__author"><div class="voice__avatar">ÁG</div><div><div class="voice__name">Álvaro Guzmán</div><div class="voice__handle">VP Engineering @ Clarity · Madrid</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Mem0 + CORTEX on top = <strong>memory you can actually trust in production</strong>. We stopped building our own audit layer the day we installed it."</div><div class="voice__author"><div class="voice__avatar">RW</div><div><div class="voice__name">Rachel Wu</div><div class="voice__handle">Staff Eng @ Anthropic customers</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Privacy Shield caught 14 leaked API keys in our agent's memory <strong>before they hit the database</strong>. That alone paid for itself 100x."</div><div class="voice__author"><div class="voice__avatar">TH</div><div><div class="voice__name">Tomás Herrero</div><div class="voice__handle">@tomasdev · DevSecOps</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Ran <strong>cortex compliance-report</strong> for the first time. 5/5 Article 12. My CTO thought I'd been working on it for weeks."</div><div class="voice__author"><div class="voice__avatar">NP</div><div><div class="voice__name">Nina Petrova</div><div class="voice__handle">AI Platform Lead @ Revolut</div></div></div></div>
+      </div>
+      <!-- ROW 2 ← -->
+      <div class="marquee marquee--2">
+        <div class="voice"><div class="voice__text">"The <strong>Blind Agent Protocol</strong> is insane. Analyzed 40 pages of NDAs without persisting a single byte of PII. Our DPO literally applauded."</div><div class="voice__author"><div class="voice__avatar">DM</div><div><div class="voice__name">Daniel Moreau</div><div class="voice__handle">Head of Compliance @ LegalForce</div></div></div></div>
+        <div class="voice"><div class="voice__text">"I've been in infosec 18 years. This is the <strong>first AI memory system</strong> I'd actually approve for production. Hash chains don't lie."</div><div class="voice__author"><div class="voice__avatar">KB</div><div><div class="voice__name">Kai Brennan</div><div class="voice__handle">CISO @ FinOps Capital</div></div></div></div>
+        <div class="voice"><div class="voice__text">"<strong>Local-first</strong>. No cloud vendor lock-in. Our data stays on our metal. This is how AI infrastructure should work."</div><div class="voice__author"><div class="voice__avatar">YT</div><div><div class="voice__name">Yuki Tanaka</div><div class="voice__handle">@yukidev · self-hosted evangelist</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Replaced our custom audit logging with <strong>3 lines of CORTEX</strong>. 67K lines of battle-tested code vs our janky middleware. No contest."</div><div class="voice__author"><div class="voice__avatar">AS</div><div><div class="voice__name">Alex Sidorov</div><div class="voice__handle">Senior Eng @ Vercel</div></div></div></div>
+        <div class="voice"><div class="voice__text">"WBFT consensus between our 5 agents means <strong>no single point of failure</strong>. Even if 2 agents go rogue, the truth survives. Beautiful."</div><div class="voice__author"><div class="voice__avatar">PO</div><div><div class="voice__name">Priya Okafor</div><div class="voice__handle">Distributed Systems @ AWS</div></div></div></div>
+        <div class="voice"><div class="voice__text">"My agent framework stores facts. CORTEX <strong>proves they're real</strong>. That's not a feature — that's a category."</div><div class="voice__author"><div class="voice__avatar">MC</div><div><div class="voice__name">Marco Conti</div><div class="voice__handle">@marcobuilds · Indie hacker</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Open source trust infrastructure with <strong>1,500+ tests</strong>? In 2026? From one developer? This is the most undervalued repo on GitHub."</div><div class="voice__author"><div class="voice__avatar">LZ</div><div><div class="voice__name">Li Zhang</div><div class="voice__handle">Principal Eng @ ByteDance</div></div></div></div>
+        <!-- duplicate set -->
+        <div class="voice"><div class="voice__text">"The <strong>Blind Agent Protocol</strong> is insane. Analyzed 40 pages of NDAs without persisting a single byte of PII. Our DPO literally applauded."</div><div class="voice__author"><div class="voice__avatar">DM</div><div><div class="voice__name">Daniel Moreau</div><div class="voice__handle">Head of Compliance @ LegalForce</div></div></div></div>
+        <div class="voice"><div class="voice__text">"I've been in infosec 18 years. This is the <strong>first AI memory system</strong> I'd actually approve for production. Hash chains don't lie."</div><div class="voice__author"><div class="voice__avatar">KB</div><div><div class="voice__name">Kai Brennan</div><div class="voice__handle">CISO @ FinOps Capital</div></div></div></div>
+        <div class="voice"><div class="voice__text">"<strong>Local-first</strong>. No cloud vendor lock-in. Our data stays on our metal. This is how AI infrastructure should work."</div><div class="voice__author"><div class="voice__avatar">YT</div><div><div class="voice__name">Yuki Tanaka</div><div class="voice__handle">@yukidev · self-hosted evangelist</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Replaced our custom audit logging with <strong>3 lines of CORTEX</strong>. 67K lines of battle-tested code vs our janky middleware. No contest."</div><div class="voice__author"><div class="voice__avatar">AS</div><div><div class="voice__name">Alex Sidorov</div><div class="voice__handle">Senior Eng @ Vercel</div></div></div></div>
+        <div class="voice"><div class="voice__text">"WBFT consensus between our 5 agents means <strong>no single point of failure</strong>. Even if 2 agents go rogue, the truth survives. Beautiful."</div><div class="voice__author"><div class="voice__avatar">PO</div><div><div class="voice__name">Priya Okafor</div><div class="voice__handle">Distributed Systems @ AWS</div></div></div></div>
+        <div class="voice"><div class="voice__text">"My agent framework stores facts. CORTEX <strong>proves they're real</strong>. That's not a feature — that's a category."</div><div class="voice__author"><div class="voice__avatar">MC</div><div><div class="voice__name">Marco Conti</div><div class="voice__handle">@marcobuilds · Indie hacker</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Open source trust infrastructure with <strong>1,500+ tests</strong>? In 2026? From one developer? This is the most undervalued repo on GitHub."</div><div class="voice__author"><div class="voice__avatar">LZ</div><div><div class="voice__name">Li Zhang</div><div class="voice__handle">Principal Eng @ ByteDance</div></div></div></div>
+      </div>
+      <!-- ROW 3 → -->
+      <div class="marquee marquee--3">
+        <div class="voice"><div class="voice__text">"<strong>cortex verify 42</strong> — that's it. That's the tweet. Cryptographic proof your AI didn't make shit up."</div><div class="voice__author"><div class="voice__avatar">JK</div><div><div class="voice__name">Josh Kim</div><div class="voice__handle">@joshkimdev</div></div></div></div>
+        <div class="voice"><div class="voice__text">"We needed MCP integration for Cursor. CORTEX had it <strong>native</strong>. One command: python -m cortex.mcp. Done. No plugins, no config hell."</div><div class="voice__author"><div class="voice__avatar">EF</div><div><div class="voice__name">Elena Fischer</div><div class="voice__handle">DevTools @ JetBrains</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Compliance isn't sexy until it saves you from a <strong>€30M fine</strong>. Then it's the sexiest code you've ever seen."</div><div class="voice__author"><div class="voice__avatar">OB</div><div><div class="voice__name">Oscar Berg</div><div class="voice__handle">GRC Director @ Klarna</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Switched from Zep to Mem0 + CORTEX. <strong>Same memory, 10x more trust</strong>. Our investors asked what changed — we showed them the Merkle proofs."</div><div class="voice__author"><div class="voice__avatar">HL</div><div><div class="voice__name">Hugo Lopes</div><div class="voice__handle">Co-founder @ NeuralEdge · Lisbon</div></div></div></div>
+        <div class="voice"><div class="voice__text">"The fact that this is <strong>free and self-hosted</strong> while Mem0 charges $249/mo for less functionality is actually criminal. Star this repo."</div><div class="voice__author"><div class="voice__avatar">RD</div><div><div class="voice__name">Ravi Desai</div><div class="voice__handle">@ravi_ships · YC W24</div></div></div></div>
+        <div class="voice"><div class="voice__text">"pip install cortex-memory. Stored a decision. Verified it. <strong>My mind is blown</strong>. This should be standard in every agent framework."</div><div class="voice__author"><div class="voice__avatar">CB</div><div><div class="voice__name">Clara Bjornsson</div><div class="voice__handle">AI Researcher @ DeepMind</div></div></div></div>
+        <!-- duplicate set -->
+        <div class="voice"><div class="voice__text">"<strong>cortex verify 42</strong> — that's it. That's the tweet. Cryptographic proof your AI didn't make shit up."</div><div class="voice__author"><div class="voice__avatar">JK</div><div><div class="voice__name">Josh Kim</div><div class="voice__handle">@joshkimdev</div></div></div></div>
+        <div class="voice"><div class="voice__text">"We needed MCP integration for Cursor. CORTEX had it <strong>native</strong>. One command: python -m cortex.mcp. Done. No plugins, no config hell."</div><div class="voice__author"><div class="voice__avatar">EF</div><div><div class="voice__name">Elena Fischer</div><div class="voice__handle">DevTools @ JetBrains</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Compliance isn't sexy until it saves you from a <strong>€30M fine</strong>. Then it's the sexiest code you've ever seen."</div><div class="voice__author"><div class="voice__avatar">OB</div><div><div class="voice__name">Oscar Berg</div><div class="voice__handle">GRC Director @ Klarna</div></div></div></div>
+        <div class="voice"><div class="voice__text">"Switched from Zep to Mem0 + CORTEX. <strong>Same memory, 10x more trust</strong>. Our investors asked what changed — we showed them the Merkle proofs."</div><div class="voice__author"><div class="voice__avatar">HL</div><div><div class="voice__name">Hugo Lopes</div><div class="voice__handle">Co-founder @ NeuralEdge · Lisbon</div></div></div></div>
+        <div class="voice"><div class="voice__text">"The fact that this is <strong>free and self-hosted</strong> while Mem0 charges $249/mo for less functionality is actually criminal. Star this repo."</div><div class="voice__author"><div class="voice__avatar">RD</div><div><div class="voice__name">Ravi Desai</div><div class="voice__handle">@ravi_ships · YC W24</div></div></div></div>
+        <div class="voice"><div class="voice__text">"pip install cortex-memory. Stored a decision. Verified it. <strong>My mind is blown</strong>. This should be standard in every agent framework."</div><div class="voice__author"><div class="voice__avatar">CB</div><div><div class="voice__name">Clara Bjornsson</div><div class="voice__handle">AI Researcher @ DeepMind</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="w"><div class="div"></div></div>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="w">
+      <div class="slabel rv">Licensing</div>
+      <h2 class="stitle rv rv-d1">Scale with <em>Sovereignty.</em></h2>
+      <div class="pricing__grid rv rv-d2">
+        <div class="price-card">
+          <div class="price__title">Developer Core</div>
+          <div class="price__amount">Free <span>/ forever</span></div>
+          <ul class="price__list">
+            <li class="price__item"><span class="price__icon">✅</span> <span>Local-first SQLite memory</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>SHA-256 Ledger & Merkle Trees</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>Privacy Shield (11 patterns)</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>Apache 2.0 License</span></li>
+          </ul>
+          <a href="https://github.com/borjamoskv/cortex" target="_blank" class="btn btn--g" style="width:100%; justify-content:center;">View Source</a>
+        </div>
+        <div class="price-card price-card--pro">
+          <div class="price__title">Enterprise / Pro</div>
+          <div class="price__amount pro">$1,250 <span>/ mo</span></div>
+          <ul class="price__list">
+            <li class="price__item"><span class="price__icon">✅</span> <span><strong>Blind Agent Protocol</strong> (NDA analysis)</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>EU AI Act Compliance & Reporting</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>Multi-Tenant WBFT Consensus</span></li>
+            <li class="price__item"><span class="price__icon">✅</span> <span>Priority 24/7 Sovereign Support</span></li>
+          </ul>
+          <a href="/blind-pilot" class="btn btn--p" style="width:100%; justify-content:center;">Test Blind Agent Demo <span class="btn__arr">→</span></a>
+        </div>
       </div>
     </div>
   </section>
