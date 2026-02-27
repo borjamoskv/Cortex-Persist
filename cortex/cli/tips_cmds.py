@@ -6,15 +6,31 @@ Designed to display during agent thinking pauses.
 
 from __future__ import annotations
 
+import asyncio
 import sqlite3
 
 import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 from cortex.cli.tips import Tip, TipCategory, TipsEngine
+
+
+def _run_async(coro):
+    """Run an async coroutine from sync context."""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop and loop.is_running():
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result()
+    return asyncio.run(coro)
+
 
 __all__ = [
     "tips",
@@ -67,26 +83,32 @@ def tips(
             return
 
         tips_engine = _get_tips_engine(db, lang=final_lang)
+        _fetch_and_render_tips(tips_engine, category, project, count)
 
-        if category:
-            results = tips_engine.for_category(category, limit=count)
-        elif project:
-            results = tips_engine.for_project(project, limit=count)
-        else:
-            try:
-                results = [tips_engine.random() for _ in range(count)]
-            except ValueError:
-                err_empty_results("tips for the given filters")
-                return
+    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, db_path=db, context="fetching tips")
 
-        if not results:
+
+def _fetch_and_render_tips(
+    tips_engine: TipsEngine, category: str | None, project: str | None, count: int
+) -> None:
+    if category:
+        results = _run_async(tips_engine.for_category(category, limit=count))
+    elif project:
+        results = _run_async(tips_engine.for_project(project, limit=count))
+    else:
+        try:
+            results = [_run_async(tips_engine.random()) for _ in range(count)]
+        except ValueError:
             err_empty_results("tips for the given filters")
             return
 
-        for tip in results:
-            _render_tip(tip)
-    except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
-        handle_cli_error(e, db_path=db, context="fetching tips")
+    if not results:
+        err_empty_results("tips for the given filters")
+        return
+
+    for tip in results:
+        _render_tip(tip)
 
 
 # ─── Subcommands ─────────────────────────────────────────────────────
@@ -109,7 +131,7 @@ def tips_list(ctx: click.Context) -> None:
         table.add_column("Category", style="bold green")
         table.add_column("Count", justify="right", style="cyan")
 
-        all_tips = tips_engine.all_tips()
+        all_tips = _run_async(tips_engine.all_tips())
         for cat in TipCategory:
             cat_count = sum(1 for t in all_tips if t.category == cat)
             if cat_count > 0:
@@ -138,9 +160,9 @@ def tips_all(ctx: click.Context, category: str | None) -> None:
         tips_engine = _get_tips_engine(db, lang=lang)
 
         if category:
-            all_tips = tips_engine.for_category(category, limit=100)
+            all_tips = _run_async(tips_engine.for_category(category, limit=100))
         else:
-            all_tips = tips_engine.all_tips()
+            all_tips = _run_async(tips_engine.all_tips())
 
         if not all_tips:
             err_empty_results("tips")
@@ -181,7 +203,7 @@ def tips_random(ctx: click.Context, count: int) -> None:
 
         console.print()
         for _ in range(count):
-            tip = tips_engine.random()
+            tip = _run_async(tips_engine.random())
             _render_tip(tip)
         console.print()
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:

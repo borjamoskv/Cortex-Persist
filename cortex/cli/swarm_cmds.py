@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from cortex.cli import cli, console
+from cortex.cli.common import cli, console
 
 
 @cli.group()

@@ -29,9 +29,9 @@ from __future__ import annotations
 
 import functools
 import threading
-import time
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Callable, Generator
+from typing import TYPE_CHECKING
 
 __all__ = [
     "SlowOpTipEmitter",
@@ -44,8 +44,8 @@ if TYPE_CHECKING:
     pass
 
 # Default thresholds
-_DEFAULT_THRESHOLD = 2.0   # seconds before first tip fires
-_DEFAULT_INTERVAL = 8.0    # seconds between subsequent tips
+_DEFAULT_THRESHOLD = 2.0  # seconds before first tip fires
+_DEFAULT_INTERVAL = 8.0  # seconds between subsequent tips
 _DEFAULT_LANG = "es"
 
 
@@ -94,7 +94,7 @@ class SlowOpTipEmitter:
 
     # ─── Lifecycle ───────────────────────────────────────────────
 
-    def start(self) -> "SlowOpTipEmitter":
+    def start(self) -> SlowOpTipEmitter:
         self._thread.start()
         return self
 
@@ -102,7 +102,7 @@ class SlowOpTipEmitter:
         self._stop_event.set()
         self._thread.join(timeout=1.0)
 
-    def __enter__(self) -> "SlowOpTipEmitter":
+    def __enter__(self) -> SlowOpTipEmitter:
         return self.start()
 
     def __exit__(self, *_) -> None:
@@ -125,17 +125,19 @@ class SlowOpTipEmitter:
     def _emit_tip(self) -> None:
         """Emit a single tip to Rich console. Fully isolated — never crashes."""
         try:
+            import asyncio
             from rich.panel import Panel
 
-            from cortex.cli import console
+            from cortex.cli.common import console
             from cortex.cli.tips import TipsEngine
 
             tips_engine = TipsEngine(
-                self._engine,
+                None,
                 lang=self._lang,
-                include_dynamic=self._engine is not None,
+                include_dynamic=False,
             )
-            tip = tips_engine.random()
+            # Fetch random tip synchronously in current thread
+            tip = asyncio.run(tips_engine.random())
             console.print()
             console.print(
                 Panel(
@@ -211,7 +213,7 @@ def slow_tips_spinner(
         from rich.spinner import Spinner
         from rich.text import Text
 
-        from cortex.cli import console
+        from cortex.cli.common import console
 
         spin = Spinner(spinner, text=Text(f" {label}", style="noir.violet"))
 
@@ -231,7 +233,9 @@ def slow_tips_spinner(
                 emitter.stop()
     except ImportError:
         # Fallback: plain context manager without spinner
-        with with_slow_tips(label, threshold=threshold, interval=interval, lang=lang, engine=engine):
+        with with_slow_tips(
+            label, threshold=threshold, interval=interval, lang=lang, engine=engine
+        ):
             yield
 
 
@@ -255,6 +259,7 @@ def tip_on_slow(
         @tip_on_slow(threshold=2.0)
         def export(project: str): ...
     """
+
     def decorator(fn: Callable) -> Callable:
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
@@ -267,7 +272,9 @@ def tip_on_slow(
                 lang=lang,
             ):
                 return fn(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -283,5 +290,7 @@ def with_slow_tips_sync(
     engine=None,
 ) -> Generator[SlowOpTipEmitter, None, None]:
     """Alias for with_slow_tips (sync-friendly name for clarity in CLI code)."""
-    with with_slow_tips(label, threshold=threshold, interval=interval, lang=lang, engine=engine) as e:
+    with with_slow_tips(
+        label, threshold=threshold, interval=interval, lang=lang, engine=engine
+    ) as e:
         yield e

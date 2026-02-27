@@ -16,7 +16,6 @@ Usage:
 
 from __future__ import annotations
 
-import aiosqlite
 import hashlib
 import json
 import logging
@@ -28,6 +27,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, NamedTuple
+
+import aiosqlite
 
 __all__ = ["TipCategory", "Tip", "TipsEngine"]
 
@@ -216,7 +217,9 @@ class TipsEngine:
         random.shuffle(matching)
         return matching[:limit]
 
-    async def for_project(self, project: str, *, lang: str | None = None, limit: int = 3) -> list[Tip]:
+    async def for_project(
+        self, project: str, *, lang: str | None = None, limit: int = 3
+    ) -> list[Tip]:
         """Get tips scoped to a specific project."""
         target_lang = lang or self.lang
         pool = await self._get_pool(lang=target_lang)
