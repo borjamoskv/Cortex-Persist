@@ -95,28 +95,11 @@ class SAPSync:
 
             # Store new entities
             for entity in diff.new:
-                try:
-                    fact_data = self.mapper.sap_to_fact(
-                        entity, entity_set, self.client.config.base_url_normalized
-                    )
-                    # Override project with user-specified project
-                    fact_data["project"] = project
-                    await self._store_fact(fact_data)
-                    result.pulled += 1
-                except (OSError, ValueError, KeyError) as e:
-                    result.errors.append(f"Failed to store entity: {e}")
+                await self._process_entity(entity, entity_set, project, result, is_update=False)
 
             # Update modified entities
             for entity in diff.modified:
-                try:
-                    fact_data = self.mapper.sap_to_fact(
-                        entity, entity_set, self.client.config.base_url_normalized
-                    )
-                    fact_data["project"] = project
-                    await self._store_fact(fact_data)
-                    result.pulled += 1
-                except (OSError, ValueError, KeyError) as e:
-                    result.errors.append(f"Failed to update entity: {e}")
+                await self._process_entity(entity, entity_set, project, result, is_update=True)
 
             result.skipped = diff.unchanged
 
@@ -157,6 +140,26 @@ class SAPSync:
             result.status = "error"
 
         return result
+
+    async def _process_entity(
+        self,
+        entity: Any,
+        entity_set: str,
+        project: str,
+        result: SAPSyncResult,
+        is_update: bool = False,
+    ) -> None:
+        """Helper to store or update a single mapped entity fact."""
+        try:
+            fact_data = self.mapper.sap_to_fact(
+                entity, entity_set, self.client.config.base_url_normalized
+            )
+            fact_data["project"] = project
+            await self._store_fact(fact_data)
+            result.pulled += 1
+        except (OSError, ValueError, KeyError) as e:
+            action = "update" if is_update else "store"
+            result.errors.append(f"Failed to {action} entity: {e}")
 
     async def _push_single_fact(
         self, fact: dict[str, Any], entity_set: str, result: SAPSyncResult

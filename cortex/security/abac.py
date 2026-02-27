@@ -195,28 +195,36 @@ class ABACEvaluator:
 
     def _matches(self, policy: Policy, ctx: AccessContext) -> bool:
         """Check if a policy applies to the given context."""
-        # Match resource type
+        if not self._match_resource_and_action(policy, ctx):
+            return False
+        return self._match_conditions(policy, ctx)
+
+    def _match_resource_and_action(self, policy: Policy, ctx: AccessContext) -> bool:
         if policy.resource != "*" and policy.resource != ctx.resource.get("type"):
             return False
-
-        # Match action
         if policy.action != "*" and policy.action != ctx.action:
             return False
+        return True
 
-        # Match conditions
+    def _match_conditions(self, policy: Policy, ctx: AccessContext) -> bool:
         for key, expected in policy.conditions.items():
-            actual = self._resolve_attribute(key, ctx)
-
-            # Special: tenant isolation check
-            if expected == "__MISMATCH__":
-                sub_tenant = ctx.subject.get("tenant_id")
-                res_tenant = ctx.resource.get("tenant_id")
-                if sub_tenant and res_tenant and sub_tenant != res_tenant:
-                    return True  # Condition matches → this DENY policy applies
+            if not self._match_single_condition(key, expected, ctx):
                 return False
+        return True
 
-            if expected != "*" and actual != expected:
-                return False
+    def _match_single_condition(self, key: str, expected: Any, ctx: AccessContext) -> bool:
+        actual = self._resolve_attribute(key, ctx)
+
+        # Special: tenant isolation check
+        if expected == "__MISMATCH__":
+            sub_tenant = ctx.subject.get("tenant_id")
+            res_tenant = ctx.resource.get("tenant_id")
+            if sub_tenant and res_tenant and sub_tenant != res_tenant:
+                return True  # Condition matches → this DENY policy applies
+            return False
+
+        if expected != "*" and actual != expected:
+            return False
 
         return True
 
