@@ -1,8 +1,7 @@
-import os
-import re
-from pathlib import Path
-import shutil
 import ast
+import re
+import shutil
+from pathlib import Path
 
 repo_root = Path(__file__).resolve().parent.parent
 cortex_root = repo_root / "cortex"
@@ -117,7 +116,7 @@ def ast_replace(filepath: Path):
         transformer.visit(tree)
         
         # Ast unparse requires python 3.9+
-        new_content = ast.unparse(tree)
+        ast.unparse(tree)
         # AST unparsing strips some formatting, so we only use regex which is safer for formatting
     except SyntaxError:
         pass
