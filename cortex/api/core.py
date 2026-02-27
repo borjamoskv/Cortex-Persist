@@ -62,6 +62,9 @@ from cortex.routes import (
     missions as missions_router,
 )
 from cortex.routes import (
+    notch_ws as notch_ws_router,
+)
+from cortex.routes import (
     search as search_router,
 )
 from cortex.routes import (
@@ -124,7 +127,7 @@ async def lifespan(app: FastAPI):
     # 3. Global Auth Registration
     import cortex.auth
 
-    cortex.auth._auth_manager = auth_manager
+    cortex.auth.manager._auth_manager = auth_manager
 
     # 4. Temporal Tracking
     from cortex.database.core import connect as db_connect
@@ -158,7 +161,7 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth._auth_manager = None
+        cortex.auth.manager._auth_manager = None
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
@@ -278,6 +281,7 @@ app.include_router(context_router.router)
 app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
 app.include_router(hive_router)
+app.include_router(notch_ws_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

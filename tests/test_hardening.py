@@ -39,7 +39,7 @@ def client():
     cortex.config.reload()
 
     # Nuke auth singletons completely to force bootstrap mode
-    cortex.auth._auth_manager = None
+    cortex.auth.manager._auth_manager = None
     api_state.auth_manager = None
     api_state.engine = None
 
@@ -59,7 +59,7 @@ def client():
         cortex.config.reload()
 
         # Reset singletons
-        cortex.auth._auth_manager = None
+        cortex.auth.manager._auth_manager = None
         api_state.auth_manager = None
         api_state.engine = None
 

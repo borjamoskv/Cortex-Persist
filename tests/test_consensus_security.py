@@ -5,12 +5,13 @@ import uuid
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+import cortex.api.state as api_state
 import cortex.auth
-from cortex import config; import cortex.api.state as api_state
+from cortex import config
 from cortex.api.core import app
 from cortex.auth import AuthManager
-from cortex.database.pool import CortexConnectionPool
 from cortex.database.core import connect as db_connect
+from cortex.database.pool import CortexConnectionPool
 from cortex.engine import CortexEngine
 from cortex.engine_async import AsyncCortexEngine
 from cortex.timing import TimingTracker
@@ -44,7 +45,7 @@ async def client():
     # Save old globals and config
     old_engine = api_state.engine
     old_auth = api_state.auth_manager
-    old_cortex_auth = cortex.auth._auth_manager
+    old_cortex_auth = cortex.auth.manager._auth_manager
     old_db_path = config.DB_PATH
 
     # Backup app.state
@@ -66,7 +67,7 @@ async def client():
     # Re-patch globals
     api_state.engine = test_engine
     api_state.auth_manager = test_auth_manager
-    cortex.auth._auth_manager = test_auth_manager
+    cortex.auth.manager._auth_manager = test_auth_manager
     config.DB_PATH = test_db
 
     transport = ASGITransport(app=app)
@@ -85,7 +86,7 @@ async def client():
     # Restore Globals and config
     api_state.engine = old_engine
     api_state.auth_manager = old_auth
-    cortex.auth._auth_manager = old_cortex_auth
+    cortex.auth.manager._auth_manager = old_cortex_auth
     config.DB_PATH = old_db_path
 
     # Clean up test DB files
