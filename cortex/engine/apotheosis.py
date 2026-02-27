@@ -15,9 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 # Known web3 libraries that indicate crypto-related entropy.
-_WEB3_LIBS = frozenset(
-    ("web3", "eth_account", "solcx", "brownie", "ape", "moralis")
-)
+_WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moralis"))
 
 
 class PredictorAST(ast.NodeVisitor):
@@ -41,9 +39,7 @@ class PredictorAST(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
-        if node.type is None or (
-            isinstance(node.type, ast.Name) and node.type.id == "Exception"
-        ):
+        if node.type is None or (isinstance(node.type, ast.Name) and node.type.id == "Exception"):
             self.bare_excepts += 1
         self.generic_visit(node)
 
@@ -72,8 +68,8 @@ class ApotheosisEngine:
         self._healer_mode = True
 
     # Adaptive sleep bounds (seconds)
-    _SLEEP_MIN: float = 30.0    # active / entropy found
-    _SLEEP_MAX: float = 300.0   # quiescent / everything clean
+    _SLEEP_MIN: float = 30.0  # active / entropy found
+    _SLEEP_MAX: float = 300.0  # quiescent / everything clean
     _SLEEP_JITTER: float = 0.20  # ±20% to prevent thundering herd
 
     async def _omniscience_loop(self) -> None:
@@ -93,7 +89,9 @@ class ApotheosisEngine:
 
         while self.is_active:
             entropy_found = await self._process_workspace(
-                file_hashes, hashlib, _random,
+                file_hashes,
+                hashlib,
+                _random,
             )
 
             # Adaptive backoff: longer sleep when clean, shorter when busy
@@ -103,7 +101,7 @@ class ApotheosisEngine:
             else:
                 consecutive_clean = min(consecutive_clean + 1, 8)
                 base_sleep = min(
-                    self._SLEEP_MIN * (1.5 ** consecutive_clean),
+                    self._SLEEP_MIN * (1.5**consecutive_clean),
                     self._SLEEP_MAX,
                 )
 
@@ -142,12 +140,14 @@ class ApotheosisEngine:
                             await self._heal_file(py_file, entropy)
                 except OSError:
                     continue
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
             logger.error("[APOTHEOSIS] Falla en ciclo: %s", e)
         return entropy_found
 
     async def _heal_file(
-        self, file_path: Path, entropy: list[dict[str, Any]],
+        self,
+        file_path: Path,
+        entropy: list[dict[str, Any]],
     ) -> None:
         """Attempt to heal a file using Keter's rewrite engine."""
         logger.info("[APOTHEOSIS] Iniciando sanación proactiva: %s", file_path.name)
@@ -157,14 +157,13 @@ class ApotheosisEngine:
         keter = KeterEngine(self.workspace)
         reasons = ", ".join(e["type"] for e in entropy)
         intent = (
-            f"Reescribir {file_path.name} para eliminar: {reasons}. "
-            "Mantener funcionalidad intacta."
+            f"Reescribir {file_path.name} para eliminar: {reasons}. Mantener funcionalidad intacta."
         )
 
         try:
             await keter.ignite(intent)
             logger.info("[APOTHEOSIS] Sanación exitosa: %s", file_path.name)
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.error("[APOTHEOSIS] Fallo al sanar %s: %s", file_path.name, e)
 
     def _scan_file(self, file_path: Path) -> list[dict[str, Any]]:
@@ -195,8 +194,7 @@ class ApotheosisEngine:
                 )
             if predictor.bare_excepts > 0 or predictor.complex_branches > 10:
                 logger.warning(
-                    "[APOTHEOSIS] AST Degraded en %s. "
-                    "Deuda (Exceptions: %d, Ramas: %d)",
+                    "[APOTHEOSIS] AST Degraded en %s. Deuda (Exceptions: %d, Ramas: %d)",
                     file_path.name,
                     predictor.bare_excepts,
                     predictor.complex_branches,

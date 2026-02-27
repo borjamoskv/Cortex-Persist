@@ -74,7 +74,7 @@ async def ast_oracle_ws(
             await asyncio.sleep(0.5)
     except WebSocketDisconnect:
         logger.info("Holographic Interface disconnected.")
-    except Exception as e:
+    except (OSError, RuntimeError, ValueError) as e:
         logger.error("AST Oracle WS Error: %s", e)
 
 
@@ -105,5 +105,5 @@ async def fiat_stream_ws(
             await asyncio.sleep(1.0)  # Slower poll for financial updates
     except WebSocketDisconnect:
         logger.info("Financial Telemetry disconnected.")
-    except Exception as e:
+    except (OSError, RuntimeError, ValueError) as e:
         logger.error("Fiat Stream WS Error: %s", e)

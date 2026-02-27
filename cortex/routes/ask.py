@@ -250,7 +250,7 @@ async def ask_stream(
                 max_tokens=req.max_tokens,
             ):
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.error("Streaming failed: %s", e)
             yield f"data: {json.dumps({'type': 'error', 'data': str(e)})}\n\n"
 

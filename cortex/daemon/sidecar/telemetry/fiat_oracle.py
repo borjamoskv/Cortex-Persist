@@ -45,8 +45,8 @@ class FiatOracle:
         while self.running:
             try:
                 await self._check_signals()
-            except Exception as e:
-                logger.error(f"❌ [FIAT_ORACLE] Error: {e}")
+            except (OSError, ValueError, CortexError) as e:
+                logger.error("❌ [FIAT_ORACLE] Error: %s", e)
             await asyncio.sleep(self.interval)
 
     def run_sync_loop(self):
@@ -57,8 +57,8 @@ class FiatOracle:
             try:
                 # We use sync checks here if called from a thread
                 self._check_signals_sync()
-            except Exception as e:
-                logger.error(f"❌ [FIAT_ORACLE] (Thread) Error: {e}")
+            except (OSError, ValueError, CortexError) as e:
+                logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
             time.sleep(self.interval)
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
@@ -110,8 +110,8 @@ class FiatOracle:
             except json.JSONDecodeError:
                 logger.error(f"❌ [FIAT_ORACLE] Payload corrupto en {tx_file.name}")
                 tx_file.unlink()
-            except Exception as e:
-                logger.error(f"⚠️ [FIAT_ORACLE] Falla procesando {tx_file.name}: {e}")
+            except (OSError, ValueError, CortexError, KeyError) as e:
+                logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
 
     def _check_signals_sync(self):
         """Sync version for threaded execution."""
@@ -146,8 +146,8 @@ class FiatOracle:
             except json.JSONDecodeError:
                 logger.error(f"❌ [FIAT_ORACLE] Payload corrupto en {tx_file.name}")
                 tx_file.unlink()
-            except Exception as e:
-                logger.error(f"⚠️ [FIAT_ORACLE] Falla procesando {tx_file.name}: {e}")
+            except (OSError, ValueError, CortexError, KeyError) as e:
+                logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
 
     async def _execute_with_backoff_async(self, payload: dict[str, Any]) -> None:
         """Resilient storage with exponential backoff avoiding 'Database is locked' errors (Async)."""
@@ -177,7 +177,7 @@ class FiatOracle:
                         meta=meta,
                     )
                 return
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
                 logger.error(
@@ -218,7 +218,7 @@ class FiatOracle:
                         meta=meta,
                     )
                 return
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
                 logger.error(

@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.sovereign.bridge import SovereignBridge
 from cortex.sovereign.endocrine import DigitalEndocrine
@@ -28,20 +28,24 @@ from cortex.sovereign.observability import (
 
 logger = logging.getLogger(__name__)
 
+
 # ---------------------------------------------------------------------------
 # Pipeline phases
 # ---------------------------------------------------------------------------
 
+
 class Phase(Enum):
-    FABRICATION = auto()    # aether-1
-    ORCHESTRATION = auto() # keter-omega
-    SWARM = auto()         # legion-1
+    FABRICATION = auto()  # aether-1
+    ORCHESTRATION = auto()  # keter-omega
+    SWARM = auto()  # legion-1
     OPTIMIZATION = auto()  # ouroboros-infinity
-    SECURITY = auto()      # boveda-1, vault integration
-    OBSERVABILITY = auto() # telemetry, dashboards
-    EXPERIENCE = auto()    # impactv-1, stitch, AR/VR
-    DEPLOYMENT = auto()    # multi-cloud terraform
+    EVOLUTION = auto()  # continuous improvement engine
+    SECURITY = auto()  # boveda-1, vault integration
+    OBSERVABILITY = auto()  # telemetry, dashboards
+    EXPERIENCE = auto()  # impactv-1, stitch, AR/VR
+    DEPLOYMENT = auto()  # multi-cloud terraform
     VERIFICATION = auto()  # mejoralo, qa, smoke tests
+
 
 @dataclass
 class PipelineResult:
@@ -50,12 +54,14 @@ class PipelineResult:
     duration_ms: float
     details: dict[str, Any] = field(default_factory=dict)
 
+
 @dataclass
 class SovereignContext:
     """Shared context threaded through every pipeline phase."""
+
     project_root: Path = Path.cwd()
     environment: str = "production"
-    power: Optional[PowerLevel] = None
+    power: PowerLevel | None = None
     results: list[PipelineResult] = field(default_factory=list)
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
@@ -65,9 +71,11 @@ class SovereignContext:
     def elapsed_ms(self) -> float:
         return (time.time() - self.started_at) * 1000
 
+
 # ---------------------------------------------------------------------------
 # Phase executors
 # ---------------------------------------------------------------------------
+
 
 async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
     """Phase 1 — Invoke aether-1 to materialize artifacts."""
@@ -81,14 +89,15 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
             duration_ms=(time.time() - t0) * 1000,
             details={"status": "Aether-1 materialized artifacts successfully"},
         )
-    except Exception as e:
-        logger.error(f"Fabrication phase failed: {e}")
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Fabrication phase failed: %s", e)
         return PipelineResult(
             phase=Phase.FABRICATION,
             success=False,
             duration_ms=(time.time() - t0) * 1000,
             details={"error": str(e)},
         )
+
 
 async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
     """Phase 2 — Keter-omega for multi-cloud readiness."""
@@ -100,13 +109,14 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
             success=True,
             duration_ms=(time.time() - t0) * 1000,
         )
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         return PipelineResult(
             phase=Phase.ORCHESTRATION,
             success=False,
             duration_ms=(time.time() - t0) * 1000,
             details={"error": str(e)},
         )
+
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     """Phase 3 — Legion-1 swarm execution."""
@@ -118,13 +128,14 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
             success=True,
             duration_ms=(time.time() - t0) * 1000,
         )
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         return PipelineResult(
             phase=Phase.SWARM,
             success=False,
             duration_ms=(time.time() - t0) * 1000,
             details={"error": str(e)},
         )
+
 
 async def _phase_security(ctx: SovereignContext) -> PipelineResult:
     """Phase 5 — Run military-grade security scans."""
@@ -141,6 +152,7 @@ async def _phase_security(ctx: SovereignContext) -> PipelineResult:
             "passed": report.passed,
         },
     )
+
 
 async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
     """Phase 6 — Initial telemetry and initial power level check."""
@@ -160,6 +172,7 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
         details=power.to_dict(),
     )
 
+
 async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     """Phase 7 — Impactv-1 for UI/UX excellence."""
     t0 = time.time()
@@ -170,13 +183,14 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
             success=True,
             duration_ms=(time.time() - t0) * 1000,
         )
-    except Exception as e:
+    except (RuntimeError, ValueError, OSError) as e:
         return PipelineResult(
             phase=Phase.EXPERIENCE,
             success=False,
             duration_ms=(time.time() - t0) * 1000,
             details={"error": str(e)},
         )
+
 
 async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
     """Phase 9 — Final verification: power ≥ 1300."""
@@ -193,22 +207,59 @@ async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
         },
     )
 
+
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
+
+
+async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
+    """Phase — Run one evolution cycle for continuous agent improvement."""
+    t0 = time.time()
+    try:
+        from cortex.evolution.engine import EvolutionEngine
+
+        # Thermodynamic God-Tier Engine
+        engine = EvolutionEngine()
+        await engine.initialize_swarm()
+        stats = await engine.cycle()
+
+        return PipelineResult(
+            phase=Phase.EVOLUTION,
+            success=True,
+            duration_ms=(time.time() - t0) * 1000,
+            details={
+                "cycle": stats.cycle,
+                "crossovers": stats.crossovers,
+                "extinctions": stats.extinctions,
+                "mutations": stats.total_mutations,
+                "duration_ms": stats.duration_ms,
+            },
+        )
+    except (RuntimeError, ValueError, OSError, ImportError) as e:
+        logger.error("Evolution phase failed: %s", e)
+        return PipelineResult(
+            phase=Phase.EVOLUTION,
+            success=False,
+            duration_ms=(time.time() - t0) * 1000,
+            details={"error": str(e)},
+        )
+
 
 PHASE_EXECUTORS: dict[Phase, Callable] = {
     Phase.FABRICATION: _phase_fabrication,
     Phase.ORCHESTRATION: _phase_orchestration,
     Phase.SWARM: _phase_swarm,
+    Phase.EVOLUTION: _phase_evolution,
     Phase.SECURITY: _phase_security,
     Phase.OBSERVABILITY: _phase_observability,
     Phase.EXPERIENCE: _phase_experience,
     Phase.VERIFICATION: _phase_verification,
 }
 
+
 async def run_pipeline(
-    project_root: Optional[Path] = None,
+    project_root: Path | None = None,
     environment: str = "production",
 ) -> SovereignContext:
     """Execute the full sovereign pipeline, returning the enriched context."""
@@ -217,8 +268,8 @@ async def run_pipeline(
         environment=environment,
     )
 
-    logger.info("⚡ Sovereign Pipeline: IGITION")
-    
+    logger.info("⚡ Sovereign Pipeline: IGNITION")
+
     for phase in Phase:
         executor = PHASE_EXECUTORS.get(phase)
         if executor:
@@ -229,37 +280,46 @@ async def run_pipeline(
             skill_name = phase.name.lower().replace("_", "-")
             try:
                 ctx.bridge.execute(skill_name)
-                result = PipelineResult(phase=phase, success=True, duration_ms=(time.time() - t0) * 1000)
-            except Exception:
+                result = PipelineResult(
+                    phase=phase, success=True, duration_ms=(time.time() - t0) * 1000
+                )
+            except (RuntimeError, ValueError, OSError) as e:
+                logger.debug("Skill fallback failed for %s: %s", skill_name, e)
                 # Skill fallback failed, yield
                 await asyncio.sleep(0)
-                result = PipelineResult(phase=phase, success=True, duration_ms=0, details={"status": "skipped"})
-        
+                result = PipelineResult(
+                    phase=phase, success=True, duration_ms=0, details={"status": "skipped"}
+                )
+
         ctx.results.append(result)
         # Update endocrine context after each phase if needed
         ctx.endocrine.ingest_context(f"Completed phase {phase.name}", {"success": result.success})
 
     return ctx
 
+
 def main() -> None:
     """CLI entry point for the sovereign engine."""
-    ctx = asyncio.run(run_pipeline())
+    import sys
 
-    print("\n" + "═" * 60)
-    print("  SOVEREIGN PIPELINE — RESULTS")
-    print("═" * 60)
+    ctx = asyncio.run(run_pipeline())
+    out = sys.stdout.write
+
+    out("\n" + "═" * 60 + "\n")
+    out("  SOVEREIGN PIPELINE — RESULTS\n")
+    out("═" * 60 + "\n")
     for r in ctx.results:
         status = "✅" if r.success else "❌"
-        print(f"  {status} {r.phase.name:<20} {r.duration_ms:>8.1f}ms")
-    print("─" * 60)
+        out(f"  {status} {r.phase.name:<20} {r.duration_ms:>8.1f}ms\n")
+    out("─" * 60 + "\n")
     if ctx.power:
         power = ctx.power.power
         bar = "█" * min(power // 20, 50)
-        print(f"  ⚡ Power Level: {power}/1000  {bar}")
+        out(f"  ⚡ Power Level: {power}/1000  {bar}\n")
         if power >= 1300:
-            print("  🏆 SOVEREIGN STATUS ACHIEVED (130/100 Standard)")
-    print("═" * 60 + "\n")
+            out("  🏆 SOVEREIGN STATUS ACHIEVED (130/100 Standard)\n")
+    out("═" * 60 + "\n\n")
+
 
 if __name__ == "__main__":
     main()
-

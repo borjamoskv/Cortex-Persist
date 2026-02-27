@@ -6,8 +6,8 @@ secuencia, modelos. Invoca, ejecuta, entrega.
 
 import asyncio
 import logging
-import random
 import os
+import random
 from abc import ABC, abstractmethod
 from typing import Any, Final
 
@@ -110,7 +110,7 @@ class FormalVerificationGate(SovereignPhase):
                     file_path,
                     result.violations,
                 )
-                
+
                 # Counterexample Learning: Store failure in semantic memory
                 if memory_manager:
                     for violation in result.violations:
@@ -167,12 +167,16 @@ class KeterEngine:
         for attempt in range(MAX_RETRIES):
             try:
                 return await phase.execute(payload)
-            except Exception as e:
+            except (CortexError, RuntimeError, OSError, ValueError, TypeError) as e:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
                 logger.error(
-                    f"❌ [KETER] Error en {phase.__class__.__name__}: {e}. "
-                    f"Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
+                    "❌ [KETER] Error en %s: %s. Reintento %d/%d en %.2fs",
+                    phase.__class__.__name__,
+                    e,
+                    attempt + 1,
+                    MAX_RETRIES,
+                    delay,
                 )
                 await asyncio.sleep(delay)
 
@@ -199,8 +203,8 @@ class KeterEngine:
         except CortexError as e:
             logger.error(f"🔥 [KETER] Colapso de singularidad: {e}")
             raise
-        except Exception as e:
-            logger.critical(f"💀 [KETER] Error fatal no controlado: {e}")
+        except (RuntimeError, OSError, TypeError, ValueError) as e:
+            logger.critical("💀 [KETER] Error fatal no controlado: %s", e)
             raise CortexError(f"KETER Engine catastrophic failure: {e}") from e
 
         return payload
