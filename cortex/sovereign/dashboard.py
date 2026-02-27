@@ -32,7 +32,7 @@ async def get_power_level() -> dict[str, Any]:
         # Map scan result dimensions to our Dimension enum
         for dim in Dimension:
             scores[dim.value] = result.get(dim.value, result.get("score", 0))
-    except Exception:
+    except (ImportError, OSError, RuntimeError, ValueError):
         # Fallback: compute from 100/100 baseline
         scores = {dim.value: 100.0 for dim in Dimension}
 
