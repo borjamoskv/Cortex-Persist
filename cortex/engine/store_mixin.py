@@ -228,7 +228,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         except ImportError:
             pass  # Guard not available — degrade gracefully
         except ValueError:
-            raise  # Re-raise critical injection blocks
+            raise  # Re-raise critical injection blocks  # noqa: S110
 
         # ── Anti-Hacker Shield: Anomaly Detection ──
         try:
@@ -268,9 +268,9 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
                     SIGNAL.emit_sync("anomaly", {"type": "anomaly", "severity": "high"})
         except ImportError:
-            pass
+            pass  # Detector not available — degrade gracefully
         except ValueError:
-            raise
+            raise  # Re-raise critical anomaly blocks  # noqa: S110
 
         # ── Anti-Hacker Shield: Honeypot Detection ──
         try:
@@ -284,9 +284,9 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 meta = {**(meta or {}), **{"honeypot_triggered": True, "decoy_id": decoy.id}}
                 raise ValueError(f"SECURITY BREACH: Access to unauthorized resource [{decoy.id}]")
         except ImportError:
-            pass
+            pass  # Honeypot not available — degrade gracefully
         except ValueError:
-            raise
+            raise  # Re-raise security breach blocks  # noqa: S110
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])

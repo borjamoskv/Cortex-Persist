@@ -81,8 +81,7 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
     """Phase 1 — Invoke aether-1 to materialize artifacts."""
     t0 = time.time()
     try:
-        # Ignite Aether-1 via the bridge
-        ctx.bridge.execute("aether-1")
+        await asyncio.to_thread(ctx.bridge.execute, "aether-1")
         return PipelineResult(
             phase=Phase.FABRICATION,
             success=True,
@@ -103,7 +102,7 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
     """Phase 2 — Keter-omega for multi-cloud readiness."""
     t0 = time.time()
     try:
-        ctx.bridge.execute("keter-omega")
+        await asyncio.to_thread(ctx.bridge.execute, "keter-omega")
         return PipelineResult(
             phase=Phase.ORCHESTRATION,
             success=True,
@@ -122,7 +121,7 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     """Phase 3 — Legion-1 swarm execution."""
     t0 = time.time()
     try:
-        ctx.bridge.execute("legion-1")
+        await asyncio.to_thread(ctx.bridge.execute, "legion-1")
         return PipelineResult(
             phase=Phase.SWARM,
             success=True,
@@ -177,7 +176,7 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     """Phase 7 — Impactv-1 for UI/UX excellence."""
     t0 = time.time()
     try:
-        ctx.bridge.execute("impactv-1")
+        await asyncio.to_thread(ctx.bridge.execute, "impactv-1")
         return PipelineResult(
             phase=Phase.EXPERIENCE,
             success=True,
