@@ -36,7 +36,7 @@ def client():
     cortex.config.DB_PATH = _test_db
     cortex.config.reload()
 
-    cortex.auth._auth_manager = None
+    cortex.auth.manager._auth_manager = None
     api_state.auth_manager = None
     api_state.engine = None
 
@@ -50,7 +50,7 @@ def client():
         else:
             os.environ.pop("CORTEX_DB", None)
         cortex.config.reload()
-        cortex.auth._auth_manager = None
+        cortex.auth.manager._auth_manager = None
         api_state.auth_manager = None
         api_state.engine = None
         for ext in ["", "-wal", "-shm"]:
@@ -116,7 +116,7 @@ class TestSelfHealingHook:
     """Verify the SelfHealingHook.trigger() records failures correctly."""
 
     def test_trigger_increments_counter(self):
-        from cortex.routes.middleware import SelfHealingHook, _HEAL_COUNTER
+        from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
 
         _HEAL_COUNTER.clear()
         exc = RuntimeError("simulated failure")
@@ -124,7 +124,7 @@ class TestSelfHealingHook:
         assert _HEAL_COUNTER.get("test_endpoint") == 1
 
     def test_trigger_accumulates(self):
-        from cortex.routes.middleware import SelfHealingHook, _HEAL_COUNTER
+        from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
 
         _HEAL_COUNTER.clear()
         for _ in range(3):
@@ -133,7 +133,7 @@ class TestSelfHealingHook:
 
     def test_status_failure_triggers_heal(self, client):
         """When get_system_status raises, the hook should be triggered."""
-        with patch("cortex.routes.middleware.SelfHealingHook.trigger") as mock_trigger:
+        with patch("cortex.routes.middleware.SelfHealingHook.trigger"):
             with patch("cortex.routes.admin.CortexEngine.stats", side_effect=RuntimeError("boom")):
                 resp = client.get(
                     "/v1/status",
