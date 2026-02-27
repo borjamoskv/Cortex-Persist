@@ -38,7 +38,7 @@ async def _writeback_if_changed(
     """Hash-check and writeback a single fact type."""
     key = hash_key or fact_type
     try:
-        computed = hash_value or await db_content_hash(engine, fact_type)
+        computed = hash_value or db_content_hash(engine, fact_type)
         if computed != wb_hashes.get(key):
             await wb_fn(engine, result)
             wb_hashes[key] = computed
@@ -61,8 +61,8 @@ async def export_to_json(engine: CortexEngine) -> WritebackResult:
 
     # System uses combined hash of knowledge + decisions
     try:
-        k_hash = await db_content_hash(engine, "knowledge")
-        d_hash = await db_content_hash(engine, "decision")
+        k_hash = db_content_hash(engine, "knowledge")
+        d_hash = db_content_hash(engine, "decision")
         combined = hashlib.sha256(f"{k_hash}:{d_hash}".encode()).hexdigest()
     except (sqlite3.Error, OSError):
         combined = None
