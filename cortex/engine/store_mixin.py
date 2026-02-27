@@ -137,7 +137,10 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                         # Actually, let's just use the fact_id as ID.
                         await mm._hdc.memorize(fact)
                         logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)
-            except (sqlite3.Error, aiosqlite.Error, OSError, ValueError, AttributeError, TypeError) as e:
+            except (
+                sqlite3.Error, aiosqlite.Error, OSError,
+                ValueError, AttributeError, TypeError,
+            ) as e:
                 logger.warning("Specular Memory indexing failed for fact %d: %s", fact_id, e)
 
     async def _process_side_effects_async(
@@ -161,6 +164,127 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             conn, project, "store", {"fact_id": fact_id, "fact_type": fact_type}
         )
         await conn.execute("UPDATE facts SET tx_id = ? WHERE id = ?", (new_tx_id, fact_id))
+
+    def _run_security_guards(
+        self,
+        content: str,
+        project: str,
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Run all Anti-Hacker Shield guards (injection, anomaly, honeypot).
+
+        Each guard is optional (ImportError → degrade gracefully).
+        ValueError propagates for critical security blocks.
+
+        Returns the (potentially enriched) metadata dict.
+        """
+        meta = self._guard_injection(content, project, meta)
+        meta = self._guard_anomaly(content, project, source, meta)
+        meta = self._guard_honeypot(content, meta)
+        return meta
+
+    def _guard_injection(
+        self, content: str, project: str, meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Scan content for injection attacks."""
+        try:
+            from cortex.security.injection_guard import GUARD
+
+            report = GUARD.scan(content)
+            if not report.is_safe:
+                logger.warning(
+                    "🛡️ INJECTION GUARD: %d threats (highest: %s) in [%s]",
+                    len(report.matches), report.highest_severity, project,
+                )
+                meta = {
+                    **(meta or {}),
+                    "injection_flagged": True,
+                    "injection_severity": report.highest_severity,
+                    "injection_matches": len(report.matches),
+                }
+                if report.highest_severity == "critical":
+                    raise ValueError(
+                        f"INJECTION BLOCKED: {report.matches[0].description}"
+                    )
+        except ImportError:
+            pass  # Guard not installed — degrade gracefully
+        return meta
+
+    def _guard_anomaly(
+        self,
+        content: str,
+        project: str,
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Check for statistical anomalies in store patterns."""
+        try:
+            from cortex.security.anomaly_detector import DETECTOR, SecurityEvent
+
+            anomaly = DETECTOR.record_event(SecurityEvent(
+                source=source or "unknown",
+                project=project,
+                action="store",
+                content_length=len(content),
+            ))
+            if anomaly and anomaly.is_anomalous:
+                logger.warning(
+                    "🔍 ANOMALY: %s (severity: %s, Z=%.1f) in [%s]",
+                    anomaly.anomaly_type, anomaly.severity,
+                    anomaly.z_score, project,
+                )
+                meta = {
+                    **(meta or {}),
+                    "anomaly_flagged": True,
+                    "anomaly_type": anomaly.anomaly_type,
+                    "anomaly_severity": anomaly.severity,
+                }
+                if anomaly.severity == "critical":
+                    from cortex.security.security_sync import SIGNAL
+                    SIGNAL.emit_sync("threat", {
+                        "type": "anomaly", "severity": "critical",
+                    })
+                    raise ValueError(
+                        f"ANOMALY BLOCKED: {anomaly.description}"
+                    )
+                if anomaly.severity == "high":
+                    from cortex.security.security_sync import SIGNAL
+                    SIGNAL.emit_sync("anomaly", {
+                        "type": "anomaly", "severity": "high",
+                    })
+        except ImportError:
+            pass  # Detector not installed — degrade gracefully
+        return meta
+
+    def _guard_honeypot(
+        self, content: str, meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Check if content attempts to access a honeypot resource."""
+        try:
+            from cortex.security.honeypot import HONEY_POT
+            from cortex.security.security_sync import SIGNAL
+
+            decoy = HONEY_POT.check_exploitation(content)
+            if decoy:
+                SIGNAL.emit_sync("threat", {
+                    "type": "honeypot", "id": decoy.id,
+                })
+                logger.critical(
+                    "☢️ HONEYPOT BREACH: Unauthorized access to [%s]",
+                    decoy.id,
+                )
+                meta = {
+                    **(meta or {}),
+                    "honeypot_triggered": True,
+                    "decoy_id": decoy.id,
+                }
+                raise ValueError(
+                    f"SECURITY BREACH: Unauthorized resource [{decoy.id}]"
+                )
+        except ImportError:
+            pass  # Honeypot not installed — degrade gracefully
+        return meta
 
     async def _store_impl(
         self,
@@ -200,93 +324,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         meta = self._apply_privacy_shield(content, project, meta)
 
-        # ── Anti-Hacker Shield: Injection Guard ──
-        try:
-            from cortex.security.injection_guard import GUARD
-
-            inj_report = GUARD.scan(content)
-            if not inj_report.is_safe:
-                logger.warning(
-                    "🛡️ INJECTION GUARD: %d threats detected (highest: %s) in project [%s]",
-                    len(inj_report.matches),
-                    inj_report.highest_severity,
-                    project,
-                )
-                meta = {
-                    **(meta or {}),
-                    **{
-                        "injection_flagged": True,
-                        "injection_severity": inj_report.highest_severity,
-                        "injection_matches": len(inj_report.matches),
-                    },
-                }
-                if inj_report.highest_severity == "critical":
-                    raise ValueError(
-                        f"INJECTION BLOCKED: Critical injection detected — "
-                        f"{inj_report.matches[0].description}"
-                    )
-        except ImportError:
-            pass  # Guard not available — degrade gracefully
-        except ValueError:
-            raise  # Re-raise critical injection blocks  # noqa: S110
-
-        # ── Anti-Hacker Shield: Anomaly Detection ──
-        try:
-            from cortex.security.anomaly_detector import DETECTOR, SecurityEvent
-
-            anomaly = DETECTOR.record_event(
-                SecurityEvent(
-                    source=source or "unknown",
-                    project=project,
-                    action="store",
-                    content_length=len(content),
-                )
-            )
-            if anomaly and anomaly.is_anomalous:
-                logger.warning(
-                    "🔍 ANOMALY DETECTED: %s (severity: %s, Z=%.1f) in project [%s]",
-                    anomaly.anomaly_type,
-                    anomaly.severity,
-                    anomaly.z_score,
-                    project,
-                )
-                meta = {
-                    **(meta or {}),
-                    **{
-                        "anomaly_flagged": True,
-                        "anomaly_type": anomaly.anomaly_type,
-                        "anomaly_severity": anomaly.severity,
-                    },
-                }
-                if anomaly.severity == "critical":
-                    from cortex.security.security_sync import SIGNAL
-
-                    SIGNAL.emit_sync("threat", {"type": "anomaly", "severity": "critical"})
-                    raise ValueError(f"ANOMALY BLOCKED: {anomaly.description}")
-                elif anomaly.severity == "high":
-                    from cortex.security.security_sync import SIGNAL
-
-                    SIGNAL.emit_sync("anomaly", {"type": "anomaly", "severity": "high"})
-        except ImportError:
-            pass  # Detector not available — degrade gracefully
-        except ValueError:
-            raise  # Re-raise critical anomaly blocks  # noqa: S110
-
-        # ── Anti-Hacker Shield: Honeypot Detection ──
-        try:
-            from cortex.security.honeypot import HONEY_POT
-            from cortex.security.security_sync import SIGNAL
-
-            decoy = HONEY_POT.check_exploitation(content)
-            if decoy:
-                SIGNAL.emit_sync("threat", {"type": "honeypot", "id": decoy.id})
-                logger.critical("☢️ HONEYPOT BREACH: Unauthorized access to [%s]", decoy.id)
-                meta = {**(meta or {}), **{"honeypot_triggered": True, "decoy_id": decoy.id}}
-                raise ValueError(f"SECURITY BREACH: Access to unauthorized resource [{decoy.id}]")
-        except ImportError:
-            pass  # Honeypot not available — degrade gracefully
-        except ValueError:
-            raise  # Re-raise security breach blocks  # noqa: S110
+        meta = self._run_security_guards(content, project, source, meta)
 
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
