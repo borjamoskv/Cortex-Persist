@@ -63,7 +63,10 @@ def row_to_fact(row: tuple) -> Fact:
         r.append(None)
 
     tenant_id = r[1] or "default"
-    content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
+    try:
+        content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
+    except (ValueError, TypeError, OSError):  # InvalidTag, InvalidKey, corrupted
+        content = f"[ENCRYPTED — key mismatch] (fact #{r[0]})"
 
     # Safely handle JSON parsing
     try:
