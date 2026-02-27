@@ -57,7 +57,7 @@ def analyze_file(filepath: Path) -> bool:
             print(f"   ► Elemento: '{worst_block.name}' en línea {worst_block.lineno}")
             print(f"   ► Complejidad: {max_cc} (Límite: {CC_THRESHOLD})")
             print(f"   ► Escolta: Necesitas romper esa lógica. Extrae helpers y usa Guard Clauses.")
-            print(f"   💊 Auto-Healing disponible: `python scripts/auto_healer.py {filepath}`")
+            print(f"   💊 Auto-Healing disponible: `cortex heal {filepath.name}`")
             return False
             
         return True

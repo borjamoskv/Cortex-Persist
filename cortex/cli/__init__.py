@@ -129,9 +129,11 @@ cli.add_command(prompt_group, name="prompt")
 
 from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
 from cortex.cli.security_cmds import security_cli  # noqa: E402
+from cortex.cli.heal_cmds import cli as heal_cmd
 
 cli.add_command(agent_cli, name="agent")
 cli.add_command(security_cli, name="security")
+cli.add_command(heal_cmd, name="heal")
 
 
 @cli.command("observe")
