@@ -6,6 +6,8 @@ the power-level calculation that targets 1300/1000.
 
 from __future__ import annotations
 
+import logging
+
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -14,6 +16,8 @@ from typing import Any
 # ---------------------------------------------------------------------------
 # Power-level scoring (target: 1300/1000)
 # ---------------------------------------------------------------------------
+
+logger = logging.getLogger(__name__)
 
 
 class Dimension(Enum):
@@ -154,7 +158,7 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
         )
 
     except ImportError:
-        print("[observability] OpenTelemetry packages not installed — running without telemetry")
+        logger.warning("OpenTelemetry packages not installed — running without telemetry")
 
 
 _latest_power: PowerLevel | None = None
@@ -220,7 +224,7 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
             elif sev == "LOW":
                 report.low += 1
             report.details.append(f"[bandit] {issue.get('issue_text', '')}")
-    except Exception as e:
+    except (OSError, subprocess.TimeoutExpired, ValueError) as e:
         report.details.append(f"[bandit] scan failed: {e}")
 
     # Safety
@@ -235,7 +239,7 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
         report.critical += len(vulns)
         for v in vulns[:5]:
             report.details.append(f"[safety] {v}")
-    except Exception as e:
+    except (OSError, subprocess.TimeoutExpired, ValueError) as e:
         report.details.append(f"[safety] scan failed: {e}")
 
     report.passed = report.critical == 0 and report.high == 0
