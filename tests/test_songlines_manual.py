@@ -1,11 +1,10 @@
-import os
-import shutil
 import tempfile
 from pathlib import Path
+
+from cortex.songlines.economy import ThermalEconomy
 from cortex.songlines.emitter import ResonanceEmitter
 from cortex.songlines.sensor import TopographicSensor
-from cortex.songlines.economy import ThermalEconomy
-from cortex.songlines.decay import DecayEngine
+
 
 def test_songline_cycle():
     with tempfile.TemporaryDirectory() as tmpdir:

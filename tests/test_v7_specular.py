@@ -1,6 +1,8 @@
-import pytest
 import os
+
 import numpy as np
+import pytest
+
 from cortex.engine import CortexEngine
 
 
@@ -75,7 +77,7 @@ async def test_specular_memory_flow(engine):
     intent_i = np.array(fact.specular_embedding, dtype=np.int8)
     context_c = mm.get_context_vector()
 
-    from cortex.memory.hdc.algebra import unbind, cosine_similarity
+    from cortex.memory.hdc.algebra import cosine_similarity, unbind
 
     recovered_f = unbind(intent_i, context_c)
     # Compare with pure content vector (since that's what was used for intent in store_mixin.py)

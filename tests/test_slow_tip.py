@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import time
 import threading
+import time
 
 import pytest
 
-from cortex.cli.slow_tip import SlowOpTipEmitter, with_slow_tips, tip_on_slow
+from cortex.cli.slow_tip import SlowOpTipEmitter, tip_on_slow, with_slow_tips
 
 
 class TestSlowOpTipEmitter:

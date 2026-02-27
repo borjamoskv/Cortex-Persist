@@ -7,11 +7,11 @@ from pathlib import Path
 import aiosqlite
 import pytest
 
-from cortex.database.pool import CortexConnectionPool
 from cortex.database.core import (
     connect,
     connect_writer,
 )
+from cortex.database.pool import CortexConnectionPool
 from cortex.database.writer import SqliteWriteWorker
 
 
