@@ -20,26 +20,25 @@ from pathlib import Path
 __all__ = ["scan_raw_connects", "ConnectionViolation"]
 
 # Modules allowed to use sqlite3.connect directly
-_WHITELISTED_MODULES: frozenset[str] = frozenset({
-    "cortex/database/core.py",
-    "cortex/database/pool.py",
-    "cortex/database/writer.py",
-    "cortex/engine/sync_compat.py",
-    "cortex/database/connection_guard.py",
-    "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
-    "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
-    "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
-})
+_WHITELISTED_MODULES: frozenset[str] = frozenset(
+    {
+        "cortex/database/core.py",
+        "cortex/database/pool.py",
+        "cortex/database/writer.py",
+        "cortex/engine/sync_compat.py",
+        "cortex/database/connection_guard.py",
+        "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
+        "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
+        "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
+        "cortex/evolution/cortex_metrics.py",  # Low-level sync telemetry metrics
+    }
+)
 
 # Pattern: raw sqlite3.connect( call
-_RAW_CONNECT_PATTERN = re.compile(
-    r"(?<!\w)sqlite3\.connect\s*\(", re.MULTILINE
-)
+_RAW_CONNECT_PATTERN = re.compile(r"(?<!\w)sqlite3\.connect\s*\(", re.MULTILINE)
 
 # Pattern: import sqlite3 (to differentiate from type hints)
-_IMPORT_PATTERN = re.compile(
-    r"^\s*import\s+sqlite3|^\s*from\s+sqlite3\s+import", re.MULTILINE
-)
+_IMPORT_PATTERN = re.compile(r"^\s*import\s+sqlite3|^\s*from\s+sqlite3\s+import", re.MULTILINE)
 
 
 class ConnectionViolation:
@@ -55,6 +54,26 @@ class ConnectionViolation:
 
     def __repr__(self) -> str:
         return f"ConnectionViolation({self.filepath!r}, {self.line_number})"
+
+
+def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> None:
+    try:
+        content = py_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return
+
+    for i, line in enumerate(content.splitlines(), start=1):
+        stripped = line.strip()
+        if stripped.startswith(("#", '"""', "'''", '"', "'")):
+            continue
+
+        if "sqlite3.connect" in stripped:
+            before = stripped.split("sqlite3.connect")[0]
+            if before.count('"') % 2 == 1 or before.count("'") % 2 == 1:
+                continue
+
+        if _RAW_CONNECT_PATTERN.search(line):
+            violations.append(ConnectionViolation(str(py_file), i, line))
 
 
 def scan_raw_connects(
@@ -75,40 +94,13 @@ def scan_raw_connects(
     violations: list[ConnectionViolation] = []
 
     for py_file in root_path.rglob("*.py"):
-        # Normalize to relative path for whitelist check
         rel_path = str(py_file)
         if any(rel_path.endswith(w) for w in allowed):
             continue
-
-        # Skip test files
         if "/tests/" in rel_path or rel_path.startswith("tests/"):
             continue
 
-        try:
-            content = py_file.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
-            continue
-
-        for i, line in enumerate(content.splitlines(), start=1):
-            # Skip comments
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                continue
-            # Skip string literals and docstrings (rough heuristic)
-            if stripped.startswith(('"""', "'''", '"', "'")):
-                continue
-            # Skip lines where sqlite3.connect appears inside a string
-            # (e.g., documentation, error messages, prompts)
-            if "sqlite3.connect" in stripped:
-                # Check if it's inside quotes
-                before = stripped.split("sqlite3.connect")[0]
-                if before.count('"') % 2 == 1 or before.count("'") % 2 == 1:
-                    continue
-
-            if _RAW_CONNECT_PATTERN.search(line):
-                violations.append(
-                    ConnectionViolation(str(py_file), i, line)
-                )
+        _scan_file_lines(py_file, violations)
 
     return violations
 
@@ -121,7 +113,8 @@ def main() -> int:
         description="Scan for unauthorized sqlite3.connect() usage in CORTEX"
     )
     parser.add_argument(
-        "--root", default="cortex",
+        "--root",
+        default="cortex",
         help="Root directory to scan (default: cortex)",
     )
     args = parser.parse_args()

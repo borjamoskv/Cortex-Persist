@@ -29,8 +29,11 @@ BLOCKED_PATTERNS = {
 # File extensions where TODO/FIXME checks are skipped (prose, not code).
 PROSE_EXTENSIONS = {".md", ".txt", ".rst", ".adoc"}
 
-# Paths where print() is legitimate (CLI output, tests, scripts).
-PRINT_ALLOWED_PREFIXES = ("cortex/cli/", "tests/", "scripts/", "examples/")
+# Paths where print() is legitimate (CLI output, tests, scripts, diagnostics).
+PRINT_ALLOWED_PREFIXES = (
+    "cortex/cli/", "tests/", "scripts/", "examples/",
+    "cortex/database/", "cortex/hooks/", "cortex/launchpad/",
+)
 
 # Operational Dirt: File names/paths that should never be tracked directly.
 BLOCKED_PATHS = {

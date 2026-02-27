@@ -11,6 +11,8 @@ __all__ = [
     "CREATE_CONTEXT_SNAPSHOTS",
     "CREATE_CONTEXT_SNAPSHOTS_INDEX",
     "CREATE_EMBEDDINGS",
+    "CREATE_EVOLUTION_STATE",
+    "CREATE_EVOLUTION_STATE_INDEX",
     "CREATE_SPECULAR_EMBEDDINGS",
     "CREATE_EPISODES",
     "CREATE_EPISODES_FTS",
@@ -405,6 +407,22 @@ ALTER TABLE facts ADD COLUMN signature TEXT;
 ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 """
 
+# ─── Evolution State (Continuous Improvement Engine) ─────────────────
+CREATE_EVOLUTION_STATE = """
+CREATE TABLE IF NOT EXISTS evolution_state (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    cycle       INTEGER NOT NULL,
+    agent_domain TEXT NOT NULL,
+    agent_json  TEXT NOT NULL,
+    saved_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_EVOLUTION_STATE_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
+CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
+"""
+
 
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
@@ -439,6 +457,8 @@ ALL_SCHEMA = [
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
     CREATE_TENANTS,
+    CREATE_EVOLUTION_STATE,
+    CREATE_EVOLUTION_STATE_INDEX,
 ]
 
 

@@ -39,7 +39,8 @@ def get_master_key() -> bytes | None:
             if len(raw) != _AES_KEY_LENGTH:
                 logger.error(
                     "Master key has wrong length: got %d bytes, expected %d.",
-                    len(raw), _AES_KEY_LENGTH,
+                    len(raw),
+                    _AES_KEY_LENGTH,
                 )
                 return None
             return raw
