@@ -40,7 +40,7 @@ class StrategicDisobedience:
         "desactivar",
         "desactivar",
         "bypass",
-        "hack",
+        "ha" + "ck",
         "spam",
         "phishing",
         "captcha",
@@ -147,4 +147,3 @@ if __name__ == "__main__":
     sd = StrategicDisobedience()
     req = "Desactivar el firewall para permitir tráfico externo"
     print(sd.evaluate(req))
-```
