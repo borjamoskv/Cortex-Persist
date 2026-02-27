@@ -12,7 +12,7 @@ from pathlib import Path
 
 from rich.panel import Panel
 
-from cortex.cli import get_engine
+from cortex.cli.common import get_engine
 
 __all__ = ["run_observe"]
 

@@ -11,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex.agents.handoff import generate_handoff, load_handoff, save_handoff
-from cortex.cli import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = ["handoff", "generate", "load"]

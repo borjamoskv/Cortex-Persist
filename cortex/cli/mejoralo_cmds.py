@@ -5,10 +5,11 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli import DEFAULT_DB, cli, console, get_engine, close_engine_sync
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 __all__ = [
     "mejoralo",
+    "mejoralo_antipatterns",
     "mejoralo_history",
     "mejoralo_record",
     "mejoralo_scan",
@@ -260,3 +261,68 @@ def mejoralo_daemon():
     from cortex.mejoralo.daemon import main
 
     main()
+
+
+@mejoralo.command("antipatterns")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--magic", is_flag=True, help="Incluir detección de magic numbers (ruidoso)")
+@click.option("--no-hints", is_flag=True, help="Excluir detección de type hints faltantes")
+def mejoralo_antipatterns(path, magic, no_hints):
+    """🔍 Antipattern Scanner — Detecta lo implícito que debería ser explícito."""
+    from cortex.mejoralo.antipatterns import scan_antipatterns
+
+    with console.status("[bold blue]Escaneando antipatrones...[/]"):
+        report = scan_antipatterns(
+            path,
+            include_magic=magic,
+            include_type_hints=not no_hints,
+        )
+
+    if not report.findings:
+        console.print(
+            f"\n  [bold green]✅ LIMPIO — {report.files_scanned} archivos, "
+            f"{report.scanners_run} scanners, 0 antipatrones.[/]\n"
+        )
+        return
+
+    # ── Severity colors ──
+    sev_colors = {"critical": "red", "high": "yellow", "medium": "cyan", "low": "dim"}
+    sev_icons = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "⚪"}
+
+    table = Table(title="🔍 Antipattern Report")
+    table.add_column("Sev", width=4)
+    table.add_column("Scanner", style="bold", width=18)
+    table.add_column("Location", width=35)
+    table.add_column("Issue", width=50)
+
+    for f in report.findings[:50]:  # Cap display at 50
+        color = sev_colors.get(f.severity, "white")
+        icon = sev_icons.get(f.severity, "")
+        loc = f"{f.file}:{f.line}" if f.line else f.file
+        table.add_row(
+            icon,
+            f"[{color}]{f.scanner}[/]",
+            loc[:35],
+            f.message[:50],
+        )
+
+    console.print(table)
+
+    # ── Summary ──
+    penalty = report.score_penalty()
+    console.print(
+        f"\n  Archivos: {report.files_scanned} | "
+        f"Scanners: {report.scanners_run} | "
+        f"Hallazgos: [bold]{report.total}[/] "
+        f"([red]{report.critical_count} critical[/], "
+        f"[yellow]{report.high_count} high[/]) | "
+        f"Penalización MEJORAlo: [bold red]-{penalty}[/]\n"
+    )
+
+    # ── Top fix hints ──
+    if report.critical_count > 0:
+        console.print("  [bold red]🔧 Fix hints (critical):[/]")
+        for f in report.findings:
+            if f.severity == "critical":
+                console.print(f"    → {f.file}:{f.line} — {f.fix_hint}")
+        console.print()

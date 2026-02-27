@@ -5,7 +5,7 @@ Interactive CLI approval logic for SovereignGate.
 import logging
 import sqlite3
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.gate import ActionStatus, GateNotApproved, GatePolicy
 
@@ -55,6 +55,10 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
         return True
 
     # ENFORCE mode — actual interactive prompt
+    return _handle_interactive_enforce(gate, action, action_id)
+
+
+def _handle_interactive_enforce(gate: "SovereignGate", action: Any, action_id: str) -> bool:
     print(f"\n{'=' * 60}")
     print("⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
     print(f"{'=' * 60}")
