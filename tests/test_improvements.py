@@ -17,13 +17,13 @@ import pytest_asyncio
 import sqlite_vec
 
 from cortex.engine import CortexEngine
-from cortex.utils.export import export_facts
-from cortex.telemetry.metrics import MetricsRegistry
 from cortex.migrations import (
     ensure_migration_table,
     get_current_version,
     run_migrations,
 )
+from cortex.telemetry.metrics import MetricsRegistry
+from cortex.utils.export import export_facts
 
 
 @pytest_asyncio.fixture

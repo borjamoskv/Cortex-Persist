@@ -1,7 +1,7 @@
 """Tests for CORTEX v7 HDC Vector Store L2."""
 
+
 import pytest
-import sqlite3
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory

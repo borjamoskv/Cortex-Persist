@@ -1,7 +1,6 @@
 """Tests for CORTEX v7 HDC Algebraic Operations."""
 
 import numpy as np
-import pytest
 
 from cortex.memory.hdc.algebra import (
     bind,

@@ -35,12 +35,11 @@ from cortex.api.core import app
 @pytest.fixture(scope="module")
 def client():
     """Test client with bootstrapped DB."""
-    from cortex.auth import reset_auth_manager, get_auth_manager
+    from cortex.auth import get_auth_manager, reset_auth_manager
     reset_auth_manager()
     manager = get_auth_manager()
     manager.initialize_sync()
 
-    from cortex.api.core import app
     with TestClient(app) as c:
         yield c
 
