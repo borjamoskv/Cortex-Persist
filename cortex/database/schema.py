@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS facts (
     hash        TEXT,
     signature   TEXT,
     signer_pubkey TEXT,
+    is_quarantined INTEGER NOT NULL DEFAULT 0,
+    quarantined_at TEXT,
+    quarantine_reason TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     tx_id       INTEGER REFERENCES transactions(id)
@@ -76,6 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_valid ON facts(valid_from, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence);
+CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────
@@ -278,6 +282,7 @@ CREATE TABLE IF NOT EXISTS ghosts (
     confidence      REAL DEFAULT 0.0,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     resolved_at     TEXT,
+    expires_at      TEXT,
     meta            TEXT DEFAULT '{}'
 );
 """
