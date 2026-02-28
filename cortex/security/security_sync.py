@@ -62,8 +62,8 @@ class SecurityVisualSync:
                 asyncio.create_task(self.emit_signal(event_type, details))
             else:
                 loop.run_until_complete(self.emit_signal(event_type, details))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to emit sync signal: %s", e)
 
 
 # Global Singleton

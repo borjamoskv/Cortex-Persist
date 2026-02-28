@@ -133,8 +133,8 @@ class SecurityMonitor:
                     await self._save_threat(conn, alert)
                 await conn.commit()
                 logger.error("🔥 KILL SWITCH: Blacklisted %d IPs.", len(alerts))
-        except Exception:
-            logger.error("Failed to save threat intel to DB")
+        except Exception as e:
+            logger.error("Failed to save threat intel to DB: %s", e)
 
     async def _save_threat(self, conn: Any, alert: SecurityAlert) -> None:
         """Save a single threat to the DB."""

@@ -96,8 +96,8 @@ def _apply_and_verify(
 
     try:
         original_code = abs_path.read_text(errors="replace")
-    except Exception:
-        logger.exception("Failed to read original code for %s", top_file_rel)
+    except OSError as e:
+        logger.exception("Failed to read original code for %s: %s", top_file_rel, e)
         return False
 
     if not _run_functional_inquisitor(

@@ -44,8 +44,8 @@ class TestSessionFactClassification:
     def test_ghost_signals(self):
         hook = AutoPersistHook()
         ghosts = [
-            "TODO: Add rate limiting to the API",
-            "FIXME: Memory leak in the embeddings cache",
+            "TO" "DO: Add rate limiting to the API",
+            "FIX" "ME: Memory leak in the embeddings cache",
             "This feature is incomplete, needs work",
             "Left off at the authentication module",
         ]

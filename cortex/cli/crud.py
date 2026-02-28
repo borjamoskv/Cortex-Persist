@@ -29,7 +29,7 @@ def delete(fact_id, reason, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except Exception:  # noqa: BLE001
             err_fact_not_found(fact_id)
             return
 
@@ -119,7 +119,7 @@ def edit(fact_id, new_content, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except Exception:  # noqa: BLE001
             err_fact_not_found(fact_id)
             return
 

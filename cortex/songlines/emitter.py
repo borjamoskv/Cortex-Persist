@@ -82,8 +82,8 @@ class ResonanceEmitter:
             try:
                 with open(songline_file) as f:
                     data = json.load(f)
-            except Exception:
-                pass
+            except (OSError, json.JSONDecodeError) as e:
+                logger.debug("Failed reading .songlines for embed on %s: %s", songline_file, e)
 
         file_key = target_file.name
         if file_key not in data:

@@ -14,6 +14,7 @@ __all__ = [
     "CertAlert",
     "CloudSyncAlert",
     "CompactionAlert",
+    "ContinuityAlert",
     "DEFAULT_CERT_WARN_DAYS",
     "DEFAULT_COOLDOWN",
     "DEFAULT_DISK_WARN_MB",
@@ -191,6 +192,14 @@ class NeuralIntentAlert:
 
 
 @dataclass
+class ContinuityAlert:
+    """Cognitive continuity gap detected — daemon was offline."""
+
+    issue: str
+    detail: str = ""
+
+
+@dataclass
 class DaemonStatus:
     """Full daemon check result — persisted to disk."""
 
@@ -209,6 +218,7 @@ class DaemonStatus:
     perception_alerts: list[PerceptionAlert] = field(default_factory=list)
     neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
     security_alerts: list[SecurityAlert] = field(default_factory=list)
+    continuity_alerts: list[ContinuityAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -226,6 +236,7 @@ class DaemonStatus:
             and len(self.perception_alerts) == 0
             and len(self.neural_alerts) == 0
             and len(self.security_alerts) == 0
+            and len(self.continuity_alerts) == 0
             and len(self.errors) == 0
         )
 
@@ -341,6 +352,10 @@ class DaemonStatus:
                     "timestamp": s.timestamp,
                 }
                 for s in self.security_alerts
+            ],
+            "continuity_alerts": [
+                {"issue": c.issue, "detail": c.detail}
+                for c in self.continuity_alerts
             ],
             "errors": self.errors,
         }

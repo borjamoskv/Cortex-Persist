@@ -47,8 +47,8 @@ def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
             mod = _get_module_name_from_node(node)
             if mod:
                 _match_module_to_targets(mod, targets, deps)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Dependency extraction failed: %s", e)
     return deps
 
 

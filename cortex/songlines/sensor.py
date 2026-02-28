@@ -119,8 +119,8 @@ class TopographicSensor:
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed deleting xattr %s on %s: %s", attr_name, file_path, e)
 
     def _scan_fallback_manifests(self, root_dir: Path) -> list[dict[str, Any]]:
         """Read ghosts from .songlines fallback files."""
@@ -141,8 +141,8 @@ class TopographicSensor:
                             ghost["strength"] = strength
                             ghost["source_file"] = str(manifest.parent / filename)
                             results.append(ghost)
-            except Exception:
-                pass
+            except (OSError, json.JSONDecodeError) as e:
+                logger.debug("Failed reading .songlines from %s: %s", manifest, e)
         return results
 
     def _is_ignored(self, path: Path) -> bool:

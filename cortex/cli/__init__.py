@@ -37,6 +37,9 @@ from cortex.cli import (  # noqa: E402
     trust_cmds,  # noqa: E402, F401
     vote_ledger,  # noqa: E402, F401
 )
+from cortex.cli.agent_cmds import agent_cmds as agent_cli
+from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli
+from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli
 from cortex.cli.chronos_cmds import chronos_cmds as chronos_cli  # noqa: E402
 from cortex.cli.common import (
     DEFAULT_DB,
@@ -56,11 +59,33 @@ from cortex.cli.context_cmds import context  # noqa: E402
 from cortex.cli.entropy_cmds import entropy  # noqa: E402
 from cortex.cli.episodic_cmds import episode  # noqa: E402
 from cortex.cli.episodic_observe import run_observe  # noqa: E402
+from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli
 from cortex.cli.handoff_cmds import handoff as handoff_cli  # noqa: E402
+from cortex.cli.heal_cmds import cli as heal_cmd
+from cortex.cli.keter_cmds import keter_cmds as keter_cli
+from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli
 from cortex.cli.launchpad_cmds import launchpad  # noqa: E402
 from cortex.cli.mejoralo_cmds import mejoralo  # noqa: E402
+from cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli
+from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli
+from cortex.cli.policy_cmds import policy_cmds as policy_cli
+from cortex.cli.prompt_cmds import prompt as prompt_group
+from cortex.cli.purge import purge as purge_cmd
 from cortex.cli.reflect_cmds import inject as inject_cmd  # noqa: E402
 from cortex.cli.reflect_cmds import reflect as reflect_cmd  # noqa: E402
+from cortex.cli.security_cmds import security_cli
+from cortex.cli.security_hardening_cmds import (
+    bridge_audit as bridge_audit_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
+    quarantine as quarantine_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
+    reap_ghosts as reap_ghosts_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
+    unquarantine as unquarantine_cmd,
+)
 from cortex.cli.swarm_cmds import swarm  # noqa: E402
 from cortex.cli.sync_cmds import (  # noqa: E402
     export,
@@ -108,16 +133,6 @@ cli.add_command(obsidian)
 cli.add_command(verify_fact, name="verify")
 cli.add_command(compliance_report, name="compliance")
 cli.add_command(audit_trail, name="audit")
-from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa: E402
-from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402
-from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
-from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
-from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402
-from cortex.cli.policy_cmds import policy_cmds as policy_cli  # noqa: E402
-from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402
-from cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402
-from cortex.cli.purge import purge as purge_cmd  # noqa: E402
-
 cli.add_command(ghost_cli, name="ghost")
 cli.add_command(nexus_cli, name="nexus")
 cli.add_command(autorouter_cli, name="autorouter")
@@ -127,18 +142,6 @@ cli.add_command(sovereign_cli, name="sovereign")
 cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
 cli.add_command(prompt_group, name="prompt")
-
-from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
-from cortex.cli.security_cmds import security_cli  # noqa: E402
-from cortex.cli.heal_cmds import cli as heal_cmd
-from cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli  # noqa: E402
-from cortex.cli.security_hardening_cmds import (  # noqa: E402
-    bridge_audit as bridge_audit_cmd,
-    quarantine as quarantine_cmd,
-    reap_ghosts as reap_ghosts_cmd,
-    unquarantine as unquarantine_cmd,
-)
-
 cli.add_command(agent_cli, name="agent")
 cli.add_command(security_cli, name="security")
 cli.add_command(heal_cmd, name="heal")

@@ -137,8 +137,8 @@ class MoltbookHeartbeat:
             except MoltbookRateLimited:
                 logger.warning("Rate limited during activity response")
                 break
-            except Exception:
-                logger.exception("Error responding to post %s", post_id)
+            except Exception as e:
+                logger.exception("Error responding to post %s: %s", post_id, e)
 
         return replies
 
@@ -164,13 +164,13 @@ class MoltbookHeartbeat:
                         upvotes += 1
                     except MoltbookRateLimited:
                         break
-                    except Exception:
-                        pass  # May already be upvoted
+                    except Exception as e:
+                        logger.debug("Upvote failed for %s: %s", post_id, e)
 
         except MoltbookRateLimited:
             logger.warning("Rate limited during feed browse")
-        except Exception:
-            logger.exception("Error browsing feed")
+        except Exception as e:
+            logger.exception("Error browsing feed: %s", e)
 
         return upvotes
 

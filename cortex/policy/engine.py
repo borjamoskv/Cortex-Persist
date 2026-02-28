@@ -260,8 +260,8 @@ class PolicyEngine:
         # All projects: get stats then recall each.
         try:
             stats = await self._engine.stats()
-        except Exception:
-            logger.warning("Failed to get stats, falling back to empty")
+        except Exception as e:
+            logger.warning("Failed to get stats, falling back to empty: %s", e)
             return []
 
         all_facts: list[Fact] = []
@@ -270,8 +270,8 @@ class PolicyEngine:
             try:
                 facts = await self._engine.recall(proj_name, tenant_id=tenant_id)
                 all_facts.extend(facts)
-            except Exception:
-                logger.warning("Failed to recall project %s", proj_name)
+            except Exception as e:
+                logger.warning("Failed to recall project %s: %s", proj_name, e)
         return all_facts
 
     @staticmethod

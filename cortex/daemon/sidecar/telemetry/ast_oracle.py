@@ -64,8 +64,8 @@ class ASTOracle:
                 mtime = py_file.stat().st_mtime
                 self._mtimes[target_str] = mtime
                 self._cache[target_str] = self._extract_semantic_nodes(py_file)
-            except Exception:
-                pass
+            except OSError as e:
+                logger.debug("Failed reading %s: %s", target_str, e)
 
     def _extract_semantic_nodes(self, path: Path) -> set[str]:
         """Parses a Python file and returns a set of semantic signatures."""
@@ -74,7 +74,11 @@ class ASTOracle:
                 tree = ast.parse(f.read(), filename=str(path))
             # Flatten AST to strings for diffing
             return {ast.dump(node) for node in ast.walk(tree)}
-        except Exception:
+        except SyntaxError as e:
+            logger.debug("Syntax error parsing %s: %s", path, e)
+            return set()
+        except OSError as e:
+            logger.debug("OS error reading %s: %s", path, e)
             return set()
 
     async def _patrol_fs(self) -> None:

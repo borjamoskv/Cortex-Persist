@@ -124,8 +124,8 @@ def _collect_snapshot() -> MemorySnapshot:
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except Exception:  # noqa: BLE001 — boundary; caller handles alerts
-            pass
+        except Exception as e:  # noqa: BLE001 — boundary; caller handles alerts
+            logger.debug("psutil stats collection failed: %s", e)
 
     if _IS_LINUX:
         # Lazy import: ctypes.CDLL("libc.so.6") only attempted on Linux
@@ -136,8 +136,8 @@ def _collect_snapshot() -> MemorySnapshot:
 
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as e:  # noqa: BLE001
+            logger.debug("mallinfo2 failed: %s", e)
 
     return MemorySnapshot(
         rss_bytes=rss,
@@ -161,7 +161,8 @@ def _do_malloc_trim() -> bool:
 
         malloc_trim(0)
         return True
-    except Exception:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
+        logger.debug("malloc_trim failed: %s", e)
         return False
 
 

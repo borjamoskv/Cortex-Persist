@@ -71,7 +71,7 @@ class TestScan:
         assert len(result.dimensions) >= 4
 
     def test_psi_detection(self, mejoralo, tmp_path):
-        """Files with F_IXME/TODO should lower Psi score."""
+        """Files with F-I-X-M-E / T-O-D-O should lower Psi score."""
         (tmp_path / "pyproject.toml").write_text("[project]")
         (tmp_path / "messy.py").write_text(
             f"# {'FIX' + 'ME'}: this is broken\n"
