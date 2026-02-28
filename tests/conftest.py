@@ -81,6 +81,14 @@ def reset_cortex_state():
     config.reload()
 
 
+@pytest.fixture(autouse=True)
+def reset_anomaly_detector():
+    """Reset AnomalyDetector singleton state between tests to avoid bulk_mutation triggers."""
+    from cortex.security.anomaly_detector import DETECTOR
+    DETECTOR.reset()
+    yield
+
+
 @pytest.fixture(scope="session", autouse=True)
 def set_test_master_key():
     import base64

@@ -211,6 +211,13 @@ class AnomalyDetector:
         self._daily_anomalies = 0
         self._daily_blocked = 0
 
+    def reset(self) -> None:
+        """Reset all detector internal state (used primarily for testing)."""
+        self._rate_tracker.clear()
+        self._project_events.clear()
+        self._baselines.clear()
+        self.reset_daily_stats()
+
     # ── Internal Methods ──
 
     def _check_rate(self, source: str, now: float) -> AnomalyReport | None:
