@@ -124,3 +124,8 @@ xokas-elevator/
 .mejoralo/
 *.out
 *.html
+
+# Analysis outputs (generated, not source)
+*_output.txt
+*_output.json
+forge_*.py
