@@ -11,6 +11,7 @@ from cortex.migrations.mig_consensus import (
     _migration_009_reputation_consensus,
 )
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
+from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
 from cortex.migrations.mig_hash import _migration_016_add_fact_hash
@@ -42,4 +43,5 @@ MIGRATIONS = [
     (15, "Sovereign Tenant Unification", _migration_015_tenant_unification),
     (16, "Add hash column to facts for dedup", _migration_016_add_fact_hash),
     (17, "Decouple FTS from facts table and use plaintext", _migration_017_fts_decouple),
+    (18, "Security Hardening: quarantine + ghost TTL", _migration_018_security_hardening),
 ]
