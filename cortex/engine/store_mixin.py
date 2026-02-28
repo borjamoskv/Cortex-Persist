@@ -326,6 +326,22 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         meta = self._run_security_guards(content, project, source, meta)
 
+        # ── Bridge Validation Guard (Phase 2: Prevention) ─────────
+        if fact_type == "bridge":
+            from cortex.engine.bridge_guard import BridgeGuard
+
+            bridge_result = await BridgeGuard.validate_bridge(
+                conn, content, project, tenant_id,
+            )
+            if not bridge_result["allowed"]:
+                raise ValueError(
+                    f"BRIDGE BLOCKED: {bridge_result['reason']}"
+                )
+            if bridge_result["meta_flags"]:
+                meta = meta or {}
+                meta.update(bridge_result["meta_flags"])
+        # ──────────────────────────────────────────────────────────
+
         ts = valid_from or now_iso()
         tags_json = json.dumps(tags or [])
 
@@ -545,6 +561,74 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             return True
         return False
 
+    async def quarantine(
+        self,
+        fact_id: int,
+        reason: str,
+        conn: aiosqlite.Connection | None = None,
+    ) -> bool:
+        """Quarantine a fact: isolate without deleting.
+
+        Quarantined facts are excluded from recall, search, and dedup.
+        They remain in the DB for forensic analysis.
+        """
+        if not isinstance(fact_id, int) or fact_id <= 0:
+            raise ValueError("Invalid fact_id")
+        if not reason or not reason.strip():
+            raise ValueError("Quarantine reason is required")
+
+        async def _impl(c: aiosqlite.Connection) -> bool:
+            ts = now_iso()
+            cursor = await c.execute(
+                "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
+                "quarantine_reason = ?, updated_at = ? "
+                "WHERE id = ? AND valid_until IS NULL AND is_quarantined = 0",
+                (ts, reason.strip(), ts, fact_id),
+            )
+            if cursor.rowcount > 0:
+                await self._log_transaction(
+                    c, "system", "quarantine",
+                    {"fact_id": fact_id, "reason": reason},
+                )
+                await c.commit()
+                return True
+            return False
+
+        if conn:
+            return await _impl(conn)
+        async with self.session() as conn:
+            return await _impl(conn)
+
+    async def unquarantine(
+        self,
+        fact_id: int,
+        conn: aiosqlite.Connection | None = None,
+    ) -> bool:
+        """Lift quarantine from a fact."""
+        if not isinstance(fact_id, int) or fact_id <= 0:
+            raise ValueError("Invalid fact_id")
+
+        async def _impl(c: aiosqlite.Connection) -> bool:
+            ts = now_iso()
+            cursor = await c.execute(
+                "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
+                "quarantine_reason = NULL, updated_at = ? "
+                "WHERE id = ? AND is_quarantined = 1",
+                (ts, fact_id),
+            )
+            if cursor.rowcount > 0:
+                await self._log_transaction(
+                    c, "system", "unquarantine", {"fact_id": fact_id},
+                )
+                await c.commit()
+                return True
+            return False
+
+        if conn:
+            return await _impl(conn)
+        async with self.session() as conn:
+            return await _impl(conn)
+
     def _validate_content(self, project: str, content: str, fact_type: str) -> str:
         """Sovereign Content Gatekeeper."""
         if not project or not project.strip():
@@ -588,7 +672,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
         cursor = await conn.execute(
             "SELECT id FROM facts WHERE tenant_id = ? AND project = ? AND hash = ? "
-            "AND valid_until IS NULL LIMIT 1",
+            "AND valid_until IS NULL AND is_quarantined = 0 LIMIT 1",
             (tenant_id, project, f_hash),
         )
         existing = await cursor.fetchone()

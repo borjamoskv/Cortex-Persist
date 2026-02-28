@@ -9,7 +9,10 @@ import ast
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +65,16 @@ _SKIP_DIRS = frozenset(("venv", ".venv", ".cortex", "__pycache__", ".git", "node
 class ApotheosisEngine:
     """Sovereign Auto-healing and Pre-Omniscience Engine."""
 
-    def __init__(self, workspace: Path) -> None:
+    def __init__(
+        self,
+        workspace: Path,
+        cortex_engine: CortexEngine | None = None,
+    ) -> None:
         self.workspace = workspace
         self.is_active = False
         self._healer_mode = True
+        self._cortex = cortex_engine  # Bellman Policy Engine integration
+        self._last_priorities: list = []  # Cached policy results
 
     # Adaptive sleep bounds (seconds)
     _SLEEP_MIN: float = 30.0  # active / entropy found
@@ -88,6 +97,9 @@ class ApotheosisEngine:
         consecutive_clean = 0  # tracks quiescent cycles for backoff
 
         while self.is_active:
+            # Bellman pulse: surface top priorities from CORTEX memory.
+            await self._policy_pulse()
+
             entropy_found = await self._process_workspace(
                 file_hashes,
                 hashlib,
@@ -113,6 +125,37 @@ class ApotheosisEngine:
                 sleep_duration,
             )
             await asyncio.sleep(sleep_duration)
+
+    # ── Bellman Policy Pulse ───────────────────────────────────────
+
+    async def _policy_pulse(self) -> None:
+        """Query the PolicyEngine for top Bellman-scored priorities.
+
+        Runs non-destructively alongside entropy scanning to surface
+        WHAT matters most from CORTEX memory (ghosts, errors, bridges).
+        """
+        if not self._cortex:
+            return
+        try:
+            from cortex.policy import PolicyConfig, PolicyEngine
+
+            config = PolicyConfig(max_actions=5)
+            policy = PolicyEngine(self._cortex, config)
+            actions = await policy.evaluate()
+            self._last_priorities = actions
+
+            if actions:
+                top = actions[0]
+                logger.info(
+                    "[APOTHEOSIS] 🎯 Policy pulse: %d priorities. "
+                    "Top: V=%.3f [%s] %s",
+                    len(actions),
+                    top.value,
+                    top.action_type,
+                    top.description[:80],
+                )
+        except Exception as e:
+            logger.debug("[APOTHEOSIS] Policy pulse skipped: %s", e)
 
     async def _process_workspace(
         self,
