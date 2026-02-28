@@ -111,6 +111,33 @@ class DomainMetrics:
     # ── Derived Signals ────────────────────────────────────────
 
     @property
+    def error_rate(self) -> float:
+        """Normalized error signal ∈ [0, 1].
+
+        Maps error_count through a saturating function so that
+        0 errors → 0.0, ~10 errors → ~0.5, 20+ errors → ~1.0.
+        """
+        return min(1.0, self.error_count / 20.0)
+
+    @property
+    def ghost_density(self) -> float:
+        """Normalized ghost load ∈ [0, 1].
+
+        Technical debt pressure: 0 ghosts → 0.0, 20+ → 1.0.
+        """
+        return min(1.0, self.ghost_count / 20.0)
+
+    @property
+    def bridge_score(self) -> float:
+        """Normalized cross-domain integration score ∈ [0, 1].
+
+        Bridges indicate proven cross-project sharing. More bridges
+        → higher openness to knowledge transfer.
+        0 bridges → 0.0, 10+ → 1.0.
+        """
+        return min(1.0, self.bridge_count / 10.0)
+
+    @property
     def health_score(self) -> float:
         """Homeostatic health index ∈ [0, 1].
 
