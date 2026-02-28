@@ -3,131 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Para Vosotros</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;700;900&display=swap" rel="stylesheet">
+<title>Para Vosotros — Borja Fernández</title>
+
+<!-- OG Tags for LinkedIn/Social -->
+<meta property="og:title" content="Esto es lo que construyo">
+<meta property="og:description" content="Cada partícula dorada es una línea de código. Miles de líneas con un propósito: crear lo que antes no existía. Para Aita y Ama.">
+<meta property="og:image" content="https://borjamoskv.github.io/Cortex-Persist/demo-padres/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://borjamoskv.github.io/Cortex-Persist/demo-padres/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Esto es lo que construyo">
+<meta name="twitter:description" content="Para Aita y Ama · Con todo el cariño del mundo">
+<meta name="twitter:image" content="https://borjamoskv.github.io/Cortex-Persist/demo-padres/og-image.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#050505;font-family:'Outfit',sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#030303;font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
 canvas{position:fixed;top:0;left:0;z-index:0}
 
-/* Overlay content */
-.content{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none}
-.greeting{text-align:center;opacity:0;animation:fadeUp 2s 0.5s ease forwards}
-.greeting h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;letter-spacing:-2px;color:#fff;line-height:1.1;margin-bottom:16px;text-shadow:0 0 80px rgba(212,175,55,0.3)}
-.greeting h1 span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 30px rgba(212,175,55,0.4))}
-.greeting p{font-size:clamp(1rem,2.5vw,1.5rem);font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:0.1em;max-width:600px;margin:0 auto;line-height:1.7}
-.greeting .heart{display:inline-block;color:#d4af37;font-size:1.2em;animation:heartbeat 1.5s ease infinite;margin:0 4px}
+/* === SCENE SYSTEM === */
+.scene{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+.scene.active{opacity:1;pointer-events:all}
 
-/* Subtitle reveal */
-.sub{opacity:0;animation:fadeUp 2s 2s ease forwards;margin-top:40px;text-align:center}
-.sub p{font-size:clamp(0.8rem,1.5vw,1rem);color:rgba(255,255,255,0.25);font-weight:200;letter-spacing:0.3em;text-transform:uppercase}
+/* === SCENE 1: GREETING === */
+.greeting{text-align:center;padding:0 24px;max-width:800px}
+.greeting h1{font-size:clamp(2.2rem,7vw,4.5rem);font-weight:900;letter-spacing:-2px;color:#fff;line-height:1.05;margin-bottom:20px;opacity:0;transform:translateY(40px)}
+.greeting h1.reveal{animation:fadeUp 1.5s 0.3s cubic-bezier(.16,1,.3,1) forwards}
+.greeting h1 span{background:linear-gradient(135deg,#c9a227,#f5d76e,#d4af37,#f0c040);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:goldShimmer 4s ease infinite}
+.greeting p{font-size:clamp(0.95rem,2vw,1.25rem);font-weight:200;color:rgba(255,255,255,0.45);line-height:1.8;max-width:550px;margin:0 auto;opacity:0;transform:translateY(30px)}
+.greeting p.reveal{animation:fadeUp 1.5s 1s cubic-bezier(.16,1,.3,1) forwards}
+.greeting .heart{display:inline-block;color:#d4af37;animation:heartbeat 1.8s ease infinite;font-style:normal}
+.dedication{margin-top:48px;opacity:0;transform:translateY(20px)}
+.dedication.reveal{animation:fadeUp 1.5s 2s cubic-bezier(.16,1,.3,1) forwards}
+.dedication p{font-size:clamp(0.75rem,1.2vw,0.9rem);color:rgba(212,175,55,0.4);letter-spacing:0.4em;text-transform:uppercase;font-weight:300}
 
-/* Music hint */
-.music-hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:20;opacity:0;animation:fadeUp 1.5s 3.5s ease forwards;pointer-events:all}
-.music-hint button{background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:#d4af37;font-family:'Outfit',sans-serif;font-size:13px;letter-spacing:0.15em;padding:12px 32px;border-radius:100px;cursor:pointer;transition:all 0.4s;text-transform:uppercase;font-weight:400}
-.music-hint button:hover{background:rgba(212,175,55,0.2);border-color:#d4af37;box-shadow:0 0 40px rgba(212,175,55,0.2)}
+/* === SCENE 2: PROJECTS === */
+.projects{text-align:center;padding:0 24px}
+.projects h2{font-size:clamp(1.5rem,4vw,2.5rem);font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:48px;opacity:0;transform:translateY(30px)}
+.projects h2.reveal{animation:fadeUp 1s 0.2s ease forwards}
+.projects h2 span{color:#d4af37}
+.project-cards{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;max-width:900px}
+.project-card{flex:1;min-width:240px;max-width:280px;padding:32px 24px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(10px);text-align:left;opacity:0;transform:translateY(40px);transition:all 0.4s cubic-bezier(.16,1,.3,1)}
+.project-card.reveal{animation:fadeUp 0.8s ease forwards}
+.project-card:nth-child(1).reveal{animation-delay:0.4s}
+.project-card:nth-child(2).reveal{animation-delay:0.6s}
+.project-card:nth-child(3).reveal{animation-delay:0.8s}
+.project-card:hover{transform:translateY(-6px);border-color:rgba(212,175,55,0.2);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.project-card .emoji{font-size:32px;margin-bottom:16px;display:block}
+.project-card h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.project-card p{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6;font-weight:300}
+.project-card .tag{display:inline-block;margin-top:12px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:4px 10px;border-radius:100px;font-weight:400}
+.project-card:nth-child(1) .tag{color:#ccff00;background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.15)}
+.project-card:nth-child(2) .tag{color:#06d6a0;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.15)}
+.project-card:nth-child(3) .tag{color:#f5d76e;background:rgba(245,215,110,0.08);border:1px solid rgba(245,215,110,0.15)}
 
-/* Counter */
-.counter{position:fixed;top:30px;right:30px;z-index:20;opacity:0;animation:fadeUp 1.5s 4s ease forwards;text-align:right}
-.counter .num{font-size:clamp(2rem,4vw,3rem);font-weight:900;background:linear-gradient(135deg,#d4af37,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.counter .label{font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:0.2em;text-transform:uppercase}
+/* === SCENE 3: FINALE === */
+.finale{text-align:center;padding:0 24px}
+.finale h2{font-size:clamp(1.8rem,5vw,3.5rem);font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.1;margin-bottom:16px;opacity:0;transform:translateY(30px)}
+.finale h2.reveal{animation:fadeUp 1.2s 0.3s ease forwards}
+.finale h2 em{font-style:normal;background:linear-gradient(135deg,#d4af37,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.finale p{font-size:clamp(0.9rem,1.8vw,1.1rem);color:rgba(255,255,255,0.3);font-weight:200;line-height:1.7;max-width:480px;margin:0 auto;opacity:0;transform:translateY(20px)}
+.finale p.reveal{animation:fadeUp 1.2s 1s ease forwards}
 
-/* Signature */
-.sig{position:fixed;bottom:30px;right:30px;z-index:20;opacity:0;animation:fadeUp 1.5s 4.5s ease forwards}
-.sig p{font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:0.15em}
+/* === COUNTER === */
+.counter{position:fixed;top:28px;right:28px;z-index:30;text-align:right;opacity:0;animation:fadeUp 1.5s 3s ease forwards}
+.counter .num{font-size:clamp(1.5rem,3.5vw,2.5rem);font-weight:900;background:linear-gradient(135deg,#d4af37,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.counter .label{font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:0.25em;text-transform:uppercase;margin-top:2px}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+/* === NAV DOTS === */
+.nav-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:12px}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;transition:all 0.4s;padding:0}
+.nav-dot.active{background:#d4af37;border-color:#d4af37;box-shadow:0 0 12px rgba(212,175,55,0.4)}
+
+/* === MUSIC === */
+.music-hint{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:30;opacity:0;animation:fadeUp 1.5s 3.5s ease forwards}
+.music-hint button{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);color:rgba(212,175,55,0.7);font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:0.2em;padding:10px 28px;border-radius:100px;cursor:pointer;transition:all 0.4s;text-transform:uppercase;font-weight:300}
+.music-hint button:hover{background:rgba(212,175,55,0.12);border-color:rgba(212,175,55,0.5);color:#d4af37;box-shadow:0 0 30px rgba(212,175,55,0.15)}
+
+/* === SIGNATURE === */
+.sig{position:fixed;bottom:28px;right:28px;z-index:30;opacity:0;animation:fadeUp 1.5s 4s ease forwards}
+.sig p{font-size:9px;color:rgba(255,255,255,0.1);letter-spacing:0.2em;text-transform:uppercase}
+
+/* === SHOOTING STARS === */
+.shooting-star{position:fixed;z-index:5;width:80px;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0),rgba(212,175,55,0.6),rgba(245,215,110,0));border-radius:1px;pointer-events:none;opacity:0}
+
+/* === ANIMATIONS === */
+@keyframes fadeUp{from{opacity:0;transform:translateY(var(--ty,30px))}to{opacity:1;transform:translateY(0)}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+@keyframes goldShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* === MOBILE === */
+@media(max-width:600px){
+  .project-cards{flex-direction:column;align-items:center}
+  .project-card{max-width:320px;width:100%}
+  .nav-dots{display:none}
+  .counter{top:16px;right:16px}
+  .sig{bottom:16px;right:16px}
+  .music-hint{bottom:16px}
+  .music-hint button{font-size:11px;padding:8px 20px}
+}
 </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
 
-<div class="content">
+<!-- SCENE 1: GREETING -->
+<div class="scene active" id="scene1">
   <div class="greeting">
-    <h1>Esto es lo que <span>construyo</span></h1>
-    <p>
+    <h1 class="reveal">Esto es lo que <span>construyo</span></h1>
+    <p class="reveal">
       Cada una de estas partículas doradas representa una línea de código que he escrito.
-      <br>Son miles. Y cada una tiene un propósito: <span class="heart">crear</span> algo que antes no existía.
+      Son miles. Y cada una tiene un propósito: <em class="heart">crear</em> algo que antes no existía.
     </p>
-  </div>
-  <div class="sub">
-    <p>Para Aita y Ama · Con todo el cariño del mundo</p>
+    <div class="dedication reveal">
+      <p>Para Aita y Ama · Con todo el cariño del mundo</p>
+    </div>
   </div>
 </div>
 
+<!-- SCENE 2: PROJECTS -->
+<div class="scene" id="scene2">
+  <div class="projects">
+    <h2>Esto es lo que he <span>creado</span></h2>
+    <div class="project-cards">
+      <div class="project-card">
+        <span class="emoji">🔍</span>
+        <h3>Detectives Digitales</h3>
+        <p>Dos asistentes que revisan miles de datos financieros en segundos y encuentran errores que un humano tardaría semanas en detectar.</p>
+        <span class="tag">Inteligencia Artificial</span>
+      </div>
+      <div class="project-card">
+        <span class="emoji">🎵</span>
+        <h3>Maestro de Sonido</h3>
+        <p>Una herramienta que mejora la calidad del sonido de la música automáticamente, como un ingeniero de sonido invisible.</p>
+        <span class="tag">Audio Profesional</span>
+      </div>
+      <div class="project-card">
+        <span class="emoji">🧠</span>
+        <h3>Cerebro Digital</h3>
+        <p>Un sistema de memoria que hace que todas mis herramientas recuerden lo aprendido y no cometan el mismo error dos veces.</p>
+        <span class="tag">Memoria Soberana</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: FINALE -->
+<div class="scene" id="scene3">
+  <div class="finale">
+    <h2>Todo esto lo he hecho<br>porque me <em>apasiona</em></h2>
+    <p class="reveal">Y porque vosotros me enseñasteis que lo importante es hacer las cosas bien, con cariño y sin atajos.</p>
+  </div>
+</div>
+
+<!-- NAV DOTS -->
+<div class="nav-dots">
+  <button class="nav-dot active" data-scene="0"></button>
+  <button class="nav-dot" data-scene="1"></button>
+  <button class="nav-dot" data-scene="2"></button>
+</div>
+
+<!-- COUNTER -->
 <div class="counter">
   <div class="num" id="lineCount">0</div>
   <div class="label">líneas de código</div>
 </div>
 
+<!-- MUSIC -->
 <div class="music-hint">
   <button id="soundBtn">✦ Activar Ambiente ✦</button>
 </div>
 
-<div class="sig">
-  <p>MOSKV-1 · 2026</p>
-</div>
+<!-- SIGNATURE -->
+<div class="sig"><p>MOSKV-1 · 2026</p></div>
 
 <script>
-// === GOLDEN PARTICLE SYSTEM ===
+// === CANVAS: GOLDEN PARTICLE COSMOS ===
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 let W, H;
 const particles = [];
-const PARTICLE_COUNT = 220;
-let mouse = { x: -1000, y: -1000 };
+const PARTICLE_COUNT = 200;
+let mouse = { x: -9999, y: -9999 };
 
 class Particle {
   constructor() { this.reset(true); }
   reset(initial) {
     this.x = Math.random() * W;
-    this.y = initial ? Math.random() * H : H + 20;
-    this.size = Math.random() * 3 + 0.5;
-    this.speedY = -(Math.random() * 0.8 + 0.15);
-    this.speedX = (Math.random() - 0.5) * 0.3;
-    this.opacity = Math.random() * 0.6 + 0.1;
-    this.life = Math.random();
+    this.y = initial ? Math.random() * H : H + Math.random() * 100;
+    this.size = Math.random() * 2.5 + 0.3;
+    this.speedY = -(Math.random() * 0.6 + 0.1);
+    this.speedX = (Math.random() - 0.5) * 0.2;
+    this.opacity = 0;
+    this.targetOpacity = Math.random() * 0.5 + 0.1;
     this.golden = Math.random();
-    this.wobbleSpeed = Math.random() * 0.02 + 0.005;
-    this.wobbleAmp = Math.random() * 30 + 10;
+    this.wobbleSpeed = Math.random() * 0.015 + 0.003;
+    this.wobbleAmp = Math.random() * 25 + 8;
     this.phase = Math.random() * Math.PI * 2;
+    this.pulsePhase = Math.random() * Math.PI * 2;
+    this.pulseSpeed = Math.random() * 0.02 + 0.008;
   }
   update() {
-    this.life += 0.002;
+    this.pulsePhase += this.pulseSpeed;
     this.phase += this.wobbleSpeed;
-    this.x += this.speedX + Math.sin(this.phase) * 0.3;
+    this.x += this.speedX + Math.sin(this.phase) * 0.25;
     this.y += this.speedY;
 
-    // Gentle mouse repulsion
+    // Smooth opacity
+    this.opacity += (this.targetOpacity - this.opacity) * 0.02;
+    const pulse = Math.sin(this.pulsePhase) * 0.15 + 0.85;
+    this.opacity *= pulse;
+
+    // Mouse/Touch repulsion
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 150) {
-      const force = (150 - dist) / 150 * 0.8;
+    if (dist < 120) {
+      const force = (120 - dist) / 120 * 0.6;
       this.x += (dx / dist) * force;
       this.y += (dy / dist) * force;
     }
 
-    // Pulse opacity
-    this.opacity = (Math.sin(this.life * 3) * 0.3 + 0.4) * (1 - Math.abs(this.y - H / 2) / (H / 2) * 0.5);
-
-    if (this.y < -20 || this.x < -20 || this.x > W + 20) this.reset(false);
+    if (this.y < -30 || this.x < -30 || this.x > W + 30) this.reset(false);
   }
   draw() {
-    const r = this.golden > 0.3 ? 212 : 245;
-    const g = this.golden > 0.3 ? 175 : 215;
-    const b = this.golden > 0.3 ? 55 : 110;
+    const r = this.golden > 0.4 ? 212 : 245;
+    const g = this.golden > 0.4 ? 175 : 215;
+    const b = this.golden > 0.4 ? 55 : 110;
 
-    // Glow
-    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 6);
-    gradient.addColorStop(0, `rgba(${r},${g},${b},${this.opacity * 0.3})`);
-    gradient.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(this.x - this.size * 6, this.y - this.size * 6, this.size * 12, this.size * 12);
+    // Soft glow
+    const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 8);
+    grad.addColorStop(0, `rgba(${r},${g},${b},${this.opacity * 0.2})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(this.x - this.size * 8, this.y - this.size * 8, this.size * 16, this.size * 16);
 
-    // Core
+    // Core dot
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(${r},${g},${b},${this.opacity})`;
@@ -142,59 +257,149 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// Init particles
 for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
-// Draw connections between nearby particles
 function drawConnections() {
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx = particles[i].x - particles[j].x;
       const dy = particles[i].y - particles[j].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 100) {
-        const alpha = (1 - dist / 100) * 0.08;
+      if (dist < 90) {
+        const alpha = (1 - dist / 90) * 0.05 * Math.min(particles[i].opacity, particles[j].opacity) * 3;
         ctx.beginPath();
         ctx.moveTo(particles[i].x, particles[i].y);
         ctx.lineTo(particles[j].x, particles[j].y);
         ctx.strokeStyle = `rgba(212,175,55,${alpha})`;
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = 0.4;
         ctx.stroke();
       }
     }
   }
 }
 
+// === SHOOTING STARS ===
+const shootingStars = [];
+class ShootingStar {
+  constructor() {
+    this.x = Math.random() * W * 0.8;
+    this.y = Math.random() * H * 0.4;
+    this.length = Math.random() * 80 + 40;
+    this.speed = Math.random() * 8 + 5;
+    this.angle = Math.PI / 6 + Math.random() * 0.3;
+    this.opacity = 1;
+    this.decay = Math.random() * 0.015 + 0.01;
+  }
+  update() {
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+    this.opacity -= this.decay;
+    return this.opacity > 0;
+  }
+  draw() {
+    const endX = this.x - Math.cos(this.angle) * this.length;
+    const endY = this.y - Math.sin(this.angle) * this.length;
+    const grad = ctx.createLinearGradient(endX, endY, this.x, this.y);
+    grad.addColorStop(0, `rgba(212,175,55,0)`);
+    grad.addColorStop(0.7, `rgba(245,215,110,${this.opacity * 0.6})`);
+    grad.addColorStop(1, `rgba(255,255,255,${this.opacity})`);
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(this.x, this.y);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+}
+
 function animate() {
-  ctx.fillStyle = 'rgba(5,5,5,0.12)';
+  ctx.fillStyle = 'rgba(3,3,3,0.1)';
   ctx.fillRect(0, 0, W, H);
 
   drawConnections();
   particles.forEach(p => { p.update(); p.draw(); });
 
+  // Shooting stars
+  if (Math.random() > 0.995) shootingStars.push(new ShootingStar());
+  for (let i = shootingStars.length - 1; i >= 0; i--) {
+    shootingStars[i].draw();
+    if (!shootingStars[i].update()) shootingStars.splice(i, 1);
+  }
+
   requestAnimationFrame(animate);
 }
 animate();
 
-// Mouse tracking
-document.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
+// === INTERACTION ===
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+document.addEventListener('touchmove', e => {
+  e.preventDefault();
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+}, { passive: false });
+document.addEventListener('touchend', () => { mouse.x = -9999; mouse.y = -9999; });
+
+// === SCENE NAVIGATION ===
+const scenes = document.querySelectorAll('.scene');
+const dots = document.querySelectorAll('.nav-dot');
+let currentScene = 0;
+let isTransitioning = false;
+
+function goToScene(n) {
+  if (n === currentScene || isTransitioning || n < 0 || n >= scenes.length) return;
+  isTransitioning = true;
+
+  scenes[currentScene].classList.remove('active');
+  currentScene = n;
+  scenes[currentScene].classList.add('active');
+
+  // Trigger reveals
+  scenes[currentScene].querySelectorAll('h1,h2,p,.dedication,.project-card').forEach((el, i) => {
+    el.classList.remove('reveal');
+    void el.offsetWidth; // reflow
+    el.classList.add('reveal');
+  });
+
+  dots.forEach((d, i) => d.classList.toggle('active', i === currentScene));
+
+  setTimeout(() => isTransitioning = false, 1400);
+}
+
+// Scroll / swipe navigation
+let startY = 0;
+document.addEventListener('wheel', e => {
+  if (e.deltaY > 30) goToScene(currentScene + 1);
+  else if (e.deltaY < -30) goToScene(currentScene - 1);
+}, { passive: true });
+
+document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dy = startY - e.changedTouches[0].clientY;
+  if (dy > 60) goToScene(currentScene + 1);
+  else if (dy < -60) goToScene(currentScene - 1);
 });
 
-// === LINE COUNTER ANIMATION ===
+dots.forEach(d => d.addEventListener('click', () => goToScene(+d.dataset.scene)));
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === ' ') goToScene(currentScene + 1);
+  if (e.key === 'ArrowUp') goToScene(currentScene - 1);
+});
+
+// === LINE COUNTER ===
 const TARGET = 47832;
 const counterEl = document.getElementById('lineCount');
 let current = 0;
 function animateCounter() {
   if (current < TARGET) {
-    const step = Math.max(1, Math.floor((TARGET - current) / 40));
+    const step = Math.max(1, Math.floor((TARGET - current) / 50));
     current = Math.min(current + step, TARGET);
     counterEl.textContent = current.toLocaleString('es-ES');
     requestAnimationFrame(animateCounter);
   }
 }
-setTimeout(animateCounter, 4200);
+setTimeout(animateCounter, 3500);
 
 // === AMBIENT SOUND ===
 const soundBtn = document.getElementById('soundBtn');
@@ -204,62 +409,51 @@ let playing = false;
 function createAmbient() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  // Deep warm pad
-  const osc1 = audioCtx.createOscillator();
-  osc1.type = 'sine';
-  osc1.frequency.value = 65.41; // C2
-  const g1 = audioCtx.createGain();
-  g1.gain.value = 0.07;
+  const notes = [
+    { freq: 65.41, type: 'sine', vol: 0.06 },   // C2 deep
+    { freq: 98, type: 'sine', vol: 0.035 },       // G2 fifth
+    { freq: 130.81, type: 'sine', vol: 0.025 },   // C3 octave
+    { freq: 261.63, type: 'sine', vol: 0.012 },   // C4 shimmer
+    { freq: 392, type: 'triangle', vol: 0.006 },   // G4 sparkle
+  ];
 
-  // Shimmer fifth
-  const osc2 = audioCtx.createOscillator();
-  osc2.type = 'sine';
-  osc2.frequency.value = 98; // ~G2
-  const g2 = audioCtx.createGain();
-  g2.gain.value = 0.04;
-
-  // High ethereal
-  const osc3 = audioCtx.createOscillator();
-  osc3.type = 'sine';
-  osc3.frequency.value = 261.63; // C4
-  const g3 = audioCtx.createGain();
-  g3.gain.value = 0.015;
-
-  // Golden overtone
-  const osc4 = audioCtx.createOscillator();
-  osc4.type = 'triangle';
-  osc4.frequency.value = 392; // G4
-  const g4 = audioCtx.createGain();
-  g4.gain.value = 0.008;
+  const oscs = notes.map(n => {
+    const osc = audioCtx.createOscillator();
+    osc.type = n.type;
+    osc.frequency.value = n.freq;
+    const gain = audioCtx.createGain();
+    gain.gain.value = n.vol;
+    osc.connect(gain);
+    return { osc, gain };
+  });
 
   // LFO for organic movement
   const lfo = audioCtx.createOscillator();
   lfo.type = 'sine';
-  lfo.frequency.value = 0.07;
+  lfo.frequency.value = 0.06;
   const lfoG = audioCtx.createGain();
-  lfoG.gain.value = 2;
+  lfoG.gain.value = 1.5;
   lfo.connect(lfoG);
-  lfoG.connect(osc2.frequency);
+  lfoG.connect(oscs[1].osc.frequency);
 
   // Warmth filter
   const filter = audioCtx.createBiquadFilter();
   filter.type = 'lowpass';
-  filter.frequency.value = 600;
-  filter.Q.value = 0.7;
+  filter.frequency.value = 500;
+  filter.Q.value = 0.5;
 
   const master = audioCtx.createGain();
   master.gain.value = 0;
 
-  osc1.connect(g1).connect(filter);
-  osc2.connect(g2).connect(filter);
-  osc3.connect(g3).connect(filter);
-  osc4.connect(g4).connect(filter);
+  oscs.forEach(o => o.gain.connect(filter));
   filter.connect(master).connect(audioCtx.destination);
 
-  [osc1, osc2, osc3, osc4, lfo].forEach(o => o.start());
-  master.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 4);
+  oscs.forEach(o => o.osc.start());
+  lfo.start();
 
-  return { master, oscs: [osc1, osc2, osc3, osc4, lfo] };
+  master.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 5);
+
+  return { master, allOscs: [...oscs.map(o => o.osc), lfo] };
 }
 
 let amb = null;
@@ -268,16 +462,18 @@ soundBtn.addEventListener('click', () => {
     amb = createAmbient();
     playing = true;
     soundBtn.textContent = '✦ Sonando ✦';
-    soundBtn.style.borderColor = '#d4af37';
-    soundBtn.style.boxShadow = '0 0 30px rgba(212,175,55,0.3)';
+    soundBtn.style.borderColor = 'rgba(212,175,55,0.6)';
+    soundBtn.style.color = '#d4af37';
+    soundBtn.style.boxShadow = '0 0 20px rgba(212,175,55,0.15)';
   } else {
     if (amb) {
-      amb.master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
-      setTimeout(() => { amb.oscs.forEach(o => o.stop()); audioCtx.close(); audioCtx = null; }, 2000);
+      amb.master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
+      setTimeout(() => { amb.allOscs.forEach(o => o.stop()); audioCtx.close(); audioCtx = null; }, 2500);
     }
     playing = false;
     soundBtn.textContent = '✦ Activar Ambiente ✦';
-    soundBtn.style.borderColor = 'rgba(212,175,55,0.3)';
+    soundBtn.style.borderColor = 'rgba(212,175,55,0.2)';
+    soundBtn.style.color = 'rgba(212,175,55,0.7)';
     soundBtn.style.boxShadow = 'none';
   }
 });
