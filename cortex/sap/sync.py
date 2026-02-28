@@ -236,11 +236,9 @@ class SAPSync:
             if hasattr(self.engine, "recall") and asyncio.iscoroutinefunction(
                 getattr(self.engine, "recall", None)
             ):
-                facts = await self.engine.recall(project=project)
+                return await self.engine.recall(project=project, fact_type="sap_entity")
             else:
-                facts = self.engine.recall_sync(project=project)
-
-            return [f for f in facts if f.get("fact_type") == "sap_entity"]
+                return self.engine.recall_sync(project=project, fact_type="sap_entity")
         except (OSError, ValueError, KeyError):
             logger.warning("Failed to recall SAP facts for project %s", project)
             return []

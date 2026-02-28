@@ -113,6 +113,7 @@ from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
 from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
 from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402
+from cortex.cli.policy_cmds import policy_cmds as policy_cli  # noqa: E402
 from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402
 from cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402
 from cortex.cli.purge import purge as purge_cmd  # noqa: E402
@@ -130,10 +131,23 @@ cli.add_command(prompt_group, name="prompt")
 from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
 from cortex.cli.security_cmds import security_cli  # noqa: E402
 from cortex.cli.heal_cmds import cli as heal_cmd
+from cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli  # noqa: E402
+from cortex.cli.security_hardening_cmds import (  # noqa: E402
+    bridge_audit as bridge_audit_cmd,
+    quarantine as quarantine_cmd,
+    reap_ghosts as reap_ghosts_cmd,
+    unquarantine as unquarantine_cmd,
+)
 
 cli.add_command(agent_cli, name="agent")
 cli.add_command(security_cli, name="security")
 cli.add_command(heal_cmd, name="heal")
+cli.add_command(moltbook_cli, name="moltbook")
+cli.add_command(quarantine_cmd)
+cli.add_command(unquarantine_cmd)
+cli.add_command(reap_ghosts_cmd)
+cli.add_command(bridge_audit_cmd)
+cli.add_command(policy_cli, name="policy")
 
 
 @cli.command("observe")

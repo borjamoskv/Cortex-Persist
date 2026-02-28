@@ -155,6 +155,7 @@ class FactManager:
         query = (
             f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
             f"WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
+            f"AND f.is_quarantined = 0 "
             f"ORDER BY (f.consensus_score * 0.8 + "
             f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, "
             f"f.fact_type, f.created_at DESC"

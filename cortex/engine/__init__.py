@@ -40,6 +40,7 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     ):
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._enforce_fs_permissions()
         self._auto_embed = auto_embed
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
@@ -52,6 +53,51 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         self.facts = FactManager(self)
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
+
+    # ─── Security: Filesystem Permission Enforcement ──────────────
+
+    def _enforce_fs_permissions(self) -> None:
+        """Enforce restrictive permissions on CORTEX data directory and DB file.
+        Directory: 700 (owner-only rwx). DB file: 600 (owner-only rw).
+        """
+        import os
+
+        parent = self._db_path.parent
+        try:
+            # Directory: rwx------ (700)
+            current_dir_mode = parent.stat().st_mode & 0o777
+            if current_dir_mode != 0o700:
+                os.chmod(parent, 0o700)
+                logger.info(
+                    "SECURITY: Fixed dir perms %o → 700 on %s",
+                    current_dir_mode, parent,
+                )
+
+            # DB file: rw------- (600) — only if it exists
+            if self._db_path.exists():
+                current_file_mode = self._db_path.stat().st_mode & 0o777
+                if current_file_mode != 0o600:
+                    os.chmod(self._db_path, 0o600)
+                    logger.info(
+                        "SECURITY: Fixed DB perms %o → 600 on %s",
+                        current_file_mode, self._db_path,
+                    )
+        except OSError as e:
+            logger.warning("SECURITY: Could not enforce permissions: %s", e)
+
+    # ─── Security: CLI Audit Trail ────────────────────────────────
+
+    @staticmethod
+    def _audit_log(
+        action: str, fact_type: str = "",
+        project: str = "", tenant_id: str = "default",
+    ) -> None:
+        """Append-only audit log for CLI/SDK access to CORTEX memory."""
+        audit_logger = logging.getLogger("cortex.audit")
+        audit_logger.info(
+            "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
+            action, fact_type, project, tenant_id,
+        )
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
@@ -115,9 +161,60 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         conn.enable_load_extension(False)
         return conn
 
+    # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
+
+    def _run_sync(self, coro):
+        """Execute a coroutine synchronously, thread-safe."""
+        import threading
+
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coro)
+
+        result = None
+        exception = None
+
+        def _worker():
+            nonlocal result, exception
+            try:
+                result = asyncio.run(coro)
+            except Exception as e:
+                exception = e
+
+        t = threading.Thread(target=_worker)
+        t.start()
+        t.join()
+        if exception:
+            raise exception
+        return result
+
+    def init_db_sync(self) -> None:
+        return self._run_sync(self.init_db())
+
+    def store_sync(self, *args, **kwargs):
+        return self._run_sync(self.store(*args, **kwargs))
+
+    def recall_sync(self, *args, **kwargs):
+        return self._run_sync(self.recall(*args, **kwargs))
+
+    def search_sync(self, *args, **kwargs):
+        return self._run_sync(self.search(*args, **kwargs))
+
+    def hybrid_search_sync(self, *args, **kwargs):
+        return self._run_sync(self.search(*args, **kwargs))
+
+    def close_sync(self):
+        return self._run_sync(self.close())
+
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
     async def store(self, *args, **kwargs):
+        self._audit_log(
+            "store",
+            fact_type=kwargs.get("fact_type", ""),
+            project=kwargs.get("project", args[0] if args else ""),
+        )
         return await self.facts.store(*args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
@@ -127,6 +224,10 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         return await self.facts.search(*args, **kwargs)
 
     async def recall(self, *args, **kwargs):
+        self._audit_log(
+            "recall",
+            project=kwargs.get("project", args[0] if args else ""),
+        )
         return await self.facts.recall(*args, **kwargs)
 
     async def update(self, *args, **kwargs):
@@ -169,6 +270,27 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     async def stats(self):
         return await self.facts.stats()
+
+    async def shannon_report(self, project: str | None = None) -> dict:
+        """Shannon entropy analysis of stored memory."""
+        from cortex.shannon.report import EntropyReport
+
+        return await EntropyReport.analyze(self, project)
+
+    async def prioritize(
+        self,
+        project: str | None = None,
+        tenant_id: str = "default",
+    ) -> list:
+        """Bellman Policy Engine — prioritized action queue.
+
+        Returns a list of ActionItems scored by value function V(s) = R(s,a) + γ·V(s').
+        Higher value = more urgent/impactful action.
+        """
+        from cortex.policy import PolicyEngine
+
+        policy = PolicyEngine(self)
+        return await policy.evaluate(project=project, tenant_id=tenant_id)
 
     # ─── Schema ───────────────────────────────────────────────────
 

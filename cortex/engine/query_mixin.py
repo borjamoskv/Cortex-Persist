@@ -92,6 +92,7 @@ class QueryMixin:
                 SELECT {_FACT_COLUMNS}
                 {_FACT_JOIN}
                 WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL
+                AND f.is_quarantined = 0
                 ORDER BY (
                     f.consensus_score * 0.8
                     + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2
