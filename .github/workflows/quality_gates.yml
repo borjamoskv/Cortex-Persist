@@ -13,6 +13,9 @@ concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   quality-gates:
     name: "7 Seals"

@@ -109,10 +109,9 @@ async def _provision_api_key(email: str, plan: str) -> str | None:
                 rate_limit=plan_cfg["rate_limit"],
             )
             logger.info(
-                "API key provisioned: %s → %s plan (prefix: %s...)",
+                "API key provisioned: %s → %s plan",
                 email,
                 plan,
-                raw_key[:12],
             )
             return raw_key
     except (RuntimeError, ValueError, OSError):

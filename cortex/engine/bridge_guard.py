@@ -105,7 +105,8 @@ class BridgeGuard:
             return match.group(1).strip()
 
         # Fallback: look for "ProjectA → ProjectB" pattern
-        arrow_match = re.search(r"(\S+)\s*(?:→|->)\s*(\S+)", content)
+        # Use possessive-like matching via atomic group workaround to prevent ReDoS
+        arrow_match = re.search(r"(\S{1,128})\s{0,5}(?:→|->)\s{0,5}(\S{1,128})", content)
         if arrow_match:
             src, dst = arrow_match.group(1), arrow_match.group(2)
             # Return whichever isn't the target project

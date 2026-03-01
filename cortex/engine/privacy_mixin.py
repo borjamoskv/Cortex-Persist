@@ -27,9 +27,9 @@ class PrivacyMixin:
             sensitivity = classify_content(content)
             if sensitivity.is_sensitive:
                 logger.warning(
-                    "PRIVACY SHIELD: Sensitive patterns detected (%s) in project [%s]. "
+                    "PRIVACY SHIELD: %d sensitive pattern(s) detected in project [%s]. "
                     "Fact flagged for audit.",
-                    ", ".join(sensitivity.matches),
+                    len(sensitivity.matches),
                     project,
                 )
                 privacy_meta = {

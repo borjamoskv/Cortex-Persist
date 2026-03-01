@@ -56,9 +56,9 @@ class TenantRouter:
             sensitivity = classify_content(content)
             if sensitivity.is_sensitive:
                 logger.warning(
-                    "PRIVACY ALERT: Sensitive patterns detected (%s). "
+                    "PRIVACY ALERT: %d sensitive pattern(s) detected. "
                     "Forcing LOCAL storage for tenant [%s].",
-                    ", ".join(sensitivity.matches),
+                    len(sensitivity.matches),
                     tenant_id,
                 )
                 return await self._get_local_backend()
