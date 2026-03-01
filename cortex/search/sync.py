@@ -108,8 +108,8 @@ def semantic_search_sync(
 
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
-            except (ValueError, OSError):
-                pass
+            except (ValueError, OSError) as exc:
+                logger.debug("Decryption failed for fact %s: %s", row[0], exc)
 
         results.append(
             SyncSearchResult(
@@ -213,8 +213,8 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
-        except (ValueError, OSError):
-            pass
+        except (ValueError, OSError) as exc:
+            logger.debug("Decryption failed for fact %s: %s", row[0], exc)
 
     return SyncSearchResult(
         fact_id=row[0],

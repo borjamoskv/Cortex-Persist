@@ -195,8 +195,8 @@ def semantic_search_sync(
         if content and str(content).startswith(enc.PREFIX):
             try:
                 content = enc.decrypt_string(content)
-            except (ValueError, OSError):
-                pass
+            except (ValueError, OSError) as exc:
+                logger.debug("Decryption failed for fact %s: %s", row[0], exc)
 
         score = 1.0 - (row[7] if row[7] else 0.0)
         results.append(

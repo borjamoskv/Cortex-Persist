@@ -392,7 +392,7 @@ class CortexMetrics:
                     result[domain] = self._query_sync(conn, domain)
             finally:
                 conn.close()
-        except Exception as e:
+        except (sqlite3.OperationalError, OSError) as e:
             logger.debug("Sync metrics refresh failed: %s", e)
             for domain in AgentDomain:
                 if domain not in result:
@@ -426,8 +426,8 @@ class CortexMetrics:
                 ).fetchone()
                 if row:
                     setattr(m, attr, row["c"] if isinstance(row, _sql.Row) else row[0])
-            except _sql.OperationalError:
-                pass
+            except _sql.OperationalError as exc:
+                logger.debug("Metrics query for %s/%s skipped: %s", domain.name, fact_type, exc)
 
         # Ghosts
         try:
@@ -437,8 +437,8 @@ class CortexMetrics:
             ).fetchone()
             if row:
                 m.ghost_count = row["c"] if isinstance(row, _sql.Row) else row[0]
-        except _sql.OperationalError:
-            pass
+        except _sql.OperationalError as exc:
+            logger.debug("Ghost count query for %s skipped: %s", domain.name, exc)
 
         return m
 
@@ -463,6 +463,6 @@ class CortexMetrics:
                     m.bridge_count += 1
                 if "decision" in line:
                     m.decision_count += 1
-        except OSError:
-            pass
+        except OSError as exc:
+            logger.debug("Fallback snapshot read failed for %s: %s", domain.name, exc)
         return m

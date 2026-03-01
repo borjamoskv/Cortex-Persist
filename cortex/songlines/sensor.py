@@ -62,8 +62,8 @@ class TopographicSensor:
         if hasattr(os, "listxattr"):
             try:
                 return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.debug("listxattr failed for %s: %s", file_path, exc)
 
         # 2. Try xattr CLI
         try:
@@ -78,8 +78,8 @@ class TopographicSensor:
         if hasattr(os, "getxattr"):
             try:
                 return os.getxattr(str(file_path), attr)
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.debug("getxattr failed for %s/%s: %s", file_path, attr, exc)
 
         # 2. Try xattr CLI -p
         try:
@@ -114,8 +114,8 @@ class TopographicSensor:
             try:
                 os.removexattr(str(file_path), attr_name)
                 return
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.debug("removexattr failed for %s/%s: %s", file_path, attr_name, exc)
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)

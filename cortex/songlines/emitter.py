@@ -53,8 +53,8 @@ class ResonanceEmitter:
                 os.setxattr(str(target_file), attr_name, encoded_payload)
                 logger.info(f"Embedded ghost {ghost_id} on {target_file.name} (os.setxattr)")
                 return
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.debug("os.setxattr failed for %s: %s", target_file.name, exc)
 
         # Primary Fallback: /usr/bin/xattr CLI (macOS)
         try:
@@ -68,8 +68,8 @@ class ResonanceEmitter:
             )
             logger.info(f"Embedded ghost {ghost_id} on {target_file.name} (xattr cli)")
             return
-        except (subprocess.SubprocessError, FileNotFoundError):
-            pass
+        except (subprocess.SubprocessError, FileNotFoundError) as exc:
+            logger.debug("xattr CLI fallback failed for %s: %s", target_file.name, exc)
 
         # Final Fallback: .songlines manifest
         self._fallback_embed(target_file, attr_name, encoded_payload)

@@ -11,7 +11,6 @@ from cortex.migrations.mig_consensus import (
     _migration_009_reputation_consensus,
 )
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
-from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
 from cortex.migrations.mig_hash import _migration_016_add_fact_hash
@@ -21,6 +20,7 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 
 __all__ = ["MIGRATIONS"]

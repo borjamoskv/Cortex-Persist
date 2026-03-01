@@ -58,7 +58,7 @@ class HealingMixin:
         MAX_CONSECUTIVE_FAILURES. Logs the healing event and increments
         the healed counter.
         """
-        from cortex.daemon.core import MAX_CONSECUTIVE_FAILURES
+        from cortex.daemon.models import MAX_CONSECUTIVE_FAILURES
 
         logger.warning(
             "🩹 Self-healing: %s failed %d times consecutively. Re-instantiating...",

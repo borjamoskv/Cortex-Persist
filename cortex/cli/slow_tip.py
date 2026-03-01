@@ -148,8 +148,10 @@ class SlowOpTipEmitter:
                     padding=(0, 2),
                 )
             )
-        except Exception:  # noqa: BLE001
-            pass  # Tips are non-critical; never break the CLI
+        except (ImportError, OSError, RuntimeError, ValueError) as exc:
+            import logging as _log
+
+            _log.getLogger(__name__).debug("Tip emission skipped: %s", exc)
 
 
 # ─── Context Manager ─────────────────────────────────────────────────

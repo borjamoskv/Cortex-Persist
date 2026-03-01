@@ -491,8 +491,8 @@ class ThreatFeedEngine:
             ts = data.get("last_update")
             if ts:
                 return datetime.fromisoformat(ts)
-        except (json.JSONDecodeError, OSError, ValueError):
-            pass
+        except (json.JSONDecodeError, OSError, ValueError) as exc:
+            logger.debug("Failed reading last update from %s: %s", self._feed_path, exc)
         return None
 
     @property
