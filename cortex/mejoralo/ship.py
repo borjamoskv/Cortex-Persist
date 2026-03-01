@@ -136,6 +136,14 @@ def _seal_psi(project: str, path: str | Path) -> ShipSeal:
 def check_ship_gate(project: str, path: str | Path) -> ShipResult:
     """Validate the 7 Seals for production readiness."""
     p = Path(path).expanduser().resolve()
+
+    # Path injection guard: ensure resolved path is within allowed boundaries
+    allowed_roots = [Path.cwd().resolve(), Path.home().resolve()]
+    if not any(p == ar or p.is_relative_to(ar) for ar in allowed_roots):
+        raise ValueError(
+            f"Path '{p}' is outside allowed directories."
+        )
+
     stack = detect_stack(p)
     cwd = str(p)
 

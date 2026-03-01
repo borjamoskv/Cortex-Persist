@@ -374,6 +374,15 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
       HIGH (weight 35): Psi (toxic markers), Complexity
     """
     root = Path(path).resolve()
+
+    # Path injection guard: ensure resolved path is within allowed boundaries
+    allowed_roots = [Path.cwd().resolve(), Path.home().resolve()]
+    if not any(root == ar or root.is_relative_to(ar) for ar in allowed_roots):
+        raise ValueError(
+            f"Path '{root}' is outside allowed directories. "
+            "Only paths within the current working directory or home directory are allowed."
+        )
+
     if root.is_file():
         # Single file scan mode
         source_files = [root]

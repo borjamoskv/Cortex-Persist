@@ -12,7 +12,8 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-_test_db = tempfile.mktemp(suffix="_admin_hardening.db")
+_fd, _test_db = tempfile.mkstemp(suffix="_admin_hardening.db")
+os.close(_fd)
 
 
 @pytest.fixture(scope="module")

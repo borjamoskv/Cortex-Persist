@@ -5,7 +5,8 @@ import tempfile
 from fastapi.testclient import TestClient
 
 # Setup test environment
-_test_db = tempfile.mktemp(suffix=".db")
+_fd, _test_db = tempfile.mkstemp(suffix=".db")
+os.close(_fd)
 os.environ["CORTEX_DB"] = _test_db
 
 from cortex.api import app  # noqa: E402

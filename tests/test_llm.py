@@ -13,6 +13,7 @@ Tests for:
 - /v1/llm/status endpoint
 """
 
+import os
 import tempfile
 from unittest.mock import patch
 
@@ -23,7 +24,8 @@ import cortex.api.core
 import cortex.config
 
 # Set test DB path
-_test_db = tempfile.mktemp(suffix=".db")
+_fd, _test_db = tempfile.mkstemp(suffix=".db")
+os.close(_fd)
 cortex.config.DB_PATH = _test_db
 cortex.api.DB_PATH = _test_db
 

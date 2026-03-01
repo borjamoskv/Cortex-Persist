@@ -12,7 +12,8 @@ from fastapi.testclient import TestClient
 
 # Path for a unique test DB — env var is NOT set at module level
 # to avoid polluting other test modules during full-suite runs.
-_test_db = tempfile.mktemp(suffix="_hardening.db")
+_fd, _test_db = tempfile.mkstemp(suffix="_hardening.db")
+os.close(_fd)
 
 
 @pytest.fixture(scope="module")

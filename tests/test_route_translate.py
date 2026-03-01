@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 
 from cortex.api.core import app
 
-_test_db = tempfile.mktemp(suffix="_translate.db")
+_fd, _test_db = tempfile.mkstemp(suffix="_translate.db")
+os.close(_fd)
 
 
 @pytest.fixture(scope="module")

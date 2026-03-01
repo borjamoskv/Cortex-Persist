@@ -17,7 +17,11 @@ __all__ = [
 
 def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
-    p = Path(path)
+    p = Path(path).resolve()
+    # Path injection guard
+    allowed_roots = [Path.cwd().resolve(), Path.home().resolve()]
+    if not any(p == ar or p.is_relative_to(ar) for ar in allowed_roots):
+        return "unknown"
     for stack, marker in STACK_MARKERS.items():
         if (p / marker).exists():
             return stack
