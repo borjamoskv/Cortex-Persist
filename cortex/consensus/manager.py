@@ -11,9 +11,25 @@ __all__ = ["ConsensusManager"]
 
 logger = logging.getLogger("cortex.consensus")
 
+# ─── Scoring Constants ────────────────────────────────────────────────
+SCORE_FLOOR = 0.0
+SCORE_CEILING = 2.0
+SCORE_BASELINE = 1.0
+V1_VOTE_WEIGHT = 0.1
+VERIFIED_THRESHOLD = 1.5
+DISPUTED_THRESHOLD = 0.5
+
 
 class ConsensusManager:
-    """Manages agent registration and weighted consensus voting."""
+    """Manages agent registration and weighted consensus voting.
+
+    Scoring model:
+        - Baseline score is 1.0 (neutral).
+        - v1: score = clamp(1.0 + sum(votes) * 0.1, 0.0, 2.0)
+        - v2: score = clamp(1.0 + weighted_sum / total_weight, 0.0, 2.0)
+        - score >= 1.5 → confidence = "verified"
+        - score <= 0.5 → confidence = "disputed"
+    """
 
     def __init__(self, engine):
         self.engine = engine
@@ -25,6 +41,14 @@ class ConsensusManager:
         value: int,
         agent_id: str | None = None,
     ) -> float:
+        """Cast a v1 consensus vote on a fact.
+
+        Args:
+            fact_id: The fact to vote on.
+            agent: Agent name (v1 style).
+            value: Vote value (-1, 0, or 1). 0 removes the vote.
+            agent_id: If provided, delegates to vote_v2.
+        """
         if agent_id:
             return await self.vote_v2(fact_id, agent_id, value)
 
@@ -46,7 +70,7 @@ class ConsensusManager:
             )
             action = "vote"
 
-        await self.engine._log_transaction(
+        await self.engine.log_transaction(
             conn,
             "consensus",
             action,
@@ -63,6 +87,7 @@ class ConsensusManager:
         public_key: str = "",
         tenant_id: str = "default",
     ) -> str:
+        """Register a new agent and return its UUID."""
         agent_id = str(uuid.uuid4())
         conn = await self.engine.get_conn()
         await conn.execute(
@@ -81,6 +106,14 @@ class ConsensusManager:
         value: int,
         reason: str | None = None,
     ) -> float:
+        """Cast a reputation-weighted consensus vote (v2).
+
+        Args:
+            fact_id: The fact to vote on.
+            agent_id: UUID of a registered agent.
+            value: Vote value (-1, 0, or 1). 0 removes the vote.
+            reason: Optional textual justification.
+        """
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
@@ -115,7 +148,7 @@ class ConsensusManager:
             )
             action = "vote_v2"
 
-        await self.engine._log_transaction(
+        await self.engine.log_transaction(
             conn,
             "consensus",
             action,
@@ -132,6 +165,7 @@ class ConsensusManager:
         return score
 
     async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
+        """Recalculate consensus using reputation-weighted votes."""
         cursor = await conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
             "FROM consensus_votes_v2 v "
@@ -145,25 +179,28 @@ class ConsensusManager:
 
         weighted_sum = sum(v[0] * max(v[1], v[2]) for v in votes)
         total_weight = sum(max(v[1], v[2]) for v in votes)
-        score = 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
+        raw = SCORE_BASELINE + (weighted_sum / total_weight) if total_weight > 0 else SCORE_BASELINE
+        score = max(SCORE_FLOOR, min(SCORE_CEILING, raw))
         await self._update_fact_score(fact_id, score, conn)
         return score
 
     async def _recalculate_consensus(self, fact_id: int, conn) -> float:
+        """Recalculate consensus from simple v1 votes."""
         cursor = await conn.execute(
             "SELECT SUM(vote) FROM consensus_votes WHERE fact_id = ?",
             (fact_id,),
         )
         row = await cursor.fetchone()
         vote_sum = row[0] or 0
-        score = max(0.0, 1.0 + (vote_sum * 0.1))
+        score = max(SCORE_FLOOR, min(SCORE_CEILING, SCORE_BASELINE + (vote_sum * V1_VOTE_WEIGHT)))
         await self._update_fact_score(fact_id, score, conn)
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
-        if score >= 1.5:
+        """Update fact consensus score and auto-set confidence label."""
+        if score >= VERIFIED_THRESHOLD:
             conf = "verified"
-        elif score <= 0.5:
+        elif score <= DISPUTED_THRESHOLD:
             conf = "disputed"
         else:
             conf = None

@@ -1,8 +1,8 @@
 """
-CORTEX v5.0 — Registro Inmutable de Votos.
+CORTEX v5.0 — Immutable Vote Ledger.
 
-Almacenamiento de votos a prueba de manipulaciones criptográficas mediante encadenamiento de hashes y árboles de Merkle.
-Parte de la Arquitectura de Soberanía Wave 5.
+Tamper-proof vote storage via SHA-256 hash chaining and Merkle tree checkpoints.
+Part of the Sovereignty Architecture Wave 5.
 """
 
 import hashlib
@@ -35,10 +35,9 @@ class VoteEntry:
 
 
 class ImmutableVoteLedger:
-    """
-    Motor criptográfico de consenso para CORTEX.
-    Garantiza la inmutabilidad de los votos mediante encadenamiento de hashes SHA-256.
-    Protocolo: MEJORAlo God Mode 7.3 - Wave 5 Structural Correction
+    """Cryptographic consensus engine for CORTEX.
+
+    Guarantees vote immutability via SHA-256 hash chaining.
     """
 
     GENESIS_HASH = "0" * 64
@@ -50,22 +49,21 @@ class ImmutableVoteLedger:
     def _compute_hash(
         self, prev_hash: str, fact_id: int, agent_id: str, vote: int, weight: float, ts: str
     ) -> str:
-        """Cálculo determinista del hash del bloque/voto."""
+        """Deterministic block/vote hash computation."""
         payload = f"{prev_hash}:{fact_id}:{agent_id}:{vote}:{weight}:{ts}"
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     async def _get_conn(self):
-        """Helper para obtener una conexión ya sea desde un pool o una conexión existente."""
+        """Get a connection from pool or return existing connection."""
         if hasattr(self._db, "acquire"):
             return await self._db.acquire().__aenter__()
         return self._db
 
     async def _release_conn(self, conn):
-        """Libera la conexión si proviene de un pool."""
+        """Release the connection back to pool if applicable."""
         if hasattr(self._db, "release"):
             await self._db.release(conn)
         elif hasattr(self._db, "acquire"):
-            # Si entramos con __aenter__, salimos con __aexit__ (cerrado por caller o manual)
             pass
 
     async def append_vote(
@@ -76,9 +74,7 @@ class ImmutableVoteLedger:
         vote_weight: float = 1.0,
         signature: str | None = None,
     ) -> VoteEntry:
-        """
-        Añade un voto de forma segura y sellada.
-        """
+        """Append a cryptographically sealed vote to the ledger."""
         timestamp = datetime.now(timezone.utc).isoformat()
         conn = await self._get_conn()
 
@@ -110,7 +106,8 @@ class ImmutableVoteLedger:
                 await conn.commit()
 
             logger.info(
-                f"Voto inmutable sellado: Fact {fact_id} | Agent {agent_id} | Hash {entry_hash[:8]}..."
+                "Immutable vote sealed: Fact %d | Agent %s | Hash %s...",
+                fact_id, agent_id, entry_hash[:8],
             )
             await self._maybe_create_checkpoint(conn)
 
@@ -128,15 +125,13 @@ class ImmutableVoteLedger:
         except (sqlite3.Error, OSError) as e:
             if should_commit:
                 await conn.rollback()
-            logger.error(f"Fallo al registrar voto inmutable: {e}")
+            logger.error("Failed to record immutable vote: %s", e)
             raise
         finally:
             await self._release_conn(conn)
 
     async def verify_chain_integrity(self) -> dict[str, Any]:
-        """
-        Audita toda la cadena de votos.
-        """
+        """Audit the entire vote chain for integrity violations."""
         violations = []
         conn = await self._get_conn()
         try:
@@ -181,7 +176,7 @@ class ImmutableVoteLedger:
             await self._release_conn(conn)
 
     async def _maybe_create_checkpoint(self, conn: aiosqlite.Connection):
-        """Verifica si es necesario crear un punto de control de Merkle."""
+        """Check if a Merkle checkpoint should be created."""
         async with conn.execute(
             "SELECT COUNT(v.id) FROM vote_ledger v "
             "LEFT JOIN vote_merkle_roots r ON v.id >= r.vote_start_id AND v.id <= r.vote_end_id "
@@ -193,7 +188,7 @@ class ImmutableVoteLedger:
             await self._create_checkpoint_internal(conn)
 
     async def create_checkpoint(self) -> str | None:
-        """Dispara manualmente un punto de control."""
+        """Manually trigger a Merkle checkpoint."""
         conn = await self._get_conn()
         try:
             should_commit = hasattr(self._db, "acquire")
@@ -213,7 +208,7 @@ class ImmutableVoteLedger:
             await self._release_conn(conn)
 
     async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> str | None:
-        """Lógica interna de creación de punto de control."""
+        """Internal checkpoint creation logic."""
         async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
             row = await cursor.fetchone()
             start_id = (row[0] + 1) if row and row[0] is not None else 1
@@ -235,20 +230,26 @@ class ImmutableVoteLedger:
 
         ts = datetime.now(timezone.utc).isoformat()
         await conn.execute(
-            "INSERT INTO vote_merkle_roots (vote_start_id, vote_end_id, root_hash, vote_count, created_at) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO vote_merkle_roots "
+            "(vote_start_id, vote_end_id, root_hash, vote_count, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
             (start_id, end_id, root_hash, len(hashes), ts),
         )
 
-        logger.info(f"Punto de control Merkle creado: {start_id}-{end_id} -> {root_hash}")
+        logger.info(
+            "Merkle checkpoint created: %d-%d -> %s",
+            start_id, end_id, root_hash,
+        )
         return root_hash
 
     async def verify_merkle_roots(self) -> list[dict[str, Any]]:
-        """Verifica todas las raíces Merkle almacenadas."""
+        """Verify all stored Merkle roots against current ledger data."""
         results = []
         conn = await self._get_conn()
         try:
             async with conn.execute(
-                "SELECT id, vote_start_id, vote_end_id, root_hash FROM vote_merkle_roots ORDER BY id"
+                "SELECT id, vote_start_id, vote_end_id, root_hash "
+                "FROM vote_merkle_roots ORDER BY id"
             ) as cursor:
                 checkpoints = await cursor.fetchall()
 

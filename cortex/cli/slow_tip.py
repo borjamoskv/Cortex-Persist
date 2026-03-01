@@ -126,6 +126,7 @@ class SlowOpTipEmitter:
         """Emit a single tip to Rich console. Fully isolated — never crashes."""
         try:
             import asyncio
+
             from rich.panel import Panel
 
             from cortex.cli.common import console

@@ -1,21 +1,21 @@
-"""CORTEX v5.0 — SAP OData Integration.
+"""Export public elements of the SAP package."""
 
-Bidirectional sync between SAP business objects and CORTEX facts.
-Enables AI agents to read/write SAP entities with full ledger traceability.
-"""
-
-from cortex.sap.client import SAPAuthError, SAPClient, SAPConfig, SAPConnectionError, SAPEntityError
-from cortex.sap.mapper import SAPMapper, SyncDiff
-from cortex.sap.sync import SAPSync, SAPSyncResult
+from cortex.sap.client import SAPClient
+from cortex.sap.mapper import GenericMapper
+from cortex.sap.models import (
+    SAPAuthError,
+    SAPConfig,
+    SAPConnectionError,
+    SAPEntityError,
+)
+from cortex.sap.sync import SAPSyncAgent
 
 __all__ = [
+    "GenericMapper",
+    "SAPAuthError",
     "SAPClient",
     "SAPConfig",
-    "SAPMapper",
-    "SAPSync",
-    "SAPSyncResult",
-    "SyncDiff",
     "SAPConnectionError",
-    "SAPAuthError",
     "SAPEntityError",
+    "SAPSyncAgent",
 ]

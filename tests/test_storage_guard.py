@@ -94,6 +94,25 @@ class TestStorageGuardFactTypeValidation:
 class TestStorageGuardSourceAttribution:
     """Gate: SOURCE_REQUIRED — the critical new Leap 1 enforcement."""
 
+    @pytest.fixture(autouse=True)
+    def _strict_source_guard(self):
+        """Override conftest's relax_source_guard for these tests."""
+        from cortex.engine.storage_guard import StorageGuard
+
+        @classmethod
+        def _real_check(cls, source):
+            if not source or not source.strip():
+                raise GuardViolation(
+                    "SOURCE_REQUIRED",
+                    "source attribution is mandatory. Use 'cli', 'agent:<name>', "
+                    "'api', or 'human' as source.",
+                )
+
+        original = StorageGuard._check_source
+        StorageGuard._check_source = _real_check
+        yield
+        StorageGuard._check_source = original
+
     def test_source_required(self):
         with pytest.raises(GuardViolation, match="SOURCE_REQUIRED"):
             StorageGuard.validate(

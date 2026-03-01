@@ -28,6 +28,7 @@ __all__ = [
     "EngineHealthAlert",
     "EntropyAlert",
     "GhostAlert",
+    "MAX_CONSECUTIVE_FAILURES",
     "MejoraloAlert",
     "MemoryAlert",
     "NeuralIntentAlert",
@@ -49,6 +50,7 @@ DEFAULT_RETRIES = 1  # HTTP retry count before declaring failure
 RETRY_BACKOFF = 2.0  # seconds between retries
 DEFAULT_CERT_WARN_DAYS = 14  # warn if SSL expires within 14 days
 DEFAULT_DISK_WARN_MB = 500  # warn if cortex dir exceeds 500 MB
+MAX_CONSECUTIVE_FAILURES = 3  # self-heal after N consecutive failures
 CORTEX_DIR = Path.home() / ".cortex"
 CORTEX_DB = CORTEX_DIR / "cortex.db"
 AGENT_DIR = Path.home() / ".agent"

@@ -27,6 +27,7 @@ from cortex.daemon.models import (
     DEFAULT_INTERVAL,
     DEFAULT_MEMORY_STALE_HOURS,
     DEFAULT_STALE_HOURS,
+    MAX_CONSECUTIVE_FAILURES,
     STATUS_FILE,
     DaemonStatus,
 )
@@ -51,8 +52,6 @@ from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 __all__ = ["MoskvDaemon"]
 
 logger = logging.getLogger("moskv-daemon")
-
-MAX_CONSECUTIVE_FAILURES = 3
 
 
 class MoskvDaemon(AlertHandlerMixin, HealingMixin):

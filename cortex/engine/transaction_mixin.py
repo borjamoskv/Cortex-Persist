@@ -60,6 +60,12 @@ class TransactionMixin:
 
         return tx_id
 
+    async def log_transaction(
+        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+    ) -> int:
+        """Public alias for transaction logging (used by composition layers)."""
+        return await self._log_transaction(conn, project, action, detail)
+
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import ImmutableLedger

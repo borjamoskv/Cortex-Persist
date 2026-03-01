@@ -129,3 +129,4 @@ xokas-elevator/
 *_output.txt
 *_output.json
 forge_*.py
+.vercel
