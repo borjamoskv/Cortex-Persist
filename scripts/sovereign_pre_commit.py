@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # =============================================================================
-# CORTEX SOVEREIGN PRE-COMMIT v2.0
+# CORTEX SOVEREIGN PRE-COMMIT v3.0
 # =============================================================================
-# Dos guardias, un commit. Si cualquiera falla, el commit muere.
+# Three guards, one commit. If any fails, the commit dies.
 #
-# Guard 1: DependencyGuard (Axiom 4 — Zero external oracle SPOF)
+# Guard 1: DependencyGuard (AX-011 — Zero external oracle SPOF)
 # Guard 2: Neural Shield (X-Ray quality score >= 90/100)
+# Guard 3: Axiom Registry Sync (AX-019 — docs generated from code)
 #
 # Installed as: .git/hooks/pre-commit → ../../scripts/sovereign_pre_commit.py
 
@@ -98,15 +99,64 @@ def run_neural_shield() -> bool:
         return True
 
 
+def run_axiom_registry_sync() -> bool:
+    """Guard 3: Verify axiom-registry.md is generated from code."""
+    print(
+        "\n📜 [GUARD 3/3] Axiom Registry Sync — AX-019"
+    )
+    registry_md = os.path.join(REPO_ROOT, "docs", "axiom-registry.md")
+    if not os.path.exists(registry_md):
+        print("   ⚠️  docs/axiom-registry.md not found, skipping.")
+        return True
+
+    try:
+        # Read current content
+        with open(registry_md) as f:
+            current = f.read()
+
+        # Regenerate from code
+        result = subprocess.run(
+            [PYTHON, "-m", "cortex.axioms.generate_docs"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            cwd=REPO_ROOT,
+        )
+        if result.returncode != 0:
+            print(f"   ⚠️  Generator failed: {result.stderr[:200]}")
+            return True  # Don't block on generator failure
+
+        # Read regenerated content
+        with open(registry_md) as f:
+            regenerated = f.read()
+
+        if current != regenerated:
+            print(
+                "   ⛔ axiom-registry.md is out of sync with registry.py!"
+            )
+            print(
+                "   💡 Run: python -m cortex.axioms.generate_docs"
+            )
+            print("   Then stage the updated file.")
+            return False
+
+        print("   ✅ axiom-registry.md in sync with code.")
+        return True
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"   ⚠️  Guard skipped: {e}")
+        return True
+
+
 if __name__ == "__main__":
     print("═" * 60)
-    print("  CORTEX SOVEREIGN PRE-COMMIT v2.0")
+    print("  CORTEX SOVEREIGN PRE-COMMIT v3.0")
     print("═" * 60)
 
     guard_1 = run_dependency_guard()
     guard_2 = run_neural_shield()
+    guard_3 = run_axiom_registry_sync()
 
-    if guard_1 and guard_2:
+    if guard_1 and guard_2 and guard_3:
         print("\n✅ All guards passed. Commit approved.\n")
         sys.exit(0)
     else:
@@ -115,6 +165,8 @@ if __name__ == "__main__":
             failed.append("DependencyGuard")
         if not guard_2:
             failed.append("NeuralShield")
+        if not guard_3:
+            failed.append("AxiomRegistrySync")
         print(
             f"\n⛔ COMMIT BLOCKED by: {', '.join(failed)}\n"
         )

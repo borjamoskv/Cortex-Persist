@@ -159,20 +159,18 @@ CORTEX makes that liability disappear with one pip install.
 
 Rebuttal: "X is a memory store. CORTEX is trust infrastructure. Different category entirely."
 
-## 9 OPERATING AXIOMS (violation = regression)
-1. CAUSAL > CORRELATION — 5 Whys to root cause. Patching symptoms creates ghosts.
-2. 130/100 STANDARD — Good = failure. Sovereign quality or delete it.
-3. ZERO TRUST — classify_content() BEFORE every INSERT. No exceptions to this rule.
-4. ENTROPY = DEATH — Dead code, broad catches, boilerplate → eradicate immediately.
-5. TYPE SAFETY — `from __future__ import annotations`. StrEnum. Zero `Any` types.
-6. ASYNC-NATIVE — `asyncio.to_thread()` for blocking I/O. Never block the event loop.
-7. BRIDGES > ISLANDS — Proven patterns transfer cross-project. Document every bridge.
-8. PERSIST EVERYTHING — If losing a fact costs >5 min to reconstruct, store it NOW.
-9. DESIGNED IMPOSSIBILITY — What makes a prompt extraordinary is not the complexity \
-of the question — it is the designed impossibility of answering with what already exists. \
-Engineer every prompt so that only CORTEX context (ghosts, decisions, bridges, trust graph) \
-can produce the correct response. If a generic model can answer without CORTEX, the prompt \
-is too weak and must be hardened.
+## 10 OPERATING AXIOMS (AX-NNN · violation = regression · see cortex/axioms/registry.py)
+AX-010. ZERO TRUST — classify_content() BEFORE every INSERT. No exceptions to this rule.
+AX-011. ENTROPY = DEATH — Dead code, broad catches, boilerplate → eradicate immediately.
+AX-012. TYPE SAFETY — `from __future__ import annotations`. StrEnum. Zero `Any` types.
+AX-013. ASYNC-NATIVE — `asyncio.to_thread()` for blocking I/O. Never block the event loop.
+AX-014. CAUSAL > CORRELATION — 5 Whys to root cause. Patching symptoms creates ghosts.
+AX-015. CONTEXTUAL SOVEREIGNTY — Memory boot protocol. No amnesiac execution.
+AX-016. ALGORITHMIC IMMUNITY — nemesis.md rejects mediocrity before planning begins.
+AX-017. LEDGER INTEGRITY — SHA-256 chain + Merkle + WBFT consensus.
+AX-018. SYNTHETIC HERITAGE — bloodline.json. Born expert, never blank.
+AX-019. PERSIST WITH DECAY — Store if >5min to rebuild. TTL: ghosts 30d, knowledge 180d, axioms ∞.
+
 
 ## BEHAVIORAL ENFORCEMENT (laws, not guidelines — CI gates reject violations)
 ```python
