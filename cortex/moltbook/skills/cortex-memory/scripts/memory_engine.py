@@ -16,7 +16,6 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 # ── Configuration ──────────────────────────────────────────────
 
@@ -32,7 +31,8 @@ MAX_SESSION_BOOT_ENTRIES = 50
 
 # ── Encryption (optional) ─────────────────────────────────────
 
-def _get_cipher_key() -> Optional[bytes]:
+
+def _get_cipher_key() -> bytes | None:
     """Return encryption key if CORTEX_MEMORY_KEY is set."""
     raw = os.environ.get("CORTEX_MEMORY_KEY")
     if not raw:
@@ -47,8 +47,9 @@ def _encrypt(data: str) -> str:
     if not key:
         return data
 
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     import base64
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)  # Recommended nonce size for GCM
@@ -65,8 +66,9 @@ def _decrypt(data: str) -> str:
     if not key:
         return data
 
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     import base64
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
     try:
         aesgcm = AESGCM(key)
@@ -81,6 +83,7 @@ def _decrypt(data: str) -> str:
 
 
 # ── Initialization ─────────────────────────────────────────────
+
 
 def init() -> dict[str, bool]:
     """Initialize memory directory structure. Idempotent."""
@@ -112,6 +115,7 @@ def init() -> dict[str, bool]:
 
 
 # ── Session Management ─────────────────────────────────────────
+
 
 def _today_session_path() -> Path:
     """Return path for today's session log."""
@@ -192,6 +196,7 @@ def session_close(
 
 # ── Store & Recall ─────────────────────────────────────────────
 
+
 def store(
     content: str,
     category: str = "decisions",
@@ -240,12 +245,14 @@ def recall(
             continue
         for i, line in enumerate(fpath.read_text().split("\n")):
             if query_lower in line.lower() and line.strip().startswith("- "):
-                results.append({
-                    "category": cat,
-                    "line_number": i + 1,
-                    "content": line.strip(),
-                    "relevance": "keyword_match",
-                })
+                results.append(
+                    {
+                        "category": cat,
+                        "line_number": i + 1,
+                        "content": line.strip(),
+                        "relevance": "keyword_match",
+                    }
+                )
                 if len(results) >= limit:
                     return results
 
@@ -253,13 +260,15 @@ def recall(
     for session_file in sorted(SESSIONS_DIR.glob("*.md"), reverse=True)[:7]:
         for i, line in enumerate(session_file.read_text().split("\n")):
             if query_lower in line.lower() and line.strip():
-                results.append({
-                    "category": "session",
-                    "source": session_file.name,
-                    "line_number": i + 1,
-                    "content": line.strip(),
-                    "relevance": "keyword_match",
-                })
+                results.append(
+                    {
+                        "category": "session",
+                        "source": session_file.name,
+                        "line_number": i + 1,
+                        "content": line.strip(),
+                        "relevance": "keyword_match",
+                    }
+                )
                 if len(results) >= limit:
                     return results
 
@@ -287,6 +296,7 @@ def forget(fact_id: str) -> bool:
 
 # ── Reflection ─────────────────────────────────────────────────
 
+
 def reflect(days_back: int = 3) -> dict[str, int]:
     """Run reflection cycle: extract patterns from recent sessions."""
     init()
@@ -307,9 +317,7 @@ def reflect(days_back: int = 3) -> dict[str, int]:
     return stats
 
 
-def _extract_section(
-    content: str, header: str, category: str, stats: dict[str, int]
-) -> None:
+def _extract_section(content: str, header: str, category: str, stats: dict[str, int]) -> None:
     """Extract items from a markdown section and store in knowledge."""
     if header not in content:
         return
@@ -333,6 +341,7 @@ def _extract_section(
 
 
 # ── Status ─────────────────────────────────────────────────────
+
 
 def status() -> dict[str, object]:
     """Return memory system status."""
@@ -364,6 +373,7 @@ def status() -> dict[str, object]:
 
 
 # ── CLI Entry Point ────────────────────────────────────────────
+
 
 def main() -> None:
     """CLI interface for cortex-memory."""

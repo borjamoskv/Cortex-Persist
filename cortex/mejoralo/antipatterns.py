@@ -26,12 +26,27 @@ __all__ = ["scan_antipatterns", "AntipatternFinding", "AntipatternReport"]
 
 logger = logging.getLogger("cortex.mejoralo.antipatterns")
 
+# Scanner 4 (Import Graph) → delegated to _scanner_import_graph to respect LOC barrier
+from cortex.mejoralo._scanner_import_graph import (
+    run_graph_scanners as _run_graph_scanners,  # noqa: E402
+)
+
 # ── Constants ────────────────────────────────────────────────────────
 
 SKIP_DIRS = {
-    "__pycache__", ".git", "node_modules", ".venv", "venv",
-    ".mypy_cache", ".pytest_cache", "dist", "build", ".eggs",
-    "egg-info", ".tox", "migrations",
+    "__pycache__",
+    ".git",
+    "node_modules",
+    ".venv",
+    "venv",
+    ".mypy_cache",
+    ".pytest_cache",
+    "dist",
+    "build",
+    ".eggs",
+    "egg-info",
+    ".tox",
+    "migrations",
 }
 
 # Blocking calls that MUST NOT appear in async functions
@@ -67,12 +82,12 @@ _MAX_FAN_OUT = 12
 class AntipatternFinding:
     """A single antipattern detection."""
 
-    scanner: str      # Which scanner found it
-    severity: str     # "critical", "high", "medium", "low"
-    file: str         # Relative path
-    line: int         # Line number
-    message: str      # Human-readable description
-    fix_hint: str     # Suggested fix
+    scanner: str  # Which scanner found it
+    severity: str  # "critical", "high", "medium", "low"
+    file: str  # Relative path
+    line: int  # Line number
+    message: str  # Human-readable description
+    fix_hint: str  # Suggested fix
 
 
 @dataclass
@@ -120,17 +135,19 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
         if node.type is None:
             # Bare `except:`
-            self.findings.append(AntipatternFinding(
-                scanner="BroadException",
-                severity="critical",
-                file=self.rel,
-                line=node.lineno,  # noqa: E501
-                message=(
-                    "Bare `except:` catches all exceptions"
-                    " including SystemExit/KeyboardInterrupt"
-                ),
-                fix_hint="Use a specific exception type: except ValueError, except OSError, etc.",
-            ))
+            self.findings.append(
+                AntipatternFinding(
+                    scanner="BroadException",
+                    severity="critical",
+                    file=self.rel,
+                    line=node.lineno,  # noqa: E501
+                    message=(
+                        "Bare `except:` catches all exceptions"
+                        " including SystemExit/KeyboardInterrupt"
+                    ),
+                    fix_hint="Use a specific exception type: except ValueError, except OSError, etc.",
+                )
+            )
         elif isinstance(node.type, ast.Name) and node.type.id in ("Exception", "BaseException"):
             # Check if the body is just `pass` or `...` (swallowed error)
             body_is_silent = (
@@ -138,27 +155,30 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                 and isinstance(node.body[0], (ast.Pass, ast.Expr))
                 and (
                     isinstance(node.body[0], ast.Pass)
-                    or (isinstance(node.body[0], ast.Expr)
+                    or (
+                        isinstance(node.body[0], ast.Expr)
                         and isinstance(node.body[0].value, ast.Constant)
-                        and node.body[0].value.value is ...)
+                        and node.body[0].value.value is ...
+                    )
                 )
             )
             severity = "critical" if body_is_silent else "high"
             msg = (
-                f"`except {node.type.id}` with silent body"
-                " — errors are being swallowed"
+                f"`except {node.type.id}` with silent body — errors are being swallowed"
                 if body_is_silent
                 else f"`except {node.type.id}` is too broad"
                 " — specific exceptions lose their identity"
             )
-            self.findings.append(AntipatternFinding(
-                scanner="BroadException",
-                severity=severity,
-                file=self.rel,
-                line=node.lineno,
-                message=msg,
-                fix_hint="Catch specific exceptions: except (ValueError, KeyError, OSError) as e:",
-            ))
+            self.findings.append(
+                AntipatternFinding(
+                    scanner="BroadException",
+                    severity=severity,
+                    file=self.rel,
+                    line=node.lineno,
+                    message=msg,
+                    fix_hint="Catch specific exceptions: except (ValueError, KeyError, OSError) as e:",
+                )
+            )
         self.generic_visit(node)
 
 
@@ -192,14 +212,16 @@ class _AsyncIntegrityVisitor(ast.NodeVisitor):
 
         call_name = self._get_call_name(node)
         if call_name and call_name in _BLOCKING_CALLS:
-            self.findings.append(AntipatternFinding(
-                scanner="AsyncIntegrity",
-                severity="high",
-                file=self.rel,
-                line=node.lineno,
-                message=f"Blocking call `{call_name}()` inside async function",
-                fix_hint=_BLOCKING_CALLS[call_name],
-            ))
+            self.findings.append(
+                AntipatternFinding(
+                    scanner="AsyncIntegrity",
+                    severity="high",
+                    file=self.rel,
+                    line=node.lineno,
+                    message=f"Blocking call `{call_name}()` inside async function",
+                    fix_hint=_BLOCKING_CALLS[call_name],
+                )
+            )
         self.generic_visit(node)
 
     @staticmethod
@@ -263,14 +285,16 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
             return
 
         # Check context — is this in a comparison, return, or arithmetic?
-        self.findings.append(AntipatternFinding(
-            scanner="MagicLiteral",
-            severity="low",
-            file=self.rel,
-            line=node.lineno,
-            message=f"Magic number `{value}` — unnamed constant obscures intent",
-            fix_hint=f"Extract to a named constant: MY_CONSTANT = {value}",
-        ))
+        self.findings.append(
+            AntipatternFinding(
+                scanner="MagicLiteral",
+                severity="low",
+                file=self.rel,
+                line=node.lineno,
+                message=f"Magic number `{value}` — unnamed constant obscures intent",
+                fix_hint=f"Extract to a named constant: MY_CONSTANT = {value}",
+            )
+        )
 
     @staticmethod
     def _is_constant_assignment(node: ast.Assign) -> bool:
@@ -283,77 +307,7 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
         return False
 
 
-# ── Scanner 4: Import Graph (Circular Deps + Fan-Out) ────────────────
-
-
-def _build_import_graph(
-    root: Path,
-) -> dict[str, set[str]]:
-    """Build a module→dependencies graph from Python imports."""
-    graph: dict[str, set[str]] = {}
-
-    for dirpath, dirs, files in os.walk(root):
-        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
-        for f in files:
-            if not f.endswith(".py"):
-                continue
-            fp = Path(dirpath) / f
-            rel = str(fp.relative_to(root))
-            module_name = rel.replace("/", ".").removesuffix(".py")
-            if module_name.endswith(".__init__"):
-                module_name = module_name.removesuffix(".__init__")
-
-            try:
-                content = fp.read_text(errors="replace")
-                tree = ast.parse(content)
-            except (SyntaxError, OSError):
-                continue
-
-            deps: set[str] = set()
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        deps.add(alias.name.split(".")[0])
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module:
-                        deps.add(node.module.split(".")[0])
-
-            graph[module_name] = deps
-
-    return graph
-
-
-def _detect_circular_deps(graph: dict[str, set[str]]) -> list[tuple[str, str]]:
-    """Find circular dependency pairs in the import graph."""
-    circular: list[tuple[str, str]] = []
-    seen: set[tuple[str, str]] = set()
-
-    for module, deps in graph.items():
-        mod_root = module.split(".")[0]
-        for dep in deps:
-            if dep == mod_root:
-                continue  # Self-import is fine
-            # Check if dep also imports module's root
-            for other_mod, other_deps in graph.items():
-                if other_mod.split(".")[0] == dep and mod_root in other_deps:
-                    pair = tuple(sorted((mod_root, dep)))
-                    if pair not in seen:
-                        seen.add(pair)
-                        circular.append((module, other_mod))
-    return circular
-
-
-def _detect_fan_out(
-    graph: dict[str, set[str]], root_package: str,
-) -> list[tuple[str, int]]:
-    """Find modules with too many dependencies (high fan-out)."""
-    violations: list[tuple[str, int]] = []
-    for module, deps in graph.items():
-        # Only count local deps (same root package)
-        local_deps = {d for d in deps if d == root_package or d.startswith(f"{root_package}.")}
-        if len(local_deps) > _MAX_FAN_OUT:
-            violations.append((module, len(local_deps)))
-    return violations
+# ── Scanner 4: Import Graph → See cortex/mejoralo/_scanner_import_graph.py ──
 
 
 # ── Scanner 5: Implicit Assumptions ──────────────────────────────────
@@ -391,47 +345,59 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def _check_return_type_hint(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef,
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
         """Public functions without return type hints hide intent."""
         if node.name.startswith("_"):
             return  # Private functions get a pass
-        if node.name in ("__init__", "__str__", "__repr__", "__len__",
-                         "__eq__", "__hash__", "__bool__", "__enter__",
-                         "__exit__", "__aenter__", "__aexit__"):
+        if node.name in (
+            "__init__",
+            "__str__",
+            "__repr__",
+            "__len__",
+            "__eq__",
+            "__hash__",
+            "__bool__",
+            "__enter__",
+            "__exit__",
+            "__aenter__",
+            "__aexit__",
+        ):
             return  # Dunder methods with obvious returns
         if node.returns is None:
-            self.findings.append(AntipatternFinding(
-                scanner="ImplicitAssumption",
-                severity="medium",
-                file=self.rel,
-                line=node.lineno,
-                message=f"Public function `{node.name}()` has no return type hint",
-                fix_hint=f"Add return type: def {node.name}(...) -> ReturnType:",
-            ))
+            self.findings.append(
+                AntipatternFinding(
+                    scanner="ImplicitAssumption",
+                    severity="medium",
+                    file=self.rel,
+                    line=node.lineno,
+                    message=f"Public function `{node.name}()` has no return type hint",
+                    fix_hint=f"Add return type: def {node.name}(...) -> ReturnType:",
+                )
+            )
 
     def _check_too_many_params(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef,
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
         """Too many parameters is a code smell (implicit complexity)."""
         args = node.args
-        total = (
-            len(args.args)
-            + len(args.posonlyargs)
-            + len(args.kwonlyargs)
-        )
+        total = len(args.args) + len(args.posonlyargs) + len(args.kwonlyargs)
         # Subtract 'self' or 'cls'
         if total > 0 and args.args and args.args[0].arg in ("self", "cls"):
             total -= 1
         if total > 5:
-            self.findings.append(AntipatternFinding(
-                scanner="ImplicitAssumption",
-                severity="medium",
-                file=self.rel,
-                line=node.lineno,
-                message=f"Function `{node.name}()` has {total} parameters (max recommended: 5)",
-                fix_hint="Consider grouping parameters into a dataclass or config object.",
-            ))
+            self.findings.append(
+                AntipatternFinding(
+                    scanner="ImplicitAssumption",
+                    severity="medium",
+                    file=self.rel,
+                    line=node.lineno,
+                    message=f"Function `{node.name}()` has {total} parameters (max recommended: 5)",
+                    fix_hint="Consider grouping parameters into a dataclass or config object.",
+                )
+            )
 
 
 # ── Scanner 6: Dead Code ─────────────────────────────────────────────
@@ -448,25 +414,30 @@ class _DeadCodeVisitor(ast.NodeVisitor):
         for i, stmt in enumerate(body):
             if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
                 # Check if there's code after this statement (in same block)
-                remaining = body[i + 1:]
+                remaining = body[i + 1 :]
                 # Filter out pass statements and string literals (docstrings)
                 real_remaining = [
-                    s for s in remaining
+                    s
+                    for s in remaining
                     if not isinstance(s, ast.Pass)
-                    and not (isinstance(s, ast.Expr)
-                             and isinstance(s.value, ast.Constant)
-                             and isinstance(s.value.value, str))
+                    and not (
+                        isinstance(s, ast.Expr)
+                        and isinstance(s.value, ast.Constant)
+                        and isinstance(s.value.value, str)
+                    )
                 ]
                 if real_remaining:
                     dead_stmt = real_remaining[0]
-                    self.findings.append(AntipatternFinding(
-                        scanner="DeadCode",
-                        severity="medium",
-                        file=self.rel,
-                        line=getattr(dead_stmt, "lineno", stmt.lineno + 1),
-                        message=f"Unreachable code after `{type(stmt).__name__.lower()}`",
-                        fix_hint="Remove dead code or restructure logic.",
-                    ))
+                    self.findings.append(
+                        AntipatternFinding(
+                            scanner="DeadCode",
+                            severity="medium",
+                            file=self.rel,
+                            line=getattr(dead_stmt, "lineno", stmt.lineno + 1),
+                            message=f"Unreachable code after `{type(stmt).__name__.lower()}`",
+                            fix_hint="Remove dead code or restructure logic.",
+                        )
+                    )
                 break  # Only report first dead block per body
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
@@ -501,7 +472,9 @@ class _DeadCodeVisitor(ast.NodeVisitor):
 
 
 def _scan_single_file(
-    filepath: Path, root: Path, findings: list[AntipatternFinding],
+    filepath: Path,
+    root: Path,
+    findings: list[AntipatternFinding],
 ) -> None:
     """Run all AST-based scanners on a single Python file."""
     try:
@@ -518,6 +491,26 @@ def _scan_single_file(
     _MagicLiteralVisitor(rel, findings).visit(tree)
     _ImplicitAssumptionVisitor(rel, findings).visit(tree)
     _DeadCodeVisitor(rel, findings).visit(tree)
+
+
+def _gather_python_files(root: Path) -> tuple[list[Path], Path] | None:
+    """Gather Python files to scan and determine the scan root."""
+    if root.is_file():
+        return [root], root.parent
+
+    if root.is_dir():
+        files = []
+        for dirpath, dirs, filenames in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+            for f in filenames:
+                if f.endswith(".py"):
+                    files.append(Path(dirpath) / f)
+        return files, root
+
+    return None
+
+
+# _run_graph_scanners → imported from _scanner_import_graph at module top
 
 
 def scan_antipatterns(
@@ -541,20 +534,12 @@ def scan_antipatterns(
     root = Path(path).resolve()
     report = AntipatternReport()
 
-    if root.is_file():
-        files = [root]
-        scan_root = root.parent
-    elif root.is_dir():
-        files = []
-        for dirpath, dirs, filenames in os.walk(root):
-            dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
-            for f in filenames:
-                if f.endswith(".py"):
-                    files.append(Path(dirpath) / f)
-        scan_root = root
-    else:
+    result = _gather_python_files(root)
+    if result is None:
         logger.error("Path is not a file or directory: %s", root)
         return report
+
+    files, scan_root = result
 
     report.files_scanned = len(files)
     findings: list[AntipatternFinding] = []
@@ -565,45 +550,26 @@ def scan_antipatterns(
 
     # ── Import graph scanners (project-wide) ──
     if root.is_dir():
-        graph = _build_import_graph(scan_root)
-
-        # Circular dependencies
-        circular = _detect_circular_deps(graph)
-        for mod_a, mod_b in circular:
-            findings.append(AntipatternFinding(
-                scanner="CircularDep",
-                severity="high",
-                file=mod_a.replace(".", "/") + ".py",
-                line=0,
-                message=f"Circular dependency: {mod_a} ↔ {mod_b}",
-                fix_hint="Break the cycle with dependency injection or an interface module.",
-            ))
-
-        # Fan-out
-        fan_out_violations = _detect_fan_out(graph, root_package)
-        for module, count in fan_out_violations:
-            findings.append(AntipatternFinding(
-                scanner="FanOut",
-                severity="medium",
-                file=module.replace(".", "/") + ".py",
-                line=0,
-                message=f"High fan-out: {module} depends on {count} local modules (max: {_MAX_FAN_OUT})",
-                fix_hint="Consider splitting this module or using a facade pattern.",
-            ))
+        _run_graph_scanners(scan_root, root_package, findings)
 
     # ── Filter by configuration ──
     if not include_magic:
         findings = [f for f in findings if f.scanner != "MagicLiteral"]
     if not include_type_hints:
-        findings = [f for f in findings if not (
-            f.scanner == "ImplicitAssumption" and "return type hint" in f.message
-        )]
+        findings = [
+            f
+            for f in findings
+            if not (f.scanner == "ImplicitAssumption" and "return type hint" in f.message)
+        ]
 
-    report.findings = sorted(findings, key=lambda f: (
-        {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(f.severity, 4),
-        f.file,
-        f.line,
-    ))
+    report.findings = sorted(
+        findings,
+        key=lambda f: (
+            {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(f.severity, 4),
+            f.file,
+            f.line,
+        ),
+    )
     report.scanners_run = 6
 
     return report

@@ -24,7 +24,8 @@ from pathlib import Path
 logger = logging.getLogger("cortex.guards.contradiction")
 
 # ── Defaults ────────────────────────────────────────────────────────
-DEFAULT_DB_PATH = Path.home() / ".cortex" / "cortex.db"
+from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+
 MAX_CANDIDATES = 10
 MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap
 
@@ -76,8 +77,7 @@ class ConflictReport:
         if not self.has_conflicts:
             return "✅ No contradictions detected."
         lines = [
-            f"⚠️ {len(self.candidates)} potential contradiction(s) "
-            f"(severity: {self.severity}):",
+            f"⚠️ {len(self.candidates)} potential contradiction(s) (severity: {self.severity}):",
         ]
         for c in sorted(self.candidates, key=lambda x: -x.overlap_score):
             lines.append(f"  {c}")
@@ -91,23 +91,99 @@ class ConflictReport:
 
 # ── Noise filter ────────────────────────────────────────────────────
 _NOISE_PREFIXES = ("MAILTV-1: ARCHIVE",)
-_STOP_WORDS = frozenset({
-    "a", "an", "the", "is", "are", "was", "were", "be", "been",
-    "being", "have", "has", "had", "do", "does", "did", "will",
-    "would", "could", "should", "may", "might", "shall", "can",
-    "de", "del", "la", "el", "los", "las", "en", "un", "una",
-    "y", "o", "que", "con", "por", "para", "se", "es", "no",
-    "al", "su", "más", "como", "pero", "sin", "sobre",
-    "to", "of", "in", "for", "on", "with", "at", "by", "from",
-    "and", "or", "not", "but", "this", "that", "it", "its",
-})
+_STOP_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "de",
+        "del",
+        "la",
+        "el",
+        "los",
+        "las",
+        "en",
+        "un",
+        "una",
+        "y",
+        "o",
+        "que",
+        "con",
+        "por",
+        "para",
+        "se",
+        "es",
+        "no",
+        "al",
+        "su",
+        "más",
+        "como",
+        "pero",
+        "sin",
+        "sobre",
+        "to",
+        "of",
+        "in",
+        "for",
+        "on",
+        "with",
+        "at",
+        "by",
+        "from",
+        "and",
+        "or",
+        "not",
+        "but",
+        "this",
+        "that",
+        "it",
+        "its",
+    }
+)
 
-_NEGATION_MARKERS = frozenset({
-    "no usar", "never use", "prohibido", "eliminado", "forbidden",
-    "deprecated", "removed", "replaced", "reemplazado", "obsolete",
-    "no utilizar", "don't use", "do not use", "eliminamos",
-    "matado", "killed", "purged", "deleted",
-})
+_NEGATION_MARKERS = frozenset(
+    {
+        "no usar",
+        "never use",
+        "prohibido",
+        "eliminado",
+        "forbidden",
+        "deprecated",
+        "removed",
+        "replaced",
+        "reemplazado",
+        "obsolete",
+        "no utilizar",
+        "don't use",
+        "do not use",
+        "eliminamos",
+        "matado",
+        "killed",
+        "purged",
+        "deleted",
+    }
+)
 
 _SUPERSESSION_MARKERS = re.compile(
     r"supersed|replac|obsolet|invalidat|deprecat|"
@@ -335,26 +411,29 @@ def scan_all_contradictions(
                     continue
             if not content or _is_noise(content):
                 continue
-            decisions.append({
-                "id": row["id"],
-                "project": row["project"],
-                "content": content,
-                "date": row["created_at"][:10],
-                "tokens": _tokenize(content),
-            })
+            decisions.append(
+                {
+                    "id": row["id"],
+                    "project": row["project"],
+                    "content": content,
+                    "date": row["created_at"][:10],
+                    "tokens": _tokenize(content),
+                }
+            )
 
         # Pairwise comparison (O(N²) — bounded by same project)
         pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]] = []
 
         # Group by project to reduce comparisons
         from collections import defaultdict
+
         by_project: dict[str, list[dict]] = defaultdict(list)
         for d in decisions:
             by_project[d["project"]].append(d)
 
         for _project, group in by_project.items():
             for i, a in enumerate(group):
-                for b in group[i + 1:]:
+                for b in group[i + 1 :]:
                     score = _jaccard(a["tokens"], b["tokens"])
                     if score >= min_score:
                         # Check for negation in either
@@ -364,12 +443,20 @@ def scan_all_contradictions(
                             score *= 1.3
 
                         ca = ConflictCandidate(
-                            a["id"], a["project"], a["content"][:200],
-                            a["date"], score, ctype,
+                            a["id"],
+                            a["project"],
+                            a["content"][:200],
+                            a["date"],
+                            score,
+                            ctype,
                         )
                         cb = ConflictCandidate(
-                            b["id"], b["project"], b["content"][:200],
-                            b["date"], score, ctype,
+                            b["id"],
+                            b["project"],
+                            b["content"][:200],
+                            b["date"],
+                            score,
+                            ctype,
                         )
                         pairs.append((score, ca, cb))
 

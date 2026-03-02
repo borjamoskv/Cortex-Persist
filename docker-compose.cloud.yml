@@ -1,0 +1,149 @@
+# CORTEX Cloud Stack — Full deployment with PostgreSQL, Qdrant, Redis
+# Usage: docker compose -f docker-compose.cloud.yml up -d
+#
+# Environment variables needed:
+#   POSTGRES_PASSWORD  — PostgreSQL superuser password
+#   CORTEX_API_KEY     — API key for admin access (optional)
+#
+# After startup:
+#   curl http://localhost:8484/health
+
+services:
+  # ─── PostgreSQL (L3 Storage) ───────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: cortex-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cortex
+      POSTGRES_USER: cortex
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cortex_sovereign}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cortex"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ─── Qdrant (L2 Vector Store) ──────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:v1.12.1
+    container_name: cortex-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ─── Redis (L1 Cache) ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: cortex-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+
+  # ─── CORTEX API ────────────────────────────────────────────────────
+  cortex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cortex-api
+    restart: unless-stopped
+    ports:
+      - "8484:8484"
+    environment:
+      - CORTEX_STORAGE=postgres
+      - POSTGRES_DSN=postgresql://cortex:${POSTGRES_PASSWORD:-cortex_sovereign}@postgres:5432/cortex
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/0
+      - CORTEX_RATE_LIMIT=300
+      - CORTEX_RATE_WINDOW=60
+      # LLM Providers (uncomment as needed)
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Stripe (for SaaS billing)
+      # - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      # - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8484/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "2.0"
+        reservations:
+          memory: 256M
+
+  # ─── Caddy Reverse Proxy (optional, with auto TLS) ────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: cortex-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      cortex:
+        condition: service_healthy
+    profiles:
+      - tls
+
+volumes:
+  pg-data:
+    driver: local
+  qdrant-data:
+    driver: local
+  redis-data:
+    driver: local
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local

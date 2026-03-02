@@ -38,7 +38,7 @@ logger = logging.getLogger("cortex.http")
 # ─── Constants ───────────────────────────────────────────────────────────
 
 _DEFAULT_MAX_RETRIES = 5
-_DEFAULT_BASE_DELAY = 2.0   # seconds — doubles each attempt (exponential)
+_DEFAULT_BASE_DELAY = 2.0  # seconds — doubles each attempt (exponential)
 
 
 # ─── Mixin ───────────────────────────────────────────────────────────────
@@ -83,9 +83,7 @@ class HttpRetryMixin:
             httpx.HTTPStatusError: On non-429 failure or exhausted retries.
             ValueError: On JSON parse/key error in response.
         """
-        return await self._request_with_retry(
-            "POST", url, headers, payload=payload, label=label
-        )
+        return await self._request_with_retry("POST", url, headers, payload=payload, label=label)
 
     async def _get_with_retry(
         self,
@@ -94,9 +92,35 @@ class HttpRetryMixin:
         label: str = "GET",
     ) -> dict[str, Any]:
         """GET with exponential backoff on 429."""
-        return await self._request_with_retry(
-            "GET", url, headers, payload=None, label=label
-        )
+        return await self._request_with_retry("GET", url, headers, payload=None, label=label)
+
+    async def _do_http_call(
+        self,
+        method: str,
+        url: str,
+        headers: dict[str, str],
+        payload: dict[str, Any] | None,
+        label: str,
+    ) -> dict[str, Any] | Exception:
+        """Execute HTTP request and parse JSON. Returns Exception on 429 instead of raising."""
+        import httpx
+
+        if method == "POST":
+            response = await self._client.post(  # type: ignore[attr-defined]
+                url, headers=headers, json=payload
+            )
+        else:
+            response = await self._client.get(  # type: ignore[attr-defined]
+                url, headers=headers
+            )
+
+        try:
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as exc:
+            return exc
+        except (KeyError, IndexError, json.JSONDecodeError) as exc:
+            raise ValueError(f"Unexpected response format from {self._provider} ({label})") from exc
 
     async def _request_with_retry(
         self,
@@ -116,48 +140,56 @@ class HttpRetryMixin:
         last_exc: Exception | None = None
 
         for attempt in range(self._max_retries):
-            try:
-                if method == "POST":
-                    response = await self._client.post(  # type: ignore[attr-defined]
-                        url, headers=headers, json=payload
-                    )
-                else:
-                    response = await self._client.get(  # type: ignore[attr-defined]
-                        url, headers=headers
-                    )
+            result = await self._do_http_call(method, url, headers, payload, label)
 
-                response.raise_for_status()
-                return response.json()
+            if not isinstance(result, Exception):
+                return result
 
-            except httpx.HTTPStatusError as exc:
-                if exc.response.status_code == 429 and attempt < self._max_retries - 1:
-                    delay = self._base_delay * (2**attempt)
-                    logger.warning(
-                        "HTTP %s 429 [%s] %s. Retry %d/%d in %.1fs…",
-                        method,
-                        self._provider,
-                        label,
-                        attempt + 1,
-                        self._max_retries,
-                        delay,
-                    )
-                    await asyncio.sleep(delay)
-                    last_exc = exc
-                    continue
-                raise
+            last_exc = result
+            if not isinstance(result, httpx.HTTPStatusError) or result.response.status_code != 429:
+                raise result
 
-            except (KeyError, IndexError, json.JSONDecodeError) as exc:
-                raise ValueError(
-                    f"Unexpected response format from {self._provider} ({label})"
-                ) from exc
+            if attempt >= self._max_retries - 1:
+                raise result
 
-        # Exhausted retries on 429 — raise the last stored exception
+            delay = self._base_delay * (2**attempt)
+            logger.warning(
+                "HTTP %s 429 [%s] %s. Retry %d/%d in %.1fs...",
+                method,
+                self._provider,
+                label,
+                attempt + 1,
+                self._max_retries,
+                delay,
+            )
+            await asyncio.sleep(delay)
+
         raise last_exc or RuntimeError(  # pragma: no cover
             f"Retry loop exhausted for {self._provider} ({label})"
         )
 
 
 # ─── Standalone function (for non-OOP clients) ──────────────────────────
+
+
+async def _do_standalone_post(
+    client: Any,
+    url: str,
+    headers: dict[str, str],
+    payload: dict[str, Any],
+    provider: str,
+    label: str,
+) -> dict[str, Any] | Exception:
+    import httpx
+
+    response = await client.post(url, headers=headers, json=payload)
+    try:
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPStatusError as exc:
+        return exc
+    except (KeyError, IndexError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Unexpected response format from {provider} ({label})") from exc
 
 
 async def post_with_retry(
@@ -190,31 +222,28 @@ async def post_with_retry(
     last_exc: Exception | None = None
 
     for attempt in range(max_retries):
-        try:
-            response = await client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            return response.json()
+        result = await _do_standalone_post(client, url, headers, payload, provider, label)
 
-        except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 429 and attempt < max_retries - 1:
-                delay = base_delay * (2**attempt)
-                logger.warning(
-                    "HTTP POST 429 [%s] %s. Retry %d/%d in %.1fs…",
-                    provider,
-                    label,
-                    attempt + 1,
-                    max_retries,
-                    delay,
-                )
-                await asyncio.sleep(delay)
-                last_exc = exc
-                continue
-            raise
+        if not isinstance(result, Exception):
+            return result
 
-        except (KeyError, IndexError, json.JSONDecodeError) as exc:
-            raise ValueError(
-                f"Unexpected response format from {provider} ({label})"
-            ) from exc
+        last_exc = result
+        if not isinstance(result, httpx.HTTPStatusError) or result.response.status_code != 429:
+            raise result
+
+        if attempt >= max_retries - 1:
+            raise result
+
+        delay = base_delay * (2**attempt)
+        logger.warning(
+            "HTTP POST 429 [%s] %s. Retry %d/%d in %.1fs...",
+            provider,
+            label,
+            attempt + 1,
+            max_retries,
+            delay,
+        )
+        await asyncio.sleep(delay)
 
     raise last_exc or RuntimeError(  # pragma: no cover
         f"Retry loop exhausted for {provider} ({label})"

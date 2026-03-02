@@ -89,7 +89,7 @@ class AutopoiesisEngine:
         logger.warning(f"AUTOPOIESIS TRIGGERED: Structural mutation initiated for {func.__name__}")
         try:
             source = inspect.getsource(func)
-            tree = ast.parse(source)
+            ast.parse(source)  # Validate AST; future: DEMIURGE-OMEGA integration
             # In a full implementation, this integrates with DEMIURGE-OMEGA to
             # replace O(N) loops with O(1) lookups and re-bind native extensions.
             logger.info("AST captured. Awaiting Demiurge compilation bridge.")

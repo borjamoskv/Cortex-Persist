@@ -15,12 +15,14 @@ from pathlib import Path
 from typing import Any
 
 from cortex.cli import get_engine
-from cortex.mejoralo.canary import CanaryMonitor
+from cortex.daemon.monitors.canary import CanaryMonitor
 from cortex.mejoralo.engine import MejoraloEngine
 from cortex.telemetry.metrics import MetricsRegistry
 from cortex.thinking.context_fusion import ContextFusion
 
 logger = logging.getLogger("cortex.mejoralo.daemon")
+
+STAGNATION_ESCALATION_THRESHOLD = 3
 
 
 class MejoraloDaemon:
@@ -50,6 +52,7 @@ class MejoraloDaemon:
         self.fusion = ContextFusion(self.cortex_engine)
         self._running = False
         self._loop_task: asyncio.Task | None = None
+        self._consecutive_stagnant: int = 0
 
     async def start(self) -> None:
         """Start the evolutionary loop."""
@@ -91,22 +94,25 @@ class MejoraloDaemon:
                 await asyncio.sleep(sleep_time)
 
     async def _execute_cycle(self):
-        """A single scan + heal cycle with Sovereign Security."""
+        """A single scan + heal + verify cycle with Sovereign Security."""
         logger.info("⚡ Starting MEJORAlo evolutionary wave...")
         self.canary.capture_baselines()
 
+        # 1. Pre-scan: capture baseline score
         result = await self.engine.scan(self.project, self.base_path)
-        self.metrics.set_gauge("cortex_code_score", result.score)
+        score_before = result.score
+        self.metrics.set_gauge("cortex_code_score", score_before)
 
-        if result.score >= self.target_score:
+        if score_before >= self.target_score:
             logger.info("💎 Sovereign Standard maintained (130/100). No action.")
+            self._consecutive_stagnant = 0
             return
 
         logger.warning(
-            "🚨 Quality Breach (%d < %d). Fetching context...", result.score, self.target_score
+            "🚨 Quality Breach (%d < %d). Fetching context...", score_before, self.target_score
         )
 
-        # 4. Memory/KI Context Fusion + Causal Analysis
+        # 2. Memory/KI Context Fusion + Causal Analysis
         fused_context = await self.fusion.fuse_context(
             query=" ".join([d.name for d in result.dimensions if d.score < 7])
             if any(d.score < 7 for d in result.dimensions)
@@ -114,13 +120,64 @@ class MejoraloDaemon:
         )
         fused_context = await self._ouroboros_analyze(result, fused_context)
 
-        # 5. Sovereign Healing
-        success = await self.engine.heal(
-            self.project, self.base_path, self.target_score, result, fused_context=fused_context
+        # 3. Healing — escalate to relentless after consecutive stagnation
+        if self._consecutive_stagnant >= STAGNATION_ESCALATION_THRESHOLD:
+            logger.warning(
+                "🔥 Stagnation detected (%d cycles). Escalating to relentless mode.",
+                self._consecutive_stagnant,
+            )
+            success = await self.engine.relentless_heal(
+                self.project, self.base_path, result, target_score=self.target_score
+            )
+        else:
+            success = await self.engine.heal(
+                self.project,
+                self.base_path,
+                self.target_score,
+                result,
+                fused_context=fused_context,
+            )
+
+        # 4. Post-heal verification: re-scan to measure real impact
+        result_after = await self.engine.scan(self.project, self.base_path)
+        score_after = result_after.score
+        delta = score_after - score_before
+
+        self.metrics.set_gauge("cortex_code_score", score_after)
+        self.metrics.set_gauge("cortex_heal_delta", delta)
+
+        # 5. Record session with REAL before/after scores
+        action = (
+            "autonomous_heal"
+            if self._consecutive_stagnant < STAGNATION_ESCALATION_THRESHOLD
+            else "relentless_heal"
+        )
+        self.engine.record_session(
+            self.project,
+            score_before,
+            score_after,
+            actions=[action],
         )
 
+        # 6. Track stagnation for escalation
+        if delta <= 0:
+            self._consecutive_stagnant += 1
+            logger.warning(
+                "⚠️ Heal produced no improvement (Δ%+d). Stagnant cycles: %d/%d",
+                delta,
+                self._consecutive_stagnant,
+                STAGNATION_ESCALATION_THRESHOLD,
+            )
+        else:
+            self._consecutive_stagnant = 0
+            logger.info(
+                "📈 Heal verified: %d → %d (Δ%+d)",
+                score_before,
+                score_after,
+                delta,
+            )
+
         if success:
-            logger.info("✅ Healing wave finished.")
             self.metrics.inc("mejoralo_heals_total")
             await self._ouroboros_absorb()
 
@@ -133,7 +190,22 @@ class MejoraloDaemon:
             logger.error("❌ Healing wave failed or stagnated.")
 
     async def _ouroboros_analyze(self, result: Any, context: str) -> str:
-        """🐍 OUROBOROS-∞ PHASE 1: Causal Reasoning."""
+        """🐍 OUROBOROS-∞ PHASE 1: Causal Reasoning with effectiveness context."""
+        # Inject historical trend data for informed reasoning
+        trend_ctx = ""
+        try:
+            from cortex.mejoralo.effectiveness import EffectivenessTracker
+
+            tracker = EffectivenessTracker(self.cortex_engine)
+            trend = tracker.project_trend(self.project)
+            trend_ctx = (
+                f"\n[EFFECTIVENESS CONTEXT] {trend.summary}\n"
+                f"Decay risk: {trend.decay_risk:.1%}, "
+                f"Stagnant: {trend.stagnant}\n"
+            )
+        except (ImportError, RuntimeError, OSError) as e:
+            logger.debug("Effectiveness context unavailable: %s", e)
+
         try:
             from cortex.thinking.orchestra import ThoughtOrchestra
             from cortex.thinking.presets import ThinkingMode
@@ -142,6 +214,7 @@ class MejoraloDaemon:
             async with ThoughtOrchestra() as orchestra:
                 prompt = (
                     f"Project {self.project} score: {result.score}. "
+                    f"{trend_ctx}"
                     "Analyze 'shadow debt' and provide strict causal reasoning. "
                     "Technical and concise."
                 )

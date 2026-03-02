@@ -56,5 +56,16 @@ docker: ## Build Docker image
 docker-run: ## Run CORTEX in Docker
 	docker run -d --name cortex -p 8000:8000 -v cortex-data:/data cortex:latest
 
+ship: ## Ship gate — blocks deploy if quality checks fail
+	@echo "🚢 Running Ship Gate..."
+	.venv/bin/python scripts/ship_gate.py
+
+ship-fast: ## Ship gate (fast — skip slow tests)
+	@echo "⚡ Running Ship Gate (fast mode)..."
+	.venv/bin/python scripts/ship_gate.py --fast
+
+typecheck: ## Run type checker
+	.venv/bin/mypy cortex/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
+
 mcp: ## Start MCP server
 	python run_mcp_server.py

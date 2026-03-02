@@ -5,6 +5,7 @@ from __future__ import annotations
 import json as json_mod
 import shutil
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -126,15 +127,108 @@ def _sparkline(velocity: dict[str, int], width: int = 20) -> str:
     return "".join(sparks[min(int(v / v_max * 7), 7)] for v in values)
 
 
+def _render_shannon_table(result: dict[str, Any]) -> None:
+    from rich.table import Table
+
+    table = Table(show_header=True, header_style="bold cyan")
+    table.add_column("Dimension", style="bold white")
+    table.add_column("H (bits)", justify="right")
+    table.add_column("H_max", justify="right")
+    table.add_column("Normalized", justify="right")
+    table.add_column("Redundancy", justify="right")
+    table.add_column("Bar", min_width=22)
+
+    for dim_name, dim_key in [
+        ("Type", "type_entropy"),
+        ("Confidence", "confidence_entropy"),
+        ("Project", "project_entropy"),
+        ("Source", "source_entropy"),
+        ("Age", "age_entropy"),
+        ("Content", "content_entropy"),
+    ]:
+        block = result[dim_key]
+        norm = block["normalized"]
+        r = block["redundancy"]
+        color = "green" if 0.3 <= norm <= 0.9 else "red"
+        if r < 0.5:
+            r_color = "green"
+        elif r < 0.7:
+            r_color = "yellow"
+        else:
+            r_color = "red"
+        table.add_row(
+            dim_name,
+            str(block["H"]),
+            str(block["H_max"]),
+            f"[{color}]{norm:.2%}[/]",
+            f"[{r_color}]{r:.2%}[/]",
+            f"[{color}]{_bar(norm)}[/]",
+        )
+
+    console.print(table)
+
+
+def _render_shannon_verbose(result: dict[str, Any]) -> None:
+    from rich.table import Table
+
+    for dim_name, dim_key in [
+        ("Type", "type_entropy"),
+        ("Confidence", "confidence_entropy"),
+        ("Source", "source_entropy"),
+        ("Content", "content_entropy"),
+    ]:
+        dist = result[dim_key]["distribution"]
+        if not dist:
+            continue
+        detail = Table(
+            title=f"{dim_name} Breakdown",
+            show_header=True,
+            header_style="dim",
+        )
+        detail.add_column("Category", style="white")
+        detail.add_column("Count", justify="right")
+        detail.add_column("Share", justify="right")
+        total_dim = sum(dist.values())
+        for cat, cnt in sorted(dist.items(), key=lambda x: -x[1]):
+            share = cnt / total_dim if total_dim else 0
+            detail.add_row(cat, str(cnt), f"{share:.1%}")
+        console.print(detail)
+
+
+def _render_shannon_diagnosis(result: dict[str, Any]) -> None:
+    from rich.panel import Panel
+
+    mi = result["mutual_info_type_project"]
+    console.print(f"\n[bold white]I(type; project)[/] = [noir.cyber]{mi:.4f}[/] bits")
+
+    diag = result["diagnosis"]
+    diag_colors = {
+        "balanced": "green",
+        "concentrated": "yellow",
+        "fragmented": "red",
+        "stale": "magenta",
+        "redundant": "yellow",
+        "declining": "red",
+    }
+    color = diag_colors.get(diag, "white")
+    console.print(f"[bold white]Diagnosis:[/] [{color}]{diag.upper()}[/]\n")
+
+    for rec in result["recommendations"]:
+        console.print(
+            Panel(
+                f"[white]{rec}[/]",
+                border_style="dim",
+                padding=(0, 1),
+            )
+        )
+
+
 @entropy.command("shannon")
 @click.option("--project", "-p", default=None, help="Filter by project.")
 @click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
 @click.option("--verbose", "-v", is_flag=True, help="Show per-category breakdown.")
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
     """Shannon entropy analysis of CORTEX memory."""
-    from rich.panel import Panel
-    from rich.table import Table
-
     from cortex.shannon.report import EntropyReport
 
     engine = get_engine()
@@ -145,112 +239,24 @@ def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
             console.print_json(json_mod.dumps(result, indent=2))
             return
 
-        # Header with health score
         title = "🧠 SHANNON ENTROPY REPORT"
         if project:
             title += f"  ·  {project}"
         health = result["health_score"]
-        console.print(
-            f"\n[noir.cyber]{title}[/]"
-            f"  [dim]({result['total_facts']} active facts)[/]\n"
-        )
+        console.print(f"\n[noir.cyber]{title}[/]  [dim]({result['total_facts']} active facts)[/]\n")
 
-        # Health score + Trend (prominent)
         console.print(
             f"  Health: {_health_badge(health)}"
             f"    Trend: {_trend_icon(result['temporal_trend'])}"
             f"    Velocity: {_sparkline(result['velocity_per_day'])}\n"
         )
 
-        # Entropy table
-        table = Table(show_header=True, header_style="bold cyan")
-        table.add_column("Dimension", style="bold white")
-        table.add_column("H (bits)", justify="right")
-        table.add_column("H_max", justify="right")
-        table.add_column("Normalized", justify="right")
-        table.add_column("Redundancy", justify="right")
-        table.add_column("Bar", min_width=22)
+        _render_shannon_table(result)
 
-        for dim_name, dim_key in [
-            ("Type", "type_entropy"),
-            ("Confidence", "confidence_entropy"),
-            ("Project", "project_entropy"),
-            ("Source", "source_entropy"),
-            ("Age", "age_entropy"),
-            ("Content", "content_entropy"),
-        ]:
-            block = result[dim_key]
-            norm = block["normalized"]
-            r = block["redundancy"]
-            color = "green" if 0.3 <= norm <= 0.9 else "red"
-            r_color = "green" if r < 0.5 else ("yellow" if r < 0.7 else "red")
-            table.add_row(
-                dim_name,
-                str(block["H"]),
-                str(block["H_max"]),
-                f"[{color}]{norm:.2%}[/]",
-                f"[{r_color}]{r:.2%}[/]",
-                f"[{color}]{_bar(norm)}[/]",
-            )
-
-        console.print(table)
-
-        # Verbose: per-category breakdown
         if verbose:
-            for dim_name, dim_key in [
-                ("Type", "type_entropy"),
-                ("Confidence", "confidence_entropy"),
-                ("Source", "source_entropy"),
-                ("Content", "content_entropy"),
-            ]:
-                dist = result[dim_key]["distribution"]
-                if not dist:
-                    continue
-                detail = Table(
-                    title=f"{dim_name} Breakdown",
-                    show_header=True,
-                    header_style="dim",
-                )
-                detail.add_column("Category", style="white")
-                detail.add_column("Count", justify="right")
-                detail.add_column("Share", justify="right")
-                total_dim = sum(dist.values())
-                for cat, cnt in sorted(dist.items(), key=lambda x: -x[1]):
-                    share = cnt / total_dim if total_dim else 0
-                    detail.add_row(cat, str(cnt), f"{share:.1%}")
-                console.print(detail)
+            _render_shannon_verbose(result)
 
-        # Mutual information
-        mi = result["mutual_info_type_project"]
-        console.print(
-            f"\n[bold white]I(type; project)[/] = "
-            f"[noir.cyber]{mi:.4f}[/] bits"
-        )
-
-        # Diagnosis
-        diag = result["diagnosis"]
-        diag_colors = {
-            "balanced": "green",
-            "concentrated": "yellow",
-            "fragmented": "red",
-            "stale": "magenta",
-            "redundant": "yellow",
-            "declining": "red",
-        }
-        color = diag_colors.get(diag, "white")
-        console.print(
-            f"[bold white]Diagnosis:[/] [{color}]{diag.upper()}[/]\n"
-        )
-
-        # Recommendations
-        for rec in result["recommendations"]:
-            console.print(
-                Panel(
-                    f"[white]{rec}[/]",
-                    border_style="dim",
-                    padding=(0, 1),
-                )
-            )
+        _render_shannon_diagnosis(result)
 
     except (OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, context="shannon analysis")

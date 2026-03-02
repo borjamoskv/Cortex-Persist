@@ -2,7 +2,6 @@ import json
 import sqlite3
 import subprocess
 import sys
-from pathlib import Path
 
 import click
 from rich.console import Console
@@ -26,7 +25,9 @@ __all__ = [
 
 console = Console()
 
-GHOST_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
+from cortex.core.paths import SKILLS_DIR
+
+GHOST_SKILL_PATH = SKILLS_DIR / "ghost-control" / "ghost.py"
 
 
 def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:

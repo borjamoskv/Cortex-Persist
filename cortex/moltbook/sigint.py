@@ -124,9 +124,7 @@ class LeadSignal:
     url: str
     pain_keywords: list[str] = field(default_factory=list)
     lead_score: float = 0.0
-    detected_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    detected_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -151,17 +149,13 @@ class LeadSignal:
         )
 
 
-def score_issue(
-    title: str, body: str
-) -> tuple[float, list[str]]:
+def score_issue(title: str, body: str) -> tuple[float, list[str]]:
     """Score an issue based on memory-pain keyword density."""
     text = (title + " " + body).lower()
     matched = [kw for kw in MEMORY_PAIN_KEYWORDS if kw in text]
 
     title_lower = title.lower()
-    title_matches = [
-        kw for kw in MEMORY_PAIN_KEYWORDS if kw in title_lower
-    ]
+    title_matches = [kw for kw in MEMORY_PAIN_KEYWORDS if kw in title_lower]
 
     raw_score = len(matched) + (len(title_matches) * 2)
     max_possible = len(MEMORY_PAIN_KEYWORDS) * 3
@@ -189,8 +183,7 @@ def scan_github_issues(
         "X-GitHub-Api-Version": "2022-11-28",
     }
     url = (
-        f"https://api.github.com/repos/{repo}/issues"
-        f"?state=open&per_page={max_issues}&sort=updated"
+        f"https://api.github.com/repos/{repo}/issues?state=open&per_page={max_issues}&sort=updated"
     )
 
     try:
@@ -201,7 +194,8 @@ def scan_github_issues(
     except httpx.HTTPStatusError as exc:
         logger.error(
             "GitHub API error for %s: %s",
-            repo, exc.response.status_code,
+            repo,
+            exc.response.status_code,
         )
         return []
     except httpx.TimeoutException:
@@ -235,7 +229,9 @@ def scan_github_issues(
     signals.sort(key=lambda s: s.lead_score, reverse=True)
     logger.info(
         "[SIGINT] %s: %d leads (min=%.2f)",
-        repo, len(signals), min_score,
+        repo,
+        len(signals),
+        min_score,
     )
     return signals
 
@@ -255,19 +251,14 @@ def run_sigint_sweep(
     all_leads: list[LeadSignal] = []
 
     for repo in target:
-        leads = scan_github_issues(
-            repo, gh_token, min_score=min_score
-        )
+        leads = scan_github_issues(repo, gh_token, min_score=min_score)
         all_leads.extend(leads)
 
     all_leads.sort(key=lambda s: s.lead_score, reverse=True)
 
     print(f"\n{'═' * 66}")
     print("  ⚔️  CORTEX SIGINT SWEEP — LEAD INTELLIGENCE")
-    print(
-        f"  Scanned {len(target)} repos "
-        f"| {len(all_leads)} leads detected"
-    )
+    print(f"  Scanned {len(target)} repos | {len(all_leads)} leads detected")
     print(f"{'═' * 66}\n")
 
     for lead in all_leads:
@@ -282,16 +273,17 @@ def run_sigint_sweep(
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="CORTEX SIGINT — Lead Scanner"
-    )
+    parser = argparse.ArgumentParser(description="CORTEX SIGINT — Lead Scanner")
     parser.add_argument(
-        "--repos", nargs="*",
+        "--repos",
+        nargs="*",
         help="Override target repos (owner/name)",
     )
     parser.add_argument("--token", help="GitHub token")
     parser.add_argument(
-        "--min-score", type=float, default=0.05,
+        "--min-score",
+        type=float,
+        default=0.05,
         help="Min lead score 0-1",
     )
     parser.add_argument(
@@ -299,9 +291,7 @@ if __name__ == "__main__":
         choices=["sweep", "blueprint"],
         default="sweep",
     )
-    parser.add_argument(
-        "--text", help="Text to analyze (blueprint mode)"
-    )
+    parser.add_argument("--text", help="Text to analyze (blueprint mode)")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -314,7 +304,7 @@ if __name__ == "__main__":
             print("Provide --text for blueprint mode")
         else:
             result = analyze_cognitive_blueprint(args.text)
-            print(f"\nBlueprint Analysis:")
+            print("\nBlueprint Analysis:")
             for k, v in result.items():
                 print(f"  {k}: {v}")
     else:

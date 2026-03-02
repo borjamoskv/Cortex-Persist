@@ -54,9 +54,7 @@ logger = logging.getLogger("cortex.llm.sovereign")
 
 # Default signature for template fallback — override via constructor
 _DEFAULT_SIGNATURE = (
-    "---\n"
-    "Borja Moskv | MOSKV Systems\n"
-    "Sovereign Architecture · Industrial Noir 2026"
+    "---\nBorja Moskv | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
 )
 
 
@@ -86,31 +84,31 @@ class SovereignResult:
 
 # Ordered by: cost-efficiency → reliability → speed
 _REMOTE_PRIORITY: list[str] = [
-    "gemini",       # 1M ctx, cheap, fast
-    "qwen",         # 131K ctx, very cheap
-    "groq",         # Ultra-fast inference
-    "deepseek",     # Cheap reasoning
-    "openai",       # GPT-5.3 heavyweight
-    "anthropic",    # Claude 4.6
-    "mistral",      # EU provider
-    "xai",          # Grok
-    "cohere",       # Command-R+
-    "fireworks",    # Open-source fast
-    "together",     # Open-source fast
-    "deepinfra",    # Open-source
-    "cerebras",     # Wafer-scale
-    "sambanova",    # RDU inference
-    "openrouter",   # Meta-router
-    "perplexity",   # Sonar
-    "novita",       # Budget
+    "gemini",  # 1M ctx, cheap, fast
+    "qwen",  # 131K ctx, very cheap
+    "groq",  # Ultra-fast inference
+    "deepseek",  # Cheap reasoning
+    "openai",  # GPT-5.3 heavyweight
+    "anthropic",  # Claude 4.6
+    "mistral",  # EU provider
+    "xai",  # Grok
+    "cohere",  # Command-R+
+    "fireworks",  # Open-source fast
+    "together",  # Open-source fast
+    "deepinfra",  # Open-source
+    "cerebras",  # Wafer-scale
+    "sambanova",  # RDU inference
+    "openrouter",  # Meta-router
+    "perplexity",  # Sonar
+    "novita",  # Budget
 ]
 
 _LOCAL_PRIORITY: list[str] = [
-    "ollama",       # Most common local
-    "lmstudio",     # GUI-friendly
-    "llamacpp",     # Raw C++
-    "vllm",         # Production local
-    "jan",          # Electron-based
+    "ollama",  # Most common local
+    "lmstudio",  # GUI-friendly
+    "llamacpp",  # Raw C++
+    "vllm",  # Production local
+    "jan",  # Electron-based
 ]
 
 
@@ -181,7 +179,11 @@ class SovereignLLM:
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
             result = await self._try_orchestra(
-                prompt, system, mode, chain, errors,
+                prompt,
+                system,
+                mode,
+                chain,
+                errors,
             )
             if result:
                 return result
@@ -190,7 +192,11 @@ class SovereignLLM:
         provider_order = self._build_priority_chain()
         for provider_name in provider_order:
             result = await self._try_provider(
-                provider_name, prompt, system, chain, errors,
+                provider_name,
+                prompt,
+                system,
+                chain,
+                errors,
                 presets=presets,
             )
             if result:
@@ -199,16 +205,20 @@ class SovereignLLM:
         # ── Layer 3: Local models ─────────────────────────────
         for local_name in _LOCAL_PRIORITY:
             result = await self._try_provider(
-                local_name, prompt, system, chain, errors,
-                presets=presets, is_local=True,
+                local_name,
+                prompt,
+                system,
+                chain,
+                errors,
+                presets=presets,
+                is_local=True,
             )
             if result:
                 return result
 
         # ── Layer 4: Template engine (ZERO connectivity) ──────
         logger.warning(
-            "SovereignLLM: ALL providers failed (%d attempts). "
-            "Using template fallback.",
+            "SovereignLLM: ALL providers failed (%d attempts). Using template fallback.",
             len(chain),
         )
         return SovereignResult(
@@ -263,41 +273,21 @@ class SovereignLLM:
 
         return None
 
-    async def _try_provider(
+    async def _execute_provider_call(
         self,
         provider_name: str,
         prompt: str,
         system: str,
         chain: list[str],
         errors: list[str],
-        *,
-        presets: dict | None = None,
-        is_local: bool = False,
+        is_local: bool,
     ) -> SovereignResult | None:
-        """Attempt a single provider. Returns None on failure."""
-        # D3 fix: use passed presets, don't reload from disk
-        if presets is None:
-            presets = _load_presets()
-
-        preset = presets.get(provider_name)
-        if not preset:
-            return None
-
-        env_key = preset.get("env_key", "")
-        # Remote providers need API key; local providers don't
-        if not is_local and env_key and not os.environ.get(env_key):
-            return None
-
-        chain.append(provider_name)
-
+        """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
-                self._providers_cache[provider_name] = LLMProvider(
-                    provider=provider_name
-                )
+                self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
             provider = self._providers_cache[provider_name]
 
-            # D2 fix: measure actual latency
             start = time.monotonic()
             content = await asyncio.wait_for(
                 provider.complete(
@@ -322,13 +312,39 @@ class SovereignLLM:
             errors.append(f"{provider_name}: empty/short response")
 
         except asyncio.TimeoutError:
-            errors.append(
-                f"{provider_name}: timeout ({self._timeout}s)"
-            )
+            errors.append(f"{provider_name}: timeout ({self._timeout}s)")
         except (OSError, ValueError, KeyError) as e:
             errors.append(f"{provider_name}: {e!r}")
 
         return None
+
+    async def _try_provider(
+        self,
+        provider_name: str,
+        prompt: str,
+        system: str,
+        chain: list[str],
+        errors: list[str],
+        *,
+        presets: dict | None = None,
+        is_local: bool = False,
+    ) -> SovereignResult | None:
+        """Attempt a single provider. Returns None on failure."""
+        if presets is None:
+            presets = _load_presets()
+
+        preset = presets.get(provider_name)
+        if not preset:
+            return None
+
+        env_key = preset.get("env_key", "")
+        if not is_local and env_key and not os.environ.get(env_key):
+            return None
+
+        chain.append(provider_name)
+        return await self._execute_provider_call(
+            provider_name, prompt, system, chain, errors, is_local
+        )
 
     def _build_priority_chain(self) -> list[str]:
         """Build ordered provider list: preferred first, then default."""
@@ -355,11 +371,7 @@ class SovereignLLM:
         Extracts the user's intent and wraps it in a professional frame.
         """
         core = prompt[:500].strip()
-        return (
-            f"[Auto-generated — no LLM available]\n\n"
-            f"{core}\n\n"
-            f"{self._signature}"
-        )
+        return f"[Auto-generated — no LLM available]\n\n{core}\n\n{self._signature}"
 
     async def close(self) -> None:
         """Close all cached providers."""

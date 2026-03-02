@@ -31,10 +31,10 @@ class EvolutionaryFalsifier:
         mutations = self._generate_mutations(seed_inputs)
         failures = 0
 
-        for idx, mutant in enumerate(mutations):
+        for _idx, mutant in enumerate(mutations):
             try:
                 # Execution
-                result = target_func(**mutant)
+                target_func(**mutant)
                 # In a real Red Team environment, we also validate if the result
                 # matches the structural boundaries (tether.md), not just if it didn't raise.
             except Exception as e:

@@ -106,7 +106,8 @@ class FactManager:
                         )
                         if results and results[0].score > 0.90:
                             logger.info(
-                                f"V8 Guardrail: Fact discarded - Semantic Duplicate of #{results[0].fact_id} (Score: {results[0].score:.2f})"
+                                "V8 Guardrail: Fact discarded - Semantic Duplicate of "
+                                f"#{results[0].fact_id} (Score: {results[0].score:.2f})"
                             )
                             # We update updated_at / last_accessed
                             await conn.execute(
@@ -119,7 +120,7 @@ class FactManager:
             from pydantic import ValidationError
 
             if isinstance(e, ValidationError):
-                raise ValueError(f"Ingestion Validation Failed: {e}")
+                raise ValueError(f"Ingestion Validation Failed: {e}") from e
             logger.warning(f"V8 Deduplication check skipped or failed: {e}")
 
         from cortex.engine.store_mixin import StoreMixin
@@ -229,7 +230,6 @@ class FactManager:
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
-        conn: Any | None = None,
         **kwargs,
     ) -> int:
         """Sovereign Update: Calls StoreMixin.update directly on the engine."""
@@ -289,7 +289,10 @@ class FactManager:
 
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")
-        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
+        query = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+            f"WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
+        )
         params = [tenant_id] + params
         if project:
             query += " AND f.project = ?"

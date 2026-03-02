@@ -53,7 +53,8 @@ DAEMON_SCRIPT = (
 )
 
 # Constants for file paths
-CORTEX_DIR = Path.home() / ".cortex"
+from cortex.core.paths import CORTEX_DIR
+
 LOG_FILENAME = "router_daemon.log"
 LOG_PATH = CORTEX_DIR / LOG_FILENAME
 

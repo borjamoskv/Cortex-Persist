@@ -1,10 +1,10 @@
-import json
 import asyncio
-from typing import Dict, Any, Optional
+import json
 import logging
+from typing import Any
 
-from cortex.llm.provider import LLMProvider
 from cortex.browser.engine import BrowserEngine
+from cortex.llm.provider import LLMProvider
 
 LOG = logging.getLogger("cortex.browser")
 
@@ -14,7 +14,10 @@ class SovereignBrowserAgent:
     Cognitive Loop for BROWSER-Ω.
     Observes the simplified DOM, reasons, and executes actions to achieve an objective.
     """
-    def __init__(self, objective: str, llm_provider: Optional[LLMProvider] = None, headless: bool = False):
+
+    def __init__(
+        self, objective: str, llm_provider: LLMProvider | None = None, headless: bool = False
+    ):
         self.objective = objective
         self.engine = BrowserEngine(headless=headless)  # Controlled by initialization
         self.llm = llm_provider or LLMProvider()
@@ -65,17 +68,19 @@ class SovereignBrowserAgent:
                     wait_time_sec = action.get("seconds", 2)
                     await asyncio.sleep(wait_time_sec)
                 elif cmd == "abort":
-                    LOG.error("BROWSER-Ω: Agent requested abort or critical failure threshold reached.")
+                    LOG.error(
+                        "BROWSER-Ω: Agent requested abort or critical failure threshold reached."
+                    )
                     break
                 else:
                     LOG.error(f"BROWSER-Ω: Unknown command {cmd}")
 
                 await asyncio.sleep(1)  # Small pause for stability
-                
+
         finally:
             await self.engine.stop()
 
-    async def _decide_next_action(self, dom_tree: str) -> Dict[str, Any]:
+    async def _decide_next_action(self, dom_tree: str) -> dict[str, Any]:
         """Provides the LLM with the context and gets the next action."""
 
         system_prompt = """
@@ -106,10 +111,7 @@ What is your next action?
         try:
             # We use the CORTEX LLMProvider's complete method
             response_text = await self.llm.complete(
-                prompt=user_prompt,
-                system=system_prompt,
-                temperature=0.1,
-                max_tokens=500
+                prompt=user_prompt, system=system_prompt, temperature=0.1, max_tokens=500
             )
 
             # The LLM should return a JSON string, let's parse it

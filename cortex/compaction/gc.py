@@ -65,45 +65,13 @@ class GarbageCollector:
             fact_ids = [row[0] for row in rows]
 
             try:
-                # 1. Borrado físico de vectores
-                for fact_id in fact_ids:
-                    # En vec0 no se suele poder hacer un WHERE id IN (), mejor un iterador
-                    await conn.execute("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
-                    await conn.execute(
-                        "DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)
-                    )
-                    stats["deleted_embeddings"] += 1
-
-                # 2. Borrado de pruned_embeddings si la tabla existe (pruner archive)
-                cursor = await conn.execute(
-                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='pruned_embeddings'"
-                )
-                if await cursor.fetchone():
-                    for fact_id in fact_ids:
-                        await conn.execute(
-                            "DELETE FROM pruned_embeddings WHERE fact_id = ?", (fact_id,)
-                        )
-
-                # 3. Borrado estructural de consensus ligados al fact
-                placeholders = ",".join(["?"] * len(fact_ids))
-                await conn.execute(
-                    f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", fact_ids
-                )
-                await conn.execute(
-                    f"DELETE FROM consensus_votes WHERE fact_id IN ({placeholders})", fact_ids
-                )
-                await conn.execute(
-                    f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", fact_ids
-                )
-
-                # 4. Por último, borrado físico del fact original
-                await conn.execute(f"DELETE FROM facts WHERE id IN ({placeholders})", fact_ids)
+                await self._execute_physical_deletion(conn, fact_ids)
+                stats["deleted_embeddings"] += len(fact_ids)
                 stats["deleted_facts"] += len(fact_ids)
-
                 await conn.commit()
 
             except (sqlite3.Error, OSError) as e:
-                logger.error(f"Failed to execute GC batch: {e}")
+                logger.error("Failed to execute GC batch: %s", e)
                 stats["errors"].append(str(e))
                 await conn.rollback()
                 stats["status"] = "failed"
@@ -114,3 +82,36 @@ class GarbageCollector:
             stats["deleted_embeddings"],
         )
         return stats
+
+    async def _execute_physical_deletion(self, conn: Any, fact_ids: list[Any]) -> None:
+        """Execute physical deletion sequences for a batch of fact IDs."""
+        # 1. Physical vector deletion
+        # In sqlite-vec vec0 tables, WHERE IN () is often not fully supported, so we iterate
+        for fact_id in fact_ids:
+            await conn.execute("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
+            await conn.execute("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,))
+
+        # 2. Pruned embeddings archive deletion
+        cursor = await conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='pruned_embeddings'"
+        )
+        if await cursor.fetchone():
+            await conn.executemany(
+                "DELETE FROM pruned_embeddings WHERE fact_id = ?",
+                [(fid,) for fid in fact_ids],
+            )
+
+        # 3. Consensus structure structural deletion
+        placeholders = ",".join(["?"] * len(fact_ids))
+        await conn.execute(
+            f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", fact_ids
+        )
+        await conn.execute(
+            f"DELETE FROM consensus_votes WHERE fact_id IN ({placeholders})", fact_ids
+        )
+        await conn.execute(
+            f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", fact_ids
+        )
+
+        # 4. Final physical deletion of the fact itself
+        await conn.execute(f"DELETE FROM facts WHERE id IN ({placeholders})", fact_ids)
