@@ -1,8 +1,11 @@
 # Operating Axioms
 
 > **The 9 Laws of Sovereign Operation — violations are regressions.**
+> **⚠️ Canonical Registry:** [`docs/axiom-registry.md`](axiom-registry.md) — unified Ω/α/π taxonomy with enforcement tags.
 
 CORTEX agents operate under 9 non-negotiable axioms. These are not guidelines; they are **enforced constraints** wired into CI gates, middleware, and storage pipelines. Violating an axiom triggers a test failure or lint rejection.
+
+> **α₀ (Axiom Zero):** *"Todo axioma que no puedas codificar como un `if` en un pipeline de CI es, en el mejor caso, una aspiración; en el peor, una alucinación con persistencia."*
 
 ---
 
@@ -152,19 +155,20 @@ Unlike axioms 1–8 which are enforced by CI, Axiom 9 is enforced by **design re
 
 ## Axiom Summary
 
-| # | Axiom | Enforcement |
-|:---:|:---|:---|
-| 1 | Causal > Correlation | Error fact format validation |
-| 2 | 130/100 Standard | MEJORAlo X-Ray 13D scoring |
-| 3 | Zero Trust | Storage pipeline middleware |
-| 4 | Entropy = Death | Ruff + entropy analyzer |
-| 5 | Type Safety | mypy --strict in CI |
-| 6 | Async-Native | pytest-asyncio, event loop guards |
-| 7 | Bridges > Islands | Bridge fact persistence |
-| 8 | Persist Everything | Auto-persistence protocol |
-| 9 | Designed Impossibility | Design review + prompt hardening |
+| # | Axiom | Registry ID | Enforcement | Level |
+|:---:|:---|:---:|:---|:---:|
+| 1 | Causal > Correlation | α5 | Error fact format validation | 🟡 PARTIAL |
+| 2 | 130/100 Standard | α6 | MEJORAlo X-Ray 13D scoring | 🟡 PARTIAL |
+| 3 | Zero Trust | α1 | Storage pipeline middleware | 🟢 FULL |
+| 4 | Entropy = Death | α2 | Ruff + entropy analyzer | 🟢 FULL |
+| 5 | Type Safety | α3 | mypy --strict in CI | 🟢 FULL |
+| 6 | Async-Native | α4 | pytest-asyncio, event loop guards | 🟡 PARTIAL |
+| 7 | Bridges > Islands | π7 | Bridge fact persistence | 🔴 NONE |
+| 8 | Persist Everything | π8 | Auto-persistence protocol | 🔴 NONE |
+| 9 | Designed Impossibility | π9 | Design review + prompt hardening | 🔴 NONE |
 
 ---
 
-*Version: v2.1 — February 2026*
+*Version: v3.0 — March 2026 · Post-Axiom-Compactor*
+*Canonical source: [`docs/axiom-registry.md`](axiom-registry.md)*
 *Source: `cortex/agents/system_prompt.py`*

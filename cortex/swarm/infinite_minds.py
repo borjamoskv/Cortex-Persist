@@ -56,19 +56,19 @@ class AgentMind:
         """Perform a biased recall over the shared DynamicSemanticSpace.
 
         The query is refracted through the agent's semantic_bias.
-        Also triggers the Hebbian Read-as-Rewrite pulse autonomously.
+        Also triggers a topological Read-as-Rewrite pulse autonomously.
         """
         # The agent's reality is skewed by its bias
         refracted_query = f"{self.semantic_bias}{query}".strip()
 
-        # O(1) Zero-Copy Read + Hebbian Rewrite
+        # O(1) Zero-Copy Read + Topological Rewrite
         return await self._space.recall_and_pulse(
             tenant_id=self.tenant_id,
             project_id=self.project_id,
             query=refracted_query,
             limit=limit,
             # Agents with deeper context exert stronger gravitational pull
-            pulse_delta=0.02 if self.semantic_bias else 0.005,
+            pulse_excitation=20.0 if self.semantic_bias else 5.0,
         )
 
 
@@ -98,13 +98,40 @@ class InfiniteMindsManager:
             raise ValueError(f"Mind {agent_id} does not exist in the continuum.")
         return self._minds[agent_id]
 
-    async def convergence_pulse(self) -> None:
+    async def convergence_pulse(self) -> dict[str, Any]:
         """Force a synchronization wave across all minds.
 
         If multiple minds have converged on similar semantic biases,
         this method detects consensus and hardcodes the bridge.
+
+        Returns:
+            Dict with convergence diagnostics.
         """
-        logger.info("InfiniteMinds: Emitting convergence pulse across %d minds.", len(self._minds))
-        # Logic for Byzantine cluster detection of shared embeddings goes here.
-        # This bridges isolated agent knowledge back to the Sovereign Master Logic.
-        pass
+        n = len(self._minds)
+        logger.info(
+            "InfiniteMinds: Convergence pulse across %d minds.", n,
+        )
+
+        if n < 2:
+            return {"status": "skip", "reason": "<2 minds", "count": n}
+
+        # Phase 1: Detect bias clusters (O(N²) but N is small)
+        biases = {
+            mid: m.semantic_bias
+            for mid, m in self._minds.items()
+            if m.semantic_bias
+        }
+
+        # TODO(borjamoskv): Byzantine cluster detection via embedding
+        # similarity when bias evolves to vector representation.
+        logger.info(
+            "InfiniteMinds: %d minds with active bias. "
+            "Cluster detection not yet implemented.",
+            len(biases),
+        )
+
+        return {
+            "status": "partial",
+            "active_biases": len(biases),
+            "total_minds": n,
+        }

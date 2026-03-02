@@ -23,16 +23,42 @@ logger = logging.getLogger("cortex.llm.boundary")
 T = TypeVar("T", bound=BaseModel)
 
 
+# Maximum characters of error detail to feed back to the LLM.
+# Avoids wasting tokens on a 2KB Pydantic dump.
+_MAX_ERROR_FEEDBACK = 500
+
+
 def _clean_llm_json(raw: str) -> str:
-    """Extrae JSON puro de una respuesta con formato Markdown."""
+    """Extract pure JSON from LLM output that may include prose/markdown.
+
+    Handles common patterns:
+    - ```json\n{...}\n```
+    - "Here is the JSON:\n```json\n{...}```"
+    - Raw JSON with leading/trailing whitespace
+    - JSON with BOM or invisible chars
+    """
     clean = raw.strip()
-    if clean.startswith("```json"):
-        clean = clean[7:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    return clean.strip()
+
+    # Strip markdown fences
+    if "```json" in clean:
+        start = clean.index("```json") + 7
+        end = clean.find("```", start)
+        clean = clean[start:end] if end > start else clean[start:]
+    elif "```" in clean:
+        start = clean.index("```") + 3
+        end = clean.find("```", start)
+        clean = clean[start:end] if end > start else clean[start:]
+
+    clean = clean.strip()
+
+    # If still not starting with { or [, hunt for first JSON-like char
+    if clean and clean[0] not in ("{{", "["):
+        for i, ch in enumerate(clean):
+            if ch in ("{{", "["):
+                clean = clean[i:]
+                break
+
+    return clean
 
 
 class ImmuneBoundary:
@@ -75,7 +101,8 @@ class ImmuneBoundary:
 
             except ValidationError as e:
                 last_exception = e
-                last_error_msg = f"Schema violation: {e.json()}"
+                err_detail = e.json()[:_MAX_ERROR_FEEDBACK]
+                last_error_msg = f"Schema violation: {err_detail}"
                 logger.warning(
                     "ImmuneBoundary: Schema violation for %s (attempt %d/%d).",
                     schema.__name__,

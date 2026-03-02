@@ -123,6 +123,8 @@ cortex verify 1
 
 ## Axiomas de la Singularidad Operativa
 
+> **Philosophical Vision.** These axioms articulate the *aspirational future* of CORTEX — where the system is heading, not where it is today. For the canonical operational registry with enforcement tags, see [`docs/axiom-registry.md`](docs/axiom-registry.md).
+
 **I. Axioma de Latencia Negativa (Colapso Evento-Intención)**
 > *"La respuesta precede a la pregunta."*
 

@@ -11,6 +11,8 @@ This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of t
 
 ## 1. Prime Directives: Quindecálogo de la Singularidad Operativa (15 Axiomas)
 
+> **⚠️ Canonical Source:** The unified Axiom Registry is now at [`docs/axiom-registry.md`](docs/axiom-registry.md) with the Ω/α/π taxonomy. The table below is **legacy reference** — use the Registry for canonical numbering, enforcement status, and cross-references.
+
 Estas 15 leyes fundamentales gobiernan el comportamiento del Enjambre CORTEX. Almacenadas como `fact_type="axiom"`. Los axiomas 1–13 son operativos; 14–15 son constitucionales (definen qué *es* el agente).
 
 | # | Axioma | Mandato Sagrado | Mecanismo de Ejecución |
