@@ -1,0 +1,9 @@
+* @borjamoskv
+
+# Sovereign Code Governance (AX-001)
+# No one, not even an autonomous swarm, can modify the foundational axioms
+# or the security gates without explicit creator approval.
+
+/cortex/axioms/ @borjamoskv
+/cortex/guards/ @borjamoskv
+/.github/workflows/ @borjamoskv
