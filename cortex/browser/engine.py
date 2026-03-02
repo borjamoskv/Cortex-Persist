@@ -166,7 +166,9 @@ class BrowserEngine:
                     total,
                 )
 
-        return result    async def click(self, cortex_id: int) -> bool:
+        return result
+
+    async def click(self, cortex_id: int) -> bool:
         """Clicks an element by its CORTEX ID."""
         if not self._page:
             return False
