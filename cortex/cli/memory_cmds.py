@@ -154,12 +154,19 @@ def recall(project, db) -> None:
         )
         by_type: dict[str, list] = {}
         for f in facts:
-            by_type.setdefault(f.fact_type, []).append(f)
+            ftype = f.get("fact_type", "unknown") if isinstance(f, dict) else f.fact_type
+            by_type.setdefault(ftype, []).append(f)
         for ftype, type_facts in by_type.items():
             console.print(f"\n[bold magenta]═══ {ftype.upper()} ({len(type_facts)}) ═══[/]")
             for f in type_facts:
-                tags_str = f" [dim]{', '.join(f.tags)}[/]" if f.tags else ""
-                console.print(f"  [dim]#{f.id}[/] {f.content}{tags_str}")
+                if isinstance(f, dict):
+                    fid = f.get("id", "?")
+                    content = f.get("content", "")
+                    tags = f.get("tags", []) or []
+                else:
+                    fid, content, tags = f.id, f.content, f.tags or []
+                tags_str = f" [dim]{', '.join(tags)}[/]" if tags else ""
+                console.print(f"  [dim]#{fid}[/] {content}{tags_str}")
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -183,7 +190,15 @@ def history(project, as_of, db) -> None:
             )
         )
         for f in facts:
-            status = "[green]●[/]" if f.is_active() else "[red]○[/]"
-            console.print(f"  {status} [dim]#{f.id}[/] [{f.valid_from[:10]}] {f.content[:80]}")
+            if isinstance(f, dict):
+                is_active = f.get("valid_until") is None
+                fid = f.get("id", "?")
+                valid_from = (f.get("valid_from") or "")[:10]
+                content = (f.get("content") or "")[:80]
+            else:
+                is_active = f.is_active()
+                fid, valid_from, content = f.id, f.valid_from[:10], f.content[:80]
+            status = "[green]●[/]" if is_active else "[red]○[/]"
+            console.print(f"  {status} [dim]#{fid}[/] [{valid_from}] {content}")
     finally:
         _run_async(engine.close())

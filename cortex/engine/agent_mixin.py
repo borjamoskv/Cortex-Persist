@@ -1,15 +1,15 @@
-"""Agent management mixin."""
-
 import sqlite3
 import uuid
 from typing import Any
 
 import aiosqlite
 
+from cortex.engine.mixins.base import EngineMixinBase
+
 __all__ = ["AgentMixin"]
 
 
-class AgentMixin:
+class AgentMixin(EngineMixinBase):
     """Mixin for agent management operations."""
 
     async def register_agent(

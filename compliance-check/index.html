@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Memory Compliance Check — CORTEX</title>
+  <meta name="description" content="Free interactive tool: audit your AI system's memory architecture in 3 minutes. Get a sovereign score and personalized risk report." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== DESIGN TOKENS — INDUSTRIAL NOIR 2026 ===== */
+    :root {
+      --black:        #0A0A0A;
+      --void:         #070707;
+      --surface:      #111111;
+      --surface-1:    #161616;
+      --surface-2:    #1E1E1E;
+      --surface-3:    #252525;
+      --border:       rgba(255,255,255,0.07);
+      --border-glow:  rgba(204,255,0,0.3);
+
+      --lime:         #CCFF00;
+      --lime-dim:     #A8D400;
+      --lime-ghost:   rgba(204,255,0,0.08);
+      --lime-glow:    rgba(204,255,0,0.15);
+
+      --gold:         #D4AF37;
+      --gold-dim:     rgba(212,175,55,0.15);
+      --violet:       #6600FF;
+      --violet-dim:   rgba(102,0,255,0.15);
+      --blue:         #2E5090;
+      --red:          #FF3B3B;
+      --orange:       #FF8C00;
+
+      --text-primary:   #F0F0F0;
+      --text-secondary: #8A8A8A;
+      --text-muted:     #555555;
+
+      --radius-sm:    6px;
+      --radius-md:    12px;
+      --radius-lg:    20px;
+      --radius-xl:    32px;
+
+      --transition:   cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== BACKGROUND NOISE + GRID ===== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(204,255,0,0.04) 0%, transparent 60%),
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 60px 60px, 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== NOISE TEXTURE ===== */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== LAYOUT ===== */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px 120px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      padding: 48px 0 0;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 56px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--lime);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(0,0,0,0.3) 100%);
+    }
+
+    .logo-mark svg { width: 18px; height: 18px; }
+
+    .logo-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-primary);
+    }
+
+    .logo-text span { color: var(--lime); }
+
+    /* ===== HERO ===== */
+    .hero {
+      padding: 0 0 72px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--lime-ghost);
+      border: 1px solid var(--lime-dim);
+      border-radius: 100px;
+      padding: 6px 14px 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--lime);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--lime);
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .accent { color: var(--lime); }
+    .hero h1 .dim { color: var(--text-secondary); }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 580px;
+      margin: 0 auto 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--lime);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ===== PROGRESS SHELL ===== */
+    .progress-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      transition: all 0.4s var(--transition);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .progress-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--lime);
+    }
+
+    .progress-track {
+      height: 4px;
+      background: var(--surface-3);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lime-dim), var(--lime));
+      border-radius: 100px;
+      transition: width 0.6s var(--transition);
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px; height: 8px;
+      background: var(--lime);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--lime);
+    }
+
+    .dimension-indicators {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .dim-dot {
+      flex: 1;
+      height: 2px;
+      background: var(--surface-3);
+      border-radius: 100px;
+      transition: background 0.4s var(--transition);
+    }
+
+    .dim-dot.active { background: var(--lime); }
+    .dim-dot.done { background: var(--lime-dim); opacity: 0.5; }
+
+    /* ===== QUIZ CARD ===== */
+    .quiz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s var(--transition);
+      min-height: 400px;
+    }
+
+    .quiz-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--lime-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .quiz-card.active::before { opacity: 1; }
+
+    .card-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .dimension-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--lime);
+      background: var(--lime-ghost);
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid rgba(204,255,0,0.2);
+    }
+
+    .dimension-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .question-text {
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .question-hint {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 36px;
+    }
+
+    /* ===== OPTIONS ===== */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px 22px;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--lime-ghost);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .option:hover { border-color: rgba(204,255,0,0.3); transform: translateX(4px); }
+    .option:hover::before { opacity: 1; }
+
+    .option.selected {
+      border-color: var(--lime);
+      background: var(--lime-ghost);
+    }
+
+    .option.selected .option-radio {
+      background: var(--lime);
+      border-color: var(--lime);
+    }
+
+    .option.selected .option-radio::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .option-radio {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 2px solid var(--surface-3);
+      border-radius: 50%;
+      position: relative;
+      transition: all 0.2s;
+      margin-top: 1px;
+    }
+
+    .option-radio::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--black);
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.2s var(--transition);
+    }
+
+    .option-content { flex: 1; position: relative; }
+
+    .option-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .option-score-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Score color coding on selected */
+    .option.selected[data-score="0"] { border-color: var(--red); }
+    .option.selected[data-score="0"] .option-radio { background: var(--red); border-color: var(--red); }
+    .option.selected[data-score="1"] { border-color: var(--orange); }
+    .option.selected[data-score="1"] .option-radio { background: var(--orange); border-color: var(--orange); }
+    .option.selected[data-score="2"] { border-color: var(--gold); }
+    .option.selected[data-score="2"] .option-radio { background: var(--gold); border-color: var(--gold); }
+    .option.selected[data-score="3"] { border-color: var(--lime); }
+    .option.selected[data-score="3"] .option-radio { background: var(--lime); border-color: var(--lime); }
+
+    /* ===== NAVIGATION ===== */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 36px;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--text-primary); }
+
+    .btn-primary {
+      background: var(--lime);
+      color: var(--black);
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #d4ff1a; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(204,255,0,0.25); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ===== RESULT SCREEN ===== */
+    .result-screen {
+      display: none;
+      animation: fadeSlideUp 0.6s var(--transition) both;
+    }
+
+    .result-screen.visible { display: block; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .score-ring-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 48px;
+      padding-top: 12px;
+    }
+
+    .score-ring-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 24px;
+    }
+
+    .score-ring-svg {
+      width: 200px;
+      height: 200px;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring-bg {
+      fill: none;
+      stroke: var(--surface-3);
+      stroke-width: 10;
+    }
+
+    .score-ring-fill {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.5s var(--transition), stroke 0.5s;
+    }
+
+    .score-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .score-verdict {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid;
+    }
+
+    /* ===== DIMENSION BREAKDOWN ===== */
+    .breakdown-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .breakdown-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+
+    .breakdown-row {
+      display: grid;
+      grid-template-columns: 180px 1fr 48px;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .breakdown-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .breakdown-bar-track {
+      height: 6px;
+      background: var(--surface-3);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .breakdown-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1.2s var(--transition);
+    }
+
+    .breakdown-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    /* ===== RISKS ===== */
+    .risks-section {
+      margin-bottom: 48px;
+    }
+
+    .risk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      border: 1px solid;
+    }
+
+    .risk-item.critical {
+      background: rgba(255,59,59,0.05);
+      border-color: rgba(255,59,59,0.2);
+    }
+
+    .risk-item.warning {
+      background: rgba(255,140,0,0.05);
+      border-color: rgba(255,140,0,0.2);
+    }
+
+    .risk-item.good {
+      background: rgba(204,255,0,0.05);
+      border-color: rgba(204,255,0,0.15);
+    }
+
+    .risk-icon {
+      font-size: 16px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .risk-content { flex: 1; }
+    .risk-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .risk-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ===== LEAD CAPTURE ===== */
+    .lead-capture {
+      background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lead-capture::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 200px;
+      background: radial-gradient(ellipse, rgba(204,255,0,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .lead-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .lead-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 32px;
+    }
+
+    .lead-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .perk {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .perk-check {
+      width: 20px; height: 20px;
+      min-width: 20px;
+      background: var(--lime-ghost);
+      border: 1px solid var(--lime-dim);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      color: var(--lime);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-input:focus { border-color: rgba(204,255,0,0.4); }
+
+    .btn-cta {
+      white-space: nowrap;
+      padding: 14px 32px;
+      background: var(--lime);
+      color: var(--black);
+      font-weight: 800;
+      font-size: 14px;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-cta:hover { background: #d4ff1a; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(204,255,0,0.3); }
+    .btn-cta:active { transform: translateY(0); }
+
+    .privacy-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ===== SUCCESS STATE ===== */
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .success-state.visible { display: flex; }
+
+    .success-icon {
+      width: 64px; height: 64px;
+      background: var(--lime-ghost);
+      border: 1px solid var(--lime-dim);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      animation: bounceIn 0.5s var(--transition);
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .success-sub {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-enter {
+      animation: fadeSlideUp 0.5s var(--transition) both;
+    }
+
+    .fade-exit {
+      animation: fadeSlideDown 0.3s var(--transition) both;
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* ===== SECTION TRANSITIONS ===== */
+    .quiz-section { display: block; }
+    .quiz-section.hidden { display: none; }
+
+    /* ===== LOADING OVERLAY ===== */
+    .processing-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 80px 48px;
+      text-align: center;
+    }
+
+    .processing-overlay.visible { display: flex; }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--surface-3);
+      border-top-color: var(--lime);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .processing-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .proc-step {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .proc-step.done { opacity: 1; color: var(--lime); }
+    .proc-step.active { opacity: 1; color: var(--text-secondary); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 48px 0 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .footer a { color: var(--text-secondary); text-decoration: none; }
+    .footer a:hover { color: var(--lime); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .quiz-card { padding: 32px 24px; }
+      .lead-capture { padding: 32px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+      .breakdown-row { grid-template-columns: 120px 1fr 40px; gap: 10px; }
+      .hero-stats { gap: 24px; }
+      .btn-cta { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0A0A0A"/>
+          <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.6"/>
+          <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.6"/>
+          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.3"/>
+        </svg>
+      </div>
+      <span class="logo-text">CORTEX<span>.</span>AI</span>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero-section">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      Free Tool — No Registration Required
+    </div>
+    <h1>
+      Is Your AI System's Memory<br/>
+      <span class="accent">Architecturally Compliant?</span>
+    </h1>
+    <p class="hero-sub">
+      Answer 7 questions in under 3 minutes. Get a sovereign compliance score and a personalized risk report for your AI memory stack.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Dimensions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">&lt;3 min</div>
+        <div class="stat-label">To Complete</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">€30M</div>
+        <div class="stat-label">Max Penalty</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ SECTION -->
+  <div id="quiz-section" class="quiz-section">
+    <!-- Progress -->
+    <div class="progress-shell" id="progress-shell">
+      <div class="progress-header">
+        <span class="progress-label">EU AI Act · Article 12 Audit</span>
+        <span class="progress-counter" id="progress-counter">0 / 8</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="dimension-indicators" id="dim-indicators">
+        <div class="dim-dot" data-idx="0"></div>
+        <div class="dim-dot" data-idx="1"></div>
+        <div class="dim-dot" data-idx="2"></div>
+        <div class="dim-dot" data-idx="3"></div>
+        <div class="dim-dot" data-idx="4"></div>
+        <div class="dim-dot" data-idx="5"></div>
+        <div class="dim-dot" data-idx="6"></div>
+        <div class="dim-dot" data-idx="7"></div>
+      </div>
+    </div>
+
+    <!-- Quiz Card -->
+    <div class="quiz-card active" id="quiz-card">
+      <div class="card-eyebrow">
+        <span class="dimension-tag" id="q-dimension">Persistence</span>
+        <span class="dimension-number" id="q-number">01 / 08</span>
+      </div>
+      <div class="question-text" id="q-text">Loading...</div>
+      <div class="question-hint" id="q-hint"></div>
+      <div class="options" id="options-container"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()" style="visibility: hidden;">
+          ← Back
+        </button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div class="quiz-card processing-overlay" id="processing-overlay">
+      <div class="spinner"></div>
+      <div class="processing-text">Analyzing your compliance profile...</div>
+      <div class="processing-steps">
+        <div class="proc-step" id="step-1">▸ Mapping memory topology</div>
+        <div class="proc-step" id="step-2">▸ Evaluating persistence gaps</div>
+        <div class="proc-step" id="step-3">▸ Scoring trust infrastructure</div>
+        <div class="proc-step" id="step-4">▸ Generating risk vectors</div>
+        <div class="proc-step" id="step-5">▸ Compiling sovereign report</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="result-screen" id="result-screen">
+    <!-- Score Ring -->
+    <div class="quiz-card" style="margin-bottom: 24px;">
+      <div class="score-ring-container">
+        <div class="score-ring-wrapper">
+          <svg class="score-ring-svg" viewBox="0 0 200 200">
+            <circle class="score-ring-bg" cx="100" cy="100" r="85"/>
+            <circle class="score-ring-fill" id="score-ring" cx="100" cy="100" r="85"
+              stroke-dasharray="534" stroke-dashoffset="534"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-number" id="score-display">0</div>
+            <div class="score-label">/ 100</div>
+          </div>
+        </div>
+        <div class="score-verdict" id="score-verdict">Calculating...</div>
+      </div>
+    </div>
+
+    <!-- Penalty Exposure -->
+    <div class="quiz-card" id="penalty-card" style="margin-bottom: 24px; border-color: rgba(255,59,59,0.2); background: linear-gradient(135deg, #111 0%, rgba(255,59,59,0.04) 100%);"></div>
+
+    <!-- Breakdown -->
+    <div class="quiz-card" style="margin-bottom: 24px;">
+      <div class="breakdown-title">Score by Dimension</div>
+      <div class="breakdown-grid" id="breakdown-grid"></div>
+    </div>
+
+    <!-- Risks + CORTEX Remediation -->
+    <div class="quiz-card" style="margin-bottom: 24px;">
+      <div class="breakdown-title">EU AI Act Gap Analysis + CORTEX Remediation</div>
+      <div id="risks-container"></div>
+    </div>
+
+    <!-- CORTEX Coverage Panel -->
+    <div class="quiz-card" id="coverage-panel" style="margin-bottom: 24px; border-color: rgba(204,255,0,0.2);"></div>
+
+    <!-- Lead Capture -->
+    <div class="lead-capture" id="lead-capture">
+      <div class="lead-title">Get Your Full Sovereign Report</div>
+      <div class="lead-subtitle">
+        Receive a detailed architectural breakdown, remediation playbook, and early access to <strong style="color:var(--lime)">CORTEX Pro</strong> — the EU AI Act-compliant memory engine.
+      </div>
+      <div class="lead-perks">
+        <div class="perk">
+          <div class="perk-check">✓</div>
+          <span>PDF compliance report with Article 12 gap-to-feature mapping</span>
+        </div>
+        <div class="perk">
+          <div class="perk-check">✓</div>
+          <span>30-min architecture review call with CORTEX team</span>
+        </div>
+        <div class="perk">
+          <div class="perk-check">✓</div>
+          <span>60-day CORTEX Pro trial — SHA-256 ledger active from day 1</span>
+        </div>
+      </div>
+      <div id="form-area">
+        <div class="form-row">
+          <input class="form-input" type="email" id="email-input" placeholder="your@company.com" />
+          <button class="btn-cta" onclick="submitLead()">
+            Get Full Report →
+          </button>
+        </div>
+        <div class="privacy-note">
+          🔒 Zero spam. Unsubscribe in 1 click. We respect sovereign privacy.
+        </div>
+      </div>
+      <div class="success-state" id="success-state">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Report on its way.</div>
+        <div class="success-sub">Check your inbox in the next few minutes. Your Article 12 compliance PDF and remediation playbook will be there.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2026 CORTEX AI — Sovereign Memory Infrastructure</p>
+    <p style="margin-top:6px;"><a href="#">Privacy</a> · <a href="#">Terms</a> · Built by borjamoskv</p>
+  </footer>
+</div>
+
+<script>
+/* ===================================================
+   CORTEX COMPLIANCE CHECK — ENGINE v2.0
+   EU AI Act Article 12 Edition
+   Powered by CORTEX Trust Infrastructure
+   === */
+
+// EU AI Act Article 12 compliance dimensions mapped to spec §10.1
+const QUESTIONS = [
+  {
+    id: 0,
+    dimension: "Automatic Logging",
+    euArticle: "Art. 12(1)",
+    icon: "📋",
+    text: "Does your AI system automatically log all decisions and outputs?",
+    hint: "EU AI Act Art. 12(1) mandates automatic logging for all high-risk AI systems. Manual logs are insufficient.",
+    cortexFeature: { name: "Transaction-based fact storage", endpoint: "POST /v1/facts", coverage: "Every AI decision auto-creates a cryptographically signed fact record." },
+    options: [
+      { label: "No logging — decisions are ephemeral", score: 0, hint: "ART. 12 VIOLATION" },
+      { label: "Manual logs only, triggered by engineers", score: 1, hint: "HIGH RISK" },
+      { label: "Auto-logs exist, but not structured or queryable", score: 2, hint: "PARTIAL" },
+      { label: "Automatic, structured, queryable decision logs", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 1,
+    dimension: "Tamper-Proof Storage",
+    euArticle: "Art. 12(2)",
+    icon: "🔒",
+    text: "Can your logged AI decisions be retroactively altered or deleted?",
+    hint: "Art. 12(2) requires tamper-evident storage. Any system where logs can be silently modified is non-compliant.",
+    cortexFeature: { name: "SHA-256 hash chain + Merkle checkpoints", endpoint: "GET /v1/ledger/verify", coverage: "Each fact links to the previous via cryptographic hash. Tampering produces hash mismatch detectable via cortex ledger verify." },
+    options: [
+      { label: "Yes — anyone with DB access can modify logs", score: 0, hint: "ART. 12 VIOLATION" },
+      { label: "Restricted access, but no cryptographic protection", score: 1, hint: "HIGH RISK" },
+      { label: "Hash-based integrity, but no chain — individual facts only", score: 2, hint: "PARTIAL" },
+      { label: "Cryptographic hash chain — modifications are detectable", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 2,
+    dimension: "Full Traceability",
+    euArticle: "Art. 12(3)",
+    icon: "🔍",
+    text: "Can you reconstruct the complete history of any AI decision, including its inputs?",
+    hint: "Art. 12(3) requires full provenance chains. You must be able to prove what data influenced a specific decision.",
+    cortexFeature: { name: "Provenance chains + temporal queries", endpoint: "GET /v1/recall", coverage: "Hybrid retrieval reconstructs full decision ancestry — semantic + structured + temporal ranking." },
+    options: [
+      { label: "No — we cannot trace decisions back to inputs", score: 0, hint: "ART. 12 VIOLATION" },
+      { label: "Partially — some decisions have parent IDs, most don't", score: 1, hint: "HIGH RISK" },
+      { label: "Most decisions traceable, but gaps in older data", score: 2, hint: "PARTIAL" },
+      { label: "Complete provenance chains — every decision fully reconstructable", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 3,
+    dimension: "Explainability",
+    euArticle: "Art. 13",
+    icon: "💬",
+    text: "Can your AI system explain why it made a specific decision — in human-readable form?",
+    hint: "Art. 13 mandates transparency. Black-box outputs with no rationale are non-compliant for high-risk systems.",
+    cortexFeature: { name: "Fact rationale + linked influences", endpoint: "GET /v1/facts/{id}", coverage: "Each fact stores rationale metadata and influence links. Decision metadata retrieval returns human-readable explanations." },
+    options: [
+      { label: "No — it's a black box with no explanation capability", score: 0, hint: "ART. 13 VIOLATION" },
+      { label: "Output only — no access to reasoning chain", score: 1, hint: "HIGH RISK" },
+      { label: "Logs capture inputs and outputs, but not the reasoning", score: 2, hint: "PARTIAL" },
+      { label: "Full rationale stored with each decision, queryable", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 4,
+    dimension: "Trust Infrastructure",
+    euArticle: "Art. 9 (Risk Mgmt)",
+    icon: "🛡️",
+    text: "How does your system validate memory reliability before acting on stored decisions?",
+    hint: "Art. 9 requires risk management systems. Acting on stale or corrupted memory without validation is a liability.",
+    cortexFeature: { name: "WBFT consensus + reputation scoring", endpoint: "POST /v1/verify", coverage: "Byzantine fault-tolerant voting with reputation decay. Malicious agents cannot corrupt consensus without controlling majority reputation weight." },
+    options: [
+      { label: "None — all stored data is treated as equally valid", score: 0, hint: "ART. 9 VIOLATION" },
+      { label: "Recency decay only (old = less trusted)", score: 1, hint: "HIGH RISK" },
+      { label: "Source attribution, but no dynamic consensus scoring", score: 2, hint: "PARTIAL" },
+      { label: "Byzantine fault-tolerant scoring with confidence intervals", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 5,
+    dimension: "Scale & Retention",
+    euArticle: "Art. 12(4)",
+    icon: "⚡",
+    text: "Does your logging infrastructure degrade as data volume grows?",
+    hint: "Art. 12(4) requires logging to remain complete throughout the system lifecycle, not just at launch scale.",
+    cortexFeature: { name: "SQLite-Vec (millions) → Qdrant (billions)", endpoint: "/metrics", coverage: "Sub-linear approximate search at scale. Configurable retention policies with legal hold override. 2-5x inference acceleration via ONNX Runtime." },
+    options: [
+      { label: "Untested — we don't know what happens at 10x volume", score: 0, hint: "ART. 12 VIOLATION" },
+      { label: "It slows significantly — queries take seconds at scale", score: 1, hint: "HIGH RISK" },
+      { label: "It scales, but requires manual tuning at each threshold", score: 2, hint: "PARTIAL" },
+      { label: "Designed for sub-linear scaling with configurable retention", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 6,
+    dimension: "Observability",
+    euArticle: "Art. 17 (QMS)",
+    icon: "📡",
+    text: "Do you have real-time visibility into your AI memory system's health and error rates?",
+    hint: "Art. 17 requires a Quality Management System. You cannot demonstrate compliance if you cannot measure it.",
+    cortexFeature: { name: "Prometheus metrics + K8s health probes", endpoint: "/metrics, /health, /ready", coverage: "p50/p95/p99 latency histograms, fact counts by type, consensus participation rates, verification success rates. Kubernetes liveness/readiness/startup probes." },
+    options: [
+      { label: "Zero visibility — it's a complete black box", score: 0, hint: "ART. 17 VIOLATION" },
+      { label: "Basic logs only — no structured metrics", score: 1, hint: "HIGH RISK" },
+      { label: "Metrics available, but no alerting or dashboards", score: 2, hint: "PARTIAL" },
+      { label: "Full telemetry: p99 histograms, alerting, audit trail", score: 3, hint: "COMPLIANT" }
+    ]
+  },
+  {
+    id: 7,
+    dimension: "Regulatory Scope",
+    euArticle: "Annex III",
+    icon: "⚖️",
+    text: "Is your AI system deployed in any of the EU AI Act high-risk categories?",
+    hint: "Annex III high-risk systems face the full weight of Art. 12 requirements. Penalties up to €30M or 6% global revenue.",
+    cortexFeature: { name: "Automated compliance reporting", endpoint: "GET /v1/status", coverage: "Single-command regulatory documentation generation. JSON/XML/PDF export for regulator integration. Pre-August 2026 deployment enables iterative refinement before enforcement." },
+    options: [
+      { label: "Yes — critical infrastructure, healthcare, credit, or HR", score: 0, hint: "MAXIMUM EXPOSURE" },
+      { label: "Yes — education, law enforcement, or biometric systems", score: 1, hint: "HIGH EXPOSURE" },
+      { label: "Adjacent — B2B tools used in high-risk contexts by clients", score: 2, hint: "MEDIUM EXPOSURE" },
+      { label: "Low-risk / general purpose — limited Annex III exposure", score: 3, hint: "LOWER EXPOSURE" }
+    ]
+  }
+];
+
+const VERDICTS = [
+  { min: 0,  max: 30, label: "Non-Compliant — Immediate Action Required", color: "#FF3B3B", ring: "#FF3B3B", penalty: "€30M or 6% revenue" },
+  { min: 31, max: 55, label: "Significant Compliance Gap",                color: "#FF8C00", ring: "#FF8C00", penalty: "€15M or 3% revenue" },
+  { min: 56, max: 75, label: "Partial Compliance — Gaps Remain",          color: "#D4AF37", ring: "#D4AF37", penalty: "€5M or 1% revenue" },
+  { min: 76, max: 89, label: "Near-Compliant Architecture",               color: "#A8D400", ring: "#A8D400", penalty: "Low residual risk" },
+  { min: 90, max: 100, label: "Article 12 Compliant ✦",                  color: "#CCFF00", ring: "#CCFF00", penalty: "Demonstrable compliance" }
+];
+
+// STATE
+let currentQ = 0;
+const TOTAL_Q = 8;
+let answers   = new Array(TOTAL_Q).fill(null);
+let started   = false;
+
+// INIT
+function init() {
+  renderQuestion(0);
+  updateProgress();
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  document.getElementById('q-dimension').textContent = `${q.icon} ${q.dimension}`;
+  document.getElementById('q-number').textContent = `${String(idx+1).padStart(2,'0')} / ${String(TOTAL_Q).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-hint').textContent = q.hint;
+
+  // EU article badge
+  const eyebrow = document.getElementById('q-dimension').parentElement;
+  let articleBadge = eyebrow.querySelector('.article-badge');
+  if (!articleBadge) {
+    articleBadge = document.createElement('span');
+    articleBadge.className = 'article-badge';
+    articleBadge.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);background:var(--surface-2);padding:3px 8px;border-radius:100px;border:1px solid var(--border);margin-left:auto;font-family:"JetBrains Mono",monospace;';
+    eyebrow.appendChild(articleBadge);
+  }
+  articleBadge.textContent = q.euArticle;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const el = document.createElement('div');
+    el.className = 'option';
+    el.setAttribute('data-score', opt.score);
+    el.setAttribute('data-idx', i);
+    if (answers[idx] === i) el.classList.add('selected');
+    el.innerHTML = `
+      <div class="option-radio"></div>
+      <div class="option-content">
+        <div class="option-label">${opt.label}</div>
+        <div class="option-score-hint">${opt.hint}</div>
+      </div>
+    `;
+    el.addEventListener('click', () => selectOption(idx, i, el));
+    container.appendChild(el);
+  });
+
+  // Nav
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  btnPrev.style.visibility = idx === 0 ? 'hidden' : 'visible';
+  btnNext.textContent = idx === TOTAL_Q - 1 ? 'Calculate Score →' : 'Next →';
+  btnNext.disabled = answers[idx] === null;
+}
+
+function selectOption(qIdx, optIdx, el) {
+  answers[qIdx] = optIdx;
+
+  const container = document.getElementById('options-container');
+  container.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  document.getElementById('btn-next').disabled = false;
+  updateProgress();
+}
+
+function nextQ() {
+  if (answers[currentQ] === null) return;
+
+  if (currentQ < TOTAL_Q - 1) {
+    currentQ++;
+    renderQuestion(currentQ);
+    updateProgress();
+    animateCard();
+  } else {
+    showProcessing();
+  }
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion(currentQ);
+    updateProgress();
+    animateCard();
+  }
+}
+
+function animateCard() {
+  const card = document.getElementById('quiz-card');
+  card.classList.remove('fade-enter');
+  void card.offsetWidth;
+  card.classList.add('fade-enter');
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  const pct = (answered / TOTAL_Q) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-counter').textContent = `${answered} / ${TOTAL_Q}`;
+
+  const dots = document.querySelectorAll('.dim-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.remove('active', 'done');
+    if (i === currentQ) dot.classList.add('active');
+    else if (answers[i] !== null) dot.classList.add('done');
+  });
+}
+
+/* ===== PROCESSING ===== */
+function showProcessing() {
+  document.getElementById('quiz-card').style.display = 'none';
+  const overlay = document.getElementById('processing-overlay');
+  overlay.classList.add('visible');
+
+  const steps = ['step-1','step-2','step-3','step-4','step-5'];
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      if (i > 0) document.getElementById(steps[i-1]).classList.remove('active');
+      document.getElementById(s).classList.add('active');
+      if (i === steps.length - 1) {
+        setTimeout(() => {
+          document.getElementById(s).classList.remove('active');
+          document.getElementById(s).classList.add('done');
+          showResults();
+        }, 700);
+      }
+    }, i * 600);
+  });
+
+  // Mark each done with a delay
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      document.getElementById(s).classList.add('done');
+    }, (i + 1) * 600 - 100);
+  });
+}
+
+/* ===== RESULTS ===== */
+function showResults() {
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('hero-section').style.display = 'none';
+  document.getElementById('progress-shell').style.display = 'none';
+
+  const resultScreen = document.getElementById('result-screen');
+  resultScreen.classList.add('visible');
+
+  const scores = QUESTIONS.map((q, i) => {
+    const ansIdx = answers[i] ?? 0;
+    return {
+      dimension: q.dimension,
+      euArticle: q.euArticle,
+      icon: q.icon,
+      raw: q.options[ansIdx].score,
+      max: 3,
+      cortexFeature: q.cortexFeature
+    };
+  });
+
+  const totalRaw = scores.reduce((s, d) => s + d.raw, 0);
+  const totalMax = scores.length * 3;
+  const percentage = Math.round((totalRaw / totalMax) * 100);
+
+  // Animate score
+  animateScore(percentage);
+
+  // Verdict
+  const verdict = VERDICTS.find(v => percentage >= v.min && percentage <= v.max);
+  const verdictEl = document.getElementById('score-verdict');
+  verdictEl.textContent = verdict.label;
+  verdictEl.style.color = verdict.color;
+  verdictEl.style.borderColor = `${verdict.color}44`;
+  verdictEl.style.background = `${verdict.color}11`;
+  document.getElementById('score-display').style.color = verdict.color;
+  document.getElementById('score-ring').style.stroke = verdict.ring;
+
+  // ── PENALTY EXPOSURE CARD ──────────────────────────────
+  const penaltyCard = document.getElementById('penalty-card');
+  const criticalCount = scores.filter(s => s.raw === 0).length;
+  const warningCount  = scores.filter(s => s.raw <= 1).length;
+  const isHighRisk    = answers[7] !== null && answers[7] <= 1; // Annex III answer
+  penaltyCard.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:8px;">⚠ Estimated Penalty Exposure</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;color:#FF3B3B;line-height:1;">${verdict.penalty}</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Based on ${criticalCount} critical gap${criticalCount !== 1 ? 's' : ''} under EU AI Act${isHighRisk ? ' (Annex III high-risk system)' : ''}.</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;">Enforcement Deadline</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--orange);">August 2026</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${Math.max(0, Math.ceil((new Date('2026-08-01') - new Date()) / (1000*60*60*24*30)))} months remaining</div>
+      </div>
+    </div>
+  `;
+
+  // ── BREAKDOWN ─────────────────────────────────────────
+  const grid = document.getElementById('breakdown-grid');
+  grid.innerHTML = '';
+  scores.forEach(s => {
+    const pct = (s.raw / s.max) * 100;
+    const barColor = s.raw === 3 ? '#CCFF00' : s.raw === 2 ? '#D4AF37' : s.raw === 1 ? '#FF8C00' : '#FF3B3B';
+    grid.innerHTML += `
+      <div class="breakdown-row">
+        <div class="breakdown-name" title="${s.euArticle}">${s.icon} ${s.dimension}</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width:0%;background:${barColor};" data-target="${pct}"></div>
+        </div>
+        <div class="breakdown-score" style="color:${barColor};">${s.raw}/${s.max}</div>
+      </div>
+    `;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  }, 300);
+
+  // ── RISK + CORTEX REMEDIATION ─────────────────────────
+  const risks = document.getElementById('risks-container');
+  risks.innerHTML = '';
+  scores.forEach(s => {
+    const type = s.raw === 0 ? 'critical' : s.raw <= 2 ? 'warning' : 'good';
+    let riskText;
+    if (s.raw === 0) riskText = `VIOLATION of ${s.euArticle}. No implementation detected. Direct exposure to maximum penalties.`;
+    else if (s.raw === 1) riskText = `${s.euArticle} partially addressed but insufficient. A regulator audit would flag this gap.`;
+    else if (s.raw === 2) riskText = `${s.euArticle} mostly covered, but one critical gap remains. Close — but not defensible in audit.`;
+    else riskText = `${s.euArticle} fully satisfied. This dimension is audit-ready.`;
+
+    const showFeature = s.raw < 3 && s.cortexFeature;
+    risks.innerHTML += `
+      <div class="risk-item ${type}" style="margin-bottom:12px;">
+        <div class="risk-icon">${type === 'critical' ? '🔴' : type === 'warning' ? '🟠' : '🟢'}</div>
+        <div class="risk-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div class="risk-title" style="color:${type === 'critical' ? 'var(--red)' : type === 'warning' ? 'var(--orange)' : 'var(--lime)'}">${s.icon} ${s.dimension}</div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);background:var(--surface-2);padding:2px 6px;border-radius:4px;">${s.euArticle}</span>
+          </div>
+          <div class="risk-desc">${riskText}</div>
+          ${showFeature ? `
+          <div style="margin-top:10px;padding:10px 14px;background:rgba(204,255,0,0.04);border:1px solid rgba(204,255,0,0.12);border-radius:8px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--lime);margin-bottom:6px;">⚡ CORTEX Closes This Gap</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">${s.cortexFeature.name}</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:6px;">${s.cortexFeature.endpoint}</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">${s.cortexFeature.coverage}</div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  // ── CORTEX COVERAGE PANEL ─────────────────────────────
+  const gapCount = scores.filter(s => s.raw < 3).length;
+  const closedByDefault = scores.filter(s => s.raw < 3 && s.cortexFeature).length;
+  const coveragePct = gapCount > 0 ? Math.round((closedByDefault / gapCount) * 100) : 100;
+  const covPanel = document.getElementById('coverage-panel');
+  covPanel.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:12px;">CORTEX Coverage of Your Gaps</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:700;color:var(--lime);line-height:1;">${coveragePct}%</div>
+        <div style="font-size:14px;color:var(--text-secondary);margin-top:8px;">of your compliance gaps are closed by CORTEX out of the box — with zero custom engineering.</div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">What CORTEX deploys for you:</div>
+        ${[
+          ['SHA-256 hash chain', '✓ Tamper-proof by default'],
+          ['WBFT consensus', '✓ Trust scoring on every fact'],
+          ['Semantic + hybrid search', '✓ Full provenance at any scale'],
+          ['Prometheus metrics', '✓ Audit-ready observability'],
+          ['EU compliance reports', '✓ One-command regulatory export']
+        ].map(([feat, status]) => `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;">
+            <span style="color:var(--lime);font-weight:700;font-size:11px;">${status.split(' ')[0]}</span>
+            <span style="color:var(--text-secondary);">${feat} — <span style="color:var(--lime);">${status.split(' ').slice(1).join(' ')}</span></span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function animateScore(target) {
+  const el = document.getElementById('score-display');
+  const ring = document.getElementById('score-ring');
+  const circumference = 2 * Math.PI * 85; // 534
+
+  let current = 0;
+  const duration = 1400;
+  const start = performance.now();
+
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    current = Math.round(ease * target);
+
+    el.textContent = current;
+    const offset = circumference - (circumference * current / 100);
+    ring.style.strokeDashoffset = offset;
+
+    if (progress < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
+
+/* ===== LEAD CAPTURE ===== */
+function submitLead() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').focus();
+    document.getElementById('email-input').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('email-input').style.borderColor = '', 1200);
+    return;
+  }
+
+  // Here you'd POST to your backend / Zapier / Mailchimp
+  console.log('[CORTEX LEAD]', { email, scores: answers, timestamp: new Date().toISOString() });
+
+  document.getElementById('form-area').style.display = 'none';
+  document.getElementById('success-state').classList.add('visible');
+}
+
+// Allow Enter key on email
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('email-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitLead();
+  });
+});
+
+// BOOT
+init();
+</script>
+</body>
+</html>

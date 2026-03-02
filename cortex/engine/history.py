@@ -8,10 +8,12 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
+
 logger = logging.getLogger("cortex.engine.history")
 
 
-class HistoryMixin:
+class HistoryMixin(EngineMixinBase):
     """Mixin for history and time-travel logic in AsyncCortexEngine."""
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
@@ -33,7 +35,7 @@ class HistoryMixin:
             clause = f"({clause}) AND f.tenant_id = ?"
             params.append(current_tenant)
 
-            query = f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE {clause}"  # type: ignore[reportAttributeAccessIssue]
+            query = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE {clause}"
             if project:
                 query += " AND f.project = ?"
                 params.append(project)

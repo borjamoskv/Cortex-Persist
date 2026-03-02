@@ -164,6 +164,17 @@ class TestLLMProvider:
             assert "ollama" in repr(p)
             assert "qwen2.5" in repr(p)
 
+    def test_xai_preset_has_intent_model_map(self):
+        from cortex.llm.provider import LLMProvider
+
+        info = LLMProvider.get_preset_info("xai")
+        assert info is not None
+        assert info["default_model"] == "grok-4.1"
+        assert "intent_model_map" in info
+        assert "code" in info["intent_model_map"]
+        assert info["intent_model_map"]["code"] == "grok-4.1-fast"
+        assert info["intent_model_map"]["reasoning"] == "grok-4.1"
+
 
 # ─── LLMManager Tests ───────────────────────────────────────────────
 

@@ -2,11 +2,6 @@
 CORTEX v5.0 — Tenant Router.
 
 Routes requests to the correct database based on tenant_id.
-In local mode: single DB for everything.
-In Turso mode: one DB per tenant (true isolation).
-
-This is the bridge between auth.py (who the user is) and
-storage/ (where their data lives).
 """
 
 from __future__ import annotations
@@ -14,7 +9,8 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from typing import Any
+from collections import OrderedDict
+from typing import Any, Final
 
 from cortex.storage import StorageMode, get_storage_mode
 
@@ -22,17 +18,18 @@ __all__ = ["TenantRouter", "get_router"]
 
 logger = logging.getLogger("cortex.storage.router")
 
+_MAX_BACKENDS: Final[int] = 500
+
 
 class TenantRouter:
     """Routes tenant requests to the correct storage backend.
 
-    Local mode:  All tenants share one SQLite file.
-    Turso mode:  Each tenant gets their own cloud database.
+    Bounded L1 cache of active connections to prevent FD exhaustion.
     """
 
     def __init__(self):
         self._mode = get_storage_mode()
-        self._connections: dict[str, Any] = {}
+        self._connections: OrderedDict[str, Any] = OrderedDict()
         self._base_url = os.environ.get("TURSO_DATABASE_URL", "")
         self._auth_token = os.environ.get("TURSO_AUTH_TOKEN", "")
         self._postgres_dsn = os.environ.get("POSTGRES_DSN", "")
@@ -70,7 +67,19 @@ class TenantRouter:
         if self._mode == StorageMode.POSTGRES:
             return await self._get_postgres_backend(tenant_id)
 
-        return await self._get_turso_backend(tenant_id)
+        backend = await self._get_turso_backend(tenant_id)
+        
+        # Connection Eviction (Axiom Ω₂)
+        if len(self._connections) > _MAX_BACKENDS:
+            # Pop the oldest connection (LRU)
+            old_tenant, old_conn = self._connections.popitem(last=False)
+            try:
+                await old_conn.close()
+                logger.debug("Evicted backend connection for tenant: %s", old_tenant)
+            except Exception as e:
+                logger.warning("Error closing evicted tenant %s: %s", old_tenant, e)
+        
+        return backend
 
     async def _get_local_backend(self):
         """Return the shared local SQLite connection pool."""

@@ -1,10 +1,13 @@
 import asyncio
 import logging
 import secrets
+import sqlite3
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
+from cortex.evolution.action import SymbolicActionEngine, SymbolicActionState
 from cortex.evolution.agents import (
     AgentDomain,
     Mutation,
@@ -13,8 +16,11 @@ from cortex.evolution.agents import (
     SubAgent,
 )
 from cortex.evolution.cortex_metrics import DomainMetrics, fetch_all_domain_metrics
+from cortex.evolution.lnn import LagrangianController
 from cortex.evolution.persistence import load_swarm, save_swarm
+from cortex.evolution.strategies import DEFAULT_STRATEGIES
 from cortex.gate.ouroboros import OuroborosGate
+from cortex.ledger import SovereignLedger
 from cortex.sovereign.endocrine import DigitalEndocrine
 
 random = secrets.SystemRandom()
@@ -37,6 +43,8 @@ class CycleReport:
     duration_ms: float
     crossovers: int = 0
     extinctions: int = 0
+    grace_injection: float = 0.0
+    lagrangian_index: float = 0.0
 
 
 @dataclass
@@ -69,9 +77,20 @@ class EvolutionEngine:
         self.last_run: float = 0.0
         self.engine = engine
         self._ouroboros = None
-        self._endocrine = DigitalEndocrine()  # 350/100 Integration
+        self._endocrine = DigitalEndocrine()
+        self._action_engine = SymbolicActionEngine()
+        self._lnn = LagrangianController()
+        self._ledger = self._build_ledger()
         if self.engine:
             self._ouroboros = OuroborosGate(self.engine._get_sync_conn())
+
+    def _build_ledger(self) -> SovereignLedger:
+        """Build a persistent SovereignLedger for evolution checkpoints."""
+        ledger_path = Path("~/.cortex/evolution_ledger.db").expanduser()
+        ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(str(ledger_path), check_same_thread=False)
+        conn.execute("PRAGMA journal_mode=WAL")
+        return SovereignLedger(conn)
 
     async def initialize_swarm(self) -> None:
         """Load from disk or create genesis swarm (Async)."""
@@ -138,17 +157,55 @@ class EvolutionEngine:
                 extinctions = self._mass_extinction()
 
         # 5. Selección, Recombinación y Plásmidos
+        total_grace = 0.0
+        domain_states: dict[AgentDomain, SymbolicActionState] = {}
         for sovereign in self.sovereigns:
             sovereign._cycle_count += 1
+            domain_grace = 0.0
+
+            # 5a. Apply Improvement Strategies (Phase 2 v3 Grace Injections)
+            for strategy in DEFAULT_STRATEGIES:
+                mutation = strategy.evaluate_agent(sovereign)
+                if mutation:
+                    sovereign.apply_mutation(mutation)
+                    domain_grace += mutation.delta_fitness
+                    total_grace += mutation.delta_fitness
+                    if mutation.epigenetic_tags.get("axiom_12_trigger"):
+                        self._record_merkle_checkpoint(sovereign, mutation)
+
+            # Apply to subagents (purifying selection / parameter tuning)
+            for sub in sovereign.subagents:
+                for strategy in DEFAULT_STRATEGIES:
+                    mutation = strategy.evaluate_subagent(sub)
+                    if mutation:
+                        sub.apply_mutation(mutation)
+                        # Sub-grace is divided by scale factor
+                        sub_grace = mutation.delta_fitness / 10.0
+                        domain_grace += sub_grace
+                        total_grace += sub_grace
+                        if mutation.epigenetic_tags.get("axiom_12_trigger"):
+                            self._record_merkle_checkpoint(sub, mutation)
+
+            # 5b. Compute ψSAP (Sovereign Lagrangian) for this domain
+            domain_telemetry = metrics.get(sovereign.domain)
+            if domain_telemetry:
+                state = self._action_engine.compute_state(
+                    sovereign, domain_telemetry, grace_injection=domain_grace
+                )
+                domain_states[sovereign.domain] = state
+
+            # 5c. Standard Evolution (Crossover & Selection)
             subs = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
             elite = subs[:3]
             cull_count = max(1, int(len(subs) * self.params.selection_pressure))
-            survivors = subs[:-cull_count]
+            survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]
 
             new_generation = list(survivors)
-
-            for _ in range(cull_count):
-                parent_a, parent_b = random.sample(elite, 2)
+            for _ in range(cull_count if cull_count < len(subs) else 0):
+                if len(elite) >= 2:
+                    parent_a, parent_b = random.sample(elite, 2)
+                else:
+                    parent_a, parent_b = elite[0], elite[0]
                 child = self._crossover(parent_a, parent_b)
                 new_generation.append(child)
                 crossovers += 1
@@ -158,8 +215,11 @@ class EvolutionEngine:
         # 6. Lateral Transfer (Plásmidos) - Cross-domain infection
         transfers = self._lateral_transfer()
 
-        # 7. Meta-Fitness / Optimization
-        self._adjust_meta_parameters()
+        # 7. Meta-Fitness / Lagrangian Optimization
+        avg_lagrangian = 0.0
+        if domain_states:
+            avg_lagrangian = sum(s.lagrangian for s in domain_states.values()) / len(domain_states)
+        self._adjust_meta_parameters(avg_lagrangian)
 
         # 8. Persistence (Async-Thread)
         await asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count)
@@ -192,6 +252,8 @@ class EvolutionEngine:
             duration_ms=duration_ms,
             crossovers=crossovers,
             extinctions=extinctions,
+            grace_injection=total_grace,
+            lagrangian_index=avg_lagrangian
         )
 
     def _apply_epigenetic_modulation(self) -> None:
@@ -244,6 +306,31 @@ class EvolutionEngine:
             )
         )
         return 1
+
+    def _record_merkle_checkpoint(
+        self,
+        agent: SovereignAgent | SubAgent,
+        mutation: Mutation,
+    ) -> None:
+        """Record an immutable checkpoint of the agent state (Phase 2 v3)."""
+        logger.info("Axiom 12: Triggering Merkle Checkpoint for %s", agent.id)
+        try:
+            self._ledger.record_transaction(
+                project="cortex-evolution",
+                action="evolution_checkpoint",
+                detail={
+                    "agent_id": agent.id,
+                    "mutation_id": mutation.mutation_id,
+                    "state_hash": agent.state_hash,
+                    "description": mutation.description,
+                    "generation": agent.generation,
+                },
+            )
+        except Exception as exc:
+            logger.warning("Ledger write failed for agent %s: %s", agent.id, exc)
+
+        # Purge non-productive history (Axiom 12 collapse)
+        agent.mutations.clear()
 
     def _crossover(self, parent_a: SubAgent, parent_b: SubAgent) -> SubAgent:
         child = SubAgent(
@@ -300,12 +387,20 @@ class EvolutionEngine:
             sovereign.subagents = survivors
         return culled
 
-    def _adjust_meta_parameters(self) -> None:
+    def _adjust_meta_parameters(self, avg_lagrangian: float = 0.0) -> None:
+        """Adjust meta-fitness targets based on Lagrangian coherence (Phase 2 v3)."""
         avg_fitness = sum(s.fitness for s in self.sovereigns) / len(self.sovereigns)
-        if avg_fitness > self.params.meta_fitness_score:
-            self.params.mutation_rate *= 0.95
-        else:
-            self.params.mutation_rate *= 1.1
+
+        # We optimize for a high Lagrangian (K - S + G - F).
+        # If the Lagrangian is negative, it means entropy/collapse is winning.
+        if avg_lagrangian < 0:
+            # Stressed system -> increase mutation and selection pressure
+            self.params.mutation_rate *= 1.2
+            self.params.selection_pressure = min(0.6, self.params.selection_pressure + 0.05)
+        elif avg_lagrangian > 10.0:
+            # Balanced system -> fine-tune
+            self.params.mutation_rate *= 0.9
+
         self.params.meta_fitness_score = avg_fitness
 
     async def _ouroboros_pruning(self) -> None:

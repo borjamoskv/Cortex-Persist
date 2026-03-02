@@ -8,6 +8,7 @@ import os
 import time
 from typing import Any, Final
 
+from cortex.database.tlru_cache import TLRUCache
 from cortex.nexus.db import NexusDB
 from cortex.nexus.types import DomainOrigin, IntentType, WorldMutation
 
@@ -15,6 +16,7 @@ logger = logging.getLogger("cortex.nexus.model")
 
 _DEFAULT_DB: Final[str] = os.path.expanduser("~/.cortex/nexus.db")
 _DEDUP_TTL: Final[float] = 3600.0  # 1 hour dedup window
+_DEDUP_MAXSIZE: Final[int] = 50_000  # Cap memory at ~6MB
 _MAX_HOOK_CONCURRENCY: Final[int] = 8
 
 
@@ -24,7 +26,7 @@ class NexusWorldModel:
     Production-grade with:
         - SQLite WAL backend for multi-process safety
         - Priority-based processing
-        - SHA-256 idempotency dedup
+        - SHA-256 idempotency dedup (TLRU-bounded)
         - Parallel async hooks
         - Direct query interface
     """
@@ -34,7 +36,7 @@ class NexusWorldModel:
     def __init__(self, db_path: str = _DEFAULT_DB) -> None:
         self._db = NexusDB(db_path)
         self._hooks: dict[IntentType, list[Any]] = {}
-        self._dedup_cache: dict[str, float] = {}  # key → timestamp (in-memory fast path)
+        self._dedup_cache = TLRUCache(maxsize=_DEDUP_MAXSIZE, ttl=_DEDUP_TTL)
         self._stats: dict[str, int] = {
             "total_mutations": 0,
             "deduplicated": 0,
@@ -49,18 +51,17 @@ class NexusWorldModel:
 
         Returns True if mutation was applied, False if deduplicated.
         """
-        # Fast-path dedup (in-memory)
+        # Fast-path dedup (in-memory, TLRU handles TTL automatically)
         key = mutation.idempotency_key
-        now = time.time()
+        now = time.monotonic()
 
         if key in self._dedup_cache:
-            if now - self._dedup_cache[key] < _DEDUP_TTL:
-                self._stats["deduplicated"] += 1
-                logger.debug("NEXUS DEDUP: %s (key=%s)", mutation.intent.name, key)
-                return False
+            self._stats["deduplicated"] += 1
+            logger.debug("NEXUS DEDUP: %s (key=%s)", mutation.intent.name, key)
+            return False
 
         # Persist to SQLite (cross-process visible)
-        inserted = await asyncio.get_event_loop().run_in_executor(None, self._db.insert, mutation)
+        inserted = await asyncio.get_running_loop().run_in_executor(None, self._db.insert, mutation)
 
         if not inserted:
             self._stats["deduplicated"] += 1
@@ -131,13 +132,13 @@ class NexusWorldModel:
             nexus.query(origin=DomainOrigin.MOLTBOOK, since=time.time()-3600)
             nexus.query(intent=IntentType.SHADOWBAN_DETECTED)
         """
-        return await asyncio.get_event_loop().run_in_executor(
+        return await asyncio.get_running_loop().run_in_executor(
             None, self._db.query, origin, intent, project, since, limit
         )
 
     # ─── Lifecycle ─────────────────────────────────────────────────────
 
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """Clean up in-memory caches."""
         self._dedup_cache.clear()
         logger.info("🛑 NEXUS shutdown. Stats: %s", self._stats)

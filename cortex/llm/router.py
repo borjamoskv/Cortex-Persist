@@ -25,13 +25,14 @@ Hedged Requests (DNS-over-HTTPS pattern):
     respuesta. Las tareas perdedoras se cancelan. Ω₂: desperdicio
     controlado < latencia. Google lo llama "hedged requests".
 
-Architecture (Ω₂ Landauer split — 1371 LOC → 5 cohesive modules):
-    _models.py     → IntentProfile, CortexPrompt, BaseProvider, CascadeEvent, HedgedResult
-    _cache.py      → NegativeCache (RFC 2308 NXDOMAIN), PositiveCache (A-record)
-    _hedging.py    → HedgedRequestStrategy (DNS-over-HTTPS race-to-first)
-    _pool.py       → ProviderMetrics, WeightedProviderPool (Anycast)
-    _validation.py → DriftSignal, IntentValidator (DNSSEC)
-    router.py      → CortexLLMRouter (pure orchestration — this file)
+Architecture (Ω₂ Landauer split — 1372 → 6 cohesive modules):
+    _models.py      — IntentProfile, CascadeTier, CascadeEvent,
+                      HedgedResult, CortexPrompt, BaseProvider
+    _cache.py       — NegativeCache (RFC 2308), PositiveCache (A-record)
+    _hedging.py     — HedgedRequestStrategy (DNS-over-HTTPS)
+    _pool.py        — ProviderMetrics, WeightedProviderPool (Anycast)
+    _validation.py  — DriftSignal, IntentValidator (DNSSEC)
+    router.py       — CortexLLMRouter (this file — orchestrator only)
 """
 
 from __future__ import annotations
@@ -51,34 +52,40 @@ from cortex.llm._models import (
     HedgedResult,
     IntentProfile,
 )
-from cortex.llm._pool import WeightedProviderPool
+from cortex.llm._pool import ProviderMetrics, WeightedProviderPool
 from cortex.llm._validation import DriftSignal, IntentValidator
 from cortex.utils.result import Err, Ok, Result
 
-# Re-export public API — backward compatibility
+logger = logging.getLogger("cortex.llm.router")
+
+
+# ─── Re-exports for backward compatibility ─────────────────────────────────
+# All public symbols were previously in this file. Zero breaking changes.
+
 __all__ = [
-    # Models
-    "IntentProfile",
-    "CascadeTier",
-    "CascadeEvent",
-    "HedgedResult",
-    "CortexPrompt",
+    # From _models
     "BaseProvider",
-    # Cache
+    "CascadeEvent",
+    "CascadeTier",
+    "CortexPrompt",
+    "HedgedResult",
+    "IntentProfile",
+    # From _cache
     "NegativeCache",
     "PositiveCache",
-    # Hedging
+    # From _hedging
     "HedgedRequestStrategy",
-    # Pool
+    # From _pool
     "WeightedProviderPool",
-    # Validation
+    # From _validation
     "DriftSignal",
     "IntentValidator",
-    # Router
+    # This file
     "CortexLLMRouter",
 ]
 
-logger = logging.getLogger("cortex.llm.router")
+
+# ─── Router ────────────────────────────────────────────────────────────────
 
 
 class CortexLLMRouter:
@@ -87,19 +94,11 @@ class CortexLLMRouter:
     Implementa Strategy + Circuit Breaker + ROP.
 
     Cascade order:
-        1. Primary — sequential (NUNCA suprimido, Ω₃ Byzantine Default)
-        2. Typed-match fallbacks — providers con afinidad a la intención
-        3. Safety-net fallbacks — resto de providers (mantiene resiliencia)
+        1. Primary (sin filtro — siempre se intenta primero)
+        2. Fallbacks elegibles para la intención del prompt (typed match)
+        3. Fallbacks no elegibles (safety net — mantiene resiliencia total)
 
     Retorna Result[str, str] — nunca lanza excepciones al caller.
-
-    DNS Analogy (full stack):
-        execute_hedged()    → DNS-over-HTTPS (race-to-first)
-        _ordered_fallbacks  → DNS resolver (typed first, then safety-net)
-        NegativeCache       → RFC 2308 NXDOMAIN (suppress failed providers)
-        PositiveCache       → A-record (promote known-good providers)
-        WeightedProviderPool→ Anycast (route to fastest)
-        IntentValidator     → DNSSEC (verify response matches intent)
     """
 
     _CASCADE_HISTORY_CAP: int = 100
@@ -139,7 +138,7 @@ class CortexLLMRouter:
     def fallbacks(self) -> list[BaseProvider]:
         return self._fallbacks
 
-    # ── Cascade Ordering ─────────────────────────────────────────────────
+    # ── Internal ──────────────────────────────────────────────────────────
 
     def _promote_known_good(
         self, providers: list[BaseProvider], intent: IntentProfile,
@@ -215,12 +214,16 @@ class CortexLLMRouter:
         typed = self._promote_known_good(typed, intent)
         untyped = self._promote_known_good(untyped, intent)
 
+        ordered = typed + untyped
+
         if typed:
+            typed_names = [f.provider_name for f in typed]
+            untyped_names = [f.provider_name for f in untyped]
             logger.debug(
                 "Intent=%s | typed-match fallbacks=%s | safety-net=%s",
                 intent.value,
-                [f.provider_name for f in typed],
-                [f.provider_name for f in untyped],
+                typed_names,
+                untyped_names,
             )
         else:
             logger.debug(
@@ -228,25 +231,23 @@ class CortexLLMRouter:
                 intent.value,
             )
 
-        return typed + untyped
-
-    # ── Adaptive TTL ─────────────────────────────────────────────────────
+        return ordered
 
     def _adaptive_positive_ttl(self, provider_name: str) -> float:
-        """A-record TTL scaled by historical success rate.
+        """Calculate A-record TTL based on historical success rate.
         Perfect provider = 100% of base TTL. Flaky provider = reduced TTL.
         """
         success_rate = self._provider_pool.get_success_rate(provider_name)
         return self._positive_cache._default_ttl * success_rate
 
     def _adaptive_negative_ttl(self, provider_name: str) -> float:
-        """NXDOMAIN TTL scaled by historical failure rate.
+        """Calculate NXDOMAIN TTL based on historical success rate.
         Perfect provider = base TTL. Dead provider = 2x base TTL.
         """
         success_rate = self._provider_pool.get_success_rate(provider_name)
         return self._negative_cache._default_ttl * (2.0 - success_rate)
 
-    # ── Execution Pipeline ────────────────────────────────────────────────
+    # ── Public API ────────────────────────────────────────────────────────
 
     async def execute_hedged(
         self, prompt: CortexPrompt
@@ -268,7 +269,9 @@ class CortexLLMRouter:
         # Build eligible pool: primary + hedging peers, minus NXDOMAIN-cached
         eligible: list[BaseProvider] = [self._primary]
         for hp in self._hedging_providers:
-            if not self._negative_cache.is_suppressed(hp.provider_name, intent_key):
+            if not self._negative_cache.is_suppressed(
+                hp.provider_name, intent_key
+            ):
                 eligible.append(hp)
             else:
                 logger.debug(
@@ -285,13 +288,16 @@ class CortexLLMRouter:
             )
             return None
 
-        hedged_result, errors = await HedgedRequestStrategy.race(eligible, prompt)
+        hedged_result, errors = await HedgedRequestStrategy.race(
+            eligible, prompt
+        )
 
         if hedged_result is not None:
             self._last_hedged_result = hedged_result
             return Ok(hedged_result.response)
 
         # All hedging peers failed — record in negative cache
+        # errors format: "provider_name: reason" (Ω₃: parse defensively)
         for error_msg in errors:
             provider_name = (error_msg.split(":", 1)[0] or "").strip()
             # Never suppress the primary (Byzantine Default) or malformed entries
@@ -360,7 +366,9 @@ class CortexLLMRouter:
         # 2 + 3. Cascade: typed-match primero, safety-net después
         for fallback in self._ordered_fallbacks(prompt.intent):
             # RFC 2308: skip NXDOMAIN-cached providers
-            if self._negative_cache.is_suppressed(fallback.provider_name, intent_key):
+            if self._negative_cache.is_suppressed(
+                fallback.provider_name, intent_key
+            ):
                 logger.debug(
                     "NXDOMAIN skip: %s suppressed for intent=%s",
                     fallback.provider_name,
@@ -401,19 +409,21 @@ class CortexLLMRouter:
         logger.error("Singularidad Negativa [intent=%s]: %s", prompt.intent.value, detail)
         return Err(f"All providers failed: {detail}")
 
-    async def _try_provider(
-        self, provider: BaseProvider, prompt: CortexPrompt
-    ) -> Result[str, str]:
+    async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
         """Try a single provider, returning Result. Records Anycast metrics."""
         start = time.monotonic()
         try:
             response = await provider.invoke(prompt)
             latency_ms = (time.monotonic() - start) * 1000
-            self._provider_pool.record_success(provider.provider_name, latency_ms)
+            self._provider_pool.record_success(
+                provider.provider_name, latency_ms
+            )
             return Ok(response)
         except Exception as e:  # deliberate boundary — LLM providers can raise any type
             latency_ms = (time.monotonic() - start) * 1000
-            self._provider_pool.record_failure(provider.provider_name, latency_ms)
+            self._provider_pool.record_failure(
+                provider.provider_name, latency_ms
+            )
             logger.warning(
                 "Provider '%s' failed [intent=%s, %.1fms]: %s",
                 provider.provider_name,
@@ -427,7 +437,11 @@ class CortexLLMRouter:
 
     @staticmethod
     def _classify_tier(provider: BaseProvider, intent: IntentProfile) -> CascadeTier:
-        """Classify which cascade tier a fallback belongs to."""
+        """Classify which cascade tier a fallback belongs to.
+
+        - typed-match:  provider declares the prompt's intent in its affinity
+        - safety-net:   provider is GENERAL-only or from a different domain
+        """
         if intent is IntentProfile.GENERAL:
             return CascadeTier.TYPED_MATCH  # GENERAL accepts all
         if intent in provider.intent_affinity:
@@ -477,7 +491,11 @@ class CortexLLMRouter:
 
     @property
     def cascade_stats(self) -> dict[str, int]:
-        """Observability: aggregated cascade metrics."""
+        """Observability: aggregated cascade metrics.
+
+        Returns counts of how each tier resolved calls, plus the
+        entropy elevation count (safety-net after ≥3 primary failures).
+        """
         stats: dict[str, int] = {
             "total_calls": len(self._cascade_history),
             "primary_hits": 0,
@@ -504,33 +522,17 @@ class CortexLLMRouter:
         """Read-only snapshot of recent cascade events."""
         return list(self._cascade_history)
 
-    # ── Cache & Observability ─────────────────────────────────────────────
+    # ── Cache & Aliases ───────────────────────────────────────────────────
 
     def clear_negative_cache(self) -> None:
         """Flush NXDOMAIN cache — use after config changes or manual override."""
         self._negative_cache.clear()
         logger.info("NXDOMAIN cache flushed")
 
-    def clear_positive_cache(self) -> None:
-        """Flush A-record cache — use after config changes."""
-        self._positive_cache.clear()
-        logger.info("A-record cache flushed")
-
-    def clear_caches(self) -> None:
-        """Flush both NXDOMAIN and A-record caches."""
-        self._negative_cache.clear()
-        self._positive_cache.clear()
-        logger.info("All resolver caches flushed (NXDOMAIN + A-record)")
-
     @property
     def negative_cache(self) -> NegativeCache:
         """Read-only access to the negative cache (observability)."""
         return self._negative_cache
-
-    @property
-    def positive_cache(self) -> PositiveCache:
-        """Read-only access to the positive cache (observability)."""
-        return self._positive_cache
 
     @property
     def last_hedged_result(self) -> HedgedResult | None:
@@ -547,7 +549,23 @@ class CortexLLMRouter:
         """Anycast-style weighted provider pool (observability)."""
         return self._provider_pool
 
-    # ── DNSSEC Validation ─────────────────────────────────────────────────
+    @property
+    def positive_cache(self) -> PositiveCache:
+        """Read-only access to the positive cache (observability)."""
+        return self._positive_cache
+
+    def clear_positive_cache(self) -> None:
+        """Flush A-record cache — use after config changes."""
+        self._positive_cache.clear()
+        logger.info("A-record cache flushed")
+
+    def clear_caches(self) -> None:
+        """Flush both NXDOMAIN and A-record caches."""
+        self._negative_cache.clear()
+        self._positive_cache.clear()
+        logger.info("All resolver caches flushed (NXDOMAIN + A-record)")
+
+    # ── DNSSEC Validation ─────────────────────────────────────────
 
     def _validate_and_penalize(
         self,
@@ -564,7 +582,9 @@ class CortexLLMRouter:
         The response is still returned to the caller — DNSSEC doesn't
         reject, it adjusts trust for future routing.
         """
-        signal = self._intent_validator.validate(response, intent, provider_name)
+        signal = self._intent_validator.validate(
+            response, intent, provider_name
+        )
         self._drift_history.append(signal)
 
         if signal.is_drift:

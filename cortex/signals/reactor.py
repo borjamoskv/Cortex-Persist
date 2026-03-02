@@ -55,7 +55,7 @@ class SignalReactor:
             try:
                 self._dispatch(signal)
                 processed += 1
-            except Exception as e:
+            except (ValueError, AttributeError, RuntimeError, OSError) as e:
                 logger.error(
                     "Reactor failed to process signal #%d (%s): %s",
                     signal.id,
@@ -90,7 +90,7 @@ class SignalReactor:
         try:
             logger.info("Reactor: Reconciling experience signal #%d", signal.id)
             self._run_async(self.engine.memory.reconcile_experience(signal))
-        except Exception as e:
+        except (RuntimeError, OSError, AttributeError) as e:
             logger.error("Failed to reconcile experience reflex: %s", e)
 
     def _handle_compact_needed(self, signal: Any) -> None:
@@ -110,7 +110,7 @@ class SignalReactor:
 
             if result:
                 logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError) as e:
             logger.error("Failed to run compaction reflex: %s", e)
 
     def _handle_fact_stored(self, signal: Any) -> None:
@@ -127,7 +127,7 @@ class SignalReactor:
 
             self._last_snapshot_time = now
             logger.info("Reflex: Snapshot updated.")
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError) as e:
             logger.error("Failed to run snapshot reflex: %s", e)
 
     def _run_async(self, coro: Any) -> Any:
@@ -155,7 +155,7 @@ class SignalReactor:
                 return asyncio.run(coro)
         except RuntimeError:
             return asyncio.run(coro)
-        except Exception as e:
+        except (asyncio.CancelledError, OSError) as e:
             logger.error("Async execution failed in reactor: %s", e)
             return None
 
@@ -167,7 +167,7 @@ class SignalReactor:
                 count = self.process_once()
                 if count > 0:
                     logger.debug("Reactor: Processed %d signal(s)", count)
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError) as e:
                 logger.error("Reactor loop error: %s", e)
 
             time.sleep(interval)
