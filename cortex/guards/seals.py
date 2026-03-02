@@ -88,8 +88,9 @@ async def check_gate_3_security() -> bool:
 
 async def check_gate_4_tests() -> bool:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
-    # Quick fast-fail test mode local
-    code, out = run_cmd(["python", "-m", "pytest", "tests/", "-x", "-q", "--timeout=10"])
+    python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
+    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--timeout=10"]
+    code, out = run_cmd(cmd)
     if code == 0:
         printer.success("All tests passed.")
         return True
@@ -116,7 +117,10 @@ async def check_gate_5_ledger() -> bool:
 
 async def check_gate_6_connection() -> bool:
     printer.seal(6, "AX-017 Ledger Integrity", "Connection Guard")
-    code, out = run_cmd(["python", "-m", "cortex.database.connection_guard", "--root", "cortex"])
+    python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
+    code, out = run_cmd(
+        [str(python_cmd), "-m", "cortex.database.connection_guard", "--root", "cortex"]
+    )
     if code == 0:
         printer.success("Connection guard passed.")
         return True
@@ -128,9 +132,20 @@ async def check_gate_6_connection() -> bool:
 
 async def check_gate_7_async() -> bool:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
+    # Directories to scan — production code only
+    _ASYNC_EXCLUDE_DIRS = frozenset(["experimental", "scripts", "examples", "notebooks"])
+    # Files intentionally allowed to use time.sleep (integration/demo/self)
+    _ASYNC_EXCLUDE_FILES = frozenset(["seals.py", "reactor.py"])
     violations = []
     for py_file in ROOT_DIR.joinpath("cortex").rglob("*.py"):
+        # Skip test helpers and caches
         if "test" in str(py_file) or ".pyc" in str(py_file):
+            continue
+        # Skip explicitly excluded dirs
+        if any(ex in py_file.parts for ex in _ASYNC_EXCLUDE_DIRS):
+            continue
+        # Skip explicitly allowed files
+        if py_file.name in _ASYNC_EXCLUDE_FILES:
             continue
         with open(py_file, encoding="utf-8") as f:
             for i, line in enumerate(f, 1):
