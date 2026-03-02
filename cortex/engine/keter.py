@@ -7,9 +7,9 @@ secuencia, modelos. Invoca, ejecuta, entrega.
 import asyncio
 import logging
 import os
-import random
+import typing
 from abc import ABC, abstractmethod
-from typing import Any, Final
+from typing import Any, Final, TypedDict
 
 from cortex.utils.errors import CortexError
 
@@ -20,6 +20,25 @@ MAX_RETRIES: Final[int] = 3
 BASE_BACKOFF: Final[float] = 1.1  # Golden ratio-ish base
 
 
+class KeterPayload(TypedDict, total=False):
+    """Explicit strict-typing for KETER Engine inter-phase payload."""
+    intent: str
+    spec_130_100: str
+    scaffold_status: str
+    legion_audit: str
+    final_code: str
+    vulnerabilities: list[str]
+    proposed_mutations: dict[str, str]
+    memory_manager: Any
+    tenant_id: str
+    project_id: str
+    fv_audit: str
+    score_130_100: float
+    status: str
+    # Catch-all for other dynamic kwargs passed to ignite
+    kwargs: dict[str, Any]
+
+
 class SovereignPhase(ABC):
     """
     Base class for all KETER phases.
@@ -27,7 +46,7 @@ class SovereignPhase(ABC):
     """
 
     @abstractmethod
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         """Runs the KETER phase on the given payload."""
         pass
 
@@ -38,7 +57,7 @@ class IntentAlchemist(SovereignPhase):
     Generar especificaciones de grado arquitectonico (130/100).
     """
 
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         intent = payload.get("intent", "").strip()
         if not intent:
             raise CortexError("KETER intent missing. Execution aborted.")
@@ -58,7 +77,7 @@ class ArchScaffolder(SovereignPhase):
     Layout base, scaffolding Industrial Noir.
     """
 
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         logger.info("🏗️ [KETER] Forjando arquitectura (Arkitetv-1)...")
         payload["scaffold_status"] = "deployed"
         return payload
@@ -69,7 +88,7 @@ class LegionSwarm(SovereignPhase):
     Fase 3: GUERRA MULTI-DIMENSIONAL (legion-1).
     """
 
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         from cortex.engine.legion import LEGION_OMEGA
 
         intent = payload.get("intent", "Refactor")
@@ -99,7 +118,7 @@ class FormalVerificationGate(SovereignPhase):
     Verifica que las mutaciones propuestas respeten los Axiomas Soberanos.
     """
 
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         if os.environ.get("CORTEX_FV") != "1":
             logger.debug("🛡️ [KETER] Phase 3.5 skipped (CORTEX_FV=0)")
             return payload
@@ -156,7 +175,7 @@ class MejoraloCrush(SovereignPhase):
     Fase 4: EXORCISMO Y PULIDO (MEJORAlo --brutal).
     """
 
-    async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
         logger.info("💎 [KETER] Sometiendo a MEJORAlo (Wave 4: Divinidad)...")
         payload["score_130_100"] = 99.8
         return payload
@@ -178,8 +197,8 @@ class KeterEngine:
         ]
 
     async def _execute_with_backoff(
-        self, phase: SovereignPhase, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+        self, phase: SovereignPhase, payload: KeterPayload
+    ) -> KeterPayload:
         """Executes a phase with exponential backoff retry logic."""
         last_error = None
         for attempt in range(MAX_RETRIES):
@@ -187,9 +206,13 @@ class KeterEngine:
                 return await phase.execute(payload)
             except (CortexError, RuntimeError, OSError, ValueError, TypeError) as e:
                 last_error = e
-                # Jitter asimétrico (generador de caos controlado) en el backoff
+                import secrets
+                
+                rng = secrets.SystemRandom()
+                # La ventana de caos crece fractalmente con la Proporción Áurea (Phi)
                 base_delay = BASE_BACKOFF ** attempt
-                delay = base_delay + (random.uniform(0.1, 2.0) ** (attempt + 1))
+                jitter = rng.uniform(0.1, 1.618 ** (attempt + 1))
+                delay = base_delay + jitter
                 logger.error(
                     "❌ [KETER] Error en %s: %s. Reintento %d/%d en %.2fs",
                     phase.__class__.__name__,
@@ -204,16 +227,19 @@ class KeterEngine:
             f"Phase {phase.__class__.__name__} failed after {MAX_RETRIES} attempts: {last_error}"
         ) from last_error
 
-    async def ignite(self, intent: str, **kwargs: Any) -> dict[str, Any]:
+    async def ignite(self, intent: str, **kwargs: Any) -> KeterPayload:
         """
         Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
         """
-        # --- Generador de Caos Controlado (Jitter Asimétrico) ---
+        # --- Generador de Caos Controlado (Termodinámico Criptográfico) ---
         # Evita la resonancia destructiva ("propio DDoS") desincronizando
-        # a los agentes que deciden curarse o actuar al unísono.
-        asymmetric_jitter = random.uniform(0.1, 2.5) ** 1.5
+        # a los agentes extrayendo entropía por hardware (/dev/urandom).
+        import secrets
+        
+        rng = secrets.SystemRandom()
+        asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
         logger.debug(
-            "🌪️ [KETER] Aplicando jitter asimétrico de %.3fs para caos controlado",
+            "🌪️ [KETER] Aplicando jitter asimétrico criptográfico de %.3fs para caos controlado",
             asymmetric_jitter,
         )
         await asyncio.sleep(asymmetric_jitter)
@@ -222,7 +248,7 @@ class KeterEngine:
         logger.info("⚡ [KETER] MATERIALIZACION INICIADA: KETER ACTIVADO")
         logger.info("=" * 60)
 
-        payload: dict[str, Any] = {"intent": intent, **kwargs}
+        payload = typing.cast(KeterPayload, {"intent": intent, **kwargs})
 
         try:
             for phase in self.phases:

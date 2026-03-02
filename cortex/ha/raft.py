@@ -6,7 +6,6 @@ Handles leader election and log replication state.
 
 import asyncio
 import logging
-import random
 import time
 from collections.abc import Awaitable, Callable
 from enum import Enum
@@ -95,7 +94,10 @@ class RaftNode:
                 await asyncio.sleep(self.HEARTBEAT_INTERVAL)
                 continue
 
-            timeout = random.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
+            import secrets
+                
+            rng = secrets.SystemRandom()
+            timeout = rng.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
             self._heartbeat_event.clear()
             try:
                 # Wake early if a heartbeat arrives; otherwise fire election.

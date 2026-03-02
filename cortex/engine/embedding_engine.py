@@ -6,9 +6,28 @@ Embedding Engine - Asynchronous fact embedding and Specular Memory.
 import json
 import logging
 import sqlite3
-from typing import Any
+from typing import Any, Protocol
 
 import aiosqlite
+
+
+class EmbedderProtocol(Protocol):
+    def embed(self, text: str) -> list[float]: ...
+
+
+class HDCEncoderProto(Protocol):
+    def encode_text(self, text: str) -> Any: ...
+
+
+class HDCMemoryProto(Protocol):
+    async def memorize(self, fact: Any) -> None: ...
+
+
+class MemoryManagerProtocol(Protocol):
+    _hdc_encoder: HDCEncoderProto | None
+    _hdc: HDCMemoryProto | None
+
+    def get_context_vector(self) -> Any: ...
 
 logger = logging.getLogger("cortex")
 
@@ -18,8 +37,8 @@ async def embed_fact_async(
     fact_id: int,
     project: str,
     content: str,
-    embedder: Any = None,
-    memory_manager: Any = None,
+    embedder: EmbedderProtocol | None = None,
+    memory_manager: MemoryManagerProtocol | None = None,
     tenant_id: str = "default",
 ) -> None:
     """Generate and store embedding for a fact asynchronously."""

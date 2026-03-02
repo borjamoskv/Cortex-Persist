@@ -1,4 +1,5 @@
 import ast
+import itertools
 from pathlib import Path
 
 
@@ -14,16 +15,16 @@ def get_ast_identifiers(filepath):
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
             identifiers.add(node.id)
-        elif isinstance(node, ast.arg):
+            continue
+        if isinstance(node, ast.arg):
             identifiers.add(node.arg)
-        elif (
-            isinstance(node, ast.FunctionDef)
-            or isinstance(node, ast.AsyncFunctionDef)
-            or isinstance(node, ast.ClassDef)
-        ):
+            continue
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             identifiers.add(node.name)
-        elif isinstance(node, ast.Attribute):
+            continue
+        if isinstance(node, ast.Attribute):
             identifiers.add(node.attr)
+            continue
     return identifiers
 
 
@@ -50,11 +51,9 @@ def main():
 
     results = []
     file_list = list(symbols_by_file.keys())
-    for i in range(len(file_list)):
-        for j in range(i + 1, len(file_list)):
-            f1, f2 = file_list[i], file_list[j]
-            overlap = calculate_overlap(symbols_by_file[f1], symbols_by_file[f2])
-            results.append((overlap, f1, f2))
+    for f1, f2 in itertools.combinations(file_list, 2):
+        overlap = calculate_overlap(symbols_by_file[f1], symbols_by_file[f2])
+        results.append((overlap, f1, f2))
 
     results.sort(reverse=True, key=lambda x: x[0])
 

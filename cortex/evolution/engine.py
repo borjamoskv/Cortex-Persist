@@ -1,6 +1,6 @@
 import asyncio
 import logging
-import random
+import secrets
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -16,6 +16,8 @@ from cortex.evolution.cortex_metrics import DomainMetrics, fetch_all_domain_metr
 from cortex.evolution.persistence import load_swarm, save_swarm
 from cortex.gate.ouroboros import OuroborosGate
 from cortex.sovereign.endocrine import DigitalEndocrine
+
+random = secrets.SystemRandom()
 
 logger = logging.getLogger("cortex.evolution.engine")
 

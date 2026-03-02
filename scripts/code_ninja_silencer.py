@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import json
-import subprocess
 import os
+import subprocess
+
 
 def run_pyright():
     print("Executing npx pyright --outputjson cortex...")
@@ -30,7 +31,7 @@ def patch_files(diagnostics):
         if not os.path.exists(filepath):
             continue
             
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
             
         ignores.sort(key=lambda x: x[0], reverse=True)

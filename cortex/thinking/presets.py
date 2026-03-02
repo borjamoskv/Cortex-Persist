@@ -79,6 +79,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-reasoner"),
         ("zhipu", "glm-5"),
+        ("kimi", "moonshot-v1-128k"),
         ("gemini", "gemini-2.0-flash"),
         ("qwen", "qwen-max"),
     ],
@@ -86,6 +87,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-chat"),
         ("zhipu", "glm-5"),
+        ("kimi", "moonshot-v1-128k"),
         ("qwen", "qwen-coder-plus"),
         ("openai", "gpt-4o"),
         ("fireworks", "accounts/fireworks/models/deepseek-coder-v2"),
@@ -93,6 +95,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.CREATIVE: [
         ("openai", "gpt-4o"),
         ("xai", "grok-2-latest"),
+        ("kimi", "moonshot-v1-128k"),
         ("gemini", "gemini-2.0-flash"),
         ("cohere", "command-r-plus"),
         ("qwen", "qwen-plus"),
@@ -107,6 +110,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.CONSENSUS: [
         ("zhipu", "glm-5"),
         ("openai", "gpt-4o"),
+        ("kimi", "moonshot-v1-128k"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-chat"),
         ("gemini", "gemini-2.0-flash"),

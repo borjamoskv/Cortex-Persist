@@ -178,8 +178,11 @@ class FiatOracle:
                     )
                 return
             except (OSError, ValueError, RuntimeError) as e:
+                import secrets
+                
+                rng = secrets.SystemRandom()
                 last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
+                delay = (BASE_BACKOFF**attempt) + rng.uniform(0.1, 1.618 ** (attempt + 1))
                 logger.error(
                     f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
                 )
@@ -220,7 +223,7 @@ class FiatOracle:
                 return
             except (OSError, ValueError, RuntimeError) as e:
                 last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
+                delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
                 logger.error(
                     f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
                 )

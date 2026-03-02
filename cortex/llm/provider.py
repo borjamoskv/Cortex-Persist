@@ -192,7 +192,7 @@ class LLMProvider(BaseProvider):
             return data["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
-                return await self._execute_fallback(url, headers, payload, e)
+                return await self._handle_429_backoff(url, headers, payload, e)
 
             logger.error(
                 "LLM API Failure [%s %s]: %s",
@@ -213,16 +213,105 @@ class LLMProvider(BaseProvider):
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
+    async def _handle_429_backoff(
+        self,
+        url: str,
+        headers: dict[str, str],
+        payload: dict[str, Any],
+        original_error: httpx.HTTPStatusError
+    ) -> str:
+        """Parse quotaResetDelay from error response, sleep, and retry."""
+        import asyncio
+        import re
+
+        last_error = original_error
+
+        # Intentaremos hasta 3 veces con backoff
+        for attempt in range(1, 4):
+            delay: float | None = None
+            text = last_error.response.text
+
+            # Intentar extraer desde JSON
+            try:
+                data = last_error.response.json()
+                if "error" in data and "details" in data["error"]:
+                    for detail in data["error"]["details"]:
+                        if "retryDelay" in detail:
+                            val = detail["retryDelay"]
+                            if val.endswith("s"):
+                                delay = float(val[:-1])
+                        elif "metadata" in detail and "quotaResetDelay" in detail["metadata"]:
+                            val = detail["metadata"]["quotaResetDelay"]
+                            if val.endswith("ms"):
+                                delay = float(val[:-2]) / 1000.0
+                            elif val.endswith("s"):
+                                delay = float(val[:-1])
+            except Exception:
+                pass
+
+            # Fallback regex si JSON falla
+            if delay is None:
+                match = re.search(r'"(?:quotaResetDelay|retryDelay)"\s*:\s*"([0-9\.]+)(m?s)"', text)
+                if match:
+                    try:
+                        val = float(match.group(1))
+                        unit = match.group(2)
+                        delay = val / 1000.0 if unit == "ms" else val
+                    except ValueError:
+                        pass
+
+            # Añadir un buffer progresivo (jitter + factor de intento)
+            safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0
+            logger.warning(
+                "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
+                self._model, safe_delay, attempt
+            )
+
+            await asyncio.sleep(safe_delay)
+
+            try:
+                # Reintento tras sleep
+                retry_resp = await self._client.post(url, headers=headers, json=payload)
+                retry_resp.raise_for_status()
+                data = retry_resp.json()
+                return data["choices"][0]["message"]["content"]
+            except httpx.HTTPStatusError as e2:
+                if e2.response.status_code == 429:
+                    last_error = e2
+                    continue  # Siguiente intento
+                raise original_error from e2
+            except Exception as retry_e:
+                logger.error("LLM Quota Retry Failure: %s", retry_e)
+                raise original_error from retry_e
+
+        # Si llegamos aquí, los 3 intentos fallaron, usar fallback
+        return await self._execute_fallback(url, headers, payload, last_error)
+
     async def _execute_fallback(
         self, url: str, headers: dict[str, str], payload: dict[str, Any], original_error: Exception
     ) -> str:
         logger.warning(
-            "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
+            "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
             self._model,
         )
-        payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
+        
+        # Si ya somos qwen, no hay más fallback
+        if self._provider == "qwen":
+            raise original_error
+
         try:
-            retry_resp = await self._client.post(url, headers=headers, json=payload)
+            # Crear un provider limpio para el fallback para no cruzar URLs con models
+            fallback_provider = LLMProvider(provider="qwen")
+            fb_url, fb_headers = fallback_provider._prepare_request()
+
+            fb_payload = {
+                "model": fallback_provider._model,
+                "messages": payload.get("messages", []),
+                "temperature": payload.get("temperature", 0.3),
+                "max_tokens": payload.get("max_tokens", 2048),
+            }
+            
+            retry_resp = await fallback_provider._client.post(fb_url, headers=fb_headers, json=fb_payload)
             retry_resp.raise_for_status()
             data = retry_resp.json()
             return data["choices"][0]["message"]["content"]
