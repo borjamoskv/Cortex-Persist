@@ -49,6 +49,16 @@ def _dm(agent_or_sub: SovereignAgent | SubAgent) -> DomainMetrics:
     return _metrics.get_domain_metrics(agent_or_sub.domain)
 
 
+def _safe_float(val: object, default: float = 0.0) -> float:
+    """Safely convert numeric values to float — returns default for non-numeric types.
+
+    Explicitly handles MagicMock and other non-standard types in test environments.
+    """
+    if isinstance(val, (int, float)):
+        return float(val)
+    return default
+
+
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
@@ -58,7 +68,7 @@ class ImprovementStrategy(Protocol):
 
 
 class ParameterTuningStrategy:
-    """Adaptive mutation rate — delta scales with error_rate.
+    """Adaptive mutation rate — scales with ruggedness (Developmental Plasticity).
 
     Low errors → small tuning nudges (stable domain).
     High errors → bigger leaps (domain needs aggressive repair).
@@ -68,8 +78,12 @@ class ParameterTuningStrategy:
         m = _dm(agent)
         if m.health_score > 0.9:
             return None  # Already sovereign-grade
-        # Scale: error_rate=0 → delta ~ 0.5, error_rate=1 → delta ~ 3.0
-        scale = 0.5 + 2.5 * m.error_rate
+        # Developmental Plasticity: scale with error_rate + rugeddness (fitness variance)
+        # Low variance -> smooth landscape; High variance -> rugged/chaotic landscape.
+        # Note: SovereignAgent.get_fitness_variance() is expected in the population controller.
+        variance = getattr(agent, "avg_subagent_fitness_variance", 0.0)
+        ruggedness = min(1.0, variance / 50.0) if variance > 0 else 0.0
+        scale = (0.5 + 2.5 * m.error_rate) * (1.0 + ruggedness)
         delta = scale * _rng.uniform(0.5, 1.2)
         return Mutation(
             mutation_type=MutationType.PARAMETER_TUNE,
@@ -194,9 +208,14 @@ class BridgeImportStrategy:
         if gap <= 30.0:
             return None
         m = _dm(agent)
-        # base_mult=0.1, bridge_score boosts to max 0.25
+        # base_mult=0.1, bridge_score boosts to max 0.25 (Margulian Endosymbiosis)
         mult = 0.1 + 0.15 * m.bridge_score
         delta = gap * mult
+
+        # Symbiotic Trait Transfer: Permanent inheritance of effective parameters
+        if hasattr(worst, 'parameters') and hasattr(best, 'parameters'):
+            worst.parameters.update(best.parameters)
+
         return Mutation(
             mutation_type=MutationType.BRIDGE_IMPORT,
             description=(
@@ -224,16 +243,23 @@ class AdversarialStressStrategy:
     def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if agent.fitness < self._FRAGILITY_THRESHOLD:
             return None
-        if _rng.random() > 0.3:
+
+        m = _dm(agent)
+        # Red Queen Trigger: Frequency-dependent dynamics.
+        # If the domain is evolving fast (high fitness_delta), stress probability increases.
+        fd = _safe_float(m.fitness_delta)
+        p_queen = 0.1 + 0.5 * min(1.0, max(0.0, fd))
+        if _rng.random() > p_queen:
             return None
-        stress_hit = _rng.uniform(1.0, self._STRESS_MAGNITUDE)
+
+        stress_hit = float(_rng.uniform(1.0, self._STRESS_MAGNITUDE))
         projected = agent.fitness - stress_hit
         if projected > self._FRAGILITY_THRESHOLD:
             return Mutation(
                 mutation_type=MutationType.ADVERSARIAL_STRESS,
                 description=(
                     f"Stress PASSED on {agent.domain.name}: "
-                    f"−{stress_hit:.1f} absorbed, +{self._RESILIENCE_BONUS:.1f}"
+                    f"\u2212{stress_hit:.1f} absorbed, +{self._RESILIENCE_BONUS:.1f}"
                 ),
                 delta_fitness=self._RESILIENCE_BONUS,
             )
@@ -247,9 +273,12 @@ class AdversarialStressStrategy:
         )
 
     def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
-        if sub.fitness < 80.0 or _rng.random() > 0.2:
+        m = _dm(sub)
+        fd = _safe_float(m.fitness_delta)
+        p_queen = 0.1 + 0.3 * min(1.0, max(0.0, fd))
+        if sub.fitness < 80.0 or _rng.random() > p_queen:
             return None
-        stress = _rng.uniform(0.5, 3.0)
+        stress = float(_rng.uniform(0.5, 3.0))
         if (sub.fitness - stress) > 70.0:
             return Mutation(
                 mutation_type=MutationType.ADVERSARIAL_STRESS,
@@ -264,43 +293,50 @@ class AdversarialStressStrategy:
 
 
 class EntropyReductionStrategy:
-    """Genetic drift correction — Axiom 12 enforcement.
+    """Genetic drift correction — Axiom 12 enforcement (Phase 2 v3).
 
     Compresses mutation history when mutations/gain ratio is too high.
+    Triggers cryptographic archival via Merkle Checkpoints.
     """
 
     _MAX_MUTATIONS_PER_GAIN: float = 20.0
 
     def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
-        if agent.generation < 10:
+        if agent.generation < 10 or agent.fitness < 80.0:
             return None
-        gain = agent.fitness - 50.0
-        if gain <= 0:
-            return None
+        gain = max(0.1, agent.fitness - 50.0)
         ratio = agent.generation / gain
         if ratio > self._MAX_MUTATIONS_PER_GAIN:
             return Mutation(
                 mutation_type=MutationType.ENTROPY_REDUCTION,
                 description=(
-                    f"Entropy purge on {agent.domain.name}: "
-                    f"{agent.generation} gens for {gain:.0f} gain (ratio={ratio:.1f})"
+                    f"Axiom 12: Entropy purge on {agent.domain.name} "
+                    f"(ratio={ratio:.1f} > threshold)"
                 ),
                 delta_fitness=2.0,
+                epigenetic_tags={
+                    "axiom_12_trigger": True,
+                    "state_hash": agent.state_hash,
+                    "purge_count": len(agent.mutations),
+                }
             )
         return None
 
     def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
-        if sub.generation < 15:
+        if sub.generation < 15 or sub.fitness < 70.0:
             return None
-        gain = sub.fitness - 50.0
-        if gain <= 0:
-            gain = 1.0
+        gain = max(0.1, sub.fitness - 50.0)
         ratio = sub.generation / gain
         if ratio > self._MAX_MUTATIONS_PER_GAIN:
             return Mutation(
                 mutation_type=MutationType.ENTROPY_REDUCTION,
-                description=f"Entropy collapse on {sub.name} (ratio={ratio:.1f})",
+                description=f"Axiom 12: Entropy collapse on {sub.id} (ratio={ratio:.1f})",
                 delta_fitness=1.5,
+                epigenetic_tags={
+                    "axiom_12_trigger": True,
+                    "state_hash": sub.state_hash,
+                    "purge_count": len(sub.mutations),
+                }
             )
         return None
 
@@ -359,6 +395,20 @@ class StagnationBreakerStrategy:
     def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if not self._is_stagnated(agent.mutations):
             return None
+
+        # ── Gould-Eldredge Circuit Breaker ─────────────────────────
+        # Reject shock if we don't have enough fitness budget.
+        # If the system is already struggling (fitness <= 80), a negative
+        # shock from fitness_delta could cause a death spiral.
+        best_sub = agent.best_subagent
+        if not best_sub or best_sub.fitness <= 80.0:
+            logger.debug(
+                "StagnationBreaker rejected for %s: fitness budget low (%.1f)",
+                agent.domain.name,
+                best_sub.fitness if best_sub else 0.0,
+            )
+            return None
+
         m = _dm(agent)
         stochastic = _rng.uniform(-1.0, 2.0)
         shock = m.fitness_delta * 1.5 + stochastic
@@ -375,6 +425,11 @@ class StagnationBreakerStrategy:
     def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         if not self._is_stagnated(sub.mutations):
             return None
+
+        # ── Gould-Eldredge Circuit Breaker (SubAgent level) ────────
+        if sub.fitness <= 80.0:
+            return None
+
         m = _dm(sub)
         shock = m.fitness_delta + _rng.uniform(-0.5, 1.0)
         shock = max(-2.0, min(6.0, shock))

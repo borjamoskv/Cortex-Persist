@@ -152,7 +152,7 @@ class SovereignVectorStoreL2:
                     (rowid, embedding_bytes),
                 )
                 conn.commit()
-            except Exception as e:
+            except (sqlite3.Error, RuntimeError) as e:
                 # LEGION-OMEGA (Chronos Sniper): Prevenir que la BD quede en estado de transacción corrupta tras error
                 conn.rollback()
                 logger.error(

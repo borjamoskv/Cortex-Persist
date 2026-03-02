@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -385,6 +386,10 @@ def scan_all_contradictions(
     Batch scanner: find pairs of potentially contradicting decisions.
 
     Returns list of (decision_a, decision_b) pairs ordered by overlap.
+
+    Architecture: O(N·logN) via token-bucketed locality-sensitive hashing.
+    Each decision is bucketed by its top-K tokens. Only decisions sharing
+    bucket membership are compared, avoiding the O(N²) pairwise explosion.
     """
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
@@ -411,43 +416,82 @@ def scan_all_contradictions(
                     continue
             if not content or _is_noise(content):
                 continue
+            tokens = _tokenize(content)
+            if len(tokens) < 3:
+                continue
             decisions.append(
                 {
                     "id": row["id"],
                     "project": row["project"],
                     "content": content,
                     "date": row["created_at"][:10],
-                    "tokens": _tokenize(content),
+                    "tokens": tokens,
                 }
             )
 
-        # Pairwise comparison (O(N²) — bounded by same project)
-        pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]] = []
-
-        # Group by project to reduce comparisons
-        from collections import defaultdict
-
+        # ── LSH Bucketing: O(N·logN) ───────────────────────────────
+        # Group by project first (cross-project conflicts are rare),
+        # then bucket by top-K tokens within each project.
         by_project: dict[str, list[dict]] = defaultdict(list)
         for d in decisions:
             by_project[d["project"]].append(d)
 
+        # Token → decision indices within project (inverted index)
+        pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]] = []
+        seen_pairs: set[tuple[int, int]] = set()
+
         for _project, group in by_project.items():
-            for i, a in enumerate(group):
-                for b in group[i + 1 :]:
-                    score = _jaccard(a["tokens"], b["tokens"])
-                    if score >= min_score:
-                        # Check for negation in either
+            # Build inverted index: token → list of decision indices
+            token_index: dict[str, list[int]] = defaultdict(list)
+            for idx, d in enumerate(group):
+                # Use top-8 tokens by length (more specific = better signal)
+                top_tokens = sorted(
+                    d["tokens"], key=len, reverse=True
+                )[:8]
+                for token in top_tokens:
+                    token_index[token].append(idx)
+
+            # Only compare decisions that share bucket membership
+            for _token, indices in token_index.items():
+                if len(indices) < 2 or len(indices) > 50:
+                    # Skip tokens that are too common (noise)
+                    # or singleton (no comparison possible)
+                    continue
+                for i_pos in range(len(indices)):
+                    for j_pos in range(i_pos + 1, len(indices)):
+                        i, j = indices[i_pos], indices[j_pos]
+                        pair_key = (
+                            min(group[i]["id"], group[j]["id"]),
+                            max(group[i]["id"], group[j]["id"]),
+                        )
+                        if pair_key in seen_pairs:
+                            continue
+                        seen_pairs.add(pair_key)
+
+                        a, b = group[i], group[j]
+                        score = _jaccard(a["tokens"], b["tokens"])
+                        if score < min_score:
+                            continue
+
                         ctype = "keyword_overlap"
-                        if _detect_negation(a["content"]) or _detect_negation(b["content"]):
+                        if _detect_negation(
+                            a["content"]
+                        ) or _detect_negation(b["content"]):
                             ctype = "negation"
                             score *= 1.3
+
+                        if _detect_supersession(
+                            a["content"]
+                        ) or _detect_supersession(b["content"]):
+                            ctype = "version_supersede"
+                            score *= 1.2
 
                         ca = ConflictCandidate(
                             a["id"],
                             a["project"],
                             a["content"][:200],
                             a["date"],
-                            score,
+                            min(score, 1.0),
                             ctype,
                         )
                         cb = ConflictCandidate(
@@ -455,7 +499,7 @@ def scan_all_contradictions(
                             b["project"],
                             b["content"][:200],
                             b["date"],
-                            score,
+                            min(score, 1.0),
                             ctype,
                         )
                         pairs.append((score, ca, cb))

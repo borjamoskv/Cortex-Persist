@@ -104,12 +104,14 @@ def list_facts(project, fact_type, limit, db) -> None:
 
         enc = get_default_encrypter()
 
+        from cryptography.exceptions import InvalidTag
+
         for row in rows:
             # Decrypt content (may be AES-encrypted in DB)
             raw_content = row[2]
             try:
                 content = enc.decrypt_str(raw_content, tenant_id="default")
-            except (ValueError, TypeError, OSError):
+            except (ValueError, TypeError, OSError, InvalidTag):
                 content = raw_content  # Fallback to raw if decryption fails
             content_preview = content[:57] + "..." if len(content) > 60 else content  # type: ignore[reportOptionalSubscript,reportArgumentType]
             tags = json.loads(row[4]) if row[4] else []

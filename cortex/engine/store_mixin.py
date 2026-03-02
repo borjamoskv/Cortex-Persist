@@ -16,6 +16,7 @@ import aiosqlite
 from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record, resolve_causality
 from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.engine.store_guards import run_security_guards
@@ -28,7 +29,7 @@ __all__ = ["StoreMixin"]
 logger = logging.getLogger("cortex")
 
 
-class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
+class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
     """Sovereign Storage Layer. Handles facts lifecycle with Zero-Trust isolation."""
 
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH

@@ -63,7 +63,12 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --notify-keyspace-events Exe
+      --save ""
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

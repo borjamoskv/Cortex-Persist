@@ -96,7 +96,7 @@ def _apply_and_verify(
 
     try:
         original_code = abs_path.read_text(errors="replace")
-    except Exception:
+    except (OSError, UnicodeDecodeError):
         logger.exception("Failed to read original code for %s", top_file_rel)
         return False
 

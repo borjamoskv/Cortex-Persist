@@ -140,7 +140,7 @@ class IntegrityAuditor:
         except ImportError:
             logger.error("aiosqlite not available — cannot run integrity audit")
             report.chain_status.is_valid = False
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Integrity audit failed: %s", e)
             report.chain_status.is_valid = False
 
@@ -174,7 +174,7 @@ class IntegrityAuditor:
                 ) as cursor:
                     facts = await cursor.fetchall()
                 return await self._verify_chain(facts)  # type: ignore[reportArgumentType]
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Chain verification failed: %s", e)
             return ChainStatus(is_valid=False)
 
@@ -191,7 +191,7 @@ class IntegrityAuditor:
                 ) as cursor:
                     facts = await cursor.fetchall()
                 return await self._verify_signatures(facts)  # type: ignore[reportArgumentType]
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Signature verification failed: %s", e)
             return []
 
@@ -320,7 +320,7 @@ class IntegrityAuditor:
                     content_preview=content[:50],
                 )
             )
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
             logger.warning("Signature check error for fact %d: %s", fact["id"], e)
 
 

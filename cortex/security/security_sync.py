@@ -51,7 +51,7 @@ class SecurityVisualSync:
         except ImportError:
             # HUB not available (e.g. running outside API context)
             pass
-        except Exception as e:
+        except (RuntimeError, OSError, AttributeError) as e:
             logger.error("Failed to emit security signal: %s", e)
 
     def emit_sync(self, event_type: str, details: dict[str, Any] | None = None) -> None:
@@ -62,7 +62,7 @@ class SecurityVisualSync:
                 asyncio.create_task(self.emit_signal(event_type, details))
             else:
                 loop.run_until_complete(self.emit_signal(event_type, details))
-        except Exception:
+        except (RuntimeError, OSError):
             pass
 
 

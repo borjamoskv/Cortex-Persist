@@ -16,8 +16,9 @@ from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
-from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN, QueryMixin
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
+from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
@@ -252,7 +253,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
 
         conn = await self.get_conn()
         cursor = await conn.execute(
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
+            f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
         )
         row = await cursor.fetchone()
         fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
@@ -326,9 +327,13 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
 
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
-    @staticmethod
-    def _row_to_fact(row) -> Fact:
-        return row_to_fact(row)
+    def _row_to_fact(  # type: ignore[override]
+        self,
+        row: aiosqlite.Row | dict,
+        tenant_id: str = "default",
+    ) -> dict:
+        """Delegate to MixinBase (supports tenant-scoped decryption)."""
+        return super()._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
 
     # ─── Lifecycle ────────────────────────────────────────────────
 

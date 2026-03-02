@@ -4,6 +4,7 @@ import logging
 import sqlite3
 from typing import Any
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
 
@@ -12,7 +13,7 @@ __all__ = ["SearchMixin"]
 logger = logging.getLogger("cortex.engine.search")
 
 
-class SearchMixin:
+class SearchMixin(EngineMixinBase):
     """Mixin for semantic, text, and graph-augmented search operations."""
 
     async def search(

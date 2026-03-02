@@ -23,10 +23,10 @@ async def event_generator():
             await f.write("")
 
     # Start at the end of the file
-    file_size = os.path.getsize(RELAY_BUFFER)
+    file_size = await asyncio.to_thread(os.path.getsize, RELAY_BUFFER)
 
     while True:
-        current_size = os.path.getsize(RELAY_BUFFER)
+        current_size = await asyncio.to_thread(os.path.getsize, RELAY_BUFFER)
         if current_size > file_size:
             async with aiofiles.open(RELAY_BUFFER) as f:
                 await f.seek(file_size)
@@ -36,7 +36,6 @@ async def event_generator():
                         yield f"data: {line.strip()}\n\n"
             file_size = current_size
         await asyncio.sleep(0.1)
-
 
 @app.get("/events")
 async def events(request: Request):

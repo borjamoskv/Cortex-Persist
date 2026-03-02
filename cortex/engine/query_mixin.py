@@ -4,35 +4,28 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from typing import Any
 
-from cortex.engine.models import Fact
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
-from cortex.search import SearchResult, semantic_search, text_search
+from cortex.search import SearchResult, hybrid_search, semantic_search, text_search
 
 __all__ = ["QueryMixin"]
 
 logger = logging.getLogger("cortex")
 
-# Common column list shared across all fact queries.
-_FACT_COLUMNS = (
-    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
-    "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
-    "f.created_at, f.updated_at, f.tx_id, t.hash"
-)
-_FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
 
-
-class QueryMixin:
+class QueryMixin(EngineMixinBase):
     async def get_all_active_facts(
         self,
         tenant_id: str = "default",
         project: str | None = None,
         fact_types: list[str] | None = None,
-    ) -> list[Fact]:
+    ) -> list[dict[str, Any]]:
         """Retrieve all active facts, optionally filtered by project or types."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND f.valid_until IS NULL "
                 "AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
             )
@@ -50,7 +43,7 @@ class QueryMixin:
             query += " ORDER BY f.project, f.fact_type, f.id"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def search(
         self,
@@ -60,191 +53,219 @@ class QueryMixin:
         top_k: int = 5,
         as_of: str | None = None,
         graph_depth: int = 0,
-        fuse: bool = False,
+        fuse: bool = True,
         **kwargs,
-    ) -> list[SearchResult] | str:
+    ) -> list[SearchResult]:
+        """Perform semantic or hybrid search with optional Graph-RAG context."""
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
 
-        from cortex.graph import extract_entities, get_context_subgraph
-
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            results = []
-            try:
+            embedder = self._get_embedder()  # type: ignore[reportAttributeAccessIssue]
+            query_embedding = embedder.embed(query)
+
+            if fuse:
+                results = await hybrid_search(
+                    conn,
+                    query,
+                    query_embedding,
+                    top_k=top_k,
+                    tenant_id=tenant_id,
+                    project=project,
+                    as_of=as_of,
+                    **kwargs,
+                )
+            else:
                 results = await semantic_search(
                     conn,
-                    self._get_embedder().embed(query),  # type: ignore[reportAttributeAccessIssue]
-                    top_k,
-                    tenant_id,
-                    project,
-                    as_of,
-                )
-            except (sqlite3.Error, OSError) as e:
-                logger.warning("Semantic search failed: %s", e)
-
-            if not results:
-                results = await text_search(
-                    conn, query, tenant_id=tenant_id, project=project, limit=top_k, **kwargs
+                    query_embedding,
+                    top_k=top_k,
+                    tenant_id=tenant_id,
+                    project=project,
+                    as_of=as_of,
+                    **kwargs,
                 )
 
+            # Add graph context if requested (Wave 4: Graph-RAG)
             if results and graph_depth > 0:
-                for res in results:
-                    entities = extract_entities(res.content)
-                    seeds = [e["name"] for e in entities]
-                    if seeds:
-                        res.graph_context = await get_context_subgraph(
-                            conn, seeds, depth=graph_depth
-                        )
-
-            # Context Fusion Wave
-            if results and fuse:
-                from cortex.thinking.fusion import ContextFusion
-
-                # The engine should provide a fast judge provider via self.provider
-                fuser = ContextFusion(judge_provider=getattr(self, "provider", None))
-                retrieved_dicts = [
-                    {"content": r.content, "score": r.score, "project": r.project} for r in results
-                ]
-                return await fuser.fuse_context(query, retrieved_dicts)
+                from cortex.graph import extract_entities, get_context_subgraph
+                entities = extract_entities(query)
+                seeds = [e["name"] for e in entities]
+                if seeds:
+                    subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth)
+                    results[0].graph_context = {"graph": subgraph, "seeds": seeds}
 
             return results
+
+    async def hybrid_search(self, *args, **kwargs):
+        """Unified hybrid search interface."""
+        return await text_search(self, *args, **kwargs)  # type: ignore[reportArgumentAccessIssue]
+
+    async def get_fact(self, fact_id: int, tenant_id: str = "default") -> dict[str, Any] | None:
+        """Retrieve a specific fact by ID and tenant."""
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            query = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ? AND f.tenant_id = ?"
+            async with conn.execute(query, (fact_id, tenant_id)) as cursor:
+                row = await cursor.fetchone()
+                return self._row_to_fact(row, tenant_id=tenant_id) if row else None  # type: ignore[reportAttributeAccessIssue]
 
     async def recall(
         self,
         project: str,
-        tenant_id: str = "default",
         limit: int | None = None,
+        tenant_id: str = "default",
+        fact_type: str | None = None,
         offset: int = 0,
-    ) -> list[Fact]:
+    ) -> list[dict[str, Any]]:
+        """High-level recall with scoring and temporal relevance."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            query = f"""  # nosec B608 — parameterized query via internal constants
-                SELECT {_FACT_COLUMNS}
-                {_FACT_JOIN}
+            query = f"""
+                SELECT {FACT_COLUMNS}
+                {FACT_JOIN}
                 WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL
                 AND f.is_quarantined = 0 AND f.is_tombstoned = 0
+            """
+            params: list = [tenant_id, project]
+
+            if fact_type:
+                query += " AND f.fact_type = ?"
+                params.append(fact_type)
+
+            # Unified Scoring: Bayesian reputation + Temporal decay
+            query += """
                 ORDER BY (
                     f.consensus_score * 0.8
                     + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2
                 ) DESC, f.fact_type, f.created_at DESC
             """
-            params: list = [tenant_id, project]
+
             if limit:
                 query += " LIMIT ?"
                 params.append(limit)
             if offset:
                 query += " OFFSET ?"
                 params.append(offset)
+
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def history(
         self,
         project: str,
         tenant_id: str = "default",
         as_of: str | None = None,
-    ) -> list[Fact]:
+    ) -> list[dict[str, Any]]:
+        """Visualización histórica: hechos activos, borrados o actualizados."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             if as_of:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
                 query = (
-                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
+                    f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608 — parameterized query
                     f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 AND {clause} "
                     "ORDER BY f.valid_from DESC"
                 )
-                cursor = await conn.execute(query, [tenant_id, project] + params)
+                cursor = await conn.execute(query, (tenant_id, project, *params))
             else:
                 query = (
-                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
+                    f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608 — parameterized query
                     "WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 "
                     "ORDER BY f.valid_from DESC"
                 )
                 cursor = await conn.execute(query, (tenant_id, project))
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def reconstruct_state(
         self,
-        target_tx_id: int,
+        project: str,
         tenant_id: str = "default",
-        project: str | None = None,
-    ) -> list[Fact]:
+        tx_id: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Reconstruct the state of a project at a specific transaction ID."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            cursor = await conn.execute(
-                "SELECT timestamp FROM transactions WHERE id = ?",
-                (target_tx_id,),
-            )
-            tx = await cursor.fetchone()
-            if not tx:
-                raise ValueError(f"Transaction {target_tx_id} not found")
+            if not tx_id:
+                return await self.recall(project, tenant_id=tenant_id)
+
+            # Check transaction existence and get its time
+            async with conn.execute(
+                "SELECT created_at FROM transactions WHERE id = ? AND tenant_id = ?",
+                (tx_id, tenant_id),
+            ) as cursor:
+                tx = await cursor.fetchone()
+                if not tx:
+                    raise ValueError(f"Transaction {tx_id} not found for tenant {tenant_id}")
+            
             tx_time = tx[0]
 
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — static constants
-                "WHERE f.tenant_id = ? AND f.is_tombstoned = 0 "
+                f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608 — static constants
+                "WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 "
                 "  AND (f.created_at <= ? "
                 "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
-                "  AND (f.tx_id IS NULL OR f.tx_id <= ?)"
             )
-            params: list = [tenant_id, tx_time, tx_time, target_tx_id]
-            if project:
-                query += " AND f.project = ?"
-                params.append(project)
+            params = [tenant_id, project, tx_time, tx_time]
+            
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def time_travel(
         self,
-        tx_id: int,
         tenant_id: str = "default",
-        project: str | None = None,
-    ) -> list[Fact]:
+        tx_id: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Retrieve the whole world state at a specific transaction."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             clause, params = time_travel_filter(tx_id, table_alias="f")
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 f"WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
             )
             # nosec B608 — parameterized via temporal builder
-            params = [tenant_id] + params
-            if project:
-                query += " AND f.project = ?"
-                params.append(project)
+            
             query += " ORDER BY f.id ASC"
-            cursor = await conn.execute(query, params)
+            cursor = await conn.execute(query, [tenant_id, *params])
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def stats(self) -> dict:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            cursor = await conn.execute("SELECT COUNT(*) FROM facts")
-            total = (await cursor.fetchone())[0]
-
-            cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-            active = (await cursor.fetchone())[0]
-
-            cursor = await conn.execute(
+            async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
+                total = (await cursor.fetchone())[0]
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL"
+            ) as cursor:
+                active = (await cursor.fetchone())[0]
+            async with conn.execute(
                 "SELECT DISTINCT project FROM facts WHERE valid_until IS NULL"
-            )
-            projects = [p[0] for p in await cursor.fetchall()]
-
-            cursor = await conn.execute(
-                "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
-            )
-            types = dict(await cursor.fetchall())
-
-            cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
-            tx_count = (await cursor.fetchone())[0]
-
-            db_size = self._db_path.stat().st_size / (1024 * 1024) if self._db_path.exists() else 0  # type: ignore[reportAttributeAccessIssue]
+            ) as cursor:
+                projects = [p[0] for p in await cursor.fetchall()]
+            async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
+                tx_count = (await cursor.fetchone())[0]
 
             try:
-                cursor = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
-                embeddings = (await cursor.fetchone())[0]
-            except (sqlite3.Error, OSError):
+                async with conn.execute("SELECT COUNT(*) FROM fact_embeddings") as cursor:
+                    embeddings = (await cursor.fetchone())[0]
+            except (sqlite3.Error, OSError, ValueError):
                 embeddings = 0
+
+            async with conn.execute(
+                "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
+            ) as cursor:
+                types = dict(await cursor.fetchall())
+
+            # Database size via PRAGMA (zero-overhead, no filesystem stat needed)
+            try:
+                async with conn.execute(
+                    "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()"
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    db_size_bytes = row[0] if row else 0
+            except (sqlite3.Error, OSError):
+                db_size_bytes = 0
+            db_size_mb = round(db_size_bytes / (1024 * 1024), 2)
 
             return {
                 "total_facts": total,
@@ -255,8 +276,8 @@ class QueryMixin:
                 "types": types,
                 "transactions": tx_count,
                 "embeddings": embeddings,
-                "db_path": str(self._db_path),  # type: ignore[reportAttributeAccessIssue]
-                "db_size_mb": round(db_size, 2),
+                "db_size_mb": db_size_mb,
+                "db_path": str(getattr(self, "_db_path", "unknown")),
             }
 
     async def graph(self, project: str | None = None):
