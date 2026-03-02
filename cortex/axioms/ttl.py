@@ -22,6 +22,13 @@ FACT_TTL: dict[str, int | None] = {
     "report": None,             # Audit reports are immutable records
     "evolution": None,          # Upgrade records persist — git archaeology
     "world-model": 90 * 86_400, # 90 days — counterfactuals decay
+    # ─── Types discovered in production ─────────────────────────
+    "archived_ghost": 7 * 86_400,  # 7 days — already resolved, cleanup fast
+    "phantom": 90 * 86_400,     # 90 days — transient observations
+    "intent": 90 * 86_400,      # 90 days — session intents decay
+    "research": 180 * 86_400,   # 6 months — research findings degrade
+    "config": None,             # System config persists
+    "schema": None,             # Schema definitions persist
 }
 
 
