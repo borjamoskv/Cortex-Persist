@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import logging
+import re
 from collections.abc import Mapping
 from typing import Any, Protocol
 
@@ -64,11 +65,22 @@ class Intruder:
 
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
-        # Check for raw eval/exec (ignore literal_eval)
+        # Check for raw eval/exec (ignore literal_eval and asyncio subprocess APIs)
+        _safe_exec_contexts = ("ast.literal_eval(", "create_subprocess_exec(", "subprocess_exec")
         for pattern in ["eval(", "exec("]:
-            if pattern in code and f"ast.literal_{pattern}" not in code:
-                findings.append(f"Security Vulnerability: Use of dangerous function `{pattern}`.")
-
+            if pattern in code:
+                occurrences = [m.start() for m in re.finditer(re.escape(pattern), code)]
+                genuine = [
+                    pos for pos in occurrences
+                    if not any(
+                        code[max(0, pos - 25): pos + len(pattern)].find(safe) != -1
+                        for safe in _safe_exec_contexts
+                    )
+                ]
+                if genuine:
+                    findings.append(
+                        f"Security Vulnerability: Use of dangerous function `{pattern}`."
+                    )
         # Check for system calls
         for pattern in ["os.system(", "subprocess.run(shell=True)"]:
             if pattern in code:

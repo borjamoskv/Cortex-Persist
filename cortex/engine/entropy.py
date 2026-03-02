@@ -75,7 +75,7 @@ class EntropyAnnihilator:
             entropy = (abstraction_ratio * nodes) * loc_penalty
             return float(entropy)
 
-        except Exception:
+        except (SyntaxError, OSError, UnicodeDecodeError):
             return 0.0
 
     def purge_energy_sinks(self, threshold: float = 0.8, confidence: float = 0.0) -> list[str]:

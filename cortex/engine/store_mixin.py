@@ -174,8 +174,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     source=source or "engine:store",
                     tenant_id=tenant_id,
                 )
-        except Exception:
-            pass
+        except Exception as _sig_err:  # noqa: BLE001
+            # Signal emission is best-effort — must not block the store operation
+            logger.debug("[STORE] Signal emit skipped: %s", _sig_err)
 
         return fact_id
 
@@ -189,7 +190,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     ids.append(await self.store(commit=False, conn=conn, **fact))
                 await conn.commit()
                 return ids
-            except Exception:
+            except Exception:  # noqa: BLE001
+                # Deliberate boundary: rollback any store failure atomically, then re-raise
                 await conn.rollback()
                 raise
 
@@ -287,8 +289,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         )
         try:
             await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-        except Exception:
-            pass
+        except aiosqlite.Error as _fts_err:  # FTS table may not exist in all deployments
+            logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
         await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
         )

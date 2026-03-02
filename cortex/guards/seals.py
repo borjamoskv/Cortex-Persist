@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Quality Gates (10 Seals) — Sovereign Local Enforcement.
+"""CORTEX Quality Gates (11 Seals) — Sovereign Local Enforcement.
 
-Executes all 10 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
+Executes all 11 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
 Zero latency axiom enforcement (AX-020).
-"""
 
+Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -159,10 +160,11 @@ async def check_gate_8_loc() -> bool:
                     blocked += 1
                 elif lines > 300:
                     warnings += 1
-        except Exception:
+        except OSError:
             pass
 
     if blocked == 0:
+
         printer.success(f"All files within entropy limits. ({warnings} warnings >300 LOC)")
         return True
     return False
@@ -207,8 +209,91 @@ async def check_gate_10_prompt_size() -> bool:
     return True
 
 
+async def check_gate_11_cobbler() -> bool:
+    """Seal 11 — Cobbler's Compliance (Ω₃ Byzantine Default).
+
+    The RED_TEAM_SWARM runs against the engine's own source code.
+    If EntropyDemon or Intruder fire on the engine itself, the auditor
+    is no longer sovereign — it is compromised.
+
+    Hard failures:
+      - EntropyDemon: bare except without noqa/justification
+      - Intruder: eval/exec/os.system in engine source
+    """
+    printer.seal(11, "Ω₃ Byzantine Default", "Cobbler's Compliance (Swarm Self-Audit)")
+
+    _NOQA_MARKERS = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")
+    _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
+    engine_dir = ROOT_DIR / "cortex" / "engine"
+
+    try:
+        from cortex.engine.legion_vectors import EntropyDemon, Intruder
+    except ImportError as e:
+        printer.fail(f"Cannot import legion_vectors: {e}")
+        return False
+
+    demon = EntropyDemon()
+    intruder = Intruder()
+    demon_violations: list[str] = []
+    intruder_violations: list[str] = []
+
+    py_files = [
+        f
+        for f in engine_dir.rglob("*.py")
+        if f.name not in _EXCLUDE and "__pycache__" not in f.parts
+    ]
+
+    for py_file in py_files:
+        try:
+            source = py_file.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        # Strip intentionally-annotated lines before handing to the demon
+        cleaned = "\n".join(
+            line
+            for line in source.splitlines()
+            if not any(m in line for m in _NOQA_MARKERS)
+        )
+
+        demon_hits = await demon.attack(cleaned, context={})
+        fragility = [h for h in demon_hits if "Bare `except`" in h]
+        if fragility:
+            demon_violations.append(f"{py_file.name}: {fragility}")
+
+        intruder_hits = await intruder.attack(source, context={})
+        if intruder_hits:
+            intruder_violations.append(f"{py_file.name}: {intruder_hits}")
+
+    passed = True
+
+    if demon_violations:
+        printer.fail(
+            f"EntropyDemon fired on engine source ({len(demon_violations)} files):"
+        )
+        for v in demon_violations:
+            print(f"      ↳ {v}")
+        passed = False
+    else:
+        printer.success(
+            f"EntropyDemon: engine source is clean ({len(py_files)} files scanned)."
+        )
+
+    if intruder_violations:
+        printer.fail(
+            f"Intruder found security issues in engine ({len(intruder_violations)} files):"
+        )
+        for v in intruder_violations:
+            print(f"      ↳ {v}")
+        passed = False
+    else:
+        printer.success("Intruder: no eval/exec/os.system in engine source.")
+
+    return passed
+
+
 async def main() -> int:
-    printer.head("10 SEALS — CORTEX QUALITY GATES")
+    printer.head("11 SEALS — CORTEX QUALITY GATES")
 
     results = await asyncio.gather(
         check_gate_1_lint(),
@@ -220,19 +305,25 @@ async def main() -> int:
         check_gate_7_async(),
         check_gate_8_loc(),
         check_gate_9_registry(),
+        check_gate_11_cobbler(),  # Seal 11: Cobbler's Compliance
     )
     # Check gate 10 independently (it never fails the run)
     await check_gate_10_prompt_size()
 
     printer.head("SEALS SUMMARY")
     failed = [i + 1 for i, r in enumerate(results) if not r]
+    # Remap index 10 → seal 11 in the summary
+    remapped = [
+        11 if s == 10 else s
+        for s in failed
+    ]
 
-    if failed:
-        printer.fail(f"SEALS BROKEN: {failed}")
+    if remapped:
+        printer.fail(f"SEALS BROKEN: {remapped}")
         print("\nFix violations before pushing.")
         return 1
     else:
-        printer.success("ALL 10 SEALS INTACT. Ready for launch.")
+        printer.success("ALL 11 SEALS INTACT. Ready for launch.")
         return 0
 
 
