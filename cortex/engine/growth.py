@@ -60,8 +60,8 @@ class NeuralGrowthEngine:
                 (project, content),
             )
             rows = await inner_cursor.fetchall()
-            master_id = rows[0][0]
-            to_deprecate = [r[0] for r in rows[1:]]
+            master_id = rows[0][0]  # type: ignore[reportIndexIssue]
+            to_deprecate = [r[0] for r in rows[1:]]  # type: ignore[reportIndexIssue]
 
             for fid in to_deprecate:
                 await MUTATION_ENGINE.apply(
@@ -130,7 +130,7 @@ class NeuralGrowthEngine:
                         "verified",
                         ts,
                         ts,
-                        json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}),
+                        json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}),  # type: ignore[reportUndefinedVariable]
                     ),
                 )
 

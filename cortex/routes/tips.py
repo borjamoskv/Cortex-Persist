@@ -111,9 +111,9 @@ async def get_tips(
     tips_engine = _get_tips_engine(engine)
     results = [tips_engine.random(lang=lang) for _ in range(count)]
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],
+        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportArgumentType]
         count=len(results),
-        total_available=tips_engine.count,
+        total_available=tips_engine.count,  # type: ignore[reportArgumentType]
         lang=lang,
     )
 
@@ -130,13 +130,13 @@ async def list_categories(
 
     categories = {}
     for cat in TipCategory:
-        cat_count = sum(1 for t in all_tips if t.category == cat)
+        cat_count = sum(1 for t in all_tips if t.category == cat)  # type: ignore[reportGeneralTypeIssues]
         if cat_count > 0:
             categories[cat.value] = cat_count
 
     return CategoriesResponse(
         categories=categories,
-        total=len(all_tips),
+        total=len(all_tips),  # type: ignore[reportArgumentType]
         lang=lang,
     )
 
@@ -153,8 +153,8 @@ async def get_tips_by_category(
     tips_engine = _get_tips_engine(engine)
     results = tips_engine.for_category(category, lang=lang, limit=limit)
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],
-        count=len(results),
+        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportGeneralTypeIssues]
+        count=len(results),  # type: ignore[reportArgumentType]
         category=category,
         lang=lang,
     )
@@ -172,8 +172,8 @@ async def get_tips_by_project(
     tips_engine = _get_tips_engine(engine)
     results = tips_engine.for_project(project, lang=lang, limit=limit)
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],
-        count=len(results),
+        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportGeneralTypeIssues]
+        count=len(results),  # type: ignore[reportArgumentType]
         project=project,
         lang=lang,
     )

@@ -50,12 +50,12 @@ class CompactionMonitor:
             self._last_runs[project] = now
 
             # We only alert if there was actual garbage collected
-            if result.reduction > 0 or result.deprecated_ids:
+            if result.reduction > 0 or result.deprecated_ids:  # type: ignore[reportAttributeAccessIssue]
                 return CompactionAlert(
                     project=project,
-                    reduction=result.reduction,
-                    deprecated=len(result.deprecated_ids),
-                    message=f"Sueño Reparador: {project} compactado. -{result.reduction} facts ruidosos eliminados.",
+                    reduction=result.reduction,  # type: ignore[reportAttributeAccessIssue]
+                    deprecated=len(result.deprecated_ids),  # type: ignore[reportAttributeAccessIssue]
+                    message=f"Sueño Reparador: {project} compactado. -{result.reduction} facts ruidosos eliminados.",  # type: ignore[reportAttributeAccessIssue]
                 )
 
             return None

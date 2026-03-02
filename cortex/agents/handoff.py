@@ -127,12 +127,12 @@ async def generate_handoff(
 
     # ── Stats summary ─────────────────────────────────────────────────
     async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
-        total_active = (await cursor.fetchone())[0]
+        total_active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     async with conn.execute(
         "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
     ) as cursor:
-        total_projects = (await cursor.fetchone())[0]
+        total_projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     db_path = Path(engine._db_path)
     db_size_mb = round(db_path.stat().st_size / (1024 * 1024), 2) if db_path.exists() else 0.0

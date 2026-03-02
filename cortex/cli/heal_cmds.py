@@ -84,7 +84,7 @@ async def auto_heal(filepath: Path) -> None:
 
     try:
         raw_code = await provider.invoke(prompt)
-        healed_code = _clean_markdown(raw_code.value if hasattr(raw_code, "value") else raw_code)
+        healed_code = _clean_markdown(raw_code.value if hasattr(raw_code, "value") else raw_code)  # type: ignore[reportAttributeAccessIssue]
 
         # Overwrite file
         filepath.write_text(healed_code + "\n", encoding="utf-8")

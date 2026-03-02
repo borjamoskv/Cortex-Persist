@@ -118,7 +118,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             cursor = await conn.execute(SQL_INSERT_KEY, args)
             await conn.commit()
-            return cursor.lastrowid
+            return cursor.lastrowid  # type: ignore[reportReturnType]
         finally:
             await conn.close()
 

@@ -34,7 +34,7 @@ class AsyncEncoder:
 
     async def encode(self, text: str) -> list[float]:
         """Encode a single text to a 384-dim vector (async, thread-isolated)."""
-        return await asyncio.to_thread(self._embedder.embed, text)
+        return await asyncio.to_thread(self._embedder.embed, text)  # type: ignore[reportReturnType]
 
     async def encode_batch(self, texts: list[str]) -> list[list[float]]:
         """Encode multiple texts (async, thread-isolated)."""

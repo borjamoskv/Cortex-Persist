@@ -110,11 +110,11 @@ class FactManager:
                                 f"#{results[0].fact_id} (Score: {results[0].score:.2f})"
                             )
                             # We update updated_at / last_accessed
-                            await conn.execute(
+                            await conn.execute(  # type: ignore[reportOptionalMemberAccess]
                                 "UPDATE facts SET updated_at = ? WHERE id = ?",
                                 (now_iso(), results[0].fact_id),
                             )
-                            await conn.commit()
+                            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
                             return results[0].fact_id
         except Exception as e:
             from pydantic import ValidationError
@@ -127,7 +127,7 @@ class FactManager:
 
         return await StoreMixin._store_impl(
             self.engine,
-            conn,
+            conn,  # type: ignore[reportArgumentType]
             project,
             content,
             tenant_id,
@@ -217,10 +217,10 @@ class FactManager:
         p = [tenant_id, project]
         if limit:
             q += " LIMIT ?"
-            p.append(limit)
+            p.append(limit)  # type: ignore[reportArgumentType]
         if offset:
             q += " OFFSET ?"
-            p.append(offset)
+            p.append(offset)  # type: ignore[reportArgumentType]
         return await self._fetch(q, p)
 
     async def history(

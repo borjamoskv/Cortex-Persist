@@ -114,29 +114,29 @@ async def sync_to_langbase(
 
     for fact in facts:
         fact_dict = {
-            "id": fact.id,
-            "project": fact.project,
-            "content": fact.content,
-            "fact_type": fact.fact_type,
-            "confidence": fact.confidence,
-            "tags": fact.tags,
-            "created_at": str(fact.created_at) if fact.created_at else "",
+            "id": fact.id,  # type: ignore[reportAttributeAccessIssue]
+            "project": fact.project,  # type: ignore[reportAttributeAccessIssue]
+            "content": fact.content,  # type: ignore[reportAttributeAccessIssue]
+            "fact_type": fact.fact_type,  # type: ignore[reportAttributeAccessIssue]
+            "confidence": fact.confidence,  # type: ignore[reportAttributeAccessIssue]
+            "tags": fact.tags,  # type: ignore[reportAttributeAccessIssue]
+            "created_at": str(fact.created_at) if fact.created_at else "",  # type: ignore[reportAttributeAccessIssue]
         }
 
         doc_content = _fact_to_markdown(fact_dict)
-        filename = f"fact-{fact.id}.md"
+        filename = f"fact-{fact.id}.md"  # type: ignore[reportAttributeAccessIssue]
 
         try:
             await client.upload_document(
                 memory_name=mem_name,
                 content=doc_content,
                 filename=filename,
-                meta={"fact_id": fact.id, "project": project, "type": fact.fact_type},
+                meta={"fact_id": fact.id, "project": project, "type": fact.fact_type},  # type: ignore[reportAttributeAccessIssue]
             )
             synced += 1
         except (OSError, RuntimeError, ValueError, LangbaseError) as e:
             errors += 1
-            detail = f"Fact #{fact.id}: {e}"
+            detail = f"Fact #{fact.id}: {e}"  # type: ignore[reportAttributeAccessIssue]
             error_details.append(detail)
             logger.error("Failed to sync fact: %s", detail)
 

@@ -48,7 +48,7 @@ class Vault:
         if not self.is_available:
             raise RuntimeError("Encryption not available (missing key or library)")
 
-        aesgcm = AESGCM(self._key)
+        aesgcm = AESGCM(self._key)  # type: ignore[reportOptionalCall,reportArgumentType]
         nonce = os.urandom(12)
         ciphertext = aesgcm.encrypt(nonce, data.encode("utf-8"), None)
 
@@ -65,7 +65,7 @@ class Vault:
             nonce = raw[:12]
             ciphertext = raw[12:]
 
-            aesgcm = AESGCM(self._key)
+            aesgcm = AESGCM(self._key)  # type: ignore[reportOptionalCall,reportArgumentType]
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
         except (OSError, ValueError) as e:

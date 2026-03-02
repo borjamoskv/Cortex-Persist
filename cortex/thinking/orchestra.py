@@ -220,7 +220,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
                     token_count=len(result.unwrap().split()),
                 ), None
 
-            last_error = result.error
+            last_error = result.error  # type: ignore[reportAttributeAccessIssue]
             logger.warning(
                 "%s:%s ROP cascade failed (intento %d/%d): %s",
                 provider_name,
@@ -367,7 +367,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         )
 
         # Fusionar
-        result = await self._fusion.fuse(
+        result = await self._fusion.fuse(  # type: ignore[reportOptionalMemberAccess]
             responses=list(responses),
             original_prompt=prompt,
             strategy=fusion_strategy,

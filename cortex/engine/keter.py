@@ -142,9 +142,9 @@ class FormalVerificationGate(SovereignPhase):
                             file_path=file_path,
                         )
 
-                # In Phase 2: stop execution and report counterexample
                 raise CortexError(
-                    f"Formal Verification failed for {file_path}. Invariant violated: {result.violations}"
+                    f"Formal Verification failed for {file_path}. "
+                    f"Invariant violated: {result.violations}"
                 )
 
         payload["fv_audit"] = "VERIFIED (Z3 UNSAT Proof)"
@@ -187,7 +187,9 @@ class KeterEngine:
                 return await phase.execute(payload)
             except (CortexError, RuntimeError, OSError, ValueError, TypeError) as e:
                 last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.random() * 0.1)
+                # Jitter asimétrico (generador de caos controlado) en el backoff
+                base_delay = BASE_BACKOFF ** attempt
+                delay = base_delay + (random.uniform(0.1, 2.0) ** (attempt + 1))
                 logger.error(
                     "❌ [KETER] Error en %s: %s. Reintento %d/%d en %.2fs",
                     phase.__class__.__name__,
@@ -206,6 +208,16 @@ class KeterEngine:
         """
         Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
         """
+        # --- Generador de Caos Controlado (Jitter Asimétrico) ---
+        # Evita la resonancia destructiva ("propio DDoS") desincronizando
+        # a los agentes que deciden curarse o actuar al unísono.
+        asymmetric_jitter = random.uniform(0.1, 2.5) ** 1.5
+        logger.debug(
+            "🌪️ [KETER] Aplicando jitter asimétrico de %.3fs para caos controlado",
+            asymmetric_jitter,
+        )
+        await asyncio.sleep(asymmetric_jitter)
+
         logger.info("=" * 60)
         logger.info("⚡ [KETER] MATERIALIZACION INICIADA: KETER ACTIVADO")
         logger.info("=" * 60)

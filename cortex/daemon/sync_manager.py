@@ -96,13 +96,13 @@ class CortexSyncManager:
         """Internal synchronous sync wrapper."""
         from cortex.sync import sync_memory
 
-        return sync_memory(self._engine)
+        return sync_memory(self._engine)  # type: ignore[reportReturnType]
 
     def _run_export_to_json(self) -> WritebackResult:
         """Internal synchronous export wrapper."""
         from cortex.sync import export_to_json
 
-        return export_to_json(self._engine)
+        return export_to_json(self._engine)  # type: ignore[reportReturnType]
 
     async def _run_export_snapshot(self) -> None:
         """Asynchronous snapshot export."""

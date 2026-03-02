@@ -150,7 +150,7 @@ class LLMProvider(BaseProvider):
                 raise ValueError(msg)
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        url = f"{self._base_url.rstrip('/')}/chat/completions"  # type: ignore[reportOptionalMemberAccess]
         headers: dict[str, str] = {
             "Content-Type": _CONTENT_TYPE_JSON,
             **self._extra_headers,

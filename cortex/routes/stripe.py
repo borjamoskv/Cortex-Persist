@@ -83,7 +83,7 @@ def _get_stripe():
             detail="stripe package not installed. Install with: pip install stripe",
         ) from exc
 
-    stripe.api_key = config.STRIPE_SECRET_KEY
+    stripe.api_key = config.STRIPE_SECRET_KEY  # type: ignore[reportAttributeAccessIssue]
     return stripe
 
 
@@ -160,14 +160,14 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         )
 
     try:
-        session = stripe.checkout.Session.create(
+        session = stripe.checkout.Session.create(  # type: ignore[reportAttributeAccessIssue]
             mode="subscription",
             line_items=[{"price": price_id, "quantity": 1}],
             success_url=body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=body.cancel_url,
             metadata={"plan": body.plan},
         )
-    except stripe.StripeError as exc:
+    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
@@ -189,8 +189,8 @@ async def stripe_webhook(
     payload = await request.body()
 
     try:
-        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)
-    except stripe.SignatureVerificationError as exc:
+        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)  # type: ignore[reportAttributeAccessIssue]
+    except stripe.SignatureVerificationError as exc:  # type: ignore[reportAttributeAccessIssue]
         raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid payload") from exc
@@ -221,7 +221,7 @@ async def stripe_webhook(
 
         try:
             stripe_obj = _get_stripe()
-            customer = stripe_obj.Customer.retrieve(customer_id)
+            customer = stripe_obj.Customer.retrieve(customer_id)  # type: ignore[reportAttributeAccessIssue]
             email = customer.get("email", "")
 
             if email:
@@ -242,11 +242,11 @@ async def create_portal_session(body: PortalRequest) -> dict:
     stripe = _get_stripe()
 
     try:
-        session = stripe.billing_portal.Session.create(
+        session = stripe.billing_portal.Session.create(  # type: ignore[reportAttributeAccessIssue]
             customer=body.customer_id,
             return_url=body.return_url,
         )
-    except stripe.StripeError as exc:
+    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe portal error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 

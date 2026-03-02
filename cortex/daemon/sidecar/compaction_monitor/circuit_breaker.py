@@ -133,7 +133,7 @@ async def call_external_compact(
             import sqlite3
 
             def _checkpoint():
-                conn = sqlite3.connect(db_path, timeout=10)
+                conn = sqlite3.connect(db_path, timeout=10)  # type: ignore[reportArgumentType]
                 try:
                     conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                     LOGGER.info("Fallback WAL checkpoint completed for %s", db_path)

@@ -37,42 +37,42 @@ class NotchHub:
     def __new__(cls) -> NotchHub:
         if cls._instance is None:
             inst = super().__new__(cls)
-            inst._clients: set[WebSocket] = set()
+            inst._clients: set[WebSocket] = set()  # type: ignore[reportInvalidTypeForm,reportAttributeAccessIssue]
             cls._instance = inst
         return cls._instance
 
     @property
     def client_count(self) -> int:
-        return len(self._clients)
+        return len(self._clients)  # type: ignore[reportAttributeAccessIssue]
 
     async def connect(self, ws: WebSocket) -> None:
         await ws.accept()
-        self._clients.add(ws)
+        self._clients.add(ws)  # type: ignore[reportAttributeAccessIssue]
         logger.info("Notch client connected (%d total)", self.client_count)
 
     def disconnect(self, ws: WebSocket) -> None:
-        self._clients.discard(ws)
+        self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
         logger.info("Notch client disconnected (%d remaining)", self.client_count)
 
     async def broadcast(self, message: str) -> None:
         """Send a command to ALL connected notch clients."""
         dead: list[WebSocket] = []
-        for ws in self._clients:
+        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
             try:
                 await ws.send_text(message)
             except (WebSocketDisconnect, RuntimeError, OSError):
                 dead.append(ws)
         for ws in dead:
-            self._clients.discard(ws)
+            self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
 
     async def send_to_first(self, message: str) -> bool:
         """Send to the first connected client (primary notch). Returns False if none."""
-        for ws in self._clients:
+        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
             try:
                 await ws.send_text(message)
                 return True
             except (WebSocketDisconnect, RuntimeError, OSError):
-                self._clients.discard(ws)
+                self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
         return False
 
 

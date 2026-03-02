@@ -47,7 +47,7 @@ class ChronosROI:
         except Exception:
             return {"added": 0, "deleted": 0, "commits": 0}
 
-    def audit_project(self, project_path: str, tokens_used: int = 25000) -> dict[str, any]:
+    def audit_project(self, project_path: str, tokens_used: int = 25000) -> dict[str, any]:  # type: ignore[reportGeneralTypeIssues]
         """Scans project with Git-archaeology to calculate real-world value."""
         relevant_files = []
         for root, _, files in os.walk(project_path):

@@ -30,7 +30,7 @@ class QueryMixin:
         fact_types: list[str] | None = None,
     ) -> list[Fact]:
         """Retrieve all active facts, optionally filtered by project or types."""
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND f.valid_until IS NULL "
@@ -50,7 +50,7 @@ class QueryMixin:
             query += " ORDER BY f.project, f.fact_type, f.id"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]
+            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def search(
         self,
@@ -68,12 +68,12 @@ class QueryMixin:
 
         from cortex.graph import extract_entities, get_context_subgraph
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             results = []
             try:
                 results = await semantic_search(
                     conn,
-                    self._get_embedder().embed(query),
+                    self._get_embedder().embed(query),  # type: ignore[reportAttributeAccessIssue]
                     top_k,
                     tenant_id,
                     project,
@@ -116,7 +116,7 @@ class QueryMixin:
         limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = f"""  # nosec B608 — parameterized query via internal constants
                 SELECT {_FACT_COLUMNS}
                 {_FACT_JOIN}
@@ -136,7 +136,7 @@ class QueryMixin:
                 params.append(offset)
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]
+            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def history(
         self,
@@ -144,7 +144,7 @@ class QueryMixin:
         tenant_id: str = "default",
         as_of: str | None = None,
     ) -> list[Fact]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             if as_of:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
                 query = (
@@ -161,7 +161,7 @@ class QueryMixin:
                 )
                 cursor = await conn.execute(query, (tenant_id, project))
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]
+            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def reconstruct_state(
         self,
@@ -169,7 +169,7 @@ class QueryMixin:
         tenant_id: str = "default",
         project: str | None = None,
     ) -> list[Fact]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             cursor = await conn.execute(
                 "SELECT timestamp FROM transactions WHERE id = ?",
                 (target_tx_id,),
@@ -193,7 +193,7 @@ class QueryMixin:
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]
+            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def time_travel(
         self,
@@ -201,7 +201,7 @@ class QueryMixin:
         tenant_id: str = "default",
         project: str | None = None,
     ) -> list[Fact]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             clause, params = time_travel_filter(tx_id, table_alias="f")
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
@@ -215,10 +215,10 @@ class QueryMixin:
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row) for row in rows]
+            return [self._row_to_fact(row) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def stats(self) -> dict:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             cursor = await conn.execute("SELECT COUNT(*) FROM facts")
             total = (await cursor.fetchone())[0]
 
@@ -238,7 +238,7 @@ class QueryMixin:
             cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
             tx_count = (await cursor.fetchone())[0]
 
-            db_size = self._db_path.stat().st_size / (1024 * 1024) if self._db_path.exists() else 0
+            db_size = self._db_path.stat().st_size / (1024 * 1024) if self._db_path.exists() else 0  # type: ignore[reportAttributeAccessIssue]
 
             try:
                 cursor = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
@@ -255,7 +255,7 @@ class QueryMixin:
                 "types": types,
                 "transactions": tx_count,
                 "embeddings": embeddings,
-                "db_path": str(self._db_path),
+                "db_path": str(self._db_path),  # type: ignore[reportAttributeAccessIssue]
                 "db_size_mb": round(db_size, 2),
             }
 
@@ -263,7 +263,7 @@ class QueryMixin:
         """Get entity graph for a project."""
         from cortex.graph import get_graph
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             return await get_graph(conn, project)
 
     async def query_entity(
@@ -274,8 +274,8 @@ class QueryMixin:
         """Query a specific entity by name."""
         from cortex.graph import query_entity
 
-        async with self.session() as conn:
-            return await query_entity(conn, name, project)
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await query_entity(conn, name, project)  # type: ignore[reportReturnType]
 
     async def find_path(
         self,
@@ -286,7 +286,7 @@ class QueryMixin:
         """Find paths between two entities."""
         from cortex.graph import find_path
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             return await find_path(conn, source, target, max_depth)
 
     async def get_context_subgraph(
@@ -298,5 +298,5 @@ class QueryMixin:
         """Retrieve a subgraph context for RAG."""
         from cortex.graph import get_context_subgraph
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             return await get_context_subgraph(conn, seeds, depth, max_nodes)

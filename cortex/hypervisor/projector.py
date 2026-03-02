@@ -101,7 +101,7 @@ class EventProjector:
             from cortex.sovereign.endocrine import DigitalEndocrine
 
             endocrine = DigitalEndocrine()
-            endocrine.signal(hormone, intensity=intensity)
+            endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
             pass  # Endocrine not installed — degrade gracefully
 
@@ -111,6 +111,6 @@ class EventProjector:
             from cortex.sovereign.autopoiesis import Autopoiesis
 
             ap = Autopoiesis()
-            await ap.verify_songlines(project)
+            await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
             pass  # Autopoiesis not installed — degrade gracefully

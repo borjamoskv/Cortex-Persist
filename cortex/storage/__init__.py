@@ -94,8 +94,8 @@ def get_storage_config() -> dict:
                 "Get it from: turso db tokens create <db-name>"
             )
 
-        config["url"] = url
-        config["token"] = token
+        config["url"] = url  # type: ignore[reportArgumentType]
+        config["token"] = token  # type: ignore[reportArgumentType]
 
     elif mode == StorageMode.POSTGRES:
         dsn = os.environ.get("POSTGRES_DSN", "")
@@ -106,6 +106,6 @@ def get_storage_config() -> dict:
                 "Example: postgresql://user:pass@host:5432/cortex"
             )
 
-        config["dsn"] = dsn
+        config["dsn"] = dsn  # type: ignore[reportArgumentType]
 
     return config

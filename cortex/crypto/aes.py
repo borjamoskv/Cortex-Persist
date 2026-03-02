@@ -55,7 +55,7 @@ class CortexEncrypter:
             salt=b"cortex_v6_tenant_isolation_salt",
             info=tenant_id.encode("utf-8"),
         )
-        tenant_key = hkdf.derive(self._master_key)
+        tenant_key = hkdf.derive(self._master_key)  # type: ignore[reportArgumentType]
         self._tenant_keys[tenant_id] = tenant_key
         return tenant_key
 
@@ -104,7 +104,7 @@ class CortexEncrypter:
             raise ValueError(
                 f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt."
             ) from e
-        except (ValueError, TypeError, base64.binascii.Error) as e:
+        except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
     def encrypt_json(self, data: dict[str, Any] | None, tenant_id: str = "default") -> str | None:

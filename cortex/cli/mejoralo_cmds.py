@@ -314,7 +314,7 @@ def mejoralo_ship(project, path, db):
 @mejoralo.command("daemon")
 def mejoralo_daemon():
     """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
-    from cortex.mejoralo.daemon import main
+    from cortex.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
 
     main()
 

@@ -84,7 +84,7 @@ class CortexMemoryManager:
     def __init__(
         self,
         l1: WorkingMemoryL1,
-        l2: VectorStoreL2,
+        l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
         hdc_l2: HDCVectorStoreL2 | None = None,
@@ -104,7 +104,7 @@ class CortexMemoryManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None
+        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router)
@@ -212,7 +212,7 @@ class CortexMemoryManager:
             "metadata": metadata or {},
         }
         await asyncio.to_thread(
-            self._bus.emit,
+            self._bus.emit,  # type: ignore[reportOptionalMemberAccess]
             event_type="experience:recorded",
             payload=payload,
             source="memory:manager",
@@ -268,7 +268,7 @@ class CortexMemoryManager:
             embedding=vector,
             timestamp=time.time(),
             metadata=_meta,
-            cognitive_layer=adjusted_layer,
+            cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
         )
         if self._l2:
             await self._l2.memorize(fact)

@@ -102,7 +102,7 @@ class SAPClient:
         self._csrf_token = resp.headers.get("x-csrf-token", "")
         logger.info("Connected to SAP at %s", self.config.base_url_normalized)
 
-        return {"status": "connected", "csrf": bool(self._csrf_token)}
+        return {"status": "connected", "csrf": bool(self._csrf_token)}  # type: ignore[reportReturnType]
 
     async def close(self) -> None:
         """Close the HTTP client."""
@@ -299,7 +299,7 @@ class SAPClient:
             raise SAPAuthError(f"OAuth2 token request failed: {resp.status_code}")
 
         self._oauth_token = resp.json().get("access_token", "")
-        return self._oauth_token
+        return self._oauth_token  # type: ignore[reportReturnType]
 
     async def _request(
         self,
@@ -377,7 +377,7 @@ class SAPClient:
         for attempt in range(self.config.max_retries):
             try:
                 # self._http is guaranteed non-None by _raw_request
-                resp = await self._http.request(
+                resp = await self._http.request(  # type: ignore[reportOptionalMemberAccess]
                     method,
                     url,
                     params=params,

@@ -29,7 +29,7 @@ class SemanticHeartbeat:
         normalized = {k: round(v, 1) if isinstance(v, float) else v for k, v in payload.items()}
         # Handle load_average tuple
         if "load_average" in normalized:
-            normalized["load_average"] = [round(x, 1) for x in normalized["load_average"]]
+            normalized["load_average"] = [round(x, 1) for x in normalized["load_average"]]  # type: ignore[reportGeneralTypeIssues]
 
         dump = json.dumps(normalized, sort_keys=True)
         return hashlib.sha256(dump.encode()).hexdigest()

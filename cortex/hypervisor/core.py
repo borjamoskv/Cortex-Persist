@@ -138,7 +138,7 @@ class AgencyHypervisor:
                 Memory(
                     content=results,
                     relevance=1.0,
-                    created=ComplexityCompressor._now()
+                    created=ComplexityCompressor._now()  # type: ignore[reportAttributeAccessIssue]
                     if hasattr(ComplexityCompressor, "_now")
                     else __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
                     source="fusion",

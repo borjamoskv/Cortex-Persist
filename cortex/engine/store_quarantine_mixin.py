@@ -61,7 +61,7 @@ class QuarantineMixin:
                 signer="store_mixin:quarantine",
                 commit=False,
             )
-            await self._log_transaction(
+            await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
                 c,
                 "system",
                 "quarantine",
@@ -72,8 +72,8 @@ class QuarantineMixin:
 
         if conn:
             return await _impl(conn)
-        async with self.session() as conn:
-            return await _impl(conn)
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await _impl(conn)  # type: ignore[reportArgumentType]
 
     async def unquarantine(
         self,
@@ -105,7 +105,7 @@ class QuarantineMixin:
                 signer="store_mixin:unquarantine",
                 commit=False,
             )
-            await self._log_transaction(
+            await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
                 c,
                 "system",
                 "unquarantine",
@@ -116,5 +116,5 @@ class QuarantineMixin:
 
         if conn:
             return await _impl(conn)
-        async with self.session() as conn:
-            return await _impl(conn)
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await _impl(conn)  # type: ignore[reportArgumentType]

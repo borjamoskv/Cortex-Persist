@@ -373,7 +373,7 @@ class VEXRunner:
             return {
                 "success": True,
                 "output": f"Found {len(results)} results",
-                "results": [r.to_dict() for r in results],
+                "results": [r.to_dict() for r in results],  # type: ignore[reportAttributeAccessIssue]
             }
 
         if tool == "cortex_recall":

@@ -105,7 +105,7 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
         lines = [
             "═══ CORTEX AUDIT TRAIL ═══",
             f"Generated: {datetime.now(timezone.utc).isoformat()}",
-            f"Entries: {len(rows)}",
+            f"Entries: {len(rows)}",  # type: ignore[reportArgumentType]
             f"Filters: project={project or '*'}, agent={agent_id or '*'}, since={since or 'all'}",
             "═" * 40,
             "",

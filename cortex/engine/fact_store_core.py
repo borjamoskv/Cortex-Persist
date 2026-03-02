@@ -90,11 +90,11 @@ async def insert_fact_record(
     from cortex.graph import process_fact_graph
 
     try:
-        await process_fact_graph(conn, fact_id, content, project, ts)
+        await process_fact_graph(conn, fact_id, content, project, ts)  # type: ignore[reportArgumentType]
     except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
         logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
-    return fact_id
+    return fact_id  # type: ignore[reportReturnType]
 
 
 def resolve_causality(

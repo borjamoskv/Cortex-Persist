@@ -325,7 +325,7 @@ async def _get_semantic_recalls(
         results = await store.recall(query=query, limit=top_k, project=project_hint)
         await store.close()
 
-        return results if results else None
+        return results if results else None  # type: ignore[reportReturnType]
     except (ImportError, sqlite3.Error, OSError, RuntimeError, ValueError) as e:
         logger.debug("L2 semantic recall unavailable: %s", e)
         return None

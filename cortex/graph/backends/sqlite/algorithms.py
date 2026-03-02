@@ -79,10 +79,10 @@ class SQLiteAlgorithmsMixin:
 
     async def _fetch_rows(self, query: str, params: list) -> list:
         """Execute a query and return all rows, handling async/sync branching."""
-        if self._is_async:
-            async with self.conn.execute(query, params) as cursor:
+        if self._is_async:  # type: ignore[reportAttributeAccessIssue]
+            async with self.conn.execute(query, params) as cursor:  # type: ignore[reportAttributeAccessIssue]
                 return await cursor.fetchall()
-        return self.conn.execute(query, params).fetchall()
+        return self.conn.execute(query, params).fetchall()  # type: ignore[reportAttributeAccessIssue]
 
     async def _expand_subgraph_layer(
         self,

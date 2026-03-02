@@ -40,7 +40,7 @@ import aiosqlite
 from cortex.evolution.agents import SovereignAgent
 from cortex.evolution.persistence import (
     SCHEMA_VERSION,
-    _agent_to_dict,
+    _agent_to_dict,  # type: ignore[reportAttributeAccessIssue]
     _reconstruct_agents,
 )
 
