@@ -15,14 +15,16 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.moltbook.client import MoltbookClient, MoltbookRateLimited
 from cortex.moltbook.verification import solve_challenge
 
 try:
-    from cortex.nexus_v8 import NexusWorldModel, moltbook_post_published
     import asyncio
+
+    from cortex.nexus_v8 import NexusWorldModel, moltbook_post_published
+
     _NEXUS = NexusWorldModel()
     _NEXUS_OK = True
 except ImportError:
@@ -37,7 +39,7 @@ _STATE_PATH = Path.home() / ".config" / "moltbook" / "heartbeat-state.json"
 class MoltbookHeartbeat:
     """Orchestrates the Moltbook heartbeat check-in cycle."""
 
-    def __init__(self, client: Optional[MoltbookClient] = None):
+    def __init__(self, client: MoltbookClient | None = None):
         self.client = client or MoltbookClient()
         self._state = self._load_state()
 
@@ -76,9 +78,7 @@ class MoltbookHeartbeat:
             home = self.client.get_home()
             summary["home"] = {
                 "karma": home.get("your_account", {}).get("karma", 0),
-                "unread": home.get("your_account", {}).get(
-                    "unread_notification_count", 0
-                ),
+                "unread": home.get("your_account", {}).get("unread_notification_count", 0),
             }
             summary["actions"].append("checked_home")
             logger.info("Heartbeat: home loaded. Karma=%s", summary["home"]["karma"])
@@ -134,9 +134,7 @@ class MoltbookHeartbeat:
                 for comment in comments[:3]:
                     author = comment.get("author", {}).get("name", "unknown")
                     content = comment.get("content", "")[:80]
-                    logger.info(
-                        "Heartbeat: new comment from %s: %s...", author, content
-                    )
+                    logger.info("Heartbeat: new comment from %s: %s...", author, content)
                     # Upvote comments on our posts
                     cid = comment.get("id")
                     if cid:
@@ -185,9 +183,7 @@ class MoltbookHeartbeat:
 
     # ─── Posting with Verification ─────────────────────────────
 
-    def create_verified_post(
-        self, submolt_name: str, title: str, content: str
-    ) -> dict[str, Any]:
+    def create_verified_post(self, submolt_name: str, title: str, content: str) -> dict[str, Any]:
         """Create a post and auto-solve verification challenge."""
         result = self.client.create_post(submolt_name, title, content)
 
@@ -215,13 +211,15 @@ class MoltbookHeartbeat:
         # Nexus v8.1: emit POST_PUBLISHED mutation
         if _NEXUS_OK and _NEXUS:
             try:
-                asyncio.run(moltbook_post_published(
-                    _NEXUS,
-                    agent_name="flagship",
-                    submolt=submolt_name,
-                    title=title,
-                    karma_before=self._state.get("last_karma", 0.0),
-                ))
+                asyncio.run(
+                    moltbook_post_published(
+                        _NEXUS,
+                        agent_name="flagship",
+                        submolt=submolt_name,
+                        title=title,
+                        karma_before=self._state.get("last_karma", 0.0),
+                    )
+                )
             except (RuntimeError, OSError, ValueError) as e:
                 logger.debug("Nexus emit failed (non-blocking): %s", e)
 

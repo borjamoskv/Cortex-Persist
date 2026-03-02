@@ -216,7 +216,7 @@ if __name__ == "__main__":
         ),
     ]
 
-    for i, it in enumerate(simulated_loop):
+    for _i, it in enumerate(simulated_loop):
         print(f"\\n--- Iteración {it.iteration_id} ---")
         exhaustion_error = detector.absorb_iteration(it)
         if exhaustion_error:

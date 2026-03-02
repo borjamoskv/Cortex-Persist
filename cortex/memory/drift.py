@@ -278,6 +278,33 @@ class DriftMonitor:
         )
         return sig
 
+    def _calculate_health_score(
+        self,
+        drift: float,
+        sg_ratio: float,
+        idim_ratio: float | None,
+        ph_alert: bool,
+    ) -> float:
+        """Calculate composite topological health score."""
+        health_components: list[float] = []
+
+        drift_score = max(0.0, 1.0 - drift / 0.15)
+        health_components.append(drift_score)
+
+        sg_score = max(0.0, 1.0 - abs(sg_ratio - 1.0))
+        health_components.append(sg_score)
+
+        if idim_ratio is not None:
+            idim_score = max(0.0, 1.0 - abs(idim_ratio - 1.0) * 0.5)
+            health_components.append(idim_score)
+
+        topological_health = sum(health_components) / len(health_components)
+
+        if ph_alert:
+            topological_health = min(topological_health, 0.4)
+
+        return topological_health
+
     def health(
         self,
         embeddings: np.ndarray,
@@ -294,7 +321,6 @@ class DriftMonitor:
             - model_valid: bool
             - detail: str
         """
-        # Load baseline from disk if not provided
         if baseline is None and self._signature_path:
             baseline = DriftSignature.load(self._signature_path)
 
@@ -309,7 +335,6 @@ class DriftMonitor:
                 "detail": "No baseline — first checkpoint needed",
             }
 
-        # Model hash validation
         model_valid = baseline.model_hash == self._model_hash
         if not model_valid:
             return {
@@ -325,7 +350,6 @@ class DriftMonitor:
                 ),
             }
 
-        # Compute current metrics
         current_centroid = embeddings.mean(axis=0)
         baseline_centroid = np.array(baseline.centroid)
 
@@ -333,39 +357,14 @@ class DriftMonitor:
         current_sg = spectral_gap(embeddings)
         sg_ratio = current_sg / max(baseline.spectral_gap, 1e-10)
 
-        # Intrinsic dimensionality (optional)
         current_idim = intrinsic_dimensionality(embeddings)
         idim_ratio = None
         if current_idim is not None and baseline.intrinsic_dim is not None:
             idim_ratio = current_idim / max(baseline.intrinsic_dim, 1e-10)
 
-        # Page-Hinkley update with centroid drift
         ph_alert = self._page_hinkley.update(drift)
+        topological_health = self._calculate_health_score(drift, sg_ratio, idim_ratio, ph_alert)
 
-        # Composite health score: weighted average of proxy signals
-        # Each proxy contributes to [0, 1] where 1 = healthy
-        health_components: list[float] = []
-
-        # Centroid drift: healthy if < 0.15 (active stratum default)
-        drift_score = max(0.0, 1.0 - drift / 0.15)
-        health_components.append(drift_score)
-
-        # Spectral ratio: healthy if close to 1.0 (between 0.5 and 2.0)
-        sg_score = max(0.0, 1.0 - abs(sg_ratio - 1.0))
-        health_components.append(sg_score)
-
-        # Intrinsic dim ratio: healthy if close to 1.0
-        if idim_ratio is not None:
-            idim_score = max(0.0, 1.0 - abs(idim_ratio - 1.0) * 0.5)
-            health_components.append(idim_score)
-
-        topological_health = sum(health_components) / len(health_components)
-
-        # Page-Hinkley override: if streaming detector fires, cap health
-        if ph_alert:
-            topological_health = min(topological_health, 0.4)
-
-        # Build detail message
         details: list[str] = [
             f"drift={drift:.4f}",
             f"spectral_ratio={sg_ratio:.3f}",

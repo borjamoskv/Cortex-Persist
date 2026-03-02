@@ -15,13 +15,16 @@ from typing import Final
 logger = logging.getLogger("cortex.sovereign.infrastructure")
 
 # Paths for the Sovereign Air-Gap simulation
-SOVEREIGN_STORAGE: Final[Path] = Path.home() / ".cortex" / "mailing" / "vault"
+from cortex.core.paths import CORTEX_DIR as _CORTEX_DIR
+
+SOVEREIGN_STORAGE: Final[Path] = _CORTEX_DIR / "mailing" / "vault"
+
 
 class HardwareVault:
     """
     Simulates a Secure Hardware Enclave (TEE) for Chinese deployments.
-    
-    Protects the 'Shadow Memory' deception tables (Red Herrings) 
+
+    Protects the 'Shadow Memory' deception tables (Red Herrings)
     at rest using state-grade isolation.
     """
 
@@ -49,11 +52,12 @@ class HardwareVault:
         except (OSError, json.JSONDecodeError):
             return {}
 
+
 class DataDiodeBridge:
     """
     Implements a 'Data Diode' (Pulse Diode) for air-gapped nodes.
-    
-    Ensures that internal CORTEX-East nodes can send telemetry 
+
+    Ensures that internal CORTEX-East nodes can send telemetry
     without any possible return path into the government network.
     """
 
@@ -63,14 +67,14 @@ class DataDiodeBridge:
 
     async def emit_unidirectional(self, event_data: dict):
         """
-        One-way push: Data leaves the air-gap. No acknowledgement expected 
+        One-way push: Data leaves the air-gap. No acknowledgement expected
         from the receiver for maximum security.
         """
         self._buffer.append(event_data)
         if len(self._buffer) > 10:
-             # Simulation of a pulsed diode transmit
-             logger.info("DataDiode: Pulsing 10 telemetry events through the gap.")
-             self._flush()
+            # Simulation of a pulsed diode transmit
+            logger.info("DataDiode: Pulsing 10 telemetry events through the gap.")
+            self._flush()
 
     def _flush(self):
         # In a real air-gap, this would be a physical diode (Fibre Optic)

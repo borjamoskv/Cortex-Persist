@@ -25,6 +25,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
+from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
+
 if TYPE_CHECKING:
     import aiosqlite
 
@@ -349,173 +352,8 @@ async def get_compaction_stats(
     }
 
 
-# ─── TTL Prune (AX-019: Persist With Decay) ─────────────────────────
-
-
-async def _apply_ttl_prune(
-    engine: CortexEngine,
-    project: str,
-    result: CompactionResult,
-    dry_run: bool,
-) -> None:
-    """Deprecate facts that have exceeded their type-specific TTL.
-
-    Uses the canonical TTL policy from cortex.axioms.ttl.
-    Immortal types (axiom, decision, bridge, rule, report, evolution) are skipped.
-    Routes all mutations through FactMutationEngine (Solid-State Substrate).
-    """
-    from cortex.axioms.ttl import FACT_TTL, is_expired
-
-    conn = await engine.get_conn()
-    cursor = await conn.execute(
-        "SELECT id, fact_type, created_at, tenant_id "
-        "FROM facts "
-        "WHERE project = ? AND valid_until IS NULL",
-        (project,),
-    )
-    rows = await cursor.fetchall()
-
-    from datetime import datetime, timezone
-
-    from cortex.axioms.ttl import is_tombstonable
-
-    now = datetime.now(tz=timezone.utc)
-    expired_ids: list[tuple[int, str]] = []  # (fact_id, tenant_id)
-    tombstonable_ids: list[tuple[int, str]] = []
-
-    for row in rows:
-        fact_id, fact_type, created_at_str, tenant_id = row[0], row[1], row[2], row[3]
-        if FACT_TTL.get(fact_type) is None:
-            continue  # Immortal type
-
-        try:
-            created = datetime.fromisoformat(created_at_str)
-            if created.tzinfo is None:
-                created = created.replace(tzinfo=timezone.utc)
-            age_seconds = (now - created).total_seconds()
-
-            if is_expired(fact_type, age_seconds):
-                expired_ids.append((fact_id, tenant_id))
-                if is_tombstonable(fact_type, age_seconds):
-                    tombstonable_ids.append((fact_id, tenant_id))
-        except (ValueError, TypeError):
-            continue
-
-    if not expired_ids:
-        return
-
-    if dry_run:
-        result.details.append(f"TTL_PRUNE: would deprecate {len(expired_ids)} expired facts")
-        if tombstonable_ids:
-            result.details.append(f"TTL_PRUNE: would tombstone {len(tombstonable_ids)} of those")
-        result.deprecated_ids.extend(fid for fid, _ in expired_ids)
-        return
-
-    from cortex.engine.mutation_engine import MUTATION_ENGINE
-
-    ts = now.isoformat()
-    tombstone_set = {fid for fid, _ in tombstonable_ids}
-
-    for fid, tid in expired_ids:
-        if fid in tombstone_set:
-            await MUTATION_ENGINE.apply(
-                conn,
-                fact_id=fid,
-                tenant_id=tid,
-                event_type="tombstone",
-                payload={"timestamp": ts, "reason": "ttl_expired"},
-                signer="compactor:ttl_prune",
-                commit=False,
-            )
-        else:
-            await MUTATION_ENGINE.apply(
-                conn,
-                fact_id=fid,
-                tenant_id=tid,
-                event_type="deprecate",
-                payload={"timestamp": ts, "reason": "ttl_expired"},
-                signer="compactor:ttl_prune",
-                commit=False,
-            )
-
-    await conn.commit()
-    result.deprecated_ids.extend(fid for fid, _ in expired_ids)
-
-    t_count = len(tombstonable_ids)
-    e_count = len(expired_ids)
-
-    result.details.append(f"TTL_PRUNE: deprecated {e_count} expired facts ({t_count} tombstoned)")
-    logger.info(
-        _LOG_FMT,
-        project,
-        f"TTL prune: {e_count} facts expired, {t_count} tombstoned",
-    )
-
-
-# ─── Drift Check ─────────────────────────────────────────────────────
-
-
-async def _apply_drift_check(
-    engine: CortexEngine,
-    project: str,
-    result: CompactionResult,
-) -> None:
-    """Check L2 vector space topological health.
-
-    Non-destructive — appends diagnostic info to result.details only.
-    Does not deprecate or modify any facts.
-    """
-    try:
-        import numpy as np
-
-        from cortex.memory.drift import DriftMonitor, model_hash_from_name
-
-        # Get the embedder info from engine
-        embedder = getattr(engine, "_embedder", None)
-        model_name = getattr(embedder, "model_name", "all-MiniLM-L6-v2")
-        model_hash = model_hash_from_name(model_name)
-
-        # Read embeddings from the facts_embeddings table
-        conn = await engine.get_conn()
-        cursor = await conn.execute(
-            "SELECT embedding FROM fact_embeddings "
-            "WHERE fact_id IN ("
-            "  SELECT id FROM facts WHERE project = ? AND valid_until IS NULL"
-            ")",
-            (project,),
-        )
-        rows = await cursor.fetchall()
-
-        if not rows or len(rows) < 10:
-            result.details.append(f"DRIFT_CHECK: insufficient vectors ({len(rows) if rows else 0})")
-            result.strategies_applied.append(str(CompactionStrategy.DRIFT_CHECK.value))
-            return
-
-        # Convert embeddings to numpy
-        embeddings = np.array([np.frombuffer(row[0], dtype=np.float32) for row in rows])
-
-        from pathlib import Path
-
-        sig_dir = Path.home() / ".cortex" / "drift"
-        monitor = DriftMonitor(model_hash=model_hash, signature_dir=sig_dir)
-
-        baseline = monitor.load_baseline()
-        if baseline is None:
-            sig = monitor.checkpoint(embeddings)
-            result.details.append(
-                f"DRIFT_CHECK: baseline created (n={sig.n_vectors}, "
-                f"spectral_gap={sig.spectral_gap:.3f})"
-            )
-        else:
-            health_result = monitor.health(embeddings, baseline)
-            health = health_result["topological_health"]
-            result.details.append(f"DRIFT_CHECK: health={health:.3f} ({health_result['detail']})")
-
-        result.strategies_applied.append(str(CompactionStrategy.DRIFT_CHECK.value))
-
-    except (ImportError, ValueError, OSError, RuntimeError) as e:
-        result.details.append(f"DRIFT_CHECK: skipped ({e})")
-        logger.warning(_LOG_FMT, project, f"Drift check failed: {e}")
+# TTL Prune → cortex.compaction.compaction_ttl
+# Drift Check → cortex.compaction.compaction_drift
 
 
 # ─── Internal ────────────────────────────────────────────────────────

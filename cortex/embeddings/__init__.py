@@ -20,7 +20,7 @@ logger = logging.getLogger("cortex.embeddings")
 # Default model — compact, fast, good quality
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
-DEFAULT_CACHE_DIR = Path.home() / ".cortex" / "models"
+from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
 
 # Configurable LRU cache size via env var (default 1024)
 _CACHE_SIZE = int(os.environ.get("CORTEX_CACHE_SIZE", "1024"))
@@ -143,6 +143,19 @@ class LocalEmbedder:
         """Embedding dimension (384 for all-MiniLM-L6-v2)."""
         return EMBEDDING_DIM
 
+    def _apply_hf_cache_hash(self, h: hashlib._Hash) -> None:
+        """Fallback: check HuggingFace cache structure."""
+        hf_config = self._cache_dir / ("models--" + self._model_name.replace("/", "--"))
+        if not hf_config.exists():
+            return
+
+        refs_dir = hf_config / "refs"
+        if not refs_dir.exists():
+            return
+
+        for ref_file in sorted(refs_dir.iterdir()):
+            h.update(ref_file.read_bytes())
+
     @property
     def model_identity_hash(self) -> str:
         """Deterministic SHA-256 hash of the embedding model identity.
@@ -159,20 +172,11 @@ class LocalEmbedder:
         h = hashlib.sha256()
         h.update(self._model_name.encode("utf-8"))
 
-        # If model is loaded locally, incorporate config file hash for
-        # fine-tuning detection (same model_name, different weights)
         config_path = self._cache_dir / self._model_name.replace("/", "_") / "config.json"
         if config_path.exists():
             h.update(config_path.read_bytes())
         else:
-            # Fallback: check HuggingFace cache structure
-            hf_config = self._cache_dir / ("models--" + self._model_name.replace("/", "--"))
-            if hf_config.exists():
-                # Hash the snapshot ref for version pinning
-                refs_dir = hf_config / "refs"
-                if refs_dir.exists():
-                    for ref_file in sorted(refs_dir.iterdir()):
-                        h.update(ref_file.read_bytes())
+            self._apply_hf_cache_hash(h)
 
         self._identity_hash = h.hexdigest()
         return self._identity_hash

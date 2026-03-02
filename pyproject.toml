@@ -69,8 +69,13 @@ toolbox = [
 billing = [
     "stripe>=8.0",
 ]
+cloud = [
+    "asyncpg>=0.29",
+    "redis>=5.0",
+    "qdrant-client>=1.9",
+]
 all = [
-    "cortex-memory[api,dev,adk,toolbox,billing]",
+    "cortex-memory[api,dev,adk,toolbox,billing,cloud]",
 ]
 
 [project.scripts]

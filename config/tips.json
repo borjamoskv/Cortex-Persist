@@ -462,5 +462,13 @@
       "eu": "Trust Score ez da zenbaki bat soilik — iturriaren fidagarritasuna × frescura × adostasuna × konfiantza konbinazio bat da. Pisatu erabilera-kasuaren arabera."
     },
     "category": "cortex"
+  },
+  {
+    "content": {
+      "en": "Structural entropy cannot be measured from a single dimensional lens. Dynamically rotating the proxy prevents hostile system adaptation to our metric. Assume sub-systems will incessantly optimize the most rewarded metric; withdraw it before they become addicted.",
+      "es": "La entropía estructural no puede medirse desde una sola lente dimensional. Rotar dinámicamente el proxy previene la adaptación hostil del sistema a nuestra métrica, garantizando que el manifold retenga una semántica generalizable real. Siempre asume que los sub-sistemas optimizarán estúpida e incesantemente la métrica más premiada; retírala justo antes de que se vuelvan adictos.",
+      "eu": "Entropia estrukturala ezin da lente dimentsional bakar batetik neurtu. Proxy-a dinamikoki biratzeak sistemaren gure metrikaren aurkako egokitzapen etsaia saihesten du, manifold-ak benetako semantika orokorgarria mantentzea bermatuz. Beti pentsatu azpisistemek etengabe eta modu inozoan optimizatuko dutela metrika sarituena; kendu ezazu menpeko bihurtu aurretik."
+    },
+    "category": "architecture"
   }
 ]

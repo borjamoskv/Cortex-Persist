@@ -154,26 +154,9 @@ class TopologicalHealthMonitor:
         """Semantic inverse of validate_anchor for clarity at call sites."""
         return anchor.model_hash != self._model_hash
 
-    def measure_drift(
-        self,
-        current_vectors: list[list[float]] | np.ndarray,
-        anchor: TopologicalAnchor,
-    ) -> float:
-        """Measure topological drift from the anchor.
-
-        Returns the L2 distance between current mean vector and anchor mean,
-        plus the relative change in variance trace.
-
-        Raises AnchorInvalidError if model_hash has drifted — you CANNOT
-        measure drift with an invalidated anchor. That's the whole point.
-        """
-        if not self.validate_anchor(anchor):
-            raise AnchorInvalidError(
-                f"Model hash mismatch: anchor={anchor.model_hash[:12]}... "
-                f"current={self._model_hash[:12]}... "
-                f"Recalculate p_0 in cold mode before measuring drift."
-            )
-
+    def _validate_and_prepare_array(
+        self, current_vectors: list[list[float]] | np.ndarray
+    ) -> np.ndarray:
         if isinstance(current_vectors, list):
             arr = np.array(current_vectors, dtype=np.float32)
         else:
@@ -181,8 +164,16 @@ class TopologicalHealthMonitor:
 
         if arr.ndim != 2 or arr.shape[0] < 2:
             raise ValueError(f"Need ≥2 vectors for drift measurement, got shape {arr.shape}")
+        return arr
 
-        # Reconstruct anchor's mean vector
+    def _calculate_drift_metrics(
+        self,
+        arr: np.ndarray,
+        anchor: TopologicalAnchor,
+        current_spectral: float,
+        current_idim: float,
+        current_hubness: float,
+    ) -> float:
         dim = arr.shape[1]
         anchor_mean = np.frombuffer(anchor.mean_vector, dtype=np.float32)
         if anchor_mean.shape[0] != dim:
@@ -190,32 +181,14 @@ class TopologicalHealthMonitor:
 
         current_mean = np.mean(arr, axis=0)
         current_var_trace = float(np.sum(np.var(arr, axis=0)))
-        current_spectral, current_idim, current_hubness = self._compute_metrics(arr)
 
-        # L2 displacement of the centroid
         centroid_drift = float(np.linalg.norm(current_mean - anchor_mean))
 
-        # Relative variance change (absolute to handle near-zero)
         if anchor.variance_trace > 1e-12:
             variance_drift = abs(current_var_trace - anchor.variance_trace) / anchor.variance_trace
         else:
             variance_drift = current_var_trace
 
-        # Store in histories
-        self._history_spectral.append(current_spectral)
-        self._history_idim.append(current_idim)
-        self._history_hubness.append(current_hubness)
-        self._checkpoints_seen += 1
-
-        # Check correlation periodically
-        self._check_correlation_divergence()
-
-        # Update active proxy
-        if self._checkpoints_seen % self._rotation_interval == 0:
-            self._active_proxy_idx = (self._active_proxy_idx + 1) % len(self._proxy_sequence)
-            logger.info("TopologicalHealthMonitor: Rotating active proxy to %s", self.active_proxy)
-
-        # Calculate structure drift based on the active proxy
         proxy = self.active_proxy
         if proxy == "spectral_gap":
             anchor_val, cur_val = anchor.spectral_gap, current_spectral
@@ -229,8 +202,44 @@ class TopologicalHealthMonitor:
         else:
             structure_drift = cur_val
 
-        # Combined metric: centroid shift + variance instability + structure drift
         return centroid_drift + variance_drift + structure_drift
+
+    def measure_drift(
+        self,
+        current_vectors: list[list[float]] | np.ndarray,
+        anchor: TopologicalAnchor,
+    ) -> float:
+        """Measure topological drift from the anchor.
+
+        Returns the L2 distance between current mean vector and anchor mean,
+        plus the relative change in variance trace.
+
+        Raises AnchorInvalidError if model_hash has drifted.
+        """
+        if not self.validate_anchor(anchor):
+            raise AnchorInvalidError(
+                f"Model hash mismatch: anchor={anchor.model_hash[:12]}... "
+                f"current={self._model_hash[:12]}... "
+                f"Recalculate p_0 in cold mode before measuring drift."
+            )
+
+        arr = self._validate_and_prepare_array(current_vectors)
+        current_spectral, current_idim, current_hubness = self._compute_metrics(arr)
+
+        self._history_spectral.append(current_spectral)
+        self._history_idim.append(current_idim)
+        self._history_hubness.append(current_hubness)
+        self._checkpoints_seen += 1
+
+        self._check_correlation_divergence()
+
+        if self._checkpoints_seen % self._rotation_interval == 0:
+            self._active_proxy_idx = (self._active_proxy_idx + 1) % len(self._proxy_sequence)
+            logger.info("TopologicalHealthMonitor: Rotating active proxy to %s", self.active_proxy)
+
+        return self._calculate_drift_metrics(
+            arr, anchor, current_spectral, current_idim, current_hubness
+        )
 
     @property
     def active_proxy(self) -> ProxyType:

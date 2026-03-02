@@ -174,6 +174,10 @@ from cortex.cli.storage_cmds import storage_init_pg, storage_status  # noqa: E40
 cli.add_command(storage_init_pg)
 cli.add_command(storage_status)
 
+from cortex.cli.loop_cmds import loop as loop_cmd  # noqa: E402
+
+cli.add_command(loop_cmd)
+
 
 @cli.command("observe")
 @click.option("--workspace", "-w", default=".", help="Workspace path to observe")

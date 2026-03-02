@@ -15,13 +15,12 @@ from __future__ import annotations
 import ast
 import json
 import os
-import re
 import sys
 from pathlib import Path
 from typing import NamedTuple
 
-
 # ── Data Types ─────────────────────────────────────────────────
+
 
 class ScoreResult(NamedTuple):
     syntax: float
@@ -67,8 +66,17 @@ EXTENSIONS = {
 }
 
 IGNORE_DIRS = {
-    "__pycache__", "node_modules", ".git", ".venv", "venv",
-    "dist", "build", ".next", ".tox", "env", ".eggs",
+    "__pycache__",
+    "node_modules",
+    ".git",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    ".next",
+    ".tox",
+    "env",
+    ".eggs",
 }
 
 
@@ -91,6 +99,7 @@ def discover_files(root: Path) -> list[Path]:
 
 # ── Dimension 1: Syntax Health (20 pts) ───────────────────────
 
+
 def score_syntax(files: list[Path]) -> tuple[float, list[Issue]]:
     """Check for syntax errors and basic formatting."""
     if not files:
@@ -109,11 +118,15 @@ def score_syntax(files: list[Path]) -> tuple[float, list[Issue]]:
             ast.parse(source, filename=str(f))
         except SyntaxError as e:
             errors += 1
-            issues.append(Issue(
-                file=str(f), line=e.lineno or 0,
-                category="syntax", severity="critical",
-                message=f"SyntaxError: {e.msg}",
-            ))
+            issues.append(
+                Issue(
+                    file=str(f),
+                    line=e.lineno or 0,
+                    category="syntax",
+                    severity="critical",
+                    message=f"SyntaxError: {e.msg}",
+                )
+            )
 
         # Check formatting
         lines = source.split("\n") if "source" in dir() else []
@@ -121,17 +134,25 @@ def score_syntax(files: list[Path]) -> tuple[float, list[Issue]]:
             if len(line) > 120:
                 warnings += 1
                 if warnings <= 5:
-                    issues.append(Issue(
-                        file=str(f), line=i,
-                        category="syntax", severity="info",
-                        message=f"Line too long ({len(line)} > 120 chars)",
-                    ))
+                    issues.append(
+                        Issue(
+                            file=str(f),
+                            line=i,
+                            category="syntax",
+                            severity="info",
+                            message=f"Line too long ({len(line)} > 120 chars)",
+                        )
+                    )
             if "\t" in line and "    " in line:
-                issues.append(Issue(
-                    file=str(f), line=i,
-                    category="syntax", severity="warning",
-                    message="Mixed tabs and spaces",
-                ))
+                issues.append(
+                    Issue(
+                        file=str(f),
+                        line=i,
+                        category="syntax",
+                        severity="warning",
+                        message="Mixed tabs and spaces",
+                    )
+                )
 
     if total_files == 0:
         return 20.0, issues
@@ -142,6 +163,7 @@ def score_syntax(files: list[Path]) -> tuple[float, list[Issue]]:
 
 
 # ── Dimension 2: Semantic Correctness (25 pts) ────────────────
+
 
 def score_semantics(files: list[Path]) -> tuple[float, list[Issue]]:
     """Check naming, dead code, unused imports."""
@@ -161,55 +183,94 @@ def score_semantics(files: list[Path]) -> tuple[float, list[Issue]]:
             continue
 
         # Check for single-char variable names (excluding i, j, k, x, y, _, e)
-        allowed_short = {"i", "j", "k", "x", "y", "z", "_", "e", "f", "s", "c", "v", "n", "m", "t", "p", "d", "r"}
+        allowed_short = {
+            "i",
+            "j",
+            "k",
+            "x",
+            "y",
+            "z",
+            "_",
+            "e",
+            "f",
+            "s",
+            "c",
+            "v",
+            "n",
+            "m",
+            "t",
+            "p",
+            "d",
+            "r",
+        }
         for node in ast.walk(tree):
             if isinstance(node, ast.Name) and len(node.id) == 1 and node.id not in allowed_short:
                 deductions += 0.2
-                issues.append(Issue(
-                    file=str(f), line=node.lineno,
-                    category="semantics", severity="info",
-                    message=f"Single-char variable name '{node.id}'",
-                ))
+                issues.append(
+                    Issue(
+                        file=str(f),
+                        line=node.lineno,
+                        category="semantics",
+                        severity="info",
+                        message=f"Single-char variable name '{node.id}'",
+                    )
+                )
 
         # Check for bare except
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type is None:
                 deductions += 1.0
-                issues.append(Issue(
-                    file=str(f), line=node.lineno,
-                    category="semantics", severity="warning",
-                    message="Bare 'except:' — catch specific exceptions",
-                ))
+                issues.append(
+                    Issue(
+                        file=str(f),
+                        line=node.lineno,
+                        category="semantics",
+                        severity="warning",
+                        message="Bare 'except:' — catch specific exceptions",
+                    )
+                )
 
         # Check for broad Exception catches
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type:
                 if isinstance(node.type, ast.Name) and node.type.id == "Exception":
                     deductions += 0.5
-                    issues.append(Issue(
-                        file=str(f), line=node.lineno,
-                        category="semantics", severity="warning",
-                        message="Broad 'except Exception' — use specific exception types",
-                    ))
+                    issues.append(
+                        Issue(
+                            file=str(f),
+                            line=node.lineno,
+                            category="semantics",
+                            severity="warning",
+                            message="Broad 'except Exception' — use specific exception types",
+                        )
+                    )
 
         # Check for functions without docstrings
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if not (node.body and isinstance(node.body[0], ast.Expr)
-                        and isinstance(node.body[0].value, ast.Constant)):
+                if not (
+                    node.body
+                    and isinstance(node.body[0], ast.Expr)
+                    and isinstance(node.body[0].value, ast.Constant)
+                ):
                     if not node.name.startswith("_"):
                         deductions += 0.3
                         if len(issues) < 50:
-                            issues.append(Issue(
-                                file=str(f), line=node.lineno,
-                                category="semantics", severity="info",
-                                message=f"Function '{node.name}' lacks docstring",
-                            ))
+                            issues.append(
+                                Issue(
+                                    file=str(f),
+                                    line=node.lineno,
+                                    category="semantics",
+                                    severity="info",
+                                    message=f"Function '{node.name}' lacks docstring",
+                                )
+                            )
 
     return max(0.0, total_score - deductions), issues
 
 
 # ── Dimension 3: Consistency (20 pts) ─────────────────────────
+
 
 def score_consistency(files: list[Path]) -> tuple[float, list[Issue]]:
     """Check naming convention consistency."""
@@ -252,16 +313,21 @@ def score_consistency(files: list[Path]) -> tuple[float, list[Issue]]:
         consistency_ratio = dominant / total_names if total_names > 0 else 1.0
         deductions += (1.0 - consistency_ratio) * 10.0
         if consistency_ratio < 0.8:
-            issues.append(Issue(
-                file="project", line=0,
-                category="consistency", severity="warning",
-                message=f"Mixed naming styles: {used_styles}. Stick to one convention.",
-            ))
+            issues.append(
+                Issue(
+                    file="project",
+                    line=0,
+                    category="consistency",
+                    severity="warning",
+                    message=f"Mixed naming styles: {used_styles}. Stick to one convention.",
+                )
+            )
 
     return max(0.0, total_score - deductions), issues
 
 
 # ── Dimension 4: Test Coverage (20 pts) ───────────────────────
+
 
 def score_tests(root: Path, files: list[Path]) -> tuple[float, list[Issue]]:
     """Check test file existence and quality."""
@@ -279,13 +345,17 @@ def score_tests(root: Path, files: list[Path]) -> tuple[float, list[Issue]]:
         return total_score, issues
 
     test_ratio = len(test_files) / len(source_files) if source_files else 0
-    
+
     if test_ratio == 0:
-        issues.append(Issue(
-            file="project", line=0,
-            category="tests", severity="critical",
-            message="No test files found. Testing is not optional.",
-        ))
+        issues.append(
+            Issue(
+                file="project",
+                line=0,
+                category="tests",
+                severity="critical",
+                message="No test files found. Testing is not optional.",
+            )
+        )
         return 0.0, issues
 
     # Score based on ratio
@@ -329,6 +399,7 @@ def score_tests(root: Path, files: list[Path]) -> tuple[float, list[Issue]]:
 
 # ── Dimension 5: Aesthetic Quality (15 pts) ───────────────────
 
+
 def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
     """Check file structure, documentation, readability."""
     if not files:
@@ -351,17 +422,24 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
         # File too long
         if len(lines) > 500:
             deductions += 1.0
-            issues.append(Issue(
-                file=str(f), line=0,
-                category="aesthetics", severity="warning",
-                message=f"File has {len(lines)} lines (>500). Consider splitting.",
-            ))
+            issues.append(
+                Issue(
+                    file=str(f),
+                    line=0,
+                    category="aesthetics",
+                    severity="warning",
+                    message=f"File has {len(lines)} lines (>500). Consider splitting.",
+                )
+            )
 
         # No module docstring
         try:
             tree = ast.parse(source)
-            if not (tree.body and isinstance(tree.body[0], ast.Expr)
-                    and isinstance(tree.body[0].value, ast.Constant)):
+            if not (
+                tree.body
+                and isinstance(tree.body[0], ast.Expr)
+                and isinstance(tree.body[0].value, ast.Constant)
+            ):
                 deductions += 0.5
         except SyntaxError:
             pass
@@ -372,16 +450,21 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
                 if marker in line:
                     deductions += 0.2
                     if len(issues) < 50:
-                        issues.append(Issue(
-                            file=str(f), line=i,
-                            category="aesthetics", severity="info",
-                            message=f"Found {marker} comment — resolve or document.",
-                        ))
+                        issues.append(
+                            Issue(
+                                file=str(f),
+                                line=i,
+                                category="aesthetics",
+                                severity="info",
+                                message=f"Found {marker} comment — resolve or document.",
+                            )
+                        )
 
     return max(0.0, total_score - deductions), issues
 
 
 # ── Main Scorer ────────────────────────────────────────────────
+
 
 def score(path: str | Path, detailed: bool = False) -> dict:
     """Score a file or directory. Returns full report."""
@@ -436,8 +519,13 @@ def score(path: str | Path, detailed: bool = False) -> dict:
 
     if detailed:
         report["issues"] = [
-            {"file": i.file, "line": i.line, "category": i.category,
-             "severity": i.severity, "message": i.message}
+            {
+                "file": i.file,
+                "line": i.line,
+                "category": i.category,
+                "severity": i.severity,
+                "message": i.message,
+            }
             for i in all_issues[:100]
         ]
         report["files"] = [str(f) for f in files]
@@ -472,8 +560,10 @@ def print_report(report: dict) -> None:
         icon = bar(s, m)
         print(f"║  {name:14s} {s:5.1f}/{m:<3d}  {icon:>20s}  ║")
     print("╠══════════════════════════════════════════╣")
-    print(f"║  Files: {report['files_analyzed']:>3d}  Issues: {report['issue_count']:>3d}  "
-          f"Critical: {report['critical_issues']:>2d}     ║")
+    print(
+        f"║  Files: {report['files_analyzed']:>3d}  Issues: {report['issue_count']:>3d}  "
+        f"Critical: {report['critical_issues']:>2d}     ║"
+    )
     print("╚══════════════════════════════════════════╝")
 
     if "issues" in report:
@@ -490,6 +580,7 @@ def print_report(report: dict) -> None:
 
 
 # ── CLI ────────────────────────────────────────────────────────
+
 
 def main() -> None:
     """CLI entry point."""

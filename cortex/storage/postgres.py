@@ -18,6 +18,7 @@ Schema Init:
 from __future__ import annotations
 
 import logging
+import os
 import time
 from typing import Any, Final
 
@@ -31,6 +32,22 @@ SLOW_QUERY_THRESHOLD_MS: Final[int] = 500
 # Connection pool bounds
 MIN_POOL_SIZE: Final[int] = 2
 MAX_POOL_SIZE: Final[int] = 20
+
+# Env-var escape hatch: set to '1' or 'true' to protect read replicas
+# from DDL statements without requiring code changes.
+# CORTEX_PG_REPLICA_MODE=1 forces auto_init_schema=False and
+# blocks executescript/executemany (DDL guard).
+_REPLICA_MODE_ENV: Final[str] = "CORTEX_PG_REPLICA_MODE"
+
+
+def _replica_mode_from_env() -> bool:
+    """Read CORTEX_PG_REPLICA_MODE from environment.
+
+    Supports: '1', 'true', 'yes', 'on' (case-insensitive) → True.
+    Anything else (or not set) → False.
+    """
+    raw = os.environ.get(_REPLICA_MODE_ENV, "").strip().lower()
+    return raw in {"1", "true", "yes", "on"}
 
 
 class PostgresBackend:
@@ -56,6 +73,19 @@ class PostgresBackend:
         max_size: int = MAX_POOL_SIZE,
         auto_init_schema: bool = True,
     ):
+        # Env-var replica mode overrides the caller's auto_init_schema.
+        # This is the escape hatch that makes the default safe:
+        # a read replica ops team can set CORTEX_PG_REPLICA_MODE=1
+        # without touching a single line of application code.
+        self._is_replica: Final[bool] = _replica_mode_from_env()
+        if self._is_replica:
+            auto_init_schema = False
+            logger.warning(
+                "PostgreSQL: REPLICA MODE active (%s=1). "
+                "auto_init_schema=False enforced. DDL writes blocked.",
+                _REPLICA_MODE_ENV,
+            )
+
         self.dsn: Final[str] = dsn
         self._min_size = min_size
         self._max_size = max_size

@@ -23,6 +23,7 @@ logger = logging.getLogger("cortex.storage")
 class StorageMode(str, Enum):
     LOCAL = "local"
     TURSO = "turso"
+    POSTGRES = "postgres"
 
 
 @runtime_checkable
@@ -95,5 +96,16 @@ def get_storage_config() -> dict:
 
         config["url"] = url
         config["token"] = token
+
+    elif mode == StorageMode.POSTGRES:
+        dsn = os.environ.get("POSTGRES_DSN", "")
+
+        if not dsn:
+            raise ValueError(
+                "POSTGRES_DSN is required when CORTEX_STORAGE=postgres. "
+                "Example: postgresql://user:pass@host:5432/cortex"
+            )
+
+        config["dsn"] = dsn
 
     return config
