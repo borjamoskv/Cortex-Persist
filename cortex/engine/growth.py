@@ -6,6 +6,7 @@ Manages fact consolidation and autonomous pattern promotion (Bridges -> Global A
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 

@@ -152,7 +152,10 @@ class HttpRetryMixin:
             if attempt >= self._max_retries - 1:
                 raise result
 
-            delay = self._base_delay * (2**attempt)
+            import random
+
+            base_delay_val = self._base_delay * (2**attempt)
+            delay = base_delay_val + (random.uniform(0.1, 2.0) ** (attempt + 1))
             logger.warning(
                 "HTTP %s 429 [%s] %s. Retry %d/%d in %.1fs...",
                 method,
@@ -234,7 +237,10 @@ async def post_with_retry(
         if attempt >= max_retries - 1:
             raise result
 
-        delay = base_delay * (2**attempt)
+        import random
+
+        base_delay_val = base_delay * (2**attempt)
+        delay = base_delay_val + (random.uniform(0.1, 2.0) ** (attempt + 1))
         logger.warning(
             "HTTP POST 429 [%s] %s. Retry %d/%d in %.1fs...",
             provider,

@@ -9,9 +9,17 @@ import inspect
 import logging
 import time
 from collections.abc import Callable
-from typing import Any
+from typing import Any, ParamSpec, TypedDict, TypeVar
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+class MutationHistory(TypedDict):
+    latencies: collections.deque[float]
+    failures: int
 
 logger = logging.getLogger("cortex.autopoiesis")
 
@@ -24,34 +32,30 @@ class AutopoiesisEngine:
 
     def __init__(self, observation_window_ms: int = 100):
         self.observation_window_ms = observation_window_ms
-        self._history: dict[str, dict[str, Any]] = {}
+        self._history: dict[str, MutationHistory] = {}
 
-    def observe_and_mutate(self, func: Callable) -> Callable:
+    def observe_and_mutate(self, func: Callable[P, R]) -> Callable[P, R]:
         """
         Decorator that tracks execution metrics of its own methods and dynamically
         rewrites the AST if consecutive degrading performance is detected.
         """
         func_name = func.__name__
 
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             start_t = time.perf_counter_ns()
             try:
                 result = func(*args, **kwargs)
-                success = True
+                latency_ms = (time.perf_counter_ns() - start_t) / 1e6
+                self._record_observation(func_name, latency_ms, True)
+                if self._requires_mutation(func_name):
+                    self._execute_autopoietic_rewrite(func)
+                return result
             except Exception as e:
-                result = e
-                success = False
-
-            latency_ms = (time.perf_counter_ns() - start_t) / 1e6
-
-            self._record_observation(func_name, latency_ms, success)
-
-            if self._requires_mutation(func_name):
-                self._execute_autopoietic_rewrite(func)
-
-            if not success and isinstance(result, Exception):
-                raise result
-            return result
+                latency_ms = (time.perf_counter_ns() - start_t) / 1e6
+                self._record_observation(func_name, latency_ms, False)
+                if self._requires_mutation(func_name):
+                    self._execute_autopoietic_rewrite(func)
+                raise e
 
         return wrapper
 
@@ -87,7 +91,7 @@ class AutopoiesisEngine:
             return True
         return False
 
-    def _execute_autopoietic_rewrite(self, func: Callable) -> None:
+    def _execute_autopoietic_rewrite(self, func: Callable[..., Any]) -> None:
         """
         The core of autopoiesis. Re-evaluates the function's AST and attempts
         JIT recompilation or structural modification to adapt to new load patterns.

@@ -43,7 +43,9 @@ try:
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     try:
-        from cortex.memory.vector_store import VectorStoreL2
+        from cortex.memory.vector_store import (
+            VectorStoreL2,  # type: ignore[import-not-found,reportMissingImports]
+        )
     except ImportError:
         VectorStoreL2 = None  # type: ignore[assignment,misc]
 

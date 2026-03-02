@@ -10,9 +10,20 @@ O(1) refractive lens over the master topology.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from cortex.memory.models import CortexFactModel
 
 from cortex.memory.semantic_ram import DynamicSemanticSpace
+
+
+class ConvergenceDiagnostics(TypedDict, total=False):
+    status: str
+    reason: str
+    count: int
+    active_biases: int
+    total_minds: int
 
 __all__ = ["InfiniteMindsManager", "AgentMind"]
 
@@ -52,7 +63,7 @@ class AgentMind:
         if len(words) > 3:
             self.semantic_bias = " ".join(words[:3]) + " "
 
-    async def think(self, query: str, limit: int = 5) -> list[Any]:
+    async def think(self, query: str, limit: int = 5) -> list[CortexFactModel]:
         """Perform a biased recall over the shared DynamicSemanticSpace.
 
         The query is refracted through the agent's semantic_bias.
@@ -95,10 +106,10 @@ class InfiniteMindsManager:
     def get_mind(self, agent_id: str) -> AgentMind:
         """Retrieve an active refractive lens."""
         if agent_id not in self._minds:
-            raise ValueError(f"Mind {agent_id} does not exist in the continuum.")
+            raise KeyError(f"Mind {agent_id} does not exist in the continuum.")
         return self._minds[agent_id]
 
-    async def convergence_pulse(self) -> dict[str, Any]:
+    async def convergence_pulse(self) -> ConvergenceDiagnostics:
         """Force a synchronization wave across all minds.
 
         If multiple minds have converged on similar semantic biases,
@@ -116,21 +127,21 @@ class InfiniteMindsManager:
         if n < 2:
             return {"status": "skip", "reason": "<2 minds", "count": n}
 
-        # Phase 1: Compile active textual biases and simulate vector projection
+        # Phase 1: Compile active textual biases
         active_minds = [m for m in self._minds.values() if m.semantic_bias]
 
         # Byzantine cluster detection via semantic centroid alignment
         try:
             import numpy as np
+            import asyncio
 
-            # Simulate embedding extraction (in production this uses the embedding model)
-            # fallback to hash-based pseudo-vectors if no real embeddings exist
-            def _pseudo_embed(text: str, dim: int = 64) -> np.ndarray:
-                return np.array([float(hash(text + str(i)) % 100) / 100.0 for i in range(dim)])
+            def _compute_byzantine_clusters(active_biases: list[str]) -> tuple[int, int]:
+                # Simulate embedding extraction (in production this uses the embedding model)
+                def _pseudo_embed(text: str, dim: int = 64) -> np.ndarray:
+                    return np.array([float(hash(text + str(i)) % 100) / 100.0 for i in range(dim)])
 
-            vectors = np.array([_pseudo_embed(m.semantic_bias) for m in active_minds])
+                vectors = np.array([_pseudo_embed(bias) for bias in active_biases])
 
-            if len(vectors) > 0:
                 # Calculate pairwise cosine similarity matrix
                 norms = np.linalg.norm(vectors, axis=1, keepdims=True)
                 normalized_vectors = vectors / np.maximum(norms, 1e-9)
@@ -138,11 +149,30 @@ class InfiniteMindsManager:
 
                 # Detect clusters where similarity > 0.85
                 _adjacency = similarity_matrix > 0.85
+                _edges = int(np.sum(_adjacency)) - len(active_biases) # Subtract self-loops
+                
+                return len(active_biases), _edges
 
-                logger.info(
-                    "InfiniteMinds: Byzantine cluster detection active. Evaluated %d tensor biases.",
-                    len(active_minds),
-                )
+            # OFF-LOAD: Liberamos el GIL / Event Loop para cálculos matemáticos
+            # (El cálculo de similaridades N^2 bloquea el hilo principal si hay muchos agentes)
+            active_biases_texts = [m.semantic_bias for m in active_minds]
+            loop = asyncio.get_running_loop()
+            biases_count, edges_count = await loop.run_in_executor(
+                None, _compute_byzantine_clusters, active_biases_texts
+            )
+
+            logger.info(
+                "InfiniteMinds: Byzantine cluster detection complete. Evaluated %d tensors, %d edges.",
+                biases_count,
+                edges_count
+            )
+            return {
+                "status": "success",
+                "count": biases_count,
+                "active_biases": biases_count,
+                "total_minds": n,
+            }
+
         except ImportError:
             logger.warning(
                 "InfiniteMinds: numpy not available. Falling back to textual Byzantine cluster detection."

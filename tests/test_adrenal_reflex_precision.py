@@ -29,7 +29,9 @@ async def test_targeted_reflex_on_rejection_signal():
         engine._cortex._db_path = "/tmp/mock.db"
 
         # 2. Trigger Reflex
-        await engine._trigger_autonomic_reflex()
+        from cortex.engine.reflex import trigger_autonomic_reflex
+        reflex_tasks = set()
+        await trigger_autonomic_reflex(workspace, engine._cortex, reflex_tasks)
 
         # 3. Verify target Keter ignition
         mock_ignite.assert_called_once()

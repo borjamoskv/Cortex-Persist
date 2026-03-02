@@ -401,11 +401,13 @@ class SAPClient:
         if attempt >= self.config.max_retries - 1:
             return
 
-        import random
+        import secrets
+        
+        rng = secrets.SystemRandom()
 
         base_wait = 2**attempt
-        jitter = random.uniform(0.5, 1.5)
-        wait = base_wait * jitter
+        jitter = rng.uniform(0.1, 1.618 ** (attempt + 1))
+        wait = base_wait + jitter
 
         logger.warning(
             "SAP request retry %d/%d in %.2fs", attempt + 1, self.config.max_retries, wait

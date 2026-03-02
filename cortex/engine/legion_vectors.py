@@ -1,12 +1,13 @@
 """
 LEGION-OMEGA: Red Team Attack Vectors.
-Specialized agents designed to destroy, hack, or saturate proposed code.
+Specialized agents designed to destroy, breach, or saturate proposed code.
 """
 
 from __future__ import annotations
 
 import ast
 import logging
+from collections.abc import Mapping
 from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ class AttackVector(Protocol):
 
     name: str
 
-    async def attack(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         """Sows entropy and returns detected vulnerabilities."""
         ...
 
@@ -27,7 +28,7 @@ class OOMKiller:
 
     name = "oom_killer"
 
-    async def attack(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         try:
             tree = ast.parse(code)
@@ -52,7 +53,7 @@ class Intruder:
 
     name = "intruder"
 
-    async def attack(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for raw eval/exec (ignore literal_eval)
         for pattern in ["eval(", "exec("]:
@@ -80,7 +81,7 @@ class EntropyDemon:
 
     name = "entropy_demon"
 
-    async def attack(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
         if "except Exception:" in code or "except:" in code:
@@ -99,7 +100,7 @@ class ChronosSniper:
 
     name = "chronos_sniper"
 
-    async def attack(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for blocking calls in async def
         blocking = ["time.sleep(", "requests.get("]

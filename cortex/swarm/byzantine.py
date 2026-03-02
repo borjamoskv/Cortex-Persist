@@ -4,7 +4,9 @@ Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 
 import hashlib
-from typing import Any
+from typing import TypeVar
+
+T = TypeVar("T")
 
 
 class ByzantineNode:
@@ -27,7 +29,7 @@ class ByzantineConsensus:
     def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
-    def execute_consensus(self, proposals: dict[str, Any]) -> Any | None:
+    def execute_consensus(self, proposals: dict[str, T]) -> T | None:
         """
         Takes proposals from multiple nodes. Validates them via reputation-weighted
         thresholding. Returns the absolute truth or None if BFT consensus fails.
@@ -36,7 +38,7 @@ class ByzantineConsensus:
             return None
 
         vote_tally: dict[str, float] = {}
-        hash_to_proposal: dict[str, Any] = {}
+        hash_to_proposal: dict[str, T] = {}
         total_reputation = 0.0
 
         for node_id, proposal in proposals.items():
@@ -69,7 +71,7 @@ class ByzantineConsensus:
         # Consensus failed (Shattered Trust)
         return None
 
-    def _update_reputations(self, winning_hash: str, proposals: dict[str, Any]) -> None:
+    def _update_reputations(self, winning_hash: str, proposals: dict[str, T]) -> None:
         """
         Zero-trust reputation slashing. Nodes that hallucinated or Byzantine-lied
         lose reputation. Nodes that proposed the truth gain.

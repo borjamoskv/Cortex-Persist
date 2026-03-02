@@ -262,7 +262,7 @@ class ApotheosisEngine:
 
     def _apply_cognitive_dampening(self) -> bool:
         """Check if action value justifies the thermodynamic cost (Ω₂)."""
-        if ENDOCRINE.get_level(HormoneType.ADRENALINE) > 0.9:
+        if ENDOCRINE.get_level(HormoneType.ADRENALINE) > 0.75:
             logger.warning("⚡ [APOTHEOSIS] Adrenal Override active. Bypassing dampening.")
             return True
         return self._cognitive_weight >= self._inertia_threshold
