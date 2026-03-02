@@ -79,10 +79,10 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "qwen/qwen2.5-coder-32b-instruct",
+      "code":      "anthropic/claude-sonnet-4-20250514",
       "reasoning": "deepseek/deepseek-r1",
-      "creative":  "anthropic/claude-haiku-4-5",
-      "general":   "qwen/qwen-2.5-72b-instruct"
+      "creative":  "anthropic/claude-sonnet-4-20250514",
+      "general":   "google/gemini-2.5-flash-preview"
     }
   },
   "groq": {
@@ -92,7 +92,7 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "qwen-2.5-coder-32b",
+      "code":      "qwen-qwq-32b",
       "reasoning": "deepseek-r1-distill-llama-70b",
       "creative":  "llama-3.3-70b-versatile",
       "general":   "llama-3.3-70b-versatile"
@@ -105,10 +105,10 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "code":      "deepseek-ai/DeepSeek-V3-0324",
       "reasoning": "deepseek-ai/DeepSeek-R1",
       "creative":  "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-      "general":   "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+      "general":   "deepseek-ai/DeepSeek-V3-0324"
     }
   },
   "fireworks": {
@@ -118,10 +118,10 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "accounts/fireworks/models/qwen2p5-coder-32b-instruct",
+      "code":      "accounts/fireworks/models/deepseek-v3",
       "reasoning": "accounts/fireworks/models/deepseek-r1",
       "creative":  "accounts/fireworks/models/llama-v3p3-70b-instruct",
-      "general":   "accounts/fireworks/models/llama-v3p3-70b-instruct"
+      "general":   "accounts/fireworks/models/deepseek-v3"
     }
   },
   "deepinfra": {
@@ -131,10 +131,10 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "code":      "deepseek-ai/DeepSeek-V3-0324",
       "reasoning": "deepseek-ai/DeepSeek-R1",
       "creative":  "meta-llama/Llama-3.3-70B-Instruct",
-      "general":   "meta-llama/Llama-3.3-70B-Instruct"
+      "general":   "deepseek-ai/DeepSeek-V3-0324"
     }
   },
   "anyscale": {

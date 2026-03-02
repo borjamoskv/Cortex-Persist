@@ -227,7 +227,12 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
             f"Translate only the value, be concise and professional."
         )
         try:
-            translation = await llm.complete(prompt, system="You are a professional translator.")
+            from cortex.llm.router import IntentProfile
+
+            translation = await llm.complete(
+                prompt, system="You are a professional translator.",
+                intent=IntentProfile.CREATIVE,
+            )
             if translation:
                 register_translation(key, lang, translation.strip())
         except (OSError, RuntimeError, ValueError) as exc:

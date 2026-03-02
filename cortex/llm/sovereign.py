@@ -47,6 +47,7 @@ import time
 from dataclasses import dataclass, field
 
 from cortex.llm.provider import LLMProvider, _load_presets
+from cortex.llm.router import IntentProfile
 
 __all__ = ["SovereignLLM", "SovereignResult"]
 
@@ -160,6 +161,7 @@ class SovereignLLM:
         system: str = "You are a helpful assistant.",
         *,
         mode: str = "speed",
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult:
         """Generate with full sovereign fallback chain.
 
@@ -198,6 +200,7 @@ class SovereignLLM:
                 chain,
                 errors,
                 presets=presets,
+                intent=intent,
             )
             if result:
                 return result
@@ -212,6 +215,7 @@ class SovereignLLM:
                 errors,
                 presets=presets,
                 is_local=True,
+                intent=intent,
             )
             if result:
                 return result
@@ -281,6 +285,7 @@ class SovereignLLM:
         chain: list[str],
         errors: list[str],
         is_local: bool,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult | None:
         """Execute a single provider call with caching and error handling."""
         try:
@@ -295,6 +300,7 @@ class SovereignLLM:
                     system=system,
                     temperature=self._temperature,
                     max_tokens=self._max_tokens,
+                    intent=intent,
                 ),
                 timeout=self._timeout,
             )
@@ -328,6 +334,7 @@ class SovereignLLM:
         *,
         presets: dict | None = None,
         is_local: bool = False,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult | None:
         """Attempt a single provider. Returns None on failure."""
         if presets is None:
@@ -343,7 +350,7 @@ class SovereignLLM:
 
         chain.append(provider_name)
         return await self._execute_provider_call(
-            provider_name, prompt, system, chain, errors, is_local
+            provider_name, prompt, system, chain, errors, is_local, intent=intent,
         )
 
     def _build_priority_chain(self) -> list[str]:

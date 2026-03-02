@@ -3,9 +3,13 @@ site_description: Trust Infrastructure for Autonomous AI — cryptographic verif
 site_url: https://cortexpersist.dev
 repo_url: https://github.com/borjamoskv/cortex
 repo_name: borjamoskv/cortex
+edit_uri: edit/master/docs/
+copyright: "© 2026 MOSKV-1 Sovereign Systems · Apache 2.0"
 
 theme:
   name: material
+  logo: https://raw.githubusercontent.com/borjamoskv/cortex/master/assets/shield.svg
+  favicon: https://raw.githubusercontent.com/borjamoskv/cortex/master/assets/shield.svg
   palette:
     - scheme: slate
       primary: black
@@ -66,6 +70,14 @@ nav:
   - Project:
       - FAQ: faq.md
       - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/borjamoskv/cortex
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/borjamoskv
+  homepage: https://cortexpersist.com
 
 extra_css:
   - stylesheets/industrial_noir.css

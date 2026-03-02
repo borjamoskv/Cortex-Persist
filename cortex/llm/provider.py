@@ -357,7 +357,7 @@ class LLMProvider(BaseProvider):
             "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
             self._model,
         )
-        
+
         # Si ya somos qwen, no hay más fallback
         if self._provider == "qwen":
             raise original_error
@@ -373,8 +373,10 @@ class LLMProvider(BaseProvider):
                 "temperature": payload.get("temperature", 0.3),
                 "max_tokens": payload.get("max_tokens", 2048),
             }
-            
-            retry_resp = await fallback_provider._client.post(fb_url, headers=fb_headers, json=fb_payload)
+
+            retry_resp = await fallback_provider._client.post(
+                fb_url, headers=fb_headers, json=fb_payload,
+            )
             retry_resp.raise_for_status()
             data = retry_resp.json()
             return data["choices"][0]["message"]["content"]
@@ -428,44 +430,30 @@ class LLMProvider(BaseProvider):
         }
 
         try:
-            async with self._client.stream("POST", url, headers=headers, json=payload) as response:
+            async with self._client.stream(
+                "POST", url, headers=headers, json=payload,
+            ) as response:
                 response.raise_for_status()
                 async for chunk in self._process_stream_lines(response):
                     yield chunk
         except httpx.HTTPStatusError as e:
-            logger.error("LLM Stream Failure [%s]: %s", self._provider, e.response.text[:500])
+            logger.error(
+                "LLM Stream Failure [%s]: %s",
+                self._provider, e.response.text[:500],
+            )
             raise
 
     def _resolve_model(self, intent: IntentProfile) -> str:
-        """Devuelve el modelo óptimo para la intención dada.
+        """Return the optimal model for the given intent.
 
-        Si el preset tiene un `intent_model_map`, se usa el modelo mapeado.
-        El usuario puede haber forzado un modelo concreto via env var / argumento
-        constructor — en ese caso se respeta (self._model ya está fijo).
-
-        Arquitectura — Routing Jerárquico de Dos Capas:
-            Capa 1 (CORTEX SovereignRouter): Selecciona el provider óptimo
-                    para la intención del prompt.
-            Capa 2 (intent_model_map): Dentro del provider elegido,
-                    selecciona el modelo especializado.
-
-        Cuando un provider como OpenRouter actúa como meta-router,
-        intent_model_map convierte a OpenRouter en un segundo nivel de
-        routing — CORTEX elige quién habla, OpenRouter elige con qué cerebro.
-
-        Future-proof: Si OpenRouter soporta auto-routing nativo
-        (models: auto), se puede configurar:
-            ``"general": "openrouter/auto"``
-        para delegar la decisión de modelo completamente a su
-        infraestructura. La trazabilidad se mantiene via
-        ``_log_resolved_model()`` que captura el modelo real de la
-        respuesta.
+        Uses ``intent_model_map`` when available (two-layer routing).
+        Falls back to ``self._model`` for providers without a map.
         """
-        if hasattr(self, "_intent_model_map") and self._intent_model_map:
+        if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:
                 logger.debug(
-                    "LLM [%s] intent=%s → model override: %s",
+                    "LLM [%s] intent=%s → model: %s",
                     self._provider,
                     intent.value,
                     resolved,

@@ -21,6 +21,7 @@ from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
 from cortex.llm.manager import LLMManager
 from cortex.llm.provider import LLMProvider
+from cortex.llm.router import IntentProfile
 
 __all__ = [
     "AskRequest",
@@ -156,6 +157,7 @@ async def ask_cortex(
             system=system,
             temperature=req.temperature,
             max_tokens=req.max_tokens,
+            intent=IntentProfile.REASONING,
         )
     except (OSError, RuntimeError) as e:
         logger.error("LLM completion failed: %s", e)
@@ -250,6 +252,7 @@ async def ask_stream(
                 system=system,
                 temperature=req.temperature,
                 max_tokens=req.max_tokens,
+                intent=IntentProfile.REASONING,
             ):
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
         except (OSError, RuntimeError, ValueError) as e:
