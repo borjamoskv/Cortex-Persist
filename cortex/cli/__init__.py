@@ -31,6 +31,7 @@ from cortex.cli import (  # noqa: E402
     quota_cmds,  # noqa: E402, F401
     reflect_cmds,  # noqa: E402, F401
     status_cmds,
+    storage_cmds,  # noqa: E402, F401
     sync_cmds,  # noqa: E402, F401
     time_cmds,  # noqa: E402, F401
     timeline_cmds,  # noqa: E402, F401
@@ -167,6 +168,11 @@ cli.add_command(browser_cli, name="browser")
 from cortex.cli.triangulation_cmds import triangulate as triangulate_cmd
 
 cli.add_command(triangulate_cmd, name="triangulate")
+
+from cortex.cli.storage_cmds import storage_init_pg, storage_status  # noqa: E402
+
+cli.add_command(storage_init_pg)
+cli.add_command(storage_status)
 
 
 @cli.command("observe")
