@@ -122,7 +122,10 @@ class AuthManager:
             rate_limit=rate_limit,
         )
         logger.info(
-            "Created %s API key '%s' for tenant '%s'", role, name, tenant_id,
+            "Created %s API key '%s' for tenant '%s'",
+            role,
+            name,
+            tenant_id,
         )
         return raw_key, new_api_key
 

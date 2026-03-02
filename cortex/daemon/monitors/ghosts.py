@@ -5,18 +5,20 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
 from cortex.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS, GhostAlert
+from cortex.daemon.monitors.base import BaseMonitor
 
 logger = logging.getLogger("moskv-daemon")
 
 
-class GhostWatcher:
+class GhostWatcher(BaseMonitor[GhostAlert]):
     """Monitors ghosts.json and alerts on stale projects."""
 
     def __init__(
         self,
-        ghosts_path=AGENT_DIR / "memory" / "ghosts.json",
+        ghosts_path: Path = AGENT_DIR / "memory" / "ghosts.json",
         stale_hours: float = DEFAULT_STALE_HOURS,
     ):
         self.ghosts_path = ghosts_path
@@ -37,13 +39,17 @@ class GhostWatcher:
         stale: list[GhostAlert] = []
 
         for project, data in ghosts.items():
+            if not isinstance(data, dict):
+                continue
+
+            ts = data.get("timestamp", "")
+            if not ts:
+                continue
+            # Skip ghosts that are intentionally blocked (parked)
+            if data.get("blocked_by"):
+                continue
+
             try:
-                ts = data.get("timestamp", "")
-                if not ts:
-                    continue
-                # Skip ghosts that are intentionally blocked (parked)
-                if data.get("blocked_by"):
-                    continue
                 last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                 hours = (now - last).total_seconds() / 3600
                 if hours > self.stale_hours:

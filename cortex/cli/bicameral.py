@@ -4,13 +4,12 @@ CORTEX V4 Bicameral Console (Subconscious Interface)
 Separates the Sovereign Agent's monologue into Limbic, Motor, and Autonomic streams.
 """
 
-from rich.console import Console
-from rich.theme import Theme
-
 import json
 import os
-from typing import Any, Dict
+from typing import Any
 
+from rich.console import Console
+from rich.theme import Theme
 
 # Industrial Noir 2026 Theme
 bicameral_theme = Theme(
@@ -34,18 +33,16 @@ console = Console(theme=bicameral_theme)
 class BicameralConsole:
     """The Subconscious Interface separating agent internal monologue."""
 
-    def _relay_event(self,
-                     stream: str,
-                     source: str,
-                     message: str,
-                     meta: Dict[str, Any] = None) -> None:
+    def _relay_event(
+        self, stream: str, source: str, message: str, meta: dict[str, Any] = None
+    ) -> None:
         """Relays the event to an external listener (Notch Alcove)."""
         event = {
             "stream": stream,
             "source": source,
             "message": message,
             "timestamp": os.popen("date +%s").read().strip(),
-            "meta": meta or {}
+            "meta": meta or {},
         }
         # In this initial implementation, we append to a dedicated relay buffer file.
         relay_path = os.path.expanduser("~/.cortex/relay_buffer.jsonl")
@@ -69,8 +66,7 @@ class BicameralConsole:
 
     def log_autonomic(self, message: str, check: str = "TETHER") -> None:
         """Logs hard boundaries, resource checks, and autolysis."""
-        prefix = (f"[autonomic_prefix][⚠ CORTEX T.C.A   | "
-                  f"{check.upper():<7}][/autonomic_prefix]")
+        prefix = f"[autonomic_prefix][⚠ CORTEX T.C.A   | {check.upper():<7}][/autonomic_prefix]"
         console.print(f"{prefix} [autonomic]{message}[/autonomic]")
         self._relay_event("autonomic", check, message)
 
@@ -83,18 +79,18 @@ class BicameralConsole:
     def log_bio(self, message: str, signal: str = "CIRCA") -> None:
         """Logs biological system status, hormones, and circadian phases."""
         from cortex.engine.endocrine import ENDOCRINE
+
         balance = ENDOCRINE.balance
-        cortisol = balance.get('CORTISOL', 0)
-        growth = balance.get('NEURAL_GROWTH', 0)
+        cortisol = balance.get("CORTISOL", 0)
+        growth = balance.get("NEURAL_GROWTH", 0)
 
         levels = f"[C:{cortisol:.2f} G:{growth:.2f}]"
         prefix = f"[bio_prefix][🧬 CORTEX Bio    | {signal.upper():<7}][/bio_prefix]"
         console.print(f"{prefix} {levels} [bio]{message}[/bio]")
 
-        self._relay_event("bio", signal, message, meta={
-            "cortisol": cortisol,
-            "neural_growth": growth
-        })
+        self._relay_event(
+            "bio", signal, message, meta={"cortisol": cortisol, "neural_growth": growth}
+        )
 
     def log_entropy(self, message: str, scan: str = "DECALC") -> None:
         """Logs thermodynamic decay of certainty (Protocol Ω₃-E)."""

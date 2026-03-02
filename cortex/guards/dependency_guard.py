@@ -15,8 +15,8 @@ import logging
 import sys
 from pathlib import Path
 
-from cortex.guards.models import DependencyViolation
 from cortex.guards import analysis
+from cortex.guards.models import DependencyViolation
 
 __all__ = ["DependencyViolation", "scan_file", "scan_directory"]
 
@@ -52,9 +52,7 @@ def scan_file(filepath: str | Path) -> list[DependencyViolation]:
     # Run all detection layers
     exec_calls = analysis.has_exec_calls(tree)
     hits = analysis.find_violations(tree)
-    hits.extend(
-        analysis.find_oracle_string_literals(tree, exec_calls)
-    )
+    hits.extend(analysis.find_oracle_string_literals(tree, exec_calls))
 
     # Deduplicate by (line, binary)
     seen: set[tuple[int, str]] = set()
@@ -64,7 +62,7 @@ def scan_file(filepath: str | Path) -> list[DependencyViolation]:
         if key in seen:
             continue
         seen.add(key)
-        
+
         is_heuristic = call_type == "string_literal"
         violations.append(
             DependencyViolation(
@@ -108,10 +106,7 @@ def main() -> None:
     target = sys.argv[1] if len(sys.argv) > 1 else "."
     target_path = Path(target).expanduser().resolve()
 
-    print(
-        "🛡️  DependencyGuard v2 — Axiom 4 Enforcement\n"
-        f"   Scanning: {target_path}\n"
-    )
+    print(f"🛡️  DependencyGuard v2 — Axiom 4 Enforcement\n   Scanning: {target_path}\n")
 
     violations = scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
 
@@ -125,10 +120,14 @@ def main() -> None:
     for v in violations:
         print(f"   {v}")
 
-    print(f"\n{'🔴' if critical else '🟡'} Total: {len(violations)} violations ({critical} CRITICAL, {warnings} warnings)")
+    print(
+        f"\n{'🔴' if critical else '🟡'} Total: {len(violations)} violations ({critical} CRITICAL, {warnings} warnings)"
+    )
 
     if critical > 0:
-        print("\n⚠️  CRITICAL violations detected. Use SovereignLLM (cortex/llm/sovereign.py) to replace subprocess oracle calls.")
+        print(
+            "\n⚠️  CRITICAL violations detected. Use SovereignLLM (cortex/llm/sovereign.py) to replace subprocess oracle calls."
+        )
         sys.exit(1)
 
 

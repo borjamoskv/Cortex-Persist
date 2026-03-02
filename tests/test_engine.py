@@ -82,6 +82,7 @@ class TestInit:
         ) as cursor:
             version = await cursor.fetchone()
         from cortex.database.schema import SCHEMA_VERSION
+
         assert version[0] == SCHEMA_VERSION
 
     async def test_init_idempotent(self, engine):

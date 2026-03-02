@@ -1,6 +1,9 @@
-import pytest
-from cortex.memory.semantic_ram import AutonomicMemoryBuffer, DynamicSemanticSpace
 from unittest.mock import MagicMock
+
+import pytest
+
+from cortex.memory.semantic_ram import AutonomicMemoryBuffer, DynamicSemanticSpace
+
 
 @pytest.mark.asyncio
 async def test_autonomic_buffer_capacity():

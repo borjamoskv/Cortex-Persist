@@ -33,10 +33,7 @@ class ActionItem:
     metadata: dict = field(default_factory=dict)
 
     def __repr__(self) -> str:
-        return (
-            f"ActionItem(v={self.value:.3f} "
-            f"[{self.action_type}] {self.description[:60]})"
-        )
+        return f"ActionItem(v={self.value:.3f} [{self.action_type}] {self.description[:60]})"
 
 
 # ── Reward Mapping ──────────────────────────────────────────────────

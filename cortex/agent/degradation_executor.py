@@ -52,9 +52,7 @@ def sovereign_execute(
         @functools.wraps(fn)
         async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             t0 = time.perf_counter()
-            action: AgentAction | None = next(
-                (a for a in args if isinstance(a, AgentAction)), None
-            )
+            action: AgentAction | None = next((a for a in args if isinstance(a, AgentAction)), None)
 
             try:
                 result = await fn(*args, **kwargs)
@@ -82,9 +80,7 @@ def sovereign_execute(
 
                 if fallback_mode == "text_only" and action is not None:
                     degraded_action = action.as_text_only()
-                    degraded_args = tuple(
-                        degraded_action if a is action else a for a in args
-                    )
+                    degraded_args = tuple(degraded_action if a is action else a for a in args)
                     try:
                         result = await fn(*degraded_args, **kwargs)
                         if isinstance(result, AgentResult):

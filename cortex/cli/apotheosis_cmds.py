@@ -230,9 +230,10 @@ def aix_cmd() -> None:
     """
     Métrica de Deificación (AIx). Cuantifica la eficiencia y soberanía del sistema.
     """
+    import asyncio
+
     from cortex.cli.aix import calculate_aix, print_aix_report
     from cortex.cli.common import get_engine
-    import asyncio
 
     async def run():
         engine = get_engine()

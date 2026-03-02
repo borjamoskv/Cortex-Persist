@@ -30,17 +30,14 @@ async def test_specular_memory_flow(engine):
         role="user",
         content="I am working on the CORTEX v7 evolutionary leap.",
         token_count=10,
-        session_id="test-session"
+        session_id="test-session",
     )
     mm.l1.add_event(event)  # Add to working memory
 
     # 2. Store the fact
     fact_content = "HDC provides O(1) memory operations for sovereign agents."
     fact_id = await engine.store(
-        project="cortex-v7",
-        content=fact_content,
-        fact_type="knowledge",
-        source="cli"
+        project="cortex-v7", content=fact_content, fact_type="knowledge", source="cli"
     )
 
     # 3. Verify main DB entry
@@ -49,7 +46,9 @@ async def test_specular_memory_flow(engine):
         assert await cursor.fetchone() is not None
 
         # Verify specular_embeddings entry in main DB
-        cursor = await conn.execute("SELECT embedding FROM specular_embeddings WHERE fact_id = ?", (fact_id,))
+        cursor = await conn.execute(
+            "SELECT embedding FROM specular_embeddings WHERE fact_id = ?", (fact_id,)
+        )
         row = await cursor.fetchone()
         assert row is not None
         spec_bytes = row[0]
@@ -58,10 +57,7 @@ async def test_specular_memory_flow(engine):
     # 4. Verify HDC L2 entries
     # Recall via HDC to see if it's there
     results = await mm._hdc.recall_secure(
-        tenant_id="default",
-        project_id="cortex-v7",
-        query="memory operations",
-        limit=1
+        tenant_id="default", project_id="cortex-v7", query="memory operations", limit=1
     )
 
     assert len(results) == 1
@@ -100,22 +96,26 @@ async def test_specular_recall_ranking(engine):
     mm.l1.clear()
     # Context A
     mm.l1.clear()
-    mm.l1.add_event(MemoryEvent(
-        role="user",
-        content="Security is my top priority.",
-        token_count=5,
-        session_id="session-a"
-    ))
+    mm.l1.add_event(
+        MemoryEvent(
+            role="user",
+            content="Security is my top priority.",
+            token_count=5,
+            session_id="session-a",
+        )
+    )
     await engine.store(project="test", content="Always use encryption for L2.", source="cli")
 
     # Context B
     mm.l1.clear()
-    mm.l1.add_event(MemoryEvent(
-        role="user",
-        content="Performance is my top priority.",
-        token_count=5,
-        session_id="session-b"
-    ))
+    mm.l1.add_event(
+        MemoryEvent(
+            role="user",
+            content="Performance is my top priority.",
+            token_count=5,
+            session_id="session-b",
+        )
+    )
     await engine.store(project="test", content="Always use compression for L2.", source="cli")
 
     # Retrieve both and check specular embeddings

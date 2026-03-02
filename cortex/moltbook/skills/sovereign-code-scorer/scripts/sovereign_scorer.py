@@ -226,7 +226,6 @@ def score_consistency(files: list[Path]) -> tuple[float, list[Issue]]:
 
 
 # ── Dimension 5: Aesthetic Quality (15 pts) ──────────────────
-─
 
 
 def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:

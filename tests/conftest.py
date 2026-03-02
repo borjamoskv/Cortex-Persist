@@ -85,6 +85,7 @@ def reset_cortex_state():
 def reset_anomaly_detector():
     """Reset AnomalyDetector singleton state between tests to avoid bulk_mutation triggers."""
     from cortex.security.anomaly_detector import DETECTOR
+
     DETECTOR.reset()
     yield
 

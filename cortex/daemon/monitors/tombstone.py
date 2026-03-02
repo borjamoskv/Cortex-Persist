@@ -75,13 +75,15 @@ class TombstoneMonitor:
                 # 1. Main Delete (Cascade handling handles vector indexes depending on schema triggers)
                 # But to be safe, we explicitly clear related vectors if cascade is off.
                 cursor.execute("SELECT id FROM facts WHERE is_tombstoned = 1")
-                fact_ids = [r[0] for r in cursor.fetchall()]
 
-                # We batch deletes to avoid mammoth transactions
-                batch_size = 1000
+                # We batch deletes to avoid mammoth transactions, pulling directly from C-layer limits
                 total_deleted = 0
-                for i in range(0, len(fact_ids), batch_size):
-                    batch = fact_ids[i : i + batch_size]
+                while True:
+                    batch_rows = cursor.fetchmany(1000)
+                    if not batch_rows:
+                        break
+
+                    batch = [r[0] for r in batch_rows]
                     id_list = ",".join("?" * len(batch))
 
                     try:

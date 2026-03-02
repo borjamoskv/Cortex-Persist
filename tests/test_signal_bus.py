@@ -168,9 +168,7 @@ class TestGarbageCollection:
 
         # Backdate the signal to 60 days ago
         cutoff = (datetime.now() - timedelta(days=60)).isoformat()
-        bus._conn.execute(
-            "UPDATE signals SET created_at = ?", (cutoff,)
-        )
+        bus._conn.execute("UPDATE signals SET created_at = ?", (cutoff,))
         bus._conn.commit()
 
         pruned = bus.gc(max_age_days=30)
@@ -181,9 +179,7 @@ class TestGarbageCollection:
 
         # Backdate but don't consume
         cutoff = (datetime.now() - timedelta(days=60)).isoformat()
-        bus._conn.execute(
-            "UPDATE signals SET created_at = ?", (cutoff,)
-        )
+        bus._conn.execute("UPDATE signals SET created_at = ?", (cutoff,))
         bus._conn.commit()
 
         pruned = bus.gc(max_age_days=30)

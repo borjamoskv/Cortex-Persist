@@ -67,6 +67,7 @@ class ConsensusMixin:
 
         async with self.session() as conn:
             from cortex.engine_async import TX_BEGIN_IMMEDIATE
+
             await conn.execute(TX_BEGIN_IMMEDIATE)
             try:
                 # 1. Resolve agent_id and reputation
@@ -91,9 +92,20 @@ class ConsensusMixin:
                 score = await self._update_vote_score(conn, fact_id)
                 conf = self._resolve_confidence(score)
 
-                await conn.execute(
-                    "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
-                    (score, conf, fact_id),
+                from cortex.engine.mutation_engine import MUTATION_ENGINE
+
+                cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
+                row = await cursor.fetchone()
+                tenant_id = row[0] if row else "default"
+
+                await MUTATION_ENGINE.apply(
+                    conn,
+                    fact_id=fact_id,
+                    tenant_id=tenant_id,
+                    event_type="score_update",
+                    payload={"consensus_score": score, "confidence": conf},
+                    signer="consensus_engine_mixin",
+                    commit=False,
                 )
 
                 await conn.commit()

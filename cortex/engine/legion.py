@@ -4,14 +4,14 @@ Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.
 """
 
 from __future__ import annotations
-import logging
-import asyncio
-from typing import Any
-from dataclasses import dataclass, field
 
-from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
+import asyncio
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+
 from cortex.cli.bicameral import bicameral
-from cortex.utils.errors import CortexError
+from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SiegeResult:
     """Result of a LEGION-OMEGA siege cycle."""
+
     success: bool
     final_code: str
     cycles: int
@@ -29,7 +30,9 @@ class SiegeResult:
 class BlueTeamAgent:
     """🛡️ Blue Team: The Defensive Constructor."""
 
-    async def synthesize(self, intent: str, context: dict[str, Any], feedback: list[str] = None) -> str:
+    async def synthesize(
+        self, intent: str, context: dict[str, Any], feedback: list[str] = None
+    ) -> str:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
         bicameral.log_limbic(msg, source="BLUE")
@@ -60,7 +63,9 @@ class BlueTeamAgent:
             body.append("async def worker():\n    await asyncio.sleep(1)")
 
         if any("bare except" in f.lower() for f in feedback):
-            body.append("def safe_execute(func, *args):\n    try:\n        return func(*args)\n    except Exception as e:\n        return str(e)")
+            body.append(
+                "def safe_execute(func, *args):\n    try:\n        return func(*args)\n    except Exception as e:\n        return str(e)"
+            )
 
         if not body:
             body.append("def process_data(data):\n    return data")
@@ -71,6 +76,7 @@ class BlueTeamAgent:
         final_code += "\n\n".join(body) + "\n"
 
         return final_code
+
 
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
@@ -117,15 +123,20 @@ class LegionOmegaEngine:
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
 
             # Report failure and collect feedback for next cycle
-            logger.warning("❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %s", cycle, vulnerabilities)
+            logger.warning(
+                "❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %s", cycle, vulnerabilities
+            )
             feedback.extend(vulnerabilities)
-            final_code = code # Keep last attempt
+            final_code = code  # Keep last attempt
 
             # Small delay to simulate evolutionary cooldown
             await asyncio.sleep(0.1)
 
         bicameral.log_motor("Asedio fallido tras ciclos máximos. Código frágil.", action="FAIL")
-        return SiegeResult(success=False, final_code=final_code, cycles=self.max_cycles, vulnerabilities=feedback)
+        return SiegeResult(
+            success=False, final_code=final_code, cycles=self.max_cycles, vulnerabilities=feedback
+        )
+
 
 # Global singleton
 LEGION_OMEGA = LegionOmegaEngine()

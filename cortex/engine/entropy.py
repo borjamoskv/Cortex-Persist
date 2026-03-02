@@ -84,7 +84,7 @@ class EntropyAnnihilator:
         If confidence > 0.95, bypasses manual confirmation (Apotheosis).
         """
         sinks = [path for path, entropy in self.scan_ecosystem() if entropy > threshold]
-        
+
         if confidence > 0.95 and sinks:
             # Axiom Ω₇: Permissionless Sovereignty
             # Bridges to JARL-OMEGA for atomic rewrite WITHOUT permission

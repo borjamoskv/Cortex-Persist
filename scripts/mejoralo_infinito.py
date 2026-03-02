@@ -5,7 +5,7 @@ import os
 import sys
 from typing import Final
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 try:
     from dotenv import load_dotenv
@@ -15,6 +15,7 @@ try:
     from rich.prompt import Prompt
 
     from cortex.llm.provider import LLMProvider
+
     load_dotenv()
 except ImportError as e:
     print(f"Error de inicialización: {e}")
@@ -39,6 +40,7 @@ Requisitos:
 Retorna ÚNICAMENTE un número entero del 0 al 130 que represente su puntuación de métrica de calidad.
 NO EXPLIQUES. NO USES MARKDOWN. SOLO EL NÚMERO."""
 
+
 async def main() -> None:
     content: str = read_input()
     if not content:
@@ -46,36 +48,47 @@ async def main() -> None:
         sys.exit(1)
 
     provider = LLMProvider(provider="gemini", model="gemini-3-flash-preview")
-    console.print(f"[dim]Inicializando el Orquestador Semántico. Motor conectado:[/dim] [bold cyan]{provider.model_name}[/bold cyan]")
-    
+    console.print(
+        f"[dim]Inicializando el Orquestador Semántico. Motor conectado:[/dim] [bold cyan]{provider.model_name}[/bold cyan]"
+    )
+
     current_content = content
     iteration = 1
 
     try:
         while True:
-            console.print(f"\n[bold magenta]► Iteración [{iteration}][/bold magenta] Aplicando MEJORAlo...")
+            console.print(
+                f"\n[bold magenta]► Iteración [{iteration}][/bold magenta] Aplicando MEJORAlo..."
+            )
             prompt_text = generate_prompt_text(current_content, iteration)
-            
-            with console.status(f"[cyan]Destilando Entropía (Fase {iteration}) vía [bold]{provider.model_name}[/bold] (temp: 0.3)...[/cyan]", spinner="dots4"):
-                result = await provider.complete(prompt=prompt_text, system=SYSTEM_PROMPT, temperature=0.3)
-                
+
+            with console.status(
+                f"[cyan]Destilando Entropía (Fase {iteration}) vía [bold]{provider.model_name}[/bold] (temp: 0.3)...[/cyan]",
+                spinner="dots4",
+            ):
+                result = await provider.complete(
+                    prompt=prompt_text, system=SYSTEM_PROMPT, temperature=0.3
+                )
+
             current_content = result.strip()
             display_result(current_content, iteration)
-            
+
             score = await evaluate_content(provider, current_content)
             display_score(score)
-            
+
             if score >= 130:
-                console.print("[bold cyan]⬡ PERFECCIÓN ALCANZADA. El Árbitro sella el constructo automáticamente.[/bold cyan]")
+                console.print(
+                    "[bold cyan]⬡ PERFECCIÓN ALCANZADA. El Árbitro sella el constructo automáticamente.[/bold cyan]"
+                )
                 break
 
             ans = get_user_input()
             if ans.lower() in ("n", "no", "exit", "quit", "q", "enough", "basta"):
                 break
-                
+
             if ans and ans.lower() not in ("y", "yes", "s", "si"):
                 current_content = f"{current_content}\n\n[DIRECTIVA DEL DIRECTOR]: {ans}"
-                
+
             iteration += 1
 
     except (KeyboardInterrupt, EOFError):
@@ -84,9 +97,10 @@ async def main() -> None:
         console.print(f"\n[bold red]✗ Falla Catastrófica en el Motor de Fusión:[/bold red] {e}")
     finally:
         await provider.close()
-        
+
     console.print("\n[bold green]✓ CORTEX Auto-Evolución Completada.[/bold green]")
     copy_to_clipboard(current_content)
+
 
 def read_input() -> str:
     if len(sys.argv) > 1:
@@ -97,86 +111,114 @@ def read_input() -> str:
         with open(file_path, encoding="utf-8") as f:
             return f.read().strip()
     else:
-        console.print(Panel(
-            "[dim]Pega el texto, código o idea que deseas someter a evolución continua.[/dim]\n"
-            "[dim]Para finalizar el input, presiona[/dim] [bold cyan]Ctrl+D[/bold cyan] [dim](macOS/Linux)[/dim] "
-            "[dim]o[/dim] [bold cyan]Ctrl+Z[/bold cyan] [dim]+ Intro (Windows).[/dim]",
-            title="[bold yellow]ENTRADA DE CORTEX[/bold yellow]",
-            expand=False
-        ))
+        console.print(
+            Panel(
+                "[dim]Pega el texto, código o idea que deseas someter a evolución continua.[/dim]\n"
+                "[dim]Para finalizar el input, presiona[/dim] [bold cyan]Ctrl+D[/bold cyan] [dim](macOS/Linux)[/dim] "
+                "[dim]o[/dim] [bold cyan]Ctrl+Z[/bold cyan] [dim]+ Intro (Windows).[/dim]",
+                title="[bold yellow]ENTRADA DE CORTEX[/bold yellow]",
+                expand=False,
+            )
+        )
         try:
             return sys.stdin.read().strip()
         except KeyboardInterrupt:
             console.print("\n[red]Cancelado.[/red]")
             sys.exit(0)
 
+
 def generate_prompt_text(current_content: str, iteration: int) -> str:
     if iteration == 1:
         return f"Evoluciona esta entrada cruda al estándar 130/100:\n\n{current_content}"
     return (
-        f"El operador ha dictaminado que la iteración {iteration-1} AÚN se puede mejorar. "
+        f"El operador ha dictaminado que la iteración {iteration - 1} AÚN se puede mejorar. "
         f"Busca ineficiencias sistémicas, optimizaciones de diseño, abstracciones más "
         f"profundas o prosa más contundente. Elévalo todo al máximo nivel.\n\n"
         f"Texto actual:\n\n{current_content}"
     )
 
+
 def display_result(current_content: str, iteration: int) -> None:
     console.print("\n")
-    console.print(Panel(
-        Markdown(current_content), 
-        title=f"Estado del Sistema · Iteración {iteration}", 
-        border_style="magenta",
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            Markdown(current_content),
+            title=f"Estado del Sistema · Iteración {iteration}",
+            border_style="magenta",
+            padding=(1, 2),
+        )
+    )
+
 
 async def evaluate_content(provider: LLMProvider, current_content: str) -> int:
-    with console.status(f"[cyan]Árbitro Soberano ([bold]{provider.model_name}[/bold] @ temp 0.0) evaluando densidad (0-130)...[/cyan]", spinner="bouncingBar"):
+    with console.status(
+        f"[cyan]Árbitro Soberano ([bold]{provider.model_name}[/bold] @ temp 0.0) evaluando densidad (0-130)...[/cyan]",
+        spinner="bouncingBar",
+    ):
         score_str = await provider.complete(
             prompt=f"Evalúa rigurosamente este bloque:\n\n{current_content}",
             system=JUDGE_PROMPT,
-            temperature=0.0
+            temperature=0.0,
         )
     try:
         return int(score_str.strip())
     except ValueError:
         import re
-        match = re.search(r'\d+', score_str)
+
+        match = re.search(r"\d+", score_str)
         return int(match.group()) if match else 0
+
 
 def display_score(score: int) -> None:
     color = "green" if score >= 130 else "yellow" if score >= 100 else "red"
     console.print(f"⚖️  [bold]Veredicto del Árbitro:[/bold] [{color}]{score}/130[/{color}]\n")
 
+
 def get_user_input() -> str:
     console.print("[bold yellow]Inyección de vector manual (opcional):[/bold yellow]")
-    console.print("[dim]- (Enter / y) → Auto-Evolucionar (El sistema intentará cruzar la barrera de 130)[/dim]")
+    console.print(
+        "[dim]- (Enter / y) → Auto-Evolucionar (El sistema intentará cruzar la barrera de 130)[/dim]"
+    )
     console.print("[dim]- (Texto) → Redirigir el ángulo de mejora.[/dim]")
     console.print("[dim]- (n / no) → Forzar detención (Aceptar imperfección).[/dim]")
     return Prompt.ask("\n[bold cyan]DIRECTIVA:[/bold cyan]", default="").strip()
 
+
 def copy_to_clipboard(current_content: str) -> None:
     plat = sys.platform
-    if plat == 'darwin':
+    if plat == "darwin":
         import subprocess
+
         try:
-            process = subprocess.Popen('pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
-            process.communicate(current_content.encode('utf-8'))
-            console.print("[dim]El estado final ha sido copiado al portapapeles. Listo para deploy.[/dim]")
+            process = subprocess.Popen("pbcopy", env={"LANG": "en_US.UTF-8"}, stdin=subprocess.PIPE)
+            process.communicate(current_content.encode("utf-8"))
+            console.print(
+                "[dim]El estado final ha sido copiado al portapapeles. Listo para deploy.[/dim]"
+            )
         except Exception:
             pass
-    elif plat == 'win32':
+    elif plat == "win32":
         import subprocess
+
         try:
             subprocess.run("clip", text=True, input=current_content, check=True)
-            console.print("[dim]El estado final ha sido copiado al portapapeles. Listo para deploy.[/dim]")
+            console.print(
+                "[dim]El estado final ha sido copiado al portapapeles. Listo para deploy.[/dim]"
+            )
         except Exception:
             pass
-    elif plat == 'linux':
+    elif plat == "linux":
         import subprocess
+
         try:
-            subprocess.run(['xclip', '-selection', 'clipboard'], input=current_content.encode('utf-8'), check=True)
+            subprocess.run(
+                ["xclip", "-selection", "clipboard"],
+                input=current_content.encode("utf-8"),
+                check=True,
+            )
         except Exception:
             pass
+
 
 if __name__ == "__main__":
     asyncio.run(main())

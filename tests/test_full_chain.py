@@ -31,44 +31,45 @@ async def engine():
 @pytest.mark.asyncio
 async def test_end_to_end_store_and_verify_ledger(engine: CortexEngine) -> None:
     """Verify that storing a fact correctly appends to the verified hash chain."""
-    
+
     # 1. Start with an Engine and store a couple of facts.
     tenant_id = "test_tenant"
     project = "test_e2e_ledger"
-    
+
     fact_id_1 = await engine.store(
         project=project,
         content="[E2E] First test fact for integration testing.",
         tenant_id=tenant_id,
         fact_type="knowledge",
-        source="test_full_chain"
+        source="test_full_chain",
     )
-    
+
     fact_id_2 = await engine.store(
         project=project,
         content="[E2E] Second test fact for integration testing.",
         tenant_id=tenant_id,
         fact_type="knowledge",
-        source="test_full_chain"
+        source="test_full_chain",
     )
 
     assert fact_id_1 is not None
     assert fact_id_2 is not None
     assert fact_id_1 != fact_id_2
-    
+
     # 2. Check that the ledger validates the integrity of the chain.
     conn = await engine.get_conn()
     ledger = ImmutableLedger(conn)
-    
+
     # Generate a Merkle checkpoint (force batch size to 1 for testing)
-    from cortex import config
     import unittest.mock
-    
-    with unittest.mock.patch.object(config, 'CHECKPOINT_MAX', 1):
+
+    from cortex import config
+
+    with unittest.mock.patch.object(config, "CHECKPOINT_MAX", 1):
         await ledger.create_checkpoint_async()
-    
+
     results = await ledger.verify_integrity_async()
-    
+
     assert results["valid"] is True, f"Chain integrity compromised: {results['violations']}"
     assert results["tx_checked"] >= 2
     assert results["roots_checked"] >= 1

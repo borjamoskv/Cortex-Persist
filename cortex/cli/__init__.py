@@ -23,6 +23,7 @@ from cortex.cli import (  # noqa: E402
     handoff_cmds,  # noqa: E402, F401
     init_cmds,
     launchpad_cmds,  # noqa: E402, F401
+    ledger,
     mejoralo_cmds,  # noqa: E402, F401
     memory_cmds,
     nexus_cmds,  # noqa: E402, F401
@@ -60,6 +61,7 @@ from cortex.cli.episodic_cmds import episode  # noqa: E402
 from cortex.cli.episodic_observe import run_observe  # noqa: E402
 from cortex.cli.handoff_cmds import handoff as handoff_cli  # noqa: E402
 from cortex.cli.launchpad_cmds import launchpad  # noqa: E402
+from cortex.cli.ledger import ledger_cmds_click  # noqa: E402
 from cortex.cli.mejoralo_cmds import mejoralo  # noqa: E402
 from cortex.cli.quota_cmds import quota_cli  # noqa: E402
 from cortex.cli.reflect_cmds import inject as inject_cmd  # noqa: E402
@@ -81,7 +83,7 @@ from cortex.cli.trust_cmds import (  # noqa: E402
     compliance_report,
     verify_fact,
 )
-from cortex.cli.vote_ledger import ledger  # noqa: E402
+from cortex.cli.vote_ledger import ledger as vote_ledger_cmd  # noqa: E402
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine import CortexEngine
 from cortex.timing import TimingTracker
@@ -91,7 +93,8 @@ cli.add_command(heartbeat_cmd, name="heartbeat")
 cli.add_command(compact_cmd, name="compact")
 cli.add_command(compact_status, name="compact-status")
 cli.add_command(compact_session_cmd, name="compact-session")
-cli.add_command(ledger)
+cli.add_command(vote_ledger_cmd)
+cli.add_command(ledger_cmds_click, name="ledger")
 cli.add_command(timeline)
 cli.add_command(launchpad)
 cli.add_command(launchpad, name="mission")  # Alias por compatibilidad
@@ -165,8 +168,8 @@ from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
 cli.add_command(signal_cli, name="signal")
 cli.add_command(browser_cli, name="browser")
 
-from cortex.cli.lineage_cmds import lineage_group as lineage_cli
 from cortex.cli.lineage_cmds import audit_file as audit_file_cmd
+from cortex.cli.lineage_cmds import lineage_group as lineage_cli
 
 cli.add_command(lineage_cli, name="lineage")
 cli.add_command(audit_file_cmd, name="audit-file")
@@ -179,6 +182,10 @@ from cortex.cli.storage_cmds import storage_init_pg, storage_status  # noqa: E40
 
 cli.add_command(storage_init_pg)
 cli.add_command(storage_status)
+
+from cortex.cli.roi_cmds import roi as roi_cli
+
+cli.add_command(roi_cli, name="roi")
 
 from cortex.cli.loop_cmds import loop as loop_cmd  # noqa: E402
 

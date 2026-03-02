@@ -13,8 +13,10 @@ from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 # We configure an isolated queue path for tests
 TEST_QUEUE_DIR = Path("/tmp/cortex_test_fiat_queue")
 
+
 class MockEngine:
     """Simulates CORTEX engine."""
+
     def __init__(self):
         self.stored_facts = []
 
@@ -22,6 +24,7 @@ class MockEngine:
         self.stored_facts.append(
             {"project": project, "content": content, "type": fact_type, "meta": meta}
         )
+
 
 @pytest.fixture
 def test_dir():
@@ -31,6 +34,7 @@ def test_dir():
         f.unlink()
     TEST_QUEUE_DIR.rmdir()
 
+
 @pytest.fixture
 def oracle(test_dir):
     engine = MockEngine()
@@ -38,6 +42,7 @@ def oracle(test_dir):
     oracle_instance = FiatOracle(engine=engine, interval=0.1)
     oracle_instance.queue_dir = test_dir
     return oracle_instance
+
 
 @pytest.mark.asyncio
 class TestFiatOracle:
@@ -48,7 +53,7 @@ class TestFiatOracle:
             "amount": "1000",
             "currency": "EUR",
             "source": "BUNQ",
-            "signature": "invalid_sig", # Fails zero-trust check
+            "signature": "invalid_sig",  # Fails zero-trust check
         }
         test_file = test_dir / "tx_spoof.json"
         test_file.write_text(json.dumps(fake_payload))
@@ -56,19 +61,17 @@ class TestFiatOracle:
         await oracle._check_signals()
 
         assert len(oracle.engine.stored_facts) == 0
-        assert not test_file.exists() # The file should be discarded (quarantined/deleted)
+        assert not test_file.exists()  # The file should be discarded (quarantined/deleted)
 
     async def test_valid_transaction_processed(self, oracle, test_dir):
         """Test legitimate transaction is processed and stored."""
-        payload_str = json.dumps({
-            "tx_id": "valid_1",
-            "amount": "99",
-            "currency": "EUR",
-            "source": "BUNQ"
-        })
+        payload_str = json.dumps(
+            {"tx_id": "valid_1", "amount": "99", "currency": "EUR", "source": "BUNQ"}
+        )
         import hashlib
+
         valid_sig = hashlib.sha256((payload_str + "SOVEREIGN_KEY_MOCK").encode()).hexdigest()
-        
+
         valid_payload = {
             "tx_id": "valid_1",
             "amount": "99",
@@ -87,15 +90,13 @@ class TestFiatOracle:
 
     async def test_idempotency(self, oracle, test_dir, caplog):
         """Test duplicate transactions are not stored twice."""
-        payload_str = json.dumps({
-            "tx_id": "idem_1",
-            "amount": "50",
-            "currency": "USD",
-            "source": "STRIPE"
-        })
+        payload_str = json.dumps(
+            {"tx_id": "idem_1", "amount": "50", "currency": "USD", "source": "STRIPE"}
+        )
         import hashlib
+
         valid_sig = hashlib.sha256((payload_str + "SOVEREIGN_KEY_MOCK").encode()).hexdigest()
-        
+
         valid_payload = {
             "tx_id": "idem_1",
             "amount": "50",
@@ -112,6 +113,6 @@ class TestFiatOracle:
         test_dir.joinpath("tx_idem_b.json").write_text(json.dumps(valid_payload))
         with caplog.at_level(logging.WARNING):
             await oracle._check_signals()
-            
-        assert len(oracle.engine.stored_facts) == 1 # Still 1
+
+        assert len(oracle.engine.stored_facts) == 1  # Still 1
         assert "prevented replay attack" in caplog.text.lower()

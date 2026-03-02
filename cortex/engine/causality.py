@@ -1,10 +1,11 @@
 """Causality Engine — AX-014: Mapping the Causal Chord (Ω₁).
 
-This engine links facts to the signals that triggered them, creating 
+This engine links facts to the signals that triggered them, creating
 a directed acyclic graph (DAG) of consequence.
 """
 
 from __future__ import annotations
+
 import logging
 import sqlite3
 from typing import Any
@@ -13,9 +14,9 @@ from cortex.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.causality")
 
+
 class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact."""
-
 
     @staticmethod
     def find_parent_signal(db_path: str, project: str | None = None) -> int | None:

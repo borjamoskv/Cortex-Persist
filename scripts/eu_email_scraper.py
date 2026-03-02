@@ -67,44 +67,136 @@ EMAIL_RE = re.compile(
 )
 
 PUBLIC_PREFIXES = {
-    "info", "contact", "contacto", "hello", "hola", "bonjour", "ciao",
-    "kontakt", "sales", "ventas", "comercial", "trade", "export",
-    "press", "media", "marketing", "support", "office", "admin",
-    "general", "mail", "enquiries", "business", "partner",
-    "hallo", "aloha", "olá", "witaj",
+    "info",
+    "contact",
+    "contacto",
+    "hello",
+    "hola",
+    "bonjour",
+    "ciao",
+    "kontakt",
+    "sales",
+    "ventas",
+    "comercial",
+    "trade",
+    "export",
+    "press",
+    "media",
+    "marketing",
+    "support",
+    "office",
+    "admin",
+    "general",
+    "mail",
+    "enquiries",
+    "business",
+    "partner",
+    "hallo",
+    "aloha",
+    "olá",
+    "witaj",
 }
 
 PRIORITY_PREFIXES = {"info", "contact", "contacto", "sales", "ventas", "hello", "hola"}
 
 BLACKLIST_DOMAINS = {
-    "example.com", "test.com", "sentry.io", "wixpress.com",
-    "wordpress.com", "shopify.com", "gmail.com", "hotmail.com",
-    "yahoo.com", "outlook.com", "protonmail.com", "icloud.com",
-    "amazonaws.com", "cloudflare.com", "google.com", "facebook.com",
-    "instagram.com", "twitter.com", "linkedin.com", "tiktok.com",
-    "w3.org", "schema.org", "apple.com", "microsoft.com",
-    "gravatar.com", "vimeo.com", "youtube.com",
+    "example.com",
+    "test.com",
+    "sentry.io",
+    "wixpress.com",
+    "wordpress.com",
+    "shopify.com",
+    "gmail.com",
+    "hotmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "protonmail.com",
+    "icloud.com",
+    "amazonaws.com",
+    "cloudflare.com",
+    "google.com",
+    "facebook.com",
+    "instagram.com",
+    "twitter.com",
+    "linkedin.com",
+    "tiktok.com",
+    "w3.org",
+    "schema.org",
+    "apple.com",
+    "microsoft.com",
+    "gravatar.com",
+    "vimeo.com",
+    "youtube.com",
 }
 
 BLACKLIST_PREFIXES = {
-    "noreply", "no-reply", "donotreply", "bounce", "mailer",
-    "daemon", "postmaster", "webmaster", "privacy", "gdpr",
+    "noreply",
+    "no-reply",
+    "donotreply",
+    "bounce",
+    "mailer",
+    "daemon",
+    "postmaster",
+    "webmaster",
+    "privacy",
+    "gdpr",
 }
 
 EU_TLDS = {
-    ".de", ".es", ".fr", ".it", ".nl", ".pl", ".se", ".be",
-    ".at", ".pt", ".dk", ".fi", ".no", ".ie", ".cz", ".ro",
-    ".hu", ".sk", ".hr", ".bg", ".gr", ".lt", ".lv", ".ee",
-    ".si", ".lu", ".mt", ".cy", ".eu",
+    ".de",
+    ".es",
+    ".fr",
+    ".it",
+    ".nl",
+    ".pl",
+    ".se",
+    ".be",
+    ".at",
+    ".pt",
+    ".dk",
+    ".fi",
+    ".no",
+    ".ie",
+    ".cz",
+    ".ro",
+    ".hu",
+    ".sk",
+    ".hr",
+    ".bg",
+    ".gr",
+    ".lt",
+    ".lv",
+    ".ee",
+    ".si",
+    ".lu",
+    ".mt",
+    ".cy",
+    ".eu",
 }
 
 TLD_COUNTRY = {
-    ".de": "Germany", ".es": "Spain", ".fr": "France", ".it": "Italy",
-    ".nl": "Netherlands", ".pl": "Poland", ".se": "Sweden", ".be": "Belgium",
-    ".at": "Austria", ".pt": "Portugal", ".dk": "Denmark", ".fi": "Finland",
-    ".no": "Norway", ".ie": "Ireland", ".cz": "Czech Republic", ".ro": "Romania",
-    ".hu": "Hungary", ".sk": "Slovakia", ".hr": "Croatia", ".bg": "Bulgaria",
-    ".gr": "Greece", ".eu": "European Union",
+    ".de": "Germany",
+    ".es": "Spain",
+    ".fr": "France",
+    ".it": "Italy",
+    ".nl": "Netherlands",
+    ".pl": "Poland",
+    ".se": "Sweden",
+    ".be": "Belgium",
+    ".at": "Austria",
+    ".pt": "Portugal",
+    ".dk": "Denmark",
+    ".fi": "Finland",
+    ".no": "Norway",
+    ".ie": "Ireland",
+    ".cz": "Czech Republic",
+    ".ro": "Romania",
+    ".hu": "Hungary",
+    ".sk": "Slovakia",
+    ".hr": "Croatia",
+    ".bg": "Bulgaria",
+    ".gr": "Greece",
+    ".eu": "European Union",
 }
 
 # ── EU Legal Goldmine Configuration ──────────────────────────────────────────
@@ -127,15 +219,25 @@ TLD_PRIORITY_SLUGS = {
 # Contact slugs — EU-optimized
 # German .de: impressum is LEGALLY REQUIRED → always has contact email
 CONTACT_SLUGS = [
-    "", "/contact", "/contact-us", "/contacto", "/kontakt",
-    "/nous-contacter", "/contattaci", "/contatti",
-    "/about", "/about-us", "/quienes-somos",
+    "",
+    "/contact",
+    "/contact-us",
+    "/contacto",
+    "/kontakt",
+    "/nous-contacter",
+    "/contattaci",
+    "/contatti",
+    "/about",
+    "/about-us",
+    "/quienes-somos",
     IMPRESSUM_SLUG,
     AVISO_LEGAL_SLUG,
     "/legal-notice",
     MENTIONS_LEGALES_SLUG,
     NOTE_LEGALI_SLUG,
-    "/get-in-touch", "/team", "/company",
+    "/get-in-touch",
+    "/team",
+    "/company",
 ]
 
 HEADERS = {
@@ -180,17 +282,21 @@ class CompanyLead:
         """Autonomously generates a high-authority outreach snippet citing legal data."""
         if not self.is_legal_source:
             return "Generic outreach (no legal hooks found)."
-        
+
         legal_anchor = self.vat_id or self.registration or "Empresa Registrada"
         name = self.company_name or self.domain
-        
+
         lines = [
             f"Subject: [Legal Insight] Referente a {name}",
             "Hola,",
-            (f"He estado revisando la estructura legal de {name} "
-             f"y vuestra presencia en {self.page_found}."),
-            (f"Como experto en Trust Infrastructure (MOSKV-1), me ha llamado la "
-             f"atención vuestro registro {legal_anchor}...")
+            (
+                f"He estado revisando la estructura legal de {name} "
+                f"y vuestra presencia en {self.page_found}."
+            ),
+            (
+                f"Como experto en Trust Infrastructure (MOSKV-1), me ha llamado la "
+                f"atención vuestro registro {legal_anchor}..."
+            ),
         ]
         return "\n".join(lines)
 
@@ -233,15 +339,14 @@ def extract_emails(html: str) -> list[str]:
             found.update(EMAIL_RE.findall(script.string or ""))
 
     # Pass 6: ROT13 obfuscation (some EU sites use this)
-    rot13_emails = re.findall(
-        r'\bROT13\(["\'"]([^"\']+)["\']\)',
-        html, re.IGNORECASE
-    )
+    rot13_emails = re.findall(r'\bROT13\(["\'"]([^"\']+)["\']\)', html, re.IGNORECASE)
     for enc in rot13_emails:
-        decoded = enc.translate(str.maketrans(
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-            "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm"
-        ))
+        decoded = enc.translate(
+            str.maketrans(
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm",
+            )
+        )
         if "@" in decoded:
             found.add(decoded)
 
@@ -256,7 +361,7 @@ def extract_emails(html: str) -> list[str]:
 def _cf_decode(encoded: str) -> str | None:
     try:
         r = int(encoded[:2], 16)
-        return "".join(chr(int(encoded[i:i+2], 16) ^ r) for i in range(2, len(encoded), 2))
+        return "".join(chr(int(encoded[i : i + 2], 16) ^ r) for i in range(2, len(encoded), 2))
     except Exception:
         return None
 
@@ -278,7 +383,10 @@ def _is_valid(email: str) -> bool:
 
 def is_public_contact(email: str) -> bool:
     prefix = email.split("@")[0].lower()
-    return any(prefix == p or prefix.startswith(f"{p}.") or prefix.startswith(f"{p}@") for p in PUBLIC_PREFIXES)
+    return any(
+        prefix == p or prefix.startswith(f"{p}.") or prefix.startswith(f"{p}@")
+        for p in PUBLIC_PREFIXES
+    )
 
 
 def is_priority(email: str) -> bool:
@@ -288,7 +396,14 @@ def is_priority(email: str) -> bool:
 
 def is_legal_page(url: str) -> bool:
     """Checks if a URL refers to a legal/impressum page."""
-    legal_slugs = [IMPRESSUM_SLUG, AVISO_LEGAL_SLUG, MENTIONS_LEGALES_SLUG, NOTE_LEGALI_SLUG, "/legal", "/privacy"]
+    legal_slugs = [
+        IMPRESSUM_SLUG,
+        AVISO_LEGAL_SLUG,
+        MENTIONS_LEGALES_SLUG,
+        NOTE_LEGALI_SLUG,
+        "/legal",
+        "/privacy",
+    ]
     return any(slug.lower() in url.lower() for slug in legal_slugs)
 
 
@@ -369,12 +484,12 @@ class HTTPClient:
                 if resp.status_code == 200:
                     return resp.text
                 if resp.status_code in (429, 503):
-                    await asyncio.sleep(2 ** attempt * 3)
+                    await asyncio.sleep(2**attempt * 3)
                 elif resp.status_code in (301, 302, 403, 404, 410):
                     return None
             except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError) as exc:
-                log.debug(f"[{attempt+1}/{self._max_retries}] {url}: {exc}")
-                await asyncio.sleep(2 ** attempt)
+                log.debug(f"[{attempt + 1}/{self._max_retries}] {url}: {exc}")
+                await asyncio.sleep(2**attempt)
             except Exception as exc:
                 log.debug(f"Unexpected: {exc}")
                 break
@@ -413,7 +528,7 @@ class CompanyCrawler:
         pages: list[str] = []
         for scheme in ["https"]:
             for b in [f"{scheme}://{domain}", f"{scheme}://www.{domain}"]:
-                for slug in current_slugs[:self._max_pages]:
+                for slug in current_slugs[: self._max_pages]:
                     pages.append(b + slug)
 
         # Unique ordered pages
@@ -422,7 +537,14 @@ class CompanyCrawler:
 
     def _extract_legal_data(self, html: str) -> dict:
         """Extracts official name, directors, phone and VAT from legal pages."""
-        data = {"name": "", "officers": "", "phone": "", "vat": "", "reg": "", "has_legal_id": False}
+        data = {
+            "name": "",
+            "officers": "",
+            "phone": "",
+            "vat": "",
+            "reg": "",
+            "has_legal_id": False,
+        }
         text = BeautifulSoup(html, "html.parser").get_text(separator=" ")
 
         # 1. Official Name (GmbH, S.L., Sp. z o.o., etc.)
@@ -479,8 +601,15 @@ class CompanyCrawler:
                 continue
 
             is_legal = is_legal_page(page_url)
-            legal_data = {"name": "", "officers": "", "phone": "", "vat": "", "reg": "", "has_legal_id": False}
-            
+            legal_data = {
+                "name": "",
+                "officers": "",
+                "phone": "",
+                "vat": "",
+                "reg": "",
+                "has_legal_id": False,
+            }
+
             if is_legal:
                 legal_data = self._extract_legal_data(html)
                 for key in ["name", "officers", "phone", "vat", "reg", "has_legal_id"]:
@@ -491,10 +620,16 @@ class CompanyCrawler:
                 # If we find it in a legal page, override previous findings (3x conversion ROI)
                 if email not in found or (is_legal and not found[email][2]):
                     found[email] = (page_url, best_legal_data.copy(), is_legal)
-                    log.debug(f"    [+] {email} ({'LEGAL' if is_legal else 'GENERIC'}) ← {page_url}")
+                    log.debug(
+                        f"    [+] {email} ({'LEGAL' if is_legal else 'GENERIC'}) ← {page_url}"
+                    )
 
             # Optimization: If we have a quality lead from a legal source WITH legal ID, we might stop early
-            if len(found) >= 4 and any(is_priority(e) for e in found) and best_legal_data["has_legal_id"]:
+            if (
+                len(found) >= 4
+                and any(is_priority(e) for e in found)
+                and best_legal_data["has_legal_id"]
+            ):
                 break
 
         return [(e, p, d, is_legal) for e, (p, d, is_legal) in found.items()]
@@ -518,7 +653,7 @@ async def serpapi_search(
             f"&api_key={api_key}"
             f"&engine=google"
         )
-        log.info(f"🔑 SerpAPI page {page_num+1}: {query}")
+        log.info(f"🔑 SerpAPI page {page_num + 1}: {query}")
 
         assert client
         html = await client.get(url)
@@ -540,9 +675,7 @@ async def serpapi_search(
 
 
 # ── Hunter.io Integration ─────────────────────────────────────────────────────
-async def hunter_domain_search(
-    domain: str, api_key: str, http: HTTPClient
-) -> list[CompanyLead]:
+async def hunter_domain_search(domain: str, api_key: str, http: HTTPClient) -> list[CompanyLead]:
     """Use Hunter.io API to find emails for a domain (50 free/month)."""
     url = f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}"
     html = await http.get(url)
@@ -577,6 +710,7 @@ async def hunter_domain_search(
 async def verify_mx(domain: str) -> bool:
     try:
         import dns.resolver
+
         resolver = dns.resolver.Resolver()
         resolver.lifetime = 3.0
         loop = asyncio.get_event_loop()
@@ -605,6 +739,7 @@ async def _process_hunter_mode(args, http) -> list[CompanyLead]:
     log.info(f"🎯 Hunter.io: {args.domain}")
     return await hunter_domain_search(args.domain, args.hunter, http)
 
+
 async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
     if not domains:
         return []
@@ -622,22 +757,37 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
             pairs = await crawler.crawl(url)
             if not pairs:
                 if await verify_mx(domain):
-                    return [CompanyLead(email=f"{p}@{domain}", domain=domain, source="mx_pattern",
-                                       country=infer_country(domain), website=url, is_public_contact=True)
-                            for p in ["info", "contact", "sales"]]
+                    return [
+                        CompanyLead(
+                            email=f"{p}@{domain}",
+                            domain=domain,
+                            source="mx_pattern",
+                            country=infer_country(domain),
+                            website=url,
+                            is_public_contact=True,
+                        )
+                        for p in ["info", "contact", "sales"]
+                    ]
                 return []
-            results = [CompanyLead(
-                email=email, domain=domain, page_found=page_found,
-                company_name=legal.get("name") or "",
-                legal_officers=legal.get("officers") or "",
-                phone=legal.get("phone") or "",
-                vat_id=legal.get("vat") or "",
-                registration=legal.get("reg") or "",
-                source="domain_crawl", country=infer_country(domain),
-                website=url, is_public_contact=is_public_contact(email),
-                is_legal_source=is_legal_source,
-                has_legal_id=legal.get("has_legal_id", False)
-            ) for email, page_found, legal, is_legal_source in pairs]
+            results = [
+                CompanyLead(
+                    email=email,
+                    domain=domain,
+                    page_found=page_found,
+                    company_name=legal.get("name") or "",
+                    legal_officers=legal.get("officers") or "",
+                    phone=legal.get("phone") or "",
+                    vat_id=legal.get("vat") or "",
+                    registration=legal.get("reg") or "",
+                    source="domain_crawl",
+                    country=infer_country(domain),
+                    website=url,
+                    is_public_contact=is_public_contact(email),
+                    is_legal_source=is_legal_source,
+                    has_legal_id=legal.get("has_legal_id", False),
+                )
+                for email, page_found, legal, is_legal_source in pairs
+            ]
 
             for r in results:
                 if isinstance(r, list):
@@ -646,11 +796,19 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
                         results_leads.append(lead)
             return results_leads
 
+
 async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead]:
     if not company_urls:
         return []
-    
-    SKIP = {"linkedin.com", "facebook.com", "indeed.com", "glassdoor.com", "wikipedia.org", "amazon.com"}
+
+    SKIP = {
+        "linkedin.com",
+        "facebook.com",
+        "indeed.com",
+        "glassdoor.com",
+        "wikipedia.org",
+        "amazon.com",
+    }
     filtered = [r for r in company_urls if not any(skip in r.get("url", "") for skip in SKIP)]
     log.info(f"🌐 Crawling {len(filtered)} curated company sites...")
 
@@ -667,13 +825,20 @@ async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead
             country = args.country or infer_country(domain)
             for email, page, legal, is_legal_source in pairs:
                 lead = CompanyLead(
-                    email=email, domain=domain, company_name=legal.get("name") or name,
-                    legal_officers=legal.get("officers") or "", phone=legal.get("phone") or "",
-                    vat_id=legal.get("vat") or "", registration=legal.get("reg") or "",
-                    source="url_crawl", country=country, website=url, page_found=page,
+                    email=email,
+                    domain=domain,
+                    company_name=legal.get("name") or name,
+                    legal_officers=legal.get("officers") or "",
+                    phone=legal.get("phone") or "",
+                    vat_id=legal.get("vat") or "",
+                    registration=legal.get("reg") or "",
+                    source="url_crawl",
+                    country=country,
+                    website=url,
+                    page_found=page,
                     is_public_contact=is_public_contact(email),
                     is_legal_source=is_legal_source,
-                    has_legal_id=legal.get("has_legal_id", False)
+                    has_legal_id=legal.get("has_legal_id", False),
                 )
                 lead.priority_score = score_lead(lead)
                 leads.append(lead)
@@ -681,13 +846,14 @@ async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead
             log.debug(f"Crawl error {url}: {exc}")
     return leads
 
+
 # ── Main Pipeline ─────────────────────────────────────────────────────────────
 async def run_pipeline(args: argparse.Namespace) -> list[CompanyLead]:
     all_leads: list[CompanyLead] = []
 
     async with HTTPClient(delay=args.delay) as http:
         crawler = CompanyCrawler(http, max_pages=args.max_pages)
-        
+
         # 1. Inputs: SERPAPI & Hunter
         found_urls = await _process_serpapi_mode(args, http)
         all_leads.extend(await _process_hunter_mode(args, http))
@@ -709,14 +875,14 @@ async def run_pipeline(args: argparse.Namespace) -> list[CompanyLead]:
                     found_urls.append({"url": ln, "name": ""})
                 else:
                     domains_to_mine.append(ln)
-        
+
         all_leads.extend(await _process_domain_mining(args, crawler, domains_to_mine))
         all_leads.extend(await _process_url_crawling(args, crawler, found_urls))
 
     # Deduplicate & Filter
     if args.public_only:
         all_leads = [lead for lead in all_leads if lead.is_public_contact]
-        
+
     if args.strict_legal:
         all_leads = [lead for lead in all_leads if lead.has_legal_id]
 
@@ -762,8 +928,11 @@ def print_table(leads: list[CompanyLead], max_rows: int = 50) -> None:
         if lead.is_legal_source:
             status = f"LEG:{status}"
 
-        vat_reg = (f"{lead.phone} | {lead.vat_id or lead.registration}"
-                   if lead.vat_id or lead.registration else lead.phone)
+        vat_reg = (
+            f"{lead.phone} | {lead.vat_id or lead.registration}"
+            if lead.vat_id or lead.registration
+            else lead.phone
+        )
         line = (
             f"  {lead.priority_score:>4.0f}  "
             f"{lead.email:<30} "
@@ -780,8 +949,10 @@ def print_table(leads: list[CompanyLead], max_rows: int = 50) -> None:
 
     print("═" * W)
     ver = sum(1 for lead in leads if lead.has_legal_id)
-    print(f"\n  📧 {len(leads)} emails | ⚖️ {legal_count} Legal (3x ROI) | "
-           f"🏢 {ver} Verified | ✓ {pub_count} public | 🇪🇺 {eu_count} EU\n")
+    print(
+        f"\n  📧 {len(leads)} emails | ⚖️ {legal_count} Legal (3x ROI) | "
+        f"🏢 {ver} Verified | ✓ {pub_count} public | 🇪🇺 {eu_count} EU\n"
+    )
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
@@ -827,7 +998,9 @@ HOW TO BUILD A DOMAIN LIST:
 
     # APIs
     a = p.add_argument_group("🔑 API Keys (optional)")
-    a.add_argument("--serpapi", type=str, metavar="KEY", help="SerpAPI key (serpapi.com - 100 free/mo)")
+    a.add_argument(
+        "--serpapi", type=str, metavar="KEY", help="SerpAPI key (serpapi.com - 100 free/mo)"
+    )
     a.add_argument("--hunter", type=str, metavar="KEY", help="Hunter.io API key (50 free/mo)")
 
     # Filters
@@ -836,7 +1009,11 @@ HOW TO BUILD A DOMAIN LIST:
     f.add_argument("--sector", "-s", type=str, default="", help="Industry sector")
     f.add_argument("--public-only", action="store_true", help="Only info@/contact@ emails")
     f.add_argument("--outreach", action="store_true", help="Generate authority snippets")
-    f.add_argument("--strict-legal", action="store_true", help="Exclude domains without verified Razón Social (GmbH, S.L., etc.)")
+    f.add_argument(
+        "--strict-legal",
+        action="store_true",
+        help="Exclude domains without verified Razón Social (GmbH, S.L., etc.)",
+    )
 
     # Output
     o = p.add_argument_group("📤 Output")
@@ -846,8 +1023,12 @@ HOW TO BUILD A DOMAIN LIST:
     # Performance
     perf = p.add_argument_group("⚡ Performance")
     perf.add_argument("--pages", "-p", type=int, default=3, help="Pages for SerpAPI (default: 3)")
-    perf.add_argument("--delay", type=float, default=1.0, help="Request delay seconds (default: 1.0)")
-    perf.add_argument("--max-pages", type=int, default=8, help="Pages to crawl per site (default: 8)")
+    perf.add_argument(
+        "--delay", type=float, default=1.0, help="Request delay seconds (default: 1.0)"
+    )
+    perf.add_argument(
+        "--max-pages", type=int, default=8, help="Pages to crawl per site (default: 8)"
+    )
 
     return p
 
@@ -895,7 +1076,7 @@ async def main() -> None:
 
     elapsed = time.monotonic() - t0
     print_table(leads)
-    
+
     if args.outreach:
         print("\n" + "═" * 120)
         print("  🚀 SOVEREIGN OUTREACH SNIPPETS (Top 3)")

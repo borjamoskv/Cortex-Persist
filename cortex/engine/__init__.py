@@ -14,14 +14,14 @@ import sqlite_vec
 from cortex.config import DEFAULT_DB_PATH
 from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
+from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
+from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN, QueryMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
-from cortex.engine.durability import PersistenceSupervisor
 
 logger = logging.getLogger("cortex")
 
@@ -31,7 +31,7 @@ from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
+class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
@@ -236,33 +236,15 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     async def store_many(self, *args, **kwargs):
         return await self.facts.store_many(*args, **kwargs)
 
-    async def search(self, *args, **kwargs):
-        return await self.facts.search(*args, **kwargs)
-
     async def recall(self, *args, **kwargs):
         self._audit_log(
             "recall",
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await self.facts.recall(*args, **kwargs)
-
-    async def update(self, *args, **kwargs):
-        return await self.facts.update(*args, **kwargs)
-
-    async def deprecate(self, *args, **kwargs):
-        return await self.facts.deprecate(*args, **kwargs)
-
-    async def history(self, *args, **kwargs):
-        return await self.facts.history(*args, **kwargs)
-
-    async def time_travel(self, *args, **kwargs):
-        return await self.facts.time_travel(*args, **kwargs)
+        return await super().recall(*args, **kwargs)
 
     async def get_fact(self, *args, **kwargs):
         return await self.facts.get_fact(*args, **kwargs)
-
-    async def reconstruct_state(self, *args, **kwargs):
-        return await self.facts.reconstruct_state(*args, **kwargs)
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
@@ -278,23 +260,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
 
-    async def get_context_subgraph(self, *args, **kwargs):
-        return await self.facts.get_context_subgraph(*args, **kwargs)
-
-    async def find_path(self, *args, **kwargs):
-        return await self.facts.find_path(*args, **kwargs)
-
-    async def graph(self, *args, **kwargs):
-        return await self.facts.graph(*args, **kwargs)
-
-    async def query_entity(self, *args, **kwargs):
-        return await self.facts.query_entity(*args, **kwargs)
-
     async def vote(self, *args, **kwargs):
         return await self.consensus.vote(*args, **kwargs)
-
-    async def stats(self):
-        return await self.facts.stats()
 
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects."""

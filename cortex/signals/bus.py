@@ -270,9 +270,7 @@ class SignalBus:
         result["by_source"] = {r[0]: r[1] for r in cursor.fetchall()}
 
         # Unconsumed (consumed_by == '[]')
-        row = self._conn.execute(
-            "SELECT COUNT(*) FROM signals WHERE consumed_by = '[]'"
-        ).fetchone()
+        row = self._conn.execute("SELECT COUNT(*) FROM signals WHERE consumed_by = '[]'").fetchone()
         result["unconsumed"] = row[0] if row else 0
 
         return result

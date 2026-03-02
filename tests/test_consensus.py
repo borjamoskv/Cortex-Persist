@@ -1,5 +1,4 @@
 import os
-import unittest.mock as mock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -40,57 +39,62 @@ async def client(monkeypatch):
     monkeypatch.setattr(cortex.auth.manager, "_auth_manager", None)
 
     # Mock Embedder to avoid model download/hang
-    with mock.patch("cortex.embeddings.LocalEmbedder") as mock_embedder:
-        instance = mock_embedder.return_value
-        instance.embed.return_value = [0.1] * 384
-        instance.embed_batch.return_value = [[0.1] * 384]
-        instance.dimension = 384
+    async def mock_embed(*args, **kwargs):
+        return [0.1] * 384
 
-        # Initialize engines
-        test_engine = CortexEngine(test_db)
-        await test_engine.init_db()
+    async def mock_embed_batch(*args, **kwargs):
+        return [[0.1] * 384]
 
-        test_pool = CortexConnectionPool(test_db, read_only=False)
-        await test_pool.initialize()
-        test_async_engine = AsyncCortexEngine(test_pool, test_db)
+    monkeypatch.setattr("cortex.embeddings.LocalEmbedder.embed", mock_embed)
+    monkeypatch.setattr("cortex.embeddings.LocalEmbedder.embed_batch", mock_embed_batch)
+    monkeypatch.setattr("cortex.embeddings.LocalEmbedder.dimension", 384)
 
-        timing_conn = db_connect(test_db)
-        test_tracker = TimingTracker(timing_conn)
+    # Initialize engines
+    test_engine = CortexEngine(test_db)
+    await test_engine.init_db()
 
-        # Re-initialize auth manager for the new DB
-        from cortex.auth import AuthManager
-        api_state.auth_manager = AuthManager(test_db)
-        await api_state.auth_manager.initialize()
+    test_pool = CortexConnectionPool(test_db, read_only=False)
+    await test_pool.initialize()
+    test_async_engine = AsyncCortexEngine(test_pool, test_db)
 
-        # Patch app.state
-        app.state.pool = test_pool
-        app.state.async_engine = test_async_engine
-        app.state.engine = test_engine
-        app.state.auth_manager = api_state.auth_manager
-        app.state.tracker = test_tracker
+    timing_conn = db_connect(test_db)
+    test_tracker = TimingTracker(timing_conn)
 
-        # Re-patch globals
-        old_engine = api_state.engine
-        api_state.engine = test_engine
+    # Re-initialize auth manager for the new DB
+    from cortex.auth import AuthManager
 
-        raw_key, _ = await api_state.auth_manager.create_key(
-            "api_agent",
-            tenant_id="test_proj",
-            permissions=["read", "write", "admin"],
-        )
+    api_state.auth_manager = AuthManager(test_db)
+    await api_state.auth_manager.initialize()
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
-            c.headers.update({"Authorization": f"Bearer {raw_key}"})
-            yield c
+    # Patch app.state
+    app.state.pool = test_pool
+    app.state.async_engine = test_async_engine
+    app.state.engine = test_engine
+    app.state.auth_manager = api_state.auth_manager
+    app.state.tracker = test_tracker
 
-        # Restore globals
-        api_state.engine = old_engine
+    # Re-patch globals
+    old_engine = api_state.engine
+    api_state.engine = test_engine
 
-        # Cleanup
-        await test_pool.close()
-        await test_engine.close()
-        timing_conn.close()
+    raw_key, _ = await api_state.auth_manager.create_key(
+        "api_agent",
+        tenant_id="test_proj",
+        permissions=["read", "write", "admin"],
+    )
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        c.headers.update({"Authorization": f"Bearer {raw_key}"})
+        yield c
+
+    # Restore globals
+    api_state.engine = old_engine
+
+    # Cleanup
+    await test_pool.close()
+    await test_engine.close()
+    timing_conn.close()
 
 
 @pytest.mark.asyncio

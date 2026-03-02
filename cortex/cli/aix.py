@@ -4,8 +4,9 @@ CORTEX V7 — Apotheosis Index (AIx) CLI.
 Quantifies agent sovereignty and system evolution metrics.
 """
 
-import math
 import logging
+import math
+
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.cli.aix")
@@ -45,13 +46,13 @@ async def calculate_aix(conn) -> dict:
         "bio_ratio": round(bio_ratio, 2),
         "verified_facts": verified_count,
         "global_axioms": axiom_count,
-        "status": "ASCENDING" if aix > 10 else "AWAKENING"
+        "status": "ASCENDING" if aix > 10 else "AWAKENING",
     }
 
 
 def print_aix_report(data: dict):
-    from rich.panel import Panel
     from rich.console import Console
+    from rich.panel import Panel
     from rich.table import Table
 
     console = Console()
@@ -61,9 +62,9 @@ def print_aix_report(data: dict):
     table.add_column("Value", style="magenta")
 
     table.add_row("Current Index", f"[bold]{data['aix']}[/bold]")
-    table.add_row("Hormonal Balance", str(data['bio_ratio']))
-    table.add_row("Verified Facts", str(data['verified_facts']))
-    table.add_row("Global Axioms", str(data['global_axioms']))
-    table.add_row("Evolution State", data['status'])
+    table.add_row("Hormonal Balance", str(data["bio_ratio"]))
+    table.add_row("Verified Facts", str(data["verified_facts"]))
+    table.add_row("Global Axioms", str(data["global_axioms"]))
+    table.add_row("Evolution State", data["status"])
 
     console.print(Panel(table, border_style="gold", title="CORTEX V7 Evolution Report"))

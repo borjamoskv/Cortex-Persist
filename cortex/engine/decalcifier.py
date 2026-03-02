@@ -51,9 +51,7 @@ class SovereignDecalcifier:
 
     async def decalcify_cycle(self, conn: Connection) -> int:
         """Scan for stale verified facts and apply decay."""
-        cutoff = (
-            datetime.now(timezone.utc) - timedelta(seconds=self.interval)
-        ).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(seconds=self.interval)).isoformat()
 
         # Find stale verified facts
         cursor = await conn.execute(

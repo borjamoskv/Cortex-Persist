@@ -7,6 +7,7 @@ EU AI Act Article 12 requirements for logging and traceability.
 Usage:
     python examples/quickstart/compliance_report.py
 """
+
 from __future__ import annotations
 
 import asyncio

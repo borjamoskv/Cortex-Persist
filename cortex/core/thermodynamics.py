@@ -18,8 +18,13 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
     """
 
     _POISONED_MODULES: Final[set[str]] = {
-        "requests", "aiohttp", "urllib3", "httpx",
-        "socket", "http.client", "cortex.moltbook",  # Añadir red
+        "requests",
+        "aiohttp",
+        "urllib3",
+        "httpx",
+        "socket",
+        "http.client",
+        "cortex.moltbook",  # Añadir red
     }
 
     def find_spec(self, fullname: str, path, target=None):

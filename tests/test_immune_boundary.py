@@ -125,10 +125,7 @@ class TestImmuneBoundaryEnforce:
 
         async def _gen(dfa_schema: dict[str, Any]) -> str:
             assert "internal_monologue" in dfa_schema["properties"]
-            return (
-                '{"internal_monologue": "Analyzing causal chain...", '
-                '"decision": "proceed"}'
-            )
+            return '{"internal_monologue": "Analyzing causal chain...", "decision": "proceed"}'
 
         result = asyncio.run(
             ImmuneBoundary.enforce(
