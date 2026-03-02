@@ -53,7 +53,7 @@ def _find_transaction(conn, fact_id: int, fact_tx_id: int | None):
     return tx
 
 
-def _verify_chain_link(conn, tx_id: int, prev_hash: str | None) -> tuple[bool, str]:
+def _verify_chain(conn, tx_id: int, prev_hash: str | None) -> tuple[bool, str]:
     if not prev_hash:
         return True, "[green]✅ Valid[/green]"
 
@@ -323,21 +323,17 @@ def audit_trail(project: str, limit: int, db: str) -> None:
             conditions.append("f.project = ?")
             params.append(project)
 
-        where = " AND ".join(conditions)
-        params.append(min(limit, 200))
-
-        rows = conn.execute(
-            """
+        where_clause = " AND ".join(conditions)
+        query = f"""
             SELECT f.id, f.project, f.content, f.fact_type,
                    f.created_at, t.hash
             FROM facts f
             LEFT JOIN transactions t ON f.tx_id = t.id
-            WHERE {where}
+            WHERE {where_clause}
             ORDER BY f.created_at DESC
             LIMIT ?
-            """.format(where=where),  # nosec B608 — parameterized query via internal conditions
-            params,
-        ).fetchall()
+        """
+        rows = conn.execute(query, params).fetchall()
 
         if not rows:
             err_empty_results("audit entries")

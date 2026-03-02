@@ -53,18 +53,17 @@ def _build_audit_trail_query(
         conditions.append("f.created_at >= ?")
         params.append(since)
 
-    where = " AND ".join(conditions)
-
-    query = f"""  # nosec B608 — parameterized query
-        SELECT f.id, f.project, f.content, f.fact_type,
-               f.created_at, f.tags,
-               t.hash, t.prev_hash, t.operation
-        FROM facts f
-        LEFT JOIN transactions t ON t.fact_id = f.id
-        WHERE {where}
-        ORDER BY f.created_at DESC
-        LIMIT ?
-    """
+    where_clause = " AND ".join(conditions)
+    query = (
+        "SELECT f.id, f.project, f.content, f.fact_type,\n"
+        "       f.created_at, f.tags,\n"
+        "       t.hash, t.prev_hash, t.operation\n"
+        "FROM facts f\n"
+        "LEFT JOIN transactions t ON t.fact_id = f.id\n"
+        f"WHERE {where_clause}\n"
+        "ORDER BY f.created_at DESC\n"
+        "LIMIT ?"
+    )
     params.append(limit)
     return query, params
 

@@ -1,19 +1,23 @@
+import logging
 import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 def get_orphaned_browsers():
     """Identify orphaned ms-playwright-go processes."""
     try:
-        # ps aux | grep ms-playwright-go
-        ps = subprocess.check_output(["ps", "aux"], text=True)
+        # /bin/ps aux | grep ms-playwright-go
+        ps = subprocess.check_output(["/bin/ps", "aux"], text=True)
         orphans = [
             line for line in ps.split("\n") if "ms-playwright-go" in line and "grep" not in line
         ]
         return orphans
-    except Exception:
+    except (subprocess.SubprocessError, OSError) as e:
+        logger.debug("Failed to get orphaned browsers: %s", e)
         return []
 
 
