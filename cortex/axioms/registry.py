@@ -2,7 +2,7 @@
 """Canonical Axiom Registry — 22 axioms, zero ambiguity.
 
 Every axiom in the MOSKV-1 ecosystem has exactly ONE definition here.
-All other documents (CODEX.md, MANIFESTO.md, operating-axioms.md, GEMINI.md)
+All other documents (operating-axioms.md, GEMINI.md, docs/internal/*)
 MUST reference axioms by their AX-NNN ID, never redefine them.
 
 Categories:
@@ -142,7 +142,7 @@ _OPERATIONAL: list[Axiom] = [
         ),
         category=AxiomCategory.OPERATIONAL,
         enforcement="Memory boot protocol. snapshot-age check.",
-        ci_gate="Boot sequence in CODEX.md §7",
+        ci_gate="Boot sequence in GEMINI.md Memory Boot Protocol",
     ),
     Axiom(
         id="AX-016",

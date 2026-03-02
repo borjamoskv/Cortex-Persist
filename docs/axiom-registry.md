@@ -11,17 +11,16 @@
 
 ## Taxonomy
 
-| Layer | IDs | Nature | Enforcement | Count |
-|:---|:---|:---|:---|:---:|
-| 🔴 **Constitutional** | AX-001 – AX-003 | Defines what the agent *is* | Identity — not CI-enforceable | 3 |
-| 🔵 **Operational** | AX-010 – AX-019 | Defines how the agent *operates* | CI gates, middleware, lint | 10 |
-| 🟡 **Aspirational** | AX-020 – AX-028 | Guides decisions and culture | Convention, design review | 9 |
+| Layer | IDs | Nature | Count |
+|:---|:---|:---|:---:|
+| 🔴 **Constitutional** | AX-001 – AX-003 | Identity | 3 |
+| 🔵 **Operational** | AX-010 – AX-019 | CI-Enforced | 10 |
+| 🟡 **Aspirational** | AX-020 – AX-028 | Vision | 9 |
 
 **Precedence:** Constitutional > Operational > Aspirational.
 
-**Axiom Cap:** ≤ 25 — No new axioms until enforcement coverage exceeds 60%.
-
 ---
+
 
 ## 🔴 Constitutional (3)
 | ID | Name | Mandate |
@@ -41,7 +40,7 @@
 | **AX-012** | Type Safety | from __future__ import annotations. StrEnum for semantic keys. Zero Any types. m… | quality_gates.yml#Gate-2 |
 | **AX-013** | Async Native | asyncio.to_thread() for blocking I/O. time.sleep() PROHIBITED in async code. | quality_gates.yml#Gate-Async |
 | **AX-014** | Causal Over Correlation | 5 Whys to root cause. Error facts require CAUSE + FIX fields. Patching symptoms … | cortex store --type error format validator |
-| **AX-015** | Contextual Sovereignty | Memory is the only Sovereign Entity. Boot protocol loads snapshot. Acting withou… | Boot sequence in CODEX.md §7 |
+| **AX-015** | Contextual Sovereignty | Memory is the only Sovereign Entity. Boot protocol loads snapshot. Acting withou… | Boot sequence in GEMINI.md Memory Boot Protocol |
 | **AX-016** | Algorithmic Immunity (Nemesis) | The agent knows what it hates. nemesis.md rejects mediocrity, boilerplate, and v… | nemesis.py middleware |
 | **AX-017** | Ledger Integrity | SHA-256 hash chain + Merkle checkpoints + WBFT consensus. Tamper one byte → chai… | quality_gates.yml#Gate-5 + quality_gates.yml#Gate-6 |
 | **AX-018** | Synthetic Heritage | The swarm is born expert, never blank. bloodline.json inherits scars, patterns, … | — |
@@ -93,7 +92,7 @@
 Total Axioms           : 22
 CI-Enforced            : 9 (41%)
 Axiom Cap              : 25
-Inflation Rate Target  : 0 (no new axioms without compaction)
+Inflation Rate Target  : 0
 ```
 
 ---
