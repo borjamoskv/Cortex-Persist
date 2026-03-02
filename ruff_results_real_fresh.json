@@ -1,0 +1,2298 @@
+[
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 48,
+      "row": 119
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa: E402\nfrom cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402\nfrom cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402\nfrom cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402\nfrom cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402\nfrom cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402\nfrom cortex.cli.policy_cmds import policy_cmds as policy_cli  # noqa: E402\nfrom cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402\nfrom cortex.cli.purge import purge as purge_cmd  # noqa: E402\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 121
+          },
+          "location": {
+            "column": 1,
+            "row": 111
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 111
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 111,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 2,
+      "row": 140
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402\nfrom cortex.cli.heal_cmds import cli as heal_cmd\nfrom cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli  # noqa: E402\nfrom cortex.cli.security_cmds import security_cli  # noqa: E402\nfrom cortex.cli.security_hardening_cmds import (  # noqa: E402\n    bridge_audit as bridge_audit_cmd,\n)\nfrom cortex.cli.security_hardening_cmds import (\n    quarantine as quarantine_cmd,\n)\nfrom cortex.cli.security_hardening_cmds import (\n    reap_ghosts as reap_ghosts_cmd,\n)\nfrom cortex.cli.security_hardening_cmds import (\n    unquarantine as unquarantine_cmd,\n)\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 142
+          },
+          "location": {
+            "column": 1,
+            "row": 131
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 131
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 131,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 49,
+      "row": 133
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/__init__.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 133
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 133,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 43,
+      "row": 22
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/heal_cmds.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import asyncio\nimport os\n\n# Fix: some commands might run longer than the 30s timeout if the model takes a while to respond.\n# We will temporarily disable the alarm handler if running this command.\nimport signal\nfrom pathlib import Path\n\nimport click\nimport dotenv\nfrom rich.console import Console\n\nfrom cortex.llm.provider import LLMProvider\nfrom cortex.llm.router import CortexPrompt\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 24
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 9
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 9,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "UP015",
+    "end_location": {
+      "column": 28,
+      "row": 51
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/heal_cmds.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 28,
+            "row": 51
+          },
+          "location": {
+            "column": 23,
+            "row": 51
+          }
+        }
+      ],
+      "message": "Remove mode argument"
+    },
+    "location": {
+      "column": 25,
+      "row": 51
+    },
+    "message": "Unnecessary mode argument",
+    "noqa_row": 51,
+    "url": "https://docs.astral.sh/ruff/rules/redundant-open-modes"
+  },
+  {
+    "cell": null,
+    "code": "B904",
+    "end_location": {
+      "column": 28,
+      "row": 59
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/heal_cmds.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 59
+    },
+    "message": "Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling",
+    "noqa_row": 59,
+    "url": "https://docs.astral.sh/ruff/rules/raise-without-from-inside-except"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 26,
+      "row": 90
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/heal_cmds.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 26,
+            "row": 90
+          },
+          "location": {
+            "column": 21,
+            "row": 90
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `e`"
+    },
+    "location": {
+      "column": 25,
+      "row": 90
+    },
+    "message": "Local variable `e` is assigned to but never used",
+    "noqa_row": 90,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "B904",
+    "end_location": {
+      "column": 28,
+      "row": 94
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/heal_cmds.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 94
+    },
+    "message": "Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling",
+    "noqa_row": 94,
+    "url": "https://docs.astral.sh/ruff/rules/raise-without-from-inside-except"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 13
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/moltbook_cmds.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 14
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Remove unused import: `json`"
+    },
+    "location": {
+      "column": 8,
+      "row": 13
+    },
+    "message": "`json` imported but unused",
+    "noqa_row": 13,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 51,
+      "row": 132
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/slow_tip.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "            import asyncio\n\n            from rich.panel import Panel\n\n            from cortex.cli.common import console\n            from cortex.cli.tips import TipsEngine\n",
+          "end_location": {
+            "column": 1,
+            "row": 133
+          },
+          "location": {
+            "column": 1,
+            "row": 128
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 13,
+      "row": 128
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 128,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 47,
+      "row": 125
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/trust_cmds.py",
+    "fix": null,
+    "location": {
+      "column": 34,
+      "row": 125
+    },
+    "message": "Undefined name `_verify_chain`",
+    "noqa_row": 125,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 36,
+      "row": 338
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/cli/trust_cmds.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n            SELECT f.id, f.project, f.content, f.fact_type,\n                   f.created_at, t.hash\n            FROM facts f\n            LEFT JOIN transactions t ON f.tx_id = t.id\n            WHERE {where}\n            ORDER BY f.created_at DESC\n            LIMIT ?\n            \"\"\"",
+          "end_location": {
+            "column": 36,
+            "row": 338
+          },
+          "location": {
+            "column": 13,
+            "row": 330
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 13,
+      "row": 330
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 338,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "UP015",
+    "end_location": {
+      "column": 28,
+      "row": 35
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/compaction/strategies/fix_sync.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 28,
+            "row": 35
+          },
+          "location": {
+            "column": 23,
+            "row": 35
+          }
+        }
+      ],
+      "message": "Remove mode argument"
+    },
+    "location": {
+      "column": 25,
+      "row": 35
+    },
+    "message": "Unnecessary mode argument",
+    "noqa_row": 35,
+    "url": "https://docs.astral.sh/ruff/rules/redundant-open-modes"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 36,
+      "row": 98
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/compaction/strategies/lateral.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n            SELECT f.id,\n                   (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as sim\n            FROM facts f\n            JOIN fact_embeddings v ON f.id = v.fact_id\n            WHERE f.project = ?\n              AND f.valid_until IS NULL\n              AND f.confidence IN ({marks})\n              AND vec_distance_cosine(v.embedding, ?) < ?\n            \"\"\"",
+          "end_location": {
+            "column": 36,
+            "row": 98
+          },
+          "location": {
+            "column": 13,
+            "row": 89
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 13,
+      "row": 89
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 98,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 5
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/compaction/strategies/merge_errors.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 5
+          }
+        }
+      ],
+      "message": "Remove unused import: `json`"
+    },
+    "location": {
+      "column": 8,
+      "row": 5
+    },
+    "message": "`json` imported but unused",
+    "noqa_row": 5,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 23,
+      "row": 153
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/engine/__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "        import sqlite3\n\n        from cortex.database.core import connect\n",
+          "end_location": {
+            "column": 1,
+            "row": 154
+          },
+          "location": {
+            "column": 1,
+            "row": 152
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 9,
+      "row": 152
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 152,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 32,
+      "row": 256
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/episodic/boot.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n            SELECT id, project, content, fact_type, created_at\n            FROM facts\n            WHERE {where}\n            ORDER BY created_at DESC\n            LIMIT ?\n        \"\"\"",
+          "end_location": {
+            "column": 32,
+            "row": 256
+          },
+          "location": {
+            "column": 17,
+            "row": 250
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 17,
+      "row": 250
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 256,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 109,
+      "row": 58
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/graph/backends/sqlite/algorithms.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"SELECT id, name, entity_type FROM entities WHERE name IN ({placeholders})\"",
+          "end_location": {
+            "column": 109,
+            "row": 58
+          },
+          "location": {
+            "column": 18,
+            "row": 58
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 18,
+      "row": 58
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 58,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 103,
+      "row": 100
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/graph/backends/sqlite/algorithms.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight\n                FROM entity_relations er\n                JOIN entities e1 ON er.source_entity_id = e1.id\n                JOIN entities e2 ON er.target_entity_id = e2.id\n                WHERE er.source_entity_id IN ({phs}) OR target_entity_id IN ({phs})\"\"\"",
+          "end_location": {
+            "column": 103,
+            "row": 100
+          },
+          "location": {
+            "column": 13,
+            "row": 96
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 13,
+      "row": 96
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 100,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 37,
+      "row": 56
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/graph/backends/sqlite/query.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n            SELECT id, source_entity_id, target_entity_id, relation_type, weight\n            FROM entity_relations\n            WHERE source_entity_id IN ({placeholders}) OR target_entity_id IN ({placeholders})\n        \"\"\"",
+          "end_location": {
+            "column": 37,
+            "row": 56
+          },
+          "location": {
+            "column": 22,
+            "row": 52
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 22,
+      "row": 52
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 56,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 41,
+      "row": 121
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/graph/backends/sqlite/query.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n            SELECT id, source_entity_id, target_entity_id, relation_type, weight \n            FROM entity_relations \n            WHERE source_entity_id IN ({placeholders}) OR target_entity_id IN ({placeholders})\n            \"\"\"",
+          "end_location": {
+            "column": 41,
+            "row": 121
+          },
+          "location": {
+            "column": 13,
+            "row": 117
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 13,
+      "row": 117
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 121,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 11
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/guards/seals.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `ast`"
+    },
+    "location": {
+      "column": 8,
+      "row": 11
+    },
+    "message": "`ast` imported but unused",
+    "noqa_row": 11,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 10,
+      "row": 13
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/guards/seals.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 14
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Remove unused import: `os`"
+    },
+    "location": {
+      "column": 8,
+      "row": 13
+    },
+    "message": "`os` imported but unused",
+    "noqa_row": 13,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 23,
+      "row": 17
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/guards/seals.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 18
+          },
+          "location": {
+            "column": 1,
+            "row": 17
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Any`"
+    },
+    "location": {
+      "column": 20,
+      "row": 17
+    },
+    "message": "`typing.Any` imported but unused",
+    "noqa_row": 17,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "UP015",
+    "end_location": {
+      "column": 31,
+      "row": 133
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/guards/seals.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 31,
+            "row": 133
+          },
+          "location": {
+            "column": 26,
+            "row": 133
+          }
+        }
+      ],
+      "message": "Remove mode argument"
+    },
+    "location": {
+      "column": 28,
+      "row": 133
+    },
+    "message": "Unnecessary mode argument",
+    "noqa_row": 133,
+    "url": "https://docs.astral.sh/ruff/rules/redundant-open-modes"
+  },
+  {
+    "cell": null,
+    "code": "UP015",
+    "end_location": {
+      "column": 35,
+      "row": 154
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/guards/seals.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 35,
+            "row": 154
+          },
+          "location": {
+            "column": 30,
+            "row": 154
+          }
+        }
+      ],
+      "message": "Remove mode argument"
+    },
+    "location": {
+      "column": 32,
+      "row": 154
+    },
+    "message": "Unnecessary mode argument",
+    "noqa_row": 154,
+    "url": "https://docs.astral.sh/ruff/rules/redundant-open-modes"
+  },
+  {
+    "cell": null,
+    "code": "UP032",
+    "end_location": {
+      "column": 28,
+      "row": 67
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/mcp/trust_tools.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"\"\"\n        SELECT f.id, f.project, f.content, f.fact_type,\n               f.created_at, f.tags,\n               t.hash, t.prev_hash, t.operation\n        FROM facts f\n        LEFT JOIN transactions t ON t.fact_id = f.id\n        WHERE {where}\n        ORDER BY f.created_at DESC\n        LIMIT ?\n    \"\"\"",
+          "end_location": {
+            "column": 28,
+            "row": 67
+          },
+          "location": {
+            "column": 13,
+            "row": 58
+          }
+        }
+      ],
+      "message": "Convert to f-string"
+    },
+    "location": {
+      "column": 13,
+      "row": 58
+    },
+    "message": "Use f-string instead of `format` call",
+    "noqa_row": 67,
+    "url": "https://docs.astral.sh/ruff/rules/f-string"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 64,
+      "row": 40
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/memory/manager.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    from cortex.memory.semantic_ram import DynamicSemanticSpace\n    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2\n",
+          "end_location": {
+            "column": 1,
+            "row": 41
+          },
+          "location": {
+            "column": 1,
+            "row": 39
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 39
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 39,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 75,
+      "row": 25
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/migrations/registry.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from cortex.migrations.mig_base import (\n    _migration_001_add_updated_at,\n    _migration_002_add_indexes,\n    _migration_003_enable_wal,\n    _migration_004_vector_index,\n    _migration_005_fts5_setup,\n)\nfrom cortex.migrations.mig_consensus import (\n    _migration_007_consensus_layer,\n    _migration_008_consensus_refinement,\n    _migration_009_reputation_consensus,\n)\nfrom cortex.migrations.mig_fts import _migration_017_fts_decouple\nfrom cortex.migrations.mig_graph import _migration_006_graph_memory\nfrom cortex.migrations.mig_ha import _migration_013_cluster_nodes\nfrom cortex.migrations.mig_hash import _migration_016_add_fact_hash\nfrom cortex.migrations.mig_ledger import (\n    _migration_010_immutable_ledger,\n    _migration_011_link_facts_to_tx,\n    _migration_012_ghosts_table,\n    _migration_014_vote_ledger_refinement,\n)\nfrom cortex.migrations.mig_security_hardening import _migration_018_security_hardening\nfrom cortex.migrations.mig_signals import _migration_019_signal_bus\nfrom cortex.migrations.mig_tenant import _migration_015_tenant_unification\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 27
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 1
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 1,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 56,
+      "row": 5
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from cortex.moltbook.client import MoltbookClient\nfrom cortex.moltbook.heartbeat import MoltbookHeartbeat\nfrom cortex.moltbook.verification import solve_challenge\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 3
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 3,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 44,
+      "row": 16
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/client.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport json\nimport logging\nimport os\nimport time\nfrom pathlib import Path\nfrom typing import Any, Optional\nfrom urllib.error import HTTPError\nfrom urllib.request import Request, urlopen\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 7
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 46,
+      "row": 51
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/client.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 46,
+            "row": 51
+          },
+          "location": {
+            "column": 33,
+            "row": 51
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 33,
+      "row": 51
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 51,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 88
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/client.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "dict | None",
+          "end_location": {
+            "column": 29,
+            "row": 88
+          },
+          "location": {
+            "column": 15,
+            "row": 88
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 15,
+      "row": 88
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 88,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 19,
+      "row": 25
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/heartbeat.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    import asyncio\n\n    from cortex.nexus_v8 import NexusWorldModel, moltbook_post_published\n",
+          "end_location": {
+            "column": 1,
+            "row": 26
+          },
+          "location": {
+            "column": 1,
+            "row": 24
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 24
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 24,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 56,
+      "row": 40
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/heartbeat.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "MoltbookClient | None",
+          "end_location": {
+            "column": 56,
+            "row": 40
+          },
+          "location": {
+            "column": 32,
+            "row": 40
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 32,
+      "row": 40
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 40,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 30,
+      "row": 6
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import: `datetime.datetime`"
+    },
+    "location": {
+      "column": 22,
+      "row": 6
+    },
+    "message": "`datetime.datetime` imported but unused",
+    "noqa_row": 6,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 22,
+      "row": 33
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 22,
+            "row": 33
+          },
+          "location": {
+            "column": 9,
+            "row": 33
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 9,
+      "row": 33
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 33,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 32,
+      "row": 41
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 32,
+            "row": 41
+          },
+          "location": {
+            "column": 19,
+            "row": 41
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 19,
+      "row": 41
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 41,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 27,
+      "row": 50
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 27,
+            "row": 50
+          },
+          "location": {
+            "column": 14,
+            "row": 50
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 14,
+      "row": 50
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 50,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 23,
+      "row": 51
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 23,
+            "row": 51
+          },
+          "location": {
+            "column": 10,
+            "row": 51
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 10,
+      "row": 51
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 51,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 55
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Author | None",
+          "end_location": {
+            "column": 29,
+            "row": 55
+          },
+          "location": {
+            "column": 13,
+            "row": 55
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 13,
+      "row": 55
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 55,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 31,
+      "row": 56
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Submolt | None",
+          "end_location": {
+            "column": 31,
+            "row": 56
+          },
+          "location": {
+            "column": 14,
+            "row": 56
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 14,
+      "row": 56
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 56,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 39,
+      "row": 57
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 39,
+            "row": 57
+          },
+          "location": {
+            "column": 26,
+            "row": 57
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 26,
+      "row": 57
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 57,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 41,
+      "row": 58
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Verification | None",
+          "end_location": {
+            "column": 41,
+            "row": 58
+          },
+          "location": {
+            "column": 19,
+            "row": 58
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 19,
+      "row": 58
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 58,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 30,
+      "row": 59
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 30,
+            "row": 59
+          },
+          "location": {
+            "column": 17,
+            "row": 59
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 17,
+      "row": 59
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 59,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 70
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Author | None",
+          "end_location": {
+            "column": 29,
+            "row": 70
+          },
+          "location": {
+            "column": 13,
+            "row": 70
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 13,
+      "row": 70
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 70,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 71
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 29,
+            "row": 71
+          },
+          "location": {
+            "column": 16,
+            "row": 71
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 16,
+      "row": 71
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 71,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 27,
+      "row": 72
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 27,
+            "row": 72
+          },
+          "location": {
+            "column": 14,
+            "row": 72
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 14,
+      "row": 72
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 72,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 30,
+      "row": 73
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 30,
+            "row": 73
+          },
+          "location": {
+            "column": 17,
+            "row": 73
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 17,
+      "row": 73
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 73,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 41,
+      "row": 74
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Verification | None",
+          "end_location": {
+            "column": 41,
+            "row": 74
+          },
+          "location": {
+            "column": 19,
+            "row": 74
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 19,
+      "row": 74
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 74,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 30,
+      "row": 81
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 30,
+            "row": 81
+          },
+          "location": {
+            "column": 17,
+            "row": 81
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 17,
+      "row": 81
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 81,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 82
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 29,
+            "row": 82
+          },
+          "location": {
+            "column": 16,
+            "row": 82
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 16,
+      "row": 82
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 82,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 43,
+      "row": 83
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 43,
+            "row": 83
+          },
+          "location": {
+            "column": 30,
+            "row": 83
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 30,
+      "row": 83
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 83,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 33,
+      "row": 96
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/models.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "dict | None",
+          "end_location": {
+            "column": 33,
+            "row": 96
+          },
+          "location": {
+            "column": 19,
+            "row": 96
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 19,
+      "row": 96
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 96,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "F541",
+    "end_location": {
+      "column": 43,
+      "row": 317
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/sigint.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"\\nBlueprint Analysis:\"",
+          "end_location": {
+            "column": 43,
+            "row": 317
+          },
+          "location": {
+            "column": 19,
+            "row": 317
+          }
+        }
+      ],
+      "message": "Remove extraneous `f` prefix"
+    },
+    "location": {
+      "column": 19,
+      "row": 317
+    },
+    "message": "f-string without any placeholders",
+    "noqa_row": 317,
+    "url": "https://docs.astral.sh/ruff/rules/f-string-missing-placeholders"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 41,
+      "row": 35
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/skills/cortex-memory/scripts/memory_engine.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "bytes | None",
+          "end_location": {
+            "column": 41,
+            "row": 35
+          },
+          "location": {
+            "column": 26,
+            "row": 35
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 26,
+      "row": 35
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 35,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "B905",
+    "end_location": {
+      "column": 82,
+      "row": 51
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/skills/cortex-memory/scripts/memory_engine.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": ", strict=False",
+          "end_location": {
+            "column": 81,
+            "row": 51
+          },
+          "location": {
+            "column": 81,
+            "row": 51
+          }
+        }
+      ],
+      "message": "Add explicit value for parameter `strict=`"
+    },
+    "location": {
+      "column": 41,
+      "row": 51
+    },
+    "message": "`zip()` without an explicit `strict=` parameter",
+    "noqa_row": 51,
+    "url": "https://docs.astral.sh/ruff/rules/zip-without-explicit-strict"
+  },
+  {
+    "cell": null,
+    "code": "B905",
+    "end_location": {
+      "column": 82,
+      "row": 63
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/skills/cortex-memory/scripts/memory_engine.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": ", strict=False",
+          "end_location": {
+            "column": 81,
+            "row": 63
+          },
+          "location": {
+            "column": 81,
+            "row": 63
+          }
+        }
+      ],
+      "message": "Add explicit value for parameter `strict=`"
+    },
+    "location": {
+      "column": 40,
+      "row": 63
+    },
+    "message": "`zip()` without an explicit `strict=` parameter",
+    "noqa_row": 63,
+    "url": "https://docs.astral.sh/ruff/rules/zip-without-explicit-strict"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 30,
+      "row": 21
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/skills/sovereign-code-scorer/scripts/sovereign_scorer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport ast\nimport json\nimport os\nimport re\nimport sys\nfrom pathlib import Path\nfrom typing import NamedTuple\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 24
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 13
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 13,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 10,
+      "row": 18
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/skills/sovereign-code-scorer/scripts/sovereign_scorer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 19
+          },
+          "location": {
+            "column": 1,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Remove unused import: `re`"
+    },
+    "location": {
+      "column": 8,
+      "row": 18
+    },
+    "message": "`re` imported but unused",
+    "noqa_row": 18,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 64,
+      "row": 112
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/verification.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "float | None",
+          "end_location": {
+            "column": 64,
+            "row": 112
+          },
+          "location": {
+            "column": 49,
+            "row": 112
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 49,
+      "row": 112
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 112,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 79,
+      "row": 112
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/verification.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 79,
+            "row": 112
+          },
+          "location": {
+            "column": 66,
+            "row": 112
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 66,
+      "row": 112
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 112,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 96,
+      "row": 112
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/verification.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "float | None",
+          "end_location": {
+            "column": 96,
+            "row": 112
+          },
+          "location": {
+            "column": 81,
+            "row": 112
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 81,
+      "row": 112
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 112,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 29,
+      "row": 161
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/verification.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 29,
+            "row": 161
+          },
+          "location": {
+            "column": 16,
+            "row": 161
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 16,
+      "row": 161
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 161,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "UP045",
+    "end_location": {
+      "column": 58,
+      "row": 220
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/moltbook/verification.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "str | None",
+          "end_location": {
+            "column": 58,
+            "row": 220
+          },
+          "location": {
+            "column": 45,
+            "row": 220
+          }
+        }
+      ],
+      "message": "Convert to `X | None`"
+    },
+    "location": {
+      "column": 45,
+      "row": 220
+    },
+    "message": "Use `X | None` for type annotations",
+    "noqa_row": 220,
+    "url": "https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 20,
+      "row": 19
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/sap/client.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    import warnings\n    from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405\n",
+          "end_location": {
+            "column": 1,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 18
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 18,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "E741",
+    "end_location": {
+      "column": 61,
+      "row": 194
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/security/anomaly_detector.py",
+    "fix": null,
+    "location": {
+      "column": 60,
+      "row": 194
+    },
+    "message": "Ambiguous variable name: `l`",
+    "noqa_row": 194,
+    "url": "https://docs.astral.sh/ruff/rules/ambiguous-variable-name"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 49,
+      "row": 14
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/skills/__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from cortex.skills.composer import SkillComposer\nfrom cortex.skills.graph import SkillGraph\nfrom cortex.skills.registry import SkillManifest, SkillRegistry\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 12
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 12,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 10,
+      "row": 14
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/skills/registry.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import: `os`"
+    },
+    "location": {
+      "column": 8,
+      "row": 14
+    },
+    "message": "`os` imported but unused",
+    "noqa_row": 14,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "UP037",
+    "end_location": {
+      "column": 66,
+      "row": 143
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/skills/registry.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "SkillRegistry",
+          "end_location": {
+            "column": 66,
+            "row": 143
+          },
+          "location": {
+            "column": 51,
+            "row": 143
+          }
+        }
+      ],
+      "message": "Remove quotes"
+    },
+    "location": {
+      "column": 51,
+      "row": 143
+    },
+    "message": "Remove quotes from type annotation",
+    "noqa_row": 143,
+    "url": "https://docs.astral.sh/ruff/rules/quoted-annotation"
+  },
+  {
+    "cell": null,
+    "code": "UP037",
+    "end_location": {
+      "column": 40,
+      "row": 181
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/skills/registry.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "SkillRegistry",
+          "end_location": {
+            "column": 40,
+            "row": 181
+          },
+          "location": {
+            "column": 25,
+            "row": 181
+          }
+        }
+      ],
+      "message": "Remove quotes"
+    },
+    "location": {
+      "column": 25,
+      "row": 181
+    },
+    "message": "Remove quotes from type annotation",
+    "noqa_row": 181,
+    "url": "https://docs.astral.sh/ruff/rules/quoted-annotation"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 23,
+      "row": 14
+    },
+    "filename": "/Users/borjafernandezangulo/cortex/cortex/sovereign/observability.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport logging\nimport time\nfrom dataclasses import dataclass, field\nfrom enum import Enum\nfrom typing import Any\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 7
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  }
+]
