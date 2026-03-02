@@ -44,6 +44,24 @@ Meanwhile, the **EU AI Act (Article 12, enforcement: August 2026)** demands:
 
 **Fines: up to €30M or 6% of global revenue.** The clock is ticking.
 
+## What CORTEX Makes Impossible
+
+> *The most valuable guarantee of a system is not what it does — it's what it makes architecturally unreachable.*
+
+| Failure | Without CORTEX | Guarantee |
+|:--------|:--------------|:---------:|
+| **Session Amnesia** | Every session is T₀. Months of decisions vanish. Agents reconstruct from hallucination. | `STRUCTURAL` |
+| **Repeated Errors** | Same architectural mistake, re-diagnosed from scratch. Learning curve resets per conversation. | `BEHAVIORAL` |
+| **Fabricated History** | LLM invents coherent rationale for decisions never made. Indistinguishable from truth. | `CRYPTOGRAPHIC` |
+| **Ghost Accumulation** | Incomplete work is invisible. Work restarts silently from scratch. Infinite waste loop. | `STRUCTURAL` |
+| **Multi-Agent Divergence** | Two agents build different realities. Silent conflict until production. | `CONSENSUS` |
+
+**CORTEX doesn't test whether your agent behaves like it remembers. It makes not-remembering structurally impossible.**
+
+→ Full technical reference: [docs/impossible-failures.md](docs/impossible-failures.md)
+
+---
+
 ## The Solution
 
 CORTEX doesn't replace your memory layer — it **certifies** it.
