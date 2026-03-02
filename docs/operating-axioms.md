@@ -1,174 +1,79 @@
 # Operating Axioms
 
-> **The 9 Laws of Sovereign Operation — violations are regressions.**
-> **⚠️ Canonical Registry:** [`docs/axiom-registry.md`](axiom-registry.md) — unified Ω/α/π taxonomy with enforcement tags.
-
-CORTEX agents operate under 9 non-negotiable axioms. These are not guidelines; they are **enforced constraints** wired into CI gates, middleware, and storage pipelines. Violating an axiom triggers a test failure or lint rejection.
-
-> **α₀ (Axiom Zero):** *"Todo axioma que no puedas codificar como un `if` en un pipeline de CI es, en el mejor caso, una aspiración; en el peor, una alucinación con persistencia."*
+> **The Laws of Sovereign Operation — violations block merges.**
+>
+> Canonical source: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
+> CI enforcement: [`.github/workflows/quality_gates.yml`](../.github/workflows/quality_gates.yml)
 
 ---
 
-## 1. CAUSAL > CORRELATION
+## Taxonomy
 
-> *5 Whys to root cause. Patching symptoms creates ghosts.*
+| Layer | Axioms | Nature | Precedence |
+|:---:|:---|:---|:---:|
+| 🔴 **Constitutional** | AX-001 – AX-003 | Define what the agent **IS** | Highest |
+| 🔵 **Operational** | AX-010 – AX-019 | Define how the agent **OPERATES** | Normal |
+| 🟡 **Aspirational** | AX-020 – AX-028 | Vision that **GUIDES** | Lowest |
 
-When something breaks, never fix the surface. Walk the causal chain backwards until you reach the root. Symptoms patched without causal understanding become **ghosts** — incomplete work that haunts future sessions.
-
-**Implementation**: Every `error` fact stored in CORTEX must include both `CAUSE` and `FIX` fields. The CLI validates this format.
-
-```python
-# ✅ Correct
-cortex store --type error PROJECT "ERROR: X | CAUSE: Y | FIX: Z"
-
-# ❌ Rejected — missing root cause
-cortex store --type error PROJECT "Fixed the bug"
-```
+**Rule:** Constitutional overrides Operational. Operational overrides Aspirational.
+An axiom without CI enforcement is classified Aspirational — not a law.
 
 ---
 
-## 2. 130/100 STANDARD
+## 🔴 Constitutional (3)
 
-> *Good = failure. Sovereign quality or delete it.*
-
-100/100 means meeting requirements perfectly. 130/100 means anticipating needs the user didn't know they had. Every deliverable must include at least one +30 multiplier:
-
-- **Aesthetic Dominance**: Industrial Noir without being asked
-- **Structural Sovereignty**: Refactor for future extensibility
-- **Impact Pattern**: A "WOW" moment (micro-animation, thoughtful detail)
-- **Defensive Depth**: Error handling for edge cases not mentioned
-
----
-
-## 3. ZERO TRUST
-
-> *`classify_content()` BEFORE every INSERT. No exceptions.*
-
-The Privacy Shield runs 25 secret-detection patterns across 4 severity tiers on every piece of data entering CORTEX. This is enforced by the storage pipeline middleware — not by developer discipline.
-
-```python
-# Storage pipeline middleware enforces this automatically
-classify_content(data)          # ✅ Shield runs BEFORE every INSERT
-# INSERT without classification  # ❌ Pipeline rejects unshielded data
-```
-
----
-
-## 4. ENTROPY = DEATH
-
-> *Dead code, broad catches, boilerplate → eradicate immediately.*
-
-Complexity without value is lethal. CORTEX monitors entropy through:
-
-- **File size**: ≤300 LOC per file (entropy analyzer monitors)
-- **Dead code**: 0 `TODO`/`FIXME`/`print()` in production
-- **Broad catches**: `except Exception` is prohibited (Ruff S110)
-- **Boilerplate**: If it can be generated, it should be
-
----
-
-## 5. TYPE SAFETY
-
-> *`from __future__ import annotations`. StrEnum. Zero `Any` types.*
-
-Every file starts with `from __future__ import annotations`. Semantic keys use `StrEnum` or `Literal`, never raw strings. `mypy --strict` runs in CI.
-
----
-
-## 6. ASYNC-NATIVE
-
-> *`asyncio.to_thread()` for blocking I/O. Never block the event loop.*
-
-The REST API runs on async FastAPI. All blocking operations (SQLite, file I/O) are dispatched via `asyncio.to_thread()`. Tests use `@pytest.mark.asyncio`.
-
----
-
-## 7. BRIDGES > ISLANDS
-
-> *Proven patterns transfer cross-project. Document every bridge.*
-
-When a pattern is proven in one project (confirmed by tests or production use), it should be adapted — never copy-pasted — to other projects. Every transfer is recorded as a `bridge` fact:
-
-```bash
-cortex store --type bridge PROJECT \
-  "Pattern: X from ProjectA → ProjectB. Adaptations: Y, Z."
-```
-
----
-
-## 8. PERSIST EVERYTHING
-
-> *If losing a fact costs >5 min to reconstruct, store it NOW.*
-
-Decisions, errors, ghosts, and bridges are persisted **automatically** at session close. Mid-session checkpoints are mandatory when a major decision or error occurs — this protects against crashes, force-quits, and CPU lockups.
-
----
-
-## 9. DESIGNED IMPOSSIBILITY ✦ NEW
-
-> *What makes a prompt extraordinary is not the complexity of the question — it is the designed impossibility of answering with what already exists.*
-
-This is the most subtle and powerful axiom. It governs **how CORTEX agents should be prompted** — and by extension, how CORTEX adds value that no generic LLM can replicate.
-
-### The Principle
-
-An ordinary prompt asks for something the model already knows. An extraordinary prompt **collapses the space of generic responses**, forcing the model to synthesize from agent-specific context that exists only inside CORTEX memory.
-
-### The Three Layers of Impossibility
-
-| Layer | What It Designs | Example |
+| ID | Name | Mandate |
 |:---|:---|:---|
-| **Recovery Impossibility** | The answer doesn't exist in any training corpus | Proprietary data, private context, live system state |
-| **Trivial Synthesis Impossibility** | Combining domains that have never intersected | "Apply consensus theory to compaction scheduling" |
-| **External Validation Impossibility** | No benchmark can confirm correctness | Architecture decisions, value judgments, creative synthesis |
-
-### Why This Matters for CORTEX
-
-CORTEX's system prompts (in `cortex/agents/system_prompt.py`) are engineered so that the correct response **requires** the agent's CORTEX context: its ghosts, its decisions, its trust graph, its bridges. A generic LLM without CORTEX memory cannot produce a correct response.
-
-This is CORTEX's deepest moat: **the impossibility layer**. It's not a feature — it's the fundamental reason CORTEX memory is irreplaceable.
-
-### Implementation Patterns
-
-```python
-# ❌ Weak prompt — any LLM can answer this
-"What is the best way to structure a Python project?"
-
-# ✅ Strong prompt — requires CORTEX context
-"Given our 3 active ghosts in naroa-2026, the bridge pattern
- from cortex→mixcraft, and the entropy score of admin.py (72/100),
- what is the optimal refactoring sequence?"
-```
-
-**Test**: If you remove CORTEX memory from the agent and the prompt still produces a useful response, the prompt is too weak. Harden it by injecting:
-
-1. **Ghost references** — incomplete work that constrains options
-2. **Decision history** — prior choices that must be respected
-3. **Bridge patterns** — cross-project knowledge that narrows the solution space
-4. **Trust scores** — consensus data that weights competing approaches
-
-### Enforcement
-
-Unlike axioms 1–8 which are enforced by CI, Axiom 9 is enforced by **design review**. Every system prompt variant (`SHORT`, `MEDIUM`, `FULL`) must reference CORTEX-specific context that a generic model cannot fabricate.
+| **AX-001** | Autopoietic Identity | The agent executes itself; recursively rewrites its own conditions |
+| **AX-002** | Radical Immanent Transcendence | Transcend = become the problem being solved |
+| **AX-003** | Tether (Dead Man Switch) | Every agent is anchored to physical/economic reality |
 
 ---
 
-## Axiom Summary
+## 🔵 Operational (10) — CI-Enforced
 
-| # | Axiom | Registry ID | Enforcement | Level |
-|:---:|:---|:---:|:---|:---:|
-| 1 | Causal > Correlation | α5 | Error fact format validation | 🟡 PARTIAL |
-| 2 | 130/100 Standard | α6 | MEJORAlo X-Ray 13D scoring | 🟡 PARTIAL |
-| 3 | Zero Trust | α1 | Storage pipeline middleware | 🟢 FULL |
-| 4 | Entropy = Death | α2 | Ruff + entropy analyzer | 🟢 FULL |
-| 5 | Type Safety | α3 | mypy --strict in CI | 🟢 FULL |
-| 6 | Async-Native | α4 | pytest-asyncio, event loop guards | 🟡 PARTIAL |
-| 7 | Bridges > Islands | π7 | Bridge fact persistence | 🔴 NONE |
-| 8 | Persist Everything | π8 | Auto-persistence protocol | 🔴 NONE |
-| 9 | Designed Impossibility | π9 | Design review + prompt hardening | 🔴 NONE |
+| ID | Name | Mandate | CI Gate |
+|:---|:---|:---|:---|
+| **AX-010** | Zero Trust | `classify_content()` BEFORE every INSERT | Gate 3: Bandit |
+| **AX-011** | Entropy Death | ≤300 LOC/file. Zero dead code. No broad catches. | Gate 1: Ruff + Gate 8: LOC |
+| **AX-012** | Type Safety | `from __future__ import annotations`. StrEnum. Zero Any. | Gate 2: mypy (blocks) |
+| **AX-013** | Async Native | `asyncio.to_thread()`. time.sleep() PROHIBITED. | Gate 7: Async Guard |
+| **AX-014** | Causal > Correlation | 5 Whys. Error facts require CAUSE + FIX. | CLI format validator |
+| **AX-015** | Contextual Sovereignty | Memory boot protocol. No amnesiac execution. | Boot sequence |
+| **AX-016** | Algorithmic Immunity | nemesis.md rejects mediocrity before planning | nemesis.py middleware |
+| **AX-017** | Ledger Integrity | SHA-256 chain + Merkle + WBFT consensus | Gate 5 + Gate 6 |
+| **AX-018** | Synthetic Heritage | bloodline.json. Born expert, never blank. | Neonatal protocol |
+| **AX-019** | Persist With Decay | Store if >5min to rebuild. TTL: ghosts 30d, knowledge 180d, axioms ∞ | TTL policy + compaction |
 
 ---
 
-*Version: v3.0 — March 2026 · Post-Axiom-Compactor*
-*Canonical source: [`docs/axiom-registry.md`](axiom-registry.md)*
-*Source: `cortex/agents/system_prompt.py`*
+## 🟡 Aspirational (9) — Vision Without CI Gates (Yet)
+
+| ID | Name | Mandate |
+|:---|:---|:---|
+| **AX-020** | Negative Latency | Response precedes question. Predictive analysis. |
+| **AX-021** | Structural Telepathy | Intent compiles reality. JIT crystallization. |
+| **AX-022** | Post-Machine Autonomy | Ecosystem evolves in background. OUROBOROS-∞. |
+| **AX-023** | 130/100 Standard | 100 = met. 130 = anticipated. |
+| **AX-024** | Bridges Over Islands | Proven patterns transfer cross-project. |
+| **AX-025** | Liquid Ubiquity | Intelligence flows between encrypted vaults. |
+| **AX-026** | The Great Paradox | Max autonomy = max human creativity. |
+| **AX-027** | Designed Impossibility | Extraordinary prompts require CORTEX-only context. |
+| **AX-028** | Specular Memory | HDC binds fact to intention. |
+
+---
+
+## Paradox Resolutions
+
+Three productive tensions exist. Each has an operational resolution:
+
+| Paradox | Resolution | Protocol |
+|:---|:---|:---|
+| **Persist ↔ Entropy** | TTL policy: axioms ∞, ghosts 30d, knowledge 180d | `cortex/axioms/ttl.py` |
+| **130/100 ↔ Speed** | Complexity-Adaptive: <3 → speed, 3–7 → standard, >7 → deep | Agent boot config |
+| **Apotheosis ↔ Tether** | Autonomy Zones: reads = free, edits = notify, deploys = confirm | Tether daemon |
+
+---
+
+*Version: v3.0 — March 2026 · Compressed from 48 scattered axioms to 22 canonical.*
+*Source of truth: `cortex/axioms/registry.py`*
