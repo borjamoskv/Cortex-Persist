@@ -41,11 +41,14 @@ class ApotheosisEngine:
         # 150/100: Predictive Inertia State
         self._cognitive_weight: float = 0.0
         self._inertia_threshold: float = 0.7
-        self._last_priorities: list = []
+        self._memory_manager = None
+        self._memory_l1 = None
+        self._memory_l3 = None
         self._rem = None
         self._signal_bus = None
         self._ignited_tasks: set[str] = set()
         self._reflex_tasks: set[asyncio.Task] = set()
+        self._oracle = None  # ForgettingOracle (lazy init)
 
         if cortex_engine:
             if hasattr(cortex_engine, "db"):
@@ -99,6 +102,10 @@ class ApotheosisEngine:
 
             if consecutive_clean >= 5 and self._rem:
                 await self._rem.enter_rem()
+                # 🔮 Trigger ForgettingOracle audit during calm phase (Ω₅)
+                oracle_task = asyncio.create_task(self._oracle_audit())
+                self._reflex_tasks.add(oracle_task)
+                oracle_task.add_done_callback(self._reflex_tasks.discard)
 
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
@@ -113,6 +120,41 @@ class ApotheosisEngine:
         if dopamine > 0.9 and growth > 0.8:
             logger.warning("🌌 [SINGULARITY-Ω] High Coherent.")
             await manifest_singularity(self._signal_bus)
+
+    async def _oracle_audit(self) -> None:
+        """Ejecuta la auditoría de olvido en segundo plano (Ω₅)."""
+        if not self._cortex:
+            return
+        try:
+            from cortex.engine.forgetting_oracle import ForgettingOracle
+
+            if self._oracle is None:
+                # Obtener referencia al caché del motor optimizado si existe
+                cache_ref = getattr(self._cortex, "_cache", None)
+                # Pass L1 reference so Oracle reads real access frequency data,
+                # not the transaction-count approximation ghost (Ω₁ + Ω₂).
+                self._oracle = ForgettingOracle(
+                    self._cortex,
+                    cache_ref=cache_ref,
+                    l1_ref=self._memory_l1,
+                )
+
+            report = await self._oracle.evaluate(window=100)
+            if report.regret_rate > ForgettingOracle.REGRET_THRESHOLD:
+                ENDOCRINE.pulse(
+                    HormoneType.CORTISOL,
+                    +0.15,
+                    reason=f"MemoryRegret:{report.regret_rate:.0%}",
+                )
+                logger.warning(
+                    "🔮 [ORACLE] High regret rate (%.0f%%). Policy: %s. Cortisol +15%%.",
+                    report.regret_rate * 100,
+                    report.recommendation.value,
+                )
+            else:
+                ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.05)
+        except Exception as e:
+            logger.debug("[ORACLE] Audit skipped: %s", e)
 
     def _apply_hormonal_shifts(self, adrenaline: float, cortisol: float, dopamine: float) -> float:
         inertia = 1.0 - self._cognitive_weight
