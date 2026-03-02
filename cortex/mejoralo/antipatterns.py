@@ -27,8 +27,8 @@ __all__ = ["scan_antipatterns", "AntipatternFinding", "AntipatternReport"]
 logger = logging.getLogger("cortex.mejoralo.antipatterns")
 
 # Scanner 4 (Import Graph) → delegated to _scanner_import_graph to respect LOC barrier
-from cortex.mejoralo._scanner_import_graph import (
-    run_graph_scanners as _run_graph_scanners,  # noqa: E402
+from cortex.mejoralo._scanner_import_graph import (  # noqa: E402
+    run_graph_scanners as _run_graph_scanners,
 )
 
 # Scanners 1 & 2 (BroadException + AsyncIntegrity) → _scanner_visitors

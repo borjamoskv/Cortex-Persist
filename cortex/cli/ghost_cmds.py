@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from cortex.core.paths import SKILLS_DIR
 
 __all__ = [
     "GHOST_SKILL_PATH",
@@ -24,8 +25,6 @@ __all__ = [
 ]
 
 console = Console()
-
-from cortex.core.paths import SKILLS_DIR
 
 GHOST_SKILL_PATH = SKILLS_DIR / "ghost-control" / "ghost.py"
 

@@ -15,12 +15,13 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
+
 logger = logging.getLogger("cortex.embeddings")
 
 # Default model — compact, fast, good quality
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
-from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
 
 # Configurable LRU cache size via env var (default 1024)
 _CACHE_SIZE = int(os.environ.get("CORTEX_CACHE_SIZE", "1024"))

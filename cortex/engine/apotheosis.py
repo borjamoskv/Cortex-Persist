@@ -182,7 +182,7 @@ class ApotheosisEngine:
                             self._ignited_tasks.add(action.description)
                             task = asyncio.create_task(keter.ignite(action.description))
                             task.add_done_callback(
-                                lambda t: self._ignited_tasks.discard(action.description)
+                                lambda t, a=action: self._ignited_tasks.discard(a.description)
                             )
             else:
                 self._cognitive_weight = 0.0

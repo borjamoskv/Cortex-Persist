@@ -3,8 +3,9 @@ import asyncio
 import click
 from rich.console import Console
 
-console = Console()
 from cortex.llm.provider import LLMProvider
+
+console = Console()
 
 # ----------------------------------------------------------------------------
 # TRIANGULATION PROTOCOL: DIAGNOSTIC TRIAGE

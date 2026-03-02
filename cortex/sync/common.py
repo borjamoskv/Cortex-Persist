@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.sync")
 
-from cortex.core.paths import (
+from cortex.core.paths import (  # noqa: E402
     AGENT_DIR,
     CORTEX_DIR,
     MEMORY_DIR,

@@ -12,6 +12,15 @@ from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "AttackVector",
+    "OOMKiller",
+    "Intruder",
+    "EntropyDemon",
+    "ChronosSniper",
+    "RED_TEAM_SWARM",
+]
+
 
 class AttackVector(Protocol):
     """Sovereign Attack Vector Interface."""
@@ -34,17 +43,17 @@ class OOMKiller:
             tree = ast.parse(code)
             # Search for infinite loops or massive allocations
             for node in ast.walk(tree):
-                if isinstance(node, (ast.While, ast.For)):
-                    # Simulating a heuristic check for unprotected loops
+                if isinstance(node, ast.While | ast.For):
                     if not any(isinstance(n, ast.Break) for n in ast.walk(node)):
-                        # This is a simplified check for demo purposes
-                        pass
+                        findings.append(
+                            "Potential infinite loop: loop without break statement detected."
+                        )
 
             # Simulated stress: Check for large list comprehensions without bounds
             if "range(" in code and "10**" in code:
                 findings.append("Potential memory exhaustion: unbound range/allocation detected.")
-        except Exception:
-            pass
+        except SyntaxError:
+            logger.debug("OOMKiller: Failed to parse code for analysis.")
         return findings
 
 
@@ -71,8 +80,8 @@ class Intruder:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Attribute) and node.attr == "__globals__":
                     findings.append("Dunder access detected: Potential sandbox escape.")
-        except Exception:
-            pass
+        except SyntaxError:
+            logger.debug("Intruder: Failed to parse code for AST analysis.")
         return findings
 
 

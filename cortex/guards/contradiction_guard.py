@@ -24,7 +24,7 @@ from pathlib import Path
 logger = logging.getLogger("cortex.guards.contradiction")
 
 # ── Defaults ────────────────────────────────────────────────────────
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH  # noqa: E402
 
 MAX_CANDIDATES = 10
 MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap

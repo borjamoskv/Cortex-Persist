@@ -12,6 +12,14 @@ from pydantic import BaseModel, Field
 
 from cortex.swarm.byzantine import ByzantineConsensus
 
+__all__ = [
+    "CentauroEngine",
+    "CentauroMissionResult",
+    "Formation",
+    "SubTask",
+    "VirtualAgent",
+]
+
 
 class CentauroMissionResult(TypedDict, total=False):
     status: str
@@ -19,6 +27,7 @@ class CentauroMissionResult(TypedDict, total=False):
     reason: str
     agents_used: int
     formation: str
+
 
 logger = logging.getLogger("cortex.swarm.centauro")
 
@@ -42,14 +51,15 @@ class Formation:
 class VirtualAgent:
     """A simulated agent for the Centauro Swarm."""
 
-    def __init__(self, agent_id: str, specialty: str = "general"):
+    def __init__(self, agent_id: str, specialty: str = "general", execution_delay: float = 0.5):
         self.agent_id = agent_id
         self.specialty = specialty
         self.alive = True
+        self._execution_delay = execution_delay
 
     async def execute(self, task_idx: str, prompt: str) -> str:
         # Simulate execution
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(self._execution_delay)
         # Mock response: return a deterministic result so Byzantine consensus can pass
         return f"Result for {task_idx} by {self.agent_id}"
 
@@ -74,7 +84,7 @@ class CentauroEngine:
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission."""
-        logger.info(f"Initiating LEGION Protocol. Mission: {mission} | Formation: {formation}")
+        logger.info("Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation)
 
         # Determine squad size
         size = 3
@@ -84,7 +94,7 @@ class CentauroEngine:
             size = 12
 
         squad = self.spawn_squad(size)
-        logger.info(f"Spawned {len(squad)} agents in {formation} formation.")
+        logger.info("Spawned %d agents in %s formation.", len(squad), formation)
 
         # Simulate execution in parallel
         tasks = []
@@ -100,7 +110,7 @@ class CentauroEngine:
                 proposals[agent.agent_id] = result
 
         # Byzantine Consensus
-        logger.info(f"Executing Byzantine Consensus with {len(proposals)} proposals...")
+        logger.info("Executing Byzantine Consensus with %d proposals...", len(proposals))
         winning_proposal = self.consensus.execute_consensus(proposals)
 
         if winning_proposal:

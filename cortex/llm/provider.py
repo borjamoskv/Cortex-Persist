@@ -3,10 +3,18 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Universal LLM Provider (OpenAI-compatible).
+"""CORTEX v5.2 — Universal LLM Provider (OpenAI-compatible).
 
 Sovereign-grade async client for ANY OpenAI-compatible LLM endpoint.
-Modularized architecture with externalized presets and high-precision logging.
+Modularized architecture with externalized presets, high-precision logging,
+and intent-aware model routing via ``intent_model_map``.
+
+Intent Model Map
+~~~~~~~~~~~~~~~~
+Providers that serve multiple models (OpenRouter, Groq, Together, Fireworks,
+DeepInfra) declare an ``intent_model_map`` in their preset (llm_presets.json).
+This maps each ``IntentProfile`` to the optimal model available on that
+provider, enabling deterministic per-intent routing without code changes.
 
 Environment:
     CORTEX_LLM_PROVIDER=qwen       (preset name, or 'custom')
@@ -26,7 +34,7 @@ from typing import Any, Final
 import httpx
 
 from cortex.llm.quota import SovereignQuotaManager
-from cortex.llm.router import BaseProvider, CortexPrompt
+from cortex.llm.router import BaseProvider, CortexPrompt, IntentProfile
 
 __all__ = ["LLMProvider"]
 
@@ -117,6 +125,8 @@ class LLMProvider(BaseProvider):
         self._api_key = api_key or os.environ.get("CORTEX_LLM_API_KEY")
         self._context_window = 128000
         self._extra_headers = {}
+        self._intent_affinity: frozenset[IntentProfile] = frozenset({IntentProfile.GENERAL})
+        self._intent_model_map: dict[IntentProfile, str] = {}  # no map for custom
 
         if not self._base_url:
             raise ValueError("Custom LLM provider requires CORTEX_LLM_BASE_URL")
@@ -136,6 +146,33 @@ class LLMProvider(BaseProvider):
         self._context_window = preset["context_window"]
         self._extra_headers = preset.get("extra_headers", {})
         self._api_key = api_key
+
+        # Resolve intent affinity from preset specialization tags
+        _TAG_MAP: dict[str, IntentProfile] = {
+            "code": IntentProfile.CODE,
+            "reasoning": IntentProfile.REASONING,
+            "creative": IntentProfile.CREATIVE,
+            "general": IntentProfile.GENERAL,
+        }
+        raw_specs: list[str] = preset.get("specialization", ["general"])
+        self._intent_affinity: frozenset[IntentProfile] = frozenset(
+            _TAG_MAP[tag] for tag in raw_specs if tag in _TAG_MAP
+        ) or frozenset({IntentProfile.GENERAL})
+
+        # Intent-to-model map (optional) — permite que un provider como OpenRouter
+        # use modelos especializados según la intención del prompt.
+        raw_map: dict[str, str] = preset.get("intent_model_map", {})
+        self._intent_model_map: dict[IntentProfile, str] = {
+            _TAG_MAP[tag]: model_id
+            for tag, model_id in raw_map.items()
+            if tag in _TAG_MAP
+        }
+        if self._intent_model_map:
+            logger.debug(
+                "LLM [%s] intent_model_map loaded: %s",
+                provider,
+                {k.value: v for k, v in self._intent_model_map.items()},
+            )
 
         # Resolve API key if not explicitly provided
         env_key = preset.get("env_key") or preset.get("api_key_env")
@@ -165,13 +202,19 @@ class LLMProvider(BaseProvider):
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
-        """Send a chat completion request. Returns the response text."""
+        """Send a chat completion request. Returns the response text.
+
+        Args:
+            intent: Intent profile for model selection. When the provider has an
+                ``intent_model_map``, this selects the optimal model for the task.
+        """
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
-            "model": self._model,
+            "model": self._resolve_model(intent),
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
@@ -189,6 +232,7 @@ class LLMProvider(BaseProvider):
             response = await self._client.post(url, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
+            self._log_resolved_model(payload, data)
             return data["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
@@ -212,6 +256,25 @@ class LLMProvider(BaseProvider):
 
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
+
+    def _log_resolved_model(
+        self, payload: dict[str, Any], response_data: dict[str, Any]
+    ) -> None:
+        """Log when a meta-router resolves to a different model than requested.
+
+        Enables traceability for hierarchical routing — when CORTEX
+        requests 'openrouter/auto' and OpenRouter resolves to e.g.
+        'anthropic/claude-3.5-sonnet', this captures both layers.
+        """
+        requested = payload.get("model", "")
+        actual = response_data.get("model", requested)
+        if actual and actual != requested:
+            logger.info(
+                "LLM [%s] meta-routed: requested=%s → resolved=%s",
+                self._provider,
+                requested,
+                actual,
+            )
 
     async def _handle_429_backoff(
         self,
@@ -342,13 +405,19 @@ class LLMProvider(BaseProvider):
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ):
-        """Stream a chat completion request. Yields text chunks."""
+        """Stream a chat completion request. Yields text chunks.
+
+        Args:
+            intent: Intent profile for model selection. When the provider has an
+                ``intent_model_map``, this selects the optimal model for the task.
+        """
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
-            "model": self._model,
+            "model": self._resolve_model(intent),
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
@@ -367,13 +436,50 @@ class LLMProvider(BaseProvider):
             logger.error("LLM Stream Failure [%s]: %s", self._provider, e.response.text[:500])
             raise
 
+    def _resolve_model(self, intent: IntentProfile) -> str:
+        """Devuelve el modelo óptimo para la intención dada.
+
+        Si el preset tiene un `intent_model_map`, se usa el modelo mapeado.
+        El usuario puede haber forzado un modelo concreto via env var / argumento
+        constructor — en ese caso se respeta (self._model ya está fijo).
+
+        Arquitectura — Routing Jerárquico de Dos Capas:
+            Capa 1 (CORTEX SovereignRouter): Selecciona el provider óptimo
+                    para la intención del prompt.
+            Capa 2 (intent_model_map): Dentro del provider elegido,
+                    selecciona el modelo especializado.
+
+        Cuando un provider como OpenRouter actúa como meta-router,
+        intent_model_map convierte a OpenRouter en un segundo nivel de
+        routing — CORTEX elige quién habla, OpenRouter elige con qué cerebro.
+
+        Future-proof: Si OpenRouter soporta auto-routing nativo
+        (models: auto), se puede configurar:
+            ``"general": "openrouter/auto"``
+        para delegar la decisión de modelo completamente a su
+        infraestructura. La trazabilidad se mantiene via
+        ``_log_resolved_model()`` que captura el modelo real de la
+        respuesta.
+        """
+        if hasattr(self, "_intent_model_map") and self._intent_model_map:
+            resolved = self._intent_model_map.get(intent, self._model)
+            if resolved != self._model:
+                logger.debug(
+                    "LLM [%s] intent=%s → model override: %s",
+                    self._provider,
+                    intent.value,
+                    resolved,
+                )
+            return resolved
+        return self._model
+
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
-            "model": self._model,
+            "model": self._resolve_model(prompt.intent),
             "messages": prompt.to_openai_messages(),
             "temperature": prompt.temperature,
             "max_tokens": prompt.max_tokens,
@@ -397,6 +503,11 @@ class LLMProvider(BaseProvider):
         return self._provider
 
     @property
+    def intent_affinity(self) -> frozenset[IntentProfile]:
+        """Intenciones para las que este provider es óptimo (leído del preset)."""
+        return self._intent_affinity
+
+    @property
     def context_window(self) -> int:
         """Context window in tokens."""
         return self._context_window
@@ -405,7 +516,24 @@ class LLMProvider(BaseProvider):
         """Gracefully close the HTTP client."""
         await self._client.aclose()
 
+    def get_intent_models(self) -> dict[str, str]:
+        """Return the intent-to-model mapping, or empty dict if none.
+
+        Useful for introspection, CLIs, and dashboards.
+        """
+        return {k.value: v for k, v in self._intent_model_map.items()}
+
+    @property
+    def has_intent_routing(self) -> bool:
+        """True if this provider routes different intents to different models."""
+        return bool(self._intent_model_map)
+
     def __repr__(self) -> str:
+        if self._intent_model_map:
+            models = ", ".join(
+                f"{k.value}={v}" for k, v in self._intent_model_map.items()
+            )
+            return f"LLMProvider(provider={self._provider!r}, models=[{models}])"
         return f"LLMProvider(provider={self._provider!r}, model={self._model!r})"
 
     @classmethod
