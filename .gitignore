@@ -1,4 +1,8 @@
-# Security — NEVER commit these
+# ══════════════════════════════════════════════════
+# CORTEX-PERSIST .gitignore — Sovereign Hygiene
+# ══════════════════════════════════════════════════
+
+# Security — NEVER commit
 .env
 .env.*
 *.pem
@@ -9,6 +13,9 @@ token.json
 credentials.json
 **/secrets/
 service-account*.json
+
+# Node
+node_modules/
 
 # Python
 __pycache__/
@@ -24,20 +31,21 @@ build/
 venv/
 env/
 
-# IDE
+# IDE & Editor
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
-# Databases
+# Databases (local)
 *.db
 *.db-journal
 *.db-shm
 *.db-wal
+*.db.bak
 
-# Testing
+# Testing & Linting
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -52,20 +60,39 @@ Thumbs.db
 # Logs
 *.log
 
-# Temporary analysis files (internal)
+# Tool caches (regenerable)
+.clj-kondo/
+.lsp/
+.qodo/
+.vercel/
+
+# Agent internals
+.agent/
+.agent_backup_workflows/
+.cortex/
+.mejoralo/
+
+# Generated / Scratch
+*.out
+*.png
+scratch_*.html
+*_generated.html
+*_output.txt
+*_output.json
+forge_*.py
+debug_*.py
+repro_*.py
+inspect_*.py
+verify_*.py
+smoke_test_*.py
+
+# Temporary analysis
 kimi_*.md
 context_for_kimi.md
 full_cortex_context.md
 consensus_output.txt
 test_output.txt
 safety_net.patch
-
-# Debug scripts (not for distribution)
-debug_*.py
-repro_*.py
-inspect_*.py
-verify_*.py
-smoke_test_*.py
 
 # Internal docs (not for public)
 WAVE5_*.md
@@ -77,56 +104,45 @@ HARDENING_*.md
 cortex_notebooklm_digest.md
 kimi_help.txt
 implementation_plan.md
-
-# Snapshots (internal)
-snapshots/
-
-# NotebookLM sources (internal)
-notebooklm_sources/
-
-# Generated images
-*.png
-
-# Agent internals
-.agent/
-.agent_backup_workflows/
-.cortex/
-.clj-kondo/
-.lsp/
-.qodo/
-
-# Misc
-site/
 static-analysis.datadog.yml
 
-# UI Prototypes & Subprojects
+# ──────────────────────────────────────────────────
+# Subprojects & Prototypes (local-only, not core)
+# All UI experiments, landings, and web prototypes
+# ──────────────────────────────────────────────────
+agent-science-paper/
 blind-pilot/
 blue/
+code-agent-academy/
 comienzos-clone/
 cortex-persist-slogan/
+cortex-sovereign-web/
+cortex_hive_ui/
 cycle-of-pain/
+demo-padres/
 docs-ui/
 economia-humor/
 filete-cumbia/
 gordacorp-immersive/
 gordacorp-remotion/
+impact-web/
+landing/
 landing-apotheosis/
 liquid-glass/
 manteca-web/
 notch-control-2026/
+notebooklm_sources/
+omni-translate-web/
+open-antigravity-integration/
+remote-control/
 remotion-factory/
 sap-audit-ui/
+security-agent-school/
+site/
+snapshots/
 sonic-supreme/
+sonic_sovereign/
 sovereign_agent/
+web/
 xokas-elevator/
-
-# Local Scratch / State
-.mejoralo/
-*.out
-scratch_*.html
-*_generated.html
-
-# Analysis outputs (generated, not source)
-*_output.txt
-*_output.json
-forge_*.py
+yt-notebooklm-ext/
