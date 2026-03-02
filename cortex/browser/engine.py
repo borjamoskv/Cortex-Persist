@@ -11,6 +11,7 @@ class BrowserEngine:
     Sovereign Browser Engine for CORTEX.
     Leverages Playwright for autonomous web interaction.
     """
+
     def __init__(self, headless: bool = True):
         self.headless = headless
         self._playwright = None
@@ -28,8 +29,8 @@ class BrowserEngine:
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--hide-scrollbars",
-                "--mute-audio"
-            ]
+                "--mute-audio",
+            ],
         )
         self._context = await self._browser.new_context(
             viewport={"width": 1280, "height": 800},
@@ -40,7 +41,7 @@ class BrowserEngine:
             ),
         )
         self._page = await self._context.new_page()
-        
+
         # Override navigator.webdriver
         await self._page.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
@@ -137,10 +138,10 @@ class BrowserEngine:
         }
         """
         result = await self._page.evaluate(js_script)
-        
-        stats = result.get('stats', {})
-        total = stats.get('total', 0)
-        accepted = stats.get('accepted', 0)
+
+        stats = result.get("stats", {})
+        total = stats.get("total", 0)
+        accepted = stats.get("accepted", 0)
 
         LOG.debug(
             "BROWSER: DOM Analizado. Total: %d | Aceptados: %d | Descartados: %d"
@@ -148,9 +149,9 @@ class BrowserEngine:
             total,
             accepted,
             total - accepted,
-            stats.get('discarded_size'),
-            stats.get('discarded_visibility'),
-            stats.get('discarded_opacity'),
+            stats.get("discarded_size"),
+            stats.get("discarded_visibility"),
+            stats.get("discarded_opacity"),
         )
 
         # Asimetría Semántica: Alarma de 2º orden
