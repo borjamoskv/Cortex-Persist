@@ -101,3 +101,5 @@ La evaluación crítica de los impactos sistemáticos y del diseño de tecnolog�
 
 ---
 *Status: Integrado | Nivel Vencido: "ULTRATHINK-INFINITE"*
+
+> **Axioma Ω₂ y Ω₃ (API Integration / BFT)**: En integraciones de API (LLM o Finanzas), la latencia es dinero y la resiliencia arquitectura. Usa la persistencia en caliente de SQLite (WAL) acoplada a un Token-Bucket estricto (no librerías de terceros con bloqueos RAM puros) para aislar termodinámicamente a los subagentes del *rate limit* de la nube. Code is Law.
