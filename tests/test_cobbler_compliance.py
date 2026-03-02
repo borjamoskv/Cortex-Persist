@@ -17,11 +17,11 @@ from pathlib import Path
 import pytest
 
 from cortex.engine.legion_vectors import (
+    RED_TEAM_SWARM,
     ChronosSniper,
     EntropyDemon,
     Intruder,
     OOMKiller,
-    RED_TEAM_SWARM,
 )
 
 # ─── Scope ────────────────────────────────────────────────────────────────────
