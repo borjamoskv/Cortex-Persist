@@ -25,9 +25,7 @@ def _make_mock_stripe() -> MagicMock:
     # The route handlers use `except stripe.StripeError` — Python requires
     # these to be actual exception *classes*, not MagicMock objects.
     mock.StripeError = type("StripeError", (Exception,), {})
-    mock.SignatureVerificationError = type(
-        "SignatureVerificationError", (mock.StripeError,), {}
-    )
+    mock.SignatureVerificationError = type("SignatureVerificationError", (mock.StripeError,), {})
     return mock
 
 
@@ -197,8 +195,8 @@ class TestWebhook:
     def test_webhook_invalid_signature(self, mock_get_stripe, client):
         mock_stripe = _make_mock_stripe()
         # Use the real exception class we set up on the mock
-        mock_stripe.Webhook.construct_event.side_effect = (
-            mock_stripe.SignatureVerificationError("bad sig")
+        mock_stripe.Webhook.construct_event.side_effect = mock_stripe.SignatureVerificationError(
+            "bad sig"
         )
         mock_get_stripe.return_value = mock_stripe
 

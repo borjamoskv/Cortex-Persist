@@ -83,7 +83,9 @@ class BridgeGuard:
             result["meta_flags"]["bridge_block_reason"] = "quarantine_threshold"
             logger.warning(
                 "🛡️ BRIDGE BLOCKED: %s → %s (quarantine ratio %.0f%%)",
-                source, project, ratio * 100,
+                source,
+                project,
+                ratio * 100,
             )
         elif ratio > 0:
             # Some quarantined facts — allow but flag for review
@@ -91,7 +93,9 @@ class BridgeGuard:
             result["meta_flags"]["bridge_source_quarantine_ratio"] = round(ratio, 4)
             logger.info(
                 "⚠️ Bridge %s → %s has quarantine warnings (ratio %.1f%%)",
-                source, project, ratio * 100,
+                source,
+                project,
+                ratio * 100,
             )
 
         return result
@@ -158,15 +162,20 @@ class BridgeGuard:
         for row in rows:
             fact_id, project, content = row[0], row[1], row[2]
             validation = await BridgeGuard.validate_bridge(
-                conn, content, project, tenant_id,
+                conn,
+                content,
+                project,
+                tenant_id,
             )
-            results.append({
-                "fact_id": fact_id,
-                "project": project,
-                "source_project": validation["source_project"],
-                "quarantine_ratio": validation["quarantine_ratio"],
-                "allowed": validation["allowed"],
-                "reason": validation["reason"],
-            })
+            results.append(
+                {
+                    "fact_id": fact_id,
+                    "project": project,
+                    "source_project": validation["source_project"],
+                    "quarantine_ratio": validation["quarantine_ratio"],
+                    "allowed": validation["allowed"],
+                    "reason": validation["reason"],
+                }
+            )
 
         return results

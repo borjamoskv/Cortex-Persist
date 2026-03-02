@@ -26,9 +26,7 @@ def _get_engine() -> CortexEngine:
         return _engine
 
     if not os.environ.get("CORTEX_MASTER_KEY"):
-        os.environ["CORTEX_MASTER_KEY"] = (
-            "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
-        )
+        os.environ["CORTEX_MASTER_KEY"] = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
 
     handle = tempfile.NamedTemporaryFile(suffix="_tenant.db", delete=False)
     _db_path = handle.name

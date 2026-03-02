@@ -1,4 +1,5 @@
 """Tests for the sovereign power-level engine and observability module."""
+
 from __future__ import annotations
 
 from cortex.sovereign.observability import (

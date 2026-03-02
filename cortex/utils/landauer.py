@@ -1,7 +1,6 @@
 import ast
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class LandauerAnalyzer(ast.NodeVisitor):
@@ -12,8 +11,8 @@ class LandauerAnalyzer(ast.NodeVisitor):
             "classes": 0,
             "decisions": 0,
         }
-        self.node_metrics: List[Dict] = []
-        self._current_node_stack: List[Dict] = []
+        self.node_metrics: list[dict] = []
+        self._current_node_stack: list[dict] = []
 
     def _visit_node(self, node, key=None):
         if key:
@@ -33,7 +32,7 @@ class LandauerAnalyzer(ast.NodeVisitor):
             "type": node_type,
             "start_line": node.lineno,
             "end_line": getattr(node, "end_lineno", node.lineno),
-            "complexity": 1  # Base complexity
+            "complexity": 1,  # Base complexity
         }
         self._current_node_stack.append(node_info)
 
@@ -101,7 +100,7 @@ class LandauerAnalyzer(ast.NodeVisitor):
         self._visit_node(node)
 
 
-def calculate_calcification(file_path: Path) -> Optional[Dict]:
+def calculate_calcification(file_path: Path) -> dict | None:
     """
     Calculate the Calcification Score (Ω₂-C) for a file.
     Formula: Calcification = (Complexity * LOC) / 100
@@ -131,13 +130,13 @@ def calculate_calcification(file_path: Path) -> Optional[Dict]:
             "complexity": analyzer.complexity,
             "score": round(calcification_score, 2),
             "is_parasite": calcification_score > 50,
-            "nodes": sorted(analyzer.node_metrics, key=lambda x: x["score"], reverse=True)
+            "nodes": sorted(analyzer.node_metrics, key=lambda x: x["score"], reverse=True),
         }
     except (OSError, SyntaxError):
         return None
 
 
-def audit_calcification(directory: Path, limit: int = 10) -> List[Dict]:
+def audit_calcification(directory: Path, limit: int = 10) -> list[dict]:
     """Scan directory for calcified files."""
     results = []
     skip_dirs = {".venv", "venv", ".cortex", ".git", "__pycache__", "node_modules"}

@@ -158,8 +158,7 @@ class TimingTracker:
         sql = (
             "SELECT id, project, category, start_time, end_time,"  # nosec B608 — parameterized query
             " duration_s, entities, heartbeats, meta"
-            " FROM time_entries WHERE " + where_clause +
-            " ORDER BY start_time ASC"
+            " FROM time_entries WHERE " + where_clause + " ORDER BY start_time ASC"
         )
         rows = self._conn.execute(sql, params).fetchall()
         return [

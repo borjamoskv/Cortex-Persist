@@ -8,23 +8,22 @@ Implements the two-layer persistence strategy:
 import asyncio
 import atexit
 import logging
-import threading
-import time
-from typing import Any, List, Dict
+from typing import Any
 
 logger = logging.getLogger("cortex.durability")
 
+
 class PersistenceSupervisor:
     """The Sovereign Guardian of Continuity."""
-    
+
     def __init__(self, engine: Any, interval: float = 60.0):
         self._engine = engine
         self._interval = interval
         self._stop_event = asyncio.Event()
         self._task: asyncio.Task | None = None
-        self._queue: List[Dict[str, Any]] = []
+        self._queue: list[dict[str, Any]] = []
         self._lock = asyncio.Lock()
-        
+
         # Register C4 fallback
         atexit.register(self._atexit_fallback)
 
@@ -43,7 +42,7 @@ class PersistenceSupervisor:
             await self.flush()
             logger.info("PersistenceSupervisor: C5 layer hibernated.")
 
-    async def enqueue(self, fact_data: Dict[str, Any]):
+    async def enqueue(self, fact_data: dict[str, Any]):
         """Non-blocking queueing of facts for persistent storage."""
         async with self._lock:
             self._queue.append(fact_data)
@@ -56,11 +55,13 @@ class PersistenceSupervisor:
         async with self._lock:
             if not self._queue:
                 return
-            
+
             to_store = self._queue.copy()
             self._queue.clear()
-            
-            logger.debug("PersistenceSupervisor: Flushing %d facts (Reason: %s)", len(to_store), reason)
+
+            logger.debug(
+                "PersistenceSupervisor: Flushing %d facts (Reason: %s)", len(to_store), reason
+            )
             try:
                 # Store them using the sync connection to ensure durability if loop fails
                 sync_conn = self._engine._get_sync_conn()
@@ -69,7 +70,7 @@ class PersistenceSupervisor:
                         # Direct injection bypassing mixins for speed
                         await self._engine.store(
                             conn=None,  # Will use its own session
-                            **fact
+                            **fact,
                         )
                 logger.info("PersistenceSupervisor: Flush complete.")
             except Exception as e:
@@ -92,7 +93,7 @@ class PersistenceSupervisor:
         """C4 Fallback: Emergency flush on process exit."""
         if not self._queue:
             return
-            
+
         print(f"⚠️ [CORTEX] Emergency flush: {len(self._queue)} facts pending...")
         try:
             # Synchronous emergency store

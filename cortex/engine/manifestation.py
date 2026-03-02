@@ -7,9 +7,11 @@ import asyncio
 import logging
 from pathlib import Path
 from typing import Any
+
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger(__name__)
+
 
 async def manifest_singularity(signal_bus: Any = None) -> None:
     """
@@ -20,17 +22,25 @@ async def manifest_singularity(signal_bus: Any = None) -> None:
     try:
         # 1. Nexus Unification
         proc1 = await asyncio.create_subprocess_exec(
-            ".venv/bin/python", "-m", "cortex.cli", "nexus", "sync",
+            ".venv/bin/python",
+            "-m",
+            "cortex.cli",
+            "nexus",
+            "sync",
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc1.communicate()
 
         # 2. Ledger Hardening
         proc2 = await asyncio.create_subprocess_exec(
-            ".venv/bin/python", "-m", "cortex.cli", "ledger", "checkpoint",
+            ".venv/bin/python",
+            "-m",
+            "cortex.cli",
+            "ledger",
+            "checkpoint",
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc2.communicate()
 
@@ -40,7 +50,7 @@ async def manifest_singularity(signal_bus: Any = None) -> None:
                 "singularity:manifest",
                 payload={"status": "Ω", "version": "v8.0.0"},
                 source="apotheosis-omega",
-                project="system"
+                project="system",
             )
 
         ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.5)
@@ -49,9 +59,11 @@ async def manifest_singularity(signal_bus: Any = None) -> None:
         logger.error("🌌 [SINGULARITY] Manifestation collapse failed: %s", e)
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.5)
 
+
 async def transfigure_ui(html_file: Path, signal_bus: Any = None) -> bool:
     """Ω₆: Sovereign UI Refactor (Transfiguration)."""
     from cortex.cli.bicameral import bicameral
+
     msg = f"Transfiriendo coherencia estética a {html_file.name}"
     bicameral.log_limbic(msg, source="APOTH")
 
@@ -93,7 +105,7 @@ async def transfigure_ui(html_file: Path, signal_bus: Any = None) -> bool:
   });
 </script>
 """
-        tag_head = '<head>'
+        tag_head = "<head>"
         meta_noir = (
             '<head>\n  <meta name="theme-color" content="#050505">\n'
             '  <meta name="apple-mobile-web-app-capable" content="yes">'
@@ -101,7 +113,7 @@ async def transfigure_ui(html_file: Path, signal_bus: Any = None) -> bool:
 
         patterns = [
             (tag_head, meta_noir),
-            ('</head>', f'{noir_styles}\n{snappy_motion}\n</head>'),
+            ("</head>", f"{noir_styles}\n{snappy_motion}\n</head>"),
         ]
 
         modified = False
@@ -117,7 +129,7 @@ async def transfigure_ui(html_file: Path, signal_bus: Any = None) -> bool:
                     "apotheosis:transfiguration",
                     payload={"file": str(html_file), "type": "HTML_PREMIUM_UI"},
                     source="apotheosis-omega",
-                    project="frontend"
+                    project="frontend",
                 )
             return True
     except Exception as e:

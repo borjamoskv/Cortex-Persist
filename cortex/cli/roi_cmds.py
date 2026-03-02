@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import click
@@ -35,7 +35,9 @@ class ROIMetrics:
     autonomous_actions: int = 0
     human_interruptions: int = 0
     projects: int = 0
-    top_projects: list[tuple[str, float, float]] = []  # (name, human_h, ai_h)
+    top_projects: list[tuple[str, float, float]] = field(
+        default_factory=list
+    )  # (name, human_h, ai_h)
 
     @property
     def roi_ratio(self) -> float:
@@ -211,14 +213,17 @@ def _render_status_table(m: ROIMetrics) -> None:
             "🟢 Positive" if m.hours_saved > 0 else "🔴 Negative",
         )
         table.add_row("ROI Ratio", m.format_roi(), "SOVEREIGN")
-        table.add_row("Apotheosis Index", m.format_aix(),
-                      "🔥 LEVEL 5" if m.apotheosis_index >= 1_000_000 else "Métrica")
+        table.add_row(
+            "Apotheosis Index",
+            m.format_aix(),
+            "🔥 LEVEL 5" if m.apotheosis_index >= 1_000_000 else "Métrica",
+        )
     else:
         # Estimate based on fact count (systemic leverage)
         estimated_human_h = m.total_facts * 0.5
         estimated_ai_h = m.total_facts * 0.01
         estimated_roi = estimated_human_h / estimated_ai_h if estimated_ai_h > 0 else 0
-        
+
         # Estimated AIx assumes 90% autonomy (baseline Sovereignty attempt)
         estimated_aix = 0.9 * estimated_roi
 

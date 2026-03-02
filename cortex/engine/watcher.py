@@ -44,23 +44,28 @@ class GhostWatcher:
         facts = await self._engine.search(f"ghost: {ghost_ref}", project=project, top_k=1)
 
         if facts and facts[0].score > 0.85:
-            logger.debug("[WATCHER] Ghost %s already tracked (Score=%.2f). Skipping trigger.",
-                         ghost_ref, facts[0].score)
+            logger.debug(
+                "[WATCHER] Ghost %s already tracked (Score=%.2f). Skipping trigger.",
+                ghost_ref,
+                facts[0].score,
+            )
             return
 
         # 2. If it's a new high-entropy ghost, fire the trigger
         logger.warning("[WATCHER] CRITICAL GHOST DETECTED: %s. Firing trigger pulse.", ghost_ref)
-        await self._nexus.mutate(WorldMutation(
-            origin=DomainOrigin.CORTEX_CORE,
-            intent=IntentType.GHOST_WATCH_TRIGGER,
-            project=project,
-            priority=mutation.priority,
-            payload={
-                "reference": ghost_ref,
-                "original_mutation_key": mutation.idempotency_key,
-                "action_required": "Track and verify entity existence",
-            }
-        ))
+        await self._nexus.mutate(
+            WorldMutation(
+                origin=DomainOrigin.CORTEX_CORE,
+                intent=IntentType.GHOST_WATCH_TRIGGER,
+                project=project,
+                priority=mutation.priority,
+                payload={
+                    "reference": ghost_ref,
+                    "original_mutation_key": mutation.idempotency_key,
+                    "action_required": "Track and verify entity existence",
+                },
+            )
+        )
 
     def stop(self) -> None:
         """Stop watching."""

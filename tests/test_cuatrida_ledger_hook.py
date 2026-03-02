@@ -20,6 +20,7 @@ async def test_cuatrida_ledger_hook():
 
     # Initialize schema using script execution for full DDL support
     from cortex.database.schema import ALL_SCHEMA
+
     async with pool.acquire() as conn:
         for statement in ALL_SCHEMA:
             await conn.executescript(statement)
@@ -34,14 +35,13 @@ async def test_cuatrida_ledger_hook():
             project="test_project",
             intent="Test decision integration",
             dimension=Dimension.TEMPORAL_SOVEREIGNTY,
-            metadata={"test": "data"}
+            metadata={"test": "data"},
         )
 
         # 2. Verify ledger entry via engine.session()
         async with engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT action, detail FROM transactions WHERE project = ?",
-                ("test_project",)
+                "SELECT action, detail FROM transactions WHERE project = ?", ("test_project",)
             )
             row = await cursor.fetchone()
             assert row is not None

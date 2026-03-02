@@ -161,6 +161,8 @@ class ConsensusManager:
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
         if score >= 1.5:
             conf = "verified"
         elif score <= 0.5:
@@ -168,12 +170,23 @@ class ConsensusManager:
         else:
             conf = None
 
+        cursor = await conn.execute(
+            "SELECT tenant_id FROM facts WHERE id = ?",
+            (fact_id,),
+        )
+        row = await cursor.fetchone()
+        tenant_id = row[0] if row else "default"
+
+        payload: dict = {"consensus_score": score}
         if conf:
-            await conn.execute(
-                "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
-                (score, conf, fact_id),
-            )
-        else:
-            await conn.execute(
-                "UPDATE facts SET consensus_score = ? WHERE id = ?", (score, fact_id)
-            )
+            payload["confidence"] = conf
+
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=tenant_id,
+            event_type="score_update",
+            payload=payload,
+            signer="consensus_manager",
+            commit=False,
+        )

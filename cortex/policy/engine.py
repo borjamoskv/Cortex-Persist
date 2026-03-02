@@ -169,7 +169,7 @@ class PolicyEngine:
             age_days = max(0.0, (now - created).total_seconds() / 86400)
             if fact_type == "ghost":
                 # Ghosts decay per-day.
-                time_factor = self._config.ghost_age_decay ** age_days
+                time_factor = self._config.ghost_age_decay**age_days
             elif fact_type == "error":
                 # Recent errors get a recency bonus.
                 age_hours = age_days * 24
@@ -222,11 +222,22 @@ class PolicyEngine:
 
         # Blocking multiplier: ghosts and errors that reference
         # architectural/critical keywords are likely blocking.
-        blocking_keywords = frozenset({
-            "blocking", "blocked", "critical", "urgent",
-            "deploy", "ship", "production", "release",
-            "security", "vulnerability", "crash", "broken",
-        })
+        blocking_keywords = frozenset(
+            {
+                "blocking",
+                "blocked",
+                "critical",
+                "urgent",
+                "deploy",
+                "ship",
+                "production",
+                "release",
+                "security",
+                "vulnerability",
+                "crash",
+                "broken",
+            }
+        )
         if fact_type in ("ghost", "error"):
             if any(kw in content_lower for kw in blocking_keywords):
                 future += self._config.blocking_multiplier
@@ -234,9 +245,7 @@ class PolicyEngine:
         # Bridge downstream: bridges unlock pattern reuse across projects.
         if fact_type == "bridge":
             # Count how many projects could benefit.
-            mentioned = sum(
-                1 for p in other_projects if p.lower() in content_lower
-            )
+            mentioned = sum(1 for p in other_projects if p.lower() in content_lower)
             future += mentioned * 0.3
 
         # Normalize to [0, 1] range.

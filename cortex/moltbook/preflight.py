@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 # ─── Result type ──────────────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True, slots=True)
 class PreflightResult:
     """Immutable result of a pre-flight suspension check.
@@ -64,6 +65,7 @@ class PreflightResult:
 
 
 # ─── Core check ───────────────────────────────────────────────────────────────
+
 
 def preflight_check(
     client: MoltbookClient,
@@ -121,10 +123,7 @@ def preflight_check(
         # Parse suspension fields — API may return various shapes
         suspended_flag: bool = status_resp.get("suspended", False)
         until_str: str = status_resp.get("suspended_until", "") or ""
-        reason: str = (
-            status_resp.get("suspension_reason", "")
-            or status_resp.get("reason", "")
-        )
+        reason: str = status_resp.get("suspension_reason", "") or status_resp.get("reason", "")
 
         if suspended_flag or until_str:
             # Defensive: sync cache with reality
@@ -132,9 +131,7 @@ def preflight_check(
                 from datetime import datetime
 
                 try:
-                    until_dt = datetime.fromisoformat(
-                        until_str.replace("Z", "+00:00")
-                    )
+                    until_dt = datetime.fromisoformat(until_str.replace("Z", "+00:00"))
                     client._suspended_until = until_dt.timestamp()
                 except ValueError:
                     client._suspended_until = time.time() + 3_600  # 1h fallback
@@ -175,6 +172,7 @@ def preflight_check(
 
 # ─── Decorator / guard ────────────────────────────────────────────────────────
 
+
 def require_clear_preflight(
     client_attr: str = "client",
     force_probe: bool = False,
@@ -192,6 +190,7 @@ def require_clear_preflight(
 
     The decorated function returns None (silently) when blocked.
     """
+
     def decorator(
         fn: Callable[..., Coroutine[Any, Any, Any]],
     ) -> Callable[..., Coroutine[Any, Any, Any]]:
@@ -202,6 +201,7 @@ def require_clear_preflight(
             if resolved_client is None:
                 # Try positional: first arg named 'client'
                 import inspect
+
                 sig = inspect.signature(fn)
                 params = list(sig.parameters.keys())
                 if client_attr in params:
@@ -210,9 +210,7 @@ def require_clear_preflight(
                         resolved_client = args[idx]
 
             if resolved_client is None:
-                logger.warning(
-                    "PREFLIGHT: could not resolve client, proceeding without check."
-                )
+                logger.warning("PREFLIGHT: could not resolve client, proceeding without check.")
                 return await fn(*args, **kwargs)
 
             result = preflight_check(resolved_client, force_probe=force_probe)
@@ -229,10 +227,12 @@ def require_clear_preflight(
             return await fn(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
 # ─── Session-start helper ─────────────────────────────────────────────────────
+
 
 def session_preflight(client: MoltbookClient) -> PreflightResult:
     """Run a FULL preflight at session start (force_probe=True).

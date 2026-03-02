@@ -19,6 +19,7 @@ async def test_cuatrida_dimension_c_aesthetic():
 
     # Initialize schema
     from cortex.database.schema import ALL_SCHEMA
+
     async with pool.acquire() as conn:
         for statement in ALL_SCHEMA:
             await conn.executescript(statement)
@@ -43,8 +44,7 @@ async def test_cuatrida_dimension_c_aesthetic():
         # 3. Verify ledger entry
         async with engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT action, detail FROM transactions WHERE action = ?",
-                ("cuatrida:C",)
+                "SELECT action, detail FROM transactions WHERE action = ?", ("cuatrida:C",)
             )
             row = await cursor.fetchone()
             assert row is not None

@@ -31,8 +31,8 @@ __all__ = [
 
 # Signatures → threat_feed_signatures.py (Landauer LOC barrier)
 from cortex.security.threat_feed_signatures import (  # noqa: E402
-    BUILT_IN_SIGNATURES,
     _COMPILED_SIGNATURES,
+    BUILT_IN_SIGNATURES,
 )
 
 # ═══════════════════════════════════════

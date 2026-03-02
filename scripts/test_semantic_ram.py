@@ -43,7 +43,8 @@ async def stress_test() -> None:
 
     encoder = MockEncoder()
     l2_store = SovereignVectorStoreL2(
-        encoder=encoder, db_path=TEST_DB,
+        encoder=encoder,
+        db_path=TEST_DB,
     )
     logger.info("✓ Initialized SovereignVectorStoreL2")
 
@@ -92,7 +93,8 @@ async def stress_test() -> None:
     for row in rows:
         logger.info(
             "  fact=%s  excitation=%.2f",
-            row["id"][:8], row["success_rate"],
+            row["id"][:8],
+            row["success_rate"],
         )
 
     # Verify at least one fact was excited above baseline
@@ -111,6 +113,7 @@ async def stress_test() -> None:
 
     # Remove test DB
     import os
+
     try:
         os.unlink(TEST_DB)
     except FileNotFoundError:

@@ -50,8 +50,7 @@ class TestConnectionGuardScanner:
         """Files without sqlite3.connect() should pass."""
         clean = tmp_path / "clean.py"
         clean.write_text(
-            "from cortex.engine import CortexEngine\n"
-            "engine = CortexEngine()\n",
+            "from cortex.engine import CortexEngine\nengine = CortexEngine()\n",
             encoding="utf-8",
         )
         violations = scan_raw_connects(tmp_path)
@@ -72,8 +71,7 @@ class TestConnectionGuardScanner:
         """Violations should include file path and line number."""
         f = tmp_path / "with_line.py"
         f.write_text(
-            "import sqlite3\n\nsome_code = True\n"
-            'conn = sqlite3.connect("test.db")\n',
+            'import sqlite3\n\nsome_code = True\nconn = sqlite3.connect("test.db")\n',
             encoding="utf-8",
         )
         violations = scan_raw_connects(tmp_path)

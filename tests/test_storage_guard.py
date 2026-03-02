@@ -68,10 +68,23 @@ class TestStorageGuardFactTypeValidation:
 
     def test_all_allowed_types_pass(self):
         allowed = [
-            "knowledge", "decision", "error", "ghost", "bridge",
-            "preference", "identity", "issue", "world-model",
-            "counterfactual", "rule", "axiom", "schema", "idea",
-            "evolution", "test", "system_health",
+            "knowledge",
+            "decision",
+            "error",
+            "ghost",
+            "bridge",
+            "preference",
+            "identity",
+            "issue",
+            "world-model",
+            "counterfactual",
+            "rule",
+            "axiom",
+            "schema",
+            "idea",
+            "evolution",
+            "test",
+            "system_health",
         ]
         for ft in allowed:
             StorageGuard.validate(
@@ -108,11 +121,13 @@ class TestStorageGuardSourceAttribution:
         def _real_check_source(cls, source):
             if not source or not source.strip():
                 from cortex.engine.storage_guard import GuardViolation
+
                 raise GuardViolation(
                     "SOURCE_REQUIRED",
                     "source attribution is mandatory. Use 'cli', 'agent:<name>', "
                     "'api', or 'human' as source.",
                 )
+
         original = StorageGuard._check_source
         StorageGuard._check_source = _real_check_source
         yield

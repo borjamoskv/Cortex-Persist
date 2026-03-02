@@ -61,10 +61,20 @@ async def test_entropy_pruner_deletes_low_energy(mock_vector_store):
     """Test that EntropyPruner removes depleted engrams."""
     # Create one healthy engram and one depleted
     healthy = CortexSemanticEngram(
-        id="healthy", tenant_id="t-1", project_id="test", content="H", embedding=[0.1], energy_level=0.9
+        id="healthy",
+        tenant_id="t-1",
+        project_id="test",
+        content="H",
+        embedding=[0.1],
+        energy_level=0.9,
     )
     depleted = CortexSemanticEngram(
-        id="depleted", tenant_id="t-1", project_id="test", content="D", embedding=[0.1], energy_level=0.1
+        id="depleted",
+        tenant_id="t-1",
+        project_id="test",
+        content="D",
+        embedding=[0.1],
+        energy_level=0.1,
     )
 
     mock_vector_store.scan_engrams.return_value = [healthy, depleted]
@@ -80,7 +90,12 @@ async def test_entropy_pruner_deletes_low_energy(mock_vector_store):
 async def test_dynamic_synapse_update_strengthens(mock_vector_store):
     """Test that DynamicSynapseUpdate applies LTP efficiently."""
     engram = CortexSemanticEngram(
-        id="weak", tenant_id="t-1", project_id="test", content="W", embedding=[0.1], energy_level=0.4
+        id="weak",
+        tenant_id="t-1",
+        project_id="test",
+        content="W",
+        embedding=[0.1],
+        energy_level=0.4,
     )
     mock_vector_store.get_fact.return_value = engram
 

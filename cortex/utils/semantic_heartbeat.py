@@ -26,10 +26,7 @@ class SemanticHeartbeat:
     def _hash_payload(self, payload: dict[str, Any]) -> str:
         """Serializes and hashes the health report."""
         # Normalize: round floats to 1 decimal to avoid jitter
-        normalized = {
-            k: round(v, 1) if isinstance(v, float) else v
-            for k, v in payload.items()
-        }
+        normalized = {k: round(v, 1) if isinstance(v, float) else v for k, v in payload.items()}
         # Handle load_average tuple
         if "load_average" in normalized:
             normalized["load_average"] = [round(x, 1) for x in normalized["load_average"]]

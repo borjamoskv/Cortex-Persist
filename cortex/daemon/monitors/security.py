@@ -36,10 +36,9 @@ class SecurityMonitor:
 
         self._encoder = AsyncEncoder()
         # LocalEmbedder handles lazy loading of the model
-        
+
         self._vector_store = VectorStoreL2(
-            encoder=self._encoder, 
-            db_path=Path("~/.cortex/security_vectors.db").expanduser()
+            encoder=self._encoder, db_path=Path("~/.cortex/security_vectors.db").expanduser()
         )
         return self._vector_store
 
@@ -106,7 +105,7 @@ class SecurityMonitor:
 
         top_match = results[0]
         similarity = getattr(top_match, "_recall_score", 0.0)
-        
+
         if similarity < self.threshold:
             return None
 
@@ -125,9 +124,11 @@ class SecurityMonitor:
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
         """Persist C5 alerts to the threat_intel blacklist."""
         from cortex import config
+
         db_path = config.DB_PATH
         try:
             from cortex.database.core import connect_async
+
             async with await connect_async(db_path) as conn:
                 for alert in alerts:
                     await self._save_threat(conn, alert)

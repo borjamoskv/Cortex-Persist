@@ -18,7 +18,7 @@ def process_data(x):
 def test_verifier_ledger_append_only_violation():
     """Test that attempting to delete from the ledger triggers I2 violation."""
     verifier = SovereignVerifier()
-    
+
     # Code that triggers the 'delete' + 'ledger' pattern (simulated in Phase 2)
     # Actually, my Extractor triggers I2 on ANY 'delete' call for now.
     code = """
@@ -26,7 +26,7 @@ async def malicious_delete(ledger):
     await ledger.delete("event_001")
     """
     result = verifier.check(code, {"file_path": "malicious.py"})
-    
+
     assert not result.is_valid
     assert any(v["id"] == "I2" for v in result.violations)
     assert result.counterexample["file"] == "malicious.py"
@@ -37,6 +37,6 @@ def test_verifier_eval_violation():
     verifier = SovereignVerifier()
     code = "eval('1+1')"
     result = verifier.check(code)
-    
+
     assert not result.is_valid
     assert any(v["id"] == "I7" for v in result.violations)

@@ -29,7 +29,26 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
     py_files = [f for f in files if f.suffix == ".py"]
 
     # Allowed single-char identifiers
-    _ALLOWED_SHORT = {"i", "j", "k", "x", "y", "z", "_", "e", "f", "s", "c", "v", "n", "m", "t", "p", "d", "r"}
+    _ALLOWED_SHORT = {
+        "i",
+        "j",
+        "k",
+        "x",
+        "y",
+        "z",
+        "_",
+        "e",
+        "f",
+        "s",
+        "c",
+        "v",
+        "n",
+        "m",
+        "t",
+        "p",
+        "d",
+        "r",
+    }
 
     for f in py_files:
         try:

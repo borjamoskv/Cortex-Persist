@@ -1,6 +1,6 @@
 # AUDITORÍA DE SEGURIDAD GITHUB — CORTEX 2026
 
-> **ESTADO:** Nivel de Amenaza CRÍTICO en Revisión  
+> **ESTADO:** Nivel de Amenaza CONTROLADO (Auditoría en curso)  
 > **FECHA:** 2026-03-02  
 > **LENTE:** Zero Trust / Axioma 4 (Byzantine Consensus)
 
@@ -12,7 +12,7 @@ La infraestructura de CORTEX en GitHub requiere un blindaje absoluto contra la e
 
 ### 1.1. Control de Acceso y Gobernanza
 - **CODEOWNERS:** Parcialmente implementado. Necesario forzar revisión estricta en ramas protegidas (`main`, `production`).
-- **MFA (Multi-Factor Authentication):** Debe ser OBLIGATORIO para todos los contribuidores y colaboradores del repositorio.
+- **MFA (Multi-Factor Authentication):** [COMPLETADO] Obligatorio para todos los contribuidores.
 - **Principio de Mínimo Privilegio:** Los Personal Access Tokens (PATs) deben ser reemplazados por Fine-Grained Tokens con expiración corta.
 
 ### 1.2. Seguridad del Pipeline (GitHub Actions)
@@ -55,14 +55,25 @@ La infraestructura de CORTEX en GitHub requiere un blindaje absoluto contra la e
 
 ---
 
+## 2.5. INCIDENTE DE INTEGRIDAD DETECTADO (2026-03-02)
+Durante el rastreo de hoy, se detectó una vulnerabilidad de **Indisponibilidad del Sistema de Anticuerpos**:
+- **Archivo:** `cortex/engine/nemesis.py`
+- **Causa:** Un `IndentationError` en el método `append_antibody` bloqueaba el arranque del daemon y la persistencia de nuevos anticuerpos.
+- **Acción:** Parcheado en caliente por Antigravity (Step Id: 81). El sistema de rechazo de entropía vuelve a estar operativo.
+
+---
+
 ## 3. CHECKLIST SOBERANO DE CERTIFICACIÓN
 
+- [x] Escaneo de vulnerabilidades bandit_results_real_fresh.json (0 High).
+- [x] Escaneo de dependencias safety_results.json (0 Vuln).
+- [X] Restauración de Nemesis Protocol (Integridad del Engine).
 - [ ] Push Protection activado en Github Advanced Security.
 - [ ] GITHUB_TOKEN limitado a read por defecto en workflows.
 - [ ] Commits firmados forzados en `main`.
 - [ ] OIDC (OpenID Connect) usado en lugar de secretos estáticos para despliegues a Cloud/AWS/Vercel.
 - [ ] CODEOWNERS cubre `/cortex/`, `/scripts/` y `.github/`.
-- [ ] Dependabot configurado para todo ecosistema relevante (`pip`, `npm`, `docker`).
+- [x] Dependabot configurado para todo ecosistema relevante (`pip`, `npm`, `docker`).
 
 ---
 > 💡 [SOVEREIGN TIP] La escalada de privilegios en GitHub casi nunca viene de un ataque frontal, sino de una Action secundaria en un pull request de un fork no confiable. Restringe siempre qué contextos tienen acceso a secretos (`pull_request_target` vs `pull_request`).

@@ -14,7 +14,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -22,16 +22,17 @@ logger = logging.getLogger("cortex.ledger")
 @dataclass(frozen=True)
 class MerkleNode:
     """A node within the Merkle Tree (V8 Immutable)."""
+
     hash: str
-    left: Optional[MerkleNode] = None
-    right: Optional[MerkleNode] = None
+    left: MerkleNode | None = None
+    right: MerkleNode | None = None
     is_leaf: bool = False
 
 
 class MerkleTree:
     """High-performance Merkle Tree for batch transaction verification."""
 
-    def __init__(self, leaves: List[str]):
+    def __init__(self, leaves: list[str]):
         if not leaves:
             self.root = None
             self._leaves = []
@@ -44,7 +45,7 @@ class MerkleTree:
     def _hash_pair(self, left: str, right: str) -> str:
         return hashlib.sha256((left + right).encode()).hexdigest()
 
-    def _build_recursive(self, nodes: List[MerkleNode]) -> MerkleNode:
+    def _build_recursive(self, nodes: list[MerkleNode]) -> MerkleNode:
         if len(nodes) == 1:
             return nodes[0]
 
@@ -58,10 +59,10 @@ class MerkleTree:
         return self._build_recursive(next_layer)
 
     @property
-    def root_hash(self) -> Optional[str]:
+    def root_hash(self) -> str | None:
         return self.root.hash if self.root else None
 
-    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+    def get_proof(self, index: int) -> list[tuple[str, str]]:
         if not self.root or index < 0 or index >= len(self._leaves):
             return []
 
@@ -85,7 +86,7 @@ class MerkleTree:
         return proof
 
     @staticmethod
-    def verify_proof(leaf_hash: str, proof: List[Tuple[str, str]], root_hash: str) -> bool:
+    def verify_proof(leaf_hash: str, proof: list[tuple[str, str]], root_hash: str) -> bool:
         current = leaf_hash
         for sibling_hash, direction in proof:
             if direction == "L":
@@ -127,7 +128,9 @@ class SovereignLedger:
             CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
         """)
 
-    def _compute_tx_hash(self, prev_hash: str, project: str, action: str, detail: str, ts: Any) -> str:
+    def _compute_tx_hash(
+        self, prev_hash: str, project: str, action: str, detail: str, ts: Any
+    ) -> str:
         ts_str = str(ts)
         payload = f"{prev_hash}:{project}:{action}:{detail}:{ts_str}"
         return hashlib.sha256(payload.encode()).hexdigest()
@@ -142,7 +145,8 @@ class SovereignLedger:
         try:
             self.conn.execute(
                 "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
-                " VALUES (?, ?, ?, ?, ?, ?)", (project, action, detail_json, prev_hash, new_hash, ts)
+                " VALUES (?, ?, ?, ?, ?, ?)",
+                (project, action, detail_json, prev_hash, new_hash, ts),
             )
             self.conn.commit()
             return new_hash
@@ -150,7 +154,7 @@ class SovereignLedger:
             logger.error("Ledger: Failed to record transaction: %s", e)
             raise
 
-    def create_checkpoint(self, batch_size: int = 100) -> Optional[str]:
+    def create_checkpoint(self, batch_size: int = 100) -> str | None:
         cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
         last_covered = cursor.fetchone()[0] or 0
         cursor = self.conn.execute(
@@ -165,7 +169,7 @@ class SovereignLedger:
         start_id, end_id = rows[0][0], rows[-1][0]
         self.conn.execute(
             "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) VALUES (?, ?, ?, ?)",
-            (root, start_id, end_id, len(rows))
+            (root, start_id, end_id, len(rows)),
         )
         self.conn.commit()
         return root
@@ -180,16 +184,24 @@ class SovereignLedger:
         for row in txs:
             tid, proj, act, det, prev, h, ts = row
             if prev != expected_prev:
-                violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "actual": prev})
+                violations.append(
+                    {"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "actual": prev}
+                )
             computed = self._compute_tx_hash(prev, proj, act, det, ts)
             if computed != h:
-                violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h, "computed": computed})
+                violations.append(
+                    {"id": tid, "type": "TAMPER_DETECTED", "stored": h, "computed": computed}
+                )
             expected_prev = h
         cursor = self.conn.execute("SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots")
         for stored_root, start, end in cursor.fetchall():
-            c = self.conn.execute("SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id", (start, end))
+            c = self.conn.execute(
+                "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id", (start, end)
+            )
             hashes = [r[0] for r in c.fetchall()]
             computed_root = MerkleTree(hashes).root_hash
             if computed_root != stored_root:
-                violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH", "stored": stored_root})
+                violations.append(
+                    {"range": f"{start}-{end}", "type": "MERKLE_MISMATCH", "stored": stored_root}
+                )
         return {"valid": not violations, "violations": violations, "tx_count": len(txs)}

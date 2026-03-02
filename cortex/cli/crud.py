@@ -101,6 +101,7 @@ def list_facts(project, fact_type, limit, db) -> None:
         table.add_column("Tags", style="dim", width=15)
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
 
         for row in rows:

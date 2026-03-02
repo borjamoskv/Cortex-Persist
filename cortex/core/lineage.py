@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.lineage")
 
@@ -16,15 +16,16 @@ logger = logging.getLogger("cortex.lineage")
 @dataclass
 class LineageNode:
     """A node in the epistemic lineage tree."""
+
     fact_id: int
     project: str
     content: str
     fact_type: str
     confidence: str
     timestamp: str
-    parents: List[LineageNode]
+    parents: list[LineageNode]
     is_valid: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class LineageVerifier:
@@ -46,7 +47,7 @@ class LineageVerifier:
                 timestamp="",
                 parents=[],
                 is_valid=False,
-                error="Fact not found in L0"
+                error="Fact not found in L0",
             )
 
         # Tracing parents via meta["lineage_sources"] or previous_fact_id
@@ -77,7 +78,7 @@ class LineageVerifier:
             confidence=fact.confidence,
             timestamp=fact.created_at,
             parents=parents,
-            is_valid=is_valid
+            is_valid=is_valid,
         )
 
     def print_tree(self, node: LineageNode, indent: int = 0):

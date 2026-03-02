@@ -9,19 +9,19 @@ from __future__ import annotations
 
 import json
 import logging
-import sqlite3
 from typing import Any
 
 import aiosqlite
 
+from cortex.engine.embedding_engine import embed_fact_async
+from cortex.engine.fact_store_core import insert_fact_record, resolve_causality
 from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
-from cortex.engine.nemesis import NemesisProtocol
 from cortex.memory.temporal import now_iso
-from cortex.engine.causality import CausalOracle, link_causality
 
 __all__ = ["StoreMixin"]
 
@@ -49,97 +49,64 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         conn: aiosqlite.Connection | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
+        kwargs = {
+            "project": project,
+            "content": content,
+            "tenant_id": tenant_id,
+            "fact_type": fact_type,
+            "tags": tags,
+            "confidence": confidence,
+            "source": source,
+            "meta": meta,
+            "valid_from": valid_from,
+            "commit": commit,
+            "tx_id": tx_id,
+        }
         if conn:
-            return await self._store_impl(
-                conn,
-                project,
-                content,
-                tenant_id,
-                fact_type,
-                tags,
-                confidence,
-                source,
-                meta,
-                valid_from,
-                commit,
-                tx_id,
-            )
+            return await self._store_impl(conn, **kwargs)
 
         async with self.session() as conn:
-            return await self._store_impl(
-                conn,
-                project,
-                content,
-                tenant_id,
-                fact_type,
-                tags,
-                confidence,
-                source,
-                meta,
-                valid_from,
-                commit,
-                tx_id,
-            )
+            return await self._store_impl(conn, **kwargs)
 
-    async def _embed_fact_async(
-        self, conn: aiosqlite.Connection, fact_id: int, project: str, content: str
-    ) -> None:
-        """Generate and store embedding for a fact asynchronously.
+    async def _run_store_validation(
+        self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
+    ) -> tuple[int | None, dict | None, str]:
+        from cortex.engine.bridge_guard import BridgeGuard
+        from cortex.engine.storage_guard import StorageGuard
 
-        Now supports G10 Specular Memory (HDC-Native).
-        """
-        # 1. Legacy Vector Store (L2 Dense)
-        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
-            try:
-                embedding = self._get_embedder().embed(content)
-                await conn.execute(
-                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, json.dumps(embedding)),
-                )
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+        StorageGuard.validate(
+            project=project,
+            content=content,
+            fact_type=fact_type,
+            source=source,
+            confidence=confidence,
+            tags=tags,
+            meta=meta,
+        )
+        content = validate_content(project, content, fact_type)
 
-        # 2. Vector Alpha (G10 Specular Memory)
-        mm = getattr(self, "_memory_manager", None)
-        if mm and hasattr(mm, "get_context_vector") and mm._hdc_encoder:
-            try:
-                import numpy as np
+        if not (meta and meta.get("previous_fact_id")):
+            if (existing_id := await check_dedup(conn, tenant_id, project, content)) is not None:
+                return existing_id, meta, content
 
-                from cortex.memory.hdc.algebra import bind
-                from cortex.memory.models import CortexFactModel
+        meta = self._apply_privacy_shield(content, project, meta)
+        meta = run_security_guards(content, project, source, meta)
 
-                fact_hv = mm._hdc_encoder.encode_text(content)
-                context_hv = mm.get_context_vector()
+        _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
+        meta = resolve_causality(str(_db_path) if _db_path else None, project, meta)
 
-                if context_hv is not None:
-                    intent_hv = bind(fact_hv, context_hv)
-                    specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
-                    await conn.execute(
-                        "INSERT INTO specular_embeddings (fact_id, embedding) VALUES (?, ?)",
-                        (fact_id, specular_bytes),
-                    )
-                    logger.debug("Specular Memory indexed for fact %d", fact_id)
+        if rej := NemesisProtocol.analyze(content, db_path=str(_db_path) if _db_path else None):
+            logger.warning("NEMESIS REJECTION: %s", rej)
+            raise ValueError(rej)
 
-                    if mm._hdc:
-                        fact = CortexFactModel(
-                            id=str(fact_id),
-                            tenant_id=getattr(self, "_tenant_id", "default"),
-                            project_id=project,
-                            content=content,
-                            embedding=fact_hv.tolist(),
-                            specular_embedding=intent_hv.tolist(),
-                        )
-                        await mm._hdc.memorize(fact)
-                        logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)
-            except (
-                sqlite3.Error,
-                aiosqlite.Error,
-                OSError,
-                ValueError,
-                AttributeError,
-                TypeError,
-            ) as e:
-                logger.warning("Specular Memory indexing failed for fact %d: %s", fact_id, e)
+        if fact_type == "bridge":
+            bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
+            if not bridge_res["allowed"]:
+                raise ValueError(f"BRIDGE BLOCKED: {bridge_res['reason']}")
+            if bridge_res["meta_flags"]:
+                meta = {**(meta or {}), **bridge_res["meta_flags"]}
+
+        return None, meta, content
 
     async def _store_impl(
         self,
@@ -156,126 +123,41 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         commit: bool,
         tx_id: int | None,
     ) -> int:
-        # ── Leap 1 Guard: Mandatory pre-store validation ──────────
-        from cortex.engine.storage_guard import StorageGuard
-
-        StorageGuard.validate(
-            project=project,
-            content=content,
-            fact_type=fact_type,
-            source=source,
-            confidence=confidence,
-            tags=tags,
-            meta=meta,
+        dedupe_id, meta, content = await self._run_store_validation(
+            conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
-        content = validate_content(project, content, fact_type)
+        if dedupe_id is not None:
+            return dedupe_id
 
-        if not (meta and meta.get("previous_fact_id")):
-            existing_id = await check_dedup(conn, tenant_id, project, content)
-            if existing_id is not None:
-                return existing_id
-
-        meta = self._apply_privacy_shield(content, project, meta)
-        meta = run_security_guards(content, project, source, meta)
-
-        # ── Causal Linking (Ω₁) ───────────────────────────────────
-        # Automatically detect the 'why' behind this store
-        _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
-        if _db_path and not (meta and meta.get("causal_parent")):
-            parent_sig = CausalOracle.find_parent_signal(str(_db_path), project)
-            meta = link_causality(meta, parent_sig)
-
-        # ── Nemesis Immunological Guard ───────────────────────────
-        rejection_reason = NemesisProtocol.analyze(
-            content, db_path=str(_db_path) if _db_path else None
+        tx_id = (
+            tx_id
+            if tx_id is not None
+            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})
         )
-        if rejection_reason:
-            logger.warning("NEMESIS REJECTION: %s", rejection_reason)
-            # Ω₅: The error is the fuel. Raise now to trigger immediate reflex.
-            raise ValueError(rejection_reason)
+        fact_id = await insert_fact_record(
+            conn,
+            tenant_id,
+            project,
+            content,
+            fact_type,
+            tags,
+            confidence,
+            valid_from,
+            source,
+            meta,
+            tx_id,
+        )
 
-        # ── Bridge Validation Guard ───────────────────────────────
-        if fact_type == "bridge":
-            from cortex.engine.bridge_guard import BridgeGuard
-
-            bridge_result = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
-            if not bridge_result["allowed"]:
-                raise ValueError(f"BRIDGE BLOCKED: {bridge_result['reason']}")
-            if bridge_result["meta_flags"]:
-                meta = {**(meta or {}), **bridge_result["meta_flags"]}
-
-        ts = valid_from or now_iso()
-        tags_json = json.dumps(tags or [])
-
-        from cortex.crypto import get_default_encrypter
-
-        enc = get_default_encrypter()
-        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
-        encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
-
-        if tx_id is None:
-            tx_id = await self._log_transaction(
-                conn, project, "store", {"fact_type": fact_type, "status": "storing"}
-            )
-
-        from cortex.utils.canonical import compute_fact_hash
-
-        f_hash = compute_fact_hash(content)
-
-        sig_b64: str | None = None
-        pub_b64: str | None = None
-        try:
-            from cortex.security.signatures import get_default_signer
-
-            signer = get_default_signer()
-            if signer and signer.can_sign:
-                sig_b64 = signer.sign(content, f_hash)
-                pub_b64 = signer.public_key_b64
-        except (ImportError, ValueError, OSError) as e:
-            logger.debug("Fact signing skipped: %s", e)
-
-        cursor = await conn.execute(
-            "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
-            "valid_from, source, meta, hash, signature, signer_pubkey, "
-            "created_at, updated_at, tx_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                tenant_id,
+        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
+            await embed_fact_async(
+                conn,
+                fact_id,
                 project,
-                encrypted_content,
-                fact_type,
-                tags_json,
-                confidence,
-                ts,
-                source,
-                encrypted_meta,
-                f_hash,
-                sig_b64,
-                pub_b64,
-                ts,
-                ts,
-                tx_id,
-            ),
-        )
-        fact_id = cursor.lastrowid
-
-        try:
-            await conn.execute(
-                "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (fact_id, content, project, tags_json, fact_type),
+                content,
+                self._get_embedder(),
+                getattr(self, "_memory_manager", None),
+                tenant_id,
             )
-        except (sqlite3.Error, aiosqlite.Error) as e:
-            logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
-
-        await self._embed_fact_async(conn, fact_id, project, content)
-
-        from cortex.graph import process_fact_graph
-
-        try:
-            await process_fact_graph(conn, fact_id, content, project, ts)
-        except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
-            logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
         if commit:
             await conn.commit()
@@ -283,17 +165,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         try:
             from cortex.signals.fact_hook import emit_fact_stored
 
-            _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
-            if _db_path:
+            if db_p := (getattr(self, "db_path", None) or getattr(self, "_db_path", None)):
                 emit_fact_stored(
-                    db_path=str(_db_path),
+                    db_path=str(db_p),
                     fact_id=fact_id,
                     project=project,
                     fact_type=fact_type,
                     source=source or "engine:store",
                     tenant_id=tenant_id,
                 )
-        except Exception:  # noqa: BLE001 — hook must never break store
+        except Exception:
             pass
 
         return fact_id
@@ -301,19 +182,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
-
         async with self.session() as conn:
             ids = []
             try:
                 for fact in facts:
-                    if "project" not in fact:
-                        raise ValueError("project cannot be empty")
-                    if "content" not in fact:
-                        raise ValueError("content cannot be empty")
                     ids.append(await self.store(commit=False, conn=conn, **fact))
                 await conn.commit()
                 return ids
-            except (sqlite3.Error, OSError, ValueError):
+            except Exception:
                 await conn.rollback()
                 raise
 
@@ -325,11 +201,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         meta: dict[str, Any] | None = None,
     ) -> int:
         async with self.session() as conn:
-            cursor = await conn.execute(
+            query = (
                 "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
-                "FROM facts WHERE id = ? AND valid_until IS NULL",
-                (fact_id,),
+                "FROM facts WHERE id = ? AND valid_until IS NULL"
             )
+            cursor = await conn.execute(query, (fact_id,))
             row = await cursor.fetchone()
             if not row:
                 raise ValueError(f"Fact {fact_id} not found")
@@ -344,7 +220,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 source,
                 raw_old_meta_json,
             ) = row
-
             from cortex.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
@@ -377,17 +252,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return new_id
 
     async def deprecate(
-        self,
-        fact_id: int,
-        reason: str | None = None,
-        conn: aiosqlite.Connection | None = None,
+        self, fact_id: int, reason: str | None = None, conn: aiosqlite.Connection | None = None
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
-
         if conn:
             return await self._deprecate_impl(conn, fact_id, reason)
-
         async with self.session() as conn:
             res = await self._deprecate_impl(conn, fact_id, reason)
             await conn.commit()
@@ -400,13 +270,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         ts = now_iso()
         cursor = await conn.execute(
-            "SELECT tenant_id, project FROM facts WHERE id = ? AND valid_until IS NULL",
-            (fact_id,),
+            "SELECT tenant_id, project FROM facts WHERE id = ? AND valid_until IS NULL", (fact_id,)
         )
         row = await cursor.fetchone()
         if not row:
             return False
-
         tenant_id, project = row[0], row[1]
         await MUTATION_ENGINE.apply(
             conn,
@@ -417,20 +285,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             signer="store_mixin:deprecate",
             commit=False,
         )
-
         try:
             await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-        except (sqlite3.Error, aiosqlite.Error) as e:
-            logger.warning("Failed to remove FTS for fact %d: %s", fact_id, e)
-
+        except Exception:
+            pass
         await self._log_transaction(
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
         )
-        return True
 
-    # Delegates: validate_content / _check_dedup → store_validators (pure functions)
     _validate_content = staticmethod(validate_content)
     _check_dedup = staticmethod(check_dedup)
-
-    # Delegates: security guards → store_guards (pure functions)
     _run_security_guards = staticmethod(run_security_guards)

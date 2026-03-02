@@ -36,6 +36,7 @@ from cortex.api.core import app
 def client():
     """Test client with bootstrapped DB."""
     from cortex.auth import get_auth_manager, reset_auth_manager
+
     reset_auth_manager()
     manager = get_auth_manager()
     manager.initialize_sync()

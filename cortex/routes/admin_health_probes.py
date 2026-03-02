@@ -78,7 +78,11 @@ def build_health_probes(
             total_row = conn.execute("SELECT COUNT(*) FROM facts_meta").fetchone()  # type: ignore[union-attr]
             total = total_row[0] if total_row else 0
             if total == 0:
-                return ("ok", True, {"useful_facts_ratio": 0.0, "duplicates_ratio": 0.0, "total_facts": 0})
+                return (
+                    "ok",
+                    True,
+                    {"useful_facts_ratio": 0.0, "duplicates_ratio": 0.0, "total_facts": 0},
+                )
 
             useful_row = conn.execute(  # type: ignore[union-attr]
                 "SELECT COUNT(*) FROM facts_meta WHERE success_rate > 0"

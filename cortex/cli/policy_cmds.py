@@ -73,10 +73,7 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
             )
 
         console.print(table)
-        console.print(
-            f"\n[dim]γ={gamma} | {len(actions)} actions | "
-            f"V(s) = R(s,a) + γ·V(s')[/dim]"
-        )
+        console.print(f"\n[dim]γ={gamma} | {len(actions)} actions | V(s) = R(s,a) + γ·V(s')[/dim]")
 
     finally:
         close_engine_sync(engine)

@@ -187,13 +187,15 @@ class ExecutionLoop:
     def _enqueue_fact(self, content: str, fact_type: str, **meta: Any) -> None:
         """Enqueue a fact for the supervisor to persist at next tick (thread-safe)."""
         with self._pending_lock:
-            self._pending_facts.append({
-                "project": self._project,
-                "content": content,
-                "fact_type": fact_type,
-                "source": self._source,
-                "meta": meta,
-            })
+            self._pending_facts.append(
+                {
+                    "project": self._project,
+                    "content": content,
+                    "fact_type": fact_type,
+                    "source": self._source,
+                    "meta": meta,
+                }
+            )
 
     def _flush_pending(self, source: str = "supervisor") -> None:
         """Drain the pending queue and persist to CORTEX. Idempotent."""
@@ -234,7 +236,7 @@ class ExecutionLoop:
         """C4 🔵 atexit fallback — fires on clean process exit only. Idempotent."""
         if self._closed:
             return
-        
+
         # Si llegamos aquí y no está cerrado, significa que hubo un crash o salida inesperada.
         # Ω₅: Generamos un GHOST para no perder el estado de la sesión interrumpida.
         if self._session.results:

@@ -4,11 +4,12 @@ Cognitive Engine - AST Analysis and Intent Prediction.
 """
 
 import ast
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 # Known web3 libraries that indicate crypto-related entropy.
 _WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moralis"))
+
 
 class PredictorAST(ast.NodeVisitor):
     """AST analysis for intent prediction and background error resolution."""
@@ -40,9 +41,11 @@ class PredictorAST(ast.NodeVisitor):
             self.web3_entropy += 1
         self.generic_visit(node)
 
+
 def scan_file_entropy(file_path: Path) -> list[dict[str, Any]]:
     """Deep analysis for entropy detection (Ω₂)."""
     from cortex.utils.landauer import calculate_calcification
+
     findings = []
     try:
         content = file_path.read_text("utf-8")
@@ -62,11 +65,9 @@ def scan_file_entropy(file_path: Path) -> list[dict[str, Any]]:
             findings.append({"type": "THERMO_ENTROPY", "score": res["score"]})
             for node in res.get("nodes", []):
                 if node["is_parasite"]:
-                    findings.append({
-                        "type": "THERMAL_PARASITE",
-                        "name": node["name"],
-                        "score": node["score"]
-                    })
+                    findings.append(
+                        {"type": "THERMAL_PARASITE", "name": node["name"], "score": node["score"]}
+                    )
     except Exception:
         pass
     return findings

@@ -48,9 +48,7 @@ class DistributedEventBus:
         self._subscribers[topic].append(callback)
         logger.debug(f"Subscribed to topic: {topic}")
 
-    async def publish(
-        self, topic: str, payload: dict[str, Any]
-    ) -> None:
+    async def publish(self, topic: str, payload: dict[str, Any]) -> None:
         """Publish a message to all local (and eventually remote) subscribers."""
         # L1 persistence bridge: persist to SQLite if attached
         if self._signal_bus is not None:
@@ -71,10 +69,7 @@ class DistributedEventBus:
         if topic not in self._subscribers:
             return
 
-        tasks = [
-            asyncio.create_task(callback(payload))
-            for callback in self._subscribers[topic]
-        ]
+        tasks = [asyncio.create_task(callback(payload)) for callback in self._subscribers[topic]]
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -107,7 +102,4 @@ class DistributedEventBus:
         """Graceful shutdown of the bus and all active topic workers."""
         self._running = False
         self._subscribers.clear()
-        logger.info(
-            "Distributed Event Bus shut down successfully."
-        )
-
+        logger.info("Distributed Event Bus shut down successfully.")

@@ -175,8 +175,10 @@ class TestMutualInformation:
     def test_independent(self):
         """Independent variables → I(X;Y) ≈ 0.0."""
         joint = {
-            ("a", "1"): 25, ("a", "2"): 25,
-            ("b", "1"): 25, ("b", "2"): 25,
+            ("a", "1"): 25,
+            ("a", "2"): 25,
+            ("b", "1"): 25,
+            ("b", "2"): 25,
         }
         mi = mutual_information(joint)
         assert math.isclose(mi, 0.0, abs_tol=1e-9)
@@ -195,8 +197,10 @@ class TestConditionalEntropy:
     def test_independent_equals_marginal(self):
         """Independent vars → H(Y|X) = H(Y)."""
         joint = {
-            ("a", "1"): 25, ("a", "2"): 25,
-            ("b", "1"): 25, ("b", "2"): 25,
+            ("a", "1"): 25,
+            ("a", "2"): 25,
+            ("b", "1"): 25,
+            ("b", "2"): 25,
         }
         h_y_given_x = conditional_entropy(joint)
         # H(Y) for Y ∈ {1, 2} uniform = 1.0 bit
@@ -213,8 +217,10 @@ class TestConditionalEntropy:
     def test_chain_rule(self):
         """Chain rule: H(X,Y) = H(X) + H(Y|X)."""
         joint = {
-            ("a", "1"): 40, ("a", "2"): 10,
-            ("b", "1"): 20, ("b", "2"): 30,
+            ("a", "1"): 40,
+            ("a", "2"): 10,
+            ("b", "1"): 20,
+            ("b", "2"): 30,
         }
         h_y_x = conditional_entropy(joint)
         margin_x = {"a": 50, "b": 50}
@@ -411,8 +417,12 @@ async def test_full_report_structure(populated_engine):
     assert "velocity_per_day" in result
 
     for key in [
-        "type_entropy", "confidence_entropy", "project_entropy",
-        "source_entropy", "age_entropy", "content_entropy",
+        "type_entropy",
+        "confidence_entropy",
+        "project_entropy",
+        "source_entropy",
+        "age_entropy",
+        "content_entropy",
     ]:
         assert key in result
         block = result[key]
