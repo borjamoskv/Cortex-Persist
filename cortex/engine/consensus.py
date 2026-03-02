@@ -9,11 +9,12 @@ from typing import Any
 import aiosqlite
 
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.engine.mixins.base import EngineMixinBase
 
 logger = logging.getLogger("cortex.engine.consensus")
 
 
-class ConsensusMixin:
+class ConsensusMixin(EngineMixinBase):
     """Mixin for consensus and voting logic in AsyncCortexEngine."""
 
     async def _resolve_agent_rep(self, conn: aiosqlite.Connection, target_agent_id: str) -> float:

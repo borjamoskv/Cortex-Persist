@@ -291,10 +291,14 @@ class TestAdversarialStress:
     @patch("cortex.evolution.strategies._rng")
     def test_stochastic_30_percent_trigger(self, mock_rng):
         """70% of the time, stress doesn't trigger."""
-        mock_rng.random.return_value = 0.5  # > 0.3 → no trigger
+        mock_rng.random.return_value = 0.5  # > p_queen → no trigger
+        m = _make_metrics()  # fitness_delta = 0.0 → p_queen = 0.1
         agent = _make_agent(fitness=120.0)
-        result = AdversarialStressStrategy().evaluate_agent(agent)
+        # p_queen = 0.1 + 0.5*0.0 = 0.1 → 0.5 > 0.1 = True → None
+        with _patch_dm(m):
+            result = AdversarialStressStrategy().evaluate_agent(agent)
         assert result is None
+
 
 
 # ── EntropyReductionStrategy ──────────────────────────────────
@@ -308,9 +312,9 @@ class TestEntropyReduction:
         assert result is None
 
     def test_high_ratio_triggers_purge(self):
-        """Many generations with little gain → entropy purge."""
-        agent = _make_agent(fitness=51.0, generation=100)
-        # ratio = 100 / (51-50) = 100 > 20 → purge
+        """Many generations with little gain → entropy purge (fitness > 80 required)."""
+        # fitness=82, gain=32, generation=700 → ratio=700/32=21.9 > 20
+        agent = _make_agent(fitness=82.0, generation=700)
         result = EntropyReductionStrategy().evaluate_agent(agent)
         assert result is not None
         assert result.mutation_type == MutationType.ENTROPY_REDUCTION
@@ -330,8 +334,9 @@ class TestEntropyReduction:
         assert result is None
 
     def test_subagent_high_ratio_purge(self):
-        """Subagent with high gen/gain ratio gets purged."""
-        sub = SubAgent(fitness=51.0, generation=100)
+        """Subagent with high gen/gain ratio gets purged (fitness > 70 required)."""
+        # fitness=72, gain=22, generation=500 → ratio=500/22=22.7 > 20
+        sub = SubAgent(fitness=72.0, generation=500)
         result = EntropyReductionStrategy().evaluate_subagent(sub)
         assert result is not None
         assert result.delta_fitness == 1.5
@@ -375,9 +380,9 @@ class TestCrossoverRecombination:
 
 
 class TestStagnationBreaker:
-    def _stagnated_agent(self) -> SovereignAgent:
+    def _stagnated_agent(self, fitness: float = 75.0) -> SovereignAgent:
         """Build an agent stuck in a plateau (5+ near-zero mutations)."""
-        agent = _make_agent(fitness=75.0)
+        agent = _make_agent(fitness=fitness)
         for _ in range(6):
             agent.mutations.append(
                 Mutation(delta_fitness=0.1)  # |0.1| < 0.5
@@ -385,38 +390,55 @@ class TestStagnationBreaker:
         return agent
 
     def test_stagnated_agent_gets_shock(self):
-        """Agent with 5+ stagnant mutations → punctuation event."""
+        """Agent with 5+ stagnant mutations and fitness > 80 → punctuation event."""
         m = _make_metrics()
-        agent = self._stagnated_agent()
+        # Ensure subagents also have fitness > 80 for the circuit breaker in evaluate_agent
+        agent = self._stagnated_agent(fitness=90.0)
+        for sub in agent.subagents:
+            sub.fitness = 85.0
         with _patch_dm(m):
             result = StagnationBreakerStrategy().evaluate_agent(agent)
         assert result is not None
         assert result.mutation_type == MutationType.STAGNATION_BREAK
         assert -3.0 <= result.delta_fitness <= 8.0
 
+    def test_circuit_breaker_rejects_struggling_agent(self):
+        """Circuit breaker (Gould-Eldredge) rejects shock if fitness <= 80."""
+        agent = self._stagnated_agent(fitness=75.0)  # Below 80.0
+        result = StagnationBreakerStrategy().evaluate_agent(agent)
+        assert result is None
+
     def test_non_stagnated_skipped(self):
         """Agent with recent significant mutations → no shock."""
-        agent = _make_agent(fitness=75.0)
+        agent = _make_agent(fitness=95.0)
         agent.mutations = [Mutation(delta_fitness=5.0) for _ in range(5)]
         result = StagnationBreakerStrategy().evaluate_agent(agent)
         assert result is None
 
     def test_too_few_mutations_skipped(self):
         """Agent with < 5 mutations → not enough history to judge."""
-        agent = _make_agent(fitness=75.0)
+        agent = _make_agent(fitness=95.0)
         agent.mutations = [Mutation(delta_fitness=0.1) for _ in range(3)]
         result = StagnationBreakerStrategy().evaluate_agent(agent)
         assert result is None
 
     def test_subagent_stagnation(self):
-        """Subagent stagnation detection works identically."""
+        """Subagent stagnation detection works identically (if fitness > 80)."""
         m = _make_metrics()
-        sub = SubAgent(fitness=60.0)
+        sub = SubAgent(fitness=85.0)
         for _ in range(6):
             sub.mutations.append(Mutation(delta_fitness=0.0))
         with _patch_dm(m):
             result = StagnationBreakerStrategy().evaluate_subagent(sub)
         assert result is not None
+
+    def test_subagent_circuit_breaker(self):
+        """Subagent shock rejected if fitness <= 80."""
+        sub = SubAgent(fitness=60.0)
+        for _ in range(6):
+            sub.mutations.append(Mutation(delta_fitness=0.0))
+        result = StagnationBreakerStrategy().evaluate_subagent(sub)
+        assert result is None
 
 
 # ── FitnessLandscape ──────────────────────────────────────────

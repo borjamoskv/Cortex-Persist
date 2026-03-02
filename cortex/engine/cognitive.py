@@ -4,8 +4,11 @@ Cognitive Engine - AST Analysis and Intent Prediction.
 """
 
 import ast
+import logging
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger("cortex.engine.cognitive")
 
 # Known web3 libraries that indicate crypto-related entropy.
 _WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moralis"))
@@ -68,6 +71,6 @@ def scan_file_entropy(file_path: Path) -> list[dict[str, Any]]:
                     findings.append(
                         {"type": "THERMAL_PARASITE", "name": node["name"], "score": node["score"]}
                     )
-    except Exception:
-        pass
+    except (SyntaxError, OSError, UnicodeDecodeError) as e:
+        logger.debug("scan_file_entropy skipped %s: %s", file_path, e)
     return findings

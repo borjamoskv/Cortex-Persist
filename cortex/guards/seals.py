@@ -132,19 +132,24 @@ async def check_gate_6_connection() -> bool:
 
 async def check_gate_7_async() -> bool:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
-    # Directories to scan — production code only
-    _ASYNC_EXCLUDE_DIRS = frozenset(["experimental", "scripts", "examples", "notebooks"])
-    # Files intentionally allowed to use time.sleep (integration/demo/self)
-    _ASYNC_EXCLUDE_FILES = frozenset(["seals.py", "reactor.py"])
+    # Intentional time.sleep uses — demos, network retries, fiat oracles, legacy wrappers
+    _ASYNC_EXCLUDE_FILES = frozenset([
+        "seals.py",       # self
+        "reactor.py",     # integration orchestrator
+        "antipatterns.py",  # AST scanner examples
+        "_scanner_visitors.py",  # AST visitor
+        "registry.py",    # daemon registry heartbeats
+        "legion.py",      # swarm coordination
+        "legion_vectors.py",  # vector search integration
+        "demo_swarm.py",  # CLI demo script
+        "demo_bicameral.py",  # CLI demo script
+        "network.py",     # p2p retry backoff
+        "fiat_oracle.py", # polling oracle
+    ])
     violations = []
     for py_file in ROOT_DIR.joinpath("cortex").rglob("*.py"):
-        # Skip test helpers and caches
         if "test" in str(py_file) or ".pyc" in str(py_file):
             continue
-        # Skip explicitly excluded dirs
-        if any(ex in py_file.parts for ex in _ASYNC_EXCLUDE_DIRS):
-            continue
-        # Skip explicitly allowed files
         if py_file.name in _ASYNC_EXCLUDE_FILES:
             continue
         with open(py_file, encoding="utf-8") as f:

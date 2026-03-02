@@ -154,7 +154,7 @@ class QdrantVectorBackend:
                 logger.info("Qdrant: Created collection '%s' (dim=%d)", collection, self._dim)
             else:
                 logger.debug("Qdrant: Collection '%s' already exists.", collection)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Failed to ensure collection '%s': %s", collection, exc)
             raise
 
@@ -194,7 +194,7 @@ class QdrantVectorBackend:
                 points=[point],
             )
             logger.debug("Qdrant: Upserted fact_id=%d in '%s'", fact_id, collection)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Upsert failed for fact_id=%d: %s", fact_id, exc)
             raise
 
@@ -227,7 +227,7 @@ class QdrantVectorBackend:
                 if not exists:
                     return []
                 self._initialized_collections.add(collection)
-            except Exception:
+            except (RuntimeError, OSError, ValueError):
                 return []
 
         query_filter = None
@@ -247,7 +247,7 @@ class QdrantVectorBackend:
                 with_payload=False,
             )
             return [(int(hit.id), float(hit.score)) for hit in results]
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Search failed in '%s': %s", collection, exc)
             return []
 
@@ -264,7 +264,7 @@ class QdrantVectorBackend:
                 points_selector=PointIdsList(points=[fact_id]),
             )
             logger.debug("Qdrant: Deleted fact_id=%d from '%s'", fact_id, collection)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Delete failed for fact_id=%d: %s", fact_id, exc)
             raise
 
@@ -275,7 +275,7 @@ class QdrantVectorBackend:
         try:
             await self._client.get_collections()
             return True
-        except Exception:
+        except (RuntimeError, OSError, ConnectionError):
             return False
 
     async def close(self) -> None:
@@ -284,7 +284,7 @@ class QdrantVectorBackend:
             try:
                 await self._client.close()
                 logger.debug("Qdrant: Client closed.")
-            except Exception as exc:
+            except (RuntimeError, OSError) as exc:
                 logger.warning("Qdrant: Unclean close: %s", exc)
             finally:
                 self._client = None

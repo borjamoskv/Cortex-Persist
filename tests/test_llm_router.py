@@ -654,8 +654,10 @@ class TestNegativeCache:
         assert call_count == 0
 
         # Simulate TTL expiry by advancing monotonic clock
+        # Rationale (Ω₁): With 0% success, NXDOMAIN TTL scales to 2x (20s).
+        # We must advance > 20s to observe resurrection.
         original_monotonic = time.monotonic
-        with patch("time.monotonic", return_value=original_monotonic() + 11.0):
+        with patch("time.monotonic", return_value=original_monotonic() + 21.0):
             call_count = 0
             # Clear positive cache to prevent backup being promoted ahead of flaky
             router.clear_positive_cache()
@@ -1797,3 +1799,56 @@ class FibonacciCalculator:
         stats = router.drift_stats
         assert stats["total_validations"] == 2
         assert stats["clean_rate"] > 0.0
+
+
+# ─── Adaptive TTL Tests ───────────────────────────────────────────────
+
+
+class TestAdaptiveTTL:
+    """Verifica el escalado dinámico de TTLs basado en fiabilidad (Ω₅)."""
+
+    @pytest.fixture
+    def prompt(self) -> CortexPrompt:
+        return CortexPrompt(
+            system_instruction="You are a helpful assistant.",
+            working_memory=[{"role": "user", "content": "Hello"}],
+        )
+
+    def test_ttl_scaling_for_new_provider(self):
+        """Un provider nuevo (sin calls) tiene success_rate=1.0 por defecto."""
+        router = CortexLLMRouter(primary=MockProvider("p1", "ok"))
+        # 100% of base TTL
+        assert router._adaptive_positive_ttl("p1") == 600.0
+        assert router._adaptive_negative_ttl("p1") == 300.0
+
+    def test_ttl_scaling_for_perfect_provider(self):
+        """Provider con 100% éxito mantiene TTLs base."""
+        router = CortexLLMRouter(primary=MockProvider("p1", "ok"))
+        router._provider_pool.get_or_create("p1").record_success(100.0)
+
+        assert router._adaptive_positive_ttl("p1") == 600.0
+        assert router._adaptive_negative_ttl("p1") == 300.0
+
+    def test_ttl_scaling_for_flaky_provider(self):
+        """Provider con 50% éxito ve reducido su A-record y aumentado su NXDOMAIN."""
+        router = CortexLLMRouter(primary=MockProvider("p1", "ok"))
+        metrics = router._provider_pool.get_or_create("p1")
+        metrics.record_success(100.0)
+        metrics.record_failure(100.0)
+
+        # success_rate = 0.5
+        # pos = 600 * 0.5 = 300
+        # neg = 300 * (2.0 - 0.5) = 450
+        assert router._adaptive_positive_ttl("p1") == 300.0
+        assert router._adaptive_negative_ttl("p1") == 450.0
+
+    def test_ttl_scaling_for_dead_provider(self):
+        """Provider con 0% éxito: 0s positive TTL, 2x negative TTL."""
+        router = CortexLLMRouter(primary=MockProvider("p1", "ok"))
+        router._provider_pool.get_or_create("p1").record_failure(100.0)
+
+        # success_rate = 0.0
+        # pos = 600 * 0.0 = 0
+        # neg = 300 * (2.0 - 0.0) = 600
+        assert router._adaptive_positive_ttl("p1") == 0.0
+        assert router._adaptive_negative_ttl("p1") == 600.0

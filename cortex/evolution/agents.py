@@ -7,6 +7,7 @@ Each agent has a domain, fitness score, and mutation history.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
 import uuid
@@ -95,6 +96,12 @@ class SubAgent:
             self.generation,
         )
 
+    @property
+    def state_hash(self) -> str:
+        """Cryptographic hash of the current agent state (Phase 2 v3)."""
+        payload = f"{self.id}:{self.fitness}:{self.generation}:{self.parameters}"
+        return hashlib.sha256(payload.encode()).hexdigest()
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
@@ -152,6 +159,13 @@ class SovereignAgent:
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1
+
+    @property
+    def state_hash(self) -> str:
+        """Aggregated state hash of the sovereign domain."""
+        sub_hashes = "".join(s.state_hash for s in self.subagents)
+        payload = f"{self.id}:{self.fitness}:{self.generation}:{sub_hashes}"
+        return hashlib.sha256(payload.encode()).hexdigest()
 
     def increment_cycle(self) -> None:
         self._cycle_count += 1
