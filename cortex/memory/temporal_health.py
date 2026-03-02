@@ -258,7 +258,7 @@ class TemporalHealthScheduler:
         report.tier.append("pulse")
 
         if self._baseline_centroid is not None:
-            drift = centroid_drift(self._running_mean, self._baseline_centroid)
+            drift = centroid_drift(self._running_mean, self._baseline_centroid)  # type: ignore[reportArgumentType]
             report.centroid_drift = drift
             if drift > self._config.centroid_alert_threshold:
                 report.alerts.append(

@@ -48,7 +48,7 @@ _DEFAULT_MODEL = os.environ.get("CORTEX_ADK_MODEL", "gemini-2.0-flash")
 def create_memory_agent(
     model: str | None = None,
     extra_tools: list | None = None,
-) -> Agent:
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Memory Agent — root agent for sovereign memory ops.
 
     This agent can store facts, search memory, check system status,
@@ -74,7 +74,7 @@ def create_memory_agent(
     if extra_tools:
         tools.extend(extra_tools)
 
-    return Agent(
+    return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
         name="cortex_memory_agent",
         description=(
@@ -108,7 +108,7 @@ def create_memory_agent(
 def create_analyst_agent(
     model: str | None = None,
     toolbox_tools: list | None = None,
-) -> Agent:
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Analyst Agent — cross-source analysis sub-agent.
 
     Combines CORTEX search with optional external database tools
@@ -130,7 +130,7 @@ def create_analyst_agent(
     if toolbox_tools:
         tools.extend(toolbox_tools)
 
-    return Agent(
+    return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
         name="cortex_analyst_agent",
         description=(
@@ -153,7 +153,7 @@ def create_analyst_agent(
 
 def create_guardian_agent(
     model: str | None = None,
-) -> Agent:
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Guardian Agent — security and integrity sub-agent.
 
     Focused on ledger verification, integrity audits, and system
@@ -170,7 +170,7 @@ def create_guardian_agent(
 
     from cortex.adk.tools import adk_ledger_verify, adk_status
 
-    return Agent(
+    return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
         name="cortex_guardian_agent",
         description=(
@@ -199,7 +199,7 @@ def create_guardian_agent(
 def create_cortex_swarm(
     model: str | None = None,
     toolbox_tools: list | None = None,
-) -> Agent:
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the full CORTEX agent swarm — multi-agent system.
 
     Returns a root agent that can delegate to specialized sub-agents:
@@ -221,7 +221,7 @@ def create_cortex_swarm(
     analyst = create_analyst_agent(model=model, toolbox_tools=toolbox_tools)
     guardian = create_guardian_agent(model=model)
 
-    return Agent(
+    return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
         name="cortex_sovereign",
         description=(

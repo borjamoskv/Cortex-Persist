@@ -16,7 +16,7 @@ class AgentMixin:
         self, name: str, agent_type: str = "ai", public_key: str = "", tenant_id: str = "default"
     ) -> str:
         agent_id = str(uuid.uuid4())
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 await conn.execute(
@@ -30,7 +30,7 @@ class AgentMixin:
                 raise e
 
     async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
                 "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?",
@@ -40,7 +40,7 @@ class AgentMixin:
                 return dict(row) if row else None
 
     async def list_agents(self, tenant_id: str) -> list[dict[str, Any]]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
                 "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE tenant_id = ?",

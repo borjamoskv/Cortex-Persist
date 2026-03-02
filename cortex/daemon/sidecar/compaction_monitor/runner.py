@@ -52,7 +52,7 @@ async def compaction_job(ctx: Any = None) -> None:
         info_after = get_mallinfo2()
         LOGGER.info("MallInfo2 after trim: %s", info_after)
         # Call external compaction service (placeholder)
-        await circuit_breaker.call_external_compact()
+        await circuit_breaker.call_external_compact()  # type: ignore[reportAttributeAccessIssue]
     except Exception as exc:
         LOGGER.exception("Compaction job failed: %s", exc)
 
@@ -117,7 +117,7 @@ async def main() -> None:
             if "queue" in ctx:
                 await ctx["queue"].close()
 
-        worker = Worker(
+        worker = Worker(  # type: ignore[reportOptionalCall]
             functions=[compaction_job],
             redis_settings=redis_settings,
             on_startup=on_startup,

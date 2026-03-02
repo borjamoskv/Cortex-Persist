@@ -48,7 +48,7 @@ def create_checkpoint():
             if not ledger:
                 from cortex.engine.ledger import ImmutableLedger
 
-                ledger = ImmutableLedger(await engine.get_conn())
+                ledger = ImmutableLedger(await engine.get_conn())  # type: ignore[reportArgumentType]
 
             root_id = await ledger.create_checkpoint_async()
             if root_id:

@@ -27,9 +27,9 @@ class SecurityMonitor:
         self.log_path = Path(log_path).expanduser()
         self.threshold = threshold
         self._encoder: AsyncEncoder | None = None
-        self._vector_store: VectorStoreL2 | None = None
+        self._vector_store: VectorStoreL2 | None = None  # type: ignore[reportInvalidTypeForm]
 
-    async def _get_store(self) -> VectorStoreL2:
+    async def _get_store(self) -> VectorStoreL2:  # type: ignore[reportInvalidTypeForm]
         """Lazily initialize the local LLM encoder and L2 vector store."""
         if self._vector_store and self._encoder:
             return self._vector_store
@@ -91,7 +91,7 @@ class SecurityMonitor:
         return alerts
 
     async def _process_single_event(
-        self, store: VectorStoreL2, event: dict[str, Any]
+        self, store: VectorStoreL2, event: dict[str, Any]  # type: ignore[reportInvalidTypeForm]
     ) -> SecurityAlert | None:
         """Process a single event and return an alert if a threat is detected."""
         payload = event.get("payload", "")

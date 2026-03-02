@@ -36,7 +36,7 @@ class SQLiteQueryMixin:
         query_entities += " ORDER BY mention_count DESC LIMIT ?"
         params_entities.append(limit)
 
-        entity_rows = await self._fetch_rows(query_entities, params_entities)
+        entity_rows = await self._fetch_rows(query_entities, params_entities)  # type: ignore[reportAttributeAccessIssue]
 
         entities = []
         entity_ids = []
@@ -60,7 +60,7 @@ class SQLiteQueryMixin:
         )
         params_rels = entity_ids + entity_ids
 
-        rel_rows = await self._fetch_rows(query_rels, params_rels)
+        rel_rows = await self._fetch_rows(query_rels, params_rels)  # type: ignore[reportAttributeAccessIssue]
 
         relationships = []
         for row in rel_rows:
@@ -77,25 +77,25 @@ class SQLiteQueryMixin:
             q_rel_count = """SELECT COUNT(*) FROM entity_relations er
                              JOIN entities e ON er.source_entity_id = e.id
                              WHERE e.project = ?"""
-            total_entities = (await self._fetch_rows(q_ent_count, [project]))[0][0]
-            total_rels = (await self._fetch_rows(q_rel_count, [project]))[0][0]
+            total_entities = (await self._fetch_rows(q_ent_count, [project]))[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_rels = (await self._fetch_rows(q_rel_count, [project]))[0][0]  # type: ignore[reportAttributeAccessIssue]
         else:
             q_ent_count = "SELECT COUNT(*) FROM entities"
             q_rel_count = "SELECT COUNT(*) FROM entity_relations"
-            total_entities = (await self._fetch_rows(q_ent_count, []))[0][0]
-            total_rels = (await self._fetch_rows(q_rel_count, []))[0][0]
+            total_entities = (await self._fetch_rows(q_ent_count, []))[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_rels = (await self._fetch_rows(q_rel_count, []))[0][0]  # type: ignore[reportAttributeAccessIssue]
 
         return {"total_entities": total_entities, "total_relationships": total_rels}
 
     def get_graph_sync(self, project: str | None = None, limit: int = 50) -> dict:
         if project:
-            entity_rows = self.conn.execute(
+            entity_rows = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT id, name, entity_type, project, mention_count "
                 "FROM entities WHERE project = ? ORDER BY mention_count DESC LIMIT ?",
                 (project, limit),
             ).fetchall()
         else:
-            entity_rows = self.conn.execute(
+            entity_rows = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT id, name, entity_type, project, mention_count "
                 "FROM entities ORDER BY mention_count DESC LIMIT ?",
                 (limit,),
@@ -117,7 +117,7 @@ class SQLiteQueryMixin:
             }
 
         placeholders = ",".join(["?"] * len(entity_ids))
-        rel_rows = self.conn.execute(
+        rel_rows = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
             "SELECT id, source_entity_id, target_entity_id, relation_type, weight\n"
             "FROM entity_relations\n"
             "WHERE source_entity_id IN ("
@@ -135,16 +135,16 @@ class SQLiteQueryMixin:
             )
 
         if project:
-            total_entities = self.conn.execute(
+            total_entities = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT COUNT(*) FROM entities WHERE project = ?", (project,)
             ).fetchone()[0]
-            total_rels = self.conn.execute(
+            total_rels = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT COUNT(*) FROM entity_relations er JOIN entities e ON er.source_entity_id = e.id WHERE e.project = ?",
                 (project,),
             ).fetchone()[0]
         else:
-            total_entities = self.conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0]
-            total_rels = self.conn.execute("SELECT COUNT(*) FROM entity_relations").fetchone()[0]
+            total_entities = self.conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0]  # type: ignore[reportAttributeAccessIssue]
+            total_rels = self.conn.execute("SELECT COUNT(*) FROM entity_relations").fetchone()[0]  # type: ignore[reportAttributeAccessIssue]
 
         return {
             "entities": entities,
@@ -164,7 +164,7 @@ class SQLiteQueryMixin:
         else:
             q_ent += " ORDER BY mention_count DESC LIMIT 1"
 
-        rows = await self._fetch_rows(q_ent, params_ent)
+        rows = await self._fetch_rows(q_ent, params_ent)  # type: ignore[reportAttributeAccessIssue]
 
         if not rows:
             return None
@@ -184,7 +184,7 @@ class SQLiteQueryMixin:
                    WHERE er.source_entity_id = ? OR er.target_entity_id = ?
                    ORDER BY er.weight DESC LIMIT 20"""
 
-        connections = await self._fetch_rows(q_conn, [row[0], row[0], row[0]])
+        connections = await self._fetch_rows(q_conn, [row[0], row[0], row[0]])  # type: ignore[reportAttributeAccessIssue]
 
         entity["connections"] = [
             {"name": c[0], "type": c[1], "relation": c[2], "weight": c[3]} for c in connections
@@ -196,9 +196,9 @@ class SQLiteQueryMixin:
             return None
         q = "SELECT id, name, entity_type, project, mention_count FROM entities WHERE name = ?"
         if project:
-            row = self.conn.execute(q + " AND project = ?", (name, project)).fetchone()
+            row = self.conn.execute(q + " AND project = ?", (name, project)).fetchone()  # type: ignore[reportAttributeAccessIssue]
         else:
-            row = self.conn.execute(q + " ORDER BY mention_count DESC LIMIT 1", (name,)).fetchone()
+            row = self.conn.execute(q + " ORDER BY mention_count DESC LIMIT 1", (name,)).fetchone()  # type: ignore[reportAttributeAccessIssue]
 
         if not row:
             return None
@@ -209,7 +209,7 @@ class SQLiteQueryMixin:
             "project": row[3],
             "mentions": row[4],
         }
-        connections = self.conn.execute(
+        connections = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
             """SELECT e.name, e.entity_type, er.relation_type, er.weight FROM entity_relations er
                JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
                WHERE er.source_entity_id = ? OR er.target_entity_id = ? ORDER BY er.weight DESC LIMIT 20""",

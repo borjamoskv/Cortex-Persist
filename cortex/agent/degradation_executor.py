@@ -82,7 +82,7 @@ def sovereign_execute(
                     degraded_action = action.as_text_only()
                     degraded_args = tuple(degraded_action if a is action else a for a in args)
                     try:
-                        result = await fn(*degraded_args, **kwargs)
+                        result = await fn(*degraded_args, **kwargs)  # type: ignore[reportCallIssue]
                         if isinstance(result, AgentResult):
                             result.latency_ms = (time.perf_counter() - t0) * 1000
                             result.degradation_level = DegradationLevel.L4_GRACEFUL

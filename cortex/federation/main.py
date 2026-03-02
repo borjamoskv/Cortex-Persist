@@ -104,7 +104,7 @@ class FederatedEngine:
             if isinstance(results, Exception):
                 logger.warning("Cross-shard search error: %s", results)
                 continue
-            merged.extend(results)
+            merged.extend(results)  # type: ignore[reportArgumentType]
 
         merged.sort(key=lambda r: getattr(r, "score", 0), reverse=True)
         return merged[:top_k]

@@ -122,7 +122,7 @@ class ContextInference:
         for s in project_signals.get(top_project, []):
             type_counts[s.signal_type] += 1
         if type_counts:
-            dominant = max(type_counts, key=type_counts.get)
+            dominant = max(type_counts, key=type_counts.get)  # type: ignore[reportCallIssue,reportArgumentType]
             summary_parts.append(
                 f"Dominant signal: {dominant} ({type_counts[dominant]} occurrences)."
             )

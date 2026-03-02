@@ -85,14 +85,14 @@ def row_to_fact(row: tuple) -> Fact:
         id=r[0],
         tenant_id=tenant_id,
         project=r[2],
-        content=content,
+        content=content,  # type: ignore[reportArgumentType]
         fact_type=r[4],
         tags=tags,
         confidence=r[6],
         valid_from=r[7],
         valid_until=r[8],
         source=r[9],
-        meta=meta,
+        meta=meta,  # type: ignore[reportArgumentType]
         consensus_score=score,
         created_at=r[12],
         updated_at=r[13],

@@ -58,11 +58,11 @@ class TransactionMixin:
                     meta={"error": str(e)},
                 )
 
-        return tx_id
+        return tx_id  # type: ignore[reportReturnType]
 
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import ImmutableLedger
 
-            self._ledger = ImmutableLedger(await self.get_conn())
+            self._ledger = ImmutableLedger(await self.get_conn())  # type: ignore[reportAttributeAccessIssue]
         return await self._ledger.verify_integrity_async()

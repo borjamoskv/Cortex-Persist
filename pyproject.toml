@@ -111,3 +111,15 @@ ignore = ["E501", "B008", "W291", "W293"]
 "tests/*.py" = ["E402", "F821"]
 "cortex/**/__init__.py" = ["F401"]
 
+[tool.pyright]
+typeCheckingMode = "basic"
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "tests",
+    "experimental",
+    "cortex/moltbook",
+    "scripts"
+]
+reportMissingImports = "warning"
+reportPrivateImportUsage = "none"

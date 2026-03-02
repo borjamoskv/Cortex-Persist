@@ -153,18 +153,18 @@ def compact_status(project, db) -> None:
     try:
         stats = get_compaction_stats(engine, project)
 
-        if stats["total_compactions"] == 0:
+        if stats["total_compactions"] == 0:  # type: ignore[reportIndexIssue]
             console.print("[dim]No compaction history found.[/]")
             return
 
         console.print(
             f"\n[bold]Compaction Stats[/]"
             f"{f' — {project}' if project else ''}\n"
-            f"  Total runs: [cyan]{stats['total_compactions']}[/]\n"
-            f"  Total deprecated: [yellow]{stats['total_deprecated']}[/]\n"
+            f"  Total runs: [cyan]{stats['total_compactions']}[/]\n"  # type: ignore[reportIndexIssue]
+            f"  Total deprecated: [yellow]{stats['total_deprecated']}[/]\n"  # type: ignore[reportIndexIssue]
         )
 
-        if stats["history"]:
+        if stats["history"]:  # type: ignore[reportIndexIssue]
             table = Table(title="Recent Compactions", border_style="cyan")
             table.add_column("ID", style="bold", width=4)
             table.add_column("Project", style="cyan", width=16)
@@ -173,7 +173,7 @@ def compact_status(project, db) -> None:
             table.add_column("Deprecated", width=10)
             table.add_column("When", style="dim", width=20)
 
-            for entry in stats["history"]:
+            for entry in stats["history"]:  # type: ignore[reportIndexIssue]
                 table.add_row(
                     str(entry["id"]),
                     entry["project"],
@@ -223,7 +223,7 @@ def gc_cmd(batch_size, force, db) -> None:
     from cortex.compaction.gc import GarbageCollector
 
     engine = get_engine(db)
-    gc = GarbageCollector(engine)
+    gc = GarbageCollector(engine)  # type: ignore[reportArgumentType]
 
     async def _do_gc():
         return await gc.run_gc(batch_size=batch_size, force=force)

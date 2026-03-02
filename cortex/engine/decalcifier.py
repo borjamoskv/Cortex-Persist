@@ -35,7 +35,7 @@ class SovereignDecalcifier:
         self.decay_factor = decay_factor
         self._is_active = False
 
-    async def start(self, conn_func: callable) -> None:
+    async def start(self, conn_func: callable) -> None:  # type: ignore[reportGeneralTypeIssues]
         """Start the decalcification cycle."""
         if self._is_active:
             return

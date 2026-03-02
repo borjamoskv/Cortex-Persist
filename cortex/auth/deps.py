@@ -100,7 +100,7 @@ async def require_consensus(
     if engine is None:
         from cortex.api.deps import get_async_engine
 
-        async for e in get_async_engine():
+        async for e in get_async_engine():  # type: ignore[reportCallIssue]
             engine = e
             break
 
@@ -144,7 +144,7 @@ def require_verified_permission(
 
         from cortex.api.deps import get_async_engine
 
-        async for engine in get_async_engine():
+        async for engine in get_async_engine():  # type: ignore[reportCallIssue]
             has_consensus = await require_consensus(
                 f"Permission {permission} granted to {auth.key_name or auth.tenant_id}",
                 min_score=min_consensus,

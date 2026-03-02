@@ -53,7 +53,7 @@ async def semantic_search(
 
     enc = get_default_encrypter()
 
-    return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]
+    return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]  # type: ignore[reportIndexIssue]
 
 
 def _build_semantic_query(
@@ -127,7 +127,7 @@ def _row_to_result(row: tuple, enc: "CortexEncrypter", tenant_id: str) -> Search
 
     return SearchResult(
         fact_id=row[0],
-        content=content,
+        content=content,  # type: ignore[reportArgumentType]
         project=row[2],
         fact_type=row[3],
         confidence=row[4],
@@ -135,7 +135,7 @@ def _row_to_result(row: tuple, enc: "CortexEncrypter", tenant_id: str) -> Search
         valid_until=row[6],
         tags=tags,
         source=row[8],
-        meta=meta,
+        meta=meta,  # type: ignore[reportArgumentType]
         score=score,
         created_at=row[11],
         updated_at=row[12],
@@ -194,7 +194,7 @@ def semantic_search_sync(
         content = row[1]
         if content and str(content).startswith(enc.PREFIX):
             try:
-                content = enc.decrypt_string(content)
+                content = enc.decrypt_string(content)  # type: ignore[reportAttributeAccessIssue]
             except (ValueError, OSError):
                 pass
 

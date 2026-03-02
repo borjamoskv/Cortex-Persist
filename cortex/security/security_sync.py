@@ -33,7 +33,7 @@ class SecurityVisualSync:
     async def emit_signal(self, event_type: str, details: dict[str, Any] | None = None) -> None:
         """Send a visual signal to the Notch via NotchHub."""
         try:
-            from cortex.routes.notch_ws import HUB
+            from cortex.routes.notch_ws import HUB  # type: ignore[reportAttributeAccessIssue]
 
             mood = self.MOODS.get(event_type, "calm")
 

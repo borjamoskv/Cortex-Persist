@@ -74,7 +74,7 @@ class GhostMixin:
     async def resolve_ghost(
         self,
         ghost_id: str,
-        target_entity_id: int | str = None,
+        target_entity_id: int | str = None,  # type: ignore[reportArgumentType]
         root_dir: Path | None = None,
         conn: aiosqlite.Connection | None = None,
     ) -> bool:

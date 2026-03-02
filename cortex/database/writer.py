@@ -156,7 +156,7 @@ class SqliteWriteWorker:
             try:
                 await asyncio.get_running_loop().run_in_executor(
                     None,
-                    lambda: self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)"),
+                    lambda: self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)"),  # type: ignore[reportOptionalMemberAccess]
                 )
                 logger.debug("Final WAL checkpoint completed on shutdown")
             except sqlite3.Error as e:
@@ -184,7 +184,7 @@ class SqliteWriteWorker:
         try:
             cursor = await loop.run_in_executor(
                 None,
-                lambda: self._conn.execute("PRAGMA wal_checkpoint(PASSIVE)"),
+                lambda: self._conn.execute("PRAGMA wal_checkpoint(PASSIVE)"),  # type: ignore[reportOptionalMemberAccess]
             )
             row = cursor.fetchone()
             pages = row[1] if row else 0
@@ -356,7 +356,7 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         """Process a single write operation in the executor."""
-        start_wait = op.created_at if hasattr(op, "created_at") else time.time()
+        start_wait = op.created_at if hasattr(op, "created_at") else time.time()  # type: ignore[reportAttributeAccessIssue]
         wait_ms = (time.time() - start_wait) * 1000
         try:
             start_exec = time.time()

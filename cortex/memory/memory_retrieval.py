@@ -68,14 +68,14 @@ async def _fetch_hdc_results(
     layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
-        toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)
-        return await manager._hdc.recall_secure(
+        toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
+        return await manager._hdc.recall_secure(  # type: ignore[reportOptionalMemberAccess]
             tenant_id=tenant_id,
             project_id=project_id,
             query=query,
             limit=max_episodes * 2,
             inhibit_ids=toxic_ids,
-            layer=layer,
+            layer=layer,  # type: ignore[reportCallIssue]
         )
     except (OSError, RuntimeError, ValueError) as e:
         logger.warning("HDC recall failed: %s", e)

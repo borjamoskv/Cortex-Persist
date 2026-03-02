@@ -67,7 +67,7 @@ class LocalEmbedder:
     def _embed_cached(self, text: str) -> list[float]:
         """Internal cached embedding for single strings."""
         self._ensure_model()
-        embedding = self._model.encode(text, normalize_embeddings=True)
+        embedding = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportOptionalMemberAccess]
         return embedding.tolist()
 
     def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
@@ -90,7 +90,7 @@ class LocalEmbedder:
                 raise ValueError("embedded text cannot be empty")
 
         self._ensure_model()
-        embeddings = self._model.encode(
+        embeddings = self._model.encode(  # type: ignore[reportOptionalMemberAccess]
             texts,
             normalize_embeddings=True,
             batch_size=batch_size,

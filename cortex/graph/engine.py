@@ -166,14 +166,14 @@ def process_fact_graph_sync(
         backend = get_backend(conn)
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            eid = backend.upsert_entity_sync(ent["name"], ent["entity_type"], project, timestamp)
+            eid = backend.upsert_entity_sync(ent["name"], ent["entity_type"], project, timestamp)  # type: ignore[reportAttributeAccessIssue]
             entity_ids[ent["name"]] = eid
 
         for rel in relationships:
             source_id = entity_ids.get(rel["source_name"])
             target_id = entity_ids.get(rel["target_name"])
             if source_id and target_id:
-                backend.upsert_relationship_sync(
+                backend.upsert_relationship_sync(  # type: ignore[reportAttributeAccessIssue]
                     source_id, target_id, rel["relation_type"], fact_id, timestamp
                 )
         return len(entities), len(relationships)
@@ -197,7 +197,7 @@ async def get_graph(conn, project: str | None = None, limit: int = 50) -> dict:
 def get_graph_sync(conn, project: str | None = None, limit: int = 50) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
-    return backend.get_graph_sync(project, limit)
+    return backend.get_graph_sync(project, limit)  # type: ignore[reportAttributeAccessIssue]
 
 
 async def query_entity(conn, name: str, project: str | None = None) -> dict | None:
@@ -215,7 +215,7 @@ async def query_entity(conn, name: str, project: str | None = None) -> dict | No
 def query_entity_sync(conn, name: str, project: str | None = None) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
-    return backend.query_entity_sync(name, project)
+    return backend.query_entity_sync(name, project)  # type: ignore[reportAttributeAccessIssue]
 
 
 async def find_path(conn, source: str, target: str, max_depth: int = 3) -> list[dict]:

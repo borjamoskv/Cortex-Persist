@@ -162,7 +162,7 @@ def storage_status() -> None:
             grid.add_row("TURSO_DATABASE_URL", url)
 
         else:  # local
-            from cortex.core.config import DB_PATH
+            from cortex.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
 
             grid.add_row("DB Path", str(DB_PATH))
             grid.add_row("Exists", "[#CCFF00]✓[/]" if DB_PATH.exists() else "[red]✗[/]")

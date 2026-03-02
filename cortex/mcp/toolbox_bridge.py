@@ -106,13 +106,13 @@ class ToolboxBridge:
         self._validate_server_url()
 
         try:
-            self._client = ToolboxClient(self.config.server_url)
+            self._client = ToolboxClient(self.config.server_url)  # type: ignore[reportOptionalCall]
 
             # Load tools (all or specific set)
             load_coro = (
-                self._client.load_toolset(self.config.toolset)
+                self._client.load_toolset(self.config.toolset)  # type: ignore[reportOptionalMemberAccess]
                 if self.config.toolset
-                else self._client.load_toolset()
+                else self._client.load_toolset()  # type: ignore[reportOptionalMemberAccess]
             )
             self._tools = await load_coro
 

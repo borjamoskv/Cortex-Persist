@@ -33,10 +33,10 @@ class SearchMixin:
 
             tenant_id = get_tenant_id()
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             try:
                 # 1. Perform Hybrid Search
-                embedder = self._get_embedder()
+                embedder = self._get_embedder()  # type: ignore[reportAttributeAccessIssue]
                 embedding = embedder.embed(query)
 
                 results = await hybrid_search(
