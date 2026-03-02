@@ -18,6 +18,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.sync")
 
 
+def _safe_parse_tags(raw: str | None) -> list[str]:
+    """Parse tags from DB, handling both JSON arrays and legacy comma-separated strings."""
+    if not raw:
+        return []
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, list) else []
+    except (json.JSONDecodeError, TypeError):
+        # Legacy format: "tag1,tag2,tag3" — split and clean
+        return [t.strip() for t in raw.split(",") if t.strip()]
+
+
 async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) -> Path:
     """Exporta un snapshot legible de toda la memoria activa de CORTEX.
 
@@ -50,7 +62,7 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
             {
                 "content": row[1],
                 "type": row[2],
-                "tags": json.loads(row[3]) if row[3] else [],
+                "tags": _safe_parse_tags(row[3]),
                 "confidence": row[4],
             }
         )

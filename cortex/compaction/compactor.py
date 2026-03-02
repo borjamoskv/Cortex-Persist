@@ -53,6 +53,7 @@ class CompactionStrategy(str, Enum):
     DEDUP = "dedup"
     MERGE_ERRORS = "merge_errors"
     STALENESS_PRUNE = "staleness_prune"
+    TTL_PRUNE = "ttl_prune"
 
     @classmethod
     def all(cls) -> list[CompactionStrategy]:
@@ -145,6 +146,12 @@ async def _apply_strategies(
         await execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)
         if len(result.deprecated_ids) > prev_count:
             result.strategies_applied.append(str(CompactionStrategy.STALENESS_PRUNE.value))
+
+    if CompactionStrategy.TTL_PRUNE in strategies:
+        prev_count = len(result.deprecated_ids)
+        await _apply_ttl_prune(engine, project, result, dry_run)
+        if len(result.deprecated_ids) > prev_count:
+            result.strategies_applied.append(str(CompactionStrategy.TTL_PRUNE.value))
 
 
 async def compact(
@@ -336,6 +343,70 @@ async def get_compaction_stats(
         "total_deprecated": total_deprecated,
         "history": history,
     }
+
+
+# ─── TTL Prune (AX-019: Persist With Decay) ─────────────────────────
+
+
+async def _apply_ttl_prune(
+    engine: CortexEngine,
+    project: str,
+    result: CompactionResult,
+    dry_run: bool,
+) -> None:
+    """Deprecate facts that have exceeded their type-specific TTL.
+
+    Uses the canonical TTL policy from cortex.axioms.ttl.
+    Immortal types (axiom, decision, bridge, rule, report, evolution) are skipped.
+    """
+    from cortex.axioms.ttl import FACT_TTL, is_expired
+
+    conn = await engine.get_conn()
+    cursor = await conn.execute(
+        "SELECT id, fact_type, created_at "
+        "FROM facts "
+        "WHERE project = ? AND valid_until IS NULL",
+        (project,),
+    )
+    rows = await cursor.fetchall()
+
+    from datetime import datetime, timezone
+
+    now = datetime.now(tz=timezone.utc)
+    expired_ids: list[int] = []
+
+    for row in rows:
+        fact_id, fact_type, created_at_str = row[0], row[1], row[2]
+        if FACT_TTL.get(fact_type) is None:
+            continue  # Immortal type
+
+        try:
+            created = datetime.fromisoformat(created_at_str)
+            if created.tzinfo is None:
+                created = created.replace(tzinfo=timezone.utc)
+            age_seconds = (now - created).total_seconds()
+            if is_expired(fact_type, age_seconds):
+                expired_ids.append(fact_id)
+        except (ValueError, TypeError):
+            continue
+
+    if not expired_ids:
+        return
+
+    if dry_run:
+        result.details.append(f"TTL_PRUNE: would deprecate {len(expired_ids)} expired facts")
+        result.deprecated_ids.extend(expired_ids)
+        return
+
+    for fid in expired_ids:
+        await conn.execute(
+            "UPDATE facts SET valid_until = datetime('now') WHERE id = ?",
+            (fid,),
+        )
+    await conn.commit()
+    result.deprecated_ids.extend(expired_ids)
+    result.details.append(f"TTL_PRUNE: deprecated {len(expired_ids)} expired facts")
+    logger.info(_LOG_FMT, project, f"TTL prune: {len(expired_ids)} facts expired")
 
 
 # ─── Internal ────────────────────────────────────────────────────────
