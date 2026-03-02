@@ -20,6 +20,15 @@ from typing import Any, Optional
 from cortex.moltbook.client import MoltbookClient, MoltbookRateLimited
 from cortex.moltbook.verification import solve_challenge
 
+try:
+    from cortex.nexus_v8 import NexusWorldModel, moltbook_post_published
+    import asyncio
+    _NEXUS = NexusWorldModel()
+    _NEXUS_OK = True
+except ImportError:
+    _NEXUS_OK = False
+    _NEXUS = None
+
 logger = logging.getLogger(__name__)
 
 _STATE_PATH = Path.home() / ".config" / "moltbook" / "heartbeat-state.json"
@@ -202,4 +211,18 @@ class MoltbookHeartbeat:
 
         self._state["last_post"] = self._now_iso()
         self._save_state()
+
+        # Nexus v8.1: emit POST_PUBLISHED mutation
+        if _NEXUS_OK and _NEXUS:
+            try:
+                asyncio.run(moltbook_post_published(
+                    _NEXUS,
+                    agent_name="flagship",
+                    submolt=submolt_name,
+                    title=title,
+                    karma_before=self._state.get("last_karma", 0.0),
+                ))
+            except (RuntimeError, OSError, ValueError) as e:
+                logger.debug("Nexus emit failed (non-blocking): %s", e)
+
         return result
