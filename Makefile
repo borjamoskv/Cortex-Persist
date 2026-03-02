@@ -48,7 +48,10 @@ clean: ## Clean build artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 bench: ## Run benchmarks
-	python benchmarks/bench_search.py
+	.venv/bin/python tests/bench_search.py
+
+bench-fast: ## Run quick benchmarks (import time + source size)
+	.venv/bin/python benchmarks/bench_repo.py --quick
 
 docker: ## Build Docker image
 	docker build -t cortex:latest .
