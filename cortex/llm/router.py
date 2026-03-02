@@ -391,111 +391,86 @@ class HedgedRequestStrategy:
         providers: list[BaseProvider],
         prompt: CortexPrompt,
     ) -> tuple[HedgedResult | None, list[str]]:
-        """Race providers. Returns (HedgedResult | None, errors).
+        """Race N providers simultaneously. Returns (winner | None, errors).
 
-        If a provider wins, HedgedResult is populated and errors is empty.
-        If all fail, HedgedResult is None and errors contains all failures.
+        DNS-over-HTTPS pattern: query sent to all providers concurrently,
+        first valid response wins, all others are cancelled.
+
+        Returns:
+            (HedgedResult, [])       — winner found, errors empty.
+            (None, ["p: reason", …]) — all failed, caller falls to cascade.
         """
         if not providers:
             return None, ["No providers for hedging"]
 
         start = time.monotonic()
-
-        # Create named tasks for traceability
         tasks: dict[asyncio.Task[str], BaseProvider] = {
             asyncio.create_task(p.invoke(prompt), name=f"hedge:{p.provider_name}"): p
             for p in providers
         }
-
-        pending = set(tasks.keys())
+        all_tasks = set(tasks)  # immutable snapshot — pending mutates in loop
+        pending: set[asyncio.Task[str]] = set(tasks)
         errors: list[str] = []
 
         try:
-            return await cls._run_race_loop(tasks, pending, start, errors)
-        except asyncio.CancelledError:
-            cls._cancel_all(pending)
-            raise
-        except Exception as e:
-            cls._cancel_all(pending)
-            errors.append(f"Hedging infrastructure: {e}")
+            while pending:
+                done, pending = await asyncio.wait(
+                    pending, return_when=asyncio.FIRST_COMPLETED
+                )
+                for completed in done:
+                    provider = tasks[completed]
+                    exc = completed.exception()
+                    if exc is not None:
+                        errors.append(f"{provider.provider_name}: {exc}")
+                        logger.debug(
+                            "Hedge loser (error): %s — %s",
+                            provider.provider_name,
+                            exc,
+                        )
+                        continue
+
+                    # Winner — capture latency, cancel remaining
+                    latency_ms = (time.monotonic() - start) * 1000
+                    cancelled_names: list[str] = []
+                    for loser in pending:
+                        loser.cancel()
+                        cancelled_names.append(tasks[loser].provider_name)
+
+                    result = HedgedResult(
+                        winner=provider.provider_name,
+                        response=completed.result(),
+                        latency_ms=latency_ms,
+                        cancelled=tuple(cancelled_names),
+                    )
+                    logger.info(
+                        "Hedge winner: %s (%.1fms) | cancelled: %s",
+                        result.winner,
+                        result.latency_ms,
+                        cancelled_names or "none",
+                    )
+                    return result, []
+
+            # All tasks completed with errors
             return None, errors
 
-    @classmethod
-    async def _run_race_loop(
-        cls,
-        tasks: dict[asyncio.Task[str], BaseProvider],
-        pending: set[asyncio.Task[str]],
-        start: float,
-        errors: list[str],
-    ) -> tuple[HedgedResult | None, list[str]]:
-        """Processes the race loop until a winner is found or all fail."""
-        while pending:
-            done, pending = await asyncio.wait(
-                pending, return_when=asyncio.FIRST_COMPLETED
-            )
-            for completed in done:
-                provider = tasks[completed]
-                exc = completed.exception()
-                if exc is not None:
-                    errors.append(f"{provider.provider_name}: {exc}")
-                    logger.debug(
-                        "Hedge loser (error): %s — %s",
-                        provider.provider_name,
-                        exc,
-                    )
-                    continue
-
-                # Winner found — process and return
-                result = await cls._process_winner(completed, tasks, pending, start)
-                return result, []
-
-        return None, errors
-
-    @classmethod
-    async def _process_winner(
-        cls,
-        winner_task: asyncio.Task[str],
-        tasks: dict[asyncio.Task[str], BaseProvider],
-        pending: set[asyncio.Task[str]],
-        start: float,
-    ) -> HedgedResult:
-        """Processes the winning task, captures latency, and cancels losers."""
-        winner_provider = tasks[winner_task]
-        latency_ms = (time.monotonic() - start) * 1000
-
-        cancelled_names: list[str] = []
-        for p_task in pending:
-            p_task.cancel()
-            cancelled_names.append(tasks[p_task].provider_name)
-
-        result = HedgedResult(
-            winner=winner_provider.provider_name,
-            response=winner_task.result(),
-            latency_ms=latency_ms,
-            cancelled=tuple(cancelled_names),
-        )
-
-        logger.info(
-            "Hedge winner: %s (%.1fms) | cancelled: %s",
-            result.winner,
-            result.latency_ms,
-            cancelled_names or "none",
-        )
-
-        # Await cancelled tasks to suppress warnings
-        for p_task in pending:
-            try:
-                await p_task
-            except (asyncio.CancelledError, Exception):
-                pass
-
-        return result
-
-    @staticmethod
-    def _cancel_all(pending: set[asyncio.Task[str]]) -> None:
-        """Utility to cancel all pending tasks cleanly."""
-        for t in pending:
-            t.cancel()
+        except asyncio.CancelledError:
+            raise  # propagate — caller owns the event loop context
+        except (RuntimeError, ValueError, TypeError, OSError) as exc:
+            errors.append(f"Hedging infrastructure: {exc}")
+            return None, errors
+        finally:
+            # Guaranteed cleanup using the immutable snapshot (Ω₃ Byzantine Default)
+            # `pending` may have been reassigned mid-loop — all_tasks is the safe ref
+            for t in all_tasks:
+                if not t.done():
+                    t.cancel()
+            # Suppress ResourceWarnings from cancelled tasks
+            for t in all_tasks:
+                if not t.done():
+                    try:
+                        await t
+                    except (asyncio.CancelledError, Exception):
+                        pass
 
 
 # ─── Provider Metrics (Anycast) ────────────────────────────────────────────
@@ -1063,12 +1038,14 @@ class CortexLLMRouter:
             return Ok(hedged_result.response)
 
         # All hedging peers failed — record in negative cache
+        # errors format: "provider_name: reason" (Ω₃: parse defensively)
         for error_msg in errors:
-            provider_name = error_msg.split(":", 1)[0].strip()
-            # Don't cache primary failures (Ω₃ Byzantine Default)
-            if provider_name != self._primary.provider_name:
-                ttl = self._adaptive_negative_ttl(provider_name)
-                self._negative_cache.record_failure(provider_name, intent_key, ttl=ttl)
+            provider_name = (error_msg.split(":", 1)[0] or "").strip()
+            # Never suppress the primary (Byzantine Default) or malformed entries
+            if not provider_name or provider_name == self._primary.provider_name:
+                continue
+            ttl = self._adaptive_negative_ttl(provider_name)
+            self._negative_cache.record_failure(provider_name, intent_key, ttl=ttl)
 
         logger.debug(
             "Hedging failed for all %d providers — falling through to cascade",
