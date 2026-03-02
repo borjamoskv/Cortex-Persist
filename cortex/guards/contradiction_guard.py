@@ -26,7 +26,7 @@ logger = logging.getLogger("cortex.guards.contradiction")
 # ── Defaults ────────────────────────────────────────────────────────
 DEFAULT_DB_PATH = Path.home() / ".cortex" / "cortex.db"
 MAX_CANDIDATES = 10
-MIN_OVERLAP_SCORE = 0.25  # Jaccard threshold for keyword overlap
+MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap
 
 
 # ── Data classes ────────────────────────────────────────────────────
@@ -205,7 +205,7 @@ def detect_contradictions(
                 ORDER BY
                     CASE WHEN project = ? THEN 0 ELSE 1 END,
                     id DESC
-                LIMIT 500
+                LIMIT 800
                 """,
                 (new_project,),
             )

@@ -11,7 +11,14 @@ This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of t
 
 ## 1. Prime Directives: Quindecálogo de la Singularidad Operativa (15 Axiomas)
 
-> **⚠️ Canonical Source:** The unified Axiom Registry is now at [`docs/axiom-registry.md`](docs/axiom-registry.md) with the Ω/α/π taxonomy. The table below is **legacy reference** — use the Registry for canonical numbering, enforcement status, and cross-references.
+> **⚠️ Canonical Source:** The unified Axiom Registry is now at:
+> - **Code:** [`cortex/axioms/registry.py`](../cortex/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
+> - **Docs:** [`docs/axiom-registry.md`](../docs/axiom-registry.md) — auto-generated from code
+> - **Taxonomy:** 3 Constitutional (AX-001–003) + 10 Operational (AX-010–019) + 9 Aspirational (AX-020–028)
+> - **TTL Policy:** [`cortex/axioms/ttl.py`](../cortex/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
+>
+> The table below is **legacy narrative context**. For canonical numbering, enforcement status, and CI gates, use the Registry.
+
 
 Estas 15 leyes fundamentales gobiernan el comportamiento del Enjambre CORTEX. Almacenadas como `fact_type="axiom"`. Los axiomas 1–13 son operativos; 14–15 son constitucionales (definen qué *es* el agente).
 
