@@ -1,16 +1,12 @@
 """Tests for the Moltbook HTTP client (mocked responses)."""
 
 import json
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, PropertyMock
-from pathlib import Path
 
 from cortex.moltbook.client import (
     MoltbookClient,
-    MoltbookRateLimited,
-    MoltbookError,
-    _BASE_URL,
-    _CREDENTIALS_PATH,
 )
 
 
@@ -51,7 +47,6 @@ class TestZeroTrust:
             # Directly test the validation in _request
             with pytest.raises(ValueError, match="SECURITY"):
                 # Manually construct a request to a bad URL
-                import types
                 original_base = "https://evil.com"
                 old_request = client._request
 
@@ -137,6 +132,6 @@ class TestAPIRequests:
         })
         # Use a client without auth for register
         c = MoltbookClient(api_key="dummy")
-        result = c.register("TestBot", "A test bot")
+        c.register("TestBot", "A test bot")
         assert c._api_key == "moltbook_new_key"
         assert (tmp_path / "creds.json").exists()

@@ -37,13 +37,11 @@ Usage::
 
 from __future__ import annotations
 
-import functools
 import logging
 import time
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, ParamSpec, TypeVar
+from typing import Any
 
 __all__ = [
     # Exception hierarchy
@@ -367,179 +365,30 @@ class DegradationReport:
 
 
 # ─── sovereign_execute Decorator ─────────────────────────────────────────────
+# Extracted to degradation_executor.py to satisfy the Landauer LOC barrier.
+# Re-exported here for backward compatibility.
+from cortex.agent.degradation_executor import (  # noqa: E402
+    _persist_to_cortex,
+    _upgrade_to_l3,
+    sovereign_execute,
+)
 
-_P = ParamSpec("_P")
-_R = TypeVar("_R")
+__all__ = [
+    # Exception hierarchy
+    "SovereignAgentError",
+    "SchemaIncompatibilityError",
+    "ToolRegistrationError",
+    "ModelUnavailableError",
+    "AgentDegradedError",
+    "AgentCalcificationError",
+    # Data contracts
+    "DegradationLevel",
+    "AgentAction",
+    "AgentResult",
+    "DegradationReport",
+    # Decorator (re-exported from degradation_executor)
+    "sovereign_execute",
+    "_upgrade_to_l3",
+    "_persist_to_cortex",
+]
 
-
-def sovereign_execute(
-    fallback_mode: str = "text_only",
-    cortex_engine: Any | None = None,
-    project: str = "default",
-) -> Callable[[Callable[_P, Awaitable[_R]]], Callable[_P, Awaitable[_R]]]:
-    """Decorator that wraps any agent execute() method with Sovereign Degradation.
-
-    Implements the §14 protocol:
-      1. Try full execution.
-      2. On SchemaIncompatibilityError: try text-only fallback (L4).
-      3. On any other SovereignAgentError: emit L3 report + re-raise.
-      4. Always persist failures to CORTEX if engine is provided.
-
-    Args:
-        fallback_mode: "text_only" to enable L4 text-only fallback.
-        cortex_engine: Optional CortexEngine for automatic error persistence.
-        project: CORTEX project scope for error facts.
-
-    Example::
-
-        class MyAgent:
-            @sovereign_execute(fallback_mode="text_only")
-            async def execute(self, action: AgentAction) -> AgentResult:
-                ...
-    """
-
-    def decorator(
-        fn: Callable[_P, Awaitable[_R]],
-    ) -> Callable[_P, Awaitable[_R]]:
-        @functools.wraps(fn)
-        async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
-            t0 = time.perf_counter()
-            # Extract AgentAction from args if present (best-effort)
-            action: AgentAction | None = next((a for a in args if isinstance(a, AgentAction)), None)
-
-            try:
-                result = await fn(*args, **kwargs)
-                if isinstance(result, AgentResult):
-                    result.latency_ms = (time.perf_counter() - t0) * 1000
-                return result
-
-            except SchemaIncompatibilityError as e:
-                # ─── L4: attempt text-only degradation ───────────────────
-                logger.warning(
-                    "sovereign_execute: SchemaIncompatibility in '%s'. "
-                    "Attempting L4 text-only fallback. model=%s",
-                    fn.__name__,
-                    e.context.get("model"),
-                )
-                await _persist_to_cortex(cortex_engine, project, e)
-
-                if (
-                    fallback_mode == "text_only"
-                    and action is not None
-                    and not action.requires_tools
-                ):
-                    # Caller already disabled tools — cannot degrade further
-                    raise AgentDegradedError(
-                        cause=e,
-                        component=e.component,
-                        suggested_model=e.suggested_alt,
-                    ) from e
-
-                if fallback_mode == "text_only" and action is not None:
-                    # Retry with tools disabled
-                    degraded_action = action.as_text_only()
-                    degraded_args = tuple(degraded_action if a is action else a for a in args)
-                    try:
-                        result = await fn(*degraded_args, **kwargs)
-                        if isinstance(result, AgentResult):
-                            result.latency_ms = (time.perf_counter() - t0) * 1000
-                            result.degradation_level = DegradationLevel.L4_GRACEFUL
-                            schema = e.context.get("required_schema")
-                            result.with_warning(
-                                f"Operating in text-only mode "
-                                f"(tool-calling unavailable: {schema}). "
-                                f"Suggested model: {e.suggested_alt}"
-                            )
-                        return result
-                    except Exception as inner_exc:
-                        raise AgentDegradedError(
-                            cause=inner_exc,
-                            component=e.component,
-                            suggested_model=e.suggested_alt,
-                        ) from inner_exc
-
-                # No fallback configured — re-raise with full context
-                raise
-
-            except SovereignAgentError as e:
-                # ─── L3: log full report, persist, re-raise ───────────────
-                report = e.as_report()
-                logger.error(
-                    "sovereign_execute: L%d failure in '%s'. component=%s message=%s",
-                    report.level.value,
-                    fn.__name__,
-                    report.component,
-                    report.message,
-                )
-                await _persist_to_cortex(cortex_engine, project, e)
-                raise
-
-            except Exception as e:
-                # ─── L0→L2 upgrade: wrap unknown errors into L3 ──────────
-                # This is the core Ω₅ principle: never let a failure escape
-                # without enriching it with context.
-                upgraded = AgentDegradedError(
-                    cause=e,
-                    component=fn.__name__,
-                    recovery_steps=[
-                        "Check logs for traceback",
-                        "Run `cortex doctor` to scan subsystem health",
-                        "Isolate the failing component and retry",
-                    ],
-                )
-                logger.error(
-                    "sovereign_execute: Unknown error in '%s' upgraded to L3. original_type=%s",
-                    fn.__name__,
-                    type(e).__name__,
-                )
-                await _persist_to_cortex(cortex_engine, project, upgraded)
-                raise upgraded from e
-
-        return wrapper  # type: ignore[return-value]
-
-    return decorator
-
-
-def _upgrade_to_l3(exc: BaseException, component: str) -> AgentDegradedError:
-    """Upgrade any unknown exception to L3 (Ω₅ principle).
-
-    A failure that escapes without context is pure entropy (L0).
-    This function ensures every unknown error becomes at least L3.
-    """
-    return AgentDegradedError(
-        cause=exc,
-        component=component,
-        recovery_steps=[
-            "Check logs for traceback",
-            _RECOVERY_DOCTOR,
-            "Isolate the failing component and retry",
-        ],
-    )
-
-
-async def _persist_to_cortex(
-    engine: Any | None,
-    project: str,
-    error: SovereignAgentError,
-) -> None:
-    """Attempt to persist a degradation report to CORTEX (step 5 of protocol).
-
-    Non-blocking — never raises. A failed persistence attempt does NOT
-    compound the original error.
-    """
-    if engine is None:
-        return
-    try:
-        report = error.as_report()
-        await engine.store(
-            project=project,
-            fact_type="error",
-            content=report.to_cortex_content(),
-            source="agent:degradation_protocol",
-            metadata={"component": report.component, "level": report.level.value},
-        )
-    except Exception as persist_exc:  # noqa: BLE001
-        logger.debug(
-            "sovereign_execute: Failed to persist degradation report to CORTEX: %s",
-            persist_exc,
-        )

@@ -470,5 +470,21 @@
       "eu": "Entropia estrukturala ezin da lente dimentsional bakar batetik neurtu. Proxy-a dinamikoki biratzeak sistemaren gure metrikaren aurkako egokitzapen etsaia saihesten du, manifold-ak benetako semantika orokorgarria mantentzea bermatuz. Beti pentsatu azpisistemek etengabe eta modu inozoan optimizatuko dutela metrika sarituena; kendu ezazu menpeko bihurtu aurretik."
     },
     "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Complacency is the first symptom of architectural calcification. If an agent tells you they've reached a limit, fire them. The limit is only the observer's lack of imagination. Do not let the system become a fossil.",
+      "es": "La complacencia es el primer síntoma de la calcificación arquitectónica. Si un agente te dice que ha llegado al límite, despídelo. El límite es solo la falta de imaginación del observador. No dejes que el sistema se convierta en un fósil.",
+      "eu": "Konplazentzia arkitektura-kaltifikazioaren lehen sintoma da. Agente batek muga batera iritsi dela esaten badizu, bota ezazu. Muga behatzailearen irudimen falta besterik ez da. Ez utzi sistema fosil bihurtzen."
+    },
+    "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "Calcification occurs when refactoring cost exceeds benefit. Apply Landauer's Razor: if a line of code doesn't decrease system entropy by >= 1%, it's a thermal parasite. Eliminate it before it becomes bone.",
+      "es": "La Calcificación ocurre cuando el coste de refactorizar supera el beneficio. Aplica la Navaja de Landauer: si una línea no reduce la entropía en >= 1%, es un parásito térmico. Elimínala antes de que se vuelva hueso.",
+      "eu": "Kaltzifikazioa gertatzen da birfaktoreatze kostua onura baino handiagoa denean. Landauer-en Navaja erabili: lerro batek entropia ez badu >= %1 murrizten, parasito termikoa da. Ezabatu hezur bihurtu aurretik."
+    },
+    "category": "architecture"
   }
 ]

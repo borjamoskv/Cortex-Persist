@@ -41,8 +41,18 @@ class HeartbeatEmitter:
             await asyncio.sleep(interval)
 
     async def pulse(self) -> bool:
-        """Single heartbeat pulse with semantic drift analysis."""
-        health = hygiene.check_system_health()
+        """Single heartbeat pulse with zero-latency semantic drift analysis."""
+        try:
+            # Gather health metrics with a strict timeout to ensure zero-latency
+            # in the main execution paths.
+            health = await asyncio.wait_for(
+                asyncio.to_thread(hygiene.check_system_health),
+                timeout=2.0
+            )
+        except Exception as e:
+            logger.warning("[HEARTBEAT] Health gathering timed out or failed: %s", e)
+            health = {"status": "degraded", "error": str(e)}
+
         drift = self._semantic.calculate_drift(health)
 
         # Determine urgency: if drift exceeds threshold, escalate priority

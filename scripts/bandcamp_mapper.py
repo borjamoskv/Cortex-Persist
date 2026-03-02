@@ -5,7 +5,7 @@ import json
 import re
 import subprocess
 import time
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 URLS = """https://basmooy.bandcamp.com
 https://ansome.bandcamp.com
@@ -712,7 +712,7 @@ https://baileyibbs.bandcamp.com
 https://kosh212.bandcamp.com
 https://customizedculturerecordings.bandcamp.com"""
 
-def get_unique_urls() -> List[str]:
+def get_unique_urls() -> list[str]:
     urls = [u.strip() for u in URLS.strip().split("\n") if u.strip()]
     seen = set()
     unique = []
@@ -759,7 +759,7 @@ def curl_get_html(url: str) -> (int, str):
     except Exception:
         return 0, ""
 
-def curl_post_api(band_id: int) -> Optional[Dict[str, Any]]:
+def curl_post_api(band_id: int) -> dict[str, Any] | None:
     try:
         result = subprocess.run(
             [
@@ -787,7 +787,7 @@ def curl_post_api(band_id: int) -> Optional[Dict[str, Any]]:
         pass
     return None
 
-def extract_band_id(body: str) -> Optional[int]:
+def extract_band_id(body: str) -> int | None:
     m = re.search(r'data-band="([^"]+)"', body)
     if m:
         decoded = html_module.unescape(m.group(1))
@@ -810,7 +810,7 @@ def extract_band_id(body: str) -> Optional[int]:
 
     return None
 
-def extract_emails(text: str) -> List[str]:
+def extract_emails(text: str) -> list[str]:
     pattern = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
     emails = re.findall(pattern, text)
     blacklist = [
@@ -829,7 +829,7 @@ def extract_emails(text: str) -> List[str]:
     ]
     return list(set(e for e in emails if not any(b in e.lower() for b in blacklist)))
 
-def process_url(url: str, idx: int, total: int) -> Dict[str, Any]:
+def process_url(url: str, idx: int, total: int) -> dict[str, Any]:
     slug = url.replace("https://", "").replace(".bandcamp.com", "").rstrip("/")
     result = {
         "url": url,

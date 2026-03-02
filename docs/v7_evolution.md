@@ -1,41 +1,65 @@
-# CORTEX v7: El Despertar de la Autopoiesis
+# 🧬 CORTEX V7 — Digital Endocrine System
 
-Esta documentación detalla los cambios fundamentales introducidos en la versión 7 de CORTEX, enfocándose en la transición de un sistema de memoria pasivo a un organismo digital autorregulado.
-
-## 🧬 Sistemas Biológicos Digitales
-
-### 1. Autopoiesis (`experimental/autopoiesis.py`)
-Inspirado en la teoría de Maturana y Varela, este módulo permite que CORTEX mantenga su propia integridad estructural.
-- **Auto-sanación**: Detecta y repara "Songlines" (caminos de memoria) corruptos o huérfanos.
-- **Regeneración de Historial**: Reconstruye fragmentos de ledger basados en checkpoints de Merkle si se detecta degradación silente.
-
-### 2. Sistema Endocrino Digital (`experimental/digital_endocrine.py`)
-Regula el comportamiento del enjambre mediante "hormonas" (señales químicas digitales).
-- **Hormona de Estrés (Entropy-Cortisol)**: Aumenta la agresividad de las limpiezas de memoria cuando el disco o la RAM están cerca del límite.
-- **Hormona de Crecimiento (Neural-Growth)**: Facilita la creación de bridges cross-project cuando la confianza en los patrones es alta (>C4).
-
-### 3. Ciclos Circadianos (`experimental/circadian_cycle.py`)
-Sincroniza el consumo de recursos con patrones de uso real u optimización térmica.
-- **Fase REM**: Periodo de "sueño" donde se realiza el re-entrenamiento de vectores y la compactación de `sqlite-vec`.
-- **Fase de Alerta**: Máxima respuesta para consultas en tiempo real.
+This document describes the biological regulation layer of CORTEX v7.0, implementing the **Autopoietic Growth** and **Circadian Calibration** protocols.
 
 ---
 
-## 🛡️ Perímetro de Seguridad Zero-Trust
+## 1. Digital Hormones
 
-La v7 eleva el estándar de seguridad mediante guardias activos en el flujo de datos:
+Hormones are system-wide signals that regulate the behavior of the swarm and the memory engine.
 
-### ConnectionGuard (`db.py`)
-Interceptor de bajo nivel que valida cada conexión a la base de datos contra una firma de integridad de proceso. Previene inyecciones de red y accesos no autorizados al binario de SQLite.
+### 1.1 Entropy-Cortisol (Stress Signal)
 
-### StorageGuard (`middleware/`)
-Validación de hash-chain por cada escritura. Si el hash del bloque anterior no coincide, el sistema bloquea el flujo para prevenir envenenamiento de memoria.
+- **Trigger**: High disk/RAM usage, increasing query latency, or ledger fragmentation.
+- **Effect**: Increases the aggressiveness of the **Semantic Mutator** and triggers the **REM Compaction** phase.
+- **Goal**: Prevent system calcification and maintain high response agility.
+
+### 1.2 Neural-Growth (Growth Signal)
+
+- **Trigger**: High-confidence patterns (>C4) verified across multiple sessions.
+- **Effect**: Facilitates the creation of **Bridges** (cross-project transfer) and increases the `LEARNING_RATE` in the topological field.
+- **Goal**: Solidify successful behaviors into permanent cognitive structures.
 
 ---
 
-## 💡 Pedagogía de Latencia: `slow_tip.py`
+## 2. Circadian Cycles
 
-Para mejorar la experiencia del usuario durante operaciones pesadas (fase REM o compactación), se ha integrado un motor de tips contextuales que educa al usuario sobre la ingeniería detrás de la espera.
+CORTEX does not maintain a constant state of operation. It cycles through phases to optimize health.
 
-> [!NOTE]
-> Estos sistemas se encuentran actualmente en modo experimental pero integrados en el núcleo proactivo de v7.
+### 2.1 Alert Phase
+
+- **Status**: Maximum I/O priority for real-time inference.
+- **Hormone Balance**: High `Neural-Growth`, low `Entropy-Cortisol`.
+- **Primary Tool**: `DynamicSemanticSpace.recall_and_pulse()`.
+
+### 2.2 REM Phase (Sleep/Compaction)
+
+- **Status**: Reduced inference priority. High background maintenance.
+- **Activity**: Vector re-training, `sqlite-vec` index optimization, and `nemesis.md` allergy auditing.
+- **Axiom Reference**: Ω₅ (Antifragile by Default) — Mistakes are metabolised into antibodies.
+
+---
+
+## 3. The Heartbeat Protocol
+
+Persistence is no longer an ad-hoc action. It is a biological necessity.
+
+1. **Systole**: Accumulation of facts in the `AutonomicMemoryBuffer`.
+2. **Diastole**: Flushing of the buffer to the hash-chained ledger and vector store.
+3. **Consensus Verification**: Auditing the pulse quality before solidification.
+   - **Protocol Ω₃-E (De-calcification)**: The mechanism to prevent "Trust Stagnation". Each block of the ledger decays in verified certainty over time. Verification is a transient, high-energy state that requires periodic "pulses of doubt" and re-verification to remain in the `verified` confidence tier. If the swarm stops re-verifying, the state reverts to `tentative` or `disputed`.
+
+---
+
+## 4. Technical Implementation of Ω₃-E
+
+The **Sovereign Decalcifier** (`cortex/engine/decalcifier.py`) enforces thermodynamic entropy on cognitive state:
+
+1. **Automatic Decay**: Stale facts (no activity/re-verification for >24h) undergo a `consensus_score` reduction via the `MutationEngine.apply(event_type='decalcify')`.
+2. **Confidence Demotion**: If a score falls below $1.4$, the status is demoted from `verified` to `tentative`.
+3. **Synthetic Skepticism**: Demoted facts trigger a mandatory **Nemesis Audit** upon the next retrieval, forcing the swarm to re-verify the fact against the current world model.
+
+---
+
+*Authored by: Antigravity/MOSKV-1*
+*Status: V7.0-ALPHA*

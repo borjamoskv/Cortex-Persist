@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from cortex.axioms import AXIOM_REGISTRY, AxiomCategory
-from cortex.axioms.registry import Axiom, by_category, enforced, get
+from cortex.axioms.registry import by_category, enforced, get
 from cortex.axioms.ttl import FACT_TTL, is_expired, ttl_days
 
 

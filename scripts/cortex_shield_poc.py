@@ -1,6 +1,6 @@
-import uuid
-import time
 import logging
+import time
+import uuid
 
 # Configuración de logging estilo Industrial Noir
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - ◈ %(name)s - %(levelname)s - %(message)s')

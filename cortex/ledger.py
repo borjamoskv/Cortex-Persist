@@ -1,0 +1,195 @@
+"""
+CORTEX v8 — Sovereign Immutable Ledger (CHRONOS-1 Standard).
+
+Axiom Reference:
+- Ω₃ (Byzantine Default): "I verify, then trust. Never reversed."
+- Ω₂ (Entropic Asymmetry): "Merkle Trees reduce trust-cost from O(N) to O(log N)."
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import logging
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, List, Optional, Tuple
+
+logger = logging.getLogger("cortex.ledger")
+
+
+@dataclass(frozen=True)
+class MerkleNode:
+    """A node within the Merkle Tree (V8 Immutable)."""
+    hash: str
+    left: Optional[MerkleNode] = None
+    right: Optional[MerkleNode] = None
+    is_leaf: bool = False
+
+
+class MerkleTree:
+    """High-performance Merkle Tree for batch transaction verification."""
+
+    def __init__(self, leaves: List[str]):
+        if not leaves:
+            self.root = None
+            self._leaves = []
+            return
+
+        self._leaves = leaves
+        nodes = [MerkleNode(hash=h, is_leaf=True) for h in leaves]
+        self.root = self._build_recursive(nodes)
+
+    def _hash_pair(self, left: str, right: str) -> str:
+        return hashlib.sha256((left + right).encode()).hexdigest()
+
+    def _build_recursive(self, nodes: List[MerkleNode]) -> MerkleNode:
+        if len(nodes) == 1:
+            return nodes[0]
+
+        next_layer = []
+        for i in range(0, len(nodes), 2):
+            left = nodes[i]
+            right = nodes[i + 1] if i + 1 < len(nodes) else nodes[i]
+            combined_hash = self._hash_pair(left.hash, right.hash)
+            next_layer.append(MerkleNode(hash=combined_hash, left=left, right=right))
+
+        return self._build_recursive(next_layer)
+
+    @property
+    def root_hash(self) -> Optional[str]:
+        return self.root.hash if self.root else None
+
+    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+        if not self.root or index < 0 or index >= len(self._leaves):
+            return []
+
+        proof = []
+        current_layer = [MerkleNode(h, is_leaf=True) for h in self._leaves]
+        current_idx = index
+
+        while len(current_layer) > 1:
+            next_layer = []
+            for i in range(0, len(current_layer), 2):
+                left = current_layer[i]
+                right = current_layer[i + 1] if i + 1 < len(current_layer) else current_layer[i]
+                if i == current_idx:
+                    proof.append((right.hash, "R"))
+                elif i + 1 == current_idx:
+                    proof.append((left.hash, "L"))
+                combined = self._hash_pair(left.hash, right.hash)
+                next_layer.append(MerkleNode(combined, left=left, right=right))
+            current_layer = next_layer
+            current_idx //= 2
+        return proof
+
+    @staticmethod
+    def verify_proof(leaf_hash: str, proof: List[Tuple[str, str]], root_hash: str) -> bool:
+        current = leaf_hash
+        for sibling_hash, direction in proof:
+            if direction == "L":
+                current = hashlib.sha256((sibling_hash + current).encode()).hexdigest()
+            else:
+                current = hashlib.sha256((current + sibling_hash).encode()).hexdigest()
+        return current == root_hash
+
+
+class SovereignLedger:
+    """The Custodian of Immutable History (CORTEX Wave 5)."""
+
+    def __init__(self, db_conn: sqlite3.Connection):
+        self.conn = db_conn
+        self._ensure_schema()
+
+    def _ensure_schema(self):
+        self.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                project     TEXT NOT NULL,
+                action      TEXT NOT NULL,
+                detail      TEXT,
+                prev_hash   TEXT NOT NULL,
+                hash        TEXT NOT NULL UNIQUE,
+                tenant_id   TEXT DEFAULT 'default',
+                timestamp   TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS merkle_roots (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                root_hash       TEXT NOT NULL,
+                tx_start_id     INTEGER NOT NULL,
+                tx_end_id       INTEGER NOT NULL,
+                tx_count        INTEGER NOT NULL,
+                signature       TEXT,
+                created_at      TEXT DEFAULT (datetime('now'))
+            );
+            CREATE INDEX IF NOT EXISTS idx_tx_prev ON transactions(prev_hash);
+            CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
+        """)
+
+    def _compute_tx_hash(self, prev_hash: str, project: str, action: str, detail: str, ts: Any) -> str:
+        ts_str = str(ts)
+        payload = f"{prev_hash}:{project}:{action}:{detail}:{ts_str}"
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    def record_transaction(self, project: str, action: str, detail: Any = None) -> str:
+        detail_json = json.dumps(detail, sort_keys=True) if detail else "{}"
+        ts = datetime.now(timezone.utc).isoformat()
+        cursor = self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        prev_hash = row[0] if row else "GENESIS"
+        new_hash = self._compute_tx_hash(prev_hash, project, action, detail_json, ts)
+        try:
+            self.conn.execute(
+                "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
+                " VALUES (?, ?, ?, ?, ?, ?)", (project, action, detail_json, prev_hash, new_hash, ts)
+            )
+            self.conn.commit()
+            return new_hash
+        except sqlite3.Error as e:
+            logger.error("Ledger: Failed to record transaction: %s", e)
+            raise
+
+    def create_checkpoint(self, batch_size: int = 100) -> Optional[str]:
+        cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+        last_covered = cursor.fetchone()[0] or 0
+        cursor = self.conn.execute(
+            "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id", (last_covered,)
+        )
+        rows = cursor.fetchall()
+        if not rows or (len(rows) < batch_size and last_covered > 0):
+            return None
+        hashes = [r[1] for r in rows]
+        tree = MerkleTree(hashes)
+        root = tree.root_hash
+        start_id, end_id = rows[0][0], rows[-1][0]
+        self.conn.execute(
+            "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) VALUES (?, ?, ?, ?)",
+            (root, start_id, end_id, len(rows))
+        )
+        self.conn.commit()
+        return root
+
+    def audit_integrity(self) -> dict:
+        violations = []
+        cursor = self.conn.execute(
+            "SELECT id, project, action, detail, prev_hash, hash, timestamp FROM transactions ORDER BY id"
+        )
+        txs = cursor.fetchall()
+        expected_prev = "GENESIS"
+        for row in txs:
+            tid, proj, act, det, prev, h, ts = row
+            if prev != expected_prev:
+                violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "actual": prev})
+            computed = self._compute_tx_hash(prev, proj, act, det, ts)
+            if computed != h:
+                violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h, "computed": computed})
+            expected_prev = h
+        cursor = self.conn.execute("SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots")
+        for stored_root, start, end in cursor.fetchall():
+            c = self.conn.execute("SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id", (start, end))
+            hashes = [r[0] for r in c.fetchall()]
+            computed_root = MerkleTree(hashes).root_hash
+            if computed_root != stored_root:
+                violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH", "stored": stored_root})
+        return {"valid": not violations, "violations": violations, "tx_count": len(txs)}

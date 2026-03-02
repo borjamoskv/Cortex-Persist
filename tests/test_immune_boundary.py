@@ -13,7 +13,6 @@ from pydantic import BaseModel, Field
 
 from cortex.llm.boundary import ImmuneBoundary, _clean_llm_json
 
-
 # ── Test Schemas ────────────────────────────────────────────────
 
 

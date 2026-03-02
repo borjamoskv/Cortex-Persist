@@ -21,6 +21,7 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
+from cortex.engine.durability import PersistenceSupervisor
 
 logger = logging.getLogger("cortex")
 
@@ -48,6 +49,7 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
+        self._persistence = PersistenceSupervisor(self)
 
         # Composition layers
         self.facts = FactManager(self)
@@ -256,6 +258,9 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     async def time_travel(self, *args, **kwargs):
         return await self.facts.time_travel(*args, **kwargs)
 
+    async def get_fact(self, *args, **kwargs):
+        return await self.facts.get_fact(*args, **kwargs)
+
     async def reconstruct_state(self, *args, **kwargs):
         return await self.facts.reconstruct_state(*args, **kwargs)
 
@@ -290,6 +295,10 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     async def stats(self):
         return await self.facts.stats()
+
+    async def get_all_active_facts(self, *args, **kwargs):
+        """Retrieve all active facts across all projects."""
+        return await self.facts.get_all_active_facts(*args, **kwargs)
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
@@ -338,6 +347,7 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
         self._ledger = ImmutableLedger(conn)
         await self._init_memory_subsystem(self._db_path, conn)
+        await self._persistence.start()
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
 
@@ -359,6 +369,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         if self._memory_manager:
             await self._memory_manager.wait_for_background()
             self._memory_manager = None
+        if self._persistence:
+            await self._persistence.stop()
         if self._conn:
             await self._conn.close()
             self._conn = None
