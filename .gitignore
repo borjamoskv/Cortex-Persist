@@ -70,6 +70,8 @@ Thumbs.db
 .agent/
 .agent_backup_workflows/
 .cortex/
+.cortex_field
+.artifacts/
 .mejoralo/
 
 # Generated / Scratch
