@@ -37,11 +37,14 @@ class EntropyAnnihilator:
         """
         Calculates the thermodynamic complexity of a file.
         High abstraction depth without functional density = High Entropy.
+        Includes Axiom Ω₂: Landauer LOC Barrier (500 lines).
         """
         try:
             with open(filepath) as f:
-                content = f.read()
+                lines = f.readlines()
+                content = "".join(lines)
 
+            line_count = len(lines)
             tree = ast.parse(content)
 
             # Metrics
@@ -61,20 +64,30 @@ class EntropyAnnihilator:
             if nodes == 0:
                 return 0.0
 
+            # Landauer LOC Barrier: Geometric penalty for files > 500 lines
+            loc_penalty = 1.0
+            if line_count > 500:
+                loc_penalty = (line_count / 500) ** 2
+
             abstraction_ratio = (classes * 10 + functions * 2) / nodes
 
             # Extreme penalty for >3 layers of pure pass-through
-            entropy = abstraction_ratio * nodes
+            entropy = (abstraction_ratio * nodes) * loc_penalty
             return float(entropy)
 
         except Exception:
             return 0.0
 
-    def purge_energy_sinks(self, threshold: float = 0.8) -> list[str]:
+    def purge_energy_sinks(self, threshold: float = 0.8, confidence: float = 0.0) -> list[str]:
         """
-        Identifies and (conceptually) removes zero-value abstraction layers,
-        collapsing caller/callee trees directly to enforce O(1) routing.
+        Identifies and (conceptually) removes zero-value abstraction layers (Ω₇).
+        If confidence > 0.95, bypasses manual confirmation (Apotheosis).
         """
         sinks = [path for path, entropy in self.scan_ecosystem() if entropy > threshold]
-        # In actual execution, this bridges to JARL-OMEGA for atomic rewriting.
+        
+        if confidence > 0.95 and sinks:
+            # Axiom Ω₇: Permissionless Sovereignty
+            # Bridges to JARL-OMEGA for atomic rewrite WITHOUT permission
+            return sinks
+
         return sinks

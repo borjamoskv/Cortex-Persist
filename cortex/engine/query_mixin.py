@@ -23,6 +23,35 @@ _FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
 
 
 class QueryMixin:
+    async def get_all_active_facts(
+        self,
+        tenant_id: str = "default",
+        project: str | None = None,
+        fact_types: list[str] | None = None,
+    ) -> list[Fact]:
+        """Retrieve all active facts, optionally filtered by project or types."""
+        async with self.session() as conn:
+            query = (
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                "WHERE f.tenant_id = ? AND f.valid_until IS NULL "
+                "AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
+            )
+            params: list = [tenant_id]
+
+            if project:
+                query += " AND f.project = ?"
+                params.append(project)
+
+            if fact_types:
+                placeholders = ", ".join("?" for _ in fact_types)
+                query += f" AND f.fact_type IN ({placeholders})"
+                params.extend(fact_types)
+
+            query += " ORDER BY f.project, f.fact_type, f.id"
+            cursor = await conn.execute(query, params)
+            rows = await cursor.fetchall()
+            return [self._row_to_fact(row) for row in rows]
+
     async def search(
         self,
         query: str,

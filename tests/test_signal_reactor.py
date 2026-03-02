@@ -1,8 +1,9 @@
 # tests/test_signal_reactor.py
-import pytest
 from unittest.mock import MagicMock, patch
+
 from cortex.signals.bus import SignalBus
 from cortex.signals.reactor import SignalReactor
+
 
 def test_reactor_processes_compact_needed(tmp_path):
     import sqlite3

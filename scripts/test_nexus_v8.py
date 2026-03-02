@@ -10,14 +10,13 @@ import os
 import time
 
 from cortex.nexus_v8 import (
-    NexusWorldModel,
     DomainOrigin,
     IntentType,
+    NexusWorldModel,
     Priority,
     WorldMutation,
     mailtv_intercepted,
     moltbook_post_published,
-    moltbook_karma_laundered,
     moltbook_shadowban_alert,
     sap_anomaly_detected,
 )

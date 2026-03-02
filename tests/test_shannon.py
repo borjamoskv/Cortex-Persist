@@ -8,6 +8,7 @@ Tests are split into two groups:
 from __future__ import annotations
 
 import math
+
 import pytest
 
 from cortex.shannon.analyzer import (
@@ -22,7 +23,6 @@ from cortex.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════
 # Pure Math Tests

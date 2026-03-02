@@ -20,6 +20,7 @@ __all__ = [
     "guard_cmd",
     "manifest_cmd",
     "nirvana_cmd",
+    "aix_cmd",
 ]
 
 console = Console()
@@ -222,6 +223,24 @@ def nirvana_cmd(target_path: str) -> None:
         f"Post-purga: max CC={max_cc}, {results['critical']} archivos aún críticos "
         f"de {results['total']} escaneados.\n"
     )
+
+
+@apotheosis_cmds.command("aix")
+def aix_cmd() -> None:
+    """
+    Métrica de Deificación (AIx). Cuantifica la eficiencia y soberanía del sistema.
+    """
+    from cortex.cli.aix import calculate_aix, print_aix_report
+    from cortex.cli.common import get_engine
+    import asyncio
+
+    async def run():
+        engine = get_engine()
+        async with engine.session() as conn:
+            data = await calculate_aix(conn)
+            print_aix_report(data)
+
+    asyncio.run(run())
 
 
 def _scan_entropy(target: Path) -> dict:

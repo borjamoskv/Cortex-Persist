@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 
 from cortex.daemon.notifier import Notifier
 
@@ -72,7 +73,10 @@ class AlertHandlerMixin:
                 alert.dead_code,
             )
 
-            msg = f"Project {alert.project} score: {alert.score}. Waking up Legion-1 Swarm (400-subagents)."
+            msg = (
+                f"Project {alert.project} score: {alert.score}. "
+                "Waking up Legion-1 Swarm (400-subagents)."
+            )
             Notifier.notify("☢️ MEJORAlo Brutal Mode", msg, sound="Basso")
 
             # Sovereign Auto-Heal: Dispatch Brutal Scan
@@ -179,3 +183,51 @@ class AlertHandlerMixin:
                     Notifier.notify("🛡️ Security Alert", message, sound="Basso")
                 except (OSError, ValueError, RuntimeError) as e:
                     logger.exception("Failed to execute security notification: %s", e)
+
+    def _alert_compaction(self, alerts: list) -> None:
+        """Handler para CompactionAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"compaction:{a.project}"
+            if self._should_alert(key):
+                Notifier.notify("Compaction completed", a.message)
+                self._last_alerts[key] = time.monotonic()
+
+    def _alert_signals(self, alerts: list) -> None:
+        """Handler for SignalAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            msg = f"L2 Reflex: {a.event_type} - {a.message}"
+            logger.info("📡 Signal Reactor: %s", msg)
+            if self._should_alert(f"signal:{a.event_type}:{a.project or 'global'}"):
+                Notifier.notify("CORTEX Reactive Shift", msg)
+
+    def _alert_tombstone(self, alerts: list) -> None:
+        """Handler for TombstoneAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.info("💀 Tombstone Sweep: %s", a.message)
+            if self._should_alert("tombstone:sweep"):
+                Notifier.notify("Garbage Collection", a.message)
+
+    def _alert_cloud_sync(self, alerts: list) -> None:
+        """Handler for CloudSyncAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.debug(a.message)
+            logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
+
+    def _flush_timer(self) -> None:
+        """Flush accumulated time tracker heartbeats."""
+        if not getattr(self, "tracker", None):
+            return
+        try:
+            entries = self.tracker.flush()
+            if entries > 0:
+                logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
+        except Exception as e:
+            logger.error("TimeTracker flush error: %s", e)

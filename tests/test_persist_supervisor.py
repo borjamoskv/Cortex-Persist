@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.cli.loop_cmds import ExecutionLoop, PersistSupervisor
+from cortex.cli.loop_engine import ExecutionLoop, PersistSupervisor
 
 # ─── Unit: PersistSupervisor mechanics ───────────────────────────────
 
@@ -113,7 +113,7 @@ class TestFlushPendingAtomicity:
 
     def _make_loop_no_supervisor(self) -> ExecutionLoop:
         """Create an ExecutionLoop with auto_persist=False to isolate flush logic."""
-        with patch("cortex.cli.loop_cmds.get_engine") as mock_get_engine:
+        with patch("cortex.cli.loop_engine.get_engine") as mock_get_engine:
             mock_engine = MagicMock()
             mock_engine.close = AsyncMock()
             mock_get_engine.return_value = mock_engine
@@ -145,7 +145,7 @@ class TestFlushPendingAtomicity:
 
         assert len(loop._pending_facts) == 5
 
-        with patch("cortex.cli.loop_cmds._run_async", side_effect=lambda coro: 1):
+        with patch("cortex.cli.loop_engine._run_async", side_effect=lambda coro: 1):
             loop._flush_pending(source="test")
 
         # Queue must be empty after flush
@@ -165,7 +165,7 @@ class TestFlushPendingAtomicity:
         def failing_run_async(coro):  # noqa: ANN001
             raise OSError("simulated DB failure")
 
-        with patch("cortex.cli.loop_cmds._run_async", side_effect=failing_run_async):
+        with patch("cortex.cli.loop_engine._run_async", side_effect=failing_run_async):
             loop._flush_pending(source="test")
 
         # Fact must have been re-enqueued — not lost
@@ -191,8 +191,8 @@ class TestExecutionLoopIntegration:
         mock_engine.close = AsyncMock()
 
         with (
-            patch("cortex.cli.loop_cmds.get_engine", return_value=mock_engine),
-            patch("cortex.cli.loop_cmds._run_async") as mock_run_async,
+            patch("cortex.cli.loop_engine.get_engine", return_value=mock_engine),
+            patch("cortex.cli.loop_engine._run_async") as mock_run_async,
         ):
             # _run_async bridges sync→async; stub it as pure sync counter
             call_tracker = {"count": 0}
@@ -295,7 +295,8 @@ class TestExecutionLoopIntegration:
         loop, _ = loop_with_mock_engine
 
         # Simulate a session with results
-        from cortex.cli.loop_cmds import TaskResult, TaskStatus
+        from cortex.cli.loop_engine import TaskResult
+        from cortex.cli.loop_models import TaskStatus
 
         loop._session.results.append(
             TaskResult(
@@ -317,6 +318,46 @@ class TestExecutionLoopIntegration:
             f"these would be permanently lost"
         )
 
+    def test_atexit_flush_generates_ghost_on_crash(self, loop_with_mock_engine) -> None:
+        """Ω₅: atexit_flush must generate a GHOST if close() was not called."""
+        loop, _ = loop_with_mock_engine
+
+        from cortex.cli.loop_models import TaskStatus, PersistenceType
+        from cortex.cli.loop_engine import TaskResult
+
+        # Simulate a session with one completed task
+        loop._session.results.append(
+            TaskResult(
+                task="interrupted task",
+                status=TaskStatus.COMPLETED,
+                output="success",
+                duration_ms=10.0,
+            )
+        )
+        loop._session.tasks_completed = 1
+
+        # We do NOT call loop.close() -> simulating crash/SIGTERM mid-session
+        loop._atexit_flush()
+
+        # It must have enqueued and flushed the pending facts
+        engine = loop._engine
+        
+        # Extract the arguments passed to engine.store inside _run_async/mock_flush
+        ghost_found = False
+        
+        # We need to inspect what was flushed by _flush_pending. Our wrapper captures logic inside _run_async.
+        # But wait, engine.store returns a coroutine. In the mock engine, store is just a MagicMock. 
+        # Check its actual calls directly.
+        for call in engine.store.call_args_list:
+            kwargs = call.kwargs
+            if kwargs.get("fact_type") == PersistenceType.GHOST.value:
+                ghost_found = True
+                assert "Sesión interrumpida" in kwargs["content"]
+                break
+                
+        assert ghost_found, "atexit_flush failed to create a GHOST on crash"
+
+
 
 # ─── Durability: confidence level documentation ───────────────────────
 
@@ -330,7 +371,7 @@ class TestDurabilityConfidenceLevels:
 
     def test_persist_interval_default_is_60s(self) -> None:
         """The max data loss window is explicitly bounded at 60s."""
-        from cortex.cli.loop_cmds import PERSIST_INTERVAL
+        from cortex.cli.loop_engine import PERSIST_INTERVAL
 
         assert PERSIST_INTERVAL == 60, (
             f"PERSIST_INTERVAL changed to {PERSIST_INTERVAL}s — "
@@ -354,7 +395,7 @@ class TestDurabilityConfidenceLevels:
 
     def test_pending_lock_exists_on_loop(self) -> None:
         """ExecutionLoop must have a threading.Lock for pending_facts."""
-        with patch("cortex.cli.loop_cmds.get_engine"):
+        with patch("cortex.cli.loop_engine.get_engine"):
             loop = ExecutionLoop(project="test", auto_persist=False)
 
         assert isinstance(loop._pending_lock, type(threading.Lock())), (

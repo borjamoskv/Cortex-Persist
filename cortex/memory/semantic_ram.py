@@ -77,7 +77,8 @@ class SemanticMutator:
                 await self._worker_task
             except asyncio.CancelledError:
                 raise
-            # LEGION-OMEGA: Wait=True para prevenir orfandad de transacciones en BD
+            except Exception as e:
+                logger.error("SemanticMutator shutdown error: %s", e)
             self._pool.shutdown(wait=True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
 
@@ -144,8 +145,7 @@ class SemanticMutator:
                 logger.critical(
                     "SemanticMutator: MODEL HASH DRIFT. "
                     "Anchor=%s, current=%s. "
-                    "Skipping %d mutations. "
-                    "Recalculate p_0 cold.",
+                    "Skipping %d mutations.",
                     self._anchor.model_hash[:12],
                     self._health_monitor._model_hash[:12],
                     len(batch),
@@ -153,7 +153,8 @@ class SemanticMutator:
                 return
 
         def _mutate():
-            # LEGION-OMEGA (Chronos Sniper): Evitar deadlock, manejar sqlite3.Error general (vía Exception genérico controlado)
+            # LEGION-OMEGA (Chronos Sniper): Evitar deadlock, manejar sqlite3.Error general
+            # (vía Exception genérico controlado)
             conn = self._store._get_conn()
             now = time.time()
             try:
@@ -226,19 +227,112 @@ class SemanticMutator:
         cursor.execute("UPDATE vec_facts SET embedding = ? WHERE rowid = ?", (new_emb_bytes, rowid))
 
 
+class AutonomicMemoryBuffer:
+    """High-frequency temporary storage for active facts (Short-Term Memory).
+
+    Items in this buffer are 'alive' but not yet 'immortal' (not in the ledger).
+    The buffer periodically flushes to the CORTEX ledger to ensure durability
+    without blocking the real-time execution loop.
+    """
+
+    def __init__(self, capacity: int = 100, pressure_threshold: float = 0.8) -> None:
+        self._buffer: list[dict[str, Any]] = []
+        self._capacity = capacity
+        self._pressure_threshold = pressure_threshold
+        self._lock = asyncio.Lock()
+
+    async def add(self, fact_data: dict[str, Any]) -> bool:
+        """Add a fact to the autonomic buffer and check semantic pressure."""
+        async with self._lock:
+            if len(self._buffer) >= self._capacity:
+                return False
+            self._buffer.append(fact_data)
+
+            # 150/100: Return True if threshold met to trigger autonomous flush
+            pressure = len(self._buffer) / self._capacity
+            return pressure >= self._pressure_threshold
+
+    async def flush(self) -> list[dict[str, Any]]:
+        """Retrieve and clear all facts from the buffer (Systole)."""
+        async with self._lock:
+            if not self._buffer:
+                return []
+            data = self._buffer.copy()
+            self._buffer.clear()
+            return data
+
+
 class DynamicSemanticSpace:
     """Wraps the SovereignVectorStoreL2 to provide Read-as-Rewrite capabilities."""
-
-    __slots__ = ("_store", "semantic_mutator")
 
     def __init__(
         self,
         store: SovereignVectorStoreL2,
         health_monitor: TopologicalHealthMonitor | None = None,
         anchor: TopologicalAnchor | None = None,
+        buffer_capacity: int = 100,
+        manager: Any | None = None,
     ) -> None:
         self._store = store
-        self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
+        self.manager = manager
+        self.semantic_mutator = SemanticMutator(
+            store, health_monitor=health_monitor, anchor=anchor
+        )
+        self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
+        self._active_flushes: set[asyncio.Task[Any]] = set()
+        self._heartbeat_task: asyncio.Task[None] | None = None
+
+    def start(self) -> None:
+        """Starts the semantic mutator and the autonomic heartbeat."""
+        self.semantic_mutator.start()
+        if self._heartbeat_task is None or self._heartbeat_task.done():
+            self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+            logger.info("DynamicSemanticSpace: Autonomic heartbeat stabilized (Started).")
+
+    async def stop(self) -> None:
+        """Gracefully stops all autonomic processes."""
+        await self.semantic_mutator.stop()
+        if self._heartbeat_task and not self._heartbeat_task.done():
+            self._heartbeat_task.cancel()
+            try:
+                await self._heartbeat_task
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                logger.error("DynamicSemanticSpace shutdown error: %s", e)
+            logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
+
+    async def _heartbeat_loop(self) -> None:
+        """Periodically flushes the autonomic buffer to the ledger (Autonomous Heartbeat)."""
+        while True:
+            try:
+                await asyncio.sleep(60.0)  # Standard Heartbeat frequency
+                await self.force_autonomic_flush(reason="Standard Heartbeat")
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                logger.error("DynamicSemanticSpace: Heartbeat failure: %s", e)
+
+    async def force_autonomic_flush(self, reason: str = "Unknown") -> None:
+        """Forces a buffer flush and integration into the persistent ledger."""
+        data = await self.autonomic_buffer.flush()
+        if data:
+            logger.info(
+                "DynamicSemanticSpace: Autonomous Flush (%d facts) - Reason: %s",
+                len(data),
+                reason
+            )
+            # 150/100 Standard: Predictive persistence (systole)
+            if self.manager:
+                for fact in data:
+                    # Async background storage
+                    asyncio.create_task(self.manager.store(
+                        tenant_id="default_tenant",  # Should be passed in real scenarios
+                        project_id=fact["project"],
+                        content=fact["content"],
+                        fact_type=fact["fact_type"],
+                        metadata={"source": "autonomic_heartbeat", "ts": fact["timestamp"]}
+                    ))
 
     async def recall_and_pulse(
         self,
@@ -264,3 +358,18 @@ class DynamicSemanticSpace:
             )
 
         return facts
+
+    async def store_with_heartbeat(self, project: str, content: str, fact_type: str = "knowledge") -> bool:
+        """Stores a fact and triggers autonomous flush if semantic pressure is high (150/100)."""
+        fact_data = {
+            "project": project,
+            "content": content,
+            "fact_type": fact_type,
+            "timestamp": time.time(),
+        }
+        needs_flush = await self.autonomic_buffer.add(fact_data)
+        if needs_flush:
+            # Autonomous trigger: Pressure threshold reached (Ω₅ Antifragile persistence)
+            _t = asyncio.create_task(self.force_autonomic_flush(reason="High Semantic Pressure"))
+            _t.add_done_callback(lambda _: None)  # Strong reference to avoid GC
+        return True

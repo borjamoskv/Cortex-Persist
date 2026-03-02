@@ -176,6 +176,15 @@ class FactManager:
             await conn.rollback()
             raise
 
+    async def get_fact(self, fact_id: int) -> Fact | None:
+        """Retrieve any fact by ID, including deprecated ones."""
+        conn = await self.engine.get_conn()
+        cursor = await conn.execute(
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
+        )
+        row = await cursor.fetchone()
+        return row_to_fact(row) if row else None
+
     async def search(
         self,
         query: str,
@@ -200,6 +209,35 @@ class FactManager:
             as_of=as_of,
             **kwargs,
         )
+
+    async def get_all_active_facts(
+        self,
+        tenant_id: str = "default",
+        project: str | None = None,
+        fact_types: list[str] | None = None,
+    ) -> list[Fact]:
+        """Retrieve all active facts, optionally filtered by project or types."""
+        conn = await self.engine.get_conn()
+        query = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+            "WHERE f.tenant_id = ? AND f.valid_until IS NULL "
+            "AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
+        )
+        params: list = [tenant_id]
+
+        if project:
+            query += " AND f.project = ?"
+            params.append(project)
+
+        if fact_types:
+            placeholders = ", ".join("?" for _ in fact_types)
+            query += f" AND f.fact_type IN ({placeholders})"
+            params.extend(fact_types)
+
+        query += " ORDER BY f.project, f.fact_type, f.id"
+        cursor = await conn.execute(query, params)
+        rows = await cursor.fetchall()
+        return [row_to_fact(row) for row in rows]
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0

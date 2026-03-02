@@ -96,20 +96,17 @@ async def cast_vote(
     """Cast a consensus vote (verify/dispute) on a fact."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id)
+        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         if not fact:
             raise HTTPException(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
-        if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
-            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
-
         agent_id = auth.key_name or "api_agent"
         score = await engine.vote(fact_id, agent_id, req.value)
 
         # Confidence is updated automatically by manager
-        updated_fact = await engine.get_fact(fact_id)
+        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
 
         return VoteResponse(
             fact_id=fact_id,
@@ -140,14 +137,11 @@ async def cast_vote_v2(
     """Cast a reputation-weighted consensus vote (RWC)."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id)
+        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         if not fact:
             raise HTTPException(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
-
-        if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
-            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
         score = await engine.vote(
             fact_id=fact_id,
@@ -156,7 +150,7 @@ async def cast_vote_v2(
         )
 
         # Re-fetch for updated confidence
-        updated_fact = await engine.get_fact(fact_id)
+        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
 
         return VoteResponse(
             fact_id=fact_id,
@@ -185,14 +179,11 @@ async def list_votes(
 ) -> list[dict]:
     """Retrieve all votes for a specific fact (Tenant Isolated)."""
     lang = request.headers.get("Accept-Language", "en")
-    fact = await engine.get_fact(fact_id)
+    fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
-
-    if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
-        raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     votes = await engine.get_votes(fact_id)
 
@@ -208,7 +199,7 @@ async def deprecate_fact(
 ) -> dict:
     """Soft-deprecate a fact (mark as invalid)."""
     lang = request.headers.get("Accept-Language", "en")
-    fact = await engine.get_fact(fact_id)
+    fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
@@ -217,7 +208,7 @@ async def deprecate_fact(
     if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
-    success = await engine.deprecate(fact_id, reason="api deprecated", tenant_id=auth.tenant_id)
+    success = await engine.deprecate(fact_id, reason="api deprecated")
     if not success:
         raise HTTPException(status_code=500, detail=get_trans("error_deprecation_failed", lang))
 

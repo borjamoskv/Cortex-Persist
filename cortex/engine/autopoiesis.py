@@ -10,6 +10,8 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+
 logger = logging.getLogger("cortex.autopoiesis")
 
 
@@ -59,6 +61,12 @@ class AutopoiesisEngine:
         self._history[func_name]["latencies"].append(latency)
         if not success:
             self._history[func_name]["failures"] += 1
+            ENDOCRINE.pulse(HormoneType.CORTISOL, 0.05)
+        else:
+            # Reward stability
+            if latency < self.observation_window_ms:
+                ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
+                ENDOCRINE.pulse(HormoneType.CORTISOL, -0.01)
 
         # O(1) bounded memory
         if len(self._history[func_name]["latencies"]) > 100:

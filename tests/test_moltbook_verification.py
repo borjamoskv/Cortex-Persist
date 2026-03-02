@@ -1,7 +1,6 @@
 """Tests for the Moltbook verification challenge solver."""
 
-import pytest
-from cortex.moltbook.verification import solve_challenge, _strip_obfuscation
+from cortex.moltbook.verification import _strip_obfuscation, solve_challenge
 
 
 class TestStripObfuscation:

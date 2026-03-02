@@ -626,7 +626,7 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
                                        country=infer_country(domain), website=url, is_public_contact=True)
                             for p in ["info", "contact", "sales"]]
                 return []
-            return [CompanyLead(
+            results = [CompanyLead(
                 email=email, domain=domain, page_found=page_found,
                 company_name=legal.get("name") or "",
                 legal_officers=legal.get("officers") or "",
@@ -779,9 +779,9 @@ def print_table(leads: list[CompanyLead], max_rows: int = 50) -> None:
         print(f"  ... +{len(leads) - max_rows} more rows")
 
     print("═" * W)
-    ver = sum(1 for l in leads if l.has_legal_id)
-    print((f"\n  📧 {len(leads)} emails | ⚖️ {legal_count} Legal (3x ROI) | "
-           f"🏢 {ver} Verified | ✓ {pub_count} public | 🇪🇺 {eu_count} EU\n"))
+    ver = sum(1 for lead in leads if lead.has_legal_id)
+    print(f"\n  📧 {len(leads)} emails | ⚖️ {legal_count} Legal (3x ROI) | "
+           f"🏢 {ver} Verified | ✓ {pub_count} public | 🇪🇺 {eu_count} EU\n")
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
