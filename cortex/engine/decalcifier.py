@@ -56,7 +56,7 @@ class SovereignDecalcifier:
         # Find stale verified facts
         cursor = await conn.execute(
             """
-            SELECT id, tenant_id, consensus_score FROM facts 
+            SELECT id, tenant_id, consensus_score FROM facts
             WHERE confidence = 'verified' AND updated_at < ?
             """,
             (cutoff,),
@@ -64,7 +64,7 @@ class SovereignDecalcifier:
         stale_facts = await cursor.fetchall()
 
         count = 0
-        for fact_id, tenant_id, score in stale_facts:
+        for fact_id, tenant_id, _score in stale_facts:
             await MUTATION_ENGINE.apply(
                 conn,
                 fact_id=fact_id,

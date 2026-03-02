@@ -20,6 +20,7 @@ import click
 from rich.console import Console
 
 from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
+from cortex.core.paths import CORTEX_DIR
 
 __all__ = [
     "CORTEX_DIR",
@@ -53,8 +54,6 @@ DAEMON_SCRIPT = (
 )
 
 # Constants for file paths
-from cortex.core.paths import CORTEX_DIR
-
 LOG_FILENAME = "router_daemon.log"
 LOG_PATH = CORTEX_DIR / LOG_FILENAME
 

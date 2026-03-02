@@ -52,7 +52,7 @@ class AsyncCortexClient:
             h["Authorization"] = f"Bearer {self.api_key}"
         return h
 
-    async def _request(self, method: str, path: str, **kwargs) -> dict:
+    async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
         try:
             resp = await self._client.request(method, path, **kwargs)
         except httpx.HTTPError as e:
@@ -76,7 +76,7 @@ class AsyncCortexClient:
         content: str,
         fact_type: str = "knowledge",
         tags: list[str] | None = None,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> int:
         """Store a fact. Returns fact ID."""
         data = {
@@ -172,7 +172,7 @@ class AsyncCortexClient:
         fact_id: int,
         content: str | None = None,
         tags: list[str] | None = None,
-        meta: dict | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
         """Update a fact. Returns new fact ID."""
         data: dict[str, Any] = {}
@@ -189,7 +189,7 @@ class AsyncCortexClient:
         self,
         project: str,
         fmt: str = "json",
-    ) -> str | list | dict:
+    ) -> dict[str, Any]:
         """Export project facts in specified format (json, csv, jsonl)."""
         result = await self._request(
             "GET",
@@ -198,13 +198,13 @@ class AsyncCortexClient:
         )
         return result
 
-    async def status(self) -> dict:
+    async def status(self) -> dict[str, Any]:
         """Get engine status."""
         return await self._request("GET", "/v1/status")
 
     # ─── Admin ────────────────────────────────────────────────────────
 
-    async def create_key(self, name: str, tenant_id: str = "default") -> dict:
+    async def create_key(self, name: str, tenant_id: str = "default") -> dict[str, Any]:
         """Create a new API key (admin only)."""
         return await self._request(
             "POST",
@@ -212,7 +212,7 @@ class AsyncCortexClient:
             params={"name": name, "tenant_id": tenant_id},
         )
 
-    async def list_keys(self) -> list[dict]:
+    async def list_keys(self) -> list[dict[str, Any]]:
         """List all API keys (admin only)."""
         return await self._request("GET", "/v1/admin/keys")  # type: ignore[reportReturnType]
 
@@ -221,8 +221,8 @@ class AsyncCortexClient:
     async def close(self):
         await self._client.aclose()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> AsyncCortexClient:
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args: object) -> None:
         await self.close()

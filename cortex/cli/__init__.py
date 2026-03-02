@@ -136,19 +136,19 @@ cli.add_command(prompt_group, name="prompt")
 cli.add_command(quota_cli, name="quota")
 
 from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
-from cortex.cli.heal_cmds import cli as heal_cmd
+from cortex.cli.heal_cmds import cli as heal_cmd  # noqa: E402
 from cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli  # noqa: E402
 from cortex.cli.security_cmds import security_cli  # noqa: E402
 from cortex.cli.security_hardening_cmds import (  # noqa: E402
     bridge_audit as bridge_audit_cmd,
 )
-from cortex.cli.security_hardening_cmds import (
+from cortex.cli.security_hardening_cmds import (  # noqa: E402
     quarantine as quarantine_cmd,
 )
-from cortex.cli.security_hardening_cmds import (
+from cortex.cli.security_hardening_cmds import (  # noqa: E402
     reap_ghosts as reap_ghosts_cmd,
 )
-from cortex.cli.security_hardening_cmds import (
+from cortex.cli.security_hardening_cmds import (  # noqa: E402
     unquarantine as unquarantine_cmd,
 )
 
@@ -168,13 +168,13 @@ from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
 cli.add_command(signal_cli, name="signal")
 cli.add_command(browser_cli, name="browser")
 
-from cortex.cli.lineage_cmds import audit_file as audit_file_cmd
-from cortex.cli.lineage_cmds import lineage_group as lineage_cli
+from cortex.cli.lineage_cmds import audit_file as audit_file_cmd  # noqa: E402
+from cortex.cli.lineage_cmds import lineage_group as lineage_cli  # noqa: E402
 
 cli.add_command(lineage_cli, name="lineage")
 cli.add_command(audit_file_cmd, name="audit-file")
 
-from cortex.cli.triangulation_cmds import triangulate as triangulate_cmd
+from cortex.cli.triangulation_cmds import triangulate as triangulate_cmd  # noqa: E402
 
 cli.add_command(triangulate_cmd, name="triangulate")
 
@@ -183,7 +183,7 @@ from cortex.cli.storage_cmds import storage_init_pg, storage_status  # noqa: E40
 cli.add_command(storage_init_pg)
 cli.add_command(storage_status)
 
-from cortex.cli.roi_cmds import roi as roi_cli
+from cortex.cli.roi_cmds import roi as roi_cli  # noqa: E402
 
 cli.add_command(roi_cli, name="roi")
 

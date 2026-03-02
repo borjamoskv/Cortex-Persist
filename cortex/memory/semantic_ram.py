@@ -28,7 +28,7 @@ class SemanticFactPayload(TypedDict):
     timestamp: str
 
 
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2  # noqa: E402
 
 __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 

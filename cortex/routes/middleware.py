@@ -24,7 +24,7 @@ __all__ = [
 logger = logging.getLogger("cortex.admin.middleware")
 
 # ─── Audit Log Configuration ──────────────────────────────────────────
-from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH
+from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH  # noqa: E402
 
 if not logger.handlers:
     try:
