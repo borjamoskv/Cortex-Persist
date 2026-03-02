@@ -1,8 +1,12 @@
 # ══════════════════════════════════════════════════
 # CORTEX-PERSIST .gitignore — Sovereign Hygiene
 # ══════════════════════════════════════════════════
+# Core tracked dirs: cortex/ config/ data/ docs/ examples/
+#   experimental/ infra/ notebooks/ scripts/ sdks/ tests/
+# Everything else is local-only.
+# ══════════════════════════════════════════════════
 
-# Security — NEVER commit
+# ── Security ──────────────────────────────────────
 .env
 .env.*
 *.pem
@@ -14,10 +18,13 @@ credentials.json
 **/secrets/
 service-account*.json
 
-# Node
+# ── Dependencies ──────────────────────────────────
 node_modules/
+.venv/
+venv/
+env/
 
-# Python
+# ── Python build artifacts ────────────────────────
 __pycache__/
 *.pyc
 *.pyo
@@ -26,26 +33,21 @@ dist/
 build/
 .eggs/
 
-# Virtual environments
-.venv/
-venv/
-env/
-
-# IDE & Editor
+# ── IDE & Editor ──────────────────────────────────
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
-# Databases (local)
+# ── Databases (local) ────────────────────────────
 *.db
 *.db-journal
 *.db-shm
 *.db-wal
 *.db.bak
 
-# Testing & Linting
+# ── Testing & Linting ────────────────────────────
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -53,20 +55,18 @@ env/
 htmlcov/
 coverage.xml
 
-# OS
+# ── OS ────────────────────────────────────────────
 .DS_Store
 Thumbs.db
-
-# Logs
 *.log
 
-# Tool caches (regenerable)
+# ── Tool caches ──────────────────────────────────
 .clj-kondo/
 .lsp/
 .qodo/
 .vercel/
 
-# Agent internals
+# ── Agent internals ──────────────────────────────
 .agent/
 .agent_backup_workflows/
 .cortex/
@@ -74,7 +74,7 @@ Thumbs.db
 .artifacts/
 .mejoralo/
 
-# Generated / Scratch
+# ── Generated / Scratch ──────────────────────────
 *.out
 *.png
 scratch_*.html
@@ -87,16 +87,17 @@ repro_*.py
 inspect_*.py
 verify_*.py
 smoke_test_*.py
-
-# Temporary analysis
+ghosts*.txt
 kimi_*.md
 context_for_kimi.md
 full_cortex_context.md
 consensus_output.txt
 test_output.txt
 safety_net.patch
+implementation_plan.md
+static-analysis.datadog.yml
 
-# Internal docs (not for public)
+# ── Internal docs patterns ───────────────────────
 WAVE5_*.md
 CORTEX_ASYNC_*.md
 CORTEX_V4_*.md
@@ -105,13 +106,8 @@ SECURITY_ARCHITECTURE_*.md
 HARDENING_*.md
 cortex_notebooklm_digest.md
 kimi_help.txt
-implementation_plan.md
-static-analysis.datadog.yml
 
-# ──────────────────────────────────────────────────
-# Subprojects & Prototypes (local-only, not core)
-# All UI experiments, landings, and web prototypes
-# ──────────────────────────────────────────────────
+# ── Subprojects (local-only prototypes) ──────────
 agent-science-paper/
 blind-pilot/
 blue/
@@ -148,11 +144,3 @@ sovereign_agent/
 web/
 xokas-elevator/
 yt-notebooklm-ext/
-
-# Loose scratch HTML
-galois.html
-valor_incalculable.html
-xokas_elevator.html
-raw_moltbook.html
-ghosts.txt
-ghosts_full.txt
