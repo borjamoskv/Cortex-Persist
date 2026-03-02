@@ -193,21 +193,37 @@ def detect_contradictions(
     conn.row_factory = sqlite3.Row
 
     try:
-        # ── Layer 1: FTS5 keyword search (coarse, fast) ─────────
-        # Build FTS query from top tokens
-        fts_terms = " OR ".join(list(new_tokens)[:8])
-        cursor = conn.execute(
-            """
-            SELECT f.id, f.project, f.content, f.created_at
-            FROM facts f
-            JOIN facts_fts fts ON fts.rowid = f.id
-            WHERE fts.facts_fts MATCH ?
-              AND f.fact_type = 'decision'
-            ORDER BY rank
-            LIMIT 100
-            """,
-            (fts_terms,),
-        )
+        # When decrypt_fn is provided, FTS5 won't work (indexes ciphertext)
+        # Fall back to direct scan with project-scoped filtering
+        if decrypt_fn:
+            # Prioritize same-project decisions, then cross-project
+            cursor = conn.execute(
+                """
+                SELECT id, project, content, created_at
+                FROM facts
+                WHERE fact_type = 'decision'
+                ORDER BY
+                    CASE WHEN project = ? THEN 0 ELSE 1 END,
+                    id DESC
+                LIMIT 500
+                """,
+                (new_project,),
+            )
+        else:
+            # FTS5 path for unencrypted DBs
+            fts_terms = " OR ".join(list(new_tokens)[:8])
+            cursor = conn.execute(
+                """
+                SELECT f.id, f.project, f.content, f.created_at
+                FROM facts f
+                JOIN facts_fts fts ON fts.rowid = f.id
+                WHERE fts.facts_fts MATCH ?
+                  AND f.fact_type = 'decision'
+                ORDER BY rank
+                LIMIT 200
+                """,
+                (fts_terms,),
+            )
         rows = cursor.fetchall()
 
         # ── Layer 2: Jaccard scoring + project boosting ─────────
@@ -220,7 +236,7 @@ def detect_contradictions(
             if decrypt_fn and content.startswith("v6_aesgcm:"):
                 try:
                     content = decrypt_fn(content)
-                except (ValueError, RuntimeError, Exception):
+                except Exception:
                     # InvalidTag, cross-tenant, corrupted — skip silently
                     continue
 
@@ -315,7 +331,7 @@ def scan_all_contradictions(
             if decrypt_fn and content.startswith("v6_aesgcm:"):
                 try:
                     content = decrypt_fn(content)
-                except (ValueError, RuntimeError):
+                except Exception:
                     continue
             if not content or _is_noise(content):
                 continue
@@ -336,7 +352,7 @@ def scan_all_contradictions(
         for d in decisions:
             by_project[d["project"]].append(d)
 
-        for project, group in by_project.items():
+        for _project, group in by_project.items():
             for i, a in enumerate(group):
                 for b in group[i + 1:]:
                     score = _jaccard(a["tokens"], b["tokens"])
