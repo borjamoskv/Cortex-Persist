@@ -61,8 +61,8 @@ class ApotheosisEngine:
                     if isinstance(sync_conn, sqlite3.Connection):
                         self._signal_bus = SignalBus(sync_conn)
                         self._signal_bus.ensure_table()
-                except Exception:
-                    pass
+                except (sqlite3.OperationalError, OSError, AttributeError) as err:
+                    logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)
 
     # Adaptive sleep bounds (seconds)
     _SLEEP_MIN: float = 30.0
@@ -257,7 +257,7 @@ class ApotheosisEngine:
             except SyntaxError:
                 logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
                 ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
-            except Exception as e:
+            except (OSError, ValueError, asyncio.CancelledError) as e:
                 logger.error("[APOTHEOSIS] Healing failed for %s: %s", py_file.name, e)
 
     def _apply_cognitive_dampening(self) -> bool:

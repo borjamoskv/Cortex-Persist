@@ -8,6 +8,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import aiosqlite
+
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.signals.bus import SignalBus
 
@@ -65,7 +67,7 @@ async def trigger_autonomic_reflex(
                             active_tasks.add(reflex_task)
                             reflex_task.add_done_callback(active_tasks.discard)
                             return
-    except Exception as e:
+    except (aiosqlite.Error, OSError, KeyError) as e:
         logger.error("[REFLEX] Reflex failure: %s", e)
 
     ENDOCRINE.pulse(HormoneType.CORTISOL, 0.1)
@@ -74,5 +76,5 @@ async def trigger_autonomic_reflex(
     keter = KeterEngine()
     try:
         await keter.ignite("Sovereign Immune Reflex (Ω₅).", workspace=workspace)
-    except Exception:
-        pass
+    except (OSError, ValueError, asyncio.CancelledError) as e:
+        logger.warning("[REFLEX] Fallback reflex aborted: %s", e)
