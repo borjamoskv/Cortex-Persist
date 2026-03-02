@@ -17,6 +17,7 @@ except ImportError:
     # Install defusedxml: pip install defusedxml
     from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405
     import warnings
+
     warnings.warn(
         "defusedxml not installed. SAP metadata parsing may be vulnerable to XXE.",
         stacklevel=1,
