@@ -82,6 +82,12 @@
 | `report` | ∞ (immortal) | ∞ |
 | `evolution` | ∞ (immortal) | ∞ |
 | `world-model` | 90 days | 90 |
+| `archived_ghost` | 7 days | 7 |
+| `phantom` | 90 days | 90 |
+| `intent` | 90 days | 90 |
+| `research` | 180 days | 180 |
+| `config` | ∞ (immortal) | ∞ |
+| `schema` | ∞ (immortal) | ∞ |
 
 ---
 
