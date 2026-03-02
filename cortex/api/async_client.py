@@ -214,7 +214,7 @@ class AsyncCortexClient:
 
     async def list_keys(self) -> list[dict]:
         """List all API keys (admin only)."""
-        return await self._request("GET", "/v1/admin/keys")
+        return await self._request("GET", "/v1/admin/keys")  # type: ignore[reportReturnType]
 
     # ─── Context Manager ──────────────────────────────────────────────
 

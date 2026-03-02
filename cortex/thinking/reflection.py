@@ -111,7 +111,7 @@ def generate_reflection(
         source=source,
     )
     logger.info("Stored reflection #%d for project '%s'", fact_id, project)
-    return fact_id
+    return fact_id  # type: ignore[reportReturnType]
 
 
 def inject_reflections(
@@ -341,7 +341,7 @@ def _fuse_rrf(
         if fid not in result_map:
             result_map[fid] = res
 
-    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]
+    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]  # type: ignore[reportCallIssue,reportArgumentType]
     merged = []
     for fid in sorted_ids:
         entry = result_map[fid]

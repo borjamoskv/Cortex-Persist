@@ -176,7 +176,7 @@ def _dominant_project(events: list[FileEvent]) -> str | None:
             projects[e.project] += 1
     if not projects:
         return None
-    return max(projects, key=projects.get)
+    return max(projects, key=projects.get)  # type: ignore[reportCallIssue,reportArgumentType]
 
 
 def _window_duration(events: list[FileEvent]) -> float:

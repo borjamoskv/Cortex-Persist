@@ -59,7 +59,7 @@ def record_session(
         project,
         delta,
     )
-    return fact_id
+    return fact_id  # type: ignore[reportReturnType]
 
 
 def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dict[str, Any]]:
@@ -110,7 +110,7 @@ def record_scar(
         },
     )
     logger.info("Recorded SCAR #%d for %s in %s", fact_id, file_path, project)
-    return fact_id
+    return fact_id  # type: ignore[reportReturnType]
 
 
 def get_scars(

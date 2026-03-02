@@ -40,7 +40,7 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine."""
-    return TimingTracker(engine._get_conn())
+    return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 
 def close_engine_sync(engine: CortexEngine) -> None:

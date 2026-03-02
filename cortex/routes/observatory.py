@@ -97,8 +97,8 @@ def _get_evolution_status() -> dict[str, Any]:
     try:
         from cortex.evolution.engine import EvolutionEngine
 
-        engine = EvolutionEngine(resume=True, persist=False)
-        return engine.swarm_status()
+        engine = EvolutionEngine(resume=True, persist=False)  # type: ignore[reportCallIssue]
+        return engine.swarm_status()  # type: ignore[reportAttributeAccessIssue]
     except (ImportError, RuntimeError, OSError) as e:
         return {"status": "not_running", "detail": str(e)}
 

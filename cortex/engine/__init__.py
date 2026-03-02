@@ -154,7 +154,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         return self._conn
 
     def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()
+        return self.get_conn()  # type: ignore[reportReturnType]
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
@@ -255,7 +255,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
             f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
         )
         row = await cursor.fetchone()
-        fact = row_to_fact(row) if row else None
+        fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
         if not fact or fact.valid_until:
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
@@ -312,7 +312,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
             )
         await conn.commit()
 
-        self._ledger = ImmutableLedger(conn)
+        self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
         await self._init_memory_subsystem(self._db_path, conn)
         await self._persistence.start()
         metrics.set_engine(self)
@@ -324,7 +324,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.sync.snapshot import export_snapshot
 
-        return export_snapshot(self, out_path)
+        return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
     @staticmethod
     def _row_to_fact(row) -> Fact:
@@ -334,7 +334,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
 
     async def close(self):
         if self._memory_manager:
-            await self._memory_manager.wait_for_background()
+            await self._memory_manager.wait_for_background()  # type: ignore[reportGeneralTypeIssues]
             self._memory_manager = None
         if self._persistence:
             await self._persistence.stop()

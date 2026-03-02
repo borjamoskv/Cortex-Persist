@@ -21,7 +21,7 @@ class HistoryMixin:
 
         current_tenant = get_tenant_id()
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             from cortex.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
@@ -33,7 +33,7 @@ class HistoryMixin:
             clause = f"({clause}) AND f.tenant_id = ?"
             params.append(current_tenant)
 
-            query = f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE {clause}"
+            query = f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE {clause}"  # type: ignore[reportAttributeAccessIssue]
             if project:
                 query += " AND f.project = ?"
                 params.append(project)

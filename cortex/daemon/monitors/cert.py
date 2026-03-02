@@ -39,8 +39,8 @@ class CertMonitor:
             with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
                 with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert = ssock.getpeercert()
-                    not_after = cert.get("notAfter", "")
-                    expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(
+                    not_after = cert.get("notAfter", "")  # type: ignore[reportOptionalMemberAccess]
+                    expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(  # type: ignore[reportArgumentType]
                         tzinfo=timezone.utc
                     )
                     days_left = (expires - datetime.now(timezone.utc)).days

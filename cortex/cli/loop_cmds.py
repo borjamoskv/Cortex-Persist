@@ -130,7 +130,7 @@ def _run_batch(loop_engine: ExecutionLoop, task: str) -> None:
     )
 
     result = loop_engine.execute_task(task)
-    loop_engine.render_result(result)
+    loop_engine.render_result(result)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _run_interactive(loop_engine: ExecutionLoop) -> None:
@@ -140,7 +140,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
     while True:
         try:
             console.print()
-            loop_engine.render_session_status()
+            loop_engine.render_session_status()  # type: ignore[reportAttributeAccessIssue]
 
             task = Prompt.ask(
                 f"\n[bold {CYBER_LIME}]⚡ TASK[/]",
@@ -157,7 +157,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
             with console.status(f"[{ELECTRIC_VIOLET}]Executing...[/]", spinner="dots"):
                 result = loop_engine.execute_task(task)
 
-            loop_engine.render_result(result)
+            loop_engine.render_result(result)  # type: ignore[reportAttributeAccessIssue]
 
         except KeyboardInterrupt:
             console.print(f"\n[{GOLD}]⊘ Interrupted. Type 'exit' to close.[/]")

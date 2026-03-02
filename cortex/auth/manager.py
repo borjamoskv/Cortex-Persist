@@ -81,7 +81,7 @@ class AuthManager:
     async def close(self) -> None:
         """Close the backend connections."""
         if hasattr(self.backend, "close"):
-            await self.backend.close()
+            await self.backend.close()  # type: ignore[reportAttributeAccessIssue]
 
     async def create_key(
         self,

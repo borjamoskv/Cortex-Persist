@@ -35,7 +35,7 @@ class MemoryMixin:
         try:
             # We use the engine's _get_sync_conn if available, or create one.
             # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()
-            sync_conn = self._get_sync_conn()
+            sync_conn = self._get_sync_conn()  # type: ignore[reportAttributeAccessIssue]
             bus = SignalBus(sync_conn)
             bus.ensure_table()
         except Exception as e:
@@ -64,7 +64,7 @@ class MemoryMixin:
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             vector_path = db_path.parent / "vectors"
-            encoder = AsyncEncoder(self._get_embedder())
+            encoder = AsyncEncoder(self._get_embedder())  # type: ignore[reportAttributeAccessIssue]
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)

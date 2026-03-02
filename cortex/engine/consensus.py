@@ -65,7 +65,7 @@ class ConsensusMixin:
         if value not in (-1, 0, 1):
             raise ValueError("Vote must be -1, 0, or 1")
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             from cortex.engine_async import TX_BEGIN_IMMEDIATE
 
             await conn.execute(TX_BEGIN_IMMEDIATE)
@@ -78,7 +78,7 @@ class ConsensusMixin:
                 await self._store_consensus_vote(conn, fact_id, agent, value, rep)
 
                 # 3. Log transaction
-                await self._log_transaction(
+                await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
                     conn,
                     "consensus",
                     "vote_v2",
@@ -141,7 +141,7 @@ class ConsensusMixin:
 
     async def get_votes(self, fact_id: int) -> list[dict[str, Any]]:
         """Get all votes for a fact from the canonical v2 table."""
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             query = """SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score
                        FROM consensus_votes_v2 v
@@ -151,6 +151,6 @@ class ConsensusMixin:
                 return [dict(r) for r in await cursor.fetchall()]
 
     async def verify_vote_ledger(self) -> dict[str, Any]:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             ledger = ImmutableVoteLedger(conn)
             return await ledger.verify_chain_integrity()

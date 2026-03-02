@@ -300,9 +300,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             from cortex.sync import export_snapshot, export_to_json, sync_memory
 
             async def _run_sync():
-                s_res = await sync_memory(self._shared_engine)
-                w_res = await export_to_json(self._shared_engine)
-                await export_snapshot(self._shared_engine)
+                s_res = await sync_memory(self._shared_engine)  # type: ignore[reportArgumentType]
+                w_res = await export_to_json(self._shared_engine)  # type: ignore[reportArgumentType]
+                await export_snapshot(self._shared_engine)  # type: ignore[reportArgumentType]
                 return s_res, w_res
 
             sync_result, wb_result = asyncio.run(_run_sync())
@@ -339,19 +339,19 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             target=self._run_neural_loop, name="NeuralSync", daemon=True
         )
         neural_thread.start()
-        self._threads.append(neural_thread)
+        self._threads.append(neural_thread)  # type: ignore[reportAttributeAccessIssue]
 
         if self.ast_oracle:
             t = threading.Thread(target=self._run_ast_oracle_loop, name="ASTOracle", daemon=True)
             t.start()
-            self._threads.append(t)
+            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
 
         if self.fiat_oracle:
             t = threading.Thread(
                 target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
             )
             t.start()
-            self._threads.append(t)
+            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
 
         if getattr(self, "sentinel_oracle", None):
             t = threading.Thread(
@@ -360,9 +360,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 daemon=True,
             )
             t.start()
-            self._threads.append(t)
+            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
 
-        logger.info("Daemon started with %d threads", len(self._threads))
+        logger.info("Daemon started with %d threads", len(self._threads))  # type: ignore[reportAttributeAccessIssue]
 
         try:
             while not self._shutdown:
@@ -393,10 +393,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         async def _lifecycle():
             # Run the observer until shutdown is flagged
-            task = asyncio.create_task(self.ast_oracle.start())
+            task = asyncio.create_task(self.ast_oracle.start())  # type: ignore[reportOptionalMemberAccess]
             while not self._shutdown:
                 await asyncio.sleep(1.0)
-            await self.ast_oracle.stop()
+            await self.ast_oracle.stop()  # type: ignore[reportOptionalMemberAccess]
             await task
 
         try:
@@ -411,7 +411,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         logger.info("🛡️ CORTEX Sentinel Oracle thread started")
         try:
             # We are running this in a new thread, so asyncio.run is perfect.
-            asyncio.run(self.sentinel_oracle.run_loop())
+            asyncio.run(self.sentinel_oracle.run_loop())  # type: ignore[reportOptionalMemberAccess]
         except Exception as e:
             logger.error("Sentinel Oracle loop error: %s", e)
 

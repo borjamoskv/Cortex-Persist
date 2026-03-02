@@ -177,12 +177,12 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(
+        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
             engine.search,
             project=project,
             limit=_MAX_EXPORT_FACTS,
         )
-        content = export_facts(facts, fmt="json")
+        content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
         def _write_export() -> Path:
             target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -261,7 +261,7 @@ async def deep_health_check(
             _healthy = _healthy and ok
             _checks[name] = HealthCheckDetail(
                 status=status,
-                **details,
+                **details,  # type: ignore[reportArgumentType]
             )
         return _checks, _healthy
 

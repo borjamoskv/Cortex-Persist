@@ -26,6 +26,12 @@
     "env_key": "GEMINI_API_KEY",
     "context_window": 1000000
   },
+  "kimi": {
+    "base_url": "https://api.moonshot.cn/v1",
+    "default_model": "moonshot-v1-128k",
+    "env_key": "MOONSHOT_API_KEY",
+    "context_window": 128000
+  },
   "mistral": {
     "base_url": "https://api.mistral.ai/v1",
     "default_model": "mistral-large-latest",

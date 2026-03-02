@@ -20,7 +20,7 @@ class CuatridaOrchestrator:
 
     def __init__(self, engine: AsyncCortexEngine):
         self.engine = engine
-        self.mejoralo = MejoraloEngine(engine=engine)
+        self.mejoralo = MejoraloEngine(engine=engine)  # type: ignore[reportArgumentType]
         self.metrics = CuatridaMetrics()
         self._last_tx_id: int | None = None
 

@@ -65,7 +65,7 @@ def manifest_cmd(intent: str) -> None:
             progress.update(
                 t_id, description="[bold #6600FF]CORTEX Engine conectado. Almacenando intent...[/]"
             )
-            engine.store(
+            engine.store(  # type: ignore[reportUnusedCoroutine]
                 content=f"APOTHEOSIS-MANIFEST: {intent}",
                 fact_type="intent",
                 project="apotheosis",
@@ -77,7 +77,7 @@ def manifest_cmd(intent: str) -> None:
 
             # Verify storage
             results = engine.search(intent, limit=1, project="apotheosis")
-            verified = len(results) > 0
+            verified = len(results) > 0  # type: ignore[reportArgumentType]
             status = "✅ Verificado" if verified else "⚠️ Sin verificación"
             progress.update(
                 t_id, description=f"[bold #D4AF37]{status} — Intent registrado en ledger[/]"

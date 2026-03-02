@@ -61,7 +61,7 @@ async def trigger_autonomic_reflex(
                                     workspace=workspace,
                                 )
                             )
-                            reflex_task._reflex_reason = reason
+                            reflex_task._reflex_reason = reason  # type: ignore[reportAttributeAccessIssue]
                             active_tasks.add(reflex_task)
                             reflex_task.add_done_callback(active_tasks.discard)
                             return

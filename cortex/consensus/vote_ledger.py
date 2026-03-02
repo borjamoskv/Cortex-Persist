@@ -187,7 +187,7 @@ class ImmutableVoteLedger:
             "LEFT JOIN vote_merkle_roots r ON v.id >= r.vote_start_id AND v.id <= r.vote_end_id "
             "WHERE r.id IS NULL"
         ) as cursor:
-            count = (await cursor.fetchone())[0]
+            count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
         if count >= self.MERKLE_BATCH_SIZE:
             await self._create_checkpoint_internal(conn)
@@ -228,7 +228,7 @@ class ImmutableVoteLedger:
             return None
 
         hashes = [r[0] for r in rows]
-        end_id = rows[-1][1]
+        end_id = rows[-1][1]  # type: ignore[reportIndexIssue]
 
         tree = MerkleTree(hashes)
         root_hash = tree.root

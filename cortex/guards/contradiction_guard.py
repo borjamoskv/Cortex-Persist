@@ -237,7 +237,7 @@ def detect_contradictions(
     new_project: str,
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: callable | None = None,
+    decrypt_fn: callable | None = None,  # type: ignore[reportGeneralTypeIssues]
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
 ) -> ConflictReport:
@@ -377,7 +377,7 @@ def detect_contradictions(
 def scan_all_contradictions(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: callable | None = None,
+    decrypt_fn: callable | None = None,  # type: ignore[reportGeneralTypeIssues]
     min_score: float = 0.45,
     limit: int = 50,
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:

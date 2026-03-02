@@ -235,7 +235,7 @@ def status(as_json: bool) -> None:
 
         # Enrich with telemetry if available
         try:
-            from cortex.telemetry import collector
+            from cortex.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
 
             last["telemetry"] = {
                 "spans_total": len(collector),

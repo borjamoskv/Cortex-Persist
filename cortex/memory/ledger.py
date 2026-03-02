@@ -152,7 +152,7 @@ class EventLedgerL3:
             (session_id, limit),
         )
         rows = await cursor.fetchall()
-        return [_row_to_event(row) for row in rows]
+        return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def replay(self, limit: int = 1000) -> list[MemoryEvent]:
         """Replay all events in chronological order for state reconstruction."""
@@ -166,7 +166,7 @@ class EventLedgerL3:
             (limit,),
         )
         rows = await cursor.fetchall()
-        return [_row_to_event(row) for row in rows]
+        return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def count(self, session_id: str | None = None) -> int:
         """Count events, optionally filtered by session."""

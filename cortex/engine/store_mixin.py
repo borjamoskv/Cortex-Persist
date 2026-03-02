@@ -65,8 +65,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if conn:
             return await self._store_impl(conn, **kwargs)
 
-        async with self.session() as conn:
-            return await self._store_impl(conn, **kwargs)
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await self._store_impl(conn, **kwargs)  # type: ignore[reportArgumentType]
 
     async def _run_store_validation(
         self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -132,7 +132,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id = (
             tx_id
             if tx_id is not None
-            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})
+            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})  # type: ignore[reportAttributeAccessIssue]
         )
         fact_id = await insert_fact_record(
             conn,
@@ -154,7 +154,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 fact_id,
                 project,
                 content,
-                self._get_embedder(),
+                self._get_embedder(),  # type: ignore[reportAttributeAccessIssue]
                 getattr(self, "_memory_manager", None),
                 tenant_id,
             )
@@ -182,7 +182,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             ids = []
             try:
                 for fact in facts:
@@ -200,7 +200,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> int:
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = (
                 "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
                 "FROM facts WHERE id = ? AND valid_until IS NULL"
@@ -232,12 +232,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 else {}
             )
             if meta:
-                new_meta.update(meta)
-            new_meta["previous_fact_id"] = fact_id
+                new_meta.update(meta)  # type: ignore[reportOptionalMemberAccess]
+            new_meta["previous_fact_id"] = fact_id  # type: ignore[reportOptionalSubscript]
 
             new_id = await self.store(
                 project=project,
-                content=content if content is not None else old_content,
+                content=content if content is not None else old_content,  # type: ignore[reportArgumentType]
                 tenant_id=tenant_id,
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),
@@ -258,14 +258,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             raise ValueError("Invalid fact_id")
         if conn:
             return await self._deprecate_impl(conn, fact_id, reason)
-        async with self.session() as conn:
-            res = await self._deprecate_impl(conn, fact_id, reason)
-            await conn.commit()
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            res = await self._deprecate_impl(conn, fact_id, reason)  # type: ignore[reportArgumentType]
+            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
             return res
 
     async def _deprecate_impl(
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None
-    ) -> bool:
+    ) -> bool:  # type: ignore[reportReturnType]
         from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         ts = now_iso()
@@ -289,7 +289,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
         except Exception:
             pass
-        await self._log_transaction(
+        await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
         )
 

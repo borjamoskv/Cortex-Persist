@@ -49,7 +49,7 @@ class ApotheosisEngine:
 
         if cortex_engine:
             if hasattr(cortex_engine, "db"):
-                self._rem = REMCoordinator(cortex_engine.db)
+                self._rem = REMCoordinator(cortex_engine.db)  # type: ignore[reportAttributeAccessIssue]
             # Initialize SignalBus if possible (requires sync sqlite3 connection)
             db = getattr(cortex_engine, "db", None)
             if db:
@@ -173,7 +173,7 @@ class ApotheosisEngine:
                 if critical_actions and self.is_active:
                     from cortex.engine.keter import KeterEngine
 
-                    keter = KeterEngine(self.workspace)
+                    keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
                     for action in critical_actions:
                         if action.description not in self._ignited_tasks:
                             logger.warning(
@@ -226,7 +226,7 @@ class ApotheosisEngine:
         """Autonomic healing for high-entropy nodes (Ω₅)."""
         from cortex.engine.keter import KeterEngine
 
-        keter = KeterEngine(self.workspace)
+        keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
 
         parasites = [f for f in entropy if f["type"] == "THERMAL_PARASITE"]
         if parasites:

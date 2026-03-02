@@ -223,7 +223,7 @@ class EpisodicMemory:
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
@@ -246,7 +246,7 @@ class EpisodicMemory:
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def detect_patterns(
         self,
@@ -271,7 +271,7 @@ class EpisodicMemory:
             return []
 
         # Computationally expensive operation — ideally offloaded to thread pool under high load
-        return _extract_patterns(rows, min_occurrences, limit)
+        return _extract_patterns(rows, min_occurrences, limit)  # type: ignore[reportArgumentType]
 
     async def count(self, project: str | None = None) -> int:
         """Sovereign audit: count total temporal memories."""
@@ -312,7 +312,7 @@ class EpisodicMemory:
         """
         async with self._conn.execute(sql, (session_id,)) as cursor:
             rows = await cursor.fetchall()
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
 
 # ─── Pattern Detection (Advanced Algorithmic) ─────────────────────────

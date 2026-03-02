@@ -86,7 +86,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin, ConsensusMixin, His
                 await conn.commit()
                 # Return lastrowid for inserts to support tx_id tracking
                 if sql.strip().upper().startswith("INSERT"):
-                    return Ok(cursor.lastrowid)
+                    return Ok(cursor.lastrowid)  # type: ignore[reportReturnType]
                 return Ok(cursor.rowcount)
         except (sqlite3.Error, OSError) as e:
             return Err(f"Pool write error: {e}")
@@ -154,7 +154,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin, ConsensusMixin, His
                 conn=conn,
             )
 
-        return tx_id
+        return tx_id  # type: ignore[reportReturnType]
 
     # store() and deprecate() are now provided by StoreMixin
     # register_agent(), get_agent(), list_agents() are now provided by AgentMixin
@@ -179,7 +179,7 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin, ConsensusMixin, His
         params = [project, current_tenant]
         if limit:
             query += " LIMIT ?"
-            params.append(limit)
+            params.append(limit)  # type: ignore[reportArgumentType]
 
         from cortex.crypto import get_default_encrypter
 
@@ -250,23 +250,23 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin, ConsensusMixin, His
     async def stats(self) -> dict[str, Any]:
         async with self.session() as conn:
             async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
-                total = (await cursor.fetchone())[0]
+                total = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
             async with conn.execute(
                 "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL"
             ) as cursor:
-                active = (await cursor.fetchone())[0]
+                active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
             async with conn.execute(
                 "SELECT DISTINCT project FROM facts WHERE valid_until IS NULL"
             ) as cursor:
                 projects = [p[0] for p in await cursor.fetchall()]
             async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
-                tx_count = (await cursor.fetchone())[0]
+                tx_count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
             db_size = self._db_path.stat().st_size / (1024 * 1024) if self._db_path.exists() else 0
 
             try:
                 async with conn.execute("SELECT COUNT(*) FROM fact_embeddings") as cursor:
-                    embeddings = (await cursor.fetchone())[0]
+                    embeddings = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
             except (sqlite3.Error, OSError, ValueError):
                 embeddings = 0
 

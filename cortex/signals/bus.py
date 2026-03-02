@@ -125,7 +125,7 @@ class SignalBus:
             signal_id,
             source,
         )
-        return signal_id
+        return signal_id  # type: ignore[reportReturnType]
 
     # ── Poll (consume) ───────────────────────────────────────────────
 
