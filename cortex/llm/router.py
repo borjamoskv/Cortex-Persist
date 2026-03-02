@@ -52,7 +52,8 @@ from cortex.llm._models import (  # noqa: F401
     HedgedResult,
     IntentProfile,
 )
-from cortex.llm._pool import ProviderMetrics, WeightedProviderPool  # noqa: F401
+from cortex.llm._pool import ProviderMetrics as ProviderMetrics  # noqa: F401
+from cortex.llm._pool import WeightedProviderPool
 from cortex.llm._validation import DriftSignal, IntentValidator  # noqa: F401
 from cortex.utils.result import Err, Ok, Result
 
@@ -126,9 +127,7 @@ class CortexLLMRouter:
         self._drift_penalty_count: int = 0
         # Entropy telemetry
         self._session_primary_failures: int = 0
-        self._cascade_history: deque[CascadeEvent] = deque(
-            maxlen=self._CASCADE_HISTORY_CAP
-        )
+        self._cascade_history: deque[CascadeEvent] = deque(maxlen=self._CASCADE_HISTORY_CAP)
         self._entropy_elevation_count: int = 0
 
     @property
@@ -142,7 +141,9 @@ class CortexLLMRouter:
     # ── Internal ──────────────────────────────────────────────────────────
 
     def _promote_known_good(
-        self, providers: list[BaseProvider], intent: IntentProfile,
+        self,
+        providers: list[BaseProvider],
+        intent: IntentProfile,
     ) -> list[BaseProvider]:
         """Within a tier, promote A-record cached providers to the front.
 
@@ -151,10 +152,7 @@ class CortexLLMRouter:
         This is the DNS A-record hot-path optimization.
         """
         intent_key = intent.value
-        known_good_set = {
-            name
-            for name, _ in self._positive_cache.known_good_providers(intent_key)
-        }
+        known_good_set = {name for name, _ in self._positive_cache.known_good_providers(intent_key)}
 
         if not known_good_set:
             return providers  # no A-records → no reordering
@@ -171,10 +169,9 @@ class CortexLLMRouter:
         if promoted:
             # Sort promoted by cached latency — fastest first
             promoted.sort(
-                key=lambda p: self._positive_cache.get_latency(
-                    p.provider_name, intent_key
+                key=lambda p: (
+                    self._positive_cache.get_latency(p.provider_name, intent_key) or float("inf")
                 )
-                or float("inf")
             )
             logger.debug(
                 "A-record promoted: %s for intent=%s",
@@ -250,9 +247,7 @@ class CortexLLMRouter:
 
     # ── Public API ────────────────────────────────────────────────────────
 
-    async def execute_hedged(
-        self, prompt: CortexPrompt
-    ) -> Result[str, str] | None:
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available.
 
         Returns Ok(response) if a hedging peer wins, None if hedging is
@@ -270,9 +265,7 @@ class CortexLLMRouter:
         # Build eligible pool: primary + hedging peers, minus NXDOMAIN-cached
         eligible: list[BaseProvider] = [self._primary]
         for hp in self._hedging_providers:
-            if not self._negative_cache.is_suppressed(
-                hp.provider_name, intent_key
-            ):
+            if not self._negative_cache.is_suppressed(hp.provider_name, intent_key):
                 eligible.append(hp)
             else:
                 logger.debug(
@@ -289,9 +282,7 @@ class CortexLLMRouter:
             )
             return None
 
-        hedged_result, errors = await HedgedRequestStrategy.race(
-            eligible, prompt
-        )
+        hedged_result, errors = await HedgedRequestStrategy.race(eligible, prompt)
 
         if hedged_result is not None:
             self._last_hedged_result = hedged_result
@@ -338,7 +329,10 @@ class CortexLLMRouter:
         hedged = await self.execute_hedged(prompt)
         if hedged is not None and isinstance(hedged, Ok):
             self._emit_cascade_event(
-                prompt.intent, "hedged", CascadeTier.PRIMARY, 1,
+                prompt.intent,
+                "hedged",
+                CascadeTier.PRIMARY,
+                1,
             )
             return hedged
 
@@ -354,12 +348,12 @@ class CortexLLMRouter:
             )
             self._session_primary_failures = 0  # streak broken
             self._emit_cascade_event(
-                prompt.intent, self._primary.provider_name,
-                CascadeTier.PRIMARY, attempts,
+                prompt.intent,
+                self._primary.provider_name,
+                CascadeTier.PRIMARY,
+                attempts,
             )
-            self._validate_and_penalize(
-                self._primary.provider_name, result.value, prompt.intent
-            )
+            self._validate_and_penalize(self._primary.provider_name, result.value, prompt.intent)
             return result
         self._session_primary_failures += 1
         errors.append(f"{self._primary.provider_name}: {result.error}")
@@ -367,9 +361,7 @@ class CortexLLMRouter:
         # 2 + 3. Cascade: typed-match primero, safety-net después
         for fallback in self._ordered_fallbacks(prompt.intent):
             # RFC 2308: skip NXDOMAIN-cached providers
-            if self._negative_cache.is_suppressed(
-                fallback.provider_name, intent_key
-            ):
+            if self._negative_cache.is_suppressed(fallback.provider_name, intent_key):
                 logger.debug(
                     "NXDOMAIN skip: %s suppressed for intent=%s",
                     fallback.provider_name,
@@ -389,22 +381,24 @@ class CortexLLMRouter:
                 )
                 tier = self._classify_tier(fallback, prompt.intent)
                 self._emit_cascade_event(
-                    prompt.intent, fallback.provider_name, tier, attempts,
+                    prompt.intent,
+                    fallback.provider_name,
+                    tier,
+                    attempts,
                 )
-                self._validate_and_penalize(
-                    fallback.provider_name, result.value, prompt.intent
-                )
+                self._validate_and_penalize(fallback.provider_name, result.value, prompt.intent)
                 return result
             # Record failure → suppress for TTL, scoped by intent
             ttl = self._adaptive_negative_ttl(fallback.provider_name)
-            self._negative_cache.record_failure(
-                fallback.provider_name, intent_key, ttl=ttl
-            )
+            self._negative_cache.record_failure(fallback.provider_name, intent_key, ttl=ttl)
             errors.append(f"{fallback.provider_name}: {result.error}")
 
         # Singularidad Negativa: todos fallaron
         self._emit_cascade_event(
-            prompt.intent, None, CascadeTier.NONE, attempts,
+            prompt.intent,
+            None,
+            CascadeTier.NONE,
+            attempts,
         )
         detail = " | ".join(errors)
         logger.error("Singularidad Negativa [intent=%s]: %s", prompt.intent.value, detail)
@@ -416,15 +410,11 @@ class CortexLLMRouter:
         try:
             response = await provider.invoke(prompt)
             latency_ms = (time.monotonic() - start) * 1000
-            self._provider_pool.record_success(
-                provider.provider_name, latency_ms
-            )
+            self._provider_pool.record_success(provider.provider_name, latency_ms)
             return Ok(response)
         except Exception as e:  # deliberate boundary — LLM providers can raise any type
             latency_ms = (time.monotonic() - start) * 1000
-            self._provider_pool.record_failure(
-                provider.provider_name, latency_ms
-            )
+            self._provider_pool.record_failure(provider.provider_name, latency_ms)
             logger.warning(
                 "Provider '%s' failed [intent=%s, %.1fms]: %s",
                 provider.provider_name,
@@ -583,9 +573,7 @@ class CortexLLMRouter:
         The response is still returned to the caller — DNSSEC doesn't
         reject, it adjusts trust for future routing.
         """
-        signal = self._intent_validator.validate(
-            response, intent, provider_name
-        )
+        signal = self._intent_validator.validate(response, intent, provider_name)
         self._drift_history.append(signal)
 
         if signal.is_drift:

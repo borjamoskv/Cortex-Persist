@@ -50,13 +50,17 @@ class LocalEmbedder:
             return
 
         try:
+            import warnings
+
             from sentence_transformers import SentenceTransformer
 
-            logger.info("Loading embedding model: %s", self._model_name)
-            self._model = SentenceTransformer(
-                self._model_name,
-                cache_folder=str(self._cache_dir),
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning, message=".*position_ids.*")
+                logger.info("Loading embedding model: %s", self._model_name)
+                self._model = SentenceTransformer(
+                    self._model_name,
+                    cache_folder=str(self._cache_dir),
+                )
             logger.info("Model loaded. Dimension: %d", EMBEDDING_DIM)
         except ImportError as exc:
             raise RuntimeError(
