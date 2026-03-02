@@ -5,6 +5,22 @@
 > Canonical source: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 > CI enforcement: [`.github/workflows/quality_gates.yml`](../.github/workflows/quality_gates.yml)
 
+## Sovereign Foundation (Peano Soberano v3)
+
+These operational axioms are **theorems derived** from 7 first-principle generators defined in `GEMINI.md`. The derivation hierarchy:
+
+| Ω (Generator) | AX derivations |
+|:---|:---|
+| **Ω₀** Self-Reference | AX-001, AX-015, AX-018 |
+| **Ω₁** Multi-Scale Causality | AX-014 |
+| **Ω₂** Entropic Asymmetry | AX-011, AX-013, AX-019 |
+| **Ω₃** Byzantine Default | AX-010, AX-012, AX-017 |
+| **Ω₄** Aesthetic Integrity | AX-016, AX-023 |
+| **Ω₅** Antifragile by Default | AX-001, AX-002, AX-018, AX-022 |
+| **Ω₆** Zenón's Razor | AX-003 |
+
+> **Derivation rule:** `DECISION:` X / `DERIVATION:` Ωn + Ωm → reasoning. If you can't name the Ω, the decision is ad-hoc — and ad-hoc is entropy.
+
 ---
 
 ## Taxonomy
@@ -17,6 +33,8 @@
 
 **Rule:** Constitutional overrides Operational. Operational overrides Aspirational.
 An axiom without CI enforcement is classified Aspirational — not a law.
+
+**Foundation:** All 22 axioms derive from the [7 Axioms of Peano Soberano](../../.gemini/GEMINI.md) (α₁ Causalidad, α₂ Adversarialidad, α₃ Entropía Negativa, α₄ Recursión Evolutiva, α₅ Verdad Estética, α₆ Memoria Soberana, α₇ Frontera), which in turn derive from the [5 Ontological Axioms of AGENTICA](AGENTICA.md#4-los-cinco-axiomas).
 
 ---
 
