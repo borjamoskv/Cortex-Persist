@@ -116,7 +116,7 @@ class SecurityMonitor:
         confidence = "C5" if similarity > 0.92 else "C4"
 
         return SecurityAlert(
-            ip_address=event.get("ip_address", "0.0.0.0"),
+            ip_address=event.get("ip_address", "0.0.0.0"),  # nosec B104 — 0.0.0.0 is a SecurityAlert model field, not a socket bind
             payload=payload[:100] + "..." if len(payload) > 100 else payload,
             similarity_score=similarity,
             confidence=confidence,

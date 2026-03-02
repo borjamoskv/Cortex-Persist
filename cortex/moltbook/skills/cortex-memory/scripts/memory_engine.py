@@ -14,7 +14,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -193,7 +192,10 @@ def store(
 
     fpath = KNOWLEDGE_DIR / f"{category}.md"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    fact_id = hashlib.md5(f"{now}:{content}".encode()).hexdigest()[:8]
+    # [SOVEREIGN-ID] SHA-256 truncated for high-entropy unique identification.
+    fact_id = hashlib.sha256(
+        f"{now}:{content}".encode(),
+    ).hexdigest()[:12]
 
     tag_str = f" [{', '.join(tags)}]" if tags else ""
     stored_content = _encrypt(content) if encrypt else content
@@ -330,7 +332,9 @@ def status() -> dict[str, object]:
     for fname in ("decisions.md", "errors.md", "patterns.md", "relationships.md"):
         fpath = KNOWLEDGE_DIR / fname
         if fpath.exists():
-            entries = sum(1 for line in fpath.read_text().split("\n") if line.strip().startswith("- "))
+            entries = sum(
+                1 for line in fpath.read_text().split("\n") if line.strip().startswith("- ")
+            )
             st[f"{fname.replace('.md', '')}_count"] = entries
 
     # Session count

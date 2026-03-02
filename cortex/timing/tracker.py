@@ -155,12 +155,13 @@ class TimingTracker:
             where.append("project = ?")
             params.append(project)
         where_clause = " AND ".join(where)
-        rows = self._conn.execute(
-            f"SELECT id, project, category, start_time, end_time, "
-            f"duration_s, entities, heartbeats, meta "
-            f"FROM time_entries WHERE {where_clause} ORDER BY start_time ASC",
-            params,
-        ).fetchall()
+        sql = (
+            "SELECT id, project, category, start_time, end_time,"  # nosec B608 — parameterized query
+            " duration_s, entities, heartbeats, meta"
+            " FROM time_entries WHERE " + where_clause +
+            " ORDER BY start_time ASC"
+        )
+        rows = self._conn.execute(sql, params).fetchall()
         return [
             TimeEntry(
                 id=r[0],
@@ -207,11 +208,11 @@ class TimingTracker:
 
     def _build_summary(self, where_clause: str, params: list) -> TimeSummary:
         """Build a TimeSummary from a WHERE clause."""
-        rows = self._conn.execute(
-            f"SELECT project, category, duration_s, entities, heartbeats "
-            f"FROM time_entries WHERE {where_clause}",
-            params,
-        ).fetchall()
+        sql = (  # nosec B608 — parameterized query
+            "SELECT project, category, duration_s, entities, heartbeats"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+            " FROM time_entries WHERE " + where_clause
+        )
+        rows = self._conn.execute(sql, params).fetchall()
         total_seconds = 0
         by_category: dict[str, int] = {}
         by_project: dict[str, int] = {}

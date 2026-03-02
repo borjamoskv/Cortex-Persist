@@ -6,6 +6,7 @@
 """Search utilities."""
 
 import json
+import logging
 import sqlite3
 from typing import Any
 
@@ -13,6 +14,8 @@ import aiosqlite
 
 from cortex.crypto.aes import CortexEncrypter
 from cortex.search.models import SearchResult
+
+logger = logging.getLogger("cortex.search")
 
 V6_PREFIX = CortexEncrypter.PREFIX
 
@@ -117,7 +120,8 @@ def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
         try:
             return enc.decrypt_str(content, tenant_id=tenant_id)
         except Exception:
-            pass
+            logger.debug("Decryption failed for row content")
+            # Fall back to content or empty string
     return content or ""
 
 

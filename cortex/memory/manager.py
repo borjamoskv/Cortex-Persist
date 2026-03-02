@@ -75,6 +75,7 @@ class CortexMemoryManager:
         "_max_bg_tasks",
         "_fusion",
         "_dynamic_space",
+        "_bus",
         "thalamus",
     )
 
@@ -89,6 +90,7 @@ class CortexMemoryManager:
         hdc_l2: HDCVectorStoreL2 | None = None,
         hdc_encoder: HDCEncoder | None = None,
         router: Any | None = None,
+        bus: Any | None = None,
         max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,
     ) -> None:
         self._l1 = l1
@@ -98,6 +100,7 @@ class CortexMemoryManager:
         self._hdc = hdc_l2
         self._hdc_encoder = hdc_encoder
         self._router = router
+        self._bus = bus
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
 
@@ -184,24 +187,62 @@ class CortexMemoryManager:
         content: str,
         fact_type: str = "general",
         metadata: dict[str, Any] | None = None,
+        layer: str = "semantic",
+        use_bus: bool = False,
     ) -> str:
         """Directly persist a high-value fact to L2 memory layers.
 
         Bypasses the L1 working memory buffer. Useful for errors,
         decisions, and formal proof counterexamples.
+
+        Args:
+            tenant_id: Zero-Trust boundary isolation ID.
+            project_id: Zero-Trust boundary project ID.
+            content: Raw text content.
+            fact_type: High-level category (decision, error, ghost).
+            metadata: Optional structured metadata.
+            layer: Cognitive stratification layer.
+            use_bus: If True, emits to SignalBus instead of sychronous write.
         """
-        # Pre-filtering Gate: Active Forgetting (#350/100 Standard)
+        # 1. Pre-filtering Gate: Active Forgetting (#350/100 Standard)
         should_process, action, patch = await self.thalamus.filter(
             content=content, project_id=project_id, tenant_id=tenant_id, fact_type=fact_type
         )
 
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            # Manifest as shockwave in Notch
             await notify_notch_pruning()
             return f"filtered:{action}"
 
         fact_id = str(uuid.uuid4())
+
+        # 2. Experience Bus Strategy (Inspiration: Letta RFC #3179)
+        # Decouples the mutation from the agent's heartbeat lifecycle.
+        if use_bus and self._bus:
+            # Emit "Experience Signal"
+            logger.info("ExperienceBus: Emitting experience:recorded for #%s", fact_id)
+
+            payload = {
+                "fact_id": fact_id,
+                "tenant_id": tenant_id,
+                "project_id": project_id,
+                "content": content,
+                "fact_type": fact_type,
+                "layer": layer,
+                "metadata": metadata or {},
+            }
+
+            # Emit synchronously via thread to allow async call to return immediately
+            await asyncio.to_thread(
+                self._bus.emit,
+                event_type="experience:recorded",
+                payload=payload,
+                source="memory:manager",
+                project=project_id
+            )
+            return fact_id
+
+        # Synchronous (wait for DB write) — Default for now
         vector = await self._encoder.encode(content)
         fact = CortexFactModel(
             id=fact_id,
@@ -211,17 +252,43 @@ class CortexMemoryManager:
             embedding=vector,
             timestamp=time.time(),
             metadata=metadata or {},
+            cognitive_layer=layer,
         )
 
-        # Store in Sovereign L2
         if self._l2:
             await self._l2.memorize(fact)
 
-        # Store in HDC L2 (Vector Alpha/Gamma)
         if self._hdc:
             await self._hdc.memorize(fact, fact_type=fact_type)
 
         return fact_id
+
+    async def reconcile_experience(self, signal: Any) -> str:
+        """Process an experience signal from the bus and commit it to L2.
+        
+        This is the 'Sleep-time Compute' part of the StratifiedCognition engine.
+        It runs asynchronously in the Reactor thread, away from the inference path.
+        """
+        payload = signal.payload
+        tenant_id = payload.get("tenant_id", "default")
+        project_id = payload.get("project_id", "unknown")
+        content = payload.get("content", "")
+        fact_type = payload.get("fact_type", "general")
+        layer = payload.get("layer", "semantic")
+        metadata = payload.get("metadata", {})
+        
+        logger.info("ExperienceBus: Reconciling signal #%d ([%s] %s)", signal.id, layer, fact_type)
+        
+        # We perform the actual heavy lift: encoding + memorizing
+        return await self.store(
+            tenant_id=tenant_id,
+            project_id=project_id,
+            content=content,
+            fact_type=fact_type,
+            metadata=metadata,
+            layer=layer,
+            use_bus=False # We are ALREADY in the reconciliation phase
+        )
 
     async def assemble_context(
         self,
@@ -230,14 +297,24 @@ class CortexMemoryManager:
         query: str | None = None,
         max_episodes: int = 3,
         fuse_context: bool = False,
+        layer: str | None = None,
     ) -> dict[str, Any]:
-        """Build an optimized context for LLM injection."""
+        """Build an optimized context for LLM injection.
+
+        Args:
+            tenant_id: Zero-Trust boundary isolation ID.
+            project_id: Zero-Trust boundary project ID.
+            query: Semantic search query.
+            max_episodes: Number of L2 episodes to retrieve.
+            fuse_context: Whether to apply LLM semantic fusion.
+            layer: Optional cognitive layer filter.
+        """
         # 1. Working Memory (L1)
         working_set = self._l1.get_context()
 
         # 2. Episodic Retrieval (L2 + HDC)
         episodic_facts = await self._retrieve_episodic_context(
-            tenant_id, project_id, query, max_episodes
+            tenant_id, project_id, query, max_episodes, layer=layer
         )
 
         # 3. Context Construction
@@ -255,7 +332,12 @@ class CortexMemoryManager:
         return context
 
     async def _retrieve_episodic_context(
-        self, tenant_id: str, project_id: str, query: str | None, max_episodes: int
+        self,
+        tenant_id: str,
+        project_id: str,
+        query: str | None,
+        max_episodes: int,
+        layer: str | None = None,
     ) -> list[dict[str, Any]]:
         """Retrieve and fuse facts from all available L2 layers."""
         if not query:
@@ -266,12 +348,14 @@ class CortexMemoryManager:
 
         # HDC (Vector Alpha + Vector Gamma Inhibition)
         if self._hdc:
-            hdc_results = await self._fetch_hdc_results(tenant_id, project_id, query, max_episodes)
+            hdc_results = await self._fetch_hdc_results(
+                tenant_id, project_id, query, max_episodes, layer=layer
+            )
 
         # Dense (Legacy Fallback)
         if not hdc_results and self._l2:
             dense_results = await self._fetch_dense_results(
-                tenant_id, project_id, query, max_episodes
+                tenant_id, project_id, query, max_episodes, layer=layer
             )
 
         # Fusion
@@ -283,7 +367,7 @@ class CortexMemoryManager:
             return [self._fact_to_dict(f) for f in dense_results[:max_episodes]]
 
     async def _fetch_hdc_results(
-        self, tenant_id: str, project_id: str, query: str, max_episodes: int
+        self, tenant_id: str, project_id: str, query: str, max_episodes: int, layer: str | None = None
     ) -> list[CortexFactModel]:
         try:
             toxic_ids = await self._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)
@@ -293,13 +377,14 @@ class CortexMemoryManager:
                 query=query,
                 limit=max_episodes * 2,
                 inhibit_ids=toxic_ids,
+                layer=layer,  # v6 Feature
             )
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("HDC recall failed: %s", e)
             return []
 
     async def _fetch_dense_results(
-        self, tenant_id: str, project_id: str, query: str, max_episodes: int
+        self, tenant_id: str, project_id: str, query: str, max_episodes: int, layer: str | None = None
     ) -> list[CortexFactModel]:
         try:
             if hasattr(self._l2, "recall_secure"):
@@ -311,12 +396,14 @@ class CortexMemoryManager:
                         project_id=project_id,
                         query=query,
                         limit=max_episodes,
+                        layer=layer,  # v6 Feature
                     )
                 return await self._l2.recall_secure(
                     tenant_id=tenant_id,
                     project_id=project_id,
                     query=query,
                     limit=max_episodes,
+                    layer=layer,  # v6 Feature
                 )
             return await self._l2.recall(query=query, limit=max_episodes)
         except (OSError, RuntimeError, ValueError) as e:
@@ -384,6 +471,7 @@ class CortexMemoryManager:
                     content=summary,
                     embedding=vector,
                     timestamp=time.time(),
+                    cognitive_layer="episodic",  # Overflow events move to LE episodic layer
                     metadata={
                         "session_id": session_id,
                         "event_count": len(events),

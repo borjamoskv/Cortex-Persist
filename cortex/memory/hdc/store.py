@@ -253,7 +253,7 @@ class HDCVectorStoreL2:
             cursor = conn.cursor()
             placeholders = ",".join(["?"] * len(inhibit_ids))
             cursor.execute(
-                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "
+                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "  # nosec B608 — parameterized query
                 f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
                 inhibit_ids,
             )

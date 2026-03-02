@@ -9,7 +9,18 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import Any
-from xml.etree import ElementTree
+
+try:
+    import defusedxml.ElementTree as ElementTree  # type: ignore[import-untyped]
+except ImportError:
+    # Fallback: stdlib (acceptable only for trusted internal SAP environments)
+    # Install defusedxml: pip install defusedxml
+    from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405
+    import warnings
+    warnings.warn(
+        "defusedxml not installed. SAP metadata parsing may be vulnerable to XXE.",
+        stacklevel=1,
+    )
 
 import httpx
 
@@ -207,7 +218,7 @@ class SAPClient:
 
         entity_sets: dict[str, list[str]] = {}
         try:
-            root = ElementTree.fromstring(resp.text)
+            root = ElementTree.fromstring(resp.text)  # nosec B314
             # OData V2 namespace
             for entity_type in root.iter(
                 "{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"

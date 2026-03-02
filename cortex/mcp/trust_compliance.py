@@ -185,7 +185,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 params.append(project)
             where = " AND ".join(conditions)
             cursor = await conn.execute(
-                f"SELECT id, project, content, fact_type, created_at, tags "
+                f"SELECT id, project, content, fact_type, created_at, tags "  # nosec B608 — parameterized query
                 f"FROM facts WHERE {where} "
                 f"ORDER BY created_at DESC LIMIT 1",
                 params,

@@ -13,13 +13,29 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cortex.memory.temporal import now_iso
+
+def now_iso() -> str:
+    """Return current UTC timestamp in ISO 8601 format."""
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat()
+
 
 __all__ = ["CortexFactModel", "EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
+
+
+# ─── Cognitive Stratification Configuration ──────────────────────────
+
+COGNITIVE_LAYER = Literal[
+    "working",      # Immediate thread context (L1)
+    "episodic",     # Chronological interaction logs (L2)
+    "semantic",     # Stable knowledge/fact vault (L2 - Default)
+    "relationship", # Inter-personal consistency patterns (L2/L3)
+    "emotional",    # Empathetic resonance and vibe (L2/L3)
+]
 
 
 # ─── Legacy L2 Payload (Qdrant-compatible) ────────────────────────────
@@ -74,6 +90,8 @@ class MemoryEvent(BaseModel):
     token_count: int = Field(ge=0, description="Token count estimate.")
     session_id: str = Field(description="Session identifier linking related events.")
     tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
+    prev_hash: str = Field(default="", description="Hash of the previous event (hash-chain).")
+    signature: str = Field(default="", description="Cryptographic signature of this event.")
     metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Optional structured metadata (tool calls, emotions, tags).",
@@ -125,6 +143,12 @@ class CortexFactModel(BaseModel):
     timestamp: float = Field(
         default_factory=lambda: datetime.now(timezone.utc).timestamp(),
         description="Unix timestamp of creation.",
+    )
+
+    # Stratified Memory (Inspiration: Letta RFC #3179)
+    cognitive_layer: COGNITIVE_LAYER = Field(
+        default="semantic",
+        description="Target cognitive layer for this fact."
     )
 
     # Sovereign Metadata

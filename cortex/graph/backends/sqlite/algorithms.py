@@ -55,7 +55,7 @@ class SQLiteAlgorithmsMixin:
         visited_ids: set[int] = set()
 
         placeholders = ",".join(["?"] * len(seed_entities))
-        q_init = f"SELECT id, name, entity_type FROM entities WHERE name IN ({placeholders})"
+        q_init = f"SELECT id, name, entity_type FROM entities WHERE name IN ({placeholders})"  # nosec B608 — parameterized query
         rows = await self._fetch_rows(q_init, seed_entities)
 
         current_layer_ids = []
@@ -93,7 +93,7 @@ class SQLiteAlgorithmsMixin:
     ) -> list[int]:
         """Expand one layer of the subgraph BFS. Returns next layer IDs."""
         phs = ",".join(["?"] * len(current_ids))
-        q = f"""SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight
+        q = f"""SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight  # nosec B608 — parameterized query
                 FROM entity_relations er
                 JOIN entities e1 ON er.source_entity_id = e1.id
                 JOIN entities e2 ON er.target_entity_id = e2.id

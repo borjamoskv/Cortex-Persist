@@ -170,9 +170,8 @@ class ApotheosisEngine:
                 if _SKIP_DIRS.intersection(py_file.parts):
                     continue
                 try:
-                    current_hash = hashlib.md5(
-                        py_file.read_bytes(),
-                    ).hexdigest()
+                    # [SOVEREIGN-INTEGRITY] Scaling to SHA-256 (prevention of script injection)
+                    current_hash = hashlib.sha256(py_file.read_bytes()).hexdigest()
                     if file_hashes.get(py_file) == current_hash:
                         continue
                     file_hashes[py_file] = current_hash

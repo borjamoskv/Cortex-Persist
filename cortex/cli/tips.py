@@ -111,7 +111,9 @@ def _load_static_tips() -> list[Tip]:
             cat_name = raw["category"]
             category = TipCategory(cat_name)
             for lang, text in raw["content"].items():
-                tip_id = hashlib.md5(f"{cat_name}-{text}".encode()).hexdigest()[:8]  # noqa: S324
+                tip_id = hashlib.sha256(
+                    f"{cat_name}-{text}".encode(),
+                ).hexdigest()[:8]
                 tips.append(Tip(f"stat-{tip_id}", text, category, lang, "static"))
 
         _STATIC_TIPS_CACHE = tips

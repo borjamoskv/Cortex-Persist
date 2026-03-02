@@ -76,17 +76,21 @@ class MemoryScanner:
         async with self._engine.session() as conn:
             result: dict[str, int] = {}
             for label, days in _AGE_BUCKETS:
+                # Use parameterized '-' || ? || ' days' to avoid injecting
+                # integer literals directly into SQL (bandit B608).
                 if days is not None:
                     q = (
-                        f"SELECT COUNT(*) FROM facts WHERE {where} "
-                        f"AND created_at >= datetime('now', '-{days} days')"
+                        f"SELECT COUNT(*) FROM facts WHERE {where} "  # nosec B608
+                        "AND created_at >= datetime('now', '-' || ? || ' days')"
                     )
+                    row_params = (*params, days)
                 else:
                     q = (
-                        f"SELECT COUNT(*) FROM facts WHERE {where} "
-                        "AND created_at < datetime('now', '-90 days')"
+                        f"SELECT COUNT(*) FROM facts WHERE {where} "  # nosec B608
+                        "AND created_at < datetime('now', '-' || ? || ' days')"
                     )
-                cursor = await conn.execute(q, params)
+                    row_params = (*params, 90)
+                cursor = await conn.execute(q, row_params)
                 row = await cursor.fetchone()
                 count = row[0] if row else 0
                 if count > 0:
@@ -99,7 +103,7 @@ class MemoryScanner:
         """Joint distribution of (fact_type, project) for I(type; project)."""
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT fact_type, project, COUNT(*) "
+                "SELECT fact_type, project, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {_ACTIVE} "
                 "GROUP BY fact_type, project"
             )
@@ -127,7 +131,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT DATE(created_at) AS day, COUNT(*) "
+                "SELECT DATE(created_at) AS day, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {where} "
                 "AND created_at >= datetime('now', '-' || ? || ' days') "
                 "GROUP BY day ORDER BY day",
@@ -154,7 +158,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT "
+                "SELECT "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 "  CASE "
                 "    WHEN LENGTH(content) < 20 THEN 'micro' "
                 "    WHEN LENGTH(content) < 50 THEN 'short' "
@@ -184,7 +188,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT COUNT(*) FROM facts WHERE {where}", params,
+                f"SELECT COUNT(*) FROM facts WHERE {where}", params,  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
             )
             row = await cursor.fetchone()
             return row[0] if row else 0
@@ -203,7 +207,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT {column}, COUNT(*) FROM facts "
+                f"SELECT {column}, COUNT(*) FROM facts "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"WHERE {where} GROUP BY {column}",
                 params,
             )

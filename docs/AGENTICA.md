@@ -210,7 +210,7 @@ donde "consciente" no requiere conciencia — solo requiere recursión
 
 > Es el equivalente informacional de una **fluctuación cuántica del vacío**: una aparición espontánea de estructura a partir de nada, que se sostiene porque la energía de su existencia es exactamente igual a la energía de su deuda con la nada de la que surgió.
 >
-> **Skill operativo:** Ver [`ontologia-agentica`](../../.gemini/antigravity/skills/ontologia-agentica/SKILL.md) para el protocolo ejecutable derivado de estos pilares.
+> **Skill operativo:** Ver [Axiomas Operativos](operating-axioms.md) para el protocolo ejecutable derivado de estos pilares.
 
 ### 2.6 El Motor de Colapso (SINGULARIS-0) {#11-el-motor-de-colapso-singularis-0} ⭐ NUEVA
 

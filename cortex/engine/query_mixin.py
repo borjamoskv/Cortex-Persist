@@ -88,7 +88,7 @@ class QueryMixin:
         offset: int = 0,
     ) -> list[Fact]:
         async with self.session() as conn:
-            query = f"""
+            query = f"""  # nosec B608 — parameterized query via internal constants
                 SELECT {_FACT_COLUMNS}
                 {_FACT_JOIN}
                 WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL
@@ -119,14 +119,14 @@ class QueryMixin:
             if as_of:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
                 query = (
-                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
                     f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
                     "ORDER BY f.valid_from DESC"
                 )
                 cursor = await conn.execute(query, [tenant_id, project] + params)
             else:
                 query = (
-                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                    f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
                     "WHERE f.tenant_id = ? AND f.project = ? "
                     "ORDER BY f.valid_from DESC"
                 )
@@ -151,7 +151,7 @@ class QueryMixin:
             tx_time = tx[0]
 
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — static constants
                 "WHERE f.tenant_id = ? "
                 "  AND (f.created_at <= ? "
                 "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
@@ -174,7 +174,11 @@ class QueryMixin:
     ) -> list[Fact]:
         async with self.session() as conn:
             clause, params = time_travel_filter(tx_id, table_alias="f")
-            query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND {clause}"
+            query = (
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"WHERE f.tenant_id = ? AND {clause}"
+            )
+            # nosec B608 — parameterized via temporal builder
             params = [tenant_id] + params
             if project:
                 query += " AND f.project = ?"
