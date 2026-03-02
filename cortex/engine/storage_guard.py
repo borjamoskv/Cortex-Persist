@@ -192,9 +192,21 @@ class StorageGuard:
             )
 
     @classmethod
-    def _check_tags(cls, tags: list[str] | None) -> None:
+    def _check_tags(cls, tags: list[str] | str | None) -> None:
         if not tags:
             return
+        # Defensive coercion: string tags → list (prevents corrupt JSON in DB)
+        if isinstance(tags, str):
+            raise GuardViolation(
+                "TAGS_TYPE_ERROR",
+                f"tags must be list[str], got str: {tags!r}. "
+                "Use --tags with comma-separated values via CLI, or pass a list.",
+            )
+        if not isinstance(tags, list):
+            raise GuardViolation(
+                "TAGS_TYPE_ERROR",
+                f"tags must be list[str] | None, got {type(tags).__name__}",
+            )
         if len(tags) > _MAX_TAGS:
             raise GuardViolation(
                 "TOO_MANY_TAGS",
