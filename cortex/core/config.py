@@ -13,12 +13,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# ─── Base Paths (constant, never env-overridden) ─────────────────────
-
-CORTEX_DIR = Path.home() / ".cortex"
-AGENT_DIR = Path.home() / ".agent"
-DEFAULT_DB_PATH = CORTEX_DIR / "cortex.db"
-
+# ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
+from cortex.core.paths import (
+    AGENT_DIR,  # noqa: F401 — re-exported for backwards compat
+    CORTEX_DIR,
+)
+from cortex.core.paths import (
+    CORTEX_DB as DEFAULT_DB_PATH,
+)
 
 # ─── Configuration Dataclass ─────────────────────────────────────────
 

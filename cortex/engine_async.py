@@ -155,10 +155,12 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     # register_agent(), get_agent(), list_agents() are now provided by AgentMixin
     # search() is now provided by SearchMixin
 
-    async def recall(self, project: str, limit: int | None = None) -> list[dict[str, Any]]:
+    async def recall(
+        self, project: str, limit: int | None = None, tenant_id: str | None = None
+    ) -> list[dict[str, Any]]:
         from cortex.security.tenant import get_tenant_id
 
-        current_tenant = get_tenant_id()
+        current_tenant = tenant_id or get_tenant_id()
 
         query = f"""
             SELECT {self.FACT_COLUMNS}
@@ -185,10 +187,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 results = []
                 for row in rows:
                     d = dict(row)
-                    t_id = d.get("tenant_id", "default")
-                    d["content"] = enc.decrypt_str(d["content"], tenant_id=t_id)
+                    d["content"] = enc.decrypt_str(d["content"], tenant_id=current_tenant)
                     d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                    d["meta"] = enc.decrypt_json(d["meta"], tenant_id=t_id)
+                    d["meta"] = enc.decrypt_json(d["meta"], tenant_id=current_tenant)
                     results.append(d)
                 return results
 
@@ -201,10 +202,10 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
 
-    async def get_fact(self, fact_id: int) -> dict[str, Any] | None:
+    async def get_fact(self, fact_id: int, tenant_id: str | None = None) -> dict[str, Any] | None:
         from cortex.security.tenant import get_tenant_id
 
-        current_tenant = get_tenant_id()
+        current_tenant = tenant_id or get_tenant_id()
 
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
@@ -221,10 +222,9 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
                 enc = get_default_encrypter()
 
                 d = dict(row)
-                t_id = d.get("tenant_id", "default")
-                d["content"] = enc.decrypt_str(d["content"], tenant_id=t_id)
+                d["content"] = enc.decrypt_str(d["content"], tenant_id=current_tenant)
                 d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                d["meta"] = enc.decrypt_json(d["meta"], tenant_id=t_id)
+                d["meta"] = enc.decrypt_json(d["meta"], tenant_id=current_tenant)
                 return d
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:

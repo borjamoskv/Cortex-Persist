@@ -48,7 +48,6 @@ class EntropyAnnihilator:
             nodes = 0
             classes = 0
             functions = 0
-            depth = 0
 
             for node in ast.walk(tree):
                 nodes += 1

@@ -7,7 +7,6 @@ the power-level calculation that targets 1300/1000.
 from __future__ import annotations
 
 import logging
-
 import time
 from dataclasses import dataclass, field
 from enum import Enum

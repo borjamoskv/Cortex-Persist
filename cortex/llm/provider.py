@@ -180,6 +180,11 @@ class LLMProvider(BaseProvider):
             "max_tokens": max_tokens,
         }
 
+        return await self._execute_completion(url, headers, payload, wrap_errors=False)
+
+    async def _execute_completion(
+        self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
+    ) -> str:
         try:
             response = await self._client.post(url, headers=headers, json=payload)
             response.raise_for_status()
@@ -187,20 +192,7 @@ class LLMProvider(BaseProvider):
             return data["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
-                logger.warning(
-                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
-                    self._model,
-                )
-                payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
-                # Retry once with open code model
-                try:
-                    retry_resp = await self._client.post(url, headers=headers, json=payload)
-                    retry_resp.raise_for_status()
-                    data = retry_resp.json()
-                    return data["choices"][0]["message"]["content"]
-                except Exception as fallback_e:
-                    logger.error("LLM Fallback Failure: %s", fallback_e)
-                    raise e from fallback_e
+                return await self._execute_fallback(url, headers, payload, e)
 
             logger.error(
                 "LLM API Failure [%s %s]: %s",
@@ -208,10 +200,35 @@ class LLMProvider(BaseProvider):
                 self._provider,
                 e.response.text[:500],
             )
+            if wrap_errors:
+                from cortex.utils.errors import CortexError
+
+                raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
             raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
+            if wrap_errors:
+                from cortex.utils.errors import CortexError
+
+                raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
+
+    async def _execute_fallback(
+        self, url: str, headers: dict[str, str], payload: dict[str, Any], original_error: Exception
+    ) -> str:
+        logger.warning(
+            "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
+            self._model,
+        )
+        payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
+        try:
+            retry_resp = await self._client.post(url, headers=headers, json=payload)
+            retry_resp.raise_for_status()
+            data = retry_resp.json()
+            return data["choices"][0]["message"]["content"]
+        except Exception as fallback_e:
+            logger.error("LLM Fallback Failure: %s", fallback_e)
+            raise original_error from fallback_e
 
     async def _process_stream_lines(self, response: httpx.Response):
         """Consume and parse SSE lines from an active HTTP stream."""
@@ -273,42 +290,7 @@ class LLMProvider(BaseProvider):
             "max_tokens": prompt.max_tokens,
         }
 
-        try:
-            response = await self._client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"]
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
-                logger.warning(
-                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
-                    self._model,
-                )
-                payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
-                # Retry once with open code model
-                try:
-                    retry_resp = await self._client.post(url, headers=headers, json=payload)
-                    retry_resp.raise_for_status()
-                    data = retry_resp.json()
-                    return data["choices"][0]["message"]["content"]
-                except Exception as fallback_e:
-                    logger.error("LLM Fallback Failure: %s", fallback_e)
-                    # continue to raise original error
-
-            logger.error(
-                "LLM API Failure [%s %s]: %s",
-                e.response.status_code,
-                self._provider,
-                e.response.text[:500],
-            )
-            from cortex.utils.errors import CortexError
-
-            raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
-        except (KeyError, IndexError, json.JSONDecodeError) as e:
-            logger.error("LLM Parse Error [%s]: %s", self._provider, e)
-            from cortex.utils.errors import CortexError
-
-            raise CortexError(f"Unexpected JSON format from {self._provider}") from e
+        return await self._execute_completion(url, headers, payload, wrap_errors=True)
 
     @property
     def model_name(self) -> str:

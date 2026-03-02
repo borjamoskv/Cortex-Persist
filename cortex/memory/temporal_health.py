@@ -306,13 +306,35 @@ class TemporalHealthScheduler:
 
         # Add to rolling buffer (bounded)
         if len(self._embedding_buffer) >= self._buffer_maxsize:
-            # Drop oldest half — amortized O(1) cost
             self._embedding_buffer = self._embedding_buffer[self._buffer_maxsize // 2 :]
         self._embedding_buffer.append(embedding)
 
         report = HealthReport(write_count=n, tier=[])
 
-        # ── PULSE: Running centroid mean — O(d), every write ──────────
+        self._run_pulse(embedding, report)
+
+        if n % self._config.heartbeat_every == 0:
+            self._run_heartbeat(report)
+
+        if n % self._config.diagnostic_every == 0:
+            self._run_diagnostic(n, report)
+
+        if n % self._config.deep_scan_every == 0:
+            self._run_deep_scan(n, report)
+
+        report.topological_health = self._compute_composite(report)
+        if report.page_hinkley_alert:
+            report.topological_health = min(report.topological_health, 0.4)
+
+        if report.alerts:
+            logger.warning("TemporalHealthScheduler: %s", report.summary())
+
+        return report
+
+    # ── Tier runners ──────────────────────────────────────────────────
+
+    def _run_pulse(self, embedding: np.ndarray, report: HealthReport) -> None:
+        """PULSE tier — O(d) running centroid update, every write."""
         self._update_running_mean(embedding)
         report.running_centroid = self._running_mean
         report.tier.append("pulse")
@@ -320,7 +342,6 @@ class TemporalHealthScheduler:
         if self._baseline_centroid is not None:
             drift = centroid_drift(self._running_mean, self._baseline_centroid)
             report.centroid_drift = drift
-
             if drift > self._config.centroid_alert_threshold:
                 report.alerts.append(
                     f"CENTROID_DRIFT={drift:.4f} > {self._config.centroid_alert_threshold}"
@@ -328,77 +349,57 @@ class TemporalHealthScheduler:
         else:
             report.centroid_drift = 0.0
 
-        # ── HEARTBEAT: Page-Hinkley — O(1), every heartbeat_every ─────
-        if n % self._config.heartbeat_every == 0:
-            report.tier.append("heartbeat")
-            drift_val = report.centroid_drift or 0.0
-            ph_fired = self._page_hinkley.update(drift_val)
-            report.page_hinkley_alert = ph_fired
-            if ph_fired:
-                report.alerts.append("PAGE_HINKLEY_CHANGE_POINT")
+    def _run_heartbeat(self, report: HealthReport) -> None:
+        """HEARTBEAT tier — O(1) Page-Hinkley streaming update."""
+        report.tier.append("heartbeat")
+        ph_fired = self._page_hinkley.update(report.centroid_drift or 0.0)
+        report.page_hinkley_alert = ph_fired
+        if ph_fired:
+            report.alerts.append("PAGE_HINKLEY_CHANGE_POINT")
 
-        # ── DIAGNOSTIC: Spectral gap — O(n·d²), every diagnostic_every ─
-        if n % self._config.diagnostic_every == 0:
-            buf = self._get_buffer_as_array()
-            if buf is not None and buf.shape[0] >= self._config.min_vectors_diagnostic:
-                report.tier.append("diagnostic")
-                sg_current = spectral_gap(buf)
-                report.spectral_gap_current = sg_current
+    def _run_diagnostic(self, n: int, report: HealthReport) -> None:
+        """DIAGNOSTIC tier — O(n·d²) spectral gap, every diagnostic_every writes."""
+        buf = self._get_buffer_as_array()
+        if buf is None or buf.shape[0] < self._config.min_vectors_diagnostic:
+            return
 
-                if self._baseline_spectral_gap and self._baseline_spectral_gap > 1e-10:
-                    sg_ratio = sg_current / self._baseline_spectral_gap
-                    report.spectral_gap_ratio = sg_ratio
+        report.tier.append("diagnostic")
+        sg_current = spectral_gap(buf)
+        report.spectral_gap_current = sg_current
 
-                    thr = self._config.spectral_drop_threshold
-                    if sg_ratio < thr:
-                        report.alerts.append(f"SPECTRAL_COLLAPSE ratio={sg_ratio:.3f} < {thr}")
-                    logger.debug(
-                        "DIAGNOSTIC write=%d: sg=%.3f ratio=%.3f",
-                        n,
-                        sg_current,
-                        sg_ratio,
-                    )
+        if not (self._baseline_spectral_gap and self._baseline_spectral_gap > 1e-10):
+            return
 
-        # ── DEEP_SCAN: Intrinsic dimensionality — O(n·k·d), every deep_scan_every
-        if n % self._config.deep_scan_every == 0:
-            buf = self._get_buffer_as_array()
-            if buf is not None and buf.shape[0] >= self._config.min_vectors_deep_scan:
-                report.tier.append("deep_scan")
-                idim_current = intrinsic_dimensionality(buf)
-                report.intrinsic_dim_current = idim_current
+        sg_ratio = sg_current / self._baseline_spectral_gap
+        report.spectral_gap_ratio = sg_ratio
+        thr = self._config.spectral_drop_threshold
+        if sg_ratio < thr:
+            report.alerts.append(f"SPECTRAL_COLLAPSE ratio={sg_ratio:.3f} < {thr}")
+        logger.debug("DIAGNOSTIC write=%d: sg=%.3f ratio=%.3f", n, sg_current, sg_ratio)
 
-                if (
-                    idim_current is not None
-                    and self._baseline_intrinsic_dim is not None
-                    and self._baseline_intrinsic_dim > 1e-10
-                ):
-                    idim_ratio = idim_current / self._baseline_intrinsic_dim
-                    report.intrinsic_dim_ratio = idim_ratio
+    def _run_deep_scan(self, n: int, report: HealthReport) -> None:
+        """DEEP_SCAN tier — O(n·k·d) intrinsic dim, every deep_scan_every writes."""
+        buf = self._get_buffer_as_array()
+        if buf is None or buf.shape[0] < self._config.min_vectors_deep_scan:
+            return
 
-                    thr_id = self._config.idim_collapse_threshold
-                    if idim_ratio < thr_id:
-                        report.alerts.append(
-                            f"INTRINSIC_DIM_COLLAPSE ratio={idim_ratio:.3f} < {thr_id}"
-                        )
-                    logger.info(
-                        "DEEP_SCAN write=%d: idim=%.1f ratio=%.3f",
-                        n,
-                        idim_current,
-                        idim_ratio,
-                    )
+        report.tier.append("deep_scan")
+        idim_current = intrinsic_dimensionality(buf)
+        report.intrinsic_dim_current = idim_current
 
-        # ── Composite health score ────────────────────────────────────
-        report.topological_health = self._compute_composite(report)
+        if not (
+            idim_current is not None
+            and self._baseline_intrinsic_dim is not None
+            and self._baseline_intrinsic_dim > 1e-10
+        ):
+            return
 
-        # ── Page-Hinkley override: cap health if streaming alert fires ─
-        if report.page_hinkley_alert:
-            report.topological_health = min(report.topological_health, 0.4)
-
-        # ── Surface log if any alert fired ────────────────────────────
-        if report.alerts:
-            logger.warning("TemporalHealthScheduler: %s", report.summary())
-
-        return report
+        idim_ratio = idim_current / self._baseline_intrinsic_dim
+        report.intrinsic_dim_ratio = idim_ratio
+        thr_id = self._config.idim_collapse_threshold
+        if idim_ratio < thr_id:
+            report.alerts.append(f"INTRINSIC_DIM_COLLAPSE ratio={idim_ratio:.3f} < {thr_id}")
+        logger.info("DEEP_SCAN write=%d: idim=%.1f ratio=%.3f", n, idim_current, idim_ratio)
 
     def status(self) -> dict[str, Any]:
         """Current scheduler state — suitable for the CLI `cortex health` command."""
@@ -464,9 +465,8 @@ class TemporalHealthScheduler:
             self._running_mean = embedding.astype(np.float32).copy()
         else:
             # μ_n = μ_{n-1} + (x_n - μ_{n-1}) / n
-            self._running_mean += (
-                embedding.astype(np.float32) - self._running_mean
-            ) / self._running_n
+            delta = embedding.astype(np.float32) - self._running_mean
+            self._running_mean += delta / self._running_n
 
     def _get_buffer_as_array(self) -> np.ndarray | None:
         """Materialize the embedding buffer as a single ndarray.
@@ -486,10 +486,9 @@ class TemporalHealthScheduler:
 
         # Centroid drift: healthy if < threshold
         if report.centroid_drift is not None:
-            drift_score = max(
-                0.0, 1.0 - report.centroid_drift / self._config.centroid_alert_threshold
-            )
-            components.append(drift_score * 1.5)  # higher weight — most frequent signal
+            thr = self._config.centroid_alert_threshold
+            drift_score = max(0.0, 1.0 - report.centroid_drift / thr)
+            components.append(drift_score * 1.5)  # higher weight — most frequent
 
         # Spectral gap ratio: healthy if close to 1.0
         if report.spectral_gap_ratio is not None:

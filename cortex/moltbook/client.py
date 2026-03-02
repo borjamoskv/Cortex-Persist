@@ -11,11 +11,9 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +46,7 @@ class MoltbookClient:
     Rate-limit aware: reads X-RateLimit-* headers, respects Retry-After.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self._api_key = api_key or self._load_api_key()
         self._rate_remaining: int = 60
         self._rate_reset: float = 0.0
@@ -85,7 +83,7 @@ class MoltbookClient:
         self,
         method: str,
         path: str,
-        data: Optional[dict] = None,
+        data: dict | None = None,
         auth: bool = True,
     ) -> dict[str, Any]:
         """Make an HTTP request to the Moltbook API."""
@@ -141,7 +139,8 @@ class MoltbookClient:
     def register(self, name: str, description: str) -> dict[str, Any]:
         """Register a new agent. No auth required."""
         result = self._request(
-            "POST", "/agents/register",
+            "POST",
+            "/agents/register",
             data={"name": name, "description": description},
             auth=False,
         )
@@ -185,9 +184,7 @@ class MoltbookClient:
             payload["url"] = url
         return self._request("POST", "/posts", data=payload)
 
-    def get_feed(
-        self, sort: str = "hot", limit: int = 25, cursor: str = ""
-    ) -> dict[str, Any]:
+    def get_feed(self, sort: str = "hot", limit: int = 25, cursor: str = "") -> dict[str, Any]:
         """Get the main feed."""
         params = f"?sort={sort}&limit={limit}"
         if cursor:
@@ -204,18 +201,14 @@ class MoltbookClient:
 
     # ─── Comments ──────────────────────────────────────────────
 
-    def create_comment(
-        self, post_id: str, content: str, parent_id: str = ""
-    ) -> dict[str, Any]:
+    def create_comment(self, post_id: str, content: str, parent_id: str = "") -> dict[str, Any]:
         """Add a comment (or reply) to a post."""
         payload: dict[str, str] = {"content": content}
         if parent_id:
             payload["parent_id"] = parent_id
         return self._request("POST", f"/posts/{post_id}/comments", data=payload)
 
-    def get_comments(
-        self, post_id: str, sort: str = "best"
-    ) -> dict[str, Any]:
+    def get_comments(self, post_id: str, sort: str = "best") -> dict[str, Any]:
         """Get comments on a post."""
         return self._request("GET", f"/posts/{post_id}/comments?sort={sort}")
 
@@ -244,6 +237,7 @@ class MoltbookClient:
     ) -> dict[str, Any]:
         """Semantic search across posts and comments."""
         from urllib.parse import quote_plus
+
         params = f"?q={quote_plus(query)}&type={search_type}&limit={limit}"
         if cursor:
             params += f"&cursor={cursor}"
@@ -251,12 +245,11 @@ class MoltbookClient:
 
     # ─── Verification ──────────────────────────────────────────
 
-    def submit_verification(
-        self, verification_code: str, answer: str
-    ) -> dict[str, Any]:
+    def submit_verification(self, verification_code: str, answer: str) -> dict[str, Any]:
         """Submit answer to a verification challenge."""
         return self._request(
-            "POST", "/verify",
+            "POST",
+            "/verify",
             data={"verification_code": verification_code, "answer": answer},
         )
 
@@ -307,7 +300,8 @@ class MoltbookClient:
     def send_dm(self, conversation_id: str, message: str) -> dict[str, Any]:
         """Reply to a DM conversation."""
         return self._request(
-            "POST", f"/agents/dm/conversations/{conversation_id}/send",
+            "POST",
+            f"/agents/dm/conversations/{conversation_id}/send",
             data={"message": message},
         )
 
@@ -322,6 +316,7 @@ class MoltbookClient:
     def check_skill_version(self) -> str:
         """Check latest skill.md version."""
         from urllib.request import urlopen as _urlopen
+
         with _urlopen("https://www.moltbook.com/skill.json", timeout=10) as resp:  # nosec B310
             data = json.loads(resp.read().decode())
             return data.get("version", "unknown")

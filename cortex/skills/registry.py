@@ -11,7 +11,6 @@ del grafo cognitivo. Los skills se registran solos al ser descubiertos.
 
 from __future__ import annotations
 
-import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -20,8 +19,8 @@ from typing import Any
 import yaml
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
+from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
 
-SKILLS_BASE_DIR = Path.home() / ".gemini" / "antigravity" / "skills"
 SKILL_FILENAME = "SKILL.md"
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 
@@ -33,19 +32,19 @@ FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 class CapabilityDeclaration:
     """Capacidad declarada por un skill: lo que puede HACER."""
 
-    name: str                    # e.g. "code_generation", "orchestration"
+    name: str  # e.g. "code_generation", "orchestration"
     description: str = ""
-    output_type: str = ""        # e.g. "code", "analysis", "orchestration"
-    confidence: float = 1.0      # 0.0–1.0
+    output_type: str = ""  # e.g. "code", "analysis", "orchestration"
+    confidence: float = 1.0  # 0.0–1.0
 
 
 @dataclass
 class RequirementDeclaration:
     """Requisito declarado por un skill: lo que NECESITA de otros."""
 
-    skill_name: str              # Nombre del skill dependencia
-    capability: str = ""         # Capacidad específica requerida
-    optional: bool = False       # Si es false, es hard dependency
+    skill_name: str  # Nombre del skill dependencia
+    capability: str = ""  # Capacidad específica requerida
+    optional: bool = False  # Si es false, es hard dependency
 
 
 @dataclass
@@ -80,7 +79,7 @@ class SkillManifest:
     amplified_by: list[str] = field(default_factory=list)  # quién le potencia
 
     # ── Fitness (calculado en runtime por NOOSPHERE) ──
-    fitness_score: float = -1.0   # -1 = no calculado aún
+    fitness_score: float = -1.0  # -1 = no calculado aún
     usage_count: int = 0
 
     # ── Metadata raw ──
@@ -140,7 +139,7 @@ class SkillRegistry:
 
     # ── Carga ──────────────────────────────────────────────────────────────
 
-    def load(self, force_reload: bool = False) -> "SkillRegistry":
+    def load(self, force_reload: bool = False) -> SkillRegistry:
         """Escanea el filesystem y construye el catálogo de manifests.
 
         Idempotente: llamadas repetidas son no-op salvo force_reload=True.
@@ -178,7 +177,7 @@ class SkillRegistry:
         self._failed = failed
         return self
 
-    def reload(self) -> "SkillRegistry":
+    def reload(self) -> SkillRegistry:
         """Fuerza re-escaneo del filesystem."""
         return self.load(force_reload=True)
 
@@ -203,23 +202,22 @@ class SkillRegistry:
 
     def by_capability(self, capability: str) -> list[SkillManifest]:
         """Skills que declaran una capacidad específica."""
-        return [
-            m for m in self.all()
-            if any(c.name == capability for c in m.capabilities)
-        ]
+        return [m for m in self.all() if any(c.name == capability for c in m.capabilities)]
 
     def search(self, query: str) -> list[SkillManifest]:
         """Búsqueda full-text en nombre, descripción y tags."""
         q = query.lower()
         results = []
         for m in self.all():
-            haystack = " ".join([
-                m.name,
-                m.description,
-                m.category,
-                " ".join(m.tags),
-                " ".join(m.aliases),
-            ]).lower()
+            haystack = " ".join(
+                [
+                    m.name,
+                    m.description,
+                    m.category,
+                    " ".join(m.tags),
+                    " ".join(m.aliases),
+                ]
+            ).lower()
             if q in haystack:
                 results.append(m)
         return results
@@ -267,12 +265,14 @@ class SkillRegistry:
             if isinstance(cap, str):
                 capabilities.append(CapabilityDeclaration(name=cap))
             elif isinstance(cap, dict):
-                capabilities.append(CapabilityDeclaration(
-                    name=cap.get("name", ""),
-                    description=cap.get("description", ""),
-                    output_type=cap.get("output_type", ""),
-                    confidence=float(cap.get("confidence", 1.0)),
-                ))
+                capabilities.append(
+                    CapabilityDeclaration(
+                        name=cap.get("name", ""),
+                        description=cap.get("description", ""),
+                        output_type=cap.get("output_type", ""),
+                        confidence=float(cap.get("confidence", 1.0)),
+                    )
+                )
 
         # ── Requisitos declarados ──
         requirements = []
@@ -280,11 +280,13 @@ class SkillRegistry:
             if isinstance(req, str):
                 requirements.append(RequirementDeclaration(skill_name=req))
             elif isinstance(req, dict):
-                requirements.append(RequirementDeclaration(
-                    skill_name=req.get("skill", ""),
-                    capability=req.get("capability", ""),
-                    optional=bool(req.get("optional", False)),
-                ))
+                requirements.append(
+                    RequirementDeclaration(
+                        skill_name=req.get("skill", ""),
+                        capability=req.get("capability", ""),
+                        optional=bool(req.get("optional", False)),
+                    )
+                )
 
         # ── Aliases normalizados ──
         aliases_raw = raw.get("aliases", [])

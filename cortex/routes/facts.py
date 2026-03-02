@@ -61,7 +61,6 @@ async def recall_facts(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
-    lang = request.headers.get("Accept-Language", "en")
     facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
 
     return [

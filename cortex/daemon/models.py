@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
+
+from cortex.core.paths import (
+    AGENT_DIR,
+    CORTEX_DB,
+    CORTEX_DIR,
+)
+from cortex.core.paths import (
+    DAEMON_CONFIG_FILE as CONFIG_FILE,
+)
+from cortex.core.paths import (
+    DAEMON_STATUS_FILE as STATUS_FILE,
+)
 
 __all__ = [
     "AGENT_DIR",
@@ -52,11 +63,6 @@ DEFAULT_RETRIES = 1  # HTTP retry count before declaring failure
 RETRY_BACKOFF = 2.0  # seconds between retries
 DEFAULT_CERT_WARN_DAYS = 14  # warn if SSL expires within 14 days
 DEFAULT_DISK_WARN_MB = 500  # warn if cortex dir exceeds 500 MB
-CORTEX_DIR = Path.home() / ".cortex"
-CORTEX_DB = CORTEX_DIR / "cortex.db"
-AGENT_DIR = Path.home() / ".agent"
-CONFIG_FILE = CORTEX_DIR / "daemon_config.json"
-STATUS_FILE = AGENT_DIR / "memory" / "daemon_status.json"
 BUNDLE_ID = "com.moskv.daemon"
 
 

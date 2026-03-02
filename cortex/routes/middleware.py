@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 import time
 from collections import defaultdict
-from pathlib import Path
 from threading import Lock
 from typing import Any
 
@@ -25,7 +24,8 @@ __all__ = [
 logger = logging.getLogger("cortex.admin.middleware")
 
 # ─── Audit Log Configuration ──────────────────────────────────────────
-_AUDIT_LOG_PATH = Path.home() / ".cortex" / "audit.log"
+from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH
+
 if not logger.handlers:
     try:
         _AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)

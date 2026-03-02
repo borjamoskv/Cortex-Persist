@@ -2,7 +2,6 @@ import logging
 import os
 import subprocess
 from datetime import datetime
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +22,11 @@ def get_orphaned_browsers():
 
 def get_snapshot_age():
     """Return the age of the CORTEX snapshot in minutes."""
-    snapshot_path = Path.home() / ".cortex" / "context-snapshot.md"
+    from cortex.core.paths import CORTEX_DIR
+
+    snapshot_path = CORTEX_DIR / "context-snapshot.md"
     if not snapshot_path.exists():
-        return float('inf')
+        return float("inf")
     mtime = datetime.fromtimestamp(snapshot_path.stat().st_mtime)
     age = (datetime.now() - mtime).total_seconds() / 60
     return age
