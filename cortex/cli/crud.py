@@ -99,8 +99,18 @@ def list_facts(project, fact_type, limit, db) -> None:
         table.add_column("Tipo", width=10)
         table.add_column("Contenido", width=60)
         table.add_column("Tags", style="dim", width=15)
+
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+
         for row in rows:
-            content_preview = row[2][:57] + "..." if len(row[2]) > 60 else row[2]
+            # Decrypt content (may be AES-encrypted in DB)
+            raw_content = row[2]
+            try:
+                content = enc.decrypt_str(raw_content, tenant_id="default")
+            except (ValueError, TypeError, OSError):
+                content = raw_content  # Fallback to raw if decryption fails
+            content_preview = content[:57] + "..." if len(content) > 60 else content
             tags = json.loads(row[4]) if row[4] else []
             tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)

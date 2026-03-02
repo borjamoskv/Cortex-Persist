@@ -33,7 +33,7 @@ logger = logging.getLogger("cortex.llm")
 
 # ─── Configuration & Presets ──────────────────────────────────────────
 
-_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent / "assets" / "llm_presets.json")
+_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent.parent / "config" / "llm_presets.json")
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
 
 # Global cache for presets to avoid redundant I/O

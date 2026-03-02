@@ -71,7 +71,7 @@ class TestStorageGuardFactTypeValidation:
             "knowledge", "decision", "error", "ghost", "bridge",
             "preference", "identity", "issue", "world-model",
             "counterfactual", "rule", "axiom", "schema", "idea",
-            "evolution", "test",
+            "evolution", "test", "system_health",
         ]
         for ft in allowed:
             StorageGuard.validate(
@@ -92,7 +92,31 @@ class TestStorageGuardFactTypeValidation:
 
 
 class TestStorageGuardSourceAttribution:
-    """Gate: SOURCE_REQUIRED — the critical new Leap 1 enforcement."""
+    """Gate: SOURCE_REQUIRED — the critical new Leap 1 enforcement.
+
+    NOTE: conftest.py has a `relax_source_guard` autouse fixture that patches
+    _check_source to silently accept None. We must restore the real guard
+    before testing source validation.
+    """
+
+    @pytest.fixture(autouse=True)
+    def restore_real_source_guard(self):
+        """Undo the conftest relax_source_guard patch for these tests."""
+        from cortex.engine.storage_guard import StorageGuard
+
+        @classmethod
+        def _real_check_source(cls, source):
+            if not source or not source.strip():
+                from cortex.engine.storage_guard import GuardViolation
+                raise GuardViolation(
+                    "SOURCE_REQUIRED",
+                    "source attribution is mandatory. Use 'cli', 'agent:<name>', "
+                    "'api', or 'human' as source.",
+                )
+        original = StorageGuard._check_source
+        StorageGuard._check_source = _real_check_source
+        yield
+        StorageGuard._check_source = original
 
     def test_source_required(self):
         with pytest.raises(GuardViolation, match="SOURCE_REQUIRED"):
@@ -184,6 +208,26 @@ class TestStorageGuardTagsValidation:
                 content="Content with invalid tag",
                 source="cli",
                 tags=["x" * 200],
+            )
+
+    def test_string_tags_rejected(self):
+        """String tags must be rejected — they caused corrupt JSON in DB (11 facts affected)."""
+        with pytest.raises(GuardViolation, match="TAGS_TYPE_ERROR"):
+            StorageGuard.validate(
+                project="test",
+                content="Content with string tags",
+                source="cli",
+                tags="sergio,history",
+            )
+
+    def test_non_list_tags_rejected(self):
+        """Non-list, non-string tags must be rejected."""
+        with pytest.raises(GuardViolation, match="TAGS_TYPE_ERROR"):
+            StorageGuard.validate(
+                project="test",
+                content="Content with numeric tags",
+                source="cli",
+                tags=42,
             )
 
 
