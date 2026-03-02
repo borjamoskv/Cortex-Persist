@@ -1,0 +1,25 @@
+
+╭──────────────────────────────── [💡 DESIGN] ─────────────────────────────────╮
+│  Las micro-animaciones de menos de 200ms se sienten rápidas. Las de más de   │
+│  300ms se sienten lentas. 200-300ms es el punto dulce para springs.          │
+╰───────────────────────── mientras esperas · static ──────────────────────────╯
+                          🔍 Results for: 'type:ghost'                          
+┏━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━┓
+┃  ┃ Project     ┃ Content                                        ┃ Type   ┃ … ┃
+┡━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━┩
+│  │ CORTEX      │ ghost_reaper implementa consolidación          │ decis… │ … │
+│  │             │ sináptica computacional: no es limpieza de...  │        │   │
+│  │ SYSTEM      │ Implementar el Ghost-Registry System de        │ archi… │ … │
+│  │             │ ghost-control en el bucle principal de O...    │        │   │
+│  │ ghost-cont… │ Fin del camino: OMEGA STATE. ghost_actions.py  │ decis… │ … │
+│  │             │ y ghost_registry.py confirmados li...          │        │   │
+│  │ ghost-cont… │ Upgraded ghost-control skill to v6.0: added    │ decis… │ … │
+│  │             │ ghost_resilience.py (retry/timeout/s...        │        │   │
+│  │ ghost-cont… │ MEJORAlo ronda 7 (Centauro): ghost_platform.py │ decis… │ … │
+│  │             │ 11 lints→0, ghost_hand.py 7 lints...           │        │   │
+└──┴─────────────┴────────────────────────────────────────────────┴────────┴───┘
+
+╭───────────────────────────────── 💡 DESIGN ──────────────────────────────────╮
+│  Industrial Noir: fondos #0A0A0A, acentos #CCFF00, paneles glassmorphism.    │
+│  La estética MOSKV.                                                          │
+╰─────────────────────────────────── static ───────────────────────────────────╯
