@@ -234,13 +234,14 @@ class NegativeCache:
         self, provider_name: str, intent: str, ttl: float | None = None
     ) -> None:
         """NXDOMAIN — cache that this provider failed for this intent."""
-        expiry = time.monotonic() + (ttl if ttl is not None else self._default_ttl)
+        effective_ttl = ttl if ttl is not None else self._default_ttl
+        expiry = time.monotonic() + effective_ttl
         self._entries[(provider_name, intent)] = expiry
         logger.debug(
             "NXDOMAIN cached: %s for intent=%s (TTL=%.0fs)",
             provider_name,
             intent,
-            ttl if ttl is not None else self._default_ttl,
+            effective_ttl,
         )
 
     def is_suppressed(self, provider_name: str, intent: str) -> bool:
@@ -384,8 +385,9 @@ class HedgedRequestStrategy:
     Axiom: Ω₂ (controlled waste < latency) + Ω₅ (redundancy as fuel).
     """
 
-    @staticmethod
+    @classmethod
     async def race(
+        cls,
         providers: list[BaseProvider],
         prompt: CortexPrompt,
     ) -> tuple[HedgedResult | None, list[str]]:
@@ -400,72 +402,100 @@ class HedgedRequestStrategy:
         start = time.monotonic()
 
         # Create named tasks for traceability
-        tasks: dict[asyncio.Task[str], BaseProvider] = {}
-        for p in providers:
-            task = asyncio.create_task(
-                p.invoke(prompt),
-                name=f"hedge:{p.provider_name}",
-            )
-            tasks[task] = p
+        tasks: dict[asyncio.Task[str], BaseProvider] = {
+            asyncio.create_task(p.invoke(prompt), name=f"hedge:{p.provider_name}"): p
+            for p in providers
+        }
 
         pending = set(tasks.keys())
         errors: list[str] = []
-        result: HedgedResult | None = None
 
         try:
-            while pending:
-                done, pending = await asyncio.wait(
-                    pending, return_when=asyncio.FIRST_COMPLETED
-                )
-                for completed in done:
-                    provider = tasks[completed]
-                    exc = completed.exception()
-                    if exc is not None:
-                        errors.append(f"{provider.provider_name}: {exc}")
-                        logger.debug(
-                            "Hedge loser (error): %s — %s",
-                            provider.provider_name,
-                            exc,
-                        )
-                        continue
-
-                    # Winner found — cancel remaining
-                    latency_ms = (time.monotonic() - start) * 1000
-                    cancelled_names: list[str] = []
-                    for p_task in pending:
-                        p_task.cancel()
-                        cancelled_names.append(tasks[p_task].provider_name)
-
-                    result = HedgedResult(
-                        winner=provider.provider_name,
-                        response=completed.result(),
-                        latency_ms=latency_ms,
-                        cancelled=tuple(cancelled_names),
-                    )
-
-                    logger.info(
-                        "Hedge winner: %s (%.1fms) | cancelled: %s",
-                        result.winner,
-                        result.latency_ms,
-                        cancelled_names or "none",
-                    )
-
-                    # Await cancelled tasks to suppress warnings
-                    for p_task in pending:
-                        try:
-                            await p_task
-                        except (asyncio.CancelledError, Exception):
-                            pass
-
-                    return result, []
-
+            return await cls._run_race_loop(tasks, pending, start, errors)
+        except asyncio.CancelledError:
+            cls._cancel_all(pending)
+            raise
         except Exception as e:
-            # Cleanup on unexpected error
-            for t in pending:
-                t.cancel()
+            cls._cancel_all(pending)
             errors.append(f"Hedging infrastructure: {e}")
+            return None, errors
 
-        return result, errors
+    @classmethod
+    async def _run_race_loop(
+        cls,
+        tasks: dict[asyncio.Task[str], BaseProvider],
+        pending: set[asyncio.Task[str]],
+        start: float,
+        errors: list[str],
+    ) -> tuple[HedgedResult | None, list[str]]:
+        """Processes the race loop until a winner is found or all fail."""
+        while pending:
+            done, pending = await asyncio.wait(
+                pending, return_when=asyncio.FIRST_COMPLETED
+            )
+            for completed in done:
+                provider = tasks[completed]
+                exc = completed.exception()
+                if exc is not None:
+                    errors.append(f"{provider.provider_name}: {exc}")
+                    logger.debug(
+                        "Hedge loser (error): %s — %s",
+                        provider.provider_name,
+                        exc,
+                    )
+                    continue
+
+                # Winner found — process and return
+                result = await cls._process_winner(completed, tasks, pending, start)
+                return result, []
+
+        return None, errors
+
+    @classmethod
+    async def _process_winner(
+        cls,
+        winner_task: asyncio.Task[str],
+        tasks: dict[asyncio.Task[str], BaseProvider],
+        pending: set[asyncio.Task[str]],
+        start: float,
+    ) -> HedgedResult:
+        """Processes the winning task, captures latency, and cancels losers."""
+        winner_provider = tasks[winner_task]
+        latency_ms = (time.monotonic() - start) * 1000
+
+        cancelled_names: list[str] = []
+        for p_task in pending:
+            p_task.cancel()
+            cancelled_names.append(tasks[p_task].provider_name)
+
+        result = HedgedResult(
+            winner=winner_provider.provider_name,
+            response=winner_task.result(),
+            latency_ms=latency_ms,
+            cancelled=tuple(cancelled_names),
+        )
+
+        logger.info(
+            "Hedge winner: %s (%.1fms) | cancelled: %s",
+            result.winner,
+            result.latency_ms,
+            cancelled_names or "none",
+        )
+
+        # Await cancelled tasks to suppress warnings
+        for p_task in pending:
+            try:
+                await p_task
+            except (asyncio.CancelledError, Exception):
+                pass
+
+        return result
+
+    @staticmethod
+    def _cancel_all(pending: set[asyncio.Task[str]]) -> None:
+        """Utility to cancel all pending tasks cleanly."""
+        for t in pending:
+            t.cancel()
 
 
 # ─── Provider Metrics (Anycast) ────────────────────────────────────────────
@@ -572,6 +602,12 @@ class WeightedProviderPool:
     def record_failure(self, provider_name: str, latency_ms: float) -> None:
         """Record a failed provider call."""
         self.get_or_create(provider_name).record_failure(latency_ms)
+
+    def get_success_rate(self, provider_name: str) -> float:
+        """Get success rate [0.0, 1.0] for adaptive behavior."""
+        if provider_name not in self._metrics:
+            return 1.0  # Benefit of the doubt for new providers
+        return self._metrics[provider_name].success_rate
 
     def select_weighted(self, providers: list[BaseProvider]) -> BaseProvider:
         """Select a provider weighted by inverse EWMA latency.
@@ -963,6 +999,20 @@ class CortexLLMRouter:
 
         return ordered
 
+    def _adaptive_positive_ttl(self, provider_name: str) -> float:
+        """Calculate A-record TTL based on historical success rate.
+        Perfect provider = 100% of base TTL. Flaky provider = reduced TTL.
+        """
+        success_rate = self._provider_pool.get_success_rate(provider_name)
+        return self._positive_cache._default_ttl * success_rate
+
+    def _adaptive_negative_ttl(self, provider_name: str) -> float:
+        """Calculate NXDOMAIN TTL based on historical success rate.
+        Perfect provider = base TTL. Dead provider = 2x base TTL.
+        """
+        success_rate = self._provider_pool.get_success_rate(provider_name)
+        return self._negative_cache._default_ttl * (2.0 - success_rate)
+
     # ── Public API ────────────────────────────────────────────────────────
 
     async def execute_hedged(
@@ -1017,7 +1067,8 @@ class CortexLLMRouter:
             provider_name = error_msg.split(":", 1)[0].strip()
             # Don't cache primary failures (Ω₃ Byzantine Default)
             if provider_name != self._primary.provider_name:
-                self._negative_cache.record_failure(provider_name, intent_key)
+                ttl = self._adaptive_negative_ttl(provider_name)
+                self._negative_cache.record_failure(provider_name, intent_key, ttl=ttl)
 
         logger.debug(
             "Hedging failed for all %d providers — falling through to cascade",
@@ -1060,8 +1111,9 @@ class CortexLLMRouter:
         result = await self._try_provider(self._primary, prompt)
         if isinstance(result, Ok):
             latency_ms = (time.monotonic() - start_primary) * 1000
+            ttl = self._adaptive_positive_ttl(self._primary.provider_name)
             self._positive_cache.record_success(
-                self._primary.provider_name, intent_key, latency_ms
+                self._primary.provider_name, intent_key, latency_ms, ttl=ttl
             )
             self._session_primary_failures = 0  # streak broken
             self._emit_cascade_event(
@@ -1094,8 +1146,9 @@ class CortexLLMRouter:
             result = await self._try_provider(fallback, prompt)
             if isinstance(result, Ok):
                 latency_ms = (time.monotonic() - start_fb) * 1000
+                ttl = self._adaptive_positive_ttl(fallback.provider_name)
                 self._positive_cache.record_success(
-                    fallback.provider_name, intent_key, latency_ms
+                    fallback.provider_name, intent_key, latency_ms, ttl=ttl
                 )
                 tier = self._classify_tier(fallback, prompt.intent)
                 self._emit_cascade_event(
@@ -1106,8 +1159,9 @@ class CortexLLMRouter:
                 )
                 return result
             # Record failure → suppress for TTL, scoped by intent
+            ttl = self._adaptive_negative_ttl(fallback.provider_name)
             self._negative_cache.record_failure(
-                fallback.provider_name, intent_key
+                fallback.provider_name, intent_key, ttl=ttl
             )
             errors.append(f"{fallback.provider_name}: {result.error}")
 
