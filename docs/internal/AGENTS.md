@@ -3,7 +3,7 @@
 > **System:** MOSKV-1 v5 (CORTEX v6)
 > **Architecture:** LEGIØN-1 Fractal Swarm
 > **Mode:** SOVEREIGN CLOUD
-> **Updated:** 2026-02-23
+> **Updated:** 2026-03-02
 
 ---
 
@@ -43,7 +43,7 @@
 ### @GUARDIAN — The QA Sentinel
 - **Role**: Safety Officer
 - **Responsibilities**: `pytest` runs, schema verification (`cortex/models.py`), PR blocking on regression
-- **Rule**: All 1,162 tests must pass. No exceptions. No skips without justification.
+- **Rule**: All 1,993 tests must pass. No exceptions. No skips without justification.
 - **V6 scope**: Multi-tenant isolation tests, RBAC permission boundary tests
 
 ### @SENTINEL — The Security Officer *(v5.0+)*
@@ -118,7 +118,7 @@
 ## 📜 Laws of the Swarm
 
 1. **Async First** — No blocking I/O anywhere in `cortex/`. `asyncio` is the law.
-2. **Test Driven** — @FORGE writes tests before (or immediately after) code. 1,162 functions and growing.
+2. **Test Driven** — @FORGE writes tests before (or immediately after) code. 1,993 tests and growing.
 3. **Tenant Aware** — Every new data operation accepts `tenant_id`. No exceptions in v6.
 4. **Zero Secrets in Code** — Environment vars only. @SENTINEL auto-scans with `classifier.py`.
 5. **Specific Exceptions** — No bare `except Exception`. Catch `sqlite3.Error`, `OSError`, `ValueError` specifically.
@@ -128,5 +128,5 @@
 
 ---
 
-*Swarm Protocol v3.0 — MOSKV-1 v5 (Antigravity) · Updated 2026-02-23*
+*Swarm Protocol v3.0 — MOSKV-1 v5 (Antigravity) · Updated 2026-03-02*
 *V6 additions: @SENTINEL, @SIDECAR, VAULT formation, HYDRA formation, v6 Laws*

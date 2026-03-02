@@ -93,6 +93,29 @@ The **Nemesis Protocol** is CORTEX's autonomic immune system, acting as an inter
 - **Hormonal Feedback**: Triggers `ADRENALINE` spikes in the Endocrine system when entropy is detected, forcing immediate corrective focus.
 - **Fail-Fast**: Blocks execution of patterns that have previously compromised system integrity (Axiom Ω₅).
 
+### 9. Composition Leakage Shield (Holistic Redaction)
+
+The **fourth leakage vector** — and the most insidious — is **composition leakage**: two individually innocuous data points that, when combined by an adversary, reconstruct a secret. This is the equivalent of **correlation attacks in differential privacy**.
+
+> [!CAUTION]
+> Field-by-field redaction is necessary but insufficient. A deploy address alone is harmless. A contract salt alone is meaningless. Combined, they derive the proxy key.
+
+**Attack surface examples:**
+
+| Data A (innocuous) | Data B (innocuous) | Composed Secret |
+|:---|:---|:---|
+| Deploy address | Contract salt | Proxy admin key |
+| Agent public key | Session nonce | Ephemeral signing key |
+| Tenant ID | Merkle root index | Internal topology map |
+| API key prefix (`ctx_`) | Hash collision pattern | Full key recovery |
+
+**Mitigations:**
+
+- **Holistic Sensitivity Scoring**: Privacy Shield evaluates facts in *context of existing stored data*, not in isolation. Each new fact is scored against the combinatorial surface of related facts.
+- **Cross-Field Correlation Analysis**: At ingress, the classifier queries semantically similar existing facts and computes a *composition risk score* — if two facts together exceed the sensitivity threshold, both are flagged.
+- **Conservative Redaction Policy**: Data is treated as secret if it *could* become sensitive when combined with future data. Irreversibility of exposure makes this the only safe default (Axiom Ω₃: Byzantine Default).
+- **Temporal Composition Awareness**: A fact stored today may be harmless, but a fact stored tomorrow could retroactively weaponize it. The shield re-evaluates composition risk during periodic REM compaction cycles.
+
 ---
 
 ## Secrets Management
@@ -135,6 +158,7 @@ CORTEX assumes:
 | Unauthorized access | API key auth + RBAC |
 | Cross-tenant leakage | Tenant-scoped queries at all layers |
 | Secret exposure | Privacy Shield ingress scanning |
+| **Composition leakage** | **Holistic cross-field correlation analysis** |
 | Code injection | AST sandbox for LLM-generated code |
 | DoS | Rate limiting + content size limits |
 | XSS/CSRF | Security headers middleware |

@@ -5,6 +5,7 @@ from typing import Any
 
 from cortex.browser.engine import BrowserEngine
 from cortex.llm.provider import LLMProvider
+from cortex.llm.router import IntentProfile
 
 LOG = logging.getLogger("cortex.browser")
 
@@ -111,7 +112,9 @@ What is your next action?
         try:
             # We use the CORTEX LLMProvider's complete method
             response_text = await self.llm.complete(
-                prompt=user_prompt, system=system_prompt, temperature=0.1, max_tokens=500
+                prompt=user_prompt, system=system_prompt,
+                temperature=0.1, max_tokens=500,
+                intent=IntentProfile.REASONING,
             )
 
             # The LLM should return a JSON string, let's parse it
