@@ -42,16 +42,16 @@ class SovereignBridge:
             logger.debug(f"Appended {parent} to sys.path")
 
     def discover_and_load(self) -> None:
-        """Scan SKILLS_ROOT for skill packages and import them."""
+        """Scan SKILLS_ROOT for skill packages and register them for lazy loading."""
         if not self.skills_root.exists():
             logger.warning(f"Sovereign Bridge: SKILLS_ROOT {self.skills_root} not found.")
             return
 
         for entry in self.skills_root.iterdir():
             if entry.is_dir() and (entry / "SKILL.md").exists():
-                self._load_skill(entry.name)
+                self.registry[entry.name] = None
 
-        logger.info(f"Sovereign Bridge: {len(self.registry)} skills registered.")
+        logger.info(f"Sovereign Bridge: {len(self.registry)} skills registered (lazy load).")
 
     def _load_skill(self, skill_name: str) -> None:
         """Import a specific skill as a Python module."""

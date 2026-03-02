@@ -182,6 +182,21 @@ class LLMProvider(BaseProvider):
             data = response.json()
             return data["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                logger.warning(
+                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...", self._model
+                )
+                payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
+                # Retry once with open code model
+                try:
+                    retry_resp = await self._client.post(url, headers=headers, json=payload)
+                    retry_resp.raise_for_status()
+                    data = retry_resp.json()
+                    return data["choices"][0]["message"]["content"]
+                except Exception as fallback_e:
+                    logger.error("LLM Fallback Failure: %s", fallback_e)
+                    raise e from fallback_e
+
             logger.error(
                 "LLM API Failure [%s %s]: %s",
                 e.response.status_code,
@@ -257,6 +272,21 @@ class LLMProvider(BaseProvider):
             data = response.json()
             return data["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                logger.warning(
+                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...", self._model
+                )
+                payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
+                # Retry once with open code model
+                try:
+                    retry_resp = await self._client.post(url, headers=headers, json=payload)
+                    retry_resp.raise_for_status()
+                    data = retry_resp.json()
+                    return data["choices"][0]["message"]["content"]
+                except Exception as fallback_e:
+                    logger.error("LLM Fallback Failure: %s", fallback_e)
+                    # continue to raise original error
+
             logger.error(
                 "LLM API Failure [%s %s]: %s",
                 e.response.status_code,
