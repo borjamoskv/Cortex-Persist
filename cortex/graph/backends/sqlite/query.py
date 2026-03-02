@@ -49,11 +49,11 @@ class SQLiteQueryMixin:
 
     async def _get_graph_relationships(self, entity_ids: list[int]) -> list[dict]:
         placeholders = ",".join(["?"] * len(entity_ids))
-        query_rels = """
-            SELECT id, source_entity_id, target_entity_id, relation_type, weight
-            FROM entity_relations
-            WHERE source_entity_id IN ({pts}) OR target_entity_id IN ({pts})
-        """.format(pts=placeholders)  # nosec B608 — parameterized query
+        query_rels = (
+            "SELECT id, source_entity_id, target_entity_id, relation_type, weight\n"
+            "FROM entity_relations\n"
+            "WHERE source_entity_id IN (" + placeholders + ") OR target_entity_id IN (" + placeholders + ")"
+        )
         params_rels = entity_ids + entity_ids
 
         rel_rows = await self._fetch_rows(query_rels, params_rels)
@@ -114,11 +114,9 @@ class SQLiteQueryMixin:
 
         placeholders = ",".join(["?"] * len(entity_ids))
         rel_rows = self.conn.execute(
-            """
-            SELECT id, source_entity_id, target_entity_id, relation_type, weight 
-            FROM entity_relations 
-            WHERE source_entity_id IN ({pts}) OR target_entity_id IN ({pts})
-            """.format(pts=placeholders),  # nosec B608 — parameterized query
+            "SELECT id, source_entity_id, target_entity_id, relation_type, weight\n"
+            "FROM entity_relations\n"
+            "WHERE source_entity_id IN (" + placeholders + ") OR target_entity_id IN (" + placeholders + ")",
             entity_ids + entity_ids,
         ).fetchall()
 

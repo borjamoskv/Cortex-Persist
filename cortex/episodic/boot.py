@@ -246,14 +246,14 @@ async def _get_reflections(
 
         conditions.append("valid_until IS NULL")
 
-        where = " AND ".join(conditions)
-        query = """
+        where_clause = " AND ".join(conditions)
+        query = f"""
             SELECT id, project, content, fact_type, created_at
             FROM facts
-            WHERE {where}
+            WHERE {where_clause}
             ORDER BY created_at DESC
             LIMIT ?
-        """.format(where=where)  # nosec B608 — parameterized query built from internal conditions
+        """
         params.append(top_k)
 
         async with conn.execute(query, params) as cursor:

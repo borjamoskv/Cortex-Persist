@@ -37,32 +37,47 @@ def _get_cipher_key() -> Optional[bytes]:
     raw = os.environ.get("CORTEX_MEMORY_KEY")
     if not raw:
         return None
+    # SHA-256 ensures a 32-byte key for AES-256
     return hashlib.sha256(raw.encode()).digest()
 
 
 def _encrypt(data: str) -> str:
-    """Encrypt data if key is available, else return plaintext."""
+    """Encrypt data using AES-256-GCM if key is available."""
     key = _get_cipher_key()
     if not key:
         return data
-    # Lightweight XOR-based obfuscation for file-at-rest protection.
-    # For production: swap with AES-256-GCM via cryptography lib.
-    key_bytes = key * (len(data) // len(key) + 1)
-    encrypted = bytes(a ^ b for a, b in zip(data.encode(), key_bytes[:len(data)]))
-    return encrypted.hex()
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    import base64
+
+    aesgcm = AESGCM(key)
+    nonce = os.urandom(12)  # Recommended nonce size for GCM
+    ciphertext = aesgcm.encrypt(nonce, data.encode(), None)
+
+    # Combine nonce + ciphertext and encode as base64
+    combined = nonce + ciphertext
+    return base64.b64encode(combined).decode("utf-8")
 
 
 def _decrypt(data: str) -> str:
-    """Decrypt data if key is available."""
+    """Decrypt AES-256-GCM data if key is available."""
     key = _get_cipher_key()
     if not key:
         return data
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    import base64
+
     try:
-        encrypted = bytes.fromhex(data)
-        key_bytes = key * (len(encrypted) // len(key) + 1)
-        return bytes(a ^ b for a, b in zip(encrypted, key_bytes[:len(encrypted)])).decode()
-    except (ValueError, UnicodeDecodeError):
-        return data  # Not encrypted, return as-is
+        aesgcm = AESGCM(key)
+        raw_bytes = base64.b64decode(data)
+        nonce = raw_bytes[:12]
+        ciphertext = raw_bytes[12:]
+        decrypted = aesgcm.decrypt(nonce, ciphertext, None)
+        return decrypted.decode("utf-8")
+    except Exception as e:
+        # In governance mode, we'd log this as a potential tampering attempt
+        return f"[[DECRYPTION_ERROR: {e}]]"
 
 
 # ── Initialization ─────────────────────────────────────────────
