@@ -10,6 +10,7 @@ This ensures the markdown doc is always in sync with the code.
 
 from __future__ import annotations
 
+import datetime
 from pathlib import Path
 
 from cortex.axioms.registry import (
@@ -22,35 +23,26 @@ from cortex.axioms.ttl import FACT_TTL, ttl_days
 
 
 def _header() -> str:
-    return """\
-# Axiom Registry — Canonical Source of Truth
-
-> *One numbering. One taxonomy. One source.*
-> **Auto-generated from `cortex/axioms/registry.py` — do not edit manually.**
-
-### Axiom Zero (α₀)
-
-> *"Every axiom without a CI gate is, at best, an aspiration; at worst, a hallucination with persistence."*
-
----
-
-## Taxonomy
-
-| Layer | IDs | Nature | Enforcement | Count |
-|:---|:---|:---|:---|:---:|
-| 🔴 **Constitutional** | AX-001 – AX-003 | Defines what the agent *is* | Identity — not CI-enforceable | {const} |
-| 🔵 **Operational** | AX-010 – AX-019 | Defines how the agent *operates* | CI gates, middleware, lint | {oper} |
-| 🟡 **Aspirational** | AX-020 – AX-028 | Guides decisions and culture | Convention, design review | {aspir} |
-
-**Precedence:** Constitutional > Operational > Aspirational.
-
-**Axiom Cap:** ≤ 25 — No new axioms until enforcement coverage exceeds 60%.
-
----
-""".format(
-        const=len(by_category(AxiomCategory.CONSTITUTIONAL)),
-        oper=len(by_category(AxiomCategory.OPERATIONAL)),
-        aspir=len(by_category(AxiomCategory.ASPIRATIONAL)),
+    const = len(by_category(AxiomCategory.CONSTITUTIONAL))
+    oper = len(by_category(AxiomCategory.OPERATIONAL))
+    aspir = len(by_category(AxiomCategory.ASPIRATIONAL))
+    return (
+        "# Axiom Registry — Canonical Source of Truth\n\n"
+        "> *One numbering. One taxonomy. One source.*\n"
+        "> **Auto-generated from `cortex/axioms/registry.py`"
+        " — do not edit manually.**\n\n"
+        "### Axiom Zero (α₀)\n\n"
+        "> *\"Every axiom without a CI gate is, at best, "
+        "an aspiration; at worst, a hallucination "
+        "with persistence.\"*\n\n---\n\n"
+        "## Taxonomy\n\n"
+        "| Layer | IDs | Nature | Count |\n"
+        "|:---|:---|:---|:---:|\n"
+        f"| 🔴 **Constitutional** | AX-001 – AX-003 | Identity | {const} |\n"
+        f"| 🔵 **Operational** | AX-010 – AX-019 | CI-Enforced | {oper} |\n"
+        f"| 🟡 **Aspirational** | AX-020 – AX-028 | Vision | {aspir} |\n\n"
+        "**Precedence:** Constitutional > Operational > Aspirational.\n\n"
+        "---\n\n"
     )
 
 
@@ -65,14 +57,24 @@ def _section(title: str, emoji: str, category: AxiomCategory) -> str:
         )
         for ax in axioms:
             gate = ax.ci_gate or "—"
-            lines.append(f"| **{ax.id}** | {ax.name} | {ax.mandate[:80]}{'…' if len(ax.mandate) > 80 else ''} | {gate} |\n")
+            mandate = ax.mandate[:80]
+            ellip = "…" if len(ax.mandate) > 80 else ""
+            lines.append(
+                f"| **{ax.id}** | {ax.name} "
+                f"| {mandate}{ellip} | {gate} |\n"
+            )
     else:
         lines.append(
             "| ID | Name | Mandate |\n"
             "|:---|:---|:---|\n"
         )
         for ax in axioms:
-            lines.append(f"| **{ax.id}** | {ax.name} | {ax.mandate[:100]}{'…' if len(ax.mandate) > 100 else ''} |\n")
+            mandate = ax.mandate[:100]
+            ellip = "…" if len(ax.mandate) > 100 else ""
+            lines.append(
+                f"| **{ax.id}** | {ax.name} "
+                f"| {mandate}{ellip} |\n"
+            )
 
     lines.append("\n---\n\n")
     return "".join(lines)
@@ -85,10 +87,11 @@ def _ttl_section() -> str:
         "| Fact Type | TTL | Days |\n",
         "|:---|:---|:---:|\n",
     ]
-    for fact_type, ttl in FACT_TTL.items():
+    for fact_type in FACT_TTL:
         days = ttl_days(fact_type)
         ttl_str = "∞ (immortal)" if days is None else f"{days} days"
-        lines.append(f"| `{fact_type}` | {ttl_str} | {'∞' if days is None else days} |\n")
+        d_col = "∞" if days is None else str(days)
+        lines.append(f"| `{fact_type}` | {ttl_str} | {d_col} |\n")
 
     lines.append("\n---\n\n")
     return "".join(lines)
@@ -98,20 +101,18 @@ def _metrics() -> str:
     total = len(AXIOM_REGISTRY)
     enf = len(enforced())
     pct = round(enf / total * 100) if total else 0
-    return f"""\
-## Metrics
-
-```
-Total Axioms           : {total}
-CI-Enforced            : {enf} ({pct}%)
-Axiom Cap              : 25
-Inflation Rate Target  : 0 (no new axioms without compaction)
-```
-
----
-
-*Auto-generated from `cortex/axioms/registry.py` — {__import__('datetime').date.today().isoformat()}*
-"""
+    today = datetime.date.today().isoformat()
+    return (
+        "## Metrics\n\n"
+        "```\n"
+        f"Total Axioms           : {total}\n"
+        f"CI-Enforced            : {enf} ({pct}%)\n"
+        "Axiom Cap              : 25\n"
+        "Inflation Rate Target  : 0\n"
+        "```\n\n---\n\n"
+        "*Auto-generated from `cortex/axioms/registry.py`"
+        f" — {today}*\n"
+    )
 
 
 def generate() -> str:
@@ -119,8 +120,14 @@ def generate() -> str:
     parts = [
         _header(),
         _section("Constitutional", "🔴", AxiomCategory.CONSTITUTIONAL),
-        _section("Operational — CI-Enforced", "🔵", AxiomCategory.OPERATIONAL),
-        _section("Aspirational — Vision", "🟡", AxiomCategory.ASPIRATIONAL),
+        _section(
+            "Operational — CI-Enforced", "🔵",
+            AxiomCategory.OPERATIONAL,
+        ),
+        _section(
+            "Aspirational — Vision", "🟡",
+            AxiomCategory.ASPIRATIONAL,
+        ),
         _ttl_section(),
         _metrics(),
     ]
@@ -132,7 +139,8 @@ def main() -> None:
     doc = generate()
     out = Path(__file__).resolve().parents[2] / "docs" / "axiom-registry.md"
     out.write_text(doc)
-    print(f"✅ Generated {out} ({len(doc)} bytes, {doc.count(chr(10))} lines)")
+    lines = doc.count(chr(10))
+    print(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
 
 
 if __name__ == "__main__":
