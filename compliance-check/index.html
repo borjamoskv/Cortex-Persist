@@ -952,7 +952,7 @@
       <span class="accent">Architecturally Compliant?</span>
     </h1>
     <p class="hero-sub">
-      Answer 7 questions in under 3 minutes. Get a sovereign compliance score and a personalized risk report for your AI memory stack.
+      5 questions. 3 minutes. One-to-one mapping to the <strong style="color:var(--lime)">EU AI Act Article 12</strong> — the law taking effect August 2026 with fines up to €30M. Know your exposure before the regulator does.
     </p>
     <div class="hero-stats">
       <div class="stat">
@@ -996,7 +996,7 @@
     <!-- Quiz Card -->
     <div class="quiz-card active" id="quiz-card">
       <div class="card-eyebrow">
-        <span class="dimension-tag" id="q-dimension">Persistence</span>
+        <span class="dimension-tag" id="q-dimension">Art. 12.1</span>
         <span class="dimension-number" id="q-number">01 / 08</span>
       </div>
       <div class="question-text" id="q-text">Loading...</div>
@@ -1066,9 +1066,9 @@
 
     <!-- Lead Capture -->
     <div class="lead-capture" id="lead-capture">
-      <div class="lead-title">Get Your Full Sovereign Report</div>
+      <div class="lead-title">If a regulator asked for your AI's decision log today, how long would it take?</div>
       <div class="lead-subtitle">
-        Receive a detailed architectural breakdown, remediation playbook, and early access to <strong style="color:var(--lime)">CORTEX Pro</strong> — the EU AI Act-compliant memory engine.
+        Most companies take weeks. With <strong style="color:var(--lime)">CORTEX</strong>, it takes 90 seconds. Enter your email to get your full sovereign report, gap analysis, and the playbook to reach EU AI Act compliance in 72 hours.
       </div>
       <div class="lead-perks">
         <div class="perk">
@@ -1077,18 +1077,18 @@
         </div>
         <div class="perk">
           <div class="perk-check">✓</div>
-          <span>30-min architecture review call with CORTEX team</span>
+          <span>The "72 Hours to Compliance" Engineering Playbook</span>
         </div>
         <div class="perk">
           <div class="perk-check">✓</div>
-          <span>60-day CORTEX Pro trial — SHA-256 ledger active from day 1</span>
+          <span>60-day CORTEX Enterprise trial — SHA-256 ledger active from day 1</span>
         </div>
       </div>
       <div id="form-area">
         <div class="form-row">
-          <input class="form-input" type="email" id="email-input" placeholder="your@company.com" />
+          <input class="form-input" type="email" id="email-input" placeholder="cto@company.com" />
           <button class="btn-cta" onclick="submitLead()">
-            Get Full Report →
+            Get the 72-Hour Playbook →
           </button>
         </div>
         <div class="privacy-note">
@@ -1097,7 +1097,7 @@
       </div>
       <div class="success-state" id="success-state">
         <div class="success-icon">✓</div>
-        <div class="success-title">Report on its way.</div>
+        <div class="success-title">The 72-Hour Playbook is on its way.</div>
         <div class="success-sub">Check your inbox in the next few minutes. Your Article 12 compliance PDF and remediation playbook will be there.</div>
       </div>
     </div>
@@ -1121,122 +1121,72 @@
 const QUESTIONS = [
   {
     id: 0,
-    dimension: "Automatic Logging",
+    dimension: "Art. 12.1 \u2014 Automatic Logging",
     euArticle: "Art. 12(1)",
-    icon: "📋",
-    text: "Does your AI system automatically log all decisions and outputs?",
-    hint: "EU AI Act Art. 12(1) mandates automatic logging for all high-risk AI systems. Manual logs are insufficient.",
-    cortexFeature: { name: "Transaction-based fact storage", endpoint: "POST /v1/facts", coverage: "Every AI decision auto-creates a cryptographically signed fact record." },
+    icon: "\ud83d\udccb",
+    text: "When your AI system takes an action or stores a decision \u2014 is it automatically logged?",
+    hint: "Art. 12(1) EU AI Act: \u2018High-risk AI systems shall technically allow for the automatic recording of events.\u2019 Every operation must create an immutable record. Manual logging does not satisfy this clause.",
     options: [
-      { label: "No logging — decisions are ephemeral", score: 0, hint: "ART. 12 VIOLATION" },
-      { label: "Manual logs only, triggered by engineers", score: 1, hint: "HIGH RISK" },
-      { label: "Auto-logs exist, but not structured or queryable", score: 2, hint: "PARTIAL" },
-      { label: "Automatic, structured, queryable decision logs", score: 3, hint: "COMPLIANT" }
+      { label: "No logging \u2014 actions happen with no record created", score: 0, hint: "DIRECT VIOLATION \u2014 Art. 12(1)" },
+      { label: "We log manually when we remember to", score: 1, hint: "NON-COMPLIANT \u2014 manual \u2260 automatic" },
+      { label: "Automatic logs exist but have gaps (not every event)", score: 2, hint: "PARTIAL \u2014 coverage gaps = liability windows" },
+      { label: "Every AI operation triggers an automatic, timestamped log entry", score: 3, hint: "ART. 12(1) COMPLIANT" }
     ]
   },
   {
     id: 1,
-    dimension: "Tamper-Proof Storage",
+    dimension: "Art. 12.2 \u2014 Log Content",
     euArticle: "Art. 12(2)",
-    icon: "🔒",
-    text: "Can your logged AI decisions be retroactively altered or deleted?",
-    hint: "Art. 12(2) requires tamper-evident storage. Any system where logs can be silently modified is non-compliant.",
-    cortexFeature: { name: "SHA-256 hash chain + Merkle checkpoints", endpoint: "GET /v1/ledger/verify", coverage: "Each fact links to the previous via cryptographic hash. Tampering produces hash mismatch detectable via cortex ledger verify." },
+    icon: "\ud83d\uddc2\ufe0f",
+    text: "What information is recorded when your AI system accesses or uses its stored knowledge?",
+    hint: "Art. 12(2) requires three fields: (1) timestamp of use, (2) reference to which database was queried, (3) what inputs led to a match. A log that just says \u2018query executed\u2019 fails this clause.",
     options: [
-      { label: "Yes — anyone with DB access can modify logs", score: 0, hint: "ART. 12 VIOLATION" },
-      { label: "Restricted access, but no cryptographic protection", score: 1, hint: "HIGH RISK" },
-      { label: "Hash-based integrity, but no chain — individual facts only", score: 2, hint: "PARTIAL" },
-      { label: "Cryptographic hash chain — modifications are detectable", score: 3, hint: "COMPLIANT" }
+      { label: "No structured log content \u2014 just raw text output", score: 0, hint: "DIRECT VIOLATION \u2014 Art. 12(2)" },
+      { label: "Timestamps only \u2014 no source reference or input data", score: 1, hint: "INSUFFICIENT \u2014 2 of 3 required fields missing" },
+      { label: "Timestamps + data source, but inputs are not recorded", score: 2, hint: "PARTIAL \u2014 Art. 12(2) input tracing gap" },
+      { label: "Full record: timestamp, source DB reference, input data, match ID", score: 3, hint: "ART. 12(2) COMPLIANT" }
     ]
   },
   {
     id: 2,
-    dimension: "Full Traceability",
-    euArticle: "Art. 12(3)",
-    icon: "🔍",
-    text: "Can you reconstruct the complete history of any AI decision, including its inputs?",
-    hint: "Art. 12(3) requires full provenance chains. You must be able to prove what data influenced a specific decision.",
-    cortexFeature: { name: "Provenance chains + temporal queries", endpoint: "GET /v1/recall", coverage: "Hybrid retrieval reconstructs full decision ancestry — semantic + structured + temporal ranking." },
+    dimension: "Art. 12.2d \u2014 Agent Traceability",
+    euArticle: "Art. 12(2)(d)",
+    icon: "\ud83e\udd16",
+    text: "If multiple AI agents contributed to a decision \u2014 can you identify which one did what?",
+    hint: "Art. 12(2)(d): Logs must identify \u2018persons who participated in the verification.\u2019 For multi-agent systems: each agent must be tagged and its contribution traceable in the audit record.",
     options: [
-      { label: "No — we cannot trace decisions back to inputs", score: 0, hint: "ART. 12 VIOLATION" },
-      { label: "Partially — some decisions have parent IDs, most don't", score: 1, hint: "HIGH RISK" },
-      { label: "Most decisions traceable, but gaps in older data", score: 2, hint: "PARTIAL" },
-      { label: "Complete provenance chains — every decision fully reconstructable", score: 3, hint: "COMPLIANT" }
+      { label: "Impossible \u2014 we have no agent identity system", score: 0, hint: "DIRECT VIOLATION \u2014 Art. 12(2)(d)" },
+      { label: "Agents are named but individual actions aren\u2019t linked", score: 1, hint: "NON-COMPLIANT \u2014 attribution without traceability" },
+      { label: "Agent IDs on logs, but no weighting or verification record", score: 2, hint: "PARTIAL \u2014 consensus evidence missing" },
+      { label: "Every agent tagged; votes, weights, and verdicts recorded per decision", score: 3, hint: "ART. 12(2)(d) COMPLIANT" }
     ]
   },
   {
     id: 3,
-    dimension: "Explainability",
-    euArticle: "Art. 13",
-    icon: "💬",
-    text: "Can your AI system explain why it made a specific decision — in human-readable form?",
-    hint: "Art. 13 mandates transparency. Black-box outputs with no rationale are non-compliant for high-risk systems.",
-    cortexFeature: { name: "Fact rationale + linked influences", endpoint: "GET /v1/facts/{id}", coverage: "Each fact stores rationale metadata and influence links. Decision metadata retrieval returns human-readable explanations." },
+    dimension: "Art. 12.3 \u2014 Tamper-Proof Storage",
+    euArticle: "Art. 12(3)",
+    icon: "\ud83d\udd12",
+    text: "Could someone \u2014 including a system admin \u2014 silently alter or delete your AI\u2019s logs?",
+    hint: "Art. 12(3): Logs must be \u2018tamper-evident\u2019 for the system\u2019s entire operational lifetime. If a database row can be UPDATE\u2019d without a trace, you fail this clause. Access policy is not tamper-evidence.",
     options: [
-      { label: "No — it's a black box with no explanation capability", score: 0, hint: "ART. 13 VIOLATION" },
-      { label: "Output only — no access to reasoning chain", score: 1, hint: "HIGH RISK" },
-      { label: "Logs capture inputs and outputs, but not the reasoning", score: 2, hint: "PARTIAL" },
-      { label: "Full rationale stored with each decision, queryable", score: 3, hint: "COMPLIANT" }
+      { label: "Yes \u2014 our DB allows direct updates and deletes with no trace", score: 0, hint: "DIRECT VIOLATION \u2014 Art. 12(3)" },
+      { label: "We have access controls but no cryptographic integrity proof", score: 1, hint: "NON-COMPLIANT \u2014 policy \u2260 tamper-evidence" },
+      { label: "Soft-deletes only, but no hash chain linking records", score: 2, hint: "PARTIAL \u2014 deletion prevented, mutation not" },
+      { label: "SHA-256 hash chain: each record includes prev_hash. Mutation = detectable break", score: 3, hint: "ART. 12(3) COMPLIANT" }
     ]
   },
   {
     id: 4,
-    dimension: "Trust Infrastructure",
-    euArticle: "Art. 9 (Risk Mgmt)",
-    icon: "🛡️",
-    text: "How does your system validate memory reliability before acting on stored decisions?",
-    hint: "Art. 9 requires risk management systems. Acting on stale or corrupted memory without validation is a liability.",
-    cortexFeature: { name: "WBFT consensus + reputation scoring", endpoint: "POST /v1/verify", coverage: "Byzantine fault-tolerant voting with reputation decay. Malicious agents cannot corrupt consensus without controlling majority reputation weight." },
-    options: [
-      { label: "None — all stored data is treated as equally valid", score: 0, hint: "ART. 9 VIOLATION" },
-      { label: "Recency decay only (old = less trusted)", score: 1, hint: "HIGH RISK" },
-      { label: "Source attribution, but no dynamic consensus scoring", score: 2, hint: "PARTIAL" },
-      { label: "Byzantine fault-tolerant scoring with confidence intervals", score: 3, hint: "COMPLIANT" }
-    ]
-  },
-  {
-    id: 5,
-    dimension: "Scale & Retention",
+    dimension: "Art. 12.4 \u2014 Periodic Verification",
     euArticle: "Art. 12(4)",
-    icon: "⚡",
-    text: "Does your logging infrastructure degrade as data volume grows?",
-    hint: "Art. 12(4) requires logging to remain complete throughout the system lifecycle, not just at launch scale.",
-    cortexFeature: { name: "SQLite-Vec (millions) → Qdrant (billions)", endpoint: "/metrics", coverage: "Sub-linear approximate search at scale. Configurable retention policies with legal hold override. 2-5x inference acceleration via ONNX Runtime." },
+    icon: "\ud83d\udd0d",
+    text: "How do you prove \u2014 on demand, to a regulator \u2014 that your AI logs haven\u2019t been corrupted?",
+    hint: "Art. 12(4): \u2018Providers shall implement means for periodic integrity verification.\u2019 Backups don\u2019t count. You need a cryptographic mechanism (e.g. Merkle checkpoints) that proves integrity efficiently.",
     options: [
-      { label: "Untested — we don't know what happens at 10x volume", score: 0, hint: "ART. 12 VIOLATION" },
-      { label: "It slows significantly — queries take seconds at scale", score: 1, hint: "HIGH RISK" },
-      { label: "It scales, but requires manual tuning at each threshold", score: 2, hint: "PARTIAL" },
-      { label: "Designed for sub-linear scaling with configurable retention", score: 3, hint: "COMPLIANT" }
-    ]
-  },
-  {
-    id: 6,
-    dimension: "Observability",
-    euArticle: "Art. 17 (QMS)",
-    icon: "📡",
-    text: "Do you have real-time visibility into your AI memory system's health and error rates?",
-    hint: "Art. 17 requires a Quality Management System. You cannot demonstrate compliance if you cannot measure it.",
-    cortexFeature: { name: "Prometheus metrics + K8s health probes", endpoint: "/metrics, /health, /ready", coverage: "p50/p95/p99 latency histograms, fact counts by type, consensus participation rates, verification success rates. Kubernetes liveness/readiness/startup probes." },
-    options: [
-      { label: "Zero visibility — it's a complete black box", score: 0, hint: "ART. 17 VIOLATION" },
-      { label: "Basic logs only — no structured metrics", score: 1, hint: "HIGH RISK" },
-      { label: "Metrics available, but no alerting or dashboards", score: 2, hint: "PARTIAL" },
-      { label: "Full telemetry: p99 histograms, alerting, audit trail", score: 3, hint: "COMPLIANT" }
-    ]
-  },
-  {
-    id: 7,
-    dimension: "Regulatory Scope",
-    euArticle: "Annex III",
-    icon: "⚖️",
-    text: "Is your AI system deployed in any of the EU AI Act high-risk categories?",
-    hint: "Annex III high-risk systems face the full weight of Art. 12 requirements. Penalties up to €30M or 6% global revenue.",
-    cortexFeature: { name: "Automated compliance reporting", endpoint: "GET /v1/status", coverage: "Single-command regulatory documentation generation. JSON/XML/PDF export for regulator integration. Pre-August 2026 deployment enables iterative refinement before enforcement." },
-    options: [
-      { label: "Yes — critical infrastructure, healthcare, credit, or HR", score: 0, hint: "MAXIMUM EXPOSURE" },
-      { label: "Yes — education, law enforcement, or biometric systems", score: 1, hint: "HIGH EXPOSURE" },
-      { label: "Adjacent — B2B tools used in high-risk contexts by clients", score: 2, hint: "MEDIUM EXPOSURE" },
-      { label: "Low-risk / general purpose — limited Annex III exposure", score: 3, hint: "LOWER EXPOSURE" }
+      { label: "We can\u2019t \u2014 no integrity verification mechanism exists", score: 0, hint: "DIRECT VIOLATION \u2014 Art. 12(4)" },
+      { label: "We do manual spot-checks occasionally", score: 1, hint: "NON-COMPLIANT \u2014 manual \u2260 periodic automated" },
+      { label: "Individual record checksums but no chain proof for full history", score: 2, hint: "PARTIAL \u2014 no checkpoint mechanism" },
+      { label: "Merkle tree checkpoints on schedule; results stored in integrity_checks table", score: 3, hint: "ART. 12(4) COMPLIANT" }
     ]
   }
 ];
@@ -1251,7 +1201,7 @@ const VERDICTS = [
 
 // STATE
 let currentQ = 0;
-const TOTAL_Q = 8;
+const TOTAL_Q = 5;
 let answers   = new Array(TOTAL_Q).fill(null);
 let started   = false;
 
@@ -1399,6 +1349,7 @@ function showResults() {
   const resultScreen = document.getElementById('result-screen');
   resultScreen.classList.add('visible');
 
+  const ART12_SHORT = ['12.1 Auto-Log','12.2 Content','12.2d Agent ID','12.3 Tamper-Proof','12.4 Verification'];
   const scores = QUESTIONS.map((q, i) => {
     const ansIdx = answers[i] ?? 0;
     return {
