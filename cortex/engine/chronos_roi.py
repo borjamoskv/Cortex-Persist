@@ -44,7 +44,7 @@ class ChronosROI:
             commit_count_cmd = ["git", "rev-list", "--count", "HEAD", "--since='24 hours ago'"]
             commit_count = int(subprocess.check_output(commit_count_cmd, cwd=project_path))
             return {"added": added, "deleted": deleted, "commits": commit_count}
-        except Exception:
+        except (subprocess.SubprocessError, OSError, ValueError):
             return {"added": 0, "deleted": 0, "commits": 0}
 
     def audit_project(self, project_path: str, tokens_used: int = 25000) -> dict[str, any]:  # type: ignore[reportGeneralTypeIssues]
@@ -70,8 +70,8 @@ class ChronosROI:
                 if f.endswith((".html", ".js", ".ts")):
                     issues = oracle.analyze_file(f)
                     frontend_violations += len(issues)
-        except Exception:
-            pass
+        except (ImportError, AttributeError, OSError):
+            pass  # FrontendOracle is optional — degraded mode is acceptable
 
         # Boost complexity based on git activity
         base_complexity = 6.5
