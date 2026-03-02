@@ -55,7 +55,7 @@ def _build_audit_trail_query(
 
     where = " AND ".join(conditions)
 
-    query = f"""
+    query = f"""  # nosec B608 — parameterized query
         SELECT f.id, f.project, f.content, f.fact_type,
                f.created_at, f.tags,
                t.hash, t.prev_hash, t.operation

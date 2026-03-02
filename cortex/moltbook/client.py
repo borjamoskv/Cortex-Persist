@@ -108,7 +108,7 @@ class MoltbookClient:
         req = Request(url, data=body, headers=headers, method=method)
 
         try:
-            with urlopen(req, timeout=_TIMEOUT) as resp:
+            with urlopen(req, timeout=_TIMEOUT) as resp:  # nosec B310
                 # Update rate limit tracking
                 remaining = resp.headers.get("X-RateLimit-Remaining")
                 if remaining is not None:
@@ -322,6 +322,6 @@ class MoltbookClient:
     def check_skill_version(self) -> str:
         """Check latest skill.md version."""
         from urllib.request import urlopen as _urlopen
-        with _urlopen("https://www.moltbook.com/skill.json", timeout=10) as resp:
+        with _urlopen("https://www.moltbook.com/skill.json", timeout=10) as resp:  # nosec B310
             data = json.loads(resp.read().decode())
             return data.get("version", "unknown")

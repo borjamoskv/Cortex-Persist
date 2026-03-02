@@ -32,7 +32,7 @@ build: ## Build distribution package
 	python -m build
 
 serve: ## Start CORTEX API server (development)
-	uvicorn cortex.api:app --reload --host 0.0.0.0 --port 8000
+	uvicorn cortex.api.core:app --reload --host 0.0.0.0 --port 8000
 
 docs: ## Build documentation
 	mkdocs build

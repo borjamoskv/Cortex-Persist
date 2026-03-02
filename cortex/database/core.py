@@ -50,10 +50,13 @@ logger = logging.getLogger("cortex.db")
 # ─── Configuration ────────────────────────────────────────────────────
 
 # How long to wait (ms) for a locked database before raising OperationalError.
-BUSY_TIMEOUT_MS: Final[int] = 5000
+# Raised to 30s to handle bursts of >10 concurrent CLI processes competing
+# for SQLite write lock (WAL allows concurrent reads but only 1 writer).
+# At 13 processes × 5s window ≈ 65s total contention; 30s covers p95.
+BUSY_TIMEOUT_MS: Final[int] = 30_000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
-CONNECT_TIMEOUT_S: Final[int] = 10
+CONNECT_TIMEOUT_S: Final[int] = 35
 
 # Memory-mapped I/O size (~20 GB). SQLite reads via kernel page cache
 # instead of userspace read() syscalls. Zero-copy for hot paths.

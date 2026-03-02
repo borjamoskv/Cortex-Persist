@@ -8,14 +8,14 @@ theme:
   name: material
   palette:
     - scheme: slate
-      primary: deep purple
-      accent: amber
+      primary: black
+      accent: lime
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
     - scheme: default
-      primary: deep purple
-      accent: amber
+      primary: black
+      accent: lime
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -55,6 +55,7 @@ nav:
   - Compliance & Security:
       - EU AI Act Compliance: compliance.md
       - Security: security.md
+      - Sovereign Infrastructure: sovereign-infrastructure.md
   - Tutorials:
       - Memory for LangChain Agents: tutorials/langchain.md
       - Multi-Agent Consensus: tutorials/consensus.md
@@ -64,6 +65,9 @@ nav:
       - FAQ: faq.md
       - Changelog: changelog.md
 
+extra_css:
+  - stylesheets/industrial_noir.css
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -71,7 +75,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: "!!python/name:pymdownx.superfences.fence_code_format"
   - pymdownx.tabbed:
       alternate_style: true
   - admonition

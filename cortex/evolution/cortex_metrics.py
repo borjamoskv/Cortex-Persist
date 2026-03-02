@@ -265,7 +265,7 @@ async def fetch_domain_metrics(
             # ── Open ghosts ──
             placeholders = ",".join("?" for _ in projects)
             async with conn.execute(
-                f"SELECT COUNT(*) FROM ghosts "
+                f"SELECT COUNT(*) FROM ghosts "  # nosec B608 — parameterized query
                 f"WHERE status = 'open' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -274,7 +274,7 @@ async def fetch_domain_metrics(
 
             # ── Last decision recency (phasic salience) ──
             async with conn.execute(
-                f"SELECT MAX(created_at) FROM facts "
+                f"SELECT MAX(created_at) FROM facts "  # nosec B608 — parameterized query
                 f"WHERE fact_type = 'decision' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -421,7 +421,7 @@ class CortexMetrics:
         ):
             try:
                 row = conn.execute(
-                    f"SELECT COUNT(*) AS c FROM facts WHERE fact_type = ? AND project IN ({ph})",
+                    f"SELECT COUNT(*) AS c FROM facts WHERE fact_type = ? AND project IN ({ph})",  # nosec B608 — parameterized query
                     (fact_type, *projects),
                 ).fetchone()
                 if row:
@@ -432,7 +432,7 @@ class CortexMetrics:
         # Ghosts
         try:
             row = conn.execute(
-                f"SELECT COUNT(*) AS c FROM ghosts WHERE status = 'open' AND project IN ({ph})",
+                f"SELECT COUNT(*) AS c FROM ghosts WHERE status = 'open' AND project IN ({ph})",  # nosec B608 — parameterized query
                 projects,
             ).fetchone()
             if row:

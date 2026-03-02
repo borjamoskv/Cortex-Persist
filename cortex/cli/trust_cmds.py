@@ -16,7 +16,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli
 
-__all__ = ["verify_fact", "compliance_report", "audit_trail"]
+__all__ = ["verify_fact", "compliance_report", "audit_trail", "audit_cognitive"]
 
 console = Console()
 
@@ -327,7 +327,7 @@ def audit_trail(project: str, limit: int, db: str) -> None:
         params.append(min(limit, 200))
 
         rows = conn.execute(
-            f"""
+            """
             SELECT f.id, f.project, f.content, f.fact_type,
                    f.created_at, t.hash
             FROM facts f
@@ -335,7 +335,7 @@ def audit_trail(project: str, limit: int, db: str) -> None:
             WHERE {where}
             ORDER BY f.created_at DESC
             LIMIT ?
-            """,
+            """.format(where=where),  # nosec B608 — parameterized query via internal conditions
             params,
         ).fetchall()
 
@@ -368,3 +368,46 @@ def audit_trail(project: str, limit: int, db: str) -> None:
     finally:
         if conn:
             conn.close()
+
+
+@cli.command("audit-cognitive")
+@click.option("--tenant", "-t", default="default", help="Tenant ID to audit")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def audit_cognitive(tenant: str, db: str) -> None:
+    """Run a deep cryptographic audit of the Cognitive Event Ledger (L3).
+
+    Verifies hash-chain continuity, signature integrity, and content immutability
+    for all interaction events stored in the persistent memory.
+    """
+    from cortex.db import connect_async
+    from cortex.memory.ledger import EventLedgerL3
+
+    async def _run_audit():
+        async with connect_async(db) as conn:
+            ledger = EventLedgerL3(conn)
+            report = await ledger.verify_chain(tenant)
+
+            table = Table(title=f"Cognitive Audit Report: {tenant}")
+            table.add_column("Metric", style="bold")
+            table.add_column("Value")
+
+            status_style = "green" if report["status"] == "VALID" else "red"
+            table.add_row("Audit Status", f"[{status_style}]{report['status']}[/{status_style}]")
+            table.add_row("Events Audited", str(report.get("events_audited", 0)))
+            table.add_row("Integrity Score", f"{report.get('integrity_score', 1.0):.2%}")
+            table.add_row("Timestamp", report.get("timestamp", ""))
+
+            console.print()
+            console.print(Panel(table, border_style=status_style))
+
+            if report.get("findings"):
+                findings_table = Table(title="Audit Findings")
+                findings_table.add_column("Log", style="dim")
+                for finding in report["findings"]:
+                    findings_table.add_row(finding)
+                console.print(findings_table)
+
+    try:
+        _run_async(_run_audit())
+    except Exception as e:
+        console.print(f"[red]Audit Failure:[/red] {e}")

@@ -88,6 +88,7 @@ class SovereignVectorStoreL2:
                     is_bridge INTEGER,
                     confidence TEXT,
                     success_rate REAL,
+                    cognitive_layer TEXT,
                     metadata TEXT
                 )
             """)
@@ -119,8 +120,9 @@ class SovereignVectorStoreL2:
                 """
                 INSERT INTO facts_meta (
                     id, tenant_id, project_id, content, timestamp,
-                    is_diamond, is_bridge, confidence, success_rate, metadata
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    is_diamond, is_bridge, confidence, success_rate, 
+                    cognitive_layer, metadata
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     fact.id,
@@ -132,6 +134,7 @@ class SovereignVectorStoreL2:
                     int(fact.is_bridge),
                     fact.confidence,
                     fact.success_rate,
+                    fact.cognitive_layer,
                     json.dumps(fact.metadata),
                 ),
             )
@@ -148,6 +151,7 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -157,22 +161,29 @@ class SovereignVectorStoreL2:
 
         # Vector search + Reranking in SQL
         cursor = conn.cursor()
-        cursor.execute(
-            """
+        
+        sql = """
             SELECT
                 m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata,
+                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, 
+                m.cognitive_layer, m.metadata,
                 ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
                  cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                  m.success_rate) as final_score
             FROM facts_meta m
             JOIN vec_facts v ON m.rowid = v.rowid
             WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            ORDER BY final_score DESC
-            LIMIT ?
-            """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit),
-        )
+        """
+        params = [embedding_bytes, now, self._half_life, tenant_id, project_id]
+        
+        if layer:
+            sql += " AND m.cognitive_layer = ?"
+            params.append(layer)
+            
+        sql += " ORDER BY final_score DESC LIMIT ?"
+        params.append(limit)
+        
+        cursor.execute(sql, tuple(params))
 
         rows = cursor.fetchall()
         final_facts = []
@@ -200,7 +211,7 @@ class SovereignVectorStoreL2:
                 is_diamond=bool(row["is_diamond"]),
                 is_bridge=bool(row["is_bridge"]),
                 confidence=row["confidence"],
-                success_rate=row["success_rate"],
+                cognitive_layer=row["cognitive_layer"] or "semantic",
                 metadata=json.loads(row["metadata"]) if row["metadata"] else {},
             )
             object.__setattr__(fact, "_recall_score", score)

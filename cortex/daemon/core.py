@@ -43,6 +43,7 @@ from cortex.daemon.monitors import (
     NeuralIntentMonitor,
     PerceptionMonitor,
     SecurityMonitor,
+    SignalMonitor,
     SiteMonitor,
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
@@ -133,6 +134,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
             threshold=file_config.get("security_threshold", 0.85),
         )
+        self.signal_monitor = SignalMonitor(
+            db_path=file_config.get("db_path", str(CORTEX_DB)),
+            engine=self._shared_engine,
+        )
+
 
         try:
             from cortex.daemon.sidecar.telemetry import ASTOracle
@@ -227,9 +233,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             status, "perception_alerts", self.perception_monitor, self._alert_perception
         )
         self._run_monitor(status, "security_alerts", self.security_monitor, self._alert_security)
+        self._run_monitor(status, "signal_alerts", self.signal_monitor, self._alert_signals)
         self._run_monitor(
             status,
             "cloud_sync_alerts",
+
             self.cloud_sync_monitor,
             self._alert_cloud_sync,
         )
@@ -290,6 +298,18 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if self._should_alert(key):
                 self._terminal_notify("Compaction completed", a.message)
                 self._last_alerts[key] = time.monotonic()
+
+
+    def _alert_signals(self, alerts: list) -> None:
+        """Handler for SignalAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            msg = f"L2 Reflex: {a.event_type} - {a.message}"
+            logger.info("📡 Signal Reactor: %s", msg)
+            if self._should_alert(f"signal:{a.event_type}:{a.project or 'global'}"):
+                self._terminal_notify("CORTEX Reactive Shift", msg)
+
 
     def _alert_cloud_sync(self, alerts: list) -> None:
         """Handler for CloudSyncAlert."""
