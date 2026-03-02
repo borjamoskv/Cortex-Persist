@@ -118,16 +118,25 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
-    """Phase 3 — Legion-1 swarm execution."""
+    """Phase 3 — Legion-Omega swarm execution."""
     t0 = time.time()
     try:
-        await asyncio.to_thread(ctx.bridge.execute, "legion-1")
+        from cortex.engine.legion import LEGION_OMEGA
+        intent = "Evaluate system immunity and forge defensive core"
+        result = await LEGION_OMEGA.forge(intent, context={"ctx": ctx})
+        
         return PipelineResult(
             phase=Phase.SWARM,
-            success=True,
+            success=result.success,
             duration_ms=(time.time() - t0) * 1000,
+            details={
+                "cycles": result.cycles,
+                "immunity": "REACHED" if result.success else "BREACHED",
+                "vulnerabilities": result.vulnerabilities
+            }
         )
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError) as e:
+        logger.error("Swarm phase (Legion-Omega) failed: %s", e)
         return PipelineResult(
             phase=Phase.SWARM,
             success=False,

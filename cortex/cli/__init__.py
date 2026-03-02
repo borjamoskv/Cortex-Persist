@@ -8,7 +8,7 @@ import click
 from rich.console import Console
 from rich.theme import Theme
 
-from cortex import __version__
+from cortex import __version__  # noqa: F401
 
 # Registrar submódulos
 # ─── Registrar todos los sub-módulos ───────────────────────────────────
@@ -77,7 +77,7 @@ from cortex.cli.time_cmds import heartbeat_cmd, time_cmd  # noqa: E402
 from cortex.cli.timeline_cmds import timeline  # noqa: E402
 from cortex.cli.tips_cmds import tips  # noqa: E402
 from cortex.cli.trust_cmds import (  # noqa: E402
-    audit_trail,
+    audit,
     compliance_report,
     verify_fact,
 )
@@ -110,7 +110,7 @@ cli.add_command(writeback)
 cli.add_command(obsidian)
 cli.add_command(verify_fact, name="verify")
 cli.add_command(compliance_report, name="compliance")
-cli.add_command(audit_trail, name="audit")
+cli.add_command(audit)
 from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa: E402
 from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
@@ -164,6 +164,12 @@ from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
 
 cli.add_command(signal_cli, name="signal")
 cli.add_command(browser_cli, name="browser")
+
+from cortex.cli.lineage_cmds import lineage_group as lineage_cli
+from cortex.cli.lineage_cmds import audit_file as audit_file_cmd
+
+cli.add_command(lineage_cli, name="lineage")
+cli.add_command(audit_file_cmd, name="audit-file")
 
 from cortex.cli.triangulation_cmds import triangulate as triangulate_cmd
 

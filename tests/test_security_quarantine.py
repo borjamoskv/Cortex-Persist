@@ -19,7 +19,6 @@ import pytest_asyncio
 from cortex.database.schema import ALL_SCHEMA
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 
-
 # ═══════════════════════════════════════════════════════════════════
 # Fixtures
 # ═══════════════════════════════════════════════════════════════════

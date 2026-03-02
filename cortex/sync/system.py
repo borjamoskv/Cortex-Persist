@@ -55,7 +55,7 @@ async def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> N
         result.errors.append(f"Error leyendo system.json: {e}")
         return
 
-    existing = await get_existing_contents(engine, "__system__")
+    existing = get_existing_contents(engine, "__system__")
 
     # knowledge_global
     await _sync_fact_list(

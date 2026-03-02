@@ -19,7 +19,9 @@ from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
+from cortex.engine.nemesis import NemesisProtocol
 from cortex.memory.temporal import now_iso
+from cortex.engine.causality import CausalOracle, link_causality
 
 __all__ = ["StoreMixin"]
 
@@ -175,6 +177,22 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         meta = self._apply_privacy_shield(content, project, meta)
         meta = run_security_guards(content, project, source, meta)
+
+        # ── Causal Linking (Ω₁) ───────────────────────────────────
+        # Automatically detect the 'why' behind this store
+        _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
+        if _db_path and not (meta and meta.get("causal_parent")):
+            parent_sig = CausalOracle.find_parent_signal(str(_db_path), project)
+            meta = link_causality(meta, parent_sig)
+
+        # ── Nemesis Immunological Guard ───────────────────────────
+        rejection_reason = NemesisProtocol.analyze(
+            content, db_path=str(_db_path) if _db_path else None
+        )
+        if rejection_reason:
+            logger.warning("NEMESIS REJECTION: %s", rejection_reason)
+            # Ω₅: The error is the fuel. Raise now to trigger immediate reflex.
+            raise ValueError(rejection_reason)
 
         # ── Bridge Validation Guard ───────────────────────────────
         if fact_type == "bridge":

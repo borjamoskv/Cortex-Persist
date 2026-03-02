@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-import sys
-import os
 import asyncio
+import os
+import sys
 from typing import Final
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 try:
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.markdown import Markdown
-    from rich.prompt import Prompt
-    from cortex.llm.provider import LLMProvider
     from dotenv import load_dotenv
+    from rich.console import Console
+    from rich.markdown import Markdown
+    from rich.panel import Panel
+    from rich.prompt import Prompt
+
+    from cortex.llm.provider import LLMProvider
     load_dotenv()
 except ImportError as e:
     print(f"Error de inicialización: {e}")
@@ -94,7 +94,7 @@ def read_input() -> str:
         if not os.path.isfile(file_path):
             console.print(f"[bold red]✗ Archivo no encontrado:[/bold red] {file_path}")
             sys.exit(1)
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read().strip()
     else:
         console.print(Panel(

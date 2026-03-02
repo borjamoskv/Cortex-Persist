@@ -11,9 +11,9 @@ Operation:
 """
 
 import os
+import subprocess
 import sys
 import time
-import subprocess
 from pathlib import Path
 
 try:
@@ -48,7 +48,7 @@ def get_python_files(directory: Path):
 def scan_file_entropy(filepath: Path) -> dict:
     """Escanea un único archivo y devuelve métricas de entropía."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             code = f.read()
             
         # 1. Complexity
@@ -67,7 +67,7 @@ def scan_file_entropy(filepath: Path) -> dict:
             'max_cc': max_cc,
             'mi': mi_score
         }
-    except Exception as e:
+    except Exception:
         # Silently ignore parsing errors
         return None
 

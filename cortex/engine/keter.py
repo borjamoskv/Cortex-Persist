@@ -70,8 +70,20 @@ class LegionSwarm(SovereignPhase):
     """
 
     async def execute(self, payload: dict[str, Any]) -> dict[str, Any]:
-        logger.info("🐝 [KETER] Desplegando Enjambre HYDRA (Legion-1)...")
-        payload["legion_audit"] = "PASS (Byzantine Consensus reached)"
+        from cortex.engine.legion import LEGION_OMEGA
+        intent = payload.get("intent", "Refactor")
+        logger.info("🐝 [KETER] Desplegando Enjambre HYDRA (Legion-Omega)...")
+
+        # Invoke the Immortal Siege (Ω₆)
+        result = await LEGION_OMEGA.forge(intent, context=payload)
+
+        payload["legion_audit"] = "PASS (Immunity Reached)" if result.success else "FAIL (Fragile Code)"
+        payload["final_code"] = result.final_code
+        payload["vulnerabilities"] = result.vulnerabilities
+
+        if not result.success:
+            logger.warning("⚠️ [KETER] Legion-Omega detected unresolved vulnerabilities: %s", result.vulnerabilities)
+
         return payload
 
 

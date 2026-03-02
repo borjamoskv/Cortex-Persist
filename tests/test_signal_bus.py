@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from datetime import datetime, timedelta
 
 import pytest
 
 from cortex.signals.bus import SignalBus
-from cortex.signals.models import Signal
 
 
 @pytest.fixture
@@ -218,6 +216,7 @@ class TestCLI:
 
     def test_cli_emit_and_history(self, tmp_path):
         from click.testing import CliRunner
+
         from cortex.cli.signal_cmds import signal_cmds
 
         db = str(tmp_path / "cli_test.db")
@@ -253,8 +252,8 @@ class TestFactHook:
 
     def test_emit_fact_stored_creates_signal(self, tmp_path):
         """emit_fact_stored persists a fact:stored signal."""
-        from cortex.signals.fact_hook import emit_fact_stored
         from cortex.signals.bus import SignalBus
+        from cortex.signals.fact_hook import emit_fact_stored
 
         db = str(tmp_path / "hook_test.db")
         emit_fact_stored(
@@ -299,8 +298,9 @@ class TestFactHook:
         """compact:needed is emitted when unconsumed fact:stored >= threshold."""
         import os
         import sqlite3
-        from cortex.signals.fact_hook import emit_fact_stored
+
         from cortex.signals.bus import SignalBus
+        from cortex.signals.fact_hook import emit_fact_stored
 
         db = str(tmp_path / "threshold_test.db")
         threshold = 3
@@ -330,8 +330,9 @@ class TestFactHook:
         """compact:needed is NOT emitted when below the threshold."""
         import os
         import sqlite3
-        from cortex.signals.fact_hook import emit_fact_stored
+
         from cortex.signals.bus import SignalBus
+        from cortex.signals.fact_hook import emit_fact_stored
 
         db = str(tmp_path / "below_threshold.db")
         threshold = 10

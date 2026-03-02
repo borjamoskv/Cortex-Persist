@@ -32,8 +32,10 @@ class ROIMetrics:
     facts_with_chronos: int
     total_ai_time_secs: float
     total_human_time_secs: float
-    projects: int
-    top_projects: list[tuple[str, float, float]]  # (name, human_h, ai_h)
+    autonomous_actions: int = 0
+    human_interruptions: int = 0
+    projects: int = 0
+    top_projects: list[tuple[str, float, float]] = []  # (name, human_h, ai_h)
 
     @property
     def roi_ratio(self) -> float:
@@ -42,8 +44,34 @@ class ROIMetrics:
         return self.total_human_time_secs / self.total_ai_time_secs
 
     @property
+    def apotheosis_index(self) -> float:
+        """Calculate the Apotheosis Index (AIx).
+        AIx = (Auton / (Auton + Human)) * ROI_Base
+        """
+        total_ops = self.autonomous_actions + self.human_interruptions
+        if total_ops == 0:
+            # If no ops tracked, assume L2 (Assistance) fallback ratio if ROI exists
+            return 0.1 * self.roi_ratio if self.roi_ratio > 0 else 0.0
+
+        autonomy_ratio = self.autonomous_actions / total_ops
+        return autonomy_ratio * self.roi_ratio
+
+    @property
     def hours_saved(self) -> float:
         return (self.total_human_time_secs - self.total_ai_time_secs) / 3600
+
+    def format_aix(self) -> str:
+        """Format AIx with Level classification."""
+        idx = self.apotheosis_index
+        if idx >= 1_000_000:
+            return f"{idx:,.0f} 🔥 L5 APOTHEOSIS"
+        if idx >= 1_000:
+            return f"{idx:,.0f} ⚡ L4 SOBERANO"
+        if idx >= 100:
+            return f"{idx:,.0f} 🟢 L3 COLABORADOR"
+        if idx >= 10:
+            return f"{idx:,.1f} 🟡 L2 ASISTENTE"
+        return f"{idx:,.1f} 🔴 L1 HERRAMIENTA"
 
     def format_roi(self) -> str:
         """Format as CHRONOS-1 ROI string."""
@@ -92,6 +120,8 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
 
     total_ai = 0.0
     total_human = 0.0
+    total_auton = 0
+    total_interruptions = 0
     chronos_count = 0
     by_project: dict[str, dict[str, float]] = {}
 
@@ -102,6 +132,8 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
 
         ai_secs = chronos.get("ai_time_secs", 0)
         human_secs = chronos.get("human_time_secs", 0)
+        auton = chronos.get("autonomous_actions", 0)
+        interruptions = chronos.get("human_interruptions", 0)
 
         if ai_secs <= 0 or human_secs <= 0:
             continue
@@ -109,6 +141,8 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
         chronos_count += 1
         total_ai += ai_secs
         total_human += human_secs
+        total_auton += auton
+        total_interruptions += interruptions
 
         proj_data = by_project.setdefault(project, {"ai": 0.0, "human": 0.0})
         proj_data["ai"] += ai_secs
@@ -130,6 +164,8 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
         facts_with_chronos=chronos_count,
         total_ai_time_secs=total_ai,
         total_human_time_secs=total_human,
+        autonomous_actions=total_auton,
+        human_interruptions=total_interruptions,
         projects=len(stats.get("projects", [])),
         top_projects=top,
     )
@@ -175,11 +211,16 @@ def _render_status_table(m: ROIMetrics) -> None:
             "🟢 Positive" if m.hours_saved > 0 else "🔴 Negative",
         )
         table.add_row("ROI Ratio", m.format_roi(), "SOVEREIGN")
+        table.add_row("Apotheosis Index", m.format_aix(),
+                      "🔥 LEVEL 5" if m.apotheosis_index >= 1_000_000 else "Métrica")
     else:
         # Estimate based on fact count (systemic leverage)
         estimated_human_h = m.total_facts * 0.5
         estimated_ai_h = m.total_facts * 0.01
         estimated_roi = estimated_human_h / estimated_ai_h if estimated_ai_h > 0 else 0
+        
+        # Estimated AIx assumes 90% autonomy (baseline Sovereignty attempt)
+        estimated_aix = 0.9 * estimated_roi
 
         table.add_row(
             "Estimated Human Time",
@@ -190,6 +231,11 @@ def _render_status_table(m: ROIMetrics) -> None:
             "Estimated MOSKV Time",
             f"{estimated_ai_h:,.1f} hours",
             "Projected (36s/fact)",
+        )
+        table.add_row(
+            "Projected AIx",
+            f"{estimated_aix:,.0f} (est.)",
+            "L4 SOVEREIGN" if estimated_aix >= 1_000 else "ESTIMATED",
         )
         table.add_row(
             "Projected ROI",
@@ -279,21 +325,25 @@ def generate_roi_markdown(m: ROIMetrics) -> str:
     if m.facts_with_chronos > 0:
         lines.extend(
             [
+                f"- **Apotheosis Index:** {m.format_aix()}",
                 f"- **ROI Ratio:** {m.format_roi()}",
                 f"- **Human Time Estimated:** {m.total_human_time_secs / 3600:,.1f}h",
                 f"- **MOSKV Time Actual:** {m.total_ai_time_secs / 3600:,.1f}h",
                 f"- **Hours Saved:** {m.hours_saved:,.1f}h",
-                f"- **Facts with CHRONOS:** {m.facts_with_chronos:,}",
+                f"- **Autonomous Actions:** {m.autonomous_actions:,}",
+                f"- **Human Interruptions:** {m.human_interruptions:,}",
             ]
         )
     else:
         estimated_roi = m.total_facts * 50  # 50x per fact (conservative)
+        estimated_aix = 0.9 * estimated_roi
         lines.extend(
             [
+                f"- **Projected AIx:** {estimated_aix:,.0f} (estimated)",
                 f"- **Projected ROI:** {estimated_roi:,}/1 (estimated)",
                 f"- **Active Facts:** {m.total_facts:,}",
                 f"- **Projects:** {m.projects:,}",
-                "- **Note:** Store facts with `--ai-time` for measured ROI.",
+                "- **Note:** Store facts with `--auton` and `--ai-time` for measured AIx.",
             ]
         )
 

@@ -289,56 +289,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 self._failure_counts.pop(monitor_name, None)
 
     #   _alert_sites, _alert_ghosts, _alert_memory, _alert_certs,
-    #   _alert_engine, _alert_disk, _alert_mejoralo, _alert_entropy,
-    #   _dispatch_warm_repair, _alert_perception, _alert_neural, _alert_compaction
-
-    def _alert_compaction(self, alerts: list) -> None:
-        """Handler para CompactionAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            key = f"compaction:{a.project}"
-            if self._should_alert(key):
-                self._terminal_notify("Compaction completed", a.message)
-                self._last_alerts[key] = time.monotonic()
-
-    def _alert_signals(self, alerts: list) -> None:
-        """Handler for SignalAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            msg = f"L2 Reflex: {a.event_type} - {a.message}"
-            logger.info("📡 Signal Reactor: %s", msg)
-            if self._should_alert(f"signal:{a.event_type}:{a.project or 'global'}"):
-                self._terminal_notify("CORTEX Reactive Shift", msg)
-
-    def _alert_tombstone(self, alerts: list) -> None:
-        """Handler for TombstoneAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            logger.info("💀 Tombstone Sweep: %s", a.message)
-            if self._should_alert("tombstone:sweep"):
-                self._terminal_notify("Garbage Collection", a.message)
-
-    def _alert_cloud_sync(self, alerts: list) -> None:
-        """Handler for CloudSyncAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            logger.debug(a.message)
-            logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
-
-    def _flush_timer(self) -> None:
-        """Flush accumulated time tracker heartbeats."""
-        if not self.tracker:
-            return
-        try:
-            entries = self.tracker.flush()
-            if entries > 0:
-                logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
-        except sqlite3.Error as e:
-            logger.error("TimeTracker flush error: %s", e)
 
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
@@ -346,20 +296,24 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             return
         try:
             from cortex.sync import export_snapshot, export_to_json, sync_memory
+            import asyncio
 
-            sync_result = sync_memory(self._shared_engine)
+            async def _run_sync():
+                s_res = await sync_memory(self._shared_engine)
+                w_res = await export_to_json(self._shared_engine)
+                await export_snapshot(self._shared_engine)
+                return s_res, w_res
+
+            sync_result, wb_result = asyncio.run(_run_sync())
+
             if sync_result.had_changes:
                 logger.info("Sync automático: %d hechos sincronizados", sync_result.total)
-            wb_result = export_to_json(self._shared_engine)
             if wb_result.had_changes:
                 logger.info(
                     "Write-back automático: %d archivos, %d items",
                     wb_result.files_written,
                     wb_result.items_exported,
                 )
-            import asyncio
-
-            asyncio.run(export_snapshot(self._shared_engine))
 
         except (sqlite3.Error, OSError, ValueError) as e:
             status.errors.append(f"Memory sync error: {e}")

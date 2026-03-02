@@ -14,7 +14,7 @@ Coverage:
 from __future__ import annotations
 
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -24,7 +24,6 @@ from cortex.moltbook.preflight import (
     require_clear_preflight,
     session_preflight,
 )
-
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 

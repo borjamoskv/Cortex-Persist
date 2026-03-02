@@ -43,6 +43,7 @@ nav:
   - Reference:
       - Architecture: architecture.md
       - Operating Axioms: operating-axioms.md
+      - Knowledge Architecture: knowledge-architecture.md
       - Peano Soberano (7 Axioms): peano-soberano.md
       - API Classes: reference.md
       - CLI Reference: cli.md

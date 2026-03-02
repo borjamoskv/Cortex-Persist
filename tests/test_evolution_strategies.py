@@ -33,7 +33,6 @@ from cortex.evolution.strategies import (
     StagnationBreakerStrategy,
 )
 
-
 # ── Fixtures ──────────────────────────────────────────────────
 
 

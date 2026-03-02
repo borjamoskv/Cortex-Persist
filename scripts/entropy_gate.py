@@ -5,9 +5,8 @@ Bloquea commits de archivos Python si su Complejidad Ciclomática (CC) supera
 el estándar Soberano (15).
 """
 
-import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 try:
@@ -41,7 +40,7 @@ def get_staged_python_files():
 def analyze_file(filepath: Path) -> bool:
     """Evalúa la entropía del archivo y devuelve False si no supera el corte."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             code = f.read()
             
         blocks = cc_visit(code)
@@ -56,12 +55,12 @@ def analyze_file(filepath: Path) -> bool:
             print(f"\n🛑 [ENTROPY GATE] {filepath.name} tiene demasiada estática.")
             print(f"   ► Elemento: '{worst_block.name}' en línea {worst_block.lineno}")
             print(f"   ► Complejidad: {max_cc} (Límite: {CC_THRESHOLD})")
-            print(f"   ► Escolta: Necesitas romper esa lógica. Extrae helpers y usa Guard Clauses.")
+            print("   ► Escolta: Necesitas romper esa lógica. Extrae helpers y usa Guard Clauses.")
             print(f"   💊 Auto-Healing disponible: `cortex heal {filepath.name}`")
             return False
             
         return True
-    except Exception as e:
+    except Exception:
         # Silenciar errores por parseo (eso lo cogerá pydantic/syntax errors luego)
         return True
 
