@@ -15,8 +15,8 @@ try:
 except ImportError:
     # Fallback: stdlib (acceptable only for trusted internal SAP environments)
     # Install defusedxml: pip install defusedxml
-    from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405
     import warnings
+    from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405
 
     warnings.warn(
         "defusedxml not installed. SAP metadata parsing may be vulnerable to XXE.",
