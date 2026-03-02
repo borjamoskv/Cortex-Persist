@@ -49,7 +49,7 @@ class SQLiteQueryMixin:
 
     async def _get_graph_relationships(self, entity_ids: list[int]) -> list[dict]:
         placeholders = ",".join(["?"] * len(entity_ids))
-        query_rels = f"""
+        query_rels = f"""  # nosec B608 — parameterized query
             SELECT id, source_entity_id, target_entity_id, relation_type, weight
             FROM entity_relations
             WHERE source_entity_id IN ({placeholders}) OR target_entity_id IN ({placeholders})
@@ -114,7 +114,7 @@ class SQLiteQueryMixin:
 
         placeholders = ",".join(["?"] * len(entity_ids))
         rel_rows = self.conn.execute(
-            f"SELECT id, source_entity_id, target_entity_id, relation_type, weight "
+            f"SELECT id, source_entity_id, target_entity_id, relation_type, weight "  # nosec B608 — parameterized query
             f"FROM entity_relations WHERE source_entity_id IN ({placeholders}) OR target_entity_id IN ({placeholders})",
             entity_ids + entity_ids,
         ).fetchall()

@@ -69,7 +69,9 @@ class IntentType(Enum):
     # CORTEX Core
     DECISION_STORED = auto()
     GHOST_DETECTED = auto()
+    GHOST_WATCH_TRIGGER = auto()
     BRIDGE_FORMED = auto()
+    HEARTBEAT_PULSE = auto()
     # SAP Audit
     ANOMALY_DETECTED = auto()
     AUDIT_COMPLETED = auto()
@@ -78,9 +80,9 @@ class IntentType(Enum):
 class Priority(Enum):
     """Mutation priority. Lower value = higher urgency."""
     CRITICAL = 0   # Shadowbans, anomalies
-    HIGH = 1       # Emails from known contacts, post results
+    HIGH = 1       # Emails, critical ghosts, triggers
     NORMAL = 2     # Standard operations
-    LOW = 3        # Archival, background tasks
+    LOW = 3        # Archival, heartbeat pulses, background tasks
 
 
 # ─── Intent → Priority mapping (O(1) lookup) ───────────────────────────
@@ -90,13 +92,15 @@ _INTENT_PRIORITY: dict[IntentType, Priority] = {
     IntentType.ANOMALY_DETECTED: Priority.CRITICAL,
     IntentType.EMAIL_INTERCEPTED: Priority.HIGH,
     IntentType.POST_PUBLISHED: Priority.HIGH,
+    IntentType.GHOST_DETECTED: Priority.HIGH,
+    IntentType.GHOST_WATCH_TRIGGER: Priority.HIGH,
     IntentType.KARMA_LAUNDERED: Priority.NORMAL,
     IntentType.ENGAGEMENT_SPIKE: Priority.NORMAL,
     IntentType.EMAIL_REPLIED: Priority.NORMAL,
     IntentType.SENDER_CLASSIFIED: Priority.NORMAL,
     IntentType.DECISION_STORED: Priority.NORMAL,
-    IntentType.GHOST_DETECTED: Priority.HIGH,
     IntentType.BRIDGE_FORMED: Priority.NORMAL,
+    IntentType.HEARTBEAT_PULSE: Priority.LOW,
     IntentType.AUDIT_COMPLETED: Priority.LOW,
     IntentType.EMAIL_ARCHIVED: Priority.LOW,
 }
@@ -122,7 +126,8 @@ class WorldMutation:
     @property
     def idempotency_key(self) -> str:
         """SHA-256 hash of the mutation's semantic content for dedup."""
-        raw = f"{self.origin.name}:{self.intent.name}:{self.project}:{json.dumps(self.payload, sort_keys=True, default=str)}"
+        payload_repr = json.dumps(self.payload, sort_keys=True, default=str)
+        raw = f"{self.origin.name}:{self.intent.name}:{self.project}:{payload_repr}"
         return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
     def __lt__(self, other: WorldMutation) -> bool:
@@ -236,12 +241,12 @@ class _NexusDB:
         if since:
             clauses.append("timestamp >= ?")
             params.append(since)
-
+  # nosec B608 — parameterized query
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         params.append(limit)
 
         rows = conn.execute(
-            f"SELECT * FROM nexus_mutations {where} ORDER BY priority ASC, timestamp DESC LIMIT ?",
+            f"SELECT * FROM nexus_mutations {where} ORDER BY priority ASC, timestamp DESC LIMIT ?",  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
             params,
         ).fetchall()
         conn.close()

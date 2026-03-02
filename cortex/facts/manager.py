@@ -211,14 +211,14 @@ class FactManager:
         if as_of:
             clause, params = build_temporal_filter_params(as_of, table_alias="f")
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
                 f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
                 "ORDER BY f.valid_from DESC"
             )
             cursor = await conn.execute(query, [tenant_id, project] + params)
         else:
             query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
                 f"WHERE f.tenant_id = ? AND f.project = ? "
                 "ORDER BY f.valid_from DESC"
             )

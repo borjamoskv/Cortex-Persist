@@ -426,6 +426,29 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         if commit:
             await conn.commit()
 
+        # ── L1 Signal Bus: emit fact:stored ───────────────────────────────
+        # Fire-and-forget: opens its own sync connection to the signals
+        # table. Never raises — the hook catches all exceptions internally.
+        # This is the neural seed of L2 reactivity.
+        try:
+            from cortex.signals.fact_hook import emit_fact_stored
+
+            _db_path = getattr(self, "db_path", None) or getattr(
+                self, "_db_path", None
+            )
+            if _db_path:
+                emit_fact_stored(
+                    db_path=str(_db_path),
+                    fact_id=fact_id,
+                    project=project,
+                    fact_type=fact_type,
+                    source=source or "engine:store",
+                    tenant_id=tenant_id,
+                )
+        except Exception:  # noqa: BLE001 — hook must never break store
+            pass
+        # ─────────────────────────────────────────────────────────────────
+
         return fact_id
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:

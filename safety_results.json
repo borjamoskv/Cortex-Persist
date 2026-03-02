@@ -1,0 +1,4414 @@
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+
+{
+    "report_meta": {
+        "scan_target": "environment",
+        "scanned": [
+            "/Users/borjafernandezangulo/cortex",
+            "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages"
+        ],
+        "scanned_full_path": [
+            "/Users/borjafernandezangulo/cortex",
+            "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages"
+        ],
+        "target_languages": [
+            "python"
+        ],
+        "policy_file": null,
+        "policy_file_source": "local",
+        "audit_and_monitor": false,
+        "api_key": false,
+        "account": "",
+        "local_database_path": null,
+        "safety_version": "3.7.0",
+        "timestamp": "2026-03-02 13:39:40",
+        "packages_found": 289,
+        "vulnerabilities_found": 0,
+        "vulnerabilities_ignored": 0,
+        "remediations_recommended": 0,
+        "telemetry": {
+            "safety_options": {
+                "json": {
+                    "--json": 1
+                }
+            },
+            "safety_version": "3.7.0",
+            "safety_source": "cli",
+            "os_type": "Darwin",
+            "os_release": "25.2.0",
+            "os_description": "macOS-26.2-arm64-arm-64bit-Mach-O",
+            "python_version": "3.14.3",
+            "safety_command": "check"
+        },
+        "git": {
+            "branch": "feat/three-domains-deploy",
+            "tag": "",
+            "commit": "b6c304ee97d33a4df8ad934700b250052a3bea59",
+            "dirty": "True",
+            "origin": "git@github.com:borjamoskv/Cortex-Persist.git"
+        },
+        "project": null,
+        "json_version": "1.1",
+        "remediations_attempted": 0,
+        "remediations_completed": 0,
+        "remediation_mode": "NON_INTERACTIVE"
+    },
+    "scanned_packages": {
+        "cortex-memory": {
+            "name": "cortex-memory",
+            "version": "0.3.0b1",
+            "requirements": [
+                {
+                    "raw": "cortex-memory==0.3.0b1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cortex-memory",
+                    "specifier": "==0.3.0b1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cortex_memory-0.3.0b1.dist-info"
+                }
+            ]
+        },
+        "anyio": {
+            "name": "anyio",
+            "version": "4.12.1",
+            "requirements": [
+                {
+                    "raw": "anyio==4.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "anyio",
+                    "specifier": "==4.12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/anyio-4.12.1.dist-info"
+                }
+            ]
+        },
+        "shellingham": {
+            "name": "shellingham",
+            "version": "1.5.4",
+            "requirements": [
+                {
+                    "raw": "shellingham==1.5.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "shellingham",
+                    "specifier": "==1.5.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/shellingham-1.5.4.dist-info"
+                }
+            ]
+        },
+        "mkdocs": {
+            "name": "mkdocs",
+            "version": "1.6.1",
+            "requirements": [
+                {
+                    "raw": "mkdocs==1.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocs",
+                    "specifier": "==1.6.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocs-1.6.1.dist-info"
+                }
+            ]
+        },
+        "mergedeep": {
+            "name": "mergedeep",
+            "version": "1.3.4",
+            "requirements": [
+                {
+                    "raw": "mergedeep==1.3.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mergedeep",
+                    "specifier": "==1.3.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mergedeep-1.3.4.dist-info"
+                }
+            ]
+        },
+        "mkdocstrings": {
+            "name": "mkdocstrings",
+            "version": "1.0.3",
+            "requirements": [
+                {
+                    "raw": "mkdocstrings==1.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocstrings",
+                    "specifier": "==1.0.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocstrings-1.0.3.dist-info"
+                }
+            ]
+        },
+        "audioread": {
+            "name": "audioread",
+            "version": "3.1.0",
+            "requirements": [
+                {
+                    "raw": "audioread==3.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "audioread",
+                    "specifier": "==3.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/audioread-3.1.0.dist-info"
+                }
+            ]
+        },
+        "threadpoolctl": {
+            "name": "threadpoolctl",
+            "version": "3.6.0",
+            "requirements": [
+                {
+                    "raw": "threadpoolctl==3.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "threadpoolctl",
+                    "specifier": "==3.6.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/threadpoolctl-3.6.0.dist-info"
+                }
+            ]
+        },
+        "MouseInfo": {
+            "name": "MouseInfo",
+            "version": "0.1.3",
+            "requirements": [
+                {
+                    "raw": "MouseInfo==0.1.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "MouseInfo",
+                    "specifier": "==0.1.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mouseinfo-0.1.3.dist-info"
+                }
+            ]
+        },
+        "ruamel.yaml": {
+            "name": "ruamel.yaml",
+            "version": "0.19.1",
+            "requirements": [
+                {
+                    "raw": "ruamel.yaml==0.19.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ruamel.yaml",
+                    "specifier": "==0.19.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/ruamel_yaml-0.19.1.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-exporter-otlp-proto-common": {
+            "name": "opentelemetry-exporter-otlp-proto-common",
+            "version": "1.38.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-otlp-proto-common==1.38.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-otlp-proto-common",
+                    "specifier": "==1.38.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_exporter_otlp_proto_common-1.38.0.dist-info"
+                }
+            ]
+        },
+        "docstring_parser": {
+            "name": "docstring_parser",
+            "version": "0.17.0",
+            "requirements": [
+                {
+                    "raw": "docstring_parser==0.17.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "docstring_parser",
+                    "specifier": "==0.17.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/docstring_parser-0.17.0.dist-info"
+                }
+            ]
+        },
+        "pyobjc-framework-Cocoa": {
+            "name": "pyobjc-framework-Cocoa",
+            "version": "12.1",
+            "requirements": [
+                {
+                    "raw": "pyobjc-framework-Cocoa==12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyobjc-framework-Cocoa",
+                    "specifier": "==12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyobjc_framework_cocoa-12.1.dist-info"
+                }
+            ]
+        },
+        "more-itertools": {
+            "name": "more-itertools",
+            "version": "10.8.0",
+            "requirements": [
+                {
+                    "raw": "more-itertools==10.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "more-itertools",
+                    "specifier": "==10.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/more_itertools-10.8.0.dist-info"
+                }
+            ]
+        },
+        "pexpect": {
+            "name": "pexpect",
+            "version": "4.9.0",
+            "requirements": [
+                {
+                    "raw": "pexpect==4.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pexpect",
+                    "specifier": "==4.9.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pexpect-4.9.0.dist-info"
+                }
+            ]
+        },
+        "oauthlib": {
+            "name": "oauthlib",
+            "version": "3.3.1",
+            "requirements": [
+                {
+                    "raw": "oauthlib==3.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "oauthlib",
+                    "specifier": "==3.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/oauthlib-3.3.1.dist-info"
+                }
+            ]
+        },
+        "regex": {
+            "name": "regex",
+            "version": "2026.2.19",
+            "requirements": [
+                {
+                    "raw": "regex==2026.2.19",
+                    "extras": [],
+                    "marker": null,
+                    "name": "regex",
+                    "specifier": "==2026.2.19",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/regex-2026.2.19.dist-info"
+                }
+            ]
+        },
+        "lazy_loader": {
+            "name": "lazy_loader",
+            "version": "0.4",
+            "requirements": [
+                {
+                    "raw": "lazy_loader==0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "lazy_loader",
+                    "specifier": "==0.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/lazy_loader-0.4.dist-info"
+                }
+            ]
+        },
+        "PyScreeze": {
+            "name": "PyScreeze",
+            "version": "1.0.1",
+            "requirements": [
+                {
+                    "raw": "PyScreeze==1.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyScreeze",
+                    "specifier": "==1.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyscreeze-1.0.1.dist-info"
+                }
+            ]
+        },
+        "cloudpickle": {
+            "name": "cloudpickle",
+            "version": "3.1.2",
+            "requirements": [
+                {
+                    "raw": "cloudpickle==3.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cloudpickle",
+                    "specifier": "==3.1.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cloudpickle-3.1.2.dist-info"
+                }
+            ]
+        },
+        "requests": {
+            "name": "requests",
+            "version": "2.32.5",
+            "requirements": [
+                {
+                    "raw": "requests==2.32.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "requests",
+                    "specifier": "==2.32.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/requests-2.32.5.dist-info"
+                }
+            ]
+        },
+        "standard-sunau": {
+            "name": "standard-sunau",
+            "version": "3.13.0",
+            "requirements": [
+                {
+                    "raw": "standard-sunau==3.13.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "standard-sunau",
+                    "specifier": "==3.13.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/standard_sunau-3.13.0.dist-info"
+                }
+            ]
+        },
+        "weasyprint": {
+            "name": "weasyprint",
+            "version": "68.1",
+            "requirements": [
+                {
+                    "raw": "weasyprint==68.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "weasyprint",
+                    "specifier": "==68.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/weasyprint-68.1.dist-info"
+                }
+            ]
+        },
+        "aiohttp": {
+            "name": "aiohttp",
+            "version": "3.13.3",
+            "requirements": [
+                {
+                    "raw": "aiohttp==3.13.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiohttp",
+                    "specifier": "==3.13.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/aiohttp-3.13.3.dist-info"
+                }
+            ]
+        },
+        "multidict": {
+            "name": "multidict",
+            "version": "6.7.1",
+            "requirements": [
+                {
+                    "raw": "multidict==6.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "multidict",
+                    "specifier": "==6.7.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/multidict-6.7.1.dist-info"
+                }
+            ]
+        },
+        "pyphen": {
+            "name": "pyphen",
+            "version": "0.17.2",
+            "requirements": [
+                {
+                    "raw": "pyphen==0.17.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyphen",
+                    "specifier": "==0.17.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyphen-0.17.2.dist-info"
+                }
+            ]
+        },
+        "pydub": {
+            "name": "pydub",
+            "version": "0.25.1",
+            "requirements": [
+                {
+                    "raw": "pydub==0.25.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydub",
+                    "specifier": "==0.25.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pydub-0.25.1.dist-info"
+                }
+            ]
+        },
+        "jaraco.classes": {
+            "name": "jaraco.classes",
+            "version": "3.4.0",
+            "requirements": [
+                {
+                    "raw": "jaraco.classes==3.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.classes",
+                    "specifier": "==3.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jaraco.classes-3.4.0.dist-info"
+                }
+            ]
+        },
+        "lz4": {
+            "name": "lz4",
+            "version": "4.4.5",
+            "requirements": [
+                {
+                    "raw": "lz4==4.4.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "lz4",
+                    "specifier": "==4.4.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/lz4-4.4.5.dist-info"
+                }
+            ]
+        },
+        "click": {
+            "name": "click",
+            "version": "8.3.1",
+            "requirements": [
+                {
+                    "raw": "click==8.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "click",
+                    "specifier": "==8.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/click-8.3.1.dist-info"
+                }
+            ]
+        },
+        "dparse": {
+            "name": "dparse",
+            "version": "0.6.4",
+            "requirements": [
+                {
+                    "raw": "dparse==0.6.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "dparse",
+                    "specifier": "==0.6.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/dparse-0.6.4.dist-info"
+                }
+            ]
+        },
+        "ptyprocess": {
+            "name": "ptyprocess",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "ptyprocess==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ptyprocess",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/ptyprocess-0.7.0.dist-info"
+                }
+            ]
+        },
+        "uvicorn": {
+            "name": "uvicorn",
+            "version": "0.41.0",
+            "requirements": [
+                {
+                    "raw": "uvicorn==0.41.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "uvicorn",
+                    "specifier": "==0.41.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/uvicorn-0.41.0.dist-info"
+                }
+            ]
+        },
+        "mkdocs-get-deps": {
+            "name": "mkdocs-get-deps",
+            "version": "0.2.0",
+            "requirements": [
+                {
+                    "raw": "mkdocs-get-deps==0.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocs-get-deps",
+                    "specifier": "==0.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocs_get_deps-0.2.0.dist-info"
+                }
+            ]
+        },
+        "zopfli": {
+            "name": "zopfli",
+            "version": "0.4.1",
+            "requirements": [
+                {
+                    "raw": "zopfli==0.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "zopfli",
+                    "specifier": "==0.4.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/zopfli-0.4.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-storage": {
+            "name": "google-cloud-storage",
+            "version": "3.9.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-storage==3.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-storage",
+                    "specifier": "==3.9.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_storage-3.9.0.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-exporter-gcp-trace": {
+            "name": "opentelemetry-exporter-gcp-trace",
+            "version": "1.11.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-gcp-trace==1.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-gcp-trace",
+                    "specifier": "==1.11.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_exporter_gcp_trace-1.11.0.dist-info"
+                }
+            ]
+        },
+        "iniconfig": {
+            "name": "iniconfig",
+            "version": "2.3.0",
+            "requirements": [
+                {
+                    "raw": "iniconfig==2.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "iniconfig",
+                    "specifier": "==2.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/iniconfig-2.3.0.dist-info"
+                }
+            ]
+        },
+        "pytz": {
+            "name": "pytz",
+            "version": "2025.2",
+            "requirements": [
+                {
+                    "raw": "pytz==2025.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytz",
+                    "specifier": "==2025.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytz-2025.2.dist-info"
+                }
+            ]
+        },
+        "mkdocs-autorefs": {
+            "name": "mkdocs-autorefs",
+            "version": "1.4.4",
+            "requirements": [
+                {
+                    "raw": "mkdocs-autorefs==1.4.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocs-autorefs",
+                    "specifier": "==1.4.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocs_autorefs-1.4.4.dist-info"
+                }
+            ]
+        },
+        "mkdocs-material-extensions": {
+            "name": "mkdocs-material-extensions",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "mkdocs-material-extensions==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocs-material-extensions",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocs_material_extensions-1.3.1.dist-info"
+                }
+            ]
+        },
+        "platformdirs": {
+            "name": "platformdirs",
+            "version": "4.9.2",
+            "requirements": [
+                {
+                    "raw": "platformdirs==4.9.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "platformdirs",
+                    "specifier": "==4.9.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/platformdirs-4.9.2.dist-info"
+                }
+            ]
+        },
+        "certifi": {
+            "name": "certifi",
+            "version": "2026.1.4",
+            "requirements": [
+                {
+                    "raw": "certifi==2026.1.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "certifi",
+                    "specifier": "==2026.1.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/certifi-2026.1.4.dist-info"
+                }
+            ]
+        },
+        "sse-starlette": {
+            "name": "sse-starlette",
+            "version": "3.2.0",
+            "requirements": [
+                {
+                    "raw": "sse-starlette==3.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sse-starlette",
+                    "specifier": "==3.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sse_starlette-3.2.0.dist-info"
+                }
+            ]
+        },
+        "browser-cookie3": {
+            "name": "browser-cookie3",
+            "version": "0.20.1",
+            "requirements": [
+                {
+                    "raw": "browser-cookie3==0.20.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "browser-cookie3",
+                    "specifier": "==0.20.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/browser_cookie3-0.20.1.dist-info"
+                }
+            ]
+        },
+        "webencodings": {
+            "name": "webencodings",
+            "version": "0.5.1",
+            "requirements": [
+                {
+                    "raw": "webencodings==0.5.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "webencodings",
+                    "specifier": "==0.5.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/webencodings-0.5.1.dist-info"
+                }
+            ]
+        },
+        "colorama": {
+            "name": "colorama",
+            "version": "0.4.6",
+            "requirements": [
+                {
+                    "raw": "colorama==0.4.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "colorama",
+                    "specifier": "==0.4.6",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/colorama-0.4.6.dist-info"
+                }
+            ]
+        },
+        "soxr": {
+            "name": "soxr",
+            "version": "1.0.0",
+            "requirements": [
+                {
+                    "raw": "soxr==1.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "soxr",
+                    "specifier": "==1.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/soxr-1.0.0.dist-info"
+                }
+            ]
+        },
+        "safety": {
+            "name": "safety",
+            "version": "3.7.0",
+            "requirements": [
+                {
+                    "raw": "safety==3.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety",
+                    "specifier": "==3.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/safety-3.7.0.dist-info"
+                }
+            ]
+        },
+        "standard-chunk": {
+            "name": "standard-chunk",
+            "version": "3.13.0",
+            "requirements": [
+                {
+                    "raw": "standard-chunk==3.13.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "standard-chunk",
+                    "specifier": "==3.13.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/standard_chunk-3.13.0.dist-info"
+                }
+            ]
+        },
+        "jsonschema-specifications": {
+            "name": "jsonschema-specifications",
+            "version": "2025.9.1",
+            "requirements": [
+                {
+                    "raw": "jsonschema-specifications==2025.9.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema-specifications",
+                    "specifier": "==2025.9.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jsonschema_specifications-2025.9.1.dist-info"
+                }
+            ]
+        },
+        "APScheduler": {
+            "name": "APScheduler",
+            "version": "3.11.2",
+            "requirements": [
+                {
+                    "raw": "APScheduler==3.11.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "APScheduler",
+                    "specifier": "==3.11.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/apscheduler-3.11.2.dist-info"
+                }
+            ]
+        },
+        "python-multipart": {
+            "name": "python-multipart",
+            "version": "0.0.22",
+            "requirements": [
+                {
+                    "raw": "python-multipart==0.0.22",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-multipart",
+                    "specifier": "==0.0.22",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/python_multipart-0.0.22.dist-info"
+                }
+            ]
+        },
+        "httplib2": {
+            "name": "httplib2",
+            "version": "0.31.2",
+            "requirements": [
+                {
+                    "raw": "httplib2==0.31.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httplib2",
+                    "specifier": "==0.31.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/httplib2-0.31.2.dist-info"
+                }
+            ]
+        },
+        "pydantic": {
+            "name": "pydantic",
+            "version": "2.12.5",
+            "requirements": [
+                {
+                    "raw": "pydantic==2.12.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic",
+                    "specifier": "==2.12.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pydantic-2.12.5.dist-info"
+                }
+            ]
+        },
+        "ImageIO": {
+            "name": "ImageIO",
+            "version": "2.37.2",
+            "requirements": [
+                {
+                    "raw": "ImageIO==2.37.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ImageIO",
+                    "specifier": "==2.37.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/imageio-2.37.2.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-exporter-gcp-monitoring": {
+            "name": "opentelemetry-exporter-gcp-monitoring",
+            "version": "1.11.0a0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-gcp-monitoring==1.11.0a0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-gcp-monitoring",
+                    "specifier": "==1.11.0a0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_exporter_gcp_monitoring-1.11.0a0.dist-info"
+                }
+            ]
+        },
+        "paginate": {
+            "name": "paginate",
+            "version": "0.5.7",
+            "requirements": [
+                {
+                    "raw": "paginate==0.5.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "paginate",
+                    "specifier": "==0.5.7",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/paginate-0.5.7.dist-info"
+                }
+            ]
+        },
+        "pytesseract": {
+            "name": "pytesseract",
+            "version": "0.3.13",
+            "requirements": [
+                {
+                    "raw": "pytesseract==0.3.13",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytesseract",
+                    "specifier": "==0.3.13",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytesseract-0.3.13.dist-info"
+                }
+            ]
+        },
+        "google-genai": {
+            "name": "google-genai",
+            "version": "1.64.0",
+            "requirements": [
+                {
+                    "raw": "google-genai==1.64.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-genai",
+                    "specifier": "==1.64.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_genai-1.64.0.dist-info"
+                }
+            ]
+        },
+        "propcache": {
+            "name": "propcache",
+            "version": "0.4.1",
+            "requirements": [
+                {
+                    "raw": "propcache==0.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "propcache",
+                    "specifier": "==0.4.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/propcache-0.4.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-core": {
+            "name": "google-cloud-core",
+            "version": "2.5.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-core==2.5.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-core",
+                    "specifier": "==2.5.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_core-2.5.0.dist-info"
+                }
+            ]
+        },
+        "networkx": {
+            "name": "networkx",
+            "version": "3.6.1",
+            "requirements": [
+                {
+                    "raw": "networkx==3.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "networkx",
+                    "specifier": "==3.6.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/networkx-3.6.1.dist-info"
+                }
+            ]
+        },
+        "protobuf": {
+            "name": "protobuf",
+            "version": "6.33.5",
+            "requirements": [
+                {
+                    "raw": "protobuf==6.33.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "protobuf",
+                    "specifier": "==6.33.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/protobuf-6.33.5.dist-info"
+                }
+            ]
+        },
+        "python-dotenv": {
+            "name": "python-dotenv",
+            "version": "1.2.1",
+            "requirements": [
+                {
+                    "raw": "python-dotenv==1.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-dotenv",
+                    "specifier": "==1.2.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/python_dotenv-1.2.1.dist-info"
+                }
+            ]
+        },
+        "qdrant-client": {
+            "name": "qdrant-client",
+            "version": "1.17.0",
+            "requirements": [
+                {
+                    "raw": "qdrant-client==1.17.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "qdrant-client",
+                    "specifier": "==1.17.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/qdrant_client-1.17.0.dist-info"
+                }
+            ]
+        },
+        "jsonschema": {
+            "name": "jsonschema",
+            "version": "4.26.0",
+            "requirements": [
+                {
+                    "raw": "jsonschema==4.26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema",
+                    "specifier": "==4.26.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jsonschema-4.26.0.dist-info"
+                }
+            ]
+        },
+        "contourpy": {
+            "name": "contourpy",
+            "version": "1.3.3",
+            "requirements": [
+                {
+                    "raw": "contourpy==1.3.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "contourpy",
+                    "specifier": "==1.3.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/contourpy-1.3.3.dist-info"
+                }
+            ]
+        },
+        "alembic": {
+            "name": "alembic",
+            "version": "1.18.4",
+            "requirements": [
+                {
+                    "raw": "alembic==1.18.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "alembic",
+                    "specifier": "==1.18.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/alembic-1.18.4.dist-info"
+                }
+            ]
+        },
+        "tomlkit": {
+            "name": "tomlkit",
+            "version": "0.14.0",
+            "requirements": [
+                {
+                    "raw": "tomlkit==0.14.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tomlkit",
+                    "specifier": "==0.14.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tomlkit-0.14.0.dist-info"
+                }
+            ]
+        },
+        "babel": {
+            "name": "babel",
+            "version": "2.18.0",
+            "requirements": [
+                {
+                    "raw": "babel==2.18.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "babel",
+                    "specifier": "==2.18.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/babel-2.18.0.dist-info"
+                }
+            ]
+        },
+        "google-auth-oauthlib": {
+            "name": "google-auth-oauthlib",
+            "version": "1.2.4",
+            "requirements": [
+                {
+                    "raw": "google-auth-oauthlib==1.2.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-auth-oauthlib",
+                    "specifier": "==1.2.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_auth_oauthlib-1.2.4.dist-info"
+                }
+            ]
+        },
+        "aiosqlite": {
+            "name": "aiosqlite",
+            "version": "0.22.1",
+            "requirements": [
+                {
+                    "raw": "aiosqlite==0.22.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiosqlite",
+                    "specifier": "==0.22.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/aiosqlite-0.22.1.dist-info"
+                }
+            ]
+        },
+        "safety-schemas": {
+            "name": "safety-schemas",
+            "version": "0.0.16",
+            "requirements": [
+                {
+                    "raw": "safety-schemas==0.0.16",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety-schemas",
+                    "specifier": "==0.0.16",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/safety_schemas-0.0.16.dist-info"
+                }
+            ]
+        },
+        "asyncpg": {
+            "name": "asyncpg",
+            "version": "0.31.0",
+            "requirements": [
+                {
+                    "raw": "asyncpg==0.31.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "asyncpg",
+                    "specifier": "==0.31.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/asyncpg-0.31.0.dist-info"
+                }
+            ]
+        },
+        "fsspec": {
+            "name": "fsspec",
+            "version": "2026.2.0",
+            "requirements": [
+                {
+                    "raw": "fsspec==2026.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fsspec",
+                    "specifier": "==2026.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/fsspec-2026.2.0.dist-info"
+                }
+            ]
+        },
+        "noisereduce": {
+            "name": "noisereduce",
+            "version": "3.0.3",
+            "requirements": [
+                {
+                    "raw": "noisereduce==3.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "noisereduce",
+                    "specifier": "==3.0.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/noisereduce-3.0.3.dist-info"
+                }
+            ]
+        },
+        "marshmallow": {
+            "name": "marshmallow",
+            "version": "4.2.2",
+            "requirements": [
+                {
+                    "raw": "marshmallow==4.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "marshmallow",
+                    "specifier": "==4.2.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/marshmallow-4.2.2.dist-info"
+                }
+            ]
+        },
+        "proto-plus": {
+            "name": "proto-plus",
+            "version": "1.27.1",
+            "requirements": [
+                {
+                    "raw": "proto-plus==1.27.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "proto-plus",
+                    "specifier": "==1.27.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/proto_plus-1.27.1.dist-info"
+                }
+            ]
+        },
+        "griffelib": {
+            "name": "griffelib",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "griffelib==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "griffelib",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/griffelib-2.0.0.dist-info"
+                }
+            ]
+        },
+        "pytest-xdist": {
+            "name": "pytest-xdist",
+            "version": "3.8.0",
+            "requirements": [
+                {
+                    "raw": "pytest-xdist==3.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-xdist",
+                    "specifier": "==3.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytest_xdist-3.8.0.dist-info"
+                }
+            ]
+        },
+        "idna": {
+            "name": "idna",
+            "version": "3.11",
+            "requirements": [
+                {
+                    "raw": "idna==3.11",
+                    "extras": [],
+                    "marker": null,
+                    "name": "idna",
+                    "specifier": "==3.11",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/idna-3.11.dist-info"
+                }
+            ]
+        },
+        "ghp-import": {
+            "name": "ghp-import",
+            "version": "2.1.0",
+            "requirements": [
+                {
+                    "raw": "ghp-import==2.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ghp-import",
+                    "specifier": "==2.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/ghp_import-2.1.0.dist-info"
+                }
+            ]
+        },
+        "sqlalchemy-spanner": {
+            "name": "sqlalchemy-spanner",
+            "version": "1.17.2",
+            "requirements": [
+                {
+                    "raw": "sqlalchemy-spanner==1.17.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sqlalchemy-spanner",
+                    "specifier": "==1.17.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sqlalchemy_spanner-1.17.2.dist-info"
+                }
+            ]
+        },
+        "typer": {
+            "name": "typer",
+            "version": "0.24.1",
+            "requirements": [
+                {
+                    "raw": "typer==0.24.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typer",
+                    "specifier": "==0.24.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/typer-0.24.1.dist-info"
+                }
+            ]
+        },
+        "cffi": {
+            "name": "cffi",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "cffi==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cffi",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cffi-2.0.0.dist-info"
+                }
+            ]
+        },
+        "fastapi": {
+            "name": "fastapi",
+            "version": "0.131.0",
+            "requirements": [
+                {
+                    "raw": "fastapi==0.131.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fastapi",
+                    "specifier": "==0.131.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/fastapi-0.131.0.dist-info"
+                }
+            ]
+        },
+        "pyobjc-framework-CoreText": {
+            "name": "pyobjc-framework-CoreText",
+            "version": "12.1",
+            "requirements": [
+                {
+                    "raw": "pyobjc-framework-CoreText==12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyobjc-framework-CoreText",
+                    "specifier": "==12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyobjc_framework_coretext-12.1.dist-info"
+                }
+            ]
+        },
+        "kiwisolver": {
+            "name": "kiwisolver",
+            "version": "1.4.9",
+            "requirements": [
+                {
+                    "raw": "kiwisolver==1.4.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "kiwisolver",
+                    "specifier": "==1.4.9",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/kiwisolver-1.4.9.dist-info"
+                }
+            ]
+        },
+        "pyobjc-framework-Quartz": {
+            "name": "pyobjc-framework-Quartz",
+            "version": "12.1",
+            "requirements": [
+                {
+                    "raw": "pyobjc-framework-Quartz==12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyobjc-framework-Quartz",
+                    "specifier": "==12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyobjc_framework_quartz-12.1.dist-info"
+                }
+            ]
+        },
+        "tinyhtml5": {
+            "name": "tinyhtml5",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "tinyhtml5==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tinyhtml5",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tinyhtml5-2.0.0.dist-info"
+                }
+            ]
+        },
+        "setuptools": {
+            "name": "setuptools",
+            "version": "82.0.0",
+            "requirements": [
+                {
+                    "raw": "setuptools==82.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "setuptools",
+                    "specifier": "==82.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/setuptools-82.0.0.dist-info"
+                }
+            ]
+        },
+        "pytest-timeout": {
+            "name": "pytest-timeout",
+            "version": "2.4.0",
+            "requirements": [
+                {
+                    "raw": "pytest-timeout==2.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-timeout",
+                    "specifier": "==2.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytest_timeout-2.4.0.dist-info"
+                }
+            ]
+        },
+        "pytweening": {
+            "name": "pytweening",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "pytweening==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytweening",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytweening-1.2.0.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-semantic-conventions": {
+            "name": "opentelemetry-semantic-conventions",
+            "version": "0.59b0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-semantic-conventions==0.59b0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-semantic-conventions",
+                    "specifier": "==0.59b0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_semantic_conventions-0.59b0.dist-info"
+                }
+            ]
+        },
+        "openai-whisper": {
+            "name": "openai-whisper",
+            "version": "20250625",
+            "requirements": [
+                {
+                    "raw": "openai-whisper==20250625",
+                    "extras": [],
+                    "marker": null,
+                    "name": "openai-whisper",
+                    "specifier": "==20250625",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/openai_whisper-20250625.dist-info"
+                }
+            ]
+        },
+        "portalocker": {
+            "name": "portalocker",
+            "version": "3.2.0",
+            "requirements": [
+                {
+                    "raw": "portalocker==3.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "portalocker",
+                    "specifier": "==3.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/portalocker-3.2.0.dist-info"
+                }
+            ]
+        },
+        "starlette": {
+            "name": "starlette",
+            "version": "0.52.1",
+            "requirements": [
+                {
+                    "raw": "starlette==0.52.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "starlette",
+                    "specifier": "==0.52.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/starlette-0.52.1.dist-info"
+                }
+            ]
+        },
+        "sqlite-vec": {
+            "name": "sqlite-vec",
+            "version": "0.1.6",
+            "requirements": [
+                {
+                    "raw": "sqlite-vec==0.1.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sqlite-vec",
+                    "specifier": "==0.1.6",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sqlite_vec-0.1.6.dist-info"
+                }
+            ]
+        },
+        "rich": {
+            "name": "rich",
+            "version": "14.3.3",
+            "requirements": [
+                {
+                    "raw": "rich==14.3.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rich",
+                    "specifier": "==14.3.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/rich-14.3.3.dist-info"
+                }
+            ]
+        },
+        "dnspython": {
+            "name": "dnspython",
+            "version": "2.8.0",
+            "requirements": [
+                {
+                    "raw": "dnspython==2.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "dnspython",
+                    "specifier": "==2.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/dnspython-2.8.0.dist-info"
+                }
+            ]
+        },
+        "matplotlib": {
+            "name": "matplotlib",
+            "version": "3.10.8",
+            "requirements": [
+                {
+                    "raw": "matplotlib==3.10.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "matplotlib",
+                    "specifier": "==3.10.8",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/matplotlib-3.10.8.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-exporter-otlp-proto-http": {
+            "name": "opentelemetry-exporter-otlp-proto-http",
+            "version": "1.38.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-otlp-proto-http==1.38.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-otlp-proto-http",
+                    "specifier": "==1.38.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_exporter_otlp_proto_http-1.38.0.dist-info"
+                }
+            ]
+        },
+        "neo4j": {
+            "name": "neo4j",
+            "version": "6.1.0",
+            "requirements": [
+                {
+                    "raw": "neo4j==6.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "neo4j",
+                    "specifier": "==6.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/neo4j-6.1.0.dist-info"
+                }
+            ]
+        },
+        "uritemplate": {
+            "name": "uritemplate",
+            "version": "4.2.0",
+            "requirements": [
+                {
+                    "raw": "uritemplate==4.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "uritemplate",
+                    "specifier": "==4.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/uritemplate-4.2.0.dist-info"
+                }
+            ]
+        },
+        "tenacity": {
+            "name": "tenacity",
+            "version": "9.1.4",
+            "requirements": [
+                {
+                    "raw": "tenacity==9.1.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tenacity",
+                    "specifier": "==9.1.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tenacity-9.1.4.dist-info"
+                }
+            ]
+        },
+        "httpcore": {
+            "name": "httpcore",
+            "version": "1.0.9",
+            "requirements": [
+                {
+                    "raw": "httpcore==1.0.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpcore",
+                    "specifier": "==1.0.9",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/httpcore-1.0.9.dist-info"
+                }
+            ]
+        },
+        "playwright": {
+            "name": "playwright",
+            "version": "1.58.0",
+            "requirements": [
+                {
+                    "raw": "playwright==1.58.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "playwright",
+                    "specifier": "==1.58.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/playwright-1.58.0.dist-info"
+                }
+            ]
+        },
+        "mmh3": {
+            "name": "mmh3",
+            "version": "5.2.0",
+            "requirements": [
+                {
+                    "raw": "mmh3==5.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mmh3",
+                    "specifier": "==5.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mmh3-5.2.0.dist-info"
+                }
+            ]
+        },
+        "decorator": {
+            "name": "decorator",
+            "version": "5.2.1",
+            "requirements": [
+                {
+                    "raw": "decorator==5.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "decorator",
+                    "specifier": "==5.2.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/decorator-5.2.1.dist-info"
+                }
+            ]
+        },
+        "typer-slim": {
+            "name": "typer-slim",
+            "version": "0.24.0",
+            "requirements": [
+                {
+                    "raw": "typer-slim==0.24.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typer-slim",
+                    "specifier": "==0.24.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/typer_slim-0.24.0.dist-info"
+                }
+            ]
+        },
+        "PyGetWindow": {
+            "name": "PyGetWindow",
+            "version": "0.0.9",
+            "requirements": [
+                {
+                    "raw": "PyGetWindow==0.0.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyGetWindow",
+                    "specifier": "==0.0.9",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pygetwindow-0.0.9.dist-info"
+                }
+            ]
+        },
+        "google-cloud-bigquery-storage": {
+            "name": "google-cloud-bigquery-storage",
+            "version": "2.36.2",
+            "requirements": [
+                {
+                    "raw": "google-cloud-bigquery-storage==2.36.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-bigquery-storage",
+                    "specifier": "==2.36.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_bigquery_storage-2.36.2.dist-info"
+                }
+            ]
+        },
+        "mcp": {
+            "name": "mcp",
+            "version": "1.26.0",
+            "requirements": [
+                {
+                    "raw": "mcp==1.26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mcp",
+                    "specifier": "==1.26.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mcp-1.26.0.dist-info"
+                }
+            ]
+        },
+        "soupsieve": {
+            "name": "soupsieve",
+            "version": "2.8.3",
+            "requirements": [
+                {
+                    "raw": "soupsieve==2.8.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "soupsieve",
+                    "specifier": "==2.8.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/soupsieve-2.8.3.dist-info"
+                }
+            ]
+        },
+        "moviepy": {
+            "name": "moviepy",
+            "version": "2.2.1",
+            "requirements": [
+                {
+                    "raw": "moviepy==2.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "moviepy",
+                    "specifier": "==2.2.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/moviepy-2.2.1.dist-info"
+                }
+            ]
+        },
+        "librosa": {
+            "name": "librosa",
+            "version": "0.11.0",
+            "requirements": [
+                {
+                    "raw": "librosa==0.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "librosa",
+                    "specifier": "==0.11.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/librosa-0.11.0.dist-info"
+                }
+            ]
+        },
+        "mando": {
+            "name": "mando",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "mando==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mando",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mando-0.7.1.dist-info"
+                }
+            ]
+        },
+        "google-adk": {
+            "name": "google-adk",
+            "version": "1.25.1",
+            "requirements": [
+                {
+                    "raw": "google-adk==1.25.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-adk",
+                    "specifier": "==1.25.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_adk-1.25.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-monitoring": {
+            "name": "google-cloud-monitoring",
+            "version": "2.29.1",
+            "requirements": [
+                {
+                    "raw": "google-cloud-monitoring==2.29.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-monitoring",
+                    "specifier": "==2.29.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_monitoring-2.29.1.dist-info"
+                }
+            ]
+        },
+        "charset-normalizer": {
+            "name": "charset-normalizer",
+            "version": "3.4.4",
+            "requirements": [
+                {
+                    "raw": "charset-normalizer==3.4.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "charset-normalizer",
+                    "specifier": "==3.4.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/charset_normalizer-3.4.4.dist-info"
+                }
+            ]
+        },
+        "sympy": {
+            "name": "sympy",
+            "version": "1.14.0",
+            "requirements": [
+                {
+                    "raw": "sympy==1.14.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sympy",
+                    "specifier": "==1.14.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sympy-1.14.0.dist-info"
+                }
+            ]
+        },
+        "grpcio": {
+            "name": "grpcio",
+            "version": "1.78.1",
+            "requirements": [
+                {
+                    "raw": "grpcio==1.78.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "grpcio",
+                    "specifier": "==1.78.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/grpcio-1.78.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-pubsub": {
+            "name": "google-cloud-pubsub",
+            "version": "2.35.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-pubsub==2.35.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-pubsub",
+                    "specifier": "==2.35.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_pubsub-2.35.0.dist-info"
+                }
+            ]
+        },
+        "markdown-it-py": {
+            "name": "markdown-it-py",
+            "version": "4.0.0",
+            "requirements": [
+                {
+                    "raw": "markdown-it-py==4.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "markdown-it-py",
+                    "specifier": "==4.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/markdown_it_py-4.0.0.dist-info"
+                }
+            ]
+        },
+        "tiktoken": {
+            "name": "tiktoken",
+            "version": "0.12.0",
+            "requirements": [
+                {
+                    "raw": "tiktoken==0.12.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tiktoken",
+                    "specifier": "==0.12.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tiktoken-0.12.0.dist-info"
+                }
+            ]
+        },
+        "pydantic-settings": {
+            "name": "pydantic-settings",
+            "version": "2.13.1",
+            "requirements": [
+                {
+                    "raw": "pydantic-settings==2.13.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic-settings",
+                    "specifier": "==2.13.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pydantic_settings-2.13.1.dist-info"
+                }
+            ]
+        },
+        "PyJWT": {
+            "name": "PyJWT",
+            "version": "2.11.0",
+            "requirements": [
+                {
+                    "raw": "PyJWT==2.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyJWT",
+                    "specifier": "==2.11.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyjwt-2.11.0.dist-info"
+                }
+            ]
+        },
+        "onnxruntime": {
+            "name": "onnxruntime",
+            "version": "1.24.2",
+            "requirements": [
+                {
+                    "raw": "onnxruntime==1.24.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "onnxruntime",
+                    "specifier": "==1.24.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/onnxruntime-1.24.2.dist-info"
+                }
+            ]
+        },
+        "google-cloud-logging": {
+            "name": "google-cloud-logging",
+            "version": "3.13.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-logging==3.13.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-logging",
+                    "specifier": "==3.13.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_logging-3.13.0.dist-info"
+                }
+            ]
+        },
+        "watchfiles": {
+            "name": "watchfiles",
+            "version": "1.1.1",
+            "requirements": [
+                {
+                    "raw": "watchfiles==1.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "watchfiles",
+                    "specifier": "==1.1.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/watchfiles-1.1.1.dist-info"
+                }
+            ]
+        },
+        "pooch": {
+            "name": "pooch",
+            "version": "1.9.0",
+            "requirements": [
+                {
+                    "raw": "pooch==1.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pooch",
+                    "specifier": "==1.9.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pooch-1.9.0.dist-info"
+                }
+            ]
+        },
+        "google-resumable-media": {
+            "name": "google-resumable-media",
+            "version": "2.8.0",
+            "requirements": [
+                {
+                    "raw": "google-resumable-media==2.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-resumable-media",
+                    "specifier": "==2.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_resumable_media-2.8.0.dist-info"
+                }
+            ]
+        },
+        "pyarrow": {
+            "name": "pyarrow",
+            "version": "23.0.1",
+            "requirements": [
+                {
+                    "raw": "pyarrow==23.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyarrow",
+                    "specifier": "==23.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyarrow-23.0.1.dist-info"
+                }
+            ]
+        },
+        "h11": {
+            "name": "h11",
+            "version": "0.16.0",
+            "requirements": [
+                {
+                    "raw": "h11==0.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "h11",
+                    "specifier": "==0.16.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/h11-0.16.0.dist-info"
+                }
+            ]
+        },
+        "sniffio": {
+            "name": "sniffio",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "sniffio==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sniffio",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sniffio-1.3.1.dist-info"
+                }
+            ]
+        },
+        "googleapis-common-protos": {
+            "name": "googleapis-common-protos",
+            "version": "1.72.0",
+            "requirements": [
+                {
+                    "raw": "googleapis-common-protos==1.72.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "googleapis-common-protos",
+                    "specifier": "==1.72.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/googleapis_common_protos-1.72.0.dist-info"
+                }
+            ]
+        },
+        "google-crc32c": {
+            "name": "google-crc32c",
+            "version": "1.8.0",
+            "requirements": [
+                {
+                    "raw": "google-crc32c==1.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-crc32c",
+                    "specifier": "==1.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_crc32c-1.8.0.dist-info"
+                }
+            ]
+        },
+        "pycparser": {
+            "name": "pycparser",
+            "version": "3.0",
+            "requirements": [
+                {
+                    "raw": "pycparser==3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycparser",
+                    "specifier": "==3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pycparser-3.0.dist-info"
+                }
+            ]
+        },
+        "mkdocstrings-python": {
+            "name": "mkdocstrings-python",
+            "version": "2.0.3",
+            "requirements": [
+                {
+                    "raw": "mkdocstrings-python==2.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocstrings-python",
+                    "specifier": "==2.0.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocstrings_python-2.0.3.dist-info"
+                }
+            ]
+        },
+        "rsa": {
+            "name": "rsa",
+            "version": "4.9.1",
+            "requirements": [
+                {
+                    "raw": "rsa==4.9.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rsa",
+                    "specifier": "==4.9.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/rsa-4.9.1.dist-info"
+                }
+            ]
+        },
+        "httptools": {
+            "name": "httptools",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "httptools==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httptools",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/httptools-0.7.1.dist-info"
+                }
+            ]
+        },
+        "filelock": {
+            "name": "filelock",
+            "version": "3.24.3",
+            "requirements": [
+                {
+                    "raw": "filelock==3.24.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "filelock",
+                    "specifier": "==3.24.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/filelock-3.24.3.dist-info"
+                }
+            ]
+        },
+        "importlib_metadata": {
+            "name": "importlib_metadata",
+            "version": "8.7.1",
+            "requirements": [
+                {
+                    "raw": "importlib_metadata==8.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "importlib_metadata",
+                    "specifier": "==8.7.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/importlib_metadata-8.7.1.dist-info"
+                }
+            ]
+        },
+        "Authlib": {
+            "name": "Authlib",
+            "version": "1.6.8",
+            "requirements": [
+                {
+                    "raw": "Authlib==1.6.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Authlib",
+                    "specifier": "==1.6.8",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/authlib-1.6.8.dist-info"
+                }
+            ]
+        },
+        "mdurl": {
+            "name": "mdurl",
+            "version": "0.1.2",
+            "requirements": [
+                {
+                    "raw": "mdurl==0.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mdurl",
+                    "specifier": "==0.1.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mdurl-0.1.2.dist-info"
+                }
+            ]
+        },
+        "standard-aifc": {
+            "name": "standard-aifc",
+            "version": "3.13.0",
+            "requirements": [
+                {
+                    "raw": "standard-aifc==3.13.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "standard-aifc",
+                    "specifier": "==3.13.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/standard_aifc-3.13.0.dist-info"
+                }
+            ]
+        },
+        "pathspec": {
+            "name": "pathspec",
+            "version": "1.0.4",
+            "requirements": [
+                {
+                    "raw": "pathspec==1.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pathspec",
+                    "specifier": "==1.0.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pathspec-1.0.4.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-api": {
+            "name": "opentelemetry-api",
+            "version": "1.38.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-api==1.38.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-api",
+                    "specifier": "==1.38.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_api-1.38.0.dist-info"
+                }
+            ]
+        },
+        "python-dateutil": {
+            "name": "python-dateutil",
+            "version": "2.9.0.post0",
+            "requirements": [
+                {
+                    "raw": "python-dateutil==2.9.0.post0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-dateutil",
+                    "specifier": "==2.9.0.post0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/python_dateutil-2.9.0.post0.dist-info"
+                }
+            ]
+        },
+        "google-cloud-audit-log": {
+            "name": "google-cloud-audit-log",
+            "version": "0.4.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-audit-log==0.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-audit-log",
+                    "specifier": "==0.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_audit_log-0.4.0.dist-info"
+                }
+            ]
+        },
+        "mpmath": {
+            "name": "mpmath",
+            "version": "1.3.0",
+            "requirements": [
+                {
+                    "raw": "mpmath==1.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mpmath",
+                    "specifier": "==1.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mpmath-1.3.0.dist-info"
+                }
+            ]
+        },
+        "google-cloud-aiplatform": {
+            "name": "google-cloud-aiplatform",
+            "version": "1.138.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-aiplatform==1.138.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-aiplatform",
+                    "specifier": "==1.138.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_aiplatform-1.138.0.dist-info"
+                }
+            ]
+        },
+        "nltk": {
+            "name": "nltk",
+            "version": "3.9.3",
+            "requirements": [
+                {
+                    "raw": "nltk==3.9.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "nltk",
+                    "specifier": "==3.9.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/nltk-3.9.3.dist-info"
+                }
+            ]
+        },
+        "PyYAML": {
+            "name": "PyYAML",
+            "version": "6.0.3",
+            "requirements": [
+                {
+                    "raw": "PyYAML==6.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyYAML",
+                    "specifier": "==6.0.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyyaml-6.0.3.dist-info"
+                }
+            ]
+        },
+        "pytest-asyncio": {
+            "name": "pytest-asyncio",
+            "version": "1.3.0",
+            "requirements": [
+                {
+                    "raw": "pytest-asyncio==1.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-asyncio",
+                    "specifier": "==1.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytest_asyncio-1.3.0.dist-info"
+                }
+            ]
+        },
+        "sentence-transformers": {
+            "name": "sentence-transformers",
+            "version": "5.2.3",
+            "requirements": [
+                {
+                    "raw": "sentence-transformers==5.2.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sentence-transformers",
+                    "specifier": "==5.2.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sentence_transformers-5.2.3.dist-info"
+                }
+            ]
+        },
+        "google-cloud-bigquery": {
+            "name": "google-cloud-bigquery",
+            "version": "3.40.1",
+            "requirements": [
+                {
+                    "raw": "google-cloud-bigquery==3.40.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-bigquery",
+                    "specifier": "==3.40.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_bigquery-3.40.1.dist-info"
+                }
+            ]
+        },
+        "huggingface_hub": {
+            "name": "huggingface_hub",
+            "version": "1.4.1",
+            "requirements": [
+                {
+                    "raw": "huggingface_hub==1.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "huggingface_hub",
+                    "specifier": "==1.4.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/huggingface_hub-1.4.1.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-proto": {
+            "name": "opentelemetry-proto",
+            "version": "1.38.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-proto==1.38.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-proto",
+                    "specifier": "==1.38.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_proto-1.38.0.dist-info"
+                }
+            ]
+        },
+        "tzlocal": {
+            "name": "tzlocal",
+            "version": "5.3.1",
+            "requirements": [
+                {
+                    "raw": "tzlocal==5.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tzlocal",
+                    "specifier": "==5.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tzlocal-5.3.1.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-exporter-gcp-logging": {
+            "name": "opentelemetry-exporter-gcp-logging",
+            "version": "1.11.0a0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-gcp-logging==1.11.0a0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-gcp-logging",
+                    "specifier": "==1.11.0a0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_exporter_gcp_logging-1.11.0a0.dist-info"
+                }
+            ]
+        },
+        "pydantic_core": {
+            "name": "pydantic_core",
+            "version": "2.41.5",
+            "requirements": [
+                {
+                    "raw": "pydantic_core==2.41.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic_core",
+                    "specifier": "==2.41.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pydantic_core-2.41.5.dist-info"
+                }
+            ]
+        },
+        "google-cloud-bigtable": {
+            "name": "google-cloud-bigtable",
+            "version": "2.35.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-bigtable==2.35.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-bigtable",
+                    "specifier": "==2.35.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_bigtable-2.35.0.dist-info"
+                }
+            ]
+        },
+        "Mako": {
+            "name": "Mako",
+            "version": "1.3.10",
+            "requirements": [
+                {
+                    "raw": "Mako==1.3.10",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Mako",
+                    "specifier": "==1.3.10",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mako-1.3.10.dist-info"
+                }
+            ]
+        },
+        "urllib3": {
+            "name": "urllib3",
+            "version": "2.6.3",
+            "requirements": [
+                {
+                    "raw": "urllib3==2.6.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "urllib3",
+                    "specifier": "==2.6.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/urllib3-2.6.3.dist-info"
+                }
+            ]
+        },
+        "frozenlist": {
+            "name": "frozenlist",
+            "version": "1.8.0",
+            "requirements": [
+                {
+                    "raw": "frozenlist==1.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "frozenlist",
+                    "specifier": "==1.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/frozenlist-1.8.0.dist-info"
+                }
+            ]
+        },
+        "pyobjc-framework-ApplicationServices": {
+            "name": "pyobjc-framework-ApplicationServices",
+            "version": "12.1",
+            "requirements": [
+                {
+                    "raw": "pyobjc-framework-ApplicationServices==12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyobjc-framework-ApplicationServices",
+                    "specifier": "==12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyobjc_framework_applicationservices-12.1.dist-info"
+                }
+            ]
+        },
+        "typing_extensions": {
+            "name": "typing_extensions",
+            "version": "4.15.0",
+            "requirements": [
+                {
+                    "raw": "typing_extensions==4.15.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typing_extensions",
+                    "specifier": "==4.15.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/typing_extensions-4.15.0.dist-info"
+                }
+            ]
+        },
+        "aiosignal": {
+            "name": "aiosignal",
+            "version": "1.4.0",
+            "requirements": [
+                {
+                    "raw": "aiosignal==1.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiosignal",
+                    "specifier": "==1.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/aiosignal-1.4.0.dist-info"
+                }
+            ]
+        },
+        "jaraco.functools": {
+            "name": "jaraco.functools",
+            "version": "4.4.0",
+            "requirements": [
+                {
+                    "raw": "jaraco.functools==4.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.functools",
+                    "specifier": "==4.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jaraco_functools-4.4.0.dist-info"
+                }
+            ]
+        },
+        "jaraco.context": {
+            "name": "jaraco.context",
+            "version": "6.1.0",
+            "requirements": [
+                {
+                    "raw": "jaraco.context==6.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.context",
+                    "specifier": "==6.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jaraco_context-6.1.0.dist-info"
+                }
+            ]
+        },
+        "mss": {
+            "name": "mss",
+            "version": "10.1.0",
+            "requirements": [
+                {
+                    "raw": "mss==10.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mss",
+                    "specifier": "==10.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mss-10.1.0.dist-info"
+                }
+            ]
+        },
+        "beautifulsoup4": {
+            "name": "beautifulsoup4",
+            "version": "4.14.3",
+            "requirements": [
+                {
+                    "raw": "beautifulsoup4==4.14.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "beautifulsoup4",
+                    "specifier": "==4.14.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/beautifulsoup4-4.14.3.dist-info"
+                }
+            ]
+        },
+        "rubicon-objc": {
+            "name": "rubicon-objc",
+            "version": "0.5.3",
+            "requirements": [
+                {
+                    "raw": "rubicon-objc==0.5.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rubicon-objc",
+                    "specifier": "==0.5.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/rubicon_objc-0.5.3.dist-info"
+                }
+            ]
+        },
+        "google-cloud-speech": {
+            "name": "google-cloud-speech",
+            "version": "2.36.1",
+            "requirements": [
+                {
+                    "raw": "google-cloud-speech==2.36.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-speech",
+                    "specifier": "==2.36.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_speech-2.36.1.dist-info"
+                }
+            ]
+        },
+        "pandas": {
+            "name": "pandas",
+            "version": "3.0.1",
+            "requirements": [
+                {
+                    "raw": "pandas==3.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pandas",
+                    "specifier": "==3.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pandas-3.0.1.dist-info"
+                }
+            ]
+        },
+        "execnet": {
+            "name": "execnet",
+            "version": "2.1.2",
+            "requirements": [
+                {
+                    "raw": "execnet==2.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "execnet",
+                    "specifier": "==2.1.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/execnet-2.1.2.dist-info"
+                }
+            ]
+        },
+        "scipy": {
+            "name": "scipy",
+            "version": "1.17.1",
+            "requirements": [
+                {
+                    "raw": "scipy==1.17.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "scipy",
+                    "specifier": "==1.17.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/scipy-1.17.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-discoveryengine": {
+            "name": "google-cloud-discoveryengine",
+            "version": "0.13.12",
+            "requirements": [
+                {
+                    "raw": "google-cloud-discoveryengine==0.13.12",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-discoveryengine",
+                    "specifier": "==0.13.12",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_discoveryengine-0.13.12.dist-info"
+                }
+            ]
+        },
+        "joblib": {
+            "name": "joblib",
+            "version": "1.5.3",
+            "requirements": [
+                {
+                    "raw": "joblib==1.5.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "joblib",
+                    "specifier": "==1.5.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/joblib-1.5.3.dist-info"
+                }
+            ]
+        },
+        "imageio-ffmpeg": {
+            "name": "imageio-ffmpeg",
+            "version": "0.6.0",
+            "requirements": [
+                {
+                    "raw": "imageio-ffmpeg==0.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "imageio-ffmpeg",
+                    "specifier": "==0.6.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/imageio_ffmpeg-0.6.0.dist-info"
+                }
+            ]
+        },
+        "PyRect": {
+            "name": "PyRect",
+            "version": "0.2.0",
+            "requirements": [
+                {
+                    "raw": "PyRect==0.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyRect",
+                    "specifier": "==0.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyrect-0.2.0.dist-info"
+                }
+            ]
+        },
+        "cycler": {
+            "name": "cycler",
+            "version": "0.12.1",
+            "requirements": [
+                {
+                    "raw": "cycler==0.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cycler",
+                    "specifier": "==0.12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cycler-0.12.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-appengine-logging": {
+            "name": "google-cloud-appengine-logging",
+            "version": "1.8.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-appengine-logging==1.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-appengine-logging",
+                    "specifier": "==1.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_appengine_logging-1.8.0.dist-info"
+                }
+            ]
+        },
+        "hf-xet": {
+            "name": "hf-xet",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "hf-xet==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "hf-xet",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/hf_xet-1.2.0.dist-info"
+                }
+            ]
+        },
+        "Jinja2": {
+            "name": "Jinja2",
+            "version": "3.1.6",
+            "requirements": [
+                {
+                    "raw": "Jinja2==3.1.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Jinja2",
+                    "specifier": "==3.1.6",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/jinja2-3.1.6.dist-info"
+                }
+            ]
+        },
+        "referencing": {
+            "name": "referencing",
+            "version": "0.37.0",
+            "requirements": [
+                {
+                    "raw": "referencing==0.37.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "referencing",
+                    "specifier": "==0.37.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/referencing-0.37.0.dist-info"
+                }
+            ]
+        },
+        "pyparsing": {
+            "name": "pyparsing",
+            "version": "3.3.2",
+            "requirements": [
+                {
+                    "raw": "pyparsing==3.3.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyparsing",
+                    "specifier": "==3.3.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyparsing-3.3.2.dist-info"
+                }
+            ]
+        },
+        "google-cloud-trace": {
+            "name": "google-cloud-trace",
+            "version": "1.18.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-trace==1.18.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-trace",
+                    "specifier": "==1.18.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_trace-1.18.0.dist-info"
+                }
+            ]
+        },
+        "pyyaml_env_tag": {
+            "name": "pyyaml_env_tag",
+            "version": "1.1",
+            "requirements": [
+                {
+                    "raw": "pyyaml_env_tag==1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyyaml_env_tag",
+                    "specifier": "==1.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyyaml_env_tag-1.1.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-resourcedetector-gcp": {
+            "name": "opentelemetry-resourcedetector-gcp",
+            "version": "1.11.0a0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-resourcedetector-gcp==1.11.0a0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-resourcedetector-gcp",
+                    "specifier": "==1.11.0a0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_resourcedetector_gcp-1.11.0a0.dist-info"
+                }
+            ]
+        },
+        "soundfile": {
+            "name": "soundfile",
+            "version": "0.13.1",
+            "requirements": [
+                {
+                    "raw": "soundfile==0.13.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "soundfile",
+                    "specifier": "==0.13.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/soundfile-0.13.1.dist-info"
+                }
+            ]
+        },
+        "grpcio-status": {
+            "name": "grpcio-status",
+            "version": "1.78.1",
+            "requirements": [
+                {
+                    "raw": "grpcio-status==1.78.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "grpcio-status",
+                    "specifier": "==1.78.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/grpcio_status-1.78.1.dist-info"
+                }
+            ]
+        },
+        "pyperclip": {
+            "name": "pyperclip",
+            "version": "1.11.0",
+            "requirements": [
+                {
+                    "raw": "pyperclip==1.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyperclip",
+                    "specifier": "==1.11.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyperclip-1.11.0.dist-info"
+                }
+            ]
+        },
+        "pyasn1": {
+            "name": "pyasn1",
+            "version": "0.6.2",
+            "requirements": [
+                {
+                    "raw": "pyasn1==0.6.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyasn1",
+                    "specifier": "==0.6.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyasn1-0.6.2.dist-info"
+                }
+            ]
+        },
+        "MarkupSafe": {
+            "name": "MarkupSafe",
+            "version": "3.0.3",
+            "requirements": [
+                {
+                    "raw": "MarkupSafe==3.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "MarkupSafe",
+                    "specifier": "==3.0.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/markupsafe-3.0.3.dist-info"
+                }
+            ]
+        },
+        "Deprecated": {
+            "name": "Deprecated",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "Deprecated==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Deprecated",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/deprecated-1.3.1.dist-info"
+                }
+            ]
+        },
+        "msgpack": {
+            "name": "msgpack",
+            "version": "1.1.2",
+            "requirements": [
+                {
+                    "raw": "msgpack==1.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "msgpack",
+                    "specifier": "==1.1.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/msgpack-1.1.2.dist-info"
+                }
+            ]
+        },
+        "google-auth": {
+            "name": "google-auth",
+            "version": "2.48.0",
+            "requirements": [
+                {
+                    "raw": "google-auth==2.48.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-auth",
+                    "specifier": "==2.48.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_auth-2.48.0.dist-info"
+                }
+            ]
+        },
+        "grpc-interceptor": {
+            "name": "grpc-interceptor",
+            "version": "0.15.4",
+            "requirements": [
+                {
+                    "raw": "grpc-interceptor==0.15.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "grpc-interceptor",
+                    "specifier": "==0.15.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/grpc_interceptor-0.15.4.dist-info"
+                }
+            ]
+        },
+        "distro": {
+            "name": "distro",
+            "version": "1.9.0",
+            "requirements": [
+                {
+                    "raw": "distro==1.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "distro",
+                    "specifier": "==1.9.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/distro-1.9.0.dist-info"
+                }
+            ]
+        },
+        "graphviz": {
+            "name": "graphviz",
+            "version": "0.21",
+            "requirements": [
+                {
+                    "raw": "graphviz==0.21",
+                    "extras": [],
+                    "marker": null,
+                    "name": "graphviz",
+                    "specifier": "==0.21",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/graphviz-0.21.dist-info"
+                }
+            ]
+        },
+        "google-api-python-client": {
+            "name": "google-api-python-client",
+            "version": "2.190.0",
+            "requirements": [
+                {
+                    "raw": "google-api-python-client==2.190.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-api-python-client",
+                    "specifier": "==2.190.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_api_python_client-2.190.0.dist-info"
+                }
+            ]
+        },
+        "ruff": {
+            "name": "ruff",
+            "version": "0.15.2",
+            "requirements": [
+                {
+                    "raw": "ruff==0.15.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ruff",
+                    "specifier": "==0.15.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/ruff-0.15.2.dist-info"
+                }
+            ]
+        },
+        "flatbuffers": {
+            "name": "flatbuffers",
+            "version": "25.12.19",
+            "requirements": [
+                {
+                    "raw": "flatbuffers==25.12.19",
+                    "extras": [],
+                    "marker": null,
+                    "name": "flatbuffers",
+                    "specifier": "==25.12.19",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/flatbuffers-25.12.19.dist-info"
+                }
+            ]
+        },
+        "pluggy": {
+            "name": "pluggy",
+            "version": "1.6.0",
+            "requirements": [
+                {
+                    "raw": "pluggy==1.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pluggy",
+                    "specifier": "==1.6.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pluggy-1.6.0.dist-info"
+                }
+            ]
+        },
+        "stevedore": {
+            "name": "stevedore",
+            "version": "5.7.0",
+            "requirements": [
+                {
+                    "raw": "stevedore==5.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "stevedore",
+                    "specifier": "==5.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/stevedore-5.7.0.dist-info"
+                }
+            ]
+        },
+        "opencv-python": {
+            "name": "opencv-python",
+            "version": "4.13.0.92",
+            "requirements": [
+                {
+                    "raw": "opencv-python==4.13.0.92",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opencv-python",
+                    "specifier": "==4.13.0.92",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opencv_python-4.13.0.92.dist-info"
+                }
+            ]
+        },
+        "Pygments": {
+            "name": "Pygments",
+            "version": "2.19.2",
+            "requirements": [
+                {
+                    "raw": "Pygments==2.19.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Pygments",
+                    "specifier": "==2.19.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pygments-2.19.2.dist-info"
+                }
+            ]
+        },
+        "python-docx": {
+            "name": "python-docx",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "python-docx==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-docx",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/python_docx-1.2.0.dist-info"
+                }
+            ]
+        },
+        "aiohappyeyeballs": {
+            "name": "aiohappyeyeballs",
+            "version": "2.6.1",
+            "requirements": [
+                {
+                    "raw": "aiohappyeyeballs==2.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiohappyeyeballs",
+                    "specifier": "==2.6.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/aiohappyeyeballs-2.6.1.dist-info"
+                }
+            ]
+        },
+        "llvmlite": {
+            "name": "llvmlite",
+            "version": "0.46.0",
+            "requirements": [
+                {
+                    "raw": "llvmlite==0.46.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "llvmlite",
+                    "specifier": "==0.46.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/llvmlite-0.46.0.dist-info"
+                }
+            ]
+        },
+        "google-cloud-iam": {
+            "name": "google-cloud-iam",
+            "version": "2.21.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-iam==2.21.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-iam",
+                    "specifier": "==2.21.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_iam-2.21.0.dist-info"
+                }
+            ]
+        },
+        "coverage": {
+            "name": "coverage",
+            "version": "7.13.4",
+            "requirements": [
+                {
+                    "raw": "coverage==7.13.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "coverage",
+                    "specifier": "==7.13.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/coverage-7.13.4.dist-info"
+                }
+            ]
+        },
+        "websockets": {
+            "name": "websockets",
+            "version": "15.0.1",
+            "requirements": [
+                {
+                    "raw": "websockets==15.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "websockets",
+                    "specifier": "==15.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/websockets-15.0.1.dist-info"
+                }
+            ]
+        },
+        "pycryptodomex": {
+            "name": "pycryptodomex",
+            "version": "3.23.0",
+            "requirements": [
+                {
+                    "raw": "pycryptodomex==3.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycryptodomex",
+                    "specifier": "==3.23.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pycryptodomex-3.23.0.dist-info"
+                }
+            ]
+        },
+        "attrs": {
+            "name": "attrs",
+            "version": "25.4.0",
+            "requirements": [
+                {
+                    "raw": "attrs==25.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "attrs",
+                    "specifier": "==25.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/attrs-25.4.0.dist-info"
+                }
+            ]
+        },
+        "pyOpenSSL": {
+            "name": "pyOpenSSL",
+            "version": "25.3.0",
+            "requirements": [
+                {
+                    "raw": "pyOpenSSL==25.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyOpenSSL",
+                    "specifier": "==25.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyopenssl-25.3.0.dist-info"
+                }
+            ]
+        },
+        "bandit": {
+            "name": "bandit",
+            "version": "1.9.3",
+            "requirements": [
+                {
+                    "raw": "bandit==1.9.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "bandit",
+                    "specifier": "==1.9.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/bandit-1.9.3.dist-info"
+                }
+            ]
+        },
+        "packaging": {
+            "name": "packaging",
+            "version": "26.0",
+            "requirements": [
+                {
+                    "raw": "packaging==26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "packaging",
+                    "specifier": "==26.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/packaging-26.0.dist-info"
+                }
+            ]
+        },
+        "brotli": {
+            "name": "brotli",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "brotli==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "brotli",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/brotli-1.2.0.dist-info"
+                }
+            ]
+        },
+        "torch": {
+            "name": "torch",
+            "version": "2.10.0",
+            "requirements": [
+                {
+                    "raw": "torch==2.10.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "torch",
+                    "specifier": "==2.10.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/torch-2.10.0.dist-info"
+                }
+            ]
+        },
+        "tinycss2": {
+            "name": "tinycss2",
+            "version": "1.5.1",
+            "requirements": [
+                {
+                    "raw": "tinycss2==1.5.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tinycss2",
+                    "specifier": "==1.5.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tinycss2-1.5.1.dist-info"
+                }
+            ]
+        },
+        "httpx": {
+            "name": "httpx",
+            "version": "0.28.1",
+            "requirements": [
+                {
+                    "raw": "httpx==0.28.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpx",
+                    "specifier": "==0.28.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/httpx-0.28.1.dist-info"
+                }
+            ]
+        },
+        "mkdocs-material": {
+            "name": "mkdocs-material",
+            "version": "9.7.2",
+            "requirements": [
+                {
+                    "raw": "mkdocs-material==9.7.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mkdocs-material",
+                    "specifier": "==9.7.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/mkdocs_material-9.7.2.dist-info"
+                }
+            ]
+        },
+        "grpc-google-iam-v1": {
+            "name": "grpc-google-iam-v1",
+            "version": "0.14.3",
+            "requirements": [
+                {
+                    "raw": "grpc-google-iam-v1==0.14.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "grpc-google-iam-v1",
+                    "specifier": "==0.14.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/grpc_google_iam_v1-0.14.3.dist-info"
+                }
+            ]
+        },
+        "h2": {
+            "name": "h2",
+            "version": "4.3.0",
+            "requirements": [
+                {
+                    "raw": "h2==4.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "h2",
+                    "specifier": "==4.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/h2-4.3.0.dist-info"
+                }
+            ]
+        },
+        "tqdm": {
+            "name": "tqdm",
+            "version": "4.67.3",
+            "requirements": [
+                {
+                    "raw": "tqdm==4.67.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tqdm",
+                    "specifier": "==4.67.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tqdm-4.67.3.dist-info"
+                }
+            ]
+        },
+        "pyobjc-core": {
+            "name": "pyobjc-core",
+            "version": "12.1",
+            "requirements": [
+                {
+                    "raw": "pyobjc-core==12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyobjc-core",
+                    "specifier": "==12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyobjc_core-12.1.dist-info"
+                }
+            ]
+        },
+        "pillow": {
+            "name": "pillow",
+            "version": "11.3.0",
+            "requirements": [
+                {
+                    "raw": "pillow==11.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pillow",
+                    "specifier": "==11.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pillow-11.3.0.dist-info"
+                }
+            ]
+        },
+        "radon": {
+            "name": "radon",
+            "version": "6.0.1",
+            "requirements": [
+                {
+                    "raw": "radon==6.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "radon",
+                    "specifier": "==6.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/radon-6.0.1.dist-info"
+                }
+            ]
+        },
+        "pyasn1_modules": {
+            "name": "pyasn1_modules",
+            "version": "0.4.2",
+            "requirements": [
+                {
+                    "raw": "pyasn1_modules==0.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyasn1_modules",
+                    "specifier": "==0.4.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyasn1_modules-0.4.2.dist-info"
+                }
+            ]
+        },
+        "opentelemetry-sdk": {
+            "name": "opentelemetry-sdk",
+            "version": "1.38.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-sdk==1.38.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-sdk",
+                    "specifier": "==1.38.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/opentelemetry_sdk-1.38.0.dist-info"
+                }
+            ]
+        },
+        "proglog": {
+            "name": "proglog",
+            "version": "0.1.12",
+            "requirements": [
+                {
+                    "raw": "proglog==0.1.12",
+                    "extras": [],
+                    "marker": null,
+                    "name": "proglog",
+                    "specifier": "==0.1.12",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/proglog-0.1.12.dist-info"
+                }
+            ]
+        },
+        "pymdown-extensions": {
+            "name": "pymdown-extensions",
+            "version": "10.21",
+            "requirements": [
+                {
+                    "raw": "pymdown-extensions==10.21",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pymdown-extensions",
+                    "specifier": "==10.21",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pymdown_extensions-10.21.dist-info"
+                }
+            ]
+        },
+        "git-filter-repo": {
+            "name": "git-filter-repo",
+            "version": "2.47.0",
+            "requirements": [
+                {
+                    "raw": "git-filter-repo==2.47.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "git-filter-repo",
+                    "specifier": "==2.47.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/git_filter_repo-2.47.0.dist-info"
+                }
+            ]
+        },
+        "hpack": {
+            "name": "hpack",
+            "version": "4.1.0",
+            "requirements": [
+                {
+                    "raw": "hpack==4.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "hpack",
+                    "specifier": "==4.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/hpack-4.1.0.dist-info"
+                }
+            ]
+        },
+        "safetensors": {
+            "name": "safetensors",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "safetensors==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safetensors",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/safetensors-0.7.0.dist-info"
+                }
+            ]
+        },
+        "tokenizers": {
+            "name": "tokenizers",
+            "version": "0.22.2",
+            "requirements": [
+                {
+                    "raw": "tokenizers==0.22.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tokenizers",
+                    "specifier": "==0.22.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/tokenizers-0.22.2.dist-info"
+                }
+            ]
+        },
+        "uvloop": {
+            "name": "uvloop",
+            "version": "0.22.1",
+            "requirements": [
+                {
+                    "raw": "uvloop==0.22.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "uvloop",
+                    "specifier": "==0.22.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/uvloop-0.22.1.dist-info"
+                }
+            ]
+        },
+        "psutil": {
+            "name": "psutil",
+            "version": "7.2.2",
+            "requirements": [
+                {
+                    "raw": "psutil==7.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "psutil",
+                    "specifier": "==7.2.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/psutil-7.2.2.dist-info"
+                }
+            ]
+        },
+        "audioop-lts": {
+            "name": "audioop-lts",
+            "version": "0.2.2",
+            "requirements": [
+                {
+                    "raw": "audioop-lts==0.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "audioop-lts",
+                    "specifier": "==0.2.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/audioop_lts-0.2.2.dist-info"
+                }
+            ]
+        },
+        "google-api-core": {
+            "name": "google-api-core",
+            "version": "2.30.0",
+            "requirements": [
+                {
+                    "raw": "google-api-core==2.30.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-api-core",
+                    "specifier": "==2.30.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_api_core-2.30.0.dist-info"
+                }
+            ]
+        },
+        "pyee": {
+            "name": "pyee",
+            "version": "13.0.1",
+            "requirements": [
+                {
+                    "raw": "pyee==13.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyee",
+                    "specifier": "==13.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyee-13.0.1.dist-info"
+                }
+            ]
+        },
+        "google-auth-httplib2": {
+            "name": "google-auth-httplib2",
+            "version": "0.3.0",
+            "requirements": [
+                {
+                    "raw": "google-auth-httplib2==0.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-auth-httplib2",
+                    "specifier": "==0.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_auth_httplib2-0.3.0.dist-info"
+                }
+            ]
+        },
+        "watchdog": {
+            "name": "watchdog",
+            "version": "6.0.0",
+            "requirements": [
+                {
+                    "raw": "watchdog==6.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "watchdog",
+                    "specifier": "==6.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/watchdog-6.0.0.dist-info"
+                }
+            ]
+        },
+        "resend": {
+            "name": "resend",
+            "version": "2.23.0",
+            "requirements": [
+                {
+                    "raw": "resend==2.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "resend",
+                    "specifier": "==2.23.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/resend-2.23.0.dist-info"
+                }
+            ]
+        },
+        "pedalboard": {
+            "name": "pedalboard",
+            "version": "0.9.22",
+            "requirements": [
+                {
+                    "raw": "pedalboard==0.9.22",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pedalboard",
+                    "specifier": "==0.9.22",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pedalboard-0.9.22.dist-info"
+                }
+            ]
+        },
+        "numba": {
+            "name": "numba",
+            "version": "0.64.0",
+            "requirements": [
+                {
+                    "raw": "numba==0.64.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "numba",
+                    "specifier": "==0.64.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/numba-0.64.0.dist-info"
+                }
+            ]
+        },
+        "lxml": {
+            "name": "lxml",
+            "version": "6.0.2",
+            "requirements": [
+                {
+                    "raw": "lxml==6.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "lxml",
+                    "specifier": "==6.0.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/lxml-6.0.2.dist-info"
+                }
+            ]
+        },
+        "stripe": {
+            "name": "stripe",
+            "version": "14.3.0",
+            "requirements": [
+                {
+                    "raw": "stripe==14.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "stripe",
+                    "specifier": "==14.3.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/stripe-14.3.0.dist-info"
+                }
+            ]
+        },
+        "PyMsgBox": {
+            "name": "PyMsgBox",
+            "version": "2.0.1",
+            "requirements": [
+                {
+                    "raw": "PyMsgBox==2.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyMsgBox",
+                    "specifier": "==2.0.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pymsgbox-2.0.1.dist-info"
+                }
+            ]
+        },
+        "google-cloud-spanner": {
+            "name": "google-cloud-spanner",
+            "version": "3.63.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-spanner==3.63.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-spanner",
+                    "specifier": "==3.63.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_spanner-3.63.0.dist-info"
+                }
+            ]
+        },
+        "typing-inspection": {
+            "name": "typing-inspection",
+            "version": "0.4.2",
+            "requirements": [
+                {
+                    "raw": "typing-inspection==0.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typing-inspection",
+                    "specifier": "==0.4.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/typing_inspection-0.4.2.dist-info"
+                }
+            ]
+        },
+        "z3-solver": {
+            "name": "z3-solver",
+            "version": "4.13.4.0",
+            "requirements": [
+                {
+                    "raw": "z3-solver==4.13.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "z3-solver",
+                    "specifier": "==4.13.4.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/z3_solver-4.13.4.0.dist-info"
+                }
+            ]
+        },
+        "zipp": {
+            "name": "zipp",
+            "version": "3.23.0",
+            "requirements": [
+                {
+                    "raw": "zipp==3.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "zipp",
+                    "specifier": "==3.23.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/zipp-3.23.0.dist-info"
+                }
+            ]
+        },
+        "annotated-types": {
+            "name": "annotated-types",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "annotated-types==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "annotated-types",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/annotated_types-0.7.0.dist-info"
+                }
+            ]
+        },
+        "fonttools": {
+            "name": "fonttools",
+            "version": "4.61.1",
+            "requirements": [
+                {
+                    "raw": "fonttools==4.61.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fonttools",
+                    "specifier": "==4.61.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/fonttools-4.61.1.dist-info"
+                }
+            ]
+        },
+        "keyring": {
+            "name": "keyring",
+            "version": "25.7.0",
+            "requirements": [
+                {
+                    "raw": "keyring==25.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "keyring",
+                    "specifier": "==25.7.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/keyring-25.7.0.dist-info"
+                }
+            ]
+        },
+        "google-cloud-secret-manager": {
+            "name": "google-cloud-secret-manager",
+            "version": "2.26.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-secret-manager==2.26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-secret-manager",
+                    "specifier": "==2.26.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_secret_manager-2.26.0.dist-info"
+                }
+            ]
+        },
+        "httpx-sse": {
+            "name": "httpx-sse",
+            "version": "0.4.3",
+            "requirements": [
+                {
+                    "raw": "httpx-sse==0.4.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpx-sse",
+                    "specifier": "==0.4.3",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/httpx_sse-0.4.3.dist-info"
+                }
+            ]
+        },
+        "cryptography": {
+            "name": "cryptography",
+            "version": "46.0.5",
+            "requirements": [
+                {
+                    "raw": "cryptography==46.0.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cryptography",
+                    "specifier": "==46.0.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cryptography-46.0.5.dist-info"
+                }
+            ]
+        },
+        "Markdown": {
+            "name": "Markdown",
+            "version": "3.10.2",
+            "requirements": [
+                {
+                    "raw": "Markdown==3.10.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Markdown",
+                    "specifier": "==3.10.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/markdown-3.10.2.dist-info"
+                }
+            ]
+        },
+        "rpds-py": {
+            "name": "rpds-py",
+            "version": "0.30.0",
+            "requirements": [
+                {
+                    "raw": "rpds-py==0.30.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rpds-py",
+                    "specifier": "==0.30.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/rpds_py-0.30.0.dist-info"
+                }
+            ]
+        },
+        "qrcode": {
+            "name": "qrcode",
+            "version": "8.2",
+            "requirements": [
+                {
+                    "raw": "qrcode==8.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "qrcode",
+                    "specifier": "==8.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/qrcode-8.2.dist-info"
+                }
+            ]
+        },
+        "six": {
+            "name": "six",
+            "version": "1.17.0",
+            "requirements": [
+                {
+                    "raw": "six==1.17.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "six",
+                    "specifier": "==1.17.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/six-1.17.0.dist-info"
+                }
+            ]
+        },
+        "transformers": {
+            "name": "transformers",
+            "version": "5.2.0",
+            "requirements": [
+                {
+                    "raw": "transformers==5.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "transformers",
+                    "specifier": "==5.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/transformers-5.2.0.dist-info"
+                }
+            ]
+        },
+        "yarl": {
+            "name": "yarl",
+            "version": "1.22.0",
+            "requirements": [
+                {
+                    "raw": "yarl==1.22.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "yarl",
+                    "specifier": "==1.22.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/yarl-1.22.0.dist-info"
+                }
+            ]
+        },
+        "hyperframe": {
+            "name": "hyperframe",
+            "version": "6.1.0",
+            "requirements": [
+                {
+                    "raw": "hyperframe==6.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "hyperframe",
+                    "specifier": "==6.1.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/hyperframe-6.1.0.dist-info"
+                }
+            ]
+        },
+        "pyloudnorm": {
+            "name": "pyloudnorm",
+            "version": "0.2.0",
+            "requirements": [
+                {
+                    "raw": "pyloudnorm==0.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyloudnorm",
+                    "specifier": "==0.2.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyloudnorm-0.2.0.dist-info"
+                }
+            ]
+        },
+        "requests-oauthlib": {
+            "name": "requests-oauthlib",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "requests-oauthlib==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "requests-oauthlib",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/requests_oauthlib-2.0.0.dist-info"
+                }
+            ]
+        },
+        "toolbox-core": {
+            "name": "toolbox-core",
+            "version": "0.5.9",
+            "requirements": [
+                {
+                    "raw": "toolbox-core==0.5.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "toolbox-core",
+                    "specifier": "==0.5.9",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/toolbox_core-0.5.9.dist-info"
+                }
+            ]
+        },
+        "google-cloud-resource-manager": {
+            "name": "google-cloud-resource-manager",
+            "version": "1.16.0",
+            "requirements": [
+                {
+                    "raw": "google-cloud-resource-manager==1.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "google-cloud-resource-manager",
+                    "specifier": "==1.16.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/google_cloud_resource_manager-1.16.0.dist-info"
+                }
+            ]
+        },
+        "pydyf": {
+            "name": "pydyf",
+            "version": "0.12.1",
+            "requirements": [
+                {
+                    "raw": "pydyf==0.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydyf",
+                    "specifier": "==0.12.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pydyf-0.12.1.dist-info"
+                }
+            ]
+        },
+        "scikit-learn": {
+            "name": "scikit-learn",
+            "version": "1.8.0",
+            "requirements": [
+                {
+                    "raw": "scikit-learn==1.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "scikit-learn",
+                    "specifier": "==1.8.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/scikit_learn-1.8.0.dist-info"
+                }
+            ]
+        },
+        "wrapt": {
+            "name": "wrapt",
+            "version": "2.1.1",
+            "requirements": [
+                {
+                    "raw": "wrapt==2.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wrapt",
+                    "specifier": "==2.1.1",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/wrapt-2.1.1.dist-info"
+                }
+            ]
+        },
+        "backrefs": {
+            "name": "backrefs",
+            "version": "6.2",
+            "requirements": [
+                {
+                    "raw": "backrefs==6.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "backrefs",
+                    "specifier": "==6.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/backrefs-6.2.dist-info"
+                }
+            ]
+        },
+        "pytest-cov": {
+            "name": "pytest-cov",
+            "version": "7.0.0",
+            "requirements": [
+                {
+                    "raw": "pytest-cov==7.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-cov",
+                    "specifier": "==7.0.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytest_cov-7.0.0.dist-info"
+                }
+            ]
+        },
+        "pip": {
+            "name": "pip",
+            "version": "26.0",
+            "requirements": [
+                {
+                    "raw": "pip==26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip",
+                    "specifier": "==26.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pip-26.0.dist-info"
+                }
+            ]
+        },
+        "numpy": {
+            "name": "numpy",
+            "version": "2.4.2",
+            "requirements": [
+                {
+                    "raw": "numpy==2.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "numpy",
+                    "specifier": "==2.4.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/numpy-2.4.2.dist-info"
+                }
+            ]
+        },
+        "greenlet": {
+            "name": "greenlet",
+            "version": "3.3.2",
+            "requirements": [
+                {
+                    "raw": "greenlet==3.3.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "greenlet",
+                    "specifier": "==3.3.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/greenlet-3.3.2.dist-info"
+                }
+            ]
+        },
+        "SQLAlchemy": {
+            "name": "SQLAlchemy",
+            "version": "2.0.46",
+            "requirements": [
+                {
+                    "raw": "SQLAlchemy==2.0.46",
+                    "extras": [],
+                    "marker": null,
+                    "name": "SQLAlchemy",
+                    "specifier": "==2.0.46",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sqlalchemy-2.0.46.dist-info"
+                }
+            ]
+        },
+        "sqlparse": {
+            "name": "sqlparse",
+            "version": "0.5.5",
+            "requirements": [
+                {
+                    "raw": "sqlparse==0.5.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sqlparse",
+                    "specifier": "==0.5.5",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/sqlparse-0.5.5.dist-info"
+                }
+            ]
+        },
+        "annotated-doc": {
+            "name": "annotated-doc",
+            "version": "0.0.4",
+            "requirements": [
+                {
+                    "raw": "annotated-doc==0.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "annotated-doc",
+                    "specifier": "==0.0.4",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/annotated_doc-0.0.4.dist-info"
+                }
+            ]
+        },
+        "pytest": {
+            "name": "pytest",
+            "version": "9.0.2",
+            "requirements": [
+                {
+                    "raw": "pytest==9.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest",
+                    "specifier": "==9.0.2",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pytest-9.0.2.dist-info"
+                }
+            ]
+        },
+        "PyAutoGUI": {
+            "name": "PyAutoGUI",
+            "version": "0.9.54",
+            "requirements": [
+                {
+                    "raw": "PyAutoGUI==0.9.54",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyAutoGUI",
+                    "specifier": "==0.9.54",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/pyautogui-0.9.54.dist-info"
+                }
+            ]
+        },
+        "cssselect2": {
+            "name": "cssselect2",
+            "version": "0.9.0",
+            "requirements": [
+                {
+                    "raw": "cssselect2==0.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cssselect2",
+                    "specifier": "==0.9.0",
+                    "url": null,
+                    "found": "/Users/borjafernandezangulo/cortex/.venv/lib/python3.14/site-packages/cssselect2-0.9.0.dist-info"
+                }
+            ]
+        }
+    },
+    "affected_packages": {},
+    "announcements": [],
+    "vulnerabilities": [],
+    "ignored_vulnerabilities": [],
+    "remediations": {},
+    "remediations_results": {
+        "vulnerabilities_fixed": [],
+        "remediations_applied": {},
+        "remediations_skipped": {}
+    }
+}
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+

@@ -24,10 +24,22 @@ class MemoryMixin:
         """
         from cortex.memory.ledger import EventLedgerL3
         from cortex.memory.working import WorkingMemoryL1
+        from cortex.signals.bus import SignalBus
 
         l1 = WorkingMemoryL1()
         l3 = EventLedgerL3(conn)
         await l3.ensure_table()
+
+        # Dedicated sync connection for the SignalBus (L1 Consciousness)
+        bus = None
+        try:
+            # We use the engine's _get_sync_conn if available, or create one.
+            # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()
+            sync_conn = self._get_sync_conn()
+            bus = SignalBus(sync_conn)
+            bus.ensure_table()
+        except Exception as e:
+            logger.warning("SignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
         import os
@@ -107,6 +119,7 @@ class MemoryMixin:
                 encoder=encoder,
                 hdc_l2=hdc_l2,
                 hdc_encoder=hdc_encoder,
+                bus=bus,
             )
         else:
             # Minimal manager: store a reference to L1+L3 for basic ops

@@ -201,12 +201,15 @@ class DynamicSemanticSpace:
         query: str,
         limit: int = 5,
         pulse_excitation: float = 20.0,
+        layer: str | None = None,
     ) -> list[Any]:
         """Recupera los vectores y emite un pulso topológico (Inversión Termodinámica)."""
         # Obtenemos el query vector para calcular la gradiente de topología
         query_vector = await self._store._encoder.encode(query)
 
-        facts = await self._store.recall_secure(tenant_id, project_id, query, limit)
+        facts = await self._store.recall_secure(
+            tenant_id=tenant_id, project_id=project_id, query=query, limit=limit, layer=layer
+        )
 
         # Inyecta masa topológica a facts útiles hacia el query_vector en O(1)
         for fact in facts:

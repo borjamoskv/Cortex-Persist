@@ -29,6 +29,8 @@ __all__ = [
     "CREATE_OUTCOMES",
     "CREATE_RWC_INDEXES",
     "CREATE_SESSIONS",
+    "CREATE_SIGNALS",
+    "CREATE_SIGNALS_INDEXES",
     "CREATE_TIME_ENTRIES",
     "CREATE_TIME_ENTRIES_INDEX",
     "CREATE_TRANSACTIONS",
@@ -428,6 +430,26 @@ CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
 CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 """
 
+# ─── Signal Bus (L1 Consciousness — Cross-Tool Reactive Signaling) ───
+CREATE_SIGNALS = """
+CREATE TABLE IF NOT EXISTS signals (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type  TEXT NOT NULL,
+    payload     TEXT NOT NULL DEFAULT '{}',
+    source      TEXT NOT NULL,
+    project     TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    consumed_by TEXT NOT NULL DEFAULT '[]'
+);
+"""
+
+CREATE_SIGNALS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_signals_type ON signals(event_type);
+CREATE INDEX IF NOT EXISTS idx_signals_source ON signals(source);
+CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
+CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
+"""
+
 
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
@@ -464,6 +486,8 @@ ALL_SCHEMA = [
     CREATE_TENANTS,
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
+    CREATE_SIGNALS,
+    CREATE_SIGNALS_INDEXES,
 ]
 
 

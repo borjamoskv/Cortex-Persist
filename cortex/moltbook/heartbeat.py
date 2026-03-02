@@ -174,7 +174,7 @@ class MoltbookHeartbeat:
                     except MoltbookRateLimited:
                         break
                     except Exception:
-                        pass  # May already be upvoted
+                        logger.debug("Upvote failed for post %s (likely already upvoted)", post_id)
 
         except MoltbookRateLimited:
             logger.warning("Rate limited during feed browse")

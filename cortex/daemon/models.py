@@ -34,6 +34,7 @@ __all__ = [
     "RETRY_BACKOFF",
     "STATUS_FILE",
     "SecurityAlert",
+    "SignalAlert",
     "SiteStatus",
 ]
 
@@ -191,6 +192,17 @@ class NeuralIntentAlert:
 
 
 @dataclass
+class SignalAlert:
+    """Alert triggered by a Signal Reactor reflex."""
+
+    event_type: str
+    message: str
+    project: str | None = None
+    payload: dict = field(default_factory=dict)
+
+
+
+@dataclass
 class DaemonStatus:
     """Full daemon check result — persisted to disk."""
 
@@ -209,6 +221,7 @@ class DaemonStatus:
     perception_alerts: list[PerceptionAlert] = field(default_factory=list)
     neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
     security_alerts: list[SecurityAlert] = field(default_factory=list)
+    signal_alerts: list[SignalAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -226,8 +239,10 @@ class DaemonStatus:
             and len(self.perception_alerts) == 0
             and len(self.neural_alerts) == 0
             and len(self.security_alerts) == 0
+            and len(self.signal_alerts) == 0
             and len(self.errors) == 0
         )
+
 
     def to_dict(self) -> dict:
         return {
@@ -342,5 +357,15 @@ class DaemonStatus:
                 }
                 for s in self.security_alerts
             ],
+            "signal_alerts": [
+                {
+                    "event_type": s.event_type,
+                    "message": s.message,
+                    "project": s.project,
+                    "payload": s.payload,
+                }
+                for s in self.signal_alerts
+            ],
             "errors": self.errors,
         }
+
