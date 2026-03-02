@@ -14,7 +14,7 @@ from cortex.compaction.compactor import (
     get_compaction_stats,
 )
 
-__all__ = ["compact_cmd", "compact_status", "compact_session_cmd"]
+__all__ = ["compact_cmd", "compact_status", "compact_session_cmd", "gc_cmd"]
 
 _STRATEGY_MAP = {s.value: s for s in CompactionStrategy}
 
@@ -203,5 +203,53 @@ def compact_session_cmd(project, max_facts, db) -> None:
     try:
         output = compact_session(engine, project, max_facts=max_facts)
         console.print(output)
+    finally:
+        close_engine_sync(engine)
+
+
+@cli.command("gc")
+@click.option(
+    "--batch-size", default=500, type=int, help="Number of tombstoned facts to delete per batch."
+)
+@click.option("--force", is_flag=True, help="Force GC execution even during peak hours.")
+@click.option("--db", default=DEFAULT_DB, help="Database path.")
+def gc_cmd(batch_size, force, db) -> None:
+    """Run vector GC (safe physical deletion).
+
+    Physically deletes facts and embeddings marked as tombstoned. Defers
+    execution to off-peak hours by default to protect database IOPS.
+    """
+    from cortex.cli.common import _run_async
+    from cortex.compaction.gc import GarbageCollector
+
+    engine = get_engine(db)
+    gc = GarbageCollector(engine)
+
+    async def _do_gc():
+        return await gc.run_gc(batch_size=batch_size, force=force)
+
+    try:
+        if force:
+            console.print("[yellow]⚠ Forcing GC execution (ignoring IOPS peak hours logic).[/]")
+        else:
+            console.print("[dim]Analyzing IOPS safe-windows for Garbage Collection...[/]")
+
+        stats = _run_async(_do_gc())
+
+        if stats["status"] == "skipped":
+            console.print(
+                f"[yellow]⚠ GC Skipped[/]: {stats['reason']}. Run with --force to override."
+            )
+        elif stats["status"] == "failed":
+            console.print(f"[[noir.danger]✗[/]] GC Failed. See errors: {stats.get('errors')}")
+        else:
+            console.print("[[noir.cyber]✓[/]] GC Execution Complete.")
+            if stats["deleted_facts"] == 0:
+                console.print("[dim]No tombstoned facts pending deletion.[/]")
+            else:
+                console.print(f"  [bold]Facts physically deleted:[/] {stats['deleted_facts']}")
+                console.print(
+                    f"  [bold]Vectors physically removed:[/] {stats['deleted_embeddings']}"
+                )
     finally:
         close_engine_sync(engine)

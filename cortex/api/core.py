@@ -18,9 +18,11 @@ import cortex.api.state as api_state
 from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
+    ImmuneMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
     SecurityHeadersMiddleware,
+    TracingMiddleware,
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
@@ -195,6 +197,8 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(SecurityFraudMiddleware)
+app.add_middleware(TracingMiddleware)
+app.add_middleware(ImmuneMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)

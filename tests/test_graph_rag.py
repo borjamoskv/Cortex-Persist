@@ -64,7 +64,7 @@ async def test_search_with_graph_context(engine_with_graph):
     # First result should have graph context if it mentions React
     assert results_graph[0].graph_context is not None
     ctx = results_graph[0].graph_context
-    nodes = [n["name"] for n in ctx["nodes"]]
+    nodes = [n["name"] for n in ctx["graph"]["nodes"]]
     assert "React" in nodes
     # Check that Vite is also there (since React -> Vite relation exists)
     assert "Vite" in nodes

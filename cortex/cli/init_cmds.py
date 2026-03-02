@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sqlite3
-
 import click
 from rich.panel import Panel
 
@@ -96,54 +94,6 @@ def migrate(source, db) -> None:
                 f"Bridges imported: {stats['bridges_imported']}\n"
                 f"Sessions imported: {stats['sessions_imported']}",
                 title="🔄 v3.1 → v4.0 Migration",
-                border_style="green",
-            )
-        )
-    finally:
-        _run_async(engine.close())
-
-
-@cli.command("migrate-graph")
-@click.option("--db", default=DEFAULT_DB, help="Database path")
-def migrate_graph(db) -> None:
-    """Migrate local SQLite graph data to Neo4j global knowledge graph."""
-    engine = get_engine(db)
-    try:
-        from cortex.graph import GRAPH_BACKEND, process_fact_graph
-
-        if GRAPH_BACKEND != "neo4j":
-            console.print("[yellow]WARNING: CORTEX_GRAPH_BACKEND is not set to 'neo4j'.[/]")
-            console.print(
-                "[dim]Migration will only re-process data into SQLite unless you set CORTEX_GRAPH_BACKEND=neo4j.[/]"
-            )
-            if not click.confirm("Do you want to continue?", default=False):
-                return
-        conn = engine._get_sync_conn()
-        facts = conn.execute("SELECT id, content, project, created_at FROM facts").fetchall()
-        console.print(f"[bold blue]Migrating {len(facts)} facts to Graph Memory...[/]")
-        processed = 0
-        from cortex.cli.slow_tip import with_slow_tips
-
-        with with_slow_tips("Migrando grafo de memoria…", threshold=3.0, interval=10.0):
-            with console.status("[bold blue]Processing...[/]") as prog_status:
-                for fid, content, project, ts in facts:
-                    try:
-                        process_fact_graph(conn, fid, content, project, ts)
-                        processed += 1
-                        if processed % 10 == 0:
-                            prog_status.update(
-                                f"[bold blue]Processed {processed}/{len(facts)}...[/]"
-                            )
-                    except (sqlite3.Error, OSError, RuntimeError) as e:
-                        console.print(
-                            f"[red]✗[/] Fact [bold]#{fid}[/] falló: [dim]{e}[/dim] "
-                            f"— continúa con los siguientes."
-                        )
-        console.print(
-            Panel(
-                f"[bold green]✓ Graph Migration Complete![/]\n"
-                f"Facts processed: {processed}\nBackend: {GRAPH_BACKEND}",
-                title="🧠 Graph Migration",
                 border_style="green",
             )
         )

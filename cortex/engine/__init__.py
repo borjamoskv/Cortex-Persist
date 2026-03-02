@@ -70,7 +70,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
                 os.chmod(parent, 0o700)
                 logger.info(
                     "SECURITY: Fixed dir perms %o → 700 on %s",
-                    current_dir_mode, parent,
+                    current_dir_mode,
+                    parent,
                 )
 
             # DB file: rw------- (600) — only if it exists
@@ -80,7 +81,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
                     os.chmod(self._db_path, 0o600)
                     logger.info(
                         "SECURITY: Fixed DB perms %o → 600 on %s",
-                        current_file_mode, self._db_path,
+                        current_file_mode,
+                        self._db_path,
                     )
         except OSError as e:
             logger.warning("SECURITY: Could not enforce permissions: %s", e)
@@ -89,14 +91,19 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     @staticmethod
     def _audit_log(
-        action: str, fact_type: str = "",
-        project: str = "", tenant_id: str = "default",
+        action: str,
+        fact_type: str = "",
+        project: str = "",
+        tenant_id: str = "default",
     ) -> None:
         """Append-only audit log for CLI/SDK access to CORTEX memory."""
         audit_logger = logging.getLogger("cortex.audit")
         audit_logger.info(
             "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
-            action, fact_type, project, tenant_id,
+            action,
+            fact_type,
+            project,
+            tenant_id,
         )
 
     @asynccontextmanager
@@ -149,8 +156,9 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
-        from cortex.database.core import connect
         import sqlite3
+
+        from cortex.database.core import connect
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)
         conn.enable_load_extension(True)
@@ -203,6 +211,12 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     def hybrid_search_sync(self, *args, **kwargs):
         return self._run_sync(self.search(*args, **kwargs))
+
+    def graph_sync(self, *args, **kwargs):
+        return self._run_sync(self.graph(*args, **kwargs))
+
+    def query_entity_sync(self, *args, **kwargs):
+        return self._run_sync(self.query_entity(*args, **kwargs))
 
     def close_sync(self):
         return self._run_sync(self.close())
@@ -264,6 +278,12 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     async def find_path(self, *args, **kwargs):
         return await self.facts.find_path(*args, **kwargs)
+
+    async def graph(self, *args, **kwargs):
+        return await self.facts.graph(*args, **kwargs)
+
+    async def query_entity(self, *args, **kwargs):
+        return await self.facts.query_entity(*args, **kwargs)
 
     async def vote(self, *args, **kwargs):
         return await self.consensus.vote(*args, **kwargs)

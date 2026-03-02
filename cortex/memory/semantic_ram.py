@@ -24,6 +24,14 @@ __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 
 logger = logging.getLogger("cortex.memory.semantic_ram")
 
+# Import topological health types (lazy to avoid circular imports)
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from cortex.memory.topological_health import (
+        TopologicalAnchor,
+        TopologicalHealthMonitor,
+    )
+
 # Sovereign 130/100 Constants
 DECAY_LAMBDA: Final[float] = 0.00000802  # 24h half-life
 EXCITATION_MAX: Final[float] = 100.0
@@ -38,14 +46,22 @@ class SemanticMutator:
     mutates the embeddings in the database via numpy vector math.
     """
 
-    __slots__ = ("_store", "_queue", "_worker_task", "_pool")
+    __slots__ = ("_store", "_queue", "_worker_task", "_pool", "_health_monitor", "_anchor")
 
-    def __init__(self, store: SovereignVectorStoreL2) -> None:
+    def __init__(
+        self,
+        store: SovereignVectorStoreL2,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
+    ) -> None:
         self._store = store
         self._queue: asyncio.Queue[tuple[list[float], str, float]] = asyncio.Queue(maxsize=10000)
         self._worker_task: asyncio.Task[None] | None = None
         # ThreadPoolExecutor to bypass Python GIL during Numpy topological operations
         self._pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ctx_mutator")
+        # Topological health write-gate: skip mutations if model_hash has drifted
+        self._health_monitor = health_monitor
+        self._anchor = anchor
 
     def start(self) -> None:
         """Start the background daemon. Should be called during Engine boot."""
@@ -60,8 +76,9 @@ class SemanticMutator:
             try:
                 await self._worker_task
             except asyncio.CancelledError:
-                pass
-            self._pool.shutdown(wait=False)
+                raise
+            # LEGION-OMEGA: Wait=True para prevenir orfandad de transacciones en BD
+            self._pool.shutdown(wait=True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
 
     def emit_pulse(
@@ -83,7 +100,7 @@ class SemanticMutator:
                 batch = await self._collect_batch()
                 await self._apply_topological_shift(batch)
             except asyncio.CancelledError:
-                break
+                raise
             except (OSError, RuntimeError, ValueError) as e:
                 logger.error("SemanticMutator: Pulse mutation failed: %s", e)
                 await asyncio.sleep(1.0)
@@ -96,7 +113,10 @@ class SemanticMutator:
         batch[fact_id] = ([query_vec], delta)
         self._queue.task_done()
 
-        while len(batch) < 100 and not self._queue.empty():
+        # LEGION-OMEGA (The OOM Killer): Límite doble,
+        # por keys únicas (100) y por sub-items totales (500)
+        total_items = 1
+        while len(batch) < 100 and total_items < 500 and not self._queue.empty():
             q_v, fid, d = self._queue.get_nowait()
             if fid in batch:
                 batch[fid][0].append(q_v)
@@ -104,17 +124,36 @@ class SemanticMutator:
             else:
                 batch[fid] = ([q_v], d)
             self._queue.task_done()
+            total_items += 1
 
         return batch
 
     async def _apply_topological_shift(
         self, batch: dict[str, tuple[list[list[float]], float]]
     ) -> None:
-        """Executes numpy topological shifts in a C-level threadpool to avoid event loop blocking."""
+        """Executes numpy topological shifts in a
+        C-level threadpool to avoid event loop blocking.
+        """
         if not batch:
             return
 
+        # WRITE-GATE: If health monitor detects model_hash drift, skip batch.
+        # Fail-safe, not fail-deadly — log CRITICAL but don't crash.
+        if self._health_monitor and self._anchor:
+            if self._health_monitor.needs_recalibration(self._anchor):
+                logger.critical(
+                    "SemanticMutator: MODEL HASH DRIFT. "
+                    "Anchor=%s, current=%s. "
+                    "Skipping %d mutations. "
+                    "Recalculate p_0 cold.",
+                    self._anchor.model_hash[:12],
+                    self._health_monitor._model_hash[:12],
+                    len(batch),
+                )
+                return
+
         def _mutate():
+            # LEGION-OMEGA (Chronos Sniper): Evitar deadlock, manejar sqlite3.Error general (vía Exception genérico controlado)
             conn = self._store._get_conn()
             now = time.time()
             try:
@@ -125,8 +164,10 @@ class SemanticMutator:
                     self._mutate_single_fact(cursor, fid, query_vecs, delta_exc, now)
 
                 conn.commit()
-            except (OSError, ValueError):
+            except Exception as e:
+                # Si una DB lock o constraint quiebra la query, asegura rollback de BEGIN IMMEDIATE
                 conn.rollback()
+                logger.error("SemanticMutator: Unrecoverable mutation error: %s", e)
                 raise
 
         # Liberamos el GIL mientras SQLite y Numpy mutan los tensores
@@ -190,9 +231,14 @@ class DynamicSemanticSpace:
 
     __slots__ = ("_store", "semantic_mutator")
 
-    def __init__(self, store: SovereignVectorStoreL2) -> None:
+    def __init__(
+        self,
+        store: SovereignVectorStoreL2,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
+    ) -> None:
         self._store = store
-        self.semantic_mutator = SemanticMutator(store)
+        self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
 
     async def recall_and_pulse(
         self,

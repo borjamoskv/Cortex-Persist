@@ -30,7 +30,13 @@ def _safe_parse_tags(raw: str | None) -> list[str]:
         return [t.strip() for t in raw.split(",") if t.strip()]
 
 
-async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) -> Path:
+async def export_snapshot(
+    engine: CortexEngine,
+    out_path: Path | None = None,
+    project_filter: str | None = None,
+    min_confidence: float | None = None,
+    fact_types: list[str] | None = None,
+) -> Path:
     """Exporta un snapshot legible de toda la memoria activa de CORTEX.
 
     Genera un archivo markdown que el agente IA puede leer al inicio
@@ -39,6 +45,9 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     Args:
         engine: Instancia de CortexEngine.
         out_path: Ruta de salida. Por defecto ~/.cortex/context-snapshot.md
+        project_filter: Filtrar por un proyecto específico.
+        min_confidence: Omitir facts con menor confianza (impacto).
+        fact_types: Lista de fact_types permitidos (para aislar capas).
 
     Returns:
         Path del archivo generado.
@@ -53,6 +62,21 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
         "ORDER BY project, fact_type, id"
     ) as cursor:
         rows = await cursor.fetchall()
+
+    filtered_rows = []
+    for row in rows:
+        project, _, fact_type, _, confidence = row
+
+        if project_filter and project != project_filter:
+            continue
+        if min_confidence is not None and (confidence or 0.0) < min_confidence:
+            continue
+        if fact_types and fact_type not in fact_types:
+            continue
+
+        filtered_rows.append(row)
+
+    rows = filtered_rows
 
     # Agrupar por proyecto
     by_project: dict[str, list] = {}

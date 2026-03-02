@@ -14,6 +14,7 @@ from cortex.daemon.monitors.neural import NeuralIntentMonitor
 from cortex.daemon.monitors.perception import PerceptionMonitor
 from cortex.daemon.monitors.security import SecurityMonitor
 from cortex.daemon.monitors.signals import SignalMonitor
+from cortex.daemon.monitors.tombstone import TombstoneMonitor
 
 __all__ = [
     "AutonomousMejoraloMonitor",
@@ -30,4 +31,5 @@ __all__ = [
     "SecurityMonitor",
     "SignalMonitor",
     "SiteMonitor",
+    "TombstoneMonitor",
 ]

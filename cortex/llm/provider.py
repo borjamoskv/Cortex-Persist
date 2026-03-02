@@ -25,6 +25,7 @@ from typing import Any, Final
 
 import httpx
 
+from cortex.llm.quota import SovereignQuotaManager
 from cortex.llm.router import BaseProvider, CortexPrompt
 
 __all__ = ["LLMProvider"]
@@ -38,6 +39,8 @@ _CONTENT_TYPE_JSON: Final[str] = "application/json"
 
 # Global cache for presets to avoid redundant I/O
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}
+
+_QUOTA_MANAGER = SovereignQuotaManager()
 
 
 def _load_presets() -> dict[str, dict[str, Any]]:
@@ -164,6 +167,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
+        await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
@@ -184,7 +188,8 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
                 logger.warning(
-                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...", self._model
+                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
+                    self._model,
                 )
                 payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
                 # Retry once with open code model
@@ -233,6 +238,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
     ):
         """Stream a chat completion request. Yields text chunks."""
+        await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
@@ -257,6 +263,7 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
+        await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
         payload = {
@@ -274,7 +281,8 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
                 logger.warning(
-                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...", self._model
+                    "LLM API [429 Quota Exceeded] on %s. Fallback to Open Code (Qwen Coder)...",
+                    self._model,
                 )
                 payload["model"] = "qwen/qwen-2.5-coder-32b-instruct"
                 # Retry once with open code model

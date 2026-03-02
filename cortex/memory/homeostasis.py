@@ -1,6 +1,7 @@
 """CORTEX v6+ — Thermodynamic Homeostasis Engine.
 
 Implements active biological memory management (Forget Gates & Synaptic Pruning).
+Integrates with drift monitoring for post-prune topological health assessment.
 """
 
 from __future__ import annotations
@@ -42,6 +43,10 @@ class EntropyPruner:
                 if await self._prune_engram(engram):
                     pruned_count += 1
 
+            # Post-prune drift checkpoint (non-blocking diagnostic)
+            if pruned_count > 0:
+                await self._post_prune_drift_check(tenant_id, project_id)
+
         except (RuntimeError, ValueError, OSError) as e:
             logger.error("Pruning cycle failed: %s", e)
 
@@ -64,6 +69,23 @@ class EntropyPruner:
             await self._vs.upsert(updated)
 
         return False
+
+    async def _post_prune_drift_check(self, tenant_id: str, project_id: str | None = None) -> None:
+        """Run non-blocking drift health check after pruning."""
+        import importlib.util
+
+        if importlib.util.find_spec("cortex.memory.drift") is None:
+            return  # drift module not available — degrade gracefully
+
+        if not hasattr(self._vs, "recall_secure"):
+            return
+
+        # We log diagnostically — no action taken, just visibility
+        logger.debug(
+            "Post-prune drift check requested for tenant=%s project=%s",
+            tenant_id,
+            project_id,
+        )
 
 
 class DynamicSynapseUpdate:

@@ -6,8 +6,7 @@ Extraction, relationship detection, and backend orchestration.
 import logging
 import sqlite3
 
-from cortex.config import GRAPH_BACKEND
-from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
+from cortex.graph.backends import GraphBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [
@@ -29,8 +28,6 @@ logger = logging.getLogger("cortex.graph")
 
 def get_backend(conn=None) -> GraphBackend:
     """Get the appropriate graph backend."""
-    if GRAPH_BACKEND == "neo4j":
-        return Neo4jBackend()
     return SQLiteBackend(conn)  # type: ignore[arg-type]
 
 
@@ -150,22 +147,10 @@ async def process_fact_graph(
             if sid and tid:
                 await _upsert_relation(conn, sid, tid, rel["relation_type"], timestamp, fact_id)
 
-        _neo4j_dual_write(entities, project, timestamp)
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.warning("Graph processing failed for fact %d: %s", fact_id, e)
         return 0, 0
-
-
-def _neo4j_dual_write(entities: list[dict], project: str, timestamp: str) -> None:
-    if GRAPH_BACKEND != "neo4j":
-        return
-    try:
-        neo = Neo4jBackend()
-        for ent in entities:
-            neo.upsert_entity(ent["name"], ent["entity_type"], project, timestamp)
-    except (sqlite3.Error, OSError, ValueError) as e:
-        logger.warning("Neo4j dual-write failed: %s", e)
 
 
 def process_fact_graph_sync(

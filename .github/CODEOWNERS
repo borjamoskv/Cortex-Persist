@@ -1,9 +1,11 @@
-* @borjamoskv
+# CORTEX CODEOWNERS
+# Enforces review by @borjamoskv for critical paths
 
-# Sovereign Code Governance (AX-001)
-# No one, not even an autonomous swarm, can modify the foundational axioms
-# or the security gates without explicit creator approval.
+# Global default
+*       @borjamoskv
 
-/cortex/axioms/ @borjamoskv
-/cortex/guards/ @borjamoskv
-/.github/workflows/ @borjamoskv
+# Critical Paths
+/.github/           @borjamoskv
+/scripts/           @borjamoskv
+/cortex/            @borjamoskv
+/tests/             @borjamoskv

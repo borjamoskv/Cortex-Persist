@@ -52,7 +52,11 @@ class SQLiteQueryMixin:
         query_rels = (
             "SELECT id, source_entity_id, target_entity_id, relation_type, weight\n"
             "FROM entity_relations\n"
-            "WHERE source_entity_id IN (" + placeholders + ") OR target_entity_id IN (" + placeholders + ")"
+            "WHERE source_entity_id IN ("
+            + placeholders
+            + ") OR target_entity_id IN ("
+            + placeholders
+            + ")"
         )
         params_rels = entity_ids + entity_ids
 
@@ -73,13 +77,13 @@ class SQLiteQueryMixin:
             q_rel_count = """SELECT COUNT(*) FROM entity_relations er
                              JOIN entities e ON er.source_entity_id = e.id
                              WHERE e.project = ?"""
-            total_entities = (await self._fetch_row(q_ent_count, [project]))[0]
-            total_rels = (await self._fetch_row(q_rel_count, [project]))[0]
+            total_entities = (await self._fetch_rows(q_ent_count, [project]))[0][0]
+            total_rels = (await self._fetch_rows(q_rel_count, [project]))[0][0]
         else:
             q_ent_count = "SELECT COUNT(*) FROM entities"
             q_rel_count = "SELECT COUNT(*) FROM entity_relations"
-            total_entities = (await self._fetch_row(q_ent_count, []))[0]
-            total_rels = (await self._fetch_row(q_rel_count, []))[0]
+            total_entities = (await self._fetch_rows(q_ent_count, []))[0][0]
+            total_rels = (await self._fetch_rows(q_rel_count, []))[0][0]
 
         return {"total_entities": total_entities, "total_relationships": total_rels}
 
@@ -116,7 +120,11 @@ class SQLiteQueryMixin:
         rel_rows = self.conn.execute(
             "SELECT id, source_entity_id, target_entity_id, relation_type, weight\n"
             "FROM entity_relations\n"
-            "WHERE source_entity_id IN (" + placeholders + ") OR target_entity_id IN (" + placeholders + ")",
+            "WHERE source_entity_id IN ("
+            + placeholders
+            + ") OR target_entity_id IN ("
+            + placeholders
+            + ")",
             entity_ids + entity_ids,
         ).fetchall()
 
@@ -156,10 +164,11 @@ class SQLiteQueryMixin:
         else:
             q_ent += " ORDER BY mention_count DESC LIMIT 1"
 
-        row = await self._fetch_row(q_ent, params_ent)
+        rows = await self._fetch_rows(q_ent, params_ent)
 
-        if not row:
+        if not rows:
             return None
+        row = rows[0]
 
         entity = {
             "id": row[0],

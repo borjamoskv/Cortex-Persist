@@ -61,14 +61,27 @@ def sync(db) -> None:
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--out", default="~/.cortex/context-snapshot.md", help="Ruta de salida")
-def export(db, out) -> None:
+@click.option("--project", help="Filtrar por proyecto")
+@click.option("--min-confidence", type=float, help="Confianza mínima (0.0-1.0)")
+@click.option("--types", help="Tipos separados por coma (ej. rule,insight)")
+def export(db, out, project, min_confidence, types) -> None:
     """Exportar snapshot de CORTEX a markdown (para lectura automática del agente)."""
     engine = get_engine(db)
     try:
         _run_async(engine.init_db())
         out_path = Path(out).expanduser()
+        fact_types = [t.strip() for t in types.split(",")] if types else None
+
         # Fix: Wrap async call
-        _run_async(export_snapshot(engine, out_path))
+        _run_async(
+            export_snapshot(
+                engine,
+                out_path,
+                project_filter=project,
+                min_confidence=min_confidence,
+                fact_types=fact_types,
+            )
+        )
         console.print(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
     finally:
         # Fix: engine.close is async

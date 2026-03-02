@@ -205,6 +205,9 @@ class HealthCheckDetail(BaseModel):
     active_connections: int | None = None
     max_connections: int | None = None
     utilization: str | None = None
+    useful_facts_ratio: float | None = None
+    duplicates_ratio: float | None = None
+    total_facts: int | None = None
 
     model_config = {"extra": "allow"}
 

@@ -15,6 +15,7 @@ Usage::
 """
 
 from cortex.memory.consolidation import SilentEngram, SystemsConsolidator
+from cortex.memory.drift import DriftMonitor, DriftSignature
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.frequency import (
@@ -29,6 +30,11 @@ from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
 from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.sparse import MushroomBodyEncoder
+from cortex.memory.temporal_health import (
+    HealthReport,
+    SchedulerConfig,
+    TemporalHealthScheduler,
+)
 from cortex.memory.working import WorkingMemoryL1
 
 try:
@@ -48,17 +54,22 @@ __all__ = [
     "ContinuousMemorySystem",
     "CortexMemoryManager",
     "CortexSemanticEngram",
+    "DriftMonitor",
+    "DriftSignature",
     "DynamicSynapseUpdate",
     "EntropyPruner",
     "EpisodicSnapshot",
     "EventLedgerL3",
+    "HealthReport",
     "MemoryEntry",
     "MemoryEvent",
     "MemoryFrequency",
     "MushroomBodyEncoder",
     "RetrievalBand",
+    "SchedulerConfig",
     "SilentEngram",
     "SystemsConsolidator",
+    "TemporalHealthScheduler",
     "VectorStoreL2",
     "WorkingMemoryL1",
 ]
