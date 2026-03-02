@@ -12,6 +12,13 @@ from pathlib import Path
 
 import pytest
 
+from cortex.compaction.compactor import (
+    CompactionResult,
+    CompactionStrategy,
+    compact,
+    compact_session,
+    get_compaction_stats,
+)
 from cortex.compaction.strategies.dedup import find_duplicates
 from cortex.compaction.strategies.staleness import find_stale_facts
 from cortex.compaction.utils import (
@@ -25,13 +32,6 @@ from cortex.compaction.utils import (
 )
 from cortex.compaction.utils import (
     similarity as _similarity,
-)
-from cortex.compaction.compactor import (
-    CompactionResult,
-    CompactionStrategy,
-    compact,
-    compact_session,
-    get_compaction_stats,
 )
 from cortex.engine import CortexEngine
 
@@ -60,12 +60,13 @@ async def seeded_engine(engine: CortexEngine) -> CortexEngine:
     )
 
     from cortex.crypto import get_default_encrypter
+
     enc = get_default_encrypter()
 
     enc_content1 = enc.encrypt_str("The sky is blue - padded to satisfy 20 chars min", "default")
     await conn.execute(stmt, (enc_content1,))
     await conn.execute(stmt, (enc_content1,))
-    
+
     await conn.commit()
 
     # 2 near-duplicates
@@ -88,7 +89,7 @@ async def seeded_engine(engine: CortexEngine) -> CortexEngine:
         "INSERT INTO facts (tenant_id, project, content, fact_type, source, "
         "confidence, created_at, updated_at, valid_from, tags) "
         "VALUES ('default', 'test', ?, 'error', 'test', "
-        "'verified', datetime('now'), datetime('now'), datetime('now'), '[]')"
+        "'C5', datetime('now'), datetime('now'), datetime('now'), '[]')"
     )
     await conn.execute(stmt_err, (enc_err,))
     await conn.execute(stmt_err, (enc_err,))
@@ -196,7 +197,7 @@ class TestCompactionResult:
 class TestCompactionStrategy:
     async def test_all_strategies(self):
         all_strats = CompactionStrategy.all()
-        assert len(all_strats) == 3
+        assert len(all_strats) == 4
         assert CompactionStrategy.DEDUP in all_strats
 
     async def test_string_value(self):

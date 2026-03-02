@@ -41,11 +41,7 @@ class CortexConfig:
     RATE_LIMIT: int = 300
     RATE_WINDOW: int = 60
 
-    # Graph
-    GRAPH_BACKEND: str = "sqlite"
-    NEO4J_URI: str = "bolt://localhost:7687"
-    NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = ""
+    # Graph Backend is exclusively SQLite now
 
     # Ledger
     CHECKPOINT_BATCH_SIZE: int = 1000
@@ -74,9 +70,7 @@ class CortexConfig:
 
     # L2 Vector Store
     VECTOR_STORE_PATH: str = ""
-    VECTOR_STORE_MODE: str = "local"  # local | remote
-    QDRANT_CLOUD_URL: str = ""
-    QDRANT_API_KEY: str = ""
+    VECTOR_STORE_MODE: str = "local"  # local exclusively (SQLite-vec)
 
     # LLM Provider
     LLM_PROVIDER: str = ""
@@ -130,10 +124,6 @@ class CortexConfig:
             ).split(","),
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
-            GRAPH_BACKEND=os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite"),
-            NEO4J_URI=os.environ.get("CORTEX_NEO4J_URI", "bolt://localhost:7687"),
-            NEO4J_USER=os.environ.get("CORTEX_NEO4J_USER", "neo4j"),
-            NEO4J_PASSWORD=os.environ.get("CORTEX_NEO4J_PASSWORD", ""),
             CHECKPOINT_BATCH_SIZE=int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000")),
             CHECKPOINT_MIN=int(os.environ.get("CORTEX_CHECKPOINT_MIN", "100")),
             CHECKPOINT_MAX=int(os.environ.get("CORTEX_CHECKPOINT_MAX", "1000")),
@@ -153,8 +143,6 @@ class CortexConfig:
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
             VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
-            QDRANT_CLOUD_URL=os.environ.get("QDRANT_CLOUD_URL", ""),
-            QDRANT_API_KEY=os.environ.get("QDRANT_API_KEY", ""),
             LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", ""),
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),

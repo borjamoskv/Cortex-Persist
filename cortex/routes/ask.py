@@ -122,7 +122,8 @@ async def ask_cortex(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id or req.project,
+        project=req.project,
+        tenant_id=auth.tenant_id,
     )
 
     # 2. Build context from retrieved facts (Optimized)
@@ -210,7 +211,8 @@ async def ask_stream(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id or req.project,
+        project=req.project,
+        tenant_id=auth.tenant_id,
     )
 
     # 2. Build context

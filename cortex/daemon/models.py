@@ -12,6 +12,7 @@ __all__ = [
     "CORTEX_DB",
     "CORTEX_DIR",
     "CertAlert",
+    "DriftAlert",
     "CloudSyncAlert",
     "CompactionAlert",
     "DEFAULT_CERT_WARN_DAYS",
@@ -36,6 +37,8 @@ __all__ = [
     "SecurityAlert",
     "SignalAlert",
     "SiteStatus",
+    "TombstoneAlert",
+    "DriftAlert",
 ]
 
 # ─── Constants ────────────────────────────────────────────────────────
@@ -201,6 +204,25 @@ class SignalAlert:
     payload: dict = field(default_factory=dict)
 
 
+@dataclass
+class TombstoneAlert:
+    """Alert triggered when physical tombstone sweep completes."""
+
+    deleted_facts: int
+    freed_mb: float
+    message: str
+
+
+@dataclass
+class DriftAlert:
+    """Alert triggered when L2 vector space topological health degrades."""
+
+    health: float
+    centroid_drift: float
+    spectral_ratio: float
+    n_vectors: int
+    message: str
+
 
 @dataclass
 class DaemonStatus:
@@ -222,6 +244,8 @@ class DaemonStatus:
     neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
     security_alerts: list[SecurityAlert] = field(default_factory=list)
     signal_alerts: list[SignalAlert] = field(default_factory=list)
+    tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
+    drift_alerts: list[DriftAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -240,9 +264,10 @@ class DaemonStatus:
             and len(self.neural_alerts) == 0
             and len(self.security_alerts) == 0
             and len(self.signal_alerts) == 0
+            and len(self.tombstone_alerts) == 0
+            and len(self.drift_alerts) == 0
             and len(self.errors) == 0
         )
-
 
     def to_dict(self) -> dict:
         return {
@@ -366,6 +391,23 @@ class DaemonStatus:
                 }
                 for s in self.signal_alerts
             ],
+            "tombstone_alerts": [
+                {
+                    "deleted_facts": t.deleted_facts,
+                    "freed_mb": round(t.freed_mb, 2),
+                    "message": t.message,
+                }
+                for t in self.tombstone_alerts
+            ],
+            "drift_alerts": [
+                {
+                    "health": round(d.health, 4),
+                    "centroid_drift": round(d.centroid_drift, 6),
+                    "spectral_ratio": round(d.spectral_ratio, 4),
+                    "n_vectors": d.n_vectors,
+                    "message": d.message,
+                }
+                for d in self.drift_alerts
+            ],
             "errors": self.errors,
         }
-

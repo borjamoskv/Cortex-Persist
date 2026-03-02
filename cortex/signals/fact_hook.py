@@ -54,6 +54,7 @@ _DEFAULT_COMPACT_THRESHOLD: int = 50
 
 def _compact_threshold() -> int:
     import os
+
     raw = os.environ.get("CORTEX_COMPACT_THRESHOLD", "")
     try:
         v = int(raw)
@@ -92,6 +93,7 @@ def emit_fact_stored(
         conn = sqlite3.connect(db_path, timeout=3)
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA busy_timeout=3000")  # runtime-policy mirrors connect() timeout
 
         bus = SignalBus(conn)
         bus.ensure_table()

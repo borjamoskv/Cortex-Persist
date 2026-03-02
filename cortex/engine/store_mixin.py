@@ -138,8 +138,12 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                         await mm._hdc.memorize(fact)
                         logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)
             except (
-                sqlite3.Error, aiosqlite.Error, OSError,
-                ValueError, AttributeError, TypeError,
+                sqlite3.Error,
+                aiosqlite.Error,
+                OSError,
+                ValueError,
+                AttributeError,
+                TypeError,
             ) as e:
                 logger.warning("Specular Memory indexing failed for fact %d: %s", fact_id, e)
 
@@ -185,7 +189,10 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         return meta
 
     def _guard_injection(
-        self, content: str, project: str, meta: dict[str, Any] | None,
+        self,
+        content: str,
+        project: str,
+        meta: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
         """Scan content for injection attacks."""
         try:
@@ -195,7 +202,9 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             if not report.is_safe:
                 logger.warning(
                     "🛡️ INJECTION GUARD: %d threats (highest: %s) in [%s]",
-                    len(report.matches), report.highest_severity, project,
+                    len(report.matches),
+                    report.highest_severity,
+                    project,
                 )
                 meta = {
                     **(meta or {}),
@@ -204,9 +213,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                     "injection_matches": len(report.matches),
                 }
                 if report.highest_severity == "critical":
-                    raise ValueError(
-                        f"INJECTION BLOCKED: {report.matches[0].description}"
-                    )
+                    raise ValueError(f"INJECTION BLOCKED: {report.matches[0].description}")
         except ImportError:
             pass  # Guard not installed — degrade gracefully
         return meta
@@ -222,17 +229,21 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         try:
             from cortex.security.anomaly_detector import DETECTOR, SecurityEvent
 
-            anomaly = DETECTOR.record_event(SecurityEvent(
-                source=source or "unknown",
-                project=project,
-                action="store",
-                content_length=len(content),
-            ))
+            anomaly = DETECTOR.record_event(
+                SecurityEvent(
+                    source=source or "unknown",
+                    project=project,
+                    action="store",
+                    content_length=len(content),
+                )
+            )
             if anomaly and anomaly.is_anomalous:
                 logger.warning(
                     "🔍 ANOMALY: %s (severity: %s, Z=%.1f) in [%s]",
-                    anomaly.anomaly_type, anomaly.severity,
-                    anomaly.z_score, project,
+                    anomaly.anomaly_type,
+                    anomaly.severity,
+                    anomaly.z_score,
+                    project,
                 )
                 meta = {
                     **(meta or {}),
@@ -242,23 +253,33 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                 }
                 if anomaly.severity == "critical":
                     from cortex.security.security_sync import SIGNAL
-                    SIGNAL.emit_sync("threat", {
-                        "type": "anomaly", "severity": "critical",
-                    })
-                    raise ValueError(
-                        f"ANOMALY BLOCKED: {anomaly.description}"
+
+                    SIGNAL.emit_sync(
+                        "threat",
+                        {
+                            "type": "anomaly",
+                            "severity": "critical",
+                        },
                     )
+                    raise ValueError(f"ANOMALY BLOCKED: {anomaly.description}")
                 if anomaly.severity == "high":
                     from cortex.security.security_sync import SIGNAL
-                    SIGNAL.emit_sync("anomaly", {
-                        "type": "anomaly", "severity": "high",
-                    })
+
+                    SIGNAL.emit_sync(
+                        "anomaly",
+                        {
+                            "type": "anomaly",
+                            "severity": "high",
+                        },
+                    )
         except ImportError:
             pass  # Detector not installed — degrade gracefully
         return meta
 
     def _guard_honeypot(
-        self, content: str, meta: dict[str, Any] | None,
+        self,
+        content: str,
+        meta: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
         """Check if content attempts to access a honeypot resource."""
         try:
@@ -267,9 +288,13 @@ class StoreMixin(PrivacyMixin, GhostMixin):
 
             decoy = HONEY_POT.check_exploitation(content)
             if decoy:
-                SIGNAL.emit_sync("threat", {
-                    "type": "honeypot", "id": decoy.id,
-                })
+                SIGNAL.emit_sync(
+                    "threat",
+                    {
+                        "type": "honeypot",
+                        "id": decoy.id,
+                    },
+                )
                 logger.critical(
                     "☢️ HONEYPOT BREACH: Unauthorized access to [%s]",
                     decoy.id,
@@ -279,9 +304,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
                     "honeypot_triggered": True,
                     "decoy_id": decoy.id,
                 }
-                raise ValueError(
-                    f"SECURITY BREACH: Unauthorized resource [{decoy.id}]"
-                )
+                raise ValueError(f"SECURITY BREACH: Unauthorized resource [{decoy.id}]")
         except ImportError:
             pass  # Honeypot not installed — degrade gracefully
         return meta
@@ -331,12 +354,13 @@ class StoreMixin(PrivacyMixin, GhostMixin):
             from cortex.engine.bridge_guard import BridgeGuard
 
             bridge_result = await BridgeGuard.validate_bridge(
-                conn, content, project, tenant_id,
+                conn,
+                content,
+                project,
+                tenant_id,
             )
             if not bridge_result["allowed"]:
-                raise ValueError(
-                    f"BRIDGE BLOCKED: {bridge_result['reason']}"
-                )
+                raise ValueError(f"BRIDGE BLOCKED: {bridge_result['reason']}")
             if bridge_result["meta_flags"]:
                 meta = meta or {}
                 meta.update(bridge_result["meta_flags"])
@@ -433,9 +457,7 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         try:
             from cortex.signals.fact_hook import emit_fact_stored
 
-            _db_path = getattr(self, "db_path", None) or getattr(
-                self, "_db_path", None
-            )
+            _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
             if _db_path:
                 emit_fact_stored(
                     db_path=str(_db_path),
@@ -553,36 +575,45 @@ class StoreMixin(PrivacyMixin, GhostMixin):
     async def _deprecate_impl(
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None
     ) -> bool:
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
         ts = now_iso()
+
+        # Fetch tenant_id for the mutation engine
         cursor = await conn.execute(
-            "UPDATE facts SET valid_until = ?, updated_at = ?, "
-            "meta = json_set(COALESCE(meta, '{}'), '$.deprecation_reason', ?) "
-            "WHERE id = ? AND valid_until IS NULL",
-            (ts, ts, reason or "deprecated", fact_id),
+            "SELECT tenant_id, project FROM facts WHERE id = ? AND valid_until IS NULL",
+            (fact_id,),
+        )
+        row = await cursor.fetchone()
+        if not row:
+            return False
+
+        tenant_id, project = row[0], row[1]
+
+        # Solid-state: append event + project atomically
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=tenant_id,
+            event_type="deprecate",
+            payload={"reason": reason or "deprecated", "timestamp": ts},
+            signer="store_mixin:deprecate",
+            commit=False,
         )
 
         # FTS5 plaintext index cleanup
-        if cursor.rowcount > 0:
-            try:
-                await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-            except (sqlite3.Error, aiosqlite.Error) as e:
-                logger.warning("Failed to remove FTS for fact %d: %s", fact_id, e)
+        try:
+            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
+        except (sqlite3.Error, aiosqlite.Error) as e:
+            logger.warning("Failed to remove FTS for fact %d: %s", fact_id, e)
 
-            cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
-            row = await cursor.fetchone()
-            await self._log_transaction(
-                conn,
-                row[0] if row else "unknown",
-                "deprecate",
-                {"fact_id": fact_id, "reason": reason},
-            )
-            # CDC: Enqueue for Neo4j sync
-            await conn.execute(
-                "INSERT INTO graph_outbox (fact_id, action, status) VALUES (?, ?, ?)",
-                (fact_id, "deprecate_fact", "pending"),
-            )
-            return True
-        return False
+        await self._log_transaction(
+            conn,
+            project,
+            "deprecate",
+            {"fact_id": fact_id, "reason": reason},
+        )
+        return True
 
     async def quarantine(
         self,
@@ -600,22 +631,37 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         if not reason or not reason.strip():
             raise ValueError("Quarantine reason is required")
 
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
         async def _impl(c: aiosqlite.Connection) -> bool:
             ts = now_iso()
             cursor = await c.execute(
-                "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
-                "quarantine_reason = ?, updated_at = ? "
-                "WHERE id = ? AND valid_until IS NULL AND is_quarantined = 0",
-                (ts, reason.strip(), ts, fact_id),
+                "SELECT tenant_id FROM facts "
+                "WHERE id = ? AND valid_until IS NULL "
+                "AND is_quarantined = 0",
+                (fact_id,),
             )
-            if cursor.rowcount > 0:
-                await self._log_transaction(
-                    c, "system", "quarantine",
-                    {"fact_id": fact_id, "reason": reason},
-                )
-                await c.commit()
-                return True
-            return False
+            row = await cursor.fetchone()
+            if not row:
+                return False
+
+            await MUTATION_ENGINE.apply(
+                c,
+                fact_id=fact_id,
+                tenant_id=row[0],
+                event_type="quarantine",
+                payload={"reason": reason.strip(), "timestamp": ts},
+                signer="store_mixin:quarantine",
+                commit=False,
+            )
+            await self._log_transaction(
+                c,
+                "system",
+                "quarantine",
+                {"fact_id": fact_id, "reason": reason},
+            )
+            await c.commit()
+            return True
 
         if conn:
             return await _impl(conn)
@@ -631,21 +677,35 @@ class StoreMixin(PrivacyMixin, GhostMixin):
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
 
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
         async def _impl(c: aiosqlite.Connection) -> bool:
             ts = now_iso()
             cursor = await c.execute(
-                "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
-                "quarantine_reason = NULL, updated_at = ? "
-                "WHERE id = ? AND is_quarantined = 1",
-                (ts, fact_id),
+                "SELECT tenant_id FROM facts WHERE id = ? AND is_quarantined = 1",
+                (fact_id,),
             )
-            if cursor.rowcount > 0:
-                await self._log_transaction(
-                    c, "system", "unquarantine", {"fact_id": fact_id},
-                )
-                await c.commit()
-                return True
-            return False
+            row = await cursor.fetchone()
+            if not row:
+                return False
+
+            await MUTATION_ENGINE.apply(
+                c,
+                fact_id=fact_id,
+                tenant_id=row[0],
+                event_type="unquarantine",
+                payload={"timestamp": ts},
+                signer="store_mixin:unquarantine",
+                commit=False,
+            )
+            await self._log_transaction(
+                c,
+                "system",
+                "unquarantine",
+                {"fact_id": fact_id},
+            )
+            await c.commit()
+            return True
 
         if conn:
             return await _impl(conn)

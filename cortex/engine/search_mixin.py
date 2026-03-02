@@ -28,6 +28,11 @@ class SearchMixin:
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+
+            tenant_id = get_tenant_id()
+
         async with self.session() as conn:
             try:
                 # 1. Perform Hybrid Search

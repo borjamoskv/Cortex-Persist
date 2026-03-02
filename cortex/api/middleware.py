@@ -6,9 +6,11 @@ and consolidate defensive mechanisms in a single Sovereign module (KETER-∞).
 """
 
 import asyncio
+import contextvars
 import json
 import logging
 import time
+import uuid
 from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +23,54 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 logger = logging.getLogger("uvicorn.error")
+
+request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="")
+
+
+class TracingMiddleware(BaseHTTPMiddleware):
+    """Generates trace_id and provides structured JSON logging for requests."""
+
+    async def dispatch(self, request: Request, call_next):
+        req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        token = request_id_var.set(req_id)
+        request.state.request_id = req_id
+
+        start_time = time.time()
+        try:
+            response = await call_next(request)
+            response.headers["X-Request-ID"] = req_id
+            process_time = time.time() - start_time
+            logger.info(
+                json.dumps(
+                    {
+                        "trace_id": req_id,
+                        "event": "request_completed",
+                        "method": request.method,
+                        "path": request.url.path,
+                        "status": response.status_code,
+                        "duration_ms": round(process_time * 1000, 2),
+                        "ip": request.client.host if request.client else "unknown",
+                    }
+                )
+            )
+            return response
+        except Exception as e:
+            process_time = time.time() - start_time
+            logger.error(
+                json.dumps(
+                    {
+                        "trace_id": req_id,
+                        "event": "request_failed",
+                        "method": request.method,
+                        "path": request.url.path,
+                        "duration_ms": round(process_time * 1000, 2),
+                        "error": str(e),
+                    }
+                )
+            )
+            raise
+        finally:
+            request_id_var.reset(token)
 
 
 class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
@@ -233,3 +283,48 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         task = asyncio.create_task(asyncio.to_thread(_write))
         self._bg_tasks.add(task)
         task.add_done_callback(self._bg_tasks.discard)
+
+
+class ImmuneMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware Inmunitario (L1 Sovereign Defense).
+    - Prevents data poisoning mathematically before hitting routing.
+    - Extracts and establishes Tenant Context for RLS isolation.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        from cortex.security.tenant import tenant_id_var
+
+        # 1. Establish Tenant Context for Database RLS
+        # In full production, this is validated by AuthManager from the JWT.
+        tenant_id = request.headers.get("X-Tenant-ID", "default")
+        token = tenant_id_var.set(tenant_id)
+
+        try:
+            # 2. Deep Payload Defense (Poisoning Check)
+            if request.method in ("POST", "PUT", "PATCH"):
+                body = await request.body()
+
+                try:
+                    from cortex.mcp.guard import MCPGuard
+
+                    if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
+                        logger.warning(
+                            "🛡️ IMMUNE SYSTEM: Poisoning attempt rejected. Tenant: %s", tenant_id
+                        )
+                        return JSONResponse(
+                            status_code=403,
+                            content={"error": "Payload rejected by Immune System (Data Poisoning)"},
+                        )
+                except ImportError:
+                    pass
+
+                # Reconstruct stream since we consumed it
+                async def receive():
+                    return {"type": "http.request", "body": body}
+
+                request._receive = receive
+
+            return await call_next(request)
+        finally:
+            tenant_id_var.reset(token)

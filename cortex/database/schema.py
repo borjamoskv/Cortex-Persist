@@ -11,6 +11,8 @@ __all__ = [
     "CREATE_CONTEXT_SNAPSHOTS",
     "CREATE_CONTEXT_SNAPSHOTS_INDEX",
     "CREATE_EMBEDDINGS",
+    "CREATE_ENTITY_EVENTS",
+    "CREATE_ENTITY_EVENTS_INDEXES",
     "CREATE_EVOLUTION_STATE",
     "CREATE_EVOLUTION_STATE_INDEX",
     "CREATE_SPECULAR_EMBEDDINGS",
@@ -21,8 +23,6 @@ __all__ = [
     "CREATE_FACTS_INDEXES",
     "CREATE_GHOSTS",
     "CREATE_GHOSTS_INDEX",
-    "CREATE_GRAPH_OUTBOX",
-    "CREATE_GRAPH_OUTBOX_INDEXES",
     "CREATE_HEARTBEATS",
     "CREATE_HEARTBEATS_INDEX",
     "CREATE_META",
@@ -45,7 +45,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.1.0"
+SCHEMA_VERSION = "5.2.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -70,7 +70,9 @@ CREATE TABLE IF NOT EXISTS facts (
     quarantine_reason TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    tx_id       INTEGER REFERENCES transactions(id)
+    tx_id       INTEGER REFERENCES transactions(id),
+    is_tombstoned INTEGER NOT NULL DEFAULT 0,
+    tombstoned_at TEXT
 );
 """
 
@@ -82,6 +84,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_valid ON facts(valid_from, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence);
 CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
+CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────
@@ -293,19 +296,6 @@ CREATE_GHOSTS_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_ghosts_ref ON ghosts(reference);
 """
 
-# ─── Graph CDC Outbox (Consistency) ──────────────────────────────────
-CREATE_GRAPH_OUTBOX = """
-CREATE TABLE IF NOT EXISTS graph_outbox (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id     INTEGER NOT NULL,
-    action      TEXT NOT NULL, -- e.g. 'deprecate'
-    payload     TEXT,
-    status      TEXT NOT NULL DEFAULT 'pending', -- pending, processed, failed
-    retry_count INTEGER DEFAULT 0,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    processed_at TEXT
-);
-"""
 
 # ─── Compactor Logs (Memory Optimization tracking) ────────────────────
 CREATE_COMPACTION_LOG = """
@@ -322,10 +312,6 @@ CREATE TABLE IF NOT EXISTS compaction_log (
 );
 """
 
-CREATE_GRAPH_OUTBOX_INDEXES = """
-CREATE INDEX IF NOT EXISTS idx_graph_outbox_status ON graph_outbox(status);
-CREATE INDEX IF NOT EXISTS idx_graph_outbox_fact ON graph_outbox(fact_id);
-"""
 
 # ─── Context Snapshots (Ambient Intelligence) ────────────────────────
 CREATE_CONTEXT_SNAPSHOTS = """
@@ -450,6 +436,29 @@ CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 """
 
+# ─── Entity Events (Solid-State Substrate — Append-Only Ledger) ──────
+CREATE_ENTITY_EVENTS = """
+CREATE TABLE IF NOT EXISTS entity_events (
+    id              TEXT PRIMARY KEY,
+    entity_id       INTEGER NOT NULL,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    event_type      TEXT NOT NULL,
+    payload         TEXT NOT NULL DEFAULT '{}',
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+    prev_hash       TEXT NOT NULL DEFAULT 'GENESIS',
+    signature       TEXT NOT NULL,
+    signer          TEXT NOT NULL DEFAULT '',
+    schema_version  TEXT NOT NULL DEFAULT '1'
+);
+"""
+
+CREATE_ENTITY_EVENTS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_ee_entity ON entity_events(entity_id);
+CREATE INDEX IF NOT EXISTS idx_ee_tenant ON entity_events(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_ee_type ON entity_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
+"""
+
 
 # ─── All statements in order ─────────────────────────────────────────
 ALL_SCHEMA = [
@@ -473,8 +482,6 @@ ALL_SCHEMA = [
     CREATE_RWC_INDEXES,
     CREATE_GHOSTS,
     CREATE_GHOSTS_INDEX,
-    CREATE_GRAPH_OUTBOX,
-    CREATE_GRAPH_OUTBOX_INDEXES,
     CREATE_COMPACTION_LOG,
     CREATE_CONTEXT_SNAPSHOTS,
     CREATE_CONTEXT_SNAPSHOTS_INDEX,
@@ -488,6 +495,8 @@ ALL_SCHEMA = [
     CREATE_EVOLUTION_STATE_INDEX,
     CREATE_SIGNALS,
     CREATE_SIGNALS_INDEXES,
+    CREATE_ENTITY_EVENTS,
+    CREATE_ENTITY_EVENTS_INDEXES,
 ]
 
 

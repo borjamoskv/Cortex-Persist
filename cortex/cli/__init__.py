@@ -28,6 +28,7 @@ from cortex.cli import (  # noqa: E402
     nexus_cmds,  # noqa: E402, F401
     prompt_cmds,  # noqa: E402, F401
     purge,  # noqa: E402, F401
+    quota_cmds,  # noqa: E402, F401
     reflect_cmds,  # noqa: E402, F401
     status_cmds,
     sync_cmds,  # noqa: E402, F401
@@ -59,6 +60,7 @@ from cortex.cli.episodic_observe import run_observe  # noqa: E402
 from cortex.cli.handoff_cmds import handoff as handoff_cli  # noqa: E402
 from cortex.cli.launchpad_cmds import launchpad  # noqa: E402
 from cortex.cli.mejoralo_cmds import mejoralo  # noqa: E402
+from cortex.cli.quota_cmds import quota_cli  # noqa: E402
 from cortex.cli.reflect_cmds import inject as inject_cmd  # noqa: E402
 from cortex.cli.reflect_cmds import reflect as reflect_cmd  # noqa: E402
 from cortex.cli.swarm_cmds import swarm  # noqa: E402
@@ -113,8 +115,8 @@ from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
 from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
 from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402
-from cortex.cli.policy_cmds import policy_cmds as policy_cli  # noqa: E402
 from cortex.cli.nexus_cmds import nexus_cmds as nexus_cli  # noqa: E402
+from cortex.cli.policy_cmds import policy_cmds as policy_cli  # noqa: E402
 from cortex.cli.prompt_cmds import prompt as prompt_group  # noqa: E402
 from cortex.cli.purge import purge as purge_cmd  # noqa: E402
 
@@ -127,15 +129,22 @@ cli.add_command(sovereign_cli, name="sovereign")
 cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
 cli.add_command(prompt_group, name="prompt")
+cli.add_command(quota_cli, name="quota")
 
 from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
-from cortex.cli.security_cmds import security_cli  # noqa: E402
 from cortex.cli.heal_cmds import cli as heal_cmd
 from cortex.cli.moltbook_cmds import moltbook_cmds as moltbook_cli  # noqa: E402
+from cortex.cli.security_cmds import security_cli  # noqa: E402
 from cortex.cli.security_hardening_cmds import (  # noqa: E402
     bridge_audit as bridge_audit_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
     quarantine as quarantine_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
     reap_ghosts as reap_ghosts_cmd,
+)
+from cortex.cli.security_hardening_cmds import (
     unquarantine as unquarantine_cmd,
 )
 
@@ -149,12 +158,15 @@ cli.add_command(reap_ghosts_cmd)
 cli.add_command(bridge_audit_cmd)
 cli.add_command(policy_cli, name="policy")
 
-from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
 from cortex.cli.browser_cmds import browser as browser_cli  # noqa: E402
+from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
 
 cli.add_command(signal_cli, name="signal")
 cli.add_command(browser_cli, name="browser")
 
+from cortex.cli.triangulation_cmds import triangulate as triangulate_cmd
+
+cli.add_command(triangulate_cmd, name="triangulate")
 
 
 @cli.command("observe")

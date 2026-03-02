@@ -33,11 +33,12 @@ from cortex.memory.models import CortexFactModel, MemoryEntry, MemoryEvent
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 from cortex.routes.notch_ws import notify_notch_pruning
+from cortex.telemetry.metrics import metrics
 from cortex.thinking.context_fusion import ContextFusion
 
 try:
-    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
     from cortex.memory.semantic_ram import DynamicSemanticSpace
+    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
@@ -214,6 +215,42 @@ class CortexMemoryManager:
             await notify_notch_pruning()
             return f"filtered:{action}"
 
+        # 1.5 Strict Deduplication & Schema Enforcement
+        if not content or not content.strip():
+            logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
+            return "filtered:empty"
+
+        if self._l2 and hasattr(self._l2, "_get_conn"):
+            try:
+                # Fast exact-match deduplication via Sovereign SQLite
+                conn = self._l2._get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT id FROM facts_meta WHERE tenant_id = ? AND project_id = ? AND content = ?",
+                    (tenant_id, project_id, content),
+                )
+                row = cursor.fetchone()
+                if row:
+                    logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
+                    return f"deduplicated:{row['id']}"
+            except Exception as e:
+                logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
+
+        # 1.6 Confidence Scoring Enforcement
+        _meta = metadata or {}
+        if "confidence_score" not in _meta:
+            _meta["confidence_score"] = 0.8  # Sovereign baseline confidence
+
+        # 1.7 Product vs Assistant Boundary Enforcement
+        # Isolate system/product engineering memory from personal/MOSKV-1 interactions
+        _pid_lower = project_id.lower()
+        if _pid_lower in ("moskv", "personal", "home", "moskv-1"):
+            layer = "assistant"
+        elif _pid_lower in ("cortex", "core", "system"):
+            layer = "system"
+        elif not layer:
+            layer = "semantic"
+
         fact_id = str(uuid.uuid4())
 
         # 2. Experience Bus Strategy (Inspiration: Letta RFC #3179)
@@ -238,7 +275,7 @@ class CortexMemoryManager:
                 event_type="experience:recorded",
                 payload=payload,
                 source="memory:manager",
-                project=project_id
+                project=project_id,
             )
             return fact_id
 
@@ -251,7 +288,7 @@ class CortexMemoryManager:
             content=content,
             embedding=vector,
             timestamp=time.time(),
-            metadata=metadata or {},
+            metadata=_meta,
             cognitive_layer=layer,
         )
 
@@ -265,7 +302,7 @@ class CortexMemoryManager:
 
     async def reconcile_experience(self, signal: Any) -> str:
         """Process an experience signal from the bus and commit it to L2.
-        
+
         This is the 'Sleep-time Compute' part of the StratifiedCognition engine.
         It runs asynchronously in the Reactor thread, away from the inference path.
         """
@@ -276,9 +313,9 @@ class CortexMemoryManager:
         fact_type = payload.get("fact_type", "general")
         layer = payload.get("layer", "semantic")
         metadata = payload.get("metadata", {})
-        
+
         logger.info("ExperienceBus: Reconciling signal #%d ([%s] %s)", signal.id, layer, fact_type)
-        
+
         # We perform the actual heavy lift: encoding + memorizing
         return await self.store(
             tenant_id=tenant_id,
@@ -287,7 +324,7 @@ class CortexMemoryManager:
             fact_type=fact_type,
             metadata=metadata,
             layer=layer,
-            use_bus=False # We are ALREADY in the reconciliation phase
+            use_bus=False,  # We are ALREADY in the reconciliation phase
         )
 
     async def assemble_context(
@@ -312,9 +349,16 @@ class CortexMemoryManager:
         # 1. Working Memory (L1)
         working_set = self._l1.get_context()
 
-        # 2. Episodic Retrieval (L2 + HDC)
+        # 2. Episodic Retrieval (L2 + HDC) with Latency Tracking
+        _start_recall = time.perf_counter()
         episodic_facts = await self._retrieve_episodic_context(
             tenant_id, project_id, query, max_episodes, layer=layer
+        )
+        _recall_duration = time.perf_counter() - _start_recall
+        metrics.observe(
+            "cortex_recall_latency_seconds",
+            _recall_duration,
+            {"tenant_id": tenant_id, "project_id": project_id, "layer": layer or "all"},
         )
 
         # 3. Context Construction
@@ -367,7 +411,12 @@ class CortexMemoryManager:
             return [self._fact_to_dict(f) for f in dense_results[:max_episodes]]
 
     async def _fetch_hdc_results(
-        self, tenant_id: str, project_id: str, query: str, max_episodes: int, layer: str | None = None
+        self,
+        tenant_id: str,
+        project_id: str,
+        query: str,
+        max_episodes: int,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         try:
             toxic_ids = await self._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)
@@ -384,7 +433,12 @@ class CortexMemoryManager:
             return []
 
     async def _fetch_dense_results(
-        self, tenant_id: str, project_id: str, query: str, max_episodes: int, layer: str | None = None
+        self,
+        tenant_id: str,
+        project_id: str,
+        query: str,
+        max_episodes: int,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         try:
             if hasattr(self._l2, "recall_secure"):

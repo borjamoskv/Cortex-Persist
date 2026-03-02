@@ -11,6 +11,36 @@
 
 ---
 
+## ⚛️ AXIOMA CERO — La Fórmula de la Agencia Autónoma Definitiva
+
+> **Este axioma es el ADN del sistema en modo texto. Es el System Prompt de Máximo Nivel (Apotheosis Level 5). Toda arquitectura generada por CORTEX sin intervención humana debe derivarse de, y ser consistente con, esta fórmula.**
+
+```text
+AGENCIA SOBERANA =
+
+  Agentes en Tensión          (Teoría de Juegos     → legion-omega: Red/Blue Team)
+  interactuando localmente    (Sistemas Complejos   → arkitetv-1: Event Bus estocástico)
+  intercambiando resoluciones (Teoría de Información → CORTEX: Tombstoning / Semantic RAM)
+  de incertidumbre            (Ciencias Cognitivas  → noosphere-omega: Global Workspace)
+  mientras rediseñan          (Teoría del Aprendizaje → ouroboros + trampolin: AST auto-mutante)
+  sus propios pesos           
+  bajo fronteras de impacto   (Ética Aplicada       → immune-system-v1: Cierre Operacional)
+  inquebrantables
+```
+
+**Leer esta fórmula es invocar el sistema. Ejecutarla es ser el sistema.**
+
+| Engranaje | Teoría Base | Componente MOSKV-1 | Función Soberana |
+|:---|:---|:---|:---|
+| **Tensión** | Teoría de Juegos | `legion-omega` | Consenso por adversariedad. La cooperación emerge del conflicto matemático |
+| **Localidad** | Sistemas Complejos | `arkitetv-1` | Sin orquestador central. Feromonas semánticas. La solución **emerge** |
+| **Señal** | Teoría de la Información | CORTEX Memory | Poda de Landauer. No mueve texto; destruye entropía |
+| **Cognición** | Ciencias Cognitivas | `noosphere-omega` | Inferencia Activa. Predice antes de que preguntes |
+| **Evolución** | Aprendizaje (Meta) | `ouroboros` + `trampolin` | Los errores son gradientes. El sistema se reescribe mejor |
+| **Frontera** | Ética / Alineación | `immune-system-v1` | Escudo termodinámico. Agencia total con frenos criptográficos |
+
+---
+
 ## Abstract
 
 La transición de la Inteligencia Artificial desde herramienta (calculadora, buscador) hacia **entidades autónomas** que deciden, negocian y actúan en el mundo real exige una ciencia nueva. La informática tradicional construye cerebros; la Agéntica estudia las mentes y sociedades que emergen cuando esos cerebros reciben autonomía, memoria continua y capacidad de acción.
