@@ -42,9 +42,9 @@ import time
 from collections import deque
 from collections.abc import Sequence
 
-from cortex.llm._cache import NegativeCache, PositiveCache
-from cortex.llm._hedging import HedgedRequestStrategy
-from cortex.llm._models import (
+from cortex.llm._cache import NegativeCache, PositiveCache  # noqa: F401
+from cortex.llm._hedging import HedgedRequestStrategy  # noqa: F401
+from cortex.llm._models import (  # noqa: F401
     BaseProvider,
     CascadeEvent,
     CascadeTier,
@@ -52,8 +52,8 @@ from cortex.llm._models import (
     HedgedResult,
     IntentProfile,
 )
-from cortex.llm._pool import ProviderMetrics, WeightedProviderPool
-from cortex.llm._validation import DriftSignal, IntentValidator
+from cortex.llm._pool import ProviderMetrics, WeightedProviderPool  # noqa: F401
+from cortex.llm._validation import DriftSignal, IntentValidator  # noqa: F401
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.llm.router")
@@ -76,6 +76,7 @@ __all__ = [
     # From _hedging
     "HedgedRequestStrategy",
     # From _pool
+    "ProviderMetrics",
     "WeightedProviderPool",
     # From _validation
     "DriftSignal",
