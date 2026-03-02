@@ -85,7 +85,8 @@ async def _find_and_purge_colliding_c3s(
 
         max_distance = 2.0 * (1.0 - similarity_threshold)
 
-        query = f"""
+        cursor = await conn.execute(
+            """
             SELECT f.id,
                    (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as sim
             FROM facts f
@@ -94,11 +95,9 @@ async def _find_and_purge_colliding_c3s(
               AND f.valid_until IS NULL
               AND f.confidence IN ({marks})
               AND vec_distance_cosine(v.embedding, ?) < ?
-        """
-        cursor = await conn.execute(
-            query,
+            """.format(marks=marks),  # nosec B608 — parameterized query
             (c5_emb_bytes, project, *target_confidences, c5_emb_bytes, max_distance),
-        )  # nosec B608
+        )
         colliding_rows = await cursor.fetchall()
 
         for c_id, sim in colliding_rows:
