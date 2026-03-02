@@ -16,6 +16,14 @@ from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "BlueTeamAgent",
+    "LegionOmegaEngine",
+    "RedTeamSwarm",
+    "SiegeResult",
+    "LEGION_OMEGA",
+]
+
 
 @dataclass
 class SiegeResult:
@@ -32,7 +40,7 @@ class BlueTeamAgent:
     """🛡️ Blue Team: The Defensive Constructor."""
 
     async def synthesize(
-        self, intent: str, context: Mapping[str, Any], feedback: list[str] = None  # type: ignore[reportArgumentType]
+        self, intent: str, context: Mapping[str, Any], feedback: list[str] | None = None
     ) -> str:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
@@ -65,7 +73,11 @@ class BlueTeamAgent:
 
         if any("bare except" in f.lower() for f in feedback):
             body.append(
-                "def safe_execute(func, *args):\n    try:\n        return func(*args)\n    except Exception as e:\n        return str(e)"
+                "def safe_execute(func, *args):\n"
+                "    try:\n"
+                "        return func(*args)\n"
+                "    except Exception as e:\n"
+                "        return str(e)"
             )
 
         if not body:
@@ -82,7 +94,7 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
-    def __init__(self, vectors: list[AttackVector] = None):  # type: ignore[reportArgumentType]
+    def __init__(self, vectors: list[AttackVector] | None = None):
         self.vectors = vectors or RED_TEAM_SWARM
 
     async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
@@ -104,13 +116,13 @@ class LegionOmegaEngine:
         self.red_team = RedTeamSwarm()
         self.max_cycles = max_cycles
 
-    async def forge(self, intent: str, context: Mapping[str, Any] = None) -> SiegeResult:  # type: ignore[reportArgumentType]
+    async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
         """Forge code through the fire of the siege."""
         ctx = context or {}
         feedback = []
         final_code = ""
 
-        bicameral.log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
+        bicameral.log_motor("LEGION-OMEGA: Forjando '%s'", action="FORGE")
 
         for cycle in range(1, self.max_cycles + 1):
             # Blue Team Synthesis

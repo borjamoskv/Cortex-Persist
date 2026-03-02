@@ -132,8 +132,9 @@ class InfiniteMindsManager:
 
         # Byzantine cluster detection via semantic centroid alignment
         try:
-            import numpy as np
             import asyncio
+
+            import numpy as np
 
             def _compute_byzantine_clusters(active_biases: list[str]) -> tuple[int, int]:
                 # Simulate embedding extraction (in production this uses the embedding model)
