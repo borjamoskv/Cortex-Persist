@@ -150,8 +150,11 @@ cli.add_command(bridge_audit_cmd)
 cli.add_command(policy_cli, name="policy")
 
 from cortex.cli.signal_cmds import signal_cmds as signal_cli  # noqa: E402
+from cortex.cli.browser_cmds import browser as browser_cli  # noqa: E402
 
 cli.add_command(signal_cli, name="signal")
+cli.add_command(browser_cli, name="browser")
+
 
 
 @cli.command("observe")
