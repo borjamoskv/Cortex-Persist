@@ -21,6 +21,8 @@ from __future__ import annotations
 import logging
 import os
 
+from cortex.llm.router import IntentProfile
+
 __all__ = ["LLMManager"]
 
 logger = logging.getLogger("cortex.llm.manager")
@@ -85,6 +87,7 @@ class LLMManager:
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str | None:
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
@@ -95,6 +98,7 @@ class LLMManager:
             system=system,
             temperature=temperature,
             max_tokens=max_tokens,
+            intent=intent,
         )
 
     async def stream(
@@ -103,6 +107,7 @@ class LLMManager:
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ):
         """Stream via the active provider. Yields text chunks."""
         p = self._get_provider()
@@ -113,6 +118,7 @@ class LLMManager:
             system=system,
             temperature=temperature,
             max_tokens=max_tokens,
+            intent=intent,
         ):
             yield chunk
 

@@ -191,6 +191,10 @@ from cortex.cli.loop_cmds import loop as loop_cmd  # noqa: E402
 
 cli.add_command(loop_cmd)
 
+from cortex.cli.notebooklm_cmds import notebooklm_cmds as notebooklm_cli  # noqa: E402
+
+cli.add_command(notebooklm_cli, name="notebooklm")
+
 
 @cli.command("observe")
 @click.option("--workspace", "-w", default=".", help="Workspace path to observe")

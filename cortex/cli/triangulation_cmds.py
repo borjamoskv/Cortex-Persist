@@ -4,6 +4,7 @@ import click
 from rich.console import Console
 
 from cortex.llm.provider import LLMProvider
+from cortex.llm.router import IntentProfile
 
 console = Console()
 
@@ -20,7 +21,7 @@ async def _lens_information_theory(log_data: str) -> str:
     prompt = f"Analyze this log through INFORMATION THEORY. Is there thermal noise in the prompt? Context degradation? Unclear signal-to-noise ratio?\n\nLOG:\n{log_data}"
     provider = LLMProvider(model="gpt-4o-mini")
     try:
-        return await provider.complete(prompt, temperature=0.1)
+        return await provider.complete(prompt, temperature=0.1, intent=IntentProfile.REASONING)
     finally:
         await provider.close()
 
@@ -30,7 +31,7 @@ async def _lens_game_theory(log_data: str) -> str:
     prompt = f"Analyze this log through GAME THEORY. Are the sub-agents perversely incentivized? Is there a resource conflict or misalignment of reward/completion metrics?\n\nLOG:\n{log_data}"
     provider = LLMProvider(model="gpt-4o-mini")
     try:
-        return await provider.complete(prompt, temperature=0.1)
+        return await provider.complete(prompt, temperature=0.1, intent=IntentProfile.REASONING)
     finally:
         await provider.close()
 
@@ -40,7 +41,7 @@ async def _lens_complex_systems(log_data: str) -> str:
     prompt = f"Analyze this log through COMPLEX SYSTEMS THEORY. Is this an unpredictable interaction between two simple, perfectly valid rules operating in isolation?\n\nLOG:\n{log_data}"
     provider = LLMProvider(model="gpt-4o-mini")
     try:
-        return await provider.complete(prompt, temperature=0.1)
+        return await provider.complete(prompt, temperature=0.1, intent=IntentProfile.REASONING)
     finally:
         await provider.close()
 
