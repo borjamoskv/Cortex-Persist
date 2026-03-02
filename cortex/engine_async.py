@@ -156,16 +156,20 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     # search() is now provided by SearchMixin
 
     async def recall(self, project: str, limit: int | None = None) -> list[dict[str, Any]]:
+        from cortex.security.tenant import get_tenant_id
+
+        current_tenant = get_tenant_id()
+
         query = f"""
             SELECT {self.FACT_COLUMNS}
             {self.FACT_JOIN}
-            WHERE f.project = ? AND f.valid_until IS NULL
+            WHERE f.project = ? AND f.tenant_id = ? AND f.valid_until IS NULL
             ORDER BY (
                 f.consensus_score * 0.8
                 + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2
             ) DESC, f.fact_type, f.created_at DESC
         """
-        params = [project]
+        params = [project, current_tenant]
         if limit:
             query += " LIMIT ?"
             params.append(limit)
@@ -198,10 +202,15 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
         return fact
 
     async def get_fact(self, fact_id: int) -> dict[str, Any] | None:
+        from cortex.security.tenant import get_tenant_id
+
+        current_tenant = get_tenant_id()
+
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
-                f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE f.id = ?", (fact_id,)
+                f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE f.id = ? AND f.tenant_id = ?",
+                (fact_id, current_tenant),
             ) as cursor:
                 row = await cursor.fetchone()
                 if not row:
@@ -221,10 +230,18 @@ class AsyncCortexEngine(StoreMixin, SearchMixin, AgentMixin):
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
         """Reconstruct state as of transaction ID."""
         from cortex.memory.temporal import time_travel_filter
+        from cortex.security.tenant import get_tenant_id
+
+        current_tenant = get_tenant_id()
 
         async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             clause, params = time_travel_filter(tx_id, table_alias="f")
+
+            # Enforce RLS
+            clause = f"({clause}) AND f.tenant_id = ?"
+            params.append(current_tenant)
+
             query = f"SELECT {self.FACT_COLUMNS} {self.FACT_JOIN} WHERE {clause}"
             if project:
                 query += " AND f.project = ?"

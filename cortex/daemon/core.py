@@ -45,6 +45,7 @@ from cortex.daemon.monitors import (
     SecurityMonitor,
     SignalMonitor,
     SiteMonitor,
+    TombstoneMonitor,
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
@@ -138,7 +139,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             db_path=file_config.get("db_path", str(CORTEX_DB)),
             engine=self._shared_engine,
         )
-
+        self.tombstone_monitor = TombstoneMonitor(
+            db_path=file_config.get("db_path", str(CORTEX_DB))
+        )
 
         try:
             from cortex.daemon.sidecar.telemetry import ASTOracle
@@ -237,10 +240,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._run_monitor(
             status,
             "cloud_sync_alerts",
-
             self.cloud_sync_monitor,
             self._alert_cloud_sync,
         )
+        self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
 
         self._auto_sync(status)
         self._flush_timer()
@@ -299,7 +302,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 self._terminal_notify("Compaction completed", a.message)
                 self._last_alerts[key] = time.monotonic()
 
-
     def _alert_signals(self, alerts: list) -> None:
         """Handler for SignalAlert."""
         if not alerts:
@@ -310,6 +312,14 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if self._should_alert(f"signal:{a.event_type}:{a.project or 'global'}"):
                 self._terminal_notify("CORTEX Reactive Shift", msg)
 
+    def _alert_tombstone(self, alerts: list) -> None:
+        """Handler for TombstoneAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.info("💀 Tombstone Sweep: %s", a.message)
+            if self._should_alert("tombstone:sweep"):
+                self._terminal_notify("Garbage Collection", a.message)
 
     def _alert_cloud_sync(self, alerts: list) -> None:
         """Handler for CloudSyncAlert."""

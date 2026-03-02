@@ -41,14 +41,15 @@ async def store_fact(
 ) -> StoreResponse:
     """Store a fact (scoped to authenticated tenant)."""
     fact_id = await engine.store(
-        project=auth.tenant_id,
+        project=req.project,
         content=req.content,
+        tenant_id=auth.tenant_id,
         fact_type=req.fact_type,
         tags=req.tags,
         source=req.source,
         meta=req.meta,
     )
-    return StoreResponse(fact_id=fact_id, project=auth.tenant_id, message="Fact stored")
+    return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])
@@ -61,10 +62,7 @@ async def recall_facts(
 ) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
     lang = request.headers.get("Accept-Language", "en")
-    if project != auth.tenant_id:
-        raise HTTPException(status_code=403, detail=get_trans("error_namespace_mismatch", lang))
-
-    facts = await engine.recall(project=project, limit=limit)
+    facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
 
     return [
         FactResponse(
@@ -105,7 +103,7 @@ async def cast_vote(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
-        if fact["project"] != auth.tenant_id:
+        if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
             raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
         agent_id = auth.key_name or "api_agent"
@@ -149,7 +147,7 @@ async def cast_vote_v2(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
-        if fact["project"] != auth.tenant_id:
+        if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
             raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
         score = await engine.vote(
@@ -194,7 +192,7 @@ async def list_votes(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
 
-    if fact["project"] != auth.tenant_id:
+    if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     votes = await engine.get_votes(fact_id)
@@ -217,10 +215,10 @@ async def deprecate_fact(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
 
-    if fact["project"] != auth.tenant_id:
+    if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
-    success = await engine.deprecate(fact_id, auth.tenant_id)
+    success = await engine.deprecate(fact_id, reason="api deprecated", tenant_id=auth.tenant_id)
     if not success:
         raise HTTPException(status_code=500, detail=get_trans("error_deprecation_failed", lang))
 

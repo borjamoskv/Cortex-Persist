@@ -74,7 +74,13 @@ class HDCVectorStoreL2:
                 err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
                 raise RuntimeError(err)
 
-            self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
+            self._conn = sqlite3.connect(
+                self._db_path,
+                check_same_thread=False,
+                timeout=30,  # opening-policy: max wait if file is OS-locked
+            )
+            # runtime-policy: wait up to 30s for WAL write-lock contention
+            self._conn.execute("PRAGMA busy_timeout=30000")
             self._conn.enable_load_extension(True)
             sqlite_vec.load(self._conn)
             self._conn.row_factory = sqlite3.Row

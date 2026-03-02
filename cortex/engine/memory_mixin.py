@@ -56,39 +56,18 @@ class MemoryMixin:
             logger.debug("Memory subsystem: lite (L1+L3 only, auto_embed=False)")
             return
 
-        import os
-
-        from cortex import config
-
-        # 1. Dense L2: Preferred Sovereign (v6) or Legacy (Qdrant)
+        # 1. Dense L2: Sovereign (v6) Vector Store (SQLite-vec)
         l2 = None
         encoder = None
         try:
             from cortex.memory.encoder import AsyncEncoder
-
-            # Detección de proveedor L2 (Preferimos SQLite-vec por Zero-Trust)
-            try:
-                from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-
-                l2_class = SovereignVectorStoreL2
-            except ImportError:
-                from cortex.memory.vector_store import VectorStoreL2
-
-                l2_class = VectorStoreL2
+            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             vector_path = db_path.parent / "vectors"
             encoder = AsyncEncoder(self._get_embedder())
+            l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
 
-            if l2_class.__name__ == "SovereignVectorStoreL2":
-                l2 = l2_class(encoder=encoder, db_path=vector_path / "vectors.db")
-            else:
-                l2 = l2_class(
-                    encoder=encoder,
-                    db_path=vector_path,
-                    url=config.QDRANT_CLOUD_URL,
-                    api_key=config.QDRANT_API_KEY,
-                )
-            logger.info("Memory L2 (%s) initialized at %s", l2_class.__name__, vector_path)
+            logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
         except (ImportError, OSError, RuntimeError) as e:
             logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
 

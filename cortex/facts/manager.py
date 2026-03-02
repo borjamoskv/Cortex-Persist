@@ -6,6 +6,8 @@ import logging
 import sqlite3
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 from cortex.engine.models import Fact, row_to_fact
 from cortex.memory.temporal import build_temporal_filter_params, now_iso
 
@@ -19,6 +21,17 @@ _FACT_COLUMNS = (
     "f.created_at, f.updated_at, f.tx_id, t.hash"
 )
 _FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
+
+
+class IngestionFact(BaseModel):
+    """V8 Guardrail: Strict input validation before processing."""
+
+    project: str = Field(..., min_length=1)
+    content: str = Field(..., min_length=10)
+    tenant_id: str = Field(..., min_length=1)
+    confidence: str = Field(..., pattern=r"^(C[1-5]|stated|inferred)$")
+    # Mapping 'source' parameter to 'provenance' conceptually
+    source: str = Field(..., min_length=1, description="Provenance / Data origin")
 
 
 class FactManager:
@@ -64,11 +77,50 @@ class FactManager:
                 await notify_notch_pruning()
                 raise ValueError(f"Thalamus: Fact rejected ({action})")
 
-        # Fallback to local validation
-        if len(content.strip()) < self.MIN_CONTENT_LENGTH:
-            raise ValueError(
-                f"content too short ({len(content.strip())} chars, min {self.MIN_CONTENT_LENGTH})"
+        # V8 Validation Layer (Strict Pydantic)
+        try:
+            validated = IngestionFact(
+                project=project,
+                content=content,
+                tenant_id=tenant_id,
+                confidence=confidence,
+                source=source or "cli",
             )
+            # Re-assign validated properties just in case of coerced changes
+            project = validated.project
+            content = validated.content
+            tenant_id = validated.tenant_id
+            confidence = validated.confidence
+            source = validated.source
+
+            # V8 Semantic Deduplication
+            if hasattr(self.engine, "embeddings") and self.engine.embeddings:
+                # 1. Generate text embedding
+                if hasattr(self.engine.embeddings, "embed_text"):
+                    vec = await self.engine.embeddings.embed_text(content)
+                    if vec:
+                        # 2. Check for Similarity > 0.90 in sqlite-vec facts or embeddings
+                        # Since we only evaluate, if the result is high, skip store
+                        results = await self.search(
+                            query=content, tenant_id=tenant_id, project=project, top_k=1
+                        )
+                        if results and results[0].score > 0.90:
+                            logger.info(
+                                f"V8 Guardrail: Fact discarded - Semantic Duplicate of #{results[0].fact_id} (Score: {results[0].score:.2f})"
+                            )
+                            # We update updated_at / last_accessed
+                            await conn.execute(
+                                "UPDATE facts SET updated_at = ? WHERE id = ?",
+                                (now_iso(), results[0].fact_id),
+                            )
+                            await conn.commit()
+                            return results[0].fact_id
+        except Exception as e:
+            from pydantic import ValidationError
+
+            if isinstance(e, ValidationError):
+                raise ValueError(f"Ingestion Validation Failed: {e}")
+            logger.warning(f"V8 Deduplication check skipped or failed: {e}")
 
         from cortex.engine.store_mixin import StoreMixin
 
@@ -155,7 +207,7 @@ class FactManager:
         query = (
             f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
             f"WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
-            f"AND f.is_quarantined = 0 "
+            f"AND f.is_quarantined = 0 AND f.is_tombstoned = 0 "
             f"ORDER BY (f.consensus_score * 0.8 + "
             f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, "
             f"f.fact_type, f.created_at DESC"
@@ -212,14 +264,14 @@ class FactManager:
             clause, params = build_temporal_filter_params(as_of, table_alias="f")
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
+                f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 AND {clause} "
                 "ORDER BY f.valid_from DESC"
             )
             cursor = await conn.execute(query, [tenant_id, project] + params)
         else:
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                f"WHERE f.tenant_id = ? AND f.project = ? "
+                f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 "
                 "ORDER BY f.valid_from DESC"
             )
             cursor = await conn.execute(query, (tenant_id, project))
@@ -237,7 +289,7 @@ class FactManager:
 
         conn = await self.engine.get_conn()
         clause, params = time_travel_filter(tx_id, table_alias="f")
-        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND {clause}"
+        query = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
         params = [tenant_id] + params
         if project:
             query += " AND f.project = ?"
@@ -322,6 +374,20 @@ class FactManager:
             "db_path": str(self.engine._db_path),
             "db_size_mb": round(db_size, 2),
         }
+
+    async def graph(self, project: str | None = None):
+        """Get entity graph for a project."""
+        from cortex.graph import get_graph
+
+        conn = await self.engine.get_conn()
+        return await get_graph(conn, project)
+
+    async def query_entity(self, name: str, project: str | None = None) -> dict | None:
+        """Query a specific entity by name."""
+        from cortex.graph import query_entity
+
+        conn = await self.engine.get_conn()
+        return await query_entity(conn, name, project)
 
     async def find_path(
         self,

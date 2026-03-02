@@ -92,7 +92,7 @@ class QueryMixin:
                 SELECT {_FACT_COLUMNS}
                 {_FACT_JOIN}
                 WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL
-                AND f.is_quarantined = 0
+                AND f.is_quarantined = 0 AND f.is_tombstoned = 0
                 ORDER BY (
                     f.consensus_score * 0.8
                     + (1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2
@@ -120,14 +120,14 @@ class QueryMixin:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
                 query = (
                     f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                    f"WHERE f.tenant_id = ? AND f.project = ? AND {clause} "
+                    f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 AND {clause} "
                     "ORDER BY f.valid_from DESC"
                 )
                 cursor = await conn.execute(query, [tenant_id, project] + params)
             else:
                 query = (
                     f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                    "WHERE f.tenant_id = ? AND f.project = ? "
+                    "WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 "
                     "ORDER BY f.valid_from DESC"
                 )
                 cursor = await conn.execute(query, (tenant_id, project))
@@ -152,7 +152,7 @@ class QueryMixin:
 
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — static constants
-                "WHERE f.tenant_id = ? "
+                "WHERE f.tenant_id = ? AND f.is_tombstoned = 0 "
                 "  AND (f.created_at <= ? "
                 "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
                 "  AND (f.tx_id IS NULL OR f.tx_id <= ?)"
@@ -176,7 +176,7 @@ class QueryMixin:
             clause, params = time_travel_filter(tx_id, table_alias="f")
             query = (
                 f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-                f"WHERE f.tenant_id = ? AND {clause}"
+                f"WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
             )
             # nosec B608 — parameterized via temporal builder
             params = [tenant_id] + params
