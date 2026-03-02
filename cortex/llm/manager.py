@@ -12,6 +12,7 @@ from EmbeddingManager. Gracefully degrades when no LLM is configured.
     CORTEX_LLM_PROVIDER=qwen        → Qwen via DashScope
     CORTEX_LLM_PROVIDER=openrouter  → Any model via OpenRouter
     CORTEX_LLM_PROVIDER=ollama      → Local Ollama
+    CORTEX_LLM_PROVIDER=ernie       → Baidu ERNIE 5.0 (AIMLAPI)
     CORTEX_LLM_PROVIDER=custom      → Any endpoint via CORTEX_LLM_BASE_URL
     ... and 20+ more presets
 """
@@ -20,6 +21,8 @@ from __future__ import annotations
 
 import logging
 import os
+
+from cortex.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
 
@@ -85,6 +88,7 @@ class LLMManager:
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str | None:
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
@@ -95,6 +99,7 @@ class LLMManager:
             system=system,
             temperature=temperature,
             max_tokens=max_tokens,
+            intent=intent,
         )
 
     async def stream(
@@ -103,6 +108,7 @@ class LLMManager:
         system: str = "You are a helpful assistant.",
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ):
         """Stream via the active provider. Yields text chunks."""
         p = self._get_provider()
@@ -113,6 +119,7 @@ class LLMManager:
             system=system,
             temperature=temperature,
             max_tokens=max_tokens,
+            intent=intent,
         ):
             yield chunk
 

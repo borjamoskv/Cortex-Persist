@@ -21,7 +21,7 @@ from typing import Any
 logger = logging.getLogger("cortex.memory.replay")
 
 
-@dataclass(slots=True)
+@dataclass()
 class ReplayResult:
     """Result of a single replay cycle."""
 

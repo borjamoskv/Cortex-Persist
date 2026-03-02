@@ -217,13 +217,13 @@ class EpisodicMemory:
             sql += " AND created_at >= ?"
             params.append(since)
 
-        sql += " ORDER BY created_at DESC LIMIT ?"
+        sql += " ORDER BY id DESC LIMIT ?"
         params.append(limit)
 
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
@@ -246,7 +246,7 @@ class EpisodicMemory:
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
     async def detect_patterns(
         self,
@@ -271,7 +271,7 @@ class EpisodicMemory:
             return []
 
         # Computationally expensive operation — ideally offloaded to thread pool under high load
-        return _extract_patterns(rows, min_occurrences, limit)
+        return _extract_patterns(rows, min_occurrences, limit)  # type: ignore[reportArgumentType]
 
     async def count(self, project: str | None = None) -> int:
         """Sovereign audit: count total temporal memories."""
@@ -308,11 +308,11 @@ class EpisodicMemory:
                 id, session_id, event_type, content, project, emotion, tags, meta, created_at 
             FROM episodes 
             WHERE session_id = ? 
-            ORDER BY created_at ASC
+            ORDER BY id ASC
         """
         async with self._conn.execute(sql, (session_id,)) as cursor:
             rows = await cursor.fetchall()
-        return [self._row_to_episode(row) for row in rows]
+        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
 
 # ─── Pattern Detection (Advanced Algorithmic) ─────────────────────────

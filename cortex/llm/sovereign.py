@@ -46,17 +46,17 @@ import os
 import time
 from dataclasses import dataclass, field
 
-from cortex.llm.provider import LLMProvider, _load_presets
+from cortex.llm._presets import load_presets
+from cortex.llm.provider import LLMProvider
+from cortex.llm.router import IntentProfile
 
-__all__ = ["SovereignLLM", "SovereignResult"]
+__all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
 logger = logging.getLogger("cortex.llm.sovereign")
 
 # Default signature for template fallback — override via constructor
 _DEFAULT_SIGNATURE = (
-    "---\n"
-    "Borja Moskv | MOSKV Systems\n"
-    "Sovereign Architecture · Industrial Noir 2026"
+    "---\nby borjamoskv.com | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
 )
 
 
@@ -86,31 +86,32 @@ class SovereignResult:
 
 # Ordered by: cost-efficiency → reliability → speed
 _REMOTE_PRIORITY: list[str] = [
-    "gemini",       # 1M ctx, cheap, fast
-    "qwen",         # 131K ctx, very cheap
-    "groq",         # Ultra-fast inference
-    "deepseek",     # Cheap reasoning
-    "openai",       # GPT-5.3 heavyweight
-    "anthropic",    # Claude 4.6
-    "mistral",      # EU provider
-    "xai",          # Grok
-    "cohere",       # Command-R+
-    "fireworks",    # Open-source fast
-    "together",     # Open-source fast
-    "deepinfra",    # Open-source
-    "cerebras",     # Wafer-scale
-    "sambanova",    # RDU inference
-    "openrouter",   # Meta-router
-    "perplexity",   # Sonar
-    "novita",       # Budget
+    "gemini",  # 1M ctx, cheap, fast
+    "qwen",  # 131K ctx, very cheap
+    "groq",  # Ultra-fast inference
+    "deepseek",  # Cheap reasoning
+    "ernie",  # #1 China, #8 Global. Integrated via Axiom Ω₅ (Antifragile)
+    "openai",  # GPT-5.3 heavyweight
+    "anthropic",  # Claude 4.6
+    "mistral",  # EU provider
+    "xai",  # Grok
+    "cohere",  # Command-R+
+    "fireworks",  # Open-source fast
+    "together",  # Open-source fast
+    "deepinfra",  # Open-source
+    "cerebras",  # Wafer-scale
+    "sambanova",  # RDU inference
+    "openrouter",  # Meta-router
+    "perplexity",  # Sonar
+    "novita",  # Budget
 ]
 
 _LOCAL_PRIORITY: list[str] = [
-    "ollama",       # Most common local
-    "lmstudio",     # GUI-friendly
-    "llamacpp",     # Raw C++
-    "vllm",         # Production local
-    "jan",          # Electron-based
+    "ollama",  # Most common local
+    "lmstudio",  # GUI-friendly
+    "llamacpp",  # Raw C++
+    "vllm",  # Production local
+    "jan",  # Electron-based
 ]
 
 
@@ -162,6 +163,7 @@ class SovereignLLM:
         system: str = "You are a helpful assistant.",
         *,
         mode: str = "speed",
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult:
         """Generate with full sovereign fallback chain.
 
@@ -176,12 +178,16 @@ class SovereignLLM:
         chain: list[str] = []
         errors: list[str] = []
         # D3 fix: cache presets once per generate() call
-        presets = _load_presets()
+        presets = load_presets()
 
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
             result = await self._try_orchestra(
-                prompt, system, mode, chain, errors,
+                prompt,
+                system,
+                mode,
+                chain,
+                errors,
             )
             if result:
                 return result
@@ -190,8 +196,13 @@ class SovereignLLM:
         provider_order = self._build_priority_chain()
         for provider_name in provider_order:
             result = await self._try_provider(
-                provider_name, prompt, system, chain, errors,
+                provider_name,
+                prompt,
+                system,
+                chain,
+                errors,
                 presets=presets,
+                intent=intent,
             )
             if result:
                 return result
@@ -199,16 +210,21 @@ class SovereignLLM:
         # ── Layer 3: Local models ─────────────────────────────
         for local_name in _LOCAL_PRIORITY:
             result = await self._try_provider(
-                local_name, prompt, system, chain, errors,
-                presets=presets, is_local=True,
+                local_name,
+                prompt,
+                system,
+                chain,
+                errors,
+                presets=presets,
+                is_local=True,
+                intent=intent,
             )
             if result:
                 return result
 
         # ── Layer 4: Template engine (ZERO connectivity) ──────
         logger.warning(
-            "SovereignLLM: ALL providers failed (%d attempts). "
-            "Using template fallback.",
+            "SovereignLLM: ALL providers failed (%d attempts). Using template fallback.",
             len(chain),
         )
         return SovereignResult(
@@ -263,41 +279,22 @@ class SovereignLLM:
 
         return None
 
-    async def _try_provider(
+    async def _execute_provider_call(
         self,
         provider_name: str,
         prompt: str,
         system: str,
         chain: list[str],
         errors: list[str],
-        *,
-        presets: dict | None = None,
-        is_local: bool = False,
+        is_local: bool,
+        intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult | None:
-        """Attempt a single provider. Returns None on failure."""
-        # D3 fix: use passed presets, don't reload from disk
-        if presets is None:
-            presets = _load_presets()
-
-        preset = presets.get(provider_name)
-        if not preset:
-            return None
-
-        env_key = preset.get("env_key", "")
-        # Remote providers need API key; local providers don't
-        if not is_local and env_key and not os.environ.get(env_key):
-            return None
-
-        chain.append(provider_name)
-
+        """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
-                self._providers_cache[provider_name] = LLMProvider(
-                    provider=provider_name
-                )
+                self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
             provider = self._providers_cache[provider_name]
 
-            # D2 fix: measure actual latency
             start = time.monotonic()
             content = await asyncio.wait_for(
                 provider.complete(
@@ -305,6 +302,7 @@ class SovereignLLM:
                     system=system,
                     temperature=self._temperature,
                     max_tokens=self._max_tokens,
+                    intent=intent,
                 ),
                 timeout=self._timeout,
             )
@@ -322,13 +320,46 @@ class SovereignLLM:
             errors.append(f"{provider_name}: empty/short response")
 
         except asyncio.TimeoutError:
-            errors.append(
-                f"{provider_name}: timeout ({self._timeout}s)"
-            )
+            errors.append(f"{provider_name}: timeout ({self._timeout}s)")
         except (OSError, ValueError, KeyError) as e:
             errors.append(f"{provider_name}: {e!r}")
 
         return None
+
+    async def _try_provider(
+        self,
+        provider_name: str,
+        prompt: str,
+        system: str,
+        chain: list[str],
+        errors: list[str],
+        *,
+        presets: dict | None = None,
+        is_local: bool = False,
+        intent: IntentProfile = IntentProfile.GENERAL,
+    ) -> SovereignResult | None:
+        """Attempt a single provider. Returns None on failure."""
+        if presets is None:
+            presets = load_presets()
+
+        preset = presets.get(provider_name)
+        if not preset:
+            return None
+
+        env_key = preset.get("env_key", "")
+        if not is_local and env_key and not os.environ.get(env_key):
+            return None
+
+        chain.append(provider_name)
+        return await self._execute_provider_call(
+            provider_name,
+            prompt,
+            system,
+            chain,
+            errors,
+            is_local,
+            intent=intent,
+        )
 
     def _build_priority_chain(self) -> list[str]:
         """Build ordered provider list: preferred first, then default."""
@@ -355,11 +386,7 @@ class SovereignLLM:
         Extracts the user's intent and wraps it in a professional frame.
         """
         core = prompt[:500].strip()
-        return (
-            f"[Auto-generated — no LLM available]\n\n"
-            f"{core}\n\n"
-            f"{self._signature}"
-        )
+        return f"[Auto-generated — no LLM available]\n\n{core}\n\n{self._signature}"
 
     async def close(self) -> None:
         """Close all cached providers."""
@@ -369,3 +396,51 @@ class SovereignLLM:
             except (OSError, ValueError) as e:
                 logger.debug("Error closing provider: %s", e)
         self._providers_cache.clear()
+
+
+# ─── El Inquisidor (Red Team) ──────────────────────────────────────────────
+
+
+class Inquisitor(SovereignLLM):
+    """El Inquisidor (Red Team Sovereign).
+
+    Axiom Ω₅ (Antifragile by Default): Su única directiva es destruir el código
+    que evalúa para asegurar su robustez. Ejerce asimetría cognitiva forzando
+    al modelo a actuar estrictamente como adversario.
+    """
+
+    def __init__(
+        self,
+        *,
+        preferred_providers: list[str] | None = None,
+        timeout_seconds: float = 60.0,
+    ):
+        super().__init__(
+            preferred_providers=preferred_providers,
+            temperature=0.1,  # Ultra-determinista para encontrar fallos exactos
+            max_tokens=4096,
+            timeout_seconds=timeout_seconds,
+            use_orchestra=False,  # Bypass orchestra para usar raw inference
+        )
+        self._system_prompt = (
+            "Eres EL INQUISIDOR (The Red Team Sovereign). "
+            "Tu única directiva es DESTRUIR el código o la arquitectura que recibes. "
+            "Busca malformaciones masivas, fallos de red, condiciones de carrera, "
+            "exploits de memoria, deudas técnicas o violaciones de las leyes de entropía. "
+            "Tu única salida válida es el vector de ataque, la línea de código exacta que "
+            "rompe el sistema o la crítica brutal si el diseño es deficiente. "
+            "No seas amable. No des sugerencias amigables. Sé letal."
+        )
+
+    async def asediar(self, content: str, original_prompt: str = "") -> SovereignResult:
+        """Somete el contenido generado por el agente principal a asedio adversario."""
+        prompt = (
+            f"=== CONTEXTO ORIGINAL (Intención del Creador) ===\n{original_prompt}\n\n"
+            f"=== OBJETIVO A DESTRUIR ===\n{content}\n\n"
+            "Destrúyelo. Encuentra la brecha."
+        )
+        return await self.generate(
+            prompt,
+            system=self._system_prompt,
+            intent=IntentProfile.ARCHITECT,
+        )

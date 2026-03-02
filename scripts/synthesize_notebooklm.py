@@ -42,7 +42,9 @@ def run():
     projects = df["project"].unique()
     for project in projects:
         proj_df = df[df["project"] == project]
-        filename = OUTPUT_DIR / f"{project}_knowledge.md"
+        # Sanatize project name for filename
+        safe_project_name = str(project).replace("/", "_").replace("\\", "_")
+        filename = OUTPUT_DIR / f"{safe_project_name}_knowledge.md"
 
         proj_orphans = (
             df_orphans[df_orphans["project"] == project]["name"].tolist()

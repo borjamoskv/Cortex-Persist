@@ -32,7 +32,7 @@ __all__ = [
 # ═══════════════════════════════════════
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TamperedFact:
     """A fact with invalid integrity."""
 
@@ -43,7 +43,7 @@ class TamperedFact:
     content_preview: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class ChainStatus:
     """Status of the hash chain."""
 
@@ -54,7 +54,7 @@ class ChainStatus:
     orphaned_facts: list[TamperedFact] = field(default_factory=list)
 
 
-@dataclass(slots=True)
+@dataclass()
 class AuditReport:
     """Full integrity audit report."""
 
@@ -122,17 +122,17 @@ class IntegrityAuditor:
                 ) as cursor:
                     facts = await cursor.fetchall()
 
-                report.total_facts = len(facts)
+                report.total_facts = len(facts)  # type: ignore[reportArgumentType]
 
                 if not facts:
                     report.duration_seconds = time.monotonic() - start
                     return report
 
                 # ── 1. Hash Chain Verification ──
-                report.chain_status = await self._verify_chain(facts)
+                report.chain_status = await self._verify_chain(facts)  # type: ignore[reportArgumentType]
 
                 # ── 2. Signature Verification ──
-                sig_failures = await self._verify_signatures(facts)
+                sig_failures = await self._verify_signatures(facts)  # type: ignore[reportArgumentType]
                 report.signature_failures = sig_failures
                 report.facts_with_signatures = sum(1 for f in facts if f["signature"])
                 report.facts_verified = report.facts_with_signatures - len(sig_failures)
@@ -140,7 +140,7 @@ class IntegrityAuditor:
         except ImportError:
             logger.error("aiosqlite not available — cannot run integrity audit")
             report.chain_status.is_valid = False
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Integrity audit failed: %s", e)
             report.chain_status.is_valid = False
 
@@ -173,8 +173,8 @@ class IntegrityAuditor:
                     "SELECT id, content, hash, prev_hash FROM facts ORDER BY id ASC"
                 ) as cursor:
                     facts = await cursor.fetchall()
-                return await self._verify_chain(facts)
-        except Exception as e:
+                return await self._verify_chain(facts)  # type: ignore[reportArgumentType]
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Chain verification failed: %s", e)
             return ChainStatus(is_valid=False)
 
@@ -190,8 +190,8 @@ class IntegrityAuditor:
                     "WHERE signature IS NOT NULL AND signature != ''"
                 ) as cursor:
                     facts = await cursor.fetchall()
-                return await self._verify_signatures(facts)
-        except Exception as e:
+                return await self._verify_signatures(facts)  # type: ignore[reportArgumentType]
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Signature verification failed: %s", e)
             return []
 
@@ -320,7 +320,7 @@ class IntegrityAuditor:
                     content_preview=content[:50],
                 )
             )
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
             logger.warning("Signature check error for fact %d: %s", fact["id"], e)
 
 

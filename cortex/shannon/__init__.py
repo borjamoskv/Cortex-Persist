@@ -19,11 +19,13 @@ from cortex.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
+from cortex.shannon.immortality import ImmortalityIndex
 from cortex.shannon.report import EntropyReport
 from cortex.shannon.scanner import MemoryScanner
 
 __all__ = [
     "EntropyReport",
+    "ImmortalityIndex",
     "MemoryScanner",
     "conditional_entropy",
     "cross_entropy",
@@ -36,3 +38,4 @@ __all__ = [
     "redundancy",
     "shannon_entropy",
 ]
+

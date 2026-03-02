@@ -8,8 +8,6 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-import z3
-
 from cortex.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
 
 logger = logging.getLogger("cortex.verification.verifier")
@@ -34,13 +32,21 @@ class SovereignVerifier:
 
     def __init__(self, invariants: list[SafetyInvariant] | None = None) -> None:
         self.invariants = invariants or SOVEREIGN_INVARIANTS
-        self._solver = z3.Solver()
-        # Set a hard timeout for Z3 to prevent blocking the RSI loop
-        self._solver.set("timeout", 5000)  # 5 seconds per proof
+        self._solver = None
+        # Lazy z3 init: z3-solver is an optional [dev] dependency
+        try:
+            import z3 as _z3
+
+            self._solver = _z3.Solver()
+            # Set a hard timeout for Z3 to prevent blocking the RSI loop
+            self._solver.set("timeout", 5000)  # 5 seconds per proof
+        except ImportError:
+            logger.debug("z3-solver not installed; SovereignVerifier in passthrough mode")
 
     def check(self, code: str, context: dict[str, Any] | None = None) -> VerificationResult:
         """Verify the given code against all active invariants using AST and SMT logic."""
-        self._solver.reset()
+        if self._solver is not None:
+            self._solver.reset()
         _ctx = context or {}
         file_path = _ctx.get("file_path", "unknown")
 

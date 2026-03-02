@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import signal
@@ -12,10 +13,9 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 
-import httpx
-
 from cortex.daemon.alerts import AlertHandlerMixin
 from cortex.daemon.healing import HealingMixin
+from cortex.daemon.loops_mixin import LoopsMixin
 from cortex.daemon.models import (
     AGENT_DIR,
     CONFIG_FILE,
@@ -31,22 +31,57 @@ from cortex.daemon.models import (
     DaemonStatus,
 )
 from cortex.daemon.monitors import (
-    AutonomousMejoraloMonitor,
+    AutoImmuneMonitor,
     CertMonitor,
     CloudSyncMonitor,
     CompactionMonitor,
     DiskMonitor,
     EngineHealthCheck,
-    EntropyMonitor,
+    EvaluationMonitor,
     GhostWatcher,
     MemorySyncer,
     NeuralIntentMonitor,
     PerceptionMonitor,
     SecurityMonitor,
+    SignalMonitor,
     SiteMonitor,
+    TombstoneMonitor,
+    UnifiedMejoraloMonitor,
+    WorkflowMonitor,
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
+
+try:
+    from cortex.aether.daemon import AetherDaemon, AetherMonitor
+    from cortex.aether.queue import TaskQueue
+
+    _AETHER_AVAILABLE = True
+except ImportError:
+    _AETHER_AVAILABLE = False
+
+try:
+    from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
+    from cortex.daemon.centaur.queue import EntropicQueue
+    from cortex.swarm.centauro_engine import CentauroEngine
+
+    _CENTAUR_AVAILABLE = True
+except ImportError:
+    _CENTAUR_AVAILABLE = False
+
+try:
+    from cortex.daemon.entropic_wake import EntropicWakeDaemon
+
+    _ENTROPIC_WAKE_AVAILABLE = True
+except ImportError:
+    _ENTROPIC_WAKE_AVAILABLE = False
+
+try:
+    from cortex.daemon.frontier import FrontierDaemon
+
+    _FRONTIER_AVAILABLE = True
+except ImportError:
+    _FRONTIER_AVAILABLE = False
 
 __all__ = ["MoskvDaemon"]
 
@@ -55,17 +90,8 @@ logger = logging.getLogger("moskv-daemon")
 MAX_CONSECUTIVE_FAILURES = 3
 
 
-class MoskvDaemon(AlertHandlerMixin, HealingMixin):
-    """MOSKV-1 persistent watchdog.
-
-    Orchestrates all monitors and sends alerts.
-    Configuration is loaded from ~/.cortex/daemon_config.json when present.
-
-    Usage:
-        daemon = MoskvDaemon()
-        daemon.check()           # Run once
-        daemon.run(interval=300) # Run forever
-    """
+class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
+    """MOSKV-1 persistent watchdog. Orchestrates monitors and sends alerts."""
 
     def __init__(
         self,
@@ -82,20 +108,39 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._stop_event = threading.Event()
         self._failure_counts: dict[str, int] = {}
         self._healed_total: int = 0
+        self._threads: list[threading.Thread] = []
 
         file_config = self._load_config()
-        resolved_sites = sites or file_config.get("sites", [])
+        self._cooldown = file_config.get("cooldown", cooldown)
+        self._last_alerts: dict[str, float] = {}
 
+        self._init_core_monitors(file_config, sites, stale_hours, memory_stale_hours)
+        self._init_advanced_monitors(file_config)
+        self._init_external_oracles(file_config, resolved_sites=[])  # sites used in certs
+        self._init_background_agents(file_config)
+        self._init_autopoiesis(file_config)
+        self._init_persistence_checkers(file_config)
+
+    def _init_core_monitors(
+        self,
+        file_config: dict,
+        sites: list[str] | None,
+        stale_hours: float,
+        memory_stale_hours: float,
+    ) -> None:
+        """Initialize basic status monitors."""
+        resolved_sites = sites or file_config.get("sites", [])
         self.site_monitor = SiteMonitor(resolved_sites)
         self.ghost_watcher = GhostWatcher(
-            config_dir / "ghosts.json",
+            self.config_dir / "ghosts.json",
             file_config.get("stale_hours", stale_hours),
         )
         self.memory_syncer = MemorySyncer(
-            config_dir / "system.json",
+            self.config_dir / "system.json",
             file_config.get("memory_stale_hours", memory_stale_hours),
         )
-        # Single shared engine instance to prevent memory leaks/pool exhaustion (HIGH-004)
+        self.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)
+        # Shared engine
         try:
             from cortex.engine import CortexEngine
 
@@ -103,18 +148,14 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         except ImportError:
             self._shared_engine = None
 
-        self.auto_mejoralo = AutonomousMejoraloMonitor(
+    def _init_advanced_monitors(self, file_config: dict) -> None:
+        """Initialize optimization and analysis monitors."""
+        self.mejoralo_monitor = UnifiedMejoraloMonitor(
             projects=file_config.get("auto_mejoralo_projects", {}),
             interval_seconds=file_config.get("auto_mejoralo_interval", 1800),
-            engine=self._shared_engine,
-        )
-        self.entropy_monitor = EntropyMonitor(
-            projects=file_config.get(
-                "entropy_projects", file_config.get("auto_mejoralo_projects", {})
-            ),
-            interval_seconds=file_config.get("entropy_interval", 1800),
             threshold=90,
             engine=self._shared_engine,
+            auto_heal=True,
         )
         self.compaction_monitor = CompactionMonitor(
             projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
@@ -122,9 +163,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             engine=self._shared_engine,
         )
         self.perception_monitor = PerceptionMonitor(
-            workspace=file_config.get(
-                "watch_path", str(Path.home() / "cortex")
-            ),  # Defaulting to the workspace
+            workspace=file_config.get("watch_path", str(Path.home() / "cortex")),
             interval_seconds=file_config.get("perception_interval", 300),
             engine=self._shared_engine,
         )
@@ -132,6 +171,21 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self.security_monitor = SecurityMonitor(
             log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
             threshold=file_config.get("security_threshold", 0.85),
+        )
+        self.workflow_monitor = WorkflowMonitor(
+            ghosts_path=self.config_dir / "ghosts.json",
+            memory_path=self.config_dir / "system.json",
+            db_path=Path(file_config.get("db_path", str(CORTEX_DB))),
+        )
+
+    def _init_external_oracles(self, file_config: dict, resolved_sites: list[str]) -> None:
+        """Initialize oracles and external connectivity monitors."""
+        self.signal_monitor = SignalMonitor(
+            db_path=file_config.get("db_path", str(CORTEX_DB)),
+            engine=self._shared_engine,
+        )
+        self.tombstone_monitor = TombstoneMonitor(
+            db_path=file_config.get("db_path", str(CORTEX_DB))
         )
 
         try:
@@ -168,6 +222,64 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             cert_hostnames,
             file_config.get("cert_warn_days", DEFAULT_CERT_WARN_DAYS),
         )
+
+    def _init_background_agents(self, file_config: dict) -> None:
+        """Initialize autonomous background agents like Aether."""
+        self._aether_daemon: AetherDaemon | None = None
+        self.aether_monitor: AetherMonitor | None = None
+        if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
+            try:
+                aether_queue = TaskQueue()
+                self._aether_daemon = AetherDaemon(
+                    queue=aether_queue,
+                    poll_interval=file_config.get("aether_poll_interval", 60),
+                    max_concurrent=file_config.get("aether_max_concurrent", 2),
+                    llm_provider=file_config.get("aether_llm_provider", "qwen"),
+                    github_token=file_config.get("aether_github_token"),
+                    github_repos=file_config.get("aether_github_repos", []),
+                )
+                self.aether_monitor = AetherMonitor(self._aether_daemon)
+                self.auto_immune_monitor = AutoImmuneMonitor(queue=aether_queue)
+                logger.info("🤖 Aether autonomous agent ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Aether daemon: %s", e)
+
+    def _init_autopoiesis(self, file_config: dict) -> None:
+        """Initialize Heartbeat and metabolism engines."""
+        self.heartbeat_daemon = None
+        if _CENTAUR_AVAILABLE:
+            try:
+                db_path = file_config.get("db_path", str(CORTEX_DB))
+                centaur_queue = EntropicQueue(db_path=Path(db_path).parent / "entropic_queue.db")
+                centauro_engine = CentauroEngine()
+                self.heartbeat_daemon = HeartbeatDaemon(
+                    queue=centaur_queue,
+                    engine=centauro_engine,
+                    poll_interval=float(file_config.get("heartbeat_interval", 30.0)),
+                )
+                logger.info("❤️  HeartbeatDaemon (Continuous Autopoiesis) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HeartbeatDaemon: %s", e)
+
+        self.frontier_daemon = None
+        if _FRONTIER_AVAILABLE:
+            try:
+                self.frontier_daemon = FrontierDaemon(
+                    engine=self._shared_engine,
+                    metabolism_interval_hours=float(
+                        file_config.get("frontier_metabolism_interval_hours", 12.0)
+                    ),
+                    ingestion_interval_hours=float(
+                        file_config.get("frontier_ingestion_interval_hours", 24.0)
+                    ),
+                    allow_commits=file_config.get("frontier_allow_commits", True),
+                )
+                logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Frontier Daemon: %s", e)
+
+    def _init_persistence_checkers(self, file_config: dict) -> None:
+        """Initialize checks related to data persistence and timing."""
         self.engine_health = EngineHealthCheck(Path(file_config.get("db_path", str(CORTEX_DB))))
         self.disk_monitor = DiskMonitor(
             Path(file_config.get("watch_path", str(CORTEX_DIR))),
@@ -178,17 +290,25 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             engine=self._shared_engine,
         )
 
-        self._last_alerts: dict[str, float] = {}
-        self._cooldown = file_config.get("cooldown", cooldown)
-
-        # Time Tracker (for flushing heartbeats)
+        self.entropic_wake_daemon = None
+        if _ENTROPIC_WAKE_AVAILABLE:
+            try:
+                self.entropic_wake_daemon = EntropicWakeDaemon(
+                    engine=self._shared_engine,
+                    check_interval_hours=float(
+                        file_config.get("entropic_wake_interval_hours", 4.0)
+                    ),
+                    zenon_threshold=float(file_config.get("zenon_threshold", 1.0)),
+                )
+                logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Entropic Wake Daemon: %s", e)
+        # Time Tracker
         try:
             from cortex.database.core import connect
             from cortex.timing import TimingTracker
 
-            self.timing_conn = connect(
-                file_config.get("db_path", str(CORTEX_DB)),
-            )
+            self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)
         except (ImportError, sqlite3.Error) as e:
             logger.error("Failed to init TimeTracker: %s", e)
@@ -210,16 +330,16 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         check_start = time.monotonic()
         now = datetime.now(timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
-
-        # Run all monitors through unified runner
         self._run_monitor(status, "sites", self.site_monitor, self._alert_sites, method="check_all")
         self._run_monitor(status, "stale_ghosts", self.ghost_watcher, self._alert_ghosts)
         self._run_monitor(status, "memory_alerts", self.memory_syncer, self._alert_memory)
         self._run_monitor(status, "cert_alerts", self.cert_monitor, self._alert_certs)
         self._run_monitor(status, "engine_alerts", self.engine_health, self._alert_engine)
         self._run_monitor(status, "disk_alerts", self.disk_monitor, self._alert_disk)
-        self._run_monitor(status, "mejoralo_alerts", self.auto_mejoralo, self._alert_mejoralo)
-        self._run_monitor(status, "entropy_alerts", self.entropy_monitor, self._alert_entropy)
+        self._run_monitor(
+            status, "evaluation_alerts", self.evaluation_monitor, self._alert_evaluation
+        )
+        self._run_monitor(status, "mejoralo_alerts", self.mejoralo_monitor, self._alert_mejoralo)
         self._run_monitor(
             status, "compaction_alerts", self.compaction_monitor, self._alert_compaction
         )
@@ -227,12 +347,21 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             status, "perception_alerts", self.perception_monitor, self._alert_perception
         )
         self._run_monitor(status, "security_alerts", self.security_monitor, self._alert_security)
+        self._run_monitor(status, "signal_alerts", self.signal_monitor, self._alert_signals)
         self._run_monitor(
-            status,
-            "cloud_sync_alerts",
-            self.cloud_sync_monitor,
-            self._alert_cloud_sync,
+            status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync
         )
+        self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
+        self._run_monitor(status, "workflow_alerts", self.workflow_monitor, self._alert_workflows)
+        if self.aether_monitor is not None:
+            self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
+            if hasattr(self, "auto_immune_monitor"):
+                self._run_monitor(
+                    status,
+                    "auto_immune_alerts",
+                    self.auto_immune_monitor,
+                    self._alert_auto_immune,
+                )
 
         self._auto_sync(status)
         self._flush_timer()
@@ -263,12 +392,14 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         monitor_name = type(monitor).__name__
         try:
             results = getattr(monitor, method)()
+            if asyncio.iscoroutine(results):
+                results = asyncio.run(results)
+
             if isinstance(results, list):
                 setattr(status, attr, results)
             alert_fn(results)
-            # Reset failure counter on success
             self._failure_counts.pop(monitor_name, None)
-        except (httpx.HTTPError, OSError, ValueError, sqlite3.Error, RuntimeError, TypeError) as e:
+        except Exception as e:  # noqa: BLE001
             status.errors.append(f"{monitor_name} error: {e}")
             logger.exception("%s failed", monitor_name)
             count = self._failure_counts.get(monitor_name, 0) + 1
@@ -276,64 +407,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if count >= MAX_CONSECUTIVE_FAILURES:
                 self._heal_monitor(attr, monitor_name)
                 self._failure_counts.pop(monitor_name, None)
-
-    #   _alert_sites, _alert_ghosts, _alert_memory, _alert_certs,
-    #   _alert_engine, _alert_disk, _alert_mejoralo, _alert_entropy,
-    #   _dispatch_warm_repair, _alert_perception, _alert_neural, _alert_compaction
-
-    def _alert_compaction(self, alerts: list) -> None:
-        """Handler para CompactionAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            key = f"compaction:{a.project}"
-            if self._should_alert(key):
-                self._terminal_notify("Compaction completed", a.message)
-                self._last_alerts[key] = time.monotonic()
-
-    def _alert_cloud_sync(self, alerts: list) -> None:
-        """Handler for CloudSyncAlert."""
-        if not alerts:
-            return
-        for a in alerts:
-            logger.debug(a.message)
-            logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
-
-    def _flush_timer(self) -> None:
-        """Flush accumulated time tracker heartbeats."""
-        if not self.tracker:
-            return
-        try:
-            entries = self.tracker.flush()
-            if entries > 0:
-                logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
-        except sqlite3.Error as e:
-            logger.error("TimeTracker flush error: %s", e)
-
-    def _auto_sync(self, status: DaemonStatus) -> None:
-        """Automatic memory JSON ↔ CORTEX DB synchronization."""
-        if not self._shared_engine:
-            return
-        try:
-            from cortex.sync import export_snapshot, export_to_json, sync_memory
-
-            sync_result = sync_memory(self._shared_engine)
-            if sync_result.had_changes:
-                logger.info("Sync automático: %d hechos sincronizados", sync_result.total)
-            wb_result = export_to_json(self._shared_engine)
-            if wb_result.had_changes:
-                logger.info(
-                    "Write-back automático: %d archivos, %d items",
-                    wb_result.files_written,
-                    wb_result.items_exported,
-                )
-            import asyncio
-
-            asyncio.run(export_snapshot(self._shared_engine))
-
-        except (sqlite3.Error, OSError, ValueError) as e:
-            status.errors.append(f"Memory sync error: {e}")
-            logger.exception("Memory sync failed")
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run checks in a loop until stopped."""
@@ -349,33 +422,26 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
 
-        # Start fast-polling low-latency loop for Neural Sync
-        neural_thread = threading.Thread(
-            target=self._run_neural_loop, name="NeuralSync", daemon=True
-        )
-        neural_thread.start()
-        self._threads.append(neural_thread)
+        if self._aether_daemon is not None:
+            self._spawn_thread(self._aether_daemon.start, "AetherAgent")
+
+        self._spawn_thread(self._run_neural_loop, "NeuralSync")
 
         if self.ast_oracle:
-            t = threading.Thread(target=self._run_ast_oracle_loop, name="ASTOracle", daemon=True)
-            t.start()
-            self._threads.append(t)
-
+            self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
         if self.fiat_oracle:
-            t = threading.Thread(
-                target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
-            )
-            t.start()
-            self._threads.append(t)
-
+            self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
+        if self.heartbeat_daemon:
+            self._spawn_thread(self._run_heartbeat_loop, "HeartbeatDaemon")
+        if self.entropic_wake_daemon:
+            self._spawn_thread(self._run_entropic_wake_loop, "EntropicWakeDaemon")
+        if self.frontier_daemon:
+            self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
         if getattr(self, "sentinel_oracle", None):
-            t = threading.Thread(
-                target=self._run_sentinel_oracle_loop,
-                name="SentinelOracle",
-                daemon=True,
-            )
-            t.start()
-            self._threads.append(t)
+            self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
+
+        # Health Index — autonomous monitoring
+        self._spawn_thread(self._run_health_loop, "HealthMonitor")
 
         logger.info("Daemon started with %d threads", len(self._threads))
 
@@ -387,62 +453,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             pass
         finally:
             logger.info("MOSKV-1 Daemon stopped")
-
-    def _run_neural_loop(self) -> None:
-        """Fast polling loop for zero-latency neural intent ingestion."""
-        logger.info("🧠 Neural-Bandwidth Sync thread started (1Hz)")
-        while not self._shutdown:
-            try:
-                alerts = self.neural_monitor.check()
-                if alerts:
-                    self._alert_neural(alerts)
-            except (ValueError, OSError, RuntimeError) as e:
-                logger.debug("Neural loop error: %s", e)
-            self._stop_event.wait(timeout=1.0)
-
-    def _run_ast_oracle_loop(self) -> None:
-        """Runs the AST Oracle event loop for live AST mutation interception."""
-        import asyncio
-
-        logger.info("👁️ AST Oracle thread started (FSEvents)")
-
-        async def _lifecycle():
-            # Run the observer until shutdown is flagged
-            task = asyncio.create_task(self.ast_oracle.start())
-            while not self._shutdown:
-                await asyncio.sleep(1.0)
-            await self.ast_oracle.stop()
-            await task
-
-        try:
-            asyncio.run(_lifecycle())
-        except Exception as e:
-            logger.error("AST Oracle loop error: %s", e)
-
-    def _run_sentinel_oracle_loop(self) -> None:
-        """Runs the Sentinel Oracle polling loop."""
-        import asyncio
-
-        logger.info("🛡️ CORTEX Sentinel Oracle thread started")
-        try:
-            # We are running this in a new thread, so asyncio.run is perfect.
-            asyncio.run(self.sentinel_oracle.run_loop())
-        except Exception as e:
-            logger.error("Sentinel Oracle loop error: %s", e)
-
-    def _should_alert(self, key: str) -> bool:
-        """Rate-limit duplicate alerts (1 per hour per key)."""
-        if not self.notify_enabled:
-            return False
-        now = time.monotonic()
-        last = self._last_alerts.get(key, 0)
-        if now - last < self._cooldown:
-            return False
-        self._last_alerts[key] = now
-        return True
+            if self.entropic_wake_daemon:
+                self.entropic_wake_daemon.stop()
+            if self.frontier_daemon:
+                self.frontier_daemon.stop()
 
     def _save_status(self, status: DaemonStatus) -> None:
-        """Persist status to daemon_status.json."""
+        """Persist status to disk."""
         try:
             STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
             STATUS_FILE.write_text(json.dumps(status.to_dict(), indent=2, ensure_ascii=False))

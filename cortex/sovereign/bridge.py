@@ -39,19 +39,19 @@ class SovereignBridge:
         parent = str(self.skills_root.parent)
         if parent not in sys.path:
             sys.path.append(parent)
-            logger.debug(f"Appended {parent} to sys.path")
+            logger.debug("Appended %s to sys.path", parent)
 
     def discover_and_load(self) -> None:
-        """Scan SKILLS_ROOT for skill packages and import them."""
+        """Scan SKILLS_ROOT for skill packages and register them for lazy loading."""
         if not self.skills_root.exists():
-            logger.warning(f"Sovereign Bridge: SKILLS_ROOT {self.skills_root} not found.")
+            logger.warning("Sovereign Bridge: SKILLS_ROOT %s not found.", self.skills_root)
             return
 
         for entry in self.skills_root.iterdir():
             if entry.is_dir() and (entry / "SKILL.md").exists():
-                self._load_skill(entry.name)
+                self.registry[entry.name] = None
 
-        logger.info(f"Sovereign Bridge: {len(self.registry)} skills registered.")
+        logger.info("Sovereign Bridge: %s skills registered (lazy load).", len(self.registry))
 
     def _load_skill(self, skill_name: str) -> None:
         """Import a specific skill as a Python module."""
@@ -60,9 +60,9 @@ class SovereignBridge:
             # We assume the directory name is the package name inside antigravity.skills
             module = importlib.import_module(module_path)
             self.registry[skill_name] = module
-            logger.debug(f"Skill loaded: {skill_name}")
+            logger.debug("Skill loaded: %s", skill_name)
         except (ImportError, AttributeError) as e:
-            logger.error(f"Failed to load skill {skill_name}: {e}")
+            logger.error("Failed to load skill %s: %s", skill_name, e)
 
     def execute(self, skill_name: str, *args, **kwargs) -> Any:
         """Execute the 'main' entry point of a registered skill."""
@@ -76,7 +76,7 @@ class SovereignBridge:
             raise ImportError(f"Sovereign skill '{skill_name}' is not available.")
 
         if hasattr(skill, "main") and callable(skill.main):
-            logger.info(f"Executing Sovereign Skill: {skill_name}")
+            logger.info("Executing Sovereign Skill: %s", skill_name)
             return skill.main(*args, **kwargs)
 
         # Fallback for skills that might expose other entry points

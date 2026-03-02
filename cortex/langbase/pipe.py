@@ -142,7 +142,7 @@ async def create_cortex_pipe(
     name: str,
     *,
     description: str = "CORTEX-powered AI agent",
-    model: str = "openai:gpt-4o-mini",
+    model: str | None = None,
     memory_names: list[str] | None = None,
 ) -> dict:
     """Create a Langbase Pipe pre-configured for CORTEX integration.

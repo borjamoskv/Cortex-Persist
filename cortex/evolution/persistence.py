@@ -42,6 +42,7 @@ def _serialize_agent(a: SovereignAgent) -> dict[str, Any]:
                 "desc": m.description,
                 "delta": m.delta_fitness,
                 "ts": m.timestamp,
+                "tags": m.epigenetic_tags,
             }
             for m in a.mutations[-20:]
         ],
@@ -60,6 +61,7 @@ def _serialize_agent(a: SovereignAgent) -> dict[str, Any]:
                         "desc": m.description,
                         "delta": m.delta_fitness,
                         "ts": m.timestamp,
+                        "tags": m.epigenetic_tags,
                     }
                     for m in s.mutations[-20:]
                 ],
@@ -178,6 +180,7 @@ def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
                     description=mut_data["desc"],
                     delta_fitness=mut_data["delta"],
                     timestamp=mut_data["ts"],
+                    epigenetic_tags=mut_data.get("tags", {}),
                 )
             )
 
@@ -209,6 +212,7 @@ def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
                         description=mut_data["desc"],
                         delta_fitness=mut_data["delta"],
                         timestamp=mut_data["ts"],
+                        epigenetic_tags=mut_data.get("tags", {}),
                     )
                 )
 

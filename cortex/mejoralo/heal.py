@@ -6,10 +6,13 @@ runs `pytest` to ensure 100% integrity, and automatically commits or rollbacks.
 v8.0 — Relentless Mode: no para hasta que sea INMEJORABLE.
 """
 
+from __future__ import annotations
+
 import ast
 import asyncio
 import logging
 import subprocess
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -17,8 +20,11 @@ if TYPE_CHECKING:
     from cortex.mejoralo.engine import MejoraloEngine
 
 from cortex.mejoralo.constants import (
+    ESCALATION_ITER_L2,
+    ESCALATION_ITER_L3,
     HARD_ITERATION_CAP,
     MIN_PROGRESS,
+    PYTEST_TIMEOUT_SECONDS,
     STAGNATION_LIMIT,
 )
 from cortex.mejoralo.deps import sort_by_topological_order
@@ -64,7 +70,7 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-    engine: "MejoraloEngine" | None = None,
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
 ) -> str | None:
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
@@ -87,7 +93,7 @@ def _apply_and_verify(
     iteration: int,
     console: Any,
     current_score: int,
-    engine: "MejoraloEngine" | None = None,
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
@@ -96,7 +102,7 @@ def _apply_and_verify(
 
     try:
         original_code = abs_path.read_text(errors="replace")
-    except Exception:
+    except (OSError, UnicodeDecodeError):
         logger.exception("Failed to read original code for %s", top_file_rel)
         return False
 
@@ -123,7 +129,7 @@ def _run_functional_inquisitor(
     original_code: str,
     top_file_rel: str,
     console: Any,
-    engine: "MejoraloEngine" | None,
+    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
     abs_path: Path,
 ) -> bool:
@@ -153,8 +159,14 @@ def _run_functional_inquisitor(
 
 def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
     console.print("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
-    subprocess.run(["ruff", "format", str(abs_path)], capture_output=True)
-    subprocess.run(["ruff", "check", "--fix", str(abs_path)], capture_output=True)
+    subprocess.run(
+        [sys.executable, "-m", "ruff", "format", str(abs_path)],
+        capture_output=True,
+    )
+    subprocess.run(
+        [sys.executable, "-m", "ruff", "check", "--fix", str(abs_path)],
+        capture_output=True,
+    )
 
 
 def _run_delta_testing(
@@ -163,10 +175,10 @@ def _run_delta_testing(
     original_code: str,
     abs_path: Path,
     console: Any,
-    engine: "MejoraloEngine" | None,
+    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
 ) -> bool:
-    pytest_cmd = ["pytest"]
+    pytest_cmd = [sys.executable, "-m", "pytest"]
     rel_parts = Path(top_file_rel).parts
 
     if len(rel_parts) > 1 and rel_parts[0] == "cortex":
@@ -177,15 +189,32 @@ def _run_delta_testing(
         else:
             console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
 
-    res = subprocess.run(pytest_cmd, cwd=path, capture_output=True, text=True)
-    if res.returncode != 0:
-        console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+    try:
+        res = subprocess.run(
+            pytest_cmd, cwd=path, capture_output=True, text=True,
+            timeout=PYTEST_TIMEOUT_SECONDS,
+        )
+        if res.returncode != 0:
+            console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+            if engine and project:
+                error_trace = (res.stdout + "\n" + res.stderr).strip()
+                engine.record_scar(project, top_file_rel, error_trace)
+            abs_path.write_text(original_code)
+            return False
+        return True
+    except subprocess.TimeoutExpired as e:
+        console.print(
+            f"  [bold red]⏳ Timeout en {top_file_rel} "
+            f"tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
+        )
         if engine and project:
-            error_trace = (res.stdout + "\n" + res.stderr).strip()
-            engine.record_scar(project, top_file_rel, error_trace)
+            err_trace = (
+                f"TimeoutExpired: pytest superó los {PYTEST_TIMEOUT_SECONDS} "
+                f"segundos. stdout: {e.stdout}"
+            )
+            engine.record_scar(project, top_file_rel, err_trace)
         abs_path.write_text(original_code)
         return False
-    return True
 
 
 def _commit_healed_file(
@@ -228,9 +257,9 @@ def _detect_escalation_level(
     stagnation_count: int,
 ) -> int:
     """Determine the current escalation level based on progress history."""
-    if stagnation_count >= STAGNATION_LIMIT * 2 or iteration > 15:
+    if stagnation_count >= STAGNATION_LIMIT * 2 or iteration > ESCALATION_ITER_L3:
         return 3
-    if stagnation_count >= STAGNATION_LIMIT or iteration > 5:
+    if stagnation_count >= STAGNATION_LIMIT or iteration > ESCALATION_ITER_L2:
         return 2
     return 1
 
@@ -240,7 +269,7 @@ def heal_project(
     path: str | Path,
     target_score: int,
     scan_result: ScanResult,
-    engine: "MejoraloEngine" | None = None,
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -292,7 +321,7 @@ def _run_healing_iteration(
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
-    engine: "MejoraloEngine" | None = None,
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.mejoralo.scan import scan
@@ -309,10 +338,11 @@ def _run_healing_iteration(
     # but we can refine it if we want parallel layers.
     targets = sorted_files[: _get_files_per_iteration(level)]
 
-    # 🚀 Parallel Generation
+    # 🚀 Sequential Generation (avoid rate-limits)
     async def _run_generations():
-        tasks = [
-            _heal_file_async(
+        results = []
+        for f, iss in targets:
+            result = await _heal_file_async(
                 Path(path).resolve() / f,
                 iss,
                 level=level,
@@ -320,9 +350,8 @@ def _run_healing_iteration(
                 engine=engine,
                 project=project,
             )
-            for f, iss in targets
-        ]
-        return await asyncio.gather(*tasks)
+            results.append(result)
+        return results
 
     try:
         loop = asyncio.get_running_loop()

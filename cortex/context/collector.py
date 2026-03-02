@@ -160,7 +160,7 @@ class ContextCollector:
             SELECT id, project, reference, context, created_at
             FROM ghosts
             WHERE resolved_at IS NULL
-            ORDER BY created_at DESC
+            ORDER BY id DESC
             LIMIT ?
         """
         try:

@@ -57,6 +57,7 @@ class GatewayIntent(str, Enum):
     MISSION = "mission"  # Launch a swarm mission
     ASK = "ask"  # Ask the AI (LLM pass-through with memory context)
     MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
+    GIDATU = "gidatu"  # UI/Desktop orchestration (Gidatu skill)
 
 
 @dataclass
@@ -153,6 +154,7 @@ class GatewayRouter:
             GatewayIntent.RECALL: self._handle_recall,
             GatewayIntent.STATUS: self._handle_status,
             GatewayIntent.EMIT: self._handle_emit,
+            GatewayIntent.GIDATU: self._handle_gidatu,
         }
 
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
@@ -162,11 +164,12 @@ class GatewayRouter:
         """
         t0 = time.perf_counter()
         handler = self._handlers.get(request.intent)
+        intent_str = getattr(request.intent, "value", str(request.intent))
 
         if handler is None:
             return GatewayResponse(
                 ok=False,
-                error=f"Unknown intent: {request.intent.value}",
+                error=f"Unknown intent: {intent_str}",
                 intent=request.intent,
                 request_id=request.request_id,
                 latency_ms=0.0,
@@ -178,7 +181,7 @@ class GatewayRouter:
             logger.info(
                 "Gateway [%s] %s → ok (%.1fms) src=%s",
                 request.request_id,
-                request.intent.value,
+                intent_str,
                 latency,
                 request.source,
             )
@@ -191,13 +194,25 @@ class GatewayRouter:
             )
         except Exception as exc:  # noqa: BLE001
             latency = (time.perf_counter() - t0) * 1000
-            logger.error(
+            logger.exception(
                 "Gateway [%s] %s → error: %s",
                 request.request_id,
-                request.intent.value,
+                intent_str,
                 exc,
-                exc_info=True,
             )
+            # Ω₅: Auto-persist error as ghost for Josu/Aether processing
+            try:
+                from cortex.immune.error_boundary import ErrorBoundary
+
+                boundary = ErrorBoundary(
+                    f"gateway.{intent_str}",
+                    project=request.project or "CORTEX",
+                    reraise=False,
+                    extra_meta={"request_id": request.request_id, "source": request.source},
+                )
+                await boundary._persist(exc)
+            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
+                pass
             return GatewayResponse(
                 ok=False,
                 error=str(exc),
@@ -295,3 +310,10 @@ class GatewayRouter:
         )
         await self._bus.emit(event)
         return {"delivered": True, "adapters": self._bus.adapter_names}
+
+    async def _handle_gidatu(self, req: GatewayRequest) -> dict[str, Any]:
+        """Orchestrate UI/Desktop actions via Gidatu skill."""
+        from cortex.gateway.handlers.gidatu import GidatuHandler
+
+        handler = GidatuHandler()
+        return await handler.handle(req)

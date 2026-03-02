@@ -31,8 +31,9 @@ import os
 import time
 from typing import Any
 
-from cortex.llm.provider import LLMProvider, _load_presets
-from cortex.llm.router import CortexLLMRouter, CortexPrompt
+from cortex.llm._presets import load_presets
+from cortex.llm.provider import LLMProvider
+from cortex.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,
@@ -48,10 +49,22 @@ from cortex.thinking.presets import (
     ThinkingMode,
 )
 from cortex.thinking.semantic_router import SemanticRouter
+from cortex.utils.respiration import oxygenate
 
 __all__ = ["ThoughtOrchestra"]
 
 logger = logging.getLogger("cortex.thinking.orchestra")
+
+# ─── Mode → Intent mapping ───────────────────────────────────────────
+# Maps ThinkingMode strings to the IntentProfile used by CortexLLMRouter
+# to sort fallbacks by semantic affinity.
+_MODE_TO_INTENT: dict[str, IntentProfile] = {
+    "code": IntentProfile.CODE,
+    "deep_reasoning": IntentProfile.REASONING,
+    "consensus": IntentProfile.REASONING,
+    "creative": IntentProfile.CREATIVE,
+    "speed": IntentProfile.GENERAL,  # speed = latency-first, no domain lock
+}
 
 
 # ─── Thought Orchestra ──────────────────────────────────────────────
@@ -121,12 +134,12 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     @staticmethod
     def _detect_available_providers() -> list[str]:
-        """Detecta providers con API key configurada."""
-        presets = _load_presets()
+        """Detecta providers disponibles (API key configurada o local sin key)."""
+        presets = load_presets()
         return [
             name
             for name, preset in presets.items()
-            if preset.get("env_key") and os.environ.get(preset["env_key"])
+            if not preset.get("env_key") or os.environ.get(preset["env_key"])
         ]
 
     def _find_judge(self, available: list[str]) -> LLMProvider | None:
@@ -138,7 +151,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             except (OSError, ValueError, KeyError) as e:
                 logger.warning("Juez %s no disponible: %s", judge_name, e)
 
-        presets = _load_presets()
+        presets = load_presets()
         for fallback in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
             if fallback in available:
                 try:
@@ -154,15 +167,18 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         mode_key = ThinkingMode(mode) if isinstance(mode, str) else mode
         candidates = self._routing.get(mode_key, [])
 
-        presets = _load_presets()
+        presets = load_presets()
         resolved = []
         for provider_name, model in candidates:
             preset = presets.get(provider_name)
             if not preset:
                 continue
+
             env_key = preset.get("env_key", "")
-            if env_key and os.environ.get(env_key):
+            # Fix: Support local providers without API keys
+            if not env_key or os.environ.get(env_key):
                 resolved.append((provider_name, model))
+
             if len(resolved) >= self.config.max_models:
                 break
 
@@ -170,18 +186,56 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     # ── Query with Retry ──────────────────────────────────────────
 
-    def _resolve_fallbacks(self, primary_provider_name: str) -> list[Any]:
-        """Resuelve la lista de fallbacks excluyendo al primario."""
-        fallbacks = []
+    def _resolve_mode_aware_fallbacks(
+        self,
+        primary_provider_name: str,
+        mode: str,
+    ) -> list[Any]:
+        """Build fallbacks from DEFAULT_ROUTING for the current mode.
+
+        Uses the providers already listed in DEFAULT_ROUTING[mode] as the
+        authoritative source of truth for which models are appropriate for
+        each intent. Excludes the primary and filters by available API keys.
+
+        Falls back to a safe generic list only when the mode is unknown.
+        """
+        from cortex.thinking.presets import DEFAULT_ROUTING, ThinkingMode
+
+        fallbacks: list[Any] = []
         available = self._available_cache or self._detect_available_providers()
-        for fb_name in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
-            if fb_name in available and fb_name != primary_provider_name:
-                try:
-                    presets = _load_presets()
-                    fb_model = presets[fb_name]["default_model"]
-                    fallbacks.append(self._pool.get(fb_name, fb_model))
-                except (OSError, ValueError, KeyError):
-                    continue
+
+        # Resolve the routing candidates for this mode
+        try:
+            mode_enum = ThinkingMode(mode)
+            candidates = DEFAULT_ROUTING.get(mode_enum, [])
+        except ValueError:
+            candidates = []
+
+        presets = load_presets()
+        for provider_name, model in candidates:
+            if provider_name == primary_provider_name:
+                continue  # never add primary as its own fallback
+            if provider_name not in available:
+                continue
+            try:
+                fallbacks.append(self._pool.get(provider_name, model))
+            except (OSError, ValueError, KeyError):
+                continue
+
+        # Safety-net: if no mode-specific fallbacks found, use generic order
+        if not fallbacks:
+            logger.debug(
+                "No mode-specific fallbacks for '%s', using generic chain",
+                mode,
+            )
+            for fb_name in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
+                if fb_name in available and fb_name != primary_provider_name:
+                    try:
+                        fb_model = presets[fb_name]["default_model"]
+                        fallbacks.append(self._pool.get(fb_name, fb_model))
+                    except (OSError, ValueError, KeyError):
+                        continue
+
         return fallbacks
 
     async def _execute_single_attempt(
@@ -192,18 +246,27 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         system: str,
         attempt: int,
         attempts: int,
+        mode: str = "deep_reasoning",
+        temperature: float | None = None,
     ) -> tuple[ModelResponse | None, str | None]:
         """Ejecuta un único intento de consulta, manejando fallos y timeouts."""
         try:
             provider = self._pool.get(provider_name, model)
-            fallbacks = self._resolve_fallbacks(provider_name)
+            fallbacks = self._resolve_mode_aware_fallbacks(provider_name, mode)
+
+            # Map mode to IntentProfile for the deterministic cascade
+            intent = _MODE_TO_INTENT.get(mode, IntentProfile.GENERAL)
+
+            # Use override temperature or default from config
+            temp = temperature if temperature is not None else self.config.temperature
 
             router = CortexLLMRouter(primary=provider, fallbacks=fallbacks)
             cortex_prompt = CortexPrompt(
                 system_instruction=system,
                 working_memory=[{"role": "user", "content": prompt}],
-                temperature=self.config.temperature,
+                temperature=temp,
                 max_tokens=self.config.max_tokens,
+                intent=intent,
             )
 
             result = await asyncio.wait_for(
@@ -220,7 +283,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
                     token_count=len(result.unwrap().split()),
                 ), None
 
-            last_error = result.error
+            last_error = result.error  # type: ignore[reportAttributeAccessIssue]
             logger.warning(
                 "%s:%s ROP cascade failed (intento %d/%d): %s",
                 provider_name,
@@ -259,6 +322,8 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         model: str,
         prompt: str,
         system: str,
+        mode: str = "deep_reasoning",
+        temperature: float | None = None,
     ) -> ModelResponse:
         """Consulta un modelo individual con timeout y retry."""
         start = time.monotonic()
@@ -267,7 +332,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
         for attempt in range(attempts):
             response, last_error = await self._execute_single_attempt(
-                provider_name, model, prompt, system, attempt, attempts
+                provider_name, model, prompt, system, attempt, attempts, mode, temperature
             )
 
             if response:
@@ -289,6 +354,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     # ── Main Think API ────────────────────────────────────────────
 
+    @oxygenate(min_interval=0.01)
     async def think(
         self,
         prompt: str,
@@ -351,11 +417,22 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             fusion_strategy.value,
         )
 
-        # Ejecución paralela
+        # Ejecución paralela — pasamos mode y temperatura variada a cada _query_model
         start = time.monotonic()
-        responses = await asyncio.gather(
-            *[self._query_model(p, m, prompt, system) for p, m in models]
-        )
+
+        tasks = []
+        for i, (p, m) in enumerate(models):
+            temp = self.config.temperature
+            if self.config.dynamic_temperature and len(models) > 1:
+                # Spread temperature linearly around the base temperature
+                # using the configured variance.
+                variance = self.config.temperature_variance
+                offset = i / (len(models) - 1)
+                temp = max(0.0, min(1.0, temp + (offset - 0.5) * variance))
+
+            tasks.append(self._query_model(p, m, prompt, system, mode, temperature=temp))
+
+        responses = await asyncio.gather(*tasks)
         total_ms = (time.monotonic() - start) * 1000
 
         ok_count = sum(1 for r in responses if r.ok)
@@ -367,7 +444,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         )
 
         # Fusionar
-        result = await self._fusion.fuse(
+        result = await self._fusion.fuse(  # type: ignore[reportOptionalMemberAccess]
             responses=list(responses),
             original_prompt=prompt,
             strategy=fusion_strategy,

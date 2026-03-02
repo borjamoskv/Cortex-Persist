@@ -135,8 +135,7 @@ def _diagnose(
     elif type_norm > _THRESHOLD_FRAGMENTED:
         diagnosis = "fragmented"
         recommendations.append(
-            "Fact types are extremely spread out. "
-            "Focus on core types relevant to active projects."
+            "Fact types are extremely spread out. Focus on core types relevant to active projects."
         )
 
     if type_redundancy > _THRESHOLD_REDUNDANT:

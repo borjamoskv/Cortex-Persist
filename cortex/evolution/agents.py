@@ -7,6 +7,7 @@ Each agent has a domain, fitness score, and mutation history.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
 import uuid
@@ -72,28 +73,46 @@ class SubAgent:
     parameters: dict[str, Any] = field(default_factory=dict)
     mutations: list[Mutation] = field(default_factory=list)
     epigenetic_state: dict[str, Any] = field(default_factory=dict)  # 350-Sovereign biological state
+    evolution_tier: str = "GENESIS"  # Match EvolutionType auto() values
     generation: int = 0
+    enneagram: str = "unknown"
 
     @property
     def mutation_count(self) -> int:
         return len(self.mutations)
 
     def apply_mutation(self, mutation: Mutation) -> None:
-        """Apply a mutation and update fitness.
-
-        Note: ceiling enforcement is handled by FitnessLandscape.clamp()
-        in the engine — not here.  We only enforce the floor (0.0).
-        """
+        """Apply a mutation and update fitness and evolution tier."""
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1
+
+        # Evolution Tier Transition
+        if self.fitness > 90.0:
+            self.evolution_tier = "SINGULARITY"
+        elif self.fitness > 75.0:
+            self.evolution_tier = "RECURSIVE"
+        elif self.fitness > 60.0:
+            self.evolution_tier = "ADAPTIVE"
+        elif self.fitness > 30.0:
+            self.evolution_tier = "COGNITIVE"
+        else:
+            self.evolution_tier = "GENESIS"
+
         logger.debug(
-            "SubAgent %s mutated: %s (fitness=%.1f, gen=%d)",
+            "SubAgent %s mutated: %s (fitness=%.1f, tier=%s, gen=%d)",
             self.id,
             mutation.mutation_type.name,
             self.fitness,
+            self.evolution_tier,
             self.generation,
         )
+
+    @property
+    def state_hash(self) -> str:
+        """Cryptographic hash of the current agent state (Phase 2 v3)."""
+        payload = f"{self.id}:{self.fitness}:{self.generation}:{self.parameters}"
+        return hashlib.sha256(payload.encode()).hexdigest()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -103,6 +122,7 @@ class SubAgent:
             "fitness": round(self.fitness, 2),
             "generation": self.generation,
             "mutation_count": self.mutation_count,
+            "enneagram": self.enneagram,
         }
 
 
@@ -121,10 +141,20 @@ class SovereignAgent:
     def __post_init__(self) -> None:
         """Spawn 10 subagents if none exist."""
         if not self.subagents:
+            import random
+
+            BEST_ENEATYPOS = [
+                "8w7 (The Sovereign Challenger)",
+                "5w4 (The Omniscient Architect)",
+                "7w4 (The Enthusiastic Individualist)",
+                "1w9 (The Idealistic Reformer)",
+                "3w4 (The Ambitious Professional)",
+            ]
             self.subagents = [
                 SubAgent(
                     name=f"{self.domain.name.lower()}-sub-{i}",
                     domain=self.domain,
+                    enneagram=random.choice(BEST_ENEATYPOS),
                 )
                 for i in range(10)
             ]
@@ -152,6 +182,13 @@ class SovereignAgent:
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1
+
+    @property
+    def state_hash(self) -> str:
+        """Aggregated state hash of the sovereign domain."""
+        sub_hashes = "".join(s.state_hash for s in self.subagents)
+        payload = f"{self.id}:{self.fitness}:{self.generation}:{sub_hashes}"
+        return hashlib.sha256(payload.encode()).hexdigest()
 
     def increment_cycle(self) -> None:
         self._cycle_count += 1

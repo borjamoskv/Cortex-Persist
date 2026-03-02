@@ -15,17 +15,21 @@ No I/O. No async. Pure in-memory speed.
 from __future__ import annotations
 
 import logging
+import time
 from collections import deque
 from typing import Final
 
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
+from cortex.security.tenant import get_tenant_id
 
 __all__ = ["WorkingMemoryL1"]
 
 logger = logging.getLogger("cortex.memory.working")
 
 DEFAULT_MAX_TOKENS: Final[int] = 8192
+# Rolling access history: max 2 048 entries to keep memory footprint bounded (≈48 KB worst-case)
+_ACCESS_LOG_MAXLEN: Final[int] = 2048
 
 
 class WorkingMemoryL1:
@@ -36,7 +40,7 @@ class WorkingMemoryL1:
                     when this limit is exceeded.
     """
 
-    __slots__ = ("_buffer", "_current_tokens", "_max_tokens", "_guardrail")
+    __slots__ = ("_buffers", "_tenant_tokens", "_max_tokens", "_guardrail", "_access_log")
 
     def __init__(
         self,
@@ -46,11 +50,36 @@ class WorkingMemoryL1:
         if max_tokens <= 0:
             raise ValueError(f"max_tokens must be positive, got {max_tokens}")
         self._max_tokens = max_tokens
-        self._buffer: deque[MemoryEvent] = deque()
-        self._current_tokens = 0
+        # Per-tenant isolation: {tenant_id: deque[MemoryEvent]}
+        self._buffers: dict[str, deque[MemoryEvent]] = {}
+        # Per-tenant token usage: {tenant_id: current_tokens}
+        self._tenant_tokens: dict[str, int] = {}
         self._guardrail = guardrail
+        # Access log: deque of (monotonic_ts, project_id) tuples.
+        # Written by add_event + get_context; read by ForgettingOracle.
+        # maxlen caps memory irrespective of session length (Ω₂ — Entropic Asymmetry).
+        self._access_log: deque[tuple[float, str]] = deque(maxlen=_ACCESS_LOG_MAXLEN)
 
     # ─── Core Operations ──────────────────────────────────────────
+
+    def _calculate_priority(self, event: MemoryEvent) -> float:
+        """Lightweight heuristic to determine event retention priority."""
+        score = 1.0
+        # 1. Recency (base priority)
+        age_seconds = time.time() - event.timestamp.timestamp()
+        score += max(0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
+
+        # 2. Emotion/Valence
+        meta_valence = event.metadata.get("valence", 0.0)
+        score += abs(float(meta_valence)) * 0.5
+
+        # 3. Role importance
+        if event.role == "user":
+            score += 0.5
+        elif event.role == "system":
+            score += 1.0
+
+        return score
 
     def add_event(self, event: MemoryEvent) -> list[MemoryEvent]:
         """Add an event, returning any overflow for L2 compression.
@@ -61,6 +90,8 @@ class WorkingMemoryL1:
         Raises:
             RuntimeError: If the session guardrail rejects the event.
         """
+        tenant_id = event.tenant_id
+
         # Session-level budget check (if guardrail attached)
         if self._guardrail is not None:
             if not self._guardrail.consume(event.token_count):
@@ -70,65 +101,132 @@ class WorkingMemoryL1:
                 )
                 raise RuntimeError(msg)
 
-        self._buffer.append(event)
-        self._current_tokens += event.token_count
+        # Record access BEFORE appending
+        project_id: str = event.metadata.get("project_id", tenant_id)
+        self._access_log.append((time.monotonic(), f"{tenant_id}:{project_id}"))
+
+        # Initialize tenant buffer if needed
+        if tenant_id not in self._buffers:
+            self._buffers[tenant_id] = deque()
+            self._tenant_tokens[tenant_id] = 0
+
+        buffer = self._buffers[tenant_id]
+        buffer.append(event)
+        self._tenant_tokens[tenant_id] += event.token_count
 
         overflow: list[MemoryEvent] = []
-        while self._current_tokens > self._max_tokens and self._buffer:
-            evicted = self._buffer.popleft()
-            self._current_tokens -= evicted.token_count
+        while self._tenant_tokens[tenant_id] > self._max_tokens and buffer:
+            # Shift from pure FIFO to priority-weighted eviction
+            lowest_priority = float("inf")
+            evict_idx = 0
+            for i, evt in enumerate(buffer):
+                p = self._calculate_priority(evt)
+                if p < lowest_priority:
+                    lowest_priority = p
+                    evict_idx = i
+
+            evicted = buffer[evict_idx]
+            del buffer[evict_idx]
+            self._tenant_tokens[tenant_id] -= evicted.token_count
             overflow.append(evicted)
 
         if overflow:
             logger.debug(
-                "L1 overflow: evicted %d events (%d tokens freed)",
+                "L1 overflow [Tenant: %s]: evicted %d events (%d tokens freed)",
+                tenant_id,
                 len(overflow),
                 sum(e.token_count for e in overflow),
             )
 
         return overflow
 
-    def get_context(self) -> list[dict[str, str]]:
-        """Return current buffer as prompt-ready message dicts."""
-        return [{"role": e.role, "content": e.content} for e in self._buffer]
+    def get_context(self, tenant_id: str | None = None) -> list[dict[str, str]]:
+        """Return current buffer for a tenant as prompt-ready message dicts."""
+        tenant_id = tenant_id or get_tenant_id()
+        if tenant_id not in self._buffers:
+            return []
 
-    def clear(self) -> list[MemoryEvent]:
-        """Flush all events. Returns the flushed buffer for archival."""
-        flushed = list(self._buffer)
-        self._buffer.clear()
-        self._current_tokens = 0
+        now = time.monotonic()
+        seen: set[str] = set()
+        buffer = self._buffers[tenant_id]
+
+        for e in buffer:
+            pid = e.metadata.get("project_id", e.tenant_id)
+            if pid not in seen:
+                self._access_log.append((now, f"{tenant_id}:{pid}"))
+                seen.add(pid)
+        return [{"role": e.role, "content": e.content} for e in buffer]
+
+    def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
+        """Return normalised access frequency for a project_id in the last window_seconds.
+
+        Reads directly from the in-memory rolling log — zero I/O, O(n) with
+        n ≤ _ACCESS_LOG_MAXLEN (2 048).  A full log queried in the worst case
+        completes in < 50 µs on modern hardware.
+
+        Args:
+            project_id: The project whose access frequency to measure.
+            window_seconds: Rolling observation window (default 1 hour).
+
+        Returns:
+            Float in [0.0, 1.0] where 1.0 means ≥ 100 accesses in window.
+        """
+        if not self._access_log:
+            return 0.0
+        cutoff = time.monotonic() - window_seconds
+        count = sum(1 for ts, pid in self._access_log if ts > cutoff and pid == project_id)
+        # Normalise: 100+ accesses in window → 1.0  (Ω₁: right scale matters)
+        return min(1.0, count / 100.0)
+
+    def clear(self, tenant_id: str | None = None) -> list[MemoryEvent]:
+        """Flush events. If tenant_id provided, clears ONLY that tenant."""
+        flushed: list[MemoryEvent] = []
+        if tenant_id:
+            if tenant_id in self._buffers:
+                flushed = list(self._buffers[tenant_id])
+                self._buffers[tenant_id].clear()
+                self._tenant_tokens[tenant_id] = 0
+        else:
+            # Clear all
+            for buf in self._buffers.values():
+                flushed.extend(buf)
+            self._buffers.clear()
+            self._tenant_tokens.clear()
         return flushed
 
     # ─── Introspection ────────────────────────────────────────────
 
     @property
     def current_tokens(self) -> int:
-        """Current token usage."""
-        return self._current_tokens
+        """Current token usage for a tenant."""
+        tenant_id = get_tenant_id()
+        return self._tenant_tokens.get(tenant_id, 0)
 
     @property
     def max_tokens(self) -> int:
-        """Maximum token budget."""
+        """Maximum token budget per tenant."""
         return self._max_tokens
 
-    @property
-    def utilization(self) -> float:
-        """Token utilization ratio (0.0 - 1.0+)."""
+    def utilization(self, tenant_id: str | None = None) -> float:
+        """Token utilization ratio for a tenant."""
+        tenant_id = tenant_id or get_tenant_id()
         if self._max_tokens == 0:
             return 0.0
-        return self._current_tokens / self._max_tokens
+        return self._tenant_tokens.get(tenant_id, 0) / self._max_tokens
 
-    @property
-    def event_count(self) -> int:
-        """Number of events in the buffer."""
-        return len(self._buffer)
+    def event_count(self, tenant_id: str | None = None) -> int:
+        """Number of events in the buffer for a tenant."""
+        tenant_id = tenant_id or get_tenant_id()
+        return len(self._buffers.get(tenant_id, []))
 
     def __len__(self) -> int:
-        return len(self._buffer)
+        """Total event count across all tenants."""
+        return sum(len(b) for b in self._buffers.values())
 
     def __repr__(self) -> str:
+        total_events = len(self)
+        total_tokens = sum(self._tenant_tokens.values())
         return (
-            f"WorkingMemoryL1(events={len(self._buffer)}, "
-            f"tokens={self._current_tokens}/{self._max_tokens}, "
-            f"util={self.utilization:.1%})"
+            f"WorkingMemoryL1(tenants={len(self._buffers)}, events={total_events}, "
+            f"tokens={total_tokens}/{self._max_tokens})"
         )

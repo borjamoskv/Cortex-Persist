@@ -4,6 +4,13 @@ Extracted from heal.py to keep file size under 300 LOC.
 Contains the escalating prompt templates used by the healing engine.
 """
 
+from cortex.mejoralo.constants import (
+    FILES_PER_ITERATION,
+    FILES_PER_ITERATION_DEFAULT,
+    HEAL_TEMPERATURES,
+    SWARM_BASE_TEMPERATURE,
+)
+
 __all__ = [
     "HEAL_PROMPT_AGGRESSIVE",
     "HEAL_PROMPT_NORMAL",
@@ -96,14 +103,10 @@ def get_prompt_for_level(level: int) -> str:
 
 def get_files_per_iteration(level: int) -> int:
     """Return how many files to heal per iteration based on escalation level."""
-    if level >= 3:
-        return 5
-    if level >= 2:
-        return 3
-    return 1
+    return FILES_PER_ITERATION.get(level, FILES_PER_ITERATION_DEFAULT)
 
 
 def temperature_for_level(level: int) -> float:
     """Return LLM temperature for the given escalation level."""
-    temps = {1: 0.1, 2: 0.2, 3: 0.3}
-    return temps.get(level, 0.1)
+    return HEAL_TEMPERATURES.get(level, SWARM_BASE_TEMPERATURE)
+

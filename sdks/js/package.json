@@ -10,7 +10,7 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": ["cortex", "memory", "ai", "agents", "rag", "semantic-search"],
-  "author": "Borja Moskv <borjamoskv@gmail.com>",
+  "author": "borjamoskv.com <borjamoskv@gmail.com>",
   "license": "BSL-1.1",
   "repository": {
     "type": "git",

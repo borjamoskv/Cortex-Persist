@@ -45,7 +45,7 @@ class PolicyViolationError(Exception):
     """Raised when ABAC denies access."""
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Policy:
     """An ABAC policy rule.
 
@@ -219,8 +219,10 @@ class ABACEvaluator:
         if expected == "__MISMATCH__":
             sub_tenant = ctx.subject.get("tenant_id")
             res_tenant = ctx.resource.get("tenant_id")
-            if sub_tenant and res_tenant and sub_tenant != res_tenant:
-                return True  # Condition matches → this DENY policy applies
+            # If ANY tenant is missing, or they don't explicitly match,
+            # we consider it a mismatch, triggering the DENY policy.
+            if sub_tenant != res_tenant or not sub_tenant or not res_tenant:
+                return True
             return False
 
         if expected != "*" and actual != expected:

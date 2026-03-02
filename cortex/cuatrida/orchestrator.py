@@ -20,7 +20,7 @@ class CuatridaOrchestrator:
 
     def __init__(self, engine: AsyncCortexEngine):
         self.engine = engine
-        self.mejoralo = MejoraloEngine(engine=engine)
+        self.mejoralo = MejoraloEngine(engine=engine)  # type: ignore[reportArgumentType]
         self.metrics = CuatridaMetrics()
         self._last_tx_id: int | None = None
 
@@ -84,7 +84,7 @@ class CuatridaOrchestrator:
             metadata=metadata,
         )
         self.metrics.decision_count += 1
-        logger.info(f"Sovereign Decision Sealed [{dimension.value}] tx:{actual_tx_id}: {intent}")
+        logger.info("Sovereign Decision Sealed [%s] tx:%s: %s", dimension.value, actual_tx_id, intent)
         return node
 
     async def validate_aesthetic(self, project: str, path: str | Path) -> bool:
@@ -126,7 +126,7 @@ class CuatridaOrchestrator:
                 "cumulative_respect": self.metrics.computational_respect,
             },
         )
-        logger.info(f"Oracle Ritual Completed. Respect: {self.metrics.computational_respect:.2f}")
+        logger.info("Oracle Ritual Completed. Respect: %.2f", self.metrics.computational_respect)
         return self.metrics.computational_respect
 
     async def zero_friction_sync(self, project: str) -> dict[str, Any]:
@@ -134,9 +134,9 @@ class CuatridaOrchestrator:
         Dimension A: Zero-Friction Sync.
         Interfaces with ghost-control to ensure the system is in a pre-cognitive state.
         """
-        ghost_path = (
-            Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
-        )
+        from cortex.core.paths import SKILLS_DIR
+
+        ghost_path = SKILLS_DIR / "ghost-control" / "ghost.py"
         latency = 0.0
         status = "unknown"
 

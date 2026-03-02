@@ -203,4 +203,4 @@ This is not a framework. This is **Sovereign Artificial Intelligence**.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](LICENSE)*
+*by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](LICENSE)*

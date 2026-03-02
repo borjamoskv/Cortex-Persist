@@ -14,10 +14,10 @@ Categories:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 
 
-class AxiomCategory(StrEnum):
+class AxiomCategory(str, Enum):
     """Three-layer axiom taxonomy."""
 
     CONSTITUTIONAL = "constitutional"
@@ -25,7 +25,7 @@ class AxiomCategory(StrEnum):
     ASPIRATIONAL = "aspirational"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Axiom:
     """A single, canonical axiom definition."""
 
@@ -94,7 +94,7 @@ _OPERATIONAL: list[Axiom] = [
         name="Entropy Death",
         mandate=(
             "Dead code, broad catches, boilerplate → eradicate. "
-            "≤300 LOC/file. Zero TODO/FIXME in production."
+            "≤300 LOC/file. Zero unresolved tasks in production."
         ),
         category=AxiomCategory.OPERATIONAL,
         enforcement="Ruff S110 (except Exception blocked) + entropy_gate.py + LOC guard.",
@@ -104,7 +104,7 @@ _OPERATIONAL: list[Axiom] = [
         id="AX-012",
         name="Type Safety",
         mandate=(
-            "from __future__ import annotations. StrEnum for semantic keys. "
+            "from __future__ import annotations. str, Enum for semantic keys. "
             "Zero Any types. mypy --strict."
         ),
         category=AxiomCategory.OPERATIONAL,
@@ -114,10 +114,7 @@ _OPERATIONAL: list[Axiom] = [
     Axiom(
         id="AX-013",
         name="Async Native",
-        mandate=(
-            "asyncio.to_thread() for blocking I/O. "
-            "time.sleep() PROHIBITED in async code."
-        ),
+        mandate=("asyncio.to_thread() for blocking I/O. time.sleep() PROHIBITED in async code."),
         category=AxiomCategory.OPERATIONAL,
         enforcement="Grep guard: time.sleep in cortex/**/*.py → block.",
         ci_gate="quality_gates.yml#Gate-Async",
@@ -198,20 +195,14 @@ _ASPIRATIONAL: list[Axiom] = [
     Axiom(
         id="AX-020",
         name="Negative Latency",
-        mandate=(
-            "The response precedes the question. "
-            "Predictive analysis + Vector Gamma."
-        ),
+        mandate=("The response precedes the question. Predictive analysis + Vector Gamma."),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Agent behavioral pattern. No CI gate.",
     ),
     Axiom(
         id="AX-021",
         name="Structural Telepathy",
-        mandate=(
-            "Intent compiles reality. JIT code crystallization "
-            "from operator mental state."
-        ),
+        mandate=("Intent compiles reality. JIT code crystallization from operator mental state."),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="DEMIURGE-omega / KETER-∞ orchestration.",
     ),
@@ -219,8 +210,7 @@ _ASPIRATIONAL: list[Axiom] = [
         id="AX-022",
         name="Post-Machine Autonomy (Ouroboros)",
         mandate=(
-            "The ecosystem never sleeps, only evolves. "
-            "Background self-engineering via OUROBOROS-∞."
+            "The ecosystem never sleeps, only evolves. Background self-engineering via OUROBOROS-∞."
         ),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="OUROBOROS-∞ daemon.",
@@ -239,8 +229,7 @@ _ASPIRATIONAL: list[Axiom] = [
         id="AX-024",
         name="Bridges Over Islands",
         mandate=(
-            "Proven patterns transfer cross-project. "
-            "Every bridge is documented as a bridge fact."
+            "Proven patterns transfer cross-project. Every bridge is documented as a bridge fact."
         ),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Bridge fact persistence. Agent discipline.",
@@ -248,10 +237,7 @@ _ASPIRATIONAL: list[Axiom] = [
     Axiom(
         id="AX-025",
         name="Liquid Ubiquity (Nexus Federation)",
-        mandate=(
-            "Intelligence flows between encrypted vaults. "
-            "Isolation is obsolescence."
-        ),
+        mandate=("Intelligence flows between encrypted vaults. Isolation is obsolescence."),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Singularity Nexus Federation protocol.",
     ),
@@ -279,11 +265,21 @@ _ASPIRATIONAL: list[Axiom] = [
         id="AX-028",
         name="Specular Memory (HDC-Alpha)",
         mandate=(
-            "Context binds fact to intention. "
-            "Hyperdimensional computing for specular recall."
+            "Context binds fact to intention. Hyperdimensional computing for specular recall."
         ),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Vector Alpha implementation.",
+    ),
+    Axiom(
+        id="AX-029",
+        name="Zero-Prompting Evolution (Ω₇)",
+        mandate=(
+            "The system predicts entropy before it occurs, executes the necessary "
+            "CORTEX mutation, purges ghosts, and leaves only a cryptographic report "
+            "of what was resolved — without user prompts. Ablación Semántica."
+        ),
+        category=AxiomCategory.ASPIRATIONAL,
+        enforcement="ZeroPromptingEvolutionStrategy in CortexEvolutionEngine.",
     ),
 ]
 

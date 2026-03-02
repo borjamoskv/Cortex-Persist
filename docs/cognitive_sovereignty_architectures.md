@@ -305,4 +305,4 @@ La convergencia de estas tecnologías define el nuevo estado del arte: **agentes
 ---
 
 > *Documento generado para el proyecto CORTEX — Febrero 2026*
-> *Borja Moskv · Arquitecturas de Soberanía Cognitiva*
+> *by [borjamoskv.com](https://borjamoskv.com) · Arquitecturas de Soberanía Cognitiva*

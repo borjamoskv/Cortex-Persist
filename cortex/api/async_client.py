@@ -13,12 +13,14 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
 import os
 from typing import Any
 
 import httpx
 
 from cortex.api.client import CortexError, Fact
+from cortex.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["AsyncCortexClient"]
 
@@ -45,6 +47,9 @@ class AsyncCortexClient:
             timeout=timeout,
             headers=self._headers(),
         )
+        # Límite estricto para escalar a 1k rpm sin timeout
+        self._semaphore = asyncio.Semaphore(100)
+        self.chaos_gate = ChaosGate(name=f"api_client:{self.base_url}")
 
     def _headers(self) -> dict[str, str]:
         h = {"Content-Type": "application/json"}
@@ -52,21 +57,48 @@ class AsyncCortexClient:
             h["Authorization"] = f"Bearer {self.api_key}"
         return h
 
-    async def _request(self, method: str, path: str, **kwargs) -> dict:
-        try:
-            resp = await self._client.request(method, path, **kwargs)
-        except httpx.HTTPError as e:
-            raise CortexError(0, f"Connection error: {e}") from e
-        if resp.status_code >= 400:
+    async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+        # Chronos Sniper Guard: Exponential Backoff Retries
+        max_retries = 3
+        backoff = 0.5
+
+        for attempt in range(max_retries):
             try:
-                detail = resp.json().get("detail", resp.text)
-            except (ValueError, KeyError):
-                detail = resp.text
-            raise CortexError(resp.status_code, detail)
-        try:
-            return resp.json()
-        except ValueError as e:
-            raise CortexError(resp.status_code, f"Invalid JSON response: {e}") from e
+                async with self._semaphore:
+                    # Chaos Interceptor Logic-Bomb
+                    resp = await async_interceptor(
+                        self.chaos_gate,
+                        self._client.request,
+                        method,
+                        path,
+                        **kwargs,
+                    )
+
+                if resp.status_code >= 500:
+                    # Server error, maybe retry
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(backoff * (2**attempt))
+                        continue
+
+                if resp.status_code >= 400:
+                    try:
+                        detail = resp.json().get("detail", resp.text)
+                    except (ValueError, KeyError):
+                        detail = resp.text
+                    raise CortexError(resp.status_code, detail)
+
+                try:
+                    return resp.json()
+                except ValueError as e:
+                    raise CortexError(resp.status_code, f"Invalid JSON response: {e}") from e
+
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(backoff * (2**attempt))
+                    continue
+                raise CortexError(0, f"Connection error after {max_retries} attempts: {e}") from e
+            except httpx.HTTPError as e:
+                raise CortexError(0, f"HTTP error: {e}") from e
 
     # ─── Facts ────────────────────────────────────────────────────────
 
@@ -76,7 +108,7 @@ class AsyncCortexClient:
         content: str,
         fact_type: str = "knowledge",
         tags: list[str] | None = None,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> int:
         """Store a fact. Returns fact ID."""
         data = {
@@ -172,7 +204,7 @@ class AsyncCortexClient:
         fact_id: int,
         content: str | None = None,
         tags: list[str] | None = None,
-        meta: dict | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
         """Update a fact. Returns new fact ID."""
         data: dict[str, Any] = {}
@@ -189,7 +221,7 @@ class AsyncCortexClient:
         self,
         project: str,
         fmt: str = "json",
-    ) -> str | list | dict:
+    ) -> dict[str, Any]:
         """Export project facts in specified format (json, csv, jsonl)."""
         result = await self._request(
             "GET",
@@ -198,13 +230,13 @@ class AsyncCortexClient:
         )
         return result
 
-    async def status(self) -> dict:
+    async def status(self) -> dict[str, Any]:
         """Get engine status."""
         return await self._request("GET", "/v1/status")
 
     # ─── Admin ────────────────────────────────────────────────────────
 
-    async def create_key(self, name: str, tenant_id: str = "default") -> dict:
+    async def create_key(self, name: str, tenant_id: str = "default") -> dict[str, Any]:
         """Create a new API key (admin only)."""
         return await self._request(
             "POST",
@@ -212,17 +244,17 @@ class AsyncCortexClient:
             params={"name": name, "tenant_id": tenant_id},
         )
 
-    async def list_keys(self) -> list[dict]:
+    async def list_keys(self) -> list[dict[str, Any]]:
         """List all API keys (admin only)."""
-        return await self._request("GET", "/v1/admin/keys")
+        return await self._request("GET", "/v1/admin/keys")  # type: ignore[reportReturnType]
 
     # ─── Context Manager ──────────────────────────────────────────────
 
     async def close(self):
         await self._client.aclose()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> AsyncCortexClient:
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args: object) -> None:
         await self.close()

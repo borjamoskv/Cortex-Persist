@@ -8,6 +8,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING
 
+from cortex.crypto.aes import get_default_encrypter
 from cortex.memory.temporal import now_iso
 from cortex.sync.common import (
     MEMORY_DIR,
@@ -24,6 +25,42 @@ if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.sync")
+
+def _decrypt_json(val: str | None) -> dict:
+    if not val or not str(val).strip():
+        return {}
+    if str(val).startswith("v6_aesgcm:"):
+        try:
+            enc = get_default_encrypter()
+            res = enc.decrypt_json(val)
+            return res if isinstance(res, dict) else {}
+        except (ValueError, TypeError, json.JSONDecodeError) as e:
+            logger.warning("Decryption failed for json meta: %s", e)
+            return {}
+    try:
+        res = json.loads(val)
+        return res if isinstance(res, dict) else {}
+    except (json.JSONDecodeError, ValueError):
+        return {}
+
+def _decrypt_json_list(val: str | None) -> list:
+    if not val or not str(val).strip():
+        return []
+    if str(val).startswith("v6_aesgcm:"):
+        try:
+            enc = get_default_encrypter()
+            decrypted = enc.decrypt_str(val)
+            if decrypted:
+                res = json.loads(decrypted)
+                return res if isinstance(res, list) else []
+        except (ValueError, TypeError, json.JSONDecodeError) as e:
+            logger.warning("Decryption failed for json list: %s", e)
+        return []
+    try:
+        res = json.loads(val)
+        return res if isinstance(res, list) else []
+    except (json.JSONDecodeError, ValueError):
+        return []
 
 
 async def _writeback_if_changed(
@@ -109,7 +146,7 @@ async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> No
     ghosts = {}
     for row in rows:
         project = row[0]
-        meta = json.loads(row[1]) if row[1] else {}
+        meta = _decrypt_json(row[1])
         ghosts[project] = meta
 
     content = json.dumps(ghosts, indent=2, ensure_ascii=False, sort_keys=True)
@@ -144,7 +181,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
 
     knowledge_list = []
     for row in k_rows:
-        meta = json.loads(row[4]) if row[4] else {}
+        meta = _decrypt_json(row[4])
         knowledge_list.append(
             {
                 "id": meta.get("id", f"K{len(knowledge_list) + 1:03d}"),
@@ -165,7 +202,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
 
     decisions_list = []
     for row in d_rows:
-        meta = json.loads(row[1]) if row[1] else {}
+        meta = _decrypt_json(row[1])
         decisions_list.append(
             {
                 "id": meta.get("id", f"D{len(decisions_list) + 1:03d}"),
@@ -200,7 +237,7 @@ async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> 
 
     lines = []
     for row in rows:
-        meta = json.loads(row[4]) if row[4] else {}
+        meta = _decrypt_json(row[4])
         # Reconstruir el formato original de mistakes.jsonl
         entry = {
             "date": row[3] or meta.get("date", ""),
@@ -208,7 +245,7 @@ async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> 
             "error": meta.get("error", ""),
             "root_cause": meta.get("root_cause", ""),
             "fix": meta.get("fix", ""),
-            "tags": json.loads(row[2]) if row[2] else [],
+            "tags": _decrypt_json_list(row[2]),
         }
         lines.append(json.dumps(entry, ensure_ascii=False))
 
@@ -231,8 +268,8 @@ async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> N
 
     lines = []
     for row in rows:
-        meta = json.loads(row[3]) if row[3] else {}
-        tags = json.loads(row[1]) if row[1] else []
+        meta = _decrypt_json(row[3])
+        tags = _decrypt_json_list(row[1])
         # Reconstruir formato original de bridges.jsonl
         entry = {
             "date": row[2] or meta.get("date", ""),

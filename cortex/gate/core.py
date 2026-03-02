@@ -102,7 +102,7 @@ class SovereignGate:
             sort_keys=True,
         )
 
-        challenge = hmac.new(self._secret, payload.encode("utf-8"), hashlib.sha256).hexdigest()
+        challenge = hmac.new(self._secret, payload.encode("utf-8"), hashlib.sha256).hexdigest()  # type: ignore[reportArgumentType]
 
         action = PendingAction(
             action_id=action_id,

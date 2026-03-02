@@ -53,7 +53,7 @@ class ImmutableLedger:
             async with self.pool.acquire() as conn:
                 yield conn
         elif hasattr(self.pool, "get_conn"):
-            conn = await self.pool.get_conn()
+            conn = await self.pool.get_conn()  # type: ignore[reportAttributeAccessIssue]
             yield conn
         else:
             yield self.pool
@@ -106,12 +106,12 @@ class ImmutableLedger:
 
         async with self._acquire_conn() as conn:
             # Find last checkpointed transaction
-            cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+            cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")  # type: ignore[reportAttributeAccessIssue]
             row = await cursor.fetchone()
             last_tx = row[0] or 0 if row else 0
 
             # Count pending transactions
-            cursor = await conn.execute(
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
             )
             row = await cursor.fetchone()
@@ -122,7 +122,7 @@ class ImmutableLedger:
 
             start_id = last_tx + 1
             # Get the ID of the N-th transaction from start
-            cursor = await conn.execute(
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT id FROM transactions WHERE id >= ? ORDER BY id LIMIT 1 OFFSET ?",
                 (start_id, batch_size - 1),
             )
@@ -139,14 +139,14 @@ class ImmutableLedger:
             if not root_hash:
                 return None
 
-            cursor = await conn.execute(
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 """
                 INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count)
                 VALUES (?, ?, ?, ?)
                 """,
                 (root_hash, start_id, end_id, batch_size),
             )
-            await conn.commit()
+            await conn.commit()  # type: ignore[reportAttributeAccessIssue]
             logger.info(
                 "Created Merkle checkpoint #%d (TX %d-%d)", cursor.lastrowid, start_id, end_id
             )
@@ -172,7 +172,7 @@ class ImmutableLedger:
         # For sync usage, the caller should provide the connection.
         if conn is None:
             if hasattr(self.pool, "_get_sync_conn"):
-                conn = self.pool._get_sync_conn()
+                conn = self.pool._get_sync_conn()  # type: ignore[reportAttributeAccessIssue]
             else:
                 # Last resort — if pool has a db_path attribute (CortexEngine does)
                 logger.warning("No sync connection provided to create_checkpoint_sync")
@@ -228,7 +228,7 @@ class ImmutableLedger:
 
         async with self._acquire_conn() as conn:
             # 1. Verify Hash Chain (Chunked to avoid OOM)
-            cursor = await conn.execute(
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT id, prev_hash, hash, project, action, detail, timestamp FROM transactions ORDER BY id"
             )
 
@@ -267,7 +267,7 @@ class ImmutableLedger:
                 current_prev = c_hash
 
             # 2. Verify Merkle Checkpoints
-            cursor = await conn.execute(
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "SELECT id, root_hash, tx_start_id, tx_end_id FROM merkle_roots ORDER BY id"
             )
             roots = await cursor.fetchall()
@@ -288,10 +288,10 @@ class ImmutableLedger:
             status = "ok" if not violations else "violation"
 
             if violations:
-                logger.error(f"Integrity check failed: {len(violations)} violations found")
+                logger.error("Integrity check failed: %s violations found", len(violations))
 
             # Record check
-            await conn.execute(
+            await conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) VALUES (?, ?, ?, ?, ?)",
                 (
                     "full",
@@ -301,11 +301,11 @@ class ImmutableLedger:
                     datetime.now().isoformat(),
                 ),
             )
-            await conn.commit()
+            await conn.commit()  # type: ignore[reportAttributeAccessIssue]
 
             return {
                 "valid": not violations,
                 "violations": violations,
                 "tx_checked": tx_count,
-                "roots_checked": len(roots),
+                "roots_checked": len(roots),  # type: ignore[reportArgumentType]
             }

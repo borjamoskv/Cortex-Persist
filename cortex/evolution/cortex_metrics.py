@@ -106,6 +106,9 @@ class DomainMetrics:
     knowledge_count: int = 0
     last_decision_age_hours: float = float("inf")
     fact_density: int = 0
+    llm_error_count: int = 0
+    avg_llm_latency_ms: float = 0.0
+    cascade_depth_avg: float = 0.0
     _fetched_at: float = field(default_factory=time.time)
 
     # ── Derived Signals ────────────────────────────────────────
@@ -178,6 +181,8 @@ class DomainMetrics:
             + self.decision_count * 0.5  # Crystallised knowledge
             - self.error_count * 1.5  # Anti-Hebbian: failure signal
             - self.ghost_count * 1.0  # Debt accumulation
+            - self.llm_error_count * 2.5  # Ω₃: Critical failure (LLM out)
+            - (self.avg_llm_latency_ms / 500.0)  # Latency pressure
         )
         # Phasic recency bonus (dopaminergic salience)
         if self.last_decision_age_hours < 24:
@@ -265,7 +270,7 @@ async def fetch_domain_metrics(
             # ── Open ghosts ──
             placeholders = ",".join("?" for _ in projects)
             async with conn.execute(
-                f"SELECT COUNT(*) FROM ghosts "
+                f"SELECT COUNT(*) FROM ghosts "  # nosec B608 — parameterized query
                 f"WHERE status = 'open' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -274,7 +279,7 @@ async def fetch_domain_metrics(
 
             # ── Last decision recency (phasic salience) ──
             async with conn.execute(
-                f"SELECT MAX(created_at) FROM facts "
+                f"SELECT MAX(created_at) FROM facts "  # nosec B608 — parameterized query
                 f"WHERE fact_type = 'decision' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -288,6 +293,39 @@ async def fetch_domain_metrics(
                         m.last_decision_age_hours = age_s / 3600
                     except (ValueError, TypeError):
                         pass
+
+            # ── LLM Telemetry (Afferent Cascade Signals) ──
+            # Measure terminal failures and average depth in the last hour
+            hour_ago = time.time() - 3600
+            async with conn.execute(
+                f"SELECT COUNT(*), AVG(latency_ms), AVG(depth) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                if row:
+                    # Count only terminal errors (tier='none') for error_count
+                    # but we also want general latency/depth.
+                    # We'll re-query specifically for tier='none' for err count
+                    pass
+
+            async with conn.execute(
+                f"SELECT COUNT(*) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND tier = 'none' AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                m.llm_error_count = row[0] if row else 0
+
+            async with conn.execute(
+                f"SELECT AVG(latency_ms), AVG(depth) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                if row:
+                    m.avg_llm_latency_ms = row[0] if row[0] is not None else 0.0
+                    m.cascade_depth_avg = row[1] if row[1] is not None else 0.0
 
             m._fetched_at = time.time()
             return m
@@ -330,139 +368,39 @@ async def fetch_all_domain_metrics(
     return metrics
 
 
-# ── Sync API (for EvolutionEngine in asyncio.to_thread) ───────
+# ── Sync Wrapper (backward compatibility) ──────────────────────
 
 
 class CortexMetrics:
-    """Sync CORTEX DB querier with per-domain caching.
+    """Sync metrics accessor for the strategies pipeline.
 
-    Thread-safe. Uses raw sqlite3 to avoid async conflicts
-    when called from asyncio.to_thread offloads.
+    Returns tonic (baseline) DomainMetrics synchronously. For real
+    DB telemetry, use the async ``fetch_domain_metrics()`` function.
+
+    This class was extracted during the async migration to preserve
+    backward compatibility with ``strategies.py`` which instantiates
+    ``CortexMetrics()`` at module level.
     """
 
-    _CACHE_TTL: float = 60.0
+    __slots__ = ("_cache",)
 
-    def __init__(self, db_path: str | Path = _DEFAULT_DB) -> None:
-        self._db_path = Path(db_path)
+    def __init__(self) -> None:
         self._cache: dict[AgentDomain, DomainMetrics] = {}
-        self._cache_time: float = 0.0
 
-    def _is_cache_valid(self) -> bool:
-        return bool(self._cache) and (time.time() - self._cache_time) < self._CACHE_TTL
+    def get_domain_metrics(self, domain: AgentDomain) -> DomainMetrics:
+        """Return cached or tonic baseline metrics for a domain."""
+        if domain not in self._cache or self._cache[domain].is_stale:
+            self._cache[domain] = DomainMetrics(domain=domain)
+        return self._cache[domain]
 
-    def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:
-        """Get metrics for all 10 domains (cached)."""
-        if self._is_cache_valid():
-            return dict(self._cache)
-        self._refresh()
-        return dict(self._cache)
+    def inject(self, domain: AgentDomain, metrics: DomainMetrics) -> None:
+        """Inject pre-fetched metrics (useful for tests and async pre-loading)."""
+        self._cache[domain] = metrics
 
     def get_domain(self, domain: AgentDomain) -> DomainMetrics:
-        """Get cached metrics for a single domain."""
-        if self._is_cache_valid() and domain in self._cache:
-            return self._cache[domain]
-        self._refresh()
-        return self._cache.get(domain, DomainMetrics(domain=domain))
+        """Alias for get_domain_metrics (used by free_energy.py)."""
+        return self.get_domain_metrics(domain)
 
-    # Alias for strategies.py compatibility
-    get_domain_metrics = get_domain
-
-    def _refresh(self) -> None:
-        """Re-query via sync sqlite3."""
-        result: dict[AgentDomain, DomainMetrics] = {}
-
-        if not self._db_path.exists():
-            for domain in AgentDomain:
-                result[domain] = self._fallback(domain)
-            self._cache = result
-            self._cache_time = time.time()
-            return
-
-        try:
-            import sqlite3
-
-            conn = sqlite3.connect(
-                str(self._db_path),
-                timeout=2.0,
-                check_same_thread=False,
-            )
-            conn.row_factory = sqlite3.Row
-            try:
-                for domain in AgentDomain:
-                    result[domain] = self._query_sync(conn, domain)
-            finally:
-                conn.close()
-        except Exception as e:
-            logger.debug("Sync metrics refresh failed: %s", e)
-            for domain in AgentDomain:
-                if domain not in result:
-                    result[domain] = self._fallback(domain)
-
-        self._cache = result
-        self._cache_time = time.time()
-
-    def _query_sync(
-        self,
-        conn: Any,
-        domain: AgentDomain,
-    ) -> DomainMetrics:
-        """Query single domain via open sqlite3 connection."""
-        import sqlite3 as _sql
-
-        projects = DOMAIN_PROJECT_MAP.get(domain, ["cortex"])
-        m = DomainMetrics(domain=domain)
-        ph = ",".join("?" for _ in projects)
-
-        for fact_type, attr in (
-            ("error", "error_count"),
-            ("bridge", "bridge_count"),
-            ("decision", "decision_count"),
-            ("knowledge", "knowledge_count"),
-        ):
-            try:
-                row = conn.execute(
-                    f"SELECT COUNT(*) AS c FROM facts WHERE fact_type = ? AND project IN ({ph})",
-                    (fact_type, *projects),
-                ).fetchone()
-                if row:
-                    setattr(m, attr, row["c"] if isinstance(row, _sql.Row) else row[0])
-            except _sql.OperationalError:
-                pass
-
-        # Ghosts
-        try:
-            row = conn.execute(
-                f"SELECT COUNT(*) AS c FROM ghosts WHERE status = 'open' AND project IN ({ph})",
-                projects,
-            ).fetchone()
-            if row:
-                m.ghost_count = row["c"] if isinstance(row, _sql.Row) else row[0]
-        except _sql.OperationalError:
-            pass
-
-        return m
-
-    @staticmethod
-    def _fallback(domain: AgentDomain) -> DomainMetrics:
-        """Parse snapshot for rough counts."""
-        m = DomainMetrics(domain=domain)
-        snap = Path("~/.cortex/context-snapshot.md").expanduser()
-        if not snap.exists():
-            return m
-        try:
-            text = snap.read_text(encoding="utf-8", errors="ignore").lower()
-            key = domain.name.lower()
-            for line in text.splitlines():
-                if key not in line:
-                    continue
-                if "error" in line:
-                    m.error_count += 1
-                if "ghost" in line:
-                    m.ghost_count += 1
-                if "bridge" in line:
-                    m.bridge_count += 1
-                if "decision" in line:
-                    m.decision_count += 1
-        except OSError:
-            pass
-        return m
+    def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:
+        """Return tonic metrics for all domains."""
+        return {d: self.get_domain_metrics(d) for d in AgentDomain}

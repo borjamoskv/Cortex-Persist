@@ -5,7 +5,7 @@ and auto-persists decisions, errors, and ghosts to CORTEX — without
 the agent needing a prompt rule to tell it. The prompt becomes unnecessary
 because the product enforces the behavior.
 
-Copyright 2026 Borja Moskv — Apache-2.0
+Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations
@@ -40,40 +40,28 @@ class SessionFact:
 # ─── Signal Detection Patterns ────────────────────────────────────
 
 _DECISION_SIGNALS: list[str] = [
-    "decided",
-    "decision:",
-    "chose",
-    "selected",
-    "approved",
-    "went with",
-    "opted for",
-    "will use",
-    "committed to",
+    r"\bdecided\b", r"\bdecision:\b", r"\bchose\b", r"\bselected\b",
+    r"\bapproved\b", r"\bwent with\b", r"\bopted for\b", r"\bwill use\b", r"\bcommitted to\b",
+    # Spanish
+    r"\bdecidido\b", r"\bdecidimos\b", r"\bdecisión:\b", r"\belegido\b",
+    r"\bseleccionado\b", r"\baprobado\b", r"\boptamos por\b", r"\busaremos\b", r"\bmejora\b"
 ]
 
 _ERROR_SIGNALS: list[str] = [
-    "error:",
-    "failed:",
-    "bug:",
-    "exception:",
-    "traceback",
-    "fix:",
-    "resolved:",
-    "crashed",
-    "broken",
+    r"\berror:\b", r"\bfailed:\b", r"\bbug:\b", r"\bexception:\b", r"\btraceback\b",
+    r"\bfix:\b", r"\bresolved:\b", r"\bcrashed\b", r"\bbroken\b",
+    # Spanish
+    r"\bfallo:\b", r"\bexcepción:\b", r"\bcorregido:\b", r"\bresuelto:\b",
+    r"\bha petado\b", r"\broto\b", r"\bfalló\b", r"\bsolucionado:\b"
 ]
 
 _GHOST_SIGNALS: list[str] = [
-    "to" + "do:",
-    "fix" + "me:",
-    "ha" + "ck:",
-    "later:",
-    "incomplete",
-    "needs work",
-    "follow up",
-    "pending",
-    "left off",
-    "unfinished",
+    r"\bto" + "do:\b", r"\bfix" + "me:\b", r"\bha" + "ck:\b", r"\blater:\b",
+    r"\bincomplete\b", r"\bneeds work\b", r"\bfollow up\b", r"\bpending\b",
+    r"\bleft off\b", r"\bunfinished\b",
+    # Spanish
+    r"\bpara luego\b", r"\bincompleto\b", r"\bnecesita trabajo\b",
+    r"\bpendiente\b", r"\bdejamos en\b", r"\bsin terminar\b"
 ]
 
 
@@ -176,17 +164,19 @@ class AutoPersistHook:
 
     @staticmethod
     def _classify_message(msg_lower: str) -> str | None:
-        """Classify a message by its signal patterns.
+        """Classify a message by its signal patterns using regex.
 
         Priority: error > decision > ghost (errors are most critical).
         """
-        for signal in _ERROR_SIGNALS:
-            if signal in msg_lower:
+        import re
+        
+        for pattern in _ERROR_SIGNALS:
+            if re.search(pattern, msg_lower):
                 return "error"
-        for signal in _DECISION_SIGNALS:
-            if signal in msg_lower:
+        for pattern in _DECISION_SIGNALS:
+            if re.search(pattern, msg_lower):
                 return "decision"
-        for signal in _GHOST_SIGNALS:
-            if signal in msg_lower:
+        for pattern in _GHOST_SIGNALS:
+            if re.search(pattern, msg_lower):
                 return "ghost"
         return None

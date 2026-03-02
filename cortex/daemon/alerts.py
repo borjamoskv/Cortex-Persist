@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 
 from cortex.daemon.notifier import Notifier
 
@@ -29,32 +30,32 @@ class AlertHandlerMixin:
 
     def _alert_sites(self, sites: list) -> None:
         for site in sites:
-            if not site.healthy and self._should_alert(f"site:{site.url}"):
+            if not site.healthy and self._should_alert(f"site:{site.url}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 Notifier.alert_site_down(site)
 
     def _alert_ghosts(self, ghosts: list) -> None:
         for ghost in ghosts:
-            if self._should_alert(f"ghost:{ghost.project}"):
+            if self._should_alert(f"ghost:{ghost.project}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 Notifier.alert_stale_project(ghost)
 
     def _alert_memory(self, alerts: list) -> None:
         for alert in alerts:
-            if self._should_alert(f"memory:{alert.file}"):
+            if self._should_alert(f"memory:{alert.file}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.warning("Memory file %s is stale", alert.file)
 
     def _alert_certs(self, certs: list) -> None:
         for cert in certs:
-            if self._should_alert(f"cert:{cert.hostname}"):
+            if self._should_alert(f"cert:{cert.hostname}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.warning("SSL certificate for %s expiring soon", cert.hostname)
 
     def _alert_engine(self, alerts: list) -> None:
         for eh in alerts:
-            if self._should_alert(f"engine:{eh.issue}"):
+            if self._should_alert(f"engine:{eh.issue}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.warning("CORTEX Engine alert for %s", eh.issue)
 
     def _alert_disk(self, alerts: list) -> None:
         for da in alerts:
-            if self._should_alert(f"disk:{da.path}"):
+            if self._should_alert(f"disk:{da.path}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.warning("Disk space low on %s", da.path)
 
     # ─── Complex Alerts ───────────────────────────────────────────
@@ -62,7 +63,7 @@ class AlertHandlerMixin:
     def _alert_mejoralo(self, alerts: list) -> None:
         """Sovereign Alert: Unified monitor for MEJORAlo score degradation."""
         for alert in alerts:
-            if alert.score >= 50 or not self._should_alert(f"mejoralo:{alert.project}"):
+            if alert.score >= 50 or not self._should_alert(f"mejoralo:{alert.project}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 continue
 
             logger.warning(
@@ -72,7 +73,10 @@ class AlertHandlerMixin:
                 alert.dead_code,
             )
 
-            msg = f"Project {alert.project} score: {alert.score}. Waking up Legion-1 Swarm (400-subagents)."
+            msg = (
+                f"Project {alert.project} score: {alert.score}. "
+                "Waking up Legion-1 Swarm (400-subagents)."
+            )
             Notifier.notify("☢️ MEJORAlo Brutal Mode", msg, sound="Basso")
 
             # Sovereign Auto-Heal: Dispatch Brutal Scan
@@ -81,7 +85,7 @@ class AlertHandlerMixin:
     def _alert_entropy(self, alerts: list) -> None:
         """Entropy Watchdog: Trigger purge on extreme complexity buildup."""
         for alert in alerts:
-            if not self._should_alert(f"entropy:{alert.project}"):
+            if not self._should_alert(f"entropy:{alert.project}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 continue
 
             logger.warning(
@@ -110,9 +114,9 @@ class AlertHandlerMixin:
         try:
             import subprocess
 
-            path_str = self.auto_mejoralo.projects.get(
+            path_str = self.auto_mejoralo.projects.get(  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 project
-            ) or self.entropy_monitor.projects.get(project, ".")
+            ) or self.entropy_monitor.projects.get(project, ".")  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
             mode = "--brutal" if brutal else "--deep"
 
             subprocess.Popen(
@@ -136,7 +140,7 @@ class AlertHandlerMixin:
 
     def _alert_perception(self, alerts: list) -> None:
         for alert in alerts:
-            if self._should_alert(f"perception:{alert.project}"):
+            if self._should_alert(f"perception:{alert.project}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.info(
                     "👁️ Perception Alert for %s: %s (Emotion: %s, Confidence: %s)",
                     alert.project,
@@ -153,7 +157,7 @@ class AlertHandlerMixin:
 
     def _alert_neural(self, alerts: list) -> None:
         for alert in alerts:
-            if self._should_alert(f"neural:{alert.intent}"):
+            if self._should_alert(f"neural:{alert.intent}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.info(
                     "🧠 Neural-Bandwidth Sync: %s (Confidence: %s)", alert.intent, alert.confidence
                 )
@@ -167,7 +171,7 @@ class AlertHandlerMixin:
         for alert in alerts:
             # We use the IP address and similarity signature to debounce alerts
             dedup_key = f"security:{alert.ip_address}:{alert.similarity_score}"
-            if self._should_alert(dedup_key):
+            if self._should_alert(dedup_key):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.warning(
                     "🛡️ SECURITY FRAUD ANOMALY %s: %s (Sim: %.2f)",
                     alert.confidence,
@@ -179,3 +183,103 @@ class AlertHandlerMixin:
                     Notifier.notify("🛡️ Security Alert", message, sound="Basso")
                 except (OSError, ValueError, RuntimeError) as e:
                     logger.exception("Failed to execute security notification: %s", e)
+
+    def _alert_compaction(self, alerts: list) -> None:
+        """Handler para CompactionAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"compaction:{a.project}"
+            if self._should_alert(key):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                Notifier.notify("Compaction completed", a.message)
+                self._last_alerts[key] = time.monotonic()  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+
+    def _alert_signals(self, alerts: list) -> None:
+        """Handler for SignalAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            msg = f"L2 Reflex: {a.event_type} - {a.message}"
+            logger.info("📡 Signal Reactor: %s", msg)
+            if self._should_alert(f"signal:{a.event_type}:{a.project or 'global'}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                Notifier.notify("CORTEX Reactive Shift", msg)
+
+    def _alert_tombstone(self, alerts: list) -> None:
+        """Handler for TombstoneAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.info("💀 Tombstone Sweep: %s", a.message)
+            if self._should_alert("tombstone:sweep"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                Notifier.notify("Garbage Collection", a.message)
+
+    def _alert_cloud_sync(self, alerts: list) -> None:
+        """Handler for CloudSyncAlert."""
+        if not alerts:
+            return
+        for a in alerts:
+            logger.debug(a.message)
+            logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
+
+    def _alert_aether(self, alerts: list) -> None:
+        """Handler for AetherAlert — autonomous coding task completions."""
+        for a in alerts:
+            emoji = "✅" if a.status == "done" else "❌"
+            logger.info("%s Aether task [%s] %s: %s", emoji, a.task_id, a.status, a.title)
+            if self._should_alert(f"aether:{a.task_id}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                sound = "Glass" if a.status == "done" else "Basso"
+                Notifier.notify(
+                    f"{emoji} Aether — {a.status}",
+                    f"{a.title[:80]}: {a.message[:120]}",
+                    sound=sound,
+                )
+
+    def _alert_evaluation(self, alerts: list) -> None:
+        """Handler for EvaluationAlert from EvaluationMonitor."""
+        for a in alerts:
+            logger.info(
+                "📡 Evaluation Metrics: Stale_Ratio=%.2f, Contradictions=%d",
+                a.stale_ratio,
+                a.contradictions_found,
+            )
+            if a.stale_ratio >= 0.5 or a.contradictions_found > 0:
+                if self._should_alert("evaluation:stale_cont"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                    msg = f"{a.message} | Contradictions: {a.contradictions_found}"
+                    Notifier.notify("⚠️ Memory Evaluation Alert", msg, sound="Basso")
+
+    def _alert_auto_immune(self, alerts: list[str]) -> None:
+        """Handler for AutoImmuneMonitor detecting stale ghosts."""
+        for task_id in alerts:
+            # We only alert once per ghost dispatched
+            if self._should_alert(f"auto_immune:{task_id}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                logger.info("🛡️ Auto-Immune System dispatched ghost resolution task: %s", task_id)
+
+    def _alert_workflows(self, alerts: list) -> None:
+        """Handler for WorkflowAlert — proactive workflow recommendations."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"workflow:{a.workflow}"
+            logger.info(
+                "🔮 Workflow Recommendation: %s (%s) — %s",
+                a.workflow,
+                a.confidence,
+                a.reason,
+            )
+            if self._should_alert(key):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                Notifier.notify(
+                    f"🔮 Deploy {a.workflow}",
+                    a.reason[:120],
+                    sound="Glass",
+                )
+
+    def _flush_timer(self) -> None:
+        """Flush accumulated time tracker heartbeats."""
+        if not getattr(self, "tracker", None):
+            return
+        try:
+            entries = self.tracker.flush()  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+            if entries > 0:
+                logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
+        except Exception as e:  # noqa: BLE001
+            logger.error("TimeTracker flush error: %s", e)

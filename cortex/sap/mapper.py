@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.sap.mapper")
 _SAP_META_KEYS = frozenset({"__metadata", "__deferred", "__count", "results"})
 
 
-@dataclass
+@dataclass()
 class SyncDiff:
     """Result of diffing CORTEX facts against SAP entities."""
 
@@ -172,7 +172,7 @@ class SAPMapper:
         return diff
 
 
-def _entities_differ(a: dict, b: dict) -> bool:
+def _entities_differ(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """Compare two entity dicts, ignoring order and metadata fields."""
     # Normalize both by stripping metadata
     clean_a = {k: v for k, v in a.items() if k not in _SAP_META_KEYS}
@@ -186,7 +186,7 @@ def _entities_differ(a: dict, b: dict) -> bool:
         return clean_a != clean_b
 
 
-def _parse_meta_str(meta_obj: Any) -> dict:
+def _parse_meta_str(meta_obj: Any) -> dict[str, Any]:
     if isinstance(meta_obj, str):
         try:
             return json.loads(meta_obj)

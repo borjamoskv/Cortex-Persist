@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Any
 
-from cortex.daemon.models import ThermodynamicAlert
+from cortex.daemon.models import ThermodynamicAlert  # type: ignore[reportAttributeAccessIssue]
 from cortex.memory.homeostasis import EntropyPruner
 
 logger = logging.getLogger("moskv-daemon")
@@ -72,7 +72,7 @@ class ThermodynamicMemoryMonitor:
                         pruned_count,
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Thermodynamic Memory monitor failed on %s: %s", tenant, e)
 
         return alerts

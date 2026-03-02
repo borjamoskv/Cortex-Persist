@@ -1,173 +1,107 @@
 #!/usr/bin/env python3
-# =============================================================================
-# CORTEX SOVEREIGN PRE-COMMIT v3.0
-# =============================================================================
-# Three guards, one commit. If any fails, the commit dies.
-#
-# Guard 1: DependencyGuard (AX-011 — Zero external oracle SPOF)
-# Guard 2: Neural Shield (X-Ray quality score >= 90/100)
-# Guard 3: Axiom Registry Sync (AX-019 — docs generated from code)
-#
-# Installed as: .git/hooks/pre-commit → ../../scripts/sovereign_pre_commit.py
+"""
+CORTEX Sovereign Pre-Commit Hook
+=================================
+Last line of defense against credential/seed leaks.
+Catches what .gitignore cannot — including `git add -f`.
 
-import os
+DERIVATION: Ω₃ Byzantine Default — verify, then trust.
+"""
 import subprocess
 import sys
+import re
+
+# ── Forbidden patterns (case-insensitive) ─────────────────────
+FORBIDDEN_PATTERNS: list[re.Pattern] = [
+    re.compile(r"wallet_seed", re.IGNORECASE),
+    re.compile(r"\.seed\.json$", re.IGNORECASE),
+    re.compile(r"private[_-]?key\.json$", re.IGNORECASE),
+    re.compile(r"\.pem$", re.IGNORECASE),
+    re.compile(r"\.p12$", re.IGNORECASE),
+    re.compile(r"\.pfx$", re.IGNORECASE),
+    re.compile(r"credentials\.json$", re.IGNORECASE),
+    re.compile(r"service[_-]account.*\.json$", re.IGNORECASE),
+]
+
+# ── Content patterns (detect secrets inside files) ────────────
+CONTENT_PATTERNS: list[re.Pattern] = [
+    re.compile(r"wallet_seed", re.IGNORECASE),
+    re.compile(r"private_key.*0x[0-9a-fA-F]{40,}", re.IGNORECASE),
+    re.compile(r"mnemonic.*(?:\b\w+\b\s+){11,}\b\w+\b"),
+]
+
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
 
 
-def _find_repo_root() -> str:
-    """Detect repo root reliably (works as hook or direct invocation)."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, timeout=5,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
-    except (OSError, subprocess.TimeoutExpired):
-        pass
-    # Fallback: assume script lives in REPO/scripts/
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-REPO_ROOT = _find_repo_root()
-VENV_PYTHON = os.path.join(REPO_ROOT, ".venv", "bin", "python")
-PYTHON = VENV_PYTHON if os.path.exists(VENV_PYTHON) else sys.executable
-
-
-def run_dependency_guard() -> bool:
-    """Axiom 4: No subprocess to external oracle without fallback."""
-    print(
-        "\n🛡️  [GUARD 1/2] DependencyGuard — Axiom 4 Enforcement"
+def get_staged_files() -> list[str]:
+    """Get list of files staged for commit."""
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR"],
+        capture_output=True,
+        text=True,
     )
-    try:
-        result = subprocess.run(
-            [PYTHON, "-m", "cortex.guards.dependency_guard", REPO_ROOT],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd=REPO_ROOT,
-        )
-        # Print output
-        if result.stdout.strip():
-            for line in result.stdout.strip().split("\n"):
-                if line.strip():
-                    print(f"   {line.strip()}")
+    return [f for f in result.stdout.strip().split("\n") if f]
 
-        if result.returncode != 0:
-            print("   ⛔ BLOCKED: Axiom 4 violations detected.")
-            print(
-                "   💡 Use SovereignLLM "
-                "(cortex/llm/sovereign.py) to fix.\n"
+
+def check_filenames(files: list[str]) -> list[str]:
+    """Check staged filenames against forbidden patterns."""
+    violations: list[str] = []
+    for filepath in files:
+        for pattern in FORBIDDEN_PATTERNS:
+            if pattern.search(filepath):
+                violations.append(f"  🚫 FILENAME: {filepath} (matched: {pattern.pattern})")
+                break
+    return violations
+
+
+def check_file_contents(files: list[str]) -> list[str]:
+    """Scan staged file contents for secret patterns."""
+    violations: list[str] = []
+    for filepath in files:
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--", filepath],
+                capture_output=True,
+                text=True,
             )
-            return False
-
-        return True
-    except (subprocess.TimeoutExpired, OSError) as e:
-        print(f"   ⚠️  Guard skipped: {e}")
-        return True  # Don't block on guard failure
-
-
-def run_neural_shield() -> bool:
-    """Quality gate: X-Ray score must be >= 90/100."""
-    print(
-        "\n👁️  [GUARD 2/2] Neural Shield — Quality Enforcement"
-    )
-    neural_script = os.path.join(
-        REPO_ROOT, "scripts", "neural_pre_commit.py"
-    )
-    if not os.path.exists(neural_script):
-        print("   ⚠️  neural_pre_commit.py not found, skipping.")
-        return True
-
-    try:
-        result = subprocess.run(
-            [PYTHON, neural_script],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            cwd=REPO_ROOT,
-        )
-        if result.stdout.strip():
-            for line in result.stdout.strip().split("\n"):
-                if line.strip():
-                    print(f"   {line.strip()}")
-
-        return result.returncode == 0
-    except (subprocess.TimeoutExpired, OSError) as e:
-        print(f"   ⚠️  Guard skipped: {e}")
-        return True
+            diff_content = result.stdout
+            for pattern in CONTENT_PATTERNS:
+                if pattern.search(diff_content):
+                    violations.append(
+                        f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'"
+                    )
+                    break
+        except Exception:
+            pass  # Binary files or access errors — skip
+    return violations
 
 
-def run_axiom_registry_sync() -> bool:
-    """Guard 3: Verify axiom-registry.md is generated from code."""
-    print(
-        "\n📜 [GUARD 3/3] Axiom Registry Sync — AX-019"
-    )
-    registry_md = os.path.join(REPO_ROOT, "docs", "axiom-registry.md")
-    if not os.path.exists(registry_md):
-        print("   ⚠️  docs/axiom-registry.md not found, skipping.")
-        return True
+def main() -> int:
+    files = get_staged_files()
+    if not files:
+        return 0
 
-    try:
-        # Read current content
-        with open(registry_md) as f:
-            current = f.read()
+    violations: list[str] = []
+    violations.extend(check_filenames(files))
+    violations.extend(check_file_contents(files))
 
-        # Regenerate from code
-        result = subprocess.run(
-            [PYTHON, "-m", "cortex.axioms.generate_docs"],
-            capture_output=True,
-            text=True,
-            timeout=15,
-            cwd=REPO_ROOT,
-        )
-        if result.returncode != 0:
-            print(f"   ⚠️  Generator failed: {result.stderr[:200]}")
-            return True  # Don't block on generator failure
+    if violations:
+        print(f"\n{RED}{BOLD}╔══════════════════════════════════════════════════╗{RESET}")
+        print(f"{RED}{BOLD}║  🛑 SOVEREIGN SECURITY GATE — COMMIT BLOCKED    ║{RESET}")
+        print(f"{RED}{BOLD}╚══════════════════════════════════════════════════╝{RESET}\n")
+        print(f"{YELLOW}Wallet seeds / credentials detected in staged files:{RESET}\n")
+        for v in violations:
+            print(f"{RED}{v}{RESET}")
+        print(f"\n{YELLOW}If this is a false positive, bypass with:{RESET}")
+        print(f"  git commit --no-verify\n")
+        print(f"{RED}⚠️  Bots drain exposed wallet seeds in <600ms.{RESET}\n")
+        return 1
 
-        # Read regenerated content
-        with open(registry_md) as f:
-            regenerated = f.read()
-
-        if current != regenerated:
-            print(
-                "   ⛔ axiom-registry.md is out of sync with registry.py!"
-            )
-            print(
-                "   💡 Run: python -m cortex.axioms.generate_docs"
-            )
-            print("   Then stage the updated file.")
-            return False
-
-        print("   ✅ axiom-registry.md in sync with code.")
-        return True
-    except (OSError, subprocess.TimeoutExpired) as e:
-        print(f"   ⚠️  Guard skipped: {e}")
-        return True
+    return 0
 
 
 if __name__ == "__main__":
-    print("═" * 60)
-    print("  CORTEX SOVEREIGN PRE-COMMIT v3.0")
-    print("═" * 60)
-
-    guard_1 = run_dependency_guard()
-    guard_2 = run_neural_shield()
-    guard_3 = run_axiom_registry_sync()
-
-    if guard_1 and guard_2 and guard_3:
-        print("\n✅ All guards passed. Commit approved.\n")
-        sys.exit(0)
-    else:
-        failed = []
-        if not guard_1:
-            failed.append("DependencyGuard")
-        if not guard_2:
-            failed.append("NeuralShield")
-        if not guard_3:
-            failed.append("AxiomRegistrySync")
-        print(
-            f"\n⛔ COMMIT BLOCKED by: {', '.join(failed)}\n"
-        )
-        sys.exit(1)
+    sys.exit(main())

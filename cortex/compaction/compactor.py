@@ -25,6 +25,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
+from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
+
 if TYPE_CHECKING:
     import aiosqlite
 
@@ -54,6 +57,7 @@ class CompactionStrategy(str, Enum):
     MERGE_ERRORS = "merge_errors"
     STALENESS_PRUNE = "staleness_prune"
     TTL_PRUNE = "ttl_prune"
+    DRIFT_CHECK = "drift_check"
 
     @classmethod
     def all(cls) -> list[CompactionStrategy]:
@@ -107,7 +111,9 @@ def _apply_dedup_strategy(
     from cortex.compaction.strategies.dedup import execute_dedup
 
     prev_count = len(result.deprecated_ids)
-    execute_dedup(engine, project, result, dry_run, similarity_threshold)
+    execute_dedup(  # type: ignore[reportUnusedCoroutine]
+        engine, project, result, dry_run, similarity_threshold,
+    )
     if len(result.deprecated_ids) > prev_count:
         result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
@@ -153,6 +159,9 @@ async def _apply_strategies(
         if len(result.deprecated_ids) > prev_count:
             result.strategies_applied.append(str(CompactionStrategy.TTL_PRUNE.value))
 
+    if CompactionStrategy.DRIFT_CHECK in strategies:
+        await _apply_drift_check(engine, project, result)
+
 
 async def compact(
     engine: CortexEngine,
@@ -176,7 +185,7 @@ async def compact(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
     )
-    count_before = (await cursor.fetchone())[0]
+    count_before = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     result = CompactionResult(project=project, original_count=count_before, dry_run=dry_run)
 
@@ -196,7 +205,7 @@ async def compact(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
     )
-    count_after = (await cursor.fetchone())[0]
+    count_after = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
     result.compacted_count = count_after
 
     # Log compaction
@@ -237,6 +246,18 @@ _TYPE_ORDER = [
 ]
 
 
+def _cortex_decay(
+    is_diamond: int, timestamp: float, current_time: float, half_life: float
+) -> float:
+    """Calcula el decaimiento temporal soberano (Axiom L4)."""
+    if is_diamond:
+        return 1.0
+    if not timestamp:
+        return 0.0
+    age = max(0.0, current_time - timestamp)
+    return float((0.5) ** (age / half_life))
+
+
 async def compact_session(
     engine: CortexEngine,
     project: str,
@@ -245,17 +266,29 @@ async def compact_session(
     """Prepare compressed context string for LLM re-injection.
 
     Instead of sending 500 facts to the LLM, we send a categorized,
-    compacted view.
+    compacted view using Unified L4 Temporal Decay.
     """
+    import time
+
     conn = await engine.get_conn()
+
+    # ─── AXIOM L4: Unified Temporal Decay ──────────────────────────────
+    try:
+        await conn.create_function("cortex_decay", 4, _cortex_decay)
+    except (sqlite3.Error, AttributeError):
+        pass  # Already registered or unsupported
+
+    now = time.time()
+    half_life = 7 * 24 * 3600  # 7 days in seconds
+
     cursor = await conn.execute(
         "SELECT fact_type, content, consensus_score, created_at "
         "FROM facts "
         "WHERE project = ? AND valid_until IS NULL "
         "ORDER BY (consensus_score * 0.7 + "
-        "(1.0 / (1.0 + (julianday('now') - julianday(created_at)))) * 0.3) DESC "
+        "cortex_decay(0, CAST(strftime('%s', created_at) AS REAL), ?, ?) * 0.3) DESC "
         "LIMIT ?",
-        (project, max_facts),
+        (project, now, half_life, max_facts),
     )
     rows = await cursor.fetchall()
 
@@ -315,7 +348,7 @@ async def get_compaction_stats(
     if project:
         query += " WHERE project = ?"
         params.append(project)
-    query += " ORDER BY timestamp DESC LIMIT 20"
+    query += " ORDER BY id DESC LIMIT 20"
 
     cursor = await conn.execute(query, params)
     rows = await cursor.fetchall()
@@ -339,74 +372,14 @@ async def get_compaction_stats(
         )
 
     return {
-        "total_compactions": len(rows),
+        "total_compactions": len(rows),  # type: ignore[reportArgumentType]
         "total_deprecated": total_deprecated,
         "history": history,
     }
 
 
-# ─── TTL Prune (AX-019: Persist With Decay) ─────────────────────────
-
-
-async def _apply_ttl_prune(
-    engine: CortexEngine,
-    project: str,
-    result: CompactionResult,
-    dry_run: bool,
-) -> None:
-    """Deprecate facts that have exceeded their type-specific TTL.
-
-    Uses the canonical TTL policy from cortex.axioms.ttl.
-    Immortal types (axiom, decision, bridge, rule, report, evolution) are skipped.
-    """
-    from cortex.axioms.ttl import FACT_TTL, is_expired
-
-    conn = await engine.get_conn()
-    cursor = await conn.execute(
-        "SELECT id, fact_type, created_at "
-        "FROM facts "
-        "WHERE project = ? AND valid_until IS NULL",
-        (project,),
-    )
-    rows = await cursor.fetchall()
-
-    from datetime import datetime, timezone
-
-    now = datetime.now(tz=timezone.utc)
-    expired_ids: list[int] = []
-
-    for row in rows:
-        fact_id, fact_type, created_at_str = row[0], row[1], row[2]
-        if FACT_TTL.get(fact_type) is None:
-            continue  # Immortal type
-
-        try:
-            created = datetime.fromisoformat(created_at_str)
-            if created.tzinfo is None:
-                created = created.replace(tzinfo=timezone.utc)
-            age_seconds = (now - created).total_seconds()
-            if is_expired(fact_type, age_seconds):
-                expired_ids.append(fact_id)
-        except (ValueError, TypeError):
-            continue
-
-    if not expired_ids:
-        return
-
-    if dry_run:
-        result.details.append(f"TTL_PRUNE: would deprecate {len(expired_ids)} expired facts")
-        result.deprecated_ids.extend(expired_ids)
-        return
-
-    for fid in expired_ids:
-        await conn.execute(
-            "UPDATE facts SET valid_until = datetime('now') WHERE id = ?",
-            (fid,),
-        )
-    await conn.commit()
-    result.deprecated_ids.extend(expired_ids)
-    result.details.append(f"TTL_PRUNE: deprecated {len(expired_ids)} expired facts")
-    logger.info(_LOG_FMT, project, f"TTL prune: {len(expired_ids)} facts expired")
+# TTL Prune → cortex.compaction.compaction_ttl
+# Drift Check → cortex.compaction.compaction_drift
 
 
 # ─── Internal ────────────────────────────────────────────────────────

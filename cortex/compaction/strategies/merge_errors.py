@@ -2,7 +2,6 @@
 Error merging strategy for compaction.
 """
 
-import json
 import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING

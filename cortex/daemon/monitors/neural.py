@@ -29,9 +29,9 @@ class NeuralIntentMonitor:
 
             context = self._engine.read_context()
             raw_clip = context  # simplified — original may have deeper extraction
-            hyp = self._engine.infer_intent(raw_clip)
+            hyp = self._engine.infer_intent(raw_clip)  # type: ignore[reportArgumentType]
 
-            if hyp and hyp.confidence > 0:
+            if hyp and hyp.confidence > 0:  # type: ignore[reportOperatorIssue]
                 alerts.append(
                     NeuralIntentAlert(
                         intent=hyp.intent,

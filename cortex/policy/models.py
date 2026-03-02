@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass(slots=True)
+@dataclass()
 class ActionItem:
     """A scored, prioritized action derived from CORTEX memory.
 
@@ -33,10 +33,7 @@ class ActionItem:
     metadata: dict = field(default_factory=dict)
 
     def __repr__(self) -> str:
-        return (
-            f"ActionItem(v={self.value:.3f} "
-            f"[{self.action_type}] {self.description[:60]})"
-        )
+        return f"ActionItem(v={self.value:.3f} [{self.action_type}] {self.description[:60]})"
 
 
 # ── Reward Mapping ──────────────────────────────────────────────────
@@ -64,7 +61,7 @@ ACTION_TYPE_MAP: dict[str, str] = {
 }
 
 
-@dataclass(slots=True)
+@dataclass()
 class PolicyConfig:
     """Tunable parameters for the Bellman value function.
 

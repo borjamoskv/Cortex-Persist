@@ -10,6 +10,13 @@
 
 set -eo pipefail
 
+# -- SECURITY GUARD --
+if [[ -z "${CORTEX_ALLOW_HOME_MUTATION}" ]]; then
+    echo -e "\033[38;2;255;0;0m[SECURITY] Script requires CORTEX_ALLOW_HOME_MUTATION=1 to modify \$HOME.\033[0m"
+    exit 1
+fi
+
+
 # -- ESTÉTICA INDUSTRIAL NOIR (ANSI COLORS) --
 CYAN='\033[38;2;6;214;160m'
 BLUE='\033[38;2;46;80;144m'

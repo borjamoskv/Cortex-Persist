@@ -210,7 +210,7 @@ _CODE_PATTERN_RE = re.compile(
 # ─── Data Models ─────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class RouteDecision:
     """Result of semantic classification."""
 

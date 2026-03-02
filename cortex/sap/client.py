@@ -8,8 +8,21 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import dataclass, field
 from typing import Any
-from xml.etree import ElementTree
+
+try:
+    import defusedxml.ElementTree as ElementTree  # type: ignore[import-untyped]
+except ImportError:
+    # Fallback: stdlib (acceptable only for trusted internal SAP environments)
+    # Install defusedxml: pip install defusedxml
+    import warnings
+    from xml.etree import ElementTree  # type: ignore[assignment]  # noqa: S405
+
+    warnings.warn(
+        "defusedxml not installed. SAP metadata parsing may be vulnerable to XXE.",
+        stacklevel=1,
+    )
 
 import httpx
 
@@ -23,13 +36,46 @@ __all__ = [
 
 logger = logging.getLogger("cortex.sap.client")
 
-# Re-export from models for backwards compatibility
-from cortex.sap.models import (  # noqa: E402
-    SAPAuthError,
-    SAPConfig,
-    SAPConnectionError,
-    SAPEntityError,
-)
+
+
+# ─── Exceptions ──────────────────────────────────────────────────────
+
+
+class SAPConnectionError(Exception):
+    """Failed to connect to SAP system."""
+
+
+class SAPAuthError(Exception):
+    """SAP authentication failed."""
+
+
+class SAPEntityError(Exception):
+    """SAP entity operation failed."""
+
+
+# ─── Configuration ───────────────────────────────────────────────────
+
+
+@dataclass
+class SAPConfig:
+    """SAP OData connection configuration."""
+
+    base_url: str
+    auth_type: str = "basic"
+    username: str = ""
+    password: str = ""
+    client: str = ""
+    oauth_token_url: str = ""
+    oauth_client_id: str = ""
+    oauth_client_secret: str = ""
+    timeout: int = 30
+    max_retries: int = 3
+    headers: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def base_url_normalized(self) -> str:
+        """Return base URL without trailing slash."""
+        return self.base_url.rstrip("/")
 
 # ─── Client ──────────────────────────────────────────────────────────
 
@@ -90,7 +136,7 @@ class SAPClient:
         self._csrf_token = resp.headers.get("x-csrf-token", "")
         logger.info("Connected to SAP at %s", self.config.base_url_normalized)
 
-        return {"status": "connected", "csrf": bool(self._csrf_token)}
+        return {"status": "connected", "csrf": bool(self._csrf_token)}  # type: ignore[reportReturnType]
 
     async def close(self) -> None:
         """Close the HTTP client."""
@@ -207,7 +253,7 @@ class SAPClient:
 
         entity_sets: dict[str, list[str]] = {}
         try:
-            root = ElementTree.fromstring(resp.text)
+            root = ElementTree.fromstring(resp.text)  # nosec B314
             # OData V2 namespace
             for entity_type in root.iter(
                 "{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"
@@ -287,7 +333,7 @@ class SAPClient:
             raise SAPAuthError(f"OAuth2 token request failed: {resp.status_code}")
 
         self._oauth_token = resp.json().get("access_token", "")
-        return self._oauth_token
+        return self._oauth_token  # type: ignore[reportReturnType]
 
     async def _request(
         self,
@@ -365,7 +411,7 @@ class SAPClient:
         for attempt in range(self.config.max_retries):
             try:
                 # self._http is guaranteed non-None by _raw_request
-                resp = await self._http.request(
+                resp = await self._http.request(  # type: ignore[reportOptionalMemberAccess]
                     method,
                     url,
                     params=params,
@@ -385,10 +431,19 @@ class SAPClient:
         )
 
     async def _handle_retry_wait(self, attempt: int) -> None:
-        """Wait before retrying, unless it's the last attempt."""
+        """Wait before retrying, unless it's the last attempt. Uses exponentially backed off jitter."""
         if attempt >= self.config.max_retries - 1:
             return
 
-        wait = 2**attempt
-        logger.warning("SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait)
+        import secrets
+
+        rng = secrets.SystemRandom()
+
+        base_wait = 2**attempt
+        jitter = rng.uniform(0.1, 1.618 ** (attempt + 1))
+        wait = base_wait + jitter
+
+        logger.warning(
+            "SAP request retry %d/%d in %.2fs", attempt + 1, self.config.max_retries, wait
+        )
         await asyncio.sleep(wait)

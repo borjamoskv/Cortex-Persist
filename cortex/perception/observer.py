@@ -9,9 +9,18 @@ from __future__ import annotations
 import logging
 import time
 from collections.abc import Callable
+from typing import Any
 
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
-from watchdog.observers import Observer
+try:
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler
+    from watchdog.observers import Observer
+
+    _HAS_WATCHDOG = True
+except ImportError:
+    _HAS_WATCHDOG = False
+    FileSystemEventHandler = object  # type: ignore[assignment,misc]
+    FileSystemEvent = None  # type: ignore[assignment,misc]
+    Observer = None  # type: ignore[assignment,misc]
 
 from cortex.perception.base import (
     DEBOUNCE_SECONDS,
@@ -90,6 +99,9 @@ class FileActivityObserver:
         observer.start()
         # ... events flow to the callback
         observer.stop()
+
+    If a ``signal_bus`` is provided, file events are also emitted
+    as ``FILE_ACTIVITY`` signals for downstream consumption.
     """
 
     def __init__(
@@ -98,9 +110,32 @@ class FileActivityObserver:
         callback: Callable[[FileEvent], None],
         debounce_s: float = DEBOUNCE_SECONDS,
         recursive: bool = True,
+        signal_bus: Any | None = None,
     ) -> None:
         self.workspace = workspace
-        self.handler = _DebouncedHandler(callback, workspace, debounce_s)
+        self._signal_bus = signal_bus
+        self._event_count = 0
+
+        def _wrapped_callback(fe: FileEvent) -> None:
+            callback(fe)
+            self._event_count += 1
+            if self._signal_bus and self._event_count % 10 == 0:
+                try:
+                    self._signal_bus.emit(
+                        "FILE_ACTIVITY",
+                        payload={
+                            "path": fe.path,
+                            "event_type": fe.event_type,
+                            "role": fe.role,
+                            "project": fe.project or "unknown",
+                        },
+                        source="perception:observer",
+                        project=fe.project,
+                    )
+                except Exception as e:  # noqa: BLE001 — file activity signal emission failure must not crash observer
+                    logging.debug("Failed to emit file activity signal: %s", e)
+
+        self.handler = _DebouncedHandler(_wrapped_callback, workspace, debounce_s)
         self._observer = Observer()
         self._observer.schedule(self.handler, workspace, recursive=recursive)
 

@@ -6,8 +6,11 @@ from cortex.agents.pitches import (
     PITCH_COMPLIANCE_DIRECTOR,
     PITCH_CTO_SKEPTIC,
     PITCH_JOURNALIST,
+    PITCH_LYNX,
     PITCH_MEMO_DEV,
+    PITCH_OLIVER,
     PITCH_OS_CONTRIBUTOR,
+    PITCH_TOM,
     PITCH_VC_FOLLOWUP,
 )
 from cortex.agents.system_prompt import (
@@ -28,4 +31,7 @@ __all__ = [
     "PITCH_COMPLIANCE_DIRECTOR",
     "PITCH_VC_FOLLOWUP",
     "PITCH_JOURNALIST",
+    "PITCH_TOM",
+    "PITCH_OLIVER",
+    "PITCH_LYNX",
 ]

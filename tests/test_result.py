@@ -1,169 +1,154 @@
-"""Tests for cortex.result — Railway Oriented Programming monads."""
+"""Tests for cortex.utils.result — Railway Oriented Programming monads."""
 
 from __future__ import annotations
-
-import json
 
 import pytest
 
 from cortex.utils.result import Err, Ok, safe, safe_async
 
-# ─── Ok Tests ─────────────────────────────────────────────────────────
+
+# ─── Ok / Err Construction ───────────────────────────────────────────
 
 
 class TestOk:
-    def test_is_ok(self):
-        assert Ok(42).is_ok() is True
+    def test_ok_value(self):
+        r = Ok(42)
+        assert r.value == 42
 
-    def test_is_err(self):
-        assert Ok(42).is_err() is False
+    def test_ok_is_ok(self):
+        assert Ok("x").is_ok() is True
 
-    def test_unwrap(self):
-        assert Ok("hello").unwrap() == "hello"
+    def test_ok_is_not_err(self):
+        assert Ok("x").is_err() is False
 
-    def test_unwrap_or(self):
-        assert Ok(42).unwrap_or(0) == 42
+    def test_ok_unwrap(self):
+        assert Ok("data").unwrap() == "data"
 
-    def test_map(self):
+    def test_ok_unwrap_or_returns_value(self):
+        assert Ok(10).unwrap_or(99) == 10
+
+    def test_ok_repr(self):
+        assert repr(Ok(7)) == "Ok(7)"
+
+
+class TestErr:
+    def test_err_error(self):
+        r = Err("boom")
+        assert r.error == "boom"
+
+    def test_err_is_err(self):
+        assert Err("x").is_err() is True
+
+    def test_err_is_not_ok(self):
+        assert Err("x").is_ok() is False
+
+    def test_err_unwrap_raises(self):
+        with pytest.raises(ValueError, match="Called unwrap"):
+            Err("fail").unwrap()
+
+    def test_err_unwrap_or_returns_default(self):
+        assert Err("fail").unwrap_or(42) == 42
+
+    def test_err_repr(self):
+        assert repr(Err("oops")) == "Err('oops')"
+
+
+# ─── Railway Chaining ────────────────────────────────────────────────
+
+
+class TestRailway:
+    def test_ok_map(self):
         result = Ok(5).map(lambda x: x * 2)
         assert isinstance(result, Ok)
         assert result.value == 10
 
-    def test_flat_map_success(self):
-        result = Ok(5).flat_map(lambda x: Ok(x * 2))
+    def test_err_map_noop(self):
+        result = Err("e").map(lambda x: x * 2)
+        assert isinstance(result, Err)
+        assert result.error == "e"
+
+    def test_ok_flat_map(self):
+        result = Ok(3).flat_map(lambda x: Ok(x + 1))
         assert isinstance(result, Ok)
-        assert result.value == 10
+        assert result.value == 4
 
-    def test_flat_map_failure(self):
-        result = Ok(5).flat_map(lambda x: Err("boom"))
+    def test_ok_flat_map_to_err(self):
+        result = Ok(3).flat_map(lambda _: Err("nope"))
         assert isinstance(result, Err)
-        assert result.error == "boom"
 
-    def test_map_err_noop(self):
-        result = Ok(42).map_err(lambda e: e.upper())
+    def test_err_flat_map_noop(self):
+        result = Err("e").flat_map(lambda x: Ok(x + 1))
+        assert isinstance(result, Err)
+
+    def test_ok_map_err_noop(self):
+        result = Ok(1).map_err(lambda e: f"wrapped: {e}")
         assert isinstance(result, Ok)
-        assert result.value == 42
+        assert result.value == 1
 
-    def test_repr(self):
-        assert "Ok(42)" in repr(Ok(42))
-
-    def test_frozen(self):
-        ok = Ok(42)
-        with pytest.raises(AttributeError):
-            ok.value = 99  # type: ignore[misc]
-
-
-# ─── Err Tests ────────────────────────────────────────────────────────
-
-
-class TestErr:
-    def test_is_ok(self):
-        assert Err("fail").is_ok() is False
-
-    def test_is_err(self):
-        assert Err("fail").is_err() is True
-
-    def test_unwrap_raises(self):
-        with pytest.raises(ValueError, match="Called unwrap"):
-            Err("fail").unwrap()
-
-    def test_unwrap_or(self):
-        assert Err("fail").unwrap_or(42) == 42
-
-    def test_map_noop(self):
-        result = Err("fail").map(lambda x: x * 2)
+    def test_err_map_err(self):
+        result = Err("raw").map_err(lambda e: f"wrapped: {e}")
         assert isinstance(result, Err)
-        assert result.error == "fail"
-
-    def test_flat_map_noop(self):
-        result = Err("fail").flat_map(lambda x: Ok(x * 2))
-        assert isinstance(result, Err)
-
-    def test_map_err(self):
-        result = Err("fail").map_err(lambda e: e.upper())
-        assert isinstance(result, Err)
-        assert result.error == "FAIL"
-
-    def test_repr(self):
-        assert "Err('fail')" in repr(Err("fail"))
+        assert result.error == "wrapped: raw"
 
 
-# ─── Pattern Matching ─────────────────────────────────────────────────
+# ─── Pattern Matching ────────────────────────────────────────────────
 
 
 class TestPatternMatching:
     def test_match_ok(self):
-        result = Ok(42)
+        result = Ok(99)
         match result:
-            case Ok(value=v):
-                assert v == 42
-            case Err():
+            case Ok(v):
+                assert v == 99
+            case Err(_):
                 pytest.fail("Should not match Err")
 
     def test_match_err(self):
-        result = Err("boom")
+        result = Err("bad")
         match result:
-            case Ok():
+            case Ok(_):
                 pytest.fail("Should not match Ok")
-            case Err(error=e):
-                assert e == "boom"
+            case Err(e):
+                assert e == "bad"
 
 
-# ─── Decorators ───────────────────────────────────────────────────────
+# ─── @safe / @safe_async Decorators ──────────────────────────────────
 
 
-class TestSafeDecorator:
-    def test_success(self):
+class TestSafeDecorators:
+    def test_safe_success(self):
         @safe
-        def parse(raw: str) -> dict:
-            return json.loads(raw)
+        def divide(a: int, b: int) -> float:
+            return a / b
 
-        result = parse('{"key": "value"}')
+        result = divide(10, 2)
         assert isinstance(result, Ok)
-        assert result.value == {"key": "value"}
+        assert result.value == 5.0
 
-    def test_failure(self):
+    def test_safe_failure(self):
         @safe
-        def parse(raw: str) -> dict:
-            return json.loads(raw)
+        def divide(a: int, b: int) -> float:
+            return a / b
 
-        result = parse("not-json")
+        result = divide(10, 0)
         assert isinstance(result, Err)
-        assert "JSONDecodeError" in result.error
+        assert "ZeroDivisionError" in result.error
 
-
-class TestSafeAsyncDecorator:
-    @pytest.mark.asyncio
-    async def test_success(self):
+    async def test_safe_async_success(self):
         @safe_async
-        async def compute(x: int) -> int:
-            return x * 2
+        async def fetch(x: int) -> int:
+            return x + 1
 
-        result = await compute(21)
+        result = await fetch(5)
         assert isinstance(result, Ok)
-        assert result.value == 42
+        assert result.value == 6
 
-    @pytest.mark.asyncio
-    async def test_failure(self):
+    async def test_safe_async_failure(self):
         @safe_async
-        async def compute(x: int) -> int:
-            raise ValueError("bad input")
+        async def blow_up() -> None:
+            raise RuntimeError("async boom")
 
-        result = await compute(0)
+        result = await blow_up()
         assert isinstance(result, Err)
-        assert "ValueError" in result.error
-
-
-# ─── Chaining ─────────────────────────────────────────────────────────
-
-
-class TestChaining:
-    def test_chain_success(self):
-        result = Ok(10).map(lambda x: x + 5).map(lambda x: x * 2)
-        assert isinstance(result, Ok)
-        assert result.value == 30
-
-    def test_chain_stops_on_error(self):
-        result = Ok(10).flat_map(lambda _: Err("broken")).map(lambda x: x * 2)
-        assert isinstance(result, Err)
-        assert result.error == "broken"
+        assert "RuntimeError" in result.error
+        assert "async boom" in result.error

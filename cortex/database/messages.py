@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _WriteOp:
     """A single write operation to be processed by the worker."""
 
@@ -38,7 +38,7 @@ class _WriteOp:
     )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _TxBegin:
     """Signal to begin a transaction."""
 
@@ -47,7 +47,7 @@ class _TxBegin:
     )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _TxCommit:
     """Signal to commit the current transaction."""
 
@@ -56,7 +56,7 @@ class _TxCommit:
     )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _TxRollback:
     """Signal to rollback the current transaction."""
 
@@ -65,7 +65,7 @@ class _TxRollback:
     )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class _Shutdown:
     """Poison pill to stop the writer loop."""
 

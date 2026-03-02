@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.handoff")
 
-HANDOFF_VERSION = "1.0"
+HANDOFF_VERSION = "1.3"
 DEFAULT_HANDOFF_PATH = CORTEX_DIR / "handoff.json"
 
 # Limits
@@ -58,10 +58,12 @@ async def generate_handoff(
 
     # ── Hot Decisions (last N, ordered by recency) ────────────────────
     async with conn.execute(
-        "SELECT id, project, content, created_at, tenant_id "
+        "SELECT id, project, content, created_at, "
+        "tenant_id, parent_decision_id "
         "FROM facts "
-        "WHERE fact_type = 'decision' AND valid_until IS NULL "
-        "ORDER BY created_at DESC LIMIT ?",
+        "WHERE fact_type = 'decision' "
+        "AND valid_until IS NULL "
+        "ORDER BY id DESC LIMIT ?",
         (MAX_DECISIONS,),
     ) as cursor:
         decision_rows = await cursor.fetchall()
@@ -74,8 +76,12 @@ async def generate_handoff(
         {
             "id": r[0],
             "project": r[1],
-            "content": enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else "",
+            "content": (
+                enc.decrypt_str(r[2], tenant_id=r[4])
+                if r[2] else ""
+            ),
             "created_at": r[3],
+            "parent_decision_id": r[5],
         }
         for r in decision_rows
     ]
@@ -85,7 +91,7 @@ async def generate_handoff(
         "SELECT id, project, reference, context "
         "FROM ghosts "
         "WHERE status = 'open' "
-        "ORDER BY created_at DESC LIMIT ?",
+        "ORDER BY id DESC LIMIT ?",
         (MAX_GHOSTS,),
     ) as cursor:
         ghost_rows = await cursor.fetchall()
@@ -96,10 +102,12 @@ async def generate_handoff(
 
     # ── Recent Errors ─────────────────────────────────────────────────
     async with conn.execute(
-        "SELECT id, project, content, created_at, tenant_id "
+        "SELECT id, project, content, created_at, "
+        "tenant_id, parent_decision_id "
         "FROM facts "
-        "WHERE fact_type IN ('error', 'mistake') AND valid_until IS NULL "
-        "ORDER BY created_at DESC LIMIT ?",
+        "WHERE fact_type IN ('error', 'mistake') "
+        "AND valid_until IS NULL "
+        "ORDER BY id DESC LIMIT ?",
         (MAX_ERRORS,),
     ) as cursor:
         error_rows = await cursor.fetchall()
@@ -108,13 +116,72 @@ async def generate_handoff(
         {
             "id": r[0],
             "project": r[1],
-            "content": enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else "",
+            "content": (
+                enc.decrypt_str(r[2], tenant_id=r[4])
+                if r[2] else ""
+            ),
             "created_at": r[3],
+            "parent_decision_id": r[5],
         }
         for r in error_rows
     ]
 
-    # ── Active Projects (with activity in last 24h) ───────────────────
+    # ── Causal Episodes (Epoch 8 — WHY context) ────────────────────
+    causal_episodes_data: list[dict[str, Any]] = []
+    try:
+        from cortex.memory.episodic import CausalTracer
+
+        tracer = CausalTracer(conn)
+        # Trace causal chains for each hot decision
+        seen_roots: set[int] = set()
+        for d in hot_decisions:
+            try:
+                episode = await tracer.trace_episode(d["id"])
+                if episode.root_fact_id not in seen_roots:
+                    seen_roots.add(episode.root_fact_id)
+                    causal_episodes_data.append({
+                        "root_fact_id": episode.root_fact_id,
+                        "depth": episode.depth,
+                        "nodes": len(episode.fact_chain),
+                        "entropy": round(episode.entropy_density, 2),
+                        "project": episode.project,
+                        "summary": episode.summary,
+                    })
+            except (AttributeError, KeyError, TypeError):
+                continue  # Skip facts without parent chains
+    except (RuntimeError, ImportError, OSError) as e:
+        logger.debug("Causal episode tracing skipped: %s", e)
+
+    # ── Causal Chains (compact DAG via get_causal_chain) ──────────
+    causal_chains: list[dict[str, Any]] = []
+    try:
+        seen_chain_roots: set[int] = set()
+        for d in hot_decisions[:5]:  # Top 5 recent decisions
+            did = d["id"]
+            if did in seen_chain_roots:
+                continue
+            chain = await engine.get_causal_chain(
+                did, direction="down", max_depth=5,
+            )
+            if chain and len(chain) > 1:
+                seen_chain_roots.add(did)
+                causal_chains.append({
+                    "root_id": did,
+                    "project": d["project"],
+                    "nodes": len(chain),
+                    "chain": [
+                        {
+                            "id": f.get("id"),
+                            "type": f.get("fact_type"),
+                            "depth": f.get("causal_depth"),
+                        }
+                        for f in chain
+                    ],
+                })
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Causal chain extraction skipped: %s", e)
+
+    # ── Active Projects (with activity in last 24h) ───────────────
     async with conn.execute(
         "SELECT DISTINCT project FROM facts "
         "WHERE created_at >= datetime('now', '-1 day') "
@@ -125,19 +192,19 @@ async def generate_handoff(
 
     active_projects = [r[0] for r in project_rows]
 
-    # ── Stats summary ─────────────────────────────────────────────────
+    # ── Stats summary ─────────────────────────────────────────────
     async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
-        total_active = (await cursor.fetchone())[0]
+        total_active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     async with conn.execute(
         "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
     ) as cursor:
-        total_projects = (await cursor.fetchone())[0]
+        total_projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     db_path = Path(engine._db_path)
     db_size_mb = round(db_path.stat().st_size / (1024 * 1024), 2) if db_path.exists() else 0.0
 
-    # ── Session metadata (from caller) ────────────────────────────────
+    # ── Session metadata (from caller) ────────────────────────────
     session = {
         "focus_projects": [],
         "pending_work": [],
@@ -146,11 +213,24 @@ async def generate_handoff(
     if session_meta:
         session.update(session_meta)
 
+    # ── Cognitive Fingerprint (v1.3) — Behavioral prior for receiving agent ─
+    cognitive_fingerprint: dict = {}
+    try:
+        from cortex.fingerprint.extractor import FingerprintExtractor
+
+        fp = await FingerprintExtractor.extract(engine, project=None, top_domains=10)
+        cognitive_fingerprint = fp.to_dict()
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Cognitive fingerprint skipped: %s", e)
+
     handoff = {
         "version": HANDOFF_VERSION,
         "generated_at": now_iso(),
         "session": session,
+        "cognitive_fingerprint": cognitive_fingerprint,
         "hot_decisions": hot_decisions,
+        "causal_episodes": causal_episodes_data,
+        "causal_chains": causal_chains,
         "active_ghosts": active_ghosts,
         "recent_errors": recent_errors,
         "active_projects": active_projects,
@@ -162,11 +242,14 @@ async def generate_handoff(
     }
 
     logger.info(
-        "Handoff generated: %d decisions, %d ghosts, %d errors, %d active projects",
+        "Handoff generated: %d decisions, %d episodes, %d ghosts, "
+        "%d errors, %d active projects, fingerprint=%s",
         len(hot_decisions),
+        len(causal_episodes_data),
         len(active_ghosts),
         len(recent_errors),
         len(active_projects),
+        cognitive_fingerprint.get("archetype", "none"),
     )
 
     return handoff

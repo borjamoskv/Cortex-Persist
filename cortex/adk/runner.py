@@ -29,7 +29,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--agent",
-        choices=["memory", "analyst", "guardian", "sovereign"],
+        choices=["memory", "analyst", "guardian", "google-one", "sovereign"],
         default="sovereign",
         help="Which agent to run (default: sovereign — full swarm)",
     )
@@ -129,6 +129,7 @@ def run_cli(
     from cortex.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
+        create_google_one_agent,
         create_guardian_agent,
         create_memory_agent,
     )
@@ -140,6 +141,7 @@ def run_cli(
         "memory": lambda: create_memory_agent(model=model),
         "analyst": lambda: create_analyst_agent(model=model, toolbox_tools=toolbox_tools or None),
         "guardian": lambda: create_guardian_agent(model=model),
+        "google-one": lambda: create_google_one_agent(model=model),
         "sovereign": lambda: create_cortex_swarm(model=model, toolbox_tools=toolbox_tools or None),
     }
 
@@ -152,7 +154,8 @@ def run_cli(
     print(f"   Model: {agent.model}{toolbox_status}")
     print("   Type 'quit' to exit\n")
 
-    session = session_service.create_session(app_name="cortex", user_id="moskv-1")
+    session_obj = session_service.create_session(app_name="cortex", user_id="moskv-1")
+    session = asyncio.run(session_obj) if asyncio.iscoroutine(session_obj) else session_obj
 
     while True:
         try:
@@ -178,13 +181,15 @@ def run_cli(
         print()
         for event in runner.run(
             user_id="moskv-1",
-            session_id=session.id,
+            session_id=session.id,  # type: ignore[union-attr]
             new_message=content,
         ):
             if event.is_final_response():
-                for part in event.content.parts:
-                    if part.text:
-                        print(part.text)
+                if event.content:
+                    parts = getattr(event.content, "parts", []) or []
+                    for part in parts:
+                        if part.text:
+                            print(part.text)
         print()
 
 

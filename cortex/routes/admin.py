@@ -26,6 +26,7 @@ from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.database.schema import SCHEMA_VERSION
 from cortex.engine import CortexEngine
+from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
 from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
 from cortex.types.models import (
     ApiKeyListItem,
@@ -112,88 +113,12 @@ def _validate_export_path(path: str | None, project: str, lang: str) -> Path:
         ) from None
 
 
-# ─── Health Probe Types ──────────────────────────────────────────────
-
-ProbeResult = tuple[str, bool, dict[str, str | int | float]]
+# Health probes → cortex.routes.admin_health_probes
 
 
 def _get_raw_conn(engine: CortexEngine) -> object:
-    """Isolate private access to engine's raw connection.
-
-    Keeps the coupling to ``_get_conn`` in a single place.
-    """
+    """Isolate private access to engine's raw connection."""
     return engine._get_conn()  # noqa: SLF001
-
-
-def _build_health_probes(
-    conn: object,
-    request: Request,
-    schema_version: str,
-) -> dict[str, object]:
-    """Build the probe registry for deep health check.
-
-    Each probe returns (status_str, is_healthy, details_dict).
-    Probes are designed to be individually failable without cascading.
-    """
-
-    def _probe_database() -> ProbeResult:
-        conn.execute("SELECT 1").fetchone()  # type: ignore[union-attr]
-        return "ok", True, {"detail": "SELECT 1 succeeded"}
-
-    def _probe_schema() -> ProbeResult:
-        row = conn.execute(  # type: ignore[union-attr]
-            "SELECT value FROM cortex_meta WHERE key = 'schema_version'",
-        ).fetchone()
-        db_ver = row[0] if row else "unknown"
-        if db_ver == schema_version:
-            return "ok", True, {"version": db_ver}
-        return (
-            "drift",
-            False,
-            {"expected": schema_version, "actual": db_ver},
-        )
-
-    def _probe_ledger() -> ProbeResult:
-        last_cp = conn.execute(  # type: ignore[union-attr]
-            "SELECT MAX(tx_end_id) FROM merkle_roots",
-        ).fetchone()
-        last_tx = last_cp[0] if last_cp else 0
-        pending_row = conn.execute(  # type: ignore[union-attr]
-            "SELECT COUNT(*) FROM transactions WHERE id > ?",
-            (last_tx,),
-        ).fetchone()
-        pending = pending_row[0] if pending_row else 0
-        healthy = pending < _LEDGER_LAG_THRESHOLD
-        return (
-            "ok" if healthy else "warning",
-            healthy,
-            {"pending_uncheckpointed": pending, "last_checkpoint_tx": last_tx},
-        )
-
-    def _probe_fts() -> ProbeResult:
-        conn.execute(  # type: ignore[union-attr]
-            "SELECT COUNT(*) FROM episodes_fts",
-        ).fetchone()
-        return "ok", True, {"detail": "episodes_fts accessible"}
-
-    def _probe_pool() -> ProbeResult:
-        pool = request.app.state.pool
-        max_c: int = getattr(pool, "max_connections", 0)
-        active: int = getattr(pool, "_active_count", 0)
-        pct = (active / max_c) * 100 if max_c else 0
-        return (
-            "ok",
-            True,
-            {"active_connections": active, "max_connections": max_c, "utilization": f"{pct:.0f}%"},
-        )
-
-    return {
-        "database": _probe_database,
-        "schema": _probe_schema,
-        "ledger": _probe_ledger,
-        "search_fts": _probe_fts,
-        "pool": _probe_pool,
-    }
 
 
 async def _verify_admin_auth(
@@ -252,12 +177,12 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(
+        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
             engine.search,
             project=project,
             limit=_MAX_EXPORT_FACTS,
         )
-        content = export_facts(facts, fmt="json")
+        content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
         def _write_export() -> Path:
             target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -336,7 +261,7 @@ async def deep_health_check(
             _healthy = _healthy and ok
             _checks[name] = HealthCheckDetail(
                 status=status,
-                **details,
+                **details,  # type: ignore[reportArgumentType]
             )
         return _checks, _healthy
 
@@ -355,6 +280,8 @@ async def deep_health_check(
             detail="Health check failed",
         ) from None
 
+    from cortex.routes.context import get_p95_context_latency
+
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     result = DeepHealthResponse(
         status="healthy" if overall_healthy else "degraded",
@@ -362,6 +289,8 @@ async def deep_health_check(
         schema_version=SCHEMA_VERSION,
         checks=checks,
         latency_ms=elapsed_ms,
+        p95_latency_ms=get_p95_context_latency(),
+        stale_ratio=None,
     )
 
     if not overall_healthy:

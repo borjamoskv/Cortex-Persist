@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -104,11 +105,14 @@ class PolicyEngine:
         for f in facts:
             project_index.setdefault(f.project, []).append(f)
 
+        # Precompute lowercased project names to avoid O(P*F) string matching
+        project_names_lower = {p.lower() for p in project_index.keys()}
+
         now = datetime.now(timezone.utc)
         actions: list[ActionItem] = []
 
         for fact in facts:
-            action = self._score_fact(fact, project_index, now)
+            action = self._score_fact(fact, project_index, project_names_lower, now)
             if action.value > 0.0:
                 actions.append(action)
 
@@ -123,11 +127,12 @@ class PolicyEngine:
         self,
         fact: Fact,
         project_index: dict[str, list[Fact]],
+        project_names_lower: set[str],
         now: datetime,
     ) -> ActionItem:
         """Convert a Fact into a scored ActionItem via Bellman equation."""
         reward = self._compute_reward(fact, now)
-        future = self._compute_future_value(fact, project_index)
+        future = self._compute_future_value(fact, project_index, project_names_lower)
         value = self._bellman_value(reward, future, self._config.gamma)
 
         # Clamp to [0, 1].
@@ -169,7 +174,7 @@ class PolicyEngine:
             age_days = max(0.0, (now - created).total_seconds() / 86400)
             if fact_type == "ghost":
                 # Ghosts decay per-day.
-                time_factor = self._config.ghost_age_decay ** age_days
+                time_factor = self._config.ghost_age_decay**age_days
             elif fact_type == "error":
                 # Recent errors get a recency bonus.
                 age_hours = age_days * 24
@@ -204,6 +209,7 @@ class PolicyEngine:
         self,
         fact: Fact,
         project_index: dict[str, list[Fact]],
+        project_names_lower: set[str],
     ) -> float:
         """Estimate downstream value of resolving this fact.
 
@@ -213,20 +219,31 @@ class PolicyEngine:
         fact_type = (fact.fact_type or "knowledge").lower()
         content_lower = (fact.content or "").lower()
 
-        # Cross-project detection: if fact content mentions another project.
-        other_projects = set(project_index.keys()) - {fact.project}
-        for other in other_projects:
-            if other.lower() in content_lower:
-                future += self._config.cross_project_bonus
-                break  # Only count once.
+        # Cross-project detection using set intersection (O(words) instead of O(projects * facts))
+        words = set(re.findall(r"[\w-]+", content_lower))
+        other_projects = words.intersection(project_names_lower) - {fact.project.lower()}
+
+        if other_projects:
+            future += self._config.cross_project_bonus
 
         # Blocking multiplier: ghosts and errors that reference
         # architectural/critical keywords are likely blocking.
-        blocking_keywords = frozenset({
-            "blocking", "blocked", "critical", "urgent",
-            "deploy", "ship", "production", "release",
-            "security", "vulnerability", "crash", "broken",
-        })
+        blocking_keywords = frozenset(
+            {
+                "blocking",
+                "blocked",
+                "critical",
+                "urgent",
+                "deploy",
+                "ship",
+                "production",
+                "release",
+                "security",
+                "vulnerability",
+                "crash",
+                "broken",
+            }
+        )
         if fact_type in ("ghost", "error"):
             if any(kw in content_lower for kw in blocking_keywords):
                 future += self._config.blocking_multiplier
@@ -234,10 +251,7 @@ class PolicyEngine:
         # Bridge downstream: bridges unlock pattern reuse across projects.
         if fact_type == "bridge":
             # Count how many projects could benefit.
-            mentioned = sum(
-                1 for p in other_projects if p.lower() in content_lower
-            )
-            future += mentioned * 0.3
+            future += len(other_projects) * 0.3
 
         # Normalize to [0, 1] range.
         # Use sigmoid-like compression for high values.
@@ -260,8 +274,8 @@ class PolicyEngine:
         # All projects: get stats then recall each.
         try:
             stats = await self._engine.stats()
-        except Exception:
-            logger.warning("Failed to get stats, falling back to empty")
+        except (RuntimeError, AttributeError, OSError) as e:
+            logger.warning("Failed to get stats, falling back to empty: %s", e)
             return []
 
         all_facts: list[Fact] = []
@@ -270,8 +284,8 @@ class PolicyEngine:
             try:
                 facts = await self._engine.recall(proj_name, tenant_id=tenant_id)
                 all_facts.extend(facts)
-            except Exception:
-                logger.warning("Failed to recall project %s", proj_name)
+            except (RuntimeError, AttributeError, OSError, ValueError) as e:
+                logger.warning("Failed to recall project %s: %s", proj_name, e)
         return all_facts
 
     @staticmethod

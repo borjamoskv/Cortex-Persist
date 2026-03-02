@@ -31,7 +31,7 @@ __all__ = [
 # ═══════════════════════════════════════
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SecurityEvent:
     """An event to be analyzed for anomalies."""
 
@@ -42,11 +42,11 @@ class SecurityEvent:
     timestamp: float = 0.0  # epoch, filled automatically if 0
 
     def __post_init__(self) -> None:
-        if self.timestamp == 0.0:
+        if not self.timestamp:  # 0.0 is sentinel: fill with current time
             object.__setattr__(self, "timestamp", time.time())
 
 
-@dataclass(slots=True)
+@dataclass()
 class AnomalyReport:
     """Report of detected anomaly."""
 
@@ -68,7 +68,7 @@ class AnomalyReport:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class ProjectBaseline:
     """Behavioral baseline for a project."""
 
@@ -191,7 +191,7 @@ class AnomalyDetector:
                 mean_len = sum(lengths) / len(lengths)
                 baseline.avg_content_length = mean_len
                 if len(lengths) >= 2:
-                    variance = sum((l - mean_len) ** 2 for l in lengths) / len(lengths)
+                    variance = sum((length - mean_len) ** 2 for length in lengths) / len(lengths)
                     baseline.std_content_length = max(math.sqrt(variance), 1.0)
 
         self._baselines[project] = baseline
@@ -280,7 +280,8 @@ class AnomalyDetector:
                     severity=severity,
                     description=(
                         f"Content length anomaly in '{event.project}': "
-                        f"{event.content_length} bytes (Z={z:.1f}, baseline={baseline.avg_content_length:.0f})"
+                        f"{event.content_length} bytes "
+                        f"(Z={z:.1f}, baseline={baseline.avg_content_length:.0f})"
                     ),
                     z_score=z,
                     details={

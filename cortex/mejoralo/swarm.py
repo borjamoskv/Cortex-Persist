@@ -13,6 +13,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from cortex.cli import console
+from cortex.mejoralo.constants import (
+    DEVILS_ADVOCATE_THRESHOLD,
+    SWARM_BASE_TEMPERATURE,
+    SWARM_DEFAULT_SQUAD_SIZE,
+    SWARM_SQUAD_SIZES,
+    SWARM_TEMPERATURE_STEP,
+    SWARM_TIMEOUT_SECONDS,
+)
 
 if TYPE_CHECKING:
     from cortex.mejoralo.engine import MejoraloEngine
@@ -54,6 +62,18 @@ SPECIALISTS_PROMPTS = {
         "You are the Destroyer of the Generic. Your goal is the 'Sovereign standard' (130/100). "
         "Design the code to feel premium, bespoke, and avant-garde. Whitespace is your canvas."
     ),
+    "AwwwardsSovereign": (
+        "You are the Awwwards Sovereign Agent. Reverse-engineer and refactor "
+        "UI/UX code to win SOTD. Force GPU compositing (will-change: transform). "
+        "Purge inline styles to utility classes. "
+        "Implement smooth scroll (Lenis) + math easing if requested. "
+        "Eliminate layout thrashing."
+    ),
+    "DevilsAdvocate": (
+        "You are the Devil's Advocate. Your job is to find the flaws in the "
+        "other specialists' logic. Force them to justify their architectural "
+        "changes. Ensure that simplicity is not sacrificed for aesthetics."
+    ),
 }
 
 
@@ -62,13 +82,13 @@ class MejoraloSwarm:
 
     def __init__(self, level: int = 1):
         self.level = level
-        # Configuración agresiva para el enjambre
+        # Configuración optimizada para el enjambre (evitar 429)
         self.config = OrchestraConfig(
-            min_models=3,
-            max_models=6,
+            min_models=1,
+            max_models=2,
             default_strategy=FusionStrategy.SYNTHESIS,
-            temperature=0.1 + (level * 0.1),
-            timeout_seconds=240.0,  # A bit more time for complex synthesis
+            temperature=SWARM_BASE_TEMPERATURE + (level * SWARM_TEMPERATURE_STEP),
+            timeout_seconds=SWARM_TIMEOUT_SECONDS,
         )
 
     async def refactor_file(
@@ -144,7 +164,7 @@ class MejoraloSwarm:
 
     def _select_specialists(self, findings_str: str) -> list[str]:
         """Dynamically build the specialist squad with zero-nesting logic."""
-        squad_size = {1: 3, 2: 5}.get(self.level, 6)
+        squad_size = SWARM_SQUAD_SIZES.get(self.level, SWARM_DEFAULT_SQUAD_SIZE)
         fs_lower = findings_str.lower()
         findings_count = findings_str.count("\n-") + (1 if findings_str.startswith("-") else 0)
 
@@ -153,14 +173,22 @@ class MejoraloSwarm:
             "PerformanceGhost": ["perform", "slow", "loop", "complex"],
             "RobustnessGuardian": ["error", "fail", "type", "except"],
             "AestheticShiva": ["format", "lint", "style", "aesthetic"],
+            "AwwwardsSovereign": ["awwward", "ui", "ux", "animation", "css", "scroll", "gpu"],
         }
 
         # Functional-style specialist selection
         dynamic = [s for s, kw in mapping.items() if any(k in fs_lower for k in kw)]
         active = (["ArchitectPrime", "CodeNinja"] + dynamic)[:squad_size]
 
+        # Force AwwwardsSovereign if explicitly requested
+        if "awwwards" in fs_lower and "AwwwardsSovereign" not in active:
+            if len(active) == squad_size:
+                active[-1] = "AwwwardsSovereign"
+            else:
+                active.append("AwwwardsSovereign")
+
         # Disentimiento Obligatorio: Inject Devil's Advocate for complex tasks
-        if findings_count > 3 or self.level >= 2:
+        if findings_count > DEVILS_ADVOCATE_THRESHOLD or self.level >= 2:
             if "DevilsAdvocate" not in active:
                 if len(active) == squad_size:
                     active[-1] = "DevilsAdvocate"
@@ -181,8 +209,9 @@ class MejoraloSwarm:
         info = "\n".join(items)
         consensus_rule = (
             (
-                "You must reach a Byzantine Consensus. If DevilsAdvocate is present, you MUST overcome "
-                "their veto with irrefutable logic before returning the final implementation."
+                "You must reach a Byzantine Consensus. If DevilsAdvocate "
+                "is present, you MUST overcome their veto with irrefutable "
+                "logic before returning the final implementation."
             )
             if "DevilsAdvocate" in specialists
             else "Synthesize ALL specialist logic."

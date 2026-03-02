@@ -1,0 +1,28 @@
+# Genesis Spec — MCP Tool
+#
+# Usage: cortex genesis from-yaml cortex/genesis/specs/mcp_tool.yaml
+---
+name: my_mcp_tool
+description: "An MCP tool registered via FastMCP."
+system_type: module
+auto_cli: false
+auto_tests: true
+tags: [genesis, mcp, tool]
+
+components:
+  - name: models
+    component_type: dataclass
+    docstring: "Input/output models for the MCP tool."
+    interfaces: [ToolInput, ToolOutput]
+
+  - name: handler
+    component_type: module
+    docstring: "Core tool logic."
+    interfaces: [execute, validate_input]
+    dependencies: [models]
+
+  - name: registration
+    component_type: module
+    docstring: "FastMCP tool registration."
+    interfaces: [register]
+    dependencies: [handler]

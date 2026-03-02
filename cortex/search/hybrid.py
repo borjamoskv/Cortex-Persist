@@ -38,6 +38,7 @@ async def hybrid_search(
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
     confidence: str | None = None,
+    **kwargs,
 ) -> list[SearchResult]:
     """
     Sovereign Hybrid Search: Semantic + Text via RRF.
@@ -121,14 +122,17 @@ def hybrid_search_sync(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
+    tenant_id: str = "default",
     project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2
-    sem_results = semantic_search_sync(conn, query_embedding, fetch_limit, project)
-    txt_results = text_search_sync(conn, query, project, limit=fetch_limit)
+    sem_results = semantic_search_sync(
+        conn, query_embedding, fetch_limit, tenant_id=tenant_id, project=project
+    )
+    txt_results = text_search_sync(conn, query, tenant_id=tenant_id, project=project, limit=fetch_limit)
 
     total_w = vector_weight + text_weight
     w_vec = vector_weight / total_w

@@ -110,8 +110,7 @@ class ImmutableVoteLedger:
                 await conn.commit()
 
             logger.info(
-                f"Voto inmutable sellado: Fact {fact_id} | Agent {agent_id} | Hash {entry_hash[:8]}..."
-            )
+                "Voto inmutable sellado: Fact %s | Agent %s | Hash %s...", fact_id, agent_id, entry_hash[:8])
             await self._maybe_create_checkpoint(conn)
 
             return VoteEntry(
@@ -128,7 +127,7 @@ class ImmutableVoteLedger:
         except (sqlite3.Error, OSError) as e:
             if should_commit:
                 await conn.rollback()
-            logger.error(f"Fallo al registrar voto inmutable: {e}")
+            logger.error("Fallo al registrar voto inmutable: %s", e)
             raise
         finally:
             await self._release_conn(conn)
@@ -187,7 +186,7 @@ class ImmutableVoteLedger:
             "LEFT JOIN vote_merkle_roots r ON v.id >= r.vote_start_id AND v.id <= r.vote_end_id "
             "WHERE r.id IS NULL"
         ) as cursor:
-            count = (await cursor.fetchone())[0]
+            count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
         if count >= self.MERKLE_BATCH_SIZE:
             await self._create_checkpoint_internal(conn)
@@ -228,7 +227,7 @@ class ImmutableVoteLedger:
             return None
 
         hashes = [r[0] for r in rows]
-        end_id = rows[-1][1]
+        end_id = rows[-1][1]  # type: ignore[reportIndexIssue]
 
         tree = MerkleTree(hashes)
         root_hash = tree.root
@@ -239,7 +238,7 @@ class ImmutableVoteLedger:
             (start_id, end_id, root_hash, len(hashes), ts),
         )
 
-        logger.info(f"Punto de control Merkle creado: {start_id}-{end_id} -> {root_hash}")
+        logger.info("Punto de control Merkle creado: %s-%s -> %s", start_id, end_id, root_hash)
         return root_hash
 
     async def verify_merkle_roots(self) -> list[dict[str, Any]]:

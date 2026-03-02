@@ -115,7 +115,7 @@ class FusionStrategy(str, Enum):
 # ─── Data Classes ────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class ModelResponse:
     """Respuesta de un modelo individual."""
 
@@ -136,7 +136,7 @@ class ModelResponse:
         return f"{self.provider}:{self.model}"
 
 
-@dataclass(slots=True)
+@dataclass()
 class FusedThought:
     """Resultado de la fusión multi-modelo."""
 

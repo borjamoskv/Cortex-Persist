@@ -24,7 +24,7 @@ __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 logger = logging.getLogger("cortex.consensus.geacl")
 
 
-@dataclass(slots=True)
+@dataclass()
 class GeaclCommitResult:
     """Result of a GEACL commit proposal."""
 

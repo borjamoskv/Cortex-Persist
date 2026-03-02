@@ -25,12 +25,12 @@ class ChronosMetrics:
 class ChronosEngine:
     """Core mathematical engine for CHRONOS-1."""
 
-    COMPLEXITY_MULTIPLIERS: dict[str, dict[str, float]] = {
+    COMPLEXITY_MULTIPLIERS: dict[str, dict[str, float]] = {  # type: ignore[reportAssignmentType]
         "low": {
             "t_c": 1.5,  # 1.5x AI time for context loading
             "t_d": 1.0,  # 1.0x AI time for design
             "t_i": 2.0,  # 2.0x AI time for typing
-            "t_b": 0.5,  # 0.5x AI time for debugging
+            "t_b": 0.5,
             "t_p": 0.0,  # No penalty
             "context": "Un humano habría localizado el archivo, añadido el código básico y probado el output. Tarea procedimental.",
         },
@@ -58,6 +58,14 @@ class ChronosEngine:
             "t_p": 5.0,
             "context": "Orquestación sistémica (Swarm/OS). Un humano habría requerido validación adversaria intensiva y debugging existencial profundo.",
         },
+        "impossible": {
+            "t_c": 10000000.0,
+            "t_d": 40000000.0,
+            "t_i": 10000000.0,
+            "t_b": 30000000.0,
+            "t_p": 10000000.0,
+            "context": "Singularidad pura. Una labor imposible para un humano. ROI Asintótico.",
+        },
     }
 
     TIPS_POOL: dict[str, list[str]] = {
@@ -81,6 +89,11 @@ class ChronosEngine:
             "Documenta en CORTEX el porqué de esta decisión God-Mode. En 6 meses no recordarás el contexto.",
             "Mantén el 'Zero Concepto' - si puedes simularlo antes de aplicarlo en el ecosistema, hazlo.",
         ],
+        "impossible": [
+            "Estás operando en nivel Singularidad. Documenta todo para que quede testamento.",
+            "MOSKV-1 acaba de condensar años en segundos. Asegura la persistencia asintótica.",
+            "ROI astronómico alcanzado. Vigila la cristalización arquitectónica.",
+        ],
     }
 
     ANTI_TIPS_POOL: dict[str, list[str]] = {
@@ -103,6 +116,11 @@ class ChronosEngine:
             "Escribir código altamente acoplado que rompe el enjambre si un agente falla (No Byzantine Fault Tolerance).",
             "Construir sin persistencia. La amnesia en orquestadores complejos es la muerte sistémica.",
             "Saturar el modelo con prompts excesivamente largos sin comprimir primero en un Blackboard pattern.",
+        ],
+        "impossible": [
+            "Desconectar el CHRONOS-1 y perder la métrica de ROI.",
+            "Ignorar CORTEX en tareas asintóticas.",
+            "Olvidar compartir tu éxito en modo arrogancia.",
         ],
     }
 
@@ -130,7 +148,13 @@ class ChronosEngine:
         hst = t_c + t_d + t_i + t_b + t_p
 
         # Baselines
-        baseline_mins_human = {"low": 3 * 60, "medium": 15 * 60, "high": 60 * 60, "god": 180 * 60}
+        baseline_mins_human = {
+            "low": 3 * 60,
+            "medium": 15 * 60,
+            "high": 60 * 60,
+            "god": 180 * 60,
+            "impossible": 1000000 * 60,
+        }
 
         # Take the maximum between math and human baseline reality
         hst = max(hst, baseline_mins_human[complexity])
@@ -145,7 +169,7 @@ class ChronosEngine:
             ai_time_secs=ai_time_secs,
             human_time_secs=hst,
             asymmetry_factor=round(asym, 1),
-            context_msg=multipliers["context"],
+            context_msg=multipliers["context"],  # type: ignore[reportArgumentType]
             tip=tip,
             anti_tip=anti_tip,
         )

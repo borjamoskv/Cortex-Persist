@@ -5,13 +5,13 @@ from cortex.migrations.mig_base import (
     _migration_004_vector_index,
     _migration_005_fts5_setup,
 )
+from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
 from cortex.migrations.mig_consensus import (
     _migration_007_consensus_layer,
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
-from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
 from cortex.migrations.mig_hash import _migration_016_add_fact_hash
@@ -21,7 +21,11 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
+from cortex.migrations.mig_signals import _migration_019_signal_bus
+from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
+from cortex.migrations.mig_tombstone import _migration_020_tombstone
 
 __all__ = ["MIGRATIONS"]
 
@@ -44,4 +48,8 @@ MIGRATIONS = [
     (16, "Add hash column to facts for dedup", _migration_016_add_fact_hash),
     (17, "Decouple FTS from facts table and use plaintext", _migration_017_fts_decouple),
     (18, "Security Hardening: quarantine + ghost TTL", _migration_018_security_hardening),
+    (19, "Signal Bus (L1 Consciousness Layer)", _migration_019_signal_bus),
+    (20, "Tombstoning GC columns", _migration_020_tombstone),
+    (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
+    (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
 ]

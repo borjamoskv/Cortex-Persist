@@ -22,7 +22,7 @@ def export_facts(facts: list[Fact], fmt: str = "json") -> str:
 
     Args:
         facts: List of Fact objects.
-        fmt: Format — 'json', 'csv', or 'jsonl'.
+        fmt: Format — 'json', 'csv', 'jsonl', or 'notebooklm'.
 
     Returns:
         Formatted string.
@@ -30,15 +30,55 @@ def export_facts(facts: list[Fact], fmt: str = "json") -> str:
     Raises:
         ValueError: If format is unsupported.
     """
-    fmt = fmt.lower().strip()
+    fmt = fmt.strip().lower()
     if fmt == "json":
         return _export_json(facts)
     elif fmt == "csv":
         return _export_csv(facts)
     elif fmt == "jsonl":
         return _export_jsonl(facts)
+    elif fmt == "notebooklm":
+        return _export_notebooklm(facts)
     else:
-        raise ValueError(f"Unsupported export format: '{fmt}'. Use: json, csv, jsonl")
+        raise ValueError(f"Unsupported export format: '{fmt}'. Use: json, csv, jsonl, notebooklm")
+
+
+def _export_notebooklm(facts: list[Fact]) -> str:
+    """Export facts as a Markdown Master Digest for NotebookLM."""
+    if not facts:
+        return ""
+
+    from datetime import datetime
+
+    # Group by project
+    projects: dict[str, list[Fact]] = {}
+    for f in facts:
+        if f.project not in projects:
+            projects[f.project] = []
+        projects[f.project].append(f)
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lines = ["# CORTEX Master Digest\n", f"> Snapshot Date: {now}\n", "---\n"]
+
+    for project, p_facts in sorted(projects.items()):
+        lines.append(f"## Domain: {project.upper()}\n")
+
+        # Group by type within project
+        types: dict[str, list[Fact]] = {}
+        for f in p_facts:
+            t = f.fact_type or "general"
+            if t not in types:
+                types[t] = []
+            types[t].append(f)
+
+        for ftype, t_facts in sorted(types.items()):
+            lines.append(f"### {ftype.capitalize()}\n")
+            for f in t_facts:
+                tags_str = f" [tags: {', '.join(f.tags)}]" if f.tags else ""
+                lines.append(f"- **{f.content}** (Confidence: {f.confidence}){tags_str}\n")
+        lines.append("\n")
+
+    return "".join(lines)
 
 
 def _export_json(facts: list[Fact]) -> str:

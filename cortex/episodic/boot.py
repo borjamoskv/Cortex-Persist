@@ -55,7 +55,7 @@ _EVENT_EMOJI: Final[dict[str, str]] = {
 # ─── Models ──────────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class BootPayload:
     """Complete session boot payload."""
 
@@ -246,12 +246,12 @@ async def _get_reflections(
 
         conditions.append("valid_until IS NULL")
 
-        where = " AND ".join(conditions)
+        where_clause = " AND ".join(conditions)
         query = f"""
             SELECT id, project, content, fact_type, created_at
             FROM facts
-            WHERE {where}
-            ORDER BY created_at DESC
+            WHERE {where_clause}
+            ORDER BY id DESC
             LIMIT ?
         """
         params.append(top_k)
@@ -325,7 +325,7 @@ async def _get_semantic_recalls(
         results = await store.recall(query=query, limit=top_k, project=project_hint)
         await store.close()
 
-        return results if results else None
+        return results if results else None  # type: ignore[reportReturnType]
     except (ImportError, sqlite3.Error, OSError, RuntimeError, ValueError) as e:
         logger.debug("L2 semantic recall unavailable: %s", e)
         return None

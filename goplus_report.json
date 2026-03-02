@@ -1,0 +1,11 @@
+{
+    "source": "MOSKV-1 CORTEX",
+    "timestamp": "2026-03-06T02:01:59.420577",
+    "malicious_contracts": [
+        "0x06060c5E3A090A1aFF282BBeC1eB7Db7bdab7a60",
+        "0xEeCAc0ac4143bbfb60a497e43646c0002285902c",
+        "0x7df27f6e4d588da6289bda87ea40d4fdd854cb0f"
+    ],
+    "description": "Syndicate utilizing EIP-7702 unauthorized delegations. Trace points to Foizur / hoangphuc197.eth / @earning_everytime.",
+    "evidence_tx": "0xd57cc6205bab1af36aa7622f8a5103be68b08ed83e01d49b186be4624d6b2335"
+}
