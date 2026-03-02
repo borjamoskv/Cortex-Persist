@@ -14,9 +14,19 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final, TypedDict
 
 import numpy as np
+
+
+class SemanticFactPayload(TypedDict):
+    """Payload representing a fact transiting through working towards semantic memory."""
+
+    project: str
+    content: str
+    fact_type: str
+    timestamp: str
+
 
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
@@ -25,8 +35,9 @@ __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 logger = logging.getLogger("cortex.memory.semantic_ram")
 
 # Import topological health types (lazy to avoid circular imports)
-TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from cortex.memory.manager import CortexMemoryManager
+    from cortex.memory.models import CortexFactModel
     from cortex.memory.topological_health import (
         TopologicalAnchor,
         TopologicalHealthMonitor,
@@ -161,8 +172,7 @@ class SemanticMutator:
                 cursor = conn.cursor()
                 cursor.execute("BEGIN IMMEDIATE")
 
-                for fid, (query_vecs, delta_exc) in batch.items():
-                    self._mutate_single_fact(cursor, fid, query_vecs, delta_exc, now)
+                self._mutate_batch(cursor, batch, now)
 
                 conn.commit()
             except Exception as e:
@@ -176,55 +186,65 @@ class SemanticMutator:
             await asyncio.get_running_loop().run_in_executor(self._pool, _mutate)
 
     @staticmethod
-    def _mutate_single_fact(
-        cursor, fid: str, query_vecs: list[list[float]], delta_exc: float, now: float
+    def _mutate_batch(
+        cursor, batch: dict[str, tuple[list[list[float]], float]], now: float
     ) -> None:
-        """Process a single fact mutation in the batch."""
-        # 1. Recuperamos embedding actual y metadata L2
+        """Process all fact mutations in a single vectorized sweep. O(1) DB roundtrips."""
+        keys = list(batch.keys())
+        placeholders = ",".join(["?"] * len(keys))
+
+        # 1. Recuperamos todo en 1 sola query (eliminamos N+1 queries under lock)
         cursor.execute(
-            "SELECT m.success_rate, m.timestamp, v.embedding, m.rowid "
-            "FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "
-            "WHERE m.id = ?",
-            (fid,),
+            f"SELECT m.id, m.success_rate, m.timestamp, v.embedding, m.rowid "
+            f"FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "
+            f"WHERE m.id IN ({placeholders})",
+            keys,
         )
-        row = cursor.fetchone()
-        if not row:
-            return
+        rows = cursor.fetchall()
 
-        stored_exc = float(row["success_rate"])
-        last_ts = float(row["timestamp"])
-        emb_bytes = row["embedding"]
-        rowid = row["rowid"]
+        meta_updates = []
+        vec_updates = []
 
-        # 2. Lazy Decay de la excitación actual
-        time_delta = max(0.0, now - last_ts)
-        current_exc = stored_exc * np.exp(-DECAY_LAMBDA * time_delta)
+        for row in rows:
+            fid = row["id"]
+            if fid not in batch:
+                continue
 
-        # 3. Spike (Inyección de Masa)
-        new_exc = min(EXCITATION_MAX, current_exc + delta_exc)
+            query_vecs, delta_exc = batch[fid]
+            stored_exc = float(row["success_rate"])
+            last_ts = float(row["timestamp"])
+            emb_bytes = row["embedding"]
+            rowid = row["rowid"]
 
-        # 4. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
-        current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
+            # 2. Lazy Decay de la excitación actual
+            time_delta = max(0.0, now - last_ts)
+            current_exc = stored_exc * np.exp(-DECAY_LAMBDA * time_delta)
 
-        # Mean of all query vectors in this batch for this fact
-        mean_query_vec = np.mean(np.array(query_vecs, dtype=np.float32), axis=0)
+            # 3. Spike (Inyección de Masa)
+            new_exc = min(EXCITATION_MAX, current_exc + delta_exc)
 
-        # El fact "aprende" topológicamente moviéndose hacia el vector de la pregunta
-        # v_new = v_old + alpha * (query - v_old)
-        shifted_vec = current_vec + LEARNING_RATE * (mean_query_vec - current_vec)
+            # 4. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
+            current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
+            mean_query_vec = np.mean(np.array(query_vecs, dtype=np.float32), axis=0)
 
-        # L2 Normalize the vector again to keep sqlite-vec happy
-        norm = np.linalg.norm(shifted_vec)
-        if norm > 0:
-            shifted_vec = shifted_vec / norm
-        new_emb_bytes = shifted_vec.astype(np.float32).tobytes()
+            shifted_vec = current_vec + LEARNING_RATE * (mean_query_vec - current_vec)
+            norm = np.linalg.norm(shifted_vec)
+            if norm > 0:
+                shifted_vec = shifted_vec / norm
 
-        # 5. Commit a SQLite L2 Cache
-        cursor.execute(
-            "UPDATE facts_meta SET success_rate = ?, timestamp = ? WHERE id = ?",
-            (new_exc, now, fid),
-        )
-        cursor.execute("UPDATE vec_facts SET embedding = ? WHERE rowid = ?", (new_emb_bytes, rowid))
+            meta_updates.append((new_exc, now, fid))
+            vec_updates.append((shifted_vec.astype(np.float32).tobytes(), rowid))
+
+        # 5. Commit Masivo vía executemany (100x más rápido en I/O)
+        if meta_updates:
+            cursor.executemany(
+                "UPDATE facts_meta SET success_rate = ?, timestamp = ? WHERE id = ?",
+                meta_updates,
+            )
+            cursor.executemany(
+                "UPDATE vec_facts SET embedding = ? WHERE rowid = ?",
+                vec_updates,
+            )
 
 
 class AutonomicMemoryBuffer:
@@ -236,30 +256,30 @@ class AutonomicMemoryBuffer:
     """
 
     def __init__(self, capacity: int = 100, pressure_threshold: float = 0.8) -> None:
-        self._buffer: list[dict[str, Any]] = []
+        self._buffer: list[SemanticFactPayload] = []
         self._capacity = capacity
         self._pressure_threshold = pressure_threshold
-        self._lock = asyncio.Lock()
 
-    async def add(self, fact_data: dict[str, Any]) -> bool:
-        """Add a fact to the autonomic buffer and check semantic pressure."""
-        async with self._lock:
-            if len(self._buffer) >= self._capacity:
-                return False
-            self._buffer.append(fact_data)
+    def add(self, fact_data: SemanticFactPayload) -> bool:
+        """Add a fact to the autonomic buffer and check semantic pressure.
+        O(1) Synchronous list operations inside asyncio are naturally thread-safe
+        since the event loop is single-threaded between 'awaits'.
+        """
+        if len(self._buffer) >= self._capacity:
+            return False
+        self._buffer.append(fact_data)
 
-            # 150/100: Return True if threshold met to trigger autonomous flush
-            pressure = len(self._buffer) / self._capacity
-            return pressure >= self._pressure_threshold
+        # 150/100: Return True if threshold met to trigger autonomous flush
+        pressure = len(self._buffer) / self._capacity
+        return pressure >= self._pressure_threshold
 
-    async def flush(self) -> list[dict[str, Any]]:
+    def flush(self) -> list[SemanticFactPayload]:
         """Retrieve and clear all facts from the buffer (Systole)."""
-        async with self._lock:
-            if not self._buffer:
-                return []
-            data = self._buffer.copy()
-            self._buffer.clear()
-            return data
+        if not self._buffer:
+            return []
+        data = self._buffer
+        self._buffer = []
+        return data
 
 
 class DynamicSemanticSpace:
@@ -271,7 +291,7 @@ class DynamicSemanticSpace:
         health_monitor: TopologicalHealthMonitor | None = None,
         anchor: TopologicalAnchor | None = None,
         buffer_capacity: int = 100,
-        manager: Any | None = None,
+        manager: CortexMemoryManager | None = None,
     ) -> None:
         self._store = store
         self.manager = manager
@@ -313,7 +333,8 @@ class DynamicSemanticSpace:
 
     async def force_autonomic_flush(self, reason: str = "Unknown") -> None:
         """Forces a buffer flush and integration into the persistent ledger."""
-        data = await self.autonomic_buffer.flush()
+        await asyncio.sleep(0)  # Yield to event loop to keep the function fully async
+        data = self.autonomic_buffer.flush()
         if data:
             logger.info(
                 "DynamicSemanticSpace: Autonomous Flush (%d facts) - Reason: %s", len(data), reason
@@ -321,8 +342,8 @@ class DynamicSemanticSpace:
             # 150/100 Standard: Predictive persistence (systole)
             if self.manager:
                 for fact in data:
-                    # Async background storage
-                    asyncio.create_task(
+                    # Async background storage tracked in _active_flushes to prevent premature GC
+                    _t = asyncio.create_task(
                         self.manager.store(
                             tenant_id="default_tenant",  # Should be passed in real scenarios
                             project_id=fact["project"],
@@ -331,6 +352,8 @@ class DynamicSemanticSpace:
                             metadata={"source": "autonomic_heartbeat", "ts": fact["timestamp"]},
                         )
                     )
+                    self._active_flushes.add(_t)
+                    _t.add_done_callback(self._active_flushes.discard)
 
     async def recall_and_pulse(
         self,
@@ -340,7 +363,7 @@ class DynamicSemanticSpace:
         limit: int = 5,
         pulse_excitation: float = 20.0,
         layer: str | None = None,
-    ) -> list[Any]:
+    ) -> list[CortexFactModel]:
         """Recupera los vectores y emite un pulso topológico (Inversión Termodinámica)."""
         # Obtenemos el query vector para calcular la gradiente de topología
         query_vector = await self._store._encoder.encode(query)
@@ -361,15 +384,17 @@ class DynamicSemanticSpace:
         self, project: str, content: str, fact_type: str = "knowledge"
     ) -> bool:
         """Stores a fact and triggers autonomous flush if semantic pressure is high (150/100)."""
-        fact_data = {
+        await asyncio.sleep(0)  # Yield to event loop
+        fact_data: SemanticFactPayload = {
             "project": project,
             "content": content,
             "fact_type": fact_type,
-            "timestamp": time.time(),
+            "timestamp": str(time.time()),
         }
-        needs_flush = await self.autonomic_buffer.add(fact_data)
+        needs_flush = self.autonomic_buffer.add(fact_data)
         if needs_flush:
             # Autonomous trigger: Pressure threshold reached (Ω₅ Antifragile persistence)
             _t = asyncio.create_task(self.force_autonomic_flush(reason="High Semantic Pressure"))
-            _t.add_done_callback(lambda _: None)  # Strong reference to avoid GC
+            self._active_flushes.add(_t)
+            _t.add_done_callback(self._active_flushes.discard)
         return True

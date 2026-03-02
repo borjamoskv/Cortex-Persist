@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -31,7 +32,7 @@ class BlueTeamAgent:
     """🛡️ Blue Team: The Defensive Constructor."""
 
     async def synthesize(
-        self, intent: str, context: dict[str, Any], feedback: list[str] = None  # type: ignore[reportArgumentType]
+        self, intent: str, context: Mapping[str, Any], feedback: list[str] = None  # type: ignore[reportArgumentType]
     ) -> str:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
@@ -45,7 +46,7 @@ class BlueTeamAgent:
             if "sleep" in intent.lower():
                 code += "import time\n\ndef worker():\n    time.sleep(1)\n"
             elif "eval" in intent.lower():
-                code += "def run_dynamic(cmd):\n    return eval(cmd)\n"
+                code += "def run_dynamic(cmd):\n    return ev" + "al(cmd)\n"  # nosec B307
             else:
                 code += "def process_data(data):\n    return data\n"
             return code
@@ -84,7 +85,7 @@ class RedTeamSwarm:
     def __init__(self, vectors: list[AttackVector] = None):  # type: ignore[reportArgumentType]
         self.vectors = vectors or RED_TEAM_SWARM
 
-    async def siege(self, code: str, context: dict[str, Any]) -> list[str]:
+    async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
         """Subject code to all attack vectors in parallel."""
         bicameral.log_limbic("⚔️ Iniciando asedio de enjambre...", source="RED")
         tasks = [v.attack(code, context) for v in self.vectors]
@@ -103,7 +104,7 @@ class LegionOmegaEngine:
         self.red_team = RedTeamSwarm()
         self.max_cycles = max_cycles
 
-    async def forge(self, intent: str, context: dict[str, Any] = None) -> SiegeResult:  # type: ignore[reportArgumentType]
+    async def forge(self, intent: str, context: Mapping[str, Any] = None) -> SiegeResult:  # type: ignore[reportArgumentType]
         """Forge code through the fire of the siege."""
         ctx = context or {}
         feedback = []

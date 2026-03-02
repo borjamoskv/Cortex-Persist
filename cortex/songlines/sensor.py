@@ -3,11 +3,22 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
 
 from cortex.songlines.decay import DecayEngine
 
 logger = logging.getLogger("cortex.songlines.sensor")
+
+
+class GhostTrace(TypedDict):
+    """Structured telemetry payload for embedded ghosts."""
+    id: str
+    strength: float
+    source_file: str
+    created_at: float
+    half_life: float
+    intent: str
+    project: str
 
 
 class TopographicSensor:
@@ -20,7 +31,7 @@ class TopographicSensor:
     def __init__(self):
         self.prefix = "user.cortex.ghost"
 
-    def scan_field(self, root_dir: Path) -> list[dict[str, Any]]:
+    def scan_field(self, root_dir: Path) -> list[GhostTrace]:
         """Scan the project topography for active ghosts."""
         resonances = []
 
@@ -42,7 +53,7 @@ class TopographicSensor:
 
         return list(unique_ghosts.values())
 
-    def _read_ghosts_from_file(self, file_path: Path) -> list[dict[str, Any]]:
+    def _read_ghosts_from_file(self, file_path: Path) -> list[GhostTrace]:
         """Read ghosts from macOS xattrs or xattr CLI."""
         results = []
         attr_names = self._get_attr_names(file_path)
@@ -91,7 +102,7 @@ class TopographicSensor:
 
     def _parse_ghost_payload(
         self, file_path: Path, attr: str, payload_bytes: bytes
-    ) -> dict[str, Any] | None:
+    ) -> GhostTrace | None:
         """Decode payload and handle decay/evaporation."""
         try:
             ghost = json.loads(payload_bytes.decode("utf-8"))
@@ -122,7 +133,7 @@ class TopographicSensor:
         except Exception:
             pass
 
-    def _scan_fallback_manifests(self, root_dir: Path) -> list[dict[str, Any]]:
+    def _scan_fallback_manifests(self, root_dir: Path) -> list[GhostTrace]:
         """Read ghosts from .songlines fallback files."""
         results = []
         for manifest in root_dir.rglob(".songlines"):

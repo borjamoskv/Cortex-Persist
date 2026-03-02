@@ -11,7 +11,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import random
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -176,8 +175,11 @@ class GossipProtocol:
         """Background loop to pick a peer and sync."""
         while self._running:
             try:
+                import secrets
+                
+                rng = secrets.SystemRandom()
                 if self.peers:
-                    peer = random.choice(list(self.peers))
+                    peer = rng.choice(list(self.peers))
                     await self._perform_gossip(peer)
             except (OSError, RuntimeError) as e:
                 logger.error("Gossip error on %s: %s", self.node_id, e)

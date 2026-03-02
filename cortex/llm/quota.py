@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import random
 import sqlite3
 import time
 from collections.abc import Generator
@@ -52,8 +51,8 @@ class SovereignQuotaManager:
     def __init__(
         self,
         db_path: str = "~/.cortex/quota.db",
-        capacity: int = 15,
-        refill_rate: float = 0.25,  # 15 tokens / 60s ≈ Gemini free tier
+        capacity: int = 5,  # Reducido de 15 a 5 para evitar burst limit (429)
+        refill_rate: float = 0.15,  # ~9 tokens / 60s (más conservador)
     ) -> None:
         self.db_path = Path(db_path).expanduser()
         self.capacity = float(capacity)
@@ -153,8 +152,11 @@ class SovereignQuotaManager:
                 self._increment_timeouts()
                 return False
 
-            # Backoff exponencial + jitter (anti thundering-herd)
-            jitter = random.uniform(0, 0.1)
+            import secrets
+
+            rng = secrets.SystemRandom()
+            # Hardware Entropy + Golden Ratio (Caos termodinámico asimétrico profundo)
+            jitter = rng.uniform(0.1, 1.618 ** min(attempt + 1, 6))
             sleep = min(wait, 2 ** min(attempt, 5)) + jitter
             sleep = min(sleep, deadline - elapsed)  # nunca sobrepasar el deadline
 

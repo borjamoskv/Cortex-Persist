@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.songlines.sensor import GhostTrace
 
 import aiosqlite
 
@@ -67,7 +70,7 @@ class GhostMixin:
 
         return hashlib.sha256(f"{reference}:{project}".encode()).hexdigest()[:16]
 
-    async def list_active_ghosts(self, root_dir: Path | None = None) -> list[dict[str, Any]]:
+    async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
         """Scan the topography for all active ghosts."""
         return self._sensor.scan_field(root_dir or Path.cwd())
 

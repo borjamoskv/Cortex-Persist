@@ -6,11 +6,19 @@ and adaptive agent formations for Zero-Trust problem solving.
 
 import asyncio
 import logging
-from typing import Any
+from typing import TypedDict
 
 from pydantic import BaseModel, Field
 
 from cortex.swarm.byzantine import ByzantineConsensus
+
+
+class CentauroMissionResult(TypedDict, total=False):
+    status: str
+    solution: str
+    reason: str
+    agents_used: int
+    formation: str
 
 logger = logging.getLogger("cortex.swarm.centauro")
 
@@ -56,7 +64,7 @@ class CentauroEngine:
     def spawn_squad(self, size: int) -> list[VirtualAgent]:
         """Spawn a squad of virtual agents."""
         squad = []
-        for i in range(size):
+        for _ in range(size):
             agent_id = f"legionnaire_{len(self.agents) + 1}"
             agent = VirtualAgent(agent_id)
             self.agents[agent_id] = agent
@@ -64,7 +72,7 @@ class CentauroEngine:
             squad.append(agent)
         return squad
 
-    async def engage(self, mission: str, formation: str = Formation.BLITZ) -> dict[str, Any]:
+    async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission."""
         logger.info(f"Initiating LEGION Protocol. Mission: {mission} | Formation: {formation}")
 
@@ -87,7 +95,7 @@ class CentauroEngine:
 
         # Collect proposals
         proposals = {}
-        for agent, result in zip(squad, results):
+        for agent, result in zip(squad, results, strict=False):
             if not isinstance(result, Exception):
                 proposals[agent.agent_id] = result
 
