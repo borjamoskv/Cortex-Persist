@@ -94,24 +94,29 @@ Input → guard validation → AES encrypt(content, meta)
 | `sync/` | Cross-device synchronization (CRDT-based) |
 | `ha/` | High-availability (leader election, replication) |
 
-### 🔍 Intelligence
+### 🔍 Intelligence (Semantic & Temporal)
 
 | Module | Purpose |
 | --- | --- |
-| `embeddings/` | Vector embedding generation (sentence-transformers → ONNX) |
-| `search/` | Semantic search over stored facts (sqlite-vec ANN) |
-| `memory/` | High-level memory management API (38 files — largest module) |
+| `embeddings/` | Vector embedding generation (`sentence-transformers` → ONNX) |
+| `search/` | Semantic search over stored facts (`sqlite-vec` ANN) |
+| `memory/` | High-level memory management API (38 files) |
 | `graph/` | Knowledge graph — entity relationships & traversal |
 | `episodic/` | Episodic memory subsystem (temporal sequences) |
 | `shannon/` | Information-theoretic analysis (entropy, compression ratios) |
 | `context/` | Context window management for LLM interactions |
 | `songlines/` | Navigational memory pathways (spatial/temporal) |
 
-### 🤖 Agent Infrastructure
+#### Search Capabilities
+- **Semantic Search**: Vector similarity via `sqlite-vec`
+- **Text Search**: FTS5 text matching
+- **Hybrid Search**: Reciprocal Rank Fusion (RRF) combining vector + text scores
+
+### 🤖 Agent Infrastructure (Sovereign Swarm)
 
 | Module | Purpose |
 | --- | --- |
-| `llm/` | LLM provider abstraction (router, negative cache, hedged requests, positive cache) |
+| `llm/` | LLM router (KETER-∞ ROP): Intent classification, Hedged Requests, EWMA Anycast |
 | `agents/` | Multi-agent definitions and orchestration |
 | `agent/` | Single-agent execution loop |
 | `swarm/` | Multi-agent swarm coordination |
@@ -123,14 +128,22 @@ Input → guard validation → AES encrypt(content, meta)
 | `hive/` | Collective intelligence aggregation |
 | `alma/` | Soul engine — personality and identity persistence |
 
-### 🔐 Security & Compliance
+#### LLM Router Architecture (DNS Analogy)
+The router implements a deterministic cascade to prevent capability degradation:
+- **NegativeCache**: `NXDOMAIN` (skip known-dead providers)
+- **PositiveCache**: `A-Record` (promote known-good providers)
+- **HedgedRequests**: Race-to-first execution for `P99` latency reduction
+- **Anycast**: EWMA-based latency tracking (fastest provider gets highest weight)
+- **DNSSEC**: `IntentValidator` (post-response validation of semantic domain)
+
+### 🔐 Security & Compliance (Zero Trust)
 
 | Module | Purpose |
 | --- | --- |
 | `auth/` | Authentication (API keys, JWT, OAuth2) |
 | `crypto/` | Cryptographic primitives (AES-256, Ed25519, hash chains) |
-| `security/` | Security policies, rate limiting, threat detection (11 files) |
-| `guards/` | Input validation, SQL injection prevention, prompt injection guards |
+| `security/` | Threat feeds, anomaly detection, honeypots, integrity audit |
+| `guards/` | Injection guards, contradiction guards, dependency guards, seals |
 | `audit/` | Audit trail generation and compliance reporting |
 | `gate/` | Admission control — policy enforcement before write |
 | `policy/` | Declarative policy engine (ABAC, RBAC rules) |
@@ -138,20 +151,32 @@ Input → guard validation → AES encrypt(content, meta)
 | `red_team/` | Adversarial testing harness |
 | `verification/` | Formal verification (Z3 solver integration) |
 
-### 🌐 Integration & API
+#### Defense in Depth
+1. **Guards Layer**: `contradiction_guard`, `dependency_guard`, `injection_guard`
+2. **Security Layer**: `anomaly_detector`, `threat_feed`, `integrity_audit`
+3. **Ledger Layer**: `cryptography` hashes ensuring unalterable history
+
+### 🌐 Integration & API (Model Context Protocol)
 
 | Module | Purpose |
 | --- | --- |
 | `api/` | FastAPI application factory and middleware |
 | `routes/` | REST API route handlers (24 files — full CRUD + search + admin) |
 | `gateway/` | API gateway (request routing, auth middleware) |
-| `mcp/` | Model Context Protocol server (10 files — tool definitions + transport) |
+| `mcp/` | Model Context Protocol server via `FastMCP` (SSE & stdio) |
 | `adk/` | Google Agent Development Kit integration |
 | `langbase/` | LangChain/LangBase adapter layer |
 | `federation/` | Cross-instance federation (multi-node sync) |
 | `consensus/` | Byzantine fault-tolerant consensus (7 files) |
 | `platform/` | Platform-level abstractions (multi-tenant, billing hooks) |
 | `browser/` | Browser automation integration |
+
+#### MCP Tools Registered
+- `cortex_store`: Store facts with intent validation
+- `cortex_search`: Hybrid semantic search
+- `cortex_status`: Memory metrics and stats
+- `cortex_ledger_verify`: Full ledger hash chain verification
+- `Mega Tools`: Aether, Void, Chronos paradigms
 
 ### 📡 Observability & Operations
 
