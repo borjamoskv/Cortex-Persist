@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, List, Coroutine
+from collections.abc import Coroutine
+from typing import Any
 
-from cortex.engine.reaper import GhostReaper
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.engine.growth import GROWTH_ENGINE
-
+from cortex.engine.reaper import GhostReaper
 
 logger = logging.getLogger("cortex.rem")
 
@@ -31,27 +31,27 @@ class REMCoordinator:
         """Executes the deep maintenance cycle."""
         if self._is_sleeping:
             return
-        
+
         from cortex.engine.evaporator import EntropicEvaporator
 
         self._is_sleeping = True
         logger.info("🌙 [REM] Entering Deep Sleep. Maintenance tasks starting.")
 
         evaporator = EntropicEvaporator(self._conn)
-        
-        tasks: List[Coroutine] = [
+
+        tasks: list[Coroutine] = [
             self._reaper.reap_db_ghosts(self._conn),
             self._decalcifier.decalcify_cycle(self._conn),
             GROWTH_ENGINE.synaptic_pruning(self._conn),
             evaporator.evaporate(),
         ]
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         for i, res in enumerate(results):
             if isinstance(res, Exception):
                 logger.error("❌ [REM] Task %d failed: %s", i, res)
-        
+
         logger.info("🌅 [REM] Maintenance complete. System refreshed.")
         self._is_sleeping = False
 

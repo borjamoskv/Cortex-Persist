@@ -52,7 +52,7 @@ class TestPrimitives:
         tracker.on_access("e3")
 
         assert tracker.labile_count == 3
-        
+
         # Confirm e1 -> boost
         boost = tracker.confirm("e1")
         assert boost > 0
@@ -105,7 +105,7 @@ class TestComposites:
 
         assert "effect1" in [link.effect_id for link in graph.effects_of("cause1")]
         assert "cause1" in graph.root_causes("effect2")
-        
+
         chain = graph.impact_chain("cause1")
         assert "effect1" in chain
         assert "effect2" in chain
@@ -122,7 +122,7 @@ class TestDistributed:
     def test_crdt_gcounter(self):
         c1 = GCounter()
         c1.increment("agent_A", 2)
-        
+
         c2 = GCounter()
         c2.increment("agent_B", 3)
         c2.increment("agent_A", 1)  # Stale

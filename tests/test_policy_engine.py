@@ -23,12 +23,14 @@ def reset_anomaly_detector():
     """Reinitialize the anomaly detector so rapid test stores don't trigger bulk mutation."""
     try:
         import cortex.security.anomaly_detector as ad
+
         ad.DETECTOR = ad.AnomalyDetector()
     except (ImportError, AttributeError):
         pass
     yield
     try:
         import cortex.security.anomaly_detector as ad
+
         ad.DETECTOR = ad.AnomalyDetector()
     except (ImportError, AttributeError):
         pass
@@ -187,14 +189,8 @@ class TestCrossProject:
         actions = await policy.evaluate()
 
         # The live-notch ghost mentions "naroa-web" — cross-project
-        cross = [
-            a for a in actions
-            if a.project == "live-notch" and a.source_type == "ghost"
-        ]
-        same = [
-            a for a in actions
-            if a.project == "naroa-web" and a.source_type == "ghost"
-        ]
+        cross = [a for a in actions if a.project == "live-notch" and a.source_type == "ghost"]
+        same = [a for a in actions if a.project == "naroa-web" and a.source_type == "ghost"]
 
         assert cross, "Should have cross-project ghost"
         assert same, "Should have same-project ghost"

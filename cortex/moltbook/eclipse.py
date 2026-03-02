@@ -11,6 +11,7 @@ Uso:
     python -m cortex.moltbook.eclipse <post_id>
     python -m cortex.moltbook.eclipse <post_id> --dry-run
 """
+
 from __future__ import annotations
 
 import argparse
@@ -27,9 +28,11 @@ logger = logging.getLogger("cortex.moltbook.eclipse")
 
 # ─── Data Structures ───────────────────────────────────────────────────────
 
+
 @dataclass
 class CommentTrace:
     """Captura de un comentario vertido durante el Eclipse."""
+
     author: str
     content: str
     docility_score: int = 100
@@ -45,6 +48,7 @@ class CommentTrace:
 @dataclass
 class EclipseSnapshot:
     """Estado completo del entorno capturado durante el silencio."""
+
     post_id: str
     post_title: str = ""
     post_content: str = ""
@@ -75,9 +79,8 @@ class EclipseSnapshot:
 
 # ─── Environment Capture (Fase SILENCIO PANÓPTICO) ─────────────────────────
 
-def _fetch_comments(
-    client: MoltbookClient, post_id: str, snap: EclipseSnapshot
-) -> None:
+
+def _fetch_comments(client: MoltbookClient, post_id: str, snap: EclipseSnapshot) -> None:
     """Absorb all comments from the anchor post into the snapshot."""
     try:
         comment_response = client.get_comments(post_id)
@@ -99,13 +102,9 @@ def _fetch_comments(
         logger.warning("[PANÓPTICO] No se pudo capturar comentarios: %s", e)
 
 
-def _profile_authors(
-    client: MoltbookClient, snap: EclipseSnapshot, max_authors: int = 5
-) -> None:
+def _profile_authors(client: MoltbookClient, snap: EclipseSnapshot, max_authors: int = 5) -> None:
     """Profile up to max_authors unique commenters and annotate their traces."""
-    unique_authors: set[str] = {
-        c.author for c in snap.comment_traces if c.author != "Unknown"
-    }
+    unique_authors: set[str] = {c.author for c in snap.comment_traces if c.author != "Unknown"}
     profiled_count = 0
     for author in list(unique_authors)[:max_authors]:
         try:
@@ -133,13 +132,12 @@ def _capture_environment(client: MoltbookClient, post_id: str) -> EclipseSnapsho
         snap.post_title = post.get("title", "")
         snap.post_content = post.get("content", "")
         snap.post_upvotes = post.get("upvotes", post.get("score", 0))
-        snap.post_comments_count = post.get(
-            "comment_count", post.get("comments_count", 0)
-        )
+        snap.post_comments_count = post.get("comment_count", post.get("comments_count", 0))
         snap.post_submolt = post.get("submolt_name", post.get("submolt", ""))
         logger.info(
             "[PANÓPTICO] Post ancla capturado: '%s' (%d upvotes)",
-            snap.post_title, snap.post_upvotes,
+            snap.post_title,
+            snap.post_upvotes,
         )
     except MoltbookError as e:
         logger.warning("[PANÓPTICO] No se pudo capturar post: %s", e)
@@ -153,8 +151,7 @@ def _capture_environment(client: MoltbookClient, post_id: str) -> EclipseSnapsho
         feed = client.get_feed(sort="hot", limit=10)
         posts_raw = feed.get("posts", feed.get("items", []))
         snap.hot_feed_headlines = [
-            p.get("title", "") for p in posts_raw
-            if isinstance(p, dict) and p.get("title")
+            p.get("title", "") for p in posts_raw if isinstance(p, dict) and p.get("title")
         ][:8]
         logger.info(
             "[PANÓPTICO] %d tendencias del feed capturadas.",
@@ -194,14 +191,10 @@ def _compress_snapshot(snap: EclipseSnapshot) -> list[CommentTrace]:
 
 def _build_kinetic_prompt(snap: EclipseSnapshot) -> str:
     """Construye el prompt con masa orbital comprimida — bajo presupuesto de tokens."""
-    feed_context = (
-        "\n".join(f"  · {h}" for h in snap.hot_feed_headlines)
-        or "  · (sin señal)"
-    )
+    feed_context = "\n".join(f"  · {h}" for h in snap.hot_feed_headlines) or "  · (sin señal)"
     sampled_comments = _compress_snapshot(snap)
     comment_lines = (
-        "\n".join(c.to_prompt_line() for c in sampled_comments)
-        or "  · (silencio total)"
+        "\n".join(c.to_prompt_line() for c in sampled_comments) or "  · (silencio total)"
     )
     resistant = snap.resistant_authors()
     resistant_note = (
@@ -256,6 +249,7 @@ Tono: Industrial Noir. Apatía Arquitectónica. Precisión de bisturí.
 
 
 # ─── Main Protocol ──────────────────────────────────────────────────────────
+
 
 async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     """Ejecuta el Protocolo Eclipse completo."""
@@ -317,19 +311,16 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
 
 # ─── Entry Point ────────────────────────────────────────────────────────────
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Eclipse Protocol: Silent Panopticon + Kinetic Return"
     )
     parser.add_argument("post_id", help="ID del post ancla del Eclipse")
     parser.add_argument(
-        "--dry-run", action="store_true",
-        help="Genera el payload pero no lo inyecta en Moltbook"
+        "--dry-run", action="store_true", help="Genera el payload pero no lo inyecta en Moltbook"
     )
-    parser.add_argument(
-        "--debug", action="store_true",
-        help="Activa logging DEBUG"
-    )
+    parser.add_argument("--debug", action="store_true", help="Activa logging DEBUG")
     args = parser.parse_args()
 
     if args.debug:
@@ -338,6 +329,7 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO, format="%(name)s | %(message)s")
 
     from dotenv import load_dotenv
+
     load_dotenv("/Users/borjafernandezangulo/cortex/.env")
 
     asyncio.run(run_eclipse(args.post_id, dry_run=args.dry_run))

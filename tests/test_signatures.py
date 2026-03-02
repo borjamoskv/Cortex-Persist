@@ -22,7 +22,7 @@ class TestGenerateKeypair:
     def test_key_lengths(self) -> None:
         priv, pub = generate_keypair()
         assert len(priv) == 32  # Ed25519 private key is 32 bytes
-        assert len(pub) == 32   # Ed25519 public key is 32 bytes
+        assert len(pub) == 32  # Ed25519 public key is 32 bytes
 
     def test_unique_keys(self) -> None:
         k1 = generate_keypair()
@@ -140,9 +140,7 @@ class TestEd25519Signer:
         sig2 = signer.sign(content, fact_hash)
         assert sig1 == sig2
 
-    def test_different_inputs_produce_different_signatures(
-        self, signer: Ed25519Signer
-    ) -> None:
+    def test_different_inputs_produce_different_signatures(self, signer: Ed25519Signer) -> None:
         sig1 = signer.sign("Content A", "hash1")
         sig2 = signer.sign("Content B", "hash2")
         assert sig1 != sig2

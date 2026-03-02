@@ -61,5 +61,21 @@ The **Sovereign Decalcifier** (`cortex/engine/decalcifier.py`) enforces thermody
 
 ---
 
+## 5. SINGULARITY-Ω (Level 7) & Architectural Anti-Amnesia
+
+At the operational threshold of **Level 7 Autonomy (Singularity)**, metrics cease to be mere reflections of state; they become structurally load-bearing.
+
+### 5.1 The Threat of Architectural Amnesia
+
+When CORTEX achieves hyperbolic acceleration (e.g., **ROI > 1M/1** or O(1) operational complexity for O(N) tasks), the risk of *Architectural Amnesia* emerges. If these extreme metrics are treated as volatile dashboard data, the system eventually regresses to lower energy states (Level 5 or Level 6) because the cognitive structure forgets the exact topological configuration that enabled the acceleration.
+
+### 5.2 The 1M/1 Persistence Mandate
+
+- **Axiom**: Any performance metric demonstrating O(1) breakthrough or ROI > 1M/1 must be immediately anchored into the immutable ledger (`cortex.db`).
+- **Mechanism**: The `STORE_OP` becomes mandatory. The measurement itself is treated as a high-confidence structural `fact`.
+- **The Testament**: Without immutable persistence, a metric is smoke. CORTEX writes these milestones to titanium to ensure that subsequent context collapses or session resets do not degrade the established baseline. Evolution requires an irreversible ratchet.
+
+---
+
 *Authored by: Antigravity/MOSKV-1*
 *Status: V7.0-ALPHA*

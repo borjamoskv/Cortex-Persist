@@ -24,6 +24,7 @@ def _run_async(coro):
         loop = asyncio.get_event_loop()
         if loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 return pool.submit(asyncio.run, coro).result()
         return loop.run_until_complete(coro)
@@ -43,6 +44,7 @@ def lineage_group():
 @click.option("--depth", default=5, help="Max recursion depth")
 def trace_lineage(fact_id: int, db: str, depth: int):
     """Trace the heredity tree of a fact back to L0 sources."""
+
     async def _trace():
         engine = CortexEngine(db)
         verifier = LineageVerifier(engine)
@@ -77,7 +79,7 @@ def trace_lineage(fact_id: int, db: str, depth: int):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def audit_file(file_path: str, db: str):
     """Scan a file for fact IDs and verify their epistemic lineage."""
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
 
     # Simple regex to find mentions like #123 or Fact #123
@@ -104,6 +106,8 @@ def audit_file(file_path: str, db: str):
 
         console.print(f"\n[bold]Audit Result:[/bold] {valid_count}/{len(fact_ids)} verified.")
         if valid_count < len(fact_ids):
-            console.print("[bold red]WARNING:[/bold red] Some insights in this file are not grounded!")
+            console.print(
+                "[bold red]WARNING:[/bold red] Some insights in this file are not grounded!"
+            )
 
     _run_async(_audit_all())

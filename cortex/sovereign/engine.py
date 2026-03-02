@@ -122,9 +122,10 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     t0 = time.time()
     try:
         from cortex.engine.legion import LEGION_OMEGA
+
         intent = "Evaluate system immunity and forge defensive core"
         result = await LEGION_OMEGA.forge(intent, context={"ctx": ctx})
-        
+
         return PipelineResult(
             phase=Phase.SWARM,
             success=result.success,
@@ -132,8 +133,8 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
             details={
                 "cycles": result.cycles,
                 "immunity": "REACHED" if result.success else "BREACHED",
-                "vulnerabilities": result.vulnerabilities
-            }
+                "vulnerabilities": result.vulnerabilities,
+            },
         )
     except (RuntimeError, ValueError, OSError, ImportError) as e:
         logger.error("Swarm phase (Legion-Omega) failed: %s", e)

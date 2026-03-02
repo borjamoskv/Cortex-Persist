@@ -22,6 +22,7 @@ def mock_db(tmp_path):
     conn.close()
     return db_path
 
+
 def test_cycle_report_structure():
     report = CycleReport(
         cycle=1,
@@ -34,28 +35,31 @@ def test_cycle_report_structure():
         species_count=10,
         crossovers=2,
         extinctions=1,
-        duration_ms=100.0
+        duration_ms=100.0,
     )
     assert report.cycle == 1
     assert report.best_agent_fitness == 60.0
     assert report.extinctions == 1
 
+
 def test_skill_bridge():
     path = get_skill_for_domain(AgentDomain.FABRICATION)
     assert "aether-1" in str(path)
+
 
 @pytest.mark.asyncio
 async def test_evolution_engine_cycle(mock_db):
     # Genesis swarm creation
     engine = EvolutionEngine()
     await engine.initialize_swarm()
-    
+
     # Run cycle
     report = await engine.cycle()
-    
+
     assert report.cycle >= 1
-    assert len(engine.sovereigns) >= len(AgentDomain) - 1 # Adjusted for SYNERGY skip
+    assert len(engine.sovereigns) >= len(AgentDomain) - 1  # Adjusted for SYNERGY skip
     assert report.tournaments_run > 0
+
 
 @pytest.mark.asyncio
 async def test_metrics_logic(mock_db):

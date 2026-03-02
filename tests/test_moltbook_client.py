@@ -74,28 +74,34 @@ class TestAPIRequests:
         }
         # Make headers.get work
         resp.headers = MagicMock()
-        resp.headers.get = MagicMock(side_effect=lambda k, d=None: {
-            "X-RateLimit-Remaining": "55",
-            "X-RateLimit-Reset": "9999999999",
-        }.get(k, d))
+        resp.headers.get = MagicMock(
+            side_effect=lambda k, d=None: {
+                "X-RateLimit-Remaining": "55",
+                "X-RateLimit-Reset": "9999999999",
+            }.get(k, d)
+        )
         return resp
 
     @patch("cortex.moltbook.client.urlopen")
     def test_get_home(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response({
-            "success": True,
-            "your_account": {"karma": 42},
-        })
+        mock_urlopen.return_value = self._mock_response(
+            {
+                "success": True,
+                "your_account": {"karma": 42},
+            }
+        )
         result = client.get_home()
         assert result["success"] is True
         assert result["your_account"]["karma"] == 42
 
     @patch("cortex.moltbook.client.urlopen")
     def test_create_post(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response({
-            "success": True,
-            "post": {"id": "test-123", "title": "Test"},
-        })
+        mock_urlopen.return_value = self._mock_response(
+            {
+                "success": True,
+                "post": {"id": "test-123", "title": "Test"},
+            }
+        )
         result = client.create_post("general", "Test", "Content")
         assert result["post"]["id"] == "test-123"
 
@@ -107,10 +113,12 @@ class TestAPIRequests:
 
     @patch("cortex.moltbook.client.urlopen")
     def test_search(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response({
-            "success": True,
-            "results": [{"id": "r1", "similarity": 0.85}],
-        })
+        mock_urlopen.return_value = self._mock_response(
+            {
+                "success": True,
+                "results": [{"id": "r1", "similarity": 0.85}],
+            }
+        )
         result = client.search("memory architectures")
         assert len(result["results"]) == 1
         assert result["results"][0]["similarity"] == 0.85
@@ -124,12 +132,14 @@ class TestAPIRequests:
     @patch("cortex.moltbook.client.urlopen")
     def test_register_saves_credentials(self, mock_urlopen, client, tmp_path, monkeypatch):
         monkeypatch.setattr("cortex.moltbook.client._CREDENTIALS_PATH", tmp_path / "creds.json")
-        mock_urlopen.return_value = self._mock_response({
-            "agent": {
-                "api_key": "moltbook_new_key",
-                "claim_url": "https://www.moltbook.com/claim/xxx",
-            },
-        })
+        mock_urlopen.return_value = self._mock_response(
+            {
+                "agent": {
+                    "api_key": "moltbook_new_key",
+                    "claim_url": "https://www.moltbook.com/claim/xxx",
+                },
+            }
+        )
         # Use a client without auth for register
         c = MoltbookClient(api_key="dummy")
         c.register("TestBot", "A test bot")

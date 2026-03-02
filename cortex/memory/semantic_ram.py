@@ -275,9 +275,7 @@ class DynamicSemanticSpace:
     ) -> None:
         self._store = store
         self.manager = manager
-        self.semantic_mutator = SemanticMutator(
-            store, health_monitor=health_monitor, anchor=anchor
-        )
+        self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
         self._active_flushes: set[asyncio.Task[Any]] = set()
         self._heartbeat_task: asyncio.Task[None] | None = None
@@ -318,21 +316,21 @@ class DynamicSemanticSpace:
         data = await self.autonomic_buffer.flush()
         if data:
             logger.info(
-                "DynamicSemanticSpace: Autonomous Flush (%d facts) - Reason: %s",
-                len(data),
-                reason
+                "DynamicSemanticSpace: Autonomous Flush (%d facts) - Reason: %s", len(data), reason
             )
             # 150/100 Standard: Predictive persistence (systole)
             if self.manager:
                 for fact in data:
                     # Async background storage
-                    asyncio.create_task(self.manager.store(
-                        tenant_id="default_tenant",  # Should be passed in real scenarios
-                        project_id=fact["project"],
-                        content=fact["content"],
-                        fact_type=fact["fact_type"],
-                        metadata={"source": "autonomic_heartbeat", "ts": fact["timestamp"]}
-                    ))
+                    asyncio.create_task(
+                        self.manager.store(
+                            tenant_id="default_tenant",  # Should be passed in real scenarios
+                            project_id=fact["project"],
+                            content=fact["content"],
+                            fact_type=fact["fact_type"],
+                            metadata={"source": "autonomic_heartbeat", "ts": fact["timestamp"]},
+                        )
+                    )
 
     async def recall_and_pulse(
         self,
@@ -359,7 +357,9 @@ class DynamicSemanticSpace:
 
         return facts
 
-    async def store_with_heartbeat(self, project: str, content: str, fact_type: str = "knowledge") -> bool:
+    async def store_with_heartbeat(
+        self, project: str, content: str, fact_type: str = "knowledge"
+    ) -> bool:
         """Stores a fact and triggers autonomous flush if semantic pressure is high (150/100)."""
         fact_data = {
             "project": project,

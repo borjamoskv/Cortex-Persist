@@ -14,7 +14,7 @@ tables_with_tenants = [
     "ghosts",
     "compaction_log",
     "context_snapshots",
-    "episodes"
+    "episodes",
 ]
 
 
@@ -25,8 +25,7 @@ def repair():
         for table in tables_with_tenants:
             # Check if table exists
             cursor = conn.execute(
-                "SELECT name FROM sqlite_master "
-                f"WHERE type='table' AND name='{table}'"
+                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'"
             )
             if not cursor.fetchone():
                 print(f"Table {table} does not exist, skipping.")
@@ -37,21 +36,15 @@ def repair():
             if "tenant_id" not in columns:
                 print(f"Adding tenant_id to {table}...")
                 conn.execute(
-                    f"ALTER TABLE {table} "
-                    "ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'"
+                    f"ALTER TABLE {table} ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'"
                 )
 
         # Also check for idx_tx_tenant if it was missing
         print("Ensuring indices...")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_ep_tenant ON episodes(tenant_id)")
         conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id)"
-        )
-        conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_ep_tenant ON episodes(tenant_id)"
-        )
-        conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_ctx_snap_tenant "
-            "ON context_snapshots(tenant_id)"
+            "CREATE INDEX IF NOT EXISTS idx_ctx_snap_tenant ON context_snapshots(tenant_id)"
         )
 
         conn.commit()

@@ -295,8 +295,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         if not self._shared_engine:
             return
         try:
-            from cortex.sync import export_snapshot, export_to_json, sync_memory
             import asyncio
+
+            from cortex.sync import export_snapshot, export_to_json, sync_memory
 
             async def _run_sync():
                 s_res = await sync_memory(self._shared_engine)

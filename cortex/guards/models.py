@@ -1,28 +1,48 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.guards.models")
 
 # Binary names that indicate external oracle dependency
-ORACLE_BINARIES: frozenset[str] = frozenset({
-    "kimi", "openai", "anthropic", "claude", "gpt",
-    "gemini", "ollama", "llama-cli", "lm-studio",
-})
+ORACLE_BINARIES: frozenset[str] = frozenset(
+    {
+        "kimi",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "ollama",
+        "llama-cli",
+        "lm-studio",
+    }
+)
 
 # Modules that enable process execution
-EXEC_MODULES: frozenset[str] = frozenset({
-    "subprocess", "os", "shutil", "asyncio",
-})
+EXEC_MODULES: frozenset[str] = frozenset(
+    {
+        "subprocess",
+        "os",
+        "shutil",
+        "asyncio",
+    }
+)
 
 # Sovereign fallback markers — if present, severity = WARNING
-SOVEREIGN_MARKERS: frozenset[str] = frozenset({
-    "SovereignLLM", "ThoughtOrchestra",
-    "CortexLLMRouter", "LLMProvider",
-})
+SOVEREIGN_MARKERS: frozenset[str] = frozenset(
+    {
+        "SovereignLLM",
+        "ThoughtOrchestra",
+        "CortexLLMRouter",
+        "LLMProvider",
+    }
+)
+
 
 @dataclass(slots=True)
 class DependencyViolation:
     """A detected Axiom 4 violation."""
+
     file: str
     line: int
     binary: str

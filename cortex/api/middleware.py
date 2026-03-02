@@ -217,10 +217,15 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, log_path: str = "~/.cortex/firewall.log"):
         super().__init__(app)
         self.log_path = Path(log_path).expanduser()
-        self._bg_tasks = set()
+        self._buffer: deque[str] = deque()
+        self._flush_task = None
 
     async def dispatch(self, request: Request, call_next):
         client_ip = request.client.host if request.client else "unknown"
+
+        # Initialize the flusher lazily on the first request to attach it to the current running loop
+        if self._flush_task is None:
+            self._flush_task = asyncio.create_task(self._flusher())
 
         # 1. Hardware-level Blacklist Check
         if await self._is_blacklisted(request, client_ip):
@@ -238,6 +243,28 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
             self._log_security_event(request, response, client_ip)
 
         return response
+
+    async def _flusher(self):
+        """Single background loop to flush deque to disk without thread spin-up overheads per-request."""
+        while True:
+            await asyncio.sleep(2.0)
+            if not self._buffer:
+                continue
+
+            # Batch O(1) extractions against C-routine deque
+            lines = []
+            while self._buffer:
+                lines.append(self._buffer.popleft())
+
+            def _write_all(data_lines):
+                try:
+                    with open(self.log_path, "a", encoding="utf-8") as f:
+                        f.write("".join(data_lines))
+                except OSError:
+                    pass
+
+            # 1 thread spin-up per interval, not per attack request
+            await asyncio.to_thread(_write_all, lines)
 
     async def _is_blacklisted(self, request: Request, client_ip: str) -> bool:
         """Check if IP is in threat intel database."""
@@ -273,16 +300,8 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
             "payload": signature,
         }
 
-        def _write():
-            try:
-                with open(self.log_path, "a", encoding="utf-8") as f:
-                    f.write(json.dumps(event) + "\n")
-            except OSError:
-                pass
-
-        task = asyncio.create_task(asyncio.to_thread(_write))
-        self._bg_tasks.add(task)
-        task.add_done_callback(self._bg_tasks.discard)
+        # O(1) append against C-routine deque. Zero spin-up.
+        self._buffer.append(json.dumps(event) + "\n")
 
 
 class ImmuneMiddleware(BaseHTTPMiddleware):

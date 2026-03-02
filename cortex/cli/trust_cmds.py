@@ -62,7 +62,7 @@ def _verify_chain(conn, tx_id: int, prev_hash: str | None) -> tuple[bool, str]:
         "SELECT hash FROM transactions WHERE id = ?",
         (tx_id - 1,),
     ).fetchone()
-    
+
     if prev_tx and prev_tx[0] != prev_hash:
         return False, "[red]BROKEN - prev_hash mismatch[/red]"
     return True, "[green]OK[/green]"
@@ -263,10 +263,11 @@ def compliance_report(db: str) -> None:
         table.add_row("Epistemic Isolation", "[green]ENFORCED (L0/L2)[/green]")
 
         from pathlib import Path
+
         cortex_root = Path(__file__).parent.parent
         calc_results = audit_calcification(cortex_root, limit=5)
         avg_calc = sum(r["score"] for r in calc_results) / len(calc_results) if calc_results else 0
-        
+
         table.add_row("Calcification Index", f"[bold yellow]{avg_calc:.2f}[/bold yellow] (Omega-2)")
         console.print(table)
 
@@ -308,7 +309,7 @@ def compliance_report(db: str) -> None:
 def _get_audit_trail(conn, project: str, limit: int):
     """Internal helper to get the audit trail rows."""
     from cortex.cli.errors import err_empty_results
-    
+
     conditions = ["f.valid_until IS NULL"]
     params: list = []
 
@@ -390,6 +391,7 @@ def audit_cognitive(tenant: str, db: str) -> None:
         _run_async(_run_audit())
     except Exception as e:
         from cortex.cli.errors import handle_cli_error
+
         handle_cli_error(e, db_path=db, context="cognitive audit")
     finally:
         console.print("[dim]Audit complete.[/dim]")
@@ -397,47 +399,80 @@ def audit_cognitive(tenant: str, db: str) -> None:
 
 @cli.command("audit")
 @click.option("--calcification", is_flag=True, help="Run Landauer's Razor audit")
+@click.option("--frontend", is_flag=True, help="Run Zero-Latency UI Axiom audit (CC < 5)")
 @click.option("--project", "-p", default="", help="Filter trail by project")
 @click.option("--limit", "-n", default=10, help="Max entries to show")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def audit(calcification: bool, project: str, limit: int, db: str) -> None:
+def audit(calcification: bool, frontend: bool, project: str, limit: int, db: str) -> None:
     """Run audits or view Audit Trail."""
-    if calcification:
+    if frontend:
+        import os
+        import sys
+
+        from cortex.verification.frontend_oracle import FrontendOracle
+
+        project_dir = os.getcwd()
+        oracle = FrontendOracle()
+        violations = []
+
+        for root, _, files in os.walk(project_dir):
+            if any(x in root for x in [".venv", ".git", "node_modules"]):
+                continue
+            for f in files:
+                if f.endswith((".html", ".js", ".ts", ".jsx", ".tsx")):
+                    v = oracle.analyze_file(os.path.join(root, f))
+                    violations.extend(v)
+
+        if not violations:
+            console.print(
+                "[bold green]OK[/bold green] Zero-Latency Axiom (Ω₇) respected. All listeners CC < 5."
+            )
+            return
+
+        console.print(
+            "[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded Cognitive Complexity 5."
+        )
+        for v in violations:
+            console.print(
+                f"  -> {v['file']} :: [yellow]{v['function']}[/yellow] (CC: {v['complexity']})"
+            )
+        sys.exit(1)
+
+    elif calcification:
         from pathlib import Path
+
         cortex_root = Path(__file__).parent.parent
         results = audit_calcification(cortex_root, limit=limit)
-        
+
         table = Table(title="Landauer's Razor Audit (Omega-2)")
         table.add_column("File", style="cyan")
         table.add_column("LOC", justify="right")
         table.add_column("Complexity", justify="right")
         table.add_column("Score", style="bold yellow", justify="right")
         table.add_column("Status")
-        
+
         for r in results:
             status = "[red]BONEY[/red]" if r["is_parasite"] else "[green]FLUID[/green]"
             table.add_row(
-                r["file"],
-                str(r["loc"]),
-                str(r["complexity"]),
-                f"{r['score']:.2f}",
-                status
+                r["file"], str(r["loc"]), str(r["complexity"]), f"{r['score']:.2f}", status
             )
-            
+
             # Show top 3 internal parasites if file is boney
             if r["is_parasite"]:
                 parasites = [n for n in r["nodes"] if n["is_parasite"]][:3]
                 for p in parasites:
                     table.add_row(
                         f"  [dim]↳ {p['name']} ({p['type']})[/dim]",
-                        f"[dim]{p['end_line']-p['start_line']+1}L[/dim]",
+                        f"[dim]{p['end_line'] - p['start_line'] + 1}L[/dim]",
                         f"[dim]cx:{p['complexity']}[/dim]",
                         f"[dim]sc:{p['score']}[/dim]",
-                        "[red]PARASITE[/red]"
+                        "[red]PARASITE[/red]",
                     )
-        
+
         console.print(table)
-        console.print("\n[dim]Threshold: Score > 50 (File) | Score > 30 (Node) indicates Calcification.[/dim]")
+        console.print(
+            "\n[dim]Threshold: Score > 50 (File) | Score > 30 (Node) indicates Calcification.[/dim]"
+        )
     else:
         from cortex.cli.errors import handle_cli_error
         from cortex.database.core import connect as db_connect

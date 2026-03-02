@@ -322,8 +322,8 @@ class TestExecutionLoopIntegration:
         """Ω₅: atexit_flush must generate a GHOST if close() was not called."""
         loop, _ = loop_with_mock_engine
 
-        from cortex.cli.loop_models import TaskStatus, PersistenceType
         from cortex.cli.loop_engine import TaskResult
+        from cortex.cli.loop_models import PersistenceType, TaskStatus
 
         # Simulate a session with one completed task
         loop._session.results.append(
@@ -341,12 +341,12 @@ class TestExecutionLoopIntegration:
 
         # It must have enqueued and flushed the pending facts
         engine = loop._engine
-        
+
         # Extract the arguments passed to engine.store inside _run_async/mock_flush
         ghost_found = False
-        
+
         # We need to inspect what was flushed by _flush_pending. Our wrapper captures logic inside _run_async.
-        # But wait, engine.store returns a coroutine. In the mock engine, store is just a MagicMock. 
+        # But wait, engine.store returns a coroutine. In the mock engine, store is just a MagicMock.
         # Check its actual calls directly.
         for call in engine.store.call_args_list:
             kwargs = call.kwargs
@@ -354,9 +354,8 @@ class TestExecutionLoopIntegration:
                 ghost_found = True
                 assert "Sesión interrumpida" in kwargs["content"]
                 break
-                
-        assert ghost_found, "atexit_flush failed to create a GHOST on crash"
 
+        assert ghost_found, "atexit_flush failed to create a GHOST on crash"
 
 
 # ─── Durability: confidence level documentation ───────────────────────

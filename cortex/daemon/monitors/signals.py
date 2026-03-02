@@ -40,7 +40,7 @@ class SignalMonitor:
             # Standard sqlite3 connection for the bus
             self._bus_conn = sqlite3.connect(self.db_path)
             self._bus_conn.execute("PRAGMA journal_mode=WAL")
-            
+
             bus = SignalBus(self._bus_conn)
             self._reactor = SignalReactor(bus, engine=self._engine)
             logger.info("SignalMonitor initialized L2 Reactor.")
@@ -57,20 +57,20 @@ class SignalMonitor:
         try:
             # We process signals. The reactor itself logs its actions.
             # We wrap the reactor to capture what it did as alerts.
-            
+
             # Since SignalReactor.process_once() returns a count,
             # we might want to extend it to return a list of actions.
             # For now, we'll poll the bus ourselves or just trust the reactor logs.
-            
+
             # Improvement: The reactor could have a callback for alerts.
             # But let's keep it simple: the reactor processes them.
             # If we want them in the daemon status, we should return them here.
-            
+
             # Let's peek at what we are about to process to generate alerts.
             signals_to_process = self._reactor.bus.peek(consumer="reactor", limit=20)
-            
+
             count = self._reactor.process_once()
-            
+
             if count > 0:
                 for sig in signals_to_process[:count]:
                     alerts.append(

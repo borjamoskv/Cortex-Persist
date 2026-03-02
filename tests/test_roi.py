@@ -70,9 +70,7 @@ class TestROIStatus:
 
         for project in ["alpha", "beta", "gamma"]:
             ai_time = 10 if project == "alpha" else 60
-            metrics = ChronosEngine.analyze(
-                ai_time_secs=ai_time, complexity="high"
-            )
+            metrics = ChronosEngine.analyze(ai_time_secs=ai_time, complexity="high")
             meta = {"chronos": dataclasses.asdict(metrics)}
             engine.store_sync(
                 project,

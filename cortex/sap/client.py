@@ -397,10 +397,17 @@ class SAPClient:
         )
 
     async def _handle_retry_wait(self, attempt: int) -> None:
-        """Wait before retrying, unless it's the last attempt."""
+        """Wait before retrying, unless it's the last attempt. Uses exponentially backed off jitter."""
         if attempt >= self.config.max_retries - 1:
             return
 
-        wait = 2**attempt
-        logger.warning("SAP request retry %d/%d in %ds", attempt + 1, self.config.max_retries, wait)
+        import random
+
+        base_wait = 2**attempt
+        jitter = random.uniform(0.5, 1.5)
+        wait = base_wait * jitter
+
+        logger.warning(
+            "SAP request retry %d/%d in %.2fs", attempt + 1, self.config.max_retries, wait
+        )
         await asyncio.sleep(wait)

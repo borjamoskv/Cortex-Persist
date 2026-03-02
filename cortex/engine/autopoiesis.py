@@ -4,6 +4,7 @@ Second-Order Cybernetics (Maturana / Varela): Axiom 10 Recursive Auto-Evolution.
 """
 
 import ast
+import collections
 import inspect
 import logging
 import time
@@ -56,7 +57,7 @@ class AutopoiesisEngine:
 
     def _record_observation(self, func_name: str, latency: float, success: bool) -> None:
         if func_name not in self._history:
-            self._history[func_name] = {"latencies": [], "failures": 0}
+            self._history[func_name] = {"latencies": collections.deque(maxlen=100), "failures": 0}
 
         self._history[func_name]["latencies"].append(latency)
         if not success:
@@ -68,10 +69,6 @@ class AutopoiesisEngine:
                 ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
                 ENDOCRINE.pulse(HormoneType.CORTISOL, -0.01)
 
-        # O(1) bounded memory
-        if len(self._history[func_name]["latencies"]) > 100:
-            self._history[func_name]["latencies"].pop(0)
-
     def _requires_mutation(self, func_name: str) -> bool:
         stats = self._history.get(func_name)
         if not stats:
@@ -82,8 +79,9 @@ class AutopoiesisEngine:
             return False
 
         # If the last 5 latencies are consistently > 2x the historical average
-        historical_avg = sum(lats[:-5]) / max(len(lats[:-5]), 1)
-        recent_avg = sum(lats[-5:]) / 5.0
+        lats_list = list(lats)
+        historical_avg = sum(lats_list[:-5]) / max(len(lats_list[:-5]), 1)
+        recent_avg = sum(lats_list[-5:]) / 5.0
 
         if recent_avg > (historical_avg * 2.0) and recent_avg > self.observation_window_ms:
             return True
@@ -103,6 +101,9 @@ class AutopoiesisEngine:
             logger.info("AST captured. Awaiting Demiurge compilation bridge.")
 
             # Reset history to allow new form to stabilize
-            self._history[func.__name__] = {"latencies": [], "failures": 0}
+            self._history[func.__name__] = {
+                "latencies": collections.deque(maxlen=100),
+                "failures": 0,
+            }
         except TypeError:
             logger.error("Function source unavailable for mutation.")

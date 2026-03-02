@@ -1,6 +1,8 @@
 import ast
 from pathlib import Path
-from cortex.guards.models import ORACLE_BINARIES, EXEC_MODULES, SOVEREIGN_MARKERS
+
+from cortex.guards.models import EXEC_MODULES, ORACLE_BINARIES, SOVEREIGN_MARKERS
+
 
 def has_exec_import(source: str) -> bool:
     """Check if the file imports any process execution module."""
@@ -20,10 +22,7 @@ def get_call_name(node: ast.Call) -> str | None:
             return f"{func.value.id}.{func.attr}"
         if isinstance(func.value, ast.Attribute):
             if isinstance(func.value.value, ast.Name):
-                return (
-                    f"{func.value.value.id}"
-                    f".{func.value.attr}.{func.attr}"
-                )
+                return f"{func.value.value.id}.{func.value.attr}.{func.attr}"
     if isinstance(func, ast.Name):
         return func.id
     return None
@@ -46,9 +45,7 @@ def scan_args_for_oracles(node: ast.Call) -> list[str]:
     for arg in all_args:
         if isinstance(arg, ast.List):
             found.extend(scan_list(arg))
-        elif isinstance(arg, ast.Constant) and isinstance(
-            arg.value, str
-        ):
+        elif isinstance(arg, ast.Constant) and isinstance(arg.value, str):
             hit = oracle_in_str(arg.value)
             if hit:
                 found.append(hit)
@@ -63,9 +60,7 @@ def scan_list(node: ast.List) -> list[str]:
     """Scan list literal elements for oracle references."""
     found: list[str] = []
     for elt in node.elts:
-        if isinstance(elt, ast.Constant) and isinstance(
-            elt.value, str
-        ):
+        if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
             name = Path(elt.value).name.lower()
             if name in ORACLE_BINARIES:
                 found.append(name)
@@ -78,9 +73,7 @@ def scan_fstring(node: ast.JoinedStr) -> list[str]:
     """Scan f-string for oracle references in constant parts."""
     found: list[str] = []
     for val in node.values:
-        if isinstance(val, ast.Constant) and isinstance(
-            val.value, str
-        ):
+        if isinstance(val, ast.Constant) and isinstance(val.value, str):
             hit = oracle_in_str(val.value)
             if hit:
                 found.append(hit)
@@ -90,9 +83,7 @@ def scan_fstring(node: ast.JoinedStr) -> list[str]:
 def scan_variable_name(node: ast.Name) -> list[str]:
     """Check if a variable name references an oracle."""
     lower = node.id.lower()
-    return [
-        node.id for o in ORACLE_BINARIES if o in lower
-    ]
+    return [node.id for o in ORACLE_BINARIES if o in lower]
 
 
 def find_violations(tree: ast.Module) -> list[tuple[int, str, str]]:
@@ -107,14 +98,15 @@ def find_violations(tree: ast.Module) -> list[tuple[int, str, str]]:
 
         # L1+L2: Direct subprocess/os calls (positional + kwargs)
         if call_name in (
-            "subprocess.run", "subprocess.call",
-            "subprocess.Popen", "os.system", "os.popen",
+            "subprocess.run",
+            "subprocess.call",
+            "subprocess.Popen",
+            "os.system",
+            "os.popen",
             "shutil.which",
         ):
             for binary in scan_args_for_oracles(node):
-                results.append(
-                    (node.lineno, binary, call_name)
-                )
+                results.append((node.lineno, binary, call_name))
             continue
 
         # L3: asyncio.create_subprocess_exec/shell
@@ -123,17 +115,13 @@ def find_violations(tree: ast.Module) -> list[tuple[int, str, str]]:
             "asyncio.create_subprocess_shell",
         ):
             for binary in scan_args_for_oracles(node):
-                results.append(
-                    (node.lineno, binary, call_name)
-                )
+                results.append((node.lineno, binary, call_name))
             continue
 
         # L5: exec/eval with oracle strings
         if call_name in ("exec", "eval"):
             for binary in scan_exec_args(node):
-                results.append(
-                    (node.lineno, binary, f"{call_name}()")
-                )
+                results.append((node.lineno, binary, f"{call_name}()"))
             continue
 
         # L6: getattr(subprocess, "run") evasion
@@ -150,9 +138,7 @@ def scan_exec_args(node: ast.Call) -> list[str]:
     """Scan exec/eval string args for oracle references."""
     found: list[str] = []
     for arg in node.args:
-        if isinstance(arg, ast.Constant) and isinstance(
-            arg.value, str
-        ):
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
             hit = oracle_in_str(arg.value)
             if hit:
                 found.append(hit)
@@ -170,9 +156,7 @@ def check_getattr_evasion(
         return None
     if target.id not in ("subprocess", "os", "shutil"):
         return None
-    if isinstance(attr, ast.Constant) and isinstance(
-        attr.value, str
-    ):
+    if isinstance(attr, ast.Constant) and isinstance(attr.value, str):
         method = f"{target.id}.{attr.value}"
         return (node.lineno, f"getattr\u2192{method}", "getattr")
     return None
@@ -199,9 +183,7 @@ def find_oracle_string_literals(
         if not hit:
             continue
         line = getattr(node, "lineno", 0)
-        results.append(
-            (line, hit, "string_literal")
-        )
+        results.append((line, hit, "string_literal"))
 
     return results
 
@@ -209,9 +191,14 @@ def find_oracle_string_literals(
 def has_exec_calls(tree: ast.Module) -> bool:
     """Check if the AST contains actual process execution calls."""
     exec_calls = {
-        "subprocess.run", "subprocess.call",
-        "subprocess.Popen", "os.system", "os.popen",
-        "shutil.which", "exec", "eval",
+        "subprocess.run",
+        "subprocess.call",
+        "subprocess.Popen",
+        "os.system",
+        "os.popen",
+        "shutil.which",
+        "exec",
+        "eval",
         "asyncio.create_subprocess_exec",
         "asyncio.create_subprocess_shell",
     }
@@ -221,10 +208,8 @@ def has_exec_calls(tree: ast.Module) -> bool:
             if name in exec_calls:
                 return True
             # Also detect getattr(subprocess, ...)
-            if name == "getattr" and len(node.args) \u2265 1:
+            if name == "getattr" and len(node.args) >= 1:
                 if isinstance(node.args[0], ast.Name):
-                    if node.args[0].id in (
-                        "subprocess", "os", "shutil"
-                    ):
+                    if node.args[0].id in ("subprocess", "os", "shutil"):
                         return True
     return False

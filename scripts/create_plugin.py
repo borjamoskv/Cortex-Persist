@@ -8,6 +8,7 @@ Usage:
     python scripts/create_plugin.py my-plugin
     python scripts/create_plugin.py my-plugin --description "Does something cool"
 """
+
 from __future__ import annotations
 
 import argparse
@@ -133,9 +134,7 @@ def create_plugin(name: str, description: str, output_dir: Path) -> Path:
     )
 
     # --- requirements.txt ---
-    (plugin_dir / "requirements.txt").write_text(
-        "fastapi>=0.110\nuvicorn[standard]>=0.27\n"
-    )
+    (plugin_dir / "requirements.txt").write_text("fastapi>=0.110\nuvicorn[standard]>=0.27\n")
 
     # --- main.py ---
     (plugin_dir / "main.py").write_text(
@@ -271,12 +270,14 @@ def main() -> None:
     )
     parser.add_argument("name", help="Plugin name (e.g. 'weather-lookup')")
     parser.add_argument(
-        "--description", "-d",
+        "--description",
+        "-d",
         default="A CORTEX plugin",
         help="Short description of the plugin",
     )
     parser.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         type=Path,
         default=Path.cwd(),
         help="Output directory (default: current directory)",

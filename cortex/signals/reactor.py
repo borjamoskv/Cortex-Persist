@@ -58,9 +58,12 @@ class SignalReactor:
             except Exception as e:
                 logger.error(
                     "Reactor failed to process signal #%d (%s): %s",
-                    signal.id, signal.event_type, e, exc_info=True
+                    signal.id,
+                    signal.event_type,
+                    e,
+                    exc_info=True,
                 )
-        
+
         return processed
 
     def _dispatch(self, signal: Any) -> None:
@@ -99,17 +102,14 @@ class SignalReactor:
 
         try:
             from cortex.compaction.compactor import compact
-            
+
             logger.info("Reactor triggering autonomous compaction for [%s]", project)
-            
+
             # compact is async, we need to run it in the loop
             result = self._run_async(compact(engine=self.engine, project=project, dry_run=False))
-            
+
             if result:
-                logger.info(
-                    "Reflex: Compaction done for %s. -%d facts.",
-                    project, result.reduction
-                )
+                logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
         except Exception as e:
             logger.error("Failed to run compaction reflex: %s", e)
 
@@ -121,7 +121,7 @@ class SignalReactor:
 
         try:
             from cortex.sync import export_snapshot
-            
+
             logger.info("Reactor triggering autonomous snapshot export.")
             self._run_async(export_snapshot(self.engine))
 
@@ -133,20 +133,21 @@ class SignalReactor:
     def _run_async(self, coro: Any) -> Any:
         """Helper to run async code from sync reactor context."""
         import asyncio
+
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 # We are in a thread with a running loop (like MoskvDaemon)
-                # But compact() needs to be awaited. 
+                # But compact() needs to be awaited.
                 # For a reactor thread, we usually use a private loop or run_coroutine_threadsafe.
                 # However, many of these are one-off.
                 # If we are in the main thread of the daemon, we can't run_async.
-                
-                # Best approach for the daemon's architecture: 
+
+                # Best approach for the daemon's architecture:
                 # MoskvDaemon uses threading.Thread for these loops.
                 # We can just create a new loop for each task if needed,
                 # or use a shared one.
-                
+
                 # Given our current constraints:
                 future = asyncio.run_coroutine_threadsafe(coro, loop)
                 return future.result()
@@ -158,7 +159,6 @@ class SignalReactor:
             logger.error("Async execution failed in reactor: %s", e)
             return None
 
-
     def run_loop(self, interval: float = 5.0) -> None:
         """Start a blocking infinite loop for standalone usage."""
         logger.info("Signal Reactor active — monitoring bus pulses (L2)")
@@ -169,5 +169,5 @@ class SignalReactor:
                     logger.debug("Reactor: Processed %d signal(s)", count)
             except Exception as e:
                 logger.error("Reactor loop error: %s", e)
-            
+
             time.sleep(interval)

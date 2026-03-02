@@ -10,6 +10,7 @@ import logging
 from typing import Any
 
 import aiosqlite
+
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.mutation_engine import MUTATION_ENGINE
 
@@ -56,7 +57,7 @@ class NeuralGrowthEngine:
             inner_cursor = await conn.execute(
                 "SELECT id FROM facts WHERE project = ? AND content = ? "
                 "AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY created_at ASC",
-                (project, content)
+                (project, content),
             )
             rows = await inner_cursor.fetchall()
             master_id = rows[0][0]
@@ -70,12 +71,14 @@ class NeuralGrowthEngine:
                     event_type="deprecate",
                     payload={"reason": f"consolidated_into_{master_id}"},
                     signer="NeuralGrowthEngine",
-                    commit=False
+                    commit=False,
                 )
                 count += 1
         return count
 
-    async def _promote_successful_bridges(self, conn: aiosqlite.Connection, storer: Any = None) -> int:
+    async def _promote_successful_bridges(
+        self, conn: aiosqlite.Connection, storer: Any = None
+    ) -> int:
         """Promotes successful bridges to global_axioms."""
         growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
         if growth < _PROMOTION_THRESHOLD:
@@ -85,14 +88,17 @@ class NeuralGrowthEngine:
             "SELECT content, COUNT(DISTINCT project) as project_count "
             "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL "
             "GROUP BY content HAVING project_count >= ?",
-            (_MIN_PROJECT_SUPPORT,)
+            (_MIN_PROJECT_SUPPORT,),
         )
         candidates = await cursor.fetchall()
 
         count = 0
         for content, p_count in candidates:
-            logger.info("🏆 [GROWTH] Promoting bridge to GLOBAL AXIOM: '%s' (%d projects)",
-                        content[:50], p_count)
+            logger.info(
+                "🏆 [GROWTH] Promoting bridge to GLOBAL AXIOM: '%s' (%d projects)",
+                content[:50],
+                p_count,
+            )
 
             if storer and hasattr(storer, "store"):
                 await storer.store(
@@ -103,10 +109,11 @@ class NeuralGrowthEngine:
                     tags=["promoted", "v7_synaptic"],
                     meta={"source_bridge_count": p_count},
                     conn=conn,
-                    commit=False
+                    commit=False,
                 )
             else:
                 from cortex.memory.temporal import now_iso
+
                 ts = now_iso()
                 # Ω₈: Morphic Resonance. Promoción a Axioma Global.
                 # Un patrón que se repite en 3 proyectos deja de ser local.
@@ -115,8 +122,16 @@ class NeuralGrowthEngine:
                 await conn.execute(
                     "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, created_at, updated_at, meta) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    ("system", "global", f"AXIOM_RESONANCE: {content}", "axiom", "verified", ts, ts, 
-                     json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}))
+                    (
+                        "system",
+                        "global",
+                        f"AXIOM_RESONANCE: {content}",
+                        "axiom",
+                        "verified",
+                        ts,
+                        ts,
+                        json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}),
+                    ),
                 )
 
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05)

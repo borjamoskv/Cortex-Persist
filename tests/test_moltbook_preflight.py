@@ -27,6 +27,7 @@ from cortex.moltbook.preflight import (
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
+
 def _make_client(
     *,
     suspended_until: float = 0.0,
@@ -40,6 +41,7 @@ def _make_client(
 
 
 # ─── Tier-0 (cache) tests ─────────────────────────────────────────────────────
+
 
 class TestPreflightCacheTier:
     def test_blocked_when_cache_suspended(self) -> None:
@@ -84,6 +86,7 @@ class TestPreflightCacheTier:
 
 
 # ─── Tier-1 (force_probe) tests ───────────────────────────────────────────────
+
 
 class TestPreflightProbeTier:
     def test_probe_blocked_from_api(self) -> None:
@@ -139,6 +142,7 @@ class TestPreflightProbeTier:
 
 # ─── session_preflight ────────────────────────────────────────────────────────
 
+
 class TestSessionPreflight:
     def test_raises_system_exit_when_suspended(self) -> None:
         client = _make_client(
@@ -162,6 +166,7 @@ class TestSessionPreflight:
 
 # ─── require_clear_preflight decorator ───────────────────────────────────────
 
+
 class TestRequireClearPreflightDecorator:
     @pytest.mark.asyncio
     async def test_aborts_when_suspended(self) -> None:
@@ -182,6 +187,7 @@ class TestRequireClearPreflightDecorator:
     @pytest.mark.asyncio
     async def test_passes_through_when_clear(self) -> None:
         """Decorated coroutine executes normally when preflight is clear."""
+
         @require_clear_preflight(client_attr="client")
         async def dispatch(client: object, llm: object, text: str) -> str:
             return f"dispatched:{text}"
@@ -194,6 +200,7 @@ class TestRequireClearPreflightDecorator:
     @pytest.mark.asyncio
     async def test_positional_client_resolution(self) -> None:
         """Decorator resolves client from positional args when not in kwargs."""
+
         @require_clear_preflight(client_attr="client")
         async def dispatch(client: object, text: str) -> str:
             return "ok"

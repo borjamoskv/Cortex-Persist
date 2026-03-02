@@ -185,30 +185,10 @@ class FactManager:
         row = await cursor.fetchone()
         return row_to_fact(row) if row else None
 
-    async def search(
-        self,
-        query: str,
-        tenant_id: str = "default",
-        project: str | None = None,
-        top_k: int = 5,
-        as_of: str | None = None,
-        **kwargs,
-    ) -> list:
-        """Sovereign Search: Calls SearchMixin.search directly.
-
-        Avoids CortexEngine override recursion.
-        """
-        from cortex.engine.search_mixin import SearchMixin
-
-        return await SearchMixin.search(
-            self.engine,
-            query=query,
-            tenant_id=tenant_id,
-            project=project,
-            top_k=top_k,
-            as_of=as_of,
-            **kwargs,
-        )
+    async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
+        conn = await self.engine.get_conn()
+        cursor = await conn.execute(query, params)
+        return [row_to_fact(r) for r in await cursor.fetchall()]
 
     async def get_all_active_facts(
         self,
@@ -216,240 +196,136 @@ class FactManager:
         project: str | None = None,
         fact_types: list[str] | None = None,
     ) -> list[Fact]:
-        """Retrieve all active facts, optionally filtered by project or types."""
-        conn = await self.engine.get_conn()
-        query = (
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-            "WHERE f.tenant_id = ? AND f.valid_until IS NULL "
-            "AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
-        )
-        params: list = [tenant_id]
-
+        q = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.valid_until IS NULL AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
+        p = [tenant_id]
         if project:
-            query += " AND f.project = ?"
-            params.append(project)
-
+            q += " AND f.project = ?"
+            p.append(project)
         if fact_types:
-            placeholders = ", ".join("?" for _ in fact_types)
-            query += f" AND f.fact_type IN ({placeholders})"
-            params.extend(fact_types)
-
-        query += " ORDER BY f.project, f.fact_type, f.id"
-        cursor = await conn.execute(query, params)
-        rows = await cursor.fetchall()
-        return [row_to_fact(row) for row in rows]
+            q += f" AND f.fact_type IN ({','.join('?' * len(fact_types))})"
+            p.extend(fact_types)
+        return await self._fetch(q + " ORDER BY f.project, f.fact_type, f.id", p)
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
     ) -> list[Fact]:
-        conn = await self.engine.get_conn()
-        query = (
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-            f"WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
-            f"AND f.is_quarantined = 0 AND f.is_tombstoned = 0 "
-            f"ORDER BY (f.consensus_score * 0.8 + "
-            f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, "
-            f"f.fact_type, f.created_at DESC"
+        q = (
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
+            f"AND f.is_quarantined = 0 AND f.is_tombstoned = 0 ORDER BY (f.consensus_score * 0.8 + "
+            f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, f.fact_type, f.created_at DESC"
         )
-        params: list = [tenant_id, project]
+        p = [tenant_id, project]
         if limit:
-            query += " LIMIT ?"
-            params.append(limit)
+            q += " LIMIT ?"
+            p.append(limit)
         if offset:
-            query += " OFFSET ?"
-            params.append(offset)
-        cursor = await conn.execute(query, params)
-        rows = await cursor.fetchall()
-        return [row_to_fact(row) for row in rows]
-
-    async def update(
-        self,
-        fact_id: int,
-        content: str | None = None,
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
-        **kwargs,
-    ) -> int:
-        """Sovereign Update: Calls StoreMixin.update directly on the engine."""
-        from cortex.engine.store_mixin import StoreMixin
-
-        return await StoreMixin.update(
-            self.engine,
-            fact_id=fact_id,
-            content=content,
-            tags=tags,
-            meta=meta,
-        )
-
-    async def deprecate(
-        self, fact_id: int, reason: str | None = None, conn: Any | None = None, **kwargs
-    ) -> bool:
-        """Sovereign Deprecation: Calls StoreMixin.deprecate directly on the engine."""
-        from cortex.engine.store_mixin import StoreMixin
-
-        return await StoreMixin.deprecate(
-            self.engine, fact_id=fact_id, reason=reason, conn=conn, **kwargs
-        )
+            q += " OFFSET ?"
+            p.append(offset)
+        return await self._fetch(q, p)
 
     async def history(
-        self,
-        project: str,
-        tenant_id: str = "default",
-        as_of: str | None = None,
+        self, project: str, tenant_id: str = "default", as_of: str | None = None
     ) -> list[Fact]:
-        conn = await self.engine.get_conn()
         if as_of:
-            clause, params = build_temporal_filter_params(as_of, table_alias="f")
-            query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 AND {clause} "
-                "ORDER BY f.valid_from DESC"
+            c, p = build_temporal_filter_params(as_of, table_alias="f")
+            return await self._fetch(
+                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id=? AND f.project=? AND f.is_tombstoned=0 AND {c} ORDER BY f.valid_from DESC",
+                [tenant_id, project] + p,
             )
-            cursor = await conn.execute(query, [tenant_id, project] + params)
-        else:
-            query = (
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "  # nosec B608 — parameterized query
-                f"WHERE f.tenant_id = ? AND f.project = ? AND f.is_tombstoned = 0 "
-                "ORDER BY f.valid_from DESC"
-            )
-            cursor = await conn.execute(query, (tenant_id, project))
-        rows = await cursor.fetchall()
-        return [row_to_fact(row) for row in rows]
+        return await self._fetch(
+            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id=? AND f.project=? AND f.is_tombstoned=0 ORDER BY f.valid_from DESC",
+            [tenant_id, project],
+        )
 
     async def time_travel(
-        self,
-        tx_id: int,
-        tenant_id: str = "default",
-        project: str | None = None,
+        self, tx_id: int, tenant_id: str = "default", project: str | None = None
     ) -> list[Fact]:
-        """Reconstruct state as of transaction ID."""
         from cortex.memory.temporal import time_travel_filter
 
-        conn = await self.engine.get_conn()
-        clause, params = time_travel_filter(tx_id, table_alias="f")
-        query = (
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} "
-            f"WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
-        )
-        params = [tenant_id] + params
+        c, p = time_travel_filter(tx_id, table_alias="f")
+        q = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {c}"
+        p = [tenant_id] + p
         if project:
-            query += " AND f.project = ?"
-            params.append(project)
-        query += " ORDER BY f.id ASC"
-        cursor = await conn.execute(query, params)
-        rows = await cursor.fetchall()
-        return [row_to_fact(row) for row in rows]
+            q += " AND f.project = ?"
+            p.append(project)
+        return await self._fetch(q + " ORDER BY f.id ASC", p)
 
-    async def reconstruct_state(
-        self,
-        tx_id: int,
-        tenant_id: str = "default",
-        project: str | None = None,
-    ) -> list[Fact]:
-        """Alias for time_travel for State Reconstruction Axiom."""
-        return await self.time_travel(tx_id, tenant_id, project)
+    reconstruct_state = time_travel
 
     async def register_ghost(self, reference: str, context: str, project: str) -> int:
         conn = await self.engine.get_conn()
-        cursor = await conn.execute(
-            "SELECT id FROM ghosts WHERE reference = ? AND project = ?", (reference, project)
+        c = await conn.execute(
+            "SELECT id FROM ghosts WHERE reference=? AND project=?", (reference, project)
         )
-        row = await cursor.fetchone()
-        if row:
-            return row[0]
-
-        ts = now_iso()
-        cursor = await conn.execute(
-            "INSERT INTO ghosts (reference, context, project, status, created_at) "
-            "VALUES (?, ?, ?, 'open', ?)",
-            (reference, context, project, ts),
+        if r := await c.fetchone():
+            return r[0]
+        c = await conn.execute(
+            "INSERT INTO ghosts (reference, context, project, status, created_at) VALUES (?, ?, ?, 'open', ?)",
+            (reference, context, project, now_iso()),
         )
-        ghost_id = cursor.lastrowid
         await conn.commit()
-        return ghost_id
+        return c.lastrowid
 
     async def stats(self) -> dict:
-        """Async gathering of fact layer statistics with zero blocking."""
         conn = await self.engine.get_conn()
-        # Optimized parallel counting is possible here if needed,
-        # but few queries are fast enough for sequential async.
-        cursor = await conn.execute("SELECT COUNT(*) FROM facts")
-        total = (await cursor.fetchone())[0]
-
-        cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-        active = (await cursor.fetchone())[0]
-
-        cursor = await conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
-        projects = [p[0] for p in await cursor.fetchall()]
-
-        cursor = await conn.execute(
-            "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
-        )
-        types = dict(await cursor.fetchall())
-
-        cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
-        tx_count = (await cursor.fetchone())[0]
-
-        db_size = (
-            self.engine._db_path.stat().st_size / (1024 * 1024)
-            if self.engine._db_path.exists()
-            else 0
-        )
-
-        embeddings = 0
-        try:
-            cursor = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
-            embeddings = (await cursor.fetchone())[0]
-        except (sqlite3.Error, OSError, ValueError):
-            pass
-
-        return {
-            "total_facts": total,
-            "active_facts": active,
-            "deprecated_facts": total - active,
-            "projects": projects,
-            "project_count": len(projects),
-            "types": types,
-            "transactions": tx_count,
-            "embeddings": embeddings,
-            "db_path": str(self.engine._db_path),
-            "db_size_mb": round(db_size, 2),
+        res = {
+            "total_facts": (await (await conn.execute("SELECT COUNT(*) FROM facts")).fetchone())[0]
         }
+        res["active_facts"] = (
+            await (
+                await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
+            ).fetchone()
+        )[0]
+        res["deprecated_facts"] = res["total_facts"] - res["active_facts"]
+        res["projects"] = [
+            p[0]
+            for p in await (
+                await conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
+            ).fetchall()
+        ]
+        res["project_count"] = len(res["projects"])
+        res["types"] = dict(
+            await (
+                await conn.execute(
+                    "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
+                )
+            ).fetchall()
+        )
+        res["transactions"] = (
+            await (await conn.execute("SELECT COUNT(*) FROM transactions")).fetchone()
+        )[0]
+        res["db_path"], res["db_size_mb"] = (
+            str(self.engine._db_path),
+            round(self.engine._db_path.stat().st_size / (1024 * 1024), 2)
+            if self.engine._db_path.exists()
+            else 0,
+        )
+        try:
+            res["embeddings"] = (
+                await (await conn.execute("SELECT COUNT(*) FROM fact_embeddings")).fetchone()
+            )[0]
+        except Exception:
+            res["embeddings"] = 0
+        return res
 
-    async def graph(self, project: str | None = None):
-        """Get entity graph for a project."""
-        from cortex.graph import get_graph
+    def __getattr__(self, name: str) -> Any:
+        """Sovereign Ablation (Wave 5): Proxy to decouple Calcification."""
+        if name in ("search", "update", "deprecate"):
+            return getattr(self.engine, name)
+        GM = {
+            "graph": "get_graph",
+            "query_entity": "query_entity",
+            "find_path": "find_path",
+            "get_context_subgraph": "get_context_subgraph",
+        }
+        if name in GM:
 
-        conn = await self.engine.get_conn()
-        return await get_graph(conn, project)
+            async def _g_proxy(*args, **kwargs):
+                import cortex.graph
 
-    async def query_entity(self, name: str, project: str | None = None) -> dict | None:
-        """Query a specific entity by name."""
-        from cortex.graph import query_entity
+                return await getattr(cortex.graph, GM[name])(
+                    await self.engine.get_conn(), *args, **kwargs
+                )
 
-        conn = await self.engine.get_conn()
-        return await query_entity(conn, name, project)
-
-    async def find_path(
-        self,
-        source: str,
-        target: str,
-        max_depth: int = 3,
-    ) -> list[dict]:
-        """Find paths between two entities."""
-        from cortex.graph import find_path
-
-        conn = await self.engine.get_conn()
-        return await find_path(conn, source, target, max_depth)
-
-    async def get_context_subgraph(
-        self,
-        seeds: list[str],
-        depth: int = 2,
-        max_nodes: int = 50,
-    ) -> dict:
-        """Retrieve a subgraph context for RAG."""
-        from cortex.graph import get_context_subgraph
-
-        conn = await self.engine.get_conn()
-        return await get_context_subgraph(conn, seeds, depth, max_nodes)
+            return _g_proxy
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")

@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 async def require_auth(
     request: Request,
     authorization: str | None = Header(
-        None, description="Bearer <api-key>",
+        None,
+        description="Bearer <api-key>",
     ),
 ) -> AuthResult:
     """Extract and validate API key from Authorization header."""
@@ -48,11 +49,7 @@ async def require_auth(
     manager = get_auth_manager()
     result = await manager.authenticate_async(parts[1])
     if not result.authenticated:
-        error_msg = (
-            get_trans("error_invalid_revoked_key", lang)
-            if result.error
-            else result.error
-        )
+        error_msg = get_trans("error_invalid_revoked_key", lang) if result.error else result.error
         raise HTTPException(status_code=401, detail=error_msg)
     return result
 
@@ -80,13 +77,10 @@ def require_permission(permission: str | Permission):
             from cortex.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
-            perm_name = (
-                permission.name
-                if isinstance(permission, Permission)
-                else permission
-            )
+            perm_name = permission.name if isinstance(permission, Permission) else permission
             detail = get_trans(
-                "error_missing_permission", lang,
+                "error_missing_permission",
+                lang,
             ).format(permission=perm_name)
             raise HTTPException(status_code=403, detail=detail)
         return auth
@@ -143,7 +137,8 @@ def require_verified_permission(
 
             lang = request.headers.get("Accept-Language", "en")
             detail = get_trans(
-                "error_missing_permission", lang,
+                "error_missing_permission",
+                lang,
             ).format(permission=permission)
             raise HTTPException(status_code=403, detail=detail)
 
@@ -151,16 +146,12 @@ def require_verified_permission(
 
         async for engine in get_async_engine():
             has_consensus = await require_consensus(
-                f"Permission {permission} granted to "
-                f"{auth.key_name or auth.tenant_id}",
+                f"Permission {permission} granted to {auth.key_name or auth.tenant_id}",
                 min_score=min_consensus,
                 engine=engine,
             )
             if not has_consensus:
-                detail = (
-                    "Sovereign Gate: Action requires consensus "
-                    f"(min: {min_consensus})"
-                )
+                detail = f"Sovereign Gate: Action requires consensus (min: {min_consensus})"
                 raise HTTPException(status_code=403, detail=detail)
             break
 

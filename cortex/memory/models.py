@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
     from datetime import datetime, timezone
+
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -30,11 +31,11 @@ __all__ = ["CortexFactModel", "EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
 # ─── Cognitive Stratification Configuration ──────────────────────────
 
 COGNITIVE_LAYER = Literal[
-    "working",      # Immediate thread context (L1)
-    "episodic",     # Chronological interaction logs (L2)
-    "semantic",     # Stable knowledge/fact vault (L2 - Default)
-    "relationship", # Inter-personal consistency patterns (L2/L3)
-    "emotional",    # Empathetic resonance and vibe (L2/L3)
+    "working",  # Immediate thread context (L1)
+    "episodic",  # Chronological interaction logs (L2)
+    "semantic",  # Stable knowledge/fact vault (L2 - Default)
+    "relationship",  # Inter-personal consistency patterns (L2/L3)
+    "emotional",  # Empathetic resonance and vibe (L2/L3)
 ]
 
 
@@ -147,8 +148,7 @@ class CortexFactModel(BaseModel):
 
     # Stratified Memory (Inspiration: Letta RFC #3179)
     cognitive_layer: COGNITIVE_LAYER = Field(
-        default="semantic",
-        description="Target cognitive layer for this fact."
+        default="semantic", description="Target cognitive layer for this fact."
     )
 
     # Sovereign Metadata

@@ -46,8 +46,7 @@ class HeartbeatEmitter:
             # Gather health metrics with a strict timeout to ensure zero-latency
             # in the main execution paths.
             health = await asyncio.wait_for(
-                asyncio.to_thread(hygiene.check_system_health),
-                timeout=2.0
+                asyncio.to_thread(hygiene.check_system_health), timeout=2.0
             )
         except Exception as e:
             logger.warning("[HEARTBEAT] Health gathering timed out or failed: %s", e)
@@ -60,22 +59,27 @@ class HeartbeatEmitter:
 
         logger.info(
             "[HEARTBEAT] Pulsing %s. Drift: %.2f (Threshold: %.2f)",
-            self._project, drift, self._semantic.threshold
+            self._project,
+            drift,
+            self._semantic.threshold,
         )
 
-        return await self._nexus.mutate(WorldMutation(
-            origin=DomainOrigin.CORTEX_CORE,
-            intent=IntentType.HEARTBEAT_PULSE,
-            project=self._project,
-            priority=priority,
-            payload={
-                "hygiene": health,
-                "semantic_drift": drift,
-                "engine_status": "active",
-                "reason": "Stable state" if priority == Priority.NORMAL
-                else "SEMANTIC DRIFT DETECTED",
-            },
-        ))
+        return await self._nexus.mutate(
+            WorldMutation(
+                origin=DomainOrigin.CORTEX_CORE,
+                intent=IntentType.HEARTBEAT_PULSE,
+                project=self._project,
+                priority=priority,
+                payload={
+                    "hygiene": health,
+                    "semantic_drift": drift,
+                    "engine_status": "active",
+                    "reason": "Stable state"
+                    if priority == Priority.NORMAL
+                    else "SEMANTIC DRIFT DETECTED",
+                },
+            )
+        )
 
     def stop(self) -> None:
         """Stop the heartbeat."""

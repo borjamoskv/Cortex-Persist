@@ -48,7 +48,7 @@ class TestSearchDefensiveJson:
         await self.conn.execute(
             """INSERT INTO facts_fts (rowid, content, project, tags, fact_type)
                VALUES (last_insert_rowid(), ?, 'test-project', ?, 'knowledge')""",
-            (content, bad_tags)
+            (content, bad_tags),
         )
         await self.conn.commit()
 

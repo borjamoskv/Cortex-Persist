@@ -23,8 +23,9 @@ class HistoryMixin:
 
         async with self.session() as conn:
             from cortex.crypto import get_default_encrypter
+
             enc = get_default_encrypter()
-            
+
             conn.row_factory = aiosqlite.Row
             clause, params = time_travel_filter(tx_id, table_alias="f")
 
@@ -42,9 +43,17 @@ class HistoryMixin:
                 results = []
                 for row in rows:
                     d = dict(row)
-                    d["content"] = enc.decrypt_str(d["content"], tenant_id=current_tenant) if d.get("content") else ""
+                    d["content"] = (
+                        enc.decrypt_str(d["content"], tenant_id=current_tenant)
+                        if d.get("content")
+                        else ""
+                    )
                     d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                    d["meta"] = enc.decrypt_json(d["meta"], tenant_id=current_tenant) if d.get("meta") else {}
+                    d["meta"] = (
+                        enc.decrypt_json(d["meta"], tenant_id=current_tenant)
+                        if d.get("meta")
+                        else {}
+                    )
                     results.append(d)
                 return results
 

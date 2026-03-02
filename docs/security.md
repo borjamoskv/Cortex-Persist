@@ -85,6 +85,14 @@ LLM-generated code is parsed via Python's AST before execution:
 - **CORS**: Explicit origin allowlist (no wildcards)
 - **Input Validation**: Pydantic models with `max_length` constraints
 
+### 8. Nemesis Protocol (Algorithmic Immunity)
+
+The **Nemesis Protocol** is CORTEX's autonomic immune system, acting as an internal "red-teaming" monitor:
+- **Antibody Ledger**: Persistently records structural anti-patterns and previous failures in `nemesis.md`.
+- **Real-time Rejection**: Analyzes every incoming fact and code mutation against the antibody ledger.
+- **Hormonal Feedback**: Triggers `ADRENALINE` spikes in the Endocrine system when entropy is detected, forcing immediate corrective focus.
+- **Fail-Fast**: Blocks execution of patterns that have previously compromised system integrity (Axiom Ω₅).
+
 ---
 
 ## Secrets Management
@@ -130,6 +138,7 @@ CORTEX assumes:
 | Code injection | AST sandbox for LLM-generated code |
 | DoS | Rate limiting + content size limits |
 | XSS/CSRF | Security headers middleware |
+| Structural Entropy | Nemesis Protocol (Antibody Rejection) |
 
 ### What CORTEX Does NOT Protect Against
 

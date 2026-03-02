@@ -1,9 +1,10 @@
 import asyncio
 import os
+
 import aiofiles
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
-import uvicorn
 
 app = FastAPI(title="CORTEX x Notch Relay")
 RELAY_BUFFER = os.path.expanduser("~/.cortex/relay_buffer.jsonl")
@@ -27,7 +28,7 @@ async def event_generator():
     while True:
         current_size = os.path.getsize(RELAY_BUFFER)
         if current_size > file_size:
-            async with aiofiles.open(RELAY_BUFFER, "r") as f:
+            async with aiofiles.open(RELAY_BUFFER) as f:
                 await f.seek(file_size)
                 lines = await f.readlines()
                 for line in lines:

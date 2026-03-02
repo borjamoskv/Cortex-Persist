@@ -196,26 +196,25 @@ class FactMutationEngine:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
         decay_factor = payload.get("decay_factor", 0.95)
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
-        
+
         # 1. Fetch current scores
         cursor = await conn.execute(
-            "SELECT consensus_score, confidence FROM facts WHERE id = ?",
-            (fact_id,)
+            "SELECT consensus_score, confidence FROM facts WHERE id = ?", (fact_id,)
         )
         row = await cursor.fetchone()
         if not row:
             return
-            
+
         current_score, confidence = row
         new_score = round((current_score or 1.0) * decay_factor, 3)
-        
+
         # 2. State demotion (Verified -> Tentative -> Disputed)
         new_confidence = confidence
         if new_score < 1.4 and confidence == "verified":
             new_confidence = "tentative"
         elif new_score < 0.6 and confidence != "disputed":
             new_confidence = "disputed"
-            
+
         await conn.execute(
             "UPDATE facts SET consensus_score = ?, confidence = ?, updated_at = ? WHERE id = ?",
             (new_score, new_confidence, ts, fact_id),
