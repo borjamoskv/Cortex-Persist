@@ -1,3 +1,0 @@
-cortex
-cortex-sovereign-web
-cortex_hive_ui
