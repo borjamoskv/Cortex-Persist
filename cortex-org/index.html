@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORTEX Community — Open Source AI Memory Infrastructure</title>
+  <meta name="description" content="The open-source community behind CORTEX — the trust infrastructure for autonomous AI. Contribute, collaborate, and build the future of AI memory together.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="CORTEX Community — Open Source AI Memory">
+  <meta property="og:description" content="Join the community building trust infrastructure for autonomous AI. Apache 2.0. No VC. No lock-in.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cortexpersist.org">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CORTEX Community — Open Source AI Memory">
+  <meta name="twitter:description" content="The open-source community behind CORTEX. Apache 2.0. Built by engineers, for engineers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --abyss: #060608;
+      --surface: #0E0E12;
+      --surface-2: #141418;
+      --surface-3: #1A1A20;
+      --border: rgba(255,255,255,0.05);
+      --border-s: rgba(255,255,255,0.08);
+      --text: #E4E4E8;
+      --text-d: #8A8A96;
+      --text-dd: #4A4A56;
+      --lime: #CCFF00;
+      --lime-dim: rgba(204,255,0,0.08);
+      --lime-glow: rgba(204,255,0,0.15);
+      --violet: #6600FF;
+      --violet-dim: rgba(102,0,255,0.08);
+      --gold: #D4AF37;
+      --blue: #2E5090;
+      --blue-bright: #4A7ADB;
+      --community: #00D4AA;
+      --community-dim: rgba(0,212,170,0.08);
+      --community-glow: rgba(0,212,170,0.15);
+      --r: 8px;
+      --r-lg: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--abyss);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 60px;
+      background: rgba(6,6,8,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav__wordmark {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--lime);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .nav__badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--community);
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.2);
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav__links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-d);
+      text-decoration: none;
+      transition: color 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .nav__links a:hover { color: var(--text); }
+
+    .nav__cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: var(--r);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-d);
+      border: 1px solid var(--border-s);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .btn-community {
+      background: var(--community);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .btn-community:hover {
+      background: #00F0BE;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--community-glow);
+    }
+
+    .btn-lime {
+      background: var(--lime);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .btn-lime:hover {
+      background: #D9FF33;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--lime-glow);
+    }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(closest-side, rgba(0,212,170,0.06) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(closest-side, rgba(102,0,255,0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--community);
+      background: var(--community-dim);
+      border: 1px solid rgba(0,212,170,0.2);
+      padding: 5px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.1em;
+      margin-bottom: 32px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .hero__tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--community);
+      box-shadow: 0 0 8px var(--community);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero__title {
+      font-size: clamp(48px, 7vw, 88px);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      max-width: 900px;
+    }
+
+    .hero__title em {
+      font-style: normal;
+      color: var(--community);
+    }
+
+    .hero__sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-d);
+      max-width: 600px;
+      margin-bottom: 48px;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .hero__sub strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .hero__actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+
+    /* ── STAT BAND ── */
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat__num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--lime);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.02em;
+    }
+
+    .stat__label {
+      font-size: 12px;
+      color: var(--text-dd);
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .stat__sep {
+      width: 1px;
+      height: 40px;
+      background: var(--border-s);
+    }
+
+    /* ── ACTIVITY FEED ── */
+    .activity {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section__label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--community);
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .section__title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .section__sub {
+      font-size: 16px;
+      color: var(--text-d);
+      max-width: 500px;
+      margin-bottom: 56px;
+      line-height: 1.7;
+    }
+
+    .activity__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    /* ── FEED CARD ── */
+    .feed {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+
+    .feed__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feed__title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-d);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feed__live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--community);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feed__live::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      background: var(--community);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--community);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .feed__body { padding: 4px 0; }
+
+    .feed__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .feed__item:last-child { border-bottom: none; }
+    .feed__item:hover { background: var(--surface-2); }
+
+    .feed__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feed__event {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feed__event-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .feed__event-text strong {
+      color: var(--lime);
+      font-weight: 600;
+    }
+
+    .feed__event-text .action-verb {
+      color: var(--community);
+    }
+
+    .feed__event-time {
+      font-size: 11px;
+      color: var(--text-dd);
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feed__tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .tag-pr { background: rgba(0,212,170,0.1); color: var(--community); }
+    .tag-issue { background: rgba(204,255,0,0.08); color: var(--lime); }
+    .tag-release { background: rgba(102,0,255,0.1); color: #A855F7; }
+    .tag-discuss { background: rgba(74,122,219,0.1); color: var(--blue-bright); }
+
+    /* ── CONTRIBUTE ── */
+    .contribute {
+      padding: 100px 40px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contribute__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .contribute__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 56px;
+    }
+
+    .contrib-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 32px;
+      transition: all 0.25s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+
+    .contrib-card:hover {
+      border-color: var(--border-s);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+
+    .contrib-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .icon-lime { background: var(--lime-dim); }
+    .icon-community { background: var(--community-dim); }
+    .icon-violet { background: var(--violet-dim); }
+
+    .contrib-card__title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .contrib-card__desc {
+      font-size: 14px;
+      color: var(--text-d);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .contrib-card__link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--community);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .contrib-card__link::after {
+      content: '→';
+      transition: transform 0.2s;
+    }
+
+    .contrib-card:hover .contrib-card__link::after {
+      transform: translateX(4px);
+    }
+
+    /* ── MANIFESTO ── */
+    .manifesto {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .manifesto__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .manifesto__content { }
+
+    .manifesto__principles { display: flex; flex-direction: column; gap: 0; }
+
+    .principle {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .principle:first-child { border-top: 1px solid var(--border); }
+
+    .principle__num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dd);
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 28px;
+      padding-top: 2px;
+    }
+
+    .principle__text { flex: 1; }
+
+    .principle__title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .principle__desc {
+      font-size: 13px;
+      color: var(--text-d);
+      line-height: 1.6;
+    }
+
+    /* ── RFCS / PROPOSALS ── */
+    .rfcs {
+      padding: 100px 40px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rfcs__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .rfc-list { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
+
+    .rfc-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 24px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .rfc-item:hover {
+      border-color: rgba(0,212,170,0.18);
+      background: var(--surface-3);
+    }
+
+    .rfc-item__id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--community);
+      min-width: 70px;
+    }
+
+    .rfc-item__title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .rfc-item__status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .status-active { background: var(--community-dim); color: var(--community); }
+    .status-draft { background: rgba(204,255,0,0.08); color: var(--lime); }
+    .status-review { background: rgba(102,0,255,0.1); color: #A855F7; }
+
+    .rfc-item__votes {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dd);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 60px 40px;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer__left { display: flex; flex-direction: column; gap: 8px; }
+
+    .footer__logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--lime);
+      letter-spacing: 0.12em;
+    }
+
+    .footer__copy {
+      font-size: 12px;
+      color: var(--text-dd);
+    }
+
+    .footer__links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .footer__links a {
+      font-size: 13px;
+      color: var(--text-dd);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer__links a:hover { color: var(--text-d); }
+
+    .footer__domain-switcher {
+      display: flex;
+      gap: 8px;
+    }
+
+    .domain-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      text-decoration: none;
+      border: 1px solid;
+      transition: all 0.2s;
+    }
+
+    .domain-pill.active {
+      background: var(--community-dim);
+      color: var(--community);
+      border-color: rgba(0,212,170,0.3);
+    }
+
+    .domain-pill:not(.active) {
+      color: var(--text-dd);
+      border-color: var(--border-s);
+    }
+
+    .domain-pill:not(.active):hover {
+      color: var(--text-d);
+      border-color: var(--border-s);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 0 20px; }
+      .nav__links { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .activity { padding: 60px 24px; }
+      .activity__grid { grid-template-columns: 1fr; }
+      .contribute { padding: 60px 24px; }
+      .contribute__grid { grid-template-columns: 1fr; }
+      .manifesto { padding: 60px 24px; }
+      .manifesto__grid { grid-template-columns: 1fr; gap: 48px; }
+      .rfcs { padding: 60px 24px; }
+      footer { padding: 40px 24px; }
+      .footer__inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav__logo">
+      <span class="nav__wordmark">CORTEX</span>
+      <span class="nav__badge">COMMUNITY</span>
+    </a>
+    <ul class="nav__links">
+      <li><a href="#contribute">Contribute</a></li>
+      <li><a href="#rfcs">RFCs</a></li>
+      <li><a href="#manifesto">Manifesto</a></li>
+      <li><a href="https://cortexpersist.dev">Docs</a></li>
+      <li><a href="https://cortexpersist.com">Product</a></li>
+    </ul>
+    <div class="nav__cta">
+      <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-ghost">★ GitHub</a>
+      <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="btn btn-community">Join Community</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__tag">OPEN SOURCE · APACHE 2.0</div>
+    <h1 class="hero__title">Built in public.<br><em>Owned by all.</em></h1>
+    <p class="hero__sub">
+      CORTEX is <strong>community infrastructure</strong> — not a product. No VC. No telemetry. No lock-in.
+      Just cryptographic memory, built by engineers who trust math over marketing.
+    </p>
+    <div class="hero__actions">
+      <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-community">★ Star on GitHub</a>
+      <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="btn btn-ghost">Join Discussions</a>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__num">Apache 2.0</div>
+        <div class="stat__label">LICENSE</div>
+      </div>
+      <div class="stat__sep"></div>
+      <div class="stat">
+        <div class="stat__num">0</div>
+        <div class="stat__label">TELEMETRY</div>
+      </div>
+      <div class="stat__sep"></div>
+      <div class="stat">
+        <div class="stat__num">67K</div>
+        <div class="stat__label">LINES OF CODE</div>
+      </div>
+      <div class="stat__sep"></div>
+      <div class="stat">
+        <div class="stat__num">v6.0</div>
+        <div class="stat__label">STABLE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIVITY FEED -->
+  <section class="activity" id="contribute">
+    <div>
+      <div class="section__label">// LIVE ACTIVITY</div>
+      <h2 class="section__title">Community pulse.</h2>
+      <p class="section__sub">Real commits. Real PRs. Real people building the AI memory layer.</p>
+    </div>
+    <div class="activity__grid">
+
+      <!-- COMMIT FEED -->
+      <div class="feed">
+        <div class="feed__header">
+          <span class="feed__title">RECENT COMMITS</span>
+          <span class="feed__live">LIVE</span>
+        </div>
+        <div class="feed__body">
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(204,255,0,0.08);color:var(--lime);">BF</div>
+            <div class="feed__event">
+              <div class="feed__event-text"><strong>borjamoskv</strong> <span class="action-verb">merged</span> ghost-control · Sterile Space Axiom enforcement</div>
+              <div class="feed__event-time">2m ago · main</div>
+            </div>
+            <span class="feed__tag tag-pr">PR</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(0,212,170,0.08);color:var(--community);">AK</div>
+            <div class="feed__event">
+              <div class="feed__event-text"><strong>akshat_k</strong> <span class="action-verb">opened</span> feat: async Merkle checkpoint batching</div>
+              <div class="feed__event-time">18m ago · feature/merkle-batch</div>
+            </div>
+            <span class="feed__tag tag-pr">PR</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(102,0,255,0.1);color:#A855F7;">SN</div>
+            <div class="feed__event">
+              <div class="feed__event-text"><strong>sophia_n</strong> <span class="action-verb">fixed</span> WBFT consensus deadlock under Byzantine 3f+1</div>
+              <div class="feed__event-time">1h ago · main</div>
+            </div>
+            <span class="feed__tag tag-issue">FIX</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(74,122,219,0.1);color:var(--blue-bright);">MR</div>
+            <div class="feed__event">
+              <div class="feed__event-text"><strong>mira_r</strong> <span class="action-verb">released</span> cortex v6.0.3 — EU AI Act Article 12 patch</div>
+              <div class="feed__event-time">3h ago</div>
+            </div>
+            <span class="feed__tag tag-release">RELEASE</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(204,255,0,0.08);color:var(--lime);">TY</div>
+            <div class="feed__event">
+              <div class="feed__event-text"><strong>tyler_y</strong> <span class="action-verb">opened</span> docs: LangGraph integration tutorial</div>
+              <div class="feed__event-time">5h ago</div>
+            </div>
+            <span class="feed__tag tag-pr">PR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISCUSSIONS FEED -->
+      <div class="feed">
+        <div class="feed__header">
+          <span class="feed__title">DISCUSSIONS</span>
+          <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" style="font-size:11px;color:var(--community);text-decoration:none;font-family:'JetBrains Mono',monospace;">VIEW ALL →</a>
+        </div>
+        <div class="feed__body">
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(74,122,219,0.1);color:var(--blue-bright);">●</div>
+            <div class="feed__event">
+              <div class="feed__event-text">RFC-009: Should CORTEX support vector store backends natively?</div>
+              <div class="feed__event-time">14 comments · 2h ago</div>
+            </div>
+            <span class="feed__tag tag-discuss">RFC</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(0,212,170,0.08);color:var(--community);">●</div>
+            <div class="feed__event">
+              <div class="feed__event-text">Best practices for multi-agent consensus in production?</div>
+              <div class="feed__event-time">31 comments · 4h ago</div>
+            </div>
+            <span class="feed__tag tag-discuss">Q&A</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(204,255,0,0.08);color:var(--lime);">●</div>
+            <div class="feed__event">
+              <div class="feed__event-text">Showcase: CORTEX + AutoGen achieving 100% audit trail coverage</div>
+              <div class="feed__event-time">8 comments · 6h ago</div>
+            </div>
+            <span class="feed__tag tag-discuss">SHOW</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(102,0,255,0.1);color:#A855F7;">●</div>
+            <div class="feed__event">
+              <div class="feed__event-text">EU AI Act Article 22 — is CORTEX compliant by default?</div>
+              <div class="feed__event-time">22 comments · 8h ago</div>
+            </div>
+            <span class="feed__tag tag-discuss">LEGAL</span>
+          </div>
+          <div class="feed__item">
+            <div class="feed__avatar" style="background:rgba(74,122,219,0.1);color:var(--blue-bright);">●</div>
+            <div class="feed__event">
+              <div class="feed__event-text">Proposal: CORTEX as the standard memory layer for OpenAgentSpec</div>
+              <div class="feed__event-time">45 comments · 12h ago</div>
+            </div>
+            <span class="feed__tag tag-discuss">PROPOSAL</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTRIBUTE CARDS -->
+  <section class="contribute">
+    <div class="contribute__inner">
+      <div class="section__label">// HOW TO CONTRIBUTE</div>
+      <h2 class="section__title">Pick your weapon.</h2>
+      <p class="section__sub">Every contribution is a defense mechanism for the protocol.</p>
+      <div class="contribute__grid">
+        <a href="https://github.com/borjamoskv/Cortex-Persist/issues" class="contrib-card">
+          <div class="contrib-card__icon icon-lime">🐛</div>
+          <div class="contrib-card__title">Fix Issues</div>
+          <div class="contrib-card__desc">Good first issues labeled and waiting. From doc typos to async race conditions — every fix reinforces the protocol.</div>
+          <div class="contrib-card__link">Browse Issues</div>
+        </a>
+        <a href="https://cortexpersist.dev" class="contrib-card">
+          <div class="contrib-card__icon icon-community">📖</div>
+          <div class="contrib-card__title">Write Docs</div>
+          <div class="contrib-card__desc">The best code is useless without documentation. Write tutorials, improve the API reference, translate to your language.</div>
+          <div class="contrib-card__link">Edit on GitHub</div>
+        </a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="contrib-card">
+          <div class="contrib-card__icon icon-violet">⚡</div>
+          <div class="contrib-card__title">Propose RFCs</div>
+          <div class="contrib-card__desc">Got an idea for a new feature or architectural change? Open a discussion, write an RFC, get consensus from the community.</div>
+          <div class="contrib-card__link">Start a Discussion</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto" id="manifesto">
+    <div class="manifesto__grid">
+      <div class="manifesto__content">
+        <div class="section__label">// THE OPEN STANDARD</div>
+        <h2 class="section__title">Infrastructure belongs to everyone.</h2>
+        <p class="section__sub">CORTEX is not a startup. It's a protocol. And protocols succeed when the community owns them — not when a single company does.</p>
+        <div style="margin-top:32px;">
+          <a href="https://github.com/borjamoskv/Cortex-Persist/blob/master/SOVEREIGN_HANDOFF" class="btn btn-lime">Read the Manifesto</a>
+        </div>
+      </div>
+      <div class="manifesto__principles">
+        <div class="principle">
+          <div class="principle__num">01</div>
+          <div class="principle__text">
+            <div class="principle__title">Zero telemetry. Ever.</div>
+            <div class="principle__desc">CORTEX never phones home. Your agent memory is yours. The protocol has no surveillance vector by design.</div>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle__num">02</div>
+          <div class="principle__text">
+            <div class="principle__title">Apache 2.0. No exceptions.</div>
+            <div class="principle__desc">No "Community Edition" vs "Enterprise Edition" bait-and-switch. The license is the contract.</div>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle__num">03</div>
+          <div class="principle__text">
+            <div class="principle__title">Decisions are cryptographic.</div>
+            <div class="principle__desc">SHA-256 hash-chained ledger. Every fact, every mutation, every consensus round — immutable and verifiable.</div>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle__num">04</div>
+          <div class="principle__text">
+            <div class="principle__title">Governance by the protocol.</div>
+            <div class="principle__desc">WBFT consensus applies to code changes too. PRs require Byzantine-fault-tolerant approval from core maintainers.</div>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle__num">05</div>
+          <div class="principle__text">
+            <div class="principle__title">Complexity is the enemy.</div>
+            <div class="principle__desc">Landauer's Razor applies: if you add more abstraction than you remove, the PR is rejected.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RFCs -->
+  <section class="rfcs" id="rfcs">
+    <div class="rfcs__inner">
+      <div class="section__label">// ACTIVE RFCS</div>
+      <h2 class="section__title">Shape the protocol.</h2>
+      <p class="section__sub">Open requests for comment. Read, debate, vote.</p>
+      <div class="rfc-list">
+        <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="rfc-item">
+          <span class="rfc-item__id">RFC-009</span>
+          <span class="rfc-item__title">Native vector store backend support (Qdrant / Weaviate / Pinecone)</span>
+          <span class="rfc-item__status status-active">ACTIVE</span>
+          <span class="rfc-item__votes">▲ 47</span>
+        </a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="rfc-item">
+          <span class="rfc-item__id">RFC-010</span>
+          <span class="rfc-item__title">Distributed CORTEX: multi-node Merkle synchronization protocol</span>
+          <span class="rfc-item__status status-review">IN REVIEW</span>
+          <span class="rfc-item__votes">▲ 38</span>
+        </a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="rfc-item">
+          <span class="rfc-item__id">RFC-011</span>
+          <span class="rfc-item__title">CORTEX as OpenAgentSpec standard memory interface</span>
+          <span class="rfc-item__status status-draft">DRAFT</span>
+          <span class="rfc-item__votes">▲ 91</span>
+        </a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist/discussions" class="rfc-item">
+          <span class="rfc-item__id">RFC-012</span>
+          <span class="rfc-item__title">Time-travel debugging API: replay agent decisions at any checkpoint</span>
+          <span class="rfc-item__status status-active">ACTIVE</span>
+          <span class="rfc-item__votes">▲ 29</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer__inner">
+      <div class="footer__left">
+        <div class="footer__logo">CORTEX v6.0</div>
+        <div class="footer__copy">Apache 2.0 · Built in public · No VC · No telemetry</div>
+      </div>
+      <ul class="footer__links">
+        <li><a href="https://github.com/borjamoskv/Cortex-Persist">GitHub</a></li>
+        <li><a href="https://cortexpersist.dev">Docs</a></li>
+        <li><a href="https://cortexpersist.com">Product</a></li>
+        <li><a href="https://github.com/borjamoskv/Cortex-Persist/discussions">Discussions</a></li>
+        <li><a href="https://github.com/borjamoskv/Cortex-Persist/blob/master/LICENSE">License</a></li>
+      </ul>
+      <div class="footer__domain-switcher">
+        <a href="https://cortexpersist.com" class="domain-pill">.com</a>
+        <a href="https://cortexpersist.dev" class="domain-pill">.dev</a>
+        <a href="https://cortexpersist.org" class="domain-pill active">.org</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
