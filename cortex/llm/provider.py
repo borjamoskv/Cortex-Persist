@@ -305,7 +305,8 @@ class LLMProvider(BaseProvider):
                                 delay = float(val[:-2]) / 1000.0
                             elif val.endswith("s"):
                                 delay = float(val[:-1])
-            except Exception:
+            except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+                # Response might not be JSON or have the expected structure, skip to regex fallback
                 pass
 
             # Fallback regex si JSON falla

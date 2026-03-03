@@ -11,10 +11,11 @@ The nervous system of MOSKV-1 — exposed through the command line.
 from __future__ import annotations
 
 import json
-import sqlite3
 
 import click
 from rich.table import Table
+
+from cortex.database.core import connect as db_connect
 
 from cortex.cli.common import DEFAULT_DB, cli, console
 
@@ -25,8 +26,7 @@ def _get_signal_bus(db: str):
     """Create a SignalBus instance from a database path."""
     from cortex.signals.bus import SignalBus
 
-    conn = sqlite3.connect(db)
-    conn.execute("PRAGMA journal_mode=WAL")
+    conn = db_connect(db)
     return SignalBus(conn), conn
 
 
