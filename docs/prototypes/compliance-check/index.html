@@ -4,12 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Memory Compliance Check — CORTEX</title>
-  <meta name="description" content="Free interactive tool: audit your AI system's memory architecture in 3 minutes. Get a sovereign score and personalized risk report." />
+  <meta name="description" content="Free interactive tool: audit your AI system's memory architecture against EU AI Act Article 12. 5 questions, 3 minutes, real compliance score." />
+  <meta property="og:title" content="AI Memory Compliance Check — CORTEX" />
+  <meta property="og:description" content="Is your AI system's memory compliant with EU AI Act Article 12? 5 questions, 3 minutes. Know your exposure before the regulator does." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cortexpersist.com/compliance-check/" />
+  <link rel="icon" type="image/png" href="../favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
-    /* ===== DESIGN TOKENS — INDUSTRIAL NOIR 2026 (AUREUS-Φ) ===== */
+    /* ===== DESIGN TOKENS — INDUSTRIAL NOIR 2026 ===== */
     :root {
       --black:        #0A0A0A;
       --void:         #070707;
@@ -21,15 +26,15 @@
       --border-glow:  rgba(204,255,0,0.3);
 
       --lime:         #CCFF00;
-      --lime-dim:     rgba(204, 255, 0, 0.2);
-      --lime-ghost:   rgba(204, 255, 0, 0.05);
+      --lime-dim:     #A8D400;
+      --lime-ghost:   rgba(204,255,0,0.08);
       --lime-glow:    rgba(204,255,0,0.15);
 
       --gold:         #D4AF37;
       --gold-dim:     rgba(212,175,55,0.15);
       --violet:       #6600FF;
       --violet-dim:   rgba(102,0,255,0.15);
-      --blue:         #2E5090; /* YInMn Blue */
+      --blue:         #2E5090;
       --red:          #FF3B3B;
       --orange:       #FF8C00;
 
@@ -37,24 +42,12 @@
       --text-secondary: #8A8A8A;
       --text-muted:     #555555;
 
-      /* Fibonacci Scales (φ = 1.618) */
-      --phi-1:    5px;   /* F(4) */
-      --phi-2:    8px;   /* F(5) */
-      --phi-3:    13px;  /* F(6) */
-      --phi-4:    21px;  /* F(7) */
-      --phi-5:    34px;  /* F(8) */
-      --phi-6:    55px;  /* F(9) */
-      --phi-7:    89px;  /* F(10) */
-      --phi-8:    144px; /* F(11) */
+      --radius-sm:    6px;
+      --radius-md:    12px;
+      --radius-lg:    20px;
+      --radius-xl:    32px;
 
-      --radius-sm:    var(--phi-2);
-      --radius-md:    var(--phi-3);
-      --radius-lg:    var(--phi-4);
-      --radius-xl:    var(--phi-5);
-
-      --transition-snappy: cubic-bezier(0.19, 1, 0.22, 1);
-      --transition-liquid: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-      --transition:   var(--transition-snappy);
+      --transition:   cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     /* ===== RESET ===== */
@@ -100,7 +93,7 @@
       z-index: 1;
       max-width: 860px;
       margin: 0 auto;
-      padding: 0 var(--phi-4) var(--phi-7);
+      padding: 0 24px 120px;
     }
 
     /* ===== HEADER ===== */
@@ -148,7 +141,7 @@
 
     /* ===== HERO ===== */
     .hero {
-      padding: 0 0 var(--phi-6);
+      padding: 0 0 72px;
     }
 
     .badge {
@@ -289,8 +282,8 @@
 
     .dimension-indicators {
       display: flex;
-      gap: var(--phi-1);
-      margin-top: var(--phi-3);
+      gap: 6px;
+      margin-top: 12px;
     }
 
     .dim-dot {
@@ -309,11 +302,11 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: var(--phi-6) var(--phi-5);
+      padding: 48px;
       position: relative;
       overflow: hidden;
       transition: all 0.5s var(--transition);
-      min-height: 480px;
+      min-height: 400px;
     }
 
     .quiz-card::before {
@@ -378,13 +371,13 @@
     .option {
       display: flex;
       align-items: flex-start;
-      gap: var(--phi-4);
-      padding: var(--phi-4) var(--phi-5);
+      gap: 16px;
+      padding: 18px 22px;
       background: var(--surface-1);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all 0.25s var(--transition-snappy);
+      transition: all 0.2s var(--transition);
       position: relative;
       overflow: hidden;
     }
@@ -450,7 +443,7 @@
     .option-score-hint {
       font-size: 11px;
       color: var(--text-muted);
-      margin-top: var(--phi-1);
+      margin-top: 3px;
       font-family: 'JetBrains Mono', monospace;
     }
 
@@ -862,45 +855,6 @@
     .quiz-section { display: block; }
     .quiz-section.hidden { display: none; }
 
-    /* ===== SINGULARITY LAYER ===== */
-    .singularity-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 2s var(--transition);
-      background: radial-gradient(circle at center, transparent 0%, rgba(204, 255, 0, 0.03) 100%);
-    }
-
-    .singularity-active .singularity-layer {
-      opacity: 1;
-      animation: singularityPulse 8s infinite alternate ease-in-out;
-    }
-
-    @keyframes singularityPulse {
-      0% { box-shadow: inset 0 0 100px rgba(204, 255, 0, 0); }
-      100% { box-shadow: inset 0 0 200px rgba(204, 255, 0, 0.15); }
-    }
-
-    .sovereign-badge {
-      position: absolute;
-      top: -12px; right: -12px;
-      background: var(--lime);
-      color: #000;
-      font-size: 10px;
-      font-weight: 900;
-      padding: 4px 10px;
-      border-radius: 4px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      transform: rotate(3deg);
-      box-shadow: 0 4px 12px rgba(204, 255, 0, 0.3);
-      display: none;
-    }
-
-    .singularity-active .sovereign-badge { display: block; animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
     /* ===== LOADING OVERLAY ===== */
     .processing-overlay {
       display: none;
@@ -975,12 +929,11 @@
   </style>
 </head>
 <body>
-<div class="singularity-layer"></div>
 
 <div class="app">
   <!-- HEADER -->
   <header class="header">
-    <div class="logo">
+    <a href="../" class="logo" style="text-decoration:none;">
       <div class="logo-mark">
         <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0A0A0A"/>
@@ -990,7 +943,7 @@
         </svg>
       </div>
       <span class="logo-text">CORTEX<span>.</span>AI</span>
-    </div>
+    </a>
   </header>
 
   <!-- HERO -->
@@ -1042,46 +995,8 @@
       </div>
     </div>
 
-    <!-- Industry Selector -->
-    <div class="quiz-card active" id="industry-selector" style="margin-bottom: 32px;">
-      <div class="card-eyebrow">
-        <span class="dimension-tag">Market Classification</span>
-        <span class="dimension-number">Step 0 / 05</span>
-      </div>
-      <div class="question-text">Select your industry for a tailored Article 12 audit</div>
-      <div class="question-hint">Your industry determines the specific regulatory pressure and operational risks associated with AI memory.</div>
-      <div class="options">
-        <div class="option" onclick="setIndustry('insurance', this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') { setIndustry('insurance', this); event.preventDefault(); }">
-          <div class="option-radio"></div>
-          <div class="option-content">
-            <div class="option-label">Insurance & Claims</div>
-            <div class="option-score-hint">Focus: Auditability of automated claims and policy underwriting.</div>
-          </div>
-        </div>
-        <div class="option" onclick="setIndustry('banking', this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') { setIndustry('banking', this); event.preventDefault(); }">
-          <div class="option-radio"></div>
-          <div class="option-content">
-            <div class="option-label">Financial Services & Banking</div>
-            <div class="option-score-hint">Focus: Chain of Thought traceability for loans and risk analysis.</div>
-          </div>
-        </div>
-        <div class="option" onclick="setIndustry('other', this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') { setIndustry('other', this); event.preventDefault(); }">
-          <div class="option-radio"></div>
-          <div class="option-content">
-            <div class="option-label">Other / General Enterprise</div>
-            <div class="option-score-hint">Focus: General Article 12 compliance and IP protection.</div>
-          </div>
-        </div>
-      </div>
-      <div class="nav-row" style="justify-content: flex-end;">
-        <button class="btn btn-primary" id="btn-start-quiz" onclick="startQuiz()" disabled>
-          Continue to Audit →
-        </button>
-      </div>
-    </div>
-
-    <!-- Quiz Card (Initially Hidden) -->
-    <div class="quiz-card" id="quiz-card" style="display: none;">
+    <!-- Quiz Card -->
+    <div class="quiz-card active" id="quiz-card">
       <div class="card-eyebrow">
         <span class="dimension-tag" id="q-dimension">Art. 12(1)</span>
         <span class="dimension-number" id="q-number">01 / 05</span>
@@ -1130,7 +1045,6 @@
           </div>
         </div>
         <div class="score-verdict" id="score-verdict">Calculating...</div>
-        <div class="sovereign-badge">SOVEREIGN</div>
       </div>
     </div>
 
@@ -1308,14 +1222,8 @@ const ART12_RISK_TEXT = [
   { // 12(4) Periodic verification
     0: "Direct violation of Art. 12(4). The regulation requires a technical mechanism for periodic verification — without it, you cannot prove integrity to a regulator on demand.",
     1: "Manual spot-checks fail Art. 12(4) on two fronts: not periodic (automated) and not systematic (covering full history). This violates the letter of the clause.",
-    2: "Individual record checksums but no chain proof for full history",
-    3: "Art. 12(4) satisfied. Merkle checkpoints run on schedule; results stored in integrity_checks table. Cryptographic integrity certificate for any period, in O(log N) time."
-  },
-  { // 12(5) Hydra Fault Tolerance
-    0: "Direct violation of Art. 12(5). Transient data loss during crashes means your audit trail is technically 'incomplete' — a primary target for regulatory scrutiny.",
-    1: "Operational risk under Art. 12(5). Standard logging cannot guarantee every event is captured if power is lost or a process is killed before a flush.",
-    2: "Systemic risk detected. Relying on circular buffers or volatile memory for compliance logs is an architecture pattern that fails the EU AI Act's availability requirements.",
-    3: "Art. 12(5) exceeded. Hydra-Log architecture ensures that even a catastrophic node failure cannot break the audit sequence. At-least-once delivery enforced."
+    2: "Individual checksums verify record-level integrity but cannot prove the entire log sequence is intact. Art. 12(4) requires a chained mechanism (Merkle tree) covering complete history.",
+    3: "Art. 12(4) satisfied. Merkle checkpoints run on schedule; results stored in integrity_checks. Cryptographic integrity certificate for any period, in O(log N) time."
   }
 ];
 
@@ -1325,26 +1233,11 @@ const TOTAL_Q = 5;
 // STATE
 let currentQ = 0;
 let answers   = new Array(TOTAL_Q).fill(null);
-let selectedIndustry = null;
 
 // INIT
 function init() {
-  // initial state: industry selector is visible, quiz card is hidden
-  updateProgress();
-}
-
-function setIndustry(industry, el) {
-  selectedIndustry = industry;
-  const container = el.parentElement;
-  container.querySelectorAll('.option').forEach(function(o) { o.classList.remove('selected'); });
-  el.classList.add('selected');
-  document.getElementById('btn-start-quiz').disabled = false;
-}
-
-function startQuiz() {
-  document.getElementById('industry-selector').style.display = 'none';
-  document.getElementById('quiz-card').style.display = 'block';
   renderQuestion(0);
+  updateProgress();
 }
 
 function renderQuestion(idx) {
@@ -1360,10 +1253,8 @@ function renderQuestion(idx) {
   q.options.forEach(function(opt, i) {
     const el = document.createElement('div');
     el.className = 'option';
-    el.tabIndex = 0;
-    el.setAttribute('role', 'button');
-    el.dataset.score = opt.score;
-    el.dataset.idx = i;
+    el.setAttribute('data-score', opt.score);
+    el.setAttribute('data-idx', i);
     if (answers[idx] === i) el.classList.add('selected');
     el.innerHTML =
       '<div class="option-radio"></div>' +
@@ -1372,12 +1263,6 @@ function renderQuestion(idx) {
         '<div class="option-score-hint">' + opt.hint + '</div>' +
       '</div>';
     el.addEventListener('click', function() { selectOption(idx, i, el); });
-    el.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        selectOption(idx, i, el);
-        event.preventDefault();
-      }
-    });
     container.appendChild(el);
   });
 
@@ -1494,10 +1379,6 @@ function showResults() {
   document.getElementById('score-display').style.color = verdict.color;
   document.getElementById('score-ring').style.stroke = verdict.ring;
 
-  if (percentage === 100) {
-    document.body.classList.add('singularity-active');
-  }
-
   // Breakdown
   const grid = document.getElementById('breakdown-grid');
   grid.innerHTML = '';
@@ -1550,148 +1431,55 @@ function showResults() {
       '</div>';
   });
 
-  // ── RENDER PIPELINE (AUREUS-Φ) ───────────────────────
-  renderBreakdown(scores);
-  renderPenaltyCard(percentage, scores);
-  renderCoveragePanel();
-
-  // Stagger visibility for Industrial Noir impact
-  staggerCards();
-
-  if (percentage === 100) {
-    document.body.classList.add('singularity-active');
-    triggerSingularityFX();
-  }
-}
-
-function staggerCards() {
-  const cards = document.querySelectorAll('#result-screen .quiz-card, #result-screen .lead-capture');
-  cards.forEach((card, i) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.1 * i}s`;
-    setTimeout(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, 50);
-  });
-}
-
-function renderBreakdown(scores) {
-  const grid = document.getElementById('breakdown-grid');
-  grid.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  
-  scores.forEach(s => {
-    const row = document.createElement('div');
-    row.className = 'breakdown-row';
-    const pct = (s.raw / s.max) * 100;
-    
-    let barColor = '#FF3B3B';
-    if (s.raw === 3) barColor = 'var(--lime)';
-    else if (s.raw === 2) barColor = 'var(--gold)';
-    else if (s.raw === 1) barColor = 'var(--orange)';
-
-    row.innerHTML = `
-      <div class="breakdown-name">${s.icon} ${s.dimension}</div>
-      <div class="breakdown-bar-track">
-        <div class="breakdown-bar-fill" style="width:0%;background:${barColor};" data-target="${pct}"></div>
-      </div>
-      <div class="breakdown-score" style="color:${barColor};">${s.raw}/${s.max}</div>
-    `;
-    fragment.appendChild(row);
-  });
-  grid.appendChild(fragment);
-
-  setTimeout(() => {
-    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
-      bar.style.width = bar.dataset.target + '%';
-    });
-  }, 300);
-}
-
-function renderPenaltyCard(percentage, scores) {
+  // 1. Penalty Exposure Calculator
   const penaltyCard = document.getElementById('penalty-card');
-  const penalty = Math.max(0, Math.round((1 - (percentage / 100)) * 30 * 1.5)) / 1.5;
-  const criticalGaps = TOTAL_Q - scores.filter(s => s.raw === 3).length;
-  
-  let industryContext = "General systemic risk detected.";
-  if (selectedIndustry === 'insurance') {
-    industryContext = "In the <strong>Insurance</strong> sector, aggregate claims denials without a 'Flight Recorder' (Art. 12 audit trail) are prime targets for class-action secondary litigation beyond regulatory fines.";
-  } else if (selectedIndustry === 'banking') {
-    industryContext = "For <strong>Financial Services</strong>, the lack of a 'Chain of Thought Ledger' violates not just the EU AI Act but potentially specific fiduciary traceability requirements and AML/KYC guidelines.";
-  }
-
+  const penalty = Math.max(0, Math.round((1 - (percentage / 100)) * 30 * 1.5)) / 1.5; // Up to 30M
+  const isHighRisk = percentage < 70;
   penaltyCard.innerHTML = `
-    <div style="font-size:11px; font-weight:700; color:var(--red); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:13px;">Regulatory Exposure Analysis</div>
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:21px;">
+    <div style="font-size:11px; font-weight:700; color:var(--red); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">Regulatory Exposure Analysis</div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
       <div>
-        <div style="font-size:34px; font-weight:900; letter-spacing:-0.03em; color:var(--red);">€${penalty.toFixed(1)}M</div>
+        <div style="font-size:32px; font-weight:900; letter-spacing:-0.03em;">€${penalty.toFixed(1)} Million</div>
         <div style="font-size:13px; color:var(--text-secondary);">Estimated Liability Cap (Art. 71)</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:700; color:${percentage < 50 ? 'var(--red)' : 'var(--gold)'};">${percentage < 50 ? 'CRITICAL EXPOSURE' : 'SIGNIFICANT GAP'}</div>
-        <div style="font-size:11px; color:var(--text-muted);">Industry: ${selectedIndustry.toUpperCase()}</div>
+        <div style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:700; color:${percentage < 40 ? 'var(--red)' : 'var(--gold)'};">${percentage < 40 ? 'CRITICAL EXPOSURE' : 'SIGNIFICANT GAP'}</div>
+        <div style="font-size:11px; color:var(--text-muted);">EU AI Act August 2026</div>
       </div>
     </div>
-    <div class="progress-track" style="height:5px; margin-bottom:13px;">
-      <div class="progress-fill" style="width:${100-percentage}%; background:var(--red); box-shadow:0 0 15px var(--red);"></div>
+    <div style="height:4px; background:rgba(255,255,255,0.05); border-radius:100px; margin-bottom:16px; overflow:hidden;">
+      <div style="height:100%; width:${Math.min(100, (100-percentage)*1.2)}%; background:var(--red); box-shadow:0 0 10px var(--red);"></div>
     </div>
-    <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
-      <strong>Analysis:</strong> ${criticalGaps} out of ${TOTAL_Q} Article 12 requirements are insufficient. Under EU AI Act strict liability, this gap is indefensible. <br><br>
-      <em>${industryContext}</em>
+    <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+      Analysis: Based on your ${percentage}% score, <strong>${5 - (scores.filter(s => s.raw === 3).length)} out of 5</strong> Article 12 requirements are not fully implemented. In a high-risk AI classification, this represents direct exposure to Article 71(3) penalties.
     </div>
   `;
-}
 
-function renderCoveragePanel() {
+  // 2. CORTEX Coverage Panel
   const coveragePanel = document.getElementById('coverage-panel');
-  
-  let solveTitle = "Instant Article 12 Sovereignty";
-  let solveDesc = "CORTEX middleware wraps your existing LLM infrastructure to satisfy all compliance requirements without refactoring your core logic.";
-  
-  if (selectedIndustry === 'insurance') {
-    solveTitle = "Deploy The AI Flight Recorder";
-    solveDesc = "CORTEX acts as the 'black box' for your claims automation. Every approval or denial is cryptographically sealed, protecting you from litigation and Art. 12 audits.";
-  } else if (selectedIndustry === 'banking') {
-    solveTitle = "Establish The Chain of Thought Ledger";
-    solveDesc = "Don't just log results — log the reasoning. CORTEX provides the cryptographic ledger for high-stakes financial decisions, satisfying both Art. 12 and sector-specific transparency mandates.";
-  }
-
   const remediation = [
-    { name: "Hydra-Log v7.5", coverage: "Art. 12(5) Persistent Audit", desc: "Zero-loss audit stream via Redis Streams & ACKs." },
-    { name: "Sovereign Ledger", coverage: "Art. 12(1,3) Immutability", desc: "SHA-256 hash chains for tamper-proof recording." },
-    { name: "WorkingMemoryL1", coverage: "Art. 12(2) Context Trace", desc: "Automatic recording of time, source, and inputs." },
-    { name: "Apotheosis Node", coverage: "Art. 12(2d,4) Traceability", desc: "Agent-specific signatures and Merkle verification." }
+    { name: "Sovereign Ledger", coverage: "100% Art. 12(1), 12(3)", desc: "Immutable SHA-256 chain for all state-changes." },
+    { name: "WorkingMemoryL1", coverage: "100% Art. 12(2)", desc: "Enforced triple-context recording (time/source/input)." },
+    { name: "Apotheosis Trace", coverage: "100% Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
+    { name: "MerkleCheck Protocol", coverage: "100% Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
   ];
   
   coveragePanel.innerHTML = `
-    <div style="font-size:11px; font-weight:700; color:var(--lime); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:21px;">CORTEX Sovereign Remediation</div>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:13px; margin-bottom:21px;">
+    <div style="font-size:11px; font-weight:700; color:var(--lime); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;">CORTEX Sovereign Coverage</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
       ${remediation.map(item => `
-        <div style="background:var(--surface-1); padding:21px; border:1px solid var(--border); border-radius:13px; transition: 0.3s var(--transition);" class="hover-glow">
-          <div style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:5px;">${item.name}</div>
-          <div style="font-size:10px; font-weight:900; color:var(--lime); text-transform:uppercase; margin-bottom:8px; opacity:0.8;">${item.coverage}</div>
-          <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">${item.desc}</div>
+        <div style="background:var(--surface-1); padding:16px; border:1px solid var(--border); border-radius:12px;">
+          <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">${item.name}</div>
+          <div style="font-size:10px; font-weight:700; color:var(--lime); text-transform:uppercase; margin-bottom:8px;">${item.coverage}</div>
+          <div style="font-size:12px; color:var(--text-secondary); line-height:1.4;">${item.desc}</div>
         </div>
       `).join('')}
     </div>
-    <div style="background:var(--lime-ghost); padding:21px; border:1px solid var(--lime-dim); border-radius:13px; text-align:center; position:relative; overflow:hidden;">
-      <div style="font-size:15px; font-weight:700; color:var(--lime); margin-bottom:5px;">${solveTitle}</div>
-      <div style="font-size:12px; color:var(--text-secondary); max-width:480px; margin:0 auto;">${solveDesc}</div>
+    <div style="background:var(--lime-ghost); padding:16px; border:1px solid var(--lime-dim); border-radius:12px; text-align:center;">
+      <div style="font-size:14px; font-weight:700; color:var(--lime); margin-bottom:4px;">Article 12 Compliance: 100% Out of the Box</div>
+      <div style="font-size:12px; color:var(--text-secondary);">CORTEX middleware wraps your existing AI stack to satisfy Article 12 requirements without code refactoring.</div>
     </div>
   `;
-}
-
-function triggerSingularityFX() {
-  console.log('🌀 SINGULARITY ACHIEVED — System Sovereign');
-  const layer = document.querySelector('.singularity-layer');
-  layer.style.background = 'radial-gradient(circle at center, rgba(204,255,0,0.05) 0%, rgba(204,255,0,0.1) 100%)';
-  
-  // Flash effect on 100%
-  const app = document.querySelector('.app');
-  app.style.filter = 'brightness(1.2) contrast(1.1)';
-  setTimeout(() => { app.style.filter = ''; }, 300);
 }
 
 function animateScore(target) {
@@ -1730,28 +1518,10 @@ function submitLead() {
       score: answers[i] !== null ? q.options[answers[i]].score : 0
     };
   });
-  
-  const traceId = 'CTX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-  console.log('[CORTEX LEAD — Art.12 Audit]', { traceId, email, industry: selectedIndustry, clauses: scoreData, timestamp: new Date().toISOString() });
+  console.log('[CORTEX LEAD — Art.12 Audit]', { email, clauses: scoreData, timestamp: new Date().toISOString() });
 
-  const btn = document.querySelector('#form-area .btn-cta');
-  const originalText = btn.textContent;
-  btn.textContent = 'Encrypting & Sending...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    document.getElementById('form-area').style.display = 'none';
-    const success = document.getElementById('success-state');
-    success.classList.add('visible');
-    
-    // Inyectar Trace ID en el UI de éxito
-    const traceEl = document.createElement('div');
-    traceEl.style.cssText = 'margin-top:20px; font-family:"JetBrains Mono", monospace; font-size:11px; color:var(--text-muted); padding:8px; background:var(--surface-1); border-radius:6px; display:inline-block;';
-    traceEl.textContent = 'Audit Trace ID: ' + traceId;
-    success.appendChild(traceEl);
-    
-    console.log('🔒 SOVEREIGN LEAD PROTECTED: ' + traceId);
-  }, 1200);
+  document.getElementById('form-area').style.display = 'none';
+  document.getElementById('success-state').classList.add('visible');
 }
 
 document.addEventListener('DOMContentLoaded', function() {

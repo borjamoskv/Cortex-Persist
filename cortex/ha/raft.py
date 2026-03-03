@@ -58,6 +58,7 @@ class RaftNode:
         self._election_task: asyncio.Task | None = None
         self._heartbeat_task: asyncio.Task | None = None
         self._heartbeat_event = asyncio.Event()  # signals arrival of heartbeat
+        self._role_lock = asyncio.Lock()  # Atomic role transitions
 
     async def start(self) -> None:
         """Start the Raft node lifecycle."""
@@ -95,7 +96,7 @@ class RaftNode:
                 continue
 
             import secrets
-                
+
             rng = secrets.SystemRandom()
             timeout = rng.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
             self._heartbeat_event.clear()
@@ -107,6 +108,10 @@ class RaftNode:
                 )
                 # Heartbeat received before timeout — loop back and reset.
             except asyncio.TimeoutError:
+                # Chronos Sniper Check: Ensure no heartbeat arrived in the millisecond of timeout
+                if self._heartbeat_event.is_set():
+                    continue
+
                 elapsed = time.monotonic() - self.last_heartbeat
                 logger.warning(
                     "Election timeout (%.2fs > %.2fs). Starting election for term %d",
@@ -114,7 +119,8 @@ class RaftNode:
                     timeout,
                     self.current_term + 1,
                 )
-                await self._start_election()
+                async with self._role_lock:
+                    await self._start_election()
 
     async def _start_election(self):
         """Become Candidate and request votes."""
@@ -135,21 +141,30 @@ class RaftNode:
 
     async def _become_leader(self) -> None:
         """Transition to Leader role."""
-        if self.role == NodeRole.LEADER:
-            return  # idempotent guard
+        async with self._role_lock:
+            if self.role == NodeRole.LEADER:
+                return  # idempotent guard
 
-        self.role = NodeRole.LEADER
-        self.leader_id = self.node_id
-        logger.info(
-            "Node %s is now LEADER (Term %d)",
-            self.node_id,
-            self.current_term,
-        )
+            # Entropy Demon/OOM Killer Guard: Clean up any zombie heartbeat tasks
+            if self._heartbeat_task and not self._heartbeat_task.done():
+                self._heartbeat_task.cancel()
+                try:
+                    await self._heartbeat_task
+                except asyncio.CancelledError:
+                    pass
 
-        if self.state_callback:
-            await self.state_callback(self.role)
+            self.role = NodeRole.LEADER
+            self.leader_id = self.node_id
+            logger.info(
+                "Node %s is now LEADER (Term %d)",
+                self.node_id,
+                self.current_term,
+            )
 
-        self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+            if self.state_callback:
+                await self.state_callback(self.role)
+
+            self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
 
     async def _heartbeat_loop(self):
         """Send heartbeats to followers."""
@@ -176,10 +191,18 @@ class RaftNode:
 
     async def receive_heartbeat(self, leader_id: str, term: int):
         """Called when a heartbeat is received from the leader."""
-        await asyncio.sleep(0)  # Yield to satisfy async requirement
-        if term >= self.current_term:
-            self.current_term = term
-            self.leader_id = leader_id
-            self.role = NodeRole.FOLLOWER
-            self.last_heartbeat = time.monotonic()
-            self._heartbeat_event.set()  # wake election_loop immediately
+        async with self._role_lock:
+            # Intruder/Higher Term Guard: Accept only valid or higher terms
+            if term >= self.current_term:
+                self.current_term = term
+                self.leader_id = leader_id
+
+                # If we were a candidate or leader (split brain), step down
+                if self.role != NodeRole.FOLLOWER:
+                    logger.info("Higher term (or leader) detected. Stepping down to FOLLOWER.")
+                    if self._heartbeat_task and not self._heartbeat_task.done():
+                        self._heartbeat_task.cancel()
+                    self.role = NodeRole.FOLLOWER
+
+                self.last_heartbeat = time.monotonic()
+                self._heartbeat_event.set()  # wake election_loop immediately

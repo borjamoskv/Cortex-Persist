@@ -25,7 +25,9 @@ Cortex is a **local-first, sovereign intelligence engine**. It is NOT a chatbot.
 2.  **Recall**: `Query` -> `Semantic Search` + `Graph Walk` -> `Context Assembly` -> `LLM`.
 3.  **Action**: `Plan` -> `Swarm Dispatch` -> `Tool Execution` -> `Result` -> `Memory`.
 
-## Key Invariants
--   **Local First**: No data leaves the machine unless explicitly authorized.
--   **Immutable**: History is never deleted, only appended (Ledger).
--   **Verifiable**: Every action has a Merkle proof.
+## Evolución: El Manifold Omega (Ω)
+
+Para la **v7 y v8**, CORTEX evoluciona de ser una infraestructura de confianza a un organismo cognitivo completo. El [Manifold Omega](OMEGA_MANIFOLD.md) define las 10 dimensiones de esta evolución, integrando percepción, decisión y acción en un solo evento sincrónico.
+
+---
+**Sovereign Architecture · Industrial Noir · v8.0.0 Alpha**

@@ -31,13 +31,11 @@ from cortex.daemon.models import (
     DaemonStatus,
 )
 from cortex.daemon.monitors import (
-    AutonomousMejoraloMonitor,
     CertMonitor,
     CloudSyncMonitor,
     CompactionMonitor,
     DiskMonitor,
     EngineHealthCheck,
-    EntropyMonitor,
     GhostWatcher,
     MemorySyncer,
     NeuralIntentMonitor,
@@ -46,6 +44,7 @@ from cortex.daemon.monitors import (
     SignalMonitor,
     SiteMonitor,
     TombstoneMonitor,
+    UnifiedMejoraloMonitor,
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
@@ -62,11 +61,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
     Orchestrates all monitors and sends alerts.
     Configuration is loaded from ~/.cortex/daemon_config.json when present.
-
-    Usage:
-        daemon = MoskvDaemon()
-        daemon.check()           # Run once
-        daemon.run(interval=300) # Run forever
     """
 
     def __init__(
@@ -84,6 +78,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._stop_event = threading.Event()
         self._failure_counts: dict[str, int] = {}
         self._healed_total: int = 0
+        self._threads: list[threading.Thread] = []
 
         file_config = self._load_config()
         resolved_sites = sites or file_config.get("sites", [])
@@ -97,7 +92,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             config_dir / "system.json",
             file_config.get("memory_stale_hours", memory_stale_hours),
         )
-        # Single shared engine instance to prevent memory leaks/pool exhaustion (HIGH-004)
+        # Single shared engine instance to prevent memory leaks (HIGH-004)
         try:
             from cortex.engine import CortexEngine
 
@@ -105,18 +100,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         except ImportError:
             self._shared_engine = None
 
-        self.auto_mejoralo = AutonomousMejoraloMonitor(
+        self.mejoralo_monitor = UnifiedMejoraloMonitor(
             projects=file_config.get("auto_mejoralo_projects", {}),
             interval_seconds=file_config.get("auto_mejoralo_interval", 1800),
-            engine=self._shared_engine,
-        )
-        self.entropy_monitor = EntropyMonitor(
-            projects=file_config.get(
-                "entropy_projects", file_config.get("auto_mejoralo_projects", {})
-            ),
-            interval_seconds=file_config.get("entropy_interval", 1800),
             threshold=90,
             engine=self._shared_engine,
+            auto_heal=True,
         )
         self.compaction_monitor = CompactionMonitor(
             projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
@@ -124,9 +113,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             engine=self._shared_engine,
         )
         self.perception_monitor = PerceptionMonitor(
-            workspace=file_config.get(
-                "watch_path", str(Path.home() / "cortex")
-            ),  # Defaulting to the workspace
+            workspace=file_config.get("watch_path", str(Path.home() / "cortex")),
             interval_seconds=file_config.get("perception_interval", 300),
             engine=self._shared_engine,
         )
@@ -190,14 +177,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._last_alerts: dict[str, float] = {}
         self._cooldown = file_config.get("cooldown", cooldown)
 
-        # Time Tracker (for flushing heartbeats)
+        # Time Tracker
         try:
             from cortex.database.core import connect
             from cortex.timing import TimingTracker
 
-            self.timing_conn = connect(
-                file_config.get("db_path", str(CORTEX_DB)),
-            )
+            self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)
         except (ImportError, sqlite3.Error) as e:
             logger.error("Failed to init TimeTracker: %s", e)
@@ -227,22 +212,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._run_monitor(status, "cert_alerts", self.cert_monitor, self._alert_certs)
         self._run_monitor(status, "engine_alerts", self.engine_health, self._alert_engine)
         self._run_monitor(status, "disk_alerts", self.disk_monitor, self._alert_disk)
-        self._run_monitor(status, "mejoralo_alerts", self.auto_mejoralo, self._alert_mejoralo)
-        self._run_monitor(status, "entropy_alerts", self.entropy_monitor, self._alert_entropy)
-        self._run_monitor(
-            status, "compaction_alerts", self.compaction_monitor, self._alert_compaction
-        )
-        self._run_monitor(
-            status, "perception_alerts", self.perception_monitor, self._alert_perception
-        )
+        # Run Unified Mejoralo/Entropy sweep (OMEGA-SINGULARITY)
+        self._run_monitor(status, "mejoralo_alerts", self.mejoralo_monitor, self._alert_mejoralo)
+        self._run_monitor(status, "compaction_alerts", self.compaction_monitor, self._alert_compaction)
+        self._run_monitor(status, "perception_alerts", self.perception_monitor, self._alert_perception)
         self._run_monitor(status, "security_alerts", self.security_monitor, self._alert_security)
         self._run_monitor(status, "signal_alerts", self.signal_monitor, self._alert_signals)
-        self._run_monitor(
-            status,
-            "cloud_sync_alerts",
-            self.cloud_sync_monitor,
-            self._alert_cloud_sync,
-        )
+        self._run_monitor(status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync)
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
 
         self._auto_sync(status)
@@ -254,11 +230,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         level = "✅" if status.all_healthy else "⚠️"
         logger.info(
             "%s Check complete in %.0fms: %d sites, %d stale ghosts, %d memory alerts",
-            level,
-            status.check_duration_ms,
-            len(status.sites),
-            len(status.stale_ghosts),
-            len(status.memory_alerts),
+            level, status.check_duration_ms, len(status.sites),
+            len(status.stale_ghosts), len(status.memory_alerts),
         )
         return status
 
@@ -277,9 +250,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if isinstance(results, list):
                 setattr(status, attr, results)
             alert_fn(results)
-            # Reset failure counter on success
             self._failure_counts.pop(monitor_name, None)
-        except (httpx.HTTPError, OSError, ValueError, sqlite3.Error, RuntimeError, TypeError) as e:
+        except Exception as e:
             status.errors.append(f"{monitor_name} error: {e}")
             logger.exception("%s failed", monitor_name)
             count = self._failure_counts.get(monitor_name, 0) + 1
@@ -288,21 +260,18 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 self._heal_monitor(attr, monitor_name)
                 self._failure_counts.pop(monitor_name, None)
 
-    #   _alert_sites, _alert_ghosts, _alert_memory, _alert_certs,
-
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
         if not self._shared_engine:
             return
         try:
             import asyncio
-
             from cortex.sync import export_snapshot, export_to_json, sync_memory
 
             async def _run_sync():
-                s_res = await sync_memory(self._shared_engine)  # type: ignore[reportArgumentType]
-                w_res = await export_to_json(self._shared_engine)  # type: ignore[reportArgumentType]
-                await export_snapshot(self._shared_engine)  # type: ignore[reportArgumentType]
+                s_res = await sync_memory(self._shared_engine)
+                w_res = await export_to_json(self._shared_engine)
+                await export_snapshot(self._shared_engine)
                 return s_res, w_res
 
             sync_result, wb_result = asyncio.run(_run_sync())
@@ -310,13 +279,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if sync_result.had_changes:
                 logger.info("Sync automático: %d hechos sincronizados", sync_result.total)
             if wb_result.had_changes:
-                logger.info(
-                    "Write-back automático: %d archivos, %d items",
-                    wb_result.files_written,
-                    wb_result.items_exported,
-                )
+                logger.info("Write-back: %d archivos, %d items", wb_result.files_written, wb_result.items_exported)
 
-        except (sqlite3.Error, OSError, ValueError) as e:
+        except Exception as e:
             status.errors.append(f"Memory sync error: {e}")
             logger.exception("Memory sync failed")
 
@@ -334,35 +299,27 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
 
-        # Start fast-polling low-latency loop for Neural Sync
-        neural_thread = threading.Thread(
-            target=self._run_neural_loop, name="NeuralSync", daemon=True
-        )
+        # Start helper threads
+        neural_thread = threading.Thread(target=self._run_neural_loop, name="NeuralSync", daemon=True)
         neural_thread.start()
-        self._threads.append(neural_thread)  # type: ignore[reportAttributeAccessIssue]
+        self._threads.append(neural_thread)
 
         if self.ast_oracle:
             t = threading.Thread(target=self._run_ast_oracle_loop, name="ASTOracle", daemon=True)
             t.start()
-            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
+            self._threads.append(t)
 
         if self.fiat_oracle:
-            t = threading.Thread(
-                target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
-            )
+            t = threading.Thread(target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True)
             t.start()
-            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
+            self._threads.append(t)
 
         if getattr(self, "sentinel_oracle", None):
-            t = threading.Thread(
-                target=self._run_sentinel_oracle_loop,
-                name="SentinelOracle",
-                daemon=True,
-            )
+            t = threading.Thread(target=self._run_sentinel_oracle_loop, name="SentinelOracle", daemon=True)
             t.start()
-            self._threads.append(t)  # type: ignore[reportAttributeAccessIssue]
+            self._threads.append(t)
 
-        logger.info("Daemon started with %d threads", len(self._threads))  # type: ignore[reportAttributeAccessIssue]
+        logger.info("Daemon started with %d threads", len(self._threads))
 
         try:
             while not self._shutdown:
@@ -381,22 +338,20 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 alerts = self.neural_monitor.check()
                 if alerts:
                     self._alert_neural(alerts)
-            except (ValueError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("Neural loop error: %s", e)
             self._stop_event.wait(timeout=1.0)
 
     def _run_ast_oracle_loop(self) -> None:
-        """Runs the AST Oracle event loop for live AST mutation interception."""
+        """Runs the AST Oracle event loop."""
         import asyncio
-
-        logger.info("👁️ AST Oracle thread started (FSEvents)")
+        logger.info("👁️ AST Oracle thread started")
 
         async def _lifecycle():
-            # Run the observer until shutdown is flagged
-            task = asyncio.create_task(self.ast_oracle.start())  # type: ignore[reportOptionalMemberAccess]
+            task = asyncio.create_task(self.ast_oracle.start())
             while not self._shutdown:
                 await asyncio.sleep(1.0)
-            await self.ast_oracle.stop()  # type: ignore[reportOptionalMemberAccess]
+            await self.ast_oracle.stop()
             await task
 
         try:
@@ -407,16 +362,14 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
     def _run_sentinel_oracle_loop(self) -> None:
         """Runs the Sentinel Oracle polling loop."""
         import asyncio
-
         logger.info("🛡️ CORTEX Sentinel Oracle thread started")
         try:
-            # We are running this in a new thread, so asyncio.run is perfect.
-            asyncio.run(self.sentinel_oracle.run_loop())  # type: ignore[reportOptionalMemberAccess]
+            asyncio.run(self.sentinel_oracle.run_loop())
         except Exception as e:
             logger.error("Sentinel Oracle loop error: %s", e)
 
     def _should_alert(self, key: str) -> bool:
-        """Rate-limit duplicate alerts (1 per hour per key)."""
+        """Rate-limit duplicate alerts."""
         if not self.notify_enabled:
             return False
         now = time.monotonic()
@@ -427,7 +380,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         return True
 
     def _save_status(self, status: DaemonStatus) -> None:
-        """Persist status to daemon_status.json."""
+        """Persist status to disk."""
         try:
             STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
             STATUS_FILE.write_text(json.dumps(status.to_dict(), indent=2, ensure_ascii=False))
