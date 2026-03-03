@@ -52,7 +52,8 @@ class ApotheosisEngine:
 
         if cortex_engine:
             if hasattr(cortex_engine, "db"):
-                self._rem = REMCoordinator(cortex_engine.db)  # type: ignore[reportAttributeAccessIssue]
+                # type: ignore[reportAttributeAccessIssue]
+                self._rem = REMCoordinator(cortex_engine.db)
             # Initialize SignalBus if possible (requires sync sqlite3 connection)
             db = getattr(cortex_engine, "db", None)
             if db:

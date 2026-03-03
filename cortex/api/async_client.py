@@ -46,6 +46,8 @@ class AsyncCortexClient:
             timeout=timeout,
             headers=self._headers(),
         )
+        # Límite estricto para escalar a 1k rpm sin timeout
+        self._semaphore = asyncio.Semaphore(100)
 
     def _headers(self) -> dict[str, str]:
         h = {"Content-Type": "application/json"}
@@ -60,7 +62,8 @@ class AsyncCortexClient:
 
         for attempt in range(max_retries):
             try:
-                resp = await self._client.request(method, path, **kwargs)
+                async with self._semaphore:
+                    resp = await self._client.request(method, path, **kwargs)
 
                 if resp.status_code >= 500:
                     # Server error, maybe retry

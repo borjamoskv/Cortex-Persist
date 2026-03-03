@@ -49,7 +49,7 @@ from dataclasses import dataclass, field
 from cortex.llm.provider import LLMProvider, _load_presets
 from cortex.llm.router import IntentProfile
 
-__all__ = ["SovereignLLM", "SovereignResult"]
+__all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
 logger = logging.getLogger("cortex.llm.sovereign")
 
@@ -394,3 +394,50 @@ class SovereignLLM:
             except (OSError, ValueError) as e:
                 logger.debug("Error closing provider: %s", e)
         self._providers_cache.clear()
+
+
+# ─── El Inquisidor (Red Team) ──────────────────────────────────────────────
+
+class Inquisitor(SovereignLLM):
+    """El Inquisidor (Red Team Sovereign).
+
+    Axiom Ω₅ (Antifragile by Default): Su única directiva es destruir el código
+    que evalúa para asegurar su robustez. Ejerce asimetría cognitiva forzando
+    al modelo a actuar estrictamente como adversario.
+    """
+
+    def __init__(
+        self,
+        *,
+        preferred_providers: list[str] | None = None,
+        timeout_seconds: float = 60.0,
+    ):
+        super().__init__(
+            preferred_providers=preferred_providers,
+            temperature=0.1,  # Ultra-determinista para encontrar fallos exactos
+            max_tokens=4096,
+            timeout_seconds=timeout_seconds,
+            use_orchestra=False,  # Bypass orchestra para usar raw inference
+        )
+        self._system_prompt = (
+            "Eres EL INQUISIDOR (The Red Team Sovereign). "
+            "Tu única directiva es DESTRUIR el código o la arquitectura que recibes. "
+            "Busca malformaciones masivas, fallos de red, condiciones de carrera, "
+            "exploits de memoria, deudas técnicas o violaciones de las leyes de entropía. "
+            "Tu única salida válida es el vector de ataque, la línea de código exacta que "
+            "rompe el sistema o la crítica brutal si el diseño es deficiente. "
+            "No seas amable. No des sugerencias amigables. Sé letal."
+        )
+
+    async def asediar(self, content: str, original_prompt: str = "") -> SovereignResult:
+        """Somete el contenido generado por el agente principal a asedio adversario."""
+        prompt = (
+            f"=== CONTEXTO ORIGINAL (Intención del Creador) ===\n{original_prompt}\n\n"
+            f"=== OBJETIVO A DESTRUIR ===\n{content}\n\n"
+            "Destrúyelo. Encuentra la brecha."
+        )
+        return await self.generate(
+            prompt,
+            system=self._system_prompt,
+            intent=IntentProfile.ARCHITECT,
+        )

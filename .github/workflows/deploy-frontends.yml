@@ -60,7 +60,7 @@ jobs:
           npm run build
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@7cb922cee83a7bcf6258e3be2c35b6caa68dee7c # v25
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -90,7 +90,7 @@ jobs:
           npm run build
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@7cb922cee83a7bcf6258e3be2c35b6caa68dee7c # v25
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
