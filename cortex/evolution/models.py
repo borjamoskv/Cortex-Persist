@@ -19,10 +19,10 @@ from typing import Any
 class EvolutionType(Enum):
     """Sovereign Agent Evolution tiers."""
 
-    GENESIS = auto()      # Newly spawned, no history
-    COGNITIVE = auto()    # Pattern-matching capable
-    ADAPTIVE = auto()     # Feedback-loop integrated
-    RECURSIVE = auto()    # Self-modifying logic
+    GENESIS = auto()  # Newly spawned, no history
+    COGNITIVE = auto()  # Pattern-matching capable
+    ADAPTIVE = auto()  # Feedback-loop integrated
+    RECURSIVE = auto()  # Self-modifying logic
     SINGULARITY = auto()  # Optimal state-space convergence
 
 
@@ -62,6 +62,8 @@ class EvolutionMutation:
             "metadata": self.metadata,
             "timestamp": self.timestamp,
         }
+
+
 @dataclass(frozen=True)
 class CycleReport:
     """Metrics produced at the end of a single evolutionary cycle."""

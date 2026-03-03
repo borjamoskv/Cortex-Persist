@@ -27,7 +27,7 @@ logger = logging.getLogger("cortex.heartbeat")
 
 # ─── Defaults ──────────────────────────────────────────────────────────
 
-_DEFAULT_IDLE_THRESHOLD_S: float = 600.0   # 10 minutes idle → trigger sleep
+_DEFAULT_IDLE_THRESHOLD_S: float = 600.0  # 10 minutes idle → trigger sleep
 _DEFAULT_SLEEP_COOLDOWN_S: float = 3600.0  # 1 hour minimum between sleep cycles
 
 
@@ -161,8 +161,7 @@ class HeartbeatEmitter:
 
         # ── Trigger consolidation ─────────────────────────────────
         logger.info(
-            "[HEARTBEAT] System idle for %.0fs (threshold: %.0fs). "
-            "Triggering sleep cycle for %s.",
+            "[HEARTBEAT] System idle for %.0fs (threshold: %.0fs). Triggering sleep cycle for %s.",
             idle_seconds,
             self._idle_threshold_s,
             self._project,
@@ -209,9 +208,7 @@ class HeartbeatEmitter:
             )
 
         except (OSError, RuntimeError, ValueError) as exc:
-            logger.warning(
-                "[HEARTBEAT] Sleep cycle failed for %s: %s", self._project, exc
-            )
+            logger.warning("[HEARTBEAT] Sleep cycle failed for %s: %s", self._project, exc)
 
     def stop(self) -> None:
         """Stop the heartbeat."""

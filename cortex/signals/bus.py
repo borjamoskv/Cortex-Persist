@@ -32,8 +32,9 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-import aiosqlite
 from datetime import datetime, timedelta
+
+import aiosqlite
 
 from cortex.signals.models import Signal, signal_from_row
 

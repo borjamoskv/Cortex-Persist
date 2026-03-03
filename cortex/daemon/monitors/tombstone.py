@@ -54,6 +54,7 @@ class TombstoneMonitor:
 
         try:
             from cortex.database.core import connect as db_connect
+
             # Using basic sqlite3 to bypass connection pools / WAL constraints if needed
             with db_connect(
                 self.db_path,

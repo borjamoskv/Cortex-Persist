@@ -85,4 +85,3 @@ class SovereignAgent:
 
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable evolutionary improvement strategies."""
-

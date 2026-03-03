@@ -60,9 +60,7 @@ class AdaptiveResonanceGate:
         self._sensor = songline_sensor
         self._endocrine = endocrine
 
-    def _calculate_topographic_boost(
-        self, candidate: CortexSemanticEngram
-    ) -> float:
+    def _calculate_topographic_boost(self, candidate: CortexSemanticEngram) -> float:
         """Evaluate if the candidate resonates with any physical 'ghosts' in its field."""
         if not self._sensor or not hasattr(candidate, "source_file"):
             return 0.0
@@ -70,6 +68,7 @@ class AdaptiveResonanceGate:
         # Optional: scan field around the source file
         try:
             from pathlib import Path
+
             field = self._sensor.scan_field(Path(candidate.source_file).parent)
             # Find ghosts matching intent or project
             for ghost in field:
@@ -87,7 +86,7 @@ class AdaptiveResonanceGate:
 
     def _calculate_endocrine_shift(self) -> float:
         """Modulate vigilance based on biological system state.
-        
+
         Cortisol (Stress) -> Increases rho (Stricter matching, defensive)
         Dopamine (Creativity) -> Decreases rho (Broader resonance, exploratory)
         """
@@ -167,9 +166,7 @@ class AdaptiveResonanceGate:
         topo_boost = self._calculate_topographic_boost(candidate)
 
         # 3. Evaluate Resonance
-        best_match, best_sim = self._evaluate_resonance(
-            candidate, neighbors, rho, topo_boost
-        )
+        best_match, best_sim = self._evaluate_resonance(candidate, neighbors, rho, topo_boost)
 
         if best_match:
             # RESONANCE → Reinforce (LTP)

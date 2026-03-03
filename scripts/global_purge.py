@@ -95,10 +95,14 @@ def global_casing_purge() -> None:
                 if source == target:
                     continue
 
-                cursor.execute(f"UPDATE {table} SET project = ? WHERE project = ?", (target, source))
+                cursor.execute(
+                    f"UPDATE {table} SET project = ? WHERE project = ?", (target, source)
+                )
                 rows = cursor.rowcount
                 if rows > 0:
-                    logger.info("  ✅ %s: %d filas migradas (%s -> %s)", table, rows, source, target)
+                    logger.info(
+                        "  ✅ %s: %d filas migradas (%s -> %s)", table, rows, source, target
+                    )
                     modified_rows += rows
 
         # Especial: facts_fts (actualizar la columna project)

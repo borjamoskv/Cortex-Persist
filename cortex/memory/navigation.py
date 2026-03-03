@@ -302,7 +302,9 @@ class SemanticNavigator:
             query_embedding, threshold=activation_threshold
         )
         if start_anchor is None:
-            logger.debug("SNP: No anchor activated for query (threshold=%.2f)", activation_threshold)
+            logger.debug(
+                "SNP: No anchor activated for query (threshold=%.2f)", activation_threshold
+            )
             result.duration_ms = (time.monotonic() - start_time) * 1000
             return result
 

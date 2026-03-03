@@ -41,18 +41,18 @@ class SubTask(BaseModel):
 class Formation:
     """Defines Swarm combative formations based on Legion Axioms."""
 
-    BLITZ = "BLITZ"      # 3-5 agents, atomic tasks
+    BLITZ = "BLITZ"  # 3-5 agents, atomic tasks
     PHALANX = "PHALANX"  # 6-10 agents, audit/coverage
-    SIEGE = "SIEGE"      # 8-15 agents, deep research
-    HYDRA = "HYDRA"      # 10-20 agents, multi-domain
-    ORACLE = "ORACLE"    # 3-5 agents, strategy
+    SIEGE = "SIEGE"  # 8-15 agents, deep research
+    HYDRA = "HYDRA"  # 10-20 agents, multi-domain
+    ORACLE = "ORACLE"  # 3-5 agents, strategy
     PHOENIX = "PHOENIX"  # 5-8 agents, self-healing
     CHIMERA = "CHIMERA"  # 4-12 agents, innovation
     LEVIATHAN = "LEVIATHAN"  # 20-50 agents, massive sweep
     OUROBOROS = "OUROBOROS"  # 3-7 agents, self-evolution
-    SENTINEL = "SENTINEL"    # Security/Infra monitoring
-    SPECTRE = "SPECTRE"      # OSINT/Intel stealth
-    GHOST = "GHOST"          # Single specialized agent
+    SENTINEL = "SENTINEL"  # Security/Infra monitoring
+    SPECTRE = "SPECTRE"  # OSINT/Intel stealth
+    GHOST = "GHOST"  # Single specialized agent
 
 
 class VirtualAgent:
@@ -75,8 +75,14 @@ class CentauroEngine:
     """The Sovereign Swarm Core."""
 
     SPECIALISTS = [
-        "CODE", "SECURITY", "INTEL", "DATA",
-        "CREATIVE", "MARKETING", "OSINT", "INFRA",
+        "CODE",
+        "SECURITY",
+        "INTEL",
+        "DATA",
+        "CREATIVE",
+        "MARKETING",
+        "OSINT",
+        "INFRA",
     ]
 
     # Class-level formation → squad size map (O(1) lookup, immutable)
@@ -121,7 +127,9 @@ class CentauroEngine:
         return self.SPECIALISTS[index % len(self.SPECIALISTS)]
 
     async def _run_consensus(
-        self, squad: dict[str, VirtualAgent], mission: str,
+        self,
+        squad: dict[str, VirtualAgent],
+        mission: str,
     ) -> tuple[str | None, int]:
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
@@ -164,7 +172,9 @@ class CentauroEngine:
 
         # --- Thermal Heat-Sink (Multiplexing) ---
         if mission_hash in self._active_missions:
-            logger.info("🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash[:8])
+            logger.info(
+                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash[:8]
+            )
             return await self._active_missions[mission_hash]  # type: ignore
 
         loop = asyncio.get_running_loop()
@@ -172,7 +182,9 @@ class CentauroEngine:
         self._active_missions[mission_hash] = mission_future
 
         try:
-            logger.info("Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation)
+            logger.info(
+                "Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation
+            )
             size = self._FORMATION_SIZES.get(formation, 3)
             squad = self.spawn_squad(size, formation=formation)
             logger.info("Spawned %d agents in %s formation.", len(squad), formation)

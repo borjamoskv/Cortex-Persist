@@ -155,4 +155,3 @@ def resolve_causality(
         parent_sig = CausalOracle.find_parent_signal(db_path, project)
         return link_causality(meta, parent_sig)
     return meta or {}
-

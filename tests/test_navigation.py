@@ -5,14 +5,11 @@ from __future__ import annotations
 import pytest
 
 from cortex.memory.navigation import (
-    ANCHOR_ACTIVATION_THRESHOLD,
     AnchorEmbedding,
-    NavigationResult,
     SemanticNavigator,
     TopologicalIndex,
     _cosine_similarity,
 )
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 

@@ -290,8 +290,16 @@ class EpistemicVoidDetector:
         covers 80% of cases with zero latency.
         """
         negation_markers = {
-            "not", "no", "never", "don't", "doesn't",
-            "shouldn't", "avoid", "wrong", "incorrect", "false",
+            "not",
+            "no",
+            "never",
+            "don't",
+            "doesn't",
+            "shouldn't",
+            "avoid",
+            "wrong",
+            "incorrect",
+            "false",
         }
         words_a = set(text_a.lower().split())
         words_b = set(text_b.lower().split())

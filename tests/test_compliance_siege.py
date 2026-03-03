@@ -5,13 +5,13 @@ Validates that the system survives mass concurrent, malicious mutations.
 """
 
 import asyncio
+
 import pytest
 
-from cortex.engine_async import AsyncCortexEngine
-from cortex.engine.legion_vectors import COMPLIANCE_SIEGE_SWARM
 from cortex.crypto.vault import Vault
-
 from cortex.database.pool import CortexConnectionPool
+from cortex.engine.legion_vectors import COMPLIANCE_SIEGE_SWARM
+from cortex.engine_async import AsyncCortexEngine
 from cortex.migrations.core import run_migrations_async
 
 
@@ -31,7 +31,7 @@ async def siege_engine(tmp_path):
     # Setup some initial facts
     await engine.store("test_project", "Genesis fact string", fact_type="knowledge")
     await engine.store("test_project", "Fact number two", fact_type="decision")
-    
+
     if engine._ledger:
         await engine._ledger.create_checkpoint_async()
 

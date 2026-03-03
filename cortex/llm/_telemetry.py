@@ -31,7 +31,7 @@ class CascadeTelemetry:
         # Log visual forensic summary
         msg = f"Cascade: intent={event.intent.value} | res={event.resolved_by or 'FAIL'}"
         msg += f" | tier={event.tier.value} | depth={event.depth} | lat={event.latency_ms:.1f}ms"
-        
+
         if not event.resolved_by:
             logger.error("Ω₃ Byzantine Failure: %s | errors=%s", msg, event.errors)
         elif event.tier == CascadeTier.SAFETY_NET:
@@ -73,19 +73,19 @@ class CascadeTelemetry:
         counts = {t.value: 0 for t in CascadeTier}
         latencies: list[float] = []
         total = len(self.events)
-        
+
         if not total:
             return {
                 "total": 0,
                 "breakdown": counts,
                 "avg_latency_ms": 0.0,
                 "success_rate": 0.0,
-                "entropy_elevation_count": 0
+                "entropy_elevation_count": 0,
             }
 
         entropy_inc = 0
         successes = 0
-        
+
         for ev in self.events:
             if ev.resolved_by:
                 successes += 1
@@ -95,7 +95,7 @@ class CascadeTelemetry:
                     entropy_inc += 1
 
         avg_lat = sum(latencies) / len(latencies) if latencies else 0.0
-        
+
         return {
             "total": total,
             "successes": successes,
@@ -103,5 +103,5 @@ class CascadeTelemetry:
             "avg_latency_ms": round(avg_lat, 2),
             "breakdown": counts,
             "entropy_elevation_count": entropy_inc,
-            "reliability_index": round((successes - entropy_inc) / total, 3) if total else 0.0
+            "reliability_index": round((successes - entropy_inc) / total, 3) if total else 0.0,
         }

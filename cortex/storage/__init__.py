@@ -35,13 +35,6 @@ class StorageBackend(Protocol):
     """
 
 
-
-
-
-
-
-
-
 def get_storage_mode() -> StorageMode:
     """Detect storage mode from environment."""
     raw = os.environ.get("CORTEX_STORAGE", "local").lower()

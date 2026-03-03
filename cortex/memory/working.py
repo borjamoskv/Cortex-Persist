@@ -107,7 +107,7 @@ class WorkingMemoryL1:
         overflow: list[MemoryEvent] = []
         while self._current_tokens > self._max_tokens and self._buffer:
             # Shift from pure FIFO to priority-weighted eviction (Central Executive)
-            lowest_priority = float('inf')
+            lowest_priority = float("inf")
             evict_idx = 0
             for i, evt in enumerate(self._buffer):
                 p = self._calculate_priority(evt)

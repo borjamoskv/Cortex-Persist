@@ -49,30 +49,45 @@ class GhostMixin:
             project: Project id.
             target_file: The file to attach the ghost to. If None, uses current working context.
         """
-        # 1. Enforce Thermal Economy
+        import asyncio
+
         root = Path.cwd()
-        self._economy.validate_emission(root)
 
-        # 2. Determine target file (default to some manifest if not provided)
-        if not target_file:
-            target_file = root / ".cortex_field"
-            if not target_file.exists():
-                target_file.touch()
-        else:
-            target_file = Path(target_file)
+        def _do_register() -> str:
+            # 1. Enforce Thermal Economy
+            self._economy.validate_emission(root)
 
-        # 3. Embed the resonance
-        content_for_id = f"{reference}: {context}"
-        self._emitter.embed_ghost(
-            target_file=target_file, intent=content_for_id, project=project
-        )
+            # 2. Determine target file (default to some manifest if not provided)
+            nonlocal target_file
+            if not target_file:
+                target_file = root / ".cortex_field"
+                if not target_file.exists():
+                    target_file.touch()
+            else:
+                target_file = Path(target_file)
 
-        # Return the same hash-based ghost ID used by the emitter
-        return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
+            # 3. Embed the resonance
+            content_for_id = f"{reference}: {context}"
+            self._emitter.embed_ghost(
+                target_file=target_file, intent=content_for_id, project=project
+            )
+
+            # Return the same hash-based ghost ID used by the emitter
+            return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
+
+        return await asyncio.to_thread(_do_register)
 
     async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
         """Scan the topography for all active ghosts."""
-        return self._sensor.scan_field(root_dir or Path.cwd())
+        import asyncio
+        
+        target_root = root_dir or Path.cwd()
+        sensor = self._sensor
+        
+        def _list() -> list[GhostTrace]:
+            return sensor.scan_field(target_root)
+            
+        return await asyncio.to_thread(_list)
 
     async def resolve_ghost(
         self,
@@ -82,21 +97,27 @@ class GhostMixin:
         conn: aiosqlite.Connection | None = None,
     ) -> bool:
         """Resolve a ghost by erasing its trace from the physical landscape."""
+        import asyncio
+
         root = root_dir or Path.cwd()
-        active = self._sensor.scan_field(root)
 
-        found = False
-        for ghost in active:
-            if ghost["id"] == ghost_id:
-                source = Path(ghost["source_file"])
-                attr_name = f"user.cortex.ghost.{ghost_id}"
-                self._sensor._delete_xattr(source, attr_name)
-                # Also check manifest fallback if needed
-                self._resolve_manifest_fallback(source, attr_name)
-                found = True
-                logger.info("Resolved ghost %s on %s", ghost_id, source.name)
+        def _do_resolve() -> bool:
+            active = self._sensor.scan_field(root)
 
-        return found
+            found = False
+            for ghost in active:
+                if ghost["id"] == ghost_id:
+                    source = Path(ghost["source_file"])
+                    attr_name = f"user.cortex.ghost.{ghost_id}"
+                    self._sensor._delete_xattr(source, attr_name)
+                    # Also check manifest fallback if needed
+                    self._resolve_manifest_fallback(source, attr_name)
+                    found = True
+                    logger.info("Resolved ghost %s on %s", ghost_id, source.name)
+
+            return found
+
+        return await asyncio.to_thread(_do_resolve)
 
     def _resolve_manifest_fallback(self, source: Path, attr_name: str) -> None:
         manifest = source.parent / ".songlines"

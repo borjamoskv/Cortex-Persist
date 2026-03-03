@@ -12,12 +12,13 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-import aiosqlite
 from dataclasses import dataclass
 from typing import Any
 
+import aiosqlite
+
 from cortex.database.core import connect as db_connect
-from cortex.signals.bus import SignalBus, AsyncSignalBus
+from cortex.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.causality")
 
@@ -137,7 +138,9 @@ class AsyncCausalOracle:
     """Async variant of the Causal Oracle."""
 
     @staticmethod
-    async def find_parent_signal(conn: aiosqlite.Connection, project: str | None = None) -> int | None:
+    async def find_parent_signal(
+        conn: aiosqlite.Connection, project: str | None = None
+    ) -> int | None:
         """Finds the most recent unconsumed causal signal asynchronously."""
         bus = AsyncSignalBus(conn)
         recent = await bus.history(project=project, limit=5)
@@ -145,7 +148,6 @@ class AsyncCausalOracle:
             if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                 return sig.id
         return None
-
 
 
 # ── Data Model ──────────────────────────────────────────────────────

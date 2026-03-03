@@ -133,6 +133,7 @@ async def call_external_compact(
 
             def _checkpoint():
                 from cortex.database.core import connect as db_connect
+
                 conn = db_connect(db_path, timeout=10)  # type: ignore[reportArgumentType]
                 try:
                     conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")

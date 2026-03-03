@@ -47,7 +47,7 @@ class AtomicMailbox:
         conn = await self._get_conn()
         await conn.execute(
             "INSERT INTO messages (topic, agent_id, payload) VALUES (?, ?, ?)",
-            (topic, agent_id, payload)
+            (topic, agent_id, payload),
         )
         await conn.commit()
 

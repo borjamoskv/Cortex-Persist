@@ -10,6 +10,9 @@ import pytest
 from pydantic import ValidationError
 
 from cortex.memory.metamemory import (
+    _MIN_CALIBRATION_SAMPLES,
+    _TOT_FAILURE_THRESHOLD,
+    _TOT_FOK_FLOOR,
     MemoryCard,
     MetacognitiveJudge,
     MetaJudgment,
@@ -17,13 +20,9 @@ from cortex.memory.metamemory import (
     MetamemoryMonitor,
     RetrievalOutcome,
     Verdict,
-    _MIN_CALIBRATION_SAMPLES,
-    _TOT_FAILURE_THRESHOLD,
-    _TOT_FOK_FLOOR,
     build_memory_card,
     detect_repair_needed,
 )
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 
@@ -197,8 +196,11 @@ class TestJOL:
             embedding=[0.5] * 384,  # Full-size embedding
             content="A detailed decision about using Pydantic v2 for all models in CORTEX",
             metadata={
-                "type": "decision", "project": "cortex",
-                "session": "abc", "confidence": "C5", "tool": "gemini",
+                "type": "decision",
+                "project": "cortex",
+                "session": "abc",
+                "confidence": "C5",
+                "tool": "gemini",
             },
             entangled_refs=["ref-1", "ref-2", "ref-3"],
         )
@@ -620,11 +622,18 @@ class TestMetamemoryIndex:
 
     def test_summary_stats(self):
         idx = MetamemoryIndex()
-        idx.register(MemoryCard(memory_id="m1", existence_probability=0.8,
-                                retrieval_confidence=0.6, repair_needed=True,
-                                consolidation_status="deceased"))
-        idx.register(MemoryCard(memory_id="m2", existence_probability=0.4,
-                                retrieval_confidence=0.4))
+        idx.register(
+            MemoryCard(
+                memory_id="m1",
+                existence_probability=0.8,
+                retrieval_confidence=0.6,
+                repair_needed=True,
+                consolidation_status="deceased",
+            )
+        )
+        idx.register(
+            MemoryCard(memory_id="m2", existence_probability=0.4, retrieval_confidence=0.4)
+        )
         stats = idx.summary_stats()
         assert stats.total_memories == 2
         assert abs(stats.mean_existence_probability - 0.6) < 0.01
@@ -633,10 +642,15 @@ class TestMetamemoryIndex:
 
 
 class TestMetacognitiveJudge:
-    def _card(self, mid: str = "m1", conf: float = 0.8, exist: float = 0.9,
-              repair: bool = False) -> MemoryCard:
-        return MemoryCard(memory_id=mid, retrieval_confidence=conf,
-                          existence_probability=exist, repair_needed=repair)
+    def _card(
+        self, mid: str = "m1", conf: float = 0.8, exist: float = 0.9, repair: bool = False
+    ) -> MemoryCard:
+        return MemoryCard(
+            memory_id=mid,
+            retrieval_confidence=conf,
+            existence_probability=exist,
+            repair_needed=repair,
+        )
 
     def test_respond(self):
         j = MetacognitiveJudge()
@@ -661,8 +675,10 @@ class TestMetacognitiveJudge:
 
     def test_ignores_repair_flagged(self):
         j = MetacognitiveJudge()
-        cards = [self._card(mid="bad", conf=0.95, repair=True),
-                 self._card(mid="good", conf=0.75, exist=0.8)]
+        cards = [
+            self._card(mid="bad", conf=0.95, repair=True),
+            self._card(mid="good", conf=0.75, exist=0.8),
+        ]
         assert j.judge(cards) == Verdict.RESPOND
 
     def test_low_existence_forces_search(self):
@@ -685,4 +701,3 @@ class TestMetacognitiveJudge:
         assert Verdict.RESPOND == "respond"
         assert Verdict.SEARCH_MORE == "search_more"
         assert Verdict.ABSTAIN == "abstain"
-

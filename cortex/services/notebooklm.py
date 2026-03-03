@@ -25,7 +25,12 @@ CLOUD_PROVIDERS = {
         / "GoogleDrive-borjafernandezangulo@gmail.com"
         / "Mi unidad"
         / "CORTEX-NotebookLM",
-        Path.home() / "Library" / "CloudStorage" / "GoogleDrive-borja@moskv.dev" / "Mi unidad" / "CORTEX-NotebookLM",
+        Path.home()
+        / "Library"
+        / "CloudStorage"
+        / "GoogleDrive-borja@moskv.dev"
+        / "Mi unidad"
+        / "CORTEX-NotebookLM",
     ],
     "OneDrive": [
         Path.home() / "Library" / "CloudStorage" / "OneDrive-Personal" / "CORTEX-NotebookLM",
@@ -37,32 +42,91 @@ CLOUD_PROVIDERS = {
 
 DOMAIN_MAP: dict[str, list[str]] = {
     "cortex-core": [
-        "cortex", "CORTEX", "CORTEX-Core", "CORTEX-V8", "CORTEX V8",
-        "CORTEX V7 Evolution", "CORTEX V8 Transition", "CORTEX_V7",
-        "MOSKV-1", "MOSKV", "moskv-1", "moskv", "__bridges__", "nexus",
-        "singularity-nexus", "centauro", "agent:gemini", "pydantic-ai",
-        "kimi-swarm-1", "KIMI",
+        "cortex",
+        "CORTEX",
+        "CORTEX-Core",
+        "CORTEX-V8",
+        "CORTEX V8",
+        "CORTEX V7 Evolution",
+        "CORTEX V8 Transition",
+        "CORTEX_V7",
+        "MOSKV-1",
+        "MOSKV",
+        "moskv-1",
+        "moskv",
+        "__bridges__",
+        "nexus",
+        "singularity-nexus",
+        "centauro",
+        "agent:gemini",
+        "pydantic-ai",
+        "kimi-swarm-1",
+        "KIMI",
     ],
     "cortex-products": [
-        "naroa", "naroa-2026", "naroa-web", "NAROA_2026", "live-notch",
-        "live-notch-swift", "livenotch", "notch-live", "cortex-notch",
-        "SonicNotch", "comienzos-clone", "xokas-elevator", "garmin-dashboard",
-        "millennium", "openclaw", "conspiracy-calculator", "RATIOHEAD",
-        "noir-ui-kit", "impact-web", "FrontierApp",
+        "naroa",
+        "naroa-2026",
+        "naroa-web",
+        "NAROA_2026",
+        "live-notch",
+        "live-notch-swift",
+        "livenotch",
+        "notch-live",
+        "cortex-notch",
+        "SonicNotch",
+        "comienzos-clone",
+        "xokas-elevator",
+        "garmin-dashboard",
+        "millennium",
+        "openclaw",
+        "conspiracy-calculator",
+        "RATIOHEAD",
+        "noir-ui-kit",
+        "impact-web",
+        "FrontierApp",
     ],
     "cortex-operations": [
-        "ghost-control", "ghost_control", "GHOST-1", "GHOST-CONTROL",
-        "autorouter", "autorouter-1", "SAP", "sap", "SAP Audit", "SAP_SYNC",
-        "ROI_LABOR", "moneytv", "moneytv-1", "cortex-landing", "landing",
-        "landing-apotheosis", "CortexSovereignWeb", "cortex-sovereign-web",
-        "moskvbot", "moskvbot-test",
+        "ghost-control",
+        "ghost_control",
+        "GHOST-1",
+        "GHOST-CONTROL",
+        "autorouter",
+        "autorouter-1",
+        "SAP",
+        "sap",
+        "SAP Audit",
+        "SAP_SYNC",
+        "ROI_LABOR",
+        "moneytv",
+        "moneytv-1",
+        "cortex-landing",
+        "landing",
+        "landing-apotheosis",
+        "CortexSovereignWeb",
+        "cortex-sovereign-web",
+        "moskvbot",
+        "moskvbot-test",
     ],
     "cortex-research": [
-        "EVOLUTION", "evolution", "Ouroboros", "ouroboros", "TEMPORAL",
-        "TEMPORAL-RENAMING", "TEMPORAL-UNIFICATION", "SINGULARITY-OMEGA",
-        "PORTAL-OMEGA", "antigravity", "Antigravity", "Antigravity/CORTEX",
-        "Antigravity/Ghost/MCP", "blue", "MANT_SYS", "OLA3", "mejoralo",
-        "Muro de Aislamiento", "eqmac-re",
+        "EVOLUTION",
+        "evolution",
+        "Ouroboros",
+        "ouroboros",
+        "TEMPORAL",
+        "TEMPORAL-RENAMING",
+        "TEMPORAL-UNIFICATION",
+        "SINGULARITY-OMEGA",
+        "PORTAL-OMEGA",
+        "antigravity",
+        "Antigravity",
+        "Antigravity/CORTEX",
+        "Antigravity/Ghost/MCP",
+        "blue",
+        "MANT_SYS",
+        "OLA3",
+        "mejoralo",
+        "Muro de Aislamiento",
+        "eqmac-re",
     ],
 }
 
@@ -136,7 +200,7 @@ class NotebookLMService:
         """Fragment facts into domain-based files."""
         output_dir.mkdir(parents=True, exist_ok=True)
         facts = await self.get_active_facts()
-        
+
         counts: dict[str, int] = {}
         domain_files: dict[str, list[str]] = {}
 
@@ -148,7 +212,7 @@ class NotebookLMService:
             file_path = output_dir / f"{domain}.md"
             file_path.write_text("\n\n".join(content_list) + self.get_signature())
             counts[domain] = len(content_list)
-            
+
         return counts
 
     def sync_to_cloud(self, source_path: Path, cloud_path: Path | None = None) -> Path:
@@ -156,15 +220,15 @@ class NotebookLMService:
         dest = cloud_path or self.detect_cloud_sync()
         if not dest:
             raise RuntimeError("No cloud sync provider detected.")
-        
+
         dest.mkdir(parents=True, exist_ok=True)
         target = dest / source_path.name
-        
+
         if source_path.is_dir():
             if target.exists():
                 shutil.rmtree(target)
             shutil.copytree(source_path, target)
         else:
             shutil.copy2(source_path, target)
-            
+
         return target

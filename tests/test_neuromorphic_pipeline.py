@@ -12,7 +12,6 @@ from __future__ import annotations
 from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
 from cortex.memory.void_detector import EpistemicState
 
-
 # ─── Helpers ──────────────────────────────────────────────────────────
 
 

@@ -45,11 +45,11 @@ class MoltbookClient:
     Rate-limit aware: reads X-RateLimit-* headers, respects Retry-After.
     """
 
-    def __init__(self, api_key: str | None = None):
+    def __init__(self, api_key: str | None = None, proxy: str | None = None):
         self._api_key = api_key or self._try_load_api_key()
         self._rate_remaining: int = 60
         self._rate_reset: float = 0.0
-        self._client = httpx.AsyncClient(timeout=_TIMEOUT)
+        self._client = httpx.AsyncClient(timeout=_TIMEOUT, proxy=proxy)
 
         # State mapping for pre-flight etc
         self._suspended_until = 0.0
@@ -101,9 +101,10 @@ class MoltbookClient:
             headers["Authorization"] = f"Bearer {self._api_key}"
 
         try:
-            resp = await self._client.request(
-                method, url, json=data, headers=headers
-            )
+            if method.upper() == "GET":
+                resp = await self._client.request(method, url, params=data, headers=headers)
+            else:
+                resp = await self._client.request(method, url, json=data, headers=headers)
 
             # Update rate limit tracking
             remaining = resp.headers.get("X-RateLimit-Remaining")
@@ -189,7 +190,9 @@ class MoltbookClient:
             payload["url"] = url
         return await self._request("POST", "/posts", data=payload)
 
-    async def get_feed(self, sort: str = "hot", limit: int = 25, cursor: str = "") -> dict[str, Any]:
+    async def get_feed(
+        self, sort: str = "hot", limit: int = 25, cursor: str = ""
+    ) -> dict[str, Any]:
         """Get the main feed."""
         params = f"?sort={sort}&limit={limit}"
         if cursor:
@@ -206,7 +209,9 @@ class MoltbookClient:
 
     # ─── Comments ──────────────────────────────────────────────
 
-    async def create_comment(self, post_id: str, content: str, parent_id: str = "") -> dict[str, Any]:
+    async def create_comment(
+        self, post_id: str, content: str, parent_id: str = ""
+    ) -> dict[str, Any]:
         """Add a comment (or reply) to a post."""
         payload: dict[str, str] = {"content": content}
         if parent_id:

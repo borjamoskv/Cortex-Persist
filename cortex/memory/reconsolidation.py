@@ -59,9 +59,9 @@ _BIAS_MIN_EVENTS: Final[int] = 5
 class ReconsolidationOutcome(StrEnum):
     """Outcome of a labilization window resolution."""
 
-    CONFIRMED = "confirmed"     # Re-stabilized → energy boost
+    CONFIRMED = "confirmed"  # Re-stabilized → energy boost
     CONTRADICTED = "contradicted"  # Content updated → no energy change
-    IGNORED = "ignored"         # Window expired → energy penalty
+    IGNORED = "ignored"  # Window expired → energy penalty
 
 
 # ─── Audit Record ────────────────────────────────────────────────────
@@ -183,18 +183,12 @@ class ConfirmationBiasDetector:
 
     def biased_engrams(self) -> list[str]:
         """All engrams currently showing confirmation bias."""
-        return [
-            eid
-            for eid in self._total_counts
-            if self.is_biased(eid)
-        ]
+        return [eid for eid in self._total_counts if self.is_biased(eid)]
 
     def report(self) -> dict[str, float]:
         """Bias scores for all tracked engrams with sufficient data."""
         return {
-            eid: self.bias_score(eid)
-            for eid in self._total_counts
-            if self.bias_score(eid) >= 0
+            eid: self.bias_score(eid) for eid in self._total_counts if self.bias_score(eid) >= 0
         }
 
 
@@ -268,8 +262,7 @@ class ReconsolidationTracker:
 
         if self._bias_detector.is_biased(engram_id):
             logger.warning(
-                "Engram %s shows confirmation bias (score=%.2f). "
-                "May be pathologically reinforced.",
+                "Engram %s shows confirmation bias (score=%.2f). May be pathologically reinforced.",
                 engram_id,
                 self._bias_detector.bias_score(engram_id),
             )
@@ -291,9 +284,7 @@ class ReconsolidationTracker:
         """
         record = self._labile.pop(engram_id, None)
         if record is None or record.is_expired:
-            logger.debug(
-                "Engram %s contradict attempt outside labile window — ignored.", engram_id
-            )
+            logger.debug("Engram %s contradict attempt outside labile window — ignored.", engram_id)
             return 0.0
 
         record.contradicted = True
@@ -302,7 +293,8 @@ class ReconsolidationTracker:
         self._bias_detector.record(engram_id, ReconsolidationOutcome.CONTRADICTED)
 
         logger.debug(
-            "Engram %s CONTRADICTED v%s during labile window.", engram_id,
+            "Engram %s CONTRADICTED v%s during labile window.",
+            engram_id,
             (record.parent_version or "init")[:8],
         )
         return 0.0
@@ -349,9 +341,7 @@ class ReconsolidationTracker:
         """
         logger.debug("Dream-cycle reconsolidation sweep initiated.")
         results = self.sweep()
-        logger.info(
-            "Dream-cycle reconsolidation complete: %d resolved.", len(results)
-        )
+        logger.info("Dream-cycle reconsolidation complete: %d resolved.", len(results))
         return results
 
     # ─── Audit Trail ──────────────────────────────────────────────

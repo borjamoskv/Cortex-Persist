@@ -81,9 +81,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
             type_rows = await cursor.fetchall()
 
             # Recent decisions (last 30 days)
-            cutoff_30d = (
-                datetime.now(timezone.utc) - timedelta(days=30)
-            ).isoformat()
+            cutoff_30d = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
             cursor = await conn.execute(
                 """
                 SELECT content FROM facts
@@ -271,7 +269,9 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
             lines.append("| :--- | ---: | :--- |")
             for filepath, entropy in top_sinks:
                 rel = os.path.relpath(filepath, safe_path)
-                verdict = "🔴 PURGE" if entropy > 200 else "🟡 REFACTOR" if entropy > 50 else "🟢 OK"
+                verdict = (
+                    "🔴 PURGE" if entropy > 200 else "🟡 REFACTOR" if entropy > 50 else "🟢 OK"
+                )
                 lines.append(f"| `{rel}` | {entropy:.1f} | {verdict} |")
             lines.append("")
 

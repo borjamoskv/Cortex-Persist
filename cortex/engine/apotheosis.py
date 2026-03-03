@@ -116,7 +116,7 @@ class ApotheosisEngine:
                 oracle_task = asyncio.create_task(self._oracle_audit())
                 self._reflex_tasks.add(oracle_task)
                 oracle_task.add_done_callback(self._reflex_tasks.discard)
-                
+
                 # 📓 Sync NotebookLM during calm phase (Ω₂)
                 sync_task = asyncio.create_task(self._sync_notebooklm())
                 self._reflex_tasks.add(sync_task)
@@ -130,6 +130,7 @@ class ApotheosisEngine:
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
             from cortex.cli.bicameral import bicameral
+
             bicameral.log_bio(
                 f"Ciclo Ω. Entropía={entropy_found}. Sueño: {duration:.1f}s", signal="Ω"
             )
@@ -150,7 +151,10 @@ class ApotheosisEngine:
             if self._trust:
                 stats = await asyncio.to_thread(self._trust.get_compliance_stats)
                 if stats.eu_ai_act_score < 0.8:
-                    logger.error("🛡️ [TRUST] Compliance score too low for Singularity: %.2f", stats.eu_ai_act_score)
+                    logger.error(
+                        "🛡️ [TRUST] Compliance score too low for Singularity: %.2f",
+                        stats.eu_ai_act_score,
+                    )
                     return
             await manifest_singularity(self._signal_bus)
 
@@ -267,9 +271,7 @@ class ApotheosisEngine:
             r_factor = 1.0 + (dopamine * 0.5)
             # After reset: base_sleep * (1.0 + growth) * r_factor
             # The exponential only kicks in on subsequent clean rounds below.
-            derived_sleep = min(
-                base_sleep * (1.0 + growth) * r_factor, self._SLEEP_MAX
-            )
+            derived_sleep = min(base_sleep * (1.0 + growth) * r_factor, self._SLEEP_MAX)
         else:
             consecutive_clean = min(consecutive_clean + 1, 8)
             ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.02)
@@ -317,20 +319,26 @@ class ApotheosisEngine:
                                 "project": action.project,
                                 "action_type": action.action_type,
                             }
-                            
+
                             triage = await self._immune.intercept(action.description, context)
-                            
+
                             if triage.verdict == Verdict.BLOCK:
-                                logger.critical("🚫 [IMMUNE] Action BLOCKED: %s", action.description)
+                                logger.critical(
+                                    "🚫 [IMMUNE] Action BLOCKED: %s", action.description
+                                )
                                 continue
                             elif triage.verdict == Verdict.HOLD:
-                                logger.warning("⏸️ [IMMUNE] Action HOLD: %s. Justification: %s", 
-                                             action.description, triage.risks_assumed[0])
+                                logger.warning(
+                                    "⏸️ [IMMUNE] Action HOLD: %s. Justification: %s",
+                                    action.description,
+                                    triage.risks_assumed[0],
+                                )
                                 continue
 
                             logger.warning(
-                                "🔥 [APOTHEOSIS] Proactive Healing: %s (Immune PASS: %.1f)", 
-                                action.description, triage.triage_score
+                                "🔥 [APOTHEOSIS] Proactive Healing: %s (Immune PASS: %.1f)",
+                                action.description,
+                                triage.triage_score,
                             )
                             self._ignited_tasks.add(action.description)
                             task = asyncio.create_task(keter.ignite(action.description))
@@ -342,35 +350,42 @@ class ApotheosisEngine:
         except Exception as e:
             logger.debug("[APOTHEOSIS] Policy pulse skipped: %s", str(e)[:30])
 
+    def _scan_workspace_hashes(
+        self, file_hashes: dict[Path, str], hashlib_module: Any
+    ) -> list[Path]:
+        """Runs the file hashing loop synchronously off the main event loop."""
+        files_to_scan = []
+        for py_file in self.workspace.rglob("*.py"):
+            if _SKIP_DIRS.intersection(py_file.parts):
+                continue
+            try:
+                current_hash = hashlib_module.sha256(py_file.read_bytes()).hexdigest()
+                if file_hashes.get(py_file) == current_hash:
+                    continue
+                file_hashes[py_file] = current_hash
+                files_to_scan.append(py_file)
+            except OSError:
+                continue
+        return files_to_scan
+
     async def _process_workspace(
         self, file_hashes: dict[Path, str], hashlib: Any, _random: Any
     ) -> bool:
         """Scan and heal workspace files (Ω₀/Ω₆) in parallel."""
         entropy_found = False
         try:
-            files_to_scan = []
-
-            for py_file in self.workspace.rglob("*.py"):
-                if _SKIP_DIRS.intersection(py_file.parts):
-                    continue
-                
-                # Fast check: hash mismatch (O(1) IO)
-                try:
-                    current_hash = hashlib.sha256(py_file.read_bytes()).hexdigest()
-                    if file_hashes.get(py_file) == current_hash:
-                        continue
-                    file_hashes[py_file] = current_hash
-                    files_to_scan.append(py_file)
-                except OSError:
-                    continue
+            # Delegate blocking filesystem globbing and hashing to bounded thread (Ω₂)
+            files_to_scan = await asyncio.to_thread(
+                self._scan_workspace_hashes, file_hashes, hashlib
+            )
 
             if files_to_scan:
                 # Parallelize entropy scan (Ω₁)
                 results = await asyncio.gather(
                     *[asyncio.to_thread(scan_file_entropy, f) for f in files_to_scan],
-                    return_exceptions=True
+                    return_exceptions=True,
                 )
-                
+
                 for py_file, entropy in zip(files_to_scan, results, strict=False):
                     if isinstance(entropy, list) and entropy:
                         entropy_found = True
@@ -416,19 +431,23 @@ class ApotheosisEngine:
             # Ω₅: Pre-commit AST Validation to maintain logical integrity
             try:
                 import ast
-                source = py_file.read_text("utf-8")
-                ast.parse(source, filename=str(py_file))  # Real AST validation
+
+                def _parse_ast(name: str, src: str) -> None:
+                    ast.parse(src, filename=name)
+
+                source_code = await asyncio.to_thread(py_file.read_text, "utf-8")
+                await asyncio.to_thread(_parse_ast, str(py_file), source_code)
                 reasons = ", ".join(e["type"] for e in entropy)
                 intent = f"Refactor {py_file.name} to eliminate: {reasons}."
-                
+
                 # 🛡️ IMMUNE-SYSTEM-v1: Sovereign Arbiter (Ω₆)
                 context = {
                     "reversibility_level": 2,  # Refactoring/Heal is R2
                     "confidence_level": 4,
                     "target_path": str(py_file),
-                    "complexity_removed": len(entropy) * 1.0  # Heuristic
+                    "complexity_removed": len(entropy) * 1.0,  # Heuristic
                 }
-                
+
                 triage = await self._immune.intercept(intent, context)
                 if triage.verdict == Verdict.BLOCK:
                     logger.critical("🚫 [IMMUNE] Healing BLOCKED for %s", py_file.name)

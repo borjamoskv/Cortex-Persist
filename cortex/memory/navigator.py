@@ -332,8 +332,7 @@ class SemanticNavigator:
             centroid_content=cluster_members[0].get("content", "") if cluster_members else "",
             member_count=len(cluster_members),
             avg_similarity=(
-                sum(m.get("score", 0) for m in cluster_members)
-                / max(1, len(cluster_members))
+                sum(m.get("score", 0) for m in cluster_members) / max(1, len(cluster_members))
             ),
             avg_energy=total_energy / max(1, len(cluster_members)),
             projects=projects,

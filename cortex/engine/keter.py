@@ -189,8 +189,9 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
+
         from cortex.database.core import connect
-        import sqlite3
+
         self.db_path = db_path
         # Use centralized factory
         self._conn = connect(db_path)
@@ -205,6 +206,7 @@ class KeterReservoir:
 
     def get(self, mission_id: str) -> KeterPayload | None:
         import json
+
         try:
             row = self._conn.execute(
                 "SELECT payload_json FROM keter_reservoir WHERE mission_id = ?", (mission_id,)
@@ -217,10 +219,11 @@ class KeterReservoir:
 
     def set(self, mission_id: str, payload: KeterPayload):
         import json
+
         try:
             self._conn.execute(
                 "INSERT OR REPLACE INTO keter_reservoir (mission_id, payload_json) VALUES (?, ?)",
-                (mission_id, json.dumps(payload))
+                (mission_id, json.dumps(payload)),
             )
             self._conn.commit()
         except Exception as e:
@@ -302,10 +305,10 @@ class KeterEngine:
         Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
         """
         import hashlib
-        
+
         thermal_audit = kwargs.get("thermal_audit", False)
         formation = kwargs.get("formation", "BLITZ")
-        
+
         # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
         cached_payload = self._reservoir.get(mission_id)
@@ -313,12 +316,15 @@ class KeterEngine:
             # Verify if it reached singularity
             if cached_payload.get("status") == "SINGULARITY_REACHED":
                 if thermal_audit:
-                    logger.info("⚡ [KETER] Identity Short-Circuit: Intent and formation already processed and stabilized.")
+                    logger.info(
+                        "⚡ [KETER] Identity Short-Circuit: Intent and formation already processed and stabilized."
+                    )
                 return cached_payload
 
         # --- Adaptive Jitter (Thermal Noise Control) ---
         if formation not in ("BLITZ", "GHOST", "ORACLE"):
             import secrets
+
             rng = secrets.SystemRandom()
             asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
             if thermal_audit:
@@ -362,17 +368,24 @@ class KeterEngine:
                 # Skip Shortcut: If we already reached Singularity excellence, bypass the Crush.
                 if previous_score >= 99.0 and isinstance(phase, MejoraloCrush):
                     if thermal_audit:
-                        logger.info("⏭️ [KETER] Thermal Bypass: Singularity excellence reached. skipping MEJORAlo.")
+                        logger.info(
+                            "⏭️ [KETER] Thermal Bypass: Singularity excellence reached. skipping MEJORAlo."
+                        )
                     continue
 
                 payload = await self._execute_with_backoff(phase, payload)
 
                 # Detection of Static Equilibrium (Redundancy)
-                if (isinstance(phase, (LegionSwarm, MejoraloCrush)) and 
-                    payload.get("final_code") == previous_code and 
-                    payload.get("score_130_100") == previous_score):
+                if (
+                    isinstance(phase, (LegionSwarm, MejoraloCrush))
+                    and payload.get("final_code") == previous_code
+                    and payload.get("score_130_100") == previous_score
+                ):
                     if thermal_audit:
-                        logger.debug("⚡ [KETER] Static Equilibrium detected in %s. No delta produced.", phase.__class__.__name__)
+                        logger.debug(
+                            "⚡ [KETER] Static Equilibrium detected in %s. No delta produced.",
+                            phase.__class__.__name__,
+                        )
 
             payload["status"] = "SINGULARITY_REACHED"
             # Update reservoir for future short-circuits

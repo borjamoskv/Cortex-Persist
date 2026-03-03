@@ -26,10 +26,7 @@ async def test_immune_arbiter_high_risk_hold():
     result = await arbiter.triage("Push code to prod", plan, confidence=0.5)
 
     assert result.verdict == Verdict.HOLD
-    assert any(
-        "F1_REVERSIBILITY" in r or "F5_CONFIDENCE" in r
-        for r in result.risks_assumed
-    )
+    assert any("F1_REVERSIBILITY" in r or "F5_CONFIDENCE" in r for r in result.risks_assumed)
     assert result.blast_radius == pytest.approx(75.0)
 
 

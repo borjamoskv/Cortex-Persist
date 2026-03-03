@@ -185,4 +185,3 @@ class GossipProtocol:
                 logger.error("Gossip error on %s: %s", self.node_id, e)
 
             await asyncio.sleep(self.interval)
-

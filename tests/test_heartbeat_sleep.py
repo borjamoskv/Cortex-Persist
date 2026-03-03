@@ -6,8 +6,6 @@ Validates idle detection, cooldown, Nexus signaling, and failure resilience.
 
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass, field
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -15,7 +13,6 @@ import pytest
 from cortex.engine.heartbeat import HeartbeatEmitter
 from cortex.memory.sleep import SleepCycleReport
 from cortex.nexus.types import IntentType
-
 
 # ─── Fixtures ──────────────────────────────────────────────────────────
 
@@ -117,7 +114,9 @@ class TestIdleDetection:
             {"status": "ok", "cpu": 80.0, "orphans": 1},  # different → drift > 0
         ]
 
-        with patch("cortex.engine.heartbeat.hygiene.check_system_health", side_effect=health_states):
+        with patch(
+            "cortex.engine.heartbeat.hygiene.check_system_health", side_effect=health_states
+        ):
             await emitter.pulse()
             await emitter.pulse()  # drift > 0 → resets idle
 

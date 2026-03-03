@@ -95,6 +95,7 @@ class ImmuneBoundary:
         last_exception: Exception | None = None
 
         import inspect
+
         schema_dict = schema.model_json_schema()
 
         for attempt in range(max_retries):

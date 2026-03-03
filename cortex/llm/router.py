@@ -91,7 +91,8 @@ class CortexLLMRouter:
 
         # Filter out circuit-broken/NXDOMAIN providers
         active_hedgers = [
-            p for p in self._hedging_providers
+            p
+            for p in self._hedging_providers
             if not self._cascade.is_nxdomain_cached(p.provider_name)
         ]
         if not active_hedgers:
@@ -138,7 +139,9 @@ class CortexLLMRouter:
         ).hexdigest()
 
         if prompt_key in self._inflight:
-            logger.debug("🔥 [HEAT-SINK] Coalescing duplicate inflight prompt: %s...", prompt_key[:8])
+            logger.debug(
+                "🔥 [HEAT-SINK] Coalescing duplicate inflight prompt: %s...", prompt_key[:8]
+            )
             return await self._inflight[prompt_key]
 
         loop = asyncio.get_running_loop()

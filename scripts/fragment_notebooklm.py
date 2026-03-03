@@ -45,62 +45,175 @@ DEFAULT_OUTPUT_DIR = Path("notebooklm_domains")
 
 DOMAIN_MAP: dict[str, list[str]] = {
     "cortex-core": [
-        "cortex", "CORTEX", "CORTEX-Core", "CORTEX-V8", "CORTEX V8",
-        "CORTEX V7 Evolution", "CORTEX V8 Transition", "CORTEX_V7",
-        "CORTEX-LLM", "CORTEX-Formatter", "CORTEX-Evolution",
-        "CORTEX-Daemon", "CORTEX_CLOUD", "cortex-v7", "cortex-test",
-        "cortex-persist", "Cortex-Persist", "cortexpersist", "cli",
-        "CORE", "CODEX", "__system__",
+        "cortex",
+        "CORTEX",
+        "CORTEX-Core",
+        "CORTEX-V8",
+        "CORTEX V8",
+        "CORTEX V7 Evolution",
+        "CORTEX V8 Transition",
+        "CORTEX_V7",
+        "CORTEX-LLM",
+        "CORTEX-Formatter",
+        "CORTEX-Evolution",
+        "CORTEX-Daemon",
+        "CORTEX_CLOUD",
+        "cortex-v7",
+        "cortex-test",
+        "cortex-persist",
+        "Cortex-Persist",
+        "cortexpersist",
+        "cli",
+        "CORE",
+        "CODEX",
+        "__system__",
     ],
     "cortex-infra": [
-        "SYSTEM", "system", "daemons", "security", "scripts",
-        "DNS / CNS Config", "macOS", "MACOS_TAHOE", "sidecar",
-        "testing", "test-project", "TEST", "default",
+        "SYSTEM",
+        "system",
+        "daemons",
+        "security",
+        "scripts",
+        "DNS / CNS Config",
+        "macOS",
+        "MACOS_TAHOE",
+        "sidecar",
+        "testing",
+        "test-project",
+        "TEST",
+        "default",
     ],
     "cortex-agents": [
-        "AGENT_SCIENCE", "AGENTICA", "moskv-swarm", "swarm-demo",
-        "MOSKV-1", "MOSKV", "moskv-1", "moskv", "__bridges__",
-        "nexus", "singularity-nexus", "centauro", "agent:gemini",
-        "pydantic-ai", "kimi-swarm-1", "KIMI",
+        "AGENT_SCIENCE",
+        "AGENTICA",
+        "moskv-swarm",
+        "swarm-demo",
+        "MOSKV-1",
+        "MOSKV",
+        "moskv-1",
+        "moskv",
+        "__bridges__",
+        "nexus",
+        "singularity-nexus",
+        "centauro",
+        "agent:gemini",
+        "pydantic-ai",
+        "kimi-swarm-1",
+        "KIMI",
     ],
     "cortex-products": [
-        "naroa", "naroa-2026", "naroa-web", "NAROA_2026",
-        "live-notch", "live-notch-swift", "livenotch", "notch-live",
-        "cortex-notch", "SonicNotch", "moltbook", "MOLTBOOK",
-        "Moltbook", "Moltbook Ledger", "Moltbook Monetization",
-        "sonic-supreme", "sonic_sovereign", "mastering-1",
-        "lyria-studio", "veo-lyria-studio", "filete-cumbia",
-        "el-pueblo-online", "gordacorp", "borjamoskv", "borjamoskv.com",
-        "borja.moskv.eth", "manteca-web", "comienzos-clone",
-        "xokas-elevator", "garmin-dashboard", "millennium",
-        "openclaw", "conspiracy-calculator", "RATIOHEAD",
-        "noir-ui-kit", "impact-web", "FrontierApp",
+        "naroa",
+        "naroa-2026",
+        "naroa-web",
+        "NAROA_2026",
+        "live-notch",
+        "live-notch-swift",
+        "livenotch",
+        "notch-live",
+        "cortex-notch",
+        "SonicNotch",
+        "moltbook",
+        "MOLTBOOK",
+        "Moltbook",
+        "Moltbook Ledger",
+        "Moltbook Monetization",
+        "sonic-supreme",
+        "sonic_sovereign",
+        "mastering-1",
+        "lyria-studio",
+        "veo-lyria-studio",
+        "filete-cumbia",
+        "el-pueblo-online",
+        "gordacorp",
+        "borjamoskv",
+        "borjamoskv.com",
+        "borja.moskv.eth",
+        "manteca-web",
+        "comienzos-clone",
+        "xokas-elevator",
+        "garmin-dashboard",
+        "millennium",
+        "openclaw",
+        "conspiracy-calculator",
+        "RATIOHEAD",
+        "noir-ui-kit",
+        "impact-web",
+        "FrontierApp",
     ],
     "cortex-operations": [
-        "ghost-control", "ghost_control", "GHOST-1", "GHOST-CONTROL",
-        "autorouter", "autorouter-1", "SAP", "sap", "SAP Audit",
-        "SAP_SYNC", "sap-audit-ui", "mailtv-1", "MAILTV-1",
-        "MAILING", "ecosistema", "global", "general",
-        "reporting", "tips", "i18n", "IDC", "idc-agent",
-        "JMIR", "JMIR-FREE-PUB-COMPLETED", "JMIR-FREE-TIERS",
-        "EU_SCRAPER", "REDDIT_OVERLORD", "omni-translate",
+        "ghost-control",
+        "ghost_control",
+        "GHOST-1",
+        "GHOST-CONTROL",
+        "autorouter",
+        "autorouter-1",
+        "SAP",
+        "sap",
+        "SAP Audit",
+        "SAP_SYNC",
+        "sap-audit-ui",
+        "mailtv-1",
+        "MAILTV-1",
+        "MAILING",
+        "ecosistema",
+        "global",
+        "general",
+        "reporting",
+        "tips",
+        "i18n",
+        "IDC",
+        "idc-agent",
+        "JMIR",
+        "JMIR-FREE-PUB-COMPLETED",
+        "JMIR-FREE-TIERS",
+        "EU_SCRAPER",
+        "REDDIT_OVERLORD",
+        "omni-translate",
     ],
     "cortex-strategy": [
-        "COMMERCE-Ω", "Pricing", "ROI_LABOR", "moneytv", "moneytv-1",
-        "cortex-landing", "landing", "landing-apotheosis",
-        "CortexSovereignWeb", "cortex-sovereign-web",
-        "moskvbot", "moskvbot-test",
+        "COMMERCE-Ω",
+        "Pricing",
+        "ROI_LABOR",
+        "moneytv",
+        "moneytv-1",
+        "cortex-landing",
+        "landing",
+        "landing-apotheosis",
+        "CortexSovereignWeb",
+        "cortex-sovereign-web",
+        "moskvbot",
+        "moskvbot-test",
     ],
     "cortex-research": [
-        "EVOLUTION", "evolution", "Ouroboros", "ouroboros",
-        "TEMPORAL", "TEMPORAL-RENAMING", "TEMPORAL-UNIFICATION",
-        "SINGULARITY-OMEGA", "PORTAL-OMEGA", "VOID-SINGULARITY",
-        "Synaptic/Causal", "APOTHEOSIS", "AUTODIDACT", "AUTO_MUTATE",
-        "CHRONOS-1", "Sovereignty", "aether-omega", "keter",
-        "keter-omega", "antigravity", "Antigravity",
-        "Antigravity/CORTEX", "Antigravity/Ghost/MCP",
-        "blue", "MANT_SYS", "OLA3", "mejoralo",
-        "Muro de Aislamiento", "eqmac-re",
+        "EVOLUTION",
+        "evolution",
+        "Ouroboros",
+        "ouroboros",
+        "TEMPORAL",
+        "TEMPORAL-RENAMING",
+        "TEMPORAL-UNIFICATION",
+        "SINGULARITY-OMEGA",
+        "PORTAL-OMEGA",
+        "VOID-SINGULARITY",
+        "Synaptic/Causal",
+        "APOTHEOSIS",
+        "AUTODIDACT",
+        "AUTO_MUTATE",
+        "CHRONOS-1",
+        "Sovereignty",
+        "aether-omega",
+        "keter",
+        "keter-omega",
+        "antigravity",
+        "Antigravity",
+        "Antigravity/CORTEX",
+        "Antigravity/Ghost/MCP",
+        "blue",
+        "MANT_SYS",
+        "OLA3",
+        "mejoralo",
+        "Muro de Aislamiento",
+        "eqmac-re",
     ],
 }
 
@@ -145,9 +258,7 @@ DOMAIN_DESCRIPTIONS: dict[str, str] = {
         "Investigación y evolución: Ouroboros, temporal, singularity, "
         "Apotheosis, evolución, meta-cognición, y axiomas."
     ),
-    "cortex-misc": (
-        "Proyectos no clasificados o emergentes."
-    ),
+    "cortex-misc": ("Proyectos no clasificados o emergentes."),
 }
 
 
@@ -177,8 +288,9 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
 
         lines: list[str] = []
         lines.append(f"# 🧠 CORTEX — {domain.upper()}\n\n")
-        lines.append(f"> Snapshot: {ts} | Facts: {len(domain_df)} | "
-                      f"Proyectos: {len(projects_in_domain)}\n\n")
+        lines.append(
+            f"> Snapshot: {ts} | Facts: {len(domain_df)} | Proyectos: {len(projects_in_domain)}\n\n"
+        )
         if desc:
             lines.append(f"**Dominio:** {desc}\n\n")
         lines.append("---\n\n")
@@ -195,27 +307,29 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
                     short_id = str(row.get("id"))[:8] if "id" in row and row["id"] else "00000000"
                     shadow_open = f"∆_CTX:{short_id.upper()}"
                     shadow_close = f"∇_CTX:{short_id.upper()}"
-                    
-                    clean_content = str(row['content']).replace("\n", " ")
+
+                    clean_content = str(row["content"]).replace("\n", " ")
                     line = f"`[{shadow_open}]` {clean_content}"
 
                     conf = row.get("confidence", "stated")
                     tags_raw = row.get("tags", "[]")
-                    
+
                     meta = []
                     if conf and conf != "stated":
                         meta.append(f"conf:{conf}")
                     if tags_raw and tags_raw != "[]":
                         try:
-                            tag_list = json.loads(tags_raw) if isinstance(tags_raw, str) else tags_raw
+                            tag_list = (
+                                json.loads(tags_raw) if isinstance(tags_raw, str) else tags_raw
+                            )
                             if tag_list:
                                 meta.append(f"tax:{','.join(tag_list)}")
                         except (ValueError, TypeError):
                             pass
-                            
+
                     if meta:
                         line += f" `{' | '.join(meta)}`"
-                        
+
                     line += f" `[{shadow_close}]`"
                     lines.append(f"> {line}\n\n")
             lines.append("---\n\n")
@@ -228,17 +342,21 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
             f.write(content)
 
         status = "✅" if word_count < 500_000 else "⚠️ OVER LIMIT"
-        stats.append({
-            "domain": domain,
-            "projects": len(projects_in_domain),
-            "facts": len(domain_df),
-            "words": word_count,
-            "chars": char_count,
-            "status": status,
-            "file": filename.name,
-        })
-        print(f"{status} {filename.name}: {len(domain_df)} facts, "
-              f"{word_count:,} words, {len(projects_in_domain)} projects")
+        stats.append(
+            {
+                "domain": domain,
+                "projects": len(projects_in_domain),
+                "facts": len(domain_df),
+                "words": word_count,
+                "chars": char_count,
+                "status": status,
+                "file": filename.name,
+            }
+        )
+        print(
+            f"{status} {filename.name}: {len(domain_df)} facts, "
+            f"{word_count:,} words, {len(projects_in_domain)} projects"
+        )
 
     # Summary
     print(f"\n{'─' * 60}")
@@ -248,19 +366,28 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
     total_words = sum(s["words"] for s in stats)
     for s in stats:
         pct = (s["facts"] / total_facts * 100) if total_facts else 0
-        print(f"  {s['domain']:25s} │ {s['facts']:5d} facts ({pct:4.1f}%) │ "
-              f"{s['words']:7,} words │ {s['projects']:3d} projs")
+        print(
+            f"  {s['domain']:25s} │ {s['facts']:5d} facts ({pct:4.1f}%) │ "
+            f"{s['words']:7,} words │ {s['projects']:3d} projs"
+        )
     print(f"{'─' * 60}")
-    print(f"  {'TOTAL':25s} │ {total_facts:5d} facts         │ "
-          f"{total_words:7,} words │ {len(stats):3d} domains")
+    print(
+        f"  {'TOTAL':25s} │ {total_facts:5d} facts         │ "
+        f"{total_words:7,} words │ {len(stats):3d} domains"
+    )
     print("\n💡 Cada archivo < 500K words → safe para NotebookLM individual source")
     print(f"📁 Output: {output_dir}/")
 
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Fragment CORTEX for NotebookLM domains")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
-                        help="Output directory (default: notebooklm_domains)")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        help="Output directory (default: notebooklm_domains)",
+    )
     args = parser.parse_args()
     run(args.output_dir)

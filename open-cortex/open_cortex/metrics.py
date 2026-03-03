@@ -102,7 +102,7 @@ def compute_brier_score(
 
     total = sum(
         (pred - (1.0 if actual else 0.0)) ** 2
-        for pred, actual in zip(predictions, outcomes)
+        for pred, actual in zip(predictions, outcomes, strict=False)
     )
     return total / len(predictions)
 

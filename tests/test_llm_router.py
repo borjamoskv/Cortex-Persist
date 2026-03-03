@@ -213,9 +213,7 @@ class TestIntentAwareCascade:
         )
 
     @pytest.mark.asyncio
-    async def test_code_intent_prefers_code_specialist_fallback(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_code_intent_prefers_code_specialist_fallback(self, code_prompt: CortexPrompt):
         """When primary fails with CODE intent, code-specialist fallback wins first."""
         router = CortexLLMRouter(
             primary=FailingProvider("primary"),
@@ -246,9 +244,7 @@ class TestIntentAwareCascade:
         assert result.value == "reasoning fallback used"
 
     @pytest.mark.asyncio
-    async def test_general_intent_does_not_reorder_fallbacks(
-        self, prompt: CortexPrompt
-    ):
+    async def test_general_intent_does_not_reorder_fallbacks(self, prompt: CortexPrompt):
         """GENERAL intent disables reordering — fallbacks used in registration order."""
         router = CortexLLMRouter(
             primary=FailingProvider("primary"),
@@ -262,9 +258,7 @@ class TestIntentAwareCascade:
         assert result.value == "first wins"
 
     @pytest.mark.asyncio
-    async def test_singularidad_negativa_includes_all_providers(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_singularidad_negativa_includes_all_providers(self, code_prompt: CortexPrompt):
         """Err message lists ALL failed providers regardless of intent."""
         router = CortexLLMRouter(
             primary=FailingProvider("primary", "timeout"),
@@ -285,6 +279,7 @@ class TestIntentAwareCascade:
             system_instruction="You are a helpful assistant.",
             working_memory=[{"role": "user", "content": "Hello"}],
         )
+
 
 # ─── Intent-Typed Mock Providers ──────────────────────────────────────
 
@@ -345,9 +340,7 @@ class TestIntentAwareRouting:
         )
 
     @pytest.mark.asyncio
-    async def test_code_prompt_uses_code_typed_fallback_first(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_code_prompt_uses_code_typed_fallback_first(self, code_prompt: CortexPrompt):
         """CODE prompt selecciona el fallback con afinidad CODE antes que GENERAL."""
         general_fb = TypedMockProvider(
             "general-llm", "generic answer", frozenset({IntentProfile.GENERAL})
@@ -365,9 +358,7 @@ class TestIntentAwareRouting:
         assert result.value == "precise code answer"
 
     @pytest.mark.asyncio
-    async def test_code_prompt_degrades_to_general_as_safety_net(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_code_prompt_degrades_to_general_as_safety_net(self, code_prompt: CortexPrompt):
         """Si todos los fallbacks CODE fallan, el generalista actúa como safety-net."""
         code_fb_failing = TypedFailingProvider(
             "deepseek-coder", frozenset({IntentProfile.CODE}), "rate limited"
@@ -384,14 +375,10 @@ class TestIntentAwareRouting:
         assert result.value == "fallback general answer"
 
     @pytest.mark.asyncio
-    async def test_general_intent_uses_all_fallbacks_in_order(
-        self, general_prompt: CortexPrompt
-    ):
+    async def test_general_intent_uses_all_fallbacks_in_order(self, general_prompt: CortexPrompt):
         """GENERAL intent desactiva el filtro — todos los fallbacks en orden de registro."""
         fb1 = TypedFailingProvider("first", frozenset({IntentProfile.CODE}))
-        fb2 = TypedMockProvider(
-            "second", "second response", frozenset({IntentProfile.REASONING})
-        )
+        fb2 = TypedMockProvider("second", "second response", frozenset({IntentProfile.REASONING}))
         router = CortexLLMRouter(
             primary=FailingProvider("primary"),
             fallbacks=[fb1, fb2],
@@ -401,19 +388,13 @@ class TestIntentAwareRouting:
         assert result.value == "second response"
 
     @pytest.mark.asyncio
-    async def test_all_providers_fail_with_intent_returns_err(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_all_providers_fail_with_intent_returns_err(self, code_prompt: CortexPrompt):
         """Singularidad Negativa — error contiene intent en el log, Err bien formado."""
         router = CortexLLMRouter(
             primary=FailingProvider("primary", "timeout"),
             fallbacks=[
-                TypedFailingProvider(
-                    "deepseek", frozenset({IntentProfile.CODE}), "quota"
-                ),
-                TypedFailingProvider(
-                    "codestral", frozenset({IntentProfile.CODE}), "unavailable"
-                ),
+                TypedFailingProvider("deepseek", frozenset({IntentProfile.CODE}), "quota"),
+                TypedFailingProvider("codestral", frozenset({IntentProfile.CODE}), "unavailable"),
             ],
         )
         result = await router.invoke(code_prompt)
@@ -483,11 +464,7 @@ class TestIntentModelMap:
 # ─── Negative Cache (RFC 2308) Tests ─────────────────────────────────────────
 
 
-
-
 # ─── Positive Cache (DNS A-Record) Tests ─────────────────────────────────────
-
-
 
 
 # ─── Intent Model Map Extended Tests ─────────────────────────────────────────
@@ -564,9 +541,7 @@ class TestCascadeTelemetry:
         )
 
     @pytest.mark.asyncio
-    async def test_primary_success_records_primary_tier(
-        self, general_prompt: CortexPrompt
-    ):
+    async def test_primary_success_records_primary_tier(self, general_prompt: CortexPrompt):
         """Primary succeeds → tier = PRIMARY, consecutive failures = 0."""
         router = CortexLLMRouter(MockProvider("primary", "ok"))
         result = await router.invoke(general_prompt)
@@ -581,13 +556,9 @@ class TestCascadeTelemetry:
         assert events[0].resolved_tier is CascadeTier.PRIMARY
 
     @pytest.mark.asyncio
-    async def test_typed_match_fallback_records_typed_tier(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_typed_match_fallback_records_typed_tier(self, code_prompt: CortexPrompt):
         """Primary fails, code-specialist fallback succeeds → tier = TYPED_MATCH."""
-        code_fb = TypedMockProvider(
-            "deepseek", "code answer", frozenset({IntentProfile.CODE})
-        )
+        code_fb = TypedMockProvider("deepseek", "code answer", frozenset({IntentProfile.CODE}))
         router = CortexLLMRouter(
             primary=FailingProvider("primary"),
             fallbacks=[code_fb],
@@ -600,9 +571,7 @@ class TestCascadeTelemetry:
         assert stats["safety_net_hits"] == 0
 
     @pytest.mark.asyncio
-    async def test_safety_net_fallback_records_safety_net_tier(
-        self, code_prompt: CortexPrompt
-    ):
+    async def test_safety_net_fallback_records_safety_net_tier(self, code_prompt: CortexPrompt):
         """All typed fallbacks miss, general resolves → tier = SAFETY_NET."""
         general_fb = TypedMockProvider(
             "gpt-4o", "general answer", frozenset({IntentProfile.GENERAL})
@@ -643,9 +612,7 @@ class TestCascadeTelemetry:
         assert stats["entropy_elevation_count"] >= 1
 
     @pytest.mark.asyncio
-    async def test_primary_success_resets_consecutive_counter(
-        self, general_prompt: CortexPrompt
-    ):
+    async def test_primary_success_resets_consecutive_counter(self, general_prompt: CortexPrompt):
         """Primary fails twice, then succeeds → streak resets to 0."""
         call_count = 0
 
@@ -691,12 +658,8 @@ class TestCascadeTelemetry:
         self, code_prompt: CortexPrompt, general_prompt: CortexPrompt
     ):
         """Mixed calls produce correct aggregate stats."""
-        code_fb = TypedMockProvider(
-            "deepseek", "code", frozenset({IntentProfile.CODE})
-        )
-        general_fb = TypedMockProvider(
-            "gpt-4o", "general", frozenset({IntentProfile.GENERAL})
-        )
+        code_fb = TypedMockProvider("deepseek", "code", frozenset({IntentProfile.CODE}))
+        general_fb = TypedMockProvider("gpt-4o", "general", frozenset({IntentProfile.GENERAL}))
         router = CortexLLMRouter(
             primary=FailingProvider("primary"),
             fallbacks=[code_fb, general_fb],
@@ -806,9 +769,7 @@ class TestHedgedRequests:
         assert hr.latency_ms < 500  # should be ~10ms, not 1000ms
 
     @pytest.mark.asyncio
-    async def test_hedged_slow_primary_loses_to_fast_peer(
-        self, prompt: CortexPrompt
-    ):
+    async def test_hedged_slow_primary_loses_to_fast_peer(self, prompt: CortexPrompt):
         """Slow primary + fast hedging peer — peer wins the race."""
         slow_primary = SlowProvider("slow-primary", "slow response", delay=1.0)
         fast_peer = SlowProvider("fast-peer", "fast response", delay=0.01)
@@ -827,9 +788,7 @@ class TestHedgedRequests:
         assert "slow-primary" in hr.cancelled
 
     @pytest.mark.asyncio
-    async def test_hedged_falls_back_to_cascade_on_all_fail(
-        self, prompt: CortexPrompt
-    ):
+    async def test_hedged_falls_back_to_cascade_on_all_fail(self, prompt: CortexPrompt):
         """If all hedged providers fail, cascade takes over."""
         failing_primary = SlowFailingProvider("primary", delay=0.01)
         failing_peer = SlowFailingProvider("peer", delay=0.01)
@@ -846,9 +805,7 @@ class TestHedgedRequests:
         assert result.value == "cascade backup"
 
     @pytest.mark.asyncio
-    async def test_hedged_skips_nxdomain_cached_peers(
-        self, prompt: CortexPrompt
-    ):
+    async def test_hedged_skips_nxdomain_cached_peers(self, prompt: CortexPrompt):
         """NXDOMAIN-cached peers are excluded from the hedging pool."""
         primary = SlowProvider("primary", "primary response", delay=0.01)
         cached_peer = SlowProvider("cached-peer", "cached response", delay=0.01)
@@ -908,13 +865,7 @@ class TestHedgedRequests:
 # ─── Anycast (WeightedProviderPool) Tests ────────────────────────────────
 
 
-
-
 # ─── DNSSEC (Intent Validation) Tests ────────────────────────────────────
 
 
-
-
 # ─── Adaptive TTL Tests ───────────────────────────────────────────────
-
-

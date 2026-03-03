@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 
 import aiosqlite
+
 from cortex.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.sap.oliver")
@@ -42,10 +43,10 @@ class OliverAgent:
             severity = payload.get("severity", "low")
             finding_type = payload.get("finding_type", "unknown")
             evidence = payload.get("evidence", {})
-            
+
             # Materiality evaluation matrix
             materiality_score = self._evaluate_materiality(severity, evidence)
-            
+
             action = "LOG_ONLY"
             if materiality_score >= 0.80:
                 action = "BLOCK_USER"
@@ -77,14 +78,14 @@ class OliverAgent:
             score += 0.5
         elif severity == "high":
             score += 0.3
-            
+
         amount = evidence.get("amount", 0)
         # Assuming >= €10M is extremely material
         if amount >= 10_000_000:
             score += 0.4
         elif amount >= 1_000_000:
             score += 0.2
-            
+
         return min(1.0, score)
 
     async def _emit_effect(self, action: str, materiality: float, trigger_finding: dict) -> None:

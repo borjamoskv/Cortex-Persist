@@ -7,23 +7,22 @@ plan, recall, write, justify, reconsolidate, audit.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ─── Enums ────────────────────────────────────────────────────────────
 
 
-class Namespace(str, Enum):
+class Namespace(StrEnum):
     USER = "user"
     TEAM = "team"
     GLOBAL = "global"
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     USER = "user"
     AGENT = "agent"
     DOCUMENT = "document"
@@ -31,13 +30,13 @@ class SourceType(str, Enum):
     ABSTRACTION = "abstraction"
 
 
-class EdgeType(str, Enum):
+class EdgeType(StrEnum):
     SUPPORTS = "supports"
     CONTRADICTS = "contradicts"
     SUPERSEDES = "supersedes"
 
 
-class ProvenanceMethod(str, Enum):
+class ProvenanceMethod(StrEnum):
     EXTRACTION = "extraction"
     INFERENCE = "inference"
     USER_INPUT = "user_input"
@@ -52,7 +51,7 @@ def _mem_id() -> str:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Provenance(BaseModel):

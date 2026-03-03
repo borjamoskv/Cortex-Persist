@@ -10,11 +10,9 @@ from cortex.memory.dream import (
     AssociativeDreamEngine,
     DreamResult,
     SemanticCluster,
-    SyntheticBridge,
     _compute_centroid,
     _cosine_similarity,
 )
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 
@@ -208,7 +206,9 @@ class TestDreamCycle:
     async def test_emotional_reweight_boosts_connected(self) -> None:
         engine = AssociativeDreamEngine()
         well_connected = _mock_engram(
-            "a", [1.0, 0.0], energy=0.8,
+            "a",
+            [1.0, 0.0],
+            energy=0.8,
             entangled_refs=["b", "c", "d"],
         )
         result = await engine._emotional_reweight([well_connected])
@@ -219,7 +219,9 @@ class TestDreamCycle:
     async def test_emotional_reweight_dampens_isolated(self) -> None:
         engine = AssociativeDreamEngine()
         isolated = _mock_engram(
-            "a", [1.0, 0.0], energy=0.1,
+            "a",
+            [1.0, 0.0],
+            energy=0.1,
             entangled_refs=[],
         )
         result = await engine._emotional_reweight([isolated])

@@ -145,10 +145,7 @@ class TrustService:
 
         violation: str | None = None
         if not valid:
-            violation = (
-                f"HASH_MISMATCH — stored={stored_hash[:16]}… "
-                f"recomputed={recomputed[:16]}…"
-            )
+            violation = f"HASH_MISMATCH — stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
             logger.warning(
                 "⚠️ [TRUST] Fact #%d hash mismatch in project '%s'. Possible tampering.",
                 fact_id,
@@ -234,11 +231,7 @@ class TrustService:
 
             recomputed = hashlib.sha256(content.encode()).hexdigest()
             valid = recomputed == stored_hash
-            violation = (
-                f"HASH_MISMATCH — stored={stored_hash[:16]}…"
-                if not valid
-                else None
-            )
+            violation = f"HASH_MISMATCH — stored={stored_hash[:16]}…" if not valid else None
             results.append(FactVerification(**common, valid=valid, violation=violation))
 
         return results
@@ -318,9 +311,7 @@ class TrustService:
     # Audit trail
     # ------------------------------------------------------------------
 
-    def get_audit_trail(
-        self, project: str | None = None, limit: int = 50
-    ) -> list[dict[str, Any]]:
+    def get_audit_trail(self, project: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         """Fetch audit trail rows via index-backed ordering."""
         conn = self._get_conn()
         if project:
