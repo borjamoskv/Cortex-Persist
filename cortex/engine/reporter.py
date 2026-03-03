@@ -11,6 +11,7 @@ import logging
 import os
 import sqlite3
 import sys
+import asyncio
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
@@ -28,6 +29,8 @@ class ManifoldStatus:
     signals: dict[str, Any]
     architecture_integrity: float
     active_ghosts: int
+    db_size_mb: float
+    total_facts: int
 
 class SovereignReporter:
     """Generates dynamic documentation from the live CORTEX state."""
@@ -69,7 +72,12 @@ class SovereignReporter:
                 # 2. Signals Stats
                 cursor = await conn.execute("SELECT COUNT(*) FROM signals")
                 total_signals = (await cursor.fetchone())[0]
-                signal_stats = {"total": total_signals}
+                
+                # Anomaly specific signal detection
+                cursor = await conn.execute("SELECT COUNT(*) FROM signals WHERE event_type='sap_anomaly'")
+                anomaly_count = (await cursor.fetchone())[0]
+
+                signal_stats = {"total": total_signals, "sap_anomaly": bool(anomaly_count > 0)}
                 
                 # 3. Efficiency (ROI)
                 roi_history = await self._fetch_roi_history(conn)
@@ -82,6 +90,10 @@ class SovereignReporter:
                 cursor = await conn.execute("SELECT COUNT(*) FROM facts")
                 fact_count = (await cursor.fetchone())[0]
                 integrity = (total_edges / max(1, fact_count)) * 100.0
+                
+                db_size_mb = 0.0
+                if os.path.exists(self.db_path):
+                    db_size_mb = os.path.getsize(self.db_path) / (1024 * 1024)
 
                 return ManifoldStatus(
                     timestamp=datetime.now().isoformat(),
@@ -93,11 +105,42 @@ class SovereignReporter:
                     },
                     signals=signal_stats,
                     architecture_integrity=round(min(100.0, integrity), 2),
-                    active_ghosts=ghost_count
+                    active_ghosts=ghost_count,
+                    db_size_mb=db_size_mb,
+                    total_facts=fact_count
                 )
         except (sqlite3.Error, OSError) as e:
             logger.error("Failed to collect metrics: %s", e)
             raise
+
+    async def stream_metrics(self, interval: float = 0.05):
+        """Yield metrics continuously, leveraging PRAGMA data_version to only yield on change."""
+        last_version = None
+        # Send initial state
+        try:
+            yield await self.collect_metrics()
+        except sqlite3.Error:
+            pass
+
+        try:
+            async with aiosqlite.connect(self.db_path) as conn:
+                cursor = await conn.execute("PRAGMA data_version")
+                row = await cursor.fetchone()
+                last_version = row[0] if row else 0
+
+                while True:
+                    await asyncio.sleep(interval)
+                    cursor = await conn.execute("PRAGMA data_version")
+                    row = await cursor.fetchone()
+                    current_version = row[0] if row else 0
+
+                    if current_version != last_version:
+                        last_version = current_version
+                        yield await self.collect_metrics()
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error("Error in stream_metrics: %s", e)
 
     async def export_json(self, output_path: str):
         """Export status to a JSON file for frontend consumption."""

@@ -29,7 +29,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--agent",
-        choices=["memory", "analyst", "guardian", "sovereign"],
+        choices=["memory", "analyst", "guardian", "google-one", "sovereign"],
         default="sovereign",
         help="Which agent to run (default: sovereign — full swarm)",
     )
@@ -129,6 +129,7 @@ def run_cli(
     from cortex.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
+        create_google_one_agent,
         create_guardian_agent,
         create_memory_agent,
     )
@@ -140,6 +141,7 @@ def run_cli(
         "memory": lambda: create_memory_agent(model=model),
         "analyst": lambda: create_analyst_agent(model=model, toolbox_tools=toolbox_tools or None),
         "guardian": lambda: create_guardian_agent(model=model),
+        "google-one": lambda: create_google_one_agent(model=model),
         "sovereign": lambda: create_cortex_swarm(model=model, toolbox_tools=toolbox_tools or None),
     }
 

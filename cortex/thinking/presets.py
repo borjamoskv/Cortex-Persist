@@ -134,6 +134,11 @@ class OrchestraConfig:
     default_strategy: FusionStrategy = FusionStrategy.SYNTHESIS
     temperature: float = 0.3
     max_tokens: int = 4096
+
+    # ── Thermal Variance (Prevents Swarm Mode Collapse) ──
+    dynamic_temperature: bool = True
+    temperature_variance: float = 0.5  # Modifica la temp de cada subagente
+
     judge_provider: str | None = None
     judge_model: str | None = None
     # Retry en caso de fallo individual

@@ -59,6 +59,7 @@ class CheckoutRequest(BaseModel):
     """Request to create a Stripe Checkout session."""
 
     plan: str = "pro"
+    customer_email: str | None = None
     success_url: str = "https://cortex.moskv.com/success"
     cancel_url: str = "https://cortex.moskv.com/pricing"
 
@@ -160,13 +161,17 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         )
 
     try:
-        session = stripe.checkout.Session.create(  # type: ignore[reportAttributeAccessIssue]
-            mode="subscription",
-            line_items=[{"price": price_id, "quantity": 1}],
-            success_url=body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=body.cancel_url,
-            metadata={"plan": body.plan},
-        )
+        session_kwargs = {
+            "mode": "subscription",
+            "line_items": [{"price": price_id, "quantity": 1}],
+            "success_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
+            "cancel_url": body.cancel_url,
+            "metadata": {"plan": body.plan},
+        }
+        if body.customer_email:
+            session_kwargs["customer_email"] = body.customer_email
+
+        session = stripe.checkout.Session.create(**session_kwargs)  # type: ignore[reportAttributeAccessIssue]
     except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc

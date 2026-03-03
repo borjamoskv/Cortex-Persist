@@ -17,9 +17,10 @@ import asyncio
 import functools
 import inspect
 import logging
+import threading
 import time
 from collections.abc import Callable
-from typing import ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 logger = logging.getLogger("cortex.respiration")
 
@@ -39,69 +40,53 @@ async def breathe(interval: float = 0.0) -> None:
     await asyncio.sleep(interval)
 
 
-def oxygenate(min_interval: float = 0.1) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Decorator: Ensures a minimum time passes between executions.
+def _reserve_slot(now: float, next_allowed: list[float], interval: float) -> float:
+    """Atomic slot reservation logic (Axiom 1)."""
+    if now < next_allowed[0]:
+        target = next_allowed[0]
+        next_allowed[0] += interval
+    else:
+        target = now
+        next_allowed[0] = now + interval
+    return target
 
-    Rate-limits heavy functions (like file parsing or fact aggregation)
-    so they don't consume the entire CPU. If called too frequently,
-    it introduces a small blocking delay (if sync) or yields (if async).
-    
-    [LEGION-Ω Hardened]: Uses atomic timeslot reservation. If 400 agents hit
-    this concurrently, they don't block each other. They each instantly reserve 
-    a slot in the future and sleep concurrently until their exact turn.
+
+def oxygenate(min_interval: float = 0.1):
+    """Decorator to ensure a function 'breathes' between calls.
+
+    Hardened legacy: LEGION-OMEGA (400 Agents) support.
+    Uses atomic timeslot reservation to handle massive concurrency without
+    blocking the Event Loop significantly.
     """
+    async_lock = asyncio.Lock()
+    sync_lock = threading.Lock()
+    next_allowed_time = [time.monotonic()]
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
         if inspect.iscoroutinefunction(func):
-            lock = asyncio.Lock()
-            next_allowed_time = 0.0
-
             @functools.wraps(func)
-            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-                nonlocal next_allowed_time
-                
-                async with lock:
-                    now = time.monotonic()
-                    if now < next_allowed_time:
-                        deficit = next_allowed_time - now
-                        next_allowed_time += min_interval
-                    else:
-                        deficit = 0.0
-                        next_allowed_time = now + min_interval
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                async with async_lock:
+                    target = _reserve_slot(time.monotonic(), next_allowed_time, min_interval)
 
+                deficit = target - time.monotonic()
                 if deficit > 0:
                     logger.debug("Oxygenating %s: breathing for %.3fs", func.__name__, deficit)
                     await breathe(deficit)
-
                 return await func(*args, **kwargs)
 
             return async_wrapper  # type: ignore[reportReturnType]
 
-        else:
-            import threading
-            lock = threading.Lock()
-            next_allowed_time = 0.0
+        @functools.wraps(func)
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+            with sync_lock:
+                target = _reserve_slot(time.monotonic(), next_allowed_time, min_interval)
 
-            @functools.wraps(func)
-            def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-                nonlocal next_allowed_time
-                
-                with lock:
-                    now = time.monotonic()
-                    if now < next_allowed_time:
-                        deficit = next_allowed_time - now
-                        next_allowed_time += min_interval
-                    else:
-                        deficit = 0.0
-                        next_allowed_time = now + min_interval
+            deficit = target - time.monotonic()
+            if deficit > 0:
+                time.sleep(deficit)
+            return func(*args, **kwargs)
 
-                if deficit > 0:
-                    # For sync functions we have no choice but to block,
-                    # but we do it outside the lock to prevent total starvation.
-                    time.sleep(deficit)
-
-                return func(*args, **kwargs)
-
-            return sync_wrapper
+        return sync_wrapper  # type: ignore[reportReturnType]
 
     return decorator

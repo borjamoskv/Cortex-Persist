@@ -158,6 +158,12 @@ CREATE_TRANSACTIONS_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
+
+CREATE TRIGGER IF NOT EXISTS prevent_tx_update BEFORE UPDATE ON transactions
+BEGIN SELECT RAISE(ABORT, 'Immunitas-Omega: Ledger UPDATE prohibited'); END;
+
+CREATE TRIGGER IF NOT EXISTS prevent_tx_delete BEFORE DELETE ON transactions
+BEGIN SELECT RAISE(ABORT, 'Immunitas-Omega: Ledger DELETE prohibited'); END;
 """
 
 # ─── Heartbeats ───────────────────────────────────────────────────────

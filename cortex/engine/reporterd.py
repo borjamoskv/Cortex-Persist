@@ -29,35 +29,32 @@ class ManifoldDaemon:
         self._loop_task: asyncio.Task | None = None
 
     async def metrics_producer(self):
-        """Generates metrics periodically or on DB changes."""
+        """Generates metrics via Event Horizon on DB changes."""
         while True:
             try:
-                # 130/100: Should ideally subscribe to the CORTEX SignalBus via ZeroMQ 
-                # or async DB triggers to push only on change. For this prototype,
-                # we do an ultra-fast local query yield loop without blocking.
-                # Since sqlite3 is sync in SovereignReporter atm, we wrap it in a threadpool to not block the event loop.
-                metrics = await asyncio.to_thread(self.reporter.collect_metrics)
-                data = json.dumps(metrics.__dict__)
-                
-                dead_clients = set()
-                for client_ref in list(self.clients):
-                    client = client_ref()
-                    if client is None or client.task.done():
-                        dead_clients.add(client_ref)
+                async for metrics in self.reporter.stream_metrics(interval=0.1):
+                    if not self.clients:
                         continue
-                    try:
-                        await client.write(f"data: {data}\n\n".encode())
-                    except BaseException:
-                        dead_clients.add(client_ref)
-                
-                self.clients -= dead_clients
-                
+                        
+                    data = json.dumps(metrics.__dict__)
+                    
+                    dead_clients = set()
+                    for client_ref in list(self.clients):
+                        client = client_ref()
+                        if client is None or client.task.done():
+                            dead_clients.add(client_ref)
+                            continue
+                        try:
+                            await client.write(f"data: {data}\n\n".encode())
+                        except BaseException:
+                            dead_clients.add(client_ref)
+                    
+                    self.clients -= dead_clients
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 logger.error("Daemon metric generation error: %s", e)
-            
-            # Real-time fluid push (every 1.5 seconds gives a good tactile feel 
-            # while avoiding pure DDOS on the frontend)
-            await asyncio.sleep(1.5)
+                await asyncio.sleep(1.0)
 
     async def sse_handler(self, request: Request) -> StreamResponse:
         """Handles incoming SSE connections from the Live Dashboard."""

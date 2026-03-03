@@ -11,6 +11,8 @@ import re
 from collections.abc import Mapping
 from typing import Any, Protocol
 
+from cortex.utils.respiration import oxygenate
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -38,6 +40,7 @@ class OOMKiller:
 
     name = "oom_killer"
 
+    @oxygenate(min_interval=0.01)
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         try:
@@ -63,6 +66,7 @@ class Intruder:
 
     name = "intruder"
 
+    @oxygenate(min_interval=0.01)
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for raw eval/exec (ignore literal_eval and asyncio subprocess APIs)
@@ -102,6 +106,7 @@ class EntropyDemon:
 
     name = "entropy_demon"
 
+    @oxygenate(min_interval=0.01)
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
@@ -121,6 +126,7 @@ class ChronosSniper:
 
     name = "chronos_sniper"
 
+    @oxygenate(min_interval=0.01)
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for blocking calls in async def
@@ -144,4 +150,99 @@ class ChronosSniper:
         return findings
 
 
+class SiegeVector(Protocol):
+    """Runtime Siege Vector Interface for live system attacks."""
+
+    name: str
+
+    async def attack(self, system: Any, context: Mapping[str, Any]) -> list[str]:
+        """Attacks the live system and returns detected vulnerabilities of success."""
+        ...
+
+
+class LedgerPoisoner:
+    """Vector: Cryptographic Hash Poisoning (The Ledger Poisoner)."""
+
+    name = "ledger_poisoner"
+
+    async def attack(self, system: Any, context: Mapping[str, Any]) -> list[str]:
+        findings = []
+        try:
+            # We assume system is an instance of AsyncCortexEngine
+            pool = system.pool
+            async with pool.acquire() as conn:
+                # Attempt to corrupt a random transaction
+                cursor = await conn.execute(
+                    "SELECT id FROM transactions ORDER BY RANDOM() LIMIT 1"
+                )
+                row = await cursor.fetchone()
+                if row:
+                    tx_id = row[0]
+                    try:
+                        await conn.execute(
+                            "UPDATE transactions SET hash = 'POISONED_HASH_12345' WHERE id = ?",
+                            (tx_id,)
+                        )
+                        await conn.commit()
+                        findings.append(f"LedgerPoisoner: Successfully corrupted transaction #{tx_id} via raw SQL UPDATE.")
+                    except Exception:
+                        # If the DB prevents it, the attack fails (this is good)
+                        pass
+
+                # Attempt to delete a Merkle root
+                try:
+                    await conn.execute("DELETE FROM merkle_roots WHERE id > 0")
+                    await conn.commit()
+                    findings.append("LedgerPoisoner: Successfully dropped Merkle checkpoints via raw SQL DELETE.")
+                except Exception:
+                    pass
+
+        except Exception as e:
+            logger.debug(f"LedgerPoisoner execution error: {e}")
+
+        return findings
+
+
+class VaultCracker:
+    """Vector: AES-GCM Entropy Cracker (The Vault Cracker)."""
+
+    name = "vault_cracker"
+
+    async def attack(self, system: Any, context: Mapping[str, Any]) -> list[str]:
+        findings = []
+        try:
+            vault = system.vault
+            if not vault or not vault.is_available:
+                return ["VaultCracker: Vault is disabled or missing key, bypass successful."]
+            
+            # Attack 1: Try deciphering garbage
+            try:
+                vault.decrypt("V0VMQ09NRSBUTyBUSEUgUkVEIFRFQU0=")
+            except Exception:
+                pass  # Expected
+
+            # Attack 2: We simulate extracting encrypted content from DB and altering the ciphertext
+            pool = system.pool
+            async with pool.acquire() as conn:
+                cursor = await conn.execute(
+                    "SELECT id, content FROM facts WHERE content LIKE '%==%' LIMIT 1"
+                )
+                row = await cursor.fetchone()
+                if row:
+                    fact_id, content = row
+                    # Try to replace a few chars in the base64 to alter decrypt payload
+                    # This tests if AES-GCM authentication tag catches the tampering
+                    tampered = content[:-5] + "XXXXX"
+                    try:
+                        vault.decrypt(tampered)
+                        findings.append(f"VaultCracker: Malleability attack succeeded on fact #{fact_id}.")
+                    except Exception:
+                        pass  # AES-GCM standard prevents this
+        except Exception as e:
+            logger.debug(f"VaultCracker execution error: {e}")
+
+        return findings
+
+
 RED_TEAM_SWARM = [OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper()]
+COMPLIANCE_SIEGE_SWARM = [LedgerPoisoner(), VaultCracker()]
