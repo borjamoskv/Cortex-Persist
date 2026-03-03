@@ -18,14 +18,14 @@ logger = logging.getLogger("cortex.adk.goog_tools")
 def goog_quota() -> dict[str, Any]:
     """
     Check the storage quota and availability of the Google One (Drive) sync folder.
-    
+
     Returns:
         A dict with total, used, and free space in the Drive mount.
     """
     detected = _detect_cloud_sync()
     if not detected:
         return {"status": "error", "message": "Google Drive sync folder not detected."}
-    
+
     path, provider = detected
     try:
         usage = shutil.disk_usage(path.parent)  # Check parent mount
@@ -36,7 +36,7 @@ def goog_quota() -> dict[str, Any]:
             "total_gb": round(usage.total / (1024**3), 2),
             "used_gb": round(usage.used / (1024**3), 2),
             "free_gb": round(usage.free / (1024**3), 2),
-            "percent_used": round((usage.used / usage.total) * 100, 1)
+            "percent_used": round((usage.used / usage.total) * 100, 1),
         }
     except Exception as e:
         return {"status": "error", "message": f"Could not check quota: {e}"}
@@ -61,13 +61,13 @@ def goog_sync_notebooklm(mode: str = "both") -> dict[str, Any]:
             return {
                 "status": "success",
                 "message": "NotebookLM sync completed successfully.",
-                "output": result.stdout.strip()
+                "output": result.stdout.strip(),
             }
         else:
             return {
                 "status": "error",
                 "message": "Sync command failed.",
-                "stderr": result.stderr.strip()
+                "stderr": result.stderr.strip(),
             }
     except Exception as e:
         return {"status": "error", "message": f"Sync process failed: {e}"}
@@ -112,7 +112,7 @@ def goog_backup_cortex() -> dict[str, Any]:
             "status": "success",
             "message": f"Sovereign backup created: {dest_name}",
             "path": str(dest_path),
-            "size_mb": round(os.path.getsize(dest_path) / (1024**2), 2)
+            "size_mb": round(os.path.getsize(dest_path) / (1024**2), 2),
         }
     except Exception as e:
         return {"status": "error", "message": f"Backup failed: {e}"}

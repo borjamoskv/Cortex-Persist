@@ -52,9 +52,9 @@ __all__ = [
 class VoteOutcome(Enum):
     """The result of a single agent's vote."""
 
-    FOR = auto()         # Agent agrees the fact is valid
-    AGAINST = auto()     # Agent rejects the fact as invalid
-    ABSTAIN = auto()     # Agent has insufficient context to vote
+    FOR = auto()  # Agent agrees the fact is valid
+    AGAINST = auto()  # Agent rejects the fact as invalid
+    ABSTAIN = auto()  # Agent has insufficient context to vote
 
 
 # ── Data Models ────────────────────────────────────────────────────────────
@@ -229,7 +229,9 @@ class RWABFTConsensus:
         if len(non_abstain) < self._min_quorum:
             logger.info(
                 "RWA-BFT: fact=%s quorum not met (%d < %d)",
-                fact_id, len(non_abstain), self._min_quorum,
+                fact_id,
+                len(non_abstain),
+                self._min_quorum,
             )
             result = ConsensusResult(
                 fact_id=fact_id,
@@ -247,14 +249,10 @@ class RWABFTConsensus:
         approving_rep = self._weighted_rep(for_votes)
 
         # Eq. 1 — Supermajority check
-        supermajority_met = (total_rep > 0) and (
-            approving_rep > self._threshold * total_rep
-        )
+        supermajority_met = (total_rep > 0) and (approving_rep > self._threshold * total_rep)
 
         # ── Step 3: Detect Byzantine outliers ─────────────────────────
-        outliers, byzantine_detected = self._detect_outliers(
-            for_votes, against_votes, total_rep
-        )
+        outliers, byzantine_detected = self._detect_outliers(for_votes, against_votes, total_rep)
 
         # ── Step 4: Weighted confidence of FOR votes ───────────────────
         confidence = self._weighted_confidence(for_votes) if for_votes else 0.0
@@ -278,10 +276,12 @@ class RWABFTConsensus:
 
         self._history[fact_id] = result
         logger.info(
-            "RWA-BFT: fact=%s accepted=%s (FOR=%.2f / TOTAL=%.2f, threshold=%.2f%%), "
-            "outliers=%s",
-            fact_id, result.accepted,
-            approving_rep, total_rep, self._threshold * 100,
+            "RWA-BFT: fact=%s accepted=%s (FOR=%.2f / TOTAL=%.2f, threshold=%.2f%%), outliers=%s",
+            fact_id,
+            result.accepted,
+            approving_rep,
+            total_rep,
+            self._threshold * 100,
             outliers or "none",
         )
         return result
@@ -311,9 +311,7 @@ class RWABFTConsensus:
         total_rep = self._weighted_rep(for_votes)
         if total_rep < 1e-9:
             return 0.0
-        return sum(
-            v.confidence * self._rep(v.agent_id) for v in for_votes
-        ) / total_rep
+        return sum(v.confidence * self._rep(v.agent_id) for v in for_votes) / total_rep
 
     def _detect_outliers(
         self,
@@ -352,7 +350,7 @@ class RWABFTConsensus:
 
         mean_rep = sum(all_reps) / len(all_reps)
         variance = sum((r - mean_rep) ** 2 for r in all_reps) / len(all_reps)
-        std_rep = variance ** 0.5
+        std_rep = variance**0.5
 
         for v in minority_votes:
             r = self._rep(v.agent_id)
@@ -363,7 +361,9 @@ class RWABFTConsensus:
                 byzantine = True
                 logger.warning(
                     "RWA-BFT: Possible byzantine node detected: %s (rep=%.3f, z=%.2f)",
-                    v.agent_id, r, z,
+                    v.agent_id,
+                    r,
+                    z,
                 )
 
         return outliers, byzantine
@@ -384,9 +384,7 @@ class RWABFTConsensus:
         # opposition in a clear consensus is a stronger byzantine signal.
         return -3.0 * vote.confidence
 
-    def _update_reputations(
-        self, votes: list[AgentVote], final: VoteOutcome
-    ) -> None:
+    def _update_reputations(self, votes: list[AgentVote], final: VoteOutcome) -> None:
         """Apply Markov reputation updates (Eq. 2) for all participating agents.
 
         Rᵢ⁽ᵗ⁺¹⁾ = λ·Rᵢ⁽ᵗ⁾ + (1−λ)·Φ(vᵢ, V_final)
@@ -403,5 +401,8 @@ class RWABFTConsensus:
             self._reputation[aid] = max(0.01, min(10.0, updated))
             logger.debug(
                 "RWA-BFT: reputation update %s: %.3f → %.3f (φ=%.2f)",
-                aid, current, self._reputation[aid], phi,
+                aid,
+                current,
+                self._reputation[aid],
+                phi,
             )

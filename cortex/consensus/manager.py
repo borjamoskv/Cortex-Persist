@@ -61,7 +61,7 @@ class ConsensusManager:
                 payload={"fact_id": fact_id, "agent": agent, "vote": value},
                 source="consensus_manager",
             )
-        
+
         score = await self._recalculate_consensus(fact_id, conn)
         await conn.commit()
         return score
@@ -108,7 +108,7 @@ class ConsensusManager:
                     payload={"agent_id": agent_id, "fact_id": fact_id},
                     source="consensus_manager",
                 )
-            
+
             # Legacy Shadow (Analyzing a corpse)
             metrics.inc(
                 "cortex_consensus_failures_total",
@@ -116,8 +116,10 @@ class ConsensusManager:
                 meta={"agent_id": agent_id, "fact_id": fact_id},
             )
             # Notify Pulse Registry of the shadow detection
-            PULSE.inc("cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"})
-            
+            PULSE.inc(
+                "cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"}
+            )
+
             raise ValueError(f"Agent {agent_id} not found")
 
         rep = agent[0]
@@ -169,6 +171,10 @@ class ConsensusManager:
         total_weight = sum(max(v[1], v[2]) for v in votes)
         score = 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
         await self._update_fact_score(fact_id, score, conn)
+
+        # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
+        await self._update_agent_entropy(fact_id, score, conn)
+
         return score
 
     async def _recalculate_consensus(self, fact_id: int, conn) -> float:
@@ -212,3 +218,54 @@ class ConsensusManager:
             signer="consensus_manager",
             commit=False,
         )
+
+    async def _update_agent_entropy(self, fact_id: int, final_consensus: float, conn) -> None:
+        """
+        Ratifica el consenso final y castiga/premia la entropía de los votantes.
+        Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
+        """
+        # Convertimos score continuo de [0.5, 1.5] a valor discreto
+        if final_consensus >= 1.5:
+            c_val = 1
+        elif final_consensus <= 0.5:
+            c_val = -1
+        else:
+            return  # No hay consenso claro aún (Disputed), no hay castigo posible.
+
+        # 1. Recuperar los votos para este Fact
+        cursor = await conn.execute(
+            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ?", (fact_id,)
+        )
+        voters = await cursor.fetchall()
+
+        for agent_id, a_vote in voters:
+            # Calcular Alineación (1 = Acierto, -1 = Divergencia, 0 = Abstención)
+            alignment_score = a_vote * c_val
+
+            # 2. Actualizar el ring_buffer de los últimos N votos (hits vs misses)
+            await conn.execute(
+                """
+                UPDATE agents 
+                SET 
+                    alignment_hits = alignment_hits + (CASE WHEN ? > 0 THEN 1 ELSE 0 END),
+                    alignment_misses = alignment_misses + (CASE WHEN ? < 0 THEN 1 ELSE 0 END),
+                    reputation_score = CASE 
+                        WHEN (alignment_hits - alignment_misses) < 0 THEN base_reputation * 0.5
+                        ELSE base_reputation 
+                    END
+                WHERE id = ? AND is_active = 1
+            """,
+                (alignment_score, alignment_score, agent_id),
+            )
+
+            # Pulse the reality degradation check
+            if alignment_score < 0:
+                logger.warning(
+                    f"Entropic drift detected in agent {agent_id} (Vote rejected by WBFT Consensus)."
+                )
+                if self._signal_bus:
+                    self._signal_bus.emit(
+                        "agent:alignment:drift",
+                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        source="consensus_manager",
+                    )

@@ -350,7 +350,13 @@ class SovereignLLM:
 
         chain.append(provider_name)
         return await self._execute_provider_call(
-            provider_name, prompt, system, chain, errors, is_local, intent=intent,
+            provider_name,
+            prompt,
+            system,
+            chain,
+            errors,
+            is_local,
+            intent=intent,
         )
 
     def _build_priority_chain(self) -> list[str]:

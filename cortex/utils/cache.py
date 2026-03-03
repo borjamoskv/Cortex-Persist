@@ -1,8 +1,8 @@
 """
 CORTEX v5.5 — Sovereign Bounded Cache.
 
-A thread-safe, async-friendly LRU+TTL cache with eviction hooks for 
-persistence and audit trails. 
+A thread-safe, async-friendly LRU+TTL cache with eviction hooks for
+persistence and audit trails.
 
 Axiom: Ω₂ (Entropic Asymmetry) — memory is finite; audit trails are infinite.
 """

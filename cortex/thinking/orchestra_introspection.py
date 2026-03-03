@@ -108,7 +108,9 @@ class OrchestraIntrospectionMixin:
         avg_latency = sum(r.total_latency_ms for r in self._history) / total  # type: ignore[reportAttributeAccessIssue]
         success_rate = (
             sum(
-                r.models_succeeded / r.models_queried for r in self._history if r.models_queried > 0  # type: ignore[reportAttributeAccessIssue]
+                r.models_succeeded / r.models_queried
+                for r in self._history
+                if r.models_queried > 0  # type: ignore[reportAttributeAccessIssue]
             )
             / total
         )

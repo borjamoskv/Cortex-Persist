@@ -32,8 +32,12 @@ DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 # Default Cloud Sync paths (macOS)
 CLOUD_PROVIDERS = {
     "Google Drive": [
-        Path.home() / "Library" / "CloudStorage" /
-        "GoogleDrive-borjafernandezangulo@gmail.com" / "Mi unidad" / "CORTEX-NotebookLM",
+        Path.home()
+        / "Library"
+        / "CloudStorage"
+        / "GoogleDrive-borjafernandezangulo@gmail.com"
+        / "Mi unidad"
+        / "CORTEX-NotebookLM",
         Path.home() / "Google Drive" / "CORTEX-NotebookLM",
     ],
     "OneDrive": [
@@ -41,68 +45,181 @@ CLOUD_PROVIDERS = {
     ],
     "iCloud": [
         Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "CORTEX-NotebookLM",
-    ]
+    ],
 }
 
 # Domain taxonomy
 DOMAIN_MAP: dict[str, list[str]] = {
     "cortex-core": [
-        "cortex", "CORTEX", "CORTEX-Core", "CORTEX-V8", "CORTEX V8",
-        "CORTEX V7 Evolution", "CORTEX V8 Transition", "CORTEX_V7",
-        "CORTEX-LLM", "CORTEX-Formatter", "CORTEX-Evolution",
-        "CORTEX-Daemon", "CORTEX_CLOUD", "cortex-v7", "cortex-test",
-        "cortex-persist", "Cortex-Persist", "cortexpersist", "cli",
-        "CORE", "CODEX", "__system__",
+        "cortex",
+        "CORTEX",
+        "CORTEX-Core",
+        "CORTEX-V8",
+        "CORTEX V8",
+        "CORTEX V7 Evolution",
+        "CORTEX V8 Transition",
+        "CORTEX_V7",
+        "CORTEX-LLM",
+        "CORTEX-Formatter",
+        "CORTEX-Evolution",
+        "CORTEX-Daemon",
+        "CORTEX_CLOUD",
+        "cortex-v7",
+        "cortex-test",
+        "cortex-persist",
+        "Cortex-Persist",
+        "cortexpersist",
+        "cli",
+        "CORE",
+        "CODEX",
+        "__system__",
     ],
     "cortex-infra": [
-        "SYSTEM", "system", "daemons", "security", "scripts",
-        "DNS / CNS Config", "macOS", "MACOS_TAHOE", "sidecar",
-        "testing", "test-project", "TEST", "default",
+        "SYSTEM",
+        "system",
+        "daemons",
+        "security",
+        "scripts",
+        "DNS / CNS Config",
+        "macOS",
+        "MACOS_TAHOE",
+        "sidecar",
+        "testing",
+        "test-project",
+        "TEST",
+        "default",
     ],
     "cortex-agents": [
-        "AGENT_SCIENCE", "AGENTICA", "moskv-swarm", "swarm-demo",
-        "MOSKV-1", "MOSKV", "moskv-1", "moskv", "__bridges__",
-        "nexus", "singularity-nexus", "centauro", "agent:gemini",
-        "pydantic-ai", "kimi-swarm-1", "KIMI",
+        "AGENT_SCIENCE",
+        "AGENTICA",
+        "moskv-swarm",
+        "swarm-demo",
+        "MOSKV-1",
+        "MOSKV",
+        "moskv-1",
+        "moskv",
+        "__bridges__",
+        "nexus",
+        "singularity-nexus",
+        "centauro",
+        "agent:gemini",
+        "pydantic-ai",
+        "kimi-swarm-1",
+        "KIMI",
     ],
     "cortex-products": [
-        "naroa", "naroa-2026", "naroa-web", "NAROA_2026",
-        "live-notch", "live-notch-swift", "livenotch", "notch-live",
-        "cortex-notch", "SonicNotch", "moltbook", "MOLTBOOK",
-        "Moltbook", "Moltbook Ledger", "Moltbook Monetization",
-        "sonic-supreme", "sonic_sovereign", "mastering-1",
-        "lyria-studio", "veo-lyria-studio", "filete-cumbia",
-        "el-pueblo-online", "gordacorp", "borjamoskv", "borjamoskv.com",
-        "borja.moskv.eth", "manteca-web", "comienzos-clone",
-        "xokas-elevator", "garmin-dashboard", "millennium",
-        "openclaw", "conspiracy-calculator", "RATIOHEAD",
-        "noir-ui-kit", "impact-web", "FrontierApp",
+        "naroa",
+        "naroa-2026",
+        "naroa-web",
+        "NAROA_2026",
+        "live-notch",
+        "live-notch-swift",
+        "livenotch",
+        "notch-live",
+        "cortex-notch",
+        "SonicNotch",
+        "moltbook",
+        "MOLTBOOK",
+        "Moltbook",
+        "Moltbook Ledger",
+        "Moltbook Monetization",
+        "sonic-supreme",
+        "sonic_sovereign",
+        "mastering-1",
+        "lyria-studio",
+        "veo-lyria-studio",
+        "filete-cumbia",
+        "el-pueblo-online",
+        "gordacorp",
+        "borjamoskv",
+        "borjamoskv.com",
+        "borja.moskv.eth",
+        "manteca-web",
+        "comienzos-clone",
+        "xokas-elevator",
+        "garmin-dashboard",
+        "millennium",
+        "openclaw",
+        "conspiracy-calculator",
+        "RATIOHEAD",
+        "noir-ui-kit",
+        "impact-web",
+        "FrontierApp",
     ],
     "cortex-operations": [
-        "ghost-control", "ghost_control", "GHOST-1", "GHOST-CONTROL",
-        "autorouter", "autorouter-1", "SAP", "sap", "SAP Audit",
-        "SAP_SYNC", "sap-audit-ui", "mailtv-1", "MAILTV-1",
-        "MAILING", "ecosistema", "global", "general",
-        "reporting", "tips", "i18n", "IDC", "idc-agent",
-        "JMIR", "JMIR-FREE-PUB-COMPLETED", "JMIR-FREE-TIERS",
-        "EU_SCRAPER", "REDDIT_OVERLORD", "omni-translate",
+        "ghost-control",
+        "ghost_control",
+        "GHOST-1",
+        "GHOST-CONTROL",
+        "autorouter",
+        "autorouter-1",
+        "SAP",
+        "sap",
+        "SAP Audit",
+        "SAP_SYNC",
+        "sap-audit-ui",
+        "mailtv-1",
+        "MAILTV-1",
+        "MAILING",
+        "ecosistema",
+        "global",
+        "general",
+        "reporting",
+        "tips",
+        "i18n",
+        "IDC",
+        "idc-agent",
+        "JMIR",
+        "JMIR-FREE-PUB-COMPLETED",
+        "JMIR-FREE-TIERS",
+        "EU_SCRAPER",
+        "REDDIT_OVERLORD",
+        "omni-translate",
     ],
     "cortex-strategy": [
-        "COMMERCE-Ω", "Pricing", "ROI_LABOR", "moneytv", "moneytv-1",
-        "cortex-landing", "landing", "landing-apotheosis",
-        "CortexSovereignWeb", "cortex-sovereign-web",
-        "moskvbot", "moskvbot-test",
+        "COMMERCE-Ω",
+        "Pricing",
+        "ROI_LABOR",
+        "moneytv",
+        "moneytv-1",
+        "cortex-landing",
+        "landing",
+        "landing-apotheosis",
+        "CortexSovereignWeb",
+        "cortex-sovereign-web",
+        "moskvbot",
+        "moskvbot-test",
     ],
     "cortex-research": [
-        "EVOLUTION", "evolution", "Ouroboros", "ouroboros",
-        "TEMPORAL", "TEMPORAL-RENAMING", "TEMPORAL-UNIFICATION",
-        "SINGULARITY-OMEGA", "PORTAL-OMEGA", "VOID-SINGULARITY",
-        "Synaptic/Causal", "APOTHEOSIS", "AUTODIDACT", "AUTO_MUTATE",
-        "CHRONOS-1", "Sovereignty", "aether-omega", "keter",
-        "keter-omega", "antigravity", "Antigravity",
-        "Antigravity/CORTEX", "Antigravity/Ghost/MCP",
-        "blue", "MANT_SYS", "OLA3", "mejoralo",
-        "Muro de Aislamiento", "eqmac-re",
+        "EVOLUTION",
+        "evolution",
+        "Ouroboros",
+        "ouroboros",
+        "TEMPORAL",
+        "TEMPORAL-RENAMING",
+        "TEMPORAL-UNIFICATION",
+        "SINGULARITY-OMEGA",
+        "PORTAL-OMEGA",
+        "VOID-SINGULARITY",
+        "Synaptic/Causal",
+        "APOTHEOSIS",
+        "AUTODIDACT",
+        "AUTO_MUTATE",
+        "CHRONOS-1",
+        "Sovereignty",
+        "aether-omega",
+        "keter",
+        "keter-omega",
+        "antigravity",
+        "Antigravity",
+        "Antigravity/CORTEX",
+        "Antigravity/Ghost/MCP",
+        "blue",
+        "MANT_SYS",
+        "OLA3",
+        "mejoralo",
+        "Muro de Aislamiento",
+        "eqmac-re",
     ],
 }
 
@@ -119,12 +236,14 @@ def _get_db_path() -> str:
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI."""
     from cortex.events.loop import sovereign_run
+
     return sovereign_run(coro)
 
 
 async def _get_engine_active_facts(project: str | None = None):
     """Fetch cleartext facts using CortexEngine."""
     from cortex.cli.common import get_engine
+
     engine = get_engine()
     try:
         await engine.init_db()
@@ -147,12 +266,14 @@ def _detect_cloud_sync() -> tuple[Path, str] | None:
 def _get_entities_and_relations(project: str | None = None):
     """Load entity graph for NotebookLM context."""
     import pandas as pd
+
     conn = sqlite3.connect(_get_db_path())
     try:
         if project:
             entities = pd.read_sql_query(
                 "SELECT name, entity_type, mention_count FROM entities WHERE project = ?",
-                conn, params=(project,)
+                conn,
+                params=(project,),
             )
             relations = pd.read_sql_query(
                 """SELECT e1.name as source, e2.name as target, r.relation_type 
@@ -160,7 +281,8 @@ def _get_entities_and_relations(project: str | None = None):
                    JOIN entities e1 ON r.source_entity_id = e1.id
                    JOIN entities e2 ON r.target_entity_id = e2.id
                    WHERE e1.project = ?""",
-                conn, params=(project,)
+                conn,
+                params=(project,),
             )
         else:
             entities = pd.read_sql_query(
@@ -171,7 +293,7 @@ def _get_entities_and_relations(project: str | None = None):
                    FROM entity_relations r
                    JOIN entities e1 ON r.source_entity_id = e1.id
                    JOIN entities e2 ON r.target_entity_id = e2.id""",
-                conn
+                conn,
             )
         return entities, relations
     finally:
@@ -180,7 +302,7 @@ def _get_entities_and_relations(project: str | None = None):
 
 def _format_fact_obj(fact) -> str:
     """Format a Fact object applying the Shadow Key pattern (Ω₁).
-    
+
     El patrón Shadow Key asegura que NotebookLM ancle la cita a un token ruidoso y específico
     (∆_CTX:xxxx), inyectándolo tanto al inicio como al final para sobrevivir a la síntesis LLM
     y permitir la extracción inversa determinista sin depender de NLP.
@@ -188,21 +310,21 @@ def _format_fact_obj(fact) -> str:
     short_id = str(fact.id)[:8] if fact.id else "00000000"
     shadow_open = f"∆_CTX:{short_id.upper()}"
     shadow_close = f"∇_CTX:{short_id.upper()}"
-    
+
     clean_content = fact.content.replace("\n", " ")
-    
+
     # Anclaje semántico encapsulado en código (backticks) para máxima retención LLM
     line = f"`[{shadow_open}]` {clean_content}"
-    
+
     meta = []
     if fact.confidence and fact.confidence != "stated":
         meta.append(f"conf:{fact.confidence}")
     if fact.tags:
         meta.append(f"tax:{','.join(fact.tags)}")
-        
+
     if meta:
         line += f" `{' | '.join(meta)}`"
-    
+
     # Shadow Key de cierre
     line += f" `[{shadow_close}]`"
     return f"> {line}"
@@ -216,6 +338,7 @@ def _sovereign_signature() -> str:
 
 # ── CLI Group ──────────────────────────────────────────────────────────
 
+
 @click.group("notebooklm")
 def notebooklm_cmds():
     """📓 NotebookLM synchronization commands."""
@@ -223,15 +346,18 @@ def notebooklm_cmds():
 
 
 @notebooklm_cmds.command("digest")
-@click.option("--output", "-o", type=click.Path(), default=str(DIGEST_FILE),
-              help="Output file path")
+@click.option(
+    "--output", "-o", type=click.Path(), default=str(DIGEST_FILE), help="Output file path"
+)
 def digest_cmd(output: str):
     """Generate Master Digest for NotebookLM (decrypted)."""
+
     async def _digest():
         facts = await _get_engine_active_facts()
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Group by project using O(1) hashing (defaultdict)
         from collections import defaultdict
+
         projects_data = defaultdict(list)
         for f in facts:
             projects_data[f.project].append(f)
@@ -251,20 +377,20 @@ def digest_cmd(output: str):
             lines.append("### Top Entities (Frequent Mention)\n")
             top_ents = ents.sort_values("mention_count", ascending=False).head(10)
             for _, row in top_ents.iterrows():
-                name = row['name']
-                count = row['mention_count']
+                name = row["name"]
+                count = row["mention_count"]
                 lines.append(f"- {name} ({row['entity_type']}) - {count} mentions\n")
             lines.append("\n---\n\n")
 
         for proj in sorted(projects_data.keys()):
             proj_facts = projects_data[proj]
             lines.append(f"## {proj}\n*{len(proj_facts)} hechos*\n\n")
-            
+
             # Group by type (O(1))
             types_data = defaultdict(list)
             for f in proj_facts:
                 types_data[f.fact_type].append(f)
-            
+
             for ftype in sorted(types_data.keys()):
                 lines.append(f"### {ftype.capitalize()}\n\n")
                 for f in types_data[ftype]:
@@ -276,24 +402,32 @@ def digest_cmd(output: str):
         Path(output).write_text(content, encoding="utf-8")
 
         word_count = len(content.split())
-        limit_msg = '✅ Safe' if word_count < 500_000 else '⚠️ OVER LIMIT'
-        console.print(Panel(
-            f"[green]✅ Master Digest generado (CLEAR_TEXT)[/green]\n"
-            f"  Archivo: {output}\n"
-            f"  Palabras: {word_count:,}\n"
-            f"  {limit_msg}",
-            title="📓 NotebookLM Digest",
-            border_style="green",
-        ))
+        limit_msg = "✅ Safe" if word_count < 500_000 else "⚠️ OVER LIMIT"
+        console.print(
+            Panel(
+                f"[green]✅ Master Digest generado (CLEAR_TEXT)[/green]\n"
+                f"  Archivo: {output}\n"
+                f"  Palabras: {word_count:,}\n"
+                f"  {limit_msg}",
+                title="📓 NotebookLM Digest",
+                border_style="green",
+            )
+        )
 
     _run_async(_digest())
 
 
 @notebooklm_cmds.command("fragment")
-@click.option("--output-dir", "-o", type=click.Path(), default=str(DOMAINS_DIR),
-              help="Output directory for domain fragments")
+@click.option(
+    "--output-dir",
+    "-o",
+    type=click.Path(),
+    default=str(DOMAINS_DIR),
+    help="Output directory for domain fragments",
+)
 def fragment_cmd(output_dir: str):
     """Fragment decrypted knowledge into semantic domains."""
+
     async def _fragment():
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
@@ -301,7 +435,7 @@ def fragment_cmd(output_dir: str):
         ts = datetime.now().strftime("%Y-%m-%d")
 
         from collections import defaultdict
-        
+
         # Classify facts by domain (O(1) with defaultdict)
         domain_facts = defaultdict(list)
         for f in facts:
@@ -317,7 +451,7 @@ def fragment_cmd(output_dir: str):
         for domain in sorted(domain_facts.keys()):
             facts_in_domain = domain_facts[domain]
             filename = out / f"{domain}-{ts}.md"
-            
+
             # Group by project within domain
             proj_data = defaultdict(list)
             for f in facts_in_domain:
@@ -328,15 +462,15 @@ def fragment_cmd(output_dir: str):
                 f"> Snapshot: {ts} | Facts: {len(facts_in_domain)} | Projects: {len(proj_data)}\n\n",
                 "---\n\n",
             ]
-            
+
             for proj in sorted(proj_data.keys()):
                 proj_facts = proj_data[proj]
                 lines.append(f"## {proj}\n*{len(proj_facts)} hechos*\n\n")
-                
+
                 type_data = defaultdict(list)
                 for f in proj_facts:
                     type_data[f.fact_type].append(f)
-                
+
                 for ftype in sorted(type_data.keys()):
                     lines.append(f"### {ftype.capitalize()}\n\n")
                     for f in type_data[ftype]:
@@ -357,10 +491,15 @@ def fragment_cmd(output_dir: str):
 
 
 @notebooklm_cmds.command("sync")
-@click.option("--drive-path", type=click.Path(), default=None,
-              help="Google Drive folder path (auto-detected if not set)")
-@click.option("--mode", type=click.Choice(["digest", "domains", "both"]),
-              default="both", help="What to sync")
+@click.option(
+    "--drive-path",
+    type=click.Path(),
+    default=None,
+    help="Google Drive folder path (auto-detected if not set)",
+)
+@click.option(
+    "--mode", type=click.Choice(["digest", "domains", "both"]), default="both", help="What to sync"
+)
 def sync_cmd(drive_path: str | None, mode: str):
     """Sync exports to Google Drive for NotebookLM auto-pickup."""
     # Detect or use provided path
@@ -412,6 +551,7 @@ def sync_cmd(drive_path: str | None, mode: str):
     # Clean old files (older than 7 days)
     import os
     import time
+
     cutoff = time.time() - (7 * 86400)
     cleaned = 0
     for f in target.glob("*.md"):
@@ -420,15 +560,17 @@ def sync_cmd(drive_path: str | None, mode: str):
             f.unlink()
             cleaned += 1
 
-    console.print(Panel(
-        f"[green]✅ Sincronizados {len(synced_files)} archivos a {provider_name}[/green]\n"
-        f"  Destino: {target}\n"
-        f"  {'Limpiados ' + str(cleaned) + ' archivos antiguos' if cleaned else ''}\n\n"
-        f"  📋 NotebookLM debería detectarlos automáticamente\n"
-        f"     si Drive está conectado como fuente.",
-        title="🔄 Google Drive Sync",
-        border_style="green",
-    ))
+    console.print(
+        Panel(
+            f"[green]✅ Sincronizados {len(synced_files)} archivos a {provider_name}[/green]\n"
+            f"  Destino: {target}\n"
+            f"  {'Limpiados ' + str(cleaned) + ' archivos antiguos' if cleaned else ''}\n\n"
+            f"  📋 NotebookLM debería detectarlos automáticamente\n"
+            f"     si Drive está conectado como fuente.",
+            title="🔄 Google Drive Sync",
+            border_style="green",
+        )
+    )
 
 
 @notebooklm_cmds.command("status")
@@ -444,11 +586,13 @@ def status_cmd():
     def _check(path: Path, label: str):
         if path.is_file():
             import os
+
             mtime = datetime.fromtimestamp(os.path.getmtime(path)).strftime("%Y-%m-%d %H:%M")
             size = os.path.getsize(path)
             table.add_row(label, str(path), "1", f"{size:,} B", mtime)
         elif path.is_dir():
             import os
+
             files = list(path.glob("*.md"))
             total_size = sum(os.path.getsize(f) for f in files)
             newest = max((os.path.getmtime(f) for f in files), default=0)
@@ -469,7 +613,9 @@ def status_cmd():
         table.add_row(
             "Cloud Sync",
             "Not detected",
-            "—", "—", "[yellow]NO SYNC[/yellow]",
+            "—",
+            "—",
+            "[yellow]NO SYNC[/yellow]",
         )
 
     console.print(table)
@@ -477,32 +623,30 @@ def status_cmd():
     # Staleness warning
     if DIGEST_FILE.exists():
         import os
+
         age_h = (datetime.now().timestamp() - os.path.getmtime(DIGEST_FILE)) / 3600
         if age_h > 48:
-            console.print(
-                f"\n[red]⚠️ Digest tiene {age_h:.0f}h"
-                f" — alto riesgo (>48h)[/red]"
-            )
+            console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
         elif age_h > 24:
-            console.print(
-                f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h"
-                f" — considerar re-sync[/yellow]"
-            )
+            console.print(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]")
         else:
-            console.print(
-                f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]"
-            )
+            console.print(f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]")
 
 
 @notebooklm_cmds.command("ingest")
-@click.option("--drive-path", type=click.Path(), default=None,
-              help="Google Drive folder path (auto-detected if not set)")
+@click.option(
+    "--drive-path",
+    type=click.Path(),
+    default=None,
+    help="Google Drive folder path (auto-detected if not set)",
+)
 def ingest_cmd(drive_path: str | None):
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
+
     from cortex.cli.common import get_engine
-    from cortex.llm.sovereign import SovereignLLM
     from cortex.llm.router import IntentProfile
+    from cortex.llm.sovereign import SovereignLLM
 
     # Detect or use provided path
     if drive_path:
@@ -522,7 +666,7 @@ def ingest_cmd(drive_path: str | None):
     processed_files = set()
     if manifest_path.exists():
         try:
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 processed_files = set(json.load(f))
         except Exception:
             pass
@@ -545,11 +689,11 @@ def ingest_cmd(drive_path: str | None):
             "Format:\n"
             "[\n"
             "  {\n"
-            "    \"fact_type\": \"decision|ghost|bridge|knowledge\",\n"
-            "    \"project\": \"The associated project name\",\n"
-            "    \"content\": \"The actual discovery or fact extracted\",\n"
-            "    \"confidence\": \"C3\",\n"
-            "    \"shadow_keys\": [\"∆_CTX:A1B2C3D4\"] // Include if found, else empty list\n"
+            '    "fact_type": "decision|ghost|bridge|knowledge",\n'
+            '    "project": "The associated project name",\n'
+            '    "content": "The actual discovery or fact extracted",\n'
+            '    "confidence": "C3",\n'
+            '    "shadow_keys": ["∆_CTX:A1B2C3D4"] // Include if found, else empty list\n'
             "  }\n"
             "]\n"
             "If no facts are present, output an empty list: []"
@@ -558,16 +702,18 @@ def ingest_cmd(drive_path: str | None):
         async with SovereignLLM() as llm:
             for file_path in target.glob("*.md"):
                 # Ignoramos los propios archivos que exporta CORTEX
-                if (file_path.name.startswith("cortex-master") or
-                    file_path.name.startswith("cortex-") or
-                    file_path.name == DIGEST_FILE.name):
+                if (
+                    file_path.name.startswith("cortex-master")
+                    or file_path.name.startswith("cortex-")
+                    or file_path.name == DIGEST_FILE.name
+                ):
                     continue
 
                 if file_path.name in processed_files:
                     continue
 
                 console.print(f"[cyan]Analizando síntesis: {file_path.name}...[/cyan]")
-                
+
                 content = file_path.read_text(encoding="utf-8")
                 # Evita archivos inmensos que puedan saturar la ventana de contexto
                 if len(content) > 50000:
@@ -577,11 +723,9 @@ def ingest_cmd(drive_path: str | None):
                     continue
 
                 res = await llm.generate(
-                    content,
-                    system=system_prompt,
-                    intent=IntentProfile.SYNTHESIS
+                    content, system=system_prompt, intent=IntentProfile.SYNTHESIS
                 )
-                
+
                 if res.ok:
                     try:
                         raw_json = res.content.strip()
@@ -599,14 +743,16 @@ def ingest_cmd(drive_path: str | None):
                                     if it.get("shadow_keys"):
                                         meta_dict["shadow_keys"] = it["shadow_keys"]
 
-                                    extracted_facts.append({
-                                        "project": it["project"],
-                                        "content": it["content"],
-                                        "fact_type": it.get("fact_type", "knowledge"),
-                                        "confidence": it.get("confidence", "C3"),
-                                        "source": "notebooklm:sync_daemon",
-                                        "meta": meta_dict
-                                    })
+                                    extracted_facts.append(
+                                        {
+                                            "project": it["project"],
+                                            "content": it["content"],
+                                            "fact_type": it.get("fact_type", "knowledge"),
+                                            "confidence": it.get("confidence", "C3"),
+                                            "source": "notebooklm:sync_daemon",
+                                            "meta": meta_dict,
+                                        }
+                                    )
                             newly_processed.append(file_path.name)
                             console.print(f"   [green]→ Se extrajeron {len(items)} hechos.[/green]")
                         else:
@@ -619,25 +765,27 @@ def ingest_cmd(drive_path: str | None):
             await engine.init_db()
             try:
                 ids = await engine.store_many(extracted_facts)
-                console.print(Panel(
-                    f"[green]✅ Ouroboros Loop Completado[/green]\n"
-                    f"Hechos asimilados: {len(ids)}\n"
-                    f"Archivos procesados: {len(newly_processed)}",
-                    title="🧠 CORTEX Ingestion",
-                    border_style="green",
-                ))
+                console.print(
+                    Panel(
+                        f"[green]✅ Ouroboros Loop Completado[/green]\n"
+                        f"Hechos asimilados: {len(ids)}\n"
+                        f"Archivos procesados: {len(newly_processed)}",
+                        title="🧠 CORTEX Ingestion",
+                        border_style="green",
+                    )
+                )
             finally:
                 await engine.close()
         elif newly_processed:
-            console.print("[yellow]0 hechos extraídos, pero archivos marcados como procesados.[/yellow]")
+            console.print(
+                "[yellow]0 hechos extraídos, pero archivos marcados como procesados.[/yellow]"
+            )
         else:
             console.print("[dim]Nada nuevo que ingerir.[/dim]")
 
         # Actualizar manifest
         if newly_processed:
             processed_files.update(newly_processed)
-            manifest_path.write_text(
-                json.dumps(list(processed_files), indent=2), encoding="utf-8"
-            )
+            manifest_path.write_text(json.dumps(list(processed_files), indent=2), encoding="utf-8")
 
     _run_async(_ingest())

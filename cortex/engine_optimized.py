@@ -137,9 +137,7 @@ class OptimizedCortexEngine(AsyncCortexEngine):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._write_buffer: asyncio.Queue = asyncio.Queue()
-        self._cache = SovereignTLRUCache(
-            capacity=2000, ttl=600, on_evict=self._on_cache_evict
-        )
+        self._cache = SovereignTLRUCache(capacity=2000, ttl=600, on_evict=self._on_cache_evict)
         self._executor = ProcessPoolExecutor(max_workers=2)
         self._buffer_task: asyncio.Task | None = None
         self._is_flushing = False
@@ -182,7 +180,7 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                     trails.append(json.loads(row[0])["audit_trail"])
                 except (KeyError, json.JSONDecodeError):
                     continue
-            
+
             if not trails:
                 return {"status": "NO_VALID_AUDITS_FOUND"}
 
@@ -190,14 +188,17 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             trails.reverse()
             initial_tip = trails[0]["prev_proof"]
             valid, calculated_tip = SovereignTLRUCache.verify_proof(initial_tip, trails)
-            
+
             actual_tip = self._cache.prove_forgetting()["tip"]
             if valid and calculated_tip == actual_tip:
                 logger.info("✅ [AUDIT] Cache Evidence Chain verified. Tip: %s", actual_tip[:16])
                 return {"status": "VALIDATED", "tip": actual_tip, "evictions_audited": len(trails)}
             else:
-                logger.error("❌ [AUDIT] Cache Evidence Chain CORRUPTED. Expected: %s, Found: %s", 
-                             actual_tip[:16], calculated_tip[:16])
+                logger.error(
+                    "❌ [AUDIT] Cache Evidence Chain CORRUPTED. Expected: %s, Found: %s",
+                    actual_tip[:16],
+                    calculated_tip[:16],
+                )
                 return {"status": "TAMPERED", "expected": actual_tip, "calculated": calculated_tip}
 
     async def start(self):

@@ -91,7 +91,9 @@ class SecurityMonitor:
         return alerts
 
     async def _process_single_event(
-        self, store: VectorStoreL2, event: dict[str, Any]  # type: ignore[reportInvalidTypeForm]
+        self,
+        store: VectorStoreL2,
+        event: dict[str, Any],  # type: ignore[reportInvalidTypeForm]
     ) -> SecurityAlert | None:
         """Process a single event and return an alert if a threat is detected."""
         payload = event.get("payload", "")

@@ -18,18 +18,20 @@ from typing import Any, Protocol
 # DATA STRUCTURES
 # ==============================================================================
 
+
 @dataclass
 class DomainMetrics:
     """
     CortexMetrics data structure representing domain health telemetry.
     Maps to the synchronized SQLite3 backend with 60s TTL cache.
     """
+
     domain_id: str
-    health_score: float = 1.0   # 0.0 to 1.0, >0.9 is sovereign-grade
-    error_rate: float = 0.0     # 0.0 to 1.0, frequency of failure events
+    health_score: float = 1.0  # 0.0 to 1.0, >0.9 is sovereign-grade
+    error_rate: float = 0.0  # 0.0 to 1.0, frequency of failure events
     ghost_density: float = 0.0  # Concentration of dead/abandoned paths
-    fact_density: float = 0.0   # Volume of verified informational units
-    bridge_score: float = 0.0   # Measure of cross-domain knowledge links
+    fact_density: float = 0.0  # Volume of verified informational units
+    bridge_score: float = 0.0  # Measure of cross-domain knowledge links
     fitness_delta: float = 0.0  # Rate of change in fitness over window
     timestamp: float = field(default_factory=time.time)
 
@@ -40,6 +42,7 @@ class DomainMetrics:
 @dataclass
 class Mutation:
     """Genotype representation passed to execution environment."""
+
     mutation_id: str
     parameters: dict[str, float] = field(default_factory=dict)
     generation: int = 0
@@ -55,6 +58,7 @@ class Mutation:
 @dataclass
 class SubAgent:
     """Individual agent within a sovereign domain."""
+
     agent_id: str
     mutation: Mutation
     domain_id: str
@@ -70,6 +74,7 @@ class SubAgent:
 @dataclass
 class SovereignAgent:
     """Top-level autonomous agent containing sub-agent population."""
+
     sovereign_id: str
     domain_id: str
     subagents: list[SubAgent] = field(default_factory=list)
@@ -94,6 +99,7 @@ class SovereignAgent:
 # ==============================================================================
 # CORTEX METRICS INFRASTRUCTURE (SQLite3 + WAL + TTL Cache)
 # ==============================================================================
+
 
 class CortexMetrics:
     """
@@ -145,16 +151,24 @@ class CortexMetrics:
     def update_metrics(self, metrics: DomainMetrics) -> None:
         """Persist metrics with hash verification (Axiom 12 compliance)."""
         conn = self._get_connection()
-        conn.execute("""
+        conn.execute(
+            """
             INSERT OR REPLACE INTO domain_metrics
             (domain_id, health_score, error_rate, ghost_density, fact_density,
              bridge_score, fitness_delta, timestamp)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            metrics.domain_id, metrics.health_score, metrics.error_rate,
-            metrics.ghost_density, metrics.fact_density, metrics.bridge_score,
-            metrics.fitness_delta, metrics.timestamp,
-        ))
+        """,
+            (
+                metrics.domain_id,
+                metrics.health_score,
+                metrics.error_rate,
+                metrics.ghost_density,
+                metrics.fact_density,
+                metrics.bridge_score,
+                metrics.fitness_delta,
+                metrics.timestamp,
+            ),
+        )
         conn.commit()
         with self._cache_lock:
             self._cache[metrics.domain_id] = (metrics, time.time())
@@ -169,19 +183,26 @@ class CortexMetrics:
                     return cached
 
         conn = self._get_connection()
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             SELECT health_score, error_rate, ghost_density, fact_density,
                    bridge_score, fitness_delta, timestamp
             FROM domain_metrics WHERE domain_id = ?
-        """, (domain_id,))
+        """,
+            (domain_id,),
+        )
         row = cursor.fetchone()
         if not row:
             return None
 
         metrics = DomainMetrics(
             domain_id=domain_id,
-            health_score=row[0], error_rate=row[1], ghost_density=row[2],
-            fact_density=row[3], bridge_score=row[4], fitness_delta=row[5],
+            health_score=row[0],
+            error_rate=row[1],
+            ghost_density=row[2],
+            fact_density=row[3],
+            bridge_score=row[4],
+            fitness_delta=row[5],
             timestamp=row[6],
         )
         with self._cache_lock:
@@ -200,18 +221,24 @@ class CortexMetrics:
         prev_hash = self._get_last_hash(domain_id)
         content = f"{prev_hash}:{json.dumps(data, sort_keys=True)}"
         current_hash = hashlib.sha256(content.encode()).hexdigest()
-        conn.execute("""
+        conn.execute(
+            """
             INSERT OR REPLACE INTO mutation_ledger (mutation_id, hash_chain, timestamp, data)
             VALUES (?, ?, ?, ?)
-        """, (mutation.mutation_id, current_hash, time.time(), json.dumps(data)))
+        """,
+            (mutation.mutation_id, current_hash, time.time(), json.dumps(data)),
+        )
         conn.commit()
 
     def _get_last_hash(self, domain_id: str) -> str:
         conn = self._get_connection()
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             SELECT hash_chain FROM mutation_ledger
             WHERE mutation_id LIKE ? ORDER BY timestamp DESC LIMIT 1
-        """, (f"{domain_id}%",))
+        """,
+            (f"{domain_id}%",),
+        )
         row = cursor.fetchone()
         return row[0] if row else "0" * 64
 
@@ -219,6 +246,7 @@ class CortexMetrics:
 # ==============================================================================
 # IMPROVEMENT STRATEGY PROTOCOL
 # ==============================================================================
+
 
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable evolutionary improvement strategies."""
@@ -240,6 +268,7 @@ class ImprovementStrategy(Protocol):
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES
 # ==============================================================================
+
 
 class ParameterTuningStrategy:
     """
@@ -307,8 +336,13 @@ class HeuristicInjectionStrategy:
     """
 
     DOMAIN_WEIGHTS: dict[str, float] = {
-        "EVOLUTION": 1.0, "SECURITY": 0.9, "FABRICATION": 0.8,
-        "VERIFICATION": 0.8, "SWARM": 0.7, "MEMORY": 0.7, "EXPERIENCE": 0.6,
+        "EVOLUTION": 1.0,
+        "SECURITY": 0.9,
+        "FABRICATION": 0.8,
+        "VERIFICATION": 0.8,
+        "SWARM": 0.7,
+        "MEMORY": 0.7,
+        "EXPERIENCE": 0.6,
     }
 
     def evaluate(self, sovereign, subagent, metrics, cortex_metrics):
@@ -324,7 +358,9 @@ class HeuristicInjectionStrategy:
         fitness_boost = weight * 5.0
         subagent.fitness += fitness_boost
 
-        subagent.mutation.record_change(f"HGT: {heuristic_key} (w={weight:.2f}, +{fitness_boost:.2f})")
+        subagent.mutation.record_change(
+            f"HGT: {heuristic_key} (w={weight:.2f}, +{fitness_boost:.2f})"
+        )
         return {
             "strategy": "HeuristicInjection",
             "domain": domain,
@@ -397,15 +433,23 @@ class AdversarialStressStrategy:
         if new_fitness >= 100.0:
             subagent.fitness = new_fitness + 3.0  # Resilience bonus
             subagent.mutation.record_change(f"RedQueen survived: -{stress_hit:.2f} +3.0 bonus")
-            return {"strategy": "AdversarialStress", "result": "survived",
-                    "stress_hit": stress_hit, "resilience_bonus": 3.0,
-                    "p_queen": round(p_queen, 3)}
+            return {
+                "strategy": "AdversarialStress",
+                "result": "survived",
+                "stress_hit": stress_hit,
+                "resilience_bonus": 3.0,
+                "p_queen": round(p_queen, 3),
+            }
         else:
             subagent.fitness = max(0.0, new_fitness)
             subagent.mutation.record_change(f"RedQueen failed: fitness→{new_fitness:.2f}")
-            return {"strategy": "AdversarialStress", "result": "failed",
-                    "stress_hit": stress_hit, "new_fitness": new_fitness,
-                    "p_queen": round(p_queen, 3)}
+            return {
+                "strategy": "AdversarialStress",
+                "result": "failed",
+                "stress_hit": stress_hit,
+                "new_fitness": new_fitness,
+                "p_queen": round(p_queen, 3),
+            }
 
 
 class EntropyReductionStrategy:
@@ -429,9 +473,7 @@ class EntropyReductionStrategy:
             return None
 
         original_len = len(subagent.mutation.history_log)
-        subagent.mutation.history_log = [
-            f"[COMPRESSED] {original_len} generations → entropy purge"
-        ]
+        subagent.mutation.history_log = [f"[COMPRESSED] {original_len} generations → entropy purge"]
         subagent.mutation.entropy_resistance = 1.0
         subagent.fitness += 2.0
 
@@ -541,6 +583,7 @@ class StagnationBreakerStrategy:
 # CORTEX EVOLUTION ENGINE ORCHESTRATOR
 # ==============================================================================
 
+
 class CortexEvolutionEngine:
     """
     Main orchestrator for CORTEX Phase 2 (v3) Continuous Improvement Engine.
@@ -550,14 +593,14 @@ class CortexEvolutionEngine:
     def __init__(self, db_path: str = ":memory:") -> None:
         self.metrics_backend = CortexMetrics(db_path)
         self.strategies: list[Any] = [
-            ParameterTuningStrategy(),        # Eigen 1971
-            PruneDeadPathStrategy(),          # Fisher 1930
-            HeuristicInjectionStrategy(),     # Ochman 2000
-            BridgeImportStrategy(),           # Margulis 1970
-            AdversarialStressStrategy(),      # Van Valen 1973
-            EntropyReductionStrategy(),       # Kimura 1968
-            CrossoverRecombinationStrategy(), # Maynard Smith 1978
-            StagnationBreakerStrategy(),      # Gould-Eldredge 1972
+            ParameterTuningStrategy(),  # Eigen 1971
+            PruneDeadPathStrategy(),  # Fisher 1930
+            HeuristicInjectionStrategy(),  # Ochman 2000
+            BridgeImportStrategy(),  # Margulis 1970
+            AdversarialStressStrategy(),  # Van Valen 1973
+            EntropyReductionStrategy(),  # Kimura 1968
+            CrossoverRecombinationStrategy(),  # Maynard Smith 1978
+            StagnationBreakerStrategy(),  # Gould-Eldredge 1972
         ]
         self._evaluation_count = 0
         # Tracks previous average fitness per domain for correct delta computation
@@ -611,11 +654,11 @@ class CortexEvolutionEngine:
                 result = strategy.evaluate(sovereign, subagent, metrics, self.metrics_backend)
                 if result:
                     applied.add(name)
-                    results.append({"agent_id": subagent.agent_id,
-                                    "timestamp": time.time(), **result})
+                    results.append(
+                        {"agent_id": subagent.agent_id, "timestamp": time.time(), **result}
+                    )
             except Exception as exc:
-                results.append({"agent_id": subagent.agent_id,
-                                "strategy": name, "error": str(exc)})
+                results.append({"agent_id": subagent.agent_id, "strategy": name, "error": str(exc)})
         return results
 
     def _refresh_fitness_delta(self, sovereign: SovereignAgent, metrics: DomainMetrics) -> None:
@@ -646,6 +689,7 @@ class CortexEvolutionEngine:
 # SIMULATION
 # ==============================================================================
 
+
 def run_evolution_simulation() -> None:
     """Demonstrate CORTEX Phase 2 (v3) with synthetic agent population."""
     SEP = "=" * 70
@@ -665,18 +709,22 @@ def run_evolution_simulation() -> None:
             generation=random.randint(1, 20),
             fitness=random.uniform(20.0, 150.0),
         )
-        sovereign.subagents.append(SubAgent(
-            agent_id=f"AGENT_{i:03d}",
-            mutation=mutation,
-            domain_id="EVOLUTION_TEST",
-            fitness=mutation.fitness,
-            generation=mutation.generation,
-        ))
+        sovereign.subagents.append(
+            SubAgent(
+                agent_id=f"AGENT_{i:03d}",
+                mutation=mutation,
+                domain_id="EVOLUTION_TEST",
+                fitness=mutation.fitness,
+                generation=mutation.generation,
+            )
+        )
 
     print("\n[INITIAL POPULATION]")
     for a in sovereign.subagents:
-        print(f"  {a.agent_id}: fitness={a.fitness:.2f}  gen={a.generation}  "
-              f"status={'ACTIVE' if a.is_active else 'PRUNED'}")
+        print(
+            f"  {a.agent_id}: fitness={a.fitness:.2f}  gen={a.generation}  "
+            f"status={'ACTIVE' if a.is_active else 'PRUNED'}"
+        )
 
     engine.inject_telemetry(
         "EVOLUTION_TEST",
@@ -714,8 +762,10 @@ def run_evolution_simulation() -> None:
     print("\n[FINAL POPULATION]")
     for a in sovereign.subagents:
         entropy = (a.generation / (a.fitness - 50.0)) if a.fitness > 50.0 else float("inf")
-        print(f"  {a.agent_id}: fitness={a.fitness:.2f}  gen={a.generation}  "
-              f"entropy_ratio={entropy:.2f}  status={'ACTIVE' if a.is_active else 'PRUNED'}")
+        print(
+            f"  {a.agent_id}: fitness={a.fitness:.2f}  gen={a.generation}  "
+            f"entropy_ratio={entropy:.2f}  status={'ACTIVE' if a.is_active else 'PRUNED'}"
+        )
 
     print("\n[SYSTEM STATUS]")
     for k, v in engine.get_system_status().items():

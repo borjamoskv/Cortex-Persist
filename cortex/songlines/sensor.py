@@ -12,6 +12,7 @@ logger = logging.getLogger("cortex.songlines.sensor")
 
 class GhostTrace(TypedDict):
     """Structured telemetry payload for embedded ghosts."""
+
     id: str
     strength: float
     source_file: str
@@ -85,7 +86,11 @@ class TopographicSensor:
             out = subprocess.check_output(
                 ["xattr", str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
             )
-            return [a for a in out.decode("utf-8", errors="ignore").splitlines() if a.startswith(self.prefix)]
+            return [
+                a
+                for a in out.decode("utf-8", errors="ignore").splitlines()
+                if a.startswith(self.prefix)
+            ]
         except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return []
 

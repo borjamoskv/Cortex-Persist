@@ -253,7 +253,7 @@ class EvolutionEngine:
             crossovers=crossovers,
             extinctions=extinctions,
             grace_injection=total_grace,
-            lagrangian_index=avg_lagrangian
+            lagrangian_index=avg_lagrangian,
         )
 
     def _apply_epigenetic_modulation(self) -> None:

@@ -212,11 +212,17 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._run_monitor(status, "disk_alerts", self.disk_monitor, self._alert_disk)
         # Run Unified Mejoralo/Entropy sweep (OMEGA-SINGULARITY)
         self._run_monitor(status, "mejoralo_alerts", self.mejoralo_monitor, self._alert_mejoralo)
-        self._run_monitor(status, "compaction_alerts", self.compaction_monitor, self._alert_compaction)
-        self._run_monitor(status, "perception_alerts", self.perception_monitor, self._alert_perception)
+        self._run_monitor(
+            status, "compaction_alerts", self.compaction_monitor, self._alert_compaction
+        )
+        self._run_monitor(
+            status, "perception_alerts", self.perception_monitor, self._alert_perception
+        )
         self._run_monitor(status, "security_alerts", self.security_monitor, self._alert_security)
         self._run_monitor(status, "signal_alerts", self.signal_monitor, self._alert_signals)
-        self._run_monitor(status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync)
+        self._run_monitor(
+            status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync
+        )
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
 
         self._auto_sync(status)
@@ -228,8 +234,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         level = "✅" if status.all_healthy else "⚠️"
         logger.info(
             "%s Check complete in %.0fms: %d sites, %d stale ghosts, %d memory alerts",
-            level, status.check_duration_ms, len(status.sites),
-            len(status.stale_ghosts), len(status.memory_alerts),
+            level,
+            status.check_duration_ms,
+            len(status.sites),
+            len(status.stale_ghosts),
+            len(status.memory_alerts),
         )
         return status
 
@@ -278,7 +287,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             if sync_result.had_changes:
                 logger.info("Sync automático: %d hechos sincronizados", sync_result.total)
             if wb_result.had_changes:
-                logger.info("Write-back: %d archivos, %d items", wb_result.files_written, wb_result.items_exported)
+                logger.info(
+                    "Write-back: %d archivos, %d items",
+                    wb_result.files_written,
+                    wb_result.items_exported,
+                )
 
         except Exception as e:
             status.errors.append(f"Memory sync error: {e}")
@@ -299,7 +312,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
 
         # Start helper threads
-        neural_thread = threading.Thread(target=self._run_neural_loop, name="NeuralSync", daemon=True)
+        neural_thread = threading.Thread(
+            target=self._run_neural_loop, name="NeuralSync", daemon=True
+        )
         neural_thread.start()
         self._threads.append(neural_thread)
 
@@ -309,12 +324,16 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             self._threads.append(t)
 
         if self.fiat_oracle:
-            t = threading.Thread(target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True)
+            t = threading.Thread(
+                target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
+            )
             t.start()
             self._threads.append(t)
 
         if getattr(self, "sentinel_oracle", None):
-            t = threading.Thread(target=self._run_sentinel_oracle_loop, name="SentinelOracle", daemon=True)
+            t = threading.Thread(
+                target=self._run_sentinel_oracle_loop, name="SentinelOracle", daemon=True
+            )
             t.start()
             self._threads.append(t)
 
@@ -344,6 +363,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
     def _run_ast_oracle_loop(self) -> None:
         """Runs the AST Oracle event loop."""
         import asyncio
+
         logger.info("👁️ AST Oracle thread started")
 
         async def _lifecycle():
@@ -361,6 +381,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
     def _run_sentinel_oracle_loop(self) -> None:
         """Runs the Sentinel Oracle polling loop."""
         import asyncio
+
         logger.info("🛡️ CORTEX Sentinel Oracle thread started")
         try:
             asyncio.run(self.sentinel_oracle.run_loop())

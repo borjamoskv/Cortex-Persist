@@ -64,6 +64,7 @@ def oxygenate(min_interval: float = 0.1):
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
         if inspect.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 async with async_lock:

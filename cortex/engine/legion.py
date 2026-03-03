@@ -36,8 +36,61 @@ class SiegeResult:
     performance_drop: float = 0.0
 
 
+_INITIAL_INTENT_MAP = {
+    "sleep": "import time\n\ndef worker():\n    time.sleep(1)\n",
+    "eval": "def run_dynamic(cmd):\n    return ev" + "al(cmd)\n",  # nosec B307
+}
+_DEFAULT_INITIAL = "def process_data(data):\n    return data\n"
+
+_EPIGENETIC_RULES = [
+    (
+        lambda f: "eval" in f,
+        "import ast",
+        "def run_dynamic(cmd):\n    return ast.literal_eval(cmd)",
+    ),
+    (
+        lambda f: "sleep" in f or "blocking" in f,
+        "import asyncio",
+        "async def worker():\n    await asyncio.sleep(1)",
+    ),
+    (
+        lambda f: "bare except" in f,
+        None,
+        (
+            "def safe_execute(func, *args):\n"
+            "    try:\n"
+            "        return func(*args)\n"
+            "    except Exception as e:\n"
+            "        return str(e)"
+        ),
+    ),
+]
+
+
 class BlueTeamAgent:
     """🛡️ Blue Team: The Defensive Constructor."""
+
+    def _get_initial(self, intent_lower: str) -> str:
+        for keyword, code in _INITIAL_INTENT_MAP.items():
+            if keyword in intent_lower:
+                return code
+        return _DEFAULT_INITIAL
+
+    def _apply_epigenetic(self, feedback: list[str]) -> tuple[set[str], list[str]]:
+        imports = set()
+        body = []
+        feedback_lower = [f.lower() for f in feedback]
+
+        for condition, imp, bdy in _EPIGENETIC_RULES:
+            if any(condition(f) for f in feedback_lower):
+                if imp:
+                    imports.add(imp)
+                body.append(bdy)
+
+        if not body:
+            body.append("def process_data(data):\n    return data")
+
+        return imports, body
 
     async def synthesize(
         self, intent: str, context: Mapping[str, Any], feedback: list[str] | None = None
@@ -46,49 +99,15 @@ class BlueTeamAgent:
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
         bicameral.log_limbic(msg, source="BLUE")
 
-        # Base code
-        code = f"# Intent: {intent}\n"
-
         if not feedback:
-            # Initial generation
-            if "sleep" in intent.lower():
-                code += "import time\n\ndef worker():\n    time.sleep(1)\n"
-            elif "eval" in intent.lower():
-                code += "def run_dynamic(cmd):\n    return ev" + "al(cmd)\n"  # nosec B307
-            else:
-                code += "def process_data(data):\n    return data\n"
-            return code
+            return f"# Intent: {intent}\n{self._get_initial(intent.lower())}"
 
-        # Epigenetic Transformation: Actual morphing based on feedback
-        imports = set()
-        body = []
-
-        if any("eval" in f.lower() for f in feedback):
-            imports.add("import ast")
-            body.append("def run_dynamic(cmd):\n    return ast.literal_eval(cmd)")
-
-        if any("sleep" in f.lower() or "blocking" in f.lower() for f in feedback):
-            imports.add("import asyncio")
-            body.append("async def worker():\n    await asyncio.sleep(1)")
-
-        if any("bare except" in f.lower() for f in feedback):
-            body.append(
-                "def safe_execute(func, *args):\n"
-                "    try:\n"
-                "        return func(*args)\n"
-                "    except Exception as e:\n"
-                "        return str(e)"
-            )
-
-        if not body:
-            body.append("def process_data(data):\n    return data")
+        imports, body = self._apply_epigenetic(feedback)
 
         final_code = f"# Intent: {intent}\n"
         if imports:
-            final_code += "\n".join(sorted(list(imports))) + "\n\n"
-        final_code += "\n\n".join(body) + "\n"
-
-        return final_code
+            final_code += "\n".join(sorted(imports)) + "\n\n"
+        return final_code + "\n\n".join(body) + "\n"
 
 
 class RedTeamSwarm:

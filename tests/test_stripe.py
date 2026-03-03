@@ -113,6 +113,7 @@ class TestCheckout:
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/test_session",
             id="cs_test_123",
+            client_secret="secret_test_123",
         )
         mock_get_stripe.return_value = mock_stripe
 
@@ -129,6 +130,7 @@ class TestCheckout:
         data = resp.json()
         assert data["url"] == "https://checkout.stripe.com/test_session"
         assert data["session_id"] == "cs_test_123"
+        assert data["client_secret"] == "secret_test_123"
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_checkout_invalid_plan(self, mock_get_stripe, client):
@@ -148,6 +150,7 @@ class TestCheckout:
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/default",
             id="cs_default",
+            client_secret="secret_default",
         )
         mock_get_stripe.return_value = mock_stripe
 

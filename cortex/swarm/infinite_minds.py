@@ -25,6 +25,7 @@ class ConvergenceDiagnostics(TypedDict, total=False):
     active_biases: int
     total_minds: int
 
+
 __all__ = ["InfiniteMindsManager", "AgentMind"]
 
 logger = logging.getLogger("cortex.swarm.infinite_minds")
@@ -150,8 +151,8 @@ class InfiniteMindsManager:
 
                 # Detect clusters where similarity > 0.85
                 _adjacency = similarity_matrix > 0.85
-                _edges = int(np.sum(_adjacency)) - len(active_biases) # Subtract self-loops
-                
+                _edges = int(np.sum(_adjacency)) - len(active_biases)  # Subtract self-loops
+
                 return len(active_biases), _edges
 
             # OFF-LOAD: Liberamos el GIL / Event Loop para cálculos matemáticos
@@ -165,7 +166,7 @@ class InfiniteMindsManager:
             logger.info(
                 "InfiniteMinds: Byzantine cluster detection complete. Evaluated %d tensors, %d edges.",
                 biases_count,
-                edges_count
+                edges_count,
             )
             return {
                 "status": "success",

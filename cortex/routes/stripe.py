@@ -140,7 +140,7 @@ async def _revoke_keys_for_email(email: str) -> None:
 # ─── Routes ──────────────────────────────────────────────────────────
 
 
-@router.post("/checkout")
+@router.post("/checkout", include_in_schema=False)
 async def create_checkout_session(body: CheckoutRequest) -> dict:
     """Create a Stripe Checkout session for a plan purchase."""
     stripe = _get_stripe()
@@ -163,9 +163,9 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
     try:
         session_kwargs = {
             "mode": "subscription",
+            "ui_mode": "embedded",
             "line_items": [{"price": price_id, "quantity": 1}],
-            "success_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
-            "cancel_url": body.cancel_url,
+            "return_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
             "metadata": {"plan": body.plan},
         }
         if body.customer_email:
@@ -176,10 +176,10 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
-    return {"url": session.url, "session_id": session.id}
+    return {"client_secret": session.client_secret, "session_id": session.id, "url": session.url}
 
 
-@router.post("/webhook")
+@router.post("/webhook", include_in_schema=False)
 async def stripe_webhook(
     request: Request,
     stripe_signature: str = Header(None, alias="Stripe-Signature"),
@@ -241,7 +241,7 @@ async def stripe_webhook(
     return {"status": "ignored", "type": event_type}
 
 
-@router.post("/portal")
+@router.post("/portal", include_in_schema=False)
 async def create_portal_session(body: PortalRequest) -> dict:
     """Create a Stripe Customer Portal session for billing management."""
     stripe = _get_stripe()

@@ -402,7 +402,7 @@ class SAPClient:
             return
 
         import secrets
-        
+
         rng = secrets.SystemRandom()
 
         base_wait = 2**attempt

@@ -227,6 +227,7 @@
             .metric-item:last-child { border-bottom: none; }
         }
     </style>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <canvas id="cortex-particles"></canvas>
@@ -621,6 +622,17 @@
 
         checkoutClose.addEventListener('click', () => {
             checkoutOverlay.classList.remove('active');
+            setTimeout(() => {
+                // Reset checkout form if closed
+                document.querySelector('.checkout-form').style.display = 'block';
+                checkoutSubmit.style.display = 'block';
+                checkoutSubmit.innerText = "Pay Securely →";
+                checkoutSubmit.style.opacity = "1";
+                checkoutSubmit.style.pointerEvents = "auto";
+                document.querySelector('.checkout-footer').style.display = 'block';
+                const embedded = document.getElementById('stripe-checkout-container');
+                if (embedded) embedded.remove();
+            }, 300);
         });
 
         checkoutOverlay.addEventListener('click', (e) => {
@@ -661,10 +673,38 @@
                 }
                 
                 const data = await response.json();
-                if (data.url) {
+                if (data.client_secret) {
+                    // Initialize Stripe Embedded Checkout natively without redirect
+                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Replace with real site PK
+                    
+                    document.querySelector('.checkout-form').style.display = 'none';
+                    checkoutSubmit.style.display = 'none';
+                    document.querySelector('.checkout-footer').style.display = 'none';
+                    
+                    const checkoutContainer = document.createElement('div');
+                    checkoutContainer.id = 'stripe-checkout-container';
+                    document.querySelector('.checkout-modal').appendChild(checkoutContainer);
+                    
+                    const checkout = await stripe.initEmbeddedCheckout({
+                        clientSecret: data.client_secret,
+                        appearance: {
+                            theme: 'night',
+                            variables: {
+                                colorPrimary: '#CCFF00',
+                                colorBackground: '#0F0F0F',
+                                colorText: '#E0E0E0',
+                                colorDanger: '#FF5252',
+                                fontFamily: 'Inter, system-ui, sans-serif',
+                                borderRadius: '12px'
+                            }
+                        }
+                    });
+                    
+                    checkout.mount('#stripe-checkout-container');
+                } else if (data.url) {
                     globalThis.location.href = data.url;
                 } else {
-                    throw new Error('No checkout URL received.');
+                    throw new Error('No checkout session received.');
                 }
             } catch (error) {
                 console.error("Stripe Checkout Error:", error);

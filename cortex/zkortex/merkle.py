@@ -38,8 +38,9 @@ def _leaf_hash(value: str) -> bytes:
 @dataclass(frozen=True)
 class MerkleProofNode:
     """Un nodo en el proof path."""
-    sibling_hash: str   # hex del nodo hermano
-    is_right: bool      # ¿el hermano está a la derecha?
+
+    sibling_hash: str  # hex del nodo hermano
+    is_right: bool  # ¿el hermano está a la derecha?
 
 
 @dataclass(frozen=True)
@@ -81,8 +82,7 @@ class ZKMembershipProof:
         return {
             "root": self.root,
             "proof_path": [
-                {"sibling": n.sibling_hash, "is_right": n.is_right}
-                for n in self.proof_path
+                {"sibling": n.sibling_hash, "is_right": n.is_right} for n in self.proof_path
             ],
             "leaf_index": self.leaf_index,
             "element_commitment": self.element_commitment,
@@ -161,10 +161,12 @@ class MerkleTree:
             is_right = current_index % 2 == 0
             sibling_index = current_index + 1 if is_right else current_index - 1
             sibling = layer[sibling_index] if sibling_index < len(layer) else layer[current_index]
-            proof_path.append(MerkleProofNode(
-                sibling_hash=sibling.hex(),
-                is_right=not is_right,  # El hermano está a la derecha si el nodo actual es izquierdo
-            ))
+            proof_path.append(
+                MerkleProofNode(
+                    sibling_hash=sibling.hex(),
+                    is_right=not is_right,  # El hermano está a la derecha si el nodo actual es izquierdo
+                )
+            )
             current_index //= 2
 
         return ZKMembershipProof(

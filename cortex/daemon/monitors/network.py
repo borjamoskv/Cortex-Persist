@@ -34,6 +34,7 @@ class SiteMonitor:
     async def check_all(self) -> list[SiteStatus]:
         """Check all URLs concurrently (oxygenated). Returns list of SiteStatus."""
         import asyncio
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             tasks = [self._check_one(client, url) for url in self.urls]
             return await asyncio.gather(*tasks)

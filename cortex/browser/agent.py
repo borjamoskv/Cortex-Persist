@@ -112,8 +112,10 @@ What is your next action?
         try:
             # We use the CORTEX LLMProvider's complete method
             response_text = await self.llm.complete(
-                prompt=user_prompt, system=system_prompt,
-                temperature=0.1, max_tokens=500,
+                prompt=user_prompt,
+                system=system_prompt,
+                temperature=0.1,
+                max_tokens=500,
                 intent=IntentProfile.REASONING,
             )
 

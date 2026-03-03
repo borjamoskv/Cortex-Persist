@@ -104,9 +104,7 @@ class CortexMemoryManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = (
-            DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None
-        )  # type: ignore[reportOptionalCall]
+        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router)

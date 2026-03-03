@@ -7,6 +7,7 @@ Zero latency axiom enforcement (AX-020).
 
 Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -133,19 +134,21 @@ async def check_gate_6_connection() -> bool:
 async def check_gate_7_async() -> bool:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
     # Intentional time.sleep uses — demos, network retries, fiat oracles, legacy wrappers
-    _ASYNC_EXCLUDE_FILES = frozenset([
-        "seals.py",       # self
-        "reactor.py",     # integration orchestrator
-        "antipatterns.py",  # AST scanner examples
-        "_scanner_visitors.py",  # AST visitor
-        "registry.py",    # daemon registry heartbeats
-        "legion.py",      # swarm coordination
-        "legion_vectors.py",  # vector search integration
-        "demo_swarm.py",  # CLI demo script
-        "demo_bicameral.py",  # CLI demo script
-        "network.py",     # p2p retry backoff
-        "fiat_oracle.py", # polling oracle
-    ])
+    _ASYNC_EXCLUDE_FILES = frozenset(
+        [
+            "seals.py",  # self
+            "reactor.py",  # integration orchestrator
+            "antipatterns.py",  # AST scanner examples
+            "_scanner_visitors.py",  # AST visitor
+            "registry.py",  # daemon registry heartbeats
+            "legion.py",  # swarm coordination
+            "legion_vectors.py",  # vector search integration
+            "demo_swarm.py",  # CLI demo script
+            "demo_bicameral.py",  # CLI demo script
+            "network.py",  # p2p retry backoff
+            "fiat_oracle.py",  # polling oracle
+        ]
+    )
     violations = []
     for py_file in ROOT_DIR.joinpath("cortex").rglob("*.py"):
         if "test" in str(py_file) or ".pyc" in str(py_file):
@@ -184,7 +187,6 @@ async def check_gate_8_loc() -> bool:
             pass
 
     if blocked == 0:
-
         printer.success(f"All files within entropy limits. ({warnings} warnings >300 LOC)")
         return True
     return False
@@ -271,9 +273,7 @@ async def check_gate_11_cobbler() -> bool:
 
         # Strip intentionally-annotated lines before handing to the demon
         cleaned = "\n".join(
-            line
-            for line in source.splitlines()
-            if not any(m in line for m in _NOQA_MARKERS)
+            line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
         )
 
         demon_hits = await demon.attack(cleaned, context={})
@@ -288,16 +288,12 @@ async def check_gate_11_cobbler() -> bool:
     passed = True
 
     if demon_violations:
-        printer.fail(
-            f"EntropyDemon fired on engine source ({len(demon_violations)} files):"
-        )
+        printer.fail(f"EntropyDemon fired on engine source ({len(demon_violations)} files):")
         for v in demon_violations:
             print(f"      ↳ {v}")
         passed = False
     else:
-        printer.success(
-            f"EntropyDemon: engine source is clean ({len(py_files)} files scanned)."
-        )
+        printer.success(f"EntropyDemon: engine source is clean ({len(py_files)} files scanned).")
 
     if intruder_violations:
         printer.fail(
@@ -333,10 +329,7 @@ async def main() -> int:
     printer.head("SEALS SUMMARY")
     failed = [i + 1 for i, r in enumerate(results) if not r]
     # Remap index 10 → seal 11 in the summary
-    remapped = [
-        11 if s == 10 else s
-        for s in failed
-    ]
+    remapped = [11 if s == 10 else s for s in failed]
 
     if remapped:
         printer.fail(f"SEALS BROKEN: {remapped}")

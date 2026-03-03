@@ -11,9 +11,9 @@ Hydra-Log Architecture:
   3. The "Audit Stream" (L1 Persistent Log):
      - Every 'put' logs to the stream.
      - Every 'eviction' logs to the stream via a reliable handoff.
-     - Background workers consume via XREADGROUP (Consumer Groups) to ensure 
+     - Background workers consume via XREADGROUP (Consumer Groups) to ensure
        no audit entry is lost even if nodes crash (Ω₃).
-  4. At-Least-Once Delivery: Atomic Lua advances the chain-tip AND logs to 
+  4. At-Least-Once Delivery: Atomic Lua advances the chain-tip AND logs to
      the stream in a single transaction (where possible) or causal sequence.
 """
 
@@ -106,9 +106,7 @@ class DistributedSovereignCache:
     Cluster-safe Redis L1 cache with Persistent Audit Streams (v7.5).
     """
 
-    def __init__(
-        self, redis_client: Any, audit_callback: AuditCallback | None = None
-    ) -> None:
+    def __init__(self, redis_client: Any, audit_callback: AuditCallback | None = None) -> None:
         if not _REDIS_AVAILABLE:
             raise ImportError("redis[asyncio] required")
         self._r = redis_client
@@ -117,7 +115,7 @@ class DistributedSovereignCache:
         self._consumer_task: asyncio.Task[None] | None = None
         self._notification_task: asyncio.Task[None] | None = None
         self._is_available = True
-        
+
         self._hydra_advance_script = self._r.register_script(_LUA_HYDRA_ADVANCE)
 
     # ─── Factory ─────────────────────────────────────────────────────────────
@@ -134,7 +132,7 @@ class DistributedSovereignCache:
         # Baseline initialization
         await client.setnx(_CHAIN_TIP_KEY, _GENESIS_HASH)
         await client.setnx(_CHAIN_COUNT_KEY, 0)
-        
+
         # Ensure Stream Group exists (Ω₃ - Antifragile group creation)
         try:
             await client.xgroup_create(_AUDIT_STREAM_KEY, _AUDIT_GROUP_NAME, id="0", mkstream=True)
@@ -158,7 +156,8 @@ class DistributedSovereignCache:
     # ─── Core Operations ─────────────────────────────────────────────────────
 
     async def get(self, key: str) -> dict[str, Any] | None:
-        if not self._is_available: return None
+        if not self._is_available:
+            return None
         try:
             shadow_key = f"{_SHADOW_KEY_PREFIX}{key}"
             raw = await self._r.get(shadow_key)
@@ -191,7 +190,9 @@ class DistributedSovereignCache:
 
     # ─── Reliable Audit Advancement ──────────────────────────────────────────
 
-    async def _reliable_advance_chain(self, key: str, payload: dict[str, Any], event_type: str) -> dict[str, Any]:
+    async def _reliable_advance_chain(
+        self, key: str, payload: dict[str, Any], event_type: str
+    ) -> dict[str, Any]:
         """
         Atomic Lua: Advance Tip + Log to Stream.
         """
@@ -201,7 +202,7 @@ class DistributedSovereignCache:
         try:
             prev_tip, new_tip, count = await self._hydra_advance_script(
                 keys=[_CHAIN_TIP_KEY, _CHAIN_COUNT_KEY, _AUDIT_STREAM_KEY],
-                args=[_GENESIS_HASH, key, ph, self._node_id, event_type, now]
+                args=[_GENESIS_HASH, key, ph, self._node_id, event_type, now],
             )
 
             return {
@@ -232,8 +233,10 @@ class DistributedSovereignCache:
         for t in [self._notification_task, self._consumer_task]:
             if t and not t.done():
                 t.cancel()
-                try: await t
-                except asyncio.CancelledError: pass
+                try:
+                    await t
+                except asyncio.CancelledError:
+                    pass
 
     # ─── Loop 1: Handoff (The Spark) ─────────────────────────────────────────
 
@@ -247,25 +250,27 @@ class DistributedSovereignCache:
 
         try:
             async for message in pubsub.listen():
-                if message["type"] not in ("message", "pmessage"): continue
+                if message["type"] not in ("message", "pmessage"):
+                    continue
                 redis_key: str = message.get("data", "")
 
-                if not redis_key.startswith(_TRIGGER_KEY_PREFIX): continue
-                agent_key = redis_key[len(_TRIGGER_KEY_PREFIX):]
+                if not redis_key.startswith(_TRIGGER_KEY_PREFIX):
+                    continue
+                agent_key = redis_key[len(_TRIGGER_KEY_PREFIX) :]
 
                 # Rescue data
                 shadow_key = f"{_SHADOW_KEY_PREFIX}{agent_key}"
                 raw = await self._r.get(shadow_key)
-                
+
                 payload = json.loads(raw) if raw else {"_type": "TOMBSTONE", "key": agent_key}
-                
+
                 # Push to Hydra Stream (Persistent)
                 # Atomically advances chain and logs to stream.
                 await self._reliable_advance_chain(agent_key, payload, "EVICTION")
-                
+
                 # Cleanup shadow
                 await self._r.delete(shadow_key)
-                
+
         except asyncio.CancelledError:
             await pubsub.unsubscribe()
             await pubsub.aclose()
@@ -281,21 +286,21 @@ class DistributedSovereignCache:
         Guarantees that audit_callback is called At-Least-Once.
         """
         consumer_id = f"{self._node_id}-worker"
-        
+
         while True:
             try:
                 # 1. Read pending / new messages (XREADGROUP)
                 items = await self._r.xreadgroup(
-                    _AUDIT_GROUP_NAME, consumer_id, 
-                    {_AUDIT_STREAM_KEY: ">"}, count=10, block=1000
+                    _AUDIT_GROUP_NAME, consumer_id, {_AUDIT_STREAM_KEY: ">"}, count=10, block=1000
                 )
 
-                if not items: continue
+                if not items:
+                    continue
 
                 for _stream, messages in items:
                     for msg_id, data in messages:
                         agent_key = data.get("agent_key", "unknown")
-                        
+
                         # 2. Persist to DB (The Callback)
                         if self._audit_callback:
                             try:
@@ -303,12 +308,16 @@ class DistributedSovereignCache:
                                 await self._audit_callback(agent_key, {}, data)
                                 # 3. Acknowledge (Safe now)
                                 await self._r.xack(_AUDIT_STREAM_KEY, _AUDIT_GROUP_NAME, msg_id)
-                                logger.info("✅ [HYDRA AUDIT] ACKed %s proof=%s", agent_key, data['current_proof'][:8])
+                                logger.info(
+                                    "✅ [HYDRA AUDIT] ACKed %s proof=%s",
+                                    agent_key,
+                                    data["current_proof"][:8],
+                                )
                             except Exception as e:
                                 logger.error("🚨 [CALLBACK FAIL] %s", e)
                                 # We DON'T ACK here so it stays in the PEL (Pending Entires List)
                                 # for another consumer to grab or for retry in next loop.
-                                await asyncio.sleep(1) # Backoff
+                                await asyncio.sleep(1)  # Backoff
 
             except asyncio.CancelledError:
                 raise

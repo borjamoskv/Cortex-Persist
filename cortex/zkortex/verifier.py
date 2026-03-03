@@ -25,6 +25,7 @@ logger = logging.getLogger("cortex.zkortex.verifier")
 @dataclass(frozen=True)
 class VerificationResult:
     """Resultado de una verificación ZK."""
+
     is_valid: bool
     proof_type: str
     verified_at: float
@@ -79,7 +80,7 @@ class ZKOrtexVerifier:
                 proof_type="membership",
                 verified_at=time.time(),
                 details=f"Root mismatch. Expected: {self._expected_root[:16]}... "
-                        f"Got: {proof.root[:16]}...",
+                f"Got: {proof.root[:16]}...",
                 public_root=proof.root,
             )
 
@@ -97,14 +98,15 @@ class ZKOrtexVerifier:
         logger.info(
             "Membership verification: %s. Root: %s",
             "VALID" if is_valid else "INVALID",
-            proof.root[:16] + "..."
+            proof.root[:16] + "...",
         )
         return VerificationResult(
             is_valid=is_valid,
             proof_type="membership",
             verified_at=time.time(),
             details="Proof valid — element is a member of the sovereign knowledge set."
-                    if is_valid else "Proof INVALID — element not in set or tampered proof.",
+            if is_valid
+            else "Proof INVALID — element not in set or tampered proof.",
             public_root=proof.root,
         )
 
@@ -116,15 +118,17 @@ class ZKOrtexVerifier:
         is_valid = verify_range_proof(proof)
         logger.info(
             "Range verification [%d, %d]: %s",
-            proof.min_val, proof.max_val,
-            "VALID" if is_valid else "INVALID"
+            proof.min_val,
+            proof.max_val,
+            "VALID" if is_valid else "INVALID",
         )
         return VerificationResult(
             is_valid=is_valid,
             proof_type="range",
             verified_at=time.time(),
             details=f"CORTEX confirmed to have knowledge count in [{proof.min_val}, {proof.max_val}]."
-                    if is_valid else "Range proof structural check FAILED.",
+            if is_valid
+            else "Range proof structural check FAILED.",
         )
 
     def verify_commitment(
@@ -156,15 +160,15 @@ class ZKOrtexVerifier:
 
         is_valid = commitment.verify(revealed_secret, blinding)
         logger.info(
-            "Commitment opening verification: %s",
-            "VALID" if is_valid else "INVALID (tampered?)"
+            "Commitment opening verification: %s", "VALID" if is_valid else "INVALID (tampered?)"
         )
         return VerificationResult(
             is_valid=is_valid,
             proof_type="commitment_opening",
             verified_at=time.time(),
             details="Commitment opens correctly — secret is authentic."
-                    if is_valid else "Commitment DOES NOT match the revealed secret. ALERT: possible forgery.",
+            if is_valid
+            else "Commitment DOES NOT match the revealed secret. ALERT: possible forgery.",
         )
 
     def audit_report(self, results: list[VerificationResult]) -> dict[str, object]:

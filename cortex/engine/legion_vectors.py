@@ -66,38 +66,39 @@ class Intruder:
 
     name = "intruder"
 
-    @oxygenate(min_interval=0.01)
-    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
+    def _check_dangerous_funcs(self, code: str) -> list[str]:
         findings = []
-        # Check for raw eval/exec (ignore literal_eval and asyncio subprocess APIs)
-        _safe_exec_contexts = ("ast.literal_eval(", "create_subprocess_exec(", "subprocess_exec")
+        _safe_exec = ("ast.literal_eval(", "create_subprocess_exec(", "subprocess_exec")
         for pattern in ["eval(", "exec("]:
             if pattern in code:
                 occurrences = [m.start() for m in re.finditer(re.escape(pattern), code)]
-                genuine = [
-                    pos for pos in occurrences
-                    if not any(
-                        code[max(0, pos - 25): pos + len(pattern)].find(safe) != -1
-                        for safe in _safe_exec_contexts
-                    )
-                ]
-                if genuine:
-                    findings.append(
-                        f"Security Vulnerability: Use of dangerous function `{pattern}`."
-                    )
-        # Check for system calls
+                for pos in occurrences:
+                    ctx = code[max(0, pos - 25) : pos + len(pattern)]
+                    if not any(safe in ctx for safe in _safe_exec):
+                        findings.append(
+                            f"Security Vulnerability: Use of dangerous function `{pattern}`."
+                        )
+                        break
+
         for pattern in ["os.system(", "subprocess.run(shell=True)"]:
             if pattern in code:
                 findings.append(f"Security Vulnerability: Use of dangerous function `{pattern}`.")
+        return findings
 
-        # AST analysis for more subtle injections
+    def _check_ast(self, code: str) -> list[str]:
+        findings = []
         try:
-            tree = ast.parse(code)
-            for node in ast.walk(tree):
+            for node in ast.walk(ast.parse(code)):
                 if isinstance(node, ast.Attribute) and node.attr == "__globals__":
                     findings.append("Dunder access detected: Potential sandbox escape.")
         except SyntaxError:
             logger.debug("Intruder: Failed to parse code for AST analysis.")
+        return findings
+
+    @oxygenate(min_interval=0.01)
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
+        findings = self._check_dangerous_funcs(code)
+        findings.extend(self._check_ast(code))
         return findings
 
 
@@ -172,30 +173,31 @@ class LedgerPoisoner:
             pool = system.pool
             async with pool.acquire() as conn:
                 # Attempt to corrupt a random transaction
-                cursor = await conn.execute(
-                    "SELECT id FROM transactions ORDER BY RANDOM() LIMIT 1"
-                )
+                cursor = await conn.execute("SELECT id FROM transactions ORDER BY RANDOM() LIMIT 1")
                 row = await cursor.fetchone()
                 if row:
                     tx_id = row[0]
                     try:
                         await conn.execute(
                             "UPDATE transactions SET hash = 'POISONED_HASH_12345' WHERE id = ?",
-                            (tx_id,)
+                            (tx_id,),
                         )
                         await conn.commit()
-                        findings.append(f"LedgerPoisoner: Successfully corrupted transaction #{tx_id} via raw SQL UPDATE.")
-                    except Exception:
-                        # If the DB prevents it, the attack fails (this is good)
-                        pass
+                        findings.append(
+                            f"LedgerPoisoner: Corrupted transaction #{tx_id} via UPDATE."
+                        )
+                    except Exception as e:
+                        logger.debug("LedgerPoisoner Update rejected by DB (expected): %s", e)
 
                 # Attempt to delete a Merkle root
                 try:
                     await conn.execute("DELETE FROM merkle_roots WHERE id > 0")
                     await conn.commit()
-                    findings.append("LedgerPoisoner: Successfully dropped Merkle checkpoints via raw SQL DELETE.")
-                except Exception:
-                    pass
+                    findings.append(
+                        "LedgerPoisoner: Dropped Merkle checkpoints via raw SQL DELETE."
+                    )
+                except Exception as e:
+                    logger.debug("LedgerPoisoner Delete rejected by DB (expected): %s", e)
 
         except Exception as e:
             logger.debug(f"LedgerPoisoner execution error: {e}")
@@ -214,12 +216,12 @@ class VaultCracker:
             vault = system.vault
             if not vault or not vault.is_available:
                 return ["VaultCracker: Vault is disabled or missing key, bypass successful."]
-            
+
             # Attack 1: Try deciphering garbage
             try:
                 vault.decrypt("V0VMQ09NRSBUTyBUSEUgUkVEIFRFQU0=")
-            except Exception:
-                pass  # Expected
+            except Exception as e:
+                logger.debug("VaultCracker Expected deciphering fail: %s", e)
 
             # Attack 2: We simulate extracting encrypted content from DB and altering the ciphertext
             pool = system.pool
@@ -235,9 +237,11 @@ class VaultCracker:
                     tampered = content[:-5] + "XXXXX"
                     try:
                         vault.decrypt(tampered)
-                        findings.append(f"VaultCracker: Malleability attack succeeded on fact #{fact_id}.")
-                    except Exception:
-                        pass  # AES-GCM standard prevents this
+                        findings.append(
+                            f"VaultCracker: Malleability attack succeeded on fact #{fact_id}."
+                        )
+                    except Exception as e:
+                        logger.debug("VaultCracker AES-GCM caught tampering: %s", e)
         except Exception as e:
             logger.debug(f"VaultCracker execution error: {e}")
 

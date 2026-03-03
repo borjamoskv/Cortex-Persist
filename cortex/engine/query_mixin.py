@@ -89,6 +89,7 @@ class QueryMixin(EngineMixinBase):
             # Add graph context if requested (Wave 4: Graph-RAG)
             if results and graph_depth > 0:
                 from cortex.graph import extract_entities, get_context_subgraph
+
                 entities = extract_entities(query)
                 seeds = [e["name"] for e in entities]
                 if seeds:
@@ -195,7 +196,7 @@ class QueryMixin(EngineMixinBase):
                 tx = await cursor.fetchone()
                 if not tx:
                     raise ValueError(f"Transaction {tx_id} not found for tenant {tenant_id}")
-            
+
             tx_time = tx[0]
 
             query = (
@@ -205,7 +206,7 @@ class QueryMixin(EngineMixinBase):
                 "  AND (f.valid_until IS NULL OR f.valid_until > ?)) "
             )
             params = [tenant_id, project, tx_time, tx_time]
-            
+
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
@@ -224,7 +225,7 @@ class QueryMixin(EngineMixinBase):
                 f"WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {clause}"
             )
             # nosec B608 — parameterized via temporal builder
-            
+
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, [tenant_id, *params])
             rows = await cursor.fetchall()
