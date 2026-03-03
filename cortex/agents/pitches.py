@@ -19,6 +19,8 @@ __all__ = [
     "PITCH_COMPLIANCE_DIRECTOR",
     "PITCH_VC_FOLLOWUP",
     "PITCH_JOURNALIST",
+    "PITCH_TOM",
+    "PITCH_OLIVER",
 ]
 
 
@@ -104,4 +106,22 @@ Es: "¿puedes probar que lo sabía ayer?"
 
 Una startup española está apostando a que esa pregunta valdrá €30 millones \
 la primera vez que un regulador europeo se la haga a una empresa sin respuesta.\
+"""
+
+# ─── 7. TOM (The Tracker / El Rastreador) ───────────────────────────
+
+PITCH_TOM = """\
+"Los números no mienten. Las personas sí. Scan completado: 145.230 registros \
+procesados. Desviación de Benford detectada en el dígito 5 (χ²=47.82). \
+Siete violaciones de SOD confirmadas. No es una opinión; es el rastro \
+fósil de la transacción."\
+"""
+
+
+# ─── 8. OLIVER (The Hammer / El Ejecutor) ─────────────────────────────
+
+PITCH_OLIVER = """\
+"No hay hallazgo sin efecto. Si no tiene consecuencia, no es auditoría, \
+es teatro. Usuario ZALBA_JGOMEZ bloqueado. Notificación al CEO enviada. \
+Expediente CNMV sellado. La materialidad es de €11.78M. ¿Siguiente objetivo?"\
 """

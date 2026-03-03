@@ -16,8 +16,11 @@ try:
 except ImportError:
     # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
     class BicameralStub:
-        def log_limbic(self, msg, **kwargs): logging.getLogger("cortex.limbic").info(msg)
-        def log_motor(self, msg, **kwargs): logging.getLogger("cortex.motor").info(msg)
+        def log_limbic(self, msg: str, **kwargs) -> None:
+            logging.getLogger("cortex.limbic").info(msg)
+
+        def log_motor(self, msg: str, **kwargs) -> None:
+            logging.getLogger("cortex.motor").info(msg)
     bicameral = BicameralStub()
 
 from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
@@ -174,7 +177,7 @@ class LegionOmegaEngine:
             v_count = len(vulnerabilities)
 
             if not vulnerabilities:
-                bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
+                bicameral.log_motor("Inmunidad Química alcanzada en ciclo %d", cycle, action="Ω₆")
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
 
             # ─── Entropy Regression Check ───
@@ -200,7 +203,10 @@ class LegionOmegaEngine:
 
         bicameral.log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
         return SiegeResult(
-            success=False, final_code=final_code, cycles=cycle, vulnerabilities=vulnerabilities
+            success=False,
+            final_code=final_code,
+            cycles=self.max_cycles,
+            vulnerabilities=vulnerabilities if vulnerabilities else [],
         )
 
 

@@ -119,6 +119,14 @@ class CortexLLMRouter:
             self._cascade.set_nx_record(p.provider_name)
         return None
 
+    def clear_positive_cache(self) -> None:
+        """Clear A-records."""
+        self._cascade._a_records.clear()
+
+    def clear_negative_cache(self) -> None:
+        """Clear NXDOMAIN records."""
+        self._cascade._nxdomain_cache.clear()
+
     async def execute_resilient(self, prompt: CortexPrompt) -> Result[str]:
         """Ejecuta inferencia con cascade determinista por intención.
 
@@ -148,6 +156,10 @@ class CortexLLMRouter:
         finally:
             self._inflight.pop(prompt_key, None)
 
+    async def invoke(self, prompt: CortexPrompt) -> Result[str]:
+        """Alias for backward compatibility."""
+        return await self.execute_resilient(prompt)
+
     async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str]:
         """Core cascade logic (extracted for Heat-Sink wrapping)."""
         # Phase 0: Hedging (Parallel race-to-first)
@@ -175,7 +187,7 @@ class CortexLLMRouter:
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt.intent)
-        errors = [f"Primary ({self._primary.provider_name}): {res_primary.err()}"]
+        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]
 
         for i, provider in enumerate(fallbacks, start=2):
             if self._cascade.is_nxdomain_cached(provider.provider_name):
@@ -202,7 +214,7 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
-            errors.append(f"{provider.provider_name}: {res_fb.err()}")
+            errors.append(f"{provider.provider_name}: {res_fb.error}")
             self._cascade.set_nx_record(provider.provider_name)
 
         # Final defeat: record terminal event
@@ -217,7 +229,7 @@ class CortexLLMRouter:
                 errors=errors,
             )
         )
-        return Err(f"Nervous System Failure: Cascade exhausted. Errors: {'; '.join(errors)}")
+        return Err(f"All providers failed. Cascade exhausted. Errors: {'; '.join(errors)}")
 
     async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str]:
         """Try a single provider, returning Result."""

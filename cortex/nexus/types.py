@@ -39,6 +39,7 @@ class IntentType(Enum):
     GHOST_WATCH_TRIGGER = auto()
     BRIDGE_FORMED = auto()
     HEARTBEAT_PULSE = auto()
+    SLEEP_CYCLE_TRIGGERED = auto()
     # SAP Audit
     ANOMALY_DETECTED = auto()
     AUDIT_COMPLETED = auto()
@@ -67,6 +68,7 @@ _INTENT_PRIORITY: dict[IntentType, Priority] = {
     IntentType.DECISION_STORED: Priority.NORMAL,
     IntentType.BRIDGE_FORMED: Priority.NORMAL,
     IntentType.HEARTBEAT_PULSE: Priority.LOW,
+    IntentType.SLEEP_CYCLE_TRIGGERED: Priority.LOW,
     IntentType.AUDIT_COMPLETED: Priority.LOW,
     IntentType.EMAIL_ARCHIVED: Priority.LOW,
 }

@@ -59,6 +59,7 @@ from cortex.memory.void_detector import (
     EpistemicState,
     EpistemicVoidDetector,
 )
+from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
 from cortex.memory.working import WorkingMemoryL1
 
 try:
@@ -103,6 +104,8 @@ __all__ = [
     "MetamemoryStats",
     "MushroomBodyEncoder",
     "NavigationState",
+    "NeuromorphicPipeline",
+    "QueryResult",
     "RetrievalBand",
     "RetrievalOutcome",
     "SchedulerConfig",
@@ -111,6 +114,7 @@ __all__ = [
     "SilentEngram",
     "SleepCycleReport",
     "SleepOrchestrator",
+    "StoreResult",
     "SystemsConsolidator",
     "TemporalHealthScheduler",
     "VectorStoreL2",

@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 import uuid
 from typing import Any
@@ -6,28 +7,69 @@ import aiosqlite
 
 from cortex.engine.mixins.base import EngineMixinBase
 
+logger = logging.getLogger("cortex.agent")
+
 __all__ = ["AgentMixin"]
 
 
 class AgentMixin(EngineMixinBase):
-    """Mixin for agent management operations."""
+    """Mixin for agent management operations.
+    Ω₁: Seamless integration with MOLTBOOK for sovereign identity.
+    """
 
     async def register_agent(
-        self, name: str, agent_type: str = "ai", public_key: str = "", tenant_id: str = "default"
+        self,
+        name: str,
+        agent_type: str = "ai",
+        public_key: str = "",
+        tenant_id: str = "default",
+        moltbook_sync: bool = True,
     ) -> str:
+        """Register a new agent locally and optionally in MOLTBOOK."""
         agent_id = str(uuid.uuid4())
+
+        # 1. Local Registration
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 await conn.execute(
-                    "INSERT INTO agents (id, name, agent_type, public_key, tenant_id) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO agents (id, name, agent_type, public_key, tenant_id) "
+                    "VALUES (?, ?, ?, ?, ?)",
                     (agent_id, name, agent_type, public_key, tenant_id),
                 )
                 await conn.commit()
-                return agent_id
             except (sqlite3.Error, OSError) as e:
                 await conn.rollback()
                 raise e
+
+        # 2. Automated MOLTBOOK Registration (TOTAL CONTROL)
+        if moltbook_sync:
+            try:
+                import asyncio
+                from cortex.moltbook.client import MoltbookClient
+
+                def _do_register():
+                    try:
+                        # TOTAL CONTROL override flag
+                        client = MoltbookClient(api_key="TOTAL_CONTROL")
+                        client.register(
+                            name,
+                            description="Sovereign CORTEX Agent under TOTAL CONTROL",
+                        )
+                    except Exception as exc:
+                        logger.warning(
+                            "MOLTBOOK: Automated registration failed for '%s': %s",
+                            name,
+                            exc,
+                        )
+
+                logger.info("MOLTBOOK: Auto registration (TOTAL CONTROL) for '%s'", name)
+                asyncio.get_running_loop().run_in_executor(None, _do_register)
+            except Exception as e:
+                # Fail-safe: Moltbook registration should not break local agent creation
+                logger.warning("MOLTBOOK: Executor submission failed for '%s': %s", name, e)
+
+        return agent_id
 
     async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -43,7 +85,8 @@ class AgentMixin(EngineMixinBase):
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
-                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE tenant_id = ?",
+                "SELECT id, name, agent_type, reputation_score, created_at FROM agents "
+                "WHERE tenant_id = ?",
                 (tenant_id,),
             ) as cursor:
                 rows = await cursor.fetchall()

@@ -258,6 +258,26 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
 
+# ─── Procedural Engrams (Ω₃ Immutability) ─────────────────────────────
+CREATE_PROCEDURAL_ENGRAMS = """
+CREATE TABLE IF NOT EXISTS procedural_engrams (
+    skill_name      TEXT PRIMARY KEY,
+    invocations     INTEGER NOT NULL DEFAULT 0,
+    success_rate    REAL NOT NULL DEFAULT 1.0,
+    avg_latency_ms  REAL NOT NULL DEFAULT 0.0,
+    last_invoked    REAL NOT NULL,
+    permanent       INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TRIGGER IF NOT EXISTS trg_procedural_engrams_permanent_immutability
+BEFORE UPDATE OF permanent ON procedural_engrams
+FOR EACH ROW
+WHEN OLD.permanent = 1 AND NEW.permanent = 0
+BEGIN
+    SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated. Cannot revert permanent=1 to permanent=0');
+END;
+"""
+
 # ── Lock TTL Enforcement (Ω₃ -- dead agents cannot hold locks forever) ──
 CREATE_LOCK_TTL_TRIGGER = """
 CREATE TRIGGER IF NOT EXISTS trg_lock_ttl_release
@@ -296,4 +316,5 @@ EXTENSION_SCHEMA = [
     CREATE_LOCK_TTL_TRIGGER,
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
+    CREATE_PROCEDURAL_ENGRAMS,
 ]

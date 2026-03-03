@@ -37,6 +37,7 @@ async def text_search(
     limit: int = 20,
     as_of: str | None = None,
     confidence: str | None = None,
+    **kwargs,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
     use_fts = await _has_fts5(conn)

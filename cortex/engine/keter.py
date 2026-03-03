@@ -182,6 +182,51 @@ class MejoraloCrush(SovereignPhase):
         return payload
 
 
+class KeterReservoir:
+    """
+    Persistent backend for KETER memory reservoir (Ω₂).
+    (Ghost 3134 implementation)
+    """
+
+    def __init__(self, db_path: str):
+        from cortex.database.core import connect
+        import sqlite3
+        self.db_path = db_path
+        # Use centralized factory
+        self._conn = connect(db_path)
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS keter_reservoir (
+                mission_id TEXT PRIMARY KEY,
+                payload_json TEXT NOT NULL,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        self._conn.commit()
+
+    def get(self, mission_id: str) -> KeterPayload | None:
+        import json
+        try:
+            row = self._conn.execute(
+                "SELECT payload_json FROM keter_reservoir WHERE mission_id = ?", (mission_id,)
+            ).fetchone()
+            if row:
+                return json.loads(row[0])
+        except Exception:
+            return None
+        return None
+
+    def set(self, mission_id: str, payload: KeterPayload):
+        import json
+        try:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO keter_reservoir (mission_id, payload_json) VALUES (?, ?)",
+                (mission_id, json.dumps(payload))
+            )
+            self._conn.commit()
+        except Exception as e:
+            logger.warning("KeterReservoir set failed: %s", e)
+
+
 class KeterEngine:
     """
     Consolida la inteligencia Soberana de MOSKV-1 en un unico comando de singularidad.
@@ -199,8 +244,11 @@ class KeterEngine:
             FormalVerificationGate(),
             MejoraloCrush(),
         ]
-        # Axiom Ω₂: Cross-invocation Thermal Bypass Repository
-        self._memory_reservoir: dict[str, KeterPayload] = {}
+        # Axiom Ω₂: Cross-invocation Thermal Bypass Repository (Persistent)
+        # We store it in a predictable location within .cortex
+        config_dir = os.path.expanduser("~/.cortex")
+        db_path = os.path.join(config_dir, "keter_reservoir.db")
+        self._reservoir = KeterReservoir(db_path)
 
     def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
         slug = getattr(manifest, "slug", "")
@@ -260,8 +308,8 @@ class KeterEngine:
         
         # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
-        if mission_id in self._memory_reservoir:
-            cached_payload = self._memory_reservoir[mission_id]
+        cached_payload = self._reservoir.get(mission_id)
+        if cached_payload:
             # Verify if it reached singularity
             if cached_payload.get("status") == "SINGULARITY_REACHED":
                 if thermal_audit:
@@ -328,7 +376,7 @@ class KeterEngine:
 
             payload["status"] = "SINGULARITY_REACHED"
             # Update reservoir for future short-circuits
-            self._memory_reservoir[mission_id] = payload
+            self._reservoir.set(mission_id, payload)
             logger.info("🌌 [KETER] Ecosistema tejido. Friccion cero.")
         except CortexError as e:
             logger.error(f"🔥 [KETER] Colapso de singularidad: {e}")
