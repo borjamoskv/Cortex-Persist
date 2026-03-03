@@ -79,10 +79,11 @@ def mock_db(tmp_path) -> str:
     return db_path
 
 
-def test_collect_metrics(mock_db: str):
+@pytest.mark.asyncio
+async def test_collect_metrics(mock_db: str):
     """Test that SovereignReporter correctly aggregates ManifoldStatus."""
     reporter = SovereignReporter(mock_db, project="test_proto")
-    status: ManifoldStatus = reporter.collect_metrics()
+    status: ManifoldStatus = await reporter.collect_metrics()
     
     assert status.project == "test_proto"
     assert status.active_ghosts == 1
@@ -94,14 +95,16 @@ def test_collect_metrics(mock_db: str):
     # Efficiency logic checks
     assert status.efficiency["history_count"] == 2
     assert status.efficiency["latest_roi"]["hours_saved"] == 42.0
-
+    
+    assert isinstance(status.timestamp, str)
     assert len(status.timestamp) > 10
 
 
-def test_missing_db_raises_error(tmp_path):
+@pytest.mark.asyncio
+async def test_missing_db_raises_error(tmp_path):
     """Ensure proper exception handling when DB is missing."""
     invalid_path = str(tmp_path / "nonexistent.db")
     reporter = SovereignReporter(invalid_path)
-
+    
     with pytest.raises(sqlite3.OperationalError):
-        reporter.collect_metrics()
+        await reporter.collect_metrics()

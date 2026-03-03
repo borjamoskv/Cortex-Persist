@@ -15,8 +15,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
-from cortex.engine.causality import CausalGraph
-from cortex.signals.bus import SignalBus
+import aiosqlite
 
 logger = logging.getLogger("cortex.reporter")
 
@@ -37,46 +36,52 @@ class SovereignReporter:
         self.db_path = db_path
         self.project = project
 
-    def _fetch_roi_history(self, conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    async def _fetch_roi_history(self, conn: aiosqlite.Connection) -> list[dict[str, Any]]:
         """Fetch the latest ROI records from the facts table."""
-        cursor = conn.execute(
+        cursor = await conn.execute(
             "SELECT content, meta FROM facts WHERE fact_type='knowledge' "
             "AND source='chronos-roi' ORDER BY created_at DESC LIMIT 5"
         )
         roi_history = []
-        for row in cursor.fetchall():
+        rows = await cursor.fetchall()
+        for row in rows:
             try:
                 roi_history.append(json.loads(row[1]))
             except (json.JSONDecodeError, TypeError):
                 continue
         return roi_history
 
-    def collect_metrics(self) -> ManifoldStatus:
-        """Aggregate data from all Ω-dimensions."""
+    async def collect_metrics(self) -> ManifoldStatus:
+        """Aggregate data from all Ω-dimensions using Async I/O."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                graph = CausalGraph(conn)
-                bus = SignalBus(conn)
+            async with aiosqlite.connect(self.db_path) as conn:
+                # 130/100: Reusing existing CausalGraph/SignalBus (assuming they 
+                # can be adapted or we query directly for speed)
+                # Since CausalGraph and SignalBus take a sync sqlite3.Connection 
+                # in this architecture context, we will perform raw fast async 
+                # queries for the stats here to achieve 0-gravity I/O.
                 
                 # 1. Causality Stats
-                causal_stats = graph.stats()
+                cursor = await conn.execute("SELECT COUNT(*) FROM causal_edges")
+                total_edges = (await cursor.fetchone())[0]
+                causal_stats = {"total_edges": total_edges}
                 
                 # 2. Signals Stats
-                signal_stats = bus.stats()
+                cursor = await conn.execute("SELECT COUNT(*) FROM signals")
+                total_signals = (await cursor.fetchone())[0]
+                signal_stats = {"total": total_signals}
                 
                 # 3. Efficiency (ROI)
-                roi_history = self._fetch_roi_history(conn)
+                roi_history = await self._fetch_roi_history(conn)
                 
-                # 4. Active Ghosts (TODOs in code + DB ghosts)
-                # For now, we query the facts table for 'ghost' types
-                cursor = conn.execute("SELECT COUNT(*) FROM facts WHERE fact_type='ghost'")
-                ghost_count = cursor.fetchone()[0]
+                # 4. Active Ghosts
+                cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE fact_type='ghost'")
+                ghost_count = (await cursor.fetchone())[0]
 
-                # 5. Architecture Integrity (Calculated heuristic)
-                # Coverage of facts by causal edges
-                fact_count = conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
-                edge_count = causal_stats.get("total_edges", 0)
-                integrity = (edge_count / max(1, fact_count)) * 100.0
+                # 5. Architecture Integrity
+                cursor = await conn.execute("SELECT COUNT(*) FROM facts")
+                fact_count = (await cursor.fetchone())[0]
+                integrity = (total_edges / max(1, fact_count)) * 100.0
 
                 return ManifoldStatus(
                     timestamp=datetime.now().isoformat(),
@@ -94,17 +99,18 @@ class SovereignReporter:
             logger.error("Failed to collect metrics: %s", e)
             raise
 
-    def export_json(self, output_path: str):
+    async def export_json(self, output_path: str):
         """Export status to a JSON file for frontend consumption."""
-        status = self.collect_metrics()
+        status = await self.collect_metrics()
+        # Rest of export code...
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "w") as f:
             json.dump(asdict(status), f, indent=2)
         logger.info("Dynamic documentation exported to %s", output_path)
 
-    def generate_markdown_report(self) -> str:
+    async def generate_markdown_report(self) -> str:
         """Generates a markdown snippet for OMEGA_MANIFOLD.md integration."""
-        s = self.collect_metrics()
+        s = await self.collect_metrics()
         return f"""
 ### 📊 Live Manifold Telemetry ({s.timestamp})
 - **Architecture Integrity:** {s.architecture_integrity}%
