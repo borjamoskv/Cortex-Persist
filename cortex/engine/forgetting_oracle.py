@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import sqlite3
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -224,7 +225,7 @@ class ForgettingOracle:
                     except (json.JSONDecodeError, TypeError):
                         continue
                 return list(reversed(records))  # Cronológico
-        except Exception as e:
+        except (AttributeError, sqlite3.Error) as e:
             logger.error("[ORACLE] Failed to fetch eviction records: %s", e)
             return []
 
@@ -285,7 +286,7 @@ class ForgettingOracle:
                 row = await cursor.fetchone()
                 post_eviction_activity = row[0] if row else 0
                 return post_eviction_activity > 0
-        except Exception:
+        except (sqlite3.Error, AttributeError):
             return False
 
     async def _estimate_causal_weight(self, key: str) -> float:
@@ -308,7 +309,7 @@ class ForgettingOracle:
                 if row:
                     dominant_type = row[0]
                     return self.CAUSAL_WEIGHT_MAP.get(dominant_type, self.DEFAULT_WEIGHT)
-        except Exception:
+        except (sqlite3.Error, AttributeError):
             pass
         return self.DEFAULT_WEIGHT
 
@@ -366,7 +367,7 @@ class ForgettingOracle:
                 count = row[0] if row else 0
                 # Normalise: 100+ accesses → score 1.0
                 return min(1.0, count / 100.0)
-        except Exception:
+        except (sqlite3.Error, AttributeError):
             return 0.0
 
     def _compose_eviction_value(
@@ -503,7 +504,7 @@ class ForgettingOracle:
                     report.to_dict(),
                 )
                 await conn.commit()
-        except Exception as e:
+        except (sqlite3.Error, json.JSONDecodeError, TypeError) as e:
             logger.error("[ORACLE] Failed to persist report: %s", e)
 
     def _empty_report(self) -> OracleReport:
