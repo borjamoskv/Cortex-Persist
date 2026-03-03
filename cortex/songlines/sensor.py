@@ -37,7 +37,11 @@ class TopographicSensor:
 
         # 1. Recursive scan of files
         for path in root_dir.rglob("*"):
+            # OOM Killer Guard: Avoid massive files and limit recursion if needed
             if path.is_file() and not self._is_ignored(path):
+                # OOM Guard: Skip files larger than 1MB (ghosts should be small)
+                if path.stat().st_size > 1024 * 1024:
+                    continue
                 file_ghosts = self._read_ghosts_from_file(path)
                 resonances.extend(file_ghosts)
 
@@ -76,11 +80,13 @@ class TopographicSensor:
             except OSError:
                 pass
 
-        # 2. Try xattr CLI
+        # 2. Try xattr CLI (Chronos Sniper: added timeout)
         try:
-            out = subprocess.check_output(["xattr", str(file_path)], stderr=subprocess.DEVNULL)
-            return [a for a in out.decode("utf-8").splitlines() if a.startswith(self.prefix)]
-        except (subprocess.SubprocessError, FileNotFoundError):
+            out = subprocess.check_output(
+                ["xattr", str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
+            )
+            return [a for a in out.decode("utf-8", errors="ignore").splitlines() if a.startswith(self.prefix)]
+        except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return []
 
     def _get_attr_payload(self, file_path: Path, attr: str) -> bytes | None:
@@ -92,12 +98,12 @@ class TopographicSensor:
             except OSError:
                 pass
 
-        # 2. Try xattr CLI -p
+        # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:
             return subprocess.check_output(
-                ["xattr", "-p", attr, str(file_path)], stderr=subprocess.DEVNULL
+                ["xattr", "-p", attr, str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
             )
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return None
 
     def _parse_ghost_payload(
@@ -105,7 +111,13 @@ class TopographicSensor:
     ) -> GhostTrace | None:
         """Decode payload and handle decay/evaporation."""
         try:
-            ghost = json.loads(payload_bytes.decode("utf-8"))
+            # Entropy Demon Guard: Handle malformed UTF-8 or unexpected JSON
+            payload_str = payload_bytes.decode("utf-8", errors="replace")
+            ghost = json.loads(payload_str)
+
+            if not isinstance(ghost, dict) or "created_at" not in ghost or "half_life" not in ghost:
+                return None
+
             strength = DecayEngine.calculate_resonance(ghost["created_at"], ghost["half_life"])
 
             if strength < 0.05:

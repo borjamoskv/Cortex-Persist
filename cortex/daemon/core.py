@@ -12,8 +12,6 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 
-import httpx
-
 from cortex.daemon.alerts import AlertHandlerMixin
 from cortex.daemon.healing import HealingMixin
 from cortex.daemon.models import (
@@ -266,6 +264,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             return
         try:
             import asyncio
+
             from cortex.sync import export_snapshot, export_to_json, sync_memory
 
             async def _run_sync():

@@ -164,22 +164,27 @@
 
   <script>
     async function updateStatus() {
+      const tsEl = document.getElementById('timestamp');
       try {
         const response = await fetch('data/manifold_status.json');
+        if (!response.ok) throw new Error('OFFLINE');
         const data = await response.json();
         
         document.getElementById('integrity-val').innerText = data.architecture_integrity + '%';
         document.getElementById('integrity-bar').style.width = data.architecture_integrity + '%';
         
-        const latestRoi = data.efficiency.latest_roi.roi_ratio || 0;
+        const latestRoi = (data.efficiency && data.efficiency.latest_roi) ? (data.efficiency.latest_roi.roi_ratio || 0) : 0;
         document.getElementById('roi-val').innerText = latestRoi + 'x';
         
-        document.getElementById('edges-val').innerText = data.causality.total_edges;
-        document.getElementById('ghosts-val').innerHTML = '<span class="ghost-pulse"></span>' + data.active_ghosts;
+        document.getElementById('edges-val').innerText = data.causality ? data.causality.total_edges : '--';
+        document.getElementById('ghosts-val').innerHTML = '<span class="ghost-pulse"></span>' + (data.active_ghosts || 0);
         
-        document.getElementById('timestamp').innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
+        tsEl.innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
+        tsEl.style.color = 'var(--text-secondary)';
       } catch (e) {
-        console.error("Dashboard offline: run 'python -m cortex.engine.reporter' to sync data.");
+        console.warn("Dashboard offline: run 'python -m cortex.engine.reporter' to sync data.");
+        tsEl.innerText = 'STATUS: OFFLINE (Check CORTEX Reporter)';
+        tsEl.style.color = '#FF3B3B';
       }
     }
     updateStatus();
