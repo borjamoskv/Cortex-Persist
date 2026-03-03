@@ -84,6 +84,7 @@ class SleepCycleReport:
     # Calibration
     brier_before: float = -1.0
     brier_after: float = -1.0
+    segmented_brier: dict[str, float] = field(default_factory=dict)
     fok_threshold_before: float = 0.3
     fok_threshold_after: float = 0.3
     threshold_adjusted: bool = False
@@ -155,15 +156,24 @@ class SleepOrchestrator:
         # ── Pre-sleep diagnostics ─────────────────────────────────
         report.brier_before = self._metamemory.calibration_score()
         report.fok_threshold_before = self._metamemory._fok_threshold
+        
+        # Domain segmentation (Ω₁: Multi-Scale Causality)
+        cal_report = self._metamemory.calibration_report()
+        report.segmented_brier = cal_report.get("segmented_brier", {})
+
         gaps_before = self._metamemory.knowledge_gaps()
         report.knowledge_gaps_detected = len(gaps_before)
 
         logger.info(
-            "[SLEEP] Starting cycle for %s. Brier=%.4f, Gaps=%d",
+            "[SLEEP] Starting cycle for %s. Brier=%.4f, Domains=%d, Gaps=%d",
             tenant_id,
             report.brier_before,
+            len(report.segmented_brier),
             report.knowledge_gaps_detected,
         )
+        for domain, score in report.segmented_brier.items():
+            if score >= 0:
+                logger.info("   ↳ Domain [%s]: Brier=%.4f", domain, score)
 
         # ── Phase 1: NREM ─────────────────────────────────────────
         try:
