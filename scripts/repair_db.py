@@ -25,7 +25,7 @@ def repair():
         for table in tables_with_tenants:
             # Check if table exists
             cursor = conn.execute(
-                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)
             )
             if not cursor.fetchone():
                 print(f"Table {table} does not exist, skipping.")

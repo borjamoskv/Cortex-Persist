@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 
 import click
@@ -24,10 +25,8 @@ def status(json_output) -> None:
     stats = mgr.status()
 
     if json_output:
-        click.echo(json.dumps(stats, indent=2))
+        click.echo(json.dumps(dataclasses.asdict(stats), indent=2))
         return
-
-    metrics = stats.get("metrics", {})
 
     table = Table(
         title="[bold #CCFF00]🫁 SOVEREIGN QUOTA MANAGER (PULMONES)[/]",
@@ -40,32 +39,31 @@ def status(json_output) -> None:
     table.add_section()
 
     # ── Bucket ────────────────────────────────────────────────────────────
-    table.add_row("Capacidad Máxima", f"{stats['capacity']} tokens (RPM)")
+    table.add_row("Capacidad Máxima", f"{stats.capacity} tokens (RPM)")
     table.add_row(
         "Tokens Actuales",
-        f"[bold white]{stats['current_tokens']}[/] ({stats['fill_pct']}%)",
+        f"[bold white]{stats.current_tokens}[/] ({stats.fill_pct}%)",
     )
-    table.add_row("Tasa de Recarga", f"{stats['refill_rate_per_s']} tok/s")
+    table.add_row("Tasa de Recarga", f"{stats.refill_rate_per_s} tok/s")
 
-    time_to_full = stats.get("time_to_full_s", 0)
+    time_to_full = stats.time_to_full_s
     color = "#06d6a0" if time_to_full == 0 else "yellow"
     table.add_row("Tiempo para 100%", f"[{color}]{time_to_full}s[/]")
 
     # ── Métricas de observabilidad ────────────────────────────────────────
     table.add_section()
-    throttle_ratio = metrics.get("throttle_ratio_pct", 0.0)
-    ratio_color = "#06d6a0" if throttle_ratio < 10 else "red"
-    table.add_row("Adquiridos (OK)", f"[bold]{metrics.get('acquired', 0)}[/]")
-    table.add_row("Estrangulados", f"[yellow]{metrics.get('throttled', 0)}[/]")
-    table.add_row("Timeouts", f"[red]{metrics.get('timeouts', 0)}[/]")
+    ratio_color = "#06d6a0" if stats.throttle_ratio_pct < 10 else "red"
+    table.add_row("Adquiridos (OK)", f"[bold]{stats.acquired}[/]")
+    table.add_row("Estrangulados", f"[yellow]{stats.throttled}[/]")
+    table.add_row("Timeouts", f"[red]{stats.timeouts}[/]")
     table.add_row(
         "Throttle Ratio",
-        f"[{ratio_color}]{throttle_ratio}%[/]",
+        f"[{ratio_color}]{stats.throttle_ratio_pct}%[/]",
     )
 
     console.print(table)
 
-    if stats["current_tokens"] < 1.0:
+    if stats.current_tokens < 1.0:
         console.print(
             "\n[yellow]⚠️  ALERTA PULMONES: Sistema estrangulado."
             " La próxima llamada API entrará en sleep asíncrono.[/yellow]"

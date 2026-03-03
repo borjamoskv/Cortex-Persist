@@ -40,10 +40,29 @@ def client():
     api_state.auth_manager = None
     api_state.engine = None
 
+    import threading
+
+    c = TestClient(api_mod.app, raise_server_exceptions=False)
+    c.__enter__()
     try:
-        with TestClient(api_mod.app) as c:
-            yield c
+        yield c
     finally:
+        # Guard against lifespan shutdown deadlock (pool/engine close)
+        done = threading.Event()
+
+        def _teardown():
+            try:
+                c.__exit__(None, None, None)
+            except Exception:
+                pass
+            finally:
+                done.set()
+
+        t = threading.Thread(target=_teardown, daemon=True)
+        t.start()
+        done.wait(timeout=5.0)
+
+        # Config restoration
         cortex.config.DB_PATH = original_db
         if original_env is not None:
             os.environ["CORTEX_DB"] = original_env

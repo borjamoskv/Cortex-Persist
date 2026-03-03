@@ -6,6 +6,7 @@ Separates the Sovereign Agent's monologue into Limbic, Motor, and Autonomic stre
 
 import json
 import os
+import time
 from typing import Any
 
 from rich.console import Console
@@ -45,7 +46,7 @@ class BicameralConsole:
             "stream": stream,
             "source": source,
             "message": message,
-            "timestamp": os.popen("date +%s").read().strip(),
+            "timestamp": str(int(time.time())),
             "meta": meta or {},
         }
         # In this initial implementation, we append to a dedicated relay buffer file.

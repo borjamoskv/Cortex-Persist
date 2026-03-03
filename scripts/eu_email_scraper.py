@@ -462,7 +462,7 @@ class HTTPClient:
             headers=HEADERS,
             follow_redirects=True,
             timeout=httpx.Timeout(connect=8.0, read=20.0, write=5.0, pool=5.0),
-            verify=False,  # Note: verify=False for broader compatibility with legacy EU sites
+            verify=True,   # Sovereign Security: Never disable SSL verification
             http2=True,
         )
         return self

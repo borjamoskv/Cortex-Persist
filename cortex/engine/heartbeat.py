@@ -48,7 +48,7 @@ class HeartbeatEmitter:
             health = await asyncio.wait_for(
                 asyncio.to_thread(hygiene.check_system_health), timeout=2.0
             )
-        except Exception as e:
+        except (TimeoutError, OSError, RuntimeError) as e:
             logger.warning("[HEARTBEAT] Health gathering timed out or failed: %s", e)
             health = {"status": "degraded", "error": str(e)}
 

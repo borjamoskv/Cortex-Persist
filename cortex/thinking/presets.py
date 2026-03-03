@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Thought Orchestra Presets.
+"""CORTEX v6.0 — Thought Orchestra Presets.
 
 Configuración estática del orquestador: modos de pensamiento, prompts de sistema,
 tabla de routing por modo, y configuración por defecto.
@@ -124,7 +124,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
 # ─── Configuration ───────────────────────────────────────────────────
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class OrchestraConfig:
     """Configuración del orchestra."""
 
