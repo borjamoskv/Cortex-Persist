@@ -20,11 +20,9 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from cortex.core.paths import COLD_STORAGE_DB, CORTEX_DB, PERSONAL_DB
-from cortex.database.core import connect
+from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope
 from cortex.search.text import text_search_sync
-from cortex.search.utils import _parse_row_sync
 
 __all__ = ["federated_search_sync", "attach_federated_dbs"]
 
@@ -91,23 +89,29 @@ def _search_attached_db(
     project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
-    """Run a LIKE search on an attached database's facts table.
+    """Search an attached database's facts table.
 
-    FTS5 is not available cross-database, so we fall back to LIKE.
-    Results are tagged with db_origin.
+    Handles AES-GCM encrypted content by decrypting client-side.
+    Falls back to LIKE for unencrypted DBs.
     """
+    from cortex.crypto import get_default_encrypter
+    from cortex.crypto.aes import CortexEncrypter
+
+    enc = get_default_encrypter()
+    v6_prefix = CortexEncrypter.PREFIX
+
+    # Fetch active facts (capped at 500 to limit memory)
     sql = (
         f"SELECT f.id, f.content, f.project, f.fact_type, "
         f"f.confidence, f.source, f.tags "
         f"FROM {alias}.facts f "
-        f"WHERE f.content LIKE ? AND f.valid_until IS NULL"
+        f"WHERE f.valid_until IS NULL"
     )
-    params: list = [f"%{query}%"]
+    params: list = []
     if project:
         sql += " AND f.project = ?"
         params.append(project)
-    sql += " ORDER BY f.updated_at DESC LIMIT ?"
-    params.append(limit)
+    sql += " LIMIT 500"
 
     try:
         cursor = conn.execute(sql, params)
@@ -116,9 +120,47 @@ def _search_attached_db(
         logger.warning("Search on %s failed: %s", alias, e)
         return []
 
-    results = [_parse_row_sync(row, has_rank=False) for row in rows]
-    for r in results:
-        r.db_origin = alias
+    # Decrypt and filter client-side
+    query_lower = query.lower()
+    results: list[SearchResult] = []
+
+    for row in rows:
+        content_raw = row[1] or ""
+        if str(content_raw).startswith(v6_prefix):
+            try:
+                content = enc.decrypt_str(content_raw, tenant_id="default")
+            except Exception:
+                continue
+        else:
+            content = str(content_raw)
+
+        if query_lower not in content.lower():
+            continue
+
+        try:
+            tags = __import__("json").loads(row[6]) if row[6] else []
+        except (ValueError, TypeError):
+            tags = []
+
+        results.append(SearchResult(
+            fact_id=row[0],
+            content=content,
+            project=row[2] or "",
+            fact_type=row[3] or "knowledge",
+            confidence=row[4] or "stated",
+            source=row[5],
+            tags=tags,
+            score=0.5,
+            valid_from="unknown",
+            valid_until=None,
+            created_at="unknown",
+            updated_at="unknown",
+            db_origin=alias,
+        ))
+
+        if len(results) >= limit:
+            break
+
     return results
 
 

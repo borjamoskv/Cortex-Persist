@@ -31,6 +31,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
         "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
         "cortex/evolution/cortex_metrics.py",  # Low-level sync telemetry metrics
+        "cortex/evolution/shannon_metrics.py",  # Sync thread metrics (asyncio.to_thread)
     }
 )
 
