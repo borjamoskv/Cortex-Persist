@@ -12,9 +12,12 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from cortex.memory.engrams import CortexSemanticEngram
+
+if TYPE_CHECKING:
+    from cortex.sovereign.endocrine import DigitalEndocrine
 
 logger = logging.getLogger("cortex.memory.resonance")
 
@@ -32,16 +35,15 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
 
 
 class AdaptiveResonanceGate:
-    """ART-inspired gate that controls memory write operations.
+    """ART-v2 inspired gate that controls memory write operations.
 
     The vigilance parameter ρ (rho) determines the threshold for
-    pattern matching. Higher ρ = more granular memory (more categories).
-    Lower ρ = more generalization (fewer, broader engrams).
+    pattern matching.
 
-    Biological analogy:
-    - ρ = parameter of vigilance (Grossberg's F1 comparison field)
-    - Resonance = match → reinforce existing engram (LTP)
-    - Reset = mismatch → create new engram category
+    Enhancements for v6.1:
+    - Dynamic Rho: Adjusts vigilance based on context (Precision vs Recall modes).
+    - Topographic Boost: Resonates with physical "ghosts" in the filesystem field.
+    - Metabolic Filtering: Incorporates engram energy levels into resonance probability.
     """
 
     def __init__(
@@ -49,17 +51,100 @@ class AdaptiveResonanceGate:
         vector_store: Any,
         rho: float = 0.85,
         ltp_boost: float = 0.25,
+        songline_sensor: Any | None = None,
+        endocrine: DigitalEndocrine | None = None,
     ):
         self._vs = vector_store
         self._rho = rho
         self._ltp_boost = ltp_boost
+        self._sensor = songline_sensor
+        self._endocrine = endocrine
+
+    def _calculate_topographic_boost(
+        self, candidate: CortexSemanticEngram
+    ) -> float:
+        """Evaluate if the candidate resonates with any physical 'ghosts' in its field."""
+        if not self._sensor or not hasattr(candidate, "source_file"):
+            return 0.0
+
+        # Optional: scan field around the source file
+        try:
+            from pathlib import Path
+            field = self._sensor.scan_field(Path(candidate.source_file).parent)
+            # Find ghosts matching intent or project
+            for ghost in field:
+                if ghost.get("project") == candidate.project:
+                    # Found a physical trace of the same project context
+                    return 0.05  # Static boost for topographic proximity
+        except (OSError, AttributeError, TypeError) as exc:
+            logger.debug(
+                "Topographic boost unavailable for engram %s: %s",
+                getattr(candidate, "id", "?"),
+                exc,
+            )
+
+        return 0.0
+
+    def _calculate_endocrine_shift(self) -> float:
+        """Modulate vigilance based on biological system state.
+        
+        Cortisol (Stress) -> Increases rho (Stricter matching, defensive)
+        Dopamine (Creativity) -> Decreases rho (Broader resonance, exploratory)
+        """
+        if not self._endocrine:
+            return 0.0
+        shift = (self._endocrine.cortisol * 0.1) - (self._endocrine.dopamine * 0.05)
+        return float(shift)
+
+    async def _find_neighbors(self, candidate: CortexSemanticEngram, limit: int) -> list[Any]:
+        """Search for nearest neighbors in vector store."""
+        if hasattr(self._vs, "search_similar"):
+            return await self._vs.search_similar(
+                embedding=candidate.embedding,
+                tenant_id=candidate.tenant_id,
+                limit=limit,
+            )
+        logger.debug("Vector store lacks search_similar; falling through.")
+        return []
+
+    def _evaluate_resonance(
+        self,
+        candidate: CortexSemanticEngram,
+        neighbors: list[Any],
+        rho: float,
+        topo_boost: float,
+    ) -> tuple[CortexSemanticEngram | None, float]:
+        """Find the best matching engram above vigilance threshold."""
+        best_match: CortexSemanticEngram | None = None
+        best_sim = 0.0
+
+        for neighbor in neighbors:
+            if not isinstance(neighbor, CortexSemanticEngram):
+                continue
+
+            # Semantic Similarity
+            sim = cosine_similarity(candidate.embedding, neighbor.embedding)
+
+            # Metabolic Modifier: Lower energy engrams are harder to "wake up"
+            current_energy = neighbor.compute_decay()
+            metabolic_penalty = (1.0 - current_energy) * 0.05
+
+            effective_sim = sim + topo_boost - metabolic_penalty
+
+            if effective_sim > best_sim:
+                best_sim = effective_sim
+                best_match = neighbor
+
+        return (best_match if best_sim >= rho else None), best_sim
 
     async def gate(
         self,
         candidate: CortexSemanticEngram,
-        search_limit: int = 10,
+        search_limit: int = 15,
+        vigilance_override: float | None = None,
+        precision_mode: bool = False,
     ) -> tuple[str, CortexSemanticEngram]:
-        """Evaluate a candidate engram against existing memory.
+        """Evaluate a candidate engram against existing memory with adaptive vigilance.
 
         Returns:
             ("resonance", existing_engram) if match found and reinforced.
@@ -67,60 +152,55 @@ class AdaptiveResonanceGate:
         """
         import time as _time
 
-        # Search for nearest neighbors in vector store
-        if hasattr(self._vs, "search_similar"):
-            neighbors = await self._vs.search_similar(
-                embedding=candidate.embedding,
-                tenant_id=candidate.tenant_id,
-                limit=search_limit,
-            )
-        else:
-            logger.debug("Vector store lacks search_similar; falling through to RESET.")
-            neighbors = []
+        # 1. Dynamic Vigilance Adjustment
+        rho = vigilance_override or self._rho
 
-        # Check for resonance (match above vigilance threshold)
-        best_match: CortexSemanticEngram | None = None
-        best_sim = 0.0
+        # Endocrine Modulation [v6.2]
+        endocrine_shift = self._calculate_endocrine_shift()
+        rho = max(0.5, min(0.98, rho + endocrine_shift))
 
-        for neighbor in neighbors:
-            if not isinstance(neighbor, CortexSemanticEngram):
-                continue
-            sim = cosine_similarity(candidate.embedding, neighbor.embedding)
-            if sim > best_sim:
-                best_sim = sim
-                best_match = neighbor
+        if precision_mode:
+            rho = min(0.98, rho + 0.1)
 
-        if best_match is not None and best_sim >= self._rho:
-            # RESONANCE → Reinforce existing engram via LTP
+        # 2. Find Neighbors and Topology Boost
+        neighbors = await self._find_neighbors(candidate, search_limit)
+        topo_boost = self._calculate_topographic_boost(candidate)
+
+        # 3. Evaluate Resonance
+        best_match, best_sim = self._evaluate_resonance(
+            candidate, neighbors, rho, topo_boost
+        )
+
+        if best_match:
+            # RESONANCE → Reinforce (LTP)
+            boost = self._ltp_boost + (0.05 if precision_mode else 0.0)
             reinforced = best_match.model_copy(
                 update={
                     "last_accessed": _time.time(),
-                    "energy_level": min(
-                        1.0,
-                        best_match.energy_level + self._ltp_boost,
-                    ),
-                    # Merge entangled refs (connectomics)
+                    "energy_level": min(1.0, best_match.energy_level + boost),
                     "entangled_refs": list(set(best_match.entangled_refs) | {candidate.id}),
                 }
             )
+
             if hasattr(self._vs, "upsert"):
                 await self._vs.upsert(reinforced)
+
             logger.info(
-                "ART RESONANCE: engram %s reinforced (sim=%.3f, E=%.2f→%.2f)",
+                "ART RESONANCE [v6.1]: engram %s reinforced (sim=%.3f, boost=%.3f)",
                 best_match.id,
                 best_sim,
-                best_match.energy_level,
-                reinforced.energy_level,
+                topo_boost,
             )
             return ("resonance", reinforced)
 
         # RESET → Insert new engram category
         if hasattr(self._vs, "upsert"):
             await self._vs.upsert(candidate)
+
         logger.info(
-            "ART RESET: new engram %s created (best_sim=%.3f < ρ=%.2f)",
+            "ART RESET [v6.1]: new engram %s created (best_sim=%.3f < ρ=%.2f)",
             candidate.id,
             best_sim,
-            self._rho,
+            rho,
         )
         return ("reset", candidate)

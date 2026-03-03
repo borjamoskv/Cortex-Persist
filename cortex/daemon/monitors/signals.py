@@ -15,6 +15,7 @@ import logging
 import sqlite3
 from typing import Any
 
+from cortex.database.core import connect as db_connect
 from cortex.daemon.models import SignalAlert
 
 logger = logging.getLogger("moskv-daemon")
@@ -38,7 +39,7 @@ class SignalMonitor:
             from cortex.signals.reactor import SignalReactor
 
             # Standard sqlite3 connection for the bus
-            self._bus_conn = sqlite3.connect(self.db_path)
+            self._bus_conn = db_connect(self.db_path)
             self._bus_conn.execute("PRAGMA journal_mode=WAL")
 
             bus = SignalBus(self._bus_conn)

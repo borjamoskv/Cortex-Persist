@@ -287,13 +287,6 @@ class PostgresBackend:
             logger.error("PG Script Error (%d stmts): %s", len(statements), exc)
             raise
 
-    async def commit(self) -> None:
-        """Commit is handled by transaction context managers in asyncpg.
-
-        This is a no-op since asyncpg uses explicit transaction blocks.
-        Kept for StorageBackend protocol compliance.
-        """
-        pass
 
     async def close(self) -> None:
         """Close all connections in the pool."""

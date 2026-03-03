@@ -272,7 +272,6 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
         except SyntaxError:
             pass
 
-        # Check for TODO/FIXME/HACK/XXX
         for i, line in enumerate(lines, 1):
             for marker in ("TODO", "FIXME", "HACK", "XXX"):
                 if marker in line:

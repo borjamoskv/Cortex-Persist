@@ -41,6 +41,7 @@ class ByzantineConsensus:
         hash_to_proposal: dict[str, T] = {}
         total_reputation = 0.0
 
+        proposal_hashes: dict[T, str] = {}
         for node_id, proposal in proposals.items():
             if node_id not in self.nodes:
                 continue
@@ -48,9 +49,10 @@ class ByzantineConsensus:
             rep = self.nodes[node_id].reputation
             total_reputation += rep
 
-            # Serialize deterministically to hash
-            # Simulating deterministic serialization
-            proposal_hash = hashlib.sha256(str(proposal).encode()).hexdigest()
+            # O(1) hashing for duplicate proposals
+            if proposal not in proposal_hashes:
+                proposal_hashes[proposal] = hashlib.sha256(str(proposal).encode()).hexdigest()
+            proposal_hash = proposal_hashes[proposal]
 
             vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
             hash_to_proposal[proposal_hash] = proposal

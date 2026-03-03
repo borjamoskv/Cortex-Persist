@@ -68,7 +68,6 @@ class TestTokenization:
 
     def test_tokenize_removes_short_tokens(self):
         tokens = _tokenize("I am ok hi no")
-        # Todos ≤ 2 chars o stopwords
         assert len(tokens) == 0
 
     def test_jaccard_identical(self):

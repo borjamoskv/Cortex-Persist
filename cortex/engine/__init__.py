@@ -41,6 +41,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         db_path: str | Path = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
+        super().__init__()
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()

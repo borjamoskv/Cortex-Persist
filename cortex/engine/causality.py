@@ -15,6 +15,7 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any
 
+from cortex.database.core import connect as db_connect
 from cortex.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.causality")
@@ -281,7 +282,7 @@ class CausalOracle:
         signals from the last 60 seconds.
         """
         try:
-            with sqlite3.connect(db_path) as conn:
+            with db_connect(db_path) as conn:
                 bus = SignalBus(conn)
                 recent = bus.history(project=project, limit=5)
                 for sig in recent:
@@ -307,7 +308,7 @@ class CausalOracle:
         Convenience method that opens its own connection.
         """
         try:
-            with sqlite3.connect(db_path) as conn:
+            with db_connect(db_path) as conn:
                 graph = CausalGraph(conn)
                 return graph.record_edge(
                     fact_id,

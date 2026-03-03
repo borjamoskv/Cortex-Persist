@@ -103,7 +103,7 @@ class CortexConfig:
     # Notifications
     TELEGRAM_TOKEN: str = ""
     TELEGRAM_CHAT_ID: str = ""
-    NOTIFICATIONS_MIN_SEVERITY: str = "warning"  # debug|info|warning|error|critical
+    NOTIFICATIONS_MIN_SEVERITY: str = "warning"
 
     # Deployment
     DEPLOY_MODE: str = "local"

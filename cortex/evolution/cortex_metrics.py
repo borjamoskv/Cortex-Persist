@@ -106,6 +106,9 @@ class DomainMetrics:
     knowledge_count: int = 0
     last_decision_age_hours: float = float("inf")
     fact_density: int = 0
+    llm_error_count: int = 0
+    avg_llm_latency_ms: float = 0.0
+    cascade_depth_avg: float = 0.0
     _fetched_at: float = field(default_factory=time.time)
 
     # ── Derived Signals ────────────────────────────────────────
@@ -178,6 +181,8 @@ class DomainMetrics:
             + self.decision_count * 0.5  # Crystallised knowledge
             - self.error_count * 1.5  # Anti-Hebbian: failure signal
             - self.ghost_count * 1.0  # Debt accumulation
+            - self.llm_error_count * 2.5  # Ω₃: Critical failure (LLM out)
+            - (self.avg_llm_latency_ms / 500.0)  # Latency pressure
         )
         # Phasic recency bonus (dopaminergic salience)
         if self.last_decision_age_hours < 24:
@@ -289,6 +294,39 @@ async def fetch_domain_metrics(
                     except (ValueError, TypeError):
                         pass
 
+            # ── LLM Telemetry (Afferent Cascade Signals) ──
+            # Measure terminal failures and average depth in the last hour
+            hour_ago = time.time() - 3600
+            async with conn.execute(
+                f"SELECT COUNT(*), AVG(latency_ms), AVG(depth) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                if row:
+                    # Count only terminal errors (tier='none') for error_count
+                    # but we also want general latency/depth.
+                    # We'll re-query specifically for tier='none' for err count
+                    pass
+
+            async with conn.execute(
+                f"SELECT COUNT(*) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND tier = 'none' AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                m.llm_error_count = row[0] if row else 0
+
+            async with conn.execute(
+                f"SELECT AVG(latency_ms), AVG(depth) FROM llm_telemetry "
+                f"WHERE project IN ({placeholders}) AND timestamp > ?",
+                projects + [hour_ago],
+            ) as cur:
+                row = await cur.fetchone()
+                if row:
+                    m.avg_llm_latency_ms = row[0] if row[0] is not None else 0.0
+                    m.cascade_depth_avg = row[1] if row[1] is not None else 0.0
+
             m._fetched_at = time.time()
             return m
 
@@ -330,249 +368,5 @@ async def fetch_all_domain_metrics(
     return metrics
 
 
-# ── Sync API (for EvolutionEngine in asyncio.to_thread) ───────
-
-
-class CortexMetrics:
-    """Sync CORTEX DB querier with per-domain caching.
-
-    Thread-safe. Uses raw sqlite3 to avoid async conflicts
-    when called from asyncio.to_thread offloads.
-    """
-
-    _BASE_TTL: float = 60.0
-    _MAX_HISTORY: int = 20
-
-    def __init__(self, db_path: str | Path = _DEFAULT_DB) -> None:
-        self._db_path = Path(db_path)
-        self._cache: dict[AgentDomain, DomainMetrics] = {}
-        self._cache_time: float = 0.0
-        self._cache_ttl: float = self._BASE_TTL
-        self._history: list[dict[AgentDomain, DomainMetrics]] = []
-
-    def _is_cache_valid(self) -> bool:
-        return bool(self._cache) and (time.time() - self._cache_time) < self._cache_ttl
-
-    # Logistic TTL parameters (matching user spec)
-    _ENTROPY_K: float = 1.5  # Sensitivity factor — how sharp the transition is
-    _ENTROPY_THETA: float = 2.0  # Stability threshold (bits) — below = cache-friendly
-    _TTL_FLOOR: float = 5.0  # Never go below 5s (high-chaos regime)
-    _TTL_CEIL: float = 120.0  # Never go above 120s (double base)
-
-    def _calculate_shannon_entropy(self) -> float:
-        """Continuous Shannon entropy H(X) over normalized metric vectors.
-
-        H(X) = -Σ p(xᵢ) log₂ p(xᵢ)
-
-        Operates on raw float values (error_rate, ghost_density, fitness_delta)
-        projected into discrete probability bins — no external dependency.
-        High H → volatile stream → shorter TTL.
-        """
-        if not self._history:
-            return 0.0
-
-        # Build a flat frequency table from the last N snapshots.
-        # Each metric is bucketed into 20 equal-width slots across its range.
-        bucket_counts: dict[str, int] = {}
-        total = 0
-
-        for snapshot in self._history:
-            for m in snapshot.values():
-                # Normalize each metric to [0, 20) integer buckets
-                for label, value in (
-                    ("err", m.error_rate),
-                    ("gho", m.ghost_density),
-                    ("fit", (m.fitness_delta + 5.0) / 10.0),  # map [-5,5]→[0,1]
-                ):
-                    clamped = max(0.0, min(0.9999, value))
-                    bucket = f"{label}:{int(clamped * 20)}"
-                    bucket_counts[bucket] = bucket_counts.get(bucket, 0) + 1
-                    total += 1
-
-        if total == 0:
-            return 0.0
-
-        # H(X) = -Σ p(xᵢ) log₂ p(xᵢ)
-        import math
-
-        entropy = 0.0
-        for count in bucket_counts.values():
-            p = count / total
-            entropy -= p * math.log2(p)
-
-        return entropy
-
-    def _update_ttl(self) -> None:
-        """Adjust TTL via logistic sigmoid decay (Shannon spec formula).
-
-        TTL_new = (2 × TTL_base) / (1 + e^(k × (H − θ)))
-
-        Where:
-            H  = Shannon entropy of recent metric stream (bits)
-            θ  = stability threshold (self._ENTROPY_THETA = 2.0 bits)
-            k  = sensitivity factor (self._ENTROPY_K = 1.5)
-
-        Regime behaviour:
-            H >> θ (volatile) → denominator >> 2 → TTL → floor (~5s)
-            H ~= θ (neutral)  → denominator =  2 → TTL =  TTL_base
-            H << θ (stable)   → denominator → 1 → TTL → 2 × TTL_base (~120s)
-        """
-        import math
-
-        H = self._calculate_shannon_entropy()
-        denominator = 1.0 + math.exp(self._ENTROPY_K * (H - self._ENTROPY_THETA))
-        self._cache_ttl = max(
-            self._TTL_FLOOR,
-            min(self._TTL_CEIL, (2.0 * self._BASE_TTL) / denominator),
-        )
-        logger.debug(
-            "CortexMetrics: H=%.2f bits → TTL=%.1fs (θ=%.1f, k=%.1f)",
-            H,
-            self._cache_ttl,
-            self._ENTROPY_THETA,
-            self._ENTROPY_K,
-        )
-
-    def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:
-        """Get metrics for all 10 domains (cached)."""
-        if self._is_cache_valid():
-            return dict(self._cache)
-        self._refresh()
-        return dict(self._cache)
-
-    def get_domain(self, domain: AgentDomain) -> DomainMetrics:
-        """Get cached metrics for a single domain."""
-        if self._is_cache_valid() and domain in self._cache:
-            return self._cache[domain]
-        self._refresh()
-        return self._cache.get(domain, DomainMetrics(domain=domain))
-
-    # Alias for strategies.py compatibility
-    get_domain_metrics = get_domain
-
-    def _refresh(self) -> None:
-        """Re-query via sync sqlite3."""
-        result: dict[AgentDomain, DomainMetrics] = {}
-
-        if not self._db_path.exists():
-            for domain in AgentDomain:
-                result[domain] = self._fallback(domain)
-            self._cache = result
-            self._cache_time = time.time()
-            return
-
-        try:
-            import sqlite3
-
-            conn = sqlite3.connect(
-                str(self._db_path),
-                timeout=5.0,
-                check_same_thread=False,
-            )
-            # Enable WAL mode and performance optimizations as per Phase 2 v3 spec
-            conn.execute("PRAGMA journal_mode=WAL")
-            conn.execute("PRAGMA synchronous=NORMAL")
-            conn.row_factory = sqlite3.Row
-            try:
-                for domain in AgentDomain:
-                    result[domain] = self._query_sync(conn, domain)
-            finally:
-                conn.close()
-        except Exception as e:
-            logger.debug("Sync metrics refresh failed: %s", e)
-            for domain in AgentDomain:
-                if domain not in result:
-                    result[domain] = self._fallback(domain)
-
-        self._cache = result
-        self._cache_time = time.time()
-
-        # Maintain history for Shannon entropy calculation
-        self._history.append(result)
-        if len(self._history) > self._MAX_HISTORY:
-            self._history.pop(0)
-
-        self._update_ttl()
-
-    def _query_sync(
-        self,
-        conn: Any,
-        domain: AgentDomain,
-    ) -> DomainMetrics:
-        """Query single domain via open sqlite3 connection."""
-        import sqlite3 as _sql
-
-        projects = DOMAIN_PROJECT_MAP.get(domain, ["cortex"])
-        m = DomainMetrics(domain=domain)
-        ph = ",".join("?" for _ in projects)
-
-        # ── Fact counts (Hebbian/Anti-Hebbian) ──
-        for fact_type, attr in (
-            ("error", "error_count"),
-            ("bridge", "bridge_count"),
-            ("decision", "decision_count"),
-            ("knowledge", "knowledge_count"),
-        ):
-            try:
-                row = conn.execute(
-                    f"SELECT COUNT(*) AS c FROM facts WHERE fact_type = ? AND project IN ({ph})",  # nosec B608
-                    (fact_type, *projects),
-                ).fetchone()
-                if row:
-                    val = row["c"] if isinstance(row, _sql.Row) else row[0]
-                    setattr(m, attr, val)
-            except _sql.OperationalError:
-                pass
-
-        # ── Total fact density ──
-        try:
-            row = conn.execute(
-                f"SELECT COUNT(*) AS c FROM facts WHERE project IN ({ph})",  # nosec B608
-                projects,
-            ).fetchone()
-            if row:
-                m.fact_density = row["c"] if isinstance(row, _sql.Row) else row[0]
-        except _sql.OperationalError:
-            pass
-
-        # ── Ghosts (Technical Debt) ──
-        try:
-            row = conn.execute(
-                f"SELECT COUNT(*) AS c FROM ghosts WHERE status = 'open' AND project IN ({ph})",  # nosec B608
-                projects,
-            ).fetchone()
-            if row:
-                m.ghost_count = row["c"] if isinstance(row, _sql.Row) else row[0]
-        except _sql.OperationalError:
-            pass
-
-        return m
-
-    @staticmethod
-    def _fallback(domain: AgentDomain) -> DomainMetrics:
-        """Parse snapshot for rough counts and estimate fact density."""
-        m = DomainMetrics(domain=domain)
-        snap = Path("~/.cortex/context-snapshot.md").expanduser()
-        if not snap.exists():
-            return m
-        try:
-            text = snap.read_text(encoding="utf-8", errors="ignore").lower()
-            key = domain.name.lower()
-            total_lines = 0
-            for line in text.splitlines():
-                total_lines += 1
-                if key not in line:
-                    continue
-                if "error" in line:
-                    m.error_count += 1
-                if "ghost" in line:
-                    m.ghost_count += 1
-                if "bridge" in line:
-                    m.bridge_count += 1
-                if "decision" in line:
-                    m.decision_count += 1
-            # Heuristic density estimate from snapshot volume
-            m.fact_density = total_lines // 10
-        except OSError:
-            pass
-        return m
+# Re-export for backward compatibility
+from cortex.evolution.shannon_metrics import CortexMetrics  # noqa: E402

@@ -23,7 +23,7 @@ EVENT_TYPES: Final[frozenset[str]] = frozenset(
         "insight",  # General realization or meta-comment.
         "milestone",  # Feature completion or ship event.
         "flow_state",  # Period of high-density productive activity.
-        "blocked",  # Stuck on a bug or missing information.
+        "blocked",
     }
 )
 

@@ -11,7 +11,15 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.cli.bicameral import bicameral
+try:
+    from cortex.cli.bicameral import bicameral
+except ImportError:
+    # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
+    class BicameralStub:
+        def log_limbic(self, msg, **kwargs): logging.getLogger("cortex.limbic").info(msg)
+        def log_motor(self, msg, **kwargs): logging.getLogger("cortex.motor").info(msg)
+    bicameral = BicameralStub()
+
 from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
@@ -130,9 +138,16 @@ class RedTeamSwarm:
 class LegionOmegaEngine:
     """⚖️ LEGION-OMEGA: The Sovereign Arbiter."""
 
-    def __init__(self, max_cycles: int = 3):
+    def __init__(self, max_cycles: int = 3, vectors: list[AttackVector] | None = None):
         self.blue_team = BlueTeamAgent()
-        self.red_team = RedTeamSwarm()
+        # Normalización de vectores: asegurar que sea una lista de objetos, no un dict
+        _vectors = vectors or RED_TEAM_SWARM
+        if isinstance(_vectors, dict):
+            self.vectors_list = list(_vectors.values())
+        else:
+            self.vectors_list = list(_vectors)
+            
+        self.red_team = RedTeamSwarm(vectors=self.vectors_list)
         self.max_cycles = max_cycles
 
     async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
@@ -140,6 +155,8 @@ class LegionOmegaEngine:
         ctx = context or {}
         feedback = []
         final_code = ""
+        previous_code = ""
+        previous_v_count = float("inf")
 
         bicameral.log_motor("LEGION-OMEGA: Forjando '%s'", action="FORGE")
 
@@ -147,26 +164,43 @@ class LegionOmegaEngine:
             # Blue Team Synthesis
             code = await self.blue_team.synthesize(intent, ctx, feedback)
 
+            # ─── Thermal Stagnation Guard (Ω₂) ───
+            if code == previous_code:
+                bicameral.log_motor("Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE")
+                break
+            
             # Red Team Siege
             vulnerabilities = await self.red_team.siege(code, ctx)
+            v_count = len(vulnerabilities)
 
             if not vulnerabilities:
                 bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
 
-            # Report failure and collect feedback for next cycle
-            logger.warning(
-                "❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %s", cycle, vulnerabilities
+            # ─── Entropy Regression Check ───
+            # Si el número de vulnerabilidades aumenta o se estanca, el feedback es inefectivo.
+            if v_count >= previous_v_count and cycle > 1:
+                logger.warning(
+                    "⚠️ [LEGION] Stagnation detected in cycle %d (%d vs %d). Breaking thermal loop.",
+                    cycle, v_count, previous_v_count
+                )
+                break
+
+            # Update stats for next cycle
+            logger.info(
+                "❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %d", cycle, v_count
             )
             feedback.extend(vulnerabilities)
             final_code = code  # Keep last attempt
+            previous_code = code
+            previous_v_count = v_count
 
             # Small delay to simulate evolutionary cooldown
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.05)
 
-        bicameral.log_motor("Asedio fallido tras ciclos máximos. Código frágil.", action="FAIL")
+        bicameral.log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
         return SiegeResult(
-            success=False, final_code=final_code, cycles=self.max_cycles, vulnerabilities=feedback
+            success=False, final_code=final_code, cycles=cycle, vulnerabilities=vulnerabilities
         )
 
 

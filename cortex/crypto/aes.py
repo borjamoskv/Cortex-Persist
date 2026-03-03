@@ -11,7 +11,7 @@ import logging
 import os
 from typing import Any
 
-from cryptography.exceptions import InvalidKey
+from cryptography.exceptions import InvalidKey, InvalidTag
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
@@ -100,9 +100,9 @@ class CortexEncrypter:
             aesgcm = AESGCM(key)
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
-        except InvalidKey as e:
+        except (InvalidKey, InvalidTag) as e:
             raise ValueError(
-                f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt."
+                f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt or corrupted data."
             ) from e
         except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e

@@ -47,7 +47,6 @@ async def _find_and_purge_colliding_c3s(
     conn = await engine.get_conn()
     purged_ids = []
 
-    # 1. Encontrar todos los hechos C5 vigentes
     cursor = await conn.execute(
         "SELECT id, content FROM facts "
         "WHERE project = ? AND valid_until IS NULL AND confidence = 'C5'",

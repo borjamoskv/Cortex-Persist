@@ -62,9 +62,7 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None: ...
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None: ...
 
 
 class ParameterTuningStrategy:

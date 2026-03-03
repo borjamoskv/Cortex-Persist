@@ -18,6 +18,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any
 
+from cortex.database.core import connect as db_connect
+
 logger = logging.getLogger("cortex.chronos")
 
 __all__ = ["ChronosROI", "ChronosReport", "CHRONOS"]
@@ -178,7 +180,7 @@ class ChronosROI:
         part of the CORTEX knowledge graph, not a dead-end calculation.
         """
         try:
-            with sqlite3.connect(db_path) as conn:
+            with db_connect(db_path) as conn:
                 # 1. Store as fact (sync path for simplicity)
                 from cortex.memory.temporal import now_iso
 

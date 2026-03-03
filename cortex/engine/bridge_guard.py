@@ -143,6 +143,36 @@ class BridgeGuard:
         return row[0] / row[1]
 
     @staticmethod
+    async def detect_bridge_candidate(
+        conn: aiosqlite.Connection,
+        content: str,
+        current_project: str,
+        tenant_id: str = "default",
+    ) -> str | None:
+        """
+        Ω₁: Detect if this content already exists in another project.
+
+        Used for prescriptive bridge elevation to prevent code duplication.
+        Returns the source project name if a duplicate is found outside current_project.
+        """
+        from cortex.utils.canonical import compute_fact_hash
+
+        f_hash = compute_fact_hash(content)
+
+        # Search for the same hash in OTHER projects
+        cursor = await conn.execute(
+            "SELECT project FROM facts "
+            "WHERE tenant_id = ? AND project != ? AND hash = ? "
+            "AND valid_until IS NULL AND is_quarantined = 0 "
+            "LIMIT 1",
+            (tenant_id, current_project, f_hash),
+        )
+        row = await cursor.fetchone()
+        if row:
+            return row[0]
+        return None
+
+    @staticmethod
     async def audit_bridges(
         conn: aiosqlite.Connection,
         tenant_id: str = "default",

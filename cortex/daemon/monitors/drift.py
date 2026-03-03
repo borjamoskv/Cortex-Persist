@@ -116,7 +116,8 @@ class DriftMonitorDaemon:
             return None
 
         try:
-            conn = sqlite3.connect(str(self.vectors_db_path), timeout=10)
+            from cortex.database.core import connect as db_connect
+            conn = db_connect(str(self.vectors_db_path), timeout=10)
             conn.execute("PRAGMA busy_timeout=10000")
             conn.enable_load_extension(True)
             sqlite_vec.load(conn)

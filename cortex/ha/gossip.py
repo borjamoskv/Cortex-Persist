@@ -186,9 +186,3 @@ class GossipProtocol:
 
             await asyncio.sleep(self.interval)
 
-    async def _perform_gossip(self, peer: str) -> None:
-        """
-        Perform gossip exchange with a peer in the network.
-        (Usually overridden by a subclass or injected network layer).
-        """
-        pass

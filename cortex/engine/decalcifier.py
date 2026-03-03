@@ -84,7 +84,19 @@ class SovereignDecalcifier:
             decay = type_factor * confidence_multiplier
             new_score = (current_score or 1.0) * decay
 
-            # 3. Colapso Entrópico Total (Terminal Entropy)
+            # 3. Multi-Scale Causality (Ω₁): Ghost Elevation
+            # Si un Ghost persiste a pesar del decaimiento, se eleva a Regla.
+            if fact_type == "ghost" and new_score > 0.4:
+                # El ruido persistente es arquitectura emergente.
+                logger.warning("🧬 [Ω₁] Ghost #%s elevado a REGLA por persistencia causal.", fact_id)
+                await conn.execute(
+                    "UPDATE facts SET fact_type = 'rule', confidence = 'verified', "
+                    "tags = json_insert(tags, '$[#]', 'elevated-ghost') WHERE id = ?",
+                    (fact_id,),
+                )
+                continue
+
+            # 4. Colapso Entrópico Total (Terminal Entropy)
             if new_score < 0.15 and fact_type not in ("axiom", "identity", "rule"):
                 await MUTATION_ENGINE.apply(
                     conn,

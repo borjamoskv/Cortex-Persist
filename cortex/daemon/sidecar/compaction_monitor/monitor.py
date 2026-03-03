@@ -325,7 +325,6 @@ class MemoryPressureMonitor:
 
                 await send_alert(alert.message)
             except ImportError:
-                # WARNING not DEBUG — misconfigured use_legion=True should be visible
                 logger.warning("use_legion=True but 'legion' is not installed; alert dropped")
 
 
