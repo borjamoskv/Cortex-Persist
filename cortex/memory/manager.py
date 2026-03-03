@@ -404,6 +404,50 @@ class CortexMemoryManager:
             logger.warning("Context vector bundling failed: %s", e)
             return None
 
+    # ─── NREM Consolidation ─────────────────────────────────────────
+
+    async def nrem_consolidation(
+        self,
+        tenant_id: str,
+        project_id: str | None = None,
+    ) -> dict:
+        """Run a full NREM consolidation cycle.
+
+        Orchestrates maturation, pruning, STDP decay, and
+        homeostatic scaling in a single sweep.
+        """
+        from cortex.memory.consolidation import SystemsConsolidator
+        from cortex.memory.homeostasis import EntropyPruner, HomeostaticScaler
+        from cortex.memory.nrem_cycle import NREMConsolidationCycle
+
+        consolidator = SystemsConsolidator(self._l2) if self._l2 else None
+        pruner = EntropyPruner(self._l2) if self._l2 else None
+        scaler = HomeostaticScaler(self._l2) if self._l2 else None
+
+        stdp = getattr(self, "_stdp_engine", None)
+
+        cycle = NREMConsolidationCycle(
+            consolidator=consolidator,
+            pruner=pruner,
+            stdp_engine=stdp,
+            homeostatic_scaler=scaler,
+        )
+        report = await cycle.run(
+            tenant_id=tenant_id,
+            project_id=project_id,
+        )
+        logger.info("NREM consolidation complete: %s", report)
+        return {
+            "matured": report.matured,
+            "deceased": report.deceased,
+            "pruned": report.pruned,
+            "edges_pruned": report.edges_pruned,
+            "engrams_scaled": report.engrams_scaled,
+            "scaling_factor": report.scaling_factor,
+            "duration_ms": report.duration_ms,
+            "errors": report.errors,
+        }
+
     # ─── Introspection ────────────────────────────────────────────
 
     @property

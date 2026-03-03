@@ -226,5 +226,12 @@
     "env_key": "",
     "context_window": 32768,
     "specialization": ["general"]
+  },
+  "ernie": {
+    "base_url": "https://api.aimlapi.com/v1",
+    "default_model": "baidu/ernie-5-0-thinking-latest",
+    "env_key": "AIMLAPI_KEY",
+    "context_window": 32768,
+    "specialization": ["reasoning", "architect", "general"]
   }
 }

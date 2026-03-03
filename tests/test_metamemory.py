@@ -7,15 +7,14 @@ and knowledge gap (TOT) detection.
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from cortex.memory.metamemory import (
-    DEFAULT_STALE_DAYS,
     MemoryCard,
     MetacognitiveJudge,
     MetaJudgment,
     MetamemoryIndex,
     MetamemoryMonitor,
-    MetamemoryStats,
     RetrievalOutcome,
     Verdict,
     _MIN_CALIBRATION_SAMPLES,
@@ -396,6 +395,8 @@ class TestCalibrationReport:
         expected_keys = {
             "brier_score",
             "calibration_tier",
+            "segmented_brier",
+            "active_domains",
             "total_outcomes",
             "successes",
             "failures",
@@ -470,7 +471,7 @@ class TestMemoryCard:
 
     def test_frozen(self):
         card = MemoryCard(memory_id="mem_frz")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             card.memory_id = "changed"  # type: ignore[misc]
 
     def test_user_schema_example(self):

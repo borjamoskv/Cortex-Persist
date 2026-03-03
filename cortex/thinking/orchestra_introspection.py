@@ -11,7 +11,10 @@ Contains status, stats, history, and convenience think methods.
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger("cortex.thinking")
 
 if TYPE_CHECKING:
     from cortex.thinking.fusion import FusedThought
@@ -53,6 +56,62 @@ class OrchestraIntrospectionMixin:
     async def consensus_think(self, prompt: str) -> FusedThought:
         """Máximo consenso — todos los modelos con síntesis."""
         return await self.think(prompt, mode="consensus", strategy="synthesis")  # type: ignore[reportAttributeAccessIssue]
+
+    async def omega_think(self, prompt: str) -> FusedThought:
+        """Omega Reasoning Protocol (ORP) — Adversarial Truth Collapse.
+
+        1. Generates consensus hypothesis (ThinkingMode.OMEGA).
+        2. Subjects the hypothesis to an Inquisitorial siege (Red Team).
+        3. Folds the siege critique into a final, invulnerable response.
+        """
+        from cortex.llm.sovereign import Inquisitor
+
+        # Phase 1: Hypothesis Synthesis
+        hypothesis = await self.think(prompt, mode="omega", strategy="synthesis")  # type: ignore[reportAttributeAccessIssue]
+
+        # Phase 2: Inquisitorial Siege (Asymmetry Ω₅)
+        inquisitor = Inquisitor()
+        siege = await inquisitor.asediar(hypothesis.content, original_prompt=prompt)
+
+        # Phase 3: Truth Folding (with Multi-round Refinement Ω₅)
+        # Extend ORP to multi-round adversarial refinement if confidence < 0.8 after first siege.
+        # (Ghost 3181 resolution)
+        refinement_prompt = (
+            f"ORIGINAL INTENT: {prompt}\n\n"
+            f"PROPOSED HYPOTHESIS: {hypothesis.content}\n\n"
+            f"INQUISITORIAL CRITIQUE: {siege.content}\n\n"
+            f"MISSION: Forge a final response that resolves ALL critiques and satisfies "
+            f"the original intent with zero-defect architecture."
+        )
+
+        final_thought = await self.think(
+            refinement_prompt, mode="deep_reasoning", strategy="synthesis"
+        )  # type: ignore[reportAttributeAccessIssue]
+
+        # Logic for Multi-round Refinement (Ω₅)
+        if final_thought.confidence < 0.8:
+            logger.info("🛡️ [ORP] Low confidence (%.2f). Starting second round of adversarial refinement.", final_thought.confidence)
+            siege_2 = await inquisitor.asediar(final_thought.content, original_prompt=prompt)
+            refinement_prompt_2 = (
+                f"ORIGINAL INTENT: {prompt}\n\n"
+                f"PREVIOUS BEST: {final_thought.content}\n\n"
+                f"SECOND CRITIQUE: {siege_2.content}\n\n"
+                f"MISSION: Absolute perfection. Resolve remaining blind spots."
+            )
+            final_thought = await self.think(
+                refinement_prompt_2, mode="deep_reasoning", strategy="synthesis"
+            )  # type: ignore[reportAttributeAccessIssue]
+
+        # Merge metadata
+        final_thought.meta.update(
+            {
+                "orp_active": True,
+                "siege_result": siege.content[:500] + "...",
+                "initial_hypothesis_confidence": hypothesis.confidence,
+                "orp_multi_round": final_thought.confidence < 0.8  # Track if multi-round was triggered
+            }
+        )
+        return final_thought
 
     # ── Introspection Properties ──────────────────────────────────
 

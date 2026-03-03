@@ -368,4 +368,39 @@ async def fetch_all_domain_metrics(
     return metrics
 
 
-# Re-export for backward compatibility
+# ── Sync Wrapper (backward compatibility) ──────────────────────
+
+
+class CortexMetrics:
+    """Sync metrics accessor for the strategies pipeline.
+
+    Returns tonic (baseline) DomainMetrics synchronously. For real
+    DB telemetry, use the async ``fetch_domain_metrics()`` function.
+
+    This class was extracted during the async migration to preserve
+    backward compatibility with ``strategies.py`` which instantiates
+    ``CortexMetrics()`` at module level.
+    """
+
+    __slots__ = ("_cache",)
+
+    def __init__(self) -> None:
+        self._cache: dict[AgentDomain, DomainMetrics] = {}
+
+    def get_domain_metrics(self, domain: AgentDomain) -> DomainMetrics:
+        """Return cached or tonic baseline metrics for a domain."""
+        if domain not in self._cache or self._cache[domain].is_stale:
+            self._cache[domain] = DomainMetrics(domain=domain)
+        return self._cache[domain]
+
+    def inject(self, domain: AgentDomain, metrics: DomainMetrics) -> None:
+        """Inject pre-fetched metrics (useful for tests and async pre-loading)."""
+        self._cache[domain] = metrics
+
+    def get_domain(self, domain: AgentDomain) -> DomainMetrics:
+        """Alias for get_domain_metrics (used by free_energy.py)."""
+        return self.get_domain_metrics(domain)
+
+    def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:
+        """Return tonic metrics for all domains."""
+        return {d: self.get_domain_metrics(d) for d in AgentDomain}

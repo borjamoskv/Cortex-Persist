@@ -38,6 +38,7 @@ async def hybrid_search(
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
     confidence: str | None = None,
+    **kwargs,
 ) -> list[SearchResult]:
     """
     Sovereign Hybrid Search: Semantic + Text via RRF.

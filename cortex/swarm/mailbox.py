@@ -9,21 +9,24 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from cortex.database.core import connect as db_connect
+from cortex.database.core import connect_async
 
 
 class AtomicMailbox:
-    """O(1) SQLite atomic mailbox for Swarm zero-latency communication."""
+    """O(1) SQLite atomic mailbox for Swarm zero-latency communication.
+    Refactored to be ASYNC to prevent Event Loop Starvation.
+    """
 
     def __init__(self, db_path: str = "file::memory:?cache=shared") -> None:
         self.db_path = db_path
-        self._init_db()
+        self._conn = None
 
-    def _init_db(self) -> None:
-        with db_connect(self.db_path, uri=True) as conn:
-            conn.execute("PRAGMA journal_mode=WAL;")
-            conn.execute("PRAGMA synchronous=NORMAL;")
-            conn.execute("""
+    async def _get_conn(self):
+        """Lazy load async connection."""
+        if self._conn is None:
+            self._conn = await connect_async(self.db_path)
+            # Ensure table exists
+            await self._conn.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     topic TEXT NOT NULL,
@@ -32,32 +35,42 @@ class AtomicMailbox:
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_topic ON messages(topic);")
+            await self._conn.execute("CREATE INDEX IF NOT EXISTS idx_topic ON messages(topic);")
+            await self._conn.commit()
+        return self._conn
 
-    def post(self, topic: str, agent_id: str, payload: dict[str, Any] | str) -> None:
+    async def post(self, topic: str, agent_id: str, payload: dict[str, Any] | str) -> None:
         """Atomic write to the mailbox without waiting for a coordinator."""
         if isinstance(payload, dict):
             payload = json.dumps(payload)
 
-        with db_connect(self.db_path, uri=True) as conn:
-            conn.execute(
-                "INSERT INTO messages (topic, agent_id, payload) VALUES (?, ?, ?)",
-                (topic, agent_id, payload)
-            )
+        conn = await self._get_conn()
+        await conn.execute(
+            "INSERT INTO messages (topic, agent_id, payload) VALUES (?, ?, ?)",
+            (topic, agent_id, payload)
+        )
+        await conn.commit()
 
-    def read(self, topic: str) -> list[tuple[str, str, str]]:
+    async def read(self, topic: str) -> list[tuple[str, str, str]]:
         """O(1) read all messages for a topic."""
-        with db_connect(self.db_path, uri=True) as conn:
-            cursor = conn.execute(
-                """
-                SELECT agent_id, payload, timestamp FROM messages
-                WHERE topic = ? ORDER BY timestamp ASC
-                """,
-                (topic,),
-            )
-            return cursor.fetchall()
+        conn = await self._get_conn()
+        async with conn.execute(
+            """
+            SELECT agent_id, payload, timestamp FROM messages
+            WHERE topic = ? ORDER BY timestamp ASC
+            """,
+            (topic,),
+        ) as cursor:
+            return await cursor.fetchall()
 
-    def clear(self, topic: str) -> None:
+    async def clear(self, topic: str) -> None:
         """Clear topic messages."""
-        with db_connect(self.db_path, uri=True) as conn:
-            conn.execute("DELETE FROM messages WHERE topic = ?", (topic,))
+        conn = await self._get_conn()
+        await conn.execute("DELETE FROM messages WHERE topic = ?", (topic,))
+        await conn.commit()
+
+    async def close(self) -> None:
+        """Close the mailbox connection."""
+        if self._conn:
+            await self._conn.close()
+            self._conn = None

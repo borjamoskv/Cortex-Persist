@@ -47,6 +47,9 @@ class IntentProfile(str, Enum):
     CREATIVE = "creative"
     """Escritura, brainstorming, contenido narrativo."""
 
+    ARCHITECT = "architect"
+    """Análisis profundo de arquitectura y asedio adversario (Red Team)."""
+
     GENERAL = "general"
     """Intención genérica o no clasificada — sin restricción de fallback."""
 

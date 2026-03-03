@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -66,8 +68,6 @@ class GhostMixin:
         )
 
         # Return the same hash-based ghost ID used by the emitter
-        import hashlib
-
         return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
 
     async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
@@ -77,7 +77,7 @@ class GhostMixin:
     async def resolve_ghost(
         self,
         ghost_id: str,
-        target_entity_id: int | str = None,  # type: ignore[reportArgumentType]
+        target_entity_id: int | str | None = None,
         root_dir: Path | None = None,
         conn: aiosqlite.Connection | None = None,
     ) -> bool:
@@ -94,16 +94,14 @@ class GhostMixin:
                 # Also check manifest fallback if needed
                 self._resolve_manifest_fallback(source, attr_name)
                 found = True
-                logger.info(f"Resolved ghost {ghost_id} on {source.name}")
+                logger.info("Resolved ghost %s on %s", ghost_id, source.name)
 
         return found
 
-    def _resolve_manifest_fallback(self, source: Path, attr_name: str):
+    def _resolve_manifest_fallback(self, source: Path, attr_name: str) -> None:
         manifest = source.parent / ".songlines"
         if manifest.exists():
             try:
-                import json
-
                 with open(manifest) as f:
                     data = json.load(f)
                 if source.name in data and attr_name in data[source.name]:
