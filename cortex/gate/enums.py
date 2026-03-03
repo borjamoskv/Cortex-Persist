@@ -30,3 +30,4 @@ class ActionStatus(str, Enum):
     DENIED = "denied"
     EXPIRED = "expired"
     EXECUTED = "executed"
+    FAILED = "failed"

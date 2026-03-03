@@ -6,6 +6,7 @@ import logging
 import uuid
 
 from cortex.telemetry.metrics import metrics
+from cortex.telemetry.pulse import PULSE
 
 __all__ = ["ConsensusManager"]
 
@@ -15,8 +16,9 @@ logger = logging.getLogger("cortex.consensus")
 class ConsensusManager:
     """Manages agent registration and weighted consensus voting."""
 
-    def __init__(self, engine):
+    def __init__(self, engine, signal_bus=None):
         self.engine = engine
+        self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
 
     async def vote(
         self,
@@ -52,6 +54,14 @@ class ConsensusManager:
             action,
             {"fact_id": fact_id, "agent": agent, "vote": value},
         )
+        # 💓 Pulse Signal (Reality Observer)
+        if self._signal_bus:
+            self._signal_bus.emit(
+                f"consensus:{action}",
+                payload={"fact_id": fact_id, "agent": agent, "vote": value},
+                source="consensus_manager",
+            )
+        
         score = await self._recalculate_consensus(fact_id, conn)
         await conn.commit()
         return score
@@ -91,11 +101,23 @@ class ConsensusManager:
         )
         agent = await cursor.fetchone()
         if not agent:
+            # 💓 Pulse Reality Check: agent missing
+            if self._signal_bus:
+                self._signal_bus.emit(
+                    "error:consensus:agent_not_found",
+                    payload={"agent_id": agent_id, "fact_id": fact_id},
+                    source="consensus_manager",
+                )
+            
+            # Legacy Shadow (Analyzing a corpse)
             metrics.inc(
                 "cortex_consensus_failures_total",
                 labels={"reason": "agent_not_found"},
                 meta={"agent_id": agent_id, "fact_id": fact_id},
             )
+            # Notify Pulse Registry of the shadow detection
+            PULSE.inc("cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"})
+            
             raise ValueError(f"Agent {agent_id} not found")
 
         rep = agent[0]

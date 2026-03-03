@@ -13,6 +13,7 @@ from cortex.daemon.models import (
     RETRY_BACKOFF,
     SiteStatus,
 )
+from cortex.utils.respiration import breathe
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -30,12 +31,15 @@ class SiteMonitor:
         self.timeout = timeout
         self.retries = retries
 
-    def check_all(self) -> list[SiteStatus]:
-        """Check all URLs. Returns list of SiteStatus."""
-        return [self._check_one(url) for url in self.urls]
+    async def check_all(self) -> list[SiteStatus]:
+        """Check all URLs concurrently (oxygenated). Returns list of SiteStatus."""
+        import asyncio
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            tasks = [self._check_one(client, url) for url in self.urls]
+            return await asyncio.gather(*tasks)
 
-    def _check_one(self, url: str) -> SiteStatus:
-        """Check a single URL with retry and backoff."""
+    async def _check_one(self, client: httpx.AsyncClient, url: str) -> SiteStatus:
+        """Check a single URL with retry and backoff (oxygenated)."""
         from datetime import datetime, timezone
 
         now = datetime.now(timezone.utc).isoformat()
@@ -44,7 +48,7 @@ class SiteMonitor:
         for attempt in range(self.retries + 1):
             try:
                 start = time.monotonic()
-                resp = httpx.get(url, timeout=self.timeout)
+                resp = await client.get(url)
                 elapsed = (time.monotonic() - start) * 1000
                 healthy = resp.status_code < 400
                 return SiteStatus(
@@ -63,7 +67,7 @@ class SiteMonitor:
                 last_error = str(e)
 
             logger.debug("Retry %d/%d for %s (%s)", attempt + 1, self.retries, url, last_error)
-            time.sleep(RETRY_BACKOFF)
+            await breathe(RETRY_BACKOFF)
 
         return SiteStatus(
             url=url,

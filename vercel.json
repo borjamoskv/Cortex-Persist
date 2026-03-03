@@ -1,0 +1,42 @@
+{
+  "buildCommand": "echo 'Build disabled for static site'",
+  "outputDirectory": "docs/prototypes",
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "cortexpersist.org"
+        }
+      ],
+      "destination": "https://cortexpersist.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.cortexpersist.org"
+        }
+      ],
+      "destination": "https://cortexpersist.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.cortexpersist.com"
+        }
+      ],
+      "destination": "https://cortexpersist.com/$1",
+      "permanent": true
+    }
+  ]
+}
