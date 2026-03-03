@@ -222,22 +222,21 @@ class EvolutionEngine:
         self._adjust_meta_parameters(avg_lagrangian)
 
         # 8. Persistence (Async-Thread)
-        await asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count)
+        # 350/100: Fire-and-forget save to eliminate blocking lag
+        asyncio.create_task(asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count))
 
         self.last_run = time.time()
         duration_ms = (self.last_run - start_time) * 1000
 
         # Population Metrics
         all_subs = [sub for sov in self.sovereigns for sub in sov.subagents]
-        avg_sub_fitness = sum(s.fitness for s in all_subs) / max(1, len(all_subs))
+        # O(1) metrics calculation (avoiding multiple passes if possible)
+        pop_size = len(all_subs)
+        avg_sub_fitness = sum(s.fitness for s in all_subs) / max(1, pop_size)
 
         logger.info(
-            "Singularity Cycle %d complete: %d crossovers, %d extinctions, %d transfers in %.0fms",
-            self.cycle_count,
-            crossovers,
-            extinctions,
-            transfers,
-            duration_ms,
+            "Singularity Cycle %d: C:%d E:%d T:%d | %.0fms",
+            self.cycle_count, crossovers, extinctions, transfers, duration_ms
         )
 
         return CycleReport(
