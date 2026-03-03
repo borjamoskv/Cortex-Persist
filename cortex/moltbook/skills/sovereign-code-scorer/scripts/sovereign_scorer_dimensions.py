@@ -102,7 +102,7 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
 
         # Functions without docstrings
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 if not (
                     node.body
                     and isinstance(node.body[0], ast.Expr)
@@ -173,7 +173,7 @@ def score_tests(root: Path, files: list[Path]) -> tuple[float, list]:
             source = tf.read_text(encoding="utf-8", errors="replace")
             tree = ast.parse(source)
             for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                     if node.name.startswith("test_"):
                         test_count += 1
                         for child in ast.walk(node):

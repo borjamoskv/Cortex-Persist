@@ -163,11 +163,11 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
 
         value = node.value
         # Skip strings, None, booleans, Ellipsis
-        if isinstance(value, (str, bytes, bool, type(None), type(...))):
+        if isinstance(value, str | bytes | bool | type(None) | type(...)):
             return
 
         # Skip whitelisted values
-        if isinstance(value, (int, float)) and value in _MAGIC_WHITELIST:
+        if isinstance(value, int | float) and value in _MAGIC_WHITELIST:
             return
 
         # Check context — is this in a comparison, return, or arithmetic?
@@ -212,7 +212,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
         if (
             isinstance(node.value, ast.Name)
             and isinstance(node.slice, ast.Constant)
-            and isinstance(node.slice.value, (str, int))
+            and isinstance(node.slice.value, str | int)
         ):
             # Check if this is inside a try block (then it's guarded)
             # We can't easily check ancestry in a simple visitor,
@@ -298,7 +298,7 @@ class _DeadCodeVisitor(ast.NodeVisitor):
 
     def _check_body(self, body: list[ast.stmt]) -> None:
         for i, stmt in enumerate(body):
-            if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
+            if isinstance(stmt, ast.Return | ast.Raise | ast.Break | ast.Continue):
                 # Check if there's code after this statement (in same block)
                 remaining = body[i + 1 :]
                 # Filter out pass statements and string literals (docstrings)

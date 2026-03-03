@@ -191,7 +191,7 @@ def score_consistency(files: list[Path]) -> tuple[float, list[Issue]]:
             continue
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 name = node.name
                 if name.startswith("__") and name.endswith("__"):
                     continue  # dunder

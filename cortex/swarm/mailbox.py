@@ -5,9 +5,9 @@ Eliminates the coordinator by allowing agents to read/write
 asynchronously to an atomic embedded database.
 """
 
-import sqlite3
 import json
 import logging
+import sqlite3
 from typing import Any
 
 logger = logging.getLogger("cortex.swarm.mailbox")
