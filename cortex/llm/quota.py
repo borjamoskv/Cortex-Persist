@@ -8,7 +8,6 @@ backoff exponencial y métricas integradas.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import sqlite3
 import time
@@ -16,17 +15,18 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 
+import time
+from collections.abc import Generator
+from cortex.database.core import connect as db_connect
+
 logger = logging.getLogger("cortex.llm.quota")
 
 
 @contextmanager
 def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, None, None]:
-    """Context manager soberano para conexiones SQLite con busy_timeout."""
-    conn = sqlite3.connect(path, timeout=5.0)
+    """Context manager soberano para conexiones SQLite via CORTEX factory."""
+    conn = db_connect(str(path), timeout=5)
     try:
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA busy_timeout=5000")  # 5s en lugar del parámetro deprecated
         if exclusive:
             conn.execute("BEGIN EXCLUSIVE")
         yield conn

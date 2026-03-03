@@ -22,14 +22,11 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-__all__ = ["scan_antipatterns", "AntipatternFinding", "AntipatternReport"]
+from cortex.mejoralo.constants import SKIP_DIRS
 
 logger = logging.getLogger("cortex.mejoralo.antipatterns")
 
-# Scanner 4 (Import Graph) → delegated to _scanner_import_graph to respect LOC barrier
-from cortex.mejoralo._scanner_import_graph import (  # noqa: E402
-    run_graph_scanners as _run_graph_scanners,
-)
+from cortex.mejoralo._scanner_import_graph import run_graph_scanners as _run_graph_scanners
 
 # Scanners 1 & 2 (BroadException + AsyncIntegrity) → _scanner_visitors
 from cortex.mejoralo._scanner_visitors import (  # noqa: E402
@@ -37,23 +34,6 @@ from cortex.mejoralo._scanner_visitors import (  # noqa: E402
     _BroadExceptionVisitor,
 )
 
-# ── Constants ────────────────────────────────────────────────────────
-
-SKIP_DIRS = {
-    "__pycache__",
-    ".git",
-    "node_modules",
-    ".venv",
-    "venv",
-    ".mypy_cache",
-    ".pytest_cache",
-    "dist",
-    "build",
-    ".eggs",
-    "egg-info",
-    ".tox",
-    "migrations",
-}
 
 # Blocking calls that MUST NOT appear in async functions
 _BLOCKING_CALLS: dict[str, str] = {
