@@ -101,33 +101,78 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
 @click.argument("query")
 @click.option("--project", "-p", default=None, help="Scope to project")
 @click.option("--top", "-k", default=5, help="Number of results")
+@click.option(
+    "--scope",
+    "-s",
+    type=click.Choice(["core", "personal", "cold", "all"]),
+    default="core",
+    help="Search scope: core (default), personal, cold, or all",
+)
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def search(query, project, top, db) -> None:
-    """Semantic search across CORTEX memory."""
+def search(query, project, top, scope, db) -> None:
+    """Semantic search across CORTEX memory.
+
+    Use --scope to search federated databases:
+      core     → main CORTEX infra/tooling (default)
+      personal → side projects (NAROA, LIVENOTCH, etc.)
+      cold     → archived tests/junk
+      all      → union of all three
+    """
     engine = get_engine(db)
     try:
-        with with_slow_tips("Buscando en CORTEX…", threshold=2.0, interval=8.0, engine=engine):
-            with console.status("[noir.violet]Searching...[/]"):
-                results = _run_async(engine.search(query, project=project, top_k=top))
+        if scope == "core":
+            # Fast path: standard search, no federation overhead
+            with with_slow_tips(
+                "Buscando en CORTEX…",
+                threshold=2.0, interval=8.0, engine=engine,
+            ):
+                with console.status("[noir.violet]Searching...[/]"):
+                    results = _run_async(
+                        engine.search(query, project=project, top_k=top),
+                    )
+        else:
+            # Federated search across partitioned databases
+            from cortex.search.federation import federated_search_sync
+
+            with console.status(
+                f"[noir.violet]Federated search (scope={scope})...[/]",
+            ):
+                sync_conn = engine._get_sync_conn()
+                results = federated_search_sync(
+                    sync_conn, query,
+                    scope=scope, project=project, limit=top,
+                )
+
         if not results:
             err_empty_results(
                 "resultados de búsqueda",
                 suggestion="Prueba con otros términos o sin filtro de proyecto.",
             )
             return
-        table = Table(title=f"🔍 Results for: '{query}'")
+
+        scope_label = f" [{scope}]" if scope != "core" else ""
+        table = Table(title=f"🔍 Results for: '{query}'{scope_label}")
         table.add_column("#", style="dim", width=4)
         table.add_column("Project", style="noir.yinmn", width=15)
         table.add_column("Content", width=50)
         table.add_column("Type", style="noir.violet", width=10)
         table.add_column("Score", style="noir.cyber", width=6)
+        if scope != "core":
+            table.add_column("DB", style="dim", width=8)
+
         for r in results:
             content = r.content[:80] + "..." if len(r.content) > 80 else r.content
-            table.add_row(str(r.fact_id), r.project, content, r.fact_type, f"{r.score:.2f}")
+            row = [str(r.fact_id), r.project, content, r.fact_type, f"{r.score:.2f}"]
+            if scope != "core":
+                origin = getattr(r, "db_origin", "core")
+                row.append(origin)
+            table.add_row(*row)
+
         console.print(table)
         _show_tip(engine)
     finally:
         _run_async(engine.close())
+
 
 
 @cli.command()

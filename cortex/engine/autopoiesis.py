@@ -51,7 +51,7 @@ class AutopoiesisEngine:
                 if self._requires_mutation(func_name):
                     self._execute_autopoietic_rewrite(func)
                 return result
-            except Exception:
+            except (RuntimeError, OSError, ValueError, TypeError, AttributeError):
                 latency_ms = (time.perf_counter_ns() - start_t) / 1e6
                 self._record_observation(func_name, latency_ms, False)
                 if self._requires_mutation(func_name):

@@ -267,7 +267,7 @@ def _get_entities_and_relations(project: str | None = None):
     """Load entity graph for NotebookLM context."""
     import pandas as pd
 
-    conn = sqlite3.connect(_get_db_path())
+    conn = __import__("cortex.database.core", fromlist=["db_connect"]).db_connect(_get_db_path())
     try:
         if project:
             entities = pd.read_sql_query(
