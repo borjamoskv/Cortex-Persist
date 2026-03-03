@@ -103,7 +103,7 @@ class SAPClient:
         logger.info("Connected to SAP at %s", self.config.base_url_normalized)
 
         return {
-            "status": "connected", 
+            "status": "connected",
             "csrf": bool(self._csrf_token)
         }  # type: ignore[reportReturnType]
 
