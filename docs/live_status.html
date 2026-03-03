@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORTEX — Live Manifold Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0A0A0A;
+      --lime: #CCFF00;
+      --surface: #111111;
+      --border: rgba(255,255,255,0.08);
+      --text-secondary: #888888;
+    }
+    body {
+      background: var(--black);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 60px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: -0.04em;
+    }
+    .status-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--lime);
+      background: rgba(204, 255, 0, 0.1);
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid rgba(204, 255, 0, 0.3);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .card-value {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .card-unit {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .integrity-bar {
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .integrity-fill {
+      height: 100%;
+      background: var(--lime);
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+    .ghost-pulse {
+      width: 12px; height: 12px;
+      background: #FF3B3B;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      box-shadow: 0 0 10px rgba(255,59,59,0.5);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .footer {
+      margin-top: 80px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Sovereign Live Documentation</h1>
+      <p style="color: var(--text-secondary); margin: 8px 0 0;">Real-time telemetry from Ω-Manifold</p>
+    </div>
+    <div class="status-badge">● SYSTEM CORE ACTIVE</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Architecture Integrity</div>
+      <div class="card-value" id="integrity-val">--%</div>
+      <div class="card-unit">Causal traceability coverage</div>
+      <div class="integrity-bar"><div class="integrity-fill" id="integrity-bar"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sovereign Efficiency</div>
+      <div class="card-value" id="roi-val">--x</div>
+      <div class="card-unit">Latest CHRONOS-1 ROI ratio</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Causal Connectivity</div>
+      <div class="card-value" id="edges-val">--</div>
+      <div class="card-unit">Verified causal edges (Ω₁)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Active Ghosts</div>
+      <div class="card-value" id="ghosts-val"><span class="ghost-pulse"></span>--</div>
+      <div class="card-unit">Incomplete systemic resolutions</div>
+    </div>
+  </div>
+
+  <div class="footer" id="timestamp">Last sync: --</div>
+
+  <script>
+    async function updateStatus() {
+      try {
+        const response = await fetch('data/manifold_status.json');
+        const data = await response.json();
+        
+        document.getElementById('integrity-val').innerText = data.architecture_integrity + '%';
+        document.getElementById('integrity-bar').style.width = data.architecture_integrity + '%';
+        
+        const latestRoi = data.efficiency.latest_roi.roi_ratio || 0;
+        document.getElementById('roi-val').innerText = latestRoi + 'x';
+        
+        document.getElementById('edges-val').innerText = data.causality.total_edges;
+        document.getElementById('ghosts-val').innerHTML = '<span class="ghost-pulse"></span>' + data.active_ghosts;
+        
+        document.getElementById('timestamp').innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
+      } catch (e) {
+        console.error("Dashboard offline: run 'python -m cortex.engine.reporter' to sync data.");
+      }
+    }
+    updateStatus();
+    setInterval(updateStatus, 5000);
+  </script>
+</body>
+</html>
