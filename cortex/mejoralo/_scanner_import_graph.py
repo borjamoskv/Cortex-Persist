@@ -11,7 +11,8 @@ import ast
 import os
 from pathlib import Path
 
-from cortex.mejoralo.antipatterns import SKIP_DIRS, AntipatternFinding
+from cortex.mejoralo.constants import SKIP_DIRS
+from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 
 __all__ = [
     "build_import_graph",
