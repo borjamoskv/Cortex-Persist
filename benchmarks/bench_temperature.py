@@ -31,7 +31,6 @@ import statistics
 import sys
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 import httpx
 
@@ -301,11 +300,11 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-async def main(argv: Optional[list[str]] = None) -> int:
+async def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     runs = 5 if args.quick else args.runs
 
-    print(f"🌡️  CORTEX Temperature Determinism Benchmark")
+    print("🌡️  CORTEX Temperature Determinism Benchmark")
     print(f"   Model  : {args.model}")
     print(f"   Runs   : {runs} per temperature")
     print(f"   Mode   : {'QUICK' if args.quick else 'FULL'}")

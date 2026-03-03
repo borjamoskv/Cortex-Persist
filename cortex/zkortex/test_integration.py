@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 def test_full_sovereign_opacity_protocol() -> None:
     """Test completo del protocolo de opacidad soberana."""
-    from cortex.zkortex import ZKOrtexProver, ZKOrtexVerifier, SovereignOpacityLayer
+    from cortex.zkortex import SovereignOpacityLayer, ZKOrtexVerifier
 
     print("\n" + "═" * 60)
     print("  ZKORTEX — SOVEREIGN OPACITY PROTOCOL")
@@ -51,7 +51,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     # ── 3. Ingestión — genera el root público ─────────────────────────────────
     public_root = opacity.ingest_facts(private_knowledge)
     print(f"[PÚBLICO] Merkle Root publicado: {public_root[:32]}...")
-    print(f"[PÚBLICO] Este hash representa TODO el conocimiento, sin revelar nada")
+    print("[PÚBLICO] Este hash representa TODO el conocimiento, sin revelar nada")
 
     # ── 4. Verifier externo se configura con el root público ──────────────────
     verifier = ZKOrtexVerifier(expected_root=opacity.public_root)
@@ -59,7 +59,7 @@ def test_full_sovereign_opacity_protocol() -> None:
 
     # ── 5. CORTEX demuestra que conoce un hecho específico ────────────────────
     fact_to_prove = "CORTEX v6 usa HKDF + AES-GCM con aislamiento por tenant"
-    print(f"\n[CORTEX] Generando prueba de membresía para:")
+    print("\n[CORTEX] Generando prueba de membresía para:")
     print(f"         '{fact_to_prove[:50]}...'")
 
     proof = opacity.prove_knows_fact(fact_to_prove)
@@ -67,31 +67,31 @@ def test_full_sovereign_opacity_protocol() -> None:
 
     result = verifier.verify_membership(proof, element_to_verify=_fact_fingerprint(fact_to_prove))
     print(f"\n[VERIFIER] Resultado: {'✓ VÁLIDO' if result.is_valid else '✗ INVÁLIDO'}")
-    print(f"[VERIFIER] El hecho existe en el knowledge set de CORTEX")
-    print(f"[VERIFIER] El Verifier NO ha visto ningún otro hecho")
+    print("[VERIFIER] El hecho existe en el knowledge set de CORTEX")
+    print("[VERIFIER] El Verifier NO ha visto ningún otro hecho")
 
     # ── 6. Prueba de rango — "¿Tienes más de 3 hechos?" ──────────────────────
-    print(f"\n[AUDITOR] ¿Tiene CORTEX entre 3 y 100 hechos?")
+    print("\n[AUDITOR] ¿Tiene CORTEX entre 3 y 100 hechos?")
     range_proof = opacity.prove_count_in_range(3, 100)
     assert range_proof is not None
 
     range_result = verifier.verify_range(range_proof)
     print(f"[VERIFIER] Rango: {'✓ CONFIRMADO' if range_result.is_valid else '✗ RECHAZADO'}")
-    print(f"[VERIFIER] CORTEX tiene entre 3 y 100 hechos. El número exacto: REDACTADO.")
+    print("[VERIFIER] CORTEX tiene entre 3 y 100 hechos. El número exacto: REDACTADO.")
 
     # ── 7. Commitment — CORTEX se compromete a un hecho futuro ───────────────
-    print(f"\n[CORTEX] Emitiendo commitment a un hecho sensible...")
+    print("\n[CORTEX] Emitiendo commitment a un hecho sensible...")
     commitment = opacity.commit_to_knowledge(
         fact_id="wallet-balance-2026-03",
         fact_content="El saldo total en cold storage es 847 ETH",
         metadata={"category": "financial", "date": "2026-03-03"}
     )
     print(f"[PÚBLICO] Commitment emitido: {commitment.commitment_hex[:32]}...")
-    print(f"[PÚBLICO] Nadie puede abrir este commitment sin el blinding key")
+    print("[PÚBLICO] Nadie puede abrir este commitment sin el blinding key")
 
     # ── 8. Estado público sin datos privados ──────────────────────────────────
     status = opacity.public_status()
-    print(f"\n[PÚBLICO] Estado del sistema ZKORTEX:")
+    print("\n[PÚBLICO] Estado del sistema ZKORTEX:")
     print(f"  Strategy:     {status['opacity_strategy']}")
     print(f"  Proofs:       {status['proofs_emitted']}")
     print(f"  Commitments:  {status['commitments_emitted']}")
@@ -149,7 +149,7 @@ def test_range_proof_honesty() -> None:
     # Deshonesto — debe lanzar ValueError
     try:
         prove_range(200, 10, 100)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 

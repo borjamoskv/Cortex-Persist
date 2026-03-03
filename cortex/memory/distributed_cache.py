@@ -292,7 +292,7 @@ class DistributedSovereignCache:
 
                 if not items: continue
 
-                for stream, messages in items:
+                for _stream, messages in items:
                     for msg_id, data in messages:
                         agent_key = data.get("agent_key", "unknown")
                         
@@ -327,6 +327,7 @@ class DistributedSovereignCache:
 
 def make_fastapi_lifespan(audit_callback: AuditCallback | None = None) -> Any:
     from contextlib import asynccontextmanager
+
     from fastapi import FastAPI as _FastAPI
 
     @asynccontextmanager

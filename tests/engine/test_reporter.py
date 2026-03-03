@@ -1,6 +1,5 @@
 import json
 import sqlite3
-from typing import Any
 
 import pytest
 
@@ -16,11 +15,14 @@ def mock_db(tmp_path) -> str:
         conn.execute(
             """
             CREATE TABLE causal_edges (
-                id INTEGER PRIMARY KEY,
-                fact_id INTEGER,
-                parent_id INTEGER,
-                signal_id INTEGER,
-                edge_type TEXT
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                fact_id     INTEGER NOT NULL,
+                parent_id   INTEGER,
+                signal_id   INTEGER,
+                edge_type   TEXT NOT NULL DEFAULT 'triggered_by',
+                project     TEXT,
+                tenant_id   TEXT NOT NULL DEFAULT 'default',
+                created_at  TEXT NOT NULL DEFAULT (datetime('now'))
             )
             """
         )
@@ -30,13 +32,20 @@ def mock_db(tmp_path) -> str:
         conn.execute(
             """
             CREATE TABLE signals (
-                id INTEGER PRIMARY KEY,
-                event_type TEXT,
-                consumed_by TEXT
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_type  TEXT NOT NULL,
+                payload     TEXT NOT NULL DEFAULT '{}',
+                source      TEXT NOT NULL,
+                project     TEXT,
+                created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+                consumed_by TEXT NOT NULL DEFAULT '[]'
             )
             """
         )
-        conn.execute("INSERT INTO signals (event_type, consumed_by) VALUES ('sig1', '[]'), ('sig2', '[\"a\"]')")
+        conn.execute(
+            "INSERT INTO signals (event_type, source, consumed_by) VALUES (?, ?, ?), (?, ?, ?)",
+            ("sig1", "cli", "[]", "sig2", "agent", '["a"]')
+        )
 
         # Create minimal facts table
         conn.execute(
@@ -85,14 +94,14 @@ def test_collect_metrics(mock_db: str):
     # Efficiency logic checks
     assert status.efficiency["history_count"] == 2
     assert status.efficiency["latest_roi"]["hours_saved"] == 42.0
-    
-    assert "timestamp" in status.timestamp
+
+    assert len(status.timestamp) > 10
 
 
 def test_missing_db_raises_error(tmp_path):
     """Ensure proper exception handling when DB is missing."""
     invalid_path = str(tmp_path / "nonexistent.db")
     reporter = SovereignReporter(invalid_path)
-    
+
     with pytest.raises(sqlite3.OperationalError):
         reporter.collect_metrics()

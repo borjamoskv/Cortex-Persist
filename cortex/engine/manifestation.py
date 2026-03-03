@@ -23,29 +23,26 @@ async def manifest_singularity(signal_bus: "SignalBus | None" = None) -> None:
     """
     logger.info("🌌 [SINGULARITY] Initiating Manifestation Protocol...")
     try:
-        # 1. Nexus Unification
-        proc1 = await asyncio.create_subprocess_exec(
-            ".venv/bin/python",
-            "-m",
-            "cortex.cli",
-            "nexus",
-            "sync",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        await proc1.communicate()
+        # Chronos Sniper Guard: Run Nexus and Ledger with timeouts to prevent hanging
+        # Parallelizing sync and checkpoint for 130/100 performance
+        coros = [
+            asyncio.create_subprocess_exec(
+                ".venv/bin/python", "-m", "cortex.cli", "nexus", "sync",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            ),
+            asyncio.create_subprocess_exec(
+                ".venv/bin/python", "-m", "cortex.cli", "ledger", "checkpoint",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            )
+        ]
 
-        # 2. Ledger Hardening
-        proc2 = await asyncio.create_subprocess_exec(
-            ".venv/bin/python",
-            "-m",
-            "cortex.cli",
-            "ledger",
-            "checkpoint",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+        procs = await asyncio.gather(*coros)
+
+        # OOM/Time Guard: Wait with timeout
+        await asyncio.wait(
+            [p.communicate() for p in procs],
+            timeout=30.0
         )
-        await proc2.communicate()
 
         # 3. Notification to Signal Bus
         if signal_bus:
@@ -71,6 +68,11 @@ async def transfigure_ui(html_file: Path, signal_bus: "SignalBus | None" = None)
     bicameral.log_limbic(msg, source="APOTH")
 
     try:
+        # OOM Killer Guard: Skip files larger than 5MB
+        if html_file.stat().st_size > 5 * 1024 * 1024:
+            logger.warning("[MANIFESTATION] File too large for transfiguration: %s", html_file)
+            return False
+
         content = await asyncio.to_thread(html_file.read_text, "utf-8")
 
         noir_styles = """

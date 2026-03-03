@@ -14,7 +14,7 @@ import math
 import pytest
 
 from cortex.evolution.action import SymbolicActionEngine, SymbolicActionState
-from cortex.evolution.agents import AgentDomain, Mutation, MutationType, SovereignAgent
+from cortex.evolution.agents import AgentDomain, Mutation, SovereignAgent
 from cortex.evolution.cortex_metrics import DomainMetrics
 from cortex.evolution.lnn import LagrangianController
 
@@ -96,7 +96,7 @@ class TestSymbolicActionEngine:
         m = _make_metrics()
 
         import time
-        state1 = engine.compute_state(agent, m, grace_injection=1.0)
+        engine.compute_state(agent, m, grace_injection=1.0)
         time.sleep(0.05)  # dt > 0
         state2 = engine.compute_state(agent, m, grace_injection=1.0)
 
