@@ -8,10 +8,7 @@ to avoid a circular dependency.
 from __future__ import annotations
 
 import ast
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from cortex.mejoralo.antipatterns import AntipatternFinding
+from cortex.mejoralo.models import AntipatternFinding
 
 __all__ = ["_BroadExceptionVisitor", "_AsyncIntegrityVisitor"]
 

@@ -8,6 +8,7 @@ import sqlite3
 import time
 from typing import Any
 
+from cortex.database.core import connect as db_connect
 from cortex.nexus.types import DomainOrigin, IntentType, WorldMutation
 
 
@@ -25,10 +26,11 @@ class NexusDB:
         self._init_schema()
 
     def _get_conn(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self._db_path, timeout=10)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA busy_timeout=5000")
+        conn = db_connect(
+            self._db_path,
+            timeout=10,
+            row_factory=sqlite3.Row,
+        )
         return conn
 
     def _init_schema(self) -> None:

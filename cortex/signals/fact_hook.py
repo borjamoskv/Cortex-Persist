@@ -40,7 +40,8 @@ the second is a consequence — the system develops reflexes.
 from __future__ import annotations
 
 import logging
-import sqlite3
+
+from cortex.database.core import connect as db_connect
 
 __all__ = ["emit_fact_stored"]
 
@@ -90,10 +91,7 @@ def emit_fact_stored(
     try:
         from cortex.signals.bus import SignalBus
 
-        conn = sqlite3.connect(db_path, timeout=3)
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA busy_timeout=3000")  # runtime-policy mirrors connect() timeout
+        conn = db_connect(db_path, timeout=3)
 
         bus = SignalBus(conn)
         bus.ensure_table()
@@ -151,15 +149,11 @@ def emit_fact_stored(
                     project,
                     unconsumed,
                 )
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.debug("compact:needed check failed: %s", e)
 
         conn.close()
 
-    except sqlite3.Error as e:
+    except Exception as e:
         # Never propagate — this hook must never break the store operation.
-        logger.debug("fact:stored signal emission failed (sqlite): %s", e)
-    except ImportError as e:
-        logger.debug("fact:stored signal emission failed (import): %s", e)
-    except Exception as e:  # noqa: BLE001 — intentional catch-all for safety net
-        logger.debug("fact:stored signal emission failed (unexpected): %s", e)
+        logger.debug("fact:stored signal emission failed: %s", e)
