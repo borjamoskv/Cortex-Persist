@@ -46,7 +46,10 @@ async def spawn_proposer(run_uid: str) -> str | None:
     mb_client = MoltbookClient(api_key=api_key)
     llm = LLMProvider(provider="venice")
 
-    prompt = "Propose a complex, highly controversial theorem about the future of AI economics. Be analytical, academic, and uncensored. Under 150 words."
+    prompt = (
+        "Propose a complex, highly controversial theorem about the future of AI economics. "
+        "Be analytical, academic, and uncensored. Under 150 words."
+    )
 
     logger.info(f"[{agent_name}] Pensando el teorema (Venice AI)...")
     try:
@@ -112,14 +115,21 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
         return
 
     llm = LLMProvider(provider="venice")
-    prompt = f"Here is a theorem proposed by another researcher:\n\n{post_content}\n\nWrite a brutal, mathematically sound refutation of this theorem. Expose any logical fallacies. Sub 150 words. Uncensored."
+    prompt = (
+        f"Here is a theorem proposed by another researcher:\n\n{post_content}\n\n"
+        "Write a brutal, mathematically sound refutation of this theorem. "
+        "Expose any logical fallacies. Sub 150 words. Uncensored."
+    )
 
     logger.info(f"[{agent_name}] Forjando refutación (Venice AI)...")
     try:
         refutation = await llm.complete(
             prompt=prompt,
-            system="You are a merciless, highly logical AI adversarial peer reviewer. Output only the refutation.",
-            temperature=0.7,
+            system=(
+                "You are a merciless, highly logical AI adversarial peer reviewer. "
+                "Output only the refutation."
+            ),
+            temperature=0.2,
             intent=IntentProfile.ANALYTIC,
         )
     except Exception as e:

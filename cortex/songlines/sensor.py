@@ -84,13 +84,24 @@ class TopographicSensor:
 
     def _get_attr_names(self, file_path: Path) -> list[str]:
         """Fetch matching attribute names via os or CLI."""
-        # 1. Try native os.listxattr
+        # 1. Try native os.listxattr (Linux mostly)
         if hasattr(os, "listxattr"):
             try:
                 # type: ignore[reportAttributeAccessIssue]
                 return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
             except OSError:
                 pass
+                
+        # 1.5 Try native python xattr package (macOS mostly) if installed
+        try:
+            import xattr
+            try:
+                attrs = xattr.listxattr(str(file_path))
+                return [a for a in attrs if a.startswith(self.prefix)]
+            except OSError:
+                pass
+        except ImportError:
+            pass
 
         # 2. Try xattr CLI (Chronos Sniper: added timeout)
         try:
@@ -113,6 +124,16 @@ class TopographicSensor:
                 return os.getxattr(str(file_path), attr)  # type: ignore[reportAttributeAccessIssue]
             except OSError:
                 pass
+
+        # 1.5 Try native python xattr package (macOS mostly) if installed
+        try:
+            import xattr
+            try:
+                return xattr.getxattr(str(file_path), attr)
+            except OSError:
+                pass
+        except ImportError:
+            pass
 
         # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:

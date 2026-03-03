@@ -206,6 +206,7 @@ class KeterReservoir:
 
     def get(self, mission_id: str) -> KeterPayload | None:
         import json
+        import sqlite3
 
         try:
             row = self._conn.execute(
@@ -213,12 +214,13 @@ class KeterReservoir:
             ).fetchone()
             if row:
                 return json.loads(row[0])
-        except Exception:
-            return None
+        except (sqlite3.Error, json.JSONDecodeError, TypeError) as e:
+            logger.warning("KeterReservoir get failed: %s", e)
         return None
 
     def set(self, mission_id: str, payload: KeterPayload):
         import json
+        import sqlite3
 
         try:
             self._conn.execute(
@@ -226,7 +228,7 @@ class KeterReservoir:
                 (mission_id, json.dumps(payload)),
             )
             self._conn.commit()
-        except Exception as e:
+        except (sqlite3.Error, TypeError) as e:
             logger.warning("KeterReservoir set failed: %s", e)
 
 
@@ -300,28 +302,20 @@ class KeterEngine:
             f"Phase {phase.__class__.__name__} failed after {MAX_RETRIES} attempts: {last_error}"
         ) from last_error
 
-    async def ignite(self, intent: str, **kwargs: Any) -> KeterPayload:
-        """
-        Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
-        """
+    def _check_thermal_bypass(
+        self, intent: str, formation: str, thermal_audit: bool
+    ) -> tuple[str, KeterPayload | None]:
         import hashlib
 
-        thermal_audit = kwargs.get("thermal_audit", False)
-        formation = kwargs.get("formation", "BLITZ")
-
-        # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
         cached_payload = self._reservoir.get(mission_id)
-        if cached_payload:
-            # Verify if it reached singularity
-            if cached_payload.get("status") == "SINGULARITY_REACHED":
-                if thermal_audit:
-                    logger.info(
-                        "⚡ [KETER] Identity Short-Circuit: Intent and formation already processed and stabilized."
-                    )
-                return cached_payload
+        if cached_payload and cached_payload.get("status") == "SINGULARITY_REACHED":
+            if thermal_audit:
+                logger.info("⚡ [KETER] Identity Short-Circuit: Intent and formation stabilized.")
+            return mission_id, cached_payload
+        return mission_id, None
 
-        # --- Adaptive Jitter (Thermal Noise Control) ---
+    async def _apply_adaptive_jitter(self, formation: str, thermal_audit: bool) -> None:
         if formation not in ("BLITZ", "GHOST", "ORACLE"):
             import secrets
 
@@ -335,20 +329,11 @@ class KeterEngine:
                 )
             await asyncio.sleep(asymmetric_jitter)
 
-        logger.info("=" * 60)
-        logger.info("⚡ [KETER] MATERIALIZACION INICIADA: KETER ACTIVADO")
-        logger.info("=" * 60)
-
-        payload = typing.cast(KeterPayload, {"intent": intent, **kwargs})
-
-        # --- Skill Routing (Enrutamiento Soberano) ---
+    def _build_execution_sequence(self, intent: str) -> list[SovereignPhase]:
         plan = self.router.create_execution_plan(intent)
         execution_sequence = []
         if plan:
-            logger.info(
-                "🗺️ [KETER] Plan de ejecución generado por SkillRouter: %s",
-                [m.slug for m in plan],
-            )
+            logger.info("🗺️ [KETER] Plan generado por SkillRouter: %s", [m.slug for m in plan])
             for manifest in plan:
                 phase = self._dispatch_skill(manifest)
                 if phase:
@@ -356,12 +341,34 @@ class KeterEngine:
 
         if not execution_sequence:
             logger.warning("[KETER] No specific plan. Falling back to default pipeline.")
-            execution_sequence = self.phases
+            return self.phases
+        return execution_sequence
+
+    async def ignite(self, intent: str, **kwargs: Any) -> KeterPayload:
+        """
+        Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
+        """
+        thermal_audit = kwargs.get("thermal_audit", False)
+        formation = kwargs.get("formation", "BLITZ")
+
+        # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
+        mission_id, bypass_payload = self._check_thermal_bypass(intent, formation, thermal_audit)
+        if bypass_payload:
+            return bypass_payload
+
+        # --- Adaptive Jitter (Thermal Noise Control) ---
+        await self._apply_adaptive_jitter(formation, thermal_audit)
+
+        logger.info("=" * 60)
+        logger.info("⚡ [KETER] MATERIALIZACION INICIADA: KETER ACTIVADO")
+        logger.info("=" * 60)
+
+        payload = typing.cast(KeterPayload, {"intent": intent, **kwargs})
+        execution_sequence = self._build_execution_sequence(intent)
 
         try:
             for phase in execution_sequence:
                 # ─── Thermal Bypass (Ω₂) ───
-                # Check if we should skip this phase to avoid redundant cycles.
                 previous_code = payload.get("final_code", "")
                 previous_score = payload.get("score_130_100", 0.0)
 
@@ -383,7 +390,7 @@ class KeterEngine:
                 ):
                     if thermal_audit:
                         logger.debug(
-                            "⚡ [KETER] Static Equilibrium detected in %s. No delta produced.",
+                            "⚡ [KETER] Static Equilibrium in %s.",
                             phase.__class__.__name__,
                         )
 
