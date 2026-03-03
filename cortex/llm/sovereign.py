@@ -89,6 +89,7 @@ _REMOTE_PRIORITY: list[str] = [
     "qwen",  # 131K ctx, very cheap
     "groq",  # Ultra-fast inference
     "deepseek",  # Cheap reasoning
+    "ernie",  # #1 China, #8 Global. Integrated via Axiom Ω₅ (Antifragile)
     "openai",  # GPT-5.3 heavyweight
     "anthropic",  # Claude 4.6
     "mistral",  # EU provider

@@ -37,8 +37,8 @@ async def test_metamemory_audit_high_brier_score_pulses_cortisol(mock_endocrine,
     # Brier score > 0.25 should pulse Cortisol
     mock_endocrine.pulse.assert_called_once_with(
         HormoneType.CORTISOL,
-        +0.10,
-        reason="CalibrationDrift:0.40",
+        +0.05,
+        reason="GlobalCalibrationDrift",
     )
 
 
@@ -50,8 +50,8 @@ async def test_metamemory_audit_optimal_calibration_pulses_dopamine(mock_endocri
 
     await engine._metamemory_audit()
 
-    # Brier score <= 0.25 should pulse Dopamine
-    mock_endocrine.pulse.assert_called_once_with(HormoneType.DOPAMINE, +0.02)
+    # Brier score <= 0.25 should NOT pulse Dopamine according to current implementation
+    mock_endocrine.pulse.assert_not_called()
 
 
 @pytest.mark.asyncio

@@ -14,7 +14,10 @@ from typing import Any
 import aiosqlite
 
 from cortex.engine.embedding_engine import embed_fact_async
-from cortex.engine.fact_store_core import insert_fact_record, resolve_causality
+from cortex.engine.fact_store_core import (
+    insert_fact_record,
+    resolve_causality_async,
+)
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.engine.nemesis import NemesisProtocol
@@ -93,12 +96,13 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         meta = self._apply_privacy_shield(content, project, meta)
         meta = run_security_guards(content, project, source, meta)
 
-        _db_path = getattr(self, "db_path", None) or getattr(self, "_db_path", None)
-        meta = resolve_causality(str(_db_path) if _db_path else None, project, meta)
+        meta = await resolve_causality_async(conn, project, meta)
 
-        if rej := NemesisProtocol.analyze(content, db_path=str(_db_path) if _db_path else None):
+        # Ω₆: Nemesis Analysis must be async to prevent loop starvation
+        if rej := await NemesisProtocol.analyze_async(content, conn=conn):
             logger.warning("NEMESIS REJECTION: %s", rej)
             raise ValueError(rej)
+
 
         # Ω₁: Bridge Elevation — Prescriptive pattern elevation for cross-project duplicates
         if fact_type in ("knowledge", "decision", "rule", "ghost"):
@@ -149,7 +153,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id = (
             tx_id
             if tx_id is not None
-            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})  # type: ignore[reportAttributeAccessIssue]
+            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})
         )
         fact_id = await insert_fact_record(
             conn,
@@ -311,6 +315,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
         )
+        return True
 
     _validate_content = staticmethod(validate_content)
     _check_dedup = staticmethod(check_dedup)

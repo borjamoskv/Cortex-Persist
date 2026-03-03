@@ -130,13 +130,29 @@ async def insert_fact_record(
     return fact_id  # type: ignore[reportReturnType]
 
 
+async def resolve_causality_async(
+    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Resolve causal linking for a fact asynchronously.
+
+    Ω₁: Every decision must point to its progenitor.
+    """
+    from cortex.engine.causality import AsyncCausalOracle, link_causality
+
+    if not (meta and meta.get("causal_parent")):
+        parent_sig = await AsyncCausalOracle.find_parent_signal(conn, project)
+        return link_causality(meta, parent_sig)
+    return meta or {}
+
+
 def resolve_causality(
     db_path: str | None, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
-    """Resolve causal linking for a fact."""
+    """Resolve causal linking for a fact (sync)."""
     from cortex.engine.causality import CausalOracle, link_causality
 
     if db_path and not (meta and meta.get("causal_parent")):
         parent_sig = CausalOracle.find_parent_signal(db_path, project)
         return link_causality(meta, parent_sig)
     return meta or {}
+

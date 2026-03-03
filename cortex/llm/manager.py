@@ -12,6 +12,7 @@ from EmbeddingManager. Gracefully degrades when no LLM is configured.
     CORTEX_LLM_PROVIDER=qwen        → Qwen via DashScope
     CORTEX_LLM_PROVIDER=openrouter  → Any model via OpenRouter
     CORTEX_LLM_PROVIDER=ollama      → Local Ollama
+    CORTEX_LLM_PROVIDER=ernie       → Baidu ERNIE 5.0 (AIMLAPI)
     CORTEX_LLM_PROVIDER=custom      → Any endpoint via CORTEX_LLM_BASE_URL
     ... and 20+ more presets
 """

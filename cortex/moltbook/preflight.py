@@ -20,9 +20,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from functools import wraps
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -67,31 +65,13 @@ class PreflightResult:
 # ─── Core check ───────────────────────────────────────────────────────────────
 
 
-def preflight_check(
+async def preflight_check(
     client: MoltbookClient,
     *,
     force_probe: bool = False,
 ) -> PreflightResult:
     """Consult suspension state before generating LLM payloads.
-
-    Strategy (two-tier, latency-ordered):
-        Tier 0 — in-process cache (O(1), zero network):
-            Read client._suspended_until.
-            If time.time() < _suspended_until → BLOCKED, return immediately.
-
-        Tier 1 — live API probe (only when force_probe=True and cache is clean):
-            Call GET /agents/status.
-            Parse suspension fields from response.
-            Update client cache if suspended (defensive sync).
-
-    Args:
-        client:       Active MoltbookClient instance.
-        force_probe:  When True, makes a live /agents/status call even if the
-                      in-process cache shows clean. Use at session start or after
-                      a long idle period. Default False (cache-only, zero latency).
-
-    Returns:
-        PreflightResult — immutable verdict.
+    Refactored to be ASYNC.
     """
     t0 = time.perf_counter()
 
@@ -117,7 +97,7 @@ def preflight_check(
         return PreflightResult(clear=True, source="cache", latency_ms=elapsed_ms)
 
     try:
-        status_resp = client.check_status()
+        status_resp = await client.check_status()
         elapsed_ms = (time.perf_counter() - t0) * 1_000
 
         # Parse suspension fields — API may return various shapes
@@ -160,8 +140,6 @@ def preflight_check(
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1_000
         logger.error("PREFLIGHT probe failed (defaulting to CLEAR): %s", exc)
-        # Fail-open: if we can't probe, allow execution and let the dispatch
-        # circuit-breaker catch the real 403.
         return PreflightResult(
             clear=True,
             source="error",
@@ -170,84 +148,11 @@ def preflight_check(
         )
 
 
-# ─── Decorator / guard ────────────────────────────────────────────────────────
-
-
-def require_clear_preflight(
-    client_attr: str = "client",
-    force_probe: bool = False,
-) -> Callable:
-    """Decorator that aborts async dispatch functions when preflight fails.
-
-    Usage:
-        @require_clear_preflight(client_attr="client")
-        async def process_post(self, client, llm, post):
-            ...  # only runs if preflight is clear
-
-        @require_clear_preflight()  # assumes first arg is 'client'
-        async def dispatch(client, llm, ...):
-            ...
-
-    The decorated function returns None (silently) when blocked.
-    """
-
-    def decorator(
-        fn: Callable[..., Coroutine[Any, Any, Any]],
-    ) -> Callable[..., Coroutine[Any, Any, Any]]:
-        @wraps(fn)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Resolve client from args or kwargs
-            resolved_client: MoltbookClient | None = kwargs.get(client_attr)
-            if resolved_client is None:
-                # Try positional: first arg named 'client'
-                import inspect
-
-                sig = inspect.signature(fn)
-                params = list(sig.parameters.keys())
-                if client_attr in params:
-                    idx = params.index(client_attr)
-                    if idx < len(args):
-                        resolved_client = args[idx]
-
-            if resolved_client is None:
-                logger.warning("PREFLIGHT: could not resolve client, proceeding without check.")
-                return await fn(*args, **kwargs)
-
-            result = preflight_check(resolved_client, force_probe=force_probe)
-            logger.debug("%s", result)
-
-            if not result.clear:
-                logger.warning(
-                    "PREFLIGHT aborted '%s' — %s",
-                    fn.__qualname__,
-                    result,
-                )
-                return None  # Zero tokens burned
-
-            return await fn(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
-# ─── Session-start helper ─────────────────────────────────────────────────────
-
-
-def session_preflight(client: MoltbookClient) -> PreflightResult:
+async def session_preflight(client: MoltbookClient) -> PreflightResult:
     """Run a FULL preflight at session start (force_probe=True).
-
-    Call this once in main() before entering the dispatch loop.
-    Raises SystemExit if suspended, so the caller never reaches LLM init.
-
-    Example:
-        async def main():
-            client = MoltbookClient()
-            session_preflight(client)   # exits here if blocked
-            llm = SovereignLLM()        # only instantiated if clear
-            ...
+    Refactored to be ASYNC.
     """
-    result = preflight_check(client, force_probe=True)
+    result = await preflight_check(client, force_probe=True)
     if result.suspended:
         logger.error(
             "SESSION ABORTED by pre-flight — agent suspended %ds. %s",

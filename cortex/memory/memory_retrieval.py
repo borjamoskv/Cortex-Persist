@@ -183,9 +183,47 @@ async def retrieve_episodic_context(
                 "Aborting retrieval to prevent local hallucination."
             )
 
+    # 5. Fuse results
     if hdc_results and dense_results:
-        return apply_rrf(dense_results, hdc_results, limit=max_episodes)
+        results = apply_rrf(dense_results, hdc_results, limit=max_episodes)
     elif hdc_results:
-        return [fact_to_dict(f) for f in hdc_results[:max_episodes]]
+        results = [fact_to_dict(f) for f in hdc_results[:max_episodes]]
     else:
-        return [fact_to_dict(f) for f in dense_results[:max_episodes]]
+        results = [fact_to_dict(f) for f in dense_results[:max_episodes]]
+
+    # 6. Hebbian Ranking Boost (STDP edge weights)
+    results = _apply_hebbian_boost(manager, results)
+    return results
+
+
+def _apply_hebbian_boost(
+    manager: CortexMemoryManager,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Boost retrieval scores using STDP edge co-activation weights.
+
+    Facts connected by strong Hebbian edges get their scores amplified,
+    causing co-activated knowledge to surface higher in rankings.
+    O(N²) over result set — bounded by max_episodes (~3-10).
+    """
+    stdp = getattr(manager, "_stdp_engine", None)
+    if stdp is None or len(results) < 2:
+        return results
+
+    # Accumulate Hebbian boost per fact from pairwise edge weights
+    boosted = []
+    for item in results:
+        fid = item.get("id", "")
+        hebb_boost = 0.0
+        for other in results:
+            oid = other.get("id", "")
+            if fid != oid:
+                w = stdp.get_edge_weight(str(fid), str(oid))
+                hebb_boost += w
+        # Apply: original score + 20% Hebbian signal
+        new_score = item.get("score", 0.0) + 0.2 * hebb_boost
+        boosted.append({**item, "score": new_score})
+
+    boosted.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+    return boosted
+

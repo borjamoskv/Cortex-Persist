@@ -4,7 +4,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.llm.provider import LLMProvider
+from cortex.llm.sovereign import SovereignLLM
 from cortex.llm.router import IntentProfile
 
 console = Console()
@@ -25,23 +25,20 @@ async def _run_lens(
     prompt: str,
 ) -> tuple[str, str | None]:
     """Run a single diagnostic lens with timeout and error isolation."""
-    provider = LLMProvider(model="gpt-4o-mini")
-    try:
-        result = await asyncio.wait_for(
-            provider.complete(
+    # Axiom 4: Zero Trust. Never rely on a single model for diagnostics.
+    async with SovereignLLM(
+        timeout_seconds=_LENS_TIMEOUT_SECONDS,
+        temperature=0.1
+    ) as llm:
+        try:
+            result = await llm.generate(
                 prompt,
-                temperature=0.1,
+                system="You are a diagnostic Inquisitor. Analyze the log through the specified lens.",
                 intent=IntentProfile.REASONING,
-            ),
-            timeout=_LENS_TIMEOUT_SECONDS,
-        )
-        return name, result
-    except TimeoutError:
-        return name, f"[TIMEOUT] Lens '{name}' exceeded {_LENS_TIMEOUT_SECONDS}s"
-    except (ConnectionError, OSError, ValueError, RuntimeError) as e:
-        return name, f"[ERROR] Lens '{name}' failed: {type(e).__name__}: {e}"
-    finally:
-        await provider.close()
+            )
+            return name, result.content
+        except Exception as e:
+            return name, f"[ERROR] Lens '{name}' failed: {type(e).__name__}: {e}"
 
 
 async def _lens_information_theory(log_data: str) -> tuple[str, str | None]:

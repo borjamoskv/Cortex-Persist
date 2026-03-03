@@ -32,11 +32,12 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+import aiosqlite
 from datetime import datetime, timedelta
 
 from cortex.signals.models import Signal, signal_from_row
 
-__all__ = ["SignalBus"]
+__all__ = ["SignalBus", "AsyncSignalBus"]
 
 logger = logging.getLogger("cortex.signals.bus")
 
@@ -58,6 +59,179 @@ CREATE INDEX IF NOT EXISTS idx_signals_source ON signals(source);
 CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 """
+
+
+# ── Async Signal Bus ──────────────────────────────────────────────────
+
+
+class AsyncSignalBus:
+    """Async variant of the Signal Bus using aiosqlite.
+
+    Optimized for high-concurrency environments where blocking the
+    event loop is a fatal structural error (Ω₆).
+    """
+
+    __slots__ = ("_conn", "_ready")
+
+    def __init__(self, conn: aiosqlite.Connection) -> None:
+        self._conn = conn
+        self._ready = False
+
+    async def ensure_table(self) -> None:
+        """Create the signals table asynchronously."""
+        if self._ready:
+            return
+        await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
+        await self._conn.commit()
+        self._ready = True
+
+    async def emit(
+        self,
+        event_type: str,
+        payload: dict | None = None,
+        *,
+        source: str = "cli",
+        project: str | None = None,
+    ) -> int:
+        """Persist a signal asynchronously."""
+        await self.ensure_table()
+        cursor = await self._conn.execute(
+            """INSERT INTO signals (event_type, payload, source, project)
+               VALUES (?, ?, ?, ?)""",
+            (
+                event_type,
+                json.dumps(payload or {}, default=str),
+                source,
+                project,
+            ),
+        )
+        await self._conn.commit()
+        return cursor.lastrowid  # type: ignore[reportReturnType]
+
+    async def history(
+        self,
+        *,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        since: datetime | None = None,
+        limit: int = 50,
+    ) -> list[Signal]:
+        """Query history asynchronously."""
+        await self.ensure_table()
+        query = (
+            "SELECT id, event_type, payload, source, project,"
+            " created_at, consumed_by FROM signals WHERE 1=1"
+        )
+        params: list = []
+
+        if event_type:
+            query += " AND event_type = ?"
+            params.append(event_type)
+        if source:
+            query += " AND source = ?"
+            params.append(source)
+        if project:
+            query += " AND project = ?"
+            params.append(project)
+        if since:
+            query += " AND created_at >= ?"
+            params.append(since.isoformat())
+
+        query += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+
+        cursor = await self._conn.execute(query, params)
+        rows = await cursor.fetchall()
+        return [signal_from_row(row) for row in rows]
+
+    async def _query(
+        self,
+        *,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        unconsumed_by: str | None = None,
+        limit: int = 50,
+    ) -> list[Signal]:
+        """Build and execute a filtered query."""
+        query = (
+            "SELECT id, event_type, payload, source, project,"
+            " created_at, consumed_by FROM signals WHERE 1=1"
+        )
+        params: list = []
+
+        if event_type:
+            query += " AND event_type = ?"
+            params.append(event_type)
+        if source:
+            query += " AND source = ?"
+            params.append(source)
+        if project:
+            query += " AND project = ?"
+            params.append(project)
+        if unconsumed_by:
+            query += " AND consumed_by NOT LIKE ?"
+            params.append(f'%"{unconsumed_by}"%')
+
+        query += " ORDER BY created_at ASC LIMIT ?"
+        params.append(limit)
+
+        cursor = await self._conn.execute(query, params)
+        rows = await cursor.fetchall()
+        return [signal_from_row(row) for row in rows]
+
+    async def poll(
+        self,
+        *,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str = "default",
+        limit: int = 50,
+    ) -> list[Signal]:
+        """Fetch unconsumed signals asynchronously and mark them as consumed."""
+        await self.ensure_table()
+        signals = await self._query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            unconsumed_by=consumer,
+            limit=limit,
+        )
+
+        for sig in signals:
+            new_consumed = sig.consumed_by + [consumer]
+            await self._conn.execute(
+                "UPDATE signals SET consumed_by = ? WHERE id = ?",
+                (json.dumps(new_consumed), sig.id),
+            )
+        if signals:
+            await self._conn.commit()
+
+        return signals
+
+    async def peek(
+        self,
+        *,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str | None = None,
+        limit: int = 50,
+    ) -> list[Signal]:
+        """Fetch signals asynchronously without consuming them."""
+        await self.ensure_table()
+        return await self._query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            unconsumed_by=consumer,
+            limit=limit,
+        )
+
+
+# ── Sync Signal Bus (Legacy/CLI) ──────────────────────────────────────
 
 
 class SignalBus:

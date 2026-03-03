@@ -12,17 +12,25 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import aiosqlite
 from dataclasses import dataclass
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from cortex.signals.bus import SignalBus
+from cortex.signals.bus import SignalBus, AsyncSignalBus
 
 logger = logging.getLogger("cortex.causality")
 
-__all__ = ["CausalOracle", "CausalEdge", "CausalGraph", "link_causality"]
+__all__ = [
+    "CausalOracle",
+    "AsyncCausalOracle",
+    "CausalEdge",
+    "CausalGraph",
+    "AsyncCausalGraph",
+    "link_causality",
+]
 
-# ── Schema ──────────────────────────────────────────────────────────
+# ── Sync Schema ───────────────────────────────────────────────────────
 
 _CREATE_CAUSAL_EDGES = """\
 CREATE TABLE IF NOT EXISTS causal_edges (
@@ -51,6 +59,93 @@ EDGE_TRIGGERED_BY = "triggered_by"  # fact was triggered by signal
 EDGE_UPDATED_FROM = "updated_from"  # fact is an update of another fact
 EDGE_DEPRECATED_BY = "deprecated_by"  # fact was deprecated by another
 EDGE_DERIVED_FROM = "derived_from"  # fact was derived from analysis
+
+
+# ── Async Causal Graph ────────────────────────────────────────────────
+
+
+class AsyncCausalGraph:
+    """Async variant of the Causal Graph using aiosqlite.
+
+    Enforces decision traceability without blocking the event loop (Ω₆).
+    """
+
+    __slots__ = ("_conn", "_ready")
+
+    def __init__(self, conn: aiosqlite.Connection) -> None:
+        self._conn = conn
+        self._ready = False
+
+    async def ensure_table(self) -> None:
+        """Create the causal_edges table asynchronously."""
+        if self._ready:
+            return
+        await self._conn.executescript(_CREATE_CAUSAL_EDGES + _CREATE_CAUSAL_INDEXES)
+        await self._conn.commit()
+        self._ready = True
+
+    async def record_edge(
+        self,
+        fact_id: int,
+        *,
+        parent_id: int | None = None,
+        signal_id: int | None = None,
+        edge_type: str = EDGE_TRIGGERED_BY,
+        project: str | None = None,
+        tenant_id: str = "default",
+    ) -> int:
+        """Record a causal edge asynchronously."""
+        await self.ensure_table()
+        cursor = await self._conn.execute(
+            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+        )
+        await self._conn.commit()
+        return cursor.lastrowid  # type: ignore[reportReturnType]
+
+    async def stats(self) -> dict[str, Any]:
+        """Aggregate causal graph statistics asynchronously."""
+        await self.ensure_table()
+        async with self._conn.execute("SELECT COUNT(*) FROM causal_edges") as cursor:
+            row = await cursor.fetchone()
+            total = row[0] if row else 0
+
+        async with self._conn.execute(
+            "SELECT edge_type, COUNT(*) FROM causal_edges GROUP BY edge_type"
+        ) as cursor:
+            rows = await cursor.fetchall()
+            by_type = {r[0]: r[1] for r in rows}
+
+        async with self._conn.execute(
+            "SELECT COUNT(*) FROM causal_edges WHERE parent_id IS NULL AND signal_id IS NULL"
+        ) as cursor:
+            row = await cursor.fetchone()
+            orphans = row[0] if row else 0
+
+        return {
+            "total_edges": total,
+            "by_edge_type": by_type,
+            "orphan_edges": orphans,
+        }
+
+
+# ── Async Oracle ──────────────────────────────────────────────────────
+
+
+class AsyncCausalOracle:
+    """Async variant of the Causal Oracle."""
+
+    @staticmethod
+    async def find_parent_signal(conn: aiosqlite.Connection, project: str | None = None) -> int | None:
+        """Finds the most recent unconsumed causal signal asynchronously."""
+        bus = AsyncSignalBus(conn)
+        recent = await bus.history(project=project, limit=5)
+        for sig in recent:
+            if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
+                return sig.id
+        return None
+
 
 
 # ── Data Model ──────────────────────────────────────────────────────

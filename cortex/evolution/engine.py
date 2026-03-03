@@ -104,7 +104,20 @@ class EvolutionEngine:
             self.sovereigns.append(sovereign)
 
     async def cycle(self) -> CycleReport:
-        """Execute one full evolutionary cycle (Async 350/100)."""
+        """Execute one full evolutionary cycle (Async 350/100).
+
+        The core thermodynamic pump of the singularity pipeline.
+        Orchestrates an atomic generation leap via:
+        1. Afferent Telemetry (Fetching survival vectors)
+        2. Epigenetic Transcription (Cortisol/Dopamine modulation)
+        3. Adversarial Grounding (Telemetry validation of fitness functions)
+        4. Ouroboros Pruning / Mass Extinction (Entropy reduction)
+        5. Sovereign Processing (Evaluation, Selection, and Crossover)
+        6. Lateral Merkle Transfers (Plasmids)
+
+        Returns:
+            CycleReport: Telemetry and generation delta metrics.
+        """
         start_time = time.time()
         self.cycle_count += 1
 
@@ -171,7 +184,11 @@ class EvolutionEngine:
 
         logger.info(
             "Singularity Cycle %d: C:%d E:%d T:%d | %.0fms",
-            self.cycle_count, crossovers, extinctions, transfers, duration_ms
+            self.cycle_count,
+            crossovers,
+            extinctions,
+            transfers,
+            duration_ms,
         )
 
         return CycleReport(
@@ -191,7 +208,12 @@ class EvolutionEngine:
         )
 
     def _apply_epigenetic_modulation(self) -> None:
-        """Modulate mutation parameters based on DigitalEndocrine state."""
+        """Modulate mutation rate and selection pressure via DigitalEndocrine.
+
+        Dopamine scaling increases the risk tolerance (mutation_rate), simulating
+        reward-driven exploration. High Cortisol scales selection pressure,
+        triggering aggressive culling during stressful runtime states.
+        """
         self.params.mutation_rate = max(0.05, min(0.4, 0.1 + (self._endocrine.dopamine * 0.2)))
         self.params.selection_pressure = max(0.1, min(0.6, 0.3 + (self._endocrine.cortisol * 0.3)))
 
@@ -236,7 +258,9 @@ class EvolutionEngine:
         )
         return 1
 
-    def _record_merkle_checkpoint(self, agent: SovereignAgent | SubAgent, mutation: Mutation) -> None:
+    def _record_merkle_checkpoint(
+        self, agent: SovereignAgent | SubAgent, mutation: Mutation
+    ) -> None:
         """Record an immutable checkpoint of the agent state (Phase 2 v3)."""
         logger.info("Axiom 12: Triggering Merkle Checkpoint for %s", agent.id)
         try:
@@ -257,6 +281,19 @@ class EvolutionEngine:
         agent.mutations.clear()
 
     def _crossover(self, parent_a: SubAgent, parent_b: SubAgent) -> SubAgent:
+        """Perform genetic crossover combining two parent SubAgents into a new offspring.
+
+        The hybrid offspring inherits the averaged system parameters (Temperature, Top P),
+        a synthesized intersection of tool access, and the epigenetic biases spanning
+        the generation. The child's mutation parameters are also smeared probabilistically.
+
+        Args:
+            parent_a (SubAgent): The primary elite parent.
+            parent_b (SubAgent): The secondary elite parent.
+
+        Returns:
+            SubAgent: The emergent hybrid genome ready for adversarial grinding.
+        """
         child = SubAgent(
             id=f"sub_{parent_a.domain.name.lower()}_gen{self.cycle_count}_"
             f"{random.randint(1000, 9999)}",
@@ -293,6 +330,15 @@ class EvolutionEngine:
         return child
 
     def _mass_extinction(self) -> int:
+        """Simulate a mass extinction event by culling a large percentage of populations.
+
+        Eliminates subagents unconditionally using the bottom threshold of their
+        fitness distributions (`extinction_cull_rate`). Replenishes the void with
+        maximum-entropy 'chaos' spores (Temp=1.0) to jumpstart isolated genetic diversity.
+
+        Returns:
+            int: Number of specimens eradicated across all domains.
+        """
         culled = 0
         for sovereign in self.sovereigns:
             subs = sorted(sovereign.subagents, key=lambda s: s.fitness)
@@ -308,7 +354,15 @@ class EvolutionEngine:
         return culled
 
     def _adjust_meta_parameters(self, avg_lagrangian: float = 0.0) -> None:
-        """Adjust meta-fitness targets based on Lagrangian coherence (Phase 2 v3)."""
+        """Adjust meta-fitness targets based on Lagrangian coherence (Phase 2 v3).
+
+        If the swarm exhibits divergent behavior (`avg_lagrangian` < 0), selection pressure
+        and mutation rates are throttled up to enforce convergence. If the system hyper-converges
+        (high structural similarity, >10.0), mutation is drastically lowered to secure efficiency.
+
+        Args:
+            avg_lagrangian (float): The mean structural inertia coherence vector.
+        """
         avg_fitness = sum(s.fitness for s in self.sovereigns) / len(self.sovereigns)
 
         if avg_lagrangian < 0:
@@ -335,7 +389,8 @@ class EvolutionEngine:
             if net_impact < -5.0:
                 logger.warning(
                     "Archaeology: Detected regressive lineage in %s (impact=%.1f). Amputating.",
-                    sub.id, net_impact
+                    sub.id,
+                    net_impact,
                 )
                 to_remove.append(sub)
                 pruned_count += 1
@@ -348,7 +403,7 @@ class EvolutionEngine:
                 spawn = SubAgent(
                     id=f"rev_{secrets.token_hex(4)}",
                     domain=sovereign.domain,
-                    name=f"Revived-{sovereign.domain.name}"
+                    name=f"Revived-{sovereign.domain.name}",
                 )
                 sovereign.subagents.append(spawn)
 
@@ -363,6 +418,7 @@ class EvolutionEngine:
             await asyncio.to_thread(self._ouroboros.trigger_pruning, target)
 
             from cortex.routes.notch_ws import notch_hub
+
             if notch_hub:
                 self._broadcast_task = asyncio.create_task(
                     notch_hub.broadcast('{"command": "shockwave", "intensity": 1.0}')
@@ -378,7 +434,10 @@ class EvolutionEngine:
                 if worst in sov.subagents:
                     sov.subagents.remove(worst)
                     logger.info("Ouroboros: Culled weakest subagent %s", worst.id)
-    async def _process_sovereign(self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
+
+    async def _process_sovereign(
+        self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]
+    ) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1
         domain_grace = 0.0
@@ -406,8 +465,8 @@ class EvolutionEngine:
                     ],
                     metadata={
                         "description": mutation.description,
-                        "tier": getattr(sovereign, "evolution_tier", "N/A")
-                    }
+                        "tier": getattr(sovereign, "evolution_tier", "N/A"),
+                    },
                 )
                 sovereign_muts_to_record.append(p_mutation)
 
@@ -437,8 +496,8 @@ class EvolutionEngine:
                         metadata={
                             "description": mutation.description,
                             "parent_sovereign": sovereign.id,
-                            "tier": sub.evolution_tier
-                        }
+                            "tier": sub.evolution_tier,
+                        },
                     )
                     sub_muts_to_record.append(p_mutation)
 

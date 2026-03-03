@@ -97,7 +97,14 @@ class SkillManifest:
             "transcendent-consciousness",
             "transcendent-manifold",
         }
-        return self.category in transcendent_categories
+        if self.category in transcendent_categories:
+            return True
+        # Auto-detect omega-tier skills and explicit transcendente classification
+        if "omega" in self.category.lower():
+            return True
+        if getattr(self, "classification", "").lower() == "transcendente":
+            return True
+        return False
 
     @property
     def primary_trigger(self) -> str:

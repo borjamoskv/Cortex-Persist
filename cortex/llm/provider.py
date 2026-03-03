@@ -25,9 +25,11 @@ Environment:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, Final
 
@@ -105,6 +107,7 @@ class LLMProvider(BaseProvider):
             raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
         self._client = httpx.AsyncClient(timeout=60.0)
+        self._semaphore = asyncio.Semaphore(100)
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",
             self._provider,
@@ -152,6 +155,7 @@ class LLMProvider(BaseProvider):
             "code": IntentProfile.CODE,
             "reasoning": IntentProfile.REASONING,
             "creative": IntentProfile.CREATIVE,
+            "architect": IntentProfile.ARCHITECT,
             "general": IntentProfile.GENERAL,
         }
         raw_specs: list[str] = preset.get("specialization", ["general"])
@@ -185,7 +189,8 @@ class LLMProvider(BaseProvider):
                 raise ValueError(msg)
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
-        url = f"{self._base_url.rstrip('/')}/chat/completions"  # type: ignore[reportOptionalMemberAccess]
+        # type: ignore[reportOptionalMemberAccess]
+        url = f"{self._base_url.rstrip('/')}/chat/completions"
         headers: dict[str, str] = {
             "Content-Type": _CONTENT_TYPE_JSON,
             **self._extra_headers,
@@ -227,11 +232,7 @@ class LLMProvider(BaseProvider):
         self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
     ) -> str:
         try:
-            response = await self._client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            self._log_resolved_model(payload, data)
-            return data["choices"][0]["message"]["content"]
+            return await self._execute_completion_raw(url, headers, payload)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
                 return await self._handle_429_backoff(url, headers, payload, e)
@@ -255,6 +256,17 @@ class LLMProvider(BaseProvider):
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
+    async def _execute_completion_raw(
+        self, url: str, headers: dict[str, str], payload: dict[str, Any]
+    ) -> str:
+        """Executes a single completion attempt directly. Throws native exceptions."""
+        async with self._semaphore:
+            response = await self._client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        self._log_resolved_model(payload, data)
+        return data["choices"][0]["message"]["content"]
+
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         """Log when a meta-router resolves to a different model than requested.
 
@@ -272,6 +284,31 @@ class LLMProvider(BaseProvider):
                 actual,
             )
 
+    def _extract_retry_delay(self, text: str) -> float | None:
+        """Extrae el delay de reintento desde el JSON o via regex."""
+        try:
+            data = json.loads(text)
+            for detail in data.get("error", {}).get("details", []):
+                meta = detail.get("metadata", {})
+                delay_str = detail.get("retryDelay") or meta.get("quotaResetDelay")
+                if delay_str and isinstance(delay_str, str):
+                    if delay_str.endswith("ms"):
+                        return float(delay_str[:-2]) / 1000.0
+                    elif delay_str.endswith("s"):
+                        return float(delay_str[:-1])
+        except (KeyError, TypeError, ValueError, AttributeError):
+            pass
+
+        match = re.search(r'"(?:quotaResetDelay|retryDelay)"\s*:\s*"([0-9\.]+)(m?s)"', text)
+        if match:
+            try:
+                val = float(match.group(1))
+                return val / 1000.0 if match.group(2) == "ms" else val
+            except ValueError:
+                pass
+
+        return None
+
     async def _handle_429_backoff(
         self,
         url: str,
@@ -279,111 +316,58 @@ class LLMProvider(BaseProvider):
         payload: dict[str, Any],
         original_error: httpx.HTTPStatusError,
     ) -> str:
-        """Parse quotaResetDelay from error response, sleep, and retry."""
-        import asyncio
-        import re
-
+        """Maneja el backoff exponencial y reintentos para errores 429."""
         last_error = original_error
-
-        # Intentaremos hasta 3 veces con backoff
         for attempt in range(1, 4):
-            delay: float | None = None
-            text = last_error.response.text
-
-            # Intentar extraer desde JSON
-            try:
-                data = last_error.response.json()
-                if "error" in data and "details" in data["error"]:
-                    for detail in data["error"]["details"]:
-                        if "retryDelay" in detail:
-                            val = detail["retryDelay"]
-                            if val.endswith("s"):
-                                delay = float(val[:-1])
-                        elif "metadata" in detail and "quotaResetDelay" in detail["metadata"]:
-                            val = detail["metadata"]["quotaResetDelay"]
-                            if val.endswith("ms"):
-                                delay = float(val[:-2]) / 1000.0
-                            elif val.endswith("s"):
-                                delay = float(val[:-1])
-            except (json.JSONDecodeError, KeyError, TypeError, ValueError):
-                # Response might not be JSON or have the expected structure, skip to regex fallback
-                pass
-
-            # Fallback regex si JSON falla
-            if delay is None:
-                match = re.search(r'"(?:quotaResetDelay|retryDelay)"\s*:\s*"([0-9\.]+)(m?s)"', text)
-                if match:
-                    try:
-                        val = float(match.group(1))
-                        unit = match.group(2)
-                        delay = val / 1000.0 if unit == "ms" else val
-                    except ValueError:
-                        pass
-
-            # Añadir un buffer progresivo (jitter + factor de intento)
+            delay = self._extract_retry_delay(last_error.response.text)
             safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0
+
             logger.warning(
                 "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
-                self._model,
-                safe_delay,
-                attempt,
+                self._model, safe_delay, attempt
             )
-
             await asyncio.sleep(safe_delay)
 
             try:
-                # Reintento tras sleep
-                retry_resp = await self._client.post(url, headers=headers, json=payload)
-                retry_resp.raise_for_status()
-                data = retry_resp.json()
-                return data["choices"][0]["message"]["content"]
+                return await self._execute_completion_raw(url, headers, payload)
             except httpx.HTTPStatusError as e2:
                 if e2.response.status_code == 429:
                     last_error = e2
-                    continue  # Siguiente intento
+                    continue
                 raise original_error from e2
-            except Exception as retry_e:
+            except (httpx.HTTPError, ValueError, KeyError) as retry_e:
                 logger.error("LLM Quota Retry Failure: %s", retry_e)
                 raise original_error from retry_e
 
-        # Si llegamos aquí, los 3 intentos fallaron, usar fallback
-        return await self._execute_fallback(url, headers, payload, last_error)
+        return await self._execute_fallback(payload, last_error)
 
     async def _execute_fallback(
-        self, url: str, headers: dict[str, str], payload: dict[str, Any], original_error: Exception
+        self, payload: dict[str, Any], original_error: httpx.HTTPStatusError
     ) -> str:
+        """Ejecuta el fallback hacia un modelo más estable si todo falla."""
         logger.warning(
             "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
             self._model,
         )
 
-        # Si ya somos qwen, no hay más fallback
         if self._provider == "qwen":
             raise original_error
 
+        fallback_provider = LLMProvider(provider="qwen")
         try:
-            # Crear un provider limpio para el fallback para no cruzar URLs con models
-            fallback_provider = LLMProvider(provider="qwen")
             fb_url, fb_headers = fallback_provider._prepare_request()
-
             fb_payload = {
                 "model": fallback_provider._model,
                 "messages": payload.get("messages", []),
                 "temperature": payload.get("temperature", 0.3),
                 "max_tokens": payload.get("max_tokens", 2048),
             }
-
-            retry_resp = await fallback_provider._client.post(
-                fb_url,
-                headers=fb_headers,
-                json=fb_payload,
-            )
-            retry_resp.raise_for_status()
-            data = retry_resp.json()
-            return data["choices"][0]["message"]["content"]
-        except Exception as fallback_e:
+            return await fallback_provider._execute_completion_raw(fb_url, fb_headers, fb_payload)
+        except (httpx.HTTPError, ValueError, KeyError) as fallback_e:
             logger.error("LLM Fallback Failure: %s", fallback_e)
             raise original_error from fallback_e
+        finally:
+            await fallback_provider.close()
 
     async def _process_stream_lines(self, response: httpx.Response):
         """Consume and parse SSE lines from an active HTTP stream."""
@@ -431,15 +415,16 @@ class LLMProvider(BaseProvider):
         }
 
         try:
-            async with self._client.stream(
-                "POST",
-                url,
-                headers=headers,
-                json=payload,
-            ) as response:
-                response.raise_for_status()
-                async for chunk in self._process_stream_lines(response):
-                    yield chunk
+            async with self._semaphore:
+                async with self._client.stream(
+                    "POST",
+                    url,
+                    headers=headers,
+                    json=payload,
+                ) as response:
+                    response.raise_for_status()
+                    async for chunk in self._process_stream_lines(response):
+                        yield chunk
         except httpx.HTTPStatusError as e:
             logger.error(
                 "LLM Stream Failure [%s]: %s",

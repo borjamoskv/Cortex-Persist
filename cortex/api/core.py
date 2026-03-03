@@ -76,6 +76,9 @@ from cortex.routes import (
     timing as timing_router,
 )
 from cortex.routes import (
+    topology_ws as topology_ws_router,
+)
+from cortex.routes import (
     tips as tips_router,
 )
 from cortex.routes import (
@@ -286,6 +289,7 @@ app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
 app.include_router(hive_router)
 app.include_router(notch_ws_router.router)
+app.include_router(topology_ws_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

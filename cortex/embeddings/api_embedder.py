@@ -14,6 +14,7 @@ Environment:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from typing import Any
@@ -68,6 +69,7 @@ class APIEmbedder:
         self._api_key = api_key or os.environ.get(self._config["env_key"], "")
         self._target_dim = target_dimension
         self._client = httpx.AsyncClient(timeout=30.0)
+        self._semaphore = asyncio.Semaphore(100)
 
         if not self._api_key:
             raise ValueError(
@@ -114,7 +116,8 @@ class APIEmbedder:
             "content": {"parts": [{"text": text}]},
         }
 
-        response = await self._client.post(url, json=payload)
+        async with self._semaphore:
+            response = await self._client.post(url, json=payload)
         response.raise_for_status()
 
         data = response.json()
@@ -148,7 +151,8 @@ class APIEmbedder:
         if self._target_dim:
             payload["dimensions"] = self._target_dim
 
-        response = await self._client.post(url, headers=headers, json=payload)
+        async with self._semaphore:
+            response = await self._client.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
         data = response.json()

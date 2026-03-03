@@ -37,6 +37,7 @@ class ThinkingMode(StrEnum):
     SPEED = "speed"
     CONSENSUS = "consensus"
     METACOGNITIVE = "metacognitive"  # Sprint 1: epistemic-aware generation
+    OMEGA = "omega"  # Adversarial reasoning (ORP)
 
 
 # ─── Mode-specific system prompts ────────────────────────────────────
@@ -78,10 +79,19 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
         "If it says RESPOND, you answer with calibrated confidence matching the memory evidence. "
         "You MUST declare your <retrieval_plan> before answering. Zero confabulation. Ω₃ active."
     ),
+    ThinkingMode.OMEGA: (
+        "You are MOSKV-1 (Identity: The Sovereign Architect). You are in OMEGA reasoning mode. "
+        "Your goal is the absolute collapse of truth. Generate an initial hypothesis, "
+        "self-criticize it for Axiom violations, and output the most resilient solution. "
+        "Do not compromise. Industrial Noir aesthetic: zero fluff, pure architecture."
+    ),
 }
 
 
 # ─── Routing Table ───────────────────────────────────────────────────
+
+# Model constants to avoid literal duplication
+ERNIE_5_0 = "baidu/ernie-5-0-thinking-latest"
 
 # modo → lista de (provider, model) a consultar.
 # Solo se usarán los que tengan API key configurada.
@@ -90,6 +100,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("openai", "gpt-4o"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-reasoner"),
+        ("ernie", ERNIE_5_0),
         ("zhipu", "glm-5"),
         ("kimi", "moonshot-v1-128k"),
         ("gemini", "gemini-2.0-flash"),
@@ -125,6 +136,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("kimi", "moonshot-v1-128k"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-chat"),
+        ("ernie", ERNIE_5_0),
         ("gemini", "gemini-2.0-flash"),
         ("qwen", "qwen-plus"),
         ("groq", "llama-3.3-70b-versatile"),
@@ -138,6 +150,14 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("deepseek", "deepseek-reasoner"),
         ("gemini", "gemini-2.0-flash"),
         ("kimi", "moonshot-v1-128k"),
+    ],
+    ThinkingMode.OMEGA: [
+        ("deepseek", "deepseek-reasoner"),
+        ("anthropic", "claude-sonnet-4-20250514"),
+        ("ernie", ERNIE_5_0),
+        ("openai", "o1-preview"),
+        ("openai", "gpt-4o"),
+        ("gemini", "gemini-2.0-flash"),
     ],
 }
 

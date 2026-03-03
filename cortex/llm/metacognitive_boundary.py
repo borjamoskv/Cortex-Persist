@@ -83,6 +83,7 @@ class MetacognitiveContext:
     memory_cards: list[MemoryCard]
     signal: EpistemicSignal
     knowledge_gaps: list[str]
+    domain_calibration: float = -1.0  # Ω₁: Segmented Brier Score
 
     @property
     def should_hard_block(self) -> bool:
@@ -149,6 +150,7 @@ def build_metacognitive_context(
         memory_cards=cards,
         signal=signal,
         knowledge_gaps=gaps,
+        domain_calibration=-1.0,  # Default, up to caller to fill
     )
 
 
@@ -172,6 +174,7 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
     conf = round(ctx.judgment.confidence, 3)
     accessibility = round(ctx.judgment.accessibility, 3)
     signal = ctx.signal.value
+    brier = ctx.domain_calibration
 
     lines: list[str] = [
         "--- [CORTEX EPISTEMIC STATE] ---",
@@ -180,6 +183,15 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
         f"FOK (Feeling-of-Knowing): {fok:.3f}  | JOL (Encoding quality): {jol:.3f}",
         f"Confidence: {conf:.3f}  | Accessibility: {accessibility:.3f}",
     ]
+
+    if brier >= 0:
+        cal_status = "STABLE" if brier < 0.15 else "DRIFTING" if brier < 0.35 else "UNRELIABLE"
+        lines.append(f"Domain Calibration: {brier:.4f} ({cal_status})")
+        if brier > 0.35:
+            lines.append(
+                "⚠ WARNING: High calibration drift detected for this domain. "
+                "Your previous answers here were overconfident. Be extremely conservative."
+            )
 
     if ctx.judgment.tip_of_tongue:
         lines.append(

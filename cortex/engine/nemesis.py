@@ -2,9 +2,10 @@ import datetime
 import logging
 import re
 
+import aiosqlite
 from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.signals.bus import SignalBus
+from cortex.signals.bus import SignalBus, AsyncSignalBus
 
 logger = logging.getLogger("cortex.nemesis")
 
@@ -80,6 +81,49 @@ class NemesisProtocol:
         return cls._check_dynamic_antibodies(content_lower, db_path)
 
     @classmethod
+    async def analyze_async(
+        cls, content: str, conn: aiosqlite.Connection | None = None
+    ) -> str | None:
+        """Analyze content asynchronously. Eliminates I/O wait on event loop (Ω₆)."""
+        content_lower = content.lower()
+
+        # 1. Static Anti-Pattern Check
+        for pattern, reason in cls.ANTI_PATTERNS:
+            if re.search(pattern, content_lower):
+                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
+                return f"[NEMESIS PROTOCOL ACTIVO] Entropía detectada: {reason}"
+
+        # 2. Dynamic Antibody Check
+        for pattern, reason in cls._load_dynamic_antibodies():
+            if re.search(pattern, content_lower):
+                cls._rejection_history[pattern] = cls._rejection_history.get(pattern, 0) + 1
+                count = cls._rejection_history[pattern]
+
+                pulse_val = 0.8 + (min(0.2, count * 0.05))
+                ENDOCRINE.pulse(
+                    HormoneType.ADRENALINE,
+                    pulse_val,
+                    reason=f"Nemesis Antibody ({count}x): {reason}",
+                )
+
+                if conn:
+                    bus = AsyncSignalBus(conn)
+                    await bus.emit(
+                        "nemesis:rejection",
+                        payload={"reason": reason, "vector": pattern, "count": count},
+                        source="nemesis-protocol",
+                        project="system",
+                    )
+
+                if count > 5:
+                    logger.critical("💀 [NEMESIS] Metabolic loop detected on vector: %s", pattern)
+                    ENDOCRINE.pulse(HormoneType.CORTISOL, 0.4, reason="Metabolic loop Stress")
+
+                return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
+        return None
+
+
+    @classmethod
     def _check_dynamic_antibodies(cls, content_lower: str, db_path: str | None) -> str | None:
         """Helper to scan for dynamically generated antibodies."""
         for pattern, reason in cls._load_dynamic_antibodies():
@@ -105,6 +149,7 @@ class NemesisProtocol:
 
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
+
 
     @classmethod
     def _emit_rejection_signal(cls, db_path: str, pattern: str, reason: str, count: int) -> None:
