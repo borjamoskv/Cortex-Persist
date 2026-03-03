@@ -226,6 +226,20 @@
             .metric-item { border-right: none; border-bottom: 1px solid var(--border); }
             .metric-item:last-child { border-bottom: none; }
         }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            border: 2px solid rgba(204,255,0,0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+            vertical-align: text-bottom;
+            margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -601,6 +615,7 @@
         }
 
         // Fast Checkout Logic
+        let stripeCheckoutInstance = null;
         const checkoutOverlay = document.getElementById('checkout-overlay');
         const checkoutClose = document.getElementById('checkout-close');
         const checkoutName = document.getElementById('checkout-plan-name');
@@ -623,6 +638,10 @@
         checkoutClose.addEventListener('click', () => {
             checkoutOverlay.classList.remove('active');
             setTimeout(() => {
+                if (stripeCheckoutInstance) {
+                    stripeCheckoutInstance.destroy();
+                    stripeCheckoutInstance = null;
+                }
                 // Reset checkout form if closed
                 document.querySelector('.checkout-form').style.display = 'block';
                 checkoutSubmit.style.display = 'block';
@@ -650,7 +669,7 @@
                 return;
             }
 
-            checkoutSubmit.innerText = "Processing...";
+            checkoutSubmit.innerHTML = "Processing... <span class='spinner'></span>";
             checkoutSubmit.style.opacity = "0.7";
             checkoutSubmit.style.pointerEvents = "none";
             
@@ -685,7 +704,7 @@
                     checkoutContainer.id = 'stripe-checkout-container';
                     document.querySelector('.checkout-modal').appendChild(checkoutContainer);
                     
-                    const checkout = await stripe.initEmbeddedCheckout({
+                    stripeCheckoutInstance = await stripe.initEmbeddedCheckout({
                         clientSecret: data.client_secret,
                         appearance: {
                             theme: 'night',
@@ -700,7 +719,7 @@
                         }
                     });
                     
-                    checkout.mount('#stripe-checkout-container');
+                    stripeCheckoutInstance.mount('#stripe-checkout-container');
                 } else if (data.url) {
                     globalThis.location.href = data.url;
                 } else {

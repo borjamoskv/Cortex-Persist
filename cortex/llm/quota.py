@@ -169,7 +169,8 @@ class SovereignQuotaManager:
         now = time.time()
         with _db(self.db_path) as conn:
             row = conn.execute(
-                "SELECT tokens, last_update, acquired, throttled, timeouts FROM quota_bucket WHERE id = 1"
+                "SELECT tokens, last_update, acquired, throttled, timeouts "
+                "FROM quota_bucket WHERE id = 1"
             ).fetchone()
         current_tokens, last_update, acquired, throttled, timeouts = row
         current = min(self.capacity, current_tokens + (now - last_update) * self.refill_rate)

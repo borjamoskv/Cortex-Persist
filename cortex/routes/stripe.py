@@ -171,7 +171,8 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         if body.customer_email:
             session_kwargs["customer_email"] = body.customer_email
 
-        session = stripe.checkout.Session.create(**session_kwargs)  # type: ignore[reportAttributeAccessIssue]
+        # type: ignore[reportAttributeAccessIssue]
+        session = stripe.checkout.Session.create(**session_kwargs)
     except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
@@ -194,7 +195,8 @@ async def stripe_webhook(
     payload = await request.body()
 
     try:
-        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)  # type: ignore[reportAttributeAccessIssue]
+        # type: ignore[reportAttributeAccessIssue]
+        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)
     except stripe.SignatureVerificationError as exc:  # type: ignore[reportAttributeAccessIssue]
         raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
     except ValueError as exc:
@@ -226,7 +228,8 @@ async def stripe_webhook(
 
         try:
             stripe_obj = _get_stripe()
-            customer = stripe_obj.Customer.retrieve(customer_id)  # type: ignore[reportAttributeAccessIssue]
+            # type: ignore[reportAttributeAccessIssue]
+            customer = stripe_obj.Customer.retrieve(customer_id)
             email = customer.get("email", "")
 
             if email:

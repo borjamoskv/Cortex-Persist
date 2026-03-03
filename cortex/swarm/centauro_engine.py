@@ -61,7 +61,7 @@ class VirtualAgent:
         # Simulate execution
         await asyncio.sleep(self._execution_delay)
         # Mock response: return a deterministic result so Byzantine consensus can pass
-        return f"Result for {task_idx} by {self.agent_id}"
+        return f"Result for {task_idx} - Operation {prompt} completed"
 
 
 class CentauroEngine:
@@ -71,15 +71,15 @@ class CentauroEngine:
         self.consensus = ByzantineConsensus(tolerance_threshold=tolerance)
         self.agents: dict[str, VirtualAgent] = {}
 
-    def spawn_squad(self, size: int) -> list[VirtualAgent]:
+    def spawn_squad(self, size: int) -> dict[str, VirtualAgent]:
         """Spawn a squad of virtual agents."""
-        squad = []
+        squad = {}
         for _ in range(size):
             agent_id = f"legionnaire_{len(self.agents) + 1}"
             agent = VirtualAgent(agent_id)
             self.agents[agent_id] = agent
             self.consensus.register_node(agent_id, initial_reputation=1.0)
-            squad.append(agent)
+            squad[agent_id] = agent
         return squad
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
@@ -97,17 +97,15 @@ class CentauroEngine:
         logger.info("Spawned %d agents in %s formation.", len(squad), formation)
 
         # Simulate execution in parallel
-        tasks = []
-        for agent in squad:
-            tasks.append(self._agent_wrapper(agent, mission))
+        tasks = [self._agent_wrapper(agent, mission) for agent in squad.values()]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Collect proposals
         proposals = {}
-        for agent, result in zip(squad, results, strict=False):
+        for agent_id, result in zip(squad.keys(), results, strict=False):
             if not isinstance(result, Exception):
-                proposals[agent.agent_id] = result
+                proposals[agent_id] = result
 
         # Byzantine Consensus
         logger.info("Executing Byzantine Consensus with %d proposals...", len(proposals))
