@@ -14,25 +14,21 @@ Scanners:
   6. DeadCodeScanner         → unreachable code after return/raise
 """
 
-from __future__ import annotations
-
 import ast
 import logging
 import os
-from dataclasses import dataclass, field
 from pathlib import Path
 
 from cortex.mejoralo.constants import SKIP_DIRS
-
-logger = logging.getLogger("cortex.mejoralo.antipatterns")
-
+from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 from cortex.mejoralo._scanner_import_graph import run_graph_scanners as _run_graph_scanners
-
-# Scanners 1 & 2 (BroadException + AsyncIntegrity) → _scanner_visitors
-from cortex.mejoralo._scanner_visitors import (  # noqa: E402
+from cortex.mejoralo._scanner_visitors import (
     _AsyncIntegrityVisitor,
     _BroadExceptionVisitor,
 )
+
+__all__ = ["scan_antipatterns"]
+
 
 
 # Blocking calls that MUST NOT appear in async functions
@@ -61,51 +57,7 @@ _MAGIC_WHITELIST = {0, 1, 2, -1, 100, 0.5}
 _MAX_FAN_OUT = 12
 
 
-# ── Data Models ──────────────────────────────────────────────────────
-
-
-@dataclass
-class AntipatternFinding:
-    """A single antipattern detection."""
-
-    scanner: str  # Which scanner found it
-    severity: str  # "critical", "high", "medium", "low"
-    file: str  # Relative path
-    line: int  # Line number
-    message: str  # Human-readable description
-    fix_hint: str  # Suggested fix
-
-
-@dataclass
-class AntipatternReport:
-    """Aggregate report from all scanners."""
-
-    findings: list[AntipatternFinding] = field(default_factory=list)
-    files_scanned: int = 0
-    scanners_run: int = 0
-
-    @property
-    def total(self) -> int:
-        return len(self.findings)
-
-    @property
-    def critical_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == "critical")
-
-    @property
-    def high_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == "high")
-
-    def by_severity(self) -> dict[str, list[AntipatternFinding]]:
-        result: dict[str, list[AntipatternFinding]] = {}
-        for f in self.findings:
-            result.setdefault(f.severity, []).append(f)
-        return result
-
-    def score_penalty(self) -> int:
-        """Calculate penalty points for MEJORAlo score integration."""
-        penalties = {"critical": 15, "high": 8, "medium": 3, "low": 1}
-        return sum(penalties.get(f.severity, 1) for f in self.findings)
+logger = logging.getLogger("cortex.mejoralo.antipatterns")
 
 
 # ── Scanner 3: Magic Literals ────────────────────────────────────────
