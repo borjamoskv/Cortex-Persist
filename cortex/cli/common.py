@@ -3,6 +3,7 @@
 Prevent circular imports by centralizing base CLI objects.
 """
 
+from __future__ import annotations
 import asyncio
 
 import click
@@ -12,8 +13,6 @@ from rich.theme import Theme
 
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH
-from cortex.engine import CortexEngine
-from cortex.timing import TimingTracker
 
 # Theme and Console
 cortex_theme = Theme(
@@ -37,12 +36,16 @@ GLOBAL_CLI_TIMEOUT: float = 45.0  # Chronos Sniper: No CLI command hangs indefin
 
 
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
-    """Create an engine instance."""
+    """Create an engine instance (lazy import)."""
+    from cortex.engine import CortexEngine
+
     return CortexEngine(db_path=db)
 
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
-    """Create a timing tracker from an engine."""
+    """Create a timing tracker from an engine (lazy import)."""
+    from cortex.timing import TimingTracker
+
     return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 

@@ -348,7 +348,13 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
 
     async def close(self):
         if self._memory_manager:
-            await self._memory_manager.wait_for_background()  # type: ignore
+            try:
+                await asyncio.wait_for(
+                    self._memory_manager.wait_for_background(),  # type: ignore
+                    timeout=5.0,
+                )
+            except (asyncio.TimeoutError, Exception):
+                logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
         if self._persistence:
             await self._persistence.stop()

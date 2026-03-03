@@ -1,4 +1,5 @@
 import re
+import shlex
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -44,8 +45,9 @@ TOTAL_WEIGHT = sum(WEIGHTS.values())
 def run_command(cmd, cwd=None):
     """Run a command in a cross-platform way."""
     try:
-        is_shell = isinstance(cmd, str)
-        result = subprocess.run(cmd, shell=is_shell, capture_output=True, text=True, cwd=cwd)
+        if isinstance(cmd, str):
+            cmd = shlex.split(cmd)  # Safe tokenization instead of shell=True
+        result = subprocess.run(cmd, shell=False, capture_output=True, text=True, cwd=cwd)
         return result.returncode, result.stdout, result.stderr
     except (subprocess.SubprocessError, OSError) as e:
         return -1, "", str(e)

@@ -73,7 +73,7 @@ class PersistenceSupervisor:
                             **fact,
                         )
                 logger.info("PersistenceSupervisor: Flush complete.")
-            except Exception as e:
+            except (OSError, RuntimeError) as e:
                 logger.error("PersistenceSupervisor: Flush failed: %s", e)
                 # Re-queue on failure? Optional.
                 self._queue.extend(to_store)
@@ -86,7 +86,7 @@ class PersistenceSupervisor:
                 await self.flush(reason="heartbeat")
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (OSError, RuntimeError) as e:
                 logger.error("PersistenceSupervisor: Heartbeat loop error: %s", e)
 
     def _atexit_fallback(self):
@@ -103,5 +103,5 @@ class PersistenceSupervisor:
                     # We use store_sync or manual SQL
                     self._engine.store_sync(**fact)
             print("✅ [CORTEX] Emergency flush successful.")
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
             print(f"❌ [CORTEX] Emergency flush failed: {e}")

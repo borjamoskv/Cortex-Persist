@@ -19,8 +19,8 @@ def temp_db(tmp_path):
 def test_quota_manager_init(temp_db):
     mgr = SovereignQuotaManager(db_path=temp_db, capacity=10, refill_rate=1.0)
     stats = mgr.status()
-    assert stats["capacity"] == 10
-    assert stats["current_tokens"] == 10.0
+    assert stats.capacity == 10
+    assert stats.current_tokens == 10.0
 
 
 @pytest.mark.asyncio
@@ -31,7 +31,7 @@ async def test_quota_manager_acquire_and_refill(temp_db):
     assert await mgr.acquire(tokens=2) is True
 
     stats = mgr.status()
-    assert stats["current_tokens"] < 1.0  # Casi 0
+    assert stats.current_tokens < 1.0  # Casi 0
 
     # Consumir 1 token más (debería dormir ~0.1s para recargar 1 token a 10 t/s)
     start = time.time()

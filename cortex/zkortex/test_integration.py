@@ -112,12 +112,12 @@ def test_commitment_binding() -> None:
     """Verifica que el commitment es binding: no se puede forjar."""
     from cortex.zkortex.commitment import commit
 
-    secret = "El Berghain tiene 3 puertas de seguridad"
-    c, blinding = commit(secret)
+    plaintext = "El Berghain tiene 3 puertas de seguridad"
+    c, blinding = commit(plaintext)
 
-    assert c.verify(secret, blinding), "Commitment should verify correctly"
+    assert c.verify(plaintext, blinding), "Commitment should verify correctly"
     assert not c.verify("Otro secreto", blinding), "Commitment should NOT verify wrong secret"
-    assert not c.verify(secret, b"\x00" * 32), "Commitment should NOT verify wrong blinding"
+    assert not c.verify(plaintext, b"\x00" * 32), "Commitment should NOT verify wrong blinding"
     print("✓ test_commitment_binding PASSED")
 
 

@@ -45,7 +45,7 @@ class SovereignDecalcifier:
         while self._is_active:
             try:
                 await self.decalcify_cycle(await conn_func())
-            except Exception as e:
+            except (OSError, RuntimeError) as e:
                 logger.error("Decalcifier failure: %s", e)
             await asyncio.sleep(self.interval)
 
