@@ -72,6 +72,7 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
    CORTEX Trust Engine v7
         ├── 🧬 Biological Core (Autopoiesis/Endocrine)
         ├── 🛡️ Zero-Trust Guards (Connection/Storage)
+        ├── 🚀 SHIPPER-Ω (Automated Deployment Orchestration)
         ├── 🔗 SHA-256 hash-chained ledger
         ├── Merkle tree checkpoints
         ├── Reputation-weighted WBFT consensus

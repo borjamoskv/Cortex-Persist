@@ -94,10 +94,22 @@ class ImmuneBoundary:
         last_error_msg: str | None = None
         last_exception: Exception | None = None
 
+        import inspect
+        schema_dict = schema.model_json_schema()
+
         for attempt in range(max_retries):
             try:
-                # El LLM genera la respuesta, posiblemente usando el feedback del error anterior
-                raw_output = await generation_func(last_error_msg)
+                # Determinar cuántos argumentos acepta la función de generación
+                # Axioma 14: Determinismo Estructural (DFA schema)
+                sig = inspect.signature(generation_func)
+                params = len(sig.parameters)
+
+                if params >= 2:
+                    raw_output = await generation_func(schema_dict, last_error_msg)
+                else:
+                    # Por defecto pasamos el schema (Axioma 14)
+                    raw_output = await generation_func(schema_dict)
+
                 clean_output = _clean_llm_json(raw_output)
                 return schema.model_validate_json(clean_output)
 
@@ -113,6 +125,7 @@ class ImmuneBoundary:
                 )
             except (ValueError, TypeError) as e:
                 last_exception = e
+                # Si falló por argumentos (TypeError), informamos detalle
                 last_error_msg = f"Parsing failure: {str(e)}"
                 logger.warning(
                     "ImmuneBoundary: Parsing failure for %s (attempt %d/%d): %s",
@@ -124,6 +137,6 @@ class ImmuneBoundary:
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(
-            f"Immunity compromised after {max_retries} attempts "
-            f"validating {schema.__name__}. Final error: {last_exception}"
+            f"Falla la inmunidad química: comprometida tras {max_retries} intentos "
+            f"validando {schema.__name__}. Error final: {last_exception}"
         )

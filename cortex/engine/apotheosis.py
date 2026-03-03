@@ -19,6 +19,7 @@ from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.manifestation import manifest_singularity, transfigure_ui
 from cortex.engine.reflex import trigger_autonomic_reflex
 from cortex.engine.rem_cycle import REMCoordinator
+from cortex.immune.membrane import ImmuneMembrane, Verdict
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
 from cortex.signals.bus import SignalBus
@@ -54,6 +55,7 @@ class ApotheosisEngine:
         self._oracle = None  # ForgettingOracle (lazy init)
         self._trust = None
         self._notebooklm = None
+        self._immune = ImmuneMembrane()
 
         if cortex_engine:
             db_path = str(getattr(cortex_engine, "_db_path", ""))
@@ -161,7 +163,7 @@ class ApotheosisEngine:
             digest_path = Path("notebooklm_sources/master_digest.md")
             digest_path.parent.mkdir(parents=True, exist_ok=True)
             digest_path.write_text(digest)
-            
+
             # Sync to cloud if detected
             cloud_target = self._notebooklm.sync_to_cloud(digest_path)
             logger.info("📓 [NOTEBOOKLM] Digest synced to cloud: %s", cloud_target)
@@ -172,30 +174,35 @@ class ApotheosisEngine:
         """Evaluate Brier Score calibration during REM cycle (Ω₅)."""
         if not self._cortex:
             return
-        
+
+        await asyncio.sleep(0)  # Async-native (Ω₁)
         try:
             manager = getattr(self._cortex, "_memory_manager", None)
             if not manager or not hasattr(manager, "metamemory"):
                 return
-            
-            score = manager.metamemory.calibration_score()
-            if score == -1.0:
-                logger.debug("🧠 [METAMEMORY] Insufficient outcomes for Brier Score.")
-                return
 
-            if score > 0.25:  # Arbitrary drift threshold for over/under-confidence
-                ENDOCRINE.pulse(
-                    HormoneType.CORTISOL,
-                    +0.10,
-                    reason=f"CalibrationDrift:{score:.2f}",
-                )
-                logger.warning(
-                    "🧠 [METAMEMORY] High Brier Score (drift). Calibration: %.2f. Cortisol +10%%.",
-                    score,
-                )
-            else:
-                logger.info("🧠 [METAMEMORY] Calibration optimal. Brier Score = %.2f.", score)
-                ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.02)
+            # 1. Global Calibration Check (Ω₂)
+            global_score = manager.metamemory.calibration_score()
+            if global_score != -1.0:
+                if global_score > 0.25:
+                    ENDOCRINE.pulse(HormoneType.CORTISOL, +0.05, reason="GlobalCalibrationDrift")
+                    logger.warning("🧠 [METAMEMORY] Global Drift detected: %.2f", global_score)
+                else:
+                    logger.debug("🧠 [METAMEMORY] Global Calibration: %.2f", global_score)
+
+            # 2. Domain-Specific Monitoring (Ω₅) - Per Project
+            # Introspection of existing outcomes to detect specific domain ignorance
+            outcomes = getattr(manager.metamemory, "_outcomes", [])
+            projects = {o.project_id for o in outcomes} if outcomes else set()
+
+            for pid in projects:
+                p_score = manager.metamemory.calibration_score(project_id=pid)
+                if p_score > 0.35:  # Stricter threshold for domain drift
+                    ENDOCRINE.pulse(HormoneType.CORTISOL, +0.05, reason=f"DomainDrift:{pid}")
+                    logger.warning("🧠 [METAMEMORY] Domain Drift in [%s]: %.2f", pid, p_score)
+                elif p_score != -1.0:
+                    logger.debug("🧠 [METAMEMORY] Domain [%s] Calibration: %.2f", pid, p_score)
+
         except Exception as e:
             logger.error("[METAMEMORY] Audit failure: %s", e)
 
@@ -301,8 +308,29 @@ class ApotheosisEngine:
                     keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
                     for action in critical_actions:
                         if action.description not in self._ignited_tasks:
+                            # 🛡️ IMMUNE-SYSTEM-v1: Sovereign Arbiter (Ω₆)
+                            # Intercept signal before ignition
+                            context = {
+                                "reversibility_level": 1,  # Policy actions are R1
+                                "confidence_level": 5 if action.value > 0.95 else 4,
+                                "is_causal": True,
+                                "project": action.project,
+                                "action_type": action.action_type,
+                            }
+                            
+                            triage = await self._immune.intercept(action.description, context)
+                            
+                            if triage.verdict == Verdict.BLOCK:
+                                logger.critical("🚫 [IMMUNE] Action BLOCKED: %s", action.description)
+                                continue
+                            elif triage.verdict == Verdict.HOLD:
+                                logger.warning("⏸️ [IMMUNE] Action HOLD: %s. Justification: %s", 
+                                             action.description, triage.risks_assumed[0])
+                                continue
+
                             logger.warning(
-                                "🔥 [APOTHEOSIS] Proactive Healing: %s", action.description
+                                "🔥 [APOTHEOSIS] Proactive Healing: %s (Immune PASS: %.1f)", 
+                                action.description, triage.triage_score
                             )
                             self._ignited_tasks.add(action.description)
                             task = asyncio.create_task(keter.ignite(action.description))
@@ -390,9 +418,25 @@ class ApotheosisEngine:
                 import ast
                 source = py_file.read_text("utf-8")
                 ast.parse(source, filename=str(py_file))  # Real AST validation
-                logger.info("[APOTHEOSIS] Healing energy sink: %s", py_file.name)
                 reasons = ", ".join(e["type"] for e in entropy)
                 intent = f"Refactor {py_file.name} to eliminate: {reasons}."
+                
+                # 🛡️ IMMUNE-SYSTEM-v1: Sovereign Arbiter (Ω₆)
+                context = {
+                    "reversibility_level": 2,  # Refactoring/Heal is R2
+                    "confidence_level": 4,
+                    "target_path": str(py_file),
+                    "complexity_removed": len(entropy) * 1.0  # Heuristic
+                }
+                
+                triage = await self._immune.intercept(intent, context)
+                if triage.verdict == Verdict.BLOCK:
+                    logger.critical("🚫 [IMMUNE] Healing BLOCKED for %s", py_file.name)
+                    return
+                elif triage.verdict == Verdict.HOLD:
+                    logger.warning("⏸️ [IMMUNE] Healing HOLD for %s", py_file.name)
+                    return
+
                 await keter.ignite(intent)
             except SyntaxError:
                 logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
