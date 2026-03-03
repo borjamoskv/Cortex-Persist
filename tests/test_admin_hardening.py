@@ -109,35 +109,20 @@ class TestAuditLogging:
         assert any("AUDIT" in record.message for record in caplog.records)
 
 
-# ─── Self-Healing Hook Tests ─────────────────────────────────────────
 
 
-class TestSelfHealingHook:
-    """Verify the SelfHealingHook.trigger() records failures correctly."""
+class TestSelfHealingHookWiring:
+    """Quick inline checks for the middleware counter.
 
-    def test_trigger_increments_counter(self):
+    Full SelfHealing coverage lives in test_self_healing.py.
+    These are kept here only so the module has at least one non-client
+    test (avoids empty class warnings).
+    """
+
+    def test_trigger_basic(self):
         from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
 
         _HEAL_COUNTER.clear()
-        exc = RuntimeError("simulated failure")
-        SelfHealingHook.trigger(exc, {"endpoint": "test_endpoint"})
-        assert _HEAL_COUNTER.get("test_endpoint") == 1
+        SelfHealingHook.trigger(RuntimeError("boom"), {"endpoint": "basic"})
+        assert _HEAL_COUNTER.get("basic") == 1
 
-    def test_trigger_accumulates(self):
-        from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
-
-        _HEAL_COUNTER.clear()
-        for _ in range(3):
-            SelfHealingHook.trigger(ValueError("oops"), {"endpoint": "ep2"})
-        assert _HEAL_COUNTER["ep2"] == 3
-
-    def test_status_failure_triggers_heal(self):
-        """SelfHealingHook.trigger records a RuntimeError for the endpoint."""
-        from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
-
-        _HEAL_COUNTER.clear()
-        SelfHealingHook.trigger(
-            RuntimeError("boom"),
-            {"endpoint": "/v1/status"},
-        )
-        assert _HEAL_COUNTER.get("/v1/status") == 1
