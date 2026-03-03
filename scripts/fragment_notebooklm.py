@@ -230,7 +230,7 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
 
     # Summary
     print(f"\n{'─' * 60}")
-    print(f"📊 Domain Fragmentation Summary")
+    print("📊 Domain Fragmentation Summary")
     print(f"{'─' * 60}")
     total_facts = sum(s["facts"] for s in stats)
     total_words = sum(s["words"] for s in stats)
@@ -241,7 +241,7 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
     print(f"{'─' * 60}")
     print(f"  {'TOTAL':25s} │ {total_facts:5d} facts         │ "
           f"{total_words:7,} words │ {len(stats):3d} domains")
-    print(f"\n💡 Cada archivo < 500K words → safe para NotebookLM individual source")
+    print("\n💡 Cada archivo < 500K words → safe para NotebookLM individual source")
     print(f"📁 Output: {output_dir}/")
 
 

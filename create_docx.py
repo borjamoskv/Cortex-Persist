@@ -1,9 +1,9 @@
-import os
 from docx import Document
-from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.shared import Inches, Pt, RGBColor
+
 
 def set_cell_background(cell, color_hex):
     # Set cell background color
@@ -58,7 +58,7 @@ def create_document():
     ]
     
     doc.add_heading('Tabla de Contenidos', level=1)
-    for index, sec in enumerate(section_titles):
+    for _index, sec in enumerate(section_titles):
         p = doc.add_paragraph(sec)
         p.style = doc.styles['List Number']
         

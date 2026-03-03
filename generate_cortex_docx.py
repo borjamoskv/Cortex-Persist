@@ -3,14 +3,14 @@ import sys
 
 try:
     import docx
-    from docx.shared import Pt, RGBColor, Inches
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt, RGBColor
 except ImportError:
     print("Installing python-docx...")
     os.system(sys.executable + " -m pip install python-docx")
     import docx
-    from docx.shared import Pt, RGBColor, Inches
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Pt
 
 def create_document():
     doc = docx.Document()

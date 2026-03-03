@@ -1,0 +1,131 @@
+# 🧠 CORTEX — CORTEX-STRATEGY
+
+> Snapshot: 2026-03-03 | Facts: 25 | Projects: 12
+
+---
+
+## COMMERCE-Ω
+*5 hechos*
+
+### Bridge
+- v6_aesgcm:Y5xxCx4ZdDimIJGE7UNd3fGmnLeNJpheo2+nHO2Z3Osw7XMN0vDG+PI7VOK3Dr5DMZwAGqaEFMT2smFdXn6BYcKstwYLu/1vvbuGvar5HA8U75K49IGOCduWRQ9OCLDvZ9vUzXdhbXVrLByrAdluJEidr2yTWQc=
+
+### Decision
+- v6_aesgcm:Y/nSCGuZMmpnOiHwE7xiGoQz9xbYbvIp1BScis4fYjjtMtuDC/EfAdTyvWZVaEKe4AA4j29HFaxlrNLDoK5GWlvn+y/vdoZtPhZnb5+n3p5c3KoO5TbQspOJGRVRCLB1bk73IryzPjZ3H/jq50sOhuAhzilnSm1sr7grjlY3fMNFcQ==
+- v6_aesgcm:VaRJSy3V26qZi1Tvl0+gQZzDANCHAKJ6ILZuJYX+QlIiheZPszQbya1riSwBAOBotSI2zHZyYotAAvMHvrRqqf32kHSRH41lG82i3btkTtJ1+NzQB5qAeSZBJig6Qmc3FCd7hLuwkXS5Ng==
+
+### Error
+- v6_aesgcm:81urY26sMSB3pgrAeSFAFNONlpgnMqBEBR9O509gD71xURQ2UP5xs3UmU834emONJPt/cwlZAmT/gC5q8bXN3Q8hFQnPv4w6DKUv+h4yFPT2ehBbw7zEWHWprt3KcWgOCZ4zhgiK9Fkd/MizqVma3++eSZtNbn5mWYdhCVM=
+
+### Ghost
+- v6_aesgcm:u8svo2Xrii2qR4Xfe9k7mMHbyq1Z+IC3fMvaIv9kygVrZ+5NSMHUQhc28+KvK8aSPUF/PmB9c5Dr1AQLUbI1WG5ROPG343qOPm5cfOmKjC85Hrzj6kY6+tQ2wby/Zc2fVdcouRATBCcv5sijtsEwY5DEE2wI+sk=
+
+---
+
+## CortexSovereignWeb
+*3 hechos*
+
+### Bridge
+- v6_aesgcm:XKZX/t67AVod342GNKSKkZZJeqZtyYrz7VZdOlCywvdQPYG/nlbLEJT+jTbyZMp4BJANjK6OxgEIDY5dn/jz/JDsFxCigTJ2XBEMcBKV/LZ0NzqRNP86QsjMo6dFHZbUPptnPR1k3iGHYsqyfK6U9zjMUS7py0JTnqkBbQSRzLHVgJ3olqpXxrK6KSnLNo8g1JLgqch8G8W9UaGSXjzf/AWyb8vLl3sx6SHm5e8DI3OKttCi/q9ITMRX+KRODIp9P7DnSjz0hx9rfQQPfqv5+aU=
+
+### Decision
+- v6_aesgcm:tC3+McwgnLBFyP7ZE8slZaAI0GSsFMt3KyAsxJ1sTTsvJhV/SPfmotuWj81W/SUAf1ZY+YAHxSsgKDEN9E+35FtZqFc1Jfjmv1bgqg6hKNOjcXifqagUSNHvnrgrM7pB8aUYNrTrD+476NFi98JiH15/nhaGY9XpMYZAo9RXqMOdZ5Ukea2dRuXksHPbon5dhd1XP1AGwMu3hODE/ZpwUBgjkU4O7Ko1xIecvNCzyZxtffQZag==
+
+### Error
+- v6_aesgcm:3o7HN50VM7DmOe2rxfHw3wf4V2lQ59pQ16CRScZRuvOb+Gvdovah9GfBk5yq81nrr67dRNku58c5n83+jyoC18qHQvYGqnGUcjYB42T2B/cThdrZk3TLf3yRu5FDln7mIlt0LzlT9zSQ1LJDr8GMvL/WavACEoApsyKPd/iwFDoAoN50Hj95q0YTulhdktIC0cgtq1JSmMiH7/1mP4J3rfP1wP0dFu8pTKQ=
+
+---
+
+## Pricing
+*1 hechos*
+
+### Decision
+- v6_aesgcm:XH4tW5iotl6AT+h8oLq7/A8sqetGa6pMkm3cE9ubT+Kop/5dJsQakTEbCZN3B561JZOgPMVKEhljlcNHTK2VbiJa9ZcY0cBdU1FzmhxfWz0DLYrkUMykCUygRcyz2Y8lolreSWWeqdxzHfZuwIoI7pjpLOBMCbEUdPNGt+Fpw312YjHp5siWQ+vKKe9hrVJ2cnfd7mJYan5XpUTlD8kGF/mg6FeKW/iIxgpRAx14rQQoapDtLNLrIiih8QJfHCIbDpK+ZsU=
+
+---
+
+## ROI_LABOR
+*3 hechos*
+
+### Decision
+- v6_aesgcm:tcl5PbTXH1uR2tLVWMm+lrt5cd2t9Uv4TRiW+Yp9ACo7Z9d+14xNQ6KcPnKE2viU+JdNgDDSoj5xrhEryqKOp8B4mPQZ2IcSCDfweGnZHsAmQUAkquOCdfZHlKEbgQjv/PO9g/P/VEdDDDI2VLmdXNR+zMEXAasCqtbL2xx8z2rLEffi1HSa+ByDK38BjJq3zRAiu1MCKngdavawj0Hkc1Nv
+
+### Error
+- v6_aesgcm:oKYrLPXPbJFCONJHq/3wmR7WUsnU/xGkukEdlgrs980L9YVh92FPdSz/HLQfNDI9FnEwqjlrQhBy1j1Q4VFQm1tI8wo3nKfxvS92OKmc9ziOSOV68FGIK6Qk43Nowitu7sEOtMs8/N0HAev4BogOk8ZL8dLyxfhyFfEmYDaVb4UhjxagbiM4bZ/aA3SmVMm1ZmtlPFBpBdfmEjqRPL75XNKhu5fC
+
+### Knowledge
+- v6_aesgcm:pZmY7tJHqmRlwcvC66nHLUv/UdLONsFh0KxGcEetJoWlcA+WMYVclRGDFdQvLwn1bRCu2TwRqUzY9f+SdScgA+UVPnFWVbEbTI3CXtxbgIIX5tGFZPMDHhLK4WY8Erb4KfiWaUZH
+
+---
+
+## cortex-landing
+*2 hechos*
+
+### Decision
+- v6_aesgcm:/GAVVipeYsc+QTss36Ww2x4YNrwVV771g/QPj//CowoKu31oqgdQYDXcP1sM1xgHk2NYbiq5X8S2k6b3cKP/YDWuJAcjlw9Pgdhd0cJwjtJcheeNcsxB6BVE57I4s1OO/C44ie7LseWzW7We
+- v6_aesgcm:W/bUSCHvPUql6z3d3U8JrLp+ablj6hReJTBvQFOXzcyQaGkvZS193IK3h4sUtzXrwM8OAmHwi8MX4M32UqAc7GXE5hh805gRykz6/b6iK/0v13SmwEJkVlwMR4I8TXpPI7OhS4o2rSWM2BMoMFNbqarBZKS4lkJZrIyqPvKZPHiSZ+UZMJFx7GnceYoKq++0xffSmmk/Ytq1EXwNrVzpWB1hxGjfrfFUKvVH08FjeM7nrhtFyCLPSnVY9YBprNnGZGG6pBjZhxG3eIcjm0x9QC+dtukh2x68kqd28FtiSbmsjDZVMI/IAQauxu4ilZz7m89FFhaiThMU63DB2qScNLpZOhaTOoW4aeh2MsUKyWykzkcAYd9Uy8ejay6Z/fGck5/X2hqrnAx9qF+avgiMEFUjbLTQ8jKuDSWte8Sf4DJv25C4BUYMrBxA88nckvPXuktOEelDtlJ91vvH2a/HDb5n/CgDAabpoQk4T7HVQlEaYzWe0ycLXlMkMZdofbhM2T2RsQvWNIZ6rLeH9oZtU9u5
+
+---
+
+## cortex-sovereign-web
+*2 hechos*
+
+### Decision
+- v6_aesgcm:GSmHq0WGq1DIeDXtk39kSky64MAsWBm4Ixje2OrouC84W3vftd8rMTHcZfquQ5jizR4rtYEmbyamcFWMDAJ5UUsvEi05GgemjYFCOld9Ayb5S2kL3K+gWp6W/jw/49JPL9FMA2UW/0vlAHbHSoWqnHskzMsaOm0L0DTv/SF4kZrmhWFyOxbCbtsBcwokTRIqegc7SQt5/75ZApidKgtYrDavlkbI4LGeFylzf92ZHOPm0SuFPgkr3qY8b4IjkEwcr6HBM+70K5TaW5gVs9hIWW7tIOl7v5bOaAn7
+- v6_aesgcm:Bc3MTQfpG8q/lDyBHyZSLbcyaMDSEwDZNDu5dcMEHMW5rcWsuduqtuwUl/UdxUkClGziYrEm2KHYBUmBF3Xoe6INrXSgJuuXdbObIA45I+/b2yaCfT0bkWmXfDXgddLdEfIRdB/3X+Yuw300KOV5XycO1OI0tZ/SDJCZRX/Eny8uhqo5yaaYSoVIvVfnUj+H88Sxqx5shHFBNMbRtGfe1jSG4auPT8thCC7udoyKeEji+MCh9uL0lEdPJCOsf/pIkrqEf+4G7Gdr5VATQn55VfJ0QGgn0JMtQrp4
+
+---
+
+## landing
+*1 hechos*
+
+### Decision
+- v6_aesgcm:91Hy4smUyE3i968yDEbwjULWhyBPdb/GlotLDJ4ODmuRinxITBQJhuRQzrB4fcAWBkZ6UfEeyK0HKTDzYWX0WJjnjIzzumisay7raJBq60o9TuyN38imkNd28AooSbcZJlvzeXwrz19oxFdBNcvft61xExXz8/BlRcJNzUfWXfdxz9PpOfATbyLsYErak/1Lg3vYTMZz6yR7WI121a8dwa7uIuOKcsJQfC3QHy/bv9oD6F06lmYIVx+JtYee3ceAeafycdH7yZbzB751eGTyzTkD1Y9vfSRtc3Ip/msqUxor7TYEl8XKUoQI8vEUFxGoL+zlU+Ylw/OE4BMZmFPOvms+oww7cxJh0UnifdFsiqRWcOxDwn6ZQHehEOjgBUOamriwWXbd2ySDAYKi7vved/Se4YaS6itKX2dhuo+sgR3oFYoz2l1S2Pj+JFduqKt8i6aQjZwuSEStMIcKdpM=
+
+---
+
+## landing-apotheosis
+*1 hechos*
+
+### Decision
+- v6_aesgcm:c214sZmTZKlXqdDeyI8HgopD3E36AAIy/E3cNEAsQKR1SBNbsX68Ql3KEADI0TyDeS69hUcC0oDLa5xMwf5ox2jWbnBlIlZUtNVgHbBHR8xUY3KZWb5K318kARlHGi3FnF20J7yo5B2U9DWHTMc9C6Ll5kN7RxNqpqgRhzSeB0pyc1jw8s1LKQtce5BZFMKkOpYbpMSd0Gf0bqsMfxfbA4RuNMoSZ1u47xxoG5Z+rbl9CRkiQu8tX+BfFWVtXw5J39KF52Ers3btUWwzTy/gzmqNQJHarhea3PQgPrkLcOixpUwhYUBslxQfAQLg9oB9VydzWs3kNOqkPgcNtNZ238NVgNXADnd67S0=
+
+---
+
+## moneytv
+*2 hechos*
+
+### Decision
+- v6_aesgcm:sjrDnJhwIBWzpkqCrVBfPGDuxZaXVMuq86Q6OBujF/wnokMaH0rmRCkbuemf9LE4altmNb8MPgXQyBNmUVF5537ou5QBrL9kfp/hmFTDKtqPNQlSaQVr4Lz1d+f45ZPIbOlql2wOjo0tQw8SrJFmpEh5GYFQzgYl3XrlljwdD1v7AlSf
+- v6_aesgcm:KsZzUENjR4nePGZKsjqe8lxXpUr7TSCGQYxKckbx/y0OKHjaF5aBpuzk/S4K0gI4RKYKsLs7wrGFFEfXO9OXmeeKmCElw4hyDPUfeyLw7xDlu3O3TW43k7bT+9+vnv5TaVWWT4e22jB57Nufx+xSDmGV02/kJA7y9b3v5B2n7whWXHvfJRvaTFHen3SfLRcpUYsTKzUDicdcj6aKxbf/yz1RUOyo78e4srBq6/eFXhtZ7aUz6mD4vJtse5hQQZO75Vwx
+
+---
+
+## moneytv-1
+*3 hechos*
+
+### Archived_ghost
+- v6_aesgcm:Xg4rUGI58YBa/ATQBeYRQZELKwKVHhjP2NYNgog4/2OEpD1tH4Oz6XK5VU7BGzczHDDtg4nQEYfqSPpnOFyhQoseETPyFjxA/sgUuXKSs1LEi9qUtstvGN6gxgmCe105xN4ycf4wHypsZTA9wUSW6Ep7l3SUAT5qimqglZgdWCG31zYOO/k0L0LgFHbAU5qnNFBBDjkjGm1b7edLFRq1wbQOJtw=
+
+### Decision
+- v6_aesgcm:QIKSwnGwXJKwmNkPpsl1xOwMq3IVzzROJePvOjqWk2TMtTNaub3o9CIYDo+z96kfMTclyfYEuCdX/BGjE5Bo4ePkvyXO+mMZYU5/ejr2Mxg0E4MirBcFU1CiZN3zn1e6vcX3hc9GoT7p/Xz9ZC2O/ZfYjbKmdquUdTw5x4gJU0rYVM0YHSb8iqdCNRHpNuX5EYiiWQHzi6oARJxZuIZhqPsV6EonbHztfWwvpeSrqSOVpkloUgr5axNMFg==
+- v6_aesgcm:VPngZCQULTJRohX1z5m3ChMG5RkbIAxu0Y2wqPHl8gQea0UXMnjRW5wjlsVkq8ppn+P8O3fDpndHSwWfgEGM3SpcNbQKWz+7BEU4lpDd/zA/VcHIZLsIX1QdxVhUmFA=
+
+---
+
+## moskvbot
+*1 hechos*
+
+### Knowledge
+- v6_aesgcm:DhCAGhNgrCrId3iogT9TNDbMtb5to6M1U8zt4oaLUGyWgYRAfNjd32jiO+kiJgUNV0KHDiTIe82Ulbh8LXtXGxb57nvoJA== `agent:moskv-1`
+
+---
+
+## moskvbot-test
+*1 hechos*
+
+### Knowledge
+- v6_aesgcm:m4U+xVP5rbhl/dcIwZRDT7aRO8JtYl/E3+X/lv6deHR+sdceXTDwvmdL5j2dpwzOcRtf3vhfpfYW9+kK6FTsras= `agent:moskv-1`
+
+---
+
