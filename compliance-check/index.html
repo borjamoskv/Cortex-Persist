@@ -982,14 +982,13 @@
   <header class="header">
     <div class="logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0A0A0A"/>
-          <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.6"/>
-          <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.6"/>
-          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0A0A0A" opacity="0.3"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L4 7V17L12 22L20 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
       </div>
-      <span class="logo-text">CORTEX<span>.</span>AI</span>
+      <div class="logo-text"><span>CORTEX</span> COMPLIANCE</div>
+    </div>
+    <div id="live-status" style="position:fixed; bottom:20px; right:20px; z-index:1001; background:var(--surface-1); border:1px solid var(--border); border-radius:100px; padding:6px 12px; font-size:10px; font-family:'JetBrains Mono', monospace; color:var(--text-muted); display:flex; align-items:center; gap:8px; opacity:0; transition:opacity 0.6s;">
+        <div id="live-dot" style="width:6px; height:6px; border-radius:50%; background:var(--text-muted);"></div>
+        <span>SOVEREIGN LINK: <span id="live-state">OFFLINE</span></span>
     </div>
   </header>
 
@@ -1784,6 +1783,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // BOOT
 init();
+
+// --- SOVEREIGN REPORTER SSE CLIENT (Ω-Dynamic) ---
+(function() {
+  const statusEl = document.getElementById('live-status');
+  const stateEl = document.getElementById('live-state');
+  const dotEl = document.getElementById('live-dot');
+  
+  function updateLiveUI(metrics) {
+      if (!metrics) return;
+      
+      // Update global stats if they exist in the UI
+      const totalFactsEl = document.getElementById('stat-total-facts');
+      if (totalFactsEl) totalFactsEl.textContent = metrics.total_facts;
+      
+      const integrityEl = document.getElementById('stat-integrity');
+      if (integrityEl) integrityEl.textContent = metrics.architecture_integrity + '%';
+      
+      // Anomaly Signal Detection (Ω-Axiom 3)
+      if (metrics.signals && metrics.signals.sap_anomaly) {
+          document.body.style.boxShadow = 'inset 0 0 100px rgba(255, 59, 59, 0.4)';
+          dotEl.style.background = 'var(--red)';
+          dotEl.style.boxShadow = '0 0 10px var(--red)';
+          setTimeout(() => {
+              document.body.style.boxShadow = '';
+          }, 400);
+      } else {
+          dotEl.style.background = 'var(--lime)'; 
+          dotEl.style.boxShadow = '0 0 10px var(--lime)';
+      }
+      
+      console.log('⚡ SSE Emission:', metrics);
+  }
+
+  function connectSSE() {
+      const source = new EventSource('http://localhost:7070/stream');
+      
+      source.onopen = function() {
+          statusEl.style.opacity = '1';
+          stateEl.textContent = 'ESTABLISHED';
+          stateEl.style.color = 'var(--lime)';
+      };
+      
+      source.onmessage = function(e) {
+          try {
+              const metrics = JSON.parse(e.data);
+              updateLiveUI(metrics);
+          } catch(err) { console.error('SSE Error:', err); }
+      };
+      
+      source.onerror = function() {
+          stateEl.textContent = 'LINK_LOST';
+          stateEl.style.color = 'var(--red)';
+          dotEl.style.background = 'var(--text-muted)';
+          dotEl.style.boxShadow = 'none';
+          source.close();
+          setTimeout(connectSSE, 5000); // Retry sync
+      };
+  }
+
+  // Auto-connect to Sovereign Reporter
+  setTimeout(connectSSE, 1000);
+})();
 
 </script>
 </body>
