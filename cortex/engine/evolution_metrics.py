@@ -4,12 +4,9 @@ import hashlib
 import json
 import logging
 import sqlite3
-import time
-from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.engine.evolution_types import DomainMetrics, Mutation
-
 
 logger = logging.getLogger("cortex.evolution.metrics")
 

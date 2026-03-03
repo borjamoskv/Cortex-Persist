@@ -13,11 +13,9 @@ from cortex.engine.evolution_metrics import CortexMetrics
 from cortex.engine.evolution_types import (
     DomainMetrics,
     ImprovementStrategy,
-    Mutation,
     SovereignAgent,
     SubAgent,
 )
-
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES

@@ -15,12 +15,18 @@ if TYPE_CHECKING:
     from cortex.memory.models import CortexFactModel
 
 __all__ = [
+    "KnowledgeGapException",
     "retrieve_episodic_context",
     "apply_rrf",
     "fact_to_dict",
 ]
 
 logger = logging.getLogger("cortex.memory.retrieval")
+
+
+class KnowledgeGapException(Exception):
+    """Raised when Metamemory FOK evaluates retrieval potential as too low to proceed."""
+    pass
 
 
 def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
@@ -113,6 +119,19 @@ async def _fetch_dense_results(
         return []
 
 
+def apply_retrieval_schemas(manager: CortexMemoryManager, query: str) -> str:
+    """Apply schema retrieval biases to modify search focus top-down."""
+    schema_engine = getattr(manager, "_schema_engine", None)
+    if not schema_engine:
+        return query
+        
+    schema = schema_engine.match_schema(query)
+    if schema:
+        logger.debug("Applied Schema '%s' to retrieval query", schema.name)
+        return schema_engine.apply_retrieval_schema(schema, query)
+    return query
+
+
 async def retrieve_episodic_context(
     manager: CortexMemoryManager,
     tenant_id: str,
@@ -131,6 +150,9 @@ async def retrieve_episodic_context(
     if not query:
         return []
 
+    # 0. Apply Top-Down Retrieval Schema Bias
+    query = apply_retrieval_schemas(manager, query)
+
     dense_results: list[CortexFactModel] = []
     hdc_results: list[CortexFactModel] = []
 
@@ -143,6 +165,23 @@ async def retrieve_episodic_context(
         dense_results = await _fetch_dense_results(
             manager, tenant_id, project_id, query, max_episodes, layer=layer
         )
+
+    # 4. Metamemory Gate: Abort if FOK is too low (Knowledge Gap)
+    candidate_engrams = hdc_results if hdc_results else dense_results
+    if hasattr(manager, "metamemory") and candidate_engrams:
+        query_embedding = await manager._encoder.encode(query)
+        judgment = manager.metamemory.judge_fok(query_embedding, candidate_engrams)
+        threshold = getattr(manager.metamemory, "_fok_threshold", 0.3)
+        if judgment.fok_score < threshold:
+            logger.warning(
+                "Retrieval aborted: KnowledgeGapException (FOK=%.2f < %.2f)",
+                judgment.fok_score,
+                threshold,
+            )
+            raise KnowledgeGapException(
+                f"Metamemory FOK too low ({judgment.fok_score:.2f}). "
+                "Aborting retrieval to prevent local hallucination."
+            )
 
     if hdc_results and dense_results:
         return apply_rrf(dense_results, hdc_results, limit=max_episodes)

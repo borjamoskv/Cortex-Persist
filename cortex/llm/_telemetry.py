@@ -1,12 +1,10 @@
 import json
 import logging
 import sqlite3
-import time
 from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.llm._models import CascadeEvent, CascadeTier
-
 
 logger = logging.getLogger("cortex.llm.telemetry")
 

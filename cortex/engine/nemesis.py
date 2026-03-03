@@ -1,7 +1,6 @@
 import datetime
 import logging
 import re
-import sqlite3
 
 from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType

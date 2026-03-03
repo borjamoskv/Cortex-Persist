@@ -18,6 +18,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
+from cortex.utils.errors import CortexError
+
 logger = logging.getLogger("cortex.llm.boundary")
 
 T = TypeVar("T", bound=BaseModel)
@@ -52,9 +54,9 @@ def _clean_llm_json(raw: str) -> str:
     clean = clean.strip()
 
     # If still not starting with { or [, hunt for first JSON-like char
-    if clean and clean[0] not in ("{{", "["):
+    if clean and clean[0] not in ("{", "["):
         for i, ch in enumerate(clean):
-            if ch in ("{{", "["):
+            if ch in ("{", "["):
                 clean = clean[i:]
                 break
 
@@ -119,8 +121,6 @@ class ImmuneBoundary:
                     max_retries,
                     str(e),
                 )
-
-        from cortex.utils.errors import CortexError
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(

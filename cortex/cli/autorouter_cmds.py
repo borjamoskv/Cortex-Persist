@@ -58,15 +58,22 @@ LOG_FILENAME = "router_daemon.log"
 LOG_PATH = CORTEX_DIR / LOG_FILENAME
 
 
-def _run_daemon(args: list[str]) -> int:
-    """Ejecuta el daemon script con los argumentos dados."""
+def _run_daemon(args: list[str]) -> int | None:
+    """Ejecuta el daemon script con los argumentos dados.
+
+    Returns:
+        Exit code from the daemon process, or None if the daemon script
+        was not found (error already reported via err_skill_not_found).
+    """
     if not DAEMON_SCRIPT.exists():
         err_skill_not_found("AUTOROUTER-1", str(DAEMON_SCRIPT))
+        return None
     try:
         result = subprocess.run(["python3", str(DAEMON_SCRIPT)] + args, check=False)
         return result.returncode
     except (OSError, ValueError, KeyError) as e:
         err_execution_failed(f"python3 {DAEMON_SCRIPT}", str(e))
+        return None
 
 
 @click.group(name="autorouter")
@@ -85,9 +92,10 @@ def start(background):
     if background:
         console.print("[bold cyan]🚀 Arrancando AUTOROUTER-1 en background...[/]")
         CORTEX_DIR.mkdir(parents=True, exist_ok=True)
+        log_handle = LOG_PATH.open("a")  # Popen takes ownership; closed on process exit
         subprocess.Popen(
             ["python3", str(DAEMON_SCRIPT)],
-            stdout=open(LOG_PATH, "a"),
+            stdout=log_handle,
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
