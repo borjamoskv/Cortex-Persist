@@ -35,7 +35,7 @@ def collapse_namespaces():
         
         for table in tables_to_update:
             # Verificar si la tabla existe
-            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}';")
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
             if not cursor.fetchone():
                 logger.warning(f"  ⚠️ Tabla '{table}' no existe, omitiendo.")
                 continue
@@ -52,7 +52,7 @@ def collapse_namespaces():
         # Si no, se actualizan como tablas normales si el esquema lo permite.
         fts_tables = ["facts_fts", "episodes_fts"]
         for fts_table in fts_tables:
-            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{fts_table}';")
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (fts_table,))
             if cursor.fetchone():
                  for target in TARGET_PROJECTS:
                     # En FTS5, esto a veces requiere un 'delete' y luego 'insert' o 'rebuild'

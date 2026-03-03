@@ -53,7 +53,7 @@ class ManifoldDaemon:
                     self.clients -= dead_clients
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (OSError, RuntimeError) as e:
                 logger.error("Daemon metric generation error: %s", e)
                 await asyncio.sleep(1.0)
 

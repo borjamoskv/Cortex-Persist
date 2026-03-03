@@ -13,7 +13,7 @@ import pytest
 from cortex.database.pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 from cortex.migrations.core import run_migrations_async
-from cortex.utils.errors import FactNotFound
+
 
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool
@@ -112,9 +112,10 @@ async def test_engine_crud(engine):
     assert fid > 0
     print(f"Fact stored with ID: {fid}")
 
-    # Retrieve
+    # Retrieve via get_fact (QueryMixin canonical API)
     print(f"Retrieving fact #{fid}...")
-    fact = await engine.retrieve(fid)
+    fact = await engine.get_fact(fid)
+    assert fact is not None
     assert fact["content"] == "Hello Async World"
     assert fact["project"] == "test-proj"
     print("Fact retrieved successfully")
@@ -126,13 +127,14 @@ async def test_engine_crud(engine):
     assert results[0].fact_id == fid
     print("Search successful")
 
-    # Delete
-    print(f"Deleting fact #{fid}...")
-    assert await engine.delete_fact(fid)
-    print("Fact deleted")
+    # Deprecate (soft-delete)
+    print(f"Deprecating fact #{fid}...")
+    await engine.deprecate(fid, "test-proj")
+    print("Fact deprecated")
 
-    # Verify missing
-    print("Verifying fact is missing...")
-    with pytest.raises(FactNotFound):
-        await engine.retrieve(fid)
+    # Verify deprecated — get_fact may return None or a row with valid_until set
+    print("Verifying fact is deprecated...")
+    fact_after = await engine.get_fact(fid)
+    assert fact_after is None or fact_after.get("valid_until") is not None
     print("--- Engine CRUD test PASSED ---")
+

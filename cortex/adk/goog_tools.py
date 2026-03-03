@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from cortex.cli.notebooklm_cmds import _detect_cloud_sync
+from cortex.cli.notebooklm_data import _detect_cloud_sync
 
 logger = logging.getLogger("cortex.adk.goog_tools")
 

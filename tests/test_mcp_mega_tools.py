@@ -1,13 +1,31 @@
+"""Tests for CORTEX MCP Mega Poderosas tools (production implementations)."""
+
+import os
+import tempfile
+
 import pytest
 
+from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES, CREATE_TRANSACTIONS
 from cortex.mcp.server import create_mcp_server
 from cortex.mcp.utils import MCPServerConfig
 
 
 @pytest.fixture
-def mcp_server():
-    cfg = MCPServerConfig(db_path=":memory:")
-    # We need to ensure the schema is initialized for the tests
+def mcp_server(tmp_path):
+    """Create MCP server with schema-initialized SQLite DB."""
+    db_path = str(tmp_path / "test.db")
+
+    # Initialize schema so tools can query real tables
+    import sqlite3
+
+    conn = sqlite3.connect(db_path)
+    conn.executescript(CREATE_FACTS)
+    conn.executescript(CREATE_FACTS_INDEXES)
+    conn.executescript(CREATE_TRANSACTIONS)
+    conn.commit()
+    conn.close()
+
+    cfg = MCPServerConfig(db_path=db_path)
     server = create_mcp_server(cfg)
     return server
 
@@ -23,51 +41,115 @@ async def test_mega_tools_registration(mcp_server):
 
 
 @pytest.mark.asyncio
-async def test_reality_weaver_output(mcp_server):
-    """Verify reality_weaver output structure."""
+async def test_reality_weaver_empty_project(mcp_server):
+    """Reality Weaver should handle empty projects gracefully."""
     result = await mcp_server.call_tool(
-        "cortex_reality_weaver", {"intent": "test auth", "project": "test_proj"}
+        "cortex_reality_weaver", {"intent": "test auth", "project": "nonexistent_proj"}
     )
     text = "".join(str(getattr(c, "text", c)) for c in result)
 
     assert "REALITY WEAVING" in text.upper()
-    assert "test_proj" in text
-    assert "Path" in text
+    assert "nonexistent_proj" in text
+    assert "No facts found" in text
+    assert "Orchestration Layer" in text
 
 
 @pytest.mark.asyncio
-async def test_entropy_cracker_output(mcp_server):
-    """Verify entropy_cracker output structure."""
-    result = await mcp_server.call_tool("cortex_entropy_cracker", {"path": "cortex/engine"})
+async def test_reality_weaver_with_data(mcp_server, tmp_path):
+    """Reality Weaver should report facts when DB has data."""
+    import sqlite3
+
+    db_path = str(tmp_path / "test.db")
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        "INSERT INTO facts (project, content, fact_type, valid_from, is_tombstoned) "
+        "VALUES (?, ?, ?, datetime('now'), 0)",
+        ("myproj", "Chose PostgreSQL over MySQL", "decision"),
+    )
+    conn.execute(
+        "INSERT INTO facts (project, content, fact_type, valid_from, is_tombstoned) "
+        "VALUES (?, ?, ?, datetime('now'), 0)",
+        ("myproj", "TODO: add retry logic", "ghost"),
+    )
+    conn.commit()
+    conn.close()
+
+    result = await mcp_server.call_tool(
+        "cortex_reality_weaver", {"intent": "expand API", "project": "myproj"}
+    )
     text = "".join(str(getattr(c, "text", c)) for c in result)
 
-    assert "ENTROPY CRACKER" in text.upper()
-    assert "Density Score" in text
-    assert "MEJORAlo" in text
+    assert "REALITY WEAVING" in text.upper()
+    assert "Knowledge Base" in text
+    assert "decision" in text.lower()
+
+
+@pytest.mark.asyncio
+async def test_entropy_cracker_real_scan(mcp_server):
+    """Entropy Cracker should scan real Python files and return metrics."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_file = os.path.join(tmpdir, "example.py")
+        with open(test_file, "w") as f:
+            f.write(
+                "class Foo:\n"
+                "    def bar(self):\n"
+                "        return 42\n"
+                "\n"
+                "def baz():\n"
+                "    pass\n"
+            )
+
+        result = await mcp_server.call_tool(
+            "cortex_entropy_cracker", {"path": tmpdir}
+        )
+        text = "".join(str(getattr(c, "text", c)) for c in result)
+
+        assert "ENTROPY CRACKER" in text.upper()
+        assert "Files Scanned:" in text
+        assert "Density Score:" in text
+        assert "Mean Entropy:" in text
+
+
+@pytest.mark.asyncio
+async def test_entropy_cracker_invalid_path(mcp_server):
+    """Entropy Cracker should reject invalid paths gracefully."""
+    result = await mcp_server.call_tool(
+        "cortex_entropy_cracker", {"path": "/tmp/nonexistent_dir_xyz_123"}
+    )
+    text = "".join(str(getattr(c, "text", c)) for c in result)
+    assert "not a valid directory" in text
+
+
+@pytest.mark.asyncio
+async def test_entropy_cracker_empty_dir(mcp_server):
+    """Entropy Cracker should handle dirs with no Python files."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result = await mcp_server.call_tool(
+            "cortex_entropy_cracker", {"path": tmpdir}
+        )
+        text = "".join(str(getattr(c, "text", c)) for c in result)
+        assert "No Python files" in text
 
 
 @pytest.mark.asyncio
 async def test_temporal_nexus_output(mcp_server):
-    """Verify temporal_nexus output structure."""
-    # Manual schema initialization for temporal_nexus if it's using the pool
-    # We can't easily get the pool from FastMCP instance, but we can mock or
-    # use the fact that the tools are available and we can register one that inits?
-    # Actually, let's just make the tool resilient to empty DB by mocking the error or
-    # just accepting that in unit tests we might need a better fixture.
+    """Temporal Nexus should return real metrics from DB."""
+    result = await mcp_server.call_tool("cortex_temporal_nexus", {"project": ""})
+    text = "".join(str(getattr(c, "text", c)) for c in result)
 
-    # I'll try to use the actual engine init if I can.
+    assert "TEMPORAL NEXUS" in text
+    assert "Active Facts:" in text
+    assert "Ghost Density:" in text
+    assert "Temporal Drift" in text
 
-    # We'll just skip the temporal nexus DB call for now if it's too hard to init,
-    # or I will just use a try-except in the tool itself to be more "130/100" resilient.
 
-    # Wait, I can probably just call ctx.ensure_ready() then run schema?
-    # I'll update the tool to be more resilient too.
+@pytest.mark.asyncio
+async def test_temporal_nexus_with_project(mcp_server):
+    """Temporal Nexus should filter by project."""
+    result = await mcp_server.call_tool(
+        "cortex_temporal_nexus", {"project": "cortex"}
+    )
+    text = "".join(str(getattr(c, "text", c)) for c in result)
 
-    try:
-        result = await mcp_server.call_tool("cortex_temporal_nexus", {"project": ""})
-        text = "".join(str(getattr(c, "text", c)) for c in result)
-        assert "TEMPORAL NEXUS" in text
-    except Exception as e:
-        if "no such table" in str(e):
-            pytest.skip("Database schema not initialized in memory for this test")
-        raise
+    assert "TEMPORAL NEXUS: cortex" in text
+    assert "Drift:" in text

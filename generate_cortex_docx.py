@@ -1,4 +1,4 @@
-import os
+import subprocess
 import sys
 
 try:
@@ -7,7 +7,7 @@ try:
     from docx.shared import Inches, Pt, RGBColor
 except ImportError:
     print("Installing python-docx...")
-    os.system(sys.executable + " -m pip install python-docx")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "python-docx"])  # nosec B603
     import docx
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.shared import Pt

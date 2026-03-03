@@ -1,4 +1,4 @@
-import asyncio
+import asyncio  # noqa: F401 — used by test_predictive_inertia_calculation
 from pathlib import Path
 
 import pytest
@@ -7,18 +7,17 @@ from cortex.engine.apotheosis import ApotheosisEngine
 from cortex.memory.semantic_ram import AutonomicMemoryBuffer
 
 
-@pytest.mark.asyncio
-async def test_semantic_pressure_autoflush():
+def test_semantic_pressure_autoflush():
     """Verify that Semantic RAM flushes automatically when pressure is high."""
     buffer = AutonomicMemoryBuffer(capacity=10, pressure_threshold=0.5)
 
     # Add 4 facts (40% pressure) -> no flush trigger
     for i in range(4):
-        needs_flush = await buffer.add({"fact": i})
+        needs_flush = buffer.add({"fact": i})
         assert needs_flush is False
 
     # Add 5th fact (50% pressure) -> trigger
-    needs_flush = await buffer.add({"fact": 5})
+    needs_flush = buffer.add({"fact": 5})
     assert needs_flush is True
 
 
