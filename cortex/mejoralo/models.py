@@ -9,6 +9,8 @@ __all__ = [
     "ScanResult",
     "ShipResult",
     "ShipSeal",
+    "AntipatternFinding",
+    "AntipatternReport",
 ]
 
 
@@ -54,3 +56,45 @@ class ShipResult:
     seals: list[ShipSeal]
     passed: int = 0
     total: int = 7
+@dataclass
+class AntipatternFinding:
+    """A single antipattern detection."""
+
+    scanner: str  # Which scanner found it
+    severity: str  # "critical", "high", "medium", "low"
+    file: str  # Relative path
+    line: int  # Line number
+    message: str  # Human-readable description
+    fix_hint: str  # Suggested fix
+
+
+@dataclass
+class AntipatternReport:
+    """Aggregate report from all scanners."""
+
+    findings: list[AntipatternFinding] = field(default_factory=list)
+    files_scanned: int = 0
+    scanners_run: int = 0
+
+    @property
+    def total(self) -> int:
+        return len(self.findings)
+
+    @property
+    def critical_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == "critical")
+
+    @property
+    def high_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == "high")
+
+    def by_severity(self) -> dict[str, list[AntipatternFinding]]:
+        result: dict[str, list[AntipatternFinding]] = {}
+        for f in self.findings:
+            result.setdefault(f.severity, []).append(f)
+        return result
+
+    def score_penalty(self) -> int:
+        """Calculate penalty points for MEJORAlo score integration."""
+        penalties = {"critical": 15, "high": 8, "medium": 3, "low": 1}
+        return sum(penalties.get(f.severity, 1) for f in self.findings)

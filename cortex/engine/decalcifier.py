@@ -1,8 +1,8 @@
 """
-CORTEX V7 — Sovereign Decalcifier (Protocol Ω₃-E).
+CORTEX V7 — Sovereign Decalcifier (Protocol Ω₃-E+).
 
 Prevents 'fossilization' of beliefs by decaying consensus scores and triggering
-active re-verification pulses.
+active re-verification pulses. Implements Entropic Asymmetry for weighted decay.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ DEFAULT_DECAY_FACTOR = 0.98
 
 
 class SovereignDecalcifier:
-    """Background engine to maintain epistemic humility (Protocol Ω₃-E)."""
+    """Background engine to maintain epistemic humility (Protocol Ω₃-E+)."""
 
     def __init__(
         self,
@@ -40,7 +40,7 @@ class SovereignDecalcifier:
         if self._is_active:
             return
         self._is_active = True
-        logger.info("🧬 [Ω₃-E] Decalcifier online. Entropy gradient active.")
+        logger.info("🧬 [Ω₃-E+] Decalcifier online. Entropy gradient active.")
 
         while self._is_active:
             try:
@@ -50,15 +50,16 @@ class SovereignDecalcifier:
             await asyncio.sleep(self.interval)
 
     async def decalcify_cycle(self, conn: Connection) -> int:
-        """Scan for stale verified facts and apply decay."""
+        """Scan for stale facts (Verified & Stated) and apply decay."""
         cutoff = (datetime.now(timezone.utc) - timedelta(seconds=self.interval)).isoformat()
 
         # Entropic Asymmetry (Ω₃-E+): Include 'stated' to prevent unverified noise accumulation.
         cursor = await conn.execute(
             """
             SELECT id, tenant_id, fact_type, confidence, consensus_score FROM facts
-            WHERE confidence IN ('verified', 'C5', 'C4', 'C3', 'stated') 
+            WHERE confidence IN ('verified', 'C5', 'C4', 'C3', 'stated')
               AND is_tombstoned = 0
+              AND is_quarantined = 0
               AND updated_at < ?
             """,
             (cutoff,),
@@ -69,7 +70,7 @@ class SovereignDecalcifier:
         for fact_id, tenant_id, fact_type, confidence, current_score in stale_facts:
             # 1. Base decay by Confidence (Stated decays faster than Verified)
             confidence_multiplier = 1.0 if confidence != "stated" else 0.95
-            
+
             # 2. Type-specific entropy (Entropic Asymmetry)
             if fact_type in ("axiom", "identity", "rule"):
                 type_factor = 0.999  # Absolute bedrock
@@ -113,7 +114,7 @@ class SovereignDecalcifier:
 
         if count > 0:
             await conn.commit()
-            logger.info("🧬 [Ω₃-E] Decalcified %d stagnant facts. Entropy restored.", count)
+            logger.info("🧬 [Ω₃-E+] Decalcified %d stagnant facts. Entropy restored.", count)
 
         return count
 
