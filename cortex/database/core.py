@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Final, Any
+from typing import Any, Final
 
 import aiosqlite
 

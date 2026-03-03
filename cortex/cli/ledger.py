@@ -1,10 +1,9 @@
 """Immutable Ledger CLI commands for CORTEX (Wave 5)."""
 
-import asyncio
 import click
 from rich.console import Console
 
-from cortex.cli.common import DEFAULT_DB, get_engine, _run_async
+from cortex.cli.common import DEFAULT_DB, _run_async, get_engine
 
 console = Console()
 

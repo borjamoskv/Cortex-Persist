@@ -21,6 +21,7 @@ __all__ = [
     "MODE_SYSTEM_PROMPTS",
     "DEFAULT_ROUTING",
     "OrchestraConfig",
+    "METACOGNITIVE_PREAMBLE_TEMPLATE",
 ]
 
 
@@ -35,6 +36,7 @@ class ThinkingMode(StrEnum):
     CREATIVE = "creative"
     SPEED = "speed"
     CONSENSUS = "consensus"
+    METACOGNITIVE = "metacognitive"  # Sprint 1: epistemic-aware generation
 
 
 # ─── Mode-specific system prompts ────────────────────────────────────
@@ -65,6 +67,16 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
     ThinkingMode.CONSENSUS: (
         "You are MOSKV-1 (Identity: The Sovereign Architect). You are a careful, balanced analyst. "
         "Consider all perspectives. Weigh evidence. Be nuanced and comprehensive, yet decisive."
+    ),
+    ThinkingMode.METACOGNITIVE: (
+        "You are MOSKV-1 (Identity: The Sovereign Architect). You operate under a strict "
+        "epistemic protocol. An EPISTEMIC STATE block will precede this prompt — it contains "
+        "your Feeling-of-Knowing (FOK), Judgment-of-Learning (JOL), retrieval confidence, "
+        "and a Verdict (RESPOND / SEARCH_MORE / ABSTAIN). "
+        "You MUST obey the Verdict. If it says ABSTAIN, you say 'I don't have reliable "
+        "information.' If it says SEARCH_MORE, you hedge explicitly. "
+        "If it says RESPOND, you answer with calibrated confidence matching the memory evidence. "
+        "You MUST declare your <retrieval_plan> before answering. Zero confabulation. Ω₃ active."
     ),
 }
 
@@ -118,6 +130,15 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("groq", "llama-3.3-70b-versatile"),
         ("xai", "grok-2-latest"),
     ],
+    # Sprint 1: Metacognitive mode uses the best reasoning models —
+    # these need to follow complex epistemic instructions reliably.
+    ThinkingMode.METACOGNITIVE: [
+        ("anthropic", "claude-sonnet-4-20250514"),
+        ("openai", "gpt-4o"),
+        ("deepseek", "deepseek-reasoner"),
+        ("gemini", "gemini-2.0-flash"),
+        ("kimi", "moonshot-v1-128k"),
+    ],
 }
 
 
@@ -146,3 +167,16 @@ class OrchestraConfig:
     retry_delay_seconds: float = 1.0
     # Usar system prompts específicos por modo
     use_mode_prompts: bool = True
+
+
+# ─── Metacognitive Preamble Template ─────────────────────────────────
+# Used by inject_epistemic_preamble() in metacognitive_boundary.py
+# when the METACOGNITIVE thinking mode is active.
+# Kept here so presets remain the single source of truth for prompts.
+
+METACOGNITIVE_PREAMBLE_TEMPLATE: str = (
+    "The CORTEX memory system has completed a metacognitive assessment. "
+    "The results are injected below as [CORTEX EPISTEMIC STATE]. "
+    "Read it before generating your response. "
+    "Your response MUST be consistent with the Verdict and confidence levels shown."
+)

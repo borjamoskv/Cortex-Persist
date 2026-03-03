@@ -6,6 +6,7 @@ import sys
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
 
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 from cortex.core.paths import SKILLS_DIR
@@ -86,8 +87,8 @@ def ghost_cmds():
 @click.option("--dir", "root_dir", default=".", help="Directory to scan")
 def field(root_dir):
     """Scan the topography for active Songline ghosts (Ω₁)."""
-    from pathlib import Path
     import asyncio
+    from pathlib import Path
 
     from cortex.cli.common import get_engine
 

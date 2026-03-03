@@ -31,6 +31,7 @@ from cortex.memory.memory_compression import compress_and_store, raw_concat
 from cortex.memory.memory_retrieval import fact_to_dict, retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
 from cortex.memory.resonance import AdaptiveResonanceGate
+from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 from cortex.routes.notch_ws import notify_notch_pruning
@@ -82,6 +83,8 @@ class CortexMemoryManager:
         "thalamus",
         "_resonance_gate",
         "_endocrine",
+        "_schema_engine",
+        "metamemory",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -114,6 +117,10 @@ class CortexMemoryManager:
         )  # type: ignore[reportOptionalCall]
 
         self._endocrine = DigitalEndocrine()
+        self._schema_engine = SchemaEngine()
+
+        from cortex.memory.metamemory import MetamemoryMonitor
+        self.metamemory = MetamemoryMonitor()
 
         # ART-v2 Resonance Engine [v6.2]
         _sensor = None
@@ -280,6 +287,13 @@ class CortexMemoryManager:
             _meta["confidence_score"] = 0.8
 
         adjusted_layer = self._determine_layer(project_id, layer)
+
+        # 0. Apply Top-Down Cognitive Schema (Bartlett) before semantic encoding
+        matched_schema = self._schema_engine.match_schema(content)
+        if matched_schema:
+            content = self._schema_engine.apply_encoding_schema(matched_schema, content)
+            _meta["active_schema"] = matched_schema.name
+            logger.debug(f"Applied Schema '{matched_schema.name}' to Fact Encoding")
 
         # 1. Encode Content for Resonance Verification
         vector = await self._encoder.encode(content)

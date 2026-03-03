@@ -19,13 +19,13 @@ import logging
 import os
 from pathlib import Path
 
-from cortex.mejoralo.constants import SKIP_DIRS
-from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 from cortex.mejoralo._scanner_import_graph import run_graph_scanners as _run_graph_scanners
 from cortex.mejoralo._scanner_visitors import (
     _AsyncIntegrityVisitor,
     _BroadExceptionVisitor,
 )
+from cortex.mejoralo.constants import SKIP_DIRS
+from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 
 __all__ = ["scan_antipatterns"]
 

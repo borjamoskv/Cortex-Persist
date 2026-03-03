@@ -6,7 +6,6 @@ and adaptive agent formations for Zero-Trust problem solving.
 
 import asyncio
 import logging
-import random
 from typing import TypedDict
 
 from pydantic import BaseModel, Field
@@ -77,8 +76,24 @@ class CentauroEngine:
 
     SPECIALISTS = [
         "CODE", "SECURITY", "INTEL", "DATA",
-        "CREATIVE", "MARKETING", "OSINT", "INFRA"
+        "CREATIVE", "MARKETING", "OSINT", "INFRA",
     ]
+
+    # Class-level formation → squad size map (O(1) lookup, immutable)
+    _FORMATION_SIZES: dict[str, int] = {
+        Formation.BLITZ: 3,
+        Formation.PHALANX: 7,
+        Formation.SIEGE: 12,
+        Formation.HYDRA: 18,
+        Formation.ORACLE: 5,
+        Formation.PHOENIX: 8,
+        Formation.CHIMERA: 10,
+        Formation.LEVIATHAN: 35,
+        Formation.OUROBOROS: 6,
+        Formation.SENTINEL: 4,
+        Formation.SPECTRE: 3,
+        Formation.GHOST: 1,
+    }
 
     def __init__(self, tolerance: float = 0.67):
         self.consensus = ByzantineConsensus(tolerance_threshold=tolerance)
@@ -103,82 +118,74 @@ class CentauroEngine:
             return "SECURITY" if index % 2 == 0 else "CODE"
         if formation == Formation.GHOST:
             return "CODE"
-        # Fast deterministic choice to avoid random() overhead
         return self.SPECIALISTS[index % len(self.SPECIALISTS)]
+
+    async def _run_consensus(
+        self, squad: dict[str, VirtualAgent], mission: str,
+    ) -> tuple[str | None, int]:
+        """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
+
+        Returns:
+            (winning_proposal, agents_used) — proposal is None if consensus failed.
+        """
+        proposals: dict[str, str] = {}
+
+        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
+            try:
+                return (a_id, await a.execute("M-01", mission))
+            except Exception as exc:
+                return (a_id, exc)
+
+        agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
+
+        winning = None
+        for future in asyncio.as_completed(agent_tasks):
+            agent_id, result = await future
+            if isinstance(result, Exception):
+                continue
+            proposals[agent_id] = result
+            winning = self.consensus.execute_consensus(proposals)
+            if winning:
+                logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
+                break
+
+        # Cancel trailing coroutines to avoid leak (Ω₂)
+        for t in agent_tasks:
+            if isinstance(t, asyncio.Task) and not t.done():
+                t.cancel()
+
+        return winning, len(squad)
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission. (Axiom Ω₂: Multiplexed Execution)"""
         import hashlib
-        
-        # Generate mission hash for Thermal Heat-Sink
+
         mission_hash = hashlib.sha256(f"{mission}:{formation}".encode()).hexdigest()
-        
+
         # --- Thermal Heat-Sink (Multiplexing) ---
         if mission_hash in self._active_missions:
             logger.info("🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash[:8])
-            return await self._active_missions[mission_hash] # type: ignore
-        
-        # Create a future for this mission
+            return await self._active_missions[mission_hash]  # type: ignore
+
         loop = asyncio.get_running_loop()
-        mission_future = loop.create_future()
+        mission_future: asyncio.Future[CentauroMissionResult] = loop.create_future()
         self._active_missions[mission_hash] = mission_future
-        
+
         try:
             logger.info("Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation)
-
-            # Determine squad size based on Legion Axioms
-            formation_map = {
-                Formation.BLITZ: 3,
-                Formation.PHALANX: 7,
-                Formation.SIEGE: 12,
-                Formation.HYDRA: 18,
-                Formation.ORACLE: 5,
-                Formation.PHOENIX: 8,
-                Formation.CHIMERA: 10,
-                Formation.LEVIATHAN: 35,
-                Formation.OUROBOROS: 6,
-                Formation.SENTINEL: 4,
-                Formation.SPECTRE: 3,
-                Formation.GHOST: 1,
-            }
-            size = formation_map.get(formation, 3)
-
+            size = self._FORMATION_SIZES.get(formation, 3)
             squad = self.spawn_squad(size, formation=formation)
             logger.info("Spawned %d agents in %s formation.", len(squad), formation)
 
-            # 100x Speed (Ω₁): Early-Exit Byzantine Consensus (Ω₃ Quorum)
-            proposals: dict[str, str] = {}
-            
-            async def _run_agent(a_id, a):
-                try:
-                    res = await a.execute("M-01", mission)
-                    return (a_id, res)
-                except Exception as e:
-                    return (a_id, e)
-
-            agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
-            
-            winning_proposal = None
-            for future in asyncio.as_completed(agent_tasks):
-                agent_id, result = await future
-                if isinstance(result, Exception):
-                    continue
-                
-                proposals[agent_id] = result
-                
-                # Check for consensus after each result
-                winning_proposal = self.consensus.execute_consensus(proposals)
-                if winning_proposal:
-                    logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
-                    break
+            winning, agents_used = await self._run_consensus(squad, mission)
 
             result: CentauroMissionResult
-            if winning_proposal:
+            if winning:
                 logger.info("Consensus Achieved (UNANIMOUS or MAJORITY).")
                 result = {
                     "status": "success",
-                    "solution": winning_proposal,
-                    "agents_used": len(squad),
+                    "solution": winning,
+                    "agents_used": agents_used,
                     "formation": formation,
                 }
             else:
@@ -186,11 +193,10 @@ class CentauroEngine:
                 result = {
                     "status": "failure",
                     "reason": "Byzantine Consensus Threshold Not Reached",
-                    "agents_used": len(squad),
+                    "agents_used": agents_used,
                     "formation": formation,
                 }
-                
-            # Fullfill the future for multiplexers
+
             mission_future.set_result(result)
             return result
 
@@ -199,9 +205,4 @@ class CentauroEngine:
                 mission_future.set_exception(e)
             raise
         finally:
-            # Clear mission from heat-sink after completion
-            if mission_hash in self._active_missions:
-                del self._active_missions[mission_hash]
-
-    async def _agent_wrapper(self, agent: VirtualAgent, mission: str) -> str:
-        return await agent.execute("M-01", mission)
+            self._active_missions.pop(mission_hash, None)

@@ -2,9 +2,18 @@
 
 from __future__ import annotations
 
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
-__all__ = ["IngestionFact"]
+__all__ = ["IngestionFact", "Provenance"]
+
+
+class Provenance(str, Enum):
+    USER_DIRECT = "user_direct"
+    INFERENCE = "inference"
+    SYSTEM = "system"
+    EXTERNAL = "external"
 
 
 class IngestionFact(BaseModel):
@@ -14,5 +23,7 @@ class IngestionFact(BaseModel):
     content: str = Field(..., min_length=10)
     tenant_id: str = Field(..., min_length=1)
     confidence: str = Field(..., pattern=r"^(C[1-5]|stated|inferred)$")
-    # Mapping 'source' parameter to 'provenance' conceptually
-    source: str = Field(..., min_length=1, description="Provenance / Data origin")
+    source: Provenance = Field(
+        default=Provenance.SYSTEM,
+        description="Provenance / Data origin (Source Monitoring)"
+    )

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import logging
-import os
 import shutil
 import time
 from pathlib import Path
@@ -11,7 +9,6 @@ from typing import Any
 from cortex.database.core import connect as db_connect
 from cortex.engine import CortexEngine
 from cortex.engine.models import Fact
-
 
 logger = logging.getLogger("cortex.services.notebooklm")
 
@@ -123,7 +120,7 @@ class NotebookLMService:
 
     def detect_cloud_sync(self) -> Path | None:
         """Detect appropriate cloud storage sync folder."""
-        for provider, paths in CLOUD_PROVIDERS.items():
+        for _provider, paths in CLOUD_PROVIDERS.items():
             for p in paths:
                 if p.exists():
                     return p

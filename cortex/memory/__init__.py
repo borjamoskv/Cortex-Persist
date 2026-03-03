@@ -27,13 +27,37 @@ from cortex.memory.frequency import (
 from cortex.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.manager import CortexMemoryManager
+from cortex.memory.metamemory import (
+    MemoryCard,
+    MetacognitiveJudge,
+    MetaJudgment,
+    MetamemoryIndex,
+    MetamemoryMonitor,
+    MetamemoryStats,
+    RetrievalOutcome,
+    Verdict,
+    build_memory_card,
+)
 from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
+from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
+from cortex.memory.navigator import (
+    ClusterInfo,
+    KnowledgeMap,
+    NavigationState,
+    SemanticNavigator,
+    SemanticPath,
+)
 from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.sparse import MushroomBodyEncoder
 from cortex.memory.temporal_health import (
     HealthReport,
     SchedulerConfig,
     TemporalHealthScheduler,
+)
+from cortex.memory.void_detector import (
+    EpistemicAnalysis,
+    EpistemicState,
+    EpistemicVoidDetector,
 )
 from cortex.memory.working import WorkingMemoryL1
 
@@ -55,23 +79,42 @@ __all__ = [
     "BIFTRouter",
     "ContinuousMemorySystem",
     "CortexMemoryManager",
+    "ClusterInfo",
     "CortexSemanticEngram",
     "DriftMonitor",
     "DriftSignature",
     "DynamicSynapseUpdate",
     "EntropyPruner",
+    "EpistemicAnalysis",
+    "EpistemicState",
+    "EpistemicVoidDetector",
     "EpisodicSnapshot",
     "EventLedgerL3",
     "HealthReport",
+    "MemoryCard",
+    "KnowledgeMap",
     "MemoryEntry",
     "MemoryEvent",
     "MemoryFrequency",
+    "MetaJudgment",
+    "MetacognitiveJudge",
+    "MetamemoryIndex",
+    "MetamemoryMonitor",
+    "MetamemoryStats",
     "MushroomBodyEncoder",
+    "NavigationState",
     "RetrievalBand",
+    "RetrievalOutcome",
     "SchedulerConfig",
+    "SemanticNavigator",
+    "SemanticPath",
     "SilentEngram",
+    "SleepCycleReport",
+    "SleepOrchestrator",
     "SystemsConsolidator",
     "TemporalHealthScheduler",
     "VectorStoreL2",
+    "Verdict",
     "WorkingMemoryL1",
+    "build_memory_card",
 ]

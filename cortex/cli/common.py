@@ -4,12 +4,18 @@ Prevent circular imports by centralizing base CLI objects.
 """
 
 from __future__ import annotations
+
 import asyncio
+from typing import TYPE_CHECKING
 
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.theme import Theme
+
+if TYPE_CHECKING:
+    from cortex.engine import CortexEngine
+    from cortex.timing import TimingTracker
 
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH

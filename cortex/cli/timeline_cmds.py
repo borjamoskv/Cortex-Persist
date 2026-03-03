@@ -153,9 +153,10 @@ def snapshot_list(db):
     """List all available snapshots."""
 
     async def _snapshot_list_async():
-        from cortex.engine.snapshots import SnapshotManager
         import sqlite3
+
         from cortex.cli.common import err_empty_results, handle_cli_error
+        from cortex.engine.snapshots import SnapshotManager
 
         try:
             sm = SnapshotManager(db_path=db)
