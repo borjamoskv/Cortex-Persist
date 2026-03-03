@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="saas.css">
     <style>
         /* ─── Additions beyond saas.css ─── */
@@ -20,18 +21,15 @@
         /* Urgency Banner */
         .urgency-banner {
             position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-            background: linear-gradient(90deg, #0A0A0A, #2E5090, #0A0A0A);
+            background: linear-gradient(90deg, #2E5090, #6600FF, #2E5090);
             background-size: 200% 100%;
-            animation: urgencyShift 6s ease-in-out infinite;
-            padding: 12px 24px; text-align: center;
+            animation: urgencyShift 4s ease infinite;
+            padding: 10px 24px; text-align: center;
             font-family: var(--mono); font-size: 0.75rem;
-            color: #fff; letter-spacing: 1.5px;
-            border-bottom: 1px solid rgba(204,255,0,0.2);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-            text-transform: uppercase;
+            color: #fff; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .urgency-banner a { color: var(--accent); font-weight: 800; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 1px;}
-        .urgency-banner a:hover { color: #fff; border-color: #fff; }
+        .urgency-banner a { color: var(--accent); font-weight: 700; text-decoration: underline; }
         @keyframes urgencyShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
         #nav { top: 38px; }
@@ -246,11 +244,11 @@
             </a>
             <div class="nav-links">
                 <a href="#compliance">Compliance</a>
-                <a href="#use-cases">Industries</a>
                 <a href="#features">Features</a>
                 <a href="#compare">vs Mem0</a>
                 <a href="#pricing">Pricing</a>
-                <a href="site/" class="nav-docs">Docs</a>
+                <a href="compliance-check/" style="color: var(--accent);">Compliance Check</a>
+                <a href="https://github.com/borjamoskv/cortex#readme" class="nav-docs">Docs</a>
                 <a href="https://github.com/borjamoskv/cortex" class="nav-github" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
             <a href="#pricing" class="nav-cta">Get Started</a>
@@ -259,9 +257,9 @@
 
     <!-- Hero -->
     <section id="hero">
-        <div class="hero-badge">SOVEREIGN PROTOCOL v5 · EU AI ACT IMMUNITY · 130/100 STANDARD</div>
-        <h1>AI Memory Without<br>Sovereignty is<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Auditable Failure.</span></h1>
-        <p class="hero-sub">CORTEX is the <strong>Immutable Pulse</strong> of your agent swarm. Cryptographic verification, zero-leakage privacy, and EU AI Act compliance. <strong>Don't just store; prove.</strong></p>
+        <div class="hero-badge">OPEN SOURCE · EU AI ACT READY · ZERO CLOUD DEPENDENCY</div>
+        <h1>Your AI Makes<br>Thousands of Decisions.<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Prove One.</span></h1>
+        <p class="hero-sub">CORTEX is to AI memory what <strong>SSL/TLS is to web communications</strong> — cryptographic verification, immutable audit trails, and EU AI Act compliance. In-process. <5ms.</p>
 
         <!-- Terminal Demo -->
         <div class="terminal-demo" id="terminal-demo">
@@ -276,7 +274,8 @@
 
         <div class="hero-actions">
             <a href="#pricing" class="btn btn-primary" id="hero-cta-start">Start Free →</a>
-            <a href="site/quickstart/" class="btn btn-outline" id="hero-cta-docs">Read the Docs</a>
+            <a href="compliance-check/" class="btn btn-outline" id="hero-cta-compliance" style="border-color: rgba(204,255,0,0.3); color: var(--accent);">🔍 Check Your Compliance</a>
+            <a href="https://github.com/borjamoskv/cortex#quickstart" class="btn btn-outline" id="hero-cta-docs">Read the Docs</a>
         </div>
 
         <!-- Metrics Bar -->
@@ -541,11 +540,11 @@
                 <span class="footer-copy">© 2026 Borja Moskv · Apache 2.0</span>
             </div>
             <div class="footer-links">
-                <a href="site/">Docs</a>
-                <a href="site/api/">API Reference</a>
-                <a href="site/security/">Security</a>
+                <a href="https://github.com/borjamoskv/cortex#readme">Docs</a>
+                <a href="https://github.com/borjamoskv/cortex/blob/main/openapi.yaml">API Reference</a>
+                <a href="https://github.com/borjamoskv/cortex/blob/main/SECURITY.md">Security</a>
                 <a href="https://github.com/borjamoskv/cortex">GitHub</a>
-                <a href="site/quickstart/">Quickstart</a>
+                <a href="compliance-check/">Compliance Check</a>
             </div>
         </div>
     </footer>

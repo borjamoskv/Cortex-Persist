@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Any
 
 from cortex.engine.causality import CausalGraph
-from cortex.engine.chronos_roi import CHRONOS
 from cortex.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.reporter")
@@ -38,6 +37,20 @@ class SovereignReporter:
         self.db_path = db_path
         self.project = project
 
+    def _fetch_roi_history(self, conn: sqlite3.Connection) -> list[dict[str, Any]]:
+        """Fetch the latest ROI records from the facts table."""
+        cursor = conn.execute(
+            "SELECT content, meta FROM facts WHERE fact_type='knowledge' "
+            "AND source='chronos-roi' ORDER BY created_at DESC LIMIT 5"
+        )
+        roi_history = []
+        for row in cursor.fetchall():
+            try:
+                roi_history.append(json.loads(row[1]))
+            except (json.JSONDecodeError, TypeError):
+                continue
+        return roi_history
+
     def collect_metrics(self) -> ManifoldStatus:
         """Aggregate data from all Ω-dimensions."""
         try:
@@ -52,17 +65,7 @@ class SovereignReporter:
                 signal_stats = bus.stats()
                 
                 # 3. Efficiency (ROI)
-                # We fetch the latest 5 ROI reports from facts
-                cursor = conn.execute(
-                    "SELECT content, meta FROM facts WHERE fact_type='knowledge' "
-                    "AND source='chronos-roi' ORDER BY created_at DESC LIMIT 5"
-                )
-                roi_history = []
-                for row in cursor.fetchall():
-                    try:
-                        roi_history.append(json.loads(row[1]))
-                    except (json.JSONDecodeError, TypeError):
-                        continue
+                roi_history = self._fetch_roi_history(conn)
                 
                 # 4. Active Ghosts (TODOs in code + DB ghosts)
                 # For now, we query the facts table for 'ghost' types
@@ -87,7 +90,7 @@ class SovereignReporter:
                     architecture_integrity=round(min(100.0, integrity), 2),
                     active_ghosts=ghost_count
                 )
-        except Exception as e:
+        except (sqlite3.Error, OSError) as e:
             logger.error("Failed to collect metrics: %s", e)
             raise
 

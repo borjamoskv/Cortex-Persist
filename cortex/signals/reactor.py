@@ -20,6 +20,7 @@ import time
 from typing import Any
 
 from cortex.signals.bus import SignalBus
+from cortex.utils.respiration import breathe, oxygenate
 
 __all__ = ["SignalReactor"]
 
@@ -39,8 +40,9 @@ class SignalReactor:
         self._last_snapshot_time: float = 0
         self._snapshot_cooldown: int = 60  # seconds
 
-    def process_once(self) -> int:
-        """Poll the bus and execute one round of reflexes.
+    @oxygenate(min_interval=0.1)
+    async def process_once(self) -> int:
+        """Poll the bus and execute one round of reflexes (oxygenated).
 
         Returns:
            The number of signals processed.
@@ -53,8 +55,10 @@ class SignalReactor:
         processed = 0
         for signal in signals:
             try:
-                self._dispatch(signal)
+                await self._dispatch(signal)
                 processed += 1
+                # Small breath between signals to avoid flooding the loop
+                await breathe(0.01)
             except (ValueError, AttributeError, RuntimeError, OSError) as e:
                 logger.error(
                     "Reactor failed to process signal #%d (%s): %s",
@@ -66,20 +70,20 @@ class SignalReactor:
 
         return processed
 
-    def _dispatch(self, signal: Any) -> None:
+    async def _dispatch(self, signal: Any) -> None:
         """Map signal types to reflex handlers."""
         etype = signal.event_type
 
         if etype == "compact:needed":
-            self._handle_compact_needed(signal)
+            await self._handle_compact_needed(signal)
         elif etype == "fact:stored":
-            self._handle_fact_stored(signal)
+            await self._handle_fact_stored(signal)
         elif etype == "experience:recorded":
-            self._handle_experience_recorded(signal)
+            await self._handle_experience_recorded(signal)
         else:
             logger.debug("Reactor ignored unknown signal type: %s", etype)
 
-    def _handle_experience_recorded(self, signal: Any) -> None:
+    async def _handle_experience_recorded(self, signal: Any) -> None:
         """Reflex: Reconcile an experience into stratified memory layers."""
         if not self.engine or not self.engine.memory:
             logger.warning(
@@ -89,11 +93,11 @@ class SignalReactor:
 
         try:
             logger.info("Reactor: Reconciling experience signal #%d", signal.id)
-            self._run_async(self.engine.memory.reconcile_experience(signal))
+            await self.engine.memory.reconcile_experience(signal)
         except (RuntimeError, OSError, AttributeError) as e:
             logger.error("Failed to reconcile experience reflex: %s", e)
 
-    def _handle_compact_needed(self, signal: Any) -> None:
+    async def _handle_compact_needed(self, signal: Any) -> None:
         """Reflex: Automate memory compaction."""
         project = signal.project or signal.payload.get("project")
         if not project:
@@ -105,15 +109,15 @@ class SignalReactor:
 
             logger.info("Reactor triggering autonomous compaction for [%s]", project)
 
-            # compact is async, we need to run it in the loop
-            result = self._run_async(compact(engine=self.engine, project=project, dry_run=False))
+            # compact is already async
+            result = await compact(engine=self.engine, project=project, dry_run=False)
 
             if result:
                 logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
         except (ImportError, RuntimeError, OSError) as e:
             logger.error("Failed to run compaction reflex: %s", e)
 
-    def _handle_fact_stored(self, signal: Any) -> None:
+    async def _handle_fact_stored(self, signal: Any) -> None:
         """Reflex: Regenerate snapshot (with cooldown)."""
         now = time.monotonic()
         if now - self._last_snapshot_time < self._snapshot_cooldown:
@@ -123,51 +127,22 @@ class SignalReactor:
             from cortex.sync import export_snapshot
 
             logger.info("Reactor triggering autonomous snapshot export.")
-            self._run_async(export_snapshot(self.engine))
+            await export_snapshot(self.engine)
 
             self._last_snapshot_time = now
             logger.info("Reflex: Snapshot updated.")
         except (ImportError, RuntimeError, OSError) as e:
             logger.error("Failed to run snapshot reflex: %s", e)
 
-    def _run_async(self, coro: Any) -> Any:
-        """Helper to run async code from sync reactor context."""
-        import asyncio
-
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # We are in a thread with a running loop (like MoskvDaemon)
-                # But compact() needs to be awaited.
-                # For a reactor thread, we usually use a private loop or run_coroutine_threadsafe.
-                # However, many of these are one-off.
-                # If we are in the main thread of the daemon, we can't run_async.
-
-                # Best approach for the daemon's architecture:
-                # MoskvDaemon uses threading.Thread for these loops.
-                # We can just create a new loop for each task if needed,
-                # or use a shared one.
-
-                # Given our current constraints:
-                future = asyncio.run_coroutine_threadsafe(coro, loop)
-                return future.result()
-            else:
-                return asyncio.run(coro)
-        except RuntimeError:
-            return asyncio.run(coro)
-        except (asyncio.CancelledError, OSError) as e:
-            logger.error("Async execution failed in reactor: %s", e)
-            return None
-
-    def run_loop(self, interval: float = 5.0) -> None:
-        """Start a blocking infinite loop for standalone usage."""
-        logger.info("Signal Reactor active — monitoring bus pulses (L2)")
+    async def run_loop(self, interval: float = 5.0) -> None:
+        """Start a non-blocking infinite loop for standalone usage. (PULMONES)"""
+        logger.info("Signal Reactor active — monitoring bus pulses (L2) [OXYGENATED]")
         while True:
             try:
-                count = self.process_once()
+                count = await self.process_once()
                 if count > 0:
                     logger.debug("Reactor: Processed %d signal(s)", count)
             except (RuntimeError, OSError, ValueError) as e:
                 logger.error("Reactor loop error: %s", e)
 
-            time.sleep(interval)
+            await breathe(interval)

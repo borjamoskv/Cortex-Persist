@@ -86,11 +86,44 @@ async def insert_fact_record(
     except (sqlite3.Error, aiosqlite.Error) as e:
         logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
 
+    # Causal Infrastructure (ANAMNESIS-Ω)
+    try:
+        from cortex.engine.causality import EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM
+
+        # Since causality.py schema uses sqlite3 directly in its record_edge (sync),
+        # but we are in an async insert context, we'll perform the insert directly
+        # here or via a future CausalGraph.record_edge_async call.
+        # For now, we manually record to guarantee atomic async flow.
+
+        # Ensure table exists (best effort, ideally initialized on startup)
+        # Note: In production this should be handled by a migration or on startup.
+
+        parent_signal = meta.get("causal_parent") if meta else None
+        parent_fact = meta.get("previous_fact_id") if meta else None
+
+        if parent_signal or parent_fact:
+            edge_type = EDGE_UPDATED_FROM if parent_fact else EDGE_TRIGGERED_BY
+            await conn.execute(
+                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    fact_id,
+                    parent_fact,
+                    parent_signal,
+                    edge_type,
+                    project,
+                    tenant_id,
+                ),
+            )
+    except (ImportError, Exception) as e:
+        logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
+
     # Graph Extraction
     from cortex.graph import process_fact_graph
 
     try:
-        await process_fact_graph(conn, fact_id, content, project, ts)  # type: ignore[reportArgumentType]
+        # type: ignore[reportArgumentType]
+        await process_fact_graph(conn, fact_id, content, project, ts)
     except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
         logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
 
