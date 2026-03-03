@@ -68,10 +68,10 @@ class ApotheosisEngine:
                 except (sqlite3.OperationalError, OSError, AttributeError) as err:
                     logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)
 
-    # Adaptive sleep bounds (seconds)
-    _SLEEP_MIN: float = 30.0
-    _SLEEP_MAX: float = 300.0
-    _SLEEP_JITTER: float = 0.20
+    # Optimized sleep bounds (seconds) - Entropic Asymmetry (Ω₂)
+    _SLEEP_MIN: float = 10.0  # Reduced from 30.0 to lower thermal floor
+    _SLEEP_MAX: float = 240.0
+    _SLEEP_JITTER: float = 0.10  # Reduced noise
 
     async def _omniscience_loop(self) -> None:
         """Ciclo infinito de latencia negativa con sueño adaptativo y hormonal."""
@@ -111,11 +111,12 @@ class ApotheosisEngine:
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
             from cortex.cli.bicameral import bicameral
-
             bicameral.log_bio(
                 f"Ciclo Ω. Entropía={entropy_found}. Sueño: {duration:.1f}s", signal="Ω"
             )
-            await asyncio.sleep(duration)
+            # ZENÓN-1: Collapse into action if duration is negligible
+            if duration > 0.1:
+                await asyncio.sleep(duration)
 
     async def _check_singularity_state(self, dopamine: float, growth: float) -> None:
         if dopamine > 0.9 and growth > 0.8:
