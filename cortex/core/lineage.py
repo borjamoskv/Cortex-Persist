@@ -34,9 +34,11 @@ class LineageVerifier:
     def __init__(self, engine: Any):
         self.engine = engine
 
-    async def get_lineage(self, fact_id: int, max_depth: int = 5, _cache: dict[int, LineageNode] | None = None) -> LineageNode:
+    async def get_lineage(
+        self, fact_id: int, max_depth: int = 5, _cache: dict[int, LineageNode] | None = None
+    ) -> LineageNode:
         """Recursively build the lineage tree for a fact.
-        
+
         Protected against cyclic DAGs and N+1 queries via _cache and max_depth.
         """
         # 1. Zero-Trust OOM Killer limit
@@ -56,10 +58,10 @@ class LineageVerifier:
         # 2. Cache check for O(1) retrieval
         if _cache is None:
             _cache = {}
-            
+
         if fact_id in _cache:
             return _cache[fact_id]
-            
+
         fact = await self.engine.get_fact(fact_id)
         if not fact:
             node = LineageNode(

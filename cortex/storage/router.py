@@ -68,7 +68,7 @@ class TenantRouter:
             return await self._get_postgres_backend(tenant_id)
 
         backend = await self._get_turso_backend(tenant_id)
-        
+
         # Connection Eviction (Axiom Ω₂)
         if len(self._connections) > _MAX_BACKENDS:
             # Pop the oldest connection (LRU)
@@ -78,7 +78,7 @@ class TenantRouter:
                 logger.debug("Evicted backend connection for tenant: %s", old_tenant)
             except Exception as e:
                 logger.warning("Error closing evicted tenant %s: %s", old_tenant, e)
-        
+
         return backend
 
     async def _get_local_backend(self):

@@ -20,7 +20,7 @@ class MentalState(Enum):
     STABLE = "stable"
     STRESSED = "stressed"  # High entropy/perplexity
     DRIFTING = "drifting"  # Deviating from axioms
-    OCD = "ocd"            # Stuck in a loop
+    OCD = "ocd"  # Stuck in a loop
     HYSTERIC = "hysteric"  # Hallucinating/Over-emotional
 
 

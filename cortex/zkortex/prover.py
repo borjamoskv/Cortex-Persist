@@ -30,6 +30,7 @@ logger = logging.getLogger("cortex.zkortex.prover")
 @dataclass
 class ProverSession:
     """Estado de una sesión de pruebas — el Prover controla su ciclo de vida."""
+
     session_id: str
     created_at: float = field(default_factory=time.time)
     proofs_issued: int = 0
@@ -52,6 +53,7 @@ class ZKOrtexProver:
 
     def __init__(self, session_id: str | None = None) -> None:
         import uuid
+
         self._session_id = session_id or str(uuid.uuid4())
         self._knowledge_base: list[str] = []
         self._tree: MerkleTree = MerkleTree()
@@ -74,8 +76,7 @@ class ZKOrtexProver:
         root = self._tree.build(facts)
         self._tree_built = True
         logger.info(
-            "Knowledge tree built. %d facts ingested. Root: %s",
-            len(facts), root[:16] + "..."
+            "Knowledge tree built. %d facts ingested. Root: %s", len(facts), root[:16] + "..."
         )
         return root
 
@@ -107,6 +108,7 @@ class ZKOrtexProver:
         if metadata:
             # Reemplazar con metadata (commitment es frozen, creamos nuevo)
             from cortex.zkortex.commitment import KnowledgeCommitment as KC
+
             c = KC(commitment_hex=c.commitment_hex, metadata=metadata)
 
         self._commitments[fact_id] = (c, blinding)
@@ -127,8 +129,7 @@ class ZKOrtexProver:
         # Solo el Prover sabe el contenido original — aquí lo recuperaríamos
         # de nuestra base de conocimiento interna
         logger.warning(
-            "Commitment OPENED for fact_id='%s'. Opacity compromised for this fact.",
-            fact_id
+            "Commitment OPENED for fact_id='%s'. Opacity compromised for this fact.", fact_id
         )
         return blinding.hex(), commitment
 
@@ -149,15 +150,14 @@ class ZKOrtexProver:
         self._session.proofs_issued += 1
         logger.info(
             "Membership proof issued. Leaf index: %d. Root: %s",
-            proof.leaf_index, proof.root[:16] + "..."
+            proof.leaf_index,
+            proof.root[:16] + "...",
         )
         return proof
 
     # ─── Range Proofs ─────────────────────────────────────────────────────────
 
-    def prove_knowledge_count_in_range(
-        self, min_count: int, max_count: int
-    ) -> ZKRangeProof:
+    def prove_knowledge_count_in_range(self, min_count: int, max_count: int) -> ZKRangeProof:
         """
         Prueba que la cantidad de hechos que CORTEX conoce ∈ [min_count, max_count].
         El número exacto permanece oculto.
@@ -169,8 +169,7 @@ class ZKOrtexProver:
         proof = prove_range(actual, min_count, max_count)
         self._session.proofs_issued += 1
         logger.info(
-            "Range proof issued. Claimed: [%d, %d]. Actual: REDACTED.",
-            min_count, max_count
+            "Range proof issued. Claimed: [%d, %d]. Actual: REDACTED.", min_count, max_count
         )
         return proof
 

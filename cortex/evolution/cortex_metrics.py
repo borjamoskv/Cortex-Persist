@@ -354,10 +354,10 @@ class CortexMetrics:
         return bool(self._cache) and (time.time() - self._cache_time) < self._cache_ttl
 
     # Logistic TTL parameters (matching user spec)
-    _ENTROPY_K: float = 1.5       # Sensitivity factor — how sharp the transition is
-    _ENTROPY_THETA: float = 2.0   # Stability threshold (bits) — below = cache-friendly
-    _TTL_FLOOR: float = 5.0       # Never go below 5s (high-chaos regime)
-    _TTL_CEIL: float = 120.0      # Never go above 120s (double base)
+    _ENTROPY_K: float = 1.5  # Sensitivity factor — how sharp the transition is
+    _ENTROPY_THETA: float = 2.0  # Stability threshold (bits) — below = cache-friendly
+    _TTL_FLOOR: float = 5.0  # Never go below 5s (high-chaos regime)
+    _TTL_CEIL: float = 120.0  # Never go above 120s (double base)
 
     def _calculate_shannon_entropy(self) -> float:
         """Continuous Shannon entropy H(X) over normalized metric vectors.
@@ -394,6 +394,7 @@ class CortexMetrics:
 
         # H(X) = -Σ p(xᵢ) log₂ p(xᵢ)
         import math
+
         entropy = 0.0
         for count in bucket_counts.values():
             p = count / total
@@ -417,6 +418,7 @@ class CortexMetrics:
             H << θ (stable)   → denominator → 1 → TTL → 2 × TTL_base (~120s)
         """
         import math
+
         H = self._calculate_shannon_entropy()
         denominator = 1.0 + math.exp(self._ENTROPY_K * (H - self._ENTROPY_THETA))
         self._cache_ttl = max(
@@ -425,7 +427,10 @@ class CortexMetrics:
         )
         logger.debug(
             "CortexMetrics: H=%.2f bits → TTL=%.1fs (θ=%.1f, k=%.1f)",
-            H, self._cache_ttl, self._ENTROPY_THETA, self._ENTROPY_K,
+            H,
+            self._cache_ttl,
+            self._ENTROPY_THETA,
+            self._ENTROPY_K,
         )
 
     def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:

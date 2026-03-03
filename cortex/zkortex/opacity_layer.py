@@ -11,7 +11,7 @@ La Opacidad Selectiva opera en dos niveles:
 El flujo completo:
     1. CORTEX ingiere un hecho → AES-GCM encrypt → almacena ciphertext (L1)
     2. CORTEX construye Merkle Tree sobre los hashes de los hechos → root (L2)
-    3. External query: "¿Sabes X?" 
+    3. External query: "¿Sabes X?"
        → CORTEX genera ZKMembershipProof → verifier confirma → L1 nunca se toca
 
 Caso de uso soberano:
@@ -45,7 +45,7 @@ class SovereignOpacityLayer:
       - El registro de pruebas emitidas (accountability interna sin exposición)
 
     Estrategia de opacidad:
-      - HIGH (default): Solo Merkle roots y proofs de membresía. 
+      - HIGH (default): Solo Merkle roots y proofs de membresía.
                         Nunca commitments abiertos.
       - MEDIUM: Permite range proofs. El rango revela magnitud pero no valor.
       - SELECTIVE: El operador soberano decide caso por caso qué abrir.
@@ -71,7 +71,7 @@ class SovereignOpacityLayer:
     def ingest_facts(self, facts: list[str]) -> str:
         """
         Ingiere hechos en el árbol ZK.
-        
+
         CRUCIAL: Los hechos originales NUNCA deben ser texto plano en producción.
         En producción, `facts` deben ser fingerprints de los AES-GCM ciphertexts,
         no los textos originales.
@@ -87,8 +87,7 @@ class SovereignOpacityLayer:
 
         root = self._prover.ingest(fingerprints)
         logger.info(
-            "SovereignOpacityLayer: %d facts ingested. Root: %s",
-            len(facts), root[:16] + "..."
+            "SovereignOpacityLayer: %d facts ingested. Root: %s", len(facts), root[:16] + "..."
         )
         return root
 
@@ -97,7 +96,7 @@ class SovereignOpacityLayer:
     def prove_knows_fact(self, fact_content: str) -> ZKMembershipProof | None:
         """
         Genera una prueba de que CORTEX conoce `fact_content`.
-        
+
         En HIGH strategy: Solo emite la proof, nunca el contenido.
         Retorna None si el hecho no está en el árbol.
         """
@@ -175,11 +174,13 @@ class SovereignOpacityLayer:
 
     def _log_proof(self, proof_type: str, meta: dict[str, Any]) -> None:
         """Registro interno de auditoría — sin datos privados."""
-        self._proof_log.append({
-            "type": proof_type,
-            "timestamp": time.time(),
-            **meta,
-        })
+        self._proof_log.append(
+            {
+                "type": proof_type,
+                "timestamp": time.time(),
+                **meta,
+            }
+        )
 
     def proof_audit_log(self) -> list[dict[str, Any]]:
         """Audit log de proofs emitidas. Solo metadatos, nunca contenido."""

@@ -21,6 +21,7 @@ class MutationHistory(TypedDict):
     latencies: collections.deque[float]
     failures: int
 
+
 logger = logging.getLogger("cortex.autopoiesis")
 
 

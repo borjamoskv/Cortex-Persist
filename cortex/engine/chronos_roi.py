@@ -25,6 +25,7 @@ __all__ = ["ChronosROI", "ChronosReport", "CHRONOS"]
 
 # ── Data Model ──────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True, slots=True)
 class ChronosReport:
     """Immutable snapshot of a CHRONOS audit result."""
@@ -65,7 +66,9 @@ class ChronosReport:
 
 # ── Engine ──────────────────────────────────────────────────────────
 
-_SKIP_DIRS = frozenset((".venv", ".git", "__pycache__", "node_modules", ".mypy_cache", ".ruff_cache"))
+_SKIP_DIRS = frozenset(
+    (".venv", ".git", "__pycache__", "node_modules", ".mypy_cache", ".ruff_cache")
+)
 _CODE_EXTENSIONS = (".py", ".js", ".ts", ".swift", ".html", ".css", ".rs", ".go")
 
 
@@ -90,7 +93,10 @@ class ChronosROI:
         try:
             cmd = ["git", "log", "--since=24 hours ago", "--pretty=tformat:", "--numstat"]
             out = subprocess.check_output(  # noqa: S603
-                cmd, cwd=project_path, text=True, timeout=10,
+                cmd,
+                cwd=project_path,
+                text=True,
+                timeout=10,
             )
             added = 0
             deleted = 0
@@ -103,9 +109,13 @@ class ChronosROI:
                     deleted += int(parts[1]) if parts[1].isdigit() else 0
 
             commit_count_cmd = ["git", "rev-list", "--count", "HEAD", "--since=24 hours ago"]
-            commit_count = int(subprocess.check_output(  # noqa: S603
-                commit_count_cmd, cwd=project_path, timeout=10,
-            ))
+            commit_count = int(
+                subprocess.check_output(  # noqa: S603
+                    commit_count_cmd,
+                    cwd=project_path,
+                    timeout=10,
+                )
+            )
             return {"added": added, "deleted": deleted, "commits": commit_count}
         except (subprocess.SubprocessError, OSError, ValueError):
             return {"added": 0, "deleted": 0, "commits": 0}

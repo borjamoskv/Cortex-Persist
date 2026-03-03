@@ -106,9 +106,7 @@ class CortexSecureMemoryCache:
 
     def _persist_to_storage(self, key: str, data: dict[str, Any], audit: dict[str, Any]) -> None:
         """Commit data and decisional proof to persistent storage."""
-        logger.info(
-            f"🛡️ [SOVEREIGN CACHE] Evicting {key} | Proof: {audit['current_proof'][:16]}..."
-        )
+        logger.info(f"🛡️ [SOVEREIGN CACHE] Evicting {key} | Proof: {audit['current_proof'][:16]}...")
 
         if self.persistence_callback:
             self.persistence_callback(key, data, audit)
@@ -122,7 +120,9 @@ class CortexSecureMemoryCache:
         }
 
     @staticmethod
-    def verify_forgetting_proof(initial_tip: str, evidence_list: list[dict[str, Any]]) -> tuple[bool, str]:
+    def verify_forgetting_proof(
+        initial_tip: str, evidence_list: list[dict[str, Any]]
+    ) -> tuple[bool, str]:
         """
         Mathematically proves the chain of forgetting.
 
@@ -171,7 +171,9 @@ if __name__ == "__main__":
             cache.put("B", {"x": 2})  # A evicted
             cache.put("C", {"x": 3})  # B evicted
 
-            valid, final_tip = CortexSecureMemoryCache.verify_forgetting_proof(genesis, evidence_trail)
+            valid, final_tip = CortexSecureMemoryCache.verify_forgetting_proof(
+                genesis, evidence_trail
+            )
             self.assertTrue(valid)
             self.assertEqual(final_tip, cache.prove_forgetting()["tip"])
 

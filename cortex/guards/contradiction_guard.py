@@ -381,7 +381,7 @@ async def scan_all_contradictions(
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
     """
     Batch scanner: find pairs of potentially contradicting decisions.
-    
+
     Returns list of (decision_a, decision_b) pairs ordered by overlap.
     """
     async with aiosqlite.connect(str(db_path)) as conn:
@@ -437,9 +437,7 @@ async def scan_all_contradictions(
                 token_index: dict[str, list[int]] = defaultdict(list)
                 for idx, d in enumerate(group):
                     # Use top-8 tokens by length (more specific = better signal)
-                    top_tokens = sorted(
-                        d["tokens"], key=len, reverse=True
-                    )[:8]
+                    top_tokens = sorted(d["tokens"], key=len, reverse=True)[:8]
                     for token in top_tokens:
                         token_index[token].append(idx)
 
@@ -466,15 +464,13 @@ async def scan_all_contradictions(
                                 continue
 
                             ctype = "keyword_overlap"
-                            if _detect_negation(
-                                a["content"]
-                            ) or _detect_negation(b["content"]):
+                            if _detect_negation(a["content"]) or _detect_negation(b["content"]):
                                 ctype = "negation"
                                 score *= 1.3
 
-                            if _detect_supersession(
-                                a["content"]
-                            ) or _detect_supersession(b["content"]):
+                            if _detect_supersession(a["content"]) or _detect_supersession(
+                                b["content"]
+                            ):
                                 ctype = "version_supersede"
                                 score *= 1.2
 

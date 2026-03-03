@@ -52,15 +52,10 @@ class SymbolicActionEngine:
     """Calculates and monitors ψSAP metrics across domains."""
 
     def __init__(self):
-        self._history: dict[AgentDomain, list[SymbolicActionState]] = {
-            d: [] for d in AgentDomain
-        }
+        self._history: dict[AgentDomain, list[SymbolicActionState]] = {d: [] for d in AgentDomain}
 
     def compute_state(
-        self,
-        agent: SovereignAgent,
-        metrics: DomainMetrics,
-        grace_injection: float = 0.0
+        self, agent: SovereignAgent, metrics: DomainMetrics, grace_injection: float = 0.0
     ) -> SymbolicActionState:
         """Compute the current L_ψ for an agent domain."""
 
@@ -88,7 +83,7 @@ class SymbolicActionEngine:
             entropy_resistance=entropy_res,
             grace=grace,
             collapse_potential=collapse_pot,
-            lagrangian=lagrangian
+            lagrangian=lagrangian,
         )
 
         # Update cumulative action
@@ -121,6 +116,6 @@ class SymbolicActionEngine:
                     "entropy": round(curr.entropy_resistance, 2),
                     "grace": round(curr.grace, 2),
                     "collapse": round(curr.collapse_potential, 2),
-                    "action": round(curr.cumulative_action, 2)
+                    "action": round(curr.cumulative_action, 2),
                 }
         return report

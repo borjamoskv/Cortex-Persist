@@ -69,9 +69,7 @@ class ProviderMetrics:
             self.ewma_latency_ms = latency_ms
         else:
             alpha = self._EWMA_ALPHA
-            self.ewma_latency_ms = (
-                alpha * latency_ms + (1 - alpha) * self.ewma_latency_ms
-            )
+            self.ewma_latency_ms = alpha * latency_ms + (1 - alpha) * self.ewma_latency_ms
 
     @property
     def success_rate(self) -> float:

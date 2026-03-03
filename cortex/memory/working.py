@@ -132,11 +132,7 @@ class WorkingMemoryL1:
         if not self._access_log:
             return 0.0
         cutoff = time.monotonic() - window_seconds
-        count = sum(
-            1
-            for ts, pid in self._access_log
-            if ts > cutoff and pid == project_id
-        )
+        count = sum(1 for ts, pid in self._access_log if ts > cutoff and pid == project_id)
         # Normalise: 100+ accesses in window → 1.0  (Ω₁: right scale matters)
         return min(1.0, count / 100.0)
 

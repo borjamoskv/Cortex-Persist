@@ -29,6 +29,7 @@ class MemoryManagerProtocol(Protocol):
 
     def get_context_vector(self) -> Any: ...
 
+
 logger = logging.getLogger("cortex")
 
 

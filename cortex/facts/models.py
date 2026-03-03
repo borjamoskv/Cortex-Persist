@@ -1,9 +1,11 @@
 """Fact Layer Models (CLI/SDK Ingestion)."""
 
 from __future__ import annotations
+
 from pydantic import BaseModel, Field
 
 __all__ = ["IngestionFact"]
+
 
 class IngestionFact(BaseModel):
     """V8 Guardrail: Strict input validation before processing."""

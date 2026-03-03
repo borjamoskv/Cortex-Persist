@@ -32,7 +32,9 @@ logger = logging.getLogger("cortex.engine.async")
 TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
 
 
-class AsyncCortexEngine(StoreMixin, QueryMixin, SearchMixin, AgentMixin, ConsensusMixin, HistoryMixin):
+class AsyncCortexEngine(
+    StoreMixin, QueryMixin, SearchMixin, AgentMixin, ConsensusMixin, HistoryMixin
+):
     """
     Native async database engine for CORTEX.
     Protocol: MEJORAlo God Mode 8.0 - Wave 3 Structural Correction

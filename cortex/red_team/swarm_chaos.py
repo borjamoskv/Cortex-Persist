@@ -72,22 +72,36 @@ class RedTeamSwarm:
             targets = self.discovery.discover()
 
             if not targets:
-                logger.warning("🦾 [RED-TEAM] No attack surfaces found. Intelligence core secured or unreachable.")
+                logger.warning(
+                    "🦾 [RED-TEAM] No attack surfaces found. Intelligence core secured or unreachable."
+                )
             else:
                 # Elegir un objetivo aleatorio de la lista para inyectar caos
                 service, func, seed = random.choice(targets)
-                logger.info("🔥 [RED-TEAM] Chaos Cycle #%d — Targeted: %s.%s", self._chaos_count, service, func.__name__)
+                logger.info(
+                    "🔥 [RED-TEAM] Chaos Cycle #%d — Targeted: %s.%s",
+                    self._chaos_count,
+                    service,
+                    func.__name__,
+                )
 
                 try:
                     # Inyectar caos (este método ya genera anticuerpos si fracasa la inmunidad)
                     success = await self.inject_chaos(service, func, seed)
                     if success:
-                        logger.warning("💀 [RED-TEAM] Falsification Success: Vector captured and assimilated.")
+                        logger.warning(
+                            "💀 [RED-TEAM] Falsification Success: Vector captured and assimilated."
+                        )
                     else:
-                        logger.info("🦾 [RED-TEAM] Surface survived. Immunity confirmed for %s.", func.__name__)
+                        logger.info(
+                            "🦾 [RED-TEAM] Surface survived. Immunity confirmed for %s.",
+                            func.__name__,
+                        )
                 except Exception as e:
                     # Si el propio inyector explota, es un error del Red Team, no del objetivo.
-                    logger.error("❌ [RED-TEAM] Red Team internal failure (Byzantine Swarm Error): %s", e)
+                    logger.error(
+                        "❌ [RED-TEAM] Red Team internal failure (Byzantine Swarm Error): %s", e
+                    )
 
             # Ω₅: El ritmo del caos es irregular para evitar patrones de adaptación predecibles.
             jitter = random.uniform(0.8, 1.2)

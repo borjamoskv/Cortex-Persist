@@ -46,13 +46,14 @@ CREATE INDEX IF NOT EXISTS idx_causal_project ON causal_edges(project);
 
 # ── Edge Types ──────────────────────────────────────────────────────
 
-EDGE_TRIGGERED_BY = "triggered_by"    # fact was triggered by signal
-EDGE_UPDATED_FROM = "updated_from"    # fact is an update of another fact
+EDGE_TRIGGERED_BY = "triggered_by"  # fact was triggered by signal
+EDGE_UPDATED_FROM = "updated_from"  # fact is an update of another fact
 EDGE_DEPRECATED_BY = "deprecated_by"  # fact was deprecated by another
-EDGE_DERIVED_FROM = "derived_from"    # fact was derived from analysis
+EDGE_DERIVED_FROM = "derived_from"  # fact was derived from analysis
 
 
 # ── Data Model ──────────────────────────────────────────────────────
+
 
 @dataclass(frozen=True, slots=True)
 class CausalEdge:
@@ -83,6 +84,7 @@ def _edge_from_row(row: tuple) -> CausalEdge:
 
 
 # ── Causal Graph ────────────────────────────────────────────────────
+
 
 class CausalGraph:
     """Persistent causal DAG backed by SQLite.
@@ -129,7 +131,11 @@ class CausalGraph:
         edge_id: int = cursor.lastrowid  # type: ignore[assignment]
         logger.debug(
             "Causal edge #%d: fact %d ←[%s]← parent=%s signal=%s",
-            edge_id, fact_id, edge_type, parent_id, signal_id,
+            edge_id,
+            fact_id,
+            edge_type,
+            parent_id,
+            signal_id,
         )
         return edge_id
 
@@ -263,6 +269,7 @@ class CausalGraph:
 
 # ── Oracle (Original API — preserved for backward compatibility) ────
 
+
 class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact."""
 
@@ -316,6 +323,7 @@ class CausalOracle:
 
 
 # ── Linking Helper (preserved API) ──────────────────────────────────
+
 
 def link_causality(meta: dict[str, Any] | None, signal_id: int | None) -> dict[str, Any]:
     """Attaches causal metadata to a fact's meta dictionary."""

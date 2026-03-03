@@ -163,9 +163,7 @@ class LLMProvider(BaseProvider):
         # use modelos especializados según la intención del prompt.
         raw_map: dict[str, str] = preset.get("intent_model_map", {})
         self._intent_model_map: dict[IntentProfile, str] = {
-            _TAG_MAP[tag]: model_id
-            for tag, model_id in raw_map.items()
-            if tag in _TAG_MAP
+            _TAG_MAP[tag]: model_id for tag, model_id in raw_map.items() if tag in _TAG_MAP
         }
         if self._intent_model_map:
             logger.debug(
@@ -257,9 +255,7 @@ class LLMProvider(BaseProvider):
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
-    def _log_resolved_model(
-        self, payload: dict[str, Any], response_data: dict[str, Any]
-    ) -> None:
+    def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         """Log when a meta-router resolves to a different model than requested.
 
         Enables traceability for hierarchical routing — when CORTEX
@@ -281,7 +277,7 @@ class LLMProvider(BaseProvider):
         url: str,
         headers: dict[str, str],
         payload: dict[str, Any],
-        original_error: httpx.HTTPStatusError
+        original_error: httpx.HTTPStatusError,
     ) -> str:
         """Parse quotaResetDelay from error response, sleep, and retry."""
         import asyncio
@@ -327,7 +323,9 @@ class LLMProvider(BaseProvider):
             safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0
             logger.warning(
                 "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
-                self._model, safe_delay, attempt
+                self._model,
+                safe_delay,
+                attempt,
             )
 
             await asyncio.sleep(safe_delay)
@@ -375,7 +373,9 @@ class LLMProvider(BaseProvider):
             }
 
             retry_resp = await fallback_provider._client.post(
-                fb_url, headers=fb_headers, json=fb_payload,
+                fb_url,
+                headers=fb_headers,
+                json=fb_payload,
             )
             retry_resp.raise_for_status()
             data = retry_resp.json()
@@ -431,7 +431,10 @@ class LLMProvider(BaseProvider):
 
         try:
             async with self._client.stream(
-                "POST", url, headers=headers, json=payload,
+                "POST",
+                url,
+                headers=headers,
+                json=payload,
             ) as response:
                 response.raise_for_status()
                 async for chunk in self._process_stream_lines(response):
@@ -439,7 +442,8 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             logger.error(
                 "LLM Stream Failure [%s]: %s",
-                self._provider, e.response.text[:500],
+                self._provider,
+                e.response.text[:500],
             )
             raise
 
@@ -518,9 +522,7 @@ class LLMProvider(BaseProvider):
 
     def __repr__(self) -> str:
         if self._intent_model_map:
-            models = ", ".join(
-                f"{k.value}={v}" for k, v in self._intent_model_map.items()
-            )
+            models = ", ".join(f"{k.value}={v}" for k, v in self._intent_model_map.items())
             return f"LLMProvider(provider={self._provider!r}, models=[{models}])"
         return f"LLMProvider(provider={self._provider!r}, model={self._model!r})"
 

@@ -230,7 +230,8 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
             from cortex.llm.router import IntentProfile
 
             translation = await llm.complete(
-                prompt, system="You are a professional translator.",
+                prompt,
+                system="You are a professional translator.",
                 intent=IntentProfile.CREATIVE,
             )
             if translation:

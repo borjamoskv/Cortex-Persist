@@ -213,7 +213,7 @@ class BridgeImportStrategy:
         delta = gap * mult
 
         # Symbiotic Trait Transfer: Permanent inheritance of effective parameters
-        if hasattr(worst, 'parameters') and hasattr(best, 'parameters'):
+        if hasattr(worst, "parameters") and hasattr(best, "parameters"):
             worst.parameters.update(best.parameters)
 
         return Mutation(
@@ -318,7 +318,7 @@ class EntropyReductionStrategy:
                     "axiom_12_trigger": True,
                     "state_hash": agent.state_hash,
                     "purge_count": len(agent.mutations),
-                }
+                },
             )
         return None
 
@@ -336,7 +336,7 @@ class EntropyReductionStrategy:
                     "axiom_12_trigger": True,
                     "state_hash": sub.state_hash,
                     "purge_count": len(sub.mutations),
-                }
+                },
             )
         return None
 

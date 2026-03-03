@@ -84,18 +84,18 @@ class IntentValidator:
     # ── Signal patterns (compiled once) ─────────────────────────────
 
     _CODE_SIGNALS: tuple[re.Pattern[str], ...] = (
-        re.compile(r"```\w*\n"),            # code fences
-        re.compile(r"\bdef \w+\("),          # function defs
-        re.compile(r"\bclass \w+[:(]"),      # class defs
-        re.compile(r"\bimport \w+"),         # imports
-        re.compile(r"\breturn \w+"),         # return statements
-        re.compile(r"[{;}]\s*$", re.M),     # braces/semicolons
+        re.compile(r"```\w*\n"),  # code fences
+        re.compile(r"\bdef \w+\("),  # function defs
+        re.compile(r"\bclass \w+[:(]"),  # class defs
+        re.compile(r"\bimport \w+"),  # imports
+        re.compile(r"\breturn \w+"),  # return statements
+        re.compile(r"[{;}]\s*$", re.M),  # braces/semicolons
         re.compile(r"\b(if|for|while)\s*\("),  # control flow
-        re.compile(r"=>|->|::\s*\w+"),       # arrows/type annotations
+        re.compile(r"=>|->|::\s*\w+"),  # arrows/type annotations
     )
 
     _REASONING_SIGNALS: tuple[re.Pattern[str], ...] = (
-        re.compile(r"^\d+\.\s", re.M),       # numbered steps
+        re.compile(r"^\d+\.\s", re.M),  # numbered steps
         re.compile(r"\b(therefore|hence|thus|consequently|because|since)\b", re.I),
         re.compile(r"\b(first|second|third|finally|in conclusion)\b", re.I),
         re.compile(r"\b(analysis|hypothesis|evidence|conclusion|reasoning)\b", re.I),
@@ -108,7 +108,7 @@ class IntentValidator:
         re.compile(r"\b(once upon|story|narrative|imagine|dream)\b", re.I),
         re.compile(r"\b(metaphor|simile|poetry|verse|stanza)\b", re.I),
         re.compile(r"\b(chapter|scene|act|protagonist|character)\b", re.I),
-        re.compile(r"[!]{2,}"),              # emphatic punctuation
+        re.compile(r"[!]{2,}"),  # emphatic punctuation
         re.compile(r"\b(felt|whispered|sighed|gazed|wandered)\b", re.I),
     )
 

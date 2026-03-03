@@ -7,6 +7,7 @@ payloads de entrada basados en la introspección del AST y firmas.
 
 Axioma Ω₁: Toda causa es alcanzable si escaneas a la escala correcta.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -64,7 +65,9 @@ class DiscoveryProvider:
         self._cache = targets
         return targets
 
-    def _scan_module(self, ns_name: str, module: types.ModuleType) -> list[tuple[str, Callable, dict[str, Any]]]:
+    def _scan_module(
+        self, ns_name: str, module: types.ModuleType
+    ) -> list[tuple[str, Callable, dict[str, Any]]]:
         """Extrae funciones y métodos públicos del módulo."""
         surfaces = []
 

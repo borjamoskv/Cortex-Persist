@@ -34,7 +34,11 @@ class BicameralConsole:
     """The Subconscious Interface separating agent internal monologue."""
 
     def _relay_event(
-        self, stream: str, source: str, message: str, meta: dict[str, Any] = None  # type: ignore[reportArgumentType]
+        self,
+        stream: str,
+        source: str,
+        message: str,
+        meta: dict[str, Any] = None,  # type: ignore[reportArgumentType]
     ) -> None:
         """Relays the event to an external listener (Notch Alcove)."""
         event = {

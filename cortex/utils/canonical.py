@@ -29,6 +29,7 @@ def now_iso() -> str:
     """Return current UTC time in ISO 8601 format."""
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
+
 # ─── Canonical JSON ───────────────────────────────────────────────
 
 
