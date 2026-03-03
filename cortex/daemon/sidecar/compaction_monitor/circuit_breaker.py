@@ -130,7 +130,6 @@ async def call_external_compact(
 
         # Fallback: direct SQLite WAL checkpoint
         if db_path:
-            import sqlite3
 
             def _checkpoint():
                 from cortex.database.core import connect as db_connect

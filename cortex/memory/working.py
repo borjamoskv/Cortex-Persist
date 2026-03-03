@@ -59,6 +59,25 @@ class WorkingMemoryL1:
 
     # ─── Core Operations ──────────────────────────────────────────
 
+    def _calculate_priority(self, event: MemoryEvent) -> float:
+        """Lightweight heuristic to determine event retention priority."""
+        score = 1.0
+        # 1. Recency (base priority)
+        age_seconds = time.time() - event.timestamp.timestamp()
+        score += max(0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
+
+        # 2. Emotion/Valence
+        meta_valence = event.metadata.get("valence", 0.0)
+        score += abs(float(meta_valence)) * 0.5
+
+        # 3. Role importance
+        if event.role == "user":
+            score += 0.5
+        elif event.role == "system":
+            score += 1.0
+
+        return score
+
     def add_event(self, event: MemoryEvent) -> list[MemoryEvent]:
         """Add an event, returning any overflow for L2 compression.
 
@@ -87,7 +106,17 @@ class WorkingMemoryL1:
 
         overflow: list[MemoryEvent] = []
         while self._current_tokens > self._max_tokens and self._buffer:
-            evicted = self._buffer.popleft()
+            # Shift from pure FIFO to priority-weighted eviction (Central Executive)
+            lowest_priority = float('inf')
+            evict_idx = 0
+            for i, evt in enumerate(self._buffer):
+                p = self._calculate_priority(evt)
+                if p < lowest_priority:
+                    lowest_priority = p
+                    evict_idx = i
+
+            evicted = self._buffer[evict_idx]
+            del self._buffer[evict_idx]
             self._current_tokens -= evicted.token_count
             overflow.append(evicted)
 

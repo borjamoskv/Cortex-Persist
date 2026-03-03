@@ -47,7 +47,11 @@ class PreVoteResult:
 # For multi-process clusters, replace RequestVote with HTTP/gRPC calls.
 
 class NodeRegistry:
-    """In-process registry for RaftNode instances (single-runtime clusters)."""
+    """In-process singleton registry for RaftNode instances.
+
+    Intentionally uses a class-level dict: all callers in the same process
+    must share the same view of the cluster topology.
+    """
 
     _nodes: dict[str, "RaftNode"] = {}
 
@@ -62,6 +66,11 @@ class NodeRegistry:
     @classmethod
     def get(cls, node_id: str) -> "RaftNode | None":
         return cls._nodes.get(node_id)
+
+    @classmethod
+    def reset(cls) -> None:
+        """Clear all registrations. Use in tests for isolation."""
+        cls._nodes.clear()
 
 
 # ─── RaftNode ─────────────────────────────────────────────────────────────────
@@ -332,7 +341,8 @@ class RaftNode:
             await self._become_leader()
         else:
             # Didn't win — revert to FOLLOWER and wait for next timeout
-            self.role = NodeRole.FOLLOWER
+            async with self._role_lock:
+                self.role = NodeRole.FOLLOWER
             logger.info("Node %s lost election for term %d. Reverting to FOLLOWER.", self.node_id, term)
 
     async def _request_vote(self, peer_id: str, term: int) -> bool:

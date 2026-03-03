@@ -10,7 +10,10 @@ Provides native CLI commands for NotebookLM synchronization:
 
 from __future__ import annotations
 
+import logging
+import os
 import shutil
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -20,10 +23,10 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli.notebooklm_data import (
+    _PROJECT_DOMAIN,
     DIGEST_FILE,
     DOMAINS_DIR,
     NOTEBOOKLM_DIR,
-    _PROJECT_DOMAIN,
     _detect_cloud_sync,
     _format_fact_obj,
     _get_engine_active_facts,
@@ -33,6 +36,7 @@ from cortex.cli.notebooklm_data import (
 )
 
 console = Console()
+logger = logging.getLogger(__name__)
 
 
 # ── CLI Group ──────────────────────────────────────────────────────────
@@ -54,9 +58,6 @@ def digest_cmd(output: str):
     async def _digest():
         facts = await _get_engine_active_facts()
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Group by project using O(1) hashing (defaultdict)
-        from collections import defaultdict
-
         projects_data = defaultdict(list)
         for f in facts:
             projects_data[f.project].append(f)
@@ -133,8 +134,6 @@ def fragment_cmd(output_dir: str):
         facts = await _get_engine_active_facts()
         ts = datetime.now().strftime("%Y-%m-%d")
 
-        from collections import defaultdict
-
         # Classify facts by domain (O(1) with defaultdict)
         domain_facts = defaultdict(list)
         for f in facts:
@@ -158,7 +157,8 @@ def fragment_cmd(output_dir: str):
 
             lines = [
                 f"# 🧠 CORTEX — {domain.upper()}\n\n",
-                f"> Snapshot: {ts} | Facts: {len(facts_in_domain)} | Projects: {len(proj_data)}\n\n",
+                f"> Snapshot: {ts} | Facts: {len(facts_in_domain)}"
+                f" | Projects: {len(proj_data)}\n\n",
                 "---\n\n",
             ]
 
@@ -248,7 +248,6 @@ def sync_cmd(drive_path: str | None, mode: str):
         synced_files.append(str(dest))
 
     # Clean old files (older than 7 days)
-    import os
     import time
 
     cutoff = time.time() - (7 * 86400)
@@ -284,14 +283,10 @@ def status_cmd():
 
     def _check(path: Path, label: str):
         if path.is_file():
-            import os
-
             mtime = datetime.fromtimestamp(os.path.getmtime(path)).strftime("%Y-%m-%d %H:%M")
             size = os.path.getsize(path)
             table.add_row(label, str(path), "1", f"{size:,} B", mtime)
         elif path.is_dir():
-            import os
-
             files = list(path.glob("*.md"))
             total_size = sum(os.path.getsize(f) for f in files)
             newest = max((os.path.getmtime(f) for f in files), default=0)
@@ -321,8 +316,6 @@ def status_cmd():
 
     # Staleness warning
     if DIGEST_FILE.exists():
-        import os
-
         age_h = (datetime.now().timestamp() - os.path.getmtime(DIGEST_FILE)) / 3600
         if age_h > 48:
             console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
@@ -367,8 +360,11 @@ def ingest_cmd(drive_path: str | None):
         try:
             with open(manifest_path, encoding="utf-8") as f:
                 processed_files = set(json.load(f))
-        except Exception:
-            pass
+        except (json.JSONDecodeError, OSError):
+            logger.warning(
+                "[NOTEBOOKLM] Manifest corrupted at %s, starting fresh.",
+                manifest_path,
+            )
 
     engine = get_engine()
 
@@ -390,9 +386,11 @@ def ingest_cmd(drive_path: str | None):
             "  {\n"
             '    "fact_type": "decision|ghost|bridge|knowledge",\n'
             '    "project": "The associated project name",\n'
-            '    "content": "The actual discovery or fact extracted",\n'
+            '    "content": "The actual discovery or fact extracted"'
+            ",\n"
             '    "confidence": "C3",\n'
-            '    "shadow_keys": ["∆_CTX:A1B2C3D4"] // Include if found, else empty list\n'
+            '    "shadow_keys": ["∆_CTX:A1B2C3D4"]'
+            " // Include if found, else empty list\\n"
             "  }\n"
             "]\n"
             "If no facts are present, output an empty list: []"

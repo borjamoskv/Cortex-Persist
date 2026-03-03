@@ -68,8 +68,6 @@ class ApotheosisEngine:
             if db:
                 try:
                     # In aiosqlite, ._conn is the sync connection
-                    import sqlite3
-
                     sync_conn = getattr(db, "_conn", db)
                     if isinstance(sync_conn, sqlite3.Connection):
                         self._signal_bus = SignalBus(sync_conn)
@@ -122,6 +120,11 @@ class ApotheosisEngine:
                 self._reflex_tasks.add(sync_task)
                 sync_task.add_done_callback(self._reflex_tasks.discard)
 
+                # 🧠 Evaluate Metamemory calibration (Brier Score)
+                meta_task = asyncio.create_task(self._metamemory_audit())
+                self._reflex_tasks.add(meta_task)
+                meta_task.add_done_callback(self._reflex_tasks.discard)
+
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
             from cortex.cli.bicameral import bicameral
@@ -162,8 +165,39 @@ class ApotheosisEngine:
             # Sync to cloud if detected
             cloud_target = self._notebooklm.sync_to_cloud(digest_path)
             logger.info("📓 [NOTEBOOKLM] Digest synced to cloud: %s", cloud_target)
-        except Exception as e:
+        except (OSError, AttributeError, sqlite3.Error, asyncio.CancelledError) as e:
             logger.debug("[NOTEBOOKLM] Sync failed: %s", e)
+
+    async def _metamemory_audit(self) -> None:
+        """Evaluate Brier Score calibration during REM cycle (Ω₅)."""
+        if not self._cortex:
+            return
+        
+        try:
+            manager = getattr(self._cortex, "_memory_manager", None)
+            if not manager or not hasattr(manager, "metamemory"):
+                return
+            
+            score = manager.metamemory.calibration_score()
+            if score == -1.0:
+                logger.debug("🧠 [METAMEMORY] Insufficient outcomes for Brier Score.")
+                return
+
+            if score > 0.25:  # Arbitrary drift threshold for over/under-confidence
+                ENDOCRINE.pulse(
+                    HormoneType.CORTISOL,
+                    +0.10,
+                    reason=f"CalibrationDrift:{score:.2f}",
+                )
+                logger.warning(
+                    "🧠 [METAMEMORY] High Brier Score (drift). Calibration: %.2f. Cortisol +10%%.",
+                    score,
+                )
+            else:
+                logger.info("🧠 [METAMEMORY] Calibration optimal. Brier Score = %.2f.", score)
+                ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.02)
+        except Exception as e:
+            logger.error("[METAMEMORY] Audit failure: %s", e)
 
     async def _oracle_audit(self) -> None:
         """Ejecuta la auditoría de olvido en segundo plano (Ω₅)."""
@@ -224,8 +258,10 @@ class ApotheosisEngine:
         if entropy_found:
             consecutive_clean = 0
             r_factor = 1.0 + (dopamine * 0.5)
+            # After reset: base_sleep * (1.0 + growth) * r_factor
+            # The exponential only kicks in on subsequent clean rounds below.
             derived_sleep = min(
-                base_sleep * (1.5**consecutive_clean) * (1.0 + growth) * r_factor, self._SLEEP_MAX
+                base_sleep * (1.0 + growth) * r_factor, self._SLEEP_MAX
             )
         else:
             consecutive_clean = min(consecutive_clean + 1, 8)
@@ -297,7 +333,7 @@ class ApotheosisEngine:
                         continue
                     file_hashes[py_file] = current_hash
                     files_to_scan.append(py_file)
-                except (IOError, OSError):
+                except OSError:
                     continue
 
             if files_to_scan:
@@ -307,7 +343,7 @@ class ApotheosisEngine:
                     return_exceptions=True
                 )
                 
-                for py_file, entropy in zip(files_to_scan, results):
+                for py_file, entropy in zip(files_to_scan, results, strict=False):
                     if isinstance(entropy, list) and entropy:
                         entropy_found = True
                         if self._healer_mode and self._apply_cognitive_dampening():
@@ -351,8 +387,9 @@ class ApotheosisEngine:
         else:
             # Ω₅: Pre-commit AST Validation to maintain logical integrity
             try:
-                # Verify parseability before triggering healing
-                py_file.read_text("utf-8")
+                import ast
+                source = py_file.read_text("utf-8")
+                ast.parse(source, filename=str(py_file))  # Real AST validation
                 logger.info("[APOTHEOSIS] Healing energy sink: %s", py_file.name)
                 reasons = ", ".join(e["type"] for e in entropy)
                 intent = f"Refactor {py_file.name} to eliminate: {reasons}."

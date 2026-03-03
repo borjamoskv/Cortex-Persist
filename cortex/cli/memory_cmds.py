@@ -109,7 +109,8 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
     help="Search scope: core (default), personal, cold, or all",
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def search(query, project, top, scope, db) -> None:
+@click.option("--epistemic", is_flag=True, default=False, help="Show epistemic analysis (void/fog/stale detection)")
+def search(query, project, top, scope, db, epistemic) -> None:
     """Semantic search across CORTEX memory.
 
     Use --scope to search federated databases:
@@ -169,6 +170,31 @@ def search(query, project, top, scope, db) -> None:
             table.add_row(*row)
 
         console.print(table)
+
+        # Epistemic analysis overlay
+        if epistemic:
+            from cortex.memory.void_detector import EpistemicVoidDetector
+
+            detector = EpistemicVoidDetector()
+            candidates = [
+                {
+                    "id": r.fact_id,
+                    "content": r.content,
+                    "score": r.score,
+                }
+                for r in results
+            ]
+            analysis = detector.analyze(candidates)
+            console.print(
+                Panel(
+                    f"{analysis.badge}  confidence={analysis.confidence:.2f}  "
+                    f"candidates={analysis.candidate_count}  top_sim={analysis.top_similarity:.2f}\n"
+                    f"{analysis.recommendation}" if analysis.recommendation else f"{analysis.badge}",
+                    title="🧠 Epistemic Analysis",
+                    border_style="cyan" if analysis.is_safe_to_respond else "yellow",
+                )
+            )
+
         _show_tip(engine)
     finally:
         _run_async(engine.close())

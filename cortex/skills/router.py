@@ -8,11 +8,17 @@ Enruta dinámicamente según el grafo de dependencias de la SkillRegistry.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Final
 
+from cortex.memory.metamemory import MetamemoryMonitor
+from cortex.memory.procedural import ProceduralMemory
 from cortex.skills.registry import SkillManifest, SkillRegistry
 
 logger = logging.getLogger(__name__)
+
+# Minimum Procedural FOK to allow execution.
+# Below this, the router declares ignorance rather than hallucinating a skill.
+_FOK_GATE: Final[float] = 0.35
 
 
 class SkillRouter:
@@ -23,8 +29,12 @@ class SkillRouter:
 
     def __init__(self, registry: SkillRegistry | None = None) -> None:
         self.registry = registry or SkillRegistry().load()
+        self.metamemory = MetamemoryMonitor()
+        self.procedural_memory = ProceduralMemory()
 
-    def route_intent(self, intent: str, context: dict[str, Any] | None = None) -> list[SkillManifest]:
+    def route_intent(
+        self, intent: str, context: dict[str, Any] | None = None
+    ) -> list[SkillManifest]:
         """
         Analiza la intención cruda del operador (TBD: usar LLM/Noosphere) o heuristics,
         y devuelve la secuencia de manifests óptima para ejecutarla.
@@ -34,6 +44,33 @@ class SkillRouter:
         # Búsqueda semántica usando el motor de búsqueda que implementamos.
         # Si la intención nombra explícitamente el alias o comando, lo matcheamos primero.
         candidates = self.registry.search(intent)
+
+        # ── Procedural Metamemory Gate ────────────────────────────────────
+        # Augment each candidate with its full capability surface before scoring.
+        # This lets FOK see *what a skill declares it can do* (not just its name).
+        augmented_candidates = []
+        for m in candidates:
+            caps = [c.name for c in getattr(m, "capabilities", [])]
+            tags = getattr(m, "tags", [])
+            # Synthesize a rich surface string the FOK heuristic can match against
+            m.__dict__.update({"_fok_surface": " ".join([m.name, m.description, *caps, *tags])})
+            augmented_candidates.append(m)
+
+        judgment = self.metamemory.judge_procedural_fok(intent, augmented_candidates)
+        if judgment.fok_score < _FOK_GATE:
+            if judgment.tip_of_tongue:
+                logger.warning(
+                    "[ROUTER] Tip-of-Tongue: conceptos relacionados detectados pero sin skill exacto para: '%s'",
+                    intent,
+                )
+            else:
+                logger.warning(
+                    "[ROUTER] Unknown Capability: FOK=%.3f < %.2f para: '%s'",
+                    judgment.fok_score,
+                    _FOK_GATE,
+                    intent,
+                )
+            return []
 
         # Si tenemos un "god mode" o transcendent skill, lo priorizamos si corresponde.
         if "crea" in intent.lower() or "build" in intent.lower() or "proyecto" in intent.lower():
@@ -46,9 +83,26 @@ class SkillRouter:
             logger.warning("[ROUTER] No skills found for intent: %s", intent)
             return []
 
-        # Retornamos el mejor match (simple logic p.ej., primera) o el manifold de ejecución
-        # En el futuro: Construiremos el grafo y aplicaremos topologically sort de dependencias.
-        return candidates[:3]  # Límite arbitrario para pruebas
+        # Re-rankeamos candidatos usando ProceduralMemory (Striatal valuation)
+        # Auto-seed transcendent skills as permanent (no temporal decay)
+        for m in candidates:
+            if getattr(m, "is_transcendent", False) and not self.procedural_memory.get_engram(
+                m.slug
+            ):
+                self.procedural_memory.record_execution(
+                    m.slug,
+                    success=True,
+                    latency_ms=0.0,
+                    permanent=True,
+                )
+
+        def _striatal_key(manifest: SkillManifest) -> float:
+            engram = self.procedural_memory.get_engram(manifest.slug)
+            return engram.striatal_value if engram else 0.5
+
+        candidates.sort(key=_striatal_key, reverse=True)
+
+        return candidates[:3]
 
     def resolve_dependencies(self, manifest: SkillManifest) -> list[SkillManifest]:
         """

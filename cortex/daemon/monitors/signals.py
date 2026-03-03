@@ -15,8 +15,8 @@ import logging
 import sqlite3
 from typing import Any
 
-from cortex.database.core import connect as db_connect
 from cortex.daemon.models import SignalAlert
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("moskv-daemon")
 

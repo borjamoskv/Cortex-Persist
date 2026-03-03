@@ -56,6 +56,13 @@ class QuotaStatus:
     timeouts: int
     throttle_ratio_pct: float
 
+    def __repr__(self) -> str:
+        return (
+            f"QuotaStatus({self.current_tokens:.1f}/{self.capacity:.0f} "
+            f"[{self.fill_pct}%] | acq={self.acquired} thr={self.throttled} "
+            f"to={self.timeouts})"
+        )
+
 
 class SovereignQuotaManager:
     """Token Bucket atómico sobre SQLite WAL.
@@ -105,12 +112,17 @@ class SovereignQuotaManager:
                 )
 
     def _consume_sync(self, tokens: int) -> float:
-        """Intenta consumir tokens atomicamente.
+        """Intenta consumir tokens atómicamente.
+
+        Args:
+            tokens: Number of tokens to consume (must be >= 1).
 
         Returns:
             0.0  → consumo exitoso.
             > 0  → segundos de espera estimados.
         """
+        if tokens < 1:
+            raise ValueError(f"tokens must be >= 1, got {tokens}")
         now = time.time()
         try:
             with _db(self.db_path, exclusive=True) as conn:

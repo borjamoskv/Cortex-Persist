@@ -369,4 +369,3 @@ async def fetch_all_domain_metrics(
 
 
 # Re-export for backward compatibility
-from cortex.evolution.shannon_metrics import CortexMetrics  # noqa: E402
