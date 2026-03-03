@@ -109,6 +109,9 @@ class RetrievalOutcome:
     query: str = ""
     """Original query text."""
 
+    project_id: str = "default_project"
+    """The project context for this retrieval."""
+
     predicted_confidence: float = 0.0
     """What the system predicted as confidence before retrieval."""
 
@@ -392,7 +395,7 @@ class MetamemoryMonitor:
             if len(self._query_failures[key]) > 20:
                 self._query_failures[key] = self._query_failures[key][-20:]
 
-    def calibration_score(self) -> float:
+    def calibration_score(self, project_id: str | None = None) -> float:
         """Compute Brier score of confidence predictions vs outcomes.
 
         Brier Score = (1/N) * Σ(predicted - actual)²
@@ -400,15 +403,19 @@ class MetamemoryMonitor:
         Lower = better calibrated. Range [0.0, 1.0].
         Returns -1.0 if insufficient data.
         """
-        if len(self._outcomes) < _MIN_CALIBRATION_SAMPLES:
+        outcomes = self._outcomes
+        if project_id:
+            outcomes = [o for o in self._outcomes if o.project_id == project_id]
+
+        if len(outcomes) < _MIN_CALIBRATION_SAMPLES:
             return -1.0
 
         total = 0.0
-        for outcome in self._outcomes:
+        for outcome in outcomes:
             actual = 1.0 if outcome.actual_success else 0.0
             total += (outcome.predicted_confidence - actual) ** 2
 
-        return round(total / len(self._outcomes), 6)
+        return round(total / len(outcomes), 6)
 
     # ─── Full Introspection ───────────────────────────────────────
 
@@ -483,6 +490,13 @@ class MetamemoryMonitor:
         gaps = self.knowledge_gaps()
         total_outcomes = len(self._outcomes)
 
+        # Segmented view (Ω₁: Multi-Scale Causality)
+        project_ids = {o.project_id for o in self._outcomes}
+        active_segments = {
+            pid: self.calibration_score(project_id=pid)
+            for pid in project_ids
+        }
+
         # Outcome distribution
         successes = sum(1 for o in self._outcomes if o.actual_success)
         failures = total_outcomes - successes
@@ -506,9 +520,15 @@ class MetamemoryMonitor:
         else:
             tier = "poor"
 
+        rounded_segments = {
+            k: round(v, 4) if v >= 0 else -1.0 for k, v in active_segments.items()
+        }
+
         return {
             "brier_score": brier,
             "calibration_tier": tier,
+            "segmented_brier": rounded_segments,
+            "active_domains": [k for k, v in active_segments.items() if v >= 0],
             "total_outcomes": total_outcomes,
             "successes": successes,
             "failures": failures,
