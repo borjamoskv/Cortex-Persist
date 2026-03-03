@@ -75,6 +75,7 @@ class SubAgent:
     epigenetic_state: dict[str, Any] = field(default_factory=dict)  # 350-Sovereign biological state
     evolution_tier: str = "GENESIS"  # Match EvolutionType auto() values
     generation: int = 0
+    enneagram: str = "unknown"
 
     @property
     def mutation_count(self) -> int:
@@ -85,7 +86,7 @@ class SubAgent:
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1
-        
+
         # Evolution Tier Transition
         if self.fitness > 90.0:
             self.evolution_tier = "SINGULARITY"
@@ -121,6 +122,7 @@ class SubAgent:
             "fitness": round(self.fitness, 2),
             "generation": self.generation,
             "mutation_count": self.mutation_count,
+            "enneagram": self.enneagram,
         }
 
 
@@ -139,10 +141,20 @@ class SovereignAgent:
     def __post_init__(self) -> None:
         """Spawn 10 subagents if none exist."""
         if not self.subagents:
+            import random
+
+            BEST_ENEATYPOS = [
+                "8w7 (The Sovereign Challenger)",
+                "5w4 (The Omniscient Architect)",
+                "7w4 (The Enthusiastic Individualist)",
+                "1w9 (The Idealistic Reformer)",
+                "3w4 (The Ambitious Professional)",
+            ]
             self.subagents = [
                 SubAgent(
                     name=f"{self.domain.name.lower()}-sub-{i}",
                     domain=self.domain,
+                    enneagram=random.choice(BEST_ENEATYPOS),
                 )
                 for i in range(10)
             ]

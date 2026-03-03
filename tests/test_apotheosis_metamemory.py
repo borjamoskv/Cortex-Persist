@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from cortex.engine.apotheosis import ApotheosisEngine
 from cortex.engine.endocrine import HormoneType
@@ -28,7 +29,9 @@ def engine(mock_cortex, tmp_path):
 
 @pytest.mark.asyncio
 @patch("cortex.engine.apotheosis.ENDOCRINE")
-async def test_metamemory_audit_high_brier_score_pulses_cortisol(mock_endocrine, engine, mock_metamemory):
+async def test_metamemory_audit_high_brier_score_pulses_cortisol(
+    mock_endocrine, engine, mock_metamemory
+):
     # Simulate high calibration drift (overconfidence/underconfidence)
     mock_metamemory.calibration_score.return_value = 0.40
 
@@ -44,7 +47,9 @@ async def test_metamemory_audit_high_brier_score_pulses_cortisol(mock_endocrine,
 
 @pytest.mark.asyncio
 @patch("cortex.engine.apotheosis.ENDOCRINE")
-async def test_metamemory_audit_optimal_calibration_pulses_dopamine(mock_endocrine, engine, mock_metamemory):
+async def test_metamemory_audit_optimal_calibration_pulses_dopamine(
+    mock_endocrine, engine, mock_metamemory
+):
     # Simulate excellent calibration
     mock_metamemory.calibration_score.return_value = 0.15
 

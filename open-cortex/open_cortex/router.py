@@ -18,7 +18,6 @@ from open_cortex.metrics import (
     TurnMetrics,
     compute_coverage,
     compute_ignored_memory_rate,
-    compute_plan_adherence,
 )
 from open_cortex.models import (
     AuditResponse,
@@ -74,16 +73,18 @@ async def plan(req: PlanRequest) -> PlanResponse:
     # In a real implementation, the LLM generates this.
     # Here we return a template plan for the given query.
     response = PlanResponse(
-        query_decomposition=[
-            {"action": "recall", "filters": {}, "k": settings.default_k}
-        ],
+        query_decomposition=[{"action": "recall", "filters": {}, "k": settings.default_k}],
         rationale=f"Plan for query: {req.query}",
     )
 
     # Metamemory enforcement: if JOL below threshold, force recall
     if response.metamemory.jol_expected < settings.jol_force_recall_threshold:
         response.metamemory.force_recall = True
-        logger.info("JOL %.2f < threshold %.2f → forcing recall", response.metamemory.jol_expected, settings.jol_force_recall_threshold)
+        logger.info(
+            "JOL %.2f < threshold %.2f → forcing recall",
+            response.metamemory.jol_expected,
+            settings.jol_force_recall_threshold,
+        )
 
     return response
 
@@ -108,7 +109,7 @@ async def recall(req: RecallRequest) -> RecallResponse:
         )
 
         for mem in memories:
-            freshness_days = (mem.freshness.valid_from.timestamp() if mem.freshness.valid_from else 0)
+            (mem.freshness.valid_from.timestamp() if mem.freshness.valid_from else 0)
             all_results.append(
                 RecalledMemory(
                     memory_id=mem.id,

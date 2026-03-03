@@ -24,6 +24,5 @@ class IngestionFact(BaseModel):
     tenant_id: str = Field(..., min_length=1)
     confidence: str = Field(..., pattern=r"^(C[1-5]|stated|inferred)$")
     source: Provenance = Field(
-        default=Provenance.SYSTEM,
-        description="Provenance / Data origin (Source Monitoring)"
+        default=Provenance.SYSTEM, description="Provenance / Data origin (Source Monitoring)"
     )

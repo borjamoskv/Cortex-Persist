@@ -90,7 +90,10 @@ class OrchestraIntrospectionMixin:
 
         # Logic for Multi-round Refinement (Ω₅)
         if final_thought.confidence < 0.8:
-            logger.info("🛡️ [ORP] Low confidence (%.2f). Starting second round of adversarial refinement.", final_thought.confidence)
+            logger.info(
+                "🛡️ [ORP] Low confidence (%.2f). Starting second round of adversarial refinement.",
+                final_thought.confidence,
+            )
             siege_2 = await inquisitor.asediar(final_thought.content, original_prompt=prompt)
             refinement_prompt_2 = (
                 f"ORIGINAL INTENT: {prompt}\n\n"
@@ -108,7 +111,8 @@ class OrchestraIntrospectionMixin:
                 "orp_active": True,
                 "siege_result": siege.content[:500] + "...",
                 "initial_hypothesis_confidence": hypothesis.confidence,
-                "orp_multi_round": final_thought.confidence < 0.8  # Track if multi-round was triggered
+                "orp_multi_round": final_thought.confidence
+                < 0.8,  # Track if multi-round was triggered
             }
         )
         return final_thought

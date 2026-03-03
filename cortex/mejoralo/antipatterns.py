@@ -30,7 +30,6 @@ from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 __all__ = ["scan_antipatterns"]
 
 
-
 # Blocking calls that MUST NOT appear in async functions
 _BLOCKING_CALLS: dict[str, str] = {
     "open": "Use aiofiles.open() or asyncio.to_thread(open, ...)",

@@ -231,7 +231,9 @@ class EntropyReductionStrategy:
             return None
 
         original_len = len(subagent.mutation.history_log)
-        subagent.mutation.history_log = [f"[COMPRESSED] {original_len} generations -> entropy purge"]
+        subagent.mutation.history_log = [
+            f"[COMPRESSED] {original_len} generations -> entropy purge"
+        ]
         subagent.mutation.entropy_resistance = 1.0
         subagent.fitness += 2.0
 

@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-import time
 from unittest.mock import patch
 
 import pytest
 
 from cortex.memory.stdp import (
-    DEFAULT_LR_LTP,
-    LTP_WINDOW_MS,
     STDPEngine,
     SynapticEdge,
 )
-
 
 # ─── SynapticEdge Tests ──────────────────────────────────────────────
 
@@ -30,9 +26,7 @@ class TestSynapticEdge:
         assert edge.plasticity_ratio == 1.0  # No events → neutral
 
     def test_plasticity_ratio_ltp_dominant(self) -> None:
-        edge = SynapticEdge(
-            source_id="a", target_id="b", ltp_events=8, ltd_events=2
-        )
+        edge = SynapticEdge(source_id="a", target_id="b", ltp_events=8, ltd_events=2)
         assert edge.plasticity_ratio == pytest.approx(0.8)
 
 
@@ -62,7 +56,7 @@ class TestSTDPEngine:
 
             # B fires at t=50ms (within LTP window)
             mock_time.return_value = 0.050  # 50ms in seconds
-            changes = stdp.record_activation("b")
+            stdp.record_activation("b")
 
         # A→B edge should have been created/strengthened
         w = stdp.get_edge_weight("a", "b")

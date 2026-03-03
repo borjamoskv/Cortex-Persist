@@ -63,8 +63,6 @@ class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
 
-
-
 class ParameterTuningStrategy:
     """Adaptive mutation rate — scales with ruggedness (Developmental Plasticity).
 

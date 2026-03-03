@@ -56,6 +56,8 @@ class ShipResult:
     seals: list[ShipSeal]
     passed: int = 0
     total: int = 7
+
+
 @dataclass
 class AntipatternFinding:
     """A single antipattern detection."""

@@ -46,6 +46,7 @@ class PreVoteResult:
 # Shared dict mapping node_id → RaftNode for same-process clusters.
 # For multi-process clusters, replace RequestVote with HTTP/gRPC calls.
 
+
 class NodeRegistry:
     """In-process singleton registry for RaftNode instances.
 
@@ -213,13 +214,13 @@ class RaftNode:
         granted = sum(1 for r in results if r is True)
         logger.debug(
             "PreVote result: %d/%d peers would grant for hypothetical term %d",
-            granted, len(self.peers), hypothetical_term,
+            granted,
+            len(self.peers),
+            hypothetical_term,
         )
         return PreVoteResult(granted=granted, total=len(self.peers))
 
-    async def handle_pre_vote_request(
-        self, candidate_id: str, hypothetical_term: int
-    ) -> bool:
+    async def handle_pre_vote_request(self, candidate_id: str, hypothetical_term: int) -> bool:
         """Handle an incoming PreVote RPC.
 
         Grant pre-vote if:
@@ -238,7 +239,9 @@ class RaftNode:
             if leader_alive:
                 logger.debug(
                     "PreVote deny to %s: leader still alive (%.2fs < %.2fs)",
-                    candidate_id, elapsed, self.ELECTION_TIMEOUT_MIN,
+                    candidate_id,
+                    elapsed,
+                    self.ELECTION_TIMEOUT_MIN,
                 )
                 return False
 
@@ -257,12 +260,14 @@ class RaftNode:
                 logger.warning(
                     "Pre-vote failed: quorum unreachable (%d/%d peers would grant). "
                     "Aborting election to prevent term inflation.",
-                    pre.granted, pre.total,
+                    pre.granted,
+                    pre.total,
                 )
                 return  # Stay FOLLOWER; election_loop re-samples timeout
             logger.info(
                 "Pre-vote passed (%d/%d). Proceeding to real election.",
-                pre.granted, pre.total,
+                pre.granted,
+                pre.total,
             )
 
         # ─── Atomic transition to CANDIDATE ────────────────────────────────
@@ -292,10 +297,7 @@ class RaftNode:
         votes_received = 1  # Self-vote counts
         majority = (len(self.peers) + 1) // 2 + 1  # +1 for self
 
-        vote_tasks = [
-            asyncio.create_task(self._request_vote(peer, term))
-            for peer in self.peers
-        ]
+        vote_tasks = [asyncio.create_task(self._request_vote(peer, term)) for peer in self.peers]
 
         # Race for majority within one election timeout window
         vote_timeout = _rng.uniform(self.ELECTION_TIMEOUT_MIN, self.ELECTION_TIMEOUT_MAX)
@@ -324,9 +326,7 @@ class RaftNode:
 
         # If term changed while we were voting (split-brain / higher term), abort
         if self.current_term != term or self.role != NodeRole.CANDIDATE:
-            logger.info(
-                "Election aborted for term %d: term changed or role mutated.", term
-            )
+            logger.info("Election aborted for term %d: term changed or role mutated.", term)
             return
 
         logger.info(
@@ -343,7 +343,9 @@ class RaftNode:
             # Didn't win — revert to FOLLOWER and wait for next timeout
             async with self._role_lock:
                 self.role = NodeRole.FOLLOWER
-            logger.info("Node %s lost election for term %d. Reverting to FOLLOWER.", self.node_id, term)
+            logger.info(
+                "Node %s lost election for term %d. Reverting to FOLLOWER.", self.node_id, term
+            )
 
     async def _request_vote(self, peer_id: str, term: int) -> bool:
         """Send RequestVote RPC to a peer.
@@ -389,7 +391,9 @@ class RaftNode:
             if candidate_term < self.current_term:
                 logger.debug(
                     "Denying vote to %s: stale term %d < %d",
-                    candidate_id, candidate_term, self.current_term,
+                    candidate_id,
+                    candidate_term,
+                    self.current_term,
                 )
                 return False
 
@@ -397,7 +401,9 @@ class RaftNode:
             if already_voted:
                 logger.debug(
                     "Denying vote to %s: already voted for %s in term %d",
-                    candidate_id, self.voted_for, self.current_term,
+                    candidate_id,
+                    self.voted_for,
+                    self.current_term,
                 )
                 return False
 
@@ -407,7 +413,9 @@ class RaftNode:
             self._heartbeat_event.set()  # Reset election timer on this node too
             logger.info(
                 "Node %s GRANTED vote to %s for term %d",
-                self.node_id, candidate_id, candidate_term,
+                self.node_id,
+                candidate_id,
+                candidate_term,
             )
             return True
 
@@ -465,7 +473,9 @@ class RaftNode:
                 if self.role != NodeRole.FOLLOWER:
                     logger.info(
                         "Node %s stepping down to FOLLOWER (leader=%s, term=%d).",
-                        self.node_id, leader_id, term,
+                        self.node_id,
+                        leader_id,
+                        term,
                     )
                     if self._heartbeat_task and not self._heartbeat_task.done():
                         self._heartbeat_task.cancel()

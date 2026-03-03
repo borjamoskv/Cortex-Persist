@@ -300,7 +300,6 @@ class TestAdversarialStress:
         assert result is None
 
 
-
 # ── EntropyReductionStrategy ──────────────────────────────────
 
 

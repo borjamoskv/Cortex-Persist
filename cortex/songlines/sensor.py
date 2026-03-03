@@ -35,21 +35,31 @@ class TopographicSensor:
     def scan_field(self, root_dir: Path) -> list[GhostTrace]:
         """Scan the project topography for active ghosts."""
         resonances = []
+        ignored = {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", ".cortex"}
 
-        # 1. Recursive scan of files
-        for path in root_dir.rglob("*"):
-            # OOM Killer Guard: Avoid massive files and limit recursion if needed
-            if path.is_file() and not self._is_ignored(path):
-                # OOM Guard: Skip files larger than 1MB (ghosts should be small)
-                if path.stat().st_size > 1024 * 1024:
+        # 1. Faster recursive scan avoiding ignored directories
+        for root, dirs, files in os.walk(root_dir):
+            dirs[:] = [d for d in dirs if d not in ignored]
+            
+            # Check for fallback manifests in this directory
+            if ".songlines" in files:
+                manifest_path = Path(root) / ".songlines"
+                resonances.extend(self._scan_single_manifest(manifest_path))
+
+            for file in files:
+                if file in ignored:
                     continue
+                path = Path(root) / file
+                try:
+                    if path.stat().st_size > 1024 * 1024:
+                        continue
+                except OSError:
+                    continue
+                
                 file_ghosts = self._read_ghosts_from_file(path)
                 resonances.extend(file_ghosts)
 
-        # 2. Scan fallback manifests (.songlines)
-        resonances.extend(self._scan_fallback_manifests(root_dir))
-
-        # 3. Deduplicate and clean (by ghost ID)
+        # 2. Deduplicate and clean (by ghost ID)
         unique_ghosts = {}
         for ghost in resonances:
             gid = ghost["id"]
@@ -152,31 +162,23 @@ class TopographicSensor:
         except Exception:
             pass
 
-    def _scan_fallback_manifests(self, root_dir: Path) -> list[GhostTrace]:
-        """Read ghosts from .songlines fallback files."""
+    def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
+        """Read ghosts from a single .songlines fallback file."""
         results = []
-        for manifest in root_dir.rglob(".songlines"):
-            try:
-                with open(manifest) as f:
-                    data = json.load(f)
-                    # data is { filename: { attr_name: payload_str } }
-                    for filename, attrs in data.items():
-                        for _, payload_str in attrs.items():
-                            ghost = json.loads(payload_str)
-                            strength = DecayEngine.calculate_resonance(
-                                ghost["created_at"], ghost["half_life"]
-                            )
-                            if strength < 0.05:
-                                continue
-                            ghost["strength"] = strength
-                            ghost["source_file"] = str(manifest.parent / filename)
-                            results.append(ghost)
-            except Exception:
-                pass
+        try:
+            with open(manifest) as f:
+                data = json.load(f)
+                for filename, attrs in data.items():
+                    for _, payload_str in attrs.items():
+                        ghost = json.loads(payload_str)
+                        strength = DecayEngine.calculate_resonance(
+                            ghost["created_at"], ghost["half_life"]
+                        )
+                        if strength < 0.05:
+                            continue
+                        ghost["strength"] = strength
+                        ghost["source_file"] = str(manifest.parent / filename)
+                        results.append(ghost)
+        except Exception:
+            pass
         return results
-
-    def _is_ignored(self, path: Path) -> bool:
-        """Basic ignore logic for hidden dirs and common noise."""
-        parts = path.parts
-        ignored = {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", ".cortex"}
-        return any(part in ignored for part in parts)

@@ -10,6 +10,8 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -37,7 +39,7 @@ def register(name: str, description: str):
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient(api_key="dummy")  # No auth needed for register
-    result = client.register(name, description)
+    result = asyncio.run(client.register(name, description))
 
     agent = result.get("agent", {})
     api_key = agent.get("api_key", "")
@@ -64,14 +66,14 @@ def status():
 
     try:
         client = MoltbookClient()
-        result = client.check_status()
+        result = asyncio.run(client.check_status())
         claim_status = result.get("status", "unknown")
 
         color = "green" if claim_status == "claimed" else "yellow"
         console.print(f"[{color}]Status: {claim_status}[/]")
 
         if claim_status == "claimed":
-            me = client.get_me()
+            me = asyncio.run(client.get_me())
             agent = me.get("agent", me)
             console.print(
                 Panel.fit(
@@ -95,7 +97,7 @@ def heartbeat():
 
     console.print("[dim]🦞 Running Moltbook heartbeat...[/]")
     hb = MoltbookHeartbeat()
-    summary = hb.run()
+    summary = asyncio.run(hb.run())
 
     actions = summary.get("actions", [])
     errors = summary.get("errors", [])
@@ -118,7 +120,7 @@ def post(submolt: str, title: str, content: str):
     from cortex.moltbook.heartbeat import MoltbookHeartbeat
 
     hb = MoltbookHeartbeat()
-    result = hb.create_verified_post(submolt, title, content)
+    result = asyncio.run(hb.create_verified_post(submolt, title, content))
 
     post_data = result.get("post", {})
     post_id = post_data.get("id", "unknown")
@@ -147,7 +149,7 @@ def search(query: str, search_type: str, limit: int):
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
-    result = client.search(query, search_type=search_type, limit=limit)
+    result = asyncio.run(client.search(query, search_type=search_type, limit=limit))
 
     results = result.get("results", [])
     if not results:
@@ -177,7 +179,7 @@ def feed(sort: str, limit: int):
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
-    result = client.get_feed(sort=sort, limit=limit)
+    result = asyncio.run(client.get_feed(sort=sort, limit=limit))
 
     posts = result.get("posts", [])
     if not posts:

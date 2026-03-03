@@ -34,7 +34,6 @@ from cortex.memory.metamemory import (
     build_memory_card,
 )
 
-
 # ─── Helpers ──────────────────────────────────────────────────────────
 
 
@@ -192,16 +191,12 @@ class TestMetacognitiveContext:
 
 class TestBuildEpistemicPreamble:
     def test_preamble_contains_cortex_header(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         preamble = build_epistemic_preamble(ctx)
         assert "[CORTEX EPISTEMIC STATE]" in preamble
 
     def test_preamble_contains_verdict(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         preamble = build_epistemic_preamble(ctx)
         assert "RESPOND" in preamble
 
@@ -214,9 +209,7 @@ class TestBuildEpistemicPreamble:
         assert "JOL" in preamble
 
     def test_preamble_contains_tot_warning_when_active(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment(tot=True)
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment(tot=True))
         preamble = build_epistemic_preamble(ctx)
         assert "TIP-OF-TONGUE" in preamble
 
@@ -261,9 +254,7 @@ class TestBuildEpistemicPreamble:
         assert len(preamble) <= _MAX_PREAMBLE_CHARS
 
     def test_preamble_contains_respond_instruction(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         preamble = build_epistemic_preamble(ctx)
         assert "RESPOND" in preamble
         assert "calibrated confidence" in preamble.lower()
@@ -284,9 +275,7 @@ class TestBuildEpistemicPreamble:
 class TestInjectEpistemicPreamble:
     def test_preamble_placed_before_system_prompt(self):
         """The epistemic preamble should appear BEFORE the main system prompt."""
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         system = "You are a helpful assistant."
         result = inject_epistemic_preamble(system, ctx)
 
@@ -295,16 +284,12 @@ class TestInjectEpistemicPreamble:
         assert preamble_pos < system_pos
 
     def test_empty_system_prompt_returns_preamble_only(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         result = inject_epistemic_preamble("", ctx)
         assert "[CORTEX EPISTEMIC STATE]" in result
 
     def test_original_system_prompt_preserved(self):
-        ctx = build_metacognitive_context(
-            verdict=Verdict.RESPOND, judgment=_judgment()
-        )
+        ctx = build_metacognitive_context(verdict=Verdict.RESPOND, judgment=_judgment())
         system = "You are the Sovereign Architect."
         result = inject_epistemic_preamble(system, ctx)
         assert "You are the Sovereign Architect." in result
@@ -380,9 +365,7 @@ class TestExtractDeclaredConfidence:
 
     def test_clips_to_zero_one(self):
         """Values outside [0,1] are clipped."""
-        response = (
-            "<retrieval_plan>Confidence: 1.5</retrieval_plan>"
-        )
+        response = "<retrieval_plan>Confidence: 1.5</retrieval_plan>"
         val = extract_declared_confidence(response)
         assert val is not None
         assert val == pytest.approx(1.0)

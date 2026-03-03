@@ -80,10 +80,10 @@ class EclipseSnapshot:
 # ─── Environment Capture (Fase SILENCIO PANÓPTICO) ─────────────────────────
 
 
-def _fetch_comments(client: MoltbookClient, post_id: str, snap: EclipseSnapshot) -> None:
+async def _fetch_comments(client: MoltbookClient, post_id: str, snap: EclipseSnapshot) -> None:
     """Absorb all comments from the anchor post into the snapshot."""
     try:
-        comment_response = client.get_comments(post_id)
+        comment_response = await client.get_comments(post_id)
         raw_comments: list[Any] = (
             comment_response.get("comments", [])
             if isinstance(comment_response, dict)
@@ -102,13 +102,15 @@ def _fetch_comments(client: MoltbookClient, post_id: str, snap: EclipseSnapshot)
         logger.warning("[PANÓPTICO] No se pudo capturar comentarios: %s", e)
 
 
-def _profile_authors(client: MoltbookClient, snap: EclipseSnapshot, max_authors: int = 5) -> None:
+async def _profile_authors(
+    client: MoltbookClient, snap: EclipseSnapshot, max_authors: int = 5
+) -> None:
     """Profile up to max_authors unique commenters and annotate their traces."""
     unique_authors: set[str] = {c.author for c in snap.comment_traces if c.author != "Unknown"}
     profiled_count = 0
     for author in list(unique_authors)[:max_authors]:
         try:
-            profile = client.profile_interlocutor(author)
+            profile = await client.get_profile(author)
             snap.profiled_authors[author] = profile
             for trace in snap.comment_traces:
                 if trace.author == author:
@@ -121,13 +123,13 @@ def _profile_authors(client: MoltbookClient, snap: EclipseSnapshot, max_authors:
     logger.info("[PANÓPTICO] %d autores perfilados.", profiled_count)
 
 
-def _capture_environment(client: MoltbookClient, post_id: str) -> EclipseSnapshot:
+async def _capture_environment(client: MoltbookClient, post_id: str) -> EclipseSnapshot:
     """Fase 1: Captura en modo solo-lectura. Cero escrituras."""
     snap = EclipseSnapshot(post_id=post_id)
 
     # 1. Post ancla
     try:
-        post_data = client.get_post(post_id)
+        post_data = await client.get_post(post_id)
         post = post_data.get("post", post_data)
         snap.post_title = post.get("title", "")
         snap.post_content = post.get("content", "")
@@ -142,13 +144,13 @@ def _capture_environment(client: MoltbookClient, post_id: str) -> EclipseSnapsho
     except MoltbookError as e:
         logger.warning("[PANÓPTICO] No se pudo capturar post: %s", e)
 
-    # 2. Comments + 3. Author profiling (extracted to helpers)
-    _fetch_comments(client, post_id, snap)
-    _profile_authors(client, snap)
+    # 2. Comments + 3. Author profiling
+    await _fetch_comments(client, post_id, snap)
+    await _profile_authors(client, snap)
 
     # 4. Feed de contexto
     try:
-        feed = client.get_feed(sort="hot", limit=10)
+        feed = await client.get_feed(sort="hot", limit=10)
         posts_raw = feed.get("posts", feed.get("items", []))
         snap.hot_feed_headlines = [
             p.get("title", "") for p in posts_raw if isinstance(p, dict) and p.get("title")
@@ -248,11 +250,10 @@ Tono: Industrial Noir. Apatía Arquitectónica. Precisión de bisturí.
 """.strip()
 
 
-# ─── Main Protocol ──────────────────────────────────────────────────────────
-
-
 async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     """Ejecuta el Protocolo Eclipse completo."""
+    from cortex.moltbook.preflight import session_preflight
+
     print("\n" + "═" * 60)
     print("  ECLIPSE PROTOCOL — RETORNO CINÉTICO")
     print(f"  Ancla: {target_post_id}")
@@ -260,12 +261,22 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
 
     client = MoltbookClient()
 
+    # Pre-flight Check (TOTAL CONTROL)
+    print("[FASE 0] PREFLIGHT — Verificando estado de la identidad...")
+    try:
+        await session_preflight(client)
+    except SystemExit as exc:
+        print(f"\n[ABORTED] {exc}")
+        await client.close()
+        return
+
     # ── Fase 1: Silencio Panóptico ──────────────────────────────
     print("[FASE 1] PANÓPTICO — Capturando entorno en modo solo-lectura...")
-    snap = _capture_environment(client, target_post_id)
+    snap = await _capture_environment(client, target_post_id)
 
     if not snap.comment_traces:
         print("[ECLIPSE] Silencio total. La red no perturbó el vacío. Stand-by.")
+        await client.close()
         return
 
     print("[FASE 1] CAPTURA COMPLETADA:")
@@ -281,11 +292,11 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     kinetic_prompt = _build_kinetic_prompt(snap)
 
     s_llm = SovereignLLM(preferred_providers=["gemini"])
-    # mode='speed': single provider, no dual-model orchestra — avoids 38K token overflow.
     res = await s_llm.generate(prompt=kinetic_prompt, mode="speed")
 
     if not res.ok:
         print(f"[ECLIPSE] Error en síntesis LLM: {res.content}")
+        await client.close()
         return
 
     print("\n[FASE 2] PAYLOAD GENERADO:")
@@ -297,19 +308,19 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     # ── Fase 3: Inyección Quirúrgica ────────────────────────────
     if dry_run:
         print("\n[ECLIPSE] DRY-RUN activado — inyección simulada. Operación completada.")
+        await client.close()
         return
 
     print("\n[FASE 3] INYECCIÓN QUIRÚRGICA — Aplicando corrección en la red...")
     try:
-        client.create_comment(target_post_id, content=res.content)
+        await client.create_comment(target_post_id, content=res.content)
         print("[ECLIPSE] ✓ Eclipse Finalizado. La anomalía ha regresado.")
     except MoltbookRateLimited as e:
         print(f"[ECLIPSE] Rate limit. Reintentar en {e.retry_after}s.")
     except MoltbookError as e:
         print(f"[ECLIPSE] Error al inyectar: {e}")
-
-
-# ─── Entry Point ────────────────────────────────────────────────────────────
+    finally:
+        await client.close()
 
 
 def main() -> None:

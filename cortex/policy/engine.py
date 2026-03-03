@@ -222,7 +222,7 @@ class PolicyEngine:
         # Cross-project detection using set intersection (O(words) instead of O(projects * facts))
         words = set(re.findall(r"[\w-]+", content_lower))
         other_projects = words.intersection(project_names_lower) - {fact.project.lower()}
-        
+
         if other_projects:
             future += self._config.cross_project_bonus
 

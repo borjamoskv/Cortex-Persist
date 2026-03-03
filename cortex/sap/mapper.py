@@ -19,11 +19,9 @@ logger = logging.getLogger("cortex.sap.mapper")
 _SAP_META_KEYS = frozenset({"__metadata", "__deferred", "__count", "results"})
 
 
-@dataclass
+@dataclass(slots=True)
 class SyncDiff:
     """Result of diffing CORTEX facts against SAP entities."""
-
-    __slots__ = ("new", "modified", "deleted", "unchanged")
 
     new: list[dict[str, Any]] = field(default_factory=list)
     modified: list[dict[str, Any]] = field(default_factory=list)

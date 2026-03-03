@@ -324,7 +324,9 @@ class LLMProvider(BaseProvider):
 
             logger.warning(
                 "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
-                self._model, safe_delay, attempt
+                self._model,
+                safe_delay,
+                attempt,
             )
             await asyncio.sleep(safe_delay)
 

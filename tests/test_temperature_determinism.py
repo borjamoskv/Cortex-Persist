@@ -148,9 +148,7 @@ class TestGateResult:
 class TestExportJson:
     def test_json_export_structure(self, tmp_path: Path) -> None:
         low = _make_trial(["def f(): pass"] * 10, temperature=0.05)
-        high = _make_trial(
-            [f"def f(): return {i}" for i in range(10)], temperature=0.80
-        )
+        high = _make_trial([f"def f(): return {i}" for i in range(10)], temperature=0.80)
         result = GateResult(
             model="qwen2.5-coder:7b",
             passed=True,
@@ -268,7 +266,7 @@ class TestGateThresholds:
 
         Known-good model behavior: 10% drift at low temp, 90% at high temp.
         """
-        low_drift = 0.10   # unique_ratio at temp 0.05
+        low_drift = 0.10  # unique_ratio at temp 0.05
         high_chaos = 0.90  # unique_ratio at temp 0.80
         gap = high_chaos - low_drift  # 0.80
 
@@ -290,7 +288,7 @@ class TestGateThresholds:
         and pass the inverted gate — confirming the gate discriminates both ways.
         """
         bad_drift = 0.85  # 85% unique at low temp — non-deterministic
-        bad_gap = 0.10    # temperature has almost no effect
+        bad_gap = 0.10  # temperature has almost no effect
 
         # Correct gate: MUST FAIL
         assert not (bad_drift <= MAX_DETERMINISM_DRIFT and bad_gap >= MIN_ENTROPY_GAP), (

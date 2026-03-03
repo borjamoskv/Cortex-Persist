@@ -4,8 +4,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.llm.sovereign import SovereignLLM
 from cortex.llm.router import IntentProfile
+from cortex.llm.sovereign import SovereignLLM
 
 console = Console()
 
@@ -26,10 +26,7 @@ async def _run_lens(
 ) -> tuple[str, str | None]:
     """Run a single diagnostic lens with timeout and error isolation."""
     # Axiom 4: Zero Trust. Never rely on a single model for diagnostics.
-    async with SovereignLLM(
-        timeout_seconds=_LENS_TIMEOUT_SECONDS,
-        temperature=0.1
-    ) as llm:
+    async with SovereignLLM(timeout_seconds=_LENS_TIMEOUT_SECONDS, temperature=0.1) as llm:
         try:
             result = await llm.generate(
                 prompt,

@@ -287,7 +287,6 @@ class PostgresBackend:
             logger.error("PG Script Error (%d stmts): %s", len(statements), exc)
             raise
 
-
     async def close(self) -> None:
         """Close all connections in the pool."""
         if self._pool:

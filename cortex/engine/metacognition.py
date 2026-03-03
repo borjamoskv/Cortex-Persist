@@ -4,7 +4,6 @@ Evaluates Semantic Divergence and Epistemic Uncertainty to prevent Coherence Tra
 Axiom Ω₃: Byzantine Default — Nothing is trusted by default, including consensus.
 """
 
-import logging
 import math
 from typing import Any
 

@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("PHOENIX-OMEGA")
@@ -34,6 +34,7 @@ class AtomicPhase(Enum):
 @dataclass
 class StructuralAtom:
     """Unidad atómica de código con metadatos de transformación"""
+
     id: str
     source_path: Path
     ast_node: ast.AST
@@ -52,29 +53,30 @@ class StructuralAtom:
 @dataclass
 class PhoenixState:
     """Estado inmutable del ciclo de transformación"""
+
     phase: AtomicPhase
     status: PhaseStatus
     atoms: dict[str, StructuralAtom]
     artifacts: dict[str, Any]
     metrics: dict[str, float]
-    rollback_snapshot: Optional[dict] = None
+    rollback_snapshot: dict | None = None
 
-    def transition_to(self, new_phase: AtomicPhase) -> 'PhoenixState':
+    def transition_to(self, new_phase: AtomicPhase) -> "PhoenixState":
         return PhoenixState(
             phase=new_phase,
             status=PhaseStatus.PENDING,
             atoms=self.atoms.copy(),
             artifacts=self.artifacts.copy(),
             metrics=self.metrics.copy(),
-            rollback_snapshot=self.to_snapshot()
+            rollback_snapshot=self.to_snapshot(),
         )
 
     def to_snapshot(self) -> dict:
         return {
-            'phase': self.phase.value,
-            'atoms_count': len(self.atoms),
-            'artifacts_keys': list(self.artifacts.keys()),
-            'metrics': self.metrics.copy()
+            "phase": self.phase.value,
+            "atoms_count": len(self.atoms),
+            "artifacts_keys": list(self.artifacts.keys()),
+            "metrics": self.metrics.copy(),
         }
 
 
@@ -83,15 +85,15 @@ class AnalysisEngine:
 
     def __init__(self):
         self.complexity_threshold = 10  # McCabe
-        self.coupling_threshold = 5     # Dependencias entrantes/salientes
+        self.coupling_threshold = 5  # Dependencias entrantes/salientes
 
-    async def execute(self, state: Optional[PhoenixState], target_paths: list[Path]) -> PhoenixState:
+    async def execute(self, state: PhoenixState | None, target_paths: list[Path]) -> PhoenixState:
         logger.info("🔬 PHOENIX ANALYSIS: Escaneando %d objetivos", len(target_paths))
 
         atoms = {}
 
         for path in target_paths:
-            if path.suffix == '.py':
+            if path.suffix == ".py":
                 file_atoms = await self._parse_file(path)
                 atoms.update(file_atoms)
 
@@ -109,27 +111,29 @@ class AnalysisEngine:
             status=PhaseStatus.COMPLETED,
             atoms=atoms,
             artifacts={
-                'coupling_graph': coupling_graph,
-                'high_coupling_clusters': high_coupling_clusters,
-                'files_analyzed': len(target_paths)
+                "coupling_graph": coupling_graph,
+                "high_coupling_clusters": high_coupling_clusters,
+                "files_analyzed": len(target_paths),
             },
             metrics={
-                'total_atoms': float(len(atoms)),
-                'avg_complexity': float(avg_complexity),
-                'max_complexity': float(max_complexity),
-                'high_coupling_modules': float(len(high_coupling_clusters))
+                "total_atoms": float(len(atoms)),
+                "avg_complexity": float(avg_complexity),
+                "max_complexity": float(max_complexity),
+                "high_coupling_modules": float(len(high_coupling_clusters)),
             },
-            rollback_snapshot=state.to_snapshot() if state else None
+            rollback_snapshot=state.to_snapshot() if state else None,
         )
 
-        logger.info("✅ Análisis completo: %d átomos, complejidad avg: %.2f", len(atoms), avg_complexity)
+        logger.info(
+            "✅ Análisis completo: %d átomos, complejidad avg: %.2f", len(atoms), avg_complexity
+        )
         return new_state
 
     async def _parse_file(self, path: Path) -> dict[str, StructuralAtom]:
         """Parsea AST y extrae átomos estructurales"""
         atoms = {}
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, encoding="utf-8") as f:
                 source = f.read()
 
             tree = ast.parse(source)
@@ -151,7 +155,7 @@ class AnalysisEngine:
                         complexity_score=float(complexity),
                         dependencies=deps,
                         dependents=set(),
-                        semantic_signature=""
+                        semantic_signature="",
                     )
                     atom.semantic_signature = atom.compute_signature()
                     atoms[atom_id] = atom
@@ -165,9 +169,18 @@ class AnalysisEngine:
         """Calcula complejidad ciclomática aproximada"""
         complexity = 1
         for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.While, ast.For,
-                                 ast.ExceptHandler, ast.With,
-                                 ast.Assert, ast.comprehension)):
+            if isinstance(
+                child,
+                (
+                    ast.If,
+                    ast.While,
+                    ast.For,
+                    ast.ExceptHandler,
+                    ast.With,
+                    ast.Assert,
+                    ast.comprehension,
+                ),
+            ):
                 complexity += 1
             elif isinstance(child, ast.BoolOp):
                 complexity += len(child.values) - 1
@@ -185,14 +198,14 @@ class AnalysisEngine:
 
     def _build_coupling_graph(self, atoms: dict[str, StructuralAtom]) -> dict:
         """Construye grafo de acoplamiento"""
-        graph = {aid: {'in': set(), 'out': atoms[aid].dependencies} for aid in atoms}
+        graph = {aid: {"in": set(), "out": atoms[aid].dependencies} for aid in atoms}
 
         # Calcular dependencias entrantes
         for aid, atom in atoms.items():
             for dep in atom.dependencies:
                 for other_id, other_atom in atoms.items():
                     if other_id != aid and dep in other_atom.id:
-                        graph[aid]['in'].add(other_id)
+                        graph[aid]["in"].add(other_id)
         return graph
 
     def _detect_clusters(self, graph: dict) -> list[set[str]]:
@@ -214,7 +227,7 @@ class AnalysisEngine:
 
         while queue:
             current = queue.pop(0)
-            neighbors = graph[current]['in'] | graph[current]['out']
+            neighbors = graph[current]["in"] | graph[current]["out"]
             for neighbor in neighbors:
                 if neighbor not in visited and neighbor in graph:
                     visited.add(neighbor)
@@ -238,11 +251,13 @@ class ExtractionEngine:
         for atom_id in candidates:
             atom = atoms[atom_id]
             interface = self._design_interface(atom)
-            extraction_plan.append({
-                'atom_id': atom_id,
-                'interface': interface,
-                'strategy': self._determine_strategy(atom, state.artifacts['coupling_graph'])
-            })
+            extraction_plan.append(
+                {
+                    "atom_id": atom_id,
+                    "interface": interface,
+                    "strategy": self._determine_strategy(atom, state.artifacts["coupling_graph"]),
+                }
+            )
 
         new_state = PhoenixState(
             phase=AtomicPhase.EXTRACTION,
@@ -250,15 +265,15 @@ class ExtractionEngine:
             atoms=atoms,
             artifacts={
                 **state.artifacts,
-                'extraction_plan': extraction_plan,
-                'interfaces_designed': len(extraction_plan)
+                "extraction_plan": extraction_plan,
+                "interfaces_designed": len(extraction_plan),
             },
             metrics={
                 **state.metrics,
-                'extraction_candidates': float(len(candidates)),
-                'isolation_potential': len(extraction_plan) * 0.8
+                "extraction_candidates": float(len(candidates)),
+                "isolation_potential": len(extraction_plan) * 0.8,
             },
-            rollback_snapshot=state.to_snapshot()
+            rollback_snapshot=state.to_snapshot(),
         )
 
         logger.info("✅ Extracción planificada: %d átomos", len(candidates))
@@ -271,16 +286,17 @@ class ExtractionEngine:
     def _design_interface(self, atom: StructuralAtom) -> dict:
         """Diseña la interfaz Protocol/ABC para el átomo"""
         return {
-            'name': f"I{atom.id.split('::')[-1]}",
-            'methods': [
-                m.name for m in ast.walk(atom.ast_node)
+            "name": f"I{atom.id.split('::')[-1]}",
+            "methods": [
+                m.name
+                for m in ast.walk(atom.ast_node)
                 if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))
-            ]
+            ],
         }
 
     def _determine_strategy(self, atom: StructuralAtom, graph: dict) -> str:
         """Determina si usar Mixin, Composición o Herencia"""
-        coupling = len(graph.get(atom.id, {}).get('in', []))
+        coupling = len(graph.get(atom.id, {}).get("in", []))
         if coupling > 5:
             return "DECOUPLE_VIA_PROTOCOL"
         return "EXTRACT_TO_HELPER"
@@ -310,7 +326,7 @@ class ReconstructionEngine:
                 complexity_score=atom.complexity_score,
                 dependencies=atom.dependencies,
                 dependents=atom.dependents,
-                semantic_signature=atom.compute_signature()
+                semantic_signature=atom.compute_signature(),
             )
             transformations_applied += 3
 
@@ -320,13 +336,10 @@ class ReconstructionEngine:
             atoms=reconstructed_atoms,
             artifacts={
                 **state.artifacts,
-                'transformations_applied': float(transformations_applied)
+                "transformations_applied": float(transformations_applied),
             },
-            metrics={
-                **state.metrics,
-                'reconstructed_count': float(len(reconstructed_atoms))
-            },
-            rollback_snapshot=state.to_snapshot()
+            metrics={**state.metrics, "reconstructed_count": float(len(reconstructed_atoms))},
+            rollback_snapshot=state.to_snapshot(),
         )
         return new_state
 
@@ -350,28 +363,24 @@ class ScalingEngine:
         logger.info("🚀 PHOENIX SCALING: Fraccionando módulos según CORTEX")
 
         scaling_plan = []
-        clusters = state.artifacts.get('high_coupling_clusters', [])
+        clusters = state.artifacts.get("high_coupling_clusters", [])
 
         for cluster in clusters:
             if len(cluster) > 5:
-                scaling_plan.append({
-                    'cluster': list(cluster),
-                    'target_module': f"scaled_{list(cluster)[0].split('::')[0]}"
-                })
+                scaling_plan.append(
+                    {
+                        "cluster": list(cluster),
+                        "target_module": f"scaled_{list(cluster)[0].split('::')[0]}",
+                    }
+                )
 
         new_state = PhoenixState(
             phase=AtomicPhase.SCALING,
             status=PhaseStatus.COMPLETED,
             atoms=state.atoms,
-            artifacts={
-                **state.artifacts,
-                'scaling_plan': scaling_plan
-            },
-            metrics={
-                **state.metrics,
-                'modules_to_split': float(len(scaling_plan))
-            },
-            rollback_snapshot=state.to_snapshot()
+            artifacts={**state.artifacts, "scaling_plan": scaling_plan},
+            metrics={**state.metrics, "modules_to_split": float(len(scaling_plan))},
+            rollback_snapshot=state.to_snapshot(),
         )
         return new_state
 
@@ -395,17 +404,17 @@ class VerificationEngine:
             atoms=state.atoms,
             artifacts={
                 **state.artifacts,
-                'verification_report': {
-                    'lint': lint_score,
-                    'coverage': test_coverage,
-                    'perf': perf_delta
-                }
+                "verification_report": {
+                    "lint": lint_score,
+                    "coverage": test_coverage,
+                    "perf": perf_delta,
+                },
             },
             metrics={
                 **state.metrics,
-                'verification_score': (float(lint_score) + float(test_coverage)) / 2
+                "verification_score": (float(lint_score) + float(test_coverage)) / 2,
             },
-            rollback_snapshot=state.to_snapshot()
+            rollback_snapshot=state.to_snapshot(),
         )
         return new_state
 

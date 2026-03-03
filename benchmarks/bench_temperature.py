@@ -145,7 +145,7 @@ async def run_trial(
         trial.outputs.append(output)
         trial.latencies_ms.append(ms)
         if verbose:
-            print(f"     run {i+1:02d} | {ms:6.0f}ms | {len(output):4d} chars", flush=True)
+            print(f"     run {i + 1:02d} | {ms:6.0f}ms | {len(output):4d} chars", flush=True)
 
     return trial
 
@@ -163,7 +163,7 @@ async def benchmark(
             t = await run_trial(client, model, temp, label, runs, verbose=verbose)
             trials.append(t)
 
-    low_trial = trials[0]   # temp 0.05
+    low_trial = trials[0]  # temp 0.05
     high_trial = trials[1]  # temp 0.80
 
     drift = low_trial.unique_ratio

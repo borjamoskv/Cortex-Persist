@@ -30,9 +30,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from cortex.memory.dream import AssociativeDreamEngine
     from cortex.memory.metamemory import MetamemoryMonitor
     from cortex.memory.replay import HippocampalReplay
-    from cortex.memory.dream import AssociativeDreamEngine
 
 logger = logging.getLogger("cortex.memory.sleep")
 
@@ -156,7 +156,7 @@ class SleepOrchestrator:
         # ── Pre-sleep diagnostics ─────────────────────────────────
         report.brier_before = self._metamemory.calibration_score()
         report.fok_threshold_before = self._metamemory._fok_threshold
-        
+
         # Domain segmentation (Ω₁: Multi-Scale Causality)
         cal_report = self._metamemory.calibration_report()
         report.segmented_brier = cal_report.get("segmented_brier", {})
@@ -230,8 +230,7 @@ class SleepOrchestrator:
         # ── Finalize ─────────────────────────────────────────────
         report.ended_at = time.monotonic()
         logger.info(
-            "[SLEEP] Cycle complete for %s in %.1fms. "
-            "Calibration: %.4f → %.4f",
+            "[SLEEP] Cycle complete for %s in %.1fms. Calibration: %.4f → %.4f",
             tenant_id,
             report.total_duration_ms,
             report.brier_before,

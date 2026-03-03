@@ -39,7 +39,6 @@ from cortex.memory.metamemory import (
     build_memory_card,
 )
 from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
-from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
 from cortex.memory.navigator import (
     ClusterInfo,
     KnowledgeMap,
@@ -47,7 +46,9 @@ from cortex.memory.navigator import (
     SemanticNavigator,
     SemanticPath,
 )
+from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
 from cortex.memory.resonance import AdaptiveResonanceGate
+from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
 from cortex.memory.sparse import MushroomBodyEncoder
 from cortex.memory.temporal_health import (
     HealthReport,
@@ -59,7 +60,6 @@ from cortex.memory.void_detector import (
     EpistemicState,
     EpistemicVoidDetector,
 )
-from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
 from cortex.memory.working import WorkingMemoryL1
 
 try:

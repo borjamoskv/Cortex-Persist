@@ -58,10 +58,10 @@ _RESPOND_CONFIDENCE_FLOOR: float = 0.5
 class EpistemicSignal(StrEnum):
     """Human-readable epistemic state passed to the LLM."""
 
-    CONFIDENT = "confident"       # FOK high, Verdict=RESPOND
-    PARTIAL = "partial"           # FOK moderate, Verdict=SEARCH_MORE
-    UNCERTAIN = "uncertain"       # FOK low, Verdict=ABSTAIN or near
-    TOT = "tip_of_tongue"         # FOK high but retrieval blocked
+    CONFIDENT = "confident"  # FOK high, Verdict=RESPOND
+    PARTIAL = "partial"  # FOK moderate, Verdict=SEARCH_MORE
+    UNCERTAIN = "uncertain"  # FOK low, Verdict=ABSTAIN or near
+    TOT = "tip_of_tongue"  # FOK high but retrieval blocked
 
 
 # ─── Metacognitive Context ────────────────────────────────────────────
@@ -94,8 +94,7 @@ class MetacognitiveContext:
         The LLM must use hedging language if confidence is below floor.
         """
         return (
-            self.verdict == Verdict.ABSTAIN
-            and self.judgment.confidence < _ABSTAIN_CONFIDENCE_CAP
+            self.verdict == Verdict.ABSTAIN and self.judgment.confidence < _ABSTAIN_CONFIDENCE_CAP
         )
 
     @property

@@ -3,9 +3,10 @@ import logging
 import re
 
 import aiosqlite
+
 from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.signals.bus import SignalBus, AsyncSignalBus
+from cortex.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.nemesis")
 
@@ -122,7 +123,6 @@ class NemesisProtocol:
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
 
-
     @classmethod
     def _check_dynamic_antibodies(cls, content_lower: str, db_path: str | None) -> str | None:
         """Helper to scan for dynamically generated antibodies."""
@@ -149,7 +149,6 @@ class NemesisProtocol:
 
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
-
 
     @classmethod
     def _emit_rejection_signal(cls, db_path: str, pattern: str, reason: str, count: int) -> None:

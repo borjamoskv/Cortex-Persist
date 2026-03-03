@@ -399,6 +399,7 @@ class SovereignLLM:
 
 # ─── El Inquisidor (Red Team) ──────────────────────────────────────────────
 
+
 class Inquisitor(SovereignLLM):
     """El Inquisidor (Red Team Sovereign).
 

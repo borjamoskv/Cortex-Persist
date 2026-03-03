@@ -62,8 +62,7 @@ class QueryResult:
     def safe_to_respond(self) -> bool:
         """Conservative gate: only respond if BOTH epistemic + metacognitive agree."""
         return (
-            self.epistemic.is_safe_to_respond
-            and self.fok_directive != FOKDirective.EXTERNAL_SEARCH
+            self.epistemic.is_safe_to_respond and self.fok_directive != FOKDirective.EXTERNAL_SEARCH
         )
 
     @property
@@ -244,7 +243,7 @@ class NeuromorphicPipeline:
         if fact_id:
             self._stdp.record_activation(fact_id)
             edges_updated += 1
-            for related_id in (related_fact_ids or []):
+            for related_id in related_fact_ids or []:
                 self._stdp.record_activation(related_id)
                 edges_updated += 1
 
