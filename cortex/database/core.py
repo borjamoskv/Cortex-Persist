@@ -100,6 +100,7 @@ def _apply_pragmas_sync(
 def connect(
     db_path: str,
     *,
+    uri: bool = False,
     check_same_thread: bool = False,
     row_factory: type | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
@@ -140,6 +141,7 @@ def connect(
 def connect_writer(
     db_path: str,
     *,
+    uri: bool = False,
     check_same_thread: bool = False,
     timeout: int = CONNECT_TIMEOUT_S,
 ) -> sqlite3.Connection:
