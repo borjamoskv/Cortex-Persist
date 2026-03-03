@@ -203,8 +203,7 @@ class AssociativeDreamEngine:
         result.duration_ms = (time.monotonic() - start) * 1000
 
         logger.info(
-            "REM dream cycle: %d clusters, %d bridges, "
-            "%d reweighted, %d fused in %.1fms",
+            "REM dream cycle: %d clusters, %d bridges, %d reweighted, %d fused in %.1fms",
             result.clusters_found,
             result.bridges_created,
             result.engrams_reweighted,
@@ -256,12 +255,8 @@ class AssociativeDreamEngine:
                     assigned.add(j)
 
             if len(cluster_members) >= MIN_CLUSTER_SIZE:
-                member_embeddings = [
-                    getattr(engrams[m], "embedding", []) for m in cluster_members
-                ]
-                centroid = _compute_centroid(
-                    [e for e in member_embeddings if e]
-                )
+                member_embeddings = [getattr(engrams[m], "embedding", []) for m in cluster_members]
+                centroid = _compute_centroid([e for e in member_embeddings if e])
 
                 # Detect dominant project
                 projects: dict[str, int] = defaultdict(int)
@@ -284,10 +279,7 @@ class AssociativeDreamEngine:
                 clusters.append(
                     SemanticCluster(
                         cluster_id=f"cluster_{cluster_idx}",
-                        member_ids=[
-                            getattr(engrams[m], "id", str(m))
-                            for m in cluster_members
-                        ],
+                        member_ids=[getattr(engrams[m], "id", str(m)) for m in cluster_members],
                         centroid=centroid,
                         avg_similarity=avg_sim,
                         dominant_project=dominant,
@@ -299,9 +291,7 @@ class AssociativeDreamEngine:
 
     # ─── Phase 2: Redundancy Fusion ───────────────────────────────
 
-    async def _fuse_redundant(
-        self, clusters: list[SemanticCluster], engrams: list[Any]
-    ) -> int:
+    async def _fuse_redundant(self, clusters: list[SemanticCluster], engrams: list[Any]) -> int:
         """Within each cluster, fuse engrams that are near-identical.
 
         Near-identical = similarity > 0.95. Keeps the newer engram
@@ -317,9 +307,7 @@ class AssociativeDreamEngine:
                 id_to_engram[eid] = e
 
         for cluster in clusters:
-            members = [
-                id_to_engram.get(mid) for mid in cluster.member_ids
-            ]
+            members = [id_to_engram.get(mid) for mid in cluster.member_ids]
             members = [m for m in members if m is not None]
 
             to_delete: set[str] = set()
@@ -343,9 +331,7 @@ class AssociativeDreamEngine:
                         # Keep the newer one (higher timestamp)
                         ts_a = getattr(ea, "timestamp", 0)
                         ts_b = getattr(eb, "timestamp", 0)
-                        victim_id = getattr(
-                            ea if ts_a < ts_b else eb, "id", ""
-                        )
+                        victim_id = getattr(ea if ts_a < ts_b else eb, "id", "")
                         if victim_id:
                             to_delete.add(victim_id)
 
@@ -360,9 +346,7 @@ class AssociativeDreamEngine:
 
     # ─── Phase 3: Synthetic Bridging ──────────────────────────────
 
-    def _generate_bridges(
-        self, clusters: list[SemanticCluster]
-    ) -> list[SyntheticBridge]:
+    def _generate_bridges(self, clusters: list[SemanticCluster]) -> list[SyntheticBridge]:
         """Generate creative bridges between distant clusters.
 
         The "sweet spot" for creativity: clusters that are neither too
@@ -389,16 +373,8 @@ class AssociativeDreamEngine:
                     bridge = SyntheticBridge(
                         source_cluster_id=cluster_a.cluster_id,
                         target_cluster_id=cluster_b.cluster_id,
-                        source_engram_id=(
-                            cluster_a.member_ids[0]
-                            if cluster_a.member_ids
-                            else ""
-                        ),
-                        target_engram_id=(
-                            cluster_b.member_ids[0]
-                            if cluster_b.member_ids
-                            else ""
-                        ),
+                        source_engram_id=(cluster_a.member_ids[0] if cluster_a.member_ids else ""),
+                        target_engram_id=(cluster_b.member_ids[0] if cluster_b.member_ids else ""),
                         semantic_distance=round(distance, 4),
                         bridge_hypothesis=(
                             f"What connects {cluster_a.dominant_project} "

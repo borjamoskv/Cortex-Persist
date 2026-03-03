@@ -31,7 +31,6 @@ class AttackVector(Protocol):
     name: str
 
 
-
 class OOMKiller:
     """Vector: Memory Exhaustion (The OOM Killer)."""
 
@@ -154,7 +153,6 @@ class SiegeVector(Protocol):
     name: str
 
 
-
 class LedgerPoisoner:
     """Vector: Cryptographic Hash Poisoning (The Ledger Poisoner)."""
 
@@ -242,9 +240,5 @@ class VaultCracker:
         return findings
 
 
-RED_TEAM_SWARM = {
-    v.name: v for v in (OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper())
-}
-COMPLIANCE_SIEGE_SWARM = {
-    v.name: v for v in (LedgerPoisoner(), VaultCracker())
-}
+RED_TEAM_SWARM = {v.name: v for v in (OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper())}
+COMPLIANCE_SIEGE_SWARM = {v.name: v for v in (LedgerPoisoner(), VaultCracker())}

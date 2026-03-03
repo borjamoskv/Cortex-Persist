@@ -34,7 +34,7 @@ _ENGINE_ROOT = Path(__file__).resolve().parents[1] / "cortex" / "engine"
 _EXCLUDE_FILES = frozenset(
     [
         "legion_vectors.py",  # The scanner itself — contains patterns as strings
-        "legion.py",          # Code-gen engine — emits example patterns as string literals
+        "legion.py",  # Code-gen engine — emits example patterns as string literals
     ]
 )
 
@@ -48,8 +48,7 @@ def _collect_engine_files() -> list[Path]:
     return [
         f
         for f in _ENGINE_ROOT.rglob("*.py")
-        if f.name not in _EXCLUDE_FILES
-        and "__pycache__" not in f.parts
+        if f.name not in _EXCLUDE_FILES and "__pycache__" not in f.parts
     ]
 
 
@@ -58,6 +57,7 @@ def _read_source(path: Path) -> str:
 
 
 # ─── EntropyDemon Self-Audit ───────────────────────────────────────────────────
+
 
 class TestEntropyDemonSelfAudit:
     """
@@ -124,9 +124,7 @@ class TestEntropyDemonSelfAudit:
             # Strip noqa-annotated lines before passing to the demon so that
             # intentional boundaries (noqa:BLE001) don't create false positives
             cleaned_lines = [
-                line
-                for line in source.splitlines()
-                if not any(m in line for m in _NOQA_MARKERS)
+                line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
             ]
             cleaned_source = "\n".join(cleaned_lines)
 
@@ -136,16 +134,12 @@ class TestEntropyDemonSelfAudit:
                 all_findings[py_file.name] = fragility_findings
 
         if all_findings:
-            report = "\n".join(
-                f"  {fname}: {findings}"
-                for fname, findings in all_findings.items()
-            )
-            pytest.fail(
-                f"\n☠️  ENTROPY DEMON FIRED ON ENGINE SOURCE:\n{report}"
-            )
+            report = "\n".join(f"  {fname}: {findings}" for fname, findings in all_findings.items())
+            pytest.fail(f"\n☠️  ENTROPY DEMON FIRED ON ENGINE SOURCE:\n{report}")
 
 
 # ─── Full Red Team Swarm Self-Audit ───────────────────────────────────────────
+
 
 class TestRedTeamSwarmSelfAudit:
     """
@@ -170,9 +164,7 @@ class TestRedTeamSwarmSelfAudit:
                 violations[py_file.name] = findings
 
         if violations:
-            report = "\n".join(
-                f"  {fname}: {findings}" for fname, findings in violations.items()
-            )
+            report = "\n".join(f"  {fname}: {findings}" for fname, findings in violations.items())
             pytest.fail(
                 f"\n🔴 SECURITY BREACH — Intruder found violations in engine source:\n{report}"
             )
@@ -193,12 +185,8 @@ class TestRedTeamSwarmSelfAudit:
                 violations[py_file.name] = findings
 
         if violations:
-            report = "\n".join(
-                f"  {fname}: {findings}" for fname, findings in violations.items()
-            )
-            pytest.fail(
-                f"\n⏱️  CHRONOS SNIPER — Blocking I/O in async engine code:\n{report}"
-            )
+            report = "\n".join(f"  {fname}: {findings}" for fname, findings in violations.items())
+            pytest.fail(f"\n⏱️  CHRONOS SNIPER — Blocking I/O in async engine code:\n{report}")
 
     @pytest.mark.asyncio
     async def test_oom_killer_warns_on_engine_loops(self) -> None:
@@ -220,13 +208,12 @@ class TestRedTeamSwarmSelfAudit:
         if findings_summary:
             # Soft warning — not a hard fail. Infinite loops in daemons are valid.
             import warnings
+
             report = "; ".join(
-                f"{fname}({len(f)} findings)"
-                for fname, f in findings_summary.items()
+                f"{fname}({len(f)} findings)" for fname, f in findings_summary.items()
             )
             warnings.warn(
-                f"OOMKiller: potential unbounded loops in engine "
-                f"(review before merging): {report}",
+                f"OOMKiller: potential unbounded loops in engine (review before merging): {report}",
                 stacklevel=2,
             )
 
@@ -247,6 +234,7 @@ class TestRedTeamSwarmSelfAudit:
 
 # ─── Regression Guard ─────────────────────────────────────────────────────────
 
+
 class TestCobblersParadoxRegression:
     """
     Regression tests: once fixed, violations must NEVER re-appear.
@@ -265,7 +253,8 @@ class TestCobblersParadoxRegression:
 
         # The original offending pattern: a bare except with pass and no log
         bare_pass_pattern_found = any(
-            "except Exception:" in line and "pass" in lines[min(i + 1, len(lines) - 1)]
+            "except Exception:" in line
+            and "pass" in lines[min(i + 1, len(lines) - 1)]
             and not any(m in line for m in _NOQA_MARKERS)
             for i, line in enumerate(lines)
         )

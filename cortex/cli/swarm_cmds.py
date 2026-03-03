@@ -128,15 +128,15 @@ def swarm_deploy(mode, target, db):
 
         # Ignition (Zero-Delay)
         progress.update(t1, completed=100)
-        
+
         # Expansion (Zero-Delay)
         progress.update(t2, completed=100)
         console.print("[dim]→ Leviathan formation activated (50+)[/]")
         console.print("[dim]→ Squadron coordination established (100)[/]")
-        
+
         # Sync (Zero-Delay)
         progress.update(t3, completed=100)
-        
+
         # Stabilization (Zero-Delay)
         progress.update(t4, completed=100)
 

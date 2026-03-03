@@ -48,10 +48,7 @@ class NREMReport:
     @property
     def total_mutations(self) -> int:
         """Total state changes applied during this cycle."""
-        return (
-            self.matured + self.deceased + self.pruned
-            + self.edges_pruned + self.engrams_scaled
-        )
+        return self.matured + self.deceased + self.pruned + self.edges_pruned + self.engrams_scaled
 
 
 class NREMConsolidationCycle:
@@ -105,15 +102,15 @@ class NREMConsolidationCycle:
         matured = deceased = pending = 0
         if self._consolidator is not None:
             try:
-                stats = await self._consolidator.consolidation_sweep(
-                    tenant_id=tenant_id
-                )
+                stats = await self._consolidator.consolidation_sweep(tenant_id=tenant_id)
                 matured = stats.get("matured", 0)
                 deceased = stats.get("deceased", 0)
                 pending = stats.get("pending", 0)
                 logger.info(
                     "NREM Phase 1 (Maturation): matured=%d deceased=%d pending=%d",
-                    matured, deceased, pending,
+                    matured,
+                    deceased,
+                    pending,
                 )
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 1 (Maturation) failed: {exc}"
@@ -142,7 +139,8 @@ class NREMConsolidationCycle:
                 edges_decayed = self._stdp.edge_count()
                 logger.info(
                     "NREM Phase 3 (Synaptic Decay): edges_remaining=%d pruned=%d",
-                    edges_decayed, edges_pruned,
+                    edges_decayed,
+                    edges_pruned,
                 )
             except (RuntimeError, ValueError) as exc:
                 msg = f"Phase 3 (Synaptic Decay) failed: {exc}"
@@ -162,7 +160,8 @@ class NREMConsolidationCycle:
                 scaling_factor = result.get("factor", 1.0)
                 logger.info(
                     "NREM Phase 4 (Homeostatic Scaling): scaled=%d factor=%.4f",
-                    engrams_scaled, scaling_factor,
+                    engrams_scaled,
+                    scaling_factor,
                 )
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 4 (Homeostatic Scaling) failed: {exc}"
@@ -186,6 +185,8 @@ class NREMConsolidationCycle:
 
         logger.info(
             "NREM Cycle complete: mutations=%d duration=%.1fms errors=%d",
-            report.total_mutations, report.duration_ms, len(errors),
+            report.total_mutations,
+            report.duration_ms,
+            len(errors),
         )
         return report

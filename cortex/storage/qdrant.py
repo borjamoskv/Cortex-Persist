@@ -46,11 +46,6 @@ class VectorBackend(Protocol):
     """
 
 
-
-
-
-
-
 # ─── Qdrant Implementation ───────────────────────────────────────────
 
 

@@ -73,7 +73,9 @@ def logout_cmd(db: str, force: bool) -> None:
     engine = get_engine(db)
     try:
         if force:
-            console.print("[noir.gold]⚠️  FORZADO: Cierre de sesión (Bypass de inmunidad activo).[/]")
+            console.print(
+                "[noir.gold]⚠️  FORZADO: Cierre de sesión (Bypass de inmunidad activo).[/]"
+            )
             return
 
         # 1. Check for uncommitted entropy

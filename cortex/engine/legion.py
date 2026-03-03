@@ -21,6 +21,7 @@ except ImportError:
 
         def log_motor(self, msg: str, **kwargs) -> None:
             logging.getLogger("cortex.motor").info(msg)
+
     bicameral = BicameralStub()
 
 from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
@@ -149,7 +150,7 @@ class LegionOmegaEngine:
             self.vectors_list = list(_vectors.values())
         else:
             self.vectors_list = list(_vectors)
-            
+
         self.red_team = RedTeamSwarm(vectors=self.vectors_list)
         self.max_cycles = max_cycles
 
@@ -169,9 +170,11 @@ class LegionOmegaEngine:
 
             # ─── Thermal Stagnation Guard (Ω₂) ───
             if code == previous_code:
-                bicameral.log_motor("Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE")
+                bicameral.log_motor(
+                    "Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE"
+                )
                 break
-            
+
             # Red Team Siege
             vulnerabilities = await self.red_team.siege(code, ctx)
             v_count = len(vulnerabilities)
@@ -185,14 +188,14 @@ class LegionOmegaEngine:
             if v_count >= previous_v_count and cycle > 1:
                 logger.warning(
                     "⚠️ [LEGION] Stagnation detected in cycle %d (%d vs %d). Breaking thermal loop.",
-                    cycle, v_count, previous_v_count
+                    cycle,
+                    v_count,
+                    previous_v_count,
                 )
                 break
 
             # Update stats for next cycle
-            logger.info(
-                "❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %d", cycle, v_count
-            )
+            logger.info("❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %d", cycle, v_count)
             feedback.extend(vulnerabilities)
             final_code = code  # Keep last attempt
             previous_code = code

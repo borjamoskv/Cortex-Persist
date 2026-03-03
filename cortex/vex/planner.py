@@ -26,7 +26,6 @@ class PlannerBackend(Protocol):
     """Protocol for pluggable LLM planner backends."""
 
 
-
 class Planner:
     """VEX Task Planner — intent → verifiable steps.
 

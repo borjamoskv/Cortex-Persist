@@ -109,7 +109,12 @@ def store(project, content, fact_type, tags, confidence, source, ai_time, comple
     help="Search scope: core (default), personal, cold, or all",
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-@click.option("--epistemic", is_flag=True, default=False, help="Show epistemic analysis (void/fog/stale detection)")
+@click.option(
+    "--epistemic",
+    is_flag=True,
+    default=False,
+    help="Show epistemic analysis (void/fog/stale detection)",
+)
 def search(query, project, top, scope, db, epistemic) -> None:
     """Semantic search across CORTEX memory.
 
@@ -125,7 +130,9 @@ def search(query, project, top, scope, db, epistemic) -> None:
             # Fast path: standard search, no federation overhead
             with with_slow_tips(
                 "Buscando en CORTEX…",
-                threshold=2.0, interval=8.0, engine=engine,
+                threshold=2.0,
+                interval=8.0,
+                engine=engine,
             ):
                 with console.status("[noir.violet]Searching...[/]"):
                     results = _run_async(
@@ -140,8 +147,11 @@ def search(query, project, top, scope, db, epistemic) -> None:
             ):
                 sync_conn = engine._get_sync_conn()
                 results = federated_search_sync(
-                    sync_conn, query,
-                    scope=scope, project=project, limit=top,
+                    sync_conn,
+                    query,
+                    scope=scope,
+                    project=project,
+                    limit=top,
                 )
 
         if not results:
@@ -189,7 +199,9 @@ def search(query, project, top, scope, db, epistemic) -> None:
                 Panel(
                     f"{analysis.badge}  confidence={analysis.confidence:.2f}  "
                     f"candidates={analysis.candidate_count}  top_sim={analysis.top_similarity:.2f}\n"
-                    f"{analysis.recommendation}" if analysis.recommendation else f"{analysis.badge}",
+                    f"{analysis.recommendation}"
+                    if analysis.recommendation
+                    else f"{analysis.badge}",
                     title="🧠 Epistemic Analysis",
                     border_style="cyan" if analysis.is_safe_to_respond else "yellow",
                 )
@@ -198,7 +210,6 @@ def search(query, project, top, scope, db, epistemic) -> None:
         _show_tip(engine)
     finally:
         _run_async(engine.close())
-
 
 
 @cli.command()

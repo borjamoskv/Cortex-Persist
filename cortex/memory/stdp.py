@@ -204,7 +204,11 @@ class STDPEngine:
         if weight_increase > 0.001:
             logger.debug(
                 "STDP LTP: %s→%s (Δt=%.1fms, Δw=+%.4f, w=%.4f)",
-                source_id, target_id, delta_t, weight_increase, edge.weight,
+                source_id,
+                target_id,
+                delta_t,
+                weight_increase,
+                edge.weight,
             )
 
         return (source_id, target_id, edge.weight)
@@ -231,7 +235,11 @@ class STDPEngine:
         if weight_decrease > 0.001:
             logger.debug(
                 "STDP LTD: %s→%s (Δt=%.1fms, Δw=-%.4f, w=%.4f)",
-                source_id, target_id, delta_t, weight_decrease, edge.weight,
+                source_id,
+                target_id,
+                delta_t,
+                weight_decrease,
+                edge.weight,
             )
 
         return (source_id, target_id, edge.weight)
@@ -298,9 +306,7 @@ class STDPEngine:
         total_ltp = sum(e.ltp_events for e in self._edges.values())
         total_ltd = sum(e.ltd_events for e in self._edges.values())
         avg_weight = (
-            sum(e.weight for e in self._edges.values()) / len(self._edges)
-            if self._edges
-            else 0.0
+            sum(e.weight for e in self._edges.values()) / len(self._edges) if self._edges else 0.0
         )
         return {
             "edges": self.edge_count,
@@ -309,9 +315,7 @@ class STDPEngine:
             "total_ltp_events": total_ltp,
             "total_ltd_events": total_ltd,
             "avg_edge_weight": round(avg_weight, 4),
-            "plasticity_ratio": round(
-                total_ltp / max(1, total_ltp + total_ltd), 4
-            ),
+            "plasticity_ratio": round(total_ltp / max(1, total_ltp + total_ltd), 4),
         }
 
     def __repr__(self) -> str:

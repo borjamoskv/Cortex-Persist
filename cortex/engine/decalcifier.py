@@ -75,9 +75,9 @@ class SovereignDecalcifier:
             if fact_type in ("axiom", "identity", "rule"):
                 type_factor = 0.999  # Absolute bedrock
             elif fact_type in ("decision", "bridge", "knowledge"):
-                type_factor = 0.99   # Structural state
+                type_factor = 0.99  # Structural state
             elif fact_type in ("error", "ghost", "telemetry"):
-                type_factor = 0.90   # Operational foam
+                type_factor = 0.90  # Operational foam
             else:
                 type_factor = self.decay_factor
 
@@ -88,7 +88,9 @@ class SovereignDecalcifier:
             # Si un Ghost persiste a pesar del decaimiento, se eleva a Regla.
             if fact_type == "ghost" and new_score > 0.4:
                 # El ruido persistente es arquitectura emergente.
-                logger.warning("🧬 [Ω₁] Ghost #%s elevado a REGLA por persistencia causal.", fact_id)
+                logger.warning(
+                    "🧬 [Ω₁] Ghost #%s elevado a REGLA por persistencia causal.", fact_id
+                )
                 await conn.execute(
                     "UPDATE facts SET fact_type = 'rule', confidence = 'verified', "
                     "tags = json_insert(tags, '$[#]', 'elevated-ghost') WHERE id = ?",

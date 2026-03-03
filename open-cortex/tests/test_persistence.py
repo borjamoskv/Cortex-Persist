@@ -15,8 +15,8 @@ from open_cortex.models import (
     Memory,
     Namespace,
     Provenance,
-    SourceType,
     ProvenanceMethod,
+    SourceType,
 )
 from open_cortex.persistence import MemoryStore
 
@@ -32,7 +32,6 @@ def store(tmp_path):
 
 
 class TestWriteAndRead:
-
     def test_write_and_get(self, store):
         mem = Memory(content="CORTEX uses AES-256-GCM", tags=["security"])
         store.write_memory(mem)
@@ -79,7 +78,6 @@ class TestWriteAndRead:
 
 
 class TestSearch:
-
     def test_search_by_text(self, store):
         store.write_memory(Memory(content="Python is great for ML"))
         store.write_memory(Memory(content="Rust is fast"))
@@ -96,6 +94,7 @@ class TestSearch:
 
     def test_search_by_confidence(self, store):
         from open_cortex.models import Belief
+
         mem = Memory(content="high conf fact", belief=Belief(confidence=0.95))
         store.write_memory(mem)
         mem_low = Memory(content="low conf fact", belief=Belief(confidence=0.1))
@@ -113,7 +112,6 @@ class TestSearch:
 
 
 class TestReconsolidation:
-
     def test_basic_reconsolidation(self, store):
         original = Memory(content="Old fact")
         store.write_memory(original)
@@ -151,7 +149,6 @@ class TestReconsolidation:
 
 
 class TestAuditTrail:
-
     def test_audit_trail_on_write(self, store):
         mem = Memory(content="Audited fact")
         store.write_memory(mem)
@@ -178,7 +175,6 @@ class TestAuditTrail:
 
 
 class TestVersionChain:
-
     def test_chain_after_reconsolidation(self, store):
         v1 = Memory(content="Version 1")
         store.write_memory(v1)

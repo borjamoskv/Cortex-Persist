@@ -9,10 +9,10 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Generator
+from datetime import UTC, datetime
+from typing import Any
 
 from open_cortex.models import (
     AuditEntry,
@@ -154,7 +154,7 @@ class MemoryStore:
 
     def write_memory(self, mem: Memory) -> str:
         """Insert a memory. Returns the memory ID."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self._conn() as conn:
             conn.execute(
                 """
@@ -197,7 +197,14 @@ class MemoryStore:
                         (source_id, target_id, edge_type, reason, confidence, created_by)
                     VALUES (?, ?, ?, ?, ?, ?)
                     """,
-                    (mem.id, rel.target_id, rel.type.value, rel.reason, rel.confidence, mem.provenance.author or "system"),
+                    (
+                        mem.id,
+                        rel.target_id,
+                        rel.type.value,
+                        rel.reason,
+                        rel.confidence,
+                        mem.provenance.author or "system",
+                    ),
                 )
                 edges_created += 1
 
@@ -214,7 +221,11 @@ class MemoryStore:
                 INSERT INTO memory_audit_log (memory_id, action, actor, new_state, reason)
                 VALUES (?, 'create', ?, ?, 'Initial write')
                 """,
-                (mem.id, mem.provenance.author or "system", json.dumps(mem.model_dump(), default=str)),
+                (
+                    mem.id,
+                    mem.provenance.author or "system",
+                    json.dumps(mem.model_dump(), default=str),
+                ),
             )
 
             conn.commit()
@@ -300,11 +311,13 @@ class MemoryStore:
             ),
             belief=Belief(confidence=confidence),
             freshness=old.freshness.model_copy(update={"is_canonical": True}),
-            version=old.version.model_copy(update={
-                "v": old.version.v + 1,
-                "parent_id": old.id,
-                "lineage": [*old.version.lineage, old.id],
-            }),
+            version=old.version.model_copy(
+                update={
+                    "v": old.version.v + 1,
+                    "parent_id": old.id,
+                    "lineage": [*old.version.lineage, old.id],
+                }
+            ),
             relations=[
                 Relation(
                     type=EdgeType.SUPERSEDES,
@@ -408,7 +421,9 @@ class MemoryStore:
             ),
             freshness={
                 "valid_from": datetime.fromisoformat(row["valid_from"]),
-                "valid_until": datetime.fromisoformat(row["valid_until"]) if row["valid_until"] else None,
+                "valid_until": datetime.fromisoformat(row["valid_until"])
+                if row["valid_until"]
+                else None,
                 "is_canonical": bool(row["is_canonical"]),
             },
             version={

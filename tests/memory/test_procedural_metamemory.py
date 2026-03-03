@@ -1,9 +1,10 @@
 import time
+
 import pytest
 
-from cortex.skills.registry import SkillManifest, SkillRegistry
-from cortex.memory.procedural import ProceduralMemory
 from cortex.memory.metamemory import MetamemoryMonitor
+from cortex.memory.procedural import ProceduralMemory
+from cortex.skills.registry import SkillManifest, SkillRegistry
 from cortex.skills.router import SkillRouter
 
 
@@ -165,8 +166,8 @@ def test_non_permanent_engram_decays(monkeypatch):
     ratio = decayed_value / fresh_value
     # Should be ~0.5 (within tolerance for the frequency_bonus component)
     assert 0.4 < ratio < 0.6, f"Expected ~50% decay, got {ratio:.2%}"
- 
- 
+
+
 def test_omega_skill_enforced_permanence(monkeypatch):
     """Omega skills must be permanent even if created with permanent=False."""
     pm = ProceduralMemory()

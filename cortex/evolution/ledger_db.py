@@ -37,7 +37,7 @@ class EvolutionLedgerDB:
         with db_connect(str(self.db_path)) as conn:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=NORMAL")
-            
+
             # Mutation Ledger
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS mutations (
@@ -52,7 +52,7 @@ class EvolutionLedgerDB:
                     timestamp     REAL NOT NULL
                 )
             """)
-            
+
             # Metric Time Series
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS metrics (
@@ -64,7 +64,7 @@ class EvolutionLedgerDB:
                     timestamp   REAL NOT NULL
                 )
             """)
-            
+
             # Domain Evolution Tracking
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS domain_evolution (
@@ -74,7 +74,7 @@ class EvolutionLedgerDB:
                     updated_at  REAL NOT NULL
                 )
             """)
-            
+
             conn.commit()
 
     def record_mutation(self, mutation: EvolutionMutation) -> None:
@@ -89,36 +89,49 @@ class EvolutionLedgerDB:
             with db_connect(str(self.db_path)) as conn:
                 conn.execute("PRAGMA journal_mode=WAL")
                 conn.execute("PRAGMA synchronous=NORMAL")
-                
+
                 mutation_entries = []
                 metric_entries = []
-                
+
                 for m in mutations:
                     m_dict = m.to_dict()
-                    mutation_entries.append((
-                        m_dict["id"], m_dict["agent_id"], m_dict["mutation_type"],
-                        m_dict["prev_hash"], m_dict["new_hash"], m_dict["delta_fitness"],
-                        json.dumps(m_dict["metrics"]), json.dumps(m_dict["metadata"]),
-                        m_dict["timestamp"]
-                    ))
-                    
+                    mutation_entries.append(
+                        (
+                            m_dict["id"],
+                            m_dict["agent_id"],
+                            m_dict["mutation_type"],
+                            m_dict["prev_hash"],
+                            m_dict["new_hash"],
+                            m_dict["delta_fitness"],
+                            json.dumps(m_dict["metrics"]),
+                            json.dumps(m_dict["metadata"]),
+                            m_dict["timestamp"],
+                        )
+                    )
+
                     for met in m.metrics:
-                        metric_entries.append((
-                            m.agent_id, met.name, met.value, met.unit, met.timestamp
-                        ))
-                
-                conn.executemany("""
+                        metric_entries.append(
+                            (m.agent_id, met.name, met.value, met.unit, met.timestamp)
+                        )
+
+                conn.executemany(
+                    """
                     INSERT INTO mutations (
                         id, agent_id, mutation_type, prev_hash, new_hash, 
                         delta_fitness, metrics, metadata, timestamp
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, mutation_entries)
-                
-                conn.executemany("""
+                """,
+                    mutation_entries,
+                )
+
+                conn.executemany(
+                    """
                     INSERT INTO metrics (agent_id, metric_name, value, unit, timestamp)
                     VALUES (?, ?, ?, ?, ?)
-                """, metric_entries)
-                
+                """,
+                    metric_entries,
+                )
+
                 conn.commit()
         except sqlite3.Error as exc:
             logger.error("Failed to record mutation batch in evolution ledger: %s", exc)
@@ -130,10 +143,13 @@ class EvolutionLedgerDB:
             with db_connect(str(self.db_path)) as conn:
                 for name, val in metrics.items():
                     value = float(val) if isinstance(val, int | float) else 0.0
-                    conn.execute("""
+                    conn.execute(
+                        """
                         INSERT INTO metrics (agent_id, metric_name, value, unit, timestamp)
                         VALUES (?, ?, ?, ?, ?)
-                    """, (agent_id, name, value, "points", now))
+                    """,
+                        (agent_id, name, value, "points", now),
+                    )
                 conn.commit()
         except sqlite3.Error as exc:
             logger.error("Failed to record metrics in evolution ledger: %s", exc)
@@ -143,28 +159,36 @@ class EvolutionLedgerDB:
         try:
             with db_connect(str(self.db_path)) as conn:
                 conn.row_factory = sqlite3.Row
-                cursor = conn.execute("""
+                cursor = conn.execute(
+                    """
                     SELECT * FROM mutations 
                     WHERE agent_id = ? 
                     ORDER BY timestamp DESC 
                     LIMIT ?
-                """, (agent_id, limit))
+                """,
+                    (agent_id, limit),
+                )
                 return [dict(row) for row in cursor.fetchall()]
         except sqlite3.Error as exc:
             logger.error("Failed to query mutation history: %s", exc)
             return []
 
-    def get_metric_trend(self, agent_id: str, metric_name: str, limit: int = 100) -> list[dict[str, Any]]:
+    def get_metric_trend(
+        self, agent_id: str, metric_name: str, limit: int = 100
+    ) -> list[dict[str, Any]]:
         """Retrieve time-series trend for a specific metric."""
         try:
             with db_connect(str(self.db_path)) as conn:
                 conn.row_factory = sqlite3.Row
-                cursor = conn.execute("""
+                cursor = conn.execute(
+                    """
                     SELECT value, timestamp FROM metrics 
                     WHERE agent_id = ? AND metric_name = ?
                     ORDER BY timestamp DESC 
                     LIMIT ?
-                """, (agent_id, metric_name, limit))
+                """,
+                    (agent_id, metric_name, limit),
+                )
                 return [dict(row) for row in cursor.fetchall()]
         except sqlite3.Error as exc:
             logger.error("Failed to query metric trend: %s", exc)
@@ -174,10 +198,13 @@ class EvolutionLedgerDB:
         """Update last known status for a domain."""
         try:
             with db_connect(str(self.db_path)) as conn:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO domain_evolution (domain, last_cycle, avg_fitness, updated_at)
                     VALUES (?, ?, ?, ?)
-                """, (domain, cycle, avg_fitness, time.time()))
+                """,
+                    (domain, cycle, avg_fitness, time.time()),
+                )
                 conn.commit()
         except sqlite3.Error as exc:
             logger.error("Failed to update domain status: %s", exc)

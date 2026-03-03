@@ -142,21 +142,23 @@ def _search_attached_db(
         except (ValueError, TypeError):
             tags = []
 
-        results.append(SearchResult(
-            fact_id=row[0],
-            content=content,
-            project=row[2] or "",
-            fact_type=row[3] or "knowledge",
-            confidence=row[4] or "stated",
-            source=row[5],
-            tags=tags,
-            score=0.5,
-            valid_from="unknown",
-            valid_until=None,
-            created_at="unknown",
-            updated_at="unknown",
-            db_origin=alias,
-        ))
+        results.append(
+            SearchResult(
+                fact_id=row[0],
+                content=content,
+                project=row[2] or "",
+                fact_type=row[3] or "knowledge",
+                confidence=row[4] or "stated",
+                source=row[5],
+                tags=tags,
+                score=0.5,
+                valid_from="unknown",
+                valid_until=None,
+                created_at="unknown",
+                updated_at="unknown",
+                db_origin=alias,
+            )
+        )
 
         if len(results) >= limit:
             break
@@ -194,7 +196,10 @@ def federated_search_sync(
     # Core search (always uses the main connection)
     if search_scope in (SearchScope.CORE, SearchScope.ALL):
         core_results = text_search_sync(
-            conn, query, project=project, limit=limit,
+            conn,
+            query,
+            project=project,
+            limit=limit,
         )
         for r in core_results:
             r.db_origin = "core"
@@ -215,8 +220,11 @@ def federated_search_sync(
         try:
             for alias in attached:
                 fed_results = _search_attached_db(
-                    conn, alias, query,
-                    project=project, limit=limit,
+                    conn,
+                    alias,
+                    query,
+                    project=project,
+                    limit=limit,
                 )
                 all_results.extend(fed_results)
         finally:

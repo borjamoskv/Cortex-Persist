@@ -228,7 +228,7 @@ class FactMutationEngine:
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         reason = payload.get("reason", "deprecated")
-        # Ω₂: Robust Metadata Projection. 
+        # Ω₂: Robust Metadata Projection.
         # If meta is encrypted (v6_aesgcm:...), json_set will fail.
         # We skip the json_set for encrypted blobs to prevent OperationalError.
         await conn.execute(

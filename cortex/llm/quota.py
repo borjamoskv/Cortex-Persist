@@ -211,9 +211,7 @@ class SovereignQuotaManager:
             current_tokens=round(current, 2),
             fill_pct=round((current / self.capacity) * 100, 1),
             refill_rate_per_s=self.refill_rate,
-            time_to_full_s=round(
-                max(0, (self.capacity - current) / self.refill_rate), 2
-            ),
+            time_to_full_s=round(max(0, (self.capacity - current) / self.refill_rate), 2),
             acquired=acquired,
             throttled=throttled,
             timeouts=timeouts,

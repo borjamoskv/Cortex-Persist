@@ -24,10 +24,11 @@ logger = logging.getLogger("cortex.memory.episodic")
 @dataclass(slots=True)
 class EpisodicFrame:
     """A single bounded moment in time before it becomes a semantic fact.
-    
-    Acts as the unit of working memory that is context-bound (includes time, 
+
+    Acts as the unit of working memory that is context-bound (includes time,
     place, active intent, and SourceMetadata).
     """
+
     content: str
     source: SourceMetadata
     temporal_context: str  # e.g., "During system boot", "User query on project X"
@@ -38,14 +39,14 @@ class EpisodicFrame:
 
 class EpisodicBuffer:
     """Holds recent EpisodicFrames before semantic consolidation."""
-    
+
     def __init__(self, max_frames: int = 50) -> None:
         self.frames: deque[EpisodicFrame] = deque(maxlen=max_frames)
-        
+
     def add_frame(self, frame: EpisodicFrame) -> None:
         """Add a frame to the episodic buffer."""
         self.frames.append(frame)
-        
+
     def get_context(self) -> str:
         """Returns a formatted string of the current buffer for the LLM."""
         return "\n".join(

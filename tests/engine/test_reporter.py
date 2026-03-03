@@ -26,7 +26,9 @@ def mock_db(tmp_path) -> str:
             )
             """
         )
-        conn.execute("INSERT INTO causal_edges (fact_id, edge_type) VALUES (1, 'test'), (2, 'test')")
+        conn.execute(
+            "INSERT INTO causal_edges (fact_id, edge_type) VALUES (1, 'test'), (2, 'test')"
+        )
 
         # Create minimal signals table
         conn.execute(
@@ -44,7 +46,7 @@ def mock_db(tmp_path) -> str:
         )
         conn.execute(
             "INSERT INTO signals (event_type, source, consumed_by) VALUES (?, ?, ?), (?, ?, ?)",
-            ("sig1", "cli", "[]", "sig2", "agent", '["a"]')
+            ("sig1", "cli", "[]", "sig2", "agent", '["a"]'),
         )
 
         # Create minimal facts table
@@ -62,20 +64,20 @@ def mock_db(tmp_path) -> str:
         )
         # Add 1 ghost fact
         conn.execute("INSERT INTO facts (fact_type) VALUES ('ghost')")
-        
+
         # Add 2 knowledge/chronos-roi facts
         roi_meta = json.dumps({"hours_saved": 42.0, "roi_ratio": 3.14})
         conn.execute(
             "INSERT INTO facts (fact_type, source, content, meta, created_at) "
             "VALUES ('knowledge', 'chronos-roi', 'summary', ?, '2026-01-01')",
-            (roi_meta,)
+            (roi_meta,),
         )
         conn.execute(
             "INSERT INTO facts (fact_type, source, content, meta, created_at) "
             "VALUES ('knowledge', 'chronos-roi', 'summary', ?, '2026-01-02')",
-            (roi_meta,)
+            (roi_meta,),
         )
-        
+
     return db_path
 
 
@@ -84,18 +86,18 @@ async def test_collect_metrics(mock_db: str):
     """Test that SovereignReporter correctly aggregates ManifoldStatus."""
     reporter = SovereignReporter(mock_db, project="test_proto")
     status: ManifoldStatus = await reporter.collect_metrics()
-    
+
     assert status.project == "test_proto"
     assert status.active_ghosts == 1
-    
+
     # We inserted 2 edges in a DB of 3 facts (2 roi, 1 ghost).
     # Integrity = (2 edges / 3 facts) * 100 = 66.67
     assert status.architecture_integrity == pytest.approx(66.67, 0.1)
-    
+
     # Efficiency logic checks
     assert status.efficiency["history_count"] == 2
     assert status.efficiency["latest_roi"]["hours_saved"] == 42.0
-    
+
     assert isinstance(status.timestamp, str)
     assert len(status.timestamp) > 10
 
@@ -105,6 +107,6 @@ async def test_missing_db_raises_error(tmp_path):
     """Ensure proper exception handling when DB is missing."""
     invalid_path = str(tmp_path / "nonexistent.db")
     reporter = SovereignReporter(invalid_path)
-    
+
     with pytest.raises(sqlite3.OperationalError):
         await reporter.collect_metrics()

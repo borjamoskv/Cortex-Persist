@@ -128,8 +128,6 @@ class TestAuditLogging:
         assert any("AUDIT" in record.message for record in caplog.records)
 
 
-
-
 class TestSelfHealingHookWiring:
     """Quick inline checks for the middleware counter.
 
@@ -144,4 +142,3 @@ class TestSelfHealingHookWiring:
         _HEAL_COUNTER.clear()
         SelfHealingHook.trigger(RuntimeError("boom"), {"endpoint": "basic"})
         assert _HEAL_COUNTER.get("basic") == 1
-

@@ -176,19 +176,21 @@ class CortexMetrics:
 
         self._update_ttl()
 
-    def _query_batch(self, conn: sqlite3.Connection, result: dict[AgentDomain, DomainMetrics]) -> None:
+    def _query_batch(
+        self, conn: sqlite3.Connection, result: dict[AgentDomain, DomainMetrics]
+    ) -> None:
         """Ω₀: Single-pass batch aggregation for all domains. 100x faster than per-domain loops."""
         hour_ago = time.time() - 3600
-        
+
         # ── 1. Batch facts aggregation ──
         # Build mapping for SQL CASE statements
         case_parts = []
         for domain, projects in DOMAIN_PROJECT_MAP.items():
             proj_list = ",".join(f"'{p}'" for p in projects)
             case_parts.append(f"WHEN project IN ({proj_list}) THEN '{domain.name}'")
-        
+
         case_sql = "CASE " + " ".join(case_parts) + " ELSE 'OTHER' END"
-        
+
         query = f"""
             SELECT 
                 {case_sql} as domain_name,
@@ -197,7 +199,7 @@ class CortexMetrics:
             FROM facts
             GROUP BY domain_name, fact_type
         """
-        
+
         for row in conn.execute(query).fetchall():
             dname = row["domain_name"]
             if dname == "OTHER":
@@ -219,7 +221,9 @@ class CortexMetrics:
                 m.knowledge_count = count
 
         # ── 2. Batch total density ──
-        query_dens = f"SELECT {case_sql} as domain_name, COUNT(*) as count FROM facts GROUP BY domain_name"
+        query_dens = (
+            f"SELECT {case_sql} as domain_name, COUNT(*) as count FROM facts GROUP BY domain_name"
+        )
         for row in conn.execute(query_dens).fetchall():
             dname = row["domain_name"]
             if dname == "OTHER":
@@ -270,7 +274,7 @@ class CortexMetrics:
         for domain in AgentDomain:
             if domain not in result:
                 result[domain] = self._fallback(domain)
-    
+
     def _query_sync(self, conn: sqlite3.Connection, domain: AgentDomain) -> DomainMetrics:
         """Legacy single query - redirected to batch for internal consistency if ever used alone."""
         res = {}

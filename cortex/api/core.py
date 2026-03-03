@@ -76,10 +76,10 @@ from cortex.routes import (
     timing as timing_router,
 )
 from cortex.routes import (
-    topology_ws as topology_ws_router,
+    tips as tips_router,
 )
 from cortex.routes import (
-    tips as tips_router,
+    topology_ws as topology_ws_router,
 )
 from cortex.routes import (
     translate as translate_router,

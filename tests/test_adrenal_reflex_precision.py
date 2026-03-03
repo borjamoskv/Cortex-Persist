@@ -30,6 +30,7 @@ async def test_targeted_reflex_on_rejection_signal():
 
         # 2. Trigger Reflex
         from cortex.engine.reflex import trigger_autonomic_reflex
+
         reflex_tasks = set()
         await trigger_autonomic_reflex(workspace, engine._cortex, reflex_tasks)
 

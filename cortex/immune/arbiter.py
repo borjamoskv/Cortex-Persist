@@ -223,5 +223,5 @@ class ImmuneArbiter:
             filter_results=results,
             blast_radius=blast_radius,
             immunity_certificate=(final_verdict == Verdict.PASS and total_score >= 85),
-            risks_assumed=risks
+            risks_assumed=risks,
         )

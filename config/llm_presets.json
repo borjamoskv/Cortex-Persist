@@ -233,5 +233,17 @@
     "env_key": "AIMLAPI_KEY",
     "context_window": 32768,
     "specialization": ["reasoning", "architect", "general"]
+  },
+  "venice": {
+    "base_url": "https://api.venice.ai/api/v1",
+    "default_model": "llama-3.3-70b",
+    "env_key": "VENICE_API_KEY",
+    "context_window": 131072,
+    "specialization": ["reasoning", "creative", "general"],
+    "intent_model_map": {
+      "reasoning": "llama-3.3-70b",
+      "creative": "llama-3.3-70b",
+      "general": "llama-3.3-70b"
+    }
   }
 }

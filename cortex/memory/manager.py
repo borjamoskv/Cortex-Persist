@@ -112,28 +112,26 @@ class CortexMemoryManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = (
-            DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None
-        )  # type: ignore[reportOptionalCall]
+        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
 
         self._endocrine = DigitalEndocrine()
         self._schema_engine = SchemaEngine()
 
         from cortex.memory.metamemory import MetamemoryMonitor
+
         self.metamemory = MetamemoryMonitor()
 
         # ART-v2 Resonance Engine [v6.2]
         _sensor = None
         try:
             from cortex.songlines.sensor import TopographicSensor
+
             _sensor = TopographicSensor()
         except ImportError:
             pass
 
         self._resonance_gate = AdaptiveResonanceGate(
-            vector_store=self._l2,
-            songline_sensor=_sensor,
-            endocrine=self._endocrine
+            vector_store=self._l2, songline_sensor=_sensor, endocrine=self._endocrine
         )
 
         if self._dynamic_space:
@@ -315,8 +313,7 @@ class CortexMemoryManager:
         # Replacing simple exact deduplication with semantic resonance.
         # This eliminates semantic overlap, not just string duplication.
         status, engram = await self._resonance_gate.gate(
-            candidate=candidate,
-            precision_mode=(fact_type in ("decision", "rule"))
+            candidate=candidate, precision_mode=(fact_type in ("decision", "rule"))
         )
 
         if status == "resonance":

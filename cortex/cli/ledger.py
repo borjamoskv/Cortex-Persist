@@ -7,10 +7,12 @@ from cortex.cli.common import DEFAULT_DB, _run_async, get_engine
 
 console = Console()
 
+
 @click.group(name="ledger")
 def ledger_cmds():
     """Sovereign Ledger Operations (Wave 5: Immutable Merkle Trees)."""
     pass
+
 
 @ledger_cmds.command("verify")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
@@ -37,6 +39,7 @@ def verify_ledger(db):
 
     _run_async(_run())
 
+
 @ledger_cmds.command("checkpoint")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def create_checkpoint(db):
@@ -49,6 +52,7 @@ def create_checkpoint(db):
             ledger_inst = getattr(engine, "_ledger", None)
             if not ledger_inst:
                 from cortex.engine.ledger import ImmutableLedger
+
                 # Re-using the connection from the engine
                 conn = await engine.get_conn()
                 ledger_inst = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
@@ -64,5 +68,6 @@ def create_checkpoint(db):
             await engine.close()
 
     _run_async(_run())
+
 
 ledger_cmds_click = ledger_cmds

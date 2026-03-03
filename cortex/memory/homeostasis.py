@@ -181,10 +181,7 @@ class HomeostaticScaler:
             return {"scaled": 0, "factor": 1.0}
 
         # Compute mean energy (excluding diamonds — they're invariant)
-        mutable = [
-            e for e in engrams
-            if isinstance(e, CortexSemanticEngram) and not e.is_diamond
-        ]
+        mutable = [e for e in engrams if isinstance(e, CortexSemanticEngram) and not e.is_diamond]
         if not mutable:
             return {"scaled": 0, "factor": 1.0}
 
@@ -194,7 +191,8 @@ class HomeostaticScaler:
         if abs(mean_energy - self._set_point) < _SCALING_DEADZONE:
             logger.debug(
                 "HomeostaticScaler: mean=%.3f within deadzone of %.3f, skipping",
-                mean_energy, self._set_point,
+                mean_energy,
+                self._set_point,
             )
             return {"scaled": 0, "factor": 1.0}
 
@@ -208,20 +206,20 @@ class HomeostaticScaler:
                 min(_ENERGY_CEILING, engram.energy_level * factor),
             )
             if abs(new_energy - engram.energy_level) > 0.01:
-                updated = engram.model_copy(
-                    update={"energy_level": new_energy}
-                )
+                updated = engram.model_copy(update={"energy_level": new_energy})
                 await self._vs.upsert(updated)
                 scaled_count += 1
 
         logger.info(
             "HomeostaticScaler: mean=%.3f → target=%.3f, factor=%.4f, scaled=%d/%d",
-            mean_energy, self._set_point, factor,
-            scaled_count, len(mutable),
+            mean_energy,
+            self._set_point,
+            factor,
+            scaled_count,
+            len(mutable),
         )
         return {
             "scaled": scaled_count,
             "factor": round(factor, 4),
             "mean_before": round(mean_energy, 4),
         }
-

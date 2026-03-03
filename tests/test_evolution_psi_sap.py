@@ -7,6 +7,7 @@ Cubre:
 - Comportamiento del LagrangianController
 - Integración con EntropyReductionStrategy (Axiom 12 tags)
 """
+
 from __future__ import annotations
 
 import math
@@ -66,7 +67,6 @@ class TestSymbolicActionEngine:
         assert state.entropy_resistance == 0.0
         assert state.grace == 2.0
 
-
     def test_lagrangian_formula_degraded_domain(self):
         """Degraded domain (high errors, ghosts) → negative Lagrangian."""
         engine = SymbolicActionEngine()
@@ -96,6 +96,7 @@ class TestSymbolicActionEngine:
         m = _make_metrics()
 
         import time
+
         engine.compute_state(agent, m, grace_injection=1.0)
         time.sleep(0.05)  # dt > 0
         state2 = engine.compute_state(agent, m, grace_injection=1.0)

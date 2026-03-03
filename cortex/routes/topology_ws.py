@@ -79,7 +79,9 @@ async def websocket_topology_endpoint(websocket: WebSocket):
             try:
                 command = json.loads(data)
                 if command.get("type") == "INJECT_NOISE":
-                    logger.info("Manual noise injection command received for %s", command.get("node_id"))
+                    logger.info(
+                        "Manual noise injection command received for %s", command.get("node_id")
+                    )
                     # Implementation would trigger a re-consolidation with perturbation
             except json.JSONDecodeError:
                 pass

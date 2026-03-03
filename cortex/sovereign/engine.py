@@ -307,12 +307,14 @@ async def run_pipeline(
             triage = await ctx.arbiter.triage(signal, plan, confidence=confidence)
 
             if triage.verdict == Verdict.BLOCK:
-                logger.critical("🚨 IMMUNE BLOCK: Phase %s aborted to prevent sabotage.", phase.name)
+                logger.critical(
+                    "🚨 IMMUNE BLOCK: Phase %s aborted to prevent sabotage.", phase.name
+                )
                 result = PipelineResult(
                     phase=phase,
                     success=False,
                     duration_ms=0,
-                    details={"error": "Immune Block", "triage": triage.__dict__}
+                    details={"error": "Immune Block", "triage": triage.__dict__},
                 )
                 ctx.results.append(result)
                 break

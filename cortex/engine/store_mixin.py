@@ -96,13 +96,30 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         meta = self._apply_privacy_shield(content, project, meta)
         meta = run_security_guards(content, project, source, meta)
 
+        # Omega-3: Byzantine Default - Pass through SovereignSanitizer
+        from cortex.engine.membrane.sanitizer import SovereignSanitizer
+
+        raw_engram = {
+            "type": fact_type,
+            "source": source or "engine:store",
+            "topic": project,
+            "content": content,
+            "metadata": meta or {},
+        }
+        pure_engram, membrane_log = SovereignSanitizer.digest(raw_engram)
+        content = pure_engram.content
+        meta = pure_engram.metadata
+        if hasattr(membrane_log, "model_dump"):
+            meta["_membrane_log"] = membrane_log.model_dump()
+        else:
+            meta["_membrane_log"] = membrane_log.dict()  # Fallback for V1 if needed
+
         meta = await resolve_causality_async(conn, project, meta)
 
         # Ω₆: Nemesis Analysis must be async to prevent loop starvation
         if rej := await NemesisProtocol.analyze_async(content, conn=conn):
             logger.warning("NEMESIS REJECTION: %s", rej)
             raise ValueError(rej)
-
 
         # Ω₁: Bridge Elevation — Prescriptive pattern elevation for cross-project duplicates
         if fact_type in ("knowledge", "decision", "rule", "ghost"):

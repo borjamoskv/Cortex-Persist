@@ -19,16 +19,15 @@ import time
 import pytest
 
 from cortex.memory.reconsolidation import (
-    ConfirmationBiasDetector,
     DEFAULT_LABILE_WINDOW_S,
     IGNORE_DECAY,
-    LabilizationRecord,
     RECONSOLIDATE_BOOST,
+    ConfirmationBiasDetector,
+    LabilizationRecord,
     ReconsolidationEvent,
     ReconsolidationOutcome,
     ReconsolidationTracker,
 )
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 

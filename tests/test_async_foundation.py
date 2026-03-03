@@ -14,7 +14,6 @@ from cortex.database.pool import CortexConnectionPool
 from cortex.engine_async import AsyncCortexEngine
 from cortex.migrations.core import run_migrations_async
 
-
 # Setup simplistic schema for testing
 # We might need full schema in real scenarios, but for unit testing the pool
 # and basic engine, we can use a subset or the real one if importable.
@@ -137,4 +136,3 @@ async def test_engine_crud(engine):
     fact_after = await engine.get_fact(fid)
     assert fact_after is None or fact_after.get("valid_until") is not None
     print("--- Engine CRUD test PASSED ---")
-

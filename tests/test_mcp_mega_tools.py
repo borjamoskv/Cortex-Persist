@@ -90,18 +90,9 @@ async def test_entropy_cracker_real_scan(mcp_server):
     with tempfile.TemporaryDirectory() as tmpdir:
         test_file = os.path.join(tmpdir, "example.py")
         with open(test_file, "w") as f:
-            f.write(
-                "class Foo:\n"
-                "    def bar(self):\n"
-                "        return 42\n"
-                "\n"
-                "def baz():\n"
-                "    pass\n"
-            )
+            f.write("class Foo:\n    def bar(self):\n        return 42\n\ndef baz():\n    pass\n")
 
-        result = await mcp_server.call_tool(
-            "cortex_entropy_cracker", {"path": tmpdir}
-        )
+        result = await mcp_server.call_tool("cortex_entropy_cracker", {"path": tmpdir})
         text = "".join(str(getattr(c, "text", c)) for c in result)
 
         assert "ENTROPY CRACKER" in text.upper()
@@ -124,9 +115,7 @@ async def test_entropy_cracker_invalid_path(mcp_server):
 async def test_entropy_cracker_empty_dir(mcp_server):
     """Entropy Cracker should handle dirs with no Python files."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        result = await mcp_server.call_tool(
-            "cortex_entropy_cracker", {"path": tmpdir}
-        )
+        result = await mcp_server.call_tool("cortex_entropy_cracker", {"path": tmpdir})
         text = "".join(str(getattr(c, "text", c)) for c in result)
         assert "No Python files" in text
 
@@ -146,9 +135,7 @@ async def test_temporal_nexus_output(mcp_server):
 @pytest.mark.asyncio
 async def test_temporal_nexus_with_project(mcp_server):
     """Temporal Nexus should filter by project."""
-    result = await mcp_server.call_tool(
-        "cortex_temporal_nexus", {"project": "cortex"}
-    )
+    result = await mcp_server.call_tool("cortex_temporal_nexus", {"project": "cortex"})
     text = "".join(str(getattr(c, "text", c)) for c in result)
 
     assert "TEMPORAL NEXUS: cortex" in text

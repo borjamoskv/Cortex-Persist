@@ -79,8 +79,12 @@ class SchemaEngine:
             name="error_debugging",
             description="Schema activated when investigating stacktraces or bugs.",
             triggers=[
-                "error:", "exception", "traceback", "bug", "crash",
-                "traceback (most recent call last)"
+                "error:",
+                "exception",
+                "traceback",
+                "bug",
+                "crash",
+                "traceback (most recent call last)",
             ],
             encoding_focus=["Stacktrace", "Cause", "Resolution", "Fix", "File Path"],
             encoding_ignore=["Frustration", "Complaints", "Greetings", "Thanks"],
@@ -90,8 +94,14 @@ class SchemaEngine:
             name="machine_learning",
             description="Schema for AI/ML specific tasks.",
             triggers=[
-                "model", "training", "loss", "epochs", "dataset",
-                "inference", "pytorch", "tensorflow"
+                "model",
+                "training",
+                "loss",
+                "epochs",
+                "dataset",
+                "inference",
+                "pytorch",
+                "tensorflow",
             ],
             encoding_focus=["Architecture", "Hyperparameters", "Metrics", "Loss Evolution"],
             encoding_ignore=["Setup logs", "Progress bars", "Warnings"],

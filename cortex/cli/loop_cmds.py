@@ -71,7 +71,7 @@ GOLD = "#D4AF37"
 @click.option(
     "--mode",
     "-m",
-    type=click.Choice(["interactive", "batch"]),
+    type=click.Choice(["interactive", "batch", "sovereign"]),
     default="interactive",
     help="Execution mode",
 )
@@ -107,7 +107,15 @@ def loop(project: str, mode: str, task: str | None, no_persist: bool, db: str) -
     )
 
     try:
-        if mode == "batch" or task:
+        if mode == "sovereign":
+            console.print(
+                Panel(
+                    "[bold green]SOVEREIGN MEMBRANE ACTIVE[/bold green]\n[dim]All engrams undergo Zero-Trust purification (Axiom Ω3).[/dim]",
+                    border_style="green",
+                )
+            )
+            _run_interactive(loop_engine)
+        elif mode == "batch" or task:
             _run_batch(loop_engine, task or "")
         else:
             _run_interactive(loop_engine)

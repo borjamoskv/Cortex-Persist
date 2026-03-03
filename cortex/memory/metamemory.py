@@ -492,10 +492,7 @@ class MetamemoryMonitor:
 
         # Segmented view (Ω₁: Multi-Scale Causality)
         project_ids = {o.project_id for o in self._outcomes}
-        active_segments = {
-            pid: self.calibration_score(project_id=pid)
-            for pid in project_ids
-        }
+        active_segments = {pid: self.calibration_score(project_id=pid) for pid in project_ids}
 
         # Outcome distribution
         successes = sum(1 for o in self._outcomes if o.actual_success)
@@ -520,9 +517,7 @@ class MetamemoryMonitor:
         else:
             tier = "poor"
 
-        rounded_segments = {
-            k: round(v, 4) if v >= 0 else -1.0 for k, v in active_segments.items()
-        }
+        rounded_segments = {k: round(v, 4) if v >= 0 else -1.0 for k, v in active_segments.items()}
 
         return {
             "brier_score": brier,
@@ -568,9 +563,9 @@ class Verdict(str, enum.Enum):
 class FOKDirective(str, enum.Enum):
     """Pre-retrieval routing directive based on Feeling of Knowing."""
 
-    RETRIEVE_INTERNAL = "retrieve_internal"            # High FOK -> search memory
-    RETRIEVE_WITH_VERIFICATION = "retrieve_verify"     # Med FOK  -> search but verify
-    EXTERNAL_SEARCH = "external_search"                # Low FOK  -> skip internal, go to tools
+    RETRIEVE_INTERNAL = "retrieve_internal"  # High FOK -> search memory
+    RETRIEVE_WITH_VERIFICATION = "retrieve_verify"  # Med FOK  -> search but verify
+    EXTERNAL_SEARCH = "external_search"  # Low FOK  -> skip internal, go to tools
 
 
 # ─── Consolidation Status ────────────────────────────────────────────

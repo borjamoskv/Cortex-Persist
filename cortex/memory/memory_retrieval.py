@@ -26,6 +26,7 @@ logger = logging.getLogger("cortex.memory.retrieval")
 
 class KnowledgeGapException(Exception):
     """Raised when Metamemory FOK evaluates retrieval potential as too low to proceed."""
+
     pass
 
 
@@ -124,7 +125,7 @@ def apply_retrieval_schemas(manager: CortexMemoryManager, query: str) -> str:
     schema_engine = getattr(manager, "_schema_engine", None)
     if not schema_engine:
         return query
-        
+
     schema = schema_engine.match_schema(query)
     if schema:
         logger.debug("Applied Schema '%s' to retrieval query", schema.name)
@@ -226,4 +227,3 @@ def _apply_hebbian_boost(
 
     boosted.sort(key=lambda x: x.get("score", 0.0), reverse=True)
     return boosted
-

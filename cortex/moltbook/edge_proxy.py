@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.moltbook.client import MoltbookClient
 
 logger = logging.getLogger("cortex.moltbook.proxy")
+
 
 class MoltbookEdgeProxy:
     """

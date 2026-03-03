@@ -9,6 +9,7 @@ __all__ = ["PolicyRecommendation", "EvictionVerdict", "OracleReport"]
 
 class PolicyRecommendation(Enum):
     """Ajuste de política sugerido por el Oracle."""
+
     OPTIMAL = "OPTIMAL"  # El sistema olvida correctamente
     INCREASE_TTL = "INCREASE_TTL"  # Olvida demasiado pronto (regret rate alto)
     REDUCE_CAPACITY = "REDUCE_CAPACITY"  # Olvida demasiado tarde (utilización OOM risk)
@@ -18,6 +19,7 @@ class PolicyRecommendation(Enum):
 @dataclass
 class EvictionVerdict:
     """Resultado del análisis post-hoc de una evicción concreta."""
+
     key: str
     eviction_id: int
     reason: str
@@ -31,6 +33,7 @@ class EvictionVerdict:
 @dataclass
 class OracleReport:
     """Informe completo de una sesión de auditoría del Oracle."""
+
     audited_at: float
     window_size: int
     verdicts: list[EvictionVerdict]
