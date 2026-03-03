@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
 __all__ = ["PolicyRecommendation", "EvictionVerdict", "OracleReport"]
+
 
 class PolicyRecommendation(Enum):
     """Ajuste de política sugerido por el Oracle."""
@@ -11,6 +13,7 @@ class PolicyRecommendation(Enum):
     INCREASE_TTL = "INCREASE_TTL"  # Olvida demasiado pronto (regret rate alto)
     REDUCE_CAPACITY = "REDUCE_CAPACITY"  # Olvida demasiado tarde (utilización OOM risk)
     PRIORITIZE_CAUSAL = "PRIORITIZE_CAUSAL"  # Olvida hechos causalmente críticos
+
 
 @dataclass
 class EvictionVerdict:
@@ -23,6 +26,7 @@ class EvictionVerdict:
     access_frequency_score: float  # 0.0 = nunca accedido, 1.0 = muy frecuente
     eviction_value: float  # Score compuesto de qué tan costosa fue la decisión
     details: dict[str, Any] = field(default_factory=dict)
+
 
 @dataclass
 class OracleReport:
