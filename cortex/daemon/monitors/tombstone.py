@@ -53,8 +53,9 @@ class TombstoneMonitor:
         self._last_run = now
 
         try:
+            from cortex.database.core import connect as db_connect
             # Using basic sqlite3 to bypass connection pools / WAL constraints if needed
-            with sqlite3.connect(
+            with db_connect(
                 self.db_path,
                 timeout=30,
                 isolation_level="IMMEDIATE",  # Exclusive write transaction

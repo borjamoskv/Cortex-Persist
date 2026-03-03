@@ -30,9 +30,6 @@ class AttackVector(Protocol):
 
     name: str
 
-    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
-        """Sows entropy and returns detected vulnerabilities."""
-        ...
 
 
 class OOMKiller:
@@ -156,9 +153,6 @@ class SiegeVector(Protocol):
 
     name: str
 
-    async def attack(self, system: Any, context: Mapping[str, Any]) -> list[str]:
-        """Attacks the live system and returns detected vulnerabilities of success."""
-        ...
 
 
 class LedgerPoisoner:

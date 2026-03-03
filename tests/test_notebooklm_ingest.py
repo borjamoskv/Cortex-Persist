@@ -48,8 +48,6 @@ def test_notebooklm_ingest_with_mock_drive(mock_get_engine, mock_llm_cls, mock_d
     mock_llm_instance.generate = mock_generate
     
     # Mock engine methods
-    async def mock_init(): pass
-    async def mock_close(): pass
     async def mock_store_many(facts):
         return [1] # Return fake IDs
         

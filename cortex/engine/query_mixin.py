@@ -54,13 +54,35 @@ class QueryMixin(EngineMixinBase):
         as_of: str | None = None,
         graph_depth: int = 0,
         fuse: bool = True,
+        fast_mode: bool | None = None,
         **kwargs,
     ) -> list[SearchResult]:
-        """Perform semantic or hybrid search with optional Graph-RAG context."""
+        """Perform semantic or hybrid search with optional Graph-RAG context.
+
+        Speed Optimization (Kairos-Ω):
+        - If query is simple (keywords) or fast_mode=True, skip model load and use FTS5.
+        """
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
 
+        # Auto-detect fast mode: queries with 1-2 words are often keywords
+        is_simple = len(query.split()) <= 2
+        if fast_mode is None:
+            fast_mode = is_simple
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            if fast_mode:
+                # 100x Faster Path: No model load, pure FTS5
+                return await text_search(
+                    conn,
+                    query,
+                    tenant_id=tenant_id,
+                    project=project,
+                    limit=top_k,
+                    as_of=as_of,
+                    **kwargs,
+                )
+
             embedder = self._get_embedder()  # type: ignore[reportAttributeAccessIssue]
             query_embedding = embedder.embed(query)
 

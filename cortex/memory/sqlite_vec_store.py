@@ -110,8 +110,15 @@ class SovereignVectorStoreL2:
             )
             self._conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON facts_meta(is_bridge)")
 
-            self._conn.commit()
             self._ready = True
+
+            # Ω₀: Structural integrity migration
+            try:
+                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN cognitive_layer TEXT")
+                self._conn.commit()
+            except sqlite3.OperationalError:
+                pass
+
         return self._conn
 
     async def memorize(self, fact: CortexFactModel) -> None:

@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS entity_events (
     payload         TEXT NOT NULL DEFAULT '{}',
     timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
     prev_hash       TEXT NOT NULL DEFAULT 'GENESIS',
-    signature       TEXT NOT NULL,
+    signature       TEXT NOT NULL CHECK(length(signature) > 0),
     signer          TEXT NOT NULL DEFAULT '',
     schema_version  TEXT NOT NULL DEFAULT '1'
 );
@@ -231,10 +231,45 @@ CREATE TABLE IF NOT EXISTS lock_state (
 );
 """
 
+CREATE_LLM_TELEMETRY = """
+CREATE TABLE IF NOT EXISTS llm_telemetry (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    intent          TEXT,
+    resolved_by     TEXT,
+    project         TEXT,
+    tier            TEXT NOT NULL,
+    depth           INTEGER NOT NULL,
+    latency_ms      REAL,
+    errors          TEXT DEFAULT '[]',
+    timestamp       REAL NOT NULL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_LLM_TELEMETRY_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_llm_telemetry_tier ON llm_telemetry(tier);
+CREATE INDEX IF NOT EXISTS idx_llm_telemetry_timestamp ON llm_telemetry(timestamp);
+"""
+
+
 CREATE_LOCK_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
+
+# ── Lock TTL Enforcement (Ω₃ -- dead agents cannot hold locks forever) ──
+CREATE_LOCK_TTL_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_lock_ttl_release
+AFTER INSERT ON lock_intents
+BEGIN
+    UPDATE lock_state
+    SET holder_agent = NULL, acquired_at = NULL,
+        expires_at = NULL, queue_depth = MAX(0, queue_depth - 1)
+    WHERE expires_at IS NOT NULL AND expires_at < datetime('now');
+END;
+"""
+
 
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
@@ -258,4 +293,7 @@ EXTENSION_SCHEMA = [
     CREATE_LOCK_INTENTS,
     CREATE_LOCK_STATE,
     CREATE_LOCK_INDEXES,
+    CREATE_LOCK_TTL_TRIGGER,
+    CREATE_LLM_TELEMETRY,
+    CREATE_LLM_TELEMETRY_INDEX,
 ]

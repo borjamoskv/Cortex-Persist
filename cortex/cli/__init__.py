@@ -11,7 +11,6 @@ from rich.theme import Theme
 from cortex import __version__  # noqa: F401
 
 # Registrar submódulos
-# ─── Registrar todos los sub-módulos ───────────────────────────────────
 from cortex.cli import (  # noqa: E402
     chronos_cmds,  # noqa: E402, F401
     compact_cmds,  # noqa: E402, F401

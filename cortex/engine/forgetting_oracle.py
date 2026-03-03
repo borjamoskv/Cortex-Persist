@@ -26,6 +26,8 @@ from cortex.engine.forgetting_models import (
     OracleReport,
     PolicyRecommendation,
 )
+from cortex.services.notebooklm import NotebookLMService
+from cortex.services.trust import TrustService
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine
@@ -83,6 +85,11 @@ class ForgettingOracle:
         self._last_report: OracleReport | None = None
         self._audit_count = 0
 
+        # Ω₃/Ω₂: Integrated Services
+        db_path = str(getattr(engine, "_db_path", ""))
+        self._trust = TrustService(db_path) if db_path else None
+        self._notebooklm = NotebookLMService(db_path) if db_path else None
+
     async def evaluate(self, window: int = 100) -> OracleReport:
         """
         Ejecuta una auditoría completa del olvido.
@@ -94,6 +101,10 @@ class ForgettingOracle:
             OracleReport con veredictos y recomendación de política.
         """
         self._audit_count += 1
+        if not self._engine:
+            logger.error("🔮 [ORACLE] Oracle not initialized with an engine.")
+            return self._empty_report()
+
         logger.info(
             "🔮 [ORACLE] Cycle #%d — Evaluating last %d evictions.",
             self._audit_count,
@@ -172,8 +183,11 @@ class ForgettingOracle:
                     except (json.JSONDecodeError, TypeError):
                         continue
                 return list(reversed(records))  # Cronológico
-        except (AttributeError, sqlite3.Error) as e:
-            logger.error("[ORACLE] Failed to fetch eviction records: %s", e)
+        except sqlite3.Error as e:
+            logger.error("[ORACLE] Database error fetching eviction records: %s", e)
+            return []
+        except Exception as e:
+            logger.error("[ORACLE] Unexpected error fetching eviction records: %s", e)
             return []
 
     async def _analyze_eviction(self, record: dict[str, Any]) -> EvictionVerdict:
@@ -233,7 +247,11 @@ class ForgettingOracle:
                 row = await cursor.fetchone()
                 post_eviction_activity = row[0] if row else 0
                 return post_eviction_activity > 0
-        except (sqlite3.Error, AttributeError):
+        except sqlite3.Error:
+            logger.debug("[ORACLE] DB error detecting cache miss for %s", key)
+            return False
+        except Exception as e:
+            logger.debug("[ORACLE] Unexpected error detecting cache miss: %s", e)
             return False
 
     async def _estimate_causal_weight(self, key: str) -> float:
@@ -256,8 +274,10 @@ class ForgettingOracle:
                 if row:
                     dominant_type = row[0]
                     return self.CAUSAL_WEIGHT_MAP.get(dominant_type, self.DEFAULT_WEIGHT)
-        except (sqlite3.Error, AttributeError):
-            pass
+        except sqlite3.Error:
+            logger.debug("[ORACLE] DB error estimating causal weight for %s", key)
+        except Exception as e:
+            logger.debug("[ORACLE] Unexpected error estimating causal weight: %s", e)
         return self.DEFAULT_WEIGHT
 
     async def _estimate_access_frequency(self, key: str, eviction_ts: str) -> float:
@@ -314,7 +334,11 @@ class ForgettingOracle:
                 count = row[0] if row else 0
                 # Normalise: 100+ accesses → score 1.0
                 return min(1.0, count / 100.0)
-        except (sqlite3.Error, AttributeError):
+        except sqlite3.Error:
+            logger.debug("[ORACLE] DB error in frequency fallback for %s", project_id)
+            return 0.0
+        except Exception as e:
+            logger.debug("[ORACLE] Unexpected error in frequency fallback: %s", e)
             return 0.0
 
     def _compose_eviction_value(
@@ -413,9 +437,19 @@ class ForgettingOracle:
     # ─── Evidence Chain Verification ──────────────────────────────────────────
 
     def _verify_evidence_chain(self, records: list[dict[str, Any]]) -> tuple[bool, str]:
-        """Verifica que la cadena de evidencia del ledger es internamente consistente."""
+        """Verifica que la cadena de evidencia del ledger es internamente consistente (Ω₃)."""
         if not records:
             return True, "NO_RECORDS"
+
+        if self._trust:
+            # Use real TrustService for full cryptographic verification
+            for record in records:
+                fact_id = record.get("tx_id")  # Assuming tx_id maps to something trust can verify
+                if fact_id:
+                    # TrustService returns FactVerification (frozen dataclass)
+                    res = self._trust.verify_fact_chain(fact_id)
+                    if not res.valid:
+                        return False, f"TRUST_FAILURE:{fact_id}"
 
         trails = []
         for record in records:

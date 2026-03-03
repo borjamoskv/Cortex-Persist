@@ -3,6 +3,7 @@ import logging
 import re
 import sqlite3
 
+from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.signals.bus import SignalBus
 
@@ -110,7 +111,7 @@ class NemesisProtocol:
     def _emit_rejection_signal(cls, db_path: str, pattern: str, reason: str, count: int) -> None:
         """Emits a signal to the CORTEX bus about the rejection."""
         try:
-            with sqlite3.connect(db_path) as conn:
+            with db_connect(db_path) as conn:
                 bus = SignalBus(conn)
                 bus.emit(
                     "nemesis:rejection",
@@ -141,7 +142,7 @@ class NemesisProtocol:
 
         if db_path:
             try:
-                with sqlite3.connect(db_path) as conn:
+                with db_connect(db_path) as conn:
                     bus = SignalBus(conn)
                     bus.emit(
                         "nemesis:assimilation",

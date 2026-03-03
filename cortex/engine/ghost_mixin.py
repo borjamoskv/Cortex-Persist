@@ -60,15 +60,15 @@ class GhostMixin:
             target_file = Path(target_file)
 
         # 3. Embed the resonance
+        content_for_id = f"{reference}: {context}"
         self._emitter.embed_ghost(
-            target_file=target_file, intent=f"{reference}: {context}", project=project
+            target_file=target_file, intent=content_for_id, project=project
         )
 
-        # Return a hash-based ghost ID (compatible with old int return where possible,
-        # but songlines use string IDs)
+        # Return the same hash-based ghost ID used by the emitter
         import hashlib
 
-        return hashlib.sha256(f"{reference}:{project}".encode()).hexdigest()[:16]
+        return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
 
     async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
         """Scan the topography for all active ghosts."""

@@ -34,33 +34,12 @@ class StorageBackend(Protocol):
     with CortexConnectionPool and AsyncCortexEngine.
     """
 
-    async def execute(self, sql: str, params: tuple = ()) -> list[dict]:
-        """Execute a single SQL statement and return rows as dicts."""
-        ...
 
-    async def execute_insert(self, sql: str, params: tuple = ()) -> int:
-        """Execute an INSERT and return the last row ID."""
-        ...
 
-    async def executemany(self, sql: str, params_list: list[tuple]) -> None:
-        """Execute a statement with multiple parameter sets."""
-        ...
 
-    async def executescript(self, script: str) -> None:
-        """Execute a multi-statement SQL script."""
-        ...
 
-    async def commit(self) -> None:
-        """Commit the current transaction."""
-        ...
 
-    async def close(self) -> None:
-        """Close the connection."""
-        ...
 
-    async def health_check(self) -> bool:
-        """Return True if the connection is alive."""
-        ...
 
 
 def get_storage_mode() -> StorageMode:

@@ -194,7 +194,6 @@ class ThoughtFusion:
             return None
         for attempt in range(self.JUDGE_MAX_RETRIES + 1):
             try:
-                # El proveedor debe soportar el método complete asíncrono
                 return await asyncio.wait_for(
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,

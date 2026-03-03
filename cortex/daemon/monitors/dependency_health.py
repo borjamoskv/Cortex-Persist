@@ -62,7 +62,8 @@ class SQLiteHealthCheck(HealthCheck):
         if not Path(self.db_path).exists():
             return DependencyAlert("sqlite", "unavailable", f"DB not found: {self.db_path}")
         try:
-            conn = sqlite3.connect(self.db_path, timeout=2)
+            from cortex.database.core import connect as db_connect
+            conn = db_connect(self.db_path, timeout=2)
             conn.execute("SELECT 1")
             conn.close()
             return None

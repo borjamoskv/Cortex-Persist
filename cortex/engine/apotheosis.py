@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,6 +19,8 @@ from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.manifestation import manifest_singularity, transfigure_ui
 from cortex.engine.reflex import trigger_autonomic_reflex
 from cortex.engine.rem_cycle import REMCoordinator
+from cortex.services.notebooklm import NotebookLMService
+from cortex.services.trust import TrustService
 from cortex.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
@@ -49,8 +52,14 @@ class ApotheosisEngine:
         self._ignited_tasks: set[str] = set()
         self._reflex_tasks: set[asyncio.Task] = set()
         self._oracle = None  # ForgettingOracle (lazy init)
+        self._trust = None
+        self._notebooklm = None
 
         if cortex_engine:
+            db_path = str(getattr(cortex_engine, "_db_path", ""))
+            if db_path:
+                self._trust = TrustService(db_path)
+                self._notebooklm = NotebookLMService(db_path)
             if hasattr(cortex_engine, "db"):
                 # type: ignore[reportAttributeAccessIssue]
                 self._rem = REMCoordinator(cortex_engine.db)
@@ -69,9 +78,9 @@ class ApotheosisEngine:
                     logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)
 
     # Optimized sleep bounds (seconds) - Entropic Asymmetry (Ω₂)
-    _SLEEP_MIN: float = 10.0  # Reduced from 30.0 to lower thermal floor
-    _SLEEP_MAX: float = 240.0
-    _SLEEP_JITTER: float = 0.10  # Reduced noise
+    _SLEEP_MIN: float = 0.1  # KAIROS-Ω: Lowered from 10.0 for 100x speedup
+    _SLEEP_MAX: float = 60.0
+    _SLEEP_JITTER: float = 0.05
 
     async def _omniscience_loop(self) -> None:
         """Ciclo infinito de latencia negativa con sueño adaptativo y hormonal."""
@@ -107,6 +116,11 @@ class ApotheosisEngine:
                 oracle_task = asyncio.create_task(self._oracle_audit())
                 self._reflex_tasks.add(oracle_task)
                 oracle_task.add_done_callback(self._reflex_tasks.discard)
+                
+                # 📓 Sync NotebookLM during calm phase (Ω₂)
+                sync_task = asyncio.create_task(self._sync_notebooklm())
+                self._reflex_tasks.add(sync_task)
+                sync_task.add_done_callback(self._reflex_tasks.discard)
 
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
@@ -115,13 +129,41 @@ class ApotheosisEngine:
                 f"Ciclo Ω. Entropía={entropy_found}. Sueño: {duration:.1f}s", signal="Ω"
             )
             # ZENÓN-1: Collapse into action if duration is negligible
-            if duration > 0.1:
+            # KAIROS-Ω: Adrenal Overdrive (Ω₆ Singularity)
+            if adrenaline > 0.8:
+                # Bypass sleep for maximum kinetic velocity during high-state
+                bicameral.log_bio("Adrenal Overdrive: Bypassing sleep.", signal="⚡")
+                continue
+
+            if duration > 0.01:
                 await asyncio.sleep(duration)
 
     async def _check_singularity_state(self, dopamine: float, growth: float) -> None:
         if dopamine > 0.9 and growth > 0.8:
             logger.warning("🌌 [SINGULARITY-Ω] High Coherent.")
+            # Ω₃: Verify compliance before manifestation (O(1) async check)
+            if self._trust:
+                stats = await asyncio.to_thread(self._trust.get_compliance_stats)
+                if stats.eu_ai_act_score < 0.8:
+                    logger.error("🛡️ [TRUST] Compliance score too low for Singularity: %.2f", stats.eu_ai_act_score)
+                    return
             await manifest_singularity(self._signal_bus)
+
+    async def _sync_notebooklm(self) -> None:
+        """Sincroniza el Master Digest con NotebookLM (Ω₂)."""
+        if not self._notebooklm:
+            return
+        try:
+            digest = await self._notebooklm.generate_digest()
+            digest_path = Path("notebooklm_sources/master_digest.md")
+            digest_path.parent.mkdir(parents=True, exist_ok=True)
+            digest_path.write_text(digest)
+            
+            # Sync to cloud if detected
+            cloud_target = self._notebooklm.sync_to_cloud(digest_path)
+            logger.info("📓 [NOTEBOOKLM] Digest synced to cloud: %s", cloud_target)
+        except Exception as e:
+            logger.debug("[NOTEBOOKLM] Sync failed: %s", e)
 
     async def _oracle_audit(self) -> None:
         """Ejecuta la auditoría de olvido en segundo plano (Ω₅)."""
@@ -155,8 +197,11 @@ class ApotheosisEngine:
                 )
             else:
                 ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.05)
-        except Exception as e:
+        except (AttributeError, sqlite3.Error, asyncio.CancelledError) as e:
             logger.debug("[ORACLE] Audit skipped: %s", e)
+        except Exception as e:
+            logger.error("[ORACLE] Unexpected audit failure: %s", e)
+            raise
 
     def _apply_hormonal_shifts(self, adrenaline: float, cortisol: float, dopamine: float) -> float:
         inertia = 1.0 - self._cognitive_weight
@@ -193,9 +238,9 @@ class ApotheosisEngine:
     def _calc_duration(self, derived_sleep: float, adrenaline: float, _random: Any) -> float:
         final_sleep = derived_sleep * (1.0 - adrenaline)
         q_jitter = final_sleep * self._SLEEP_JITTER * (1.0 + _random.random())
-        return max(
-            2.0 if adrenaline > 0.3 else 5.0, final_sleep + _random.uniform(-q_jitter, q_jitter)
-        )
+        # KAIROS-Ω: Lowered floor for high-adrenaline states
+        floor = 0.05 if adrenaline > 0.8 else (0.5 if adrenaline > 0.3 else 1.0)
+        return max(floor, final_sleep + _random.uniform(-q_jitter, q_jitter))
 
     async def _policy_pulse(self) -> None:
         """Fetch priorities from PolicyEngine (Ω₃)."""
@@ -236,23 +281,37 @@ class ApotheosisEngine:
     async def _process_workspace(
         self, file_hashes: dict[Path, str], hashlib: Any, _random: Any
     ) -> bool:
-        """Scan and heal workspace files (Ω₀/Ω₆)."""
+        """Scan and heal workspace files (Ω₀/Ω₆) in parallel."""
         entropy_found = False
         try:
+            files_to_scan = []
+
             for py_file in self.workspace.rglob("*.py"):
                 if _SKIP_DIRS.intersection(py_file.parts):
                     continue
-
-                current_hash = hashlib.sha256(py_file.read_bytes()).hexdigest()
-                if file_hashes.get(py_file) == current_hash:
+                
+                # Fast check: hash mismatch (O(1) IO)
+                try:
+                    current_hash = hashlib.sha256(py_file.read_bytes()).hexdigest()
+                    if file_hashes.get(py_file) == current_hash:
+                        continue
+                    file_hashes[py_file] = current_hash
+                    files_to_scan.append(py_file)
+                except (IOError, OSError):
                     continue
 
-                file_hashes[py_file] = current_hash
-                entropy = scan_file_entropy(py_file)
-                if entropy:
-                    entropy_found = True
-                    if self._healer_mode and self._apply_cognitive_dampening():
-                        await self._heal_file_or_prune(py_file, entropy)
+            if files_to_scan:
+                # Parallelize entropy scan (Ω₁)
+                results = await asyncio.gather(
+                    *[asyncio.to_thread(scan_file_entropy, f) for f in files_to_scan],
+                    return_exceptions=True
+                )
+                
+                for py_file, entropy in zip(files_to_scan, results):
+                    if isinstance(entropy, list) and entropy:
+                        entropy_found = True
+                        if self._healer_mode and self._apply_cognitive_dampening():
+                            await self._heal_file_or_prune(py_file, entropy)
 
             # 2. 🧬 Ω₆: Autopoietic Transfiguration
             growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)

@@ -1,22 +1,25 @@
 """Immutable Ledger CLI commands for CORTEX (Wave 5)."""
 
 import asyncio
-
-import typer
+import click
 from rich.console import Console
 
-from cortex.cli.common import DEFAULT_DB, get_engine
+from cortex.cli.common import DEFAULT_DB, get_engine, _run_async
 
-ledger_cmds = typer.Typer(help="Sovereign Ledger Operations (Wave 5: Immutable Merkle Trees).")
 console = Console()
 
+@click.group(name="ledger")
+def ledger_cmds():
+    """Sovereign Ledger Operations (Wave 5: Immutable Merkle Trees)."""
+    pass
 
 @ledger_cmds.command("verify")
-def verify_ledger():
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def verify_ledger(db):
     """Verify the integrity of the entire CORTEX transaction chain."""
 
     async def _run():
-        engine = get_engine(DEFAULT_DB)
+        engine = get_engine(db)
         try:
             await engine.init_db()
             result = await engine.verify_ledger()
@@ -33,24 +36,25 @@ def verify_ledger():
         finally:
             await engine.close()
 
-    asyncio.run(_run())
-
+    _run_async(_run())
 
 @ledger_cmds.command("checkpoint")
-def create_checkpoint():
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def create_checkpoint(db):
     """Force the creation of a Merkle Tree checkpoint."""
 
     async def _run():
-        engine = get_engine(DEFAULT_DB)
+        engine = get_engine(db)
         try:
             await engine.init_db()
-            ledger = getattr(engine, "_ledger", None)
-            if not ledger:
+            ledger_inst = getattr(engine, "_ledger", None)
+            if not ledger_inst:
                 from cortex.engine.ledger import ImmutableLedger
+                # Re-using the connection from the engine
+                conn = await engine.get_conn()
+                ledger_inst = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
 
-                ledger = ImmutableLedger(await engine.get_conn())  # type: ignore[reportArgumentType]
-
-            root_id = await ledger.create_checkpoint_async()
+            root_id = await ledger_inst.create_checkpoint_async()
             if root_id:
                 console.print(
                     f"[bold green]Checkpoint created successfully.[/bold green] ID: {root_id}"
@@ -60,7 +64,6 @@ def create_checkpoint():
         finally:
             await engine.close()
 
-    asyncio.run(_run())
+    _run_async(_run())
 
-
-ledger_cmds_click = typer.main.get_command(ledger_cmds)
+ledger_cmds_click = ledger_cmds

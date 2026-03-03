@@ -199,6 +199,8 @@ class KeterEngine:
             FormalVerificationGate(),
             MejoraloCrush(),
         ]
+        # Axiom Ω₂: Cross-invocation Thermal Bypass Repository
+        self._memory_reservoir: dict[str, KeterPayload] = {}
 
     def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
         slug = getattr(manifest, "slug", "")
@@ -251,18 +253,33 @@ class KeterEngine:
         """
         Alimenta intencion cruda; Keter materializa a nivel 130/100 sin intervencion humana.
         """
-        # --- Generador de Caos Controlado (Termodinámico Criptográfico) ---
-        # Evita la resonancia destructiva ("propio DDoS") desincronizando
-        # a los agentes extrayendo entropía por hardware (/dev/urandom).
-        import secrets
+        import hashlib
+        
+        thermal_audit = kwargs.get("thermal_audit", False)
+        formation = kwargs.get("formation", "BLITZ")
+        
+        # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
+        mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
+        if mission_id in self._memory_reservoir:
+            cached_payload = self._memory_reservoir[mission_id]
+            # Verify if it reached singularity
+            if cached_payload.get("status") == "SINGULARITY_REACHED":
+                if thermal_audit:
+                    logger.info("⚡ [KETER] Identity Short-Circuit: Intent and formation already processed and stabilized.")
+                return cached_payload
 
-        rng = secrets.SystemRandom()
-        asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
-        logger.debug(
-            "🌪️ [KETER] Aplicando jitter asimétrico criptográfico de %.3fs para caos controlado",
-            asymmetric_jitter,
-        )
-        await asyncio.sleep(asymmetric_jitter)
+        # --- Adaptive Jitter (Thermal Noise Control) ---
+        if formation not in ("BLITZ", "GHOST", "ORACLE"):
+            import secrets
+            rng = secrets.SystemRandom()
+            asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
+            if thermal_audit:
+                logger.info(
+                    "🌪️ [KETER] Swarm formation %s: Applying jitter of %.3fs",
+                    formation,
+                    asymmetric_jitter,
+                )
+            await asyncio.sleep(asymmetric_jitter)
 
         logger.info("=" * 60)
         logger.info("⚡ [KETER] MATERIALIZACION INICIADA: KETER ACTIVADO")
@@ -278,24 +295,40 @@ class KeterEngine:
                 "🗺️ [KETER] Plan de ejecución generado por SkillRouter: %s",
                 [m.slug for m in plan],
             )
-            # Intentar resolver phases correspondientes al plan
             for manifest in plan:
                 phase = self._dispatch_skill(manifest)
                 if phase:
                     execution_sequence.append(phase)
 
         if not execution_sequence:
-            logger.warning(
-                "⚠️ [KETER] Enrutamiento dinámico no generó pipeline válido. "
-                "Usando pipeline fallback."
-            )
+            logger.warning("[KETER] No specific plan. Falling back to default pipeline.")
             execution_sequence = self.phases
 
         try:
             for phase in execution_sequence:
+                # ─── Thermal Bypass (Ω₂) ───
+                # Check if we should skip this phase to avoid redundant cycles.
+                previous_code = payload.get("final_code", "")
+                previous_score = payload.get("score_130_100", 0.0)
+
+                # Skip Shortcut: If we already reached Singularity excellence, bypass the Crush.
+                if previous_score >= 99.0 and isinstance(phase, MejoraloCrush):
+                    if thermal_audit:
+                        logger.info("⏭️ [KETER] Thermal Bypass: Singularity excellence reached. skipping MEJORAlo.")
+                    continue
+
                 payload = await self._execute_with_backoff(phase, payload)
 
+                # Detection of Static Equilibrium (Redundancy)
+                if (isinstance(phase, (LegionSwarm, MejoraloCrush)) and 
+                    payload.get("final_code") == previous_code and 
+                    payload.get("score_130_100") == previous_score):
+                    if thermal_audit:
+                        logger.debug("⚡ [KETER] Static Equilibrium detected in %s. No delta produced.", phase.__class__.__name__)
+
             payload["status"] = "SINGULARITY_REACHED"
+            # Update reservoir for future short-circuits
+            self._memory_reservoir[mission_id] = payload
             logger.info("🌌 [KETER] Ecosistema tejido. Friccion cero.")
         except CortexError as e:
             logger.error(f"🔥 [KETER] Colapso de singularidad: {e}")

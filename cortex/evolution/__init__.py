@@ -13,11 +13,21 @@ from cortex.evolution.agents import (
     create_sovereign_swarm,
 )
 from cortex.evolution.engine import EvolutionEngine
+from cortex.evolution.ledger_db import EvolutionLedgerDB
+from cortex.evolution.models import (
+    EvolutionMetric,
+    EvolutionMutation,
+    EvolutionType,
+)
 from cortex.evolution.persistence import load_swarm, save_swarm
 
 __all__ = [
     "AgentDomain",
     "EvolutionEngine",
+    "EvolutionLedgerDB",
+    "EvolutionMetric",
+    "EvolutionMutation",
+    "EvolutionType",
     "Mutation",
     "MutationType",
     "SovereignAgent",

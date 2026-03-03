@@ -45,37 +45,10 @@ class VectorBackend(Protocol):
     - health_check: Verify connectivity
     """
 
-    async def upsert(
-        self,
-        fact_id: int,
-        embedding: list[float],
-        tenant_id: str = "default",
-        payload: dict[str, Any] | None = None,
-    ) -> None:
-        """Upsert a vector embedding for a fact."""
-        ...
 
-    async def search(
-        self,
-        query_embedding: list[float],
-        top_k: int = 5,
-        tenant_id: str = "default",
-        project: str | None = None,
-    ) -> list[tuple[int, float]]:
-        """KNN search. Returns [(fact_id, score)] sorted by score DESC."""
-        ...
 
-    async def delete(self, fact_id: int, tenant_id: str = "default") -> None:
-        """Delete the vector for a given fact."""
-        ...
 
-    async def health_check(self) -> bool:
-        """Return True if the vector store is reachable."""
-        ...
 
-    async def close(self) -> None:
-        """Close any connections."""
-        ...
 
 
 # ─── Qdrant Implementation ───────────────────────────────────────────

@@ -89,7 +89,6 @@ def prove_range(value: int, min_val: int, max_val: int) -> ZKRangeProof:
     blindings = [os.urandom(_BLINDING_LENGTH) for _ in range(num_bits)]
     bit_commitments = [_bit_commit(b, r) for b, r in zip(bits, blindings, strict=True)]
 
-    # Challenge response: XOR de todos los blindings (simplificado — Fiat-Shamir)
     combined = b"".join(blindings)
     challenge = hashlib.sha256(
         b"zkortex:range:challenge:" + str(value).encode() + combined

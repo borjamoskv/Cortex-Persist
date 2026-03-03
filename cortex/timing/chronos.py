@@ -30,7 +30,7 @@ class ChronosEngine:
             "t_c": 1.5,  # 1.5x AI time for context loading
             "t_d": 1.0,  # 1.0x AI time for design
             "t_i": 2.0,  # 2.0x AI time for typing
-            "t_b": 0.5,  # 0.5x AI time for debugging
+            "t_b": 0.5,
             "t_p": 0.0,  # No penalty
             "context": "Un humano habría localizado el archivo, añadido el código básico y probado el output. Tarea procedimental.",
         },

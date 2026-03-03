@@ -15,7 +15,6 @@ async def main():
     await engine.initialize()
 
     print("Buscando ghosts activos...")
-    # Buscamos todos los facts tipo ghost
     ghosts = await engine.search("type:ghost")
 
     print(f"\nSe encontraron {len(ghosts)} ghosts en total.")

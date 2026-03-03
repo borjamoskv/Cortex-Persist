@@ -137,7 +137,6 @@ def main():
 
     try:
         while True:
-            # Check solo si hay modificaciones recientes sería ideal, pero por ahora escaneamos todo
             analyze_project(target_dir)
             if single_run:
                 break

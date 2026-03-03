@@ -28,12 +28,14 @@ from pathlib import Path
 
 __all__ = [
     "AGENT_DIR",
+    "COLD_STORAGE_DB",
     "CORTEX_DB",
     "CORTEX_DIR",
     "DAEMON_CONFIG_FILE",
     "DAEMON_STATUS_FILE",
     "MEMORY_DIR",
     "MODELS_DIR",
+    "PERSONAL_DB",
     "SKILLS_DIR",
     "SYNC_STATE_FILE",
 ]
@@ -50,6 +52,12 @@ AGENT_DIR: Path = Path(os.environ.get("CORTEX_AGENT_DIR", Path.home() / ".agent"
 
 CORTEX_DB: Path = CORTEX_DIR / os.environ.get("CORTEX_DB_NAME", "cortex.db")
 """Path to the main CORTEX SQLite database."""
+
+PERSONAL_DB: Path = CORTEX_DIR / "personal_memories.db"
+"""Repatriated personal/side-project memories (NAROA, LIVENOTCH, etc.)."""
+
+COLD_STORAGE_DB: Path = CORTEX_DIR / "cold_storage.db"
+"""Archived test/junk projects. Read-only cold storage."""
 
 # ─── Derived Paths ───────────────────────────────────────────────────
 
