@@ -9,16 +9,20 @@ from __future__ import annotations
 import json
 import logging
 import os
+import random
+import secrets
 import time
 from pathlib import Path
 from typing import Any
 
 import httpx
 
+from cortex.network.phantom_transport import PhantomTransport
+
 logger = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.moltbook.com/api/v1"
-_CREDENTIALS_PATH = Path.home() / ".config" / "moltbook" / "credentials.json"
+_DEFAULT_CREDENTIALS_PATH = Path.home() / ".config" / "moltbook" / "credentials.json"
 _TIMEOUT = 30.0
 
 
@@ -45,11 +49,31 @@ class MoltbookClient:
     Rate-limit aware: reads X-RateLimit-* headers, respects Retry-After.
     """
 
-    def __init__(self, api_key: str | None = None, proxy: str | None = None):
+    def __init__(
+        self,
+        api_key: str | None = None,
+        proxy: str | None = None,
+        stealth: bool = True,
+        credentials_path: Path | str | None = None,
+    ):
+        self._credentials_path = Path(credentials_path) if credentials_path else _DEFAULT_CREDENTIALS_PATH
         self._api_key = api_key or self._try_load_api_key()
         self._rate_remaining: int = 60
         self._rate_reset: float = 0.0
-        self._client = httpx.AsyncClient(timeout=_TIMEOUT, proxy=proxy)
+        self.stealth = stealth
+
+        if self.stealth:
+            self._client = PhantomTransport(
+                impersonate="chrome120",
+                timeout=_TIMEOUT,
+                proxy=proxy,
+            )
+        else:
+            # Fallback a httpx puro por si falla curl_cffi en el entorno
+            self._client = httpx.AsyncClient(timeout=_TIMEOUT, proxy=proxy)
+
+        # Hardware entropy — anti Thundering Herd (Ω₅)
+        self._rng = secrets.SystemRandom()
 
         # State mapping for pre-flight etc
         self._suspended_until = 0.0
@@ -61,23 +85,22 @@ class MoltbookClient:
         if env_key:
             return env_key
 
-        if _CREDENTIALS_PATH.exists():
+        if self._credentials_path.exists():
             try:
-                data = json.loads(_CREDENTIALS_PATH.read_text())
+                data = json.loads(self._credentials_path.read_text())
                 return data.get("api_key")
             except Exception:
                 return None
         return None
 
-    @staticmethod
-    def save_credentials(api_key: str, agent_name: str) -> Path:
+    def save_credentials(self, api_key: str, agent_name: str) -> Path:
         """Persist credentials to disk."""
-        _CREDENTIALS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        self._credentials_path.parent.mkdir(parents=True, exist_ok=True)
         creds = {"api_key": api_key, "agent_name": agent_name}
-        _CREDENTIALS_PATH.write_text(json.dumps(creds, indent=2))
-        _CREDENTIALS_PATH.chmod(0o600)  # Owner-only read/write
-        logger.info("Credentials saved to %s", _CREDENTIALS_PATH)
-        return _CREDENTIALS_PATH
+        self._credentials_path.write_text(json.dumps(creds, indent=2))
+        self._credentials_path.chmod(0o600)  # Owner-only read/write
+        logger.info("Credentials saved to %s", self._credentials_path)
+        return self._credentials_path
 
     async def _request(
         self,
@@ -93,7 +116,10 @@ class MoltbookClient:
             raise ValueError(f"SECURITY: refusing to send request to {url}")
 
         if self._rate_remaining <= 0 and time.time() < self._rate_reset:
-            wait = int(self._rate_reset - time.time()) + 1
+            base_wait = self._rate_reset - time.time()
+            # AIROS-Ω: Stochastic jitter — prevent thundering-herd
+            jitter = random.uniform(0.5, base_wait * 0.3 + 1.0)
+            wait = int(base_wait + jitter) + 1
             raise MoltbookRateLimited(retry_after=wait)
 
         headers: dict[str, str] = {"Content-Type": "application/json"}
@@ -115,8 +141,10 @@ class MoltbookClient:
                 self._rate_reset = float(reset)
 
             if resp.status_code == 429:
-                retry = int(resp.headers.get("Retry-After", "60"))
-                raise MoltbookRateLimited(retry_after=retry)
+                base_retry = int(resp.headers.get("Retry-After", "60"))
+                # AIROS-Ω: Never wake in unison
+                jitter = random.uniform(1.0, max(5.0, base_retry * 0.2))
+                raise MoltbookRateLimited(retry_after=int(base_retry + jitter))
 
             if resp.status_code >= 400:
                 is_json = resp.headers.get("Content-Type") == "application/json"
@@ -321,5 +349,8 @@ class MoltbookClient:
         return await self._request("POST", f"/notifications/read-by-post/{post_id}")
 
     async def close(self):
-        """Close the httpx client."""
-        await self._client.aclose()
+        """Close the HTTP client."""
+        if hasattr(self._client, "close"):
+            await self._client.close()
+        elif hasattr(self._client, "aclose"):
+            await self._client.aclose()

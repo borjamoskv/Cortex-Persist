@@ -92,8 +92,8 @@ class SovereignQuotaManager:
         with _db(self.db_path) as conn:
             conn.execute(
                 """
-                CREATE TABLE IF NOT EXISTS quota_bucket (
-                    id            INTEGER PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS provider_quotas (
+                    provider      TEXT PRIMARY KEY,
                     tokens        REAL    NOT NULL,
                     last_update   REAL    NOT NULL,
                     acquired      INTEGER NOT NULL DEFAULT 0,
@@ -102,33 +102,43 @@ class SovereignQuotaManager:
                 )
                 """
             )
-            cursor = conn.execute("SELECT COUNT(*) FROM quota_bucket")
-            if cursor.fetchone()[0] == 0:
-                conn.execute(
-                    """INSERT INTO quota_bucket
-                       (id, tokens, last_update, acquired, throttled, timeouts)
-                       VALUES (1, ?, ?, 0, 0, 0)""",
-                    (self.capacity, time.time()),
+            # Legacy fallback if needed (leave it around for safety)
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS quota_bucket (
+                    id            INTEGER PRIMARY KEY,
+                    tokens        REAL    NOT NULL, last_update REAL NOT NULL,
+                    acquired INTEGER NOT NULL DEFAULT 0, throttled INTEGER NOT NULL DEFAULT 0,
+                    timeouts INTEGER NOT NULL DEFAULT 0
                 )
+                """
+            )
 
-    def _consume_sync(self, tokens: int) -> float:
-        """Intenta consumir tokens atómicamente.
+    def _init_provider(self, provider: str) -> None:
+        with _db(self.db_path) as conn:
+            conn.execute(
+                """INSERT OR IGNORE INTO provider_quotas
+                   (provider, tokens, last_update, acquired, throttled, timeouts)
+                   VALUES (?, ?, ?, 0, 0, 0)""",
+                (provider, self.capacity, time.time()),
+            )
 
-        Args:
-            tokens: Number of tokens to consume (must be >= 1).
-
-        Returns:
-            0.0  → consumo exitoso.
-            > 0  → segundos de espera estimados.
-        """
+    def _consume_sync(self, provider: str, tokens: int) -> float:
+        """Intenta consumir tokens atómicamente."""
         if tokens < 1:
             raise ValueError(f"tokens must be >= 1, got {tokens}")
         now = time.time()
         try:
             with _db(self.db_path, exclusive=True) as conn:
                 row = conn.execute(
-                    "SELECT tokens, last_update FROM quota_bucket WHERE id = 1"
+                    "SELECT tokens, last_update FROM provider_quotas WHERE provider = ?",
+                    (provider,),
                 ).fetchone()
+
+                if not row:
+                    self._init_provider(provider)
+                    row = (self.capacity, now)
+
                 current_tokens, last_update = row
 
                 refilled = min(
@@ -138,16 +148,19 @@ class SovereignQuotaManager:
 
                 if refilled >= tokens:
                     conn.execute(
-                        """UPDATE quota_bucket
+                        """UPDATE provider_quotas
                            SET tokens = ?, last_update = ?, acquired = acquired + 1
-                           WHERE id = 1""",
-                        (refilled - tokens, now),
+                           WHERE provider = ?""",
+                        (refilled - tokens, now, provider),
                     )
                     return 0.0
 
                 deficit = tokens - refilled
                 wait = deficit / self.refill_rate
-                conn.execute("UPDATE quota_bucket SET throttled = throttled + 1 WHERE id = 1")
+                conn.execute(
+                    "UPDATE provider_quotas SET throttled = throttled + 1 WHERE provider = ?",
+                    (provider,),
+                )
                 return wait
 
         except sqlite3.OperationalError:
@@ -155,13 +168,16 @@ class SovereignQuotaManager:
 
     # ─── Public API ───────────────────────────────────────────────────
 
-    async def acquire(self, tokens: int = 1, deadline: float = 120.0) -> bool:
+    async def acquire(
+        self, provider: str = "default", tokens: int = 1, deadline: float = 120.0
+    ) -> bool:
         """Adquiere tokens asíncronamente siguiendo el Protocolo PULMONES.
 
         Usa backoff exponencial con jitter para prevenir thundering-herd
         cuando múltiples procesos compiten por el mismo bucket.
 
         Args:
+            provider: Identificador del proveedor a estrangular.
             tokens:   Tokens a consumir (1 = 1 API request).
             deadline: Tiempo máximo de espera total en segundos.
 
@@ -172,15 +188,20 @@ class SovereignQuotaManager:
         attempt = 0
 
         while True:
-            wait = self._consume_sync(tokens)
+            wait = self._consume_sync(provider, tokens)
 
             if wait <= 0:
                 return True
 
             elapsed = time.time() - start
             if elapsed >= deadline:
-                logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
-                self._increment_timeouts()
+                logger.error(
+                    "PULMONES [%s]: Timeout tras %.1fs esperando %d tokens.",
+                    provider,
+                    elapsed,
+                    tokens,
+                )
+                self._increment_timeouts(provider)
                 return False
 
             # Hardware Entropy + Golden Ratio (Caos termodinámico asimétrico profundo)
@@ -188,19 +209,52 @@ class SovereignQuotaManager:
             sleep = min(wait, 2 ** min(attempt, 5)) + jitter
             sleep = min(sleep, deadline - elapsed)  # nunca sobrepasar el deadline
 
-            logger.info("PULMONES: Estrangulado. Exhalando %.2fs (intento %d)…", sleep, attempt + 1)
+            logger.info(
+                "PULMONES [%s]: Estrangulado. Exhalando %.2fs (intento %d)…",
+                provider,
+                sleep,
+                attempt + 1,
+            )
             await asyncio.sleep(sleep)
             attempt += 1
 
-    def status(self) -> QuotaStatus:
+    def bankrupt(self, provider: str, penalty_seconds: float = 0.0) -> None:
+        """Vacía el cubo de un proveedor y opcionalmente aplica una penalización térmica."""
+        now = time.time()
+        tokens = -(penalty_seconds * self.refill_rate)
+        try:
+            with _db(self.db_path, exclusive=True) as conn:
+                conn.execute(
+                    """UPDATE provider_quotas
+                       SET tokens = ?, last_update = ?
+                       WHERE provider = ?""",
+                    (tokens, now, provider),
+                )
+            logger.warning(
+                "PULMONES [%s]: Bankrupt! Tokens drained to %.1f (Penalty: %.1fs).",
+                provider,
+                tokens,
+                penalty_seconds,
+            )
+        except sqlite3.OperationalError:
+            pass
+
+    def status(self, provider: str = "default") -> QuotaStatus:
         """Estado completo del bucket con métricas de observabilidad."""
         now = time.time()
         with _db(self.db_path) as conn:
             row = conn.execute(
                 "SELECT tokens, last_update, acquired, throttled, timeouts "
-                "FROM quota_bucket WHERE id = 1"
+                "FROM provider_quotas WHERE provider = ?",
+                (provider,),
             ).fetchone()
-        current_tokens, last_update, acquired, throttled, timeouts = row
+
+        if not row:
+            self._init_provider(provider)
+            current_tokens, last_update, acquired, throttled, timeouts = self.capacity, now, 0, 0, 0
+        else:
+            current_tokens, last_update, acquired, throttled, timeouts = row
+
         current = min(
             self.capacity,
             current_tokens + (now - last_update) * self.refill_rate,
@@ -218,20 +272,27 @@ class SovereignQuotaManager:
             throttle_ratio_pct=round((throttled / total) * 100, 1),
         )
 
-    def reset(self) -> None:
+    def reset(self, provider: str = "default") -> None:
         """Reset de emergencia: llena el bucket al máximo y borra métricas."""
         with _db(self.db_path, exclusive=True) as conn:
             conn.execute(
-                """UPDATE quota_bucket
+                """UPDATE provider_quotas
                    SET tokens = ?, last_update = ?, acquired = 0, throttled = 0, timeouts = 0
-                   WHERE id = 1""",
-                (self.capacity, time.time()),
+                   WHERE provider = ?""",
+                (self.capacity, time.time(), provider),
             )
-        logger.warning("PULMONES: Bucket reseteado a capacidad máxima (%s tokens).", self.capacity)
+        logger.warning(
+            "PULMONES [%s]: Bucket reseteado a capacidad máxima (%s tokens).",
+            provider,
+            self.capacity,
+        )
 
-    def _increment_timeouts(self) -> None:
+    def _increment_timeouts(self, provider: str) -> None:
         try:
             with _db(self.db_path) as conn:
-                conn.execute("UPDATE quota_bucket SET timeouts = timeouts + 1 WHERE id = 1")
+                conn.execute(
+                    "UPDATE provider_quotas SET timeouts = timeouts + 1 WHERE provider = ?",
+                    (provider,),
+                )
         except sqlite3.OperationalError:
             pass

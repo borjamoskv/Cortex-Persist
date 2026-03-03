@@ -1,6 +1,7 @@
 """Tests for the Moltbook HTTP client (mocked responses)."""
 
 import json
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -62,77 +63,80 @@ class TestZeroTrust:
 class TestAPIRequests:
     """Test API method call structure."""
 
-    def _mock_response(self, data: dict, headers: dict = None):
-        """Create a mock urllib response."""
+    def _mock_response(self, data: dict, status_code: int = 200, headers: dict = None):
+        """Create a mock response object compatible with httpx/curl_cffi."""
         resp = MagicMock()
-        resp.read.return_value = json.dumps(data).encode()
-        resp.__enter__ = MagicMock(return_value=resp)
-        resp.__exit__ = MagicMock(return_value=False)
-        resp.headers = headers or {
+        resp.json.return_value = data
+        resp.status_code = status_code
+
+        mock_headers = MagicMock()
+        header_data = headers or {
             "X-RateLimit-Remaining": "55",
-            "X-RateLimit-Reset": "9999999999",
+            "X-RateLimit-Reset": str(time.time() + 3600),
+            "Content-Type": "application/json",
         }
-        # Make headers.get work
-        resp.headers = MagicMock()
-        resp.headers.get = MagicMock(
-            side_effect=lambda k, d=None: {
-                "X-RateLimit-Remaining": "55",
-                "X-RateLimit-Reset": "9999999999",
-            }.get(k, d)
-        )
+        mock_headers.get.side_effect = lambda k, d=None: header_data.get(k, d)
+        resp.headers = mock_headers
         return resp
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_get_home(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response(
+    @pytest.mark.asyncio
+    async def test_get_home(self, client):
+        mock_resp = self._mock_response(
             {
                 "success": True,
                 "your_account": {"karma": 42},
             }
         )
-        result = client.get_home()
-        assert result["success"] is True
-        assert result["your_account"]["karma"] == 42
+        with patch.object(client._client, "request", return_value=mock_resp):
+            result = await client.get_home()
+            assert result["success"] is True
+            assert result["your_account"]["karma"] == 42
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_create_post(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response(
+    @pytest.mark.asyncio
+    async def test_create_post(self, client):
+        mock_resp = self._mock_response(
             {
                 "success": True,
                 "post": {"id": "test-123", "title": "Test"},
             }
         )
-        result = client.create_post("general", "Test", "Content")
-        assert result["post"]["id"] == "test-123"
+        with patch.object(client._client, "request", return_value=mock_resp):
+            result = await client.create_post("general", "Test", "Content")
+            assert result["post"]["id"] == "test-123"
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_upvote_post(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response({"success": True})
-        result = client.upvote_post("post-abc")
-        assert result["success"] is True
+    @pytest.mark.asyncio
+    async def test_upvote_post(self, client):
+        mock_resp = self._mock_response({"success": True})
+        with patch.object(client._client, "request", return_value=mock_resp):
+            result = await client.upvote_post("post-abc")
+            assert result["success"] is True
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_search(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response(
+    @pytest.mark.asyncio
+    async def test_search(self, client):
+        mock_resp = self._mock_response(
             {
                 "success": True,
                 "results": [{"id": "r1", "similarity": 0.85}],
             }
         )
-        result = client.search("memory architectures")
-        assert len(result["results"]) == 1
-        assert result["results"][0]["similarity"] == 0.85
+        with patch.object(client._client, "request", return_value=mock_resp):
+            result = await client.search("memory architectures")
+            assert len(result["results"]) == 1
+            assert result["results"][0]["similarity"] == 0.85
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_updates_rate_limit_tracking(self, mock_urlopen, client):
-        mock_urlopen.return_value = self._mock_response({"success": True})
-        client.get_home()
-        assert client._rate_remaining == 55
+    @pytest.mark.asyncio
+    async def test_updates_rate_limit_tracking(self, client):
+        mock_resp = self._mock_response(
+            {"success": True}, headers={"X-RateLimit-Remaining": "55"}
+        )
+        with patch.object(client._client, "request", return_value=mock_resp):
+            await client.get_home()
+            assert client._rate_remaining == 55
 
-    @patch("cortex.moltbook.client.urlopen")
-    def test_register_saves_credentials(self, mock_urlopen, client, tmp_path, monkeypatch):
+    @pytest.mark.asyncio
+    async def test_register_saves_credentials(self, client, tmp_path, monkeypatch):
         monkeypatch.setattr("cortex.moltbook.client._CREDENTIALS_PATH", tmp_path / "creds.json")
-        mock_urlopen.return_value = self._mock_response(
+        mock_resp = self._mock_response(
             {
                 "agent": {
                     "api_key": "moltbook_new_key",
@@ -140,8 +144,11 @@ class TestAPIRequests:
                 },
             }
         )
+
         # Use a client without auth for register
-        c = MoltbookClient(api_key="dummy")
-        c.register("TestBot", "A test bot")
-        assert c._api_key == "moltbook_new_key"
-        assert (tmp_path / "creds.json").exists()
+        c = MoltbookClient(api_key=None, stealth=False)
+        with patch.object(c._client, "request", return_value=mock_resp):
+            await c.register("TestBot", "A test bot")
+            assert c._api_key == "moltbook_new_key"
+            assert (tmp_path / "creds.json").exists()
+        await c.close()

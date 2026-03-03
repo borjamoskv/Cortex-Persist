@@ -15,11 +15,14 @@ from __future__ import annotations
 
 import asyncio
 import os
+import secrets
 from typing import Any
 
 import httpx
+from curl_cffi.requests import AsyncSession
 
 from cortex.api.client import CortexError, Fact
+from cortex.concurrency import SovereignGate
 
 __all__ = ["AsyncCortexClient"]
 
@@ -38,16 +41,28 @@ class AsyncCortexClient:
         base_url: str = "http://localhost:8484",
         api_key: str | None = None,
         timeout: float = 30.0,
+        stealth: bool = False,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key or os.environ.get("CORTEX_API_KEY", "")
-        self._client = httpx.AsyncClient(
-            base_url=self.base_url,
-            timeout=timeout,
-            headers=self._headers(),
-        )
-        # Límite estricto para escalar a 1k rpm sin timeout
-        self._semaphore = asyncio.Semaphore(100)
+        self.stealth = stealth
+
+        if self.stealth:
+            self._client = AsyncSession(
+                impersonate="chrome120",
+                timeout=timeout,
+                headers=self._headers(),
+            )
+        else:
+            self._client = httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=timeout,
+                headers=self._headers(),
+            )
+        # Sovereign Gate is now global singleton via SovereignGate.shared()
+        self._gate = SovereignGate.shared()
+        # Hardware entropy — anti Thundering Herd (Ω₅)
+        self._rng = secrets.SystemRandom()
 
     def _headers(self) -> dict[str, str]:
         h = {"Content-Type": "application/json"}
@@ -62,19 +77,26 @@ class AsyncCortexClient:
 
         for attempt in range(max_retries):
             try:
-                async with self._semaphore:
-                    resp = await self._client.request(method, path, **kwargs)
+                async with self._gate.gate(provider="cortex-api"):
+                    # curl_cffi needs full URL; httpx uses base_url in constructor
+                    full_path = f"{self.base_url}/{path.lstrip('/')}"
+                    if self.stealth:
+                        resp = await self._client.request(method, full_path, **kwargs)
+                    else:
+                        resp = await self._client.request(method, path, **kwargs)
 
                 if resp.status_code >= 500:
                     # Server error, maybe retry
                     if attempt < max_retries - 1:
-                        await asyncio.sleep(backoff * (2**attempt))
+                        jitter = self._rng.uniform(0.1, 1.618 ** (attempt + 1))
+                        await asyncio.sleep(backoff * (2**attempt) + jitter)
                         continue
 
                 if resp.status_code >= 400:
                     try:
-                        detail = resp.json().get("detail", resp.text)
-                    except (ValueError, KeyError):
+                        resp_json = resp.json()
+                        detail = resp_json.get("detail", resp.text)
+                    except (ValueError, KeyError, AttributeError):
                         detail = resp.text
                     raise CortexError(resp.status_code, detail)
 
@@ -85,7 +107,8 @@ class AsyncCortexClient:
 
             except (httpx.ConnectError, httpx.TimeoutException) as e:
                 if attempt < max_retries - 1:
-                    await asyncio.sleep(backoff * (2**attempt))
+                    jitter = self._rng.uniform(0.1, 1.618 ** (attempt + 1))
+                    await asyncio.sleep(backoff * (2**attempt) + jitter)
                     continue
                 raise CortexError(0, f"Connection error after {max_retries} attempts: {e}") from e
             except httpx.HTTPError as e:
@@ -242,7 +265,10 @@ class AsyncCortexClient:
     # ─── Context Manager ──────────────────────────────────────────────
 
     async def close(self):
-        await self._client.aclose()
+        if self.stealth:
+            await self._client.close()
+        else:
+            await self._client.aclose()
 
     async def __aenter__(self) -> AsyncCortexClient:
         return self

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import secrets
 from typing import Any
 
 logger = logging.getLogger("cortex.thinking.context_fusion")
@@ -64,7 +65,9 @@ class ContextFusion:
                     e,
                 )
             if attempt < self.JUDGE_MAX_RETRIES:
-                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt))
+                _rng = secrets.SystemRandom()
+                jitter = _rng.uniform(0.05, 0.618 ** (attempt + 1))
+                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt) + jitter)
         return None
 
     async def fuse_context(self, user_prompt: str, retrieved_facts: list[dict[str, Any]]) -> str:

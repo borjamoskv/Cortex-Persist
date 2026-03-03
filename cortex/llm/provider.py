@@ -33,8 +33,9 @@ import re
 from pathlib import Path
 from typing import Any, Final
 
-import httpx
+from curl_cffi.requests import AsyncSession, RequestsError
 
+from cortex.concurrency import Singleflight, SovereignGate
 from cortex.llm.quota import SovereignQuotaManager
 from cortex.llm.router import BaseProvider, CortexPrompt, IntentProfile
 
@@ -51,6 +52,8 @@ _CONTENT_TYPE_JSON: Final[str] = "application/json"
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}
 
 _QUOTA_MANAGER = SovereignQuotaManager()
+_SINGLEFLIGHT = Singleflight()
+_GATE = SovereignGate.shared()
 
 
 def _load_presets() -> dict[str, dict[str, Any]]:
@@ -94,6 +97,7 @@ class LLMProvider(BaseProvider):
         api_key: str | None = None,
         model: str | None = None,
         base_url: str | None = None,
+        impersonate: str = "chrome120",
     ):
         presets = _load_presets()
 
@@ -106,8 +110,8 @@ class LLMProvider(BaseProvider):
             supported = sorted(list(presets.keys()) + ["custom"])
             raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
-        self._client = httpx.AsyncClient(timeout=60.0)
-        self._semaphore = asyncio.Semaphore(100)
+        self._client = AsyncSession(impersonate=impersonate, timeout=60.0)
+        # Sovereign Gate is now global singleton via _GATE
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",
             self._provider,
@@ -213,7 +217,7 @@ class LLMProvider(BaseProvider):
             intent: Intent profile for model selection. When the provider has an
                 ``intent_model_map``, this selects the optimal model for the task.
         """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        # Quota/Semaphore handled by SovereignGate in _execute_completion_raw
         url, headers = self._prepare_request()
 
         payload = {
@@ -231,22 +235,35 @@ class LLMProvider(BaseProvider):
     async def _execute_completion(
         self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
     ) -> str:
+        import hashlib
+
+        # Request Coalescing (Defecto #3)
+        # Hash based on model, messages, and temperature to collapse identical calls
+        call_key = hashlib.sha256(
+            json.dumps({"url": url, "payload": payload}, sort_keys=True).encode()
+        ).hexdigest()
+
         try:
-            return await self._execute_completion_raw(url, headers, payload)
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
+            return await _SINGLEFLIGHT.do(
+                call_key,
+                lambda: self._execute_completion_raw(url, headers, payload)
+            )
+        except RequestsError as e:
+            if e.response is not None and e.response.status_code == 429:
                 return await self._handle_429_backoff(url, headers, payload, e)
 
+            status_code = e.response.status_code if e.response else "???"
+            resp_text = e.response.text[:500] if e.response else str(e)
             logger.error(
                 "LLM API Failure [%s %s]: %s",
-                e.response.status_code,
+                status_code,
                 self._provider,
-                e.response.text[:500],
+                resp_text,
             )
             if wrap_errors:
                 from cortex.utils.errors import CortexError
 
-                raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
+                raise CortexError(f"HTTP {status_code} from {self._provider}") from e
             raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
@@ -260,7 +277,7 @@ class LLMProvider(BaseProvider):
         self, url: str, headers: dict[str, str], payload: dict[str, Any]
     ) -> str:
         """Executes a single completion attempt directly. Throws native exceptions."""
-        async with self._semaphore:
+        async with _GATE.gate(provider=self._provider):
             response = await self._client.post(url, headers=headers, json=payload)
         response.raise_for_status()
         data = response.json()
@@ -314,13 +331,23 @@ class LLMProvider(BaseProvider):
         url: str,
         headers: dict[str, str],
         payload: dict[str, Any],
-        original_error: httpx.HTTPStatusError,
+        original_error: RequestsError,
     ) -> str:
         """Maneja el backoff exponencial y reintentos para errores 429."""
         last_error = original_error
         for attempt in range(1, 4):
-            delay = self._extract_retry_delay(last_error.response.text)
-            safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0
+            resp_text = last_error.response.text if last_error.response else "{}"
+            delay = self._extract_retry_delay(resp_text)
+
+            # Singularidad de Vaciado en PULMONES (Drenaje para evadir el herd)
+            if attempt == 1:
+                _QUOTA_MANAGER.bankrupt(self._provider, penalty_seconds=delay or 5.0)
+
+            # Hardware Entropy + Golden Ratio Asymmetric Jitter
+            import secrets
+
+            rng = secrets.SystemRandom()
+            safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0 + rng.uniform(0.1, 1.618**attempt)
 
             logger.warning(
                 "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
@@ -332,19 +359,19 @@ class LLMProvider(BaseProvider):
 
             try:
                 return await self._execute_completion_raw(url, headers, payload)
-            except httpx.HTTPStatusError as e2:
-                if e2.response.status_code == 429:
+            except RequestsError as e2:
+                if e2.response is not None and e2.response.status_code == 429:
                     last_error = e2
                     continue
                 raise original_error from e2
-            except (httpx.HTTPError, ValueError, KeyError) as retry_e:
+            except (ValueError, KeyError) as retry_e:
                 logger.error("LLM Quota Retry Failure: %s", retry_e)
                 raise original_error from retry_e
 
         return await self._execute_fallback(payload, last_error)
 
     async def _execute_fallback(
-        self, payload: dict[str, Any], original_error: httpx.HTTPStatusError
+        self, payload: dict[str, Any], original_error: RequestsError
     ) -> str:
         """Ejecuta el fallback hacia un modelo más estable si todo falla."""
         logger.warning(
@@ -365,19 +392,22 @@ class LLMProvider(BaseProvider):
                 "max_tokens": payload.get("max_tokens", 2048),
             }
             return await fallback_provider._execute_completion_raw(fb_url, fb_headers, fb_payload)
-        except (httpx.HTTPError, ValueError, KeyError) as fallback_e:
+        except (RequestsError, ValueError, KeyError) as fallback_e:
             logger.error("LLM Fallback Failure: %s", fallback_e)
             raise original_error from fallback_e
         finally:
             await fallback_provider.close()
 
-    async def _process_stream_lines(self, response: httpx.Response):
+    async def _process_stream_lines(self, response: Any):
         """Consume and parse SSE lines from an active HTTP stream."""
-        async for line in response.aiter_lines():
-            if not line or not line.startswith("data: "):
+        # curl_cffi doesn't have aiter_lines(), it has iter_lines() (blocking) or we can use response.content
+        # Better: use response.iter_lines() if it's async-compatible or wait...
+        # curl_cffi AsyncSession stream returns an object that we can iterate over.
+        async for line in response.iter_lines():
+            if not line or not line.startswith(b"data: "):
                 continue
 
-            data_str = line[6:].strip()
+            data_str = line[6:].decode("utf-8").strip()
             if data_str == "[DONE]":
                 break
 
@@ -396,13 +426,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
     ):
-        """Stream a chat completion request. Yields text chunks.
-
-        Args:
-            intent: Intent profile for model selection. When the provider has an
-                ``intent_model_map``, this selects the optimal model for the task.
-        """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        """Stream a chat completion request. Yields text chunks."""
         url, headers = self._prepare_request()
 
         payload = {
@@ -417,21 +441,23 @@ class LLMProvider(BaseProvider):
         }
 
         try:
-            async with self._semaphore:
-                async with self._client.stream(
-                    "POST",
+            async with _GATE.gate(provider=self._provider):
+                # curl_cffi AsyncSession.post(..., stream=True) returns a context manager
+                async with self._client.post(
                     url,
                     headers=headers,
                     json=payload,
+                    stream=True,
                 ) as response:
                     response.raise_for_status()
                     async for chunk in self._process_stream_lines(response):
                         yield chunk
-        except httpx.HTTPStatusError as e:
+        except RequestsError as e:
+            resp_text = e.response.text[:500] if e.response else str(e)
             logger.error(
                 "LLM Stream Failure [%s]: %s",
                 self._provider,
-                e.response.text[:500],
+                resp_text,
             )
             raise
 
@@ -455,7 +481,7 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _QUOTA_MANAGER.acquire(provider=self._provider, tokens=1)
         url, headers = self._prepare_request()
 
         payload = {

@@ -170,12 +170,27 @@ class BrowserEngine:
         return result
 
     async def click(self, cortex_id: int) -> bool:
-        """Clicks an element by its CORTEX ID."""
+        """Clicks an element by its CORTEX ID with bounding box verification."""
         if not self._page:
             return False
         try:
             selector = f"[data-cortex-id='{cortex_id}']"
-            await self._page.click(selector, timeout=5000)
+            element = await self._page.wait_for_selector(selector, timeout=5000)
+            if not element:
+                raise RuntimeError(f"Element {cortex_id} not found.")
+
+            # Verifica bounding box físico para evadir trampas de opacidad/visibilidad
+            box = await element.bounding_box()
+            if not box or box["width"] == 0 or box["height"] == 0:
+                LOG.error(f"BROWSER: Bloqueado click en {cortex_id} - Elemento sin masa física (Trampa Detectada).")
+                return False
+
+            # Clic real en coordenadas para saltar heurísticas de 'AutomationControlled'
+            await self._page.mouse.click(
+                box["x"] + box["width"] / 2,
+                box["y"] + box["height"] / 2
+            )
+            
             await self._page.wait_for_load_state("networkidle")
             return True
         except Exception as e:

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import secrets
 from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
@@ -203,7 +204,9 @@ class ThoughtFusion:
                     "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
                 )
             if attempt < self.JUDGE_MAX_RETRIES:
-                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt))
+                _rng = secrets.SystemRandom()
+                jitter = _rng.uniform(0.05, 0.618 ** (attempt + 1))
+                await asyncio.sleep(self.JUDGE_BACKOFF_BASE * (2**attempt) + jitter)
         return None
 
     # ── Shared Scoring ───────────────────────────────────────────

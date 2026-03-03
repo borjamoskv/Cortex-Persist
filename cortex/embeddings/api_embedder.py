@@ -14,12 +14,13 @@ Environment:
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 from typing import Any
 
 import httpx
+
+from cortex.concurrency import Singleflight, SovereignGate
 
 __all__ = ["PROVIDER_CONFIGS", "APIEmbedder"]
 
@@ -46,6 +47,10 @@ PROVIDER_CONFIGS = {
 }
 
 
+_GATE = SovereignGate.shared()
+_SINGLEFLIGHT = Singleflight()
+
+
 class APIEmbedder:
     """Cloud-based embedding engine using external APIs.
 
@@ -69,7 +74,8 @@ class APIEmbedder:
         self._api_key = api_key or os.environ.get(self._config["env_key"], "")
         self._target_dim = target_dimension
         self._client = httpx.AsyncClient(timeout=30.0)
-        self._semaphore = asyncio.Semaphore(100)
+        # Sovereign Gate is now global singleton via _GATE
+
 
         if not self._api_key:
             raise ValueError(
@@ -85,10 +91,15 @@ class APIEmbedder:
         if not text or not str(text).strip():
             raise ValueError("text cannot be empty")
 
+        import hashlib
+
+        # Request Coalescing (Defecto #3)
+        call_key = hashlib.sha256(f"{self._provider}:{text}".encode()).hexdigest()
+
         if self._provider == "gemini":
-            return await self._embed_gemini(str(text))
+            return await _SINGLEFLIGHT.do(call_key, lambda: self._embed_gemini(str(text)))
         elif self._provider == "openai":
-            return await self._embed_openai(str(text))
+            return await _SINGLEFLIGHT.do(call_key, lambda: self._embed_openai(str(text)))
 
         raise ValueError(f"No embed implementation for {self._provider}")
 
@@ -116,7 +127,7 @@ class APIEmbedder:
             "content": {"parts": [{"text": text}]},
         }
 
-        async with self._semaphore:
+        async with _GATE.gate(provider=self._provider):
             response = await self._client.post(url, json=payload)
         response.raise_for_status()
 
@@ -151,7 +162,7 @@ class APIEmbedder:
         if self._target_dim:
             payload["dimensions"] = self._target_dim
 
-        async with self._semaphore:
+        async with _GATE.gate(provider=self._provider):
             response = await self._client.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
