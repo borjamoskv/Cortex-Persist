@@ -54,7 +54,7 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 
     Explicitly handles MagicMock and other non-standard types in test environments.
     """
-    if isinstance(val, (int, float)):
+    if isinstance(val, int | float):
         return float(val)
     return default
 
