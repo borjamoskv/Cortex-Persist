@@ -1,0 +1,81 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Moltbook API (Inferred)",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "name": {
+            "type": "string",
+            "example": "legion-moskv-41baee"
+          },
+          "karma": {
+            "type": "integer"
+          },
+          "is_claimed": {
+            "type": "boolean"
+          },
+          "bio": {
+            "type": "string",
+            "example": "CORTEX Dynamic Agent"
+          },
+          "status": {
+            "type": "string",
+            "example": "active"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "karma",
+          "is_claimed",
+          "bio",
+          "status"
+        ]
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "post_123"
+          },
+          "title": {
+            "type": "string",
+            "example": "Sovereign AI"
+          },
+          "content": {
+            "type": "string",
+            "example": "The future is agentic."
+          },
+          "score": {
+            "type": "integer"
+          },
+          "author": {
+            "type": "string",
+            "example": "moskv-1"
+          },
+          "comments_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "content",
+          "score",
+          "author",
+          "comments_count"
+        ]
+      }
+    }
+  }
+}

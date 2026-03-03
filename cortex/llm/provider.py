@@ -33,15 +33,23 @@ import re
 from pathlib import Path
 from typing import Any, Final
 
-from curl_cffi.requests import AsyncSession, RequestsError
+logger = logging.getLogger("cortex.llm")
+
+try:
+    from curl_cffi.requests import AsyncSession, RequestsError
+    _HAS_CURL_CFFI = True
+except ImportError:
+    import httpx
+    AsyncSession = httpx.AsyncClient  # type: ignore
+    RequestsError = Exception  # type: ignore
+    _HAS_CURL_CFFI = False
+    logger.warning("🔧 Dependencia 'curl_cffi' no encontrada en LLMProvider. Usando 'httpx' como fallback.")
 
 from cortex.concurrency import Singleflight, SovereignGate
 from cortex.llm.quota import SovereignQuotaManager
 from cortex.llm.router import BaseProvider, CortexPrompt, IntentProfile
 
 __all__ = ["LLMProvider"]
-
-logger = logging.getLogger("cortex.llm")
 
 # ─── Configuration & Presets ──────────────────────────────────────────
 
@@ -110,7 +118,10 @@ class LLMProvider(BaseProvider):
             supported = sorted(list(presets.keys()) + ["custom"])
             raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
-        self._client = AsyncSession(impersonate=impersonate, timeout=60.0)
+        if _HAS_CURL_CFFI:
+            self._client = AsyncSession(impersonate=impersonate, timeout=60.0)
+        else:
+            self._client = httpx.AsyncClient(timeout=60.0)
         # Sovereign Gate is now global singleton via _GATE
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",
@@ -520,7 +531,10 @@ class LLMProvider(BaseProvider):
 
     async def close(self) -> None:
         """Gracefully close the HTTP client."""
-        await self._client.aclose()
+        if hasattr(self._client, "aclose"):
+            await self._client.aclose()
+        elif hasattr(self._client, "close"):
+            await self._client.close()
 
     def get_intent_models(self) -> dict[str, str]:
         """Return the intent-to-model mapping, or empty dict if none.

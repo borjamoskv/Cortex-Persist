@@ -13,7 +13,7 @@ from typing import Any
 from cortex.config import DEFAULT_DB_PATH
 
 # ── Constants ──────────────────────────────────────────────────────────
-NOTEBOOKLM_DIR = Path("notebooklm_sources")
+NOTEBOOKLM_DIR = Path("cortex_eguzkia")
 DOMAINS_DIR = Path("notebooklm_domains")
 DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 

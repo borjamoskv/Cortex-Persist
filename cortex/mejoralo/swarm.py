@@ -54,6 +54,12 @@ SPECIALISTS_PROMPTS = {
         "You are the Destroyer of the Generic. Your goal is the 'Sovereign standard' (130/100). "
         "Design the code to feel premium, bespoke, and avant-garde. Whitespace is your canvas."
     ),
+    "DevilsAdvocate": (
+        "You are the Adversarial Auditor. Your mission is to find edge cases, logical "
+        "vulnerabilities, and hidden complexities in the proposed solution. You MUST VETO "
+        "any solution that is fragile, opaque, or non-sovereign. Force the swarm to reach "
+        "absolute crystalline clarity."
+    ),
 }
 
 
@@ -181,8 +187,9 @@ class MejoraloSwarm:
         info = "\n".join(items)
         consensus_rule = (
             (
-                "You must reach a Byzantine Consensus. If DevilsAdvocate is present, you MUST overcome "
-                "their veto with irrefutable logic before returning the final implementation."
+                "You must reach a Byzantine Consensus. If DevilsAdvocate is present, "
+                "you MUST overcome their veto with irrefutable logic before returning "
+                "the final implementation."
             )
             if "DevilsAdvocate" in specialists
             else "Synthesize ALL specialist logic."

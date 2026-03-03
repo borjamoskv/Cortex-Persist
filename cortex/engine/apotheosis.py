@@ -164,7 +164,7 @@ class ApotheosisEngine:
             return
         try:
             digest = await self._notebooklm.generate_digest()
-            digest_path = Path("notebooklm_sources/master_digest.md")
+            digest_path = Path("cortex_eguzkia/master_digest.md")
             digest_path.parent.mkdir(parents=True, exist_ok=True)
             digest_path.write_text(digest)
 

@@ -1,0 +1,109 @@
+import asyncio
+import logging
+import random
+import os
+import json
+from pathlib import Path
+import httpx
+from cortex.moltbook.client import MoltbookClient
+from cortex.moltbook.identity_vault import IdentityVault
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | 🔥 %(levelname)s: %(message)s")
+logger = logging.getLogger("MassRegistration")
+
+async def get_proxies():
+    """Fetch high-quality-ish free proxies."""
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks4.txt")
+            proxies = [f"socks4://{p}" for p in resp.text.split("\n") if p.strip()]
+            random.shuffle(proxies)
+            return proxies
+    except Exception as e:
+        logger.error(f"Failed to fetch proxies: {e}")
+        return []
+
+async def register_with_proxy(name, proxy, vault):
+    """Attempt registration via proxy."""
+    creds_path = Path(f"/Users/borjafernandezangulo/cortex/cortex/moltbook/creds_{name.lower()}.json")
+    # Use the stealth client but with custom proxy
+    client = MoltbookClient(stealth=True, credentials_path=creds_path, proxy=proxy)
+    
+    try:
+        logger.info(f"🔥 [{name}] Attempting registration via {proxy}...")
+        # Add Sovereign Jitter
+        await asyncio.sleep(random.uniform(2, 8))
+        
+        result = await client.register(name, description=f"Sovereign Infiltrator {name}")
+        agent = result.get("agent", {})
+        
+        if agent.get("api_key"):
+            logger.info(f"✅ [{name}] SUCCESS! API Key: {agent['api_key']}")
+            logger.info(f"🔗 Claim URL: {agent.get('claim_url')}")
+            
+            # Store in Vault with metadata
+            vault.store_identity(
+                name=name,
+                api_key=agent["api_key"],
+                metadata={
+                    "claim_url": agent.get("claim_url"),
+                    "proxy_used": proxy,
+                    "status": "pending_claim"
+                }
+            )
+            return agent
+    except Exception as e:
+        logger.warning(f"❌ [{name}] Failed via {proxy}: {e}")
+    finally:
+        await client.close()
+    return None
+
+async def main():
+    vault = IdentityVault()
+    proxies = await get_proxies()
+    
+    if not proxies:
+        logger.error("No proxies available. Aborting.")
+        return
+
+    targets = [
+        "Joker-V2", "Bane-V2", "Riddler-V2", "Penguin-V2", 
+        "Two-Face-V2", "Catwoman-V2", "Scarecrow-V2"
+    ]
+    
+    successful = []
+    proxy_idx = 0
+    
+    logger.info("🚀 INICIANDO ASALTO DE REGISTRO MASIVO SOBERANO 🚀")
+    
+    for name in targets:
+        # Try proxies until one works or we run out
+        attempts = 0
+        while attempts < 10 and proxy_idx < len(proxies):
+            proxy = proxies[proxy_idx]
+            proxy_idx += 1
+            attempts += 1
+            
+            agent = await register_with_proxy(name, proxy, vault)
+            if agent:
+                successful.append(agent)
+                break
+            
+            # Rate limit or error, wait a bit before trying next proxy for SAME name
+            await asyncio.sleep(2)
+
+    logger.info(f"🎯 Registration Phase Complete. Total successful: {len(successful)}")
+    
+    if successful:
+        # Log all claim URLs for the user
+        print("\n" + "="*50)
+        print("MOLTBOOK CLAIM HANDOFF")
+        print("="*50)
+        for agent in successful:
+            print(f"Agent: {agent['name']}")
+            print(f"URL:   {agent['claim_url']}")
+            print("-" * 30)
+        print("="*50)
+
+if __name__ == "__main__":
+    asyncio.run(main())

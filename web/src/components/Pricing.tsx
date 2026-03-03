@@ -1,5 +1,5 @@
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { Zap, Rocket, Check, ArrowRight, CheckCircle2, HeartHandshake } from 'lucide-react';
+import { Zap, Rocket, Check, ArrowRight, CheckCircle2, HeartHandshake, Network } from 'lucide-react';
 import { useRef, useState, useCallback } from 'react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -8,7 +8,7 @@ const SUCCESS_URL = 'https://cortex-landing-2i9ficnwo-borja-moskvs-projects.verc
 
 const tiers = [
   {
-    name: 'Community',
+    name: 'Explorer',
     price: 'Free',
     period: 'forever',
     description: 'Full sovereign engine. Apache 2.0.',
@@ -29,8 +29,8 @@ const tiers = [
     href: 'https://cortexpersist.com/signup',
   },
   {
-    name: 'Pro',
-    price: '$49',
+    name: 'Sovereign',
+    price: '$29',
     period: '/month',
     description: 'Automated compliance reporting.',
     icon: <Rocket className="w-5 h-5" />,
@@ -38,7 +38,7 @@ const tiers = [
     accentBg: 'bg-cyber-lime/[0.03]',
     borderAccent: 'border-cyber-lime/20',
     features: [
-      'Everything in Community',
+      'Everything in Explorer',
       'Up to 1M agent calls/mo',
       'EU AI Act compliance reports',
       'Deterministic audit trails',
@@ -48,10 +48,32 @@ const tiers = [
     cta: 'Start Pro Trial',
     ctaStyle: 'bg-cyber-lime text-black hover:shadow-[0_0_30px_rgba(204,255,0,0.3)] font-black',
     featured: true,
-    href: `https://buy.stripe.com/test_v2x14P27s0qg4hO6oo?success_url=${SUCCESS_URL}`,
+    href: process.env.NEXT_PUBLIC_STRIPE_PRO_LINK || `https://buy.stripe.com/test_v2x14P27s0qg4hO6oo?success_url=${SUCCESS_URL}`,
   },
   {
-    name: 'Enterprise',
+    name: 'Nexus',
+    price: '$99',
+    period: '/month',
+    description: 'Multi-agent swarm coordination.',
+    icon: <Network className="w-5 h-5" />,
+    accent: 'text-violet-500',
+    accentBg: 'bg-violet-500/[0.03]',
+    borderAccent: 'border-violet-500/20',
+    features: [
+      'Everything in Sovereign',
+      'Cross-project swarm sync',
+      'Hierarchical reputation engine',
+      'Byzantine Fault Tolerance (L3)',
+      'Custom webhook events',
+      'Advanced graph visualization',
+    ],
+    cta: 'Connect Swarm',
+    ctaStyle: 'bg-violet-500/20 text-white border border-violet-500/50 hover:bg-violet-500/40 font-bold',
+    featured: false,
+    href: 'https://cortexpersist.com/nexus',
+  },
+  {
+    name: 'Legion',
     price: 'Custom',
     period: '',
     description: 'Full verification & 24/7 support.',
@@ -60,7 +82,7 @@ const tiers = [
     accentBg: 'bg-yinmn-blue/[0.03]',
     borderAccent: 'border-yinmn-blue/20',
     features: [
-      'Everything in Pro',
+      'Everything in Nexus',
       'Unlimited agent calls',
       'Custom deployment (VPC)',
       'On-site compliance audit',

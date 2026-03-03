@@ -5,7 +5,7 @@
 > **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
 > *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and EU AI Act compliance out of the box.*
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
+![License](https://img.shields.io/badge/license-Dual%20License-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v7.0%20alpha-orange.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
@@ -215,7 +215,7 @@ block-beta
 | **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Multi-Tenant (v6)** | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial |
-| **Cost** | **Free (Apache 2.0)** | $249/mo | $$$ | Free | $$$ |
+| **Cost** | **Free (Non-Commercial) / Enterprise** | $249/mo | $$$ | Free | $$$ |
 | **SSRF Vulnerabilities** | **None** | CVSS 9.1 (Feb 2026) | — | — | — |
 
 ---
@@ -262,15 +262,19 @@ See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
 2. **Competitor vulnerabilities are public.** Mem0 SSRF (CVSS 9.1) remains open.
 3. **Context-reconstruction costs compound daily.** 45 min/dev/day × 230 days = $258K/yr for 10 engineers.
 4. **Local-first is non-negotiable** for defense, healthcare, banking, and legal.
-5. **CORTEX is free.** Apache 2.0. Zero risk to evaluate. 30 seconds to install.
+5. **CORTEX is Sovereign.** Dual-licensing protects the ecosystem while allowing free non-commercial evaluation. 30 seconds to install.
 
 ---
 
-## License
+## ⚖️ License & Sovereignty (Dual-Licensing)
 
-**Apache License 2.0** — Free for any use, commercial or non-commercial.
-See [LICENSE](LICENSE) for details.
+CORTEX operates under a **Dual-Licensing Model** to protect the integrity of the ecosystem:
+
+1. **Non-Commercial / Academic / Open-Source (CC BY-NC-ND 4.0 Modified):** Free for personal use, research, and technical auditing. You can read the code, learn from it, and use it locally.
+2. **Enterprise Commercial License:** Required for production deployments, B2B SaaS integration, or commercial use. Contact Sovereign Systems Labs for enterprise licensing.
+
+See [LICENSE](LICENSE) for full details.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com)*
+*Built by [Borja Moskv](https://github.com/borjamoskv) | © 2026 | Integrity verified via Merkle Tree Anchor [Polygon Mainnet]*

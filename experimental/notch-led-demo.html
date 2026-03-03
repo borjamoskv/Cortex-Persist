@@ -124,6 +124,144 @@ const COLORS={
 let curColor='cyber',curFx='breathe',speed=1,rgbMode=false;
 let micLevel=0,micActive=false,audioCtx,analyser,micData;
 
+// ─── Cephalopod Protocol (CORTEX WebSocket) ──────────────
+// The Notch is not UI. It's non-verbal communication
+// between two agents: the human operator and CORTEX.
+let ws=null,wsReconnectTimer=null;
+let currentModeLabel='idle';
+let targetIntensity=0.5,currentIntensity=0.5;
+let transitionMs=300;
+
+function connectCortex(){
+  const wsUrl='ws://localhost:8000/ws/notch';
+  try{
+    ws=new WebSocket(wsUrl);
+  }catch(e){
+    console.warn('CORTEX WS unavailable:',e);
+    scheduleReconnect();
+    return;
+  }
+
+  ws.onopen=()=>{
+    console.log('🐙 Cephalopod Protocol: Connected to CORTEX');
+    updateConnectionBadge(true);
+    if(wsReconnectTimer){clearTimeout(wsReconnectTimer);wsReconnectTimer=null}
+  };
+
+  ws.onmessage=(evt)=>{
+    const data=evt.data;
+
+    // Try JSON first (Cephalopod Protocol)
+    if(data.startsWith('{')){
+      try{
+        const cmd=JSON.parse(data);
+        if(cmd.command==='emotive_state'){
+          handleEmotiveState(cmd);
+          return;
+        }
+        if(cmd.command==='shockwave'){
+          triggerShockwave(cmd.intensity||1.0);
+          return;
+        }
+      }catch(e){/* not JSON, fall through */}
+    }
+
+    // Legacy string commands
+    if(data==='thinking'){col('cyber');fx('breathe');speed=1.0}
+    else if(data==='idle'){col('yinmn');fx('breathe');speed=0.4}
+    else if(data.startsWith('mode:')){currentModeLabel=data.slice(5)}
+    else if(data.startsWith('model:')){/* future */}
+    else if(data==='ping'){ws.send('pong')}
+  };
+
+  ws.onclose=()=>{
+    console.warn('🐙 CORTEX disconnected. Reconnecting...');
+    updateConnectionBadge(false);
+    scheduleReconnect();
+  };
+
+  ws.onerror=()=>{
+    updateConnectionBadge(false);
+  };
+}
+
+function scheduleReconnect(){
+  if(wsReconnectTimer)return;
+  wsReconnectTimer=setTimeout(()=>{wsReconnectTimer=null;connectCortex()},3000);
+}
+
+function handleEmotiveState(cmd){
+  // cmd = {command, color, effect, speed, intensity, mode_label, threat_level, transition_ms}
+  if(cmd.color&&COLORS[cmd.color]){
+    rgbMode=false;
+    curColor=cmd.color;
+    // Update UI dots
+    document.querySelectorAll('.dot').forEach(d=>d.classList.remove('on'));
+    const dotEl=document.querySelector(`.dot[data-c="${cmd.color}"]`);
+    if(dotEl)dotEl.classList.add('on');
+  }
+  if(cmd.effect){
+    curFx=cmd.effect;
+    document.querySelectorAll('[data-fx]').forEach(b=>b.classList.remove('on'));
+    const fxEl=document.querySelector(`[data-fx="${cmd.effect}"]`);
+    if(fxEl)fxEl.classList.add('on');
+  }
+  if(typeof cmd.speed==='number')speed=cmd.speed;
+  if(typeof cmd.intensity==='number')targetIntensity=cmd.intensity;
+  if(cmd.transition_ms)transitionMs=cmd.transition_ms;
+  if(cmd.mode_label){
+    currentModeLabel=cmd.mode_label;
+    updateModeLabel(cmd.mode_label,cmd.threat_level||0);
+  }
+}
+
+function triggerShockwave(intensity){
+  // Brief strobe flash for entropy purge events
+  const origFx=curFx,origSpeed=speed,origColor=curColor;
+  curFx='strobe';speed=4;curColor='cyber';
+  setTimeout(()=>{curFx=origFx;speed=origSpeed;curColor=origColor},300*intensity);
+}
+
+function updateModeLabel(label,threat){
+  let el=document.getElementById('mode-label');
+  if(!el){
+    el=document.createElement('div');
+    el.id='mode-label';
+    el.style.cssText='position:fixed;top:38px;left:50%;transform:translateX(-50%);'+
+      'font-family:inherit;font-size:7px;letter-spacing:3px;text-transform:uppercase;'+
+      'z-index:200;pointer-events:none;transition:all 0.5s;opacity:0.4;color:#3A3A3A';
+    document.body.appendChild(el);
+  }
+  el.textContent=label;
+  // Threat level colors the label
+  if(threat>0.6)el.style.color='#FF1744';
+  else if(threat>0.3)el.style.color='#D4AF37';
+  else el.style.color='#3A3A3A';
+}
+
+function updateConnectionBadge(connected){
+  let el=document.getElementById('ws-badge');
+  if(!el){
+    el=document.createElement('div');
+    el.id='ws-badge';
+    el.style.cssText='position:fixed;top:6px;right:12px;font-size:6px;letter-spacing:1px;'+
+      'text-transform:uppercase;z-index:200;opacity:0.3;font-family:inherit';
+    document.body.appendChild(el);
+  }
+  el.textContent=connected?'◉ CORTEX':'○ OFFLINE';
+  el.style.color=connected?'#CCFF00':'#333';
+}
+
+// Smooth intensity interpolation (prevents jarring jumps)
+function lerpIntensity(dt){
+  const rate=1.0-(transitionMs/1000);
+  const factor=Math.min(1,dt*0.06*(1.0/Math.max(0.05,1.0-rate)));
+  currentIntensity+=(targetIntensity-currentIntensity)*factor;
+}
+
+// Boot CORTEX connection
+connectCortex();
+
 // ─── Canvas ───────────────────────────────────────────────
 const cv=document.getElementById('c'),cx=cv.getContext('2d');
 let W,H,dpr;
@@ -284,8 +422,13 @@ function render(t){
   const dt=Math.min((t-lt)/16.67,3);
   lt=t;
 
+  // Cephalopod Protocol: smooth intensity transitions
+  lerpIntensity(dt);
+
   const color=getColor(t);
-  const intensity=getIntensity(t);
+  let intensity=getIntensity(t);
+  // Modulate by cephalopod target (CORTEX emotional state)
+  intensity=intensity*currentIntensity;
   const wOff=curFx==='wave'?Math.sin(t*0.002*speed)*50:
              curFx==='aurora'?(noise(t*0.0005*speed,0)-0.5)*80:0;
 

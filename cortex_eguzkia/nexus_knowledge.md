@@ -1,0 +1,22 @@
+# 🧠 CORTEX Domain: NEXUS
+
+## 🔍 NOTAS DE INVESTIGACIÓN (CRÍTICO)
+> NotebookLM: He detectado las siguientes lagunas en CORTEX para este proyecto.
+- Hay **13** hechos sin verificar que requieren validación lógica.
+
+## Base de Conocimiento
+### Report
+- **v6_aesgcm:PnTLQuFzKJQX89XrXrfRPDzISFcrvaw4mb0OWMwYz67u1yn0l28t8inKQuJc6Y/Yi3yxC27qk8vjkgXh+2O471FvGsTpdTC/J9U1fSFRql7TMYyMi1KwsblTk077/PejIk9HUyb6MwlQQYMVKN6klnp/fgay2d1LdTtggi8ka+9taG+lRgJCh7iwX36gXSDG6/Qv9vLbqjMkwRU=** (Confid: stated)
+- **v6_aesgcm:BUSDUr+Fg8xCyoWFHMx+yflrDN1nrko/fDz6KcKyNTN5v6jc/+cOAOlJyWdrYCuB6PrN1XMzhhEzS+rD6ixSsXbpU9YJuObRK7HSwzU77155txqlJWQ6l04egQvGWBpZ1lMK0+X2+8PLicNHRTLdaa007YXOPHvwjyuglmtfUBYQbSByPc/wXlltRiOiZGx17JAaXME3lrTWB0zTmeVLmZ758w805kW9Y6i9q2WN** (Confid: stated)
+- **v6_aesgcm:3tqwAc8NQ05mEuyttHBkk4K6TPUAMblAThR9aefHEskLvIcEQAQlf8n64M+GYL45j75MWwTTvZG0qsFKfeboWNfZpIJdTa99rNZhXfZruIvCJaWZxbUQXopBzOvXxqmzuAzjS3CAoxVbbjoZAkMfOhdZvraH4N4AH2qxJMg1VoTOq/dw0AweoKcKrsSaibo=** (Confid: stated)
+- **v6_aesgcm:8TPppoP5EQc5zF/M7BkT414omHLhgmMFCcMZ2Q2hWUQZ1CK9wCaO1uryeUCZmDl5zCATM7y3CWgkDZBq0Wc3hFIyFx/fzlvJ/DQNNWwMnV+sqx3+glthnZJGdaLLw2O1+mHvI9ANroWL4EQml9On1NVNSXo+VrfyogxzwE3Pc3x7GGWQ** (Confid: stated)
+- **v6_aesgcm:E7YkDievbGxWs32sUtJEVW7b6eG3RP8soY48xVXAQd2iaZZPBosUBY+ULAIixRKEUpd8EUw5yCq8EhQrdQXGf9PYNDUB5NgjgIthN4kUnIm+ExXaC3IfP0D/o2y4E/PpZgcFYBSTQJVxdX+orw3AvrpGHtTXOIZ1deCTi08+mT75NnrN** (Confid: stated)
+- **v6_aesgcm:PQoqTGYYt025m+WE+IwfiSZpbKj1W3E4ElrbkVojJpP54VrzKDntuFrir+8WgG75+8COdU8XDg1JGbLHwdwNNB1mns1cLX5X9lYxrzXjnOLD8V8CXlCeO5ACe3t3ZWWaTe2G+ifrMTAjK4NPay4UHLFXd0+0UdHK0tb3SJcVS46HPOo8zjWPLnhF/Z8K8vU=** (Confid: stated)
+- **v6_aesgcm:n2+/5SXFnc7L3/VwbqLXM6JuGdaGMhs23Do/FlOJruJfDa0k+ABoBsAlt1naaTeHdcl1F+fWZYRaReN5Y/R2e3vXiq+QWiYzIj8wflfohmPajBmYrfjBWQjTCJRcmjN8wPjOU2K3ti/7CvfOfhEHhtsggBcnqjprOV2LQMKBH7ks8ZPVYk/C** (Confid: stated)
+- **v6_aesgcm:wnYR9bIzka1YL8QsPXfUPJgIBzBbup+NL5eLc8Q0KzvAS1nlCZxAXhVorL3G9Hr6SouP6mhRz9ouKyGIOlCI90eBksDROFpjDURgIclt5xyC6skrL8NS55qGaXkYm1j4f1iOOk6NYLEOZawaGZoJE5sKoRp0ELor/gSYy7GkaZal5QpQSK+j** (Confid: stated)
+- **v6_aesgcm:2q56mFv8DE6yrQ9QPr/sukFXR95G21KcXPNu+sNjvEYCnghorZIWMHhYsvjCqElmqAv4B5IIZnCip43hJ4Y3IH9BQOHR+7fZ69JUigcHoQpr3F4es/3euZTip1xD7mogEgg52syFKh1o/Mta9Dg9sq0AeQDXRfz9a9AXRbTT1IhLkU4G3XV7Nwlizm2UAtPXlwgRHBG1v7jkIpXL** (Confid: stated)
+- **v6_aesgcm:6v3oOvuMFSvB0qnzeI3P81R5qiHHnqolfyFRWEELq6bojkTewv6aQLHmpjzHthefQbMm8LHBBlP2cN/kisYffwX/SJRki5POnZGAX3KpQw7Nrq8kza3hk36p0WB2XS5sy0nfcEBgHPb9CIymC7BD7CqrXQ8xIpVIVS6RTs1s2aTaYpVhRT45N/zP8Eh63q7Hs0Dexo/mXJSZ** (Confid: stated)
+- **v6_aesgcm:Yp2ul4it7OcKNGl338BHeiKATaMLXGMQ1xcC8OsY6vOy7ejl0xKyD0ONeYyO1/neNB2kqSEsjsjSIONnVkIDDKte4IgyQfZxFWZ2h72xugO0Moms4hQLTCiLiXPKMY6kPqIksWUQmMV0h7ocTvHsMY8YIx0Op+JgynY+Ms78JIDteA5aCZ2dYMaww/QGxvRchfF7ozRIl2ZeLw==** (Confid: stated)
+- **v6_aesgcm:pDUq2fbD59FoE7JSDiwAOcwfEgQHKLYGEd1cJUOmIVr/BZhCBZtRwymHvjRz9Xw+BmT6PQsHq7GeXVZLYZrWbSKkwdUvR4/mDsTeEklEGlhz9MPy6eW0ASQun+90U6tAVFSPgCxIii4Wx5LFROXzNvi4xDhCIckLJ0ju1Aj1LDqxImhoHoFjBqTiUjhNU2j2Xf/cjCKnKn1vX4U=** (Confid: stated)
+### Decision
+- **v6_aesgcm:4TMYzyGJueUSJFIi3/4TAn37LAOJEmk+UmOlm474hcnpTkgGk8eG8MmZQKI5gsmeH5Z3CgTZ3/mVs9PaTW+jhxnVJtNLaUW78HryJ5nbt/blDhxCm3GHxEwAVa7Bw0xPnn/W/BmyuOWEuf2x4f/24HGYBOlqtusa04McxqanlCcRKRSbnRNb5LAYuFDMz/npuFHIcLLhs/3fUaW8vSMf9s/DNSh/m0fQi1gJ0pPZ1fy3w4NGsIxs1PjRNB12y4Qr/JDKbM3WUFJ8k2gqsMpX3Jl7o+Yzb+eUfmeyUtqPb/8Su3QdtyFI/BoWlOBXNR/Swql4awD7PtjiZPX4VflJeMYIal8aygiHYGNqldcCTA==** (Confid: stated)

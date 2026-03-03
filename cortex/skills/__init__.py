@@ -11,9 +11,12 @@ Skills que se registran solos, declaran capacidades y se componen bajo demanda.
 
 from cortex.skills.registry import SkillManifest, SkillRegistry
 from cortex.skills.router import SkillRouter
+from cortex.skills.synthesis_omega import SynthesisOmega, trigger_synthesis
 
 __all__ = [
     "SkillManifest",
     "SkillRegistry",
     "SkillRouter",
+    "SynthesisOmega",
+    "trigger_synthesis",
 ]

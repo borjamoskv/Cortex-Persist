@@ -136,6 +136,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.security_hardening_cmds",
     "cortex.cli.session_cmds",
     "cortex.cli.signal_cmds",
+    "cortex.cli.social_cmds",
     "cortex.cli.status_cmds",
     "cortex.cli.storage_cmds",
     "cortex.cli.swarm_cmds",

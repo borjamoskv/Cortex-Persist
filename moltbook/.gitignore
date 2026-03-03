@@ -1,0 +1,7 @@
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+creds_*.json
+credentials.json
+.vault_key

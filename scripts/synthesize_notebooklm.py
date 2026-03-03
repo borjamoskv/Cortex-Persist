@@ -13,7 +13,7 @@ import sqlite3
 import pandas as pd
 
 CORTEX_DB_PATH = Path.home() / ".cortex" / "cortex.db"
-OUTPUT_DIR = Path("notebooklm_sources")
+OUTPUT_DIR = Path("cortex_eguzkia")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 

@@ -1,0 +1,16 @@
+# 🧠 CORTEX Domain: COMIENZOS-CLONE
+
+## 🔍 NOTAS DE INVESTIGACIÓN (CRÍTICO)
+> NotebookLM: He detectado las siguientes lagunas en CORTEX para este proyecto.
+- Hay **6** hechos sin verificar que requieren validación lógica.
+
+## Base de Conocimiento
+### Decision
+- **v6_aesgcm:RWK7Gg00cH5rR0e2qBDfy831xcbMUIs9bk5swB2ZbR5XLexDurpm5mR3wv5CFJbGdtabRKPqKJTMYSeRaVllXSCmz812JhqOw25IsBAFoBZlQD3sYyglqQjmkcX9JkiNCqHEzva1qQJmD3AXqmyyFe2M3QVFaPuUYanRNaPSEK+a** (Confid: stated)
+- **v6_aesgcm:Odm27AtmHT8Iww19iO67lNxriAydCGwKWGrVVp+ye0mBZQcyOw2q3hJXm3/9TS1P91pCzoCy+vatazN0eHy6Yb004EQL52p+elX8alCScbtXt8KKtYkVowTpYjZ5aQJAsjeorK37NoGPDtSPGpInuSGkqNtGv8soCuiyzYJ5RMuRMyG7kD4zKJZVapIXG0BaHCj7o932QIXyUy61EAIB5mO21GmIENzWD0RnW8bIR6LPMnUAMfIdy8vUkWQ+JUK24RoewYMSPIWDAMIhlv6ZgPN+9mKa9SfiPyjcIf6QbKihT4t6PrxscSgE2Wa0ah5Bz62QNBvhJf43ZnDIH9BkVcMAuwslDA4EWes95Yg=** (Confid: stated)
+- **v6_aesgcm:Gc2K5CdBTuZ3BHu5u/c4/dZQWkDyPryPVaWgYvfkiO/96kX9tO17THaAh6uEWJM/lvQi/03CdUkEX4uVPp0MrPsXuY62n5jiIe0bMDshsNa5UnDjV0WP8rnfhojmMFGD3wwkWREg5z9YwY6C6E2RZuoR44BYGI8F8ZMnRDlF7+GasTwBT2e6GB0VWbm+xXLlyHWPwUmUCybxiNFoQgvHBAEr1Ge0baYWn4magBysP01ORYgEq+n1xyzi05UXTsa91VfmFVpNZoGHUlQjCfDdRg2sDAMr3hCGZ42eri7zEoKhZ2qjlis4n+ZflqlbWeztUA60t+mdU84x8F3y6BV73+crQ4LMr4fwCRjrlj9BF/etTg3iPb38Wuy/sWKfjF+9CD1H8CpKCMolP7zGyvVidK7aZr8U31umcbXE8trKmHwCcJtxC0DHPXqNVB5QeAlScbb78dKWeKLOIY4xesc6rlG+Tc3pt/3k4YyLWnKSjGcuHPtif401GZ/roYlFv+u025LxnyKEUr5Oi+g92D2RvvcT4ottpik0UvQ3GKg=** (Confid: stated)
+- **v6_aesgcm:fD7dfa7rV2OVwU/V5xtGVwzNOE2Zx2lgCwXNtl7zWNayfQ8PMRUUxu/ABPkM40Gqpahc53riQIYIa3ik2oVs+zONJO4/qv+ACowMZ78OcSXharKPZkKEcGS4u9TbfTbD+hehLf8QCSG2J4Ney/cu9q3Yz7voNn9ShrQ+jgHEjJheVg1gXQmYwFY74YbRXJw6SMmqINyNgxEK1J4KLTHOdqrrlNgKlsVEype1qMvO977Zo7tqtRFrA1UT1f4um+pT1/GjtTHDmZbDFem5usCF6XiXmsch83OXA0DRaWfRNwRBdFBIPQ==** (Confid: stated)
+### Error
+- **v6_aesgcm:hgPpQD5ydwAiL7bxmP8hBUrzsdd3KoHxuCien+qT2nhlFqPUZ5bkzvPq1ig9ECUZPSIKnFbdEFZUI8Oia7Hj+sBDB5kJN1haTd2826rGILQZbvTEfSyNX4X+sLBikEjo9xQ5WNZKIDPYM3Sw/5pm68rB4zQlrvo=** (Confid: stated)
+### Bridge
+- **v6_aesgcm:etauJuLPnqb8j+I2Sz1XK4x1BTMBZUE86S5AFuup6LE2OYtoa247OdsaSG7ZlYUOahPcElfhBN2hm8wBTGKjYODFLq0Z/z7wWNW/zXB9KC7mokpwRlrKeZPLTfnICV1jefwbHbt8Vafhumm6ovMb3gClpIgG0r2A** (Confid: stated)

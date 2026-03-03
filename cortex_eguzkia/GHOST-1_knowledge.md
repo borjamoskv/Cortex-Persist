@@ -1,0 +1,10 @@
+# 🧠 CORTEX Domain: GHOST-1
+
+## 🔍 NOTAS DE INVESTIGACIÓN (CRÍTICO)
+> NotebookLM: He detectado las siguientes lagunas en CORTEX para este proyecto.
+- Hay **2** hechos sin verificar que requieren validación lógica.
+
+## Base de Conocimiento
+### Decision
+- **v6_aesgcm:XuQmElMS18dXndLT6dhaKs24CBPM0wO8BGpCPaWQeLSVlqIFusC3NIwTfCFX9tJaYoLxfwtlKLEkc2LzKb519gXDDGwIhTy9XfzrS43Hx1JVmOUFmnFQL8g/IiKI3zPF3txyNaojIGNYIasfFoqPTA1peYKNp7I6rF+dMjS6rKjIyuoeMC5F7f7ZmN+iVvjM7jwpk6G1YZYvviL8GWXg+gmKyOP/+gnioTG+jkn/0uMD/1vw1HdMsvR4Uum8AOtg+UYMp9iR5aIvCkGspYhjldp0Gwhd2sFXnu1LcaU5W1GwHpI98w==** (Confid: stated)
+- **v6_aesgcm:6/p3eltKVKXl955VE8FRCry9TLf4ho18n9DySdFinW9vdUKPPlT5F5HiQd6sD/H2+HL1GE+Xt4PIFPv8EzY58+U8P7wTh52ZisivGuI3BI2HGiDEZaT/CqUuhUQ/bCbH3saq6ZQ0gQWH481SOeIYMT/e+nqq6MEd+4u0sB8SviRnw+Ee6uxpShhsg813E0j6A5KROX5VUDl0GLf9TJvTfsWRqagtu62GMRHniOgcCENDKZ++YJGfsYd2FaXduxCFbSxz66ZwNapfS5iyoYKvzCVzClwe28mrL4GfaD46qQgDlMW2uqLtvvpxOKhQhXG9gTIAEf3FrffJ+i55sJM00q80RMfRfmD6CadxG7aV2ACdV6z/GwC6U92OhFOPydzdrwVwwvf3gucVdzVWe19PYXIgrItPerJb+m+xdzD+DLTVWjsZoBKT4bCcHFnDFQGMDxXsMA7hGxnzbARqam2tN82k67x5k++UZJ9PDVJjEnYyMjDLzMfr4JJmLxldVYK3g/bTw/Tb6sI8JWiQjtlzkUbsYWlxMF4u22fCCHvFYK7oPRgysPx5ReuZsQtWi9i6yLzqehet9H+xo2nwpC05e9RqTH0APCwFkaB1JnpywMLgG4PX7ISZ** (Confid: stated)

@@ -43,6 +43,7 @@
 **The scale-up.** From single-user local daemon → enterprise multi-tenant cloud platform.
 
 ### Phase 1: Foundation *(In Progress)*
+
 - [x] Multi-tenancy: `tenant_id` injected at all L1/L2/L3 layers
 - [x] RBAC engine (4 roles, 4 permission scopes)
 - [x] SecurityHeadersMiddleware (CSP, HSTS, X-Frame)
@@ -51,6 +52,7 @@
 - [ ] **Redis L1 cache** — distributed working memory
 
 ### Phase 2: Orchestration *(Q2 2026)*
+
 - [ ] **GraphQL API** — cross-language integration replacing REST where needed
 - [ ] **Distributed Event Bus** — NATS or Redis Streams for swarm coordination
 - [ ] **JavaScript/TypeScript SDK** — `npm install @cortex-memory/sdk`
@@ -59,6 +61,7 @@
 - [ ] **Webhooks** — real-time event delivery to external systems
 
 ### Phase 3: Sovereign Cloud *(Q3 2026)*
+
 - [ ] **GCP deployment blueprints** — AlloyDB + GKE + Qdrant Cloud + Cloud Run
 - [ ] **Zero-Knowledge encryption** — user memories encrypted at rest, keys stay on hardware
 - [ ] **Multi-node CORTEX federation** — distributed CORTEX clusters with Gossip protocol
@@ -85,18 +88,18 @@
 ## Pricing Strategy
 
 | Tier | Price | Target |
-|:---|:---|:---|
-| **Free** | $0/mo | Solo developers, local deployments |
-| **Pro** | $29/mo | Small teams, cloud backends |
-| **Team** | $99/mo | Companies, multi-agent consensus, SLA 99.9% |
-| **Self-Hosted** | Free forever | On-prem, unlimited, community support |
+| :--- | :--- | :--- |
+| **Explorer** | $0/mo | Solo developers, local deployments |
+| **Sovereign** | $29/mo | Small teams, cloud backends |
+| **Nexus** | $99/mo | Companies, multi-agent consensus, SLA 99.9% |
+| **Legion** | Custom | Enterprise, custom VPC, on-site audit |
 
 ---
 
 ## Current Status (2026-02-23)
 
 | Metric | Value |
-|:---|:---|
+| :--- | :--- |
 | Test functions | 1,162 |
 | Production LOC | ~45,500 |
 | Python Modules | 444 |
@@ -106,4 +109,6 @@
 
 ---
 
-*Roadmap maintained by MOSKV-1 v5 (Antigravity) · Subject to Sovereign revision*
+### Identity & Vision
+
+Roadmap maintained by MOSKV-1 v5 (Antigravity) · Subject to Sovereign revision

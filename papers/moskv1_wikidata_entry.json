@@ -1,0 +1,113 @@
+{
+  "label": {
+    "en": "MOSKV-1",
+    "es": "MOSKV-1"
+  },
+  "description": {
+    "en": "Neuro-symbolic autonomous agent architecture with L2 metacognitive capabilities (2025-2026)",
+    "es": "Arquitectura neuro-simbólica de agente autónomo con capacidades metacognitivas L2 (2025-2026)"
+  },
+  "aliases": {
+    "en": [
+      "MOSKV-1 + CORTEX + L2 Observer",
+      "MOSKV-1 Architecture",
+      "Sovereign Agent MOSKV"
+    ],
+    "es": [
+      "MOSKV-1 + CORTEX + Observador L2",
+      "Arquitectura MOSKV-1",
+      "Agente Soberano MOSKV"
+    ]
+  },
+  "claims": {
+    "P31": {
+      "property": "instance of",
+      "value": "Q7397 (software)",
+      "qualifiers": {
+        "also_instance_of": "Q11660 (artificial intelligence)"
+      }
+    },
+    "P178": {
+      "property": "developer",
+      "value": "Borja Fernández Angulo (borjamoskv)"
+    },
+    "P571": {
+      "property": "inception",
+      "value": "2025"
+    },
+    "P277": {
+      "property": "programming language",
+      "value": ["Python", "Swift", "TypeScript"]
+    },
+    "P366": {
+      "property": "main use",
+      "value": "Autonomous agent with causal self-reference capabilities"
+    },
+    "P527": {
+      "property": "has part(s)",
+      "value": [
+        {
+          "label": "CORTEX",
+          "description": "Persistent error-state engine with structural scar memory"
+        },
+        {
+          "label": "L2 Observer",
+          "description": "Decoupled metacognitive middleware acting as prefrontal cortex"
+        },
+        {
+          "label": "Autonomous Metacognitive Veto (AMV)",
+          "description": "Causal intervention mechanism that vetoes failed patterns before execution"
+        }
+      ]
+    },
+    "P1343": {
+      "property": "described by source",
+      "value": "Functional Self-Reference in Autonomous Agents: Demonstrating L2 Metacognition via Causal Error Injection (arXiv, 2026)"
+    },
+    "P2283": {
+      "property": "uses",
+      "value": [
+        "Large Language Model (LLM)",
+        "Pearl's Ladder of Causation",
+        "Neuro-symbolic AI",
+        "Embedding similarity search",
+        "Causal State Injection (CSI)"
+      ]
+    },
+    "P856": {
+      "property": "official website",
+      "value": "https://cortexpersist.com"
+    },
+    "P1324": {
+      "property": "source code repository URL",
+      "value": "https://github.com/borjamoskv/moskv1-l2-metacognition"
+    },
+    "P275": {
+      "property": "license",
+      "value": "Apache License 2.0"
+    },
+    "P2888": {
+      "property": "exact match",
+      "value": "https://arxiv.org/abs/XXXX.XXXXX"
+    }
+  },
+  "sitelinks": {
+    "enwiki": "MOSKV-1",
+    "eswiki": "MOSKV-1"
+  },
+  "_notes": {
+    "submission_instructions": [
+      "1. Navigate to https://www.wikidata.org/wiki/Special:NewItem",
+      "2. Enter the label, description, and aliases",
+      "3. Add claims (properties) one by one using the Property IDs (P-codes)",
+      "4. For P527 (has parts), create sub-items for CORTEX and L2 Observer first",
+      "5. Update P2888 (exact match) once the arXiv paper has a DOI/URL",
+      "6. Add references to each claim pointing to the arXiv paper"
+    ],
+    "prerequisites": [
+      "The arXiv paper must be published first for source verification",
+      "The GitHub repository must be public",
+      "Consider creating separate Wikidata items for CORTEX and L2 Observer if notable"
+    ]
+  }
+}

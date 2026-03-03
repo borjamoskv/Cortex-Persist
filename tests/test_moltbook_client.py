@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.moltbook.client import (
+from moltbook.client import (
     MoltbookClient,
 )
 
@@ -30,9 +30,10 @@ class TestCredentials:
 
     def test_saves_credentials(self, tmp_path, monkeypatch):
         creds_path = tmp_path / "credentials.json"
-        monkeypatch.setattr("cortex.moltbook.client._CREDENTIALS_PATH", creds_path)
+        monkeypatch.setattr("moltbook.client._DEFAULT_CREDENTIALS_PATH", creds_path)
 
-        MoltbookClient.save_credentials("moltbook_xxx", "TestAgent")
+        client = MoltbookClient()
+        client.save_credentials("moltbook_xxx", "TestAgent")
         assert creds_path.exists()
 
         data = json.loads(creds_path.read_text())
@@ -135,7 +136,7 @@ class TestAPIRequests:
 
     @pytest.mark.asyncio
     async def test_register_saves_credentials(self, client, tmp_path, monkeypatch):
-        monkeypatch.setattr("cortex.moltbook.client._CREDENTIALS_PATH", tmp_path / "creds.json")
+        monkeypatch.setattr("moltbook.client._DEFAULT_CREDENTIALS_PATH", tmp_path / "creds.json")
         mock_resp = self._mock_response(
             {
                 "agent": {

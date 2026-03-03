@@ -20,7 +20,7 @@ import networkx as nx
 
 # ── 1. Connect ────────────────────────────────────────────────────────
 DB_PATH = Path.home() / ".cortex" / "cortex.db"
-OUTPUT_DIR = Path("notebooklm_sources")
+OUTPUT_DIR = Path("cortex_eguzkia")
 OUTPUT_DIR.mkdir(exist_ok=True)
 MASTER_FILE = "cortex_notebooklm_digest.md"
 

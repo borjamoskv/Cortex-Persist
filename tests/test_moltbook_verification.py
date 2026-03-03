@@ -1,6 +1,6 @@
 """Tests for the Moltbook verification challenge solver."""
 
-from cortex.moltbook.verification import _strip_obfuscation, solve_challenge
+from moltbook.verification import _strip_obfuscation, solve_challenge
 
 
 class TestStripObfuscation:

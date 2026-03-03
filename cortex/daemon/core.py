@@ -46,6 +46,7 @@ from cortex.daemon.monitors import (
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
+from cortex.perception.embodied import EmbodiedCognitionLoop
 
 __all__ = ["MoskvDaemon"]
 
@@ -127,6 +128,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self.tombstone_monitor = TombstoneMonitor(
             db_path=file_config.get("db_path", str(CORTEX_DB))
         )
+        self.embodied_loop = EmbodiedCognitionLoop(memory_engine=self._shared_engine)
 
         try:
             from cortex.daemon.sidecar.telemetry import ASTOracle
@@ -337,6 +339,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             t.start()
             self._threads.append(t)
 
+        embodied_t = threading.Thread(
+            target=self._run_embodied_loop, name="EmbodiedLoop", daemon=True
+        )
+        embodied_t.start()
+        self._threads.append(embodied_t)
+
         logger.info("Daemon started with %d threads", len(self._threads))
 
         try:
@@ -359,6 +367,24 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             except Exception as e:
                 logger.debug("Neural loop error: %s", e)
             self._stop_event.wait(timeout=1.0)
+
+    def _run_embodied_loop(self) -> None:
+        """Runs the Embodied Cognition Sensorimotor Loop."""
+        import asyncio
+
+        logger.info("🦾 Embodied Sensorimotor thread started")
+
+        async def _lifecycle():
+            task = asyncio.create_task(self.embodied_loop.start())
+            while not self._shutdown:
+                await asyncio.sleep(1.0)
+            self.embodied_loop.stop()
+            await task
+
+        try:
+            asyncio.run(_lifecycle())
+        except Exception as e:
+            logger.error("Embodied Loop error: %s", e)
 
     def _run_ast_oracle_loop(self) -> None:
         """Runs the AST Oracle event loop."""

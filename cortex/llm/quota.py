@@ -77,8 +77,8 @@ class SovereignQuotaManager:
     def __init__(
         self,
         db_path: str = "~/.cortex/quota.db",
-        capacity: int = 5,  # Reducido de 15 a 5 para evitar burst limit (429)
-        refill_rate: float = 0.15,  # ~9 tokens / 60s (más conservador)
+        capacity: int = 50,  # Aumentado para escalado masivo
+        refill_rate: float = 1.0,  # 1 token/s = 60 rpm
     ) -> None:
         self.db_path = Path(db_path).expanduser()
         self.capacity = float(capacity)

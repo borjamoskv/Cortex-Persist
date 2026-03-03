@@ -13,7 +13,7 @@ from cortex.engine.models import Fact
 logger = logging.getLogger("cortex.services.notebooklm")
 
 # Constants extracted from CLI
-NOTEBOOKLM_DIR = Path("notebooklm_sources")
+NOTEBOOKLM_DIR = Path("cortex_eguzkia")
 DOMAINS_DIR = Path("notebooklm_domains")
 DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 

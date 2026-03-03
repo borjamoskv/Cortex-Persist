@@ -27,6 +27,7 @@ class CentauroMissionResult(TypedDict, total=False):
     reason: str
     agents_used: int
     formation: str
+    execution_time: float
 
 
 logger = logging.getLogger("cortex.swarm.centauro")
@@ -110,8 +111,14 @@ class CentauroEngine:
         """Spawn a squad of virtual agents with specialized focus."""
         squad = {}
         for i in range(size):
-            agent_id = f"legionnaire_{len(self.agents) + 1}"
             specialty = self._get_specialty(i, formation)
+            from cortex.swarm.naming import generate_agent_name
+            agent_id = generate_agent_name(specialty)
+            
+            # Ensure unique ID if manifold collides
+            while agent_id in self.agents:
+                agent_id = generate_agent_name(specialty)
+
             agent = VirtualAgent(agent_id, specialty=specialty)
             self.agents[agent_id] = agent
             self.consensus.register_node(agent_id, initial_reputation=1.0)
@@ -164,11 +171,18 @@ class CentauroEngine:
 
         return winning, len(squad)
 
-    async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
+    async def engage(
+        self, 
+        mission: str, 
+        formation: str = Formation.BLITZ,
+        use_fractal: bool = False
+    ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission. (Axiom Ω₂: Multiplexed Execution)"""
         import hashlib
+        import time
 
-        mission_hash = hashlib.sha256(f"{mission}:{formation}".encode()).hexdigest()
+        start_time = time.time()
+        mission_hash = hashlib.sha256(f"{mission}:{formation}:{use_fractal}".encode()).hexdigest()
 
         # --- Thermal Heat-Sink (Multiplexing) ---
         if mission_hash in self._active_missions:
@@ -183,30 +197,37 @@ class CentauroEngine:
 
         try:
             logger.info(
-                "Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation
+                "Initiating LEGION Protocol. Mission: %s | Formation: %s | Fractal: %s", 
+                mission, formation, use_fractal
             )
-            size = self._FORMATION_SIZES.get(formation, 3)
+            base_size = self._FORMATION_SIZES.get(formation, 3)
+            # Fractal expansion: multiplication of agents if use_fractal is True
+            size = base_size * 10 if use_fractal else base_size
+            
             squad = self.spawn_squad(size, formation=formation)
-            logger.info("Spawned %d agents in %s formation.", len(squad), formation)
+            logger.info("Spawned %d agents in %s formation (Fractal=%s).", len(squad), formation, use_fractal)
 
             winning, agents_used = await self._run_consensus(squad, mission)
 
+            execution_time = time.time() - start_time
             result: CentauroMissionResult
             if winning:
-                logger.info("Consensus Achieved (UNANIMOUS or MAJORITY).")
+                logger.info("Consensus Achieved (UNANIMOUS or MAJORITY) in %.2fs.", execution_time)
                 result = {
                     "status": "success",
                     "solution": winning,
                     "agents_used": agents_used,
                     "formation": formation,
+                    "execution_time": execution_time,
                 }
             else:
-                logger.warning("Consensus Failed (DEADLOCK or SPLIT).")
+                logger.warning("Consensus Failed (DEADLOCK or SPLIT) after %.2fs.", execution_time)
                 result = {
                     "status": "failure",
                     "reason": "Byzantine Consensus Threshold Not Reached",
                     "agents_used": agents_used,
                     "formation": formation,
+                    "execution_time": execution_time,
                 }
 
             mission_future.set_result(result)

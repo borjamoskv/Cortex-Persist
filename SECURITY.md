@@ -4,48 +4,16 @@
 
 | Version | Supported          |
 |:--------|:------------------:|
-| 8.x     | ✅ Active          |
-| < 8.0   | ❌ No longer       |
+| 0.3.x   | ✅ Active          |
+| < 0.3   | ❌ No longer       |
 
 ## Reporting a Vulnerability
-
-**Do NOT open a public issue for security vulnerabilities.**
-
-Email: **security@cortexpersist.com**
-
-You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
-
-## Security Features
-
-CORTEX is built security-first:
-
-- **SHA-256 hash-chained ledger** — tamper-evident fact storage
-- **Merkle tree checkpoints** — batch integrity verification
-- **Privacy Shield** — 11-pattern secret detection at ingress
-- **AST Sandbox** — safe LLM code execution without `eval()`
-- **RBAC** — 4-role access control (admin, editor, viewer, auditor)
-- **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
-- **Input Sanitization** — all user inputs validated and escaped
-
-## Supply Chain Security
-
-### Release Signing
-
-All CORTEX releases published to PyPI are **cryptographically signed using [Sigstore](https://sigstore.dev/)**. This provides:
-
-- **Provenance verification** — Confirm artifacts were built by our CI pipeline
-- **Tamper detection** — Verify packages haven't been modified after signing
-- **Keyless signing** — Uses OIDC identity, no long-lived keys to compromise
-
-To verify a release:
-
-```bash
-pip install sigstore
+ ... (omitido por brevedad, solo cambio de versión) ...
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/cortex/.github/workflows/release.yml@refs/tags/v8.0.0 \
-  cortex_memory-8.0.0.tar.gz
-```
+  --cert-identity https://github.com/borjamoskv/cortex/.github/workflows/release.yml@refs/tags/v0.3.0b1 \
+  cortex_memory-0.3.0b1.tar.gz
+
 
 ### Container Image Scanning
 
