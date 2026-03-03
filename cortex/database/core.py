@@ -126,6 +126,7 @@ def connect(
             db_path,
             timeout=timeout,
             check_same_thread=check_same_thread,
+            uri=uri,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
@@ -163,6 +164,7 @@ def connect_writer(
             db_path,
             timeout=timeout,
             check_same_thread=check_same_thread,
+            uri=uri,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
