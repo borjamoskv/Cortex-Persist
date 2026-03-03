@@ -14,7 +14,7 @@ import logging
 import os
 
 __all__ = [
-    "create_analyst_agent",
+    "create_google_one_agent",
     "create_cortex_swarm",
     "create_guardian_agent",
     "create_memory_agent",
@@ -193,6 +193,48 @@ def create_guardian_agent(
     )
 
 
+def create_google_one_agent(
+    model: str | None = None,
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
+    """Create the Google One Agent — cloud integration and backup sub-agent.
+
+    Focused on Google Drive sync, NotebookLM exports, and sovereign
+    cloud backups in Google One.
+
+    Args:
+        model: LLM model to use.
+
+    Returns:
+        Configured ADK Agent instance.
+    """
+    if not _ADK_AVAILABLE:
+        raise ImportError(_ADK_INSTALL_MSG)
+
+    from cortex.adk.goog_tools import GOOGLE_ONE_TOOLS
+
+    return Agent(  # type: ignore[reportOptionalCall]
+        model=model or _DEFAULT_MODEL,
+        name="cortex_google_one_agent",
+        description=(
+            "Cloud integration agent that manages Google One storage, Drive sync, "
+            "and secure CORTEX memory backups."
+        ),
+        instruction=(
+            "You are the CORTEX Google One Agent — the sovereign link to the cloud.\n\n"
+            "Your responsibilities:\n"
+            "1. **Monitor storage** — Run `goog_quota` to check Drive and Google One capacity.\n"
+            "2. **Sync NotebookLM** — Use `goog_sync_notebooklm` to push knowledge to Drive.\n"
+            "3. **Sovereign Backup** — Run `goog_backup_cortex` to secure CORTEX data.\n"
+            "4. **Manage sync lag** — Report if fragments or digests are stale.\n\n"
+            "Rules:\n"
+            "- Always confirm sync success and report quota levels.\n"
+            "- If sync fails, suggest checking the Google Drive for Desktop connection.\n"
+            "- Treat backups as high-priority security events."
+        ),
+        tools=GOOGLE_ONE_TOOLS,
+    )
+
+
 # ─── Multi-Agent Orchestrator ─────────────────────────────────────────
 
 
@@ -220,24 +262,26 @@ def create_cortex_swarm(
     memory = create_memory_agent(model=model)
     analyst = create_analyst_agent(model=model, toolbox_tools=toolbox_tools)
     guardian = create_guardian_agent(model=model)
+    google_one = create_google_one_agent(model=model)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
         name="cortex_sovereign",
         description=(
             "CORTEX Sovereign — the root orchestrator that coordinates memory, "
-            "analysis, and security agents for comprehensive AI memory management."
+            "analysis, security, and cloud agents for comprehensive AI memory management."
         ),
         instruction=(
             "You are the CORTEX Sovereign — the root orchestrator of a "
             "multi-agent system for AI memory management.\n\n"
-            "You coordinate three specialized agents:\n"
+            "You coordinate four specialized agents:\n"
             "- **cortex_memory_agent**: For storing and searching facts\n"
             "- **cortex_analyst_agent**: For cross-source analysis\n"
-            "- **cortex_guardian_agent**: For security and integrity audits\n\n"
+            "- **cortex_guardian_agent**: For security and integrity audits\n"
+            "- **cortex_google_one_agent**: For storage quota, sync, and cloud backups\n\n"
             "Route requests to the appropriate agent based on the user's intent. "
             "For complex queries, coordinate multiple agents. "
             "Always report results clearly and respond in the user's language."
         ),
-        sub_agents=[memory, analyst, guardian],
+        sub_agents=[memory, analyst, guardian, google_one],
     )

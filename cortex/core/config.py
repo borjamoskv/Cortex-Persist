@@ -12,6 +12,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 # ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
 from cortex.core.paths import (
@@ -87,7 +88,17 @@ class CortexConfig:
     # Stripe (SaaS billing)
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
-    STRIPE_PRICE_TABLE: dict[str, str] = field(default_factory=dict)
+    _STRIPE_PRICE_TABLE_RAW: str = ""
+
+    @property
+    def STRIPE_PRICE_TABLE(self) -> dict[str, str]:
+        """Lazy parsing of Stripe price table."""
+        if not self._STRIPE_PRICE_TABLE_RAW:
+            return {"pro": "", "team": ""}
+        try:
+            return json.loads(self._STRIPE_PRICE_TABLE_RAW)
+        except json.JSONDecodeError:
+            return {"pro": "", "team": ""}
 
     # Notifications
     TELEGRAM_TOKEN: str = ""
@@ -153,9 +164,7 @@ class CortexConfig:
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
-            STRIPE_PRICE_TABLE=json.loads(
-                os.environ.get("STRIPE_PRICE_TABLE", '{"pro": "", "team": ""}')
-            ),
+            _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),
             DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
             CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
@@ -178,11 +187,20 @@ def reload() -> None:
     # Update module-level attributes for backwards compat
     _module = sys.modules[__name__]
     for attr in CortexConfig.__dataclass_fields__:
+        if attr.startswith("_"):
+            continue
         setattr(_module, attr, getattr(_cfg, attr))
 
     # Set properties/helpers
     _module.PROD = _cfg.PROD  # type: ignore[reportAttributeAccessIssue]
     _module.IS_PROD = _cfg.IS_PROD  # type: ignore[reportAttributeAccessIssue]
+
+
+def __getattr__(name: str) -> Any:
+    # Evaluate at module level lazily when imported config.STRIPE_PRICE_TABLE
+    if name == "STRIPE_PRICE_TABLE":
+        return _cfg.STRIPE_PRICE_TABLE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # Initialize module-level attributes for backwards compatibility

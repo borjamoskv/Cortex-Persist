@@ -1,37 +1,17 @@
-"""Fact Sovereign Layer — FactManager for CORTEX."""
-
 from __future__ import annotations
 
 import logging
-import sqlite3
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import ValidationError
 
 from cortex.engine.models import Fact, row_to_fact
-from cortex.memory.temporal import build_temporal_filter_params, now_iso
+from cortex.engine.store_validators import validate_content
+from cortex.utils.canonical import now_iso
 
 __all__ = ["FactManager"]
 
 logger = logging.getLogger("cortex.facts")
-
-_FACT_COLUMNS = (
-    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
-    "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
-    "f.created_at, f.updated_at, f.tx_id, t.hash"
-)
-_FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
-
-
-class IngestionFact(BaseModel):
-    """V8 Guardrail: Strict input validation before processing."""
-
-    project: str = Field(..., min_length=1)
-    content: str = Field(..., min_length=10)
-    tenant_id: str = Field(..., min_length=1)
-    confidence: str = Field(..., pattern=r"^(C[1-5]|stated|inferred)$")
-    # Mapping 'source' parameter to 'provenance' conceptually
-    source: str = Field(..., min_length=1, description="Provenance / Data origin")
 
 
 class FactManager:
@@ -77,21 +57,9 @@ class FactManager:
                 await notify_notch_pruning()
                 raise ValueError(f"Thalamus: Fact rejected ({action})")
 
-        # V8 Validation Layer (Strict Pydantic)
+        # V8 Validation Layer (Sovereign Gate)
         try:
-            validated = IngestionFact(
-                project=project,
-                content=content,
-                tenant_id=tenant_id,
-                confidence=confidence,
-                source=source or "cli",
-            )
-            # Re-assign validated properties just in case of coerced changes
-            project = validated.project
-            content = validated.content
-            tenant_id = validated.tenant_id
-            confidence = validated.confidence
-            source = validated.source
+            content = validate_content(project, content, fact_type)
 
             # V8 Semantic Deduplication
             if hasattr(self.engine, "embeddings") and self.engine.embeddings:
@@ -100,8 +68,7 @@ class FactManager:
                     vec = await self.engine.embeddings.embed_text(content)
                     if vec:
                         # 2. Check for Similarity > 0.90 in sqlite-vec facts or embeddings
-                        # Since we only evaluate, if the result is high, skip store
-                        results = await self.search(
+                        results = await self.engine.search(
                             query=content, tenant_id=tenant_id, project=project, top_k=1
                         )
                         if results and results[0].score > 0.90:
@@ -116,12 +83,11 @@ class FactManager:
                             )
                             await conn.commit()  # type: ignore[reportOptionalMemberAccess]
                             return results[0].fact_id
-        except Exception as e:
-            from pydantic import ValidationError
-
+        except (OSError, RuntimeError, ValueError) as e:
+            # The ValidationError import was moved to the top of the file.
             if isinstance(e, ValidationError):
                 raise ValueError(f"Ingestion Validation Failed: {e}") from e
-            logger.warning(f"V8 Deduplication check skipped or failed: {e}")
+            logger.warning(f"V8 Ingestion check failed: {e}")
 
         from cortex.engine.store_mixin import StoreMixin
 
@@ -144,48 +110,18 @@ class FactManager:
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:
             raise ValueError("Facts list cannot be empty")
-
-        # Validation pass before any inserts
-        for i, fact in enumerate(facts):
-            if "project" not in fact or not fact["project"].strip():
-                raise ValueError(f"Fact at index {i} is missing project")
-            if "content" not in fact or not fact["content"].strip():
-                raise ValueError(f"Fact at index {i} is missing content")
-
-        conn = await self.engine.get_conn()
-        ids = []
-        try:
-            for fact in facts:
-                tenant_id = fact.get("tenant_id", "default")
-                fid = await self.store(
-                    project=fact["project"],
-                    content=fact["content"],
-                    tenant_id=tenant_id,
-                    fact_type=fact.get("fact_type", "knowledge"),
-                    tags=fact.get("tags"),
-                    confidence=fact.get("confidence", "stated"),
-                    source=fact.get("source"),
-                    meta=fact.get("meta"),
-                    valid_from=fact.get("valid_from"),
-                    commit=False,
-                )
-                ids.append(fid)
-            await conn.commit()
-            return ids
-        except (sqlite3.Error, OSError, ValueError):
-            await conn.rollback()
-            raise
+        return await self.engine.store_many(facts)
 
     async def get_fact(self, fact_id: int) -> Fact | None:
         """Retrieve any fact by ID, including deprecated ones."""
-        conn = await self.engine.get_conn()
-        cursor = await conn.execute(
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
-        )
-        row = await cursor.fetchone()
-        return row_to_fact(row) if row else None
+        raw = await self.engine.get_fact(fact_id)
+        if not raw:
+            return None
+        # Convert dict to Fact model
+        return Fact(**raw)
 
     async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
+        """Lower-level fetch from engine database."""
         conn = await self.engine.get_conn()
         cursor = await conn.execute(query, params)
         return [row_to_fact(r) for r in await cursor.fetchall()]
@@ -196,117 +132,44 @@ class FactManager:
         project: str | None = None,
         fact_types: list[str] | None = None,
     ) -> list[Fact]:
-        q = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.valid_until IS NULL AND f.is_quarantined = 0 AND f.is_tombstoned = 0"
-        p = [tenant_id]
-        if project:
-            q += " AND f.project = ?"
-            p.append(project)
-        if fact_types:
-            q += f" AND f.fact_type IN ({','.join('?' * len(fact_types))})"
-            p.extend(fact_types)
-        return await self._fetch(q + " ORDER BY f.project, f.fact_type, f.id", p)
+        """Retrieve all active facts, delegated to QueryMixin and wrapped in models."""
+        results = await self.engine.get_all_active_facts(
+            tenant_id=tenant_id, project=project, fact_types=fact_types
+        )
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
     ) -> list[Fact]:
-        q = (
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.project = ? AND f.valid_until IS NULL "
-            f"AND f.is_quarantined = 0 AND f.is_tombstoned = 0 ORDER BY (f.consensus_score * 0.8 + "
-            f"(1.0 / (1.0 + (julianday('now') - julianday(f.created_at)))) * 0.2) DESC, f.fact_type, f.created_at DESC"
+        """Scored recall delegated to QueryMixin and wrapped in models."""
+        results = await self.engine.recall(
+            project=project, tenant_id=tenant_id, limit=limit, offset=offset
         )
-        p = [tenant_id, project]
-        if limit:
-            q += " LIMIT ?"
-            p.append(limit)  # type: ignore[reportArgumentType]
-        if offset:
-            q += " OFFSET ?"
-            p.append(offset)  # type: ignore[reportArgumentType]
-        return await self._fetch(q, p)
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def history(
         self, project: str, tenant_id: str = "default", as_of: str | None = None
     ) -> list[Fact]:
-        if as_of:
-            c, p = build_temporal_filter_params(as_of, table_alias="f")
-            return await self._fetch(
-                f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id=? AND f.project=? AND f.is_tombstoned=0 AND {c} ORDER BY f.valid_from DESC",
-                [tenant_id, project] + p,
-            )
-        return await self._fetch(
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id=? AND f.project=? AND f.is_tombstoned=0 ORDER BY f.valid_from DESC",
-            [tenant_id, project],
-        )
+        """Temporal history delegated to QueryMixin."""
+        results = await self.engine.history(project=project, tenant_id=tenant_id, as_of=as_of)
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def time_travel(
         self, tx_id: int, tenant_id: str = "default", project: str | None = None
     ) -> list[Fact]:
-        from cortex.memory.temporal import time_travel_filter
-
-        c, p = time_travel_filter(tx_id, table_alias="f")
-        q = f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.tenant_id = ? AND f.is_tombstoned = 0 AND {c}"
-        p = [tenant_id] + p
-        if project:
-            q += " AND f.project = ?"
-            p.append(project)
-        return await self._fetch(q + " ORDER BY f.id ASC", p)
+        """Project state reconstruction delegated to QueryMixin."""
+        results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id, project=project)
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     reconstruct_state = time_travel
 
     async def register_ghost(self, reference: str, context: str, project: str) -> int:
-        conn = await self.engine.get_conn()
-        c = await conn.execute(
-            "SELECT id FROM ghosts WHERE reference=? AND project=?", (reference, project)
-        )
-        if r := await c.fetchone():
-            return r[0]
-        c = await conn.execute(
-            "INSERT INTO ghosts (reference, context, project, status, created_at) VALUES (?, ?, ?, 'open', ?)",
-            (reference, context, project, now_iso()),
-        )
-        await conn.commit()
-        return c.lastrowid
+        """Register a new ghost, delegated to GhostMixin."""
+        return await self.engine.register_ghost(reference, context, project)
 
     async def stats(self) -> dict:
-        conn = await self.engine.get_conn()
-        res = {
-            "total_facts": (await (await conn.execute("SELECT COUNT(*) FROM facts")).fetchone())[0]
-        }
-        res["active_facts"] = (
-            await (
-                await conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
-            ).fetchone()
-        )[0]
-        res["deprecated_facts"] = res["total_facts"] - res["active_facts"]
-        res["projects"] = [
-            p[0]
-            for p in await (
-                await conn.execute("SELECT DISTINCT project FROM facts WHERE valid_until IS NULL")
-            ).fetchall()
-        ]
-        res["project_count"] = len(res["projects"])
-        res["types"] = dict(
-            await (
-                await conn.execute(
-                    "SELECT fact_type, COUNT(*) FROM facts WHERE valid_until IS NULL GROUP BY fact_type"
-                )
-            ).fetchall()
-        )
-        res["transactions"] = (
-            await (await conn.execute("SELECT COUNT(*) FROM transactions")).fetchone()
-        )[0]
-        res["db_path"], res["db_size_mb"] = (
-            str(self.engine._db_path),
-            round(self.engine._db_path.stat().st_size / (1024 * 1024), 2)
-            if self.engine._db_path.exists()
-            else 0,
-        )
-        try:
-            res["embeddings"] = (
-                await (await conn.execute("SELECT COUNT(*) FROM fact_embeddings")).fetchone()
-            )[0]
-        except Exception:
-            res["embeddings"] = 0
-        return res
+        """System stats delegated to QueryMixin."""
+        return await self.engine.stats()
 
     def __getattr__(self, name: str) -> Any:
         """Sovereign Ablation (Wave 5): Proxy to decouple Calcification."""

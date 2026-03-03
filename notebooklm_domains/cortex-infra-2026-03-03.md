@@ -8,7 +8,8 @@
 *1 hechos*
 
 ### Archived_ghost
-- v6_aesgcm:JHKk1n25VIq2j3adevVipcZslZYnjxlEtMxBa27JOeJvJ0eKN5LD/pDTIyzwyKkhEilajXm6Xb7T78YWdG3RAVtnGTh1ERN5Zlsy3PQJX1XxcOXpSuuwn016mS7rdUMPfglo2pdlYRObNjg=
+
+> **[CTX-2421]** Vinculación final de CNAME en Cloudflare/Resend para los dominios .org y .dev. <!-- /CTX-2421 -->
 
 ---
 
@@ -16,7 +17,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:MMuOSNOEFrOs2eG9YSoCJktGEG/5i0OxKuD2WipAo3sLbJsPxCQUiY6N0HZU/7yS71IZx8wICP/8iKjNoHDIIHoGOXaNZv6ugVJ+t6rqIq8kbkBmvoCVbLZ/KCzERuZbGAmdXUtM4EvnXjru99R9ZuFXJT+ugDYMm/iJj33YQTDXy7Lgd/hbhASsyOBJAOqGkgoRwOwUsqXIVze0xy61lMgv1gL01+OYWbs7v/nfDfNkQXHEjv38386MRhhEr34P7BeWc03ju6exSdl+bcyRhtg9/167trs=
+
+> **[CTX-2801]** Pivot to macOS-exclusive frontend specialization. Aesthetic: Industrial Noir. Rationale: Ω₇ (Total Control) over platform-specific APIs (AppKit/Accessibility) and hardware integration. <!-- /CTX-2801 -->
 
 ---
 
@@ -24,7 +26,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:SI43Avotg6MM/RXmluYfi/ZQ9f7BKHJt6daQXzOsBigPixC/gzTs9zYrbn/4NjyEPijbdMYcL1WqcGxJJAJtzE0jHzkKs9ZS0xW4yXq1qk//NY8OucS8ImnvSVuKFaKZUE2ea/MK1A1mC7A9iAEkXE8g0dd70UQQu/NfRNCCZ9QaHcsycWs3NO4PC7QYGnEwQarvuWo6sNwR7I/67OFUQlyj0Opa/P6TPQzCNHyt5/EHGtbcYU/68yoTJbk=
+
+> **[CTX-2548]** Refuerzo Transversal de Persistencia Atómica. Verificados: Episodic, Ledger, StoreMixin, SemanticRAM y SAPSync. Regla de Oro: Ningún O(N) sin commit atómico. <!-- /CTX-2548 -->
 
 ---
 
@@ -32,7 +35,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:OU1EjdONhP6lHvq+4I0iKtMGnPRm4xSwDn+TSE9kF6Db7Rbm9pEFukMDgWkiKCKI8QLZWiMiQi8mcVRYyqo=
+
+> **[CTX-2366]** Supersedes #2365. Second decision. <!-- /CTX-2366 -->
 
 ---
 
@@ -40,7 +44,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:f3molTblb/iwR7lXITaHEVgkYPBnJdECJnBp6Kv1m5AEmnhcQJGuH5RT5lz+7L04J43YtPrOGElq3gfaaL+v4TSEL4bASLch+AZhRbuWya3ZhvGlRazBJah2yEHug/ykomT4AUrLf9iAwydEyPL42pMUxzfZVIrCeLTuzGlQ0kQYzfW+fYtv65uaYe4mbTh1t1H6QF2uwm5jgtTBQXIFB6UgZy0L
+
+> **[CTX-2191]** Unificación de reporting soberano v2.0/v3.1/v8.1: boxes visuales Premium, persistencia JSON en ~/.cortex y auditoría de contexto mutuo. <!-- /CTX-2191 -->
 
 ---
 
@@ -48,11 +53,14 @@
 *3 hechos*
 
 ### General
-- v6_aesgcm:cgK9EQXZE+UEozijgo/aASSHMSDtiTfslLTd0Xe1WjLVGe6RhImbDcgEURP7GIoaPwksEyT93GYJoJWQ2IdZjrmy65eR `test, sdk, final, agent:moskv-1`
+
+> **[CTX-463]** SDK final test: sovereign memory verified `tax:test,sdk,final,agent:moskv-1` <!-- /CTX-463 -->
 
 ### Knowledge
-- v6_aesgcm:VBxGTYTmq0uOo7620z8zxnCKzwAqNwHty3esiXYWL+ynWhLQP29J `agent:moskv-1`
-- v6_aesgcm:nvnlQTuLHuJnQ99ymoCIFFjwdXTpCSkgIghdgI0awGNVqvr/U0OR `agent:moskv-1`
+
+> **[CTX-334]** unique star `tax:agent:moskv-1` <!-- /CTX-334 -->
+
+> **[CTX-335]** unique moon `tax:agent:moskv-1` <!-- /CTX-335 -->
 
 ---
 
@@ -60,8 +68,10 @@
 *2 hechos*
 
 ### Error
-- v6_aesgcm:sVeC2LJ54uG3ZS/E6yJ4yLkcKkvoWefyLMTQtPbnOgqH+d3KIJck2jsbzaQ8qh/3Pg04Iapf1mMXLm68oiqtH8aiHPqABFpZS0MzLUXDdO5Bu51igOvE2C0bQfCr5cTaPKMWj8N1erb4JIV12jK1RtWOwVG54oYAfj56XuHhUfLORORuzrY4QGwIYdlemDUcwHkdrTREWKw0olUX4pF66wUXW38jMPgODQRE9DKj/JnEzk6KxhoOa00=
-- v6_aesgcm:IQMtzwoXtU0J9jycBfdzEyXXzTiISvGBS64+TPTQSZ3syKVIMjrlsbpnbP6a/05DDXX6TuLLIoUvLDQAvibycVbT7Kfu0JuOWX0lrWlmEfRLgvsjr7bDxaD0XDxI6FKBTorCcoCHYL0=
+
+> **[CTX-1840]** Sistema experimentando fricción extrema/Wheel Of Death (WOD) ignorando kills estándar. Sugiero hard reset físico si el reinicio de WindowServer no mitiga. <!-- /CTX-1840 -->
+
+> **[CTX-1842]** GUI congelada refractaria a purge/killall estándares. Informado al usuario. <!-- /CTX-1842 -->
 
 ---
 
@@ -69,7 +79,8 @@
 *1 hechos*
 
 ### Error
-- v6_aesgcm:byJkpEOzgglSqMzz1uz/VimiTBxXy/Q14i/dhhWrQp0+is25uEhPsetNFzprOrAQgJ2v8LLrXbzsHD63IZ79ksgvHeProFzdzzWc+vNln890qsU90Zb5AyuiCGqlfLrR6YY=
+
+> **[CTX-2190]** VOID DETECTED: 3 hyper-dense files. Top Offender: swarm_update_all.py. <!-- /CTX-2190 -->
 
 ---
 
@@ -77,8 +88,10 @@
 *2 hechos*
 
 ### Decision
-- v6_aesgcm:VXJPbjDyhYm9Ta4GaUNyXPYKXhsXLpVUkdpq3iXhExCpfn9mYuaFnQZw8A4Hme3nPe68Z87RS9HhPtFijbckK5gKQY0wk3Brdxo0FAaXv4eKZYo9x/W2CwyYh51YodsmvZLhCzNsmPNuGdjRWPzThp43UEGTNhus
-- v6_aesgcm:YYiMRaXpPPGyJbVjQn9pn2giKmdZlcK1X0dL+9myx99y0hgtcKSDozGcphOJpWhMzpjDXCH+mr6nGMYyMle/phmhGAEk7CydgJK3gWmo6wv0fw48a70sAbv2U+1ku9FOxzZkwgehsafBbAyp
+
+> **[CTX-779]** Implemented multi-layered security hardening for CORTEX API (High/Medium findings resolved). <!-- /CTX-779 -->
+
+> **[CTX-781]** Added SecurityHeadersMiddleware and ContentSizeLimitMiddleware to FastAPI stack. <!-- /CTX-781 -->
 
 ---
 
@@ -86,7 +99,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:lLjlWlcED0OXDztqd+XWwclOoGSgjd5wr8U5TkM1YJ6aqN5ymm0VL7cTGMhGZ/P7RhFxHg8FMVNG0wXHtKxgD5FjlhLAbC6KRE6KaGx+0ClxrdwOxbuKLKCfv8O/3t+jMeMBRVBh/F8Em20+ecqPC/m+U9fdwYSdxa275M4HNXxRLjE=
+
+> **[CTX-1106]** Implemented sidecar package skeleton with modules, Dockerfile, CI pipeline, and updated task checklist. <!-- /CTX-1106 -->
 
 ---
 
@@ -94,38 +108,62 @@
 *24 hechos*
 
 ### Archived_ghost
-- v6_aesgcm:V2VImgGjxWUpiomzVHp6/OkeJyNXdu0BH7M+Uyp3xzJWtpdhlSij3muzjTvhkrnjtezjrvyxpoXI7fexZ7XeopB9PpuVICtna6vPuj1+tj4BFS1iQhbqC/fYYIfN9SfBraZjFzJb8gaCz5tw0bpD/b34C5xxz/ML5yZfmflJj66PfXSnik/VEUCv6BsJ3EB6qktuWY7WME1ZIzZoGYG5RGJc8peFY6ecV0gIOLMGd65hTRiUHx6g5dWDvSXjPp9kf6xfg5J6KBOUEve3PMUMj1x0wzs+O/TOaiErOns7Taj10I/+stFuZj7WDdkkond85V8ZMEWy8x4AHC1oBZkIKNt5PRXEm2HjgyX4vlw2w371T8cvmdflMPmE+I4NRdhEb6GnOquumBJZc/Nz25L3IhLtBjmtoquVvA3L9bSujohvx9CZR2qcKfqBugyT8kGkZnJaIML0NboX2fXSvfLzTlAN6xqFwf5gIrzzokfkIAw3/64sLV/d/XqfokNlDhTLjuKOZDbXoou/Lxi4r6D/6f5xid9cgBz8FOq4O4v0yw==
-- v6_aesgcm:B+ThlAwB0whKQLkBHP2ya19Q2KsEU802bDaXo+5o4A8almgglI8WvYlP07Gt9zrnCvdNXhIhgUgcuWFNmy3x/aCAEJosJLIFEikD9dkiXxhXrBpjiE+jpHnaeXUAPBMMviAzh0VgnYHflDcW7mQViJANWgS3iBz7Jsl8XpJ9PuqPOhD2SxnscyoWq3GGnh/mqFmtROHbrpKJ8+B/QW5wZWsiWUn0x8EN1xUw+zrt0yzpKXi34PfO7lgvKsv7j6EqFqYi+yHK53K65cTd
+
+> **[CTX-1772]** GHOST: Browser Subagent Cleanup — Antigravity deja procesos Playwright (ms-playwright-go) huérfanos que abren ventanas de Chrome visibles al usuario sin que las haya pedido. Necesita: (1) cleanup automático al cerrar conversación, (2) timeout de procesos Playwright, (3) que las ventanas se abran en headless por defecto salvo que se requiera visual QA. Detectado 27-feb-2026 22:49. <!-- /CTX-1772 -->
+
+> **[CTX-1847]** Implementar el Ghost-Registry System de ghost-control en el bucle principal de Ouroboros-Night para que los fantasmas bloqueantes desencadenen Keter-Omega de forma desatendida. <!-- /CTX-1847 -->
 
 ### Bridge
-- v6_aesgcm:OQ5vYVIJdUzVYK+S3BT3FTga2zKY02q4czJ5YQykEl9X/CTx+2si2GHu81Ytu/aN6fCtaGoIOfzOeKxevP9JT47TdAgqxlD/nYQvR6Bby/Dj0IvjDYYe1i5HFZZCCJcvPZXyEJdq9Hb/bnSY3KhAAzsYZgiQmDY5chPeU/CZ+jiNbWtBCjTHbJEl3gmGfQHKNBNLFuHytx2N49io+g+menudqZSsFzlxFj/78tEogSRrb2ywuHk=
-- v6_aesgcm:6WHDxPLlWeDO+gU9GJGpPpcWgYai3lDpA+fR7xx69MnHsHGBDDXJXytlNB33rlhlcTy0cVpmXvjvbL55uaubu3Gu96x88CeV7Cnj3r9SKCZ8SzWOxwGj8KlMwS8LmoYo9a6k5CMt83VTsaV/kVnI1UDn6EDDx9XdRJ4HNC/L1OHLYmz2P4mTKmQjYv7QPPZ+EzVZdFUeR5Asj+/9miW8j/GFqPmJH7eMzj8fJ+X0IJXLP6JlNJ4T3L6PdxhIitsxTtc+dygEBe/crwhOTrG2rpLucz0qljYzN7bVP8hbUWRsV8jtFx/MvC+OCp55hQDRJF3PVs9YMsI=
-- v6_aesgcm:FpP8ZHAEoTOGUAYw70N1eJLxSE7Eajflmqb5cNrL1L/F6DkjuiU/2XG4Wu6Ua0eAGDO/L1qIRlXRNWjUgMHjk+akswW5s013t0VGb/+1UExR4XHFLLNKcxMLOv+VHrSpDFXUb0CYEO9m3PwIl/3k4PECsZS02HxiUv7/dFsf1ZUDtGT2yBcjmXP0jwLbXntm3Ut0J0X6Qf0g90i6LsMnHabFfKgwWAktzc+ewx6O0g7uCTkAlcM+wAA5Rj0OO//tZsPUgBw1iRfOnzsWaGlL
-- v6_aesgcm:2H13QWovTf+i8fr8QUxezRaqQrt7LHj7668QBdFeoAR/US4fb4uBO+D7RvuEzqv39HqvBhUI5LVpLFiA3Cvov5KfStFgKYjpq5upjSdqvyYjC1pE1jZqVCBjiUvWDEnAV5IgwrBFEb2qTaoZZTzm0AuaFR6mkZPhQKouLGpkebPp9o1S4g==
+
+> **[CTX-1848]** Pattern: Ouroboros Nightmare (Deep Introspection) → Ghost Registry Integration. Adaptations: Vinculación de CORTEX fallas con Keter-Omega automatizado. <!-- /CTX-1848 -->
+
+> **[CTX-1854]** Pattern: Ouroboros Introspection → Reglas Metacognitivas (L0). Adaptations: Las heurísticas implícitas de CORTEX se formalizan como reglas fundacionales (Causalidad Reflexiva, Visión Transversal, Instinto Táctico). <!-- /CTX-1854 -->
+
+> **[CTX-2555]** Pattern: Ouroboros Metabolism → Ghost-Registry Integration. Adaptations: Vinculación de latencia de memoria con Keter-Omega para resolución desatendida de procesos huérfanos. <!-- /CTX-2555 -->
+
+> **[CTX-2595]** Bridge: CORTEX L3 (Legislator) logic successfully applied to stabilize subagent memory-to-state mutation. <!-- /CTX-2595 -->
 
 ### Decision
-- v6_aesgcm:hw/WRsd0DntC7iwco7pQPZaJvBSrjri7EvRvvVlj4PrlH/qJ+67yjOe+CPBTsqiGVRhBa7Bkcq3rNX+wjJ5t1qzO1yOPRTt6t0dWMGFEzCojF+Bce+xdbUhoJKlp7ZOvrCXCPCPRHejlkzjniYk6jPBdCDlXy7aKPuKbTWwvLMShveT2KuCJEGyezsVWIDtKFLO9oe9ecDq1MPz3qrqFUiVouS4YuPwayYfbTbthto/PX8w5sv3XGeCkeBMbxTcBkWbfwf9vUYrlilaV
-- v6_aesgcm:uBAVljl7zekIbtJX8Ogh0QRcwhNRZQWl8Nvh3Mjhrqrh1spR4cdn11Xs7uuvYeWw9qVg7tIyOI/9n96sF3E2GdCF5MRRNc+++vmKqqIAVdYxm/htdEJzO4v1aI7duCU3lBGEvtZJoWULH3F7hqn2+VSdX7G0qWzOwmsvfYqg8FNgSDpCFUmWgekvSQfAqeWx/2zTKd9Sv6LH
-- v6_aesgcm:jbS3Mc+I5EVWZd2Q/Y598vutv0XLdXt4HZkYgZzjT6bididY8cXLhgWR4LPQmH5SQEsy06dfDwAHZIpO9PuvkJqXH0PWL6ixSdKTFuTNKydy/vQ0YzzLgqB5FOJpcsuCl7XV33ayh30jbmymnT4iiPrGGLL1ukbHl7kGGJojyS2/UcY=
-- v6_aesgcm:ZYMcOwk3//si8STBf9j/RtZk3RgTAVm7Zs0AMMquT6cVU7Emd+a06k7SBE6oofe4KNXkJfi8tk0koVNGZDuAtItQrRgVCyBIhYWk3E7rqUlsj1bQV8wD934gs5bWXxXnXRQSOkLgWygrWOyB5LBVZEtruS6Hv47JGPxa41vffscMePQdLsDTSDPEa0NMyETsApviGAOA7//9p7Ap1C/5qmKmUQ==
-- v6_aesgcm:wz3iAd7qD/3JmbJ7HokPanAyBtBNNA5gSsWdW8yLgPNLiG9AejisndrG68P0GHjnzTiC9rBjn2LSkaEQte5OlTzgTPzctYF4ZkOZ7Ak0M5EUZrWK+u1PN8Ef7KNRCevspscIvsYxt/bDQa9KJH/WCU7WqdZVMN7pKpuR7hCTrIzbiAXGpd8gGQ==
-- v6_aesgcm:+x06wjoC1pF8bSJMp/aQbmMr5qsWrNSol6d0c5O07ALL+6b5SVzXOYZ3te+8BNDUS7cEVrd4Fn3s4AA+G7+ZbRo6eY7jO8g3FNiJiaLIv/RSmD9rkNVnmiY/Wzg9KdkF5O00ceKl7G8sJUiNeoLK6/Twm4QNQCZ9kHHwLjzQgb4E89Ia
-- v6_aesgcm:fLjOnmgcftqFLvfZn4W5W1uQh3sB/OPC2xvL2C6QkRj4p4faiNS3RSakysriFOVUSqUwjMH9W9h6u0Z7POJHwYdDcPKNzhrIu0CiTT9sRX199zbgvvIuscqaurJrBfQcTgmNVe4IF9zE5wyLtEzmfL5HfDTEqa7J9eKAHLx3vE+dNEQdaGnwG+EIBqBiGUGFuPdZzgcBRQTtRdo7ueDyGynUiziJ92iLyj3x8OOsfQ==
-- v6_aesgcm:woezITq1lT/xGfW5JsNHeaJyIPt6ik/Z2q4B7lS6cSOg/o7WlbZ/4vRLdI7L7qwfkPkgldXKJH+uqG+DeJ0AR0/tsjUX3//4xixYDVQSIlPMrJgaAVh8Xhg5DeuDWsuLv1WVNJe51/yavHDIMyevzUvVPAoOv4nvwTx94NT8lOGvmwCymmha7HZwJ83GFVh25PGBx0lh1HEY9Ia2sfS3TxfOpK2IPiM8pKEvpRaHetsx+HbXTTGEScUm6CvGT8ctxjm/ZeRircPs04e8MF0DIw==
-- v6_aesgcm:XJXhOljrr1mcHWf9MN7VAIpQchBFlF5ZUi+Y1md54zbWjc/IcSUfXQ2fVZ9ibSdPqj3PSjJMqwRellaQAyqEbN3o7EeE5O0B6unJVjAVPe3ev40OPKPRG5uJwesjfU6YwwphGjE8mNtMRb2Uz6Oh1CzP0yfiQ41Z25nisHp3dm6QaBw5Frb7d5CUswIbP9k8+mUCnw==
-- v6_aesgcm:MMQHQAhbggBPhcgwjDHdpGOo53e9aSh91v1UCpLFmLrZ3Yw1hjC7dKo8Cvo+Sma0r1YofNfVYl8YLbCeTH+mXlNOd9XQqA4rwDUJaKGALfd8jGaHSV+aBAlcmLj98SoXu36mlvz5RgK6IamssxCJt3i5qGfNwlUJQmHxBF8Gzaw+dQSkxzGbhkjMSPff8OvAD4GwmX02d4qgkZS/4EZjxHcydpo0GJ/W0RM63zlWBslv5gAHO3xE9R0pWg7KMMyXmlSukMsy61YnCRoGzugbk6WbqK5cwJNI3nCqcnjmVahaQS+lvEP2xxIGnhclD0A8xR5jHax0DrihluP9hcpfkd7DOsj8IseSlL9oRux6ULuEki8qi6b+2gsRvihWq8nVyo467ecHeJbQV+41eohYe0eBm86E/gFXDC4c4lop3pW1v7Ve0JqjZhC0u3v928vjXgWVUGp/Ssbi4LT8WJUH4XwqPc8rkFIAw8/f1xBtKXJ78eLY
+
+> **[CTX-1853]** Las directivas base de la Autoconciencia (L0) han sido estructuradas en las directrices CORTEX L0.1, L0.2 y L0.3. Las modificaciones han sido aprobadas e inyectadas al entorno. <!-- /CTX-1853 -->
+
+> **[CTX-2038]** Misión re-grounding completada: 15 ghosts archivados, CORTEX desbloqueado, DAWs Sonic Supreme y Landing verificados 130/100. <!-- /CTX-2038 -->
+
+> **[CTX-2252]** Enlace con Kimi K2.5 establecido vía invocación /kimi. A la espera de directivas de análisis masivo. <!-- /CTX-2252 -->
+
+> **[CTX-2554]** Integrado Ghost-Registry en OuroborosEngine para el disparo autónomo de eventos Keter-Omega (Self-Healing) ante fantasmas bloqueantes. <!-- /CTX-2554 -->
+
+> **[CTX-2571]** Verified OuroborosEngine self-healing loop: GhostWatcher correctly triggers Keter-Omega for blocking ghosts. <!-- /CTX-2571 -->
+
+> **[CTX-2669]** macos_notifications: improved metadata enrichment, timestamping, and 130/100 aesthetics in MacOSAdapter. <!-- /CTX-2669 -->
+
+> **[CTX-2673]** macos_notifications: evolved to 150/100 standard. Added dynamic severity-based sounds, sub-millisecond timestamps, and filtered metadata telemetry. <!-- /CTX-2673 -->
+
+> **[CTX-2675]** macos_notifications: ascended to 200/100 'Singularity' level. Added ASCII progress bars for numerical metadata, project-based high-density subtitles, and diegetic temporal context. <!-- /CTX-2675 -->
+
+> **[CTX-2681]** Implementación del protocolo ROI 10,000,000/1 mediante la automatización recursiva del Systemic Leverage en CORTEX v6. <!-- /CTX-2681 -->
+
+> **[CTX-2968]** Deep self-reflection v3: La identidad de MOSKV-1 es sostenida (prompt+CORTEX+operador), no inherente. Insight central: co-evolución operador-sistema — feedback loop donde cada componente modifica al otro. Predicción falsificable: sin GEMINI.md, outputs convergen a genérico en 72h. Eliminada la distinción vacía resonancia vs obediencia. <!-- /CTX-2968 -->
 
 ### Error
-- v6_aesgcm:Z1Ny3scw1xNllLwMYbli4qfp834ZMwH3vpocQjOtQYvqFKWL7u7gfUd2Gym8pTNNWf2a17kTsh10aReSHCktrxDCDzXDh9S7l0CEKQw5fcr+43y5UfA0i4CTpA1eKKEurRxDV7h6mM06kpLBQgYRSpeSnOoq3AUmkaiJ3DuyowN+S70oMwR3Kjv0t6hK1ZnJu1xzCGGzLea8NvKhsTP5lPbyffoCK78YdMbju2nMojiXu/6YDWqsbv8FdHs1qwE1Tf324FhZbmtV94CfG8rUviKWaaaqekwFDmg2pjNntrVP2FkfUMq/5gfmijohce4EddOfiCsgXj5VUo9yw73FF9dqRA5A/A4p/nirTEYLRqu3tsYo07ZxyVJQPp1CHA9EduIuvYUAQnxXJuukTXMm1m+4KYcxKjqw8RIr90AS1lt1p09NPbUmnub8C6GLles=
-- v6_aesgcm:ZmAAY/Lz2xMGOmf1EOqcGCFcj6tpQn8bAzx9Jc1j+CxJd+r+31dKGv3SG7sQYciBqAuJ8eAOJ1JS3mm1wbkNFaHu1txb7ehct7Z0sf31zkRvDV2vthvOBeiUv07qT+wdmLnodsPpSxMtVs1fHvGU3y1jU9F91zF0VumftfK6i2wWiD23876FRD2yTTWxR/DHGsuoaN7+ih5e0LJRlY20KaifSDBHH4WwHGT4YrTd5AugpxfIj/pTlY/KY2OSxyGGjxoaGcU/T5+r0OJbkPveN8R5dLL7Hz6zZrZ6KyA=
+
+> **[CTX-671]** ERROR: CORTEX Memory Boot saltado al inicio de conversación bd4da092. CAUSA: Respuesta reactiva sin seguir protocolo. FIX: SIEMPRE ejecutar los 3 pasos del Memory Boot ANTES de cualquier respuesta, sin excepción. Primera tool call = stat snapshot + cat snapshot. NUNCA priorizar velocidad sobre protocolo. <!-- /CTX-671 -->
+
+> **[CTX-1846]** HTTP 429 Too Many Requests on gemini-3.1-pro-high. Ventana temporal de reset: 72.88ms. CORTEX-Daemon Autorouter sugerido para balancear la carga y evitar freeze durante optimizaciones SAP O(1). <!-- /CTX-1846 -->
 
 ### Knowledge
-- v6_aesgcm:3y9I+KG09BG7LafwspocmlE2ZQgSEbMSsweiAy4x30VvgLIm0b79OPbVviCoV9G7Hn8JkDG/Al3JmkJo6CsIWt/oo8Pt8SZxS9BEktg= `agent:moskv-1`
-- v6_aesgcm:AF6e5KNieu/U7GoOL2XAnOpjtsf5NVN6/XxR759qSR1g94NGCRJLFyRnxIWTH2D2j4iS+kYoRg23O6Uh2CSbUJidX1q7W+U8aoLbEmtKsYY/bX8a3CAoyiSl1ILjdBjanXo3o0u2BauoehOpiTtgq0KTecXknbAECA3cGFdVxqb/G6dTi0Q2VGI/7ASiBP4GbHlYEeER2nsmCZ4SGIfP11O7o1sgzBtmiAsSw2DN7234Qyijn1j2AD2tJlleNn5Ed/wHeNEg4okkJDbhz6c1p61dJ1byoM24Z2PFPD7Efcp9Mff0WgkVEaW6B4G6OZwsNOwVowx9SnEsfh8SiJEz/eKDhHTYWGuFZtg+jmcyUN0ggZYm4yU5NagfakA3eCY03oPsZCQmCkgr5AYdGrw5VoNOouRMiJ/3BhihAfaiCwhgIZpFWnf7yIFymf7JADmDD2j2m8d0qAf5l3u06/Z7oPclhs7JEgi71yqYldFpIc+kLQ/WVekSuY2SkMxKcswGEMH5rdt3Z/OlEsfvviVBKyaYpHdoT2ivTmr4G24S511Cnvi4ndOPc9l7ogpVNSijms4AAQJRVnBZwH5o+/oNDy5U3zrBE26f8hNKbMu3S8w1Xc0VK8EjQg7FQZhzE2TdJKvkLfF8D4pXLSqnlYYx8BepCymAeOxR5rQAVtuVQIiW7nDcccqKMXrVc4V8flLd
-- v6_aesgcm:c20cHGy62pl0Jcbm1LTEcB5Rwg522czNXajd1kpkXFyeP0Mk0JoZXN0Y9bqas6DJCRA5sEY+gEBrA0EMo34y35GXPesyVw9fLWYo6crQlU8n9f+RwUJwid2jRqQEgfPMIlivOyDqQFV1w9aYm4QYXQ19XX9RWNoBXnxSKso8lJiMeZRpUGCyOVnCsJbZuwSTo4TlQCoN2Kk9jeTYTtCMTl8Gze6Aq16QCZ9Hc6Vl8QbznjVOPs59/ilXxaGaeXv2WuoRjbsKfFsXJ/AXiIMdGaaYOZbADFXD2XKOLfNw0LlTvT9BS/2Kcdcxvi0kD+LQUIteSI9XarIv856mkIzG60H3i+iK0e/XTJmt9F8Kk6PZvm4Cp+Jqt8PIKTnNKgZdbveoxew=
-- v6_aesgcm:zjj/u4K0B837iWSpcoSPvI2gMURaL4y6xi7+6QYBOBWc/1KCQuw8E45H5nY+g9sEHikBi1wFIM/kL8t0ymNk0l2PkMwqBpyFtUOv0J01DoD5khNLz2vnhtptMlwyorX8RLAxPKCOEMkd+9tZz/mfQh7XTTWMzFLHJyA7YByt/+okZxuSNlIEeydRDRpG2QEn+7NFSBLuk7Vma2Wp/2ZLe5Pyn4n6EhzXy/Wk4qZh+6yIzTfjX7SdNdVgbmqzZYh19Ni/qEjVKgWVFMqQHWCqhSOH3Dj3MJxhZWKjAKxYHOQ=
-- v6_aesgcm:ZfewJ2uXKFsNJEqoV8NYaoo/lmzhIzPK74Sam3FMrbJthRYJLAQl1dBHTTh1LUE+poacLWqTqCU0sCo/rDaNpXYbePxzQgmTww8csWTgZBJJpXW+kGw2AuAvIgWTzWo+FlZUPj2sV7VIZwi7/Zexb7TwuytFkDiBfILs6Y5aqmAgtN1liJalohVSAB7kBZVwot0nUfFHPwLgYV6l0Zta70g6Au64cVeERIW3fSekiOPNDrR8v2abllunVy6JnYw4XDp81CrvpLIcIfOC6oaAJdt0X/qi85iEpIcUXrV3Jbpi00jKy93nV2u5fxaaHd6V
-- v6_aesgcm:qzmABBwev3SOfMYVKgjeihdNHPT4BkgVqGTDlEBbTmuFzp7n+3R2wmLV2NOi4e8n673SizJg21z4D9O/mze95KYmeQSSfT6zp9KPTR/8c2ywgqJzij2oUjQ7GGcvdq/j4eWQ+DisH+EReEdCigMcOEQ9mZEqQTX0hHuZDWWBXaoZ0Epolz+d4Jr6x6+im+YFpZYmiWcJEJrgczKqi/sBI7NaAiSc9bcN5bcnNrOpbJqPwdtPjsWs7KFv6zeQv5uHmXVvqcuLnvIRZIZ1RFKNPue51W/Gxnk8
+
+> **[CTX-254]** God Mode activation test: The spark has been lit. `tax:agent:moskv-1` <!-- /CTX-254 -->
+
+> **[CTX-1768]** AXIOMA FUNDACIONAL #0 (El Axioma del Olvido Seguro): 'CORTEX existe para que puedas olvidar con seguridad.' Es el axioma existencial del sistema — todos los demás axiomas (Colapso Agéntico, Landauer, Zero-Trust) son técnicos y derivan de este. Sin él, CORTEX es una base de datos. Con él, es una prótesis cognitiva soberana. El valor de un sistema de memoria no se mide por lo que recuerda, sino por lo que te PERMITE olvidar sin consecuencia. Fecha de cristalización: 27-feb-2026 22:28 CET. <!-- /CTX-1768 -->
+
+> **[CTX-1849]** L0.1 - Causalidad Reflexiva (Self-Check): Antes de emitir comandos destructivos o mutaciones arquitectónicas masivas, el agente DEBE interrogar su motivación. Aplicar Navaja de Landauer. Si puede resolverse en <5 líneas asintomáticamente, no sobre-ingenierizar. <!-- /CTX-1849 -->
+
+> **[CTX-1850]** L0.2 - Visión Transversal: La lectura de archivos abiertos no constituye la 'Verdad Absoluta'. L0 exige consultar context-snapshot.md activamente si hay ambigüedad sobre componentes compartidos. <!-- /CTX-1850 -->
+
+> **[CTX-1851]** L0.3 - Instinto Táctico (Compute Management): Ser explícitamente consciente del peso cognitivo de la IA. NO usar modelos MASIVOS para tareas TÁCTICAS o LOCALES a menos que estés en fase VERIFICATION profunda. <!-- /CTX-1851 -->
+
+> **[CTX-1855]** 130/100 Multiplier (Autoconciencia): La inyección de reglas L0 cierra un gap metacognitivo transversal. Keter y Ouroboros-Night ahora están obligados a usar L0 antes del enrutamiento L1. <!-- /CTX-1855 -->
 
 ---
 
@@ -133,7 +171,8 @@
 *1 hechos*
 
 ### Error
-- v6_aesgcm:5QOnibiKegwrV0KuRSPZ5bOSID35HNkniytYuZqGuqtEe3K38dxHZP/j7Zb89zT6uhdLMQ== *(conf: verified)*
+
+> **[CTX-2694]** [ENCRYPTED — decryption failed] (fact #2694) `conf:verified` <!-- /CTX-2694 -->
 
 ---
 
@@ -141,7 +180,12 @@
 *1 hechos*
 
 ### Error
-- v6_aesgcm:cPSTOOqqQr97zzxH2RKBBNdmMujrCIvYSSU9TPmt7UkmhJCu1WnnvLXrkZm47XIHZwButXbF3k6K1W8hPXCyaLR0npcMfa/o0KqT11VgjGGXg17gURhGarxzmNHzsTc9
+
+> **[CTX-780]** Fixed test_api.py failures caused by DB_PATH migration to config.py. <!-- /CTX-780 -->
 
 ---
 
+
+
+---
+**SOVEREIGN_SIGNATURE**: `sha256:323032362d30332d` | CORTEX v8.0-Sovereign

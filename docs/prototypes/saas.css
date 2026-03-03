@@ -470,3 +470,65 @@ h2 {
     opacity: 0.85; /* Increased opacity slightly for the darker background */
     mix-blend-mode: screen; /* Helps blend with the noir aesthetic */
 }
+
+/* ─── Fast Checkout Modal ────────────────────── */
+.checkout-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s var(--spring-snappy);
+}
+.checkout-overlay.active { opacity: 1; pointer-events: all; }
+
+.checkout-modal {
+    background: #0A0A0A;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%; max-width: 480px;
+    padding: 32px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.4s var(--spring-snappy);
+    position: relative;
+    overflow: hidden;
+}
+.checkout-overlay.active .checkout-modal { transform: translateY(0) scale(1); }
+
+/* Accent glow inside modal */
+.checkout-modal::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.checkout-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.checkout-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+.checkout-close { 
+    background: none; border: none; color: var(--text-dim); font-size: 1.5rem; 
+    cursor: pointer; transition: color 0.2s; line-height: 1;
+}
+.checkout-close:hover { color: var(--text); }
+
+.checkout-plan { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.checkout-plan-name { font-weight: 600; color: var(--accent); }
+.checkout-plan-price { font-size: 1.5rem; font-weight: 800; }
+
+.checkout-form { display: flex; flex-direction: column; gap: 16px; }
+.checkout-input {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    padding: 14px 16px; border-radius: var(--radius-sm);
+    color: var(--text); font-family: var(--font); font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+}
+.checkout-input:focus { border-color: var(--accent); }
+
+.checkout-btn {
+    margin-top: 16px; width: 100%;
+}
+.checkout-footer {
+    text-align: center; font-size: 0.75rem; color: var(--text-dim); margin-top: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+

@@ -3,6 +3,7 @@
 Prevent circular imports by centralizing base CLI objects.
 """
 
+import asyncio
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -31,6 +32,7 @@ cortex_theme = Theme(
 
 console = Console(theme=cortex_theme)
 DEFAULT_DB = str(DEFAULT_DB_PATH)
+GLOBAL_CLI_TIMEOUT: float = 45.0  # Chronos Sniper: No CLI command hangs indefinitely
 
 
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
@@ -53,8 +55,8 @@ def close_engine_sync(engine: CortexEngine) -> None:
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
     from cortex.events.loop import sovereign_run
-
-    return sovereign_run(coro)
+    # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
+    return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
 
 
 def _show_tip(engine=None) -> None:
@@ -107,6 +109,7 @@ def _detect_agent_source() -> str:
         return explicit
     markers = [
         ("GEMINI_AGENT", "agent:gemini"),
+        ("ANTIGRAVITY_SESSION_ID", "agent:antigravity"),
         ("CURSOR_SESSION_ID", "agent:cursor"),
         ("CLAUDE_CODE_AGENT", "agent:claude-code"),
         ("WINDSURF_SESSION", "agent:windsurf"),

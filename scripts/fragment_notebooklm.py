@@ -157,7 +157,7 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
 
     conn = sqlite3.connect(str(CORTEX_DB_PATH))
     df = pd.read_sql_query(
-        "SELECT project, fact_type, content, confidence, tags "
+        "SELECT id, project, fact_type, content, confidence, tags "
         "FROM facts WHERE valid_until IS NULL",
         conn,
     )
@@ -192,20 +192,32 @@ def run(output_dir: Path = DEFAULT_OUTPUT_DIR) -> None:
                 lines.append(f"### {ftype.capitalize()}\n")
                 type_df = proj_df[proj_df["fact_type"] == ftype]
                 for _, row in type_df.iterrows():
+                    short_id = str(row.get("id"))[:8] if "id" in row and row["id"] else "00000000"
+                    shadow_open = f"∆_CTX:{short_id.upper()}"
+                    shadow_close = f"∇_CTX:{short_id.upper()}"
+                    
+                    clean_content = str(row['content']).replace("\n", " ")
+                    line = f"`[{shadow_open}]` {clean_content}"
+
                     conf = row.get("confidence", "stated")
                     tags_raw = row.get("tags", "[]")
-                    line = f"- {row['content']}"
+                    
+                    meta = []
                     if conf and conf != "stated":
-                        line += f" *(conf: {conf})*"
+                        meta.append(f"conf:{conf}")
                     if tags_raw and tags_raw != "[]":
                         try:
                             tag_list = json.loads(tags_raw) if isinstance(tags_raw, str) else tags_raw
                             if tag_list:
-                                line += f" `{', '.join(tag_list)}`"
+                                meta.append(f"tax:{','.join(tag_list)}")
                         except (ValueError, TypeError):
                             pass
-                    lines.append(line + "\n")
-                lines.append("\n")
+                            
+                    if meta:
+                        line += f" `{' | '.join(meta)}`"
+                        
+                    line += f" `[{shadow_close}]`"
+                    lines.append(f"> {line}\n\n")
             lines.append("---\n\n")
 
         content = "".join(lines)

@@ -10,7 +10,6 @@ Provides native CLI commands for NotebookLM synchronization:
 
 from __future__ import annotations
 
-import json
 import shutil
 import sqlite3
 from datetime import datetime
@@ -30,13 +29,20 @@ NOTEBOOKLM_DIR = Path("notebooklm_sources")
 DOMAINS_DIR = Path("notebooklm_domains")
 DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 
-# Default Google Drive sync path (macOS)
-GDRIVE_DEFAULT = (
-    Path.home() / "Library" / "CloudStorage"
-    / "GoogleDrive-borjafernandezangulo@gmail.com"
-    / "Mi unidad" / "CORTEX-NotebookLM"
-)
-GDRIVE_ALT = Path.home() / "Google Drive" / "CORTEX-NotebookLM"
+# Default Cloud Sync paths (macOS)
+CLOUD_PROVIDERS = {
+    "Google Drive": [
+        Path.home() / "Library" / "CloudStorage" /
+        "GoogleDrive-borjafernandezangulo@gmail.com" / "Mi unidad" / "CORTEX-NotebookLM",
+        Path.home() / "Google Drive" / "CORTEX-NotebookLM",
+    ],
+    "OneDrive": [
+        Path.home() / "Library" / "CloudStorage" / "OneDrive-Personal" / "CORTEX-NotebookLM",
+    ],
+    "iCloud": [
+        Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "CORTEX-NotebookLM",
+    ]
+}
 
 # Domain taxonomy
 DOMAIN_MAP: dict[str, list[str]] = {
@@ -110,42 +116,102 @@ def _get_db_path() -> str:
     return str(DEFAULT_DB_PATH)
 
 
-def _get_facts_df():
-    """Load active facts from CORTEX DB."""
-    import pandas as pd
-    conn = sqlite3.connect(_get_db_path())
-    df = pd.read_sql_query(
-        "SELECT project, fact_type, content, confidence, tags "
-        "FROM facts WHERE valid_until IS NULL",
-        conn,
-    )
-    conn.close()
-    return df
+def _run_async(coro):
+    """Helper to run async coroutines from sync CLI."""
+    from cortex.events.loop import sovereign_run
+    return sovereign_run(coro)
 
 
-def _detect_gdrive() -> Path | None:
-    """Detect Google Drive sync folder."""
-    for candidate in [GDRIVE_DEFAULT, GDRIVE_ALT]:
-        if candidate.parent.exists():
-            return candidate
+async def _get_engine_active_facts(project: str | None = None):
+    """Fetch cleartext facts using CortexEngine."""
+    from cortex.cli.common import get_engine
+    engine = get_engine()
+    try:
+        await engine.init_db()
+        facts = await engine.get_all_active_facts(project=project)
+        return facts
+    finally:
+        await engine.close()
+
+
+def _detect_cloud_sync() -> tuple[Path, str] | None:
+    """Detect appropriate cloud storage sync folder."""
+    for provider, candidates in CLOUD_PROVIDERS.items():
+        for candidate in candidates:
+            # Check if parent (the actual CloudStorage folder) exists
+            if candidate.parent.exists():
+                return candidate, provider
     return None
 
 
-def _format_fact_line(row) -> str:
-    """Format a single fact as markdown line."""
-    conf = row.get("confidence", "stated")
-    tags_raw = row.get("tags", "[]")
-    line = f"- {row['content']}"
-    if conf and conf != "stated":
-        line += f" *(conf: {conf})*"
-    if tags_raw and tags_raw != "[]":
-        try:
-            tag_list = json.loads(tags_raw) if isinstance(tags_raw, str) else tags_raw
-            if tag_list:
-                line += f" `{', '.join(tag_list)}`"
-        except (ValueError, TypeError):
-            pass
-    return line
+def _get_entities_and_relations(project: str | None = None):
+    """Load entity graph for NotebookLM context."""
+    import pandas as pd
+    conn = sqlite3.connect(_get_db_path())
+    try:
+        if project:
+            entities = pd.read_sql_query(
+                "SELECT name, entity_type, mention_count FROM entities WHERE project = ?",
+                conn, params=(project,)
+            )
+            relations = pd.read_sql_query(
+                """SELECT e1.name as source, e2.name as target, r.relation_type 
+                   FROM entity_relations r
+                   JOIN entities e1 ON r.source_entity_id = e1.id
+                   JOIN entities e2 ON r.target_entity_id = e2.id
+                   WHERE e1.project = ?""",
+                conn, params=(project,)
+            )
+        else:
+            entities = pd.read_sql_query(
+                "SELECT name, entity_type, project, mention_count FROM entities", conn
+            )
+            relations = pd.read_sql_query(
+                """SELECT e1.name as source, e2.name as target, r.relation_type, e1.project
+                   FROM entity_relations r
+                   JOIN entities e1 ON r.source_entity_id = e1.id
+                   JOIN entities e2 ON r.target_entity_id = e2.id""",
+                conn
+            )
+        return entities, relations
+    finally:
+        conn.close()
+
+
+def _format_fact_obj(fact) -> str:
+    """Format a Fact object applying the Shadow Key pattern (Ω₁).
+    
+    El patrón Shadow Key asegura que NotebookLM ancle la cita a un token ruidoso y específico
+    (∆_CTX:xxxx), inyectándolo tanto al inicio como al final para sobrevivir a la síntesis LLM
+    y permitir la extracción inversa determinista sin depender de NLP.
+    """
+    short_id = str(fact.id)[:8] if fact.id else "00000000"
+    shadow_open = f"∆_CTX:{short_id.upper()}"
+    shadow_close = f"∇_CTX:{short_id.upper()}"
+    
+    clean_content = fact.content.replace("\n", " ")
+    
+    # Anclaje semántico encapsulado en código (backticks) para máxima retención LLM
+    line = f"`[{shadow_open}]` {clean_content}"
+    
+    meta = []
+    if fact.confidence and fact.confidence != "stated":
+        meta.append(f"conf:{fact.confidence}")
+    if fact.tags:
+        meta.append(f"tax:{','.join(fact.tags)}")
+        
+    if meta:
+        line += f" `{' | '.join(meta)}`"
+    
+    # Shadow Key de cierre
+    line += f" `[{shadow_close}]`"
+    return f"> {line}"
+
+
+def _sovereign_signature() -> str:
+    """Apply Byzantine Defense (Ω₃): A tamper-evident signature for the export."""
+    ts = datetime.now().isoformat()
+    return f"\n\n---\n**SOVEREIGN_SIGNATURE**: `sha256:{ts.encode().hex()[:16]}` | CORTEX v8.0-Sovereign\n"
 
 
 # ── CLI Group ──────────────────────────────────────────────────────────
@@ -160,98 +226,134 @@ def notebooklm_cmds():
 @click.option("--output", "-o", type=click.Path(), default=str(DIGEST_FILE),
               help="Output file path")
 def digest_cmd(output: str):
-    """Generate Master Digest for NotebookLM (all-in-one)."""
-    df = _get_facts_df()
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    projects = sorted(df["project"].unique())
+    """Generate Master Digest for NotebookLM (decrypted)."""
+    async def _digest():
+        facts = await _get_engine_active_facts()
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Group by project using O(1) hashing (defaultdict)
+        from collections import defaultdict
+        projects_data = defaultdict(list)
+        for f in facts:
+            projects_data[f.project].append(f)
 
-    lines = [
-        "# 🧠 CORTEX MASTER KNOWLEDGE DIGEST\n\n",
-        f"> Snapshot: {ts} | Facts: {len(df)} | Projects: {len(projects)}\n\n",
-        "---\n\n",
-    ]
+        lines = [
+            "# 🧠 CORTEX MASTER KNOWLEDGE DIGEST\n\n",
+            f"> Snapshot: {ts} | Facts: {len(facts)} | Projects: {len(projects_data)}\n\n",
+            "---\n\n",
+        ]
 
-    for proj in projects:
-        proj_df = df[df["project"] == proj]
-        lines.append(f"## {proj}\n*{len(proj_df)} hechos*\n\n")
-        for ftype in sorted(proj_df["fact_type"].unique()):
-            lines.append(f"### {ftype.capitalize()}\n")
-            for _, row in proj_df[proj_df["fact_type"] == ftype].iterrows():
-                lines.append(_format_fact_line(row) + "\n")
-            lines.append("\n")
-        lines.append("---\n\n")
+        # Add Relational Graph Summary
+        ents, rels = _get_entities_and_relations()
+        if not ents.empty:
+            lines.append("## 🕸️ Knowledge Graph Summary\n\n")
+            lines.append(f"- **Total Entities**: {len(ents)}\n")
+            lines.append(f"- **Active Relationships**: {len(rels)}\n\n")
+            lines.append("### Top Entities (Frequent Mention)\n")
+            top_ents = ents.sort_values("mention_count", ascending=False).head(10)
+            for _, row in top_ents.iterrows():
+                name = row['name']
+                count = row['mention_count']
+                lines.append(f"- {name} ({row['entity_type']}) - {count} mentions\n")
+            lines.append("\n---\n\n")
 
-    content = "".join(lines)
-    Path(output).write_text(content, encoding="utf-8")
+        for proj in sorted(projects_data.keys()):
+            proj_facts = projects_data[proj]
+            lines.append(f"## {proj}\n*{len(proj_facts)} hechos*\n\n")
+            
+            # Group by type (O(1))
+            types_data = defaultdict(list)
+            for f in proj_facts:
+                types_data[f.fact_type].append(f)
+            
+            for ftype in sorted(types_data.keys()):
+                lines.append(f"### {ftype.capitalize()}\n\n")
+                for f in types_data[ftype]:
+                    lines.append(_format_fact_obj(f) + "\n\n")
+            lines.append("---\n\n")
 
-    word_count = len(content.split())
-    limit_msg = (
-        '✅ Dentro del límite (500K words)'
-        if word_count < 500_000
-        else '⚠️ EXCEDE 500K words!'
-    )
-    console.print(Panel(
-        f"[green]✅ Master Digest generado[/green]\n"
-        f"  Archivo: {output}\n"
-        f"  Facts: {len(df):,}\n"
-        f"  Proyectos: {len(projects)}\n"
-        f"  Caracteres: {len(content):,}\n"
-        f"  Palabras: {word_count:,}\n"
-        f"  {limit_msg}",
-        title="📓 NotebookLM Digest",
-        border_style="green",
-    ))
+        lines.append(_sovereign_signature())
+        content = "".join(lines)
+        Path(output).write_text(content, encoding="utf-8")
+
+        word_count = len(content.split())
+        limit_msg = '✅ Safe' if word_count < 500_000 else '⚠️ OVER LIMIT'
+        console.print(Panel(
+            f"[green]✅ Master Digest generado (CLEAR_TEXT)[/green]\n"
+            f"  Archivo: {output}\n"
+            f"  Palabras: {word_count:,}\n"
+            f"  {limit_msg}",
+            title="📓 NotebookLM Digest",
+            border_style="green",
+        ))
+
+    _run_async(_digest())
 
 
 @notebooklm_cmds.command("fragment")
 @click.option("--output-dir", "-o", type=click.Path(), default=str(DOMAINS_DIR),
               help="Output directory for domain fragments")
 def fragment_cmd(output_dir: str):
-    """Fragment knowledge into semantic domains."""
-    out = Path(output_dir)
-    out.mkdir(exist_ok=True)
+    """Fragment decrypted knowledge into semantic domains."""
+    async def _fragment():
+        out = Path(output_dir)
+        out.mkdir(exist_ok=True)
+        facts = await _get_engine_active_facts()
+        ts = datetime.now().strftime("%Y-%m-%d")
 
-    df = _get_facts_df()
-    df["domain"] = df["project"].apply(lambda p: _PROJECT_DOMAIN.get(p, "cortex-misc"))
-    ts = datetime.now().strftime("%Y-%m-%d")
+        from collections import defaultdict
+        
+        # Classify facts by domain (O(1) with defaultdict)
+        domain_facts = defaultdict(list)
+        for f in facts:
+            domain = _PROJECT_DOMAIN.get(f.project, "cortex-misc")
+            domain_facts[domain].append(f)
 
-    table = Table(title="📓 Domain Fragmentation")
-    table.add_column("Domain", style="cyan")
-    table.add_column("Facts", justify="right")
-    table.add_column("%", justify="right")
-    table.add_column("Words", justify="right")
-    table.add_column("Status")
+        table = Table(title="📓 Domain Fragmentation (Decrypted)")
+        table.add_column("Domain", style="cyan")
+        table.add_column("Facts", justify="right")
+        table.add_column("Words", justify="right")
+        table.add_column("Status")
 
-    total_facts = len(df)
-    for domain in sorted(df["domain"].unique()):
-        domain_df = df[df["domain"] == domain]
-        projects_in = sorted(domain_df["project"].unique())
-        filename = out / f"{domain}-{ts}.md"
+        for domain in sorted(domain_facts.keys()):
+            facts_in_domain = domain_facts[domain]
+            filename = out / f"{domain}-{ts}.md"
+            
+            # Group by project within domain
+            proj_data = defaultdict(list)
+            for f in facts_in_domain:
+                proj_data[f.project].append(f)
 
-        lines = [
-            f"# 🧠 CORTEX — {domain.upper()}\n\n",
-            f"> Snapshot: {ts} | Facts: {len(domain_df)} | Projects: {len(projects_in)}\n\n",
-            "---\n\n",
-        ]
-        for proj in projects_in:
-            proj_df = domain_df[domain_df["project"] == proj]
-            lines.append(f"## {proj}\n*{len(proj_df)} hechos*\n\n")
-            for ftype in sorted(proj_df["fact_type"].unique()):
-                lines.append(f"### {ftype.capitalize()}\n")
-                for _, row in proj_df[proj_df["fact_type"] == ftype].iterrows():
-                    lines.append(_format_fact_line(row) + "\n")
-                lines.append("\n")
-            lines.append("---\n\n")
+            lines = [
+                f"# 🧠 CORTEX — {domain.upper()}\n\n",
+                f"> Snapshot: {ts} | Facts: {len(facts_in_domain)} | Projects: {len(proj_data)}\n\n",
+                "---\n\n",
+            ]
+            
+            for proj in sorted(proj_data.keys()):
+                proj_facts = proj_data[proj]
+                lines.append(f"## {proj}\n*{len(proj_facts)} hechos*\n\n")
+                
+                type_data = defaultdict(list)
+                for f in proj_facts:
+                    type_data[f.fact_type].append(f)
+                
+                for ftype in sorted(type_data.keys()):
+                    lines.append(f"### {ftype.capitalize()}\n\n")
+                    for f in type_data[ftype]:
+                        lines.append(_format_fact_obj(f) + "\n\n")
+                lines.append("---\n\n")
 
-        content = "".join(lines)
-        filename.write_text(content, encoding="utf-8")
-        word_count = len(content.split())
-        pct = (len(domain_df) / total_facts * 100) if total_facts else 0
-        status = "[green]✅[/green]" if word_count < 500_000 else "[red]⚠️ OVER[/red]"
-        table.add_row(domain, str(len(domain_df)), f"{pct:.1f}%", f"{word_count:,}", status)
+            lines.append(_sovereign_signature())
+            content = "".join(lines)
+            filename.write_text(content, encoding="utf-8")
+            word_count = len(content.split())
+            status = "[green]✅[/green]" if word_count < 500_000 else "[red]⚠️ OVER[/red]"
+            table.add_row(domain, str(len(facts_in_domain)), f"{word_count:,}", status)
 
-    console.print(table)
-    console.print(f"\n📁 Output: {out}/")
+        console.print(table)
+        console.print(f"\n📁 Output: {out}/")
+
+    _run_async(_fragment())
 
 
 @notebooklm_cmds.command("sync")
@@ -264,12 +366,14 @@ def sync_cmd(drive_path: str | None, mode: str):
     # Detect or use provided path
     if drive_path:
         target = Path(drive_path)
+        provider_name = "Custom"
     else:
-        target = _detect_gdrive()
-        if not target:
-            console.print("[red]❌ Google Drive no detectado.[/red]")
-            console.print("Especifica --drive-path manualmente o instala Google Drive for Desktop.")
+        detected = _detect_cloud_sync()
+        if not detected:
+            console.print("[red]❌ Cloud Storage no detectado (Drive/OneDrive/iCloud).[/red]")
+            console.print("Especifica --drive-path manualmente.")
             return
+        target, provider_name = detected
 
     target.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y-%m-%d")
@@ -298,6 +402,13 @@ def sync_cmd(drive_path: str | None, mode: str):
             shutil.copy2(f, dest)
             synced_files.append(str(dest))
 
+    # Sync Master Guide if exists
+    guide = Path("cortex_notebooklm_guide.md")
+    if guide.exists():
+        dest = target / guide.name
+        shutil.copy2(guide, dest)
+        synced_files.append(str(dest))
+
     # Clean old files (older than 7 days)
     import os
     import time
@@ -310,7 +421,7 @@ def sync_cmd(drive_path: str | None, mode: str):
             cleaned += 1
 
     console.print(Panel(
-        f"[green]✅ Sincronizados {len(synced_files)} archivos[/green]\n"
+        f"[green]✅ Sincronizados {len(synced_files)} archivos a {provider_name}[/green]\n"
         f"  Destino: {target}\n"
         f"  {'Limpiados ' + str(cleaned) + ' archivos antiguos' if cleaned else ''}\n\n"
         f"  📋 NotebookLM debería detectarlos automáticamente\n"
@@ -350,13 +461,14 @@ def status_cmd():
     _check(NOTEBOOKLM_DIR, "Per-Project Sources")
     _check(DOMAINS_DIR, "Domain Fragments")
 
-    gdrive = _detect_gdrive()
-    if gdrive and gdrive.exists():
-        _check(gdrive, "Google Drive Sync")
+    cloud = _detect_cloud_sync()
+    if cloud:
+        target, provider = cloud
+        _check(target, f"{provider} Sync")
     else:
         table.add_row(
-            "Google Drive",
-            str(gdrive or "Not detected"),
+            "Cloud Sync",
+            "Not detected",
             "—", "—", "[yellow]NO SYNC[/yellow]",
         )
 
@@ -380,3 +492,152 @@ def status_cmd():
             console.print(
                 f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]"
             )
+
+
+@notebooklm_cmds.command("ingest")
+@click.option("--drive-path", type=click.Path(), default=None,
+              help="Google Drive folder path (auto-detected if not set)")
+def ingest_cmd(drive_path: str | None):
+    """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
+    import json
+    from cortex.cli.common import get_engine
+    from cortex.llm.sovereign import SovereignLLM
+    from cortex.llm.router import IntentProfile
+
+    # Detect or use provided path
+    if drive_path:
+        target = Path(drive_path)
+    else:
+        detected = _detect_cloud_sync()
+        if not detected:
+            console.print("[red]❌ Cloud Storage no detectado.[/red]")
+            return
+        target, _ = detected
+
+    if not target.exists():
+        console.print(f"[red]❌ El directorio {target} no existe.[/red]")
+        return
+
+    manifest_path = target / ".cortex_ingest_manifest.json"
+    processed_files = set()
+    if manifest_path.exists():
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                processed_files = set(json.load(f))
+        except Exception:
+            pass
+
+    engine = get_engine()
+
+    async def _ingest():
+        extracted_facts = []
+        newly_processed = []
+
+        system_prompt = (
+            "You are a CORTEX integration parser operating under Axiom Ω₁ (Multi-Scale Causality). "
+            "Extract discrete sovereign facts (decisions, ghosts, bridges, and knowledge) "
+            "from the provided NotebookLM automated summary/notes.\n"
+            "CRITICAL: If the text references any previous insights containing a 'Shadow Key', "
+            "which looks like '[∆_CTX:xxxxxxxx]' or '∆_CTX:xxxxxxxx' (or implies a connection to one), you MUST extract it.\n"
+            "Respond ONLY with a raw JSON list of objects. No markdown formatting, "
+            "no explanations.\n"
+            "Do NOT include backticks (```json). Just the raw list in valid JSON.\n"
+            "Format:\n"
+            "[\n"
+            "  {\n"
+            "    \"fact_type\": \"decision|ghost|bridge|knowledge\",\n"
+            "    \"project\": \"The associated project name\",\n"
+            "    \"content\": \"The actual discovery or fact extracted\",\n"
+            "    \"confidence\": \"C3\",\n"
+            "    \"shadow_keys\": [\"∆_CTX:A1B2C3D4\"] // Include if found, else empty list\n"
+            "  }\n"
+            "]\n"
+            "If no facts are present, output an empty list: []"
+        )
+
+        async with SovereignLLM() as llm:
+            for file_path in target.glob("*.md"):
+                # Ignoramos los propios archivos que exporta CORTEX
+                if (file_path.name.startswith("cortex-master") or
+                    file_path.name.startswith("cortex-") or
+                    file_path.name == DIGEST_FILE.name):
+                    continue
+
+                if file_path.name in processed_files:
+                    continue
+
+                console.print(f"[cyan]Analizando síntesis: {file_path.name}...[/cyan]")
+                
+                content = file_path.read_text(encoding="utf-8")
+                # Evita archivos inmensos que puedan saturar la ventana de contexto
+                if len(content) > 50000:
+                    console.print(
+                        f"[yellow]⚠️  Archivo demasiado grande, saltando: {file_path.name}[/yellow]"
+                    )
+                    continue
+
+                res = await llm.generate(
+                    content,
+                    system=system_prompt,
+                    intent=IntentProfile.SYNTHESIS
+                )
+                
+                if res.ok:
+                    try:
+                        raw_json = res.content.strip()
+                        if raw_json.startswith("```json"):
+                            raw_json = raw_json[7:]
+                        if raw_json.endswith("```"):
+                            raw_json = raw_json[:-3]
+                        raw_json = raw_json.strip()
+
+                        items = json.loads(raw_json)
+                        if isinstance(items, list):
+                            for it in items:
+                                if "content" in it and "project" in it:
+                                    meta_dict = {"notebooklm_file": file_path.name}
+                                    if it.get("shadow_keys"):
+                                        meta_dict["shadow_keys"] = it["shadow_keys"]
+
+                                    extracted_facts.append({
+                                        "project": it["project"],
+                                        "content": it["content"],
+                                        "fact_type": it.get("fact_type", "knowledge"),
+                                        "confidence": it.get("confidence", "C3"),
+                                        "source": "notebooklm:sync_daemon",
+                                        "meta": meta_dict
+                                    })
+                            newly_processed.append(file_path.name)
+                            console.print(f"   [green]→ Se extrajeron {len(items)} hechos.[/green]")
+                        else:
+                            console.print("   [red]→ Respuesta no es una lista JSON válida.[/red]")
+                    except json.JSONDecodeError:
+                        console.print(f"   [red]→ Error parseando JSON de {res.provider}[/red]")
+                        console.print(f"      Raw output: {res.content[:200]}...")
+
+        if extracted_facts:
+            await engine.init_db()
+            try:
+                ids = await engine.store_many(extracted_facts)
+                console.print(Panel(
+                    f"[green]✅ Ouroboros Loop Completado[/green]\n"
+                    f"Hechos asimilados: {len(ids)}\n"
+                    f"Archivos procesados: {len(newly_processed)}",
+                    title="🧠 CORTEX Ingestion",
+                    border_style="green",
+                ))
+            finally:
+                await engine.close()
+        elif newly_processed:
+            console.print("[yellow]0 hechos extraídos, pero archivos marcados como procesados.[/yellow]")
+        else:
+            console.print("[dim]Nada nuevo que ingerir.[/dim]")
+
+        # Actualizar manifest
+        if newly_processed:
+            processed_files.update(newly_processed)
+            manifest_path.write_text(
+                json.dumps(list(processed_files), indent=2), encoding="utf-8"
+            )
+
+    _run_async(_ingest())

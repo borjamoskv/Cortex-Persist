@@ -1006,6 +1006,15 @@
     <p class="hero-sub">
       5 questions. 3 minutes. One-to-one mapping to the <strong style="color:var(--lime)">EU AI Act Article 12</strong> — the law taking effect August 2026 with fines up to €30M. Know your exposure before the regulator does.
     </p>
+        <div class="arch-visual">
+            <div class="layer"><span class="layer-label">L0 — Operational Ground Truth</span> — CORTEX Local Memory Chain</div>
+            <div class="arrow">↓</div>
+            <div class="layer"><span class="layer-label">Bicameral Sync (L1)</span> — Relational Export to NotebookLM</div>
+            <div class="arrow">↓</div>
+            <div class="layer"><span class="layer-label">L2 — Synthetic Intelligence</span> — NotebookLM Deep Insights & Audits</div>
+            <div class="arrow">↓</div>
+            <div class="layer">🔗 Cryptographic Proof (L0) + Narrative Synthesis (L2)</div>
+        </div>
     <div class="hero-stats">
       <div class="stat">
         <div class="stat-value">5</div>
@@ -1114,8 +1123,14 @@
   </div>
 
   <!-- RESULT SCREEN -->
-  <div class="result-screen" id="result-screen">
-    <!-- Score Ring -->
+    <div class="result-screen" id="result-screen">
+      <!-- Sovereign Verification ID (Ω₁) -->
+      <div style="text-align: right; margin-bottom: 8px;">
+        <span style="font-family:'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted);">
+          Audit ID: <span id="audit-id-display">CORTEX-V5-000000</span> | Registry: SOVEREIGN-MAINNET
+        </span>
+      </div>
+      <!-- Score Ring -->
     <div class="quiz-card" style="margin-bottom: 24px;">
       <div class="score-ring-container">
         <div class="score-ring-wrapper">
@@ -1484,6 +1499,10 @@ function showResults() {
   const percentage = Math.round((totalRaw / totalMax) * 100);
 
   animateScore(percentage);
+
+  // Generate Sovereign Audit ID (Byzantine Ω₃)
+  const auditId = 'CX' + Math.random().toString(16).slice(2, 8).toUpperCase() + '-' + percentage;
+  document.getElementById('audit-id-display').textContent = auditId;
 
   const verdict = VERDICTS.find(function(v) { return percentage >= v.min && percentage <= v.max; });
   const verdictEl = document.getElementById('score-verdict');

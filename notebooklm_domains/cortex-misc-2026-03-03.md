@@ -1,6 +1,6 @@
 # 🧠 CORTEX — CORTEX-MISC
 
-> Snapshot: 2026-03-03 | Facts: 23 | Projects: 10
+> Snapshot: 2026-03-03 | Facts: 25 | Projects: 11
 
 ---
 
@@ -8,10 +8,12 @@
 *2 hechos*
 
 ### Decision
-- v6_aesgcm:sXlc7HwgIHDPLYTNNZpcJBW6gEp3xIeXjeJD+oRAUG5DYNtAWinNbQjjZlvkQw2TvvUMFKDpbGzbhXYRLoF/ZZTdtqvWNYrJjOXPmfsuVhXPQvDQ3qwH39fhZMeqaVAPA+zJmftIRRMWIci34/LZFgXU/3imU9Ch1Wh2eGf146DeesA0tMSnLPiNioTny94WLMgG
+
+> **[CTX-2986]** Implemented Phase 2 v3 architecture: Adaptive TTL, ψSAP Lagrangian, LNN Controller, and Axiom 12 Merkle Checkpointing. <!-- /CTX-2986 -->
 
 ### Ghost
-- v6_aesgcm:xTaQamIK6lIinngtVurTl+RLJ57Nq9YyuwlM5TrXCFl96iOEdiHWA4LDTSNCydd4pqyLbW9aqGuBeintnI9M8TBQfmrILouLLk+J2g7gBlPFEawYueL5qWJXc3RMqAYcLM/P3DTmResWUQ==
+
+> **[CTX-2988]** Optimization of Lagrangian Neural Network (LNN) using real parameter backprop. <!-- /CTX-2988 -->
 
 ---
 
@@ -19,7 +21,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:yDIfrquL5X79Bp/C8n0y6qJkYtczsE0PXj+DDmQMxPpc5ty0q7vkwkgBksDJrzUoApTEWcyZhgcnLyttRxBnmnyjMTe74+x5EAYPV8dpJpuQDuE3QCJC9gILv+CsNmq9zS0YX7ZyALalgREq9+kGxik4l9K1+NURZOALbq+Z+6922HutShOnYvkt/fwEJxYA9mAM8iqP8/2gdSxz6fKH3wtn0PNpSbYGwtcvnpXJMw58t0+DCVwN1v9/kz1Q6i5Vjqk9w3/Q/PPybw1cr7wUn08=
+
+> **[CTX-2953]** Refactorizado HedgedRequestStrategy.race en router.py de C a B en radon cc para reducir anidamiento asíncrono. Except Exception delimitado con Zero-Trust CancelledError explícito. <!-- /CTX-2953 -->
 
 ---
 
@@ -27,7 +30,21 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:UUcdt0GGa6nb/3Q/pwhgTBoKr6G+Tok05hgNNTFnhc9c0WHQgsozRUauN+u14NfThoQ1aluGKPqAqNIis8l7CsI8E2Czst+XWyJz1AlMjqn7BXNjEraxnX8+wMmFe5lz3BHoA+0y1N/uwxF+DgF2/MDbp2sA9XE5642B2bmwofCysePVvZ3OARs6T4rUFPibId9WPHg1CjGRzxD14pfwuc04PGVbAq/sxrnxIkpRadXhGH8fy1iu217uqgBfjYyp/ne7rw==
+
+> **[CTX-3034]** Se ha inyectado el Protocolo de Ejecución del Agente en el SKILL de LEGION, forzando la simulación explícita de pruebas, integración CORTEX y el estándar Soberano. <!-- /CTX-3034 -->
+
+---
+
+## OMEGA
+*2 hechos*
+
+### Bridge
+
+> **[CTX-3045]** Pattern: Siege Loop (Red Team/Blue Team) inyectado universalmente en skills de ejecución y orquestación. <!-- /CTX-3045 -->
+
+### Decision
+
+> **[CTX-3044]** Inyección masiva del Siege Loop finalizada. 12 skills blindados con inmunidad adversarial mediante asedio mental del Red Team. <!-- /CTX-3044 -->
 
 ---
 
@@ -35,16 +52,22 @@
 *6 hechos*
 
 ### Decision
-- v6_aesgcm:VZstIvdeR0IOQ6Xn/xXnZBmMPq05Klt1rJ73qbyLK+9+40VHlMAwi8YesuqEpdN51+iwf2KhU0xFzi7MC6QPLFWCV/zR2x7WHoR+/w6nFk7tL30urtlAIZyRULnYfMpaKTAVxuhqdSo2u31Ie8+IjaRdj7tLGQVz2DqKIIWycIzAaFqar3Ueywfexv8tflnJkQv9tgACF35Znp169b1T61YjgNPMXzwI/VbuhvuWUU4raEPP+cQg8kYs25RgJacb4TipCTBdkP0LY6dN9KmpR884dR1jaLf7d+1kUapQLRS3kATXYrVcXNJ7Epg=
-- v6_aesgcm:xftKmVSFkwugMwZACG9GEaR2a/RFrhxWd5gvOU0VUmbH8I58/xw+QX19c8tJpCzXT4iwkgz0KDarTX3ssFUb/Wx5EEFy5mLilj76zPlCzcI7qyOVhNz62f/nKBHaxxLBM/1hr+bU5/EPdx5znkWrSQvAbUVXrePLIzk78Rwo9NpIbPfPd+v6eWptyhwrIc1L26H0GEIfnX9RMNuQJEKmfioAmiX5eyCqbcrzRujQtVm6wP+XeLuXfIwcr3L07ZfPTUYEgPuaxz20ruDv25yx/0W8lhO7grzk9wcsRF96hLRx9mG1t3PCFO7vVVgDRvNpQVCfCGko
-- v6_aesgcm:YisfB09wv8Fnhb+aaV/S1WQioOA8jhpe10iC/D0MGVr8z0FSppNqmG7rDBLRH46jkUUc9XG+65NcVOrWkRjaEvbO7xebo5UrIUcf934l3cLtJ+rjvEDpXPbD+cEacaxFN7cxtaeFi61l/6hyn+KMFRSiW4AYO86eQtRjwbt9EPL77mPQbaeVVK+Y9nCdnXEhJg8mOvaVlWB9ijrPaFTmqZLNRISNltPPcj3Uo8swi0gQfXaiSq3pVV0pyOTAN3Kr5rnNN1FlziBJRx1+dM4VdCdRVd+YmeIuiHPczPyoYXwAuAHL+5OlR1xnokxSnqHgMmNV0iYKh2uf1H7VecAjcgkASvo+FjjqCK611PGDzbtnxQY08sIwLZk9fBzI7CpZCAnmsZpVcHdWwBFVcPWXLlp2Rgd9cYcmkDglP7/WtbamReYNsWvsLo9dDlyQvpdiQILeOyBokqkTwCYcvAxn5vizfNJ647MssyqIdiMlEd0V1oKHWGhzFBRe6tmS215dfb66Wsx77k+Ha2adtrzvfV8zVZ+Q5E6WoVDLPMggqOzX9dXaCWThV15PGdkm7Ig8qDgR+Kfs/rz04DD+vRZxIZO2GG4GUrU+zW0CCO6bbvTJ20qmpz4=
-- v6_aesgcm:ygbcUsmzso1esDTKYnFxPCXcMarjHnlT72628R7/56dho2QDaaVPbvX3WHg4noq/N7/h6g7DUbsyvaGilKqPwqrjQyKhi9aUCgE+iDgaCV2GbVH97cQFwOkmjn/2YGLZoVXmN813+PSYDIwWl0bcYoab5M0mFcHUBtc3Ro9NFL23moj596yywPutzuOPOdGe4z3+ieOqoLWw5NxoZ957tTroA+bXexKYtsOYdXyHQTewR5mMadXCY1qh82IrPbkWDvqvQPLD94fZNvysti/CWgPTwsfN6OJDP9s1gTCGypJef60J2zU3ram83EOWH+boGgS7aJO3rQEHzLFDZIHvrzh7gCkyErXiWweDhSo+gQsncNuL0bUFO12ff7FIKVuEs8T3HRYrhvTm
+
+> **[CTX-3014]** Initialized OMEGA-SINGULARITY: The Event Horizon — fusing 10 Omega skills (TESSERACT, KETER, DEMIURGE, NOOSPHERE, ANAMNESIS, APOTHEOSIS, SERVO, IMMUNITAS, ALEPH, KAIROS) into a unified operational manifold. <!-- /CTX-3014 -->
+
+> **[CTX-3019]** RIGOROUS EXECUTION: OMEGA-SINGULARITY has completed initial structural validation. All core subsystems (Evolution, ZK, Strategies) verified with 100% test pass rate (57 tests). Ready for high-density operational phase. <!-- /CTX-3019 -->
+
+> **[CTX-3026]** REFORGED v2.0: OMEGA-SINGULARITY rewritten from 65-line cosmetic poster to 443-line operational manifold. 5 emergent innovations (Antibody-Informed Convergence, Predictive Tool Forging, Temporal Autonomy Scaling, Physical-Cognitive Loop, Paradigm-Aware Validation). 10 governors, 10 axioms (1 per source skill), 7-metric convergence engine, degradation ladder, 6 commands, auto-invocation table. Deep ULTRATHINK analysis of 2900 source lines. <!-- /CTX-3026 -->
+
+> **[CTX-3031]** REFORGED v2.1: Integrated LEGION-OMEGA as the 5th dimension of the manifold. 10 Omega skills now include: TESSERACT, KETER, DEMIURGE, NOOSPHERE, LEGION-OMEGA, IMMUNITAS, APOTHEOSIS, SERVO, ALEPH, KAIROS. Swarm Intelligence Elevated. Axiom S5 updated to Legion protocol. <!-- /CTX-3031 -->
 
 ### Ghost
-- v6_aesgcm:DG+86DAppHNRo4FkJIG7dtgU+QMbIevhLWPCp0moRNsjycNreYLuCDI6Cr+b/Ew/a9lnhMQQgw/0eYsHB6mswxoHy4t+q3oK32ExQ29k63fHO+hurO8pUF4YkDV5pttphRusxpn33NlryuatVL+TqczldjdfOVf8wl0mz9IGeB2jik4=
+
+> **[CTX-3021]** Next stage: Deep integration with ghost_reaper and real-time adversarial immunity loops (IMMUNITAS-Ω). <!-- /CTX-3021 -->
 
 ### Knowledge
-- v6_aesgcm:+ftlRGAaA44aH9B9yF7p6IcuDG0y3OODL4QB8LrcwmzWqIJO23FroKZC0BB3YOaQoLWmGmE/0xZ1/tnz0LRzwFJaMIAiyn68pLZYAgpnIRLHstDJwi87cK2i5WxsU8ifLf3O8NK4V1N0lg1TZFA4NHZ88A5eTKymz1rr4SqrmyV+oNmoXOzfPPnTpF9sszPAcw==
+
+> **[CTX-3017]** OMEGA-SINGULARITY is the final manifestation of the 130/100 standard, operating as a zero-latency cognitive manifold. <!-- /CTX-3017 -->
 
 ---
 
@@ -52,7 +75,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:y2apdEN/7nRffgAvphbYCI3Ommq1n/tFge/HpZr3Jpm+QhXcVrIPkxoTeWr9YJrjY+EcYc+WqTOk2fRy4RN77J7pjldlnjvUWLoFofLqTZzaSiFtgegFPQ7P9U4TOsp2c6I68hSg6u/hecZ4BPXhxFsiIzOw0iZ7EHCiVL+T73IEH1Md5D/o/8Qq+Kbd7G6tkN5RE3DHo2Q20r0zFsh2yzw5jgBU6e4BqlpfskvQyTtiy9OcfQD8m3ekN0E=
+
+> **[CTX-2958]** MEJORAlo X-Ray web monetization: eliminado Checkout.tsx (291 líneas muertas), conectado Navbar→scroll pricing, verificado TSC+build clean. Score 60→82/100. <!-- /CTX-2958 -->
 
 ---
 
@@ -60,14 +84,20 @@
 *6 hechos*
 
 ### Bridge
-- v6_aesgcm:SBHMNKTzY+6zXqwJyKOvF6Tmuy4Iyi0JVhW0Ny6GTiVcdwxGaSLFmV5YV5VpYgnZJkvUTs2SCNTJbz4agufwYzJyyBvXYQl47medPKuu1g3+VGNzkuJ8qhA2evfj2uaohS9PV6ZnOsAI/njy3BEzdNk52z0edvG3L/6XotzRCbtLbKAmGCrgqw8BUDfS/7p4M1H1Y3j58Ni9kQ6iFhx065K+sxej/BbTlPY7qbZGrqJtJlaFFWp0Nw8wyWAwh4JCVq1gtUd7bWX8d4y/SxYtF/3aPp85DXqsJ0CxVpwMViM/yJm2Km+zImBD04hsCJT1iagjJVGZNtPZxn6HHcTgAF6ZWcbgeHnajNUhspMRRsTEkj/hTiKd/hiyFu/CxJg1Oa1KOsaT8Sg7RC9REaQNhUvqGX/sjqIotHmdBQddqkZYJi7LonuRj2/Huw==
-- v6_aesgcm:O2vcx/MA+51F6dprwuCDRsSGvLLhNOzzlm1EnXrbWUwe8g2iZZmeKJAdgFmO0Th7DOZtMDGOuap5K7Wsv3L8DynNs28s0tvLXva4i8/Hy7DkF+8wMTrYCRF0zOkjaJKSgWTHdGSdfCD54QbGVVs60WbQSy14eJ+UAfxXKT+YvSqhIfOOif9OwmqXeZn20r+RdwCAFGfHXMk5H2M/ZWdsWPqIDR8D+097k4Q0y96J478Yjb/bPRk0xcxWB0fx7vnfU5BziYK5Jn2R18mZFKQUjPgDebMvv4FMgIFlX2dAKajyOQakAF3VB1Uq9O6/HdcJgzZ7P9EqYRc2agdLV/t83m8qjdhvTJmpl9/7iJJQavK68rSvXlQ7eVaQZ3pkaGOeGuLN6wfMeTGIMqUNxV5hq/FYcqwo78ogLVeYE24QR9B7NA==
+
+> **[CTX-1790]** Pattern: 'DashboardShell' de NOIR UI KIT → reutilizable en futuros builds SaaS. Layout grid CSS, sidebar sticky glassmorphism (bg-[#0A0A0A]/80 backdrop-blur-xl), top header buscar/notificaciones, container central custom-scrollbar. Sin frameworks externos. Ideal para: admin panels, SaaS B2B, portals. <!-- /CTX-1790 -->
+
+> **[CTX-1791]** Pattern: 'PricingTable' de NOIR UI KIT → Componente React de alta conversión. Flex/Grid 3 columnas escalonadas, columna central destacada con top border (bg-neo-lime), checkmarks condicionales. 0 dependencias externas salvo framer-motion y lucide-react. Listo para inyectar en landing pages. <!-- /CTX-1791 -->
 
 ### Decision
-- v6_aesgcm:WY3y5YUVx3iQmoxYHfujk4YrDu8e9TkqKw8wZDSlWVp3ud0baMiSdA8okuiTQULdMbhyDdKp5xIXG/cIWT8N/784lecycrH/RnYh1LrFhphJofVB8YtnyvHXE1Havmq3H5Z0GVyVmTJz+7hfAUDnYMgWiiexDui5526C9mKouYNtcSrNrGLpbhEnFWM60HEfFqEM5lwrt3nV1J1aLXw959nJtas+VDkp4hwLvPy6DH16FzwmQCyxd9m0ubLAQEX1DIR3wpFX1AaX8frlcVxT5EbTOMuDmpwSLwa0+WL+K+HDGPFLOmX7tzFsgMvwG6EYEawFiwGcHVL9F48zqzfFg7ot5V/Vjp6TOKxqfbKN2F+t2vQYWyboP7oJ+542PQkp95z15EOVljH4tkLHzr1k8pv+rMdORj90KoiIp8F5Qq3YteXfu/8HboHh3CwW4pbJVm7sPgrtKllz1rmy8QGd1yN7U4o2PtP4L7wV8CFSLK9+ePDgPJD5hCyw0X5fTJdKTTwxjAze1mvVB/B8gvk7SQZzXzDfFDQZlVVoXYOB/0rr2tml3SNhRT3DrjaBIpPCN+B1MsTeu+FRjbUXl5T6NkbAMvPWsOStmX0Flz08f+DtGKCaldAorSZLaKqxkWqedOrex0G9XdjQImMqp+DEmic=
-- v6_aesgcm:rJcUD8q/KaOExJ4F7wVT2846LFovbaf4GZjBwlfTQkdG9spXkeP8pJ90vVvYL6C5Kwrqup4/r1QQuEB0y2FdC/Y0q9LRC//BNyBiH7BLG1DmMJH9lzqghunzG+GZY7qKRVH6uGRmxw6QYXGwZVc+SIBfkjh3NoA7swyqYJvFCwfYGV80JRs2uBXBxWHgrSyYSsjEpHMaYdwxvIaFjEzzOb6tPiTko5nHQ1/ugBuCd6xgKFkRjVb387pczNcD8NpSUB8OVRqFu4c8b9qqsajjvhc03D8WRAbZ+qi9Kk2bC1TtbRlYgOJ4HJDSfYV9uyqQ02V1aENY/wMVxEcK54nPgE/wSPcdFA9kCSxhLOmzhlnU1Dj0HIWx+X/5TnP+dGYrx/qkrNnpV0nD/30V0EnlocbLxI/xdE9UVhOud1GQEWFzISsvXGsvygpyk9eC2kQfgTG3JSsQiNPahO+nNlwGbfju/6Cm
-- v6_aesgcm:TcHIr5LwSNuGviaRj6v+VMbDLLWxbyTIW8E7ZSCLvT0rLgjNakWOHWaEIRsYsBO5OKsX1ZvYJ/CYgjDyT2atEJ5PwMbeqRl3kX6R2H1/Uac/DwQ/HSnIIG+zqgFPUR8U4cx4HyzKLZrqKYsHCiie+xVG0QkpwEKvkInTQzMKqozXncKZdXOEaDXChCYhEbdacyYFjcroucn1MqR2tLeTbHUnOfrSllFteHDtAkSHyUQBaphWMXZh1NQ1DGqIlU8fz0GFNF7vF+gkG5cjJfWQfMtFWPa1at6u2nrO9JKy4R9azGSL3Iu7a/NNqNbvzUD7MIGjFXSvD6l6ZLioL37rgscqHtUYhiP7eROJavw9lPid/rHOIZggXNTXWHi593kRhSK6msg5U1uKoBGxSfSH8VmQj2pybBSyuUVAlvGDnER2fU0Y4f1YPX7hZs+gDkLOlPq/LIZpp+3Avv+95pFfBkIEePbrNGxynhFLn+gXafausvegvRGAUOjL3Pxbav2MN2spF+u2gNgvbxcsriRq7Pgf1d12pg9/N1Fbjji8l1M/vimEWL+CxHqP9kgctBNNIaAY9gUfbCXCygKGfwhFpWJbxu4LA5S+mSCMMF/ueQ==
-- v6_aesgcm:ekPksN60ExlvRuAf1qP3abdBHh69jH7rQyYrZ28gP8jxARD2OESB7kmau2paaory9fWnyjbkGH3apWpaE7wDzLY96pICQk4hPA+LuvTJ6AGt6U3YS00C5RJYDBQcCI56j5QuzQrDgIT7OjAp9ujNjiXAUWsiklGZEJDYlr6jpP6nHnxUW9A=
+
+> **[CTX-1774]** Creado GENESIS-1 v1.0: El Protocolo Bala. Pipeline de 8 fases ejecutables para crear proyectos millonarios completos con un solo prompt. Fases: Detonación (evolv-1) → Scaffolding → Design System → Lógica Core → Monetización (moneytv-1) → UI Final → Deploy → Ship. Cada fase tiene INPUT, OUTPUT, GATE y FALLBACK concretos. Cero filosofía, 100% ejecutable. Auto-invocación activada para patrones como 'crea un proyecto completo' o 'de 0 a producción'. <!-- /CTX-1774 -->
+
+> **[CTX-1775]** Documentación completa creada para GENESIS-1: README.md, docs/ARCHITECTURE.md (diagramas Mermaid pipeline + flujo datos + gates + stack detection matrix), docs/COMPARISON.md (tabla comparativa vs KETER/AETHER/DEMIURGE + posición en jerarquía + 5 innovaciones clave), docs/CHANGELOG.md (release notes + roadmap v1.1/v1.2/v2.0). <!-- /CTX-1775 -->
+
+> **[CTX-1776]** GENESIS-1 upgraded v1.0→v1.1. Fixes: (1) Git checkpoints por fase para rollback seguro, (2) Pre-flight de credenciales con protocolo de degradación elegante (sin Stripe→payment links, sin Vercel→build estático, sin Supabase→localStorage), (3) Timing honesto 25-45min (no 20min aspiracional), (4) Fase 8 POST-SHIP con analytics/feedback loop/uptime monitoring, (5) Paralelización Fase 2∥Fase 3 cuando no comparten archivos. <!-- /CTX-1776 -->
+
+> **[CTX-1792]** Sesión finalizada. GENESIS-1 consolidado como la joya de la corona para product execution out-of-the-box. <!-- /CTX-1792 -->
 
 ---
 
@@ -75,9 +105,12 @@
 *3 hechos*
 
 ### Decision
-- v6_aesgcm:K+suEtTAxrKT7sgsCdBIGJ51wR/UjbM+anRsclojUXw7Khz4dyA6FN4akrPdIla53WuKFB/DD6i1m765/7RulaCds3WbxXL/LSqehABBGJM340zBh6HB+IEp/LB0R3b97ScOKvET7A3dsy6S2F6JWDJDNQ4vp28tVc7F3bW0ZZtQC6tqsq/TIK4bD8BTEtnXMqlqHmXYBmSOYul5gEI1HWS2XvLpsygap+gJ4Thnpfty8OW76k/jX72gVNPsvNTSbnl5QQ5V9mftAb6ET/4vgfw7a4z2W5SO6kcTJjAYSFZVb9ffyJm6Bgq7msQF1zOhY5/yHHGb8xc7V3ED6PO/sgPJXOzZyenqgudGuBPcGmJL+4sQ0V+wyf5Dsn/mNl2t9L+mS794WqTqD+UjNRXCFDOElD/Ck3DFXOrRseRcjjsrxtKpJs0HzITL05SUMnIyQyH8hXZRkQP0hf6ZiURhyXuriSS1+BRyJRjkDEJANnrIuP65ujwhx+7ovP8IbTjZgWLZIkw/1+9qf73g/hV169wGlaO4jvCh+xOYZqvJB6SumPqM9kRwpJKEgWCn//1kjpZMcHZyZzaTe2BSYp9ZhIDk90kYQ6InZT9c7C3mbixRPoYHoOMAoya/gB0+GDq+/gUg9JYSxqy6Vh0Zg5IOU2MXmJFcusMjEumGYwtfXNWEn9ABE6C4AwKOdQ==
-- v6_aesgcm:ORYGm2BUwJIit+cvrWFkDELD9OshfW5XRFVMU6q+CTB3B/ak2IDTI9TBpOZ1icDDmVMHQ7A6+aIql0WrSWcocnGCyEckQvn3UhQRzXwzmtsHB23W86jq7lsHv6hruuxDfz2l0Gd5jmCbBRU/MOgEyykT+72aILfoLR+vogbWeoHeHg4TZ6Iiu8oxrcOyyR9xlUdfa0VqTrOtVtQbJADK29L+l4LuP8LV+3SunO3rNFHMa3XeGpWSWjv3NesnaYzeXzJrN9C6t2Cli+9AK/oCJCEWAxtMj5o+QXLl4/Qe6XnaB205kxWJmhkpIcd4s8Anfp9p2ivg2/ZfjUtBsdoE1zSCi50fkpuB882WbwhxAVjry7yY/ODaLHykSMIr3J75UwtUdjUXc3r8ddE6/bjTCT11/h3jyexFMHbJyRO5pK+fM60ViPWbcPLRff5vLQMY46N3dugayZl2U2C6igtA7Jgh761kduqpjRXUVreuC0u06MnEPnQm9W+5cIZQ/b/9uYA5wMw9JXsp0OE=
-- v6_aesgcm:TiQBVcrEWDHomC4pEY0e26Z29jqmC1jqxi8WHyMvP7sOlQxFkli+HTnkVi+u0m2A4YiHGA19iZMtvq61LREWBnWh/oy2QjkQ7TQIzfRbX6Wc6zHqYy7ppLCMUcP/njtlIC6VsM3iTwYKnYYSXxJfBOeXT1eU8TdYy9slO9fy2xI0G9xn1K8b+psG2qAFmPAgLw1TzXxatqQj+iXo7bigB6K77Jk4SCvvFgPD/8/brnm0Vy0p6ADqmQNNmTFFRfYuug0klM2SculuYyxHOZFPsdlat9Yg5ytTxdsn46jpVTX5x2L4Q8MFjQi0V61PP8sm5WCQIwv0vnE3/1lKtqT1ewi44lKWD32CzKVSc7xF3FgSWLnrU9qUe0OlVRsdm53NDkMrz2dfivbN3YcMAGoQ8qsKc+j4PvRSeeMb/ksejWTgVf3husvCasGF4n9EFnejbplRvvh0gpAlpm2WLUU/1xcHPhO49cv88fk5xkTMLgOsyxcLubrM0X9yA/sndmUZMejUBSPT29G1XmlAmirx4wDNLWIAV3CelFad8+sfKlsWF6WrI5eRVOks856ZJbo0Sn3w+N87qe+pE1jw5rRHMj5tomcCaX7M7DTmYMQ+NZPMVgUyyxbaGbYRClYGVoo/jy24mOE77fXF2WCXiENrcp67FGnrWCUbc2P4EgYAocw+6p+TmRCxD7RfelzkHwydeVLbpXG0baifJaOZF/Bk6HqsOqzT79LBHmPwb8pr8nXOZ7wJq1pCINseSJ6tbk+Qb0DlpI0QbYqeRfqHbnHtWu4qOKjif6IEmcY2rLrbElypQdcCtYKlN186xzjp1g7YcM4H3u8pJ4oBkQD2PccuO2dLWEc6+jCU2cbAM2FQb6hx469RmSSxT4RDhnwPfTHF9Z8VaoZjV+c3EQmhFLSUqw==
+
+> **[CTX-2941]** Anti-patrón 'Source Huérfano': Un source que no comparte vocabulario con ningún otro source del notebook es invisible para el cross-referencing de NotebookLM. REGLA: Antes de subir, verificar que cada source tenga al menos 3 términos-ancla compartidos con otro source (e.g., 'CORTEX', 'provider', 'resilience'). Sin shared lexicon, NotebookLM no puede cruzar sources. Derivación: Ω₃ (Byzantine Default) — no confiar en que NotebookLM detectará la conexión; verificar explícitamente. <!-- /CTX-2941 -->
+
+> **[CTX-2949]** Anti-patron 2 Ambiguedad Semantica: Cuando un termino aparece en multiples sources con significados distintos, NotebookLM fusiona los contextos incorrectamente. SOLUCION: Glossary Bridge al inicio de cada source desambiguando terminos-ancla. Taxonomia: 1-Source Huerfano (lexico aislado), 2-Ambiguedad Semantica (lexico compartido pero polisemico). Derivacion: Omega2 <!-- /CTX-2949 -->
+
+> **[CTX-2951]** Anti-patron 3 Source Monolitico: Documentos >15000 palabras sufren bias de posicion - las referencias del final pierden peso contra las del principio. NotebookLM pierde coherencia interna entre secciones del mismo source. SOLUCION: Segmentar en sources tematicos cohesivos de 5000-10000 palabras, cada uno con su Glossary Bridge. TRIADA COMPLETA de anti-patrones NotebookLM: 1-Source Huerfano (lexico aislado, sin 3 terminos-ancla compartidos), 2-Ambiguedad Semantica (lexico polisemico sin desambiguacion), 3-Source Monolitico (>15k palabras, bias de posicion). Los 3 se atacan en el punto de ingesta. Derivacion: Omega2 (reducir entropia donde es mas barata) <!-- /CTX-2951 -->
 
 ---
 
@@ -85,7 +118,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:erZU4hrC0ozbYSSiweOtgBSs/92RPdPRmOUl1WSaZuDqXFodaz/Qrr9n03vLxRm6XWEImFv3HDowyf1AMCEe5wPRY8IoweLd35ZrgeDdNRw5NCt5lvR8EphFK2L3s2BKGSUQ27AIzqUzY1XtLG7WB6uXau6NjJcSW0MQXdLUMaEcMzKtpeb0pbLPon7hLZlrv4B8jKSHpYh/F/scK9wKFQ2Xl0v4Sc4ozseWHoyxgUlS9lIyjlLb9fBkC159KMIyS3skiCNfy74TfZLu+tcYOD/zZlR1TWfKDp/s2maWUCCLqEmd0VKaogIpDpSv6gqltA==
+
+> **[CTX-3036]** Se ha aplicado el protocolo LEGION-OMEGA a RaftNode. Se han blindado las transiciones de estado con lock atómico, prevenido fugas de tareas de heartbeat y corregido condiciones de carrera en el loop de elección. <!-- /CTX-3036 -->
 
 ---
 
@@ -93,7 +127,8 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:DvgnyYlu2W1sGl1kJ7gTUU9vZKSoC/yClWcUuzLqQzN88EIQ3GcOeR9mTmpocp6kvXg4Mj19HhOfQTp1Jk5f+AjFrJPhHGNH7eOK7z/3Agpz9+2Pbz9Lby6CKz221kB6fn3eNfI80aKs5q0/hrc699n3qB8PMADWnoqjESzVigUvk4KFcrI+NR/6p8kE8TcoXzUQZXZsz895S6Eb8aj+W88dp+lJvmmQCFapH2nzI3SXWtOzntouNHYYqqxL07PSwd+6PxBU31lqp6hFAEN9fFIVRLGIoG38sp+U5J4qiP/HvndVtMxu
+
+> **[CTX-3039]** Se ha aplicado el asedio LEGION-OMEGA a SONGLINES y MANIFESTATION: añadidos guardas de OOM Killer (tamaño de archivo), Chronos Sniper (timeouts en subprocess) y Entropy Demon (decodificación robusta). <!-- /CTX-3039 -->
 
 ---
 
@@ -101,7 +136,12 @@
 *1 hechos*
 
 ### Decision
-- v6_aesgcm:FSGsA8ahdlNujMwVRoc/NYeoxVfbok+a+WCHM+WhUsDwpaW60qZUycvkhq0vW8mGH50tZr1EY7xckN7vh/CZ6luMe9BdWMElYiK9IPUwFzSwQjUnClj7gQQN9wBCff3wwwcUGKk+u8WMt3YO0vXJ/J4Kt/iKjWRnP+9rYThg7A==
+
+> **[CTX-1721]** Implemented AI Financial Copilot MVP scaffold, Stripe integration, Python agent, ready for testing. <!-- /CTX-1721 -->
 
 ---
 
+
+
+---
+**SOVEREIGN_SIGNATURE**: `sha256:323032362d30332d` | CORTEX v8.0-Sovereign

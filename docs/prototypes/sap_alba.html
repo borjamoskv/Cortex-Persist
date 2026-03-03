@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP Alba — Financial Compliance Horizon</title>
+    <style>
+        :root {
+            --bg-base: #0A0A0A;
+            --bg-panel: #1A1A1A;
+            --accent-cyber: #CCFF00;
+            --accent-alert: #FF0033;
+            --text-main: #FFFFFF;
+            --text-dim: #888888;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Outfit', sans-serif;
+            --transition-snappy: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: box-shadow 0.05s ease-out;
+        }
+
+        /* Anomaly Pulse Effect */
+        body.anomaly-active {
+            box-shadow: inset 0 0 150px var(--accent-alert);
+        }
+
+        header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .title-group h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        .title-group .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-cyber);
+            box-shadow: 0 0 10px var(--accent-cyber);
+            transition: background-color 0.05s ease, box-shadow 0.05s ease;
+        }
+
+        .anomaly-active .status-badge {
+            border-color: rgba(255, 0, 51, 0.3);
+            color: var(--accent-alert);
+        }
+
+        .anomaly-active .status-indicator {
+            background-color: var(--accent-alert);
+            box-shadow: 0 0 20px var(--accent-alert);
+        }
+
+        #graph-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-overlay {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            pointer-events: none;
+        }
+
+        .stat-box {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .stat-value {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--accent-cyber);
+            margin-bottom: 0.5rem;
+            transition: color 0.05s ease;
+        }
+
+        .anomaly-active .stat-value {
+            color: var(--accent-alert);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+    </style>
+    <!-- Include D3.js for physics graph -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="title-group">
+            <h1>SAP Alba</h1>
+            <div class="subtitle">Financial Audit Causal Graph</div>
+        </div>
+        <div class="status-badge" id="conn-status">
+            <div class="status-indicator" id="pulse-dot"></div>
+            <span id="status-text">SSE LINK: AWAITING</span>
+        </div>
+    </header>
+
+    <div id="graph-container">
+        <svg width="100%" height="100%"></svg>
+    </div>
+
+    <div class="stats-overlay">
+        <div class="stat-box">
+            <div class="stat-value" id="val-edges">0</div>
+            <div class="stat-label">Causal Edges</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="val-signals">0</div>
+            <div class="stat-label">Signals Processed</div>
+        </div>
+    </div>
+
+    <script>
+        // D3 Graph Setup
+        const svg = d3.select("svg");
+        const width = window.innerWidth;
+        const height = window.innerHeight - 100;
+        
+        const simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id).distance(50))
+            .force("charge", d3.forceManyBody().strength(-100))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(height / 2).strength(0.05));
+
+        const g = svg.append("g");
+        let link = g.append("g").attr("stroke", "rgba(255,255,255,0.1)").selectAll(".link");
+        let node = g.append("g").selectAll(".node");
+
+        let nodes = [];
+        let links = [];
+        let isAnomaly = false;
+
+        function updateGraph() {
+            // Update links
+            link = link.data(links, d => d.source.id + "-" + d.target.id);
+            link.exit().remove();
+            let linkEnter = link.enter().append("line")
+                .attr("class", "link")
+                .attr("stroke-width", 1.5)
+                .attr("stroke", () => isAnomaly ? "rgba(255,0,51,0.5)" : "rgba(204,255,0,0.3)");
+            link = linkEnter.merge(link);
+
+            // Update nodes
+            node = node.data(nodes, d => d.id);
+            node.exit().remove();
+            let nodeEnter = node.enter().append("circle")
+                .attr("class", "node")
+                .attr("r", 4)
+                .attr("fill", () => isAnomaly ? "#FF0033" : "#CCFF00")
+                .style("filter", () => isAnomaly ? "drop-shadow(0 0 6px #FF0033)" : "drop-shadow(0 0 4px #CCFF00)");
+            node = nodeEnter.merge(node);
+
+            simulation.nodes(nodes).on("tick", ticked);
+            simulation.force("link").links(links);
+            simulation.alpha(0.3).restart();
+        }
+
+        function ticked() {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            node
+                .attr("cx", d => d.x = Math.max(10, Math.min(width - 10, d.x)))
+                .attr("cy", d => d.y = Math.max(10, Math.min(height - 10, d.y)));
+        }
+
+        function triggerAnomalyState(active) {
+            if (active && !isAnomaly) {
+                isAnomaly = true;
+                document.body.classList.add('anomaly-active');
+                document.getElementById('status-text').innerText = 'ANOMALY DETECTED';
+                
+                // Recolor instantly
+                node.transition().duration(50)
+                    .attr("fill", "#FF0033")
+                    .style("filter", "drop-shadow(0 0 8px #FF0033)");
+                link.transition().duration(50)
+                    .attr("stroke", "rgba(255,0,51,0.6)");
+                    
+                // Agitate physics
+                simulation.force("charge", d3.forceManyBody().strength(-200));
+                simulation.alpha(1).restart();
+                
+            } else if (!active && isAnomaly) {
+                isAnomaly = false;
+                document.body.classList.remove('anomaly-active');
+                document.getElementById('status-text').innerText = 'SSE LINK: ACTIVE';
+                
+                // Revert color
+                node.transition().duration(500)
+                    .attr("fill", "#CCFF00")
+                    .style("filter", "drop-shadow(0 0 4px #CCFF00)");
+                link.transition().duration(500)
+                    .attr("stroke", "rgba(204,255,0,0.3)");
+                    
+                // Calm physics
+                simulation.force("charge", d3.forceManyBody().strength(-100));
+                simulation.alpha(0.3).restart();
+            }
+        }
+
+        // Parse SSE Data and visually map to Graph
+        function ingestData(data) {
+            const targetEdges = data.causality.total_edges || 0;
+            const targetSignals = data.signals.total || 0;
+            const sapAnomaly = data.signals.sap_anomaly || false;
+
+            document.getElementById('val-edges').innerText = targetEdges;
+            document.getElementById('val-signals').innerText = targetSignals;
+
+            triggerAnomalyState(sapAnomaly);
+
+            // Synthesize visual nodes based on total_edges for aesthetic demo
+            const targetNodesCount = Math.min(targetEdges + 5, 200); // Cap for performance
+            
+            if (nodes.length < targetNodesCount) {
+                const newNodesCount = targetNodesCount - nodes.length;
+                for(let i=0; i<newNodesCount; i++) {
+                    const newId = nodes.length;
+                    nodes.push({ id: newId });
+                    if (newId > 0) {
+                        // connect to a random existing node
+                        links.push({ source: newId, target: Math.floor(Math.random() * newId) });
+                    }
+                }
+                updateGraph();
+            }
+        }
+
+        // Connect to Server-Sent Events Daemon
+        const evtSource = new EventSource("http://127.0.0.1:7070/stream");
+        
+        evtSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                ingestData(data);
+                if (!isAnomaly) {
+                    document.getElementById('status-text').innerText = 'SSE LINK: ACTIVE';
+                }
+            } catch (e) {
+                console.error("Payload parse error", e);
+            }
+        };
+
+        evtSource.addEventListener("connected", function(event) {
+            document.getElementById('status-text').innerText = 'SSE LINK: ESTABLISHED';
+        });
+
+        evtSource.onerror = function(err) {
+            document.getElementById('status-text').innerText = 'SSE LINK: DISCONNECTED';
+            document.getElementById('pulse-dot').style.backgroundColor = '#888888';
+            document.getElementById('pulse-dot').style.boxShadow = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -488,3 +488,78 @@ def audit(calcification: bool, frontend: bool, project: str, limit: int, db: str
         finally:
             if conn:
                 conn.close()
+
+
+@cli.command("siege")
+@click.option("--db", default=DEFAULT_DB, help="Database path to attack")
+def siege(db: str) -> None:
+    """Run an autonomous Red Team swarm to test Ledger and Vault BFT compliance."""
+    from cortex.cli.errors import handle_cli_error
+    from cortex.engine_async import AsyncCortexEngine
+    from cortex.database.pool import CortexConnectionPool
+    from cortex.engine.legion_vectors import COMPLIANCE_SIEGE_SWARM
+    from cortex.crypto.vault import Vault
+
+    async def _run_siege():
+        pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)
+        await pool.initialize()
+        engine = AsyncCortexEngine(pool, db)
+        # Attempt to load Vault if keys are available in env
+        try:
+            import os
+            key = os.environ.get("CORTEX_VAULT_KEY")
+            if key:
+                engine.vault = Vault(key.encode("utf-8"))
+        except Exception:
+            pass
+
+        console.print(Panel("[bold red]INITIATING COMPLIANCE SIEGE — LEGION-Ω SWARM[/bold red]\n[dim]Targeting CORTEX Ledger and Vault...[/dim]"))
+        
+        # Start the attacks
+        tasks = []
+        for vector in COMPLIANCE_SIEGE_SWARM:
+            tasks.append(vector.attack(engine, {}))
+            
+        import asyncio
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        all_findings = []
+        for r in results:
+            if isinstance(r, list):
+                all_findings.extend(r)
+                
+        # Run integrity verification
+        report = await engine.verify_ledger()
+        await pool.close()
+        
+        return all_findings, report
+
+    try:
+        findings, verification_report = _run_async(_run_siege())
+        
+        # Verification Report Output
+        status = verification_report.get("valid")
+        if status:
+            color = "green"
+            verdict = "IMMUNITAS OMEGA: SYSTEM SURVIVED"
+        else:
+            color = "red"
+            verdict = "BREACH DETECTED: LEDGER CORRUPTED"
+
+        table = Table(title="Siege Results", show_header=False)
+        table.add_column("Metric")
+        table.add_column("Value")
+        table.add_row("Red Team Findings", str(len(findings)))
+        table.add_row("Transactions Checked", str(verification_report.get("tx_checked", 0)))
+        table.add_row("Violations Found", str(len(verification_report.get("violations", []))))
+        
+        console.print(table)
+        
+        if findings:
+            for f in findings:
+                console.print(f"[{color}]• {f}[/{color}]")
+
+        console.print(Panel(verdict, title="Final Verdict", style=color))
+        
+    except Exception as e:
+        handle_cli_error(e, db_path=db, context="Compliance Siege execution")
