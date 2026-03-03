@@ -102,6 +102,18 @@
       width: 0%;
       transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
     }
+    @keyframes glitch {
+      0% { transform: translate(0) }
+      20% { transform: translate(-2px, 1px) }
+      40% { transform: translate(-1px, -1px) }
+      60% { transform: translate(2px, 1px) }
+      80% { transform: translate(1px, -1px) }
+      100% { transform: translate(0) }
+    }
+    .glitch-anim {
+      animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+      color: #FF3B3B;
+    }
     .ghost-pulse {
       width: 12px; height: 12px;
       background: #FF3B3B;
@@ -116,6 +128,30 @@
       50% { transform: scale(1.2); opacity: 0.5; }
       100% { transform: scale(1); opacity: 1; }
     }
+    .kinetic-line {
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--lime), transparent);
+      animation: kinetic 3s linear infinite;
+    }
+    @keyframes kinetic {
+      0% { left: -100%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { left: 200%; opacity: 0; }
+    }
+    .header {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 60px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
     .footer {
       margin-top: 80px;
       font-size: 12px;
@@ -126,11 +162,12 @@
 </head>
 <body>
   <div class="header">
+    <div class="kinetic-line"></div>
     <div>
       <h1>Sovereign Live Documentation</h1>
-      <p style="color: var(--text-secondary); margin: 8px 0 0;">Real-time telemetry from Ω-Manifold</p>
+      <p style="color: var(--text-secondary); margin: 8px 0 0;">Real-time SSE telemetry from Ω-Manifold</p>
     </div>
-    <div class="status-badge">● SYSTEM CORE ACTIVE</div>
+    <div class="status-badge" id="conn-badge">● CONNECTING...</div>
   </div>
 
   <div class="grid">
@@ -163,32 +200,74 @@
   <div class="footer" id="timestamp">Last sync: --</div>
 
   <script>
-    async function updateStatus() {
-      const tsEl = document.getElementById('timestamp');
-      try {
-        const response = await fetch('data/manifold_status.json');
-        if (!response.ok) throw new Error('OFFLINE');
-        const data = await response.json();
-        
-        document.getElementById('integrity-val').innerText = data.architecture_integrity + '%';
-        document.getElementById('integrity-bar').style.width = data.architecture_integrity + '%';
-        
-        const latestRoi = (data.efficiency && data.efficiency.latest_roi) ? (data.efficiency.latest_roi.roi_ratio || 0) : 0;
-        document.getElementById('roi-val').innerText = latestRoi + 'x';
-        
-        document.getElementById('edges-val').innerText = data.causality ? data.causality.total_edges : '--';
-        document.getElementById('ghosts-val').innerHTML = '<span class="ghost-pulse"></span>' + (data.active_ghosts || 0);
-        
-        tsEl.innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
-        tsEl.style.color = 'var(--text-secondary)';
-      } catch (e) {
-        console.warn("Dashboard offline: run 'python -m cortex.engine.reporter' to sync data.");
-        tsEl.innerText = 'STATUS: OFFLINE (Check CORTEX Reporter)';
+    const tsEl = document.getElementById('timestamp');
+    const badgeEl = document.getElementById('conn-badge');
+    let evtSource = null;
+    let oldGhosts = -1;
+
+    function connectSSE() {
+      if (evtSource) evtSource.close();
+      
+      tsEl.innerText = 'STATUS: CONNECTING TO EVENT HORIZON...';
+      badgeEl.innerText = '● CONNECTING...';
+      badgeEl.style.color = 'var(--text-secondary)';
+      badgeEl.style.borderColor = 'var(--border)';
+
+      evtSource = new EventSource('http://0.0.0.0:7070/stream');
+      
+      evtSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.status === 'SOVEREIGN_LINK_ESTABLISHED') {
+            badgeEl.innerText = '● KINETIC LINK ACTIVE';
+            badgeEl.style.color = 'var(--lime)';
+            badgeEl.style.borderColor = 'rgba(204, 255, 0, 0.3)';
+            return;
+          }
+
+          document.getElementById('integrity-val').innerText = data.architecture_integrity + '%';
+          document.getElementById('integrity-bar').style.width = data.architecture_integrity + '%';
+          
+          const latestRoi = (data.efficiency && data.efficiency.latest_roi) ? (data.efficiency.latest_roi.roi_ratio || 0) : 0;
+          document.getElementById('roi-val').innerText = latestRoi + 'x';
+          document.getElementById('edges-val').innerText = data.causality ? data.causality.total_edges : '--';
+          
+          const ghostsVal = document.getElementById('ghosts-val');
+          const currentGhosts = data.active_ghosts || 0;
+          
+          // Glitch animation if ghosts increase (entropic instability)
+          if (oldGhosts !== -1 && currentGhosts > oldGhosts) {
+             ghostsVal.classList.add('glitch-anim');
+             setTimeout(() => ghostsVal.classList.remove('glitch-anim'), 600);
+          }
+          oldGhosts = currentGhosts;
+          
+          ghostsVal.innerHTML = '<span class="ghost-pulse"></span>' + currentGhosts;
+          
+          tsEl.innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
+          tsEl.style.color = 'var(--text-secondary)';
+        } catch (e) {
+             console.error("Payload error", e);
+        }
+      };
+
+      evtSource.onerror = function(err) {
+        console.warn("EventSource failed:", err);
+        badgeEl.innerText = '● OFFLINE';
+        badgeEl.style.color = '#FF3B3B';
+        badgeEl.style.borderColor = 'rgba(255, 59, 59, 0.3)';
+        tsEl.innerText = 'STATUS: OFFLINE (Wake the Daemon / reporterd.py)';
         tsEl.style.color = '#FF3B3B';
-      }
+        evtSource.close();
+        
+        // Reconnect loop (Trampolin protocol logic)
+        setTimeout(connectSSE, 3000);
+      };
     }
-    updateStatus();
-    setInterval(updateStatus, 5000);
+    
+    // Init Sovereign Link
+    connectSSE();
   </script>
 </body>
 </html>
