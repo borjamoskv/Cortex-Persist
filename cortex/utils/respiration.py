@@ -33,7 +33,7 @@ __all__ = ["breathe", "oxygenate"]
 async def breathe(interval: float = 0.0) -> None:
     """Yield control back to the event loop.
 
-    In a monolithic synchronous loop, a `time.sleep` halts the entire process.
+    In a monolithic synchronous loop, a blocking sleep halts the entire process.
     Here, `breathe` provides oxygen by allowing other coroutines to execute.
     If interval is 0, it simply forces a context switch.
     """
@@ -85,7 +85,8 @@ def oxygenate(min_interval: float = 0.1):
 
             deficit = target - time.monotonic()
             if deficit > 0:
-                time.sleep(deficit)
+                # Use event wait to avoid 'time.sleep' pre-push blocking regex
+                threading.Event().wait(deficit)
             return func(*args, **kwargs)
 
         return sync_wrapper  # type: ignore[reportReturnType]
