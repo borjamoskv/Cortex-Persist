@@ -251,6 +251,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         if not res:
             return None
         from cortex.engine.models import Fact
+
         return Fact(**{k: v for k, v in res.items() if k != "type"})
 
     async def retrieve(self, fact_id: int):
@@ -258,9 +259,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         from cortex.utils.errors import FactNotFound
 
         conn = await self.get_conn()
-        cursor = await conn.execute(
-            f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
-        )
+        cursor = await conn.execute(f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,))
         row = await cursor.fetchone()
         fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
         if not fact or fact.valid_until:
@@ -342,9 +341,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
-        return super()._row_to_fact(
-            row, tenant_id=tenant_id
-        )  # type: ignore[reportAttributeAccessIssue]
+        return super()._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
 
     # ─── Lifecycle ────────────────────────────────────────────────
 

@@ -4,6 +4,7 @@ Prevent circular imports by centralizing base CLI objects.
 """
 
 import asyncio
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -55,6 +56,7 @@ def close_engine_sync(engine: CortexEngine) -> None:
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
     from cortex.events.loop import sovereign_run
+
     # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
     return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
 

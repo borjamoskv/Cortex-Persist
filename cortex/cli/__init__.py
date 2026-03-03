@@ -116,6 +116,7 @@ cli.add_command(compliance_report, name="compliance")
 cli.add_command(audit)
 from cortex.cli.apotheosis_cmds import apotheosis_cmds as apotheosis_cli  # noqa: E402
 from cortex.cli.autorouter_cmds import autorouter_cmds as autorouter_cli  # noqa: E402
+from cortex.cli.bibliotecario_cmds import bibliotecario_cmds as bibliotecario_cli  # noqa: E402
 from cortex.cli.ghost_cmds import ghost_cmds as ghost_cli  # noqa: E402
 from cortex.cli.keter_cmds import keter_cmds as keter_cli  # noqa: E402
 from cortex.cli.keter_cmds import sovereign_cmds as sovereign_cli  # noqa: E402
@@ -134,6 +135,7 @@ cli.add_command(episode)
 cli.add_command(purge_cmd, name="purge")
 cli.add_command(prompt_group, name="prompt")
 cli.add_command(quota_cli, name="quota")
+cli.add_command(bibliotecario_cli, name="bibliotecario")
 
 from cortex.cli.agent_cmds import agent_cmds as agent_cli  # noqa: E402
 from cortex.cli.heal_cmds import cli as heal_cmd  # noqa: E402

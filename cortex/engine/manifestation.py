@@ -27,22 +27,29 @@ async def manifest_singularity(signal_bus: "SignalBus | None" = None) -> None:
         # Parallelizing sync and checkpoint for 130/100 performance
         coros = [
             asyncio.create_subprocess_exec(
-                ".venv/bin/python", "-m", "cortex.cli", "nexus", "sync",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                ".venv/bin/python",
+                "-m",
+                "cortex.cli",
+                "nexus",
+                "sync",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             ),
             asyncio.create_subprocess_exec(
-                ".venv/bin/python", "-m", "cortex.cli", "ledger", "checkpoint",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-            )
+                ".venv/bin/python",
+                "-m",
+                "cortex.cli",
+                "ledger",
+                "checkpoint",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            ),
         ]
 
         procs = await asyncio.gather(*coros)
 
         # OOM/Time Guard: Wait with timeout
-        await asyncio.wait(
-            [p.communicate() for p in procs],
-            timeout=30.0
-        )
+        await asyncio.wait([p.communicate() for p in procs], timeout=30.0)
 
         # 3. Notification to Signal Bus
         if signal_bus:

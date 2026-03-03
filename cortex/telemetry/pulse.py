@@ -27,6 +27,7 @@ logger = logging.getLogger("cortex.telemetry.pulse")
 @dataclass(slots=True)
 class PulseMetric:
     """A metric derived from the system pulse."""
+
     name: str
     value: float = 0.0
     labels: dict[str, str] = field(default_factory=dict)
@@ -73,7 +74,7 @@ class PulseRegistry:
     def _process_signal(self, signal: Any) -> None:
         """Infers metrics from a pulse signal."""
         event_type = signal.event_type
-        
+
         # 1. Automatic metric derivation from event_type
         # Patterns:
         #   'error:*' -> counter
@@ -124,8 +125,7 @@ class PulseRegistry:
                 "active_metrics": len(self._metrics),
                 "shadow_ghosts": list(self._ghost_metrics),
                 "pulse_rate": sum(
-                    1 for m in self._metrics.values()
-                    if time.time() - m.last_update < 60
+                    1 for m in self._metrics.values() if time.time() - m.last_update < 60
                 ),
             }
 

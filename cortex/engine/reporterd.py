@@ -19,6 +19,7 @@ from cortex.engine.reporter import SovereignReporter
 
 logger = logging.getLogger("cortex.reporterd")
 
+
 class ManifoldDaemon:
     """Emits live Sovereign System metrics via SSE."""
 
@@ -35,9 +36,9 @@ class ManifoldDaemon:
                 async for metrics in self.reporter.stream_metrics(interval=0.1):
                     if not self.clients:
                         continue
-                        
+
                     data = json.dumps(metrics.__dict__)
-                    
+
                     dead_clients = set()
                     for client_ref in list(self.clients):
                         client = client_ref()
@@ -48,7 +49,7 @@ class ManifoldDaemon:
                             await client.write(f"data: {data}\n\n".encode())
                         except BaseException:
                             dead_clients.add(client_ref)
-                    
+
                     self.clients -= dead_clients
             except asyncio.CancelledError:
                 break
@@ -60,42 +61,44 @@ class ManifoldDaemon:
         """Handles incoming SSE connections from the Live Dashboard."""
         response = StreamResponse(
             status=200,
-            reason='OK',
+            reason="OK",
             headers={
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-                'Access-Control-Allow-Origin': '*'  # Permissive for local dashboards
-            }
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*",  # Permissive for local dashboards
+            },
         )
         await response.prepare(request)
-        
+
         # Send initial connection success
-        await response.write(b"event: connected\ndata: {\"status\": \"SOVEREIGN_LINK_ESTABLISHED\"}\n\n")
-        
+        await response.write(
+            b'event: connected\ndata: {"status": "SOVEREIGN_LINK_ESTABLISHED"}\n\n'
+        )
+
         self.clients.add(weakref.ref(response))
         logger.info("New SSE client attached. Total: %d", len(self.clients))
-        
+
         try:
             # Keep connection open indefinitely
             while True:
-                await asyncio.sleep(60) 
+                await asyncio.sleep(60)
         except asyncio.CancelledError:
             pass
         finally:
             logger.info("SSE client detached.")
-            
+
         return response
 
     async def start(self):
         app = web.Application()
-        app.router.add_get('/stream', self.sse_handler)
-        
+        app.router.add_get("/stream", self.sse_handler)
+
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, '0.0.0.0', 7070)
+        site = web.TCPSite(runner, "0.0.0.0", 7070)
         await site.start()
-        
+
         self._loop_task = asyncio.create_task(self.metrics_producer())
         logger.info("⚡ Sovereign Reporter Daemon active on http://0.0.0.0:7070/stream")
 
@@ -107,17 +110,19 @@ class ManifoldDaemon:
             if client:
                 client.task.cancel()
 
+
 async def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
     db_path = os.path.expanduser("~/.cortex/cortex.db")
     daemon = ManifoldDaemon(db_path)
     await daemon.start()
-    
+
     try:
         while True:
             await asyncio.sleep(3600)
     except KeyboardInterrupt:
         await daemon.stop()
+
 
 if __name__ == "__main__":
     try:

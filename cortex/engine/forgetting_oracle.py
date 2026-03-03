@@ -11,6 +11,7 @@ Axioma: Ω₅ — el error de olvido es el gradiente más valioso del sistema.
 Derivación: Ω₁ (Multi-Scale Causality) + Ω₅ (Antifragile) →
             la tasa de errores de evicción es el KPI de salud de memoria.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -32,11 +33,12 @@ logger = logging.getLogger("cortex.oracle.forgetting")
 
 # ─── Domain Models ────────────────────────────────────────────────────────────
 
+
 class PolicyRecommendation(Enum):
     """Ajuste de política sugerido por el Oracle."""
 
-    OPTIMAL = "OPTIMAL"              # El sistema olvida correctamente
-    INCREASE_TTL = "INCREASE_TTL"    # Olvida demasiado pronto (regret rate alto)
+    OPTIMAL = "OPTIMAL"  # El sistema olvida correctamente
+    INCREASE_TTL = "INCREASE_TTL"  # Olvida demasiado pronto (regret rate alto)
     REDUCE_CAPACITY = "REDUCE_CAPACITY"  # Olvida demasiado tarde (utilización OOM risk)
     PRIORITIZE_CAUSAL = "PRIORITIZE_CAUSAL"  # Olvida hechos causalmente críticos
 
@@ -48,10 +50,10 @@ class EvictionVerdict:
     key: str
     eviction_id: int
     reason: str
-    was_regrettable: bool       # ¿Fue eviccionado algo que se necesitó después?
-    causal_weight: float        # 0.0 = sin peso causal, 1.0 = axioma crítico
+    was_regrettable: bool  # ¿Fue eviccionado algo que se necesitó después?
+    causal_weight: float  # 0.0 = sin peso causal, 1.0 = axioma crítico
     access_frequency_score: float  # 0.0 = nunca accedido, 1.0 = muy frecuente
-    eviction_value: float       # Score compuesto de qué tan costosa fue la decisión
+    eviction_value: float  # Score compuesto de qué tan costosa fue la decisión
     details: dict[str, Any] = field(default_factory=dict)
 
 
@@ -65,8 +67,8 @@ class OracleReport:
     regret_rate: float
     avg_eviction_value: float
     recommendation: PolicyRecommendation
-    suggested_ttl_delta: float       # +N segundos o -N segundos
-    suggested_capacity_delta: int    # +N items o -N items
+    suggested_ttl_delta: float  # +N segundos o -N segundos
+    suggested_capacity_delta: int  # +N items o -N items
     evidence_chain_valid: bool
     evidence_tip: str
 
@@ -88,6 +90,7 @@ class OracleReport:
 
 # ─── The Oracle ───────────────────────────────────────────────────────────────
 
+
 class ForgettingOracle:
     """
     Motor de Metacognición del Olvido (Ω₅).
@@ -105,7 +108,7 @@ class ForgettingOracle:
     """
 
     # Umbrales soberanos
-    REGRET_THRESHOLD = 0.20         # >20% de errores de olvido → acción
+    REGRET_THRESHOLD = 0.20  # >20% de errores de olvido → acción
     HIGH_CAUSAL_WEIGHT_TYPES = frozenset({"axiom", "decision", "bridge", "rule"})
     CAUSAL_WEIGHT_MAP = {
         "axiom": 1.0,
@@ -155,9 +158,7 @@ class ForgettingOracle:
             return self._empty_report()
 
         # 1. Análisis paralelo de cada evicción
-        verdict_tasks = [
-            self._analyze_eviction(record) for record in eviction_records
-        ]
+        verdict_tasks = [self._analyze_eviction(record) for record in eviction_records]
         verdicts: list[EvictionVerdict] = await asyncio.gather(*verdict_tasks)
 
         # 2. Métricas agregadas
@@ -324,9 +325,7 @@ class ForgettingOracle:
         so both methods see the same namespace.
         """
         project_id = (
-            key.replace("last_hash_", "").split(":")[0]
-            if key.startswith("last_hash_")
-            else key
+            key.replace("last_hash_", "").split(":")[0] if key.startswith("last_hash_") else key
         )
 
         # —— Path 1: Real L1 data ———————————————————————————————
@@ -465,9 +464,7 @@ class ForgettingOracle:
 
     # ─── Evidence Chain Verification ──────────────────────────────────────────
 
-    def _verify_evidence_chain(
-        self, records: list[dict[str, Any]]
-    ) -> tuple[bool, str]:
+    def _verify_evidence_chain(self, records: list[dict[str, Any]]) -> tuple[bool, str]:
         """Verifica que la cadena de evidencia del ledger es internamente consistente."""
         if not records:
             return True, "NO_RECORDS"

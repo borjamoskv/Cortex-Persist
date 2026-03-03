@@ -22,6 +22,7 @@ from pathlib import Path
 
 # ─── Data Model ───────────────────────────────────────────────────────────────
 
+
 @dataclass
 class NoqaEntry:
     """A single `# noqa: BLE001` suppression instance."""
@@ -57,13 +58,11 @@ class NoqaEntry:
 # ─── Classification ────────────────────────────────────────────────────────────
 
 _JUSTIFICATION_PATTERNS = (
-    r"—\s*.+",           # em-dash followed by reason
-    r"-\s*[A-Z].+",      # dash + capital letter reason
+    r"—\s*.+",  # em-dash followed by reason
+    r"-\s*[A-Z].+",  # dash + capital letter reason
     r"#\s*(deliberate|intentional|boundary|relay|supervisor|resilience|safety)",
 )
-_JUSTIFICATION_RE = re.compile(
-    "|".join(_JUSTIFICATION_PATTERNS), re.IGNORECASE
-)
+_JUSTIFICATION_RE = re.compile("|".join(_JUSTIFICATION_PATTERNS), re.IGNORECASE)
 
 
 def classify_entry(entry: NoqaEntry, next_line: str = "") -> NoqaEntry:
@@ -88,6 +87,7 @@ def classify_entry(entry: NoqaEntry, next_line: str = "") -> NoqaEntry:
 
 # ─── Static Scanner ────────────────────────────────────────────────────────────
 
+
 class NoqaAudit:
     """
     Scans the codebase for noqa:BLE001 suppressions and enriches with git data.
@@ -107,9 +107,16 @@ class NoqaAudit:
         Static scan: find all noqa:BLE001 in the codebase.
         Returns list of NoqaEntry with quality classification.
         """
-        exclude = set(exclude_paths or [
-            "__pycache__", ".venv", "venv", ".git", "node_modules",
-        ])
+        exclude = set(
+            exclude_paths
+            or [
+                "__pycache__",
+                ".venv",
+                "venv",
+                ".git",
+                "node_modules",
+            ]
+        )
         include = include_paths or ["cortex"]
 
         entries: list[NoqaEntry] = []
@@ -196,7 +203,8 @@ class NoqaAudit:
         try:
             result = subprocess.run(
                 [
-                    "git", "log",
+                    "git",
+                    "log",
                     f"--since={since}",
                     f"-S{search_term}",
                     "--pretty=format:%H|%ad|%an|%s",
@@ -215,18 +223,21 @@ class NoqaAudit:
                     continue
                 parts = line.split("|", 3)
                 if len(parts) == 4:
-                    commits.append({
-                        "hash": parts[0][:8],
-                        "date": parts[1],
-                        "author": parts[2],
-                        "subject": parts[3],
-                    })
+                    commits.append(
+                        {
+                            "hash": parts[0][:8],
+                            "date": parts[1],
+                            "author": parts[2],
+                            "subject": parts[3],
+                        }
+                    )
             return commits
         except (subprocess.SubprocessError, OSError):
             return []
 
 
 # ─── Report Formatting ─────────────────────────────────────────────────────────
+
 
 def format_report(
     entries: list[NoqaEntry],
@@ -258,9 +269,7 @@ def format_report(
     lines.append(f"─ Git Pickaxe — New noqa:BLE001 since '{since}' ─")
     if git_commits:
         for c in git_commits:
-            lines.append(
-                f"  [{c['hash']}] {c['date']} {c['author']:<20} {c['subject']}"
-            )
+            lines.append(f"  [{c['hash']}] {c['date']} {c['author']:<20} {c['subject']}")
     else:
         lines.append("  ✅  No new noqa:BLE001 introduced in this window.")
     lines.append("")
@@ -294,8 +303,7 @@ def format_report(
         lines.append("  🟢 CLEAN — No drift detected. All suppressions are justified.")
     elif git_commits and not silent:
         lines.append(
-            f"  🟡 DRIFT — {len(git_commits)} new noqa(s) introduced. "
-            f"All have justifications."
+            f"  🟡 DRIFT — {len(git_commits)} new noqa(s) introduced. All have justifications."
         )
     else:
         lines.append(

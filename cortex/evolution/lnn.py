@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class LagrangianParameterSet:
     """State-space coordinates for the Lagrangian."""
-    q: np.ndarray      # Generalized coordinates (e.g., current fitness, health)
+
+    q: np.ndarray  # Generalized coordinates (e.g., current fitness, health)
     q_dot: np.ndarray  # Generalized velocities (e.g., fitness_delta, health_delta)
 
 
@@ -37,9 +38,7 @@ class LagrangianController:
         self.weights = np.array([1.0, -1.0, 1.0, -1.0])
 
     def predict_next_state(
-        self,
-        current: SymbolicActionState,
-        previous: SymbolicActionState | None = None
+        self, current: SymbolicActionState, previous: SymbolicActionState | None = None
     ) -> dict[str, float]:
         """Using Euler-Lagrange to predict the stationary path.
 
@@ -71,7 +70,7 @@ class LagrangianController:
             "momentum_shift": float(suggested_shift[0]),
             "entropy_reduction_target": float(-suggested_shift[1]),
             "grace_multiplier": float(suggested_shift[2]),
-            "collapse_avoidance": float(-suggested_shift[3])
+            "collapse_avoidance": float(-suggested_shift[3]),
         }
 
     def compute_action_loss(self, state: SymbolicActionState) -> float:

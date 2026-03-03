@@ -42,9 +42,7 @@ class NegativeCache:
     def __init__(self, capacity: int = _DEFAULT_NEG_CAPACITY, default_ttl: float = 300.0) -> None:
         self._cache = TLRUCache(maxsize=capacity, ttl=default_ttl)
 
-    def record_failure(
-        self, provider_name: str, intent: str, ttl: float | None = None
-    ) -> None:
+    def record_failure(self, provider_name: str, intent: str, ttl: float | None = None) -> None:
         """NXDOMAIN — cache that this provider failed for this intent."""
         key = f"{provider_name}:{intent}"
         # TLRUCache stores a value; we just store 1.0 as a placeholder since presence is what matters
@@ -141,4 +139,3 @@ class PositiveCache:
     def cached_count(self) -> int:
         """Active A-record count (for observability)."""
         return len(self._cache)
-

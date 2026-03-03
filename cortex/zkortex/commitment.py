@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 _BLINDING_LENGTH = 32  # 256-bit blinding factor
 _COMMITMENT_VERSION = 2  # v2: Pedersen sobre BLS12-381
 
-_GROUP_ORDER = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+_GROUP_ORDER = 0x73EDA753299D7D483339D80809A1D80553BDA402FFFE5BFEFFFFFFFF00000001
 G = G1
 
 
@@ -121,9 +121,6 @@ def _compute_commitment(secret: str, blinding_factor: bytes) -> str:
     """
     secret_scalar = _hash_to_scalar(secret.encode("utf-8"))
     blinding_scalar = int.from_bytes(blinding_factor, "big") % _GROUP_ORDER
-    
-    C = add(
-        multiply(G, secret_scalar),
-        multiply(H, blinding_scalar)
-    )
+
+    C = add(multiply(G, secret_scalar), multiply(H, blinding_scalar))
     return _point_to_hex(C)

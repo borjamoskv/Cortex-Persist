@@ -41,7 +41,6 @@ from cortex.thinking.fusion import (
 )
 from cortex.thinking.orchestra_introspection import OrchestraIntrospectionMixin
 from cortex.thinking.pool import ProviderPool, ThinkingRecord
-from cortex.utils.respiration import oxygenate
 from cortex.thinking.presets import (
     DEFAULT_ROUTING,
     MODE_SYSTEM_PROMPTS,
@@ -49,6 +48,7 @@ from cortex.thinking.presets import (
     ThinkingMode,
 )
 from cortex.thinking.semantic_router import SemanticRouter
+from cortex.utils.respiration import oxygenate
 
 __all__ = ["ThoughtOrchestra"]
 

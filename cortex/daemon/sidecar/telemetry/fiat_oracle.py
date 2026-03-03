@@ -179,7 +179,7 @@ class FiatOracle:
                 return
             except (OSError, ValueError, RuntimeError) as e:
                 import secrets
-                
+
                 rng = secrets.SystemRandom()
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + rng.uniform(0.1, 1.618 ** (attempt + 1))

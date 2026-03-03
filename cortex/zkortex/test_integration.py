@@ -44,8 +44,7 @@ def test_full_sovereign_opacity_protocol() -> None:
 
     # ── 2. Inicializar Opacity Layer ──────────────────────────────────────────
     opacity = SovereignOpacityLayer(
-        opacity_strategy=SovereignOpacityLayer.STRATEGY_MEDIUM,
-        session_id="sovereign-demo-session"
+        opacity_strategy=SovereignOpacityLayer.STRATEGY_MEDIUM, session_id="sovereign-demo-session"
     )
 
     # ── 3. Ingestión — genera el root público ─────────────────────────────────
@@ -84,7 +83,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     commitment = opacity.commit_to_knowledge(
         fact_id="wallet-balance-2026-03",
         fact_content="El saldo total en cold storage es 847 ETH",
-        metadata={"category": "financial", "date": "2026-03-03"}
+        metadata={"category": "financial", "date": "2026-03-03"},
     )
     print(f"[PÚBLICO] Commitment emitido: {commitment.commitment_hex[:32]}...")
     print("[PÚBLICO] Nadie puede abrir este commitment sin el blinding key")
@@ -105,6 +104,7 @@ def test_full_sovereign_opacity_protocol() -> None:
 def _fact_fingerprint(fact: str) -> str:
     """Helper para fingerprint — replicando la lógica interna de SovereignOpacityLayer."""
     import hashlib
+
     return hashlib.sha256(b"zkortex:fact:" + fact.encode()).hexdigest()
 
 

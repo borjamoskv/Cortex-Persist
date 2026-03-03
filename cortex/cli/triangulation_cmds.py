@@ -141,4 +141,3 @@ def triangulate(log_file: str) -> None:
 
     console.print("\n[bold purple]/// TRIANGULACIÓN COMPLETADA ///[/bold purple]")
     console.print("Evalúe los tres vectores para aislar la cuenca del error.")
-

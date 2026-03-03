@@ -18,6 +18,7 @@ class PsiActionState:
     time_delta: float
     grace_constant: float = 1.0
 
+
 def calculate_lagrangian(state: PsiActionState) -> float:
     """Calculates the L_ψ in UAS."""
     # K_ψ: Kinetic Energy (Velocity of Fitness gain per unit time)
@@ -31,6 +32,7 @@ def calculate_lagrangian(state: PsiActionState) -> float:
     g_grace = state.grace_constant / (1.0 + state.entropy)
 
     return k_psi - s_psi + g_grace
+
 
 # TODO Phase 3: Implement Euler-Lagrange geodesic pathfinding for Mutation trajectories.
 # This will allow CORTEX to predict the "path of least symbolic action" for future

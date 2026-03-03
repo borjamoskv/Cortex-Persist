@@ -176,7 +176,7 @@ class GossipProtocol:
         while self._running:
             try:
                 import secrets
-                
+
                 rng = secrets.SystemRandom()
                 if self.peers:
                     peer = rng.choice(list(self.peers))

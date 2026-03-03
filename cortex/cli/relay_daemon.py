@@ -37,6 +37,7 @@ async def event_generator():
             file_size = current_size
         await asyncio.sleep(0.1)
 
+
 @app.get("/events")
 async def events(request: Request):
     return StreamingResponse(event_generator(), media_type="text/event-stream")

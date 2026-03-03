@@ -65,9 +65,7 @@ class HedgedRequestStrategy:
 
         try:
             while pending:
-                done, pending = await asyncio.wait(
-                    pending, return_when=asyncio.FIRST_COMPLETED
-                )
+                done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
                 for completed in done:
                     provider = tasks[completed]
                     exc = completed.exception()

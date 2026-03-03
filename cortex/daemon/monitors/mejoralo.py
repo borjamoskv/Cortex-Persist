@@ -2,7 +2,7 @@
 CORTEX v6.0 — OMEGA-SINGULARITY: Unified Project Quality Monitor.
 
 Unifies AutonomousMejoraloMonitor and EntropyMonitor into a single,
-zero-redundancy thermodynamic sweep. 
+zero-redundancy thermodynamic sweep.
 
 Resolves overlap detected in analyze_entropy.py (0.93 -> 0.0).
 """
@@ -48,7 +48,7 @@ class UnifiedMejoraloMonitor(IntervalProjectMonitor[Any]):
         # 1. Singular Scan
         result = m.scan(project, path, deep=True, brutal=True)
         self._stats["scans"] += 1
-        
+
         initial_score = result.score
         alerts: list[Any] = []
 
@@ -60,7 +60,7 @@ class UnifiedMejoraloMonitor(IntervalProjectMonitor[Any]):
                 initial_score,
                 self.threshold,
             )
-            
+
             # 3. Autonomous Healing (if enabled)
             if self.auto_heal:
                 logger.info("🛠️  Triggering sovereign healing for %s...", project)
@@ -76,20 +76,24 @@ class UnifiedMejoraloMonitor(IntervalProjectMonitor[Any]):
                     )
 
         # 4. Generate Alerts (backward compatible with DaemonStatus)
-        alerts.append(MejoraloAlert(
-            project=project,
-            score=result.score,
-            dead_code=result.dead_code,
-            total_loc=result.total_loc,
-        ))
+        alerts.append(
+            MejoraloAlert(
+                project=project,
+                score=result.score,
+                dead_code=result.dead_code,
+                total_loc=result.total_loc,
+            )
+        )
 
         if result.score < self.threshold:
-            alerts.append(EntropyAlert(
-                project=project,
-                file_path=str(path),
-                complexity_score=result.score,
-                message=f"Persistent entropy: {result.score}/{self.threshold}",
-            ))
+            alerts.append(
+                EntropyAlert(
+                    project=project,
+                    file_path=str(path),
+                    complexity_score=result.score,
+                    message=f"Persistent entropy: {result.score}/{self.threshold}",
+                )
+            )
 
         return alerts
 

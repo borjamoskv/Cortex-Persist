@@ -22,6 +22,7 @@ BASE_BACKOFF: Final[float] = 1.1  # Golden ratio-ish base
 
 class KeterPayload(TypedDict, total=False):
     """Explicit strict-typing for KETER Engine inter-phase payload."""
+
     intent: str
     spec_130_100: str
     scaffold_status: str
@@ -188,6 +189,9 @@ class KeterEngine:
     """
 
     def __init__(self) -> None:
+        from cortex.skills.router import SkillRouter
+
+        self.router = SkillRouter()
         self.phases: list[SovereignPhase] = [
             IntentAlchemist(),
             ArchScaffolder(),
@@ -195,6 +199,22 @@ class KeterEngine:
             FormalVerificationGate(),
             MejoraloCrush(),
         ]
+
+    def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
+        slug = getattr(manifest, "slug", "")
+        if "evolv" in slug or "intencion" in slug:
+            return IntentAlchemist()
+        if "arkitetv" in slug or "architecture" in slug:
+            return ArchScaffolder()
+        if "legion" in slug or "swarm" in slug:
+            return LegionSwarm()
+        if "verification" in slug or "vector" in slug:
+            return FormalVerificationGate()
+        if "mejoralo" in slug or "crush" in slug:
+            return MejoraloCrush()
+
+        logger.debug("[KETER] No specific phase mapping for %s", slug)
+        return None
 
     async def _execute_with_backoff(
         self, phase: SovereignPhase, payload: KeterPayload
@@ -207,10 +227,10 @@ class KeterEngine:
             except (CortexError, RuntimeError, OSError, ValueError, TypeError) as e:
                 last_error = e
                 import secrets
-                
+
                 rng = secrets.SystemRandom()
                 # La ventana de caos crece fractalmente con la Proporción Áurea (Phi)
-                base_delay = BASE_BACKOFF ** attempt
+                base_delay = BASE_BACKOFF**attempt
                 jitter = rng.uniform(0.1, 1.618 ** (attempt + 1))
                 delay = base_delay + jitter
                 logger.error(
@@ -235,7 +255,7 @@ class KeterEngine:
         # Evita la resonancia destructiva ("propio DDoS") desincronizando
         # a los agentes extrayendo entropía por hardware (/dev/urandom).
         import secrets
-        
+
         rng = secrets.SystemRandom()
         asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
         logger.debug(
@@ -250,8 +270,29 @@ class KeterEngine:
 
         payload = typing.cast(KeterPayload, {"intent": intent, **kwargs})
 
+        # --- Skill Routing (Enrutamiento Soberano) ---
+        plan = self.router.create_execution_plan(intent)
+        execution_sequence = []
+        if plan:
+            logger.info(
+                "🗺️ [KETER] Plan de ejecución generado por SkillRouter: %s",
+                [m.slug for m in plan],
+            )
+            # Intentar resolver phases correspondientes al plan
+            for manifest in plan:
+                phase = self._dispatch_skill(manifest)
+                if phase:
+                    execution_sequence.append(phase)
+
+        if not execution_sequence:
+            logger.warning(
+                "⚠️ [KETER] Enrutamiento dinámico no generó pipeline válido. "
+                "Usando pipeline fallback."
+            )
+            execution_sequence = self.phases
+
         try:
-            for phase in self.phases:
+            for phase in execution_sequence:
                 payload = await self._execute_with_backoff(phase, payload)
 
             payload["status"] = "SINGULARITY_REACHED"

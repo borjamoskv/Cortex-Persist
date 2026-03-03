@@ -99,7 +99,7 @@ class ItemMemory:
     ) -> list[tuple[str, float]]:
         """Find the nearest symbols to a query hypervector."""
         from cortex.memory.hdc.algebra import cosine_similarity
-        
+
         search_space = candidates or list(self._cache.keys())
         scores: list[tuple[str, float]] = []
 
@@ -146,10 +146,10 @@ class ItemMemory:
             if len(self._cache) >= self._maxsize:
                 # Basic eviction to maintain bounds
                 self._cache.pop(next(iter(self._cache)))
-            
+
             seed = _deterministic_seed(symbol)
             self._cache[symbol] = random_bipolar(self._dim, seed=seed)
-        
+
         return self._cache[symbol]
 
     def _load_codebook(self) -> None:
