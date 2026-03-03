@@ -102,7 +102,10 @@ class SAPClient:
         self._csrf_token = resp.headers.get("x-csrf-token", "")
         logger.info("Connected to SAP at %s", self.config.base_url_normalized)
 
-        return {"status": "connected", "csrf": bool(self._csrf_token)}  # type: ignore[reportReturnType]
+        return {
+            "status": "connected", 
+            "csrf": bool(self._csrf_token)
+        }  # type: ignore[reportReturnType]
 
     async def close(self) -> None:
         """Close the HTTP client."""
@@ -393,7 +396,8 @@ class SAPClient:
                 await self._handle_retry_wait(attempt)
 
         raise SAPConnectionError(
-            f"SAP request failed after {self.config.max_retries} retries: {last_error}"
+            f"SAP request failed after {self.config.max_retries} "
+            f"retries: {last_error}"
         )
 
     async def _handle_retry_wait(self, attempt: int) -> None:

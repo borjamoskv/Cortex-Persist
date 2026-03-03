@@ -77,7 +77,8 @@ class TopographicSensor:
         # 1. Try native os.listxattr
         if hasattr(os, "listxattr"):
             try:
-                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]  # type: ignore[reportAttributeAccessIssue]
+                # type: ignore[reportAttributeAccessIssue]
+                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
             except OSError:
                 pass
 
@@ -140,7 +141,8 @@ class TopographicSensor:
         """Helper to delete an xattr."""
         if hasattr(os, "removexattr"):
             try:
-                os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
+                # type: ignore[reportAttributeAccessIssue]
+                os.removexattr(str(file_path), attr_name)
                 return
             except OSError:
                 pass

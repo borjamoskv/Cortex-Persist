@@ -248,5 +248,9 @@ class VaultCracker:
         return findings
 
 
-RED_TEAM_SWARM = [OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper()]
-COMPLIANCE_SIEGE_SWARM = [LedgerPoisoner(), VaultCracker()]
+RED_TEAM_SWARM = {
+    v.name: v for v in (OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper())
+}
+COMPLIANCE_SIEGE_SWARM = {
+    v.name: v for v in (LedgerPoisoner(), VaultCracker())
+}

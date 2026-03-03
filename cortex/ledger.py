@@ -40,12 +40,14 @@ class MerkleTree:
 
         self._leaves = leaves
         nodes = [MerkleNode(hash=h, is_leaf=True) for h in leaves]
+        self.layers = []
         self.root = self._build_recursive(nodes)
 
     def _hash_pair(self, left: str, right: str) -> str:
         return hashlib.sha256((left + right).encode()).hexdigest()
 
     def _build_recursive(self, nodes: list[MerkleNode]) -> MerkleNode:
+        self.layers.append(nodes)
         if len(nodes) == 1:
             return nodes[0]
 
@@ -68,43 +70,9 @@ class MerkleTree:
             return []
 
         proof = []
-        # Each node in the tree covers a range of indices.
-        # However, due to the way _build_recursive is implemented (duplicating odd nodes),
-        # we need to track the path from the root.
-
-        # Simpler O(log N) path search if we know how many leaves are in each subtree
-        # Given _build_recursive logic, we can also traverse the tree directly if it's balanced.
-        # But since we store links in MerkleNode, we can traverse it.
-
-        # Since _build_recursive doesn't store counts, we use the original approach
-        # BUT optimized to avoid O(N) layer reconstruction.
-
-        # Actually, the original implementation was O(N) because it rebuilt 'current_layer'.
-        # Let's fix it by storing the tree properly or using the existing refs.
-
-        # To make it O(log N), we really should have stored sub-counts.
-        # Given the current structure, let's keep it O(N) for correctness but more idiomatic,
-        # or mejoralo: improve build to store subcounts for true O(log N).
-
-        # For Wave 3: Maintain correctness, improve legibility and error handling.
-        # Rebuilding layers is O(N) total but O(log N) steps.
-        # Let's stick to a more robust layer-based approach without full reconstruction.
-
-        layers = []
-        current_layer = [MerkleNode(h, is_leaf=True) for h in self._leaves]
-        while len(current_layer) > 1:
-            layers.append(current_layer)
-            next_layer = []
-            for i in range(0, len(current_layer), 2):
-                left = current_layer[i]
-                right = current_layer[i + 1] if i + 1 < len(current_layer) else current_layer[i]
-                next_layer.append(
-                    MerkleNode(hash=self._hash_pair(left.hash, right.hash), left=left, right=right)
-                )
-            current_layer = next_layer
-
         idx = index
-        for layer in layers:
+        # We skip the last layer since it only contains the root
+        for layer in self.layers[:-1]:
             sibling_idx = idx + 1 if idx % 2 == 0 else idx - 1
             if sibling_idx < len(layer):
                 proof.append((layer[sibling_idx].hash, "R" if idx % 2 == 0 else "L"))
