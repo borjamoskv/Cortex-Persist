@@ -17,10 +17,11 @@ from __future__ import annotations
 
 import logging
 import re
-import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import aiosqlite
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
@@ -233,7 +234,7 @@ def _is_noise(content: str) -> bool:
 
 
 # ── Main detector ───────────────────────────────────────────────────
-def detect_contradictions(
+async def detect_contradictions(
     new_content: str,
     new_project: str,
     *,
@@ -266,116 +267,112 @@ def detect_contradictions(
         # Too short to meaningfully compare
         return report
 
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
+    async with aiosqlite.connect(str(db_path)) as conn:
+        conn.row_factory = aiosqlite.Row
+        try:
+            # Chronos Sniper Guard: Timeout for heavy FTS/Decryption scanning
+            if decrypt_fn:
+                # Prioritize same-project decisions, then cross-project
+                cursor = await conn.execute(
+                    """
+                    SELECT id, project, content, created_at
+                    FROM facts
+                    WHERE fact_type = 'decision'
+                    ORDER BY
+                        CASE WHEN project = ? THEN 0 ELSE 1 END,
+                        id DESC
+                    LIMIT 400
+                    """,
+                    (new_project,),
+                )
+            else:
+                # FTS5 path for unencrypted DBs
+                fts_terms = " OR ".join(list(new_tokens)[:8])
+                cursor = await conn.execute(
+                    """
+                    SELECT f.id, f.project, f.content, f.created_at
+                    FROM facts f
+                    JOIN facts_fts fts ON fts.rowid = f.id
+                    WHERE fts.facts_fts MATCH ?
+                      AND f.fact_type = 'decision'
+                    ORDER BY rank
+                    LIMIT 200
+                    """,
+                    (fts_terms,),
+                )
+            rows = await cursor.fetchall()
 
-    try:
-        # When decrypt_fn is provided, FTS5 won't work (indexes ciphertext)
-        # Fall back to direct scan with project-scoped filtering
-        if decrypt_fn:
-            # Prioritize same-project decisions, then cross-project
-            cursor = conn.execute(
-                """
-                SELECT id, project, content, created_at
-                FROM facts
-                WHERE fact_type = 'decision'
-                ORDER BY
-                    CASE WHEN project = ? THEN 0 ELSE 1 END,
-                    id DESC
-                LIMIT 800
-                """,
-                (new_project,),
-            )
-        else:
-            # FTS5 path for unencrypted DBs
-            fts_terms = " OR ".join(list(new_tokens)[:8])
-            cursor = conn.execute(
-                """
-                SELECT f.id, f.project, f.content, f.created_at
-                FROM facts f
-                JOIN facts_fts fts ON fts.rowid = f.id
-                WHERE fts.facts_fts MATCH ?
-                  AND f.fact_type = 'decision'
-                ORDER BY rank
-                LIMIT 200
-                """,
-                (fts_terms,),
-            )
-        rows = cursor.fetchall()
+            # ── Layer 2: Jaccard scoring + project boosting ─────────
+            candidates: list[ConflictCandidate] = []
 
-        # ── Layer 2: Jaccard scoring + project boosting ─────────
-        candidates: list[ConflictCandidate] = []
+            for row in rows:
+                content = row["content"]
 
-        for row in rows:
-            content = row["content"]
+                # Decrypt if needed
+                if decrypt_fn and content.startswith("v6_aesgcm:"):
+                    try:
+                        content = decrypt_fn(content)
+                    except Exception:
+                        # InvalidTag, cross-tenant, corrupted — skip silently
+                        continue
 
-            # Decrypt if needed
-            if decrypt_fn and content.startswith("v6_aesgcm:"):
-                try:
-                    content = decrypt_fn(content)
-                except Exception:
-                    # InvalidTag, cross-tenant, corrupted — skip silently
+                if not content or _is_noise(content):
                     continue
 
-            if not content or _is_noise(content):
-                continue
+                existing_tokens = _tokenize(content)
+                base_score = _jaccard(new_tokens, existing_tokens)
 
-            existing_tokens = _tokenize(content)
-            base_score = _jaccard(new_tokens, existing_tokens)
+                # Project boost: same project = 1.3x score
+                if row["project"] == new_project:
+                    base_score *= 1.3
 
-            # Project boost: same project = 1.3x score
-            if row["project"] == new_project:
-                base_score *= 1.3
+                if base_score < min_score:
+                    continue
 
-            if base_score < min_score:
-                continue
+                # ── Layer 3: Conflict type classification ───────────
+                conflict_type = "keyword_overlap"
 
-            # ── Layer 3: Conflict type classification ───────────
-            conflict_type = "keyword_overlap"
+                if _detect_negation(new_content) or _detect_negation(content):
+                    conflict_type = "negation"
+                    base_score *= 1.5  # Boost negation conflicts
 
-            if _detect_negation(new_content) or _detect_negation(content):
-                conflict_type = "negation"
-                base_score *= 1.5  # Boost negation conflicts
-
-            if _detect_supersession(new_content) or _detect_supersession(content):
-                conflict_type = "version_supersede"
-                base_score *= 1.2
-
-            # Version conflict detection
-            new_versions = _extract_versions(new_content)
-            old_versions = _extract_versions(content)
-            if new_versions and old_versions:
-                # Same module but different versions = high conflict potential
-                common_tokens = new_tokens & existing_tokens
-                if len(common_tokens) > 5:
+                if _detect_supersession(new_content) or _detect_supersession(content):
                     conflict_type = "version_supersede"
-                    base_score *= 1.4
+                    base_score *= 1.2
 
-            candidates.append(
-                ConflictCandidate(
-                    fact_id=row["id"],
-                    project=row["project"],
-                    content=content[:300],
-                    date=row["created_at"][:10],
-                    overlap_score=min(base_score, 1.0),
-                    conflict_type=conflict_type,
+                # Version conflict detection
+                new_versions = _extract_versions(new_content)
+                old_versions = _extract_versions(content)
+                if new_versions and old_versions:
+                    # Same module but different versions = high conflict potential
+                    common_tokens = new_tokens & existing_tokens
+                    if len(common_tokens) > 5:
+                        conflict_type = "version_supersede"
+                        base_score *= 1.4
+
+                candidates.append(
+                    ConflictCandidate(
+                        fact_id=row["id"],
+                        project=row["project"],
+                        content=content[:300],
+                        date=row["created_at"][:10],
+                        overlap_score=min(base_score, 1.0),
+                        conflict_type=conflict_type,
+                    )
                 )
-            )
 
-        # Sort by score, keep top N
-        candidates.sort(key=lambda c: -c.overlap_score)
-        report.candidates = candidates[:max_candidates]
+            # Sort by score, keep top N
+            candidates.sort(key=lambda c: -c.overlap_score)
+            report.candidates = candidates[:max_candidates]
 
-    except sqlite3.OperationalError as e:
-        logger.warning("Contradiction scan failed (DB error): %s", e)
-    finally:
-        conn.close()
+        except (aiosqlite.OperationalError, Exception) as e:
+            logger.warning("Contradiction scan failed: %s", e)
 
     return report
 
 
 # ── CLI-friendly batch scanner ──────────────────────────────────────
-def scan_all_contradictions(
+async def scan_all_contradictions(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
     decrypt_fn: callable | None = None,  # type: ignore[reportGeneralTypeIssues]
@@ -384,131 +381,124 @@ def scan_all_contradictions(
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
     """
     Batch scanner: find pairs of potentially contradicting decisions.
-
+    
     Returns list of (decision_a, decision_b) pairs ordered by overlap.
-
-    Architecture: O(N·logN) via token-bucketed locality-sensitive hashing.
-    Each decision is bucketed by its top-K tokens. Only decisions sharing
-    bucket membership are compared, avoiding the O(N²) pairwise explosion.
     """
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
-
-    try:
-        cursor = conn.execute(
-            """
-            SELECT id, project, content, created_at
-            FROM facts
-            WHERE fact_type = 'decision'
-            ORDER BY id
-            """
-        )
-        rows = cursor.fetchall()
-
-        # Decrypt and tokenize all
-        decisions: list[dict] = []
-        for row in rows:
-            content = row["content"]
-            if decrypt_fn and content.startswith("v6_aesgcm:"):
-                try:
-                    content = decrypt_fn(content)
-                except Exception:
-                    continue
-            if not content or _is_noise(content):
-                continue
-            tokens = _tokenize(content)
-            if len(tokens) < 3:
-                continue
-            decisions.append(
-                {
-                    "id": row["id"],
-                    "project": row["project"],
-                    "content": content,
-                    "date": row["created_at"][:10],
-                    "tokens": tokens,
-                }
+    async with aiosqlite.connect(str(db_path)) as conn:
+        conn.row_factory = aiosqlite.Row
+        try:
+            cursor = await conn.execute(
+                """
+                SELECT id, project, content, created_at
+                FROM facts
+                WHERE fact_type = 'decision'
+                ORDER BY id
+                """
             )
+            rows = await cursor.fetchall()
 
-        # ── LSH Bucketing: O(N·logN) ───────────────────────────────
-        # Group by project first (cross-project conflicts are rare),
-        # then bucket by top-K tokens within each project.
-        by_project: dict[str, list[dict]] = defaultdict(list)
-        for d in decisions:
-            by_project[d["project"]].append(d)
-
-        # Token → decision indices within project (inverted index)
-        pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]] = []
-        seen_pairs: set[tuple[int, int]] = set()
-
-        for _project, group in by_project.items():
-            # Build inverted index: token → list of decision indices
-            token_index: dict[str, list[int]] = defaultdict(list)
-            for idx, d in enumerate(group):
-                # Use top-8 tokens by length (more specific = better signal)
-                top_tokens = sorted(
-                    d["tokens"], key=len, reverse=True
-                )[:8]
-                for token in top_tokens:
-                    token_index[token].append(idx)
-
-            # Only compare decisions that share bucket membership
-            for _token, indices in token_index.items():
-                if len(indices) < 2 or len(indices) > 50:
-                    # Skip tokens that are too common (noise)
-                    # or singleton (no comparison possible)
+            # Decrypt and tokenize all
+            decisions: list[dict] = []
+            for row in rows:
+                content = row["content"]
+                if decrypt_fn and content.startswith("v6_aesgcm:"):
+                    try:
+                        content = decrypt_fn(content)
+                    except Exception:
+                        continue
+                if not content or _is_noise(content):
                     continue
-                for i_pos in range(len(indices)):
-                    for j_pos in range(i_pos + 1, len(indices)):
-                        i, j = indices[i_pos], indices[j_pos]
-                        pair_key = (
-                            min(group[i]["id"], group[j]["id"]),
-                            max(group[i]["id"], group[j]["id"]),
-                        )
-                        if pair_key in seen_pairs:
-                            continue
-                        seen_pairs.add(pair_key)
+                tokens = _tokenize(content)
+                if len(tokens) < 3:
+                    continue
+                decisions.append(
+                    {
+                        "id": row["id"],
+                        "project": row["project"],
+                        "content": content,
+                        "date": row["created_at"][:10],
+                        "tokens": tokens,
+                    }
+                )
 
-                        a, b = group[i], group[j]
-                        score = _jaccard(a["tokens"], b["tokens"])
-                        if score < min_score:
-                            continue
+            # ── LSH Bucketing: O(N·logN) ───────────────────────────────
+            # Group by project first (cross-project conflicts are rare),
+            # then bucket by top-K tokens within each project.
+            by_project: dict[str, list[dict]] = defaultdict(list)
+            for d in decisions:
+                by_project[d["project"]].append(d)
 
-                        ctype = "keyword_overlap"
-                        if _detect_negation(
-                            a["content"]
-                        ) or _detect_negation(b["content"]):
-                            ctype = "negation"
-                            score *= 1.3
+            # Token → decision indices within project (inverted index)
+            pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]] = []
+            seen_pairs: set[tuple[int, int]] = set()
 
-                        if _detect_supersession(
-                            a["content"]
-                        ) or _detect_supersession(b["content"]):
-                            ctype = "version_supersede"
-                            score *= 1.2
+            for _project, group in by_project.items():
+                # Build inverted index: token → list of decision indices
+                token_index: dict[str, list[int]] = defaultdict(list)
+                for idx, d in enumerate(group):
+                    # Use top-8 tokens by length (more specific = better signal)
+                    top_tokens = sorted(
+                        d["tokens"], key=len, reverse=True
+                    )[:8]
+                    for token in top_tokens:
+                        token_index[token].append(idx)
 
-                        ca = ConflictCandidate(
-                            a["id"],
-                            a["project"],
-                            a["content"][:200],
-                            a["date"],
-                            min(score, 1.0),
-                            ctype,
-                        )
-                        cb = ConflictCandidate(
-                            b["id"],
-                            b["project"],
-                            b["content"][:200],
-                            b["date"],
-                            min(score, 1.0),
-                            ctype,
-                        )
-                        pairs.append((score, ca, cb))
+                # Only compare decisions that share bucket membership
+                for _token, indices in token_index.items():
+                    if len(indices) < 2 or len(indices) > 50:
+                        # Skip tokens that are too common (noise)
+                        # or singleton (no comparison possible)
+                        continue
+                    for i_pos in range(len(indices)):
+                        for j_pos in range(i_pos + 1, len(indices)):
+                            i, j = indices[i_pos], indices[j_pos]
+                            pair_key = (
+                                min(group[i]["id"], group[j]["id"]),
+                                max(group[i]["id"], group[j]["id"]),
+                            )
+                            if pair_key in seen_pairs:
+                                continue
+                            seen_pairs.add(pair_key)
 
-        pairs.sort(key=lambda x: -x[0])
-        return [(a, b) for _, a, b in pairs[:limit]]
+                            a, b = group[i], group[j]
+                            score = _jaccard(a["tokens"], b["tokens"])
+                            if score < min_score:
+                                continue
 
-    except sqlite3.OperationalError as e:
-        logger.warning("Batch contradiction scan failed: %s", e)
-        return []
-    finally:
-        conn.close()
+                            ctype = "keyword_overlap"
+                            if _detect_negation(
+                                a["content"]
+                            ) or _detect_negation(b["content"]):
+                                ctype = "negation"
+                                score *= 1.3
+
+                            if _detect_supersession(
+                                a["content"]
+                            ) or _detect_supersession(b["content"]):
+                                ctype = "version_supersede"
+                                score *= 1.2
+
+                            ca = ConflictCandidate(
+                                a["id"],
+                                a["project"],
+                                a["content"][:200],
+                                a["date"],
+                                min(score, 1.0),
+                                ctype,
+                            )
+                            cb = ConflictCandidate(
+                                b["id"],
+                                b["project"],
+                                b["content"][:200],
+                                b["date"],
+                                min(score, 1.0),
+                                ctype,
+                            )
+                            pairs.append((score, ca, cb))
+
+            pairs.sort(key=lambda x: -x[0])
+            return [(a, b) for _, a, b in pairs[:limit]]
+
+        except (aiosqlite.OperationalError, Exception) as e:
+            logger.warning("Batch contradiction scan failed: %s", e)
+            return []

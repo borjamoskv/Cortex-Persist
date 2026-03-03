@@ -208,6 +208,34 @@ CREATE INDEX IF NOT EXISTS idx_ee_type ON entity_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 """
 
+# ─── Sovereign Locks (Axiom Ω₂ — Lock-Free Concurrency) ──────────────
+CREATE_LOCK_INTENTS = """
+CREATE TABLE IF NOT EXISTS lock_intents (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    resource        TEXT NOT NULL,
+    agent_id        TEXT NOT NULL,
+    action          TEXT NOT NULL, -- 'request', 'release'
+    priority        INTEGER DEFAULT 0,
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+    expires_at      TEXT
+);
+"""
+
+CREATE_LOCK_STATE = """
+CREATE TABLE IF NOT EXISTS lock_state (
+    resource        TEXT PRIMARY KEY,
+    holder_agent    TEXT,
+    acquired_at     TEXT,
+    expires_at      TEXT,
+    queue_depth     INTEGER DEFAULT 0
+);
+"""
+
+CREATE_LOCK_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
+CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
+"""
+
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
     CREATE_VOTES,
@@ -227,4 +255,7 @@ EXTENSION_SCHEMA = [
     CREATE_SIGNALS_INDEXES,
     CREATE_ENTITY_EVENTS,
     CREATE_ENTITY_EVENTS_INDEXES,
+    CREATE_LOCK_INTENTS,
+    CREATE_LOCK_STATE,
+    CREATE_LOCK_INDEXES,
 ]

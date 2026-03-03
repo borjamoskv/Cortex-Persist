@@ -11,11 +11,23 @@ Hash Scheme Versions:
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 from typing import Any
 
-__all__ = ["canonical_json", "compute_tx_hash", "compute_tx_hash_v1", "compute_fact_hash"]
+__all__ = [
+    "canonical_json",
+    "compute_tx_hash",
+    "compute_tx_hash_v1",
+    "compute_fact_hash",
+    "now_iso",
+]
+
+
+def now_iso() -> str:
+    """Return current UTC time in ISO 8601 format."""
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 # ─── Canonical JSON ───────────────────────────────────────────────
 

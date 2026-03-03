@@ -29,6 +29,7 @@ logger = logging.getLogger("cortex")
 
 from cortex.consensus.manager import ConsensusManager  # noqa: E402
 from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
+from cortex.engine.lock import SovereignLock  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
@@ -56,6 +57,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         self.facts = FactManager(self)
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
+        self.lock_sovereign = SovereignLock(self)
 
     # ─── Security: Filesystem Permission Enforcement ──────────────
 
@@ -245,7 +247,11 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         return await super().recall(*args, **kwargs)
 
     async def get_fact(self, *args, **kwargs):
-        return await self.facts.get_fact(*args, **kwargs)
+        res = await super().get_fact(*args, **kwargs)
+        if not res:
+            return None
+        from cortex.engine.models import Fact
+        return Fact(**{k: v for k, v in res.items() if k != "type"})
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
@@ -265,8 +271,11 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         return await self.consensus.vote(*args, **kwargs)
 
     async def get_all_active_facts(self, *args, **kwargs):
-        """Retrieve all active facts across all projects."""
-        return await self.facts.get_all_active_facts(*args, **kwargs)
+        """Retrieve all active facts across all projects, wrapped in models."""
+        results = await super().get_all_active_facts(*args, **kwargs)
+        from cortex.engine.models import Fact
+
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
@@ -333,13 +342,15 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
-        return super()._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
+        return super()._row_to_fact(
+            row, tenant_id=tenant_id
+        )  # type: ignore[reportAttributeAccessIssue]
 
     # ─── Lifecycle ────────────────────────────────────────────────
 
     async def close(self):
         if self._memory_manager:
-            await self._memory_manager.wait_for_background()  # type: ignore[reportGeneralTypeIssues]
+            await self._memory_manager.wait_for_background()  # type: ignore
             self._memory_manager = None
         if self._persistence:
             await self._persistence.stop()

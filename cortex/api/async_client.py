@@ -13,6 +13,7 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
 import os
 from typing import Any
 
@@ -53,20 +54,39 @@ class AsyncCortexClient:
         return h
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
-        try:
-            resp = await self._client.request(method, path, **kwargs)
-        except httpx.HTTPError as e:
-            raise CortexError(0, f"Connection error: {e}") from e
-        if resp.status_code >= 400:
+        # Chronos Sniper Guard: Exponential Backoff Retries
+        max_retries = 3
+        backoff = 0.5
+        
+        for attempt in range(max_retries):
             try:
-                detail = resp.json().get("detail", resp.text)
-            except (ValueError, KeyError):
-                detail = resp.text
-            raise CortexError(resp.status_code, detail)
-        try:
-            return resp.json()
-        except ValueError as e:
-            raise CortexError(resp.status_code, f"Invalid JSON response: {e}") from e
+                resp = await self._client.request(method, path, **kwargs)
+                
+                if resp.status_code >= 500:
+                    # Server error, maybe retry
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(backoff * (2 ** attempt))
+                        continue
+                        
+                if resp.status_code >= 400:
+                    try:
+                        detail = resp.json().get("detail", resp.text)
+                    except (ValueError, KeyError):
+                        detail = resp.text
+                    raise CortexError(resp.status_code, detail)
+                    
+                try:
+                    return resp.json()
+                except ValueError as e:
+                    raise CortexError(resp.status_code, f"Invalid JSON response: {e}") from e
+                    
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(backoff * (2 ** attempt))
+                    continue
+                raise CortexError(0, f"Connection error after {max_retries} attempts: {e}") from e
+            except httpx.HTTPError as e:
+                raise CortexError(0, f"HTTP error: {e}") from e
 
     # ─── Facts ────────────────────────────────────────────────────────
 

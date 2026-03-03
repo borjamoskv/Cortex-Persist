@@ -41,6 +41,7 @@ from cortex.thinking.fusion import (
 )
 from cortex.thinking.orchestra_introspection import OrchestraIntrospectionMixin
 from cortex.thinking.pool import ProviderPool, ThinkingRecord
+from cortex.utils.respiration import oxygenate
 from cortex.thinking.presets import (
     DEFAULT_ROUTING,
     MODE_SYSTEM_PROMPTS,
@@ -242,6 +243,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         attempt: int,
         attempts: int,
         mode: str = "deep_reasoning",
+        temperature: float | None = None,
     ) -> tuple[ModelResponse | None, str | None]:
         """Ejecuta un único intento de consulta, manejando fallos y timeouts."""
         try:
@@ -251,11 +253,14 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             # Map mode to IntentProfile for the deterministic cascade
             intent = _MODE_TO_INTENT.get(mode, IntentProfile.GENERAL)
 
+            # Use override temperature or default from config
+            temp = temperature if temperature is not None else self.config.temperature
+
             router = CortexLLMRouter(primary=provider, fallbacks=fallbacks)
             cortex_prompt = CortexPrompt(
                 system_instruction=system,
                 working_memory=[{"role": "user", "content": prompt}],
-                temperature=self.config.temperature,
+                temperature=temp,
                 max_tokens=self.config.max_tokens,
                 intent=intent,
             )
@@ -314,6 +319,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         prompt: str,
         system: str,
         mode: str = "deep_reasoning",
+        temperature: float | None = None,
     ) -> ModelResponse:
         """Consulta un modelo individual con timeout y retry."""
         start = time.monotonic()
@@ -322,7 +328,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
         for attempt in range(attempts):
             response, last_error = await self._execute_single_attempt(
-                provider_name, model, prompt, system, attempt, attempts, mode
+                provider_name, model, prompt, system, attempt, attempts, mode, temperature
             )
 
             if response:
@@ -344,6 +350,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     # ── Main Think API ────────────────────────────────────────────
 
+    @oxygenate(min_interval=0.01)
     async def think(
         self,
         prompt: str,
@@ -406,11 +413,22 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             fusion_strategy.value,
         )
 
-        # Ejecución paralela — pasamos mode a cada _query_model
+        # Ejecución paralela — pasamos mode y temperatura variada a cada _query_model
         start = time.monotonic()
-        responses = await asyncio.gather(
-            *[self._query_model(p, m, prompt, system, mode) for p, m in models]
-        )
+
+        tasks = []
+        for i, (p, m) in enumerate(models):
+            temp = self.config.temperature
+            if self.config.dynamic_temperature and len(models) > 1:
+                # Spread temperature linearly around the base temperature
+                # using the configured variance.
+                variance = self.config.temperature_variance
+                offset = i / (len(models) - 1)
+                temp = max(0.0, min(1.0, temp + (offset - 0.5) * variance))
+
+            tasks.append(self._query_model(p, m, prompt, system, mode, temperature=temp))
+
+        responses = await asyncio.gather(*tasks)
         total_ms = (time.monotonic() - start) * 1000
 
         ok_count = sum(1 for r in responses if r.ok)

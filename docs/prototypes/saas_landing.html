@@ -355,15 +355,13 @@
         <h2>How It Works</h2>
         <p class="section-sub">CORTEX doesn't replace your memory layer — it <strong>certifies</strong> it. Drop-in trust for any AI stack.</p>
         <div class="arch-visual">
-            <div class="layer"><span class="layer-label">Your Stack</span> — Mem0 / Zep / Letta / Custom</div>
+            <div class="layer"><span class="layer-label">L0 — Operational Ground Truth</span> — CORTEX Local Memory Chain</div>
             <div class="arrow">↓</div>
-            <div class="layer"><span class="layer-label">CORTEX Trust Engine v7</span></div>
+            <div class="layer"><span class="layer-label">Bicameral Sync (L1)</span> — Relational Export to NotebookLM</div>
             <div class="arrow">↓</div>
-            <div class="layer">🔗 SHA-256 Hash Chain → 🌳 Merkle Checkpoints → 🤝 WBFT Consensus</div>
+            <div class="layer"><span class="layer-label">L2 — Synthetic Intelligence</span> — NotebookLM Deep Insights & Audits</div>
             <div class="arrow">↓</div>
-            <div class="layer">🔐 AES-256-GCM Encryption  ·  🛡️ Privacy Shield (11 patterns)  ·  🧬 Biological Core</div>
-            <div class="arrow">↓</div>
-            <div class="layer"><span class="layer-label">Output</span> — Audit Trails · Compliance Reports · Verified Memory</div>
+            <div class="layer">🔗 Cryptographic Proof (L0) + Narrative Synthesis (L2)</div>
         </div>
     </section>
 
@@ -481,7 +479,10 @@
                     <li>Immutable Ledger</li>
                     <li>Community support</li>
                 </ul>
-                <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline plan-btn" id="btn-community" target="_blank" rel="noopener noreferrer">pip install cortex-memory</a>
+                <button class="btn btn-outline plan-btn btn-copy" id="btn-community" onclick="copyInstallCmd(this)">
+                    <span class="copy-text">pip install cortex-memory</span>
+                    <span class="copy-icon" style="margin-left:8px;">📋</span>
+                </button>
             </div>
             <div class="plan plan-popular">
                 <div class="plan-badge">MOST POPULAR</div>
@@ -550,18 +551,129 @@
         </div>
     </footer>
 
-    <!-- Payment Integration -->
+    <!-- Fast Checkout Modal -->
+    <div class="checkout-overlay" id="checkout-overlay">
+        <div class="checkout-modal">
+            <div class="checkout-header">
+                <div class="checkout-title">Complete your Subscription</div>
+                <button class="checkout-close" id="checkout-close">&times;</button>
+            </div>
+            <div class="checkout-plan">
+                <div class="checkout-plan-name" id="checkout-plan-name">Pro Plan</div>
+                <div class="checkout-plan-price" id="checkout-plan-price">$29</div>
+            </div>
+            <div class="checkout-form">
+                <input type="email" class="checkout-input" placeholder="Email Address" required>
+                <input type="text" class="checkout-input" placeholder="Card Number" required>
+                <div style="display:flex; gap:16px;">
+                    <input type="text" class="checkout-input" placeholder="MM/YY" style="flex:1" required>
+                    <input type="text" class="checkout-input" placeholder="CVC" style="flex:1" required>
+                </div>
+            </div>
+            <button class="btn btn-primary checkout-btn" id="checkout-submit">Pay Securely →</button>
+            <div class="checkout-footer">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:green; margin-right:4px;"></span>
+                Encrypted & Secured by CORTEX Privacy Shield
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Integration & 1-Click Install -->
     <script>
+        // 1-Click Install function
+        function copyInstallCmd(btn) {
+            navigator.clipboard.writeText('pip install cortex-memory').then(() => {
+                const textSpan = btn.querySelector('.copy-text');
+                const iconSpan = btn.querySelector('.copy-icon');
+                const originalText = textSpan.innerText;
+                textSpan.innerText = 'Copied!';
+                iconSpan.innerText = '✓';
+                btn.style.borderColor = 'var(--accent)';
+                btn.style.color = 'var(--accent)';
+                setTimeout(() => {
+                    textSpan.innerText = originalText;
+                    iconSpan.innerText = '📋';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Fast Checkout Logic
+        const checkoutOverlay = document.getElementById('checkout-overlay');
+        const checkoutClose = document.getElementById('checkout-close');
+        const checkoutName = document.getElementById('checkout-plan-name');
+        const checkoutPrice = document.getElementById('checkout-plan-price');
+        const checkoutSubmit = document.getElementById('checkout-submit');
+
         document.querySelectorAll('[data-plan]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const plan = btn.dataset.plan;
                 const amount = plan === 'pro' ? '29' : '99';
-                btn.innerText = "Redirecting...";
-                btn.style.opacity = "0.7";
-                btn.style.pointerEvents = "none";
-                globalThis.location.href = `https://bunq.me/cortex/${amount}`;
+                const name = plan === 'pro' ? 'Pro Plan' : 'Team Plan';
+                
+                checkoutName.innerText = name;
+                checkoutPrice.innerText = '$' + amount;
+                checkoutOverlay.classList.add('active');
             });
+        });
+
+        checkoutClose.addEventListener('click', () => {
+            checkoutOverlay.classList.remove('active');
+        });
+
+        checkoutOverlay.addEventListener('click', (e) => {
+            if (e.target === checkoutOverlay) {
+                checkoutOverlay.classList.remove('active');
+            }
+        });
+
+        checkoutSubmit.addEventListener('click', async () => {
+            const emailInput = document.querySelector('.checkout-input[type="email"]');
+            const plan = checkoutName.innerText.toLowerCase().includes('pro') ? 'pro' : 'team';
+            
+            if (!emailInput.value || !emailInput.checkValidity()) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            checkoutSubmit.innerText = "Processing...";
+            checkoutSubmit.style.opacity = "0.7";
+            checkoutSubmit.style.pointerEvents = "none";
+            
+            try {
+                // Connect to CORTEX Sovereign Stripe Bridge
+                const response = await fetch('/v1/stripe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        plan: plan,
+                        customer_email: emailInput.value,
+                        success_url: globalThis.location.origin + "/docs/prototypes/success.html",
+                        cancel_url: globalThis.location.origin + "/docs/prototypes/cancel.html"
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Stripe initialization failed.');
+                }
+                
+                const data = await response.json();
+                if (data.url) {
+                    globalThis.location.href = data.url;
+                } else {
+                    throw new Error('No checkout URL received.');
+                }
+            } catch (error) {
+                console.error("Stripe Checkout Error:", error);
+                alert("Payment gateway connection failed. Error: " + error.message);
+                
+                checkoutSubmit.innerText = "Pay Securely →";
+                checkoutSubmit.style.opacity = "1";
+                checkoutSubmit.style.pointerEvents = "auto";
+            }
         });
 
         // Nav scroll effect

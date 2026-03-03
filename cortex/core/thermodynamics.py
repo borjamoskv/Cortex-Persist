@@ -28,9 +28,10 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
     }
 
     def find_spec(self, fullname: str, path, target=None):
-        base_module = fullname.split(".")[0]
-        # Si el prefijo exacto matcha molbook
-        if fullname.startswith("cortex.moltbook") or base_module in self._POISONED_MODULES:
+        base_module = fullname.partition(".")[0]
+        # Prevents meta_path hacking (Intruder Vector) where fullname could look like "cortex\0.moltbook"
+        # or other pathological module names that python might allow internally.
+        if "cortex.moltbook" in fullname or base_module in self._POISONED_MODULES:
             print("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
             print(f"FATAL: Attempted to import '{fullname}' within Cold Mode.")
             print("Activating Cyanide Protocol. Self-destructing.")

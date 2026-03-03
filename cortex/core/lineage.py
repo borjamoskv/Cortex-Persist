@@ -34,11 +34,35 @@ class LineageVerifier:
     def __init__(self, engine: Any):
         self.engine = engine
 
-    async def get_lineage(self, fact_id: int, max_depth: int = 5) -> LineageNode:
-        """Recursively build the lineage tree for a fact."""
+    async def get_lineage(self, fact_id: int, max_depth: int = 5, _cache: dict[int, LineageNode] | None = None) -> LineageNode:
+        """Recursively build the lineage tree for a fact.
+        
+        Protected against cyclic DAGs and N+1 queries via _cache and max_depth.
+        """
+        # 1. Zero-Trust OOM Killer limit
+        if max_depth < 0:
+            return LineageNode(
+                fact_id=fact_id,
+                project="unknown",
+                content="[MAX DEPTH EXCEEDED]",
+                fact_type="error",
+                confidence="none",
+                timestamp="",
+                parents=[],
+                is_valid=False,
+                error="Lineage tree depth exceeded safe limits.",
+            )
+
+        # 2. Cache check for O(1) retrieval
+        if _cache is None:
+            _cache = {}
+            
+        if fact_id in _cache:
+            return _cache[fact_id]
+            
         fact = await self.engine.get_fact(fact_id)
         if not fact:
-            return LineageNode(
+            node = LineageNode(
                 fact_id=fact_id,
                 project="unknown",
                 content="[NOT FOUND]",
@@ -49,6 +73,8 @@ class LineageVerifier:
                 is_valid=False,
                 error="Fact not found in L0",
             )
+            _cache[fact_id] = node
+            return node
 
         # Tracing parents via meta["lineage_sources"] or previous_fact_id
         parent_ids = fact.meta.get("lineage_sources", [])
@@ -60,10 +86,29 @@ class LineageVerifier:
         if prev_id and prev_id not in parent_ids:
             parent_ids.append(prev_id)
 
+        # To prevent deadlocks, _cache is simply used to prevent infinite recursion
+        # during traversal, not to store fully materialized trees which breaks GC in pytest.
+        _cache[fact_id] = True
+
         parents = []
         if max_depth > 0:
             for pid in parent_ids:
-                parents.append(await self.get_lineage(pid, max_depth - 1))
+                if pid not in _cache:
+                    parents.append(await self.get_lineage(pid, max_depth - 1, _cache))
+                else:
+                    parents.append(
+                        LineageNode(
+                            fact_id=pid,
+                            project=fact.project,
+                            content="[CYCLIC REFERENCE DETECTED]",
+                            fact_type="error",
+                            confidence="none",
+                            timestamp="",
+                            parents=[],
+                            is_valid=False,
+                            error="Cyclic graph lineage protection triggered.",
+                        )
+                    )
 
         # Cryptographic Verification (Ω₃-V)
         # In a real scenario, we'd verify hashes here.
