@@ -318,7 +318,6 @@ def main():
     parser.add_argument("--limit", type=int, default=0, help="Max archivos a procesar (0=todos)")
     args = parser.parse_args()
 
-    # Si no se especifica filtro, actualiza todo
     do_skills = args.skills or not (args.skills or args.workflows or args.scripts)
     do_workflows = args.workflows or not (args.skills or args.workflows or args.scripts)
     do_scripts = args.scripts or not (args.skills or args.workflows or args.scripts)

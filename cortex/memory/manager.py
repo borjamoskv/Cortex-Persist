@@ -24,14 +24,17 @@ import uuid
 from typing import Any
 
 from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.memory_compression import compress_and_store, raw_concat
 from cortex.memory.memory_retrieval import fact_to_dict, retrieve_episodic_context
-from cortex.memory.models import CortexFactModel, MemoryEvent
+from cortex.memory.models import MemoryEvent
+from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 from cortex.routes.notch_ws import notify_notch_pruning
+from cortex.sovereign.endocrine import DigitalEndocrine
 from cortex.telemetry.metrics import metrics
 from cortex.thinking.context_fusion import ContextFusion
 
@@ -77,6 +80,8 @@ class CortexMemoryManager:
         "_dynamic_space",
         "_bus",
         "thalamus",
+        "_resonance_gate",
+        "_endocrine",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -104,7 +109,26 @@ class CortexMemoryManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
+        self._dynamic_space = (
+            DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None
+        )  # type: ignore[reportOptionalCall]
+
+        self._endocrine = DigitalEndocrine()
+
+        # ART-v2 Resonance Engine [v6.2]
+        _sensor = None
+        try:
+            from cortex.songlines.sensor import TopographicSensor
+            _sensor = TopographicSensor()
+        except ImportError:
+            pass
+
+        self._resonance_gate = AdaptiveResonanceGate(
+            vector_store=self._l2,
+            songline_sensor=_sensor,
+            endocrine=self._endocrine
+        )
+
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router)
@@ -141,6 +165,10 @@ class CortexMemoryManager:
         )
 
         await self._l3.append_event(event)
+
+        # Ingest into Digital Endocrine system [v6.2]
+        self._endocrine.ingest_context(content, metadata=_meta)
+
         overflowed = self._l1.add_event(event)
 
         if overflowed:
@@ -252,15 +280,13 @@ class CortexMemoryManager:
             _meta["confidence_score"] = 0.8
 
         adjusted_layer = self._determine_layer(project_id, layer)
+
+        # 1. Encode Content for Resonance Verification
+        vector = await self._encoder.encode(content)
         fact_id = str(uuid.uuid4())
 
-        if use_bus and self._bus:
-            return await self._emit_to_bus(
-                fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
-            )
-
-        vector = await self._encoder.encode(content)
-        fact = CortexFactModel(
+        # 2. Build Candidate Engram (CORTEX v6+ Thermodynamic Engine)
+        candidate = CortexSemanticEngram(
             id=fact_id,
             tenant_id=tenant_id,
             project_id=project_id,
@@ -270,12 +296,35 @@ class CortexMemoryManager:
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
         )
-        if self._l2:
-            await self._l2.memorize(fact)
-        if self._hdc:
-            await self._hdc.memorize(fact, fact_type=fact_type)
 
-        return fact_id
+        # 3. Process through Adaptive Resonance Gate (ART-v2)
+        # Replacing simple exact deduplication with semantic resonance.
+        # This eliminates semantic overlap, not just string duplication.
+        status, engram = await self._resonance_gate.gate(
+            candidate=candidate,
+            precision_mode=(fact_type in ("decision", "rule"))
+        )
+
+        if status == "resonance":
+            # Resonance found! The gate already reinforced the existing engram.
+            # We return the existing ID to the caller.
+            logger.info("CortexMemoryManager: Fact assimilated via resonance with #%s", engram.id)
+            return f"deduplicated:{engram.id}"
+
+        # 4. If we reached here, it's a 'reset' (new engram category)
+        # Emit to Experience Bus if required
+        if use_bus and self._bus:
+            return await self._emit_to_bus(
+                fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
+            )
+
+        # 5. Parallel storage (L2 + HDC)
+        # Note: L2 store is handled by the gate itself on 'reset' if upsert exists,
+        # but we double-check for HDC and persistence.
+        if self._hdc:
+            await self._hdc.memorize(engram, fact_type=fact_type)
+
+        return engram.id
 
     async def reconcile_experience(self, signal: Any) -> str:
         """Process an experience signal from the bus and commit it to L2."""

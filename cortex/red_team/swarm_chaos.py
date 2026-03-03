@@ -86,7 +86,6 @@ class RedTeamSwarm:
                 )
 
                 try:
-                    # Inyectar caos (este método ya genera anticuerpos si fracasa la inmunidad)
                     success = await self.inject_chaos(service, func, seed)
                     if success:
                         logger.warning(

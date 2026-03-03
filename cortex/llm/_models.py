@@ -71,10 +71,12 @@ class CascadeEvent:
 
     intent: IntentProfile
     resolved_by: str | None
-    resolved_tier: CascadeTier
-    cascade_depth: int  # how many providers attempted before success
-    primary_consecutive_failures: int  # session counter at call time
-    timestamp: float = field(default_factory=time.monotonic)
+    tier: CascadeTier
+    project: str | None = None
+    depth: int = 1  # how many providers attempted before success
+    latency_ms: float = 0.0
+    errors: list[str] = field(default_factory=list)
+    timestamp: float = field(default_factory=time.time)
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +122,10 @@ class CortexPrompt(BaseModel):
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
+    project: str | None = Field(
+        default=None,
+        description="Project to which this prompt belongs. Used for telemetry and billing.",
+    )
     intent: IntentProfile = Field(
         default=IntentProfile.GENERAL,
         description=(

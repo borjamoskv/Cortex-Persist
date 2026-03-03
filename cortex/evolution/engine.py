@@ -1,12 +1,11 @@
 import asyncio
 import logging
 import secrets
-import sqlite3
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from cortex.database.core import connect as db_connect
 from cortex.evolution.action import SymbolicActionEngine, SymbolicActionState
 from cortex.evolution.agents import (
     AgentDomain,
@@ -16,7 +15,14 @@ from cortex.evolution.agents import (
     SubAgent,
 )
 from cortex.evolution.cortex_metrics import DomainMetrics, fetch_all_domain_metrics
+from cortex.evolution.ledger_db import EvolutionLedgerDB
 from cortex.evolution.lnn import LagrangianController
+from cortex.evolution.models import (
+    CycleReport,
+    EngineParameters,
+    EvolutionMetric,
+    EvolutionMutation,
+)
 from cortex.evolution.persistence import load_swarm, save_swarm
 from cortex.evolution.strategies import DEFAULT_STRATEGIES
 from cortex.gate.ouroboros import OuroborosGate
@@ -26,38 +32,6 @@ from cortex.sovereign.endocrine import DigitalEndocrine
 random = secrets.SystemRandom()
 
 logger = logging.getLogger("cortex.evolution.engine")
-
-
-@dataclass
-class CycleReport:
-    """Metrics produced at the end of a single evolutionary cycle."""
-
-    cycle: int
-    avg_agent_fitness: float
-    best_agent_fitness: float
-    worst_agent_fitness: float
-    avg_subagent_fitness: float
-    total_mutations: int
-    tournaments_run: int
-    species_count: int
-    duration_ms: float
-    crossovers: int = 0
-    extinctions: int = 0
-    grace_injection: float = 0.0
-    lagrangian_index: float = 0.0
-
-
-@dataclass
-class EngineParameters:
-    """Hyperparameters for the Evolution Engine (Meta-Fitness targets)."""
-
-    selection_pressure: float = 0.3
-    mutation_rate: float = 0.1
-    extinction_cycle: int = 10
-    extinction_cull_rate: float = 0.5
-    speciation_rate: float = 0.1
-    lateral_transfer_rate: float = 0.15  # 350/100: Lateral Transfer
-    meta_fitness_score: float = 0.0
 
 
 class EvolutionEngine:
@@ -81,6 +55,7 @@ class EvolutionEngine:
         self._action_engine = SymbolicActionEngine()
         self._lnn = LagrangianController()
         self._ledger = self._build_ledger()
+        self._evolution_ledger = EvolutionLedgerDB()
         if self.engine:
             self._ouroboros = OuroborosGate(self.engine._get_sync_conn())
 
@@ -88,13 +63,12 @@ class EvolutionEngine:
         """Build a persistent SovereignLedger for evolution checkpoints."""
         ledger_path = Path("~/.cortex/evolution_ledger.db").expanduser()
         ledger_path.parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(str(ledger_path), check_same_thread=False)
+        conn = db_connect(str(ledger_path), check_same_thread=False)
         conn.execute("PRAGMA journal_mode=WAL")
         return SovereignLedger(conn)
 
     async def initialize_swarm(self) -> None:
         """Load from disk or create genesis swarm (Async)."""
-        # persistence might be sync for now, wrapping in thread if needed
         loaded = await asyncio.to_thread(load_swarm)
         if loaded:
             agents, cycle = loaded
@@ -149,88 +123,49 @@ class EvolutionEngine:
 
         # 4. Extinción Masiva
         if self.cycle_count % self.params.extinction_cycle == 0:
-            # 350/100: Ouroboros Pruning takes precedence over random extinction
             if random.random() > 0.5:
                 await self._ouroboros_pruning()
                 extinctions = 1
             else:
                 extinctions = self._mass_extinction()
 
-        # 5. Selección, Recombinación y Plásmidos
+        # 5. Selección, Recombinación y Plásmidos (Ω₀ Parallelized)
+        tasks = [self._process_sovereign(s, metrics) for s in self.sovereigns]
+        results = await asyncio.gather(*tasks)
+
+        all_mutations = []
+        domain_states = {}
+        crossovers = 0
         total_grace = 0.0
-        domain_states: dict[AgentDomain, SymbolicActionState] = {}
-        for sovereign in self.sovereigns:
-            sovereign._cycle_count += 1
-            domain_grace = 0.0
 
-            # 5a. Apply Improvement Strategies (Phase 2 v3 Grace Injections)
-            for strategy in DEFAULT_STRATEGIES:
-                mutation = strategy.evaluate_agent(sovereign)
-                if mutation:
-                    sovereign.apply_mutation(mutation)
-                    domain_grace += mutation.delta_fitness
-                    total_grace += mutation.delta_fitness
-                    if mutation.epigenetic_tags.get("axiom_12_trigger"):
-                        self._record_merkle_checkpoint(sovereign, mutation)
+        for sovereign_muts, domain_muts, crossovers_count, domain_state in results:
+            all_mutations.extend(sovereign_muts)
+            all_mutations.extend(domain_muts)
+            crossovers += crossovers_count
+            total_grace += sum(m.delta_fitness for m in sovereign_muts)
+            total_grace += sum(m.delta_fitness for m in domain_muts)
+            if domain_state:
+                domain_states[domain_state.domain] = domain_state
 
-            # Apply to subagents (purifying selection / parameter tuning)
-            for sub in sovereign.subagents:
-                for strategy in DEFAULT_STRATEGIES:
-                    mutation = strategy.evaluate_subagent(sub)
-                    if mutation:
-                        sub.apply_mutation(mutation)
-                        # Sub-grace is divided by scale factor
-                        sub_grace = mutation.delta_fitness / 10.0
-                        domain_grace += sub_grace
-                        total_grace += sub_grace
-                        if mutation.epigenetic_tags.get("axiom_12_trigger"):
-                            self._record_merkle_checkpoint(sub, mutation)
+        # Batch record all mutations in one pass
+        if all_mutations:
+            self._evolution_ledger.record_mutations_batch(all_mutations)
 
-            # 5b. Compute ψSAP (Sovereign Lagrangian) for this domain
-            domain_telemetry = metrics.get(sovereign.domain)
-            if domain_telemetry:
-                state = self._action_engine.compute_state(
-                    sovereign, domain_telemetry, grace_injection=domain_grace
-                )
-                domain_states[sovereign.domain] = state
-
-            # 5c. Standard Evolution (Crossover & Selection)
-            subs = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
-            elite = subs[:3]
-            cull_count = max(1, int(len(subs) * self.params.selection_pressure))
-            survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]
-
-            new_generation = list(survivors)
-            for _ in range(cull_count if cull_count < len(subs) else 0):
-                if len(elite) >= 2:
-                    parent_a, parent_b = random.sample(elite, 2)
-                else:
-                    parent_a, parent_b = elite[0], elite[0]
-                child = self._crossover(parent_a, parent_b)
-                new_generation.append(child)
-                crossovers += 1
-
-            sovereign.subagents = new_generation
-
-        # 6. Lateral Transfer (Plásmidos) - Cross-domain infection
         transfers = self._lateral_transfer()
 
-        # 7. Meta-Fitness / Lagrangian Optimization
         avg_lagrangian = 0.0
         if domain_states:
             avg_lagrangian = sum(s.lagrangian for s in domain_states.values()) / len(domain_states)
         self._adjust_meta_parameters(avg_lagrangian)
 
-        # 8. Persistence (Async-Thread)
-        # 350/100: Fire-and-forget save to eliminate blocking lag
-        asyncio.create_task(asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count))
+        self._save_task = asyncio.create_task(
+            asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count)
+        )
 
         self.last_run = time.time()
         duration_ms = (self.last_run - start_time) * 1000
 
-        # Population Metrics
         all_subs = [sub for sov in self.sovereigns for sub in sov.subagents]
-        # O(1) metrics calculation (avoiding multiple passes if possible)
         pop_size = len(all_subs)
         avg_sub_fitness = sum(s.fitness for s in all_subs) / max(1, pop_size)
 
@@ -257,8 +192,6 @@ class EvolutionEngine:
 
     def _apply_epigenetic_modulation(self) -> None:
         """Modulate mutation parameters based on DigitalEndocrine state."""
-        # High dopamine increases mutation variance
-        # High cortisol favors pruning/conservative states
         self.params.mutation_rate = max(0.05, min(0.4, 0.1 + (self._endocrine.dopamine * 0.2)))
         self.params.selection_pressure = max(0.1, min(0.6, 0.3 + (self._endocrine.cortisol * 0.3)))
 
@@ -269,32 +202,29 @@ class EvolutionEngine:
             if not domain_telemetry:
                 continue
 
-            # δ_fitness = (health * 0.7) + (delta * 0.3)
             h_score = domain_telemetry.health_score * 70.0
             f_delta = domain_telemetry.fitness_delta * 6.0
             grounded_fitness = h_score + f_delta
-
-            # Smooth update
             sovereign.fitness = (sovereign.fitness * 0.8) + (grounded_fitness * 0.2)
 
-            # Apply to subagents (proportional to their temp stability)
             for sub in sovereign.subagents:
                 success_ratio = domain_telemetry.decision_success_rate
                 sub_delta = (success_ratio - 0.5) * 10.0
                 sub.fitness = max(0.1, sub.fitness + sub_delta)
 
     def _lateral_transfer(self) -> int:
-        """Plásmidos: Transfer parameters from the global best subagent to a random domain."""
+        """Plásmidos: Transfer parameters from random best to random target."""
         if random.random() > self.params.lateral_transfer_rate:
             return 0
 
         all_subs = [s for sov in self.sovereigns for s in sov.subagents]
+        if not all_subs:
+            return 0
         best_sub = max(all_subs, key=lambda s: s.fitness)
 
         target_sov = random.choice(self.sovereigns)
         target_sub = random.choice(target_sov.subagents)
 
-        # Infect parameters
         key = random.choice(["temperature", "top_p", "tools"])
         target_sub.parameters[key] = best_sub.parameters.get(key)
         target_sub.apply_mutation(
@@ -306,11 +236,7 @@ class EvolutionEngine:
         )
         return 1
 
-    def _record_merkle_checkpoint(
-        self,
-        agent: SovereignAgent | SubAgent,
-        mutation: Mutation,
-    ) -> None:
+    def _record_merkle_checkpoint(self, agent: SovereignAgent | SubAgent, mutation: Mutation) -> None:
         """Record an immutable checkpoint of the agent state (Phase 2 v3)."""
         logger.info("Axiom 12: Triggering Merkle Checkpoint for %s", agent.id)
         try:
@@ -328,7 +254,6 @@ class EvolutionEngine:
         except Exception as exc:
             logger.warning("Ledger write failed for agent %s: %s", agent.id, exc)
 
-        # Purge non-productive history (Axiom 12 collapse)
         agent.mutations.clear()
 
     def _crossover(self, parent_a: SubAgent, parent_b: SubAgent) -> SubAgent:
@@ -340,13 +265,11 @@ class EvolutionEngine:
             generation=max(parent_a.generation, parent_b.generation) + 1,
         )
 
-        # Epigenetic Inheritance
         child.epigenetic_state = {
             "dopamine_bias": self._endocrine.dopamine,
             "cortisol_bias": self._endocrine.cortisol,
         }
 
-        # Parameters
         t_a = parent_a.parameters.get("temperature", 0.5)
         t_b = parent_b.parameters.get("temperature", 0.5)
         child.parameters = {
@@ -361,7 +284,6 @@ class EvolutionEngine:
             )[:5],
         }
 
-        # Mutation
         if random.random() < self.params.mutation_rate:
             shift = random.uniform(-0.1, 0.1) * (1.0 + self._endocrine.dopamine)
             child.parameters["temperature"] = max(
@@ -378,7 +300,6 @@ class EvolutionEngine:
             survivors = subs[cull_limit:]
 
             while len(survivors) < len(subs):
-                # Replace with max-entropy spawns
                 spawn = SubAgent(id=f"chaos_{random.randint(100, 999)}", domain=sovereign.domain)
                 spawn.parameters = {"temperature": 1.0, "top_p": 1.0}
                 survivors.append(spawn)
@@ -390,17 +311,46 @@ class EvolutionEngine:
         """Adjust meta-fitness targets based on Lagrangian coherence (Phase 2 v3)."""
         avg_fitness = sum(s.fitness for s in self.sovereigns) / len(self.sovereigns)
 
-        # We optimize for a high Lagrangian (K - S + G - F).
-        # If the Lagrangian is negative, it means entropy/collapse is winning.
         if avg_lagrangian < 0:
-            # Stressed system -> increase mutation and selection pressure
             self.params.mutation_rate *= 1.2
             self.params.selection_pressure = min(0.6, self.params.selection_pressure + 0.05)
         elif avg_lagrangian > 10.0:
-            # Balanced system -> fine-tune
             self.params.mutation_rate *= 0.9
 
         self.params.meta_fitness_score = avg_fitness
+
+    def _decision_archaeology(self, sovereign: SovereignAgent) -> None:
+        """Analyze ledger to prune regressive lineages (Axioms Ω₁ + Ω₃)."""
+        pruned_count = 0
+        to_remove = []
+
+        for sub in sovereign.subagents:
+            history = self._evolution_ledger.get_mutation_history(sub.id, limit=5)
+            if len(history) < 3:
+                continue
+
+            deltas = [h["delta_fitness"] for h in history]
+            net_impact = sum(deltas)
+
+            if net_impact < -5.0:
+                logger.warning(
+                    "Archaeology: Detected regressive lineage in %s (impact=%.1f). Amputating.",
+                    sub.id, net_impact
+                )
+                to_remove.append(sub)
+                pruned_count += 1
+
+        for sub in to_remove:
+            sovereign.subagents.remove(sub)
+
+        if pruned_count > 0:
+            for _ in range(pruned_count):
+                spawn = SubAgent(
+                    id=f"rev_{secrets.token_hex(4)}",
+                    domain=sovereign.domain,
+                    name=f"Revived-{sovereign.domain.name}"
+                )
+                sovereign.subagents.append(spawn)
 
     async def _ouroboros_pruning(self) -> None:
         """Enforces Landauer's Razor: Pruning dead-weight projects."""
@@ -412,22 +362,15 @@ class EvolutionEngine:
             logger.warning("Ouroboros: Amputating project %s due to high entropy.", target)
             await asyncio.to_thread(self._ouroboros.trigger_pruning, target)
 
-            # 350/100: Visual Feedback via Notch Live
             from cortex.routes.notch_ws import notch_hub
-
             if notch_hub:
-                # Persistent reference to avoid garbage collection
                 self._broadcast_task = asyncio.create_task(
                     notch_hub.broadcast('{"command": "shockwave", "intensity": 1.0}')
                 )
 
-            # Recompute entropy index (wrapped in thread to avoid blocking)
             result = await asyncio.to_thread(self._ouroboros.measure_entropy)
-            logger.info(
-                "Ouroboros: Pruning complete. New Entropy Index: %.4f", result["entropy_index"]
-            )
+            logger.info("Ouroboros: Pruning complete. New Entropy: %.4f", result["entropy_index"])
 
-        # Cull weakest subagents globally
         all_subs = [sub for sov in self.sovereigns for sub in sov.subagents]
         if all_subs:
             worst = min(all_subs, key=lambda s: s.fitness)
@@ -435,3 +378,97 @@ class EvolutionEngine:
                 if worst in sov.subagents:
                     sov.subagents.remove(worst)
                     logger.info("Ouroboros: Culled weakest subagent %s", worst.id)
+    async def _process_sovereign(self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
+        """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
+        sovereign._cycle_count += 1
+        domain_grace = 0.0
+        sovereign_muts_to_record = []
+        sub_muts_to_record = []
+        crossovers_count = 0
+
+        # Agent Mutations
+        for strategy in DEFAULT_STRATEGIES:
+            mutation = strategy.evaluate_agent(sovereign)
+            if mutation:
+                prev_h = sovereign.state_hash
+                sovereign.apply_mutation(mutation)
+                domain_grace += mutation.delta_fitness
+
+                p_mutation = EvolutionMutation(
+                    agent_id=sovereign.id,
+                    mutation_type=mutation.mutation_type.name,
+                    prev_hash=prev_h,
+                    new_hash=sovereign.state_hash,
+                    delta_fitness=mutation.delta_fitness,
+                    metrics=[
+                        EvolutionMetric("fitness", sovereign.fitness),
+                        EvolutionMetric("cycle", float(self.cycle_count)),
+                    ],
+                    metadata={
+                        "description": mutation.description,
+                        "tier": getattr(sovereign, "evolution_tier", "N/A")
+                    }
+                )
+                sovereign_muts_to_record.append(p_mutation)
+
+                if mutation.epigenetic_tags.get("axiom_12_trigger"):
+                    self._record_merkle_checkpoint(sovereign, mutation)
+
+        # Subagent Mutations
+        for sub in sovereign.subagents:
+            for strategy in DEFAULT_STRATEGIES:
+                mutation = strategy.evaluate_subagent(sub)
+                if mutation:
+                    prev_h_sub = sub.state_hash
+                    sub.apply_mutation(mutation)
+                    sub_grace = mutation.delta_fitness / 10.0
+                    domain_grace += sub_grace
+
+                    p_mutation = EvolutionMutation(
+                        agent_id=sub.id,
+                        mutation_type=mutation.mutation_type.name,
+                        prev_hash=prev_h_sub,
+                        new_hash=sub.state_hash,
+                        delta_fitness=mutation.delta_fitness,
+                        metrics=[
+                            EvolutionMetric("fitness", sub.fitness),
+                            EvolutionMetric("grace_contribution", sub_grace),
+                        ],
+                        metadata={
+                            "description": mutation.description,
+                            "parent_sovereign": sovereign.id,
+                            "tier": sub.evolution_tier
+                        }
+                    )
+                    sub_muts_to_record.append(p_mutation)
+
+                    if mutation.epigenetic_tags.get("axiom_12_trigger"):
+                        self._record_merkle_checkpoint(sub, mutation)
+
+        self._decision_archaeology(sovereign)
+
+        domain_telemetry = metrics.get(sovereign.domain)
+        state = None
+        if domain_telemetry:
+            state = self._action_engine.compute_state(
+                sovereign, domain_telemetry, grace_injection=domain_grace
+            )
+
+        # Crossover & Survival
+        subs = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
+        elite = subs[:3]
+        cull_count = max(1, int(len(subs) * self.params.selection_pressure))
+        survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]
+
+        new_generation = list(survivors)
+        for _ in range(cull_count if cull_count < len(subs) else 0):
+            if len(elite) >= 2:
+                parent_a, parent_b = random.sample(elite, 2)
+            else:
+                parent_a, parent_b = elite[0], elite[0]
+            child = self._crossover(parent_a, parent_b)
+            new_generation.append(child)
+            crossovers_count += 1
+
+        sovereign.subagents = new_generation
+        return sovereign_muts_to_record, sub_muts_to_record, crossovers_count, state

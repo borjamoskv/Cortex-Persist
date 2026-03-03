@@ -117,7 +117,7 @@ class TestTipOnSlowDecorator:
 
         @tip_on_slow(threshold=60.0)
         def my_func():
-            pass
+            return "sovereign"
 
         assert my_func.__name__ == "my_func"
 

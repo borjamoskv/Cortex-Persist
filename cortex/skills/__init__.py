@@ -9,13 +9,11 @@ De un directorio de .md a un grafo cognitivo vivo.
 Skills que se registran solos, declaran capacidades y se componen bajo demanda.
 """
 
-from cortex.skills.composer import SkillComposer
-from cortex.skills.graph import SkillGraph
 from cortex.skills.registry import SkillManifest, SkillRegistry
+from cortex.skills.router import SkillRouter
 
 __all__ = [
     "SkillManifest",
     "SkillRegistry",
-    "SkillGraph",
-    "SkillComposer",
+    "SkillRouter",
 ]

@@ -71,7 +71,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
     async def _run_store_validation(
         self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
-    ) -> tuple[int | None, dict | None, str]:
+    ) -> tuple[int | None, dict | None, str, str]:
         from cortex.engine.bridge_guard import BridgeGuard
         from cortex.engine.storage_guard import StorageGuard
 
@@ -100,6 +100,22 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             logger.warning("NEMESIS REJECTION: %s", rej)
             raise ValueError(rej)
 
+        # Ω₁: Bridge Elevation — Prescriptive pattern elevation for cross-project duplicates
+        if fact_type in ("knowledge", "decision", "rule", "ghost"):
+            # Don't bridge if it's an update (has previous_fact_id)
+            if not (meta and meta.get("previous_fact_id")):
+                source_proj = await BridgeGuard.detect_bridge_candidate(
+                    conn, content, project, tenant_id
+                )
+                if source_proj:
+                    logger.info(
+                        "🌉 [Ω₁] Elevating pattern to BRIDGE: %s → %s", source_proj, project
+                    )
+                    fact_type = "bridge"
+                    # Prescriptive pattern adoption: ensure bridge content follows BridgeGuard format
+                    if "→" not in content and "->" not in content:
+                        content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
+
         if fact_type == "bridge":
             bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
             if not bridge_res["allowed"]:
@@ -107,7 +123,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             if bridge_res["meta_flags"]:
                 meta = {**(meta or {}), **bridge_res["meta_flags"]}
 
-        return None, meta, content
+        return None, meta, content, fact_type
 
     async def _store_impl(
         self,
@@ -124,7 +140,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         commit: bool,
         tx_id: int | None,
     ) -> int:
-        dedupe_id, meta, content = await self._run_store_validation(
+        dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
         if dedupe_id is not None:

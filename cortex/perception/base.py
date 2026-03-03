@@ -103,7 +103,7 @@ class FileEvent:
 class BehavioralSnapshot:
     """Inferred user behavior from a window of file events."""
 
-    intent: str  # debugging, deep_work, refactoring, setup, etc.
+    intent: str
     emotion: str  # frustrated, flow, curious, cautious, confident, neutral
     confidence: str  # C1-C5
     project: str | None

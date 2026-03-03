@@ -51,12 +51,12 @@ class AutopoiesisEngine:
                 if self._requires_mutation(func_name):
                     self._execute_autopoietic_rewrite(func)
                 return result
-            except Exception as e:
+            except Exception:
                 latency_ms = (time.perf_counter_ns() - start_t) / 1e6
                 self._record_observation(func_name, latency_ms, False)
                 if self._requires_mutation(func_name):
                     self._execute_autopoietic_rewrite(func)
-                raise e
+                raise  # Preserve original traceback (Ω₃)
 
         return wrapper
 
@@ -94,21 +94,28 @@ class AutopoiesisEngine:
 
     def _execute_autopoietic_rewrite(self, func: Callable[..., Any]) -> None:
         """
-        The core of autopoiesis. Re-evaluates the function's AST and attempts
-        JIT recompilation or structural modification to adapt to new load patterns.
+        The core of autopoiesis. Re-evaluates the function's AST and validates
+        parsability. Does NOT silently claim mutation succeeded.
+
+        Ω₃ Honesty: If no actual rewrite is performed, history is NOT reset.
         """
-        logger.warning(f"AUTOPOIESIS TRIGGERED: Structural mutation initiated for {func.__name__}")
+        logger.warning(
+            "AUTOPOIESIS TRIGGERED: Performance degradation detected for '%s'. "
+            "AST analysis initiated — no runtime mutation applied (bridge pending).",
+            func.__name__,
+        )
         try:
             source = inspect.getsource(func)
-            ast.parse(source)  # Validate AST; future: DEMIURGE-OMEGA integration
-            # In a full implementation, this integrates with DEMIURGE-OMEGA to
-            # replace O(N) loops with O(1) lookups and re-bind native extensions.
-            logger.info("AST captured. Awaiting Demiurge compilation bridge.")
-
-            # Reset history to allow new form to stabilize
-            self._history[func.__name__] = {
-                "latencies": collections.deque(maxlen=100),
-                "failures": 0,
-            }
-        except TypeError:
-            logger.error("Function source unavailable for mutation.")
+            tree = ast.parse(source)
+            node_count = sum(1 for _ in ast.walk(tree))
+            logger.info(
+                "AST captured for '%s': %d nodes. "
+                "No mutation applied — Demiurge bridge not connected. "
+                "History preserved for continued observation.",
+                func.__name__,
+                node_count,
+            )
+            # Ω₃: Do NOT reset history. The function was NOT actually mutated.
+            # Resetting would mask continued degradation.
+        except (TypeError, OSError):
+            logger.error("Function source unavailable for mutation of '%s'.", func.__name__)

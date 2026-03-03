@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Final
+from typing import Final, Any
 
 import aiosqlite
 
@@ -102,9 +102,10 @@ def connect(
     *,
     uri: bool = False,
     check_same_thread: bool = False,
-    row_factory: type | None = None,
+    row_factory: Any | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
+    isolation_level: str | None = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 
@@ -117,6 +118,7 @@ def connect(
         row_factory: Optional row factory (e.g., sqlite3.Row).
         timeout: Connection timeout in seconds.
         read_only: If True, enforce query_only=1 (no writes allowed).
+        isolation_level: Optional isolation level for the connection.
 
     Returns:
         A fully-configured sqlite3.Connection.
@@ -127,6 +129,7 @@ def connect(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
+            isolation_level=isolation_level,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):

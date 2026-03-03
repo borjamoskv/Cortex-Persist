@@ -359,7 +359,6 @@ class HDCVectorStoreL2:
             (tenant_id, project_id, limit),
         )
         ids = [row["id"] for row in cursor.fetchall()]
-        # print(f"DEBUG: Found {len(ids)} toxic IDs for {tenant_id}/{project_id}")
         return ids
 
     def extract_traces(self, fact: CortexFactModel) -> dict[str, Any]:

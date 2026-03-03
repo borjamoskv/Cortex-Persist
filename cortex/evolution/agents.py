@@ -73,6 +73,7 @@ class SubAgent:
     parameters: dict[str, Any] = field(default_factory=dict)
     mutations: list[Mutation] = field(default_factory=list)
     epigenetic_state: dict[str, Any] = field(default_factory=dict)  # 350-Sovereign biological state
+    evolution_tier: str = "GENESIS"  # Match EvolutionType auto() values
     generation: int = 0
 
     @property
@@ -80,19 +81,29 @@ class SubAgent:
         return len(self.mutations)
 
     def apply_mutation(self, mutation: Mutation) -> None:
-        """Apply a mutation and update fitness.
-
-        Note: ceiling enforcement is handled by FitnessLandscape.clamp()
-        in the engine — not here.  We only enforce the floor (0.0).
-        """
+        """Apply a mutation and update fitness and evolution tier."""
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1
+        
+        # Evolution Tier Transition
+        if self.fitness > 90.0:
+            self.evolution_tier = "SINGULARITY"
+        elif self.fitness > 75.0:
+            self.evolution_tier = "RECURSIVE"
+        elif self.fitness > 60.0:
+            self.evolution_tier = "ADAPTIVE"
+        elif self.fitness > 30.0:
+            self.evolution_tier = "COGNITIVE"
+        else:
+            self.evolution_tier = "GENESIS"
+
         logger.debug(
-            "SubAgent %s mutated: %s (fitness=%.1f, gen=%d)",
+            "SubAgent %s mutated: %s (fitness=%.1f, tier=%s, gen=%d)",
             self.id,
             mutation.mutation_type.name,
             self.fitness,
+            self.evolution_tier,
             self.generation,
         )
 

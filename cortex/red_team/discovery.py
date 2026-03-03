@@ -78,7 +78,6 @@ class DiscoveryProvider:
             if name.startswith("_"):
                 continue
 
-            # Escanear métodos de la clase
             for func_name, func_obj in inspect.getmembers(
                 obj, lambda x: inspect.isfunction(x) or inspect.ismethod(x)
             ):

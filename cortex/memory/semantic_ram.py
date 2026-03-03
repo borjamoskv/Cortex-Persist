@@ -193,7 +193,6 @@ class SemanticMutator:
         keys = list(batch.keys())
         placeholders = ",".join(["?"] * len(keys))
 
-        # 1. Recuperamos todo en 1 sola query (eliminamos N+1 queries under lock)
         cursor.execute(
             f"SELECT m.id, m.success_rate, m.timestamp, v.embedding, m.rowid "
             f"FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "

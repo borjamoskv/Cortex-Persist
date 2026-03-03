@@ -160,7 +160,6 @@ def create_plugin(name: str, description: str, output_dir: Path) -> Path:
 
         @app.post("/action")
         async def action(req: ActionRequest) -> ActionResponse:
-            # TODO: Implement your plugin logic here
             return ActionResponse(result=f"Processed: {{req.input}}")
 
 

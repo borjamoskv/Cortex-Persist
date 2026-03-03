@@ -90,7 +90,6 @@ class TestConnectionGuardOnCortex:
             return  # Skip if not in repo context
 
         violations = scan_raw_connects(cortex_root)
-        # Allow printing for debug even if we don't hard-fail
         for v in violations:
             print(f"  ⚠️  {v}")
         # We assert 0 violations — this is the whole point of the guard

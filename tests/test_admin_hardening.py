@@ -7,7 +7,7 @@ wired into cortex/routes/admin.py.
 
 import os
 import tempfile
-from unittest.mock import patch
+from unittest.mock import patch  # noqa: F401 — kept for future admin tests
 
 import pytest
 from fastapi.testclient import TestClient
@@ -131,16 +131,13 @@ class TestSelfHealingHook:
             SelfHealingHook.trigger(ValueError("oops"), {"endpoint": "ep2"})
         assert _HEAL_COUNTER["ep2"] == 3
 
-    def test_status_failure_triggers_heal(self, client):
-        """When get_system_status raises, the hook should be triggered."""
-        with patch("cortex.routes.middleware.SelfHealingHook.trigger"):
-            with patch("cortex.routes.admin.CortexEngine.stats", side_effect=RuntimeError("boom")):
-                resp = client.get(
-                    "/v1/status",
-                    headers={"Authorization": "Bearer fake-key-that-wont-auth"},
-                )
-                # We expect 401 because fake key won't authenticate.
-                # The self-heal trigger is only reached if auth passes and engine fails.
-                # So this test validates the wiring exists by checking the mock isn't
-                # called with a bad auth (correct isolation).
-                assert resp.status_code == 401
+    def test_status_failure_triggers_heal(self):
+        """SelfHealingHook.trigger records a RuntimeError for the endpoint."""
+        from cortex.routes.middleware import _HEAL_COUNTER, SelfHealingHook
+
+        _HEAL_COUNTER.clear()
+        SelfHealingHook.trigger(
+            RuntimeError("boom"),
+            {"endpoint": "/v1/status"},
+        )
+        assert _HEAL_COUNTER.get("/v1/status") == 1
