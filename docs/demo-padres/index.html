@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Para Vosotros — Borja Fernández</title>
+  <meta name="description" content="174.284 líneas de código. Cada una con un propósito: crear lo que antes no existía. Para Aita y Ama.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --gold: #D4AF37;
+      --gold-soft: rgba(212, 175, 55, 0.15);
+      --bg: #0a0a0a;
+      --card-bg: rgba(20, 20, 25, 0.8);
+      --text: #e8e4dc;
+      --text-soft: rgba(232, 228, 220, 0.6);
+      --border: rgba(212, 175, 55, 0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ─── PARTICLES ─── */
+    canvas#particles {
+      position: fixed; inset: 0;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ─── LAYOUT ─── */
+    .page { position:relative; z-index: 1; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-soft);
+      max-width: 550px;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+    .hero .dedication {
+      font-size: 0.9rem;
+      color: var(--gold);
+      opacity: 0.8;
+      margin-top: 2rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 5rem 2rem; max-width: 900px; margin: 0 auto; }
+    
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* ─── CARDS ─── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+    }
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    /* ─── MUSIC ─── */
+    .music-section {
+      text-align: center;
+    }
+    .music-section p {
+      color: var(--text-soft);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .spotify-embed {
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+    .spotify-embed iframe {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+    .music-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .music-link {
+      padding: 0.6rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    .music-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ─── CLOSING ─── */
+    .closing {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .closing p {
+      font-size: 1.1rem;
+      color: var(--text-soft);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .closing strong { color: var(--text); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      opacity: 0.5;
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
+      section { padding: 3rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Esto es lo que construyo</h1>
+    <p>Cada una de estas partículas doradas representa una línea de código que he escrito. Son miles. Y cada una tiene un propósito: crear algo que antes no existía.</p>
+    <div class="dedication">Para Aita y Ama · Con todo el cariño del mundo</div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section>
+    <h2 class="section-title">Esto es lo que he creado</h2>
+    <div class="cards">
+      
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3>Detectives Digitales</h3>
+        <p>Asistentes que revisan miles de datos financieros en segundos y encuentran errores que un equipo tardaría semanas en detectar.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🎵</div>
+        <h3>Maestro de Sonido</h3>
+        <p>Una herramienta que mejora la calidad del sonido de la música automáticamente, como un ingeniero de sonido invisible.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>Cerebro Digital (CORTEX)</h3>
+        <p>Un sistema de memoria persistente con más de 1.500 decisiones almacenadas. Aprende de cada error y nunca olvida.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3>MOSKV-1</h3>
+        <p>Mi alter-ego digital. Un agente autónomo con personalidad propia que conversa, debate y defiende ideas en foros de inteligencia artificial.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h3>Identidad Soberana</h3>
+        <p>Un sistema que protege la identidad y los datos de la inteligencia artificial, como una caja fuerte inquebrantable.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🎨</div>
+        <h3>Naroa.online</h3>
+        <p>La web de Naroa. Diseñada con cariño para mostrar su obra al mundo. Cada detalle pensado para que sus cuadros brillen.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MUSIC -->
+  <section class="music-section">
+    <h2 class="section-title">🎶 Mi Música</h2>
+    <p>Además de código, hago música electrónica desde 2008. Aquí está <strong>MOSKVLOGÍA</strong> — mi recopilatorio completo de producciones originales. Todo 120% original.</p>
+    
+    <div class="spotify-embed">
+      <iframe 
+        src="https://open.spotify.com/embed/artist/4p7wMuZpktE5aBFhBoQdqa?utm_source=generator&theme=0" 
+        height="352" 
+        allowfullscreen 
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <div class="music-links">
+      <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="music-link">Bandcamp</a>
+      <a href="https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa" target="_blank" rel="noopener" class="music-link">Spotify</a>
+      <a href="https://soundcloud.com/borja-moskv" target="_blank" rel="noopener" class="music-link">SoundCloud</a>
+      <a href="https://www.youtube.com/@borjamoskv" target="_blank" rel="noopener" class="music-link">YouTube</a>
+      <a href="https://borjamoskv.com" target="_blank" rel="noopener" class="music-link">borjamoskv.com</a>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <p>Todo esto lo he hecho <strong>porque me apasiona</strong>.</p>
+    <p>Y porque vosotros me enseñasteis que lo importante es hacer las cosas bien, con cariño y sin atajos.</p>
+  </div>
+
+  <footer>
+    <a href="https://borjamoskv.com">borjamoskv.com</a> · 
+    <a href="https://portrait.so/borja">Portrait.so/borja</a>
+    <br><br>MOSKV-1 · 2026
+  </footer>
+
+</div>
+
+<script>
+// Golden particles
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function init() {
+  resize();
+  particles = [];
+  const count = Math.min(200, Math.floor(canvas.width * canvas.height / 8000));
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.3 + 0.05,
+      opacity: Math.random() * 0.6 + 0.2,
+      drift: (Math.random() - 0.5) * 0.2
+    });
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const p of particles) {
+    p.y -= p.speed;
+    p.x += p.drift;
+    if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+    if (p.x < -10) p.x = canvas.width + 10;
+    if (p.x > canvas.width + 10) p.x = -10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(212, 175, 55, ${p.opacity})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', init);
+init();
+draw();
+</script>
+
+</body>
+</html>
