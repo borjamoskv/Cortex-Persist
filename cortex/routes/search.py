@@ -24,7 +24,8 @@ async def search_facts(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id or req.project,
+        project=req.project,
+        tenant_id=auth.tenant_id,
         as_of=req.as_of,
         graph_depth=req.graph_depth,
         include_graph=req.include_graph,
@@ -61,7 +62,8 @@ async def search_facts_get(
     results = await engine.search(
         query=query,
         top_k=k,
-        project=auth.tenant_id,
+        project=None,
+        tenant_id=auth.tenant_id,
         as_of=as_of,
         graph_depth=graph_depth,
         include_graph=include_graph,

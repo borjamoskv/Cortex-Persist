@@ -1,103 +1,63 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
-# Change Date: 2030-01-01 (Transitions to Apache 2.0)
-
-"""CORTEX v5.1 — Sovereign LLM Routing (KETER-∞ ROP).
-
-Abstracción arquitectónica para desvincular el motor de razonamiento
-de proveedores específicos. Implementa Strategy + Circuit Breaker
-con Railway Oriented Programming (Result monads).
-"""
-
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import logging
-from abc import ABC, abstractmethod
+import time
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
-from pydantic import BaseModel, Field
-
+from cortex.llm._cascade import CascadeManager, classify_tier
+from cortex.llm._hedging import HedgedRequestStrategy
+from cortex.llm._models import (
+    BaseProvider,
+    CascadeEvent,
+    CascadeTier,
+    CortexPrompt,
+    HedgedResult,
+    IntentProfile,
+)
+from cortex.llm._telemetry import CascadeTelemetry
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.llm.router")
 
-
-class CortexPrompt(BaseModel):
-    """Representación Soberana de una instrucción para el enjambre.
-    Independiente del proveedor final (OpenAI, Anthropic, Gemini, etc).
-    """
-
-    system_instruction: str = Field(
-        default="You are a helpful assistant.",
-        description="El prompt del sistema o rol principal.",
-    )
-    working_memory: list[dict[str, str]] = Field(
-        default_factory=list,
-        description="Historial reciente o contexto de trabajo (rol/contenido).",
-    )
-    episodic_context: list[dict[str, str]] | None = Field(
-        default=None,
-        description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
-    )
-    temperature: float = Field(default=0.3, ge=0.0, le=2.0)
-    max_tokens: int = Field(default=4096, gt=0)
-
-    def to_openai_messages(self) -> list[dict[str, str]]:
-        """Convierte la estructura soberana al formato de mensajes de OpenAI."""
-        messages: list[dict[str, str]] = [{"role": "system", "content": self.system_instruction}]
-
-        # Inyectar contexto episódico si existe, asimilado tempranamente
-        if self.episodic_context:
-            context_str = "\n".join(
-                f"[{m.get('role', 'memory')}]: {m.get('content', '')}"
-                for m in self.episodic_context
-            )
-            messages.append(
-                {
-                    "role": "user",
-                    "content": (
-                        f"<episodic_context>\n{context_str}\n</episodic_context>\n"
-                        "Use this context for the following interactions if relevant."
-                    ),
-                }
-            )
-
-        messages.extend(self.working_memory)
-        return messages
-
-
-class BaseProvider(ABC):
-    """Interfaz estricta que todo proveedor LLM debe cumplir."""
-
-    @property
-    @abstractmethod
-    def provider_name(self) -> str:
-        """Identificador único del proveedor."""
-        pass
-
-    @property
-    @abstractmethod
-    def model_name(self) -> str:
-        """Nombre del modelo subyacente."""
-        pass
-
-    @abstractmethod
-    async def invoke(self, prompt: CortexPrompt) -> str:
-        """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        pass
+# Re-exports for backward compatibility
+__all__ = [
+    "BaseProvider",
+    "CascadeEvent",
+    "CascadeTier",
+    "CortexLLMRouter",
+    "CortexPrompt",
+    "HedgedResult",
+    "IntentProfile",
+]
 
 
 class CortexLLMRouter:
-    """Enrutador resiliente usando Strategy + Circuit Breaker + ROP.
+    """Enrutador resiliente con routing determinista por intención.
 
-    Retorna Result[str, str] en lugar de lanzar excepciones,
-    permitiendo flujo determinista en el enjambre.
+    Implementa Strategy + Circuit Breaker + ROP (Ω₂ Landauer split).
     """
 
-    def __init__(self, primary: BaseProvider, fallbacks: Sequence[BaseProvider] | None = None):
+    def __init__(
+        self,
+        primary: BaseProvider,
+        fallbacks: Sequence[BaseProvider] | None = None,
+        *,
+        negative_ttl: float = 300.0,
+        positive_ttl: float = 600.0,
+        hedging_providers: Sequence[BaseProvider] | None = None,
+        db_path: str | Path | None = None,
+    ) -> None:
         self._primary = primary
-        self._fallbacks = list(fallbacks) if fallbacks else []
+        self._fallbacks = list(fallbacks or [])
+        self._hedging_providers = list(hedging_providers or [])
+        self._cascade = CascadeManager(negative_ttl, positive_ttl)
+        self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
+        # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
+        self._inflight: dict[str, asyncio.Future[Result[str]]] = {}
 
     @property
     def primary(self) -> BaseProvider:
@@ -107,40 +67,180 @@ class CortexLLMRouter:
     def fallbacks(self) -> list[BaseProvider]:
         return self._fallbacks
 
-    async def execute_resilient(self, prompt: CortexPrompt) -> Result[str, str]:
-        """Ejecuta inferencia con cascade resiliente. Retorna Result.
+    def _ordered_fallbacks(self, intent: IntentProfile) -> list[BaseProvider]:
+        """Ordena los fallbacks por afinidad de intención."""
+        typed_matches: list[BaseProvider] = []
+        safety_net: list[BaseProvider] = []
 
-        Ok(response) en éxito, Err(detail) si todos los proveedores fallan.
+        for p in self._fallbacks:
+            if classify_tier(p, intent) == CascadeTier.TYPED_MATCH:
+                typed_matches.append(p)
+            else:
+                safety_net.append(p)
+
+        # Apply A-record promotion (fastest first)
+        promoted_typed = self._cascade.promote_known_good(typed_matches, intent)
+        promoted_safety = self._cascade.promote_known_good(safety_net, intent)
+
+        return promoted_typed + promoted_safety
+
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str] | None:
+        """Attempt hedged (parallel) execution if peers are available."""
+        if not self._hedging_providers:
+            return None
+
+        # Filter out circuit-broken/NXDOMAIN providers
+        active_hedgers = [
+            p
+            for p in self._hedging_providers
+            if not self._cascade.is_nxdomain_cached(p.provider_name)
+        ]
+        if not active_hedgers:
+            return None
+
+        result_hedge, errors = await HedgedRequestStrategy.race(active_hedgers, prompt)
+        if result_hedge:
+            # Winner found — cache A-record and return
+            self._cascade.set_a_record(result_hedge.winner, result_hedge.latency_ms)
+            self._telemetry.emit(
+                CascadeEvent(
+                    intent=prompt.intent,
+                    resolved_by=result_hedge.winner,
+                    project=prompt.project,
+                    tier=CascadeTier.PRIMARY,  # Hedging is primary-tier
+                    depth=1,
+                    latency_ms=result_hedge.latency_ms,
+                    errors=errors,
+                )
+            )
+            return Ok(result_hedge.response)
+
+        # All hedged requests failed — mark them as NXDOMAIN cached
+        for p in active_hedgers:
+            self._cascade.set_nx_record(p.provider_name)
+        return None
+
+    def clear_positive_cache(self) -> None:
+        """Clear A-records."""
+        self._cascade._a_records.clear()
+
+    def clear_negative_cache(self) -> None:
+        """Clear NXDOMAIN records."""
+        self._cascade._nxdomain_cache.clear()
+
+    async def execute_resilient(self, prompt: CortexPrompt) -> Result[str]:
+        """Ejecuta inferencia con cascade determinista por intención.
+
+        Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
         """
-        errors: list[str] = []
+        # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
+        prompt_key = hashlib.sha256(
+            f"{prompt.system_instruction}:{prompt.working_memory}:{prompt.intent}".encode()
+        ).hexdigest()
 
-        # Intento con el primario
-        result = await self._try_provider(self._primary, prompt)
-        if isinstance(result, Ok):
+        if prompt_key in self._inflight:
+            logger.debug(
+                "🔥 [HEAT-SINK] Coalescing duplicate inflight prompt: %s...", prompt_key[:8]
+            )
+            return await self._inflight[prompt_key]
+
+        loop = asyncio.get_running_loop()
+        future: asyncio.Future[Result[str]] = loop.create_future()
+        self._inflight[prompt_key] = future
+
+        try:
+            result = await self._execute_resilient_impl(prompt)
+            future.set_result(result)
             return result
-        errors.append(f"{self._primary.provider_name}: {result.error}")
+        except Exception as exc:
+            if not future.done():
+                future.set_exception(exc)
+            raise
+        finally:
+            self._inflight.pop(prompt_key, None)
 
-        # Cascade a fallbacks
-        for fallback in self._fallbacks:
-            result = await self._try_provider(fallback, prompt)
-            if isinstance(result, Ok):
-                return result
-            errors.append(f"{fallback.provider_name}: {result.error}")
+    async def invoke(self, prompt: CortexPrompt) -> Result[str]:
+        """Alias for backward compatibility."""
+        return await self.execute_resilient(prompt)
 
-        # Singularidad Negativa: todos fallaron
-        detail = " | ".join(errors)
-        logger.error("Singularidad Negativa: %s", detail)
-        return Err(f"All providers failed: {detail}")
+    async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str]:
+        """Core cascade logic (extracted for Heat-Sink wrapping)."""
+        # Phase 0: Hedging (Parallel race-to-first)
+        hedged_res = await self.execute_hedged(prompt)
+        if hedged_res:
+            return hedged_res
 
-    async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
+        # Phase 1: Primary sequential attempt
+        start = time.time()
+        res_primary = await self._try_provider(self._primary, prompt)
+        latency = (time.time() - start) * 1000
+
+        if res_primary.is_ok():
+            self._telemetry.emit(
+                CascadeEvent(
+                    intent=prompt.intent,
+                    resolved_by=self._primary.provider_name,
+                    project=prompt.project,
+                    tier=CascadeTier.PRIMARY,
+                    depth=1,
+                    latency_ms=latency,
+                )
+            )
+            return res_primary
+
+        # Phase 2: Fallback cascade
+        fallbacks = self._ordered_fallbacks(prompt.intent)
+        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]
+
+        for i, provider in enumerate(fallbacks, start=2):
+            if self._cascade.is_nxdomain_cached(provider.provider_name):
+                errors.append(f"{provider.provider_name}: Skip (NXDOMAIN cached)")
+                continue
+
+            fb_start = time.time()
+            res_fb = await self._try_provider(provider, prompt)
+            fb_latency = (time.time() - fb_start) * 1000
+
+            if res_fb.is_ok():
+                tier = classify_tier(provider, prompt.intent)
+                self._cascade.set_a_record(provider.provider_name, fb_latency)
+                self._telemetry.emit(
+                    CascadeEvent(
+                        intent=prompt.intent,
+                        resolved_by=provider.provider_name,
+                        project=prompt.project,
+                        tier=tier,
+                        depth=i,
+                        latency_ms=fb_latency,
+                        errors=errors,
+                    )
+                )
+                return res_fb
+
+            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            self._cascade.set_nx_record(provider.provider_name)
+
+        # Final defeat: record terminal event
+        self._telemetry.emit(
+            CascadeEvent(
+                intent=prompt.intent,
+                resolved_by=None,
+                project=prompt.project,
+                tier=CascadeTier.NONE,
+                depth=len(fallbacks) + 1,
+                latency_ms=(time.time() - start) * 1000,
+                errors=errors,
+            )
+        )
+        return Err(f"All providers failed. Cascade exhausted. Errors: {'; '.join(errors)}")
+
+    async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str]:
         """Try a single provider, returning Result."""
         try:
-            response = await provider.invoke(prompt)
-            return Ok(response)
-        except Exception as e:  # deliberate boundary — LLM providers can raise any type
-            logger.warning("Provider '%s' failed: %s", provider.provider_name, e)
-            return Err(str(e))
+            return Ok(await provider.invoke(prompt))
+        except Exception as exc:
+            return Err(str(exc))
 
-    async def invoke(self, prompt: CortexPrompt) -> Result[str, str]:
-        """Primary entry point — alias for execute_resilient."""
-        return await self.execute_resilient(prompt)
+    def cascade_stats(self) -> dict[str, Any]:
+        """Aggregated cascade metrics."""
+        return self._telemetry.stats()

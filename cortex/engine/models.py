@@ -65,8 +65,8 @@ def row_to_fact(row: tuple) -> Fact:
     tenant_id = r[1] or "default"
     try:
         content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
-    except (ValueError, TypeError, OSError):  # InvalidTag, InvalidKey, corrupted
-        content = f"[ENCRYPTED — key mismatch] (fact #{r[0]})"
+    except Exception:  # noqa: BLE001 — Corrupted or key-mismatched facts shouldn't crash the engine
+        content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
 
     # Safely handle JSON parsing
     try:
@@ -76,8 +76,8 @@ def row_to_fact(row: tuple) -> Fact:
 
     try:
         meta = enc.decrypt_json(r[10], tenant_id=tenant_id) if r[10] else {}
-    except (json.JSONDecodeError, TypeError):
-        meta = {}
+    except Exception:  # noqa: BLE001 — corrupted or key-mismatched facts shouldn't crash retrieval
+        meta = {"error": "decryption_failed", "fact_id": r[0]}
 
     score = r[11] if r[11] is not None else 1.0
 
@@ -85,14 +85,14 @@ def row_to_fact(row: tuple) -> Fact:
         id=r[0],
         tenant_id=tenant_id,
         project=r[2],
-        content=content,
+        content=content,  # type: ignore[reportArgumentType]
         fact_type=r[4],
         tags=tags,
         confidence=r[6],
         valid_from=r[7],
         valid_until=r[8],
         source=r[9],
-        meta=meta,
+        meta=meta,  # type: ignore[reportArgumentType]
         consensus_score=score,
         created_at=r[12],
         updated_at=r[13],

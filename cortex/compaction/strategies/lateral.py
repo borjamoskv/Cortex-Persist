@@ -47,7 +47,6 @@ async def _find_and_purge_colliding_c3s(
     conn = await engine.get_conn()
     purged_ids = []
 
-    # 1. Encontrar todos los hechos C5 vigentes
     cursor = await conn.execute(
         "SELECT id, content FROM facts "
         "WHERE project = ? AND valid_until IS NULL AND confidence = 'C5'",
@@ -84,9 +83,7 @@ async def _find_and_purge_colliding_c3s(
         # distance < 2.0 * (1.0 - threshold)
 
         max_distance = 2.0 * (1.0 - similarity_threshold)
-
-        cursor = await conn.execute(
-            f"""
+        query = f"""
             SELECT f.id,
                    (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as sim
             FROM facts f
@@ -95,7 +92,10 @@ async def _find_and_purge_colliding_c3s(
               AND f.valid_until IS NULL
               AND f.confidence IN ({marks})
               AND vec_distance_cosine(v.embedding, ?) < ?
-            """,
+        """
+
+        cursor = await conn.execute(
+            query,
             (c5_emb_bytes, project, *target_confidences, c5_emb_bytes, max_distance),
         )
         colliding_rows = await cursor.fetchall()

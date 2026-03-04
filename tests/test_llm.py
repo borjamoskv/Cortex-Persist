@@ -36,6 +36,7 @@ from cortex.api.core import app
 def client():
     """Test client with bootstrapped DB."""
     from cortex.auth import get_auth_manager, reset_auth_manager
+
     reset_auth_manager()
     manager = get_auth_manager()
     manager.initialize_sync()
@@ -118,7 +119,7 @@ class TestLLMProvider:
     def test_missing_api_key_raises(self):
         from cortex.llm.provider import LLMProvider
 
-        with pytest.raises(ValueError, match="required"):
+        with pytest.raises(ValueError, match="requires"):
             LLMProvider(provider="qwen", api_key="")
 
     def test_local_providers_no_key_needed(self):
@@ -150,16 +151,29 @@ class TestLLMProvider:
     def test_preset_with_explicit_key(self):
         from cortex.llm.provider import LLMProvider
 
-        p = LLMProvider(provider="qwen", api_key="test-key-123")
-        assert p.provider_name == "qwen"
-        assert p.model == "qwen-plus"
+        with patch.dict("os.environ", {"CORTEX_LLM_MODEL": ""}, clear=False):
+            p = LLMProvider(provider="qwen", api_key="test-key-123")
+            assert p.provider_name == "qwen"
+            assert p.model == "qwen-plus"
 
     def test_repr(self):
         from cortex.llm.provider import LLMProvider
 
-        p = LLMProvider(provider="ollama")
-        assert "ollama" in repr(p)
-        assert "qwen2.5" in repr(p)
+        with patch.dict("os.environ", {"CORTEX_LLM_MODEL": ""}, clear=False):
+            p = LLMProvider(provider="ollama")
+            assert "ollama" in repr(p)
+            assert "qwen2.5" in repr(p)
+
+    def test_xai_preset_has_intent_model_map(self):
+        from cortex.llm.provider import LLMProvider
+
+        info = LLMProvider.get_preset_info("xai")
+        assert info is not None
+        assert info["default_model"] == "grok-4.1"
+        assert "intent_model_map" in info
+        assert "code" in info["intent_model_map"]
+        assert info["intent_model_map"]["code"] == "grok-4.1-fast"
+        assert info["intent_model_map"]["reasoning"] == "grok-4.1"
 
 
 # ─── LLMManager Tests ───────────────────────────────────────────────

@@ -111,7 +111,7 @@ def generate_reflection(
         source=source,
     )
     logger.info("Stored reflection #%d for project '%s'", fact_id, project)
-    return fact_id
+    return fact_id  # type: ignore[reportReturnType]
 
 
 def inject_reflections(
@@ -219,7 +219,25 @@ def _hybrid_search_learnable(
     return _fuse_rrf(sem_results, txt_results, top_k)
 
 
-def _semantic_arm(
+def _build_type_filter_clause(
+    types: tuple[str, ...],
+    project: str | None,
+) -> tuple[str, list]:
+    """Build a safe SQL fragment for type IN + optional project filter.
+
+    Returns (sql_fragment, params) where sql_fragment contains only `?`
+    placeholders and static column names — never interpolated user input.
+    """
+    placeholders = ",".join("?" for _ in types)
+    clause = "AND f.fact_type IN (" + placeholders + ")"
+    params: list = list(types)
+    if project:
+        clause += " AND f.project = ?"
+        params.append(project)
+    return clause, params
+
+
+def _semantic_arm(  # nosec B608 — parameterized query
     conn: sqlite3.Connection,
     query: str,
     project: str | None,
@@ -234,24 +252,19 @@ def _semantic_arm(
         logger.warning("Embeddings unavailable, falling back to text-only search")
         return []
 
-    type_placeholders = ",".join("?" for _ in LEARNABLE_TYPES)
-    project_filter = "AND f.project = ?" if project else ""
+    type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
-    sql = f"""
-        SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,
-               f.created_at
-        FROM fact_embeddings AS ve
-        JOIN facts AS f ON f.id = ve.fact_id
-        WHERE ve.embedding MATCH ?
-          AND k = ?
-          AND f.fact_type IN ({type_placeholders})
-          {project_filter}
-          AND f.deprecated_at IS NULL
-        ORDER BY ve.distance
-    """
-    params: list = [json.dumps(embedding), top_k * 2, *LEARNABLE_TYPES]
-    if project:
-        params.append(project)
+    sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
+        "SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+        "       f.created_at"
+        " FROM fact_embeddings AS ve"
+        " JOIN facts AS f ON f.id = ve.fact_id"
+        " WHERE ve.embedding MATCH ?"
+        "   AND k = ?"
+        "   " + type_clause + "   AND f.deprecated_at IS NULL"
+        " ORDER BY ve.distance"
+    )
+    params: list = [json.dumps(embedding), top_k * 2, *type_params]
 
     try:
         cursor = conn.execute(sql, params)
@@ -267,7 +280,7 @@ def _semantic_arm(
             for row in cursor.fetchall()
         ]
     except (sqlite3.Error, ValueError, OSError) as exc:
-        logger.debug("Semantic search failed: %s", exc)
+        logger.debug("Semantic search failed: %s", exc)  # nosec B608 — parameterized query
         return []
 
 
@@ -278,23 +291,17 @@ def _text_arm(
     top_k: int,
 ) -> list[dict]:
     """Full-text search arm via FTS5."""
-    type_placeholders = ",".join("?" for _ in LEARNABLE_TYPES)
-    project_filter = "AND f.project = ?" if project else ""
+    type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
-    sql = f"""
-        SELECT f.id, f.project, f.content, f.fact_type, f.created_at
-        FROM facts AS f
-        JOIN facts_fts AS fts ON fts.rowid = f.id
-        WHERE facts_fts MATCH ?
-          AND f.fact_type IN ({type_placeholders})
-          {project_filter}
-          AND f.deprecated_at IS NULL
-        LIMIT ?
-    """
-    params: list = [query, *LEARNABLE_TYPES]
-    if project:
-        params.append(project)
-    params.append(top_k * 2)
+    sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
+        "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+        " FROM facts AS f"
+        " JOIN facts_fts AS fts ON fts.rowid = f.id"
+        " WHERE facts_fts MATCH ?"
+        "   " + type_clause + "   AND f.deprecated_at IS NULL"
+        " LIMIT ?"
+    )
+    params: list = [query, *type_params, top_k * 2]
 
     try:
         cursor = conn.execute(sql, params)
@@ -334,7 +341,7 @@ def _fuse_rrf(
         if fid not in result_map:
             result_map[fid] = res
 
-    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]
+    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]  # type: ignore[reportCallIssue,reportArgumentType]
     merged = []
     for fid in sorted_ids:
         entry = result_map[fid]

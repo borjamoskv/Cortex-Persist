@@ -3,15 +3,22 @@
 Prevent circular imports by centralizing base CLI objects.
 """
 
+from __future__ import annotations
+
+import asyncio
+from typing import TYPE_CHECKING
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.theme import Theme
 
+if TYPE_CHECKING:
+    from cortex.engine import CortexEngine
+    from cortex.timing import TimingTracker
+
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH
-from cortex.engine import CortexEngine
-from cortex.timing import TimingTracker
 
 # Theme and Console
 cortex_theme = Theme(
@@ -31,16 +38,21 @@ cortex_theme = Theme(
 
 console = Console(theme=cortex_theme)
 DEFAULT_DB = str(DEFAULT_DB_PATH)
+GLOBAL_CLI_TIMEOUT: float = 45.0  # Chronos Sniper: No CLI command hangs indefinitely
 
 
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
-    """Create an engine instance."""
+    """Create an engine instance (lazy import)."""
+    from cortex.engine import CortexEngine
+
     return CortexEngine(db_path=db)
 
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
-    """Create a timing tracker from an engine."""
-    return TimingTracker(engine._get_conn())
+    """Create a timing tracker from an engine (lazy import)."""
+    from cortex.timing import TimingTracker
+
+    return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 
 def close_engine_sync(engine: CortexEngine) -> None:
@@ -54,7 +66,8 @@ def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
     from cortex.events.loop import sovereign_run
 
-    return sovereign_run(coro)
+    # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
+    return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
 
 
 def _show_tip(engine=None) -> None:
@@ -107,6 +120,7 @@ def _detect_agent_source() -> str:
         return explicit
     markers = [
         ("GEMINI_AGENT", "agent:gemini"),
+        ("ANTIGRAVITY_SESSION_ID", "agent:antigravity"),
         ("CURSOR_SESSION_ID", "agent:cursor"),
         ("CLAUDE_CODE_AGENT", "agent:claude-code"),
         ("WINDSURF_SESSION", "agent:windsurf"),

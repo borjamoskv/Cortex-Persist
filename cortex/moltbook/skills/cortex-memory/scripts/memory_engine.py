@@ -14,10 +14,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 # ── Configuration ──────────────────────────────────────────────
 
@@ -33,40 +31,59 @@ MAX_SESSION_BOOT_ENTRIES = 50
 
 # ── Encryption (optional) ─────────────────────────────────────
 
-def _get_cipher_key() -> Optional[bytes]:
+
+def _get_cipher_key() -> bytes | None:
     """Return encryption key if CORTEX_MEMORY_KEY is set."""
     raw = os.environ.get("CORTEX_MEMORY_KEY")
     if not raw:
         return None
+    # SHA-256 ensures a 32-byte key for AES-256
     return hashlib.sha256(raw.encode()).digest()
 
 
 def _encrypt(data: str) -> str:
-    """Encrypt data if key is available, else return plaintext."""
+    """Encrypt data using AES-256-GCM if key is available."""
     key = _get_cipher_key()
     if not key:
         return data
-    # Lightweight XOR-based obfuscation for file-at-rest protection.
-    # For production: swap with AES-256-GCM via cryptography lib.
-    key_bytes = key * (len(data) // len(key) + 1)
-    encrypted = bytes(a ^ b for a, b in zip(data.encode(), key_bytes[:len(data)]))
-    return encrypted.hex()
+
+    import base64
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    aesgcm = AESGCM(key)
+    nonce = os.urandom(12)  # Recommended nonce size for GCM
+    ciphertext = aesgcm.encrypt(nonce, data.encode(), None)
+
+    # Combine nonce + ciphertext and encode as base64
+    combined = nonce + ciphertext
+    return base64.b64encode(combined).decode("utf-8")
 
 
 def _decrypt(data: str) -> str:
-    """Decrypt data if key is available."""
+    """Decrypt AES-256-GCM data if key is available."""
     key = _get_cipher_key()
     if not key:
         return data
+
+    import base64
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
     try:
-        encrypted = bytes.fromhex(data)
-        key_bytes = key * (len(encrypted) // len(key) + 1)
-        return bytes(a ^ b for a, b in zip(encrypted, key_bytes[:len(encrypted)])).decode()
-    except (ValueError, UnicodeDecodeError):
-        return data  # Not encrypted, return as-is
+        aesgcm = AESGCM(key)
+        raw_bytes = base64.b64decode(data)
+        nonce = raw_bytes[:12]
+        ciphertext = raw_bytes[12:]
+        decrypted = aesgcm.decrypt(nonce, ciphertext, None)
+        return decrypted.decode("utf-8")
+    except Exception as e:
+        # In governance mode, we'd log this as a potential tampering attempt
+        return f"[[DECRYPTION_ERROR: {e}]]"
 
 
 # ── Initialization ─────────────────────────────────────────────
+
 
 def init() -> dict[str, bool]:
     """Initialize memory directory structure. Idempotent."""
@@ -98,6 +115,7 @@ def init() -> dict[str, bool]:
 
 
 # ── Session Management ─────────────────────────────────────────
+
 
 def _today_session_path() -> Path:
     """Return path for today's session log."""
@@ -178,6 +196,7 @@ def session_close(
 
 # ── Store & Recall ─────────────────────────────────────────────
 
+
 def store(
     content: str,
     category: str = "decisions",
@@ -193,7 +212,10 @@ def store(
 
     fpath = KNOWLEDGE_DIR / f"{category}.md"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    fact_id = hashlib.md5(f"{now}:{content}".encode()).hexdigest()[:8]
+    # [SOVEREIGN-ID] SHA-256 truncated for high-entropy unique identification.
+    fact_id = hashlib.sha256(
+        f"{now}:{content}".encode(),
+    ).hexdigest()[:12]
 
     tag_str = f" [{', '.join(tags)}]" if tags else ""
     stored_content = _encrypt(content) if encrypt else content
@@ -223,12 +245,14 @@ def recall(
             continue
         for i, line in enumerate(fpath.read_text().split("\n")):
             if query_lower in line.lower() and line.strip().startswith("- "):
-                results.append({
-                    "category": cat,
-                    "line_number": i + 1,
-                    "content": line.strip(),
-                    "relevance": "keyword_match",
-                })
+                results.append(
+                    {
+                        "category": cat,
+                        "line_number": i + 1,
+                        "content": line.strip(),
+                        "relevance": "keyword_match",
+                    }
+                )
                 if len(results) >= limit:
                     return results
 
@@ -236,13 +260,15 @@ def recall(
     for session_file in sorted(SESSIONS_DIR.glob("*.md"), reverse=True)[:7]:
         for i, line in enumerate(session_file.read_text().split("\n")):
             if query_lower in line.lower() and line.strip():
-                results.append({
-                    "category": "session",
-                    "source": session_file.name,
-                    "line_number": i + 1,
-                    "content": line.strip(),
-                    "relevance": "keyword_match",
-                })
+                results.append(
+                    {
+                        "category": "session",
+                        "source": session_file.name,
+                        "line_number": i + 1,
+                        "content": line.strip(),
+                        "relevance": "keyword_match",
+                    }
+                )
                 if len(results) >= limit:
                     return results
 
@@ -270,6 +296,7 @@ def forget(fact_id: str) -> bool:
 
 # ── Reflection ─────────────────────────────────────────────────
 
+
 def reflect(days_back: int = 3) -> dict[str, int]:
     """Run reflection cycle: extract patterns from recent sessions."""
     init()
@@ -290,9 +317,7 @@ def reflect(days_back: int = 3) -> dict[str, int]:
     return stats
 
 
-def _extract_section(
-    content: str, header: str, category: str, stats: dict[str, int]
-) -> None:
+def _extract_section(content: str, header: str, category: str, stats: dict[str, int]) -> None:
     """Extract items from a markdown section and store in knowledge."""
     if header not in content:
         return
@@ -317,6 +342,7 @@ def _extract_section(
 
 # ── Status ─────────────────────────────────────────────────────
 
+
 def status() -> dict[str, object]:
     """Return memory system status."""
     init()
@@ -330,7 +356,9 @@ def status() -> dict[str, object]:
     for fname in ("decisions.md", "errors.md", "patterns.md", "relationships.md"):
         fpath = KNOWLEDGE_DIR / fname
         if fpath.exists():
-            entries = sum(1 for line in fpath.read_text().split("\n") if line.strip().startswith("- "))
+            entries = sum(
+                1 for line in fpath.read_text().split("\n") if line.strip().startswith("- ")
+            )
             st[f"{fname.replace('.md', '')}_count"] = entries
 
     # Session count
@@ -345,6 +373,7 @@ def status() -> dict[str, object]:
 
 
 # ── CLI Entry Point ────────────────────────────────────────────
+
 
 def main() -> None:
     """CLI interface for cortex-memory."""

@@ -6,8 +6,7 @@ Extraction, relationship detection, and backend orchestration.
 import logging
 import sqlite3
 
-from cortex.config import GRAPH_BACKEND
-from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
+from cortex.graph.backends import GraphBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [
@@ -29,8 +28,6 @@ logger = logging.getLogger("cortex.graph")
 
 def get_backend(conn=None) -> GraphBackend:
     """Get the appropriate graph backend."""
-    if GRAPH_BACKEND == "neo4j":
-        return Neo4jBackend()
     return SQLiteBackend(conn)  # type: ignore[arg-type]
 
 
@@ -150,22 +147,10 @@ async def process_fact_graph(
             if sid and tid:
                 await _upsert_relation(conn, sid, tid, rel["relation_type"], timestamp, fact_id)
 
-        _neo4j_dual_write(entities, project, timestamp)
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.warning("Graph processing failed for fact %d: %s", fact_id, e)
         return 0, 0
-
-
-def _neo4j_dual_write(entities: list[dict], project: str, timestamp: str) -> None:
-    if GRAPH_BACKEND != "neo4j":
-        return
-    try:
-        neo = Neo4jBackend()
-        for ent in entities:
-            neo.upsert_entity(ent["name"], ent["entity_type"], project, timestamp)
-    except (sqlite3.Error, OSError, ValueError) as e:
-        logger.warning("Neo4j dual-write failed: %s", e)
 
 
 def process_fact_graph_sync(
@@ -181,14 +166,14 @@ def process_fact_graph_sync(
         backend = get_backend(conn)
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            eid = backend.upsert_entity_sync(ent["name"], ent["entity_type"], project, timestamp)
+            eid = backend.upsert_entity_sync(ent["name"], ent["entity_type"], project, timestamp)  # type: ignore[reportAttributeAccessIssue]
             entity_ids[ent["name"]] = eid
 
         for rel in relationships:
             source_id = entity_ids.get(rel["source_name"])
             target_id = entity_ids.get(rel["target_name"])
             if source_id and target_id:
-                backend.upsert_relationship_sync(
+                backend.upsert_relationship_sync(  # type: ignore[reportAttributeAccessIssue]
                     source_id, target_id, rel["relation_type"], fact_id, timestamp
                 )
         return len(entities), len(relationships)
@@ -212,7 +197,7 @@ async def get_graph(conn, project: str | None = None, limit: int = 50) -> dict:
 def get_graph_sync(conn, project: str | None = None, limit: int = 50) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
-    return backend.get_graph_sync(project, limit)
+    return backend.get_graph_sync(project, limit)  # type: ignore[reportAttributeAccessIssue]
 
 
 async def query_entity(conn, name: str, project: str | None = None) -> dict | None:
@@ -230,7 +215,7 @@ async def query_entity(conn, name: str, project: str | None = None) -> dict | No
 def query_entity_sync(conn, name: str, project: str | None = None) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
-    return backend.query_entity_sync(name, project)
+    return backend.query_entity_sync(name, project)  # type: ignore[reportAttributeAccessIssue]
 
 
 async def find_path(conn, source: str, target: str, max_depth: int = 3) -> list[dict]:

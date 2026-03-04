@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX — Trust Infrastructure for Autonomous AI</title>
+    <meta name="description" content="Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with? CORTEX is to AI memory what SSL/TLS is to web communications. EU AI Act compliant.">
+    <meta name="keywords" content="AI memory, sovereign AI, trust infrastructure, EU AI Act, immutable ledger, multi-agent consensus, AES-256">
+    <meta property="og:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
+    <meta property="og:description" content="Cryptographic verification, audit trails, and EU AI Act compliance for AI agents. <5ms latency. Zero cloud dependency.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cortexpersist.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="saas.css">
+    <style>
+        /* ─── Additions beyond saas.css ─── */
+
+        /* Urgency Banner */
+        .urgency-banner {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+            background: linear-gradient(90deg, #2E5090, #6600FF, #2E5090);
+            background-size: 200% 100%;
+            animation: urgencyShift 4s ease infinite;
+            padding: 10px 24px; text-align: center;
+            font-family: var(--mono); font-size: 0.75rem;
+            color: #fff; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .urgency-banner a { color: var(--accent); font-weight: 700; text-decoration: underline; }
+        @keyframes urgencyShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+        #nav { top: 38px; }
+        #hero { padding-top: 180px; }
+
+        /* Terminal Typewriter */
+        .terminal-demo {
+            background: #0A0A0A;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius);
+            max-width: 740px; width: 100%;
+            margin: 0 auto 56px;
+            overflow: hidden;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04) inset;
+            transform: perspective(1200px) rotateX(2deg);
+            transition: transform 0.5s var(--spring-fluid), box-shadow 0.5s var(--spring-fluid);
+        }
+        .terminal-demo:hover {
+            transform: perspective(1200px) rotateX(0deg) translateY(-6px);
+            box-shadow: 0 40px 100px rgba(0,0,0,1), 0 0 0 1px rgba(204,255,0,0.12) inset;
+            border-color: rgba(204,255,0,0.15);
+        }
+        .terminal-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.04);
+            background: rgba(0,0,0,0.4);
+        }
+        .terminal-body {
+            padding: 24px; min-height: 220px;
+            font-family: var(--mono); font-size: 0.85rem; line-height: 1.8;
+            color: #A0A0A0;
+        }
+        .terminal-body .prompt { color: var(--accent); }
+        .terminal-body .cmd { color: #E0E0E0; }
+        .terminal-body .output { color: #8B949E; }
+        .terminal-body .success { color: #54D62C; }
+        .terminal-body .hash { color: #6600FF; font-size: 0.75rem; }
+
+        .typing-cursor {
+            display: inline-block; width: 8px; height: 16px;
+            background: var(--accent); margin-left: 2px;
+            animation: cursorBlink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+        @keyframes cursorBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Compliance Section */
+        #compliance {
+            background: radial-gradient(ellipse at top, rgba(102, 0, 255, 0.06) 0%, transparent 60%);
+        }
+        .compliance-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+            align-items: center;
+        }
+        .compliance-content h3 {
+            font-size: 1.8rem; font-weight: 800; margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        .compliance-content p {
+            color: var(--text-dim); font-size: 1.05rem; line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .compliance-content .fine-amount {
+            font-size: 2.5rem; font-weight: 900; color: #FF5252;
+            display: block; margin: 16px 0;
+            text-shadow: 0 0 20px rgba(255,82,82,0.3);
+        }
+        .compliance-checklist {
+            list-style: none; display: flex; flex-direction: column; gap: 16px;
+        }
+        .compliance-checklist li {
+            display: flex; align-items: flex-start; gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s var(--spring-snappy);
+        }
+        .compliance-checklist li:hover {
+            border-color: rgba(84, 214, 44, 0.3);
+            transform: translateX(8px);
+        }
+        .compliance-checklist .check-icon {
+            width: 24px; height: 24px; flex-shrink: 0;
+            background: rgba(84, 214, 44, 0.15);
+            border: 1px solid rgba(84, 214, 44, 0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #54D62C; font-size: 0.75rem; font-weight: 800;
+        }
+        .compliance-checklist .check-text { font-size: 0.95rem; color: var(--text-dim); line-height: 1.5; }
+        .compliance-checklist .check-text strong { color: var(--text); }
+
+        /* Metrics Bar */
+        .metrics-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0; border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            margin: 80px auto 0; max-width: 1000px;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+        }
+        .metric-item {
+            padding: 40px 24px; text-align: center;
+            border-right: 1px solid var(--border);
+            transition: all 0.3s var(--spring-snappy);
+        }
+        .metric-item:last-child { border-right: none; }
+        .metric-item:hover { background: var(--bg-card-hover); }
+        .metric-value {
+            font-size: 2.2rem; font-weight: 900; letter-spacing: -1px;
+            margin-bottom: 8px; line-height: 1;
+        }
+        .metric-value.lime { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        .metric-value.blue { color: var(--yinmn); }
+        .metric-value.violet { color: #A855F7; }
+        .metric-value.white { color: var(--text); }
+        .metric-label {
+            font-size: 0.7rem; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 600;
+        }
+
+        /* Architecture Visual */
+        .arch-visual {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 48px;
+            max-width: 800px; margin: 64px auto 0;
+            font-family: var(--mono); font-size: 0.85rem;
+            line-height: 2; color: var(--text-dim);
+            text-align: center;
+        }
+        .arch-visual .layer {
+            padding: 12px 24px; margin: 4px auto;
+            border: 1px solid var(--border); border-radius: 8px;
+            max-width: 600px;
+            transition: all 0.3s var(--spring-snappy);
+        }
+        .arch-visual .layer:hover {
+            border-color: var(--accent);
+            background: rgba(204,255,0,0.02);
+        }
+        .arch-visual .layer-label { color: var(--accent); font-weight: 700; }
+        .arch-visual .arrow { color: #333; font-size: 1.2rem; }
+
+        /* Social Proof / Logos */
+        .proof-section { text-align: center; padding: 80px 24px; }
+        .proof-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 3px;
+            color: #555; font-weight: 600; margin-bottom: 32px;
+        }
+        .proof-logos {
+            display: flex; justify-content: center; align-items: center;
+            gap: 48px; flex-wrap: wrap; opacity: 0.4;
+            font-family: var(--font); font-size: 1.1rem; font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        /* Why Now Section */
+        #why-now { background: radial-gradient(ellipse at bottom, rgba(204,255,0,0.03) 0%, transparent 60%); }
+        .why-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+        }
+        .why-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 36px 32px;
+            display: flex; gap: 20px; align-items: flex-start;
+            transition: all 0.4s var(--spring-fluid);
+        }
+        .why-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+        }
+        .why-number {
+            font-family: var(--mono); font-size: 2rem; font-weight: 900;
+            color: var(--accent); line-height: 1; flex-shrink: 0;
+            min-width: 40px;
+        }
+        .why-card h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
+        .why-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; }
+
+        /* Responsive Additions */
+        @media (max-width: 768px) {
+            .compliance-grid { grid-template-columns: 1fr; }
+            .metrics-bar { grid-template-columns: repeat(2, 1fr); }
+            .metric-item:nth-child(2) { border-right: none; }
+            .why-grid { grid-template-columns: 1fr; }
+            .urgency-banner { font-size: 0.65rem; padding: 8px 16px; }
+            #nav { top: 34px; }
+        }
+        @media (max-width: 600px) {
+            .metrics-bar { grid-template-columns: 1fr; }
+            .metric-item { border-right: none; border-bottom: 1px solid var(--border); }
+            .metric-item:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cortex-particles"></canvas>
+
+    <!-- Urgency Banner -->
+    <div class="urgency-banner" id="urgency-banner">
+        ⚠️ EU AI Act enforcement begins <strong>August 2026</strong> — Companies without audit trails face <strong>€30M fines</strong>.
+        <a href="#compliance">Learn how CORTEX makes you compliant →</a>
+    </div>
+
+    <!-- Nav -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">CORTEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="#compliance">Compliance</a>
+                <a href="#features">Features</a>
+                <a href="#compare">vs Mem0</a>
+                <a href="#pricing">Pricing</a>
+                <a href="compliance-check/" style="color: var(--accent);">Compliance Check</a>
+                <a href="https://github.com/borjamoskv/cortex#readme" class="nav-docs">Docs</a>
+                <a href="https://github.com/borjamoskv/cortex" class="nav-github" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+            <a href="#pricing" class="nav-cta">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section id="hero">
+        <div class="hero-badge">OPEN SOURCE · EU AI ACT READY · ZERO CLOUD DEPENDENCY</div>
+        <h1>Your AI Makes<br>Thousands of Decisions.<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Prove One.</span></h1>
+        <p class="hero-sub">CORTEX is to AI memory what <strong>SSL/TLS is to web communications</strong> — cryptographic verification, immutable audit trails, and EU AI Act compliance. In-process. <5ms.</p>
+
+        <!-- Terminal Demo -->
+        <div class="terminal-demo" id="terminal-demo">
+            <div class="terminal-header">
+                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                <span class="code-lang">terminal</span>
+            </div>
+            <div class="terminal-body" id="terminal-output">
+                <!-- Filled by typewriter JS -->
+            </div>
+        </div>
+
+        <div class="hero-actions">
+            <a href="#pricing" class="btn btn-primary" id="hero-cta-start">Start Free →</a>
+            <a href="compliance-check/" class="btn btn-outline" id="hero-cta-compliance" style="border-color: rgba(204,255,0,0.3); color: var(--accent);">🔍 Check Your Compliance</a>
+            <a href="https://github.com/borjamoskv/cortex#quickstart" class="btn btn-outline" id="hero-cta-docs">Read the Docs</a>
+        </div>
+
+        <!-- Metrics Bar -->
+        <div class="metrics-bar">
+            <div class="metric-item">
+                <div class="metric-value lime" id="metric-latency">&lt;5ms</div>
+                <div class="metric-label">Retrieval Latency</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value white" id="metric-savings">$258K</div>
+                <div class="metric-label">Annual Savings / 10 Devs</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value violet" id="metric-tests">1,162+</div>
+                <div class="metric-label">Test Functions</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value blue" id="metric-attack">Zero</div>
+                <div class="metric-label">Attack Surface</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <div class="proof-section">
+        <div class="proof-label">Works with the tools you already use</div>
+        <div class="proof-logos">
+            <span>Claude Code</span>
+            <span>Cursor</span>
+            <span>Antigravity</span>
+            <span>Windsurf</span>
+            <span>LangChain</span>
+            <span>CrewAI</span>
+        </div>
+    </div>
+
+    <!-- Compliance (EU AI Act) -->
+    <section id="compliance">
+        <h2>EU AI Act.<br>Ready Now.</h2>
+        <p class="section-sub">Article 12 enforcement begins August 2026. Non-compliance means fines of up to <strong>€30M or 6% of global revenue</strong>. CORTEX makes compliance structural, not procedural.</p>
+        <div class="compliance-grid">
+            <div class="compliance-content">
+                <h3>What Article 12 Demands</h3>
+                <p>Every AI system operating in the EU must maintain <strong>automatic, tamper-proof logging</strong> of all decisions with full traceability and periodic integrity verification.</p>
+                <p>The penalty for non-compliance:</p>
+                <span class="fine-amount">Up to €30,000,000</span>
+                <p style="font-size:0.85rem; color:#666;">or 6% of total worldwide annual turnover — whichever is higher.</p>
+            </div>
+            <ul class="compliance-checklist">
+                <li>
+                    <span class="check-icon">✓</span>
+                    <span class="check-text"><strong>Art. 12.1 — Automatic Logging:</strong> Every fact stored in CORTEX is timestamped, hash-verified, and appended to the immutable ledger.</span>
+                </li>
+                <li>
+                    <span class="check-icon">✓</span>
+                    <span class="check-text"><strong>Art. 12.3 — Tamper-Proof Storage:</strong> SHA-256 hash-chained ledger with Merkle tree checkpoints. Any tampering is cryptographically detectable.</span>
+                </li>
+                <li>
+                    <span class="check-icon">✓</span>
+                    <span class="check-text"><strong>Art. 12.2d — Decision Lineage:</strong> Full traceability — trace how any agent arrived at any conclusion, with supporting evidence chain.</span>
+                </li>
+                <li>
+                    <span class="check-icon">✓</span>
+                    <span class="check-text"><strong>Art. 12.4 — Integrity Verification:</strong> One-command compliance reports and periodic Merkle batch verification.</span>
+                </li>
+                <li>
+                    <span class="check-icon">✓</span>
+                    <span class="check-text"><strong>Art. 14 — Multi-Agent Oversight:</strong> Reputation-weighted Byzantine consensus (WBFT) ensures no single agent corrupts shared memory.</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture">
+        <h2>How It Works</h2>
+        <p class="section-sub">CORTEX doesn't replace your memory layer — it <strong>certifies</strong> it. Drop-in trust for any AI stack.</p>
+        <div class="arch-visual">
+            <div class="layer"><span class="layer-label">Your Stack</span> — Mem0 / Zep / Letta / Custom</div>
+            <div class="arrow">↓</div>
+            <div class="layer"><span class="layer-label">CORTEX Trust Engine v7</span></div>
+            <div class="arrow">↓</div>
+            <div class="layer">🔗 SHA-256 Hash Chain → 🌳 Merkle Checkpoints → 🤝 WBFT Consensus</div>
+            <div class="arrow">↓</div>
+            <div class="layer">🔐 AES-256-GCM Encryption  ·  🛡️ Privacy Shield (11 patterns)  ·  🧬 Biological Core</div>
+            <div class="arrow">↓</div>
+            <div class="layer"><span class="layer-label">Output</span> — Audit Trails · Compliance Reports · Verified Memory</div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <h2>Built Different</h2>
+        <p class="section-sub">Not just a key-value store with embeddings. CORTEX was engineered for trust-critical, multi-agent systems from day one.</p>
+        <div class="features-grid">
+            <div class="feature" id="feat-ledger">
+                <div class="feature-icon">🔗</div>
+                <h3>Immutable Ledger</h3>
+                <p>Every fact is SHA-256 hash-chained. If anyone tampers with a single byte, the entire chain breaks. Cryptographic proof, not promises.</p>
+            </div>
+            <div class="feature" id="feat-search">
+                <div class="feature-icon">🔍</div>
+                <h3>Hybrid Search</h3>
+                <p>Semantic (MiniLM) + Full-Text (FTS5) with Reciprocal Rank Fusion. "What did we decide about auth?" returns the actual decision, not a hallucination.</p>
+            </div>
+            <div class="feature" id="feat-ghosts">
+                <div class="feature-icon">👻</div>
+                <h3>Ghost Tracking</h3>
+                <p>Track unfinished work across sessions. Ghosts surface incomplete tasks, blocking dependencies, and forgotten promises. Nothing falls through the cracks.</p>
+            </div>
+            <div class="feature" id="feat-consensus">
+                <div class="feature-icon">🤝</div>
+                <h3>WBFT Consensus</h3>
+                <p>Multi-agent Byzantine fault-tolerant verification. Agents vote on facts. ⅔ supermajority required. Reputation-weighted. No single agent can corrupt memory.</p>
+            </div>
+            <div class="feature" id="feat-privacy">
+                <div class="feature-icon">🔐</div>
+                <h3>Privacy Shield</h3>
+                <p>Zero-leakage ingress guard detects 11 secret patterns (API keys, passwords, tokens). AES-256-GCM encryption at rest. Your data never leaves your machine.</p>
+            </div>
+            <div class="feature" id="feat-bio">
+                <div class="feature-icon">🧬</div>
+                <h3>Biological Core</h3>
+                <p>Autopoietic self-repair, endocrine emotional state, circadian memory cycles. CORTEX doesn't just store — it <em>metabolizes</em> knowledge.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section id="compare">
+        <h2>CORTEX vs. The Rest</h2>
+        <p class="section-sub">Mem0 raised $24M at $150M valuation. Here's what you get with CORTEX — for free, with zero attack surface.</p>
+        <div class="compare-table-wrap">
+            <table class="compare-table" id="compare-table">
+                <thead>
+                    <tr><th>Capability</th><th>Mem0</th><th>Zep</th><th>Letta</th><th>CORTEX</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Cryptographic Ledger</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅ SHA-256</td></tr>
+                    <tr><td>Merkle Checkpoints</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅</td></tr>
+                    <tr><td>Multi-Agent Consensus</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅ WBFT</td></tr>
+                    <tr><td>Privacy Shield</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅ 11 patterns</td></tr>
+                    <tr><td>AST Sandbox</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅</td></tr>
+                    <tr><td>Local-First</td><td>❌ Cloud</td><td>❌ Cloud</td><td>✅</td><td class="win">✅ SQLite</td></tr>
+                    <tr><td>MCP Native</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅</td></tr>
+                    <tr><td>EU AI Act Ready</td><td>❌</td><td>❌</td><td>❌</td><td class="win">✅ Art. 12</td></tr>
+                    <tr><td>Known CVEs</td><td style="color:#FF5252;">CVSS 9.1</td><td>—</td><td>—</td><td class="win">None</td></tr>
+                    <tr><td>Price</td><td>$249/mo</td><td>$$$</td><td>Free</td><td class="win">Free (Apache 2.0)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Why Now -->
+    <section id="why-now">
+        <h2>Why Now?</h2>
+        <p class="section-sub">Five forces are converging. The window to build trust infrastructure is closing.</p>
+        <div class="why-grid">
+            <div class="why-card">
+                <span class="why-number">01</span>
+                <div>
+                    <h4>EU AI Act: August 2026</h4>
+                    <p>Companies deploying AI agents without audit trails face fines up to €30M. The clock is ticking. CORTEX makes compliance structural.</p>
+                </div>
+            </div>
+            <div class="why-card">
+                <span class="why-number">02</span>
+                <div>
+                    <h4>Competitor Vulnerabilities Are Public</h4>
+                    <p>Mem0 has a CVSS 9.1 SSRF vulnerability (Feb 2026) still open. Enterprise trust requires zero attack surface.</p>
+                </div>
+            </div>
+            <div class="why-card">
+                <span class="why-number">03</span>
+                <div>
+                    <h4>Context-Reconstruction Costs Compound Daily</h4>
+                    <p>45 min/dev/day × 230 days × 10 engineers = $258K/yr in wasted reconstruction. CORTEX eliminates this debt entirely.</p>
+                </div>
+            </div>
+            <div class="why-card">
+                <span class="why-number">04</span>
+                <div>
+                    <h4>Local-First Is Non-Negotiable</h4>
+                    <p>Defense, healthcare, banking, legal — these verticals will never send agent memory to a third-party cloud. CORTEX runs on your machine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing">
+        <h2>Simple Pricing</h2>
+        <p class="section-sub">Start free. Scale when you need to. Self-host forever if you want.</p>
+        <div class="pricing-grid">
+            <div class="plan">
+                <div class="plan-name">Community</div>
+                <div class="plan-price">$0<span>/forever</span></div>
+                <ul class="plan-features">
+                    <li>Full CLI & API</li>
+                    <li>1 tenant</li>
+                    <li>Semantic + Text Search</li>
+                    <li>Immutable Ledger</li>
+                    <li>Community support</li>
+                </ul>
+                <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline plan-btn" id="btn-community" target="_blank" rel="noopener noreferrer">pip install cortex-memory</a>
+            </div>
+            <div class="plan plan-popular">
+                <div class="plan-badge">MOST POPULAR</div>
+                <div class="plan-name">Pro</div>
+                <div class="plan-price">$29<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Multi-device sync (E2EE)</li>
+                    <li>5 tenants</li>
+                    <li>Ghost tracking</li>
+                    <li>Session handoff</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#" class="btn btn-primary plan-btn" id="btn-pro" data-plan="pro">Subscribe →</a>
+            </div>
+            <div class="plan">
+                <div class="plan-name">Team</div>
+                <div class="plan-price">$99<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Unlimited tenants</li>
+                    <li>WBFT Consensus</li>
+                    <li>Graph Knowledge Fusion</li>
+                    <li>Compliance Reports</li>
+                    <li>SLA 99.9%</li>
+                </ul>
+                <a href="#" class="btn btn-outline plan-btn" id="btn-team" data-plan="team">Subscribe →</a>
+            </div>
+            <div class="plan">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">$499<span>+/month</span></div>
+                <ul class="plan-features">
+                    <li>On-Premise deployment</li>
+                    <li>Custom integrations</li>
+                    <li>Dedicated support</li>
+                    <li>SOC 2 / ISO 27001</li>
+                    <li>EU AI Act audit package</li>
+                </ul>
+                <a href="mailto:borja@cortexpersist.com" class="btn btn-outline plan-btn" id="btn-enterprise">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="cta">
+        <h2>Prove Every Decision.<br>Starting Now.</h2>
+        <p>30 seconds to install. Zero cloud dependency. Apache 2.0 forever.</p>
+        <div class="cta-actions">
+            <a href="#pricing" class="btn btn-primary btn-lg" id="cta-start">Start Free →</a>
+            <a href="https://github.com/borjamoskv/cortex" class="btn btn-outline btn-lg" id="cta-github" target="_blank" rel="noopener noreferrer">⭐ Star on GitHub</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="logo-icon">⚡</span> CORTEX
+                <span class="footer-copy">© 2026 Borja Moskv · Apache 2.0</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/borjamoskv/cortex#readme">Docs</a>
+                <a href="https://github.com/borjamoskv/cortex/blob/main/openapi.yaml">API Reference</a>
+                <a href="https://github.com/borjamoskv/cortex/blob/main/SECURITY.md">Security</a>
+                <a href="https://github.com/borjamoskv/cortex">GitHub</a>
+                <a href="compliance-check/">Compliance Check</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Payment Integration -->
+    <script>
+        document.querySelectorAll('[data-plan]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const plan = btn.dataset.plan;
+                const amount = plan === 'pro' ? '29' : '99';
+                btn.innerText = "Redirecting...";
+                btn.style.opacity = "0.7";
+                btn.style.pointerEvents = "none";
+                globalThis.location.href = `https://bunq.me/cortex/${amount}`;
+            });
+        });
+
+        // Nav scroll effect
+        window.addEventListener('scroll', () => {
+            document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+
+    <!-- Terminal Typewriter Animation -->
+    <script>
+    (function() {
+        const lines = [
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'pip install cortex-memory', delay: 40 },
+            { type: 'newline', delay: 600 },
+            { type: 'output', text: '✓ Installed cortex-memory 7.0.0', delay: 10 },
+            { type: 'newline', delay: 800 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'cortex store --type decision "Chose OAuth2 PKCE for auth"', delay: 35 },
+            { type: 'newline', delay: 500 },
+            { type: 'success', text: '✅ Stored fact #42 — SHA-256 hash-chained to ledger', delay: 10 },
+            { type: 'newline', delay: 200 },
+            { type: 'hash', text: '   tx: a3f8c2...d91b → prev: 7e2b01...4fc3', delay: 10 },
+            { type: 'newline', delay: 800 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'cortex verify 42', delay: 35 },
+            { type: 'newline', delay: 400 },
+            { type: 'success', text: '✅ VERIFIED — Hash chain intact, Merkle sealed', delay: 10 },
+            { type: 'newline', delay: 800 },
+            { type: 'prompt', text: '$ ', delay: 0 },
+            { type: 'cmd', text: 'cortex compliance-report', delay: 30 },
+            { type: 'newline', delay: 400 },
+            { type: 'success', text: '📋 Compliance Score: 5/5 — All Article 12 requirements met', delay: 10 },
+        ];
+
+        const output = document.getElementById('terminal-output');
+        let lineIndex = 0;
+        let charIndex = 0;
+        let currentSpan = null;
+
+        function typeNext() {
+            if (lineIndex >= lines.length) {
+                // Add blinking cursor at end
+                const cursor = document.createElement('span');
+                cursor.className = 'typing-cursor';
+                output.appendChild(cursor);
+                return;
+            }
+
+            const line = lines[lineIndex];
+
+            if (line.type === 'newline') {
+                output.appendChild(document.createElement('br'));
+                lineIndex++;
+                charIndex = 0;
+                currentSpan = null;
+                setTimeout(typeNext, line.delay);
+                return;
+            }
+
+            if (!currentSpan) {
+                currentSpan = document.createElement('span');
+                currentSpan.className = line.type;
+                output.appendChild(currentSpan);
+            }
+
+            if (charIndex < line.text.length) {
+                currentSpan.textContent += line.text[charIndex];
+                charIndex++;
+                setTimeout(typeNext, line.delay);
+            } else {
+                lineIndex++;
+                charIndex = 0;
+                currentSpan = null;
+                setTimeout(typeNext, 50);
+            }
+        }
+
+        // Start typewriter when element is in viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(typeNext, 500);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        observer.observe(document.getElementById('terminal-demo'));
+    })();
+    </script>
+
+    <!-- Cortex Particles (Fixed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    (function() {
+        const canvas = document.getElementById('cortex-particles');
+        if (!canvas) return;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 70;
+
+        const count = 600;
+        const geometry = new THREE.IcosahedronGeometry(0.15, 0);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x2E5090,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.6
+        });
+
+        const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+        scene.add(instancedMesh);
+
+        const dummy = new THREE.Object3D();
+        const particles = [];
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                t: Math.random() * 100,
+                factor: 20 + Math.random() * 100,
+                speed: 0.005 + Math.random() / 400,
+                xFactor: -50 + Math.random() * 100,
+                yFactor: -50 + Math.random() * 100,
+                zFactor: -30 + Math.random() * 60,
+            });
+        }
+
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            for (let i = 0; i < count; i++) {
+                const p = particles[i];
+                p.t += p.speed;
+
+                const a = Math.cos(p.t) + Math.sin(p.t) / 10;
+                const b = Math.sin(p.t) + Math.cos(p.t * 2) / 10;
+                const s = Math.max(0.2, Math.cos(p.t));
+
+                dummy.position.set(
+                    p.xFactor + Math.cos((p.t / 10) * p.factor) + (Math.sin(p.t) * p.factor) / 10,
+                    p.yFactor + Math.sin((p.t / 10) * p.factor) + (Math.cos(p.t * 2) * p.factor) / 10,
+                    p.zFactor + Math.cos((p.t / 10) * p.factor) + (Math.sin(p.t * 3) * p.factor) / 10
+                );
+                dummy.scale.set(s, s, s);
+                dummy.rotation.set(s * 5, s * 5, s * 5);
+                dummy.updateMatrix();
+
+                instancedMesh.setMatrixAt(i, dummy.matrix);
+            }
+
+            instancedMesh.instanceMatrix.needsUpdate = true;
+
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
+            camera.position.y += (-mouseY * 5 - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    })();
+    </script>
+</body>
+</html>

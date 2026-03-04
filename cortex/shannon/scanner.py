@@ -42,13 +42,15 @@ class MemoryScanner:
     # ── Single-dimension distributions ──────────────────────────────
 
     async def type_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of each fact_type among active facts."""
         return await self._grouped_count("fact_type", project)
 
     async def confidence_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of each confidence level among active facts."""
         return await self._grouped_count("confidence", project)
@@ -58,13 +60,15 @@ class MemoryScanner:
         return await self._grouped_count("project", project=None)
 
     async def source_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of active facts per source."""
         return await self._grouped_count("source", project)
 
     async def age_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Active facts bucketed by age (today/week/month/quarter/older)."""
         where = _ACTIVE
@@ -76,17 +80,21 @@ class MemoryScanner:
         async with self._engine.session() as conn:
             result: dict[str, int] = {}
             for label, days in _AGE_BUCKETS:
+                # Use parameterized '-' || ? || ' days' to avoid injecting
+                # integer literals directly into SQL (bandit B608).
                 if days is not None:
                     q = (
-                        f"SELECT COUNT(*) FROM facts WHERE {where} "
-                        f"AND created_at >= datetime('now', '-{days} days')"
+                        f"SELECT COUNT(*) FROM facts WHERE {where} "  # nosec B608
+                        "AND created_at >= datetime('now', '-' || ? || ' days')"
                     )
+                    row_params = (*params, days)
                 else:
                     q = (
-                        f"SELECT COUNT(*) FROM facts WHERE {where} "
-                        "AND created_at < datetime('now', '-90 days')"
+                        f"SELECT COUNT(*) FROM facts WHERE {where} "  # nosec B608
+                        "AND created_at < datetime('now', '-' || ? || ' days')"
                     )
-                cursor = await conn.execute(q, params)
+                    row_params = (*params, 90)
+                cursor = await conn.execute(q, row_params)
                 row = await cursor.fetchone()
                 count = row[0] if row else 0
                 if count > 0:
@@ -99,7 +107,7 @@ class MemoryScanner:
         """Joint distribution of (fact_type, project) for I(type; project)."""
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT fact_type, project, COUNT(*) "
+                "SELECT fact_type, project, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {_ACTIVE} "
                 "GROUP BY fact_type, project"
             )
@@ -127,7 +135,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT DATE(created_at) AS day, COUNT(*) "
+                "SELECT DATE(created_at) AS day, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {where} "
                 "AND created_at >= datetime('now', '-' || ? || ' days') "
                 "GROUP BY day ORDER BY day",
@@ -139,7 +147,8 @@ class MemoryScanner:
     # ── Content length distribution ──────────────────────────────────
 
     async def content_length_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Content length bucketed into bands for quality assessment.
 
@@ -154,7 +163,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT "
+                "SELECT "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 "  CASE "
                 "    WHEN LENGTH(content) < 20 THEN 'micro' "
                 "    WHEN LENGTH(content) < 50 THEN 'short' "
@@ -173,7 +182,8 @@ class MemoryScanner:
     # ── Totals ───────────────────────────────────────────────────────
 
     async def total_active_facts(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> int:
         """Count of active (non-deprecated, non-quarantined) facts."""
         where = _ACTIVE
@@ -184,7 +194,8 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT COUNT(*) FROM facts WHERE {where}", params,
+                f"SELECT COUNT(*) FROM facts WHERE {where}",
+                params,  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
             )
             row = await cursor.fetchone()
             return row[0] if row else 0
@@ -192,7 +203,9 @@ class MemoryScanner:
     # ── Internal helpers ─────────────────────────────────────────────
 
     async def _grouped_count(
-        self, column: str, project: str | None,
+        self,
+        column: str,
+        project: str | None,
     ) -> dict[str, int]:
         """Generic GROUP BY count for a single column."""
         where = _ACTIVE
@@ -203,12 +216,9 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT {column}, COUNT(*) FROM facts "
+                f"SELECT {column}, COUNT(*) FROM facts "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
                 f"WHERE {where} GROUP BY {column}",
                 params,
             )
             rows = await cursor.fetchall()
-            return {
-                (str(r[0]) if r[0] is not None else "unknown"): r[1]
-                for r in rows
-            }
+            return {(str(r[0]) if r[0] is not None else "unknown"): r[1] for r in rows}

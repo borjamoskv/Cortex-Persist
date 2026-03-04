@@ -10,15 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex import config
 from cortex.daemon.models import SecurityAlert
-from cortex.database.core import connect_async
-from cortex.memory.encoder import AsyncEncoder
-
-try:
-    from cortex.memory.vector_store import VectorStoreL2
-except ImportError:
-    VectorStoreL2 = None  # type: ignore[assignment,misc]
+from cortex.memory import AsyncEncoder, VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -34,19 +27,19 @@ class SecurityMonitor:
         self.log_path = Path(log_path).expanduser()
         self.threshold = threshold
         self._encoder: AsyncEncoder | None = None
-        self._vector_store: VectorStoreL2 | None = None
+        self._vector_store: VectorStoreL2 | None = None  # type: ignore[reportInvalidTypeForm]
 
-    async def _get_store(self) -> VectorStoreL2:
+    async def _get_store(self) -> VectorStoreL2:  # type: ignore[reportInvalidTypeForm]
         """Lazily initialize the local LLM encoder and L2 vector store."""
         if self._vector_store and self._encoder:
             return self._vector_store
 
         self._encoder = AsyncEncoder()
-        # Initialize the encoder so it downloads model if needed
-        await self._encoder.initialize()
+        # LocalEmbedder handles lazy loading of the model
 
-        self._vector_store = VectorStoreL2(encoder=self._encoder, db_path="~/.cortex/vectors")
-        await self._vector_store.ensure_collection()
+        self._vector_store = VectorStoreL2(
+            encoder=self._encoder, db_path=Path("~/.cortex/security_vectors.db").expanduser()
+        )
         return self._vector_store
 
     def _read_recent_events(self) -> list[dict[str, Any]]:
@@ -98,7 +91,9 @@ class SecurityMonitor:
         return alerts
 
     async def _process_single_event(
-        self, store: VectorStoreL2, event: dict[str, Any]
+        self,
+        store: VectorStoreL2,
+        event: dict[str, Any],  # type: ignore[reportInvalidTypeForm]
     ) -> SecurityAlert | None:
         """Process a single event and return an alert if a threat is detected."""
         payload = event.get("payload", "")
@@ -106,13 +101,17 @@ class SecurityMonitor:
             return None
 
         # Query L2 vector store for structurally/semantically similar attacks
-        results = await store.recall(query=payload, limit=1, score_threshold=self.threshold)
+        results = await store.recall(query=payload, limit=1)
         if not results:
             return None
 
         top_match = results[0]
-        similarity = top_match["score"]
-        summary = top_match.get("content", "Unknown historical attack pattern")
+        similarity = getattr(top_match, "_recall_score", 0.0)
+
+        if similarity < self.threshold:
+            return None
+
+        summary = top_match.content or "Unknown historical attack pattern"
         confidence = "C5" if similarity > 0.92 else "C4"
 
         return SecurityAlert(
@@ -126,8 +125,12 @@ class SecurityMonitor:
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
         """Persist C5 alerts to the threat_intel blacklist."""
+        from cortex import config
+
         db_path = config.DB_PATH
         try:
+            from cortex.database.core import connect_async
+
             async with await connect_async(db_path) as conn:
                 for alert in alerts:
                     await self._save_threat(conn, alert)

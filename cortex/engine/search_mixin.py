@@ -4,6 +4,7 @@ import logging
 import sqlite3
 from typing import Any
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
 
@@ -12,7 +13,7 @@ __all__ = ["SearchMixin"]
 logger = logging.getLogger("cortex.engine.search")
 
 
-class SearchMixin:
+class SearchMixin(EngineMixinBase):
     """Mixin for semantic, text, and graph-augmented search operations."""
 
     async def search(
@@ -28,10 +29,15 @@ class SearchMixin:
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
-        async with self.session() as conn:
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+
+            tenant_id = get_tenant_id()
+
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             try:
                 # 1. Perform Hybrid Search
-                embedder = self._get_embedder()
+                embedder = self._get_embedder()  # type: ignore[reportAttributeAccessIssue]
                 embedding = embedder.embed(query)
 
                 results = await hybrid_search(

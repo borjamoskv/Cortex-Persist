@@ -15,6 +15,7 @@ __all__ = [
     "mejoralo_scan",
     "mejoralo_ship",
     "mejoralo_daemon",
+    "mejoralo_trend",
 ]
 
 
@@ -148,9 +149,10 @@ def mejoralo_record(project, score_before, score_after, actions, db):
         # Update mejora_loop_state.json if it exists
         import json
         from datetime import datetime
-        from pathlib import Path
 
-        state_file = Path.home() / ".cortex" / "mejora_loop_state.json"
+        from cortex.core.paths import CORTEX_DIR
+
+        state_file = CORTEX_DIR / "mejora_loop_state.json"
         if state_file.exists():
             try:
                 with open(state_file) as f:
@@ -226,6 +228,60 @@ def mejoralo_history(project, limit, db):
         close_engine_sync(engine)
 
 
+@mejoralo.command("trend")
+@click.argument("project")
+@click.option("--window", "-w", default=30, help="Sessions to analyze")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def mejoralo_trend(project, window, db):
+    """📈 Effectiveness Trend — ¿CORTEX está mejorando tu código de verdad?"""
+    from cortex.mejoralo.effectiveness import EffectivenessTracker
+
+    engine = get_engine(db)
+    try:
+        tracker = EffectivenessTracker(engine)
+        trend = tracker.project_trend(project, window=window)
+
+        if trend.score_trend == "insufficient_data":
+            console.print(
+                f"[dim]Datos insuficientes para '{project}' "
+                f"({trend.sessions_analyzed} sesiones, mínimo 3).[/]"
+            )
+            return
+
+        # Trend icon and color
+        icons = {"improving": "📈", "stable": "➡️", "declining": "📉"}
+        colors = {"improving": "green", "stable": "yellow", "declining": "red"}
+        icon = icons.get(trend.score_trend, "❓")
+        color = colors.get(trend.score_trend, "white")
+
+        console.print(f"\n  {icon} [bold {color}]{trend.score_trend.upper()}[/]")
+        console.print(f"  Proyecto: [bold]{project}[/]")
+        console.print(f"  Sesiones analizadas: {trend.sessions_analyzed}")
+        console.print(f"  Score actual: [bold]{trend.latest_score}[/]")
+        console.print(f"  Delta promedio: [{color}]Δ{trend.avg_delta:+.1f}[/]")
+        console.print(f"  Tasa de mejora: {trend.positive_rate:.0%}")
+
+        # Decay risk bar
+        risk_pct = trend.decay_risk * 100
+        if risk_pct < 20:
+            risk_color = "green"
+        elif risk_pct < 50:
+            risk_color = "yellow"
+        else:
+            risk_color = "red"
+        bar = "█" * int(risk_pct / 5) + "░" * (20 - int(risk_pct / 5))
+        console.print(f"  Riesgo de decay: [{risk_color}]{bar} {risk_pct:.0f}%[/]")
+
+        if trend.stagnant:
+            console.print(
+                "  [bold red]⚠️  ESTANCAMIENTO DETECTADO — últimas 5 sesiones sin mejora[/]"
+            )
+
+        console.print()
+    finally:
+        close_engine_sync(engine)
+
+
 @mejoralo.command("ship")
 @click.argument("project")
 @click.argument("path", type=click.Path(exists=True))
@@ -258,7 +314,7 @@ def mejoralo_ship(project, path, db):
 @mejoralo.command("daemon")
 def mejoralo_daemon():
     """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
-    from cortex.mejoralo.daemon import main
+    from cortex.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
 
     main()
 

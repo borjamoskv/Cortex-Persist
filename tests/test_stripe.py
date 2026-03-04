@@ -25,9 +25,7 @@ def _make_mock_stripe() -> MagicMock:
     # The route handlers use `except stripe.StripeError` — Python requires
     # these to be actual exception *classes*, not MagicMock objects.
     mock.StripeError = type("StripeError", (Exception,), {})
-    mock.SignatureVerificationError = type(
-        "SignatureVerificationError", (mock.StripeError,), {}
-    )
+    mock.SignatureVerificationError = type("SignatureVerificationError", (mock.StripeError,), {})
     return mock
 
 
@@ -115,6 +113,7 @@ class TestCheckout:
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/test_session",
             id="cs_test_123",
+            client_secret="secret_test_123",
         )
         mock_get_stripe.return_value = mock_stripe
 
@@ -131,6 +130,7 @@ class TestCheckout:
         data = resp.json()
         assert data["url"] == "https://checkout.stripe.com/test_session"
         assert data["session_id"] == "cs_test_123"
+        assert data["client_secret"] == "secret_test_123"
 
     @patch("cortex.routes.stripe._get_stripe")
     def test_checkout_invalid_plan(self, mock_get_stripe, client):
@@ -150,6 +150,7 @@ class TestCheckout:
         mock_stripe.checkout.Session.create.return_value = SimpleNamespace(
             url="https://checkout.stripe.com/default",
             id="cs_default",
+            client_secret="secret_default",
         )
         mock_get_stripe.return_value = mock_stripe
 
@@ -197,8 +198,8 @@ class TestWebhook:
     def test_webhook_invalid_signature(self, mock_get_stripe, client):
         mock_stripe = _make_mock_stripe()
         # Use the real exception class we set up on the mock
-        mock_stripe.Webhook.construct_event.side_effect = (
-            mock_stripe.SignatureVerificationError("bad sig")
+        mock_stripe.Webhook.construct_event.side_effect = mock_stripe.SignatureVerificationError(
+            "bad sig"
         )
         mock_get_stripe.return_value = mock_stripe
 

@@ -68,7 +68,13 @@ class SovereignVectorStoreL2:
                 err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
                 raise RuntimeError(err)
 
-            self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
+            self._conn = sqlite3.connect(
+                self._db_path,
+                check_same_thread=False,
+                timeout=30,  # opening-policy: max wait if file is OS-locked
+            )
+            # runtime-policy: wait up to 30s for WAL write-lock contention
+            self._conn.execute("PRAGMA busy_timeout=30000")
             self._conn.enable_load_extension(True)
             sqlite_vec.load(self._conn)
             self._conn.row_factory = sqlite3.Row
@@ -88,6 +94,7 @@ class SovereignVectorStoreL2:
                     is_bridge INTEGER,
                     confidence TEXT,
                     success_rate REAL,
+                    cognitive_layer TEXT,
                     metadata TEXT
                 )
             """)
@@ -103,8 +110,15 @@ class SovereignVectorStoreL2:
             )
             self._conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON facts_meta(is_bridge)")
 
-            self._conn.commit()
             self._ready = True
+
+            # Ω₀: Structural integrity migration
+            try:
+                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN cognitive_layer TEXT")
+                self._conn.commit()
+            except sqlite3.OperationalError:
+                pass
+
         return self._conn
 
     async def memorize(self, fact: CortexFactModel) -> None:
@@ -115,32 +129,43 @@ class SovereignVectorStoreL2:
             embedding_bytes = np.array(fact.embedding, dtype=np.float32).tobytes()
 
             cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT INTO facts_meta (
-                    id, tenant_id, project_id, content, timestamp,
-                    is_diamond, is_bridge, confidence, success_rate, metadata
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    fact.id,
-                    fact.tenant_id,
-                    fact.project_id,
-                    fact.content,
-                    fact.timestamp,
-                    int(fact.is_diamond),
-                    int(fact.is_bridge),
-                    fact.confidence,
-                    fact.success_rate,
-                    json.dumps(fact.metadata),
-                ),
-            )
-            rowid = cursor.lastrowid
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO facts_meta (
+                        id, tenant_id, project_id, content, timestamp,
+                        is_diamond, is_bridge, confidence, success_rate, 
+                        cognitive_layer, metadata
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        fact.id,
+                        fact.tenant_id,
+                        fact.project_id,
+                        fact.content,
+                        fact.timestamp,
+                        int(fact.is_diamond),
+                        int(fact.is_bridge),
+                        fact.confidence,
+                        fact.success_rate,
+                        fact.cognitive_layer,
+                        json.dumps(fact.metadata),
+                    ),
+                )
+                rowid = cursor.lastrowid
 
-            cursor.execute(
-                "INSERT INTO vec_facts(rowid, embedding) VALUES (?, ?)", (rowid, embedding_bytes)
-            )
-            conn.commit()
+                cursor.execute(
+                    "INSERT INTO vec_facts(rowid, embedding) VALUES (?, ?)",
+                    (rowid, embedding_bytes),
+                )
+                conn.commit()
+            except (sqlite3.Error, RuntimeError) as e:
+                # LEGION-OMEGA (Chronos Sniper): Prevenir que la BD quede en estado de transacción corrupta tras error
+                conn.rollback()
+                logger.error(
+                    "SovereignVectorStoreL2: Database integrity breach during memorize: %s", e
+                )
+                raise
 
     async def recall_secure(
         self,
@@ -148,6 +173,7 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -157,22 +183,29 @@ class SovereignVectorStoreL2:
 
         # Vector search + Reranking in SQL
         cursor = conn.cursor()
-        cursor.execute(
-            """
+
+        sql = """
             SELECT
-                m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata,
+                m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, 
+                m.cognitive_layer, m.metadata,
                 ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
                  cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                  m.success_rate) as final_score
             FROM facts_meta m
             JOIN vec_facts v ON m.rowid = v.rowid
             WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            ORDER BY final_score DESC
-            LIMIT ?
-            """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit),
-        )
+        """
+        params = [embedding_bytes, now, self._half_life, tenant_id, project_id]
+
+        if layer:
+            sql += " AND m.cognitive_layer = ?"
+            params.append(layer)
+
+        sql += " ORDER BY final_score DESC LIMIT ?"
+        params.append(limit)
+
+        cursor.execute(sql, tuple(params))
 
         rows = cursor.fetchall()
         final_facts = []
@@ -180,12 +213,12 @@ class SovereignVectorStoreL2:
         for row in rows:
             score = row["final_score"]
 
+            # LEGION-OMEGA (Entropy Demon): Aniquilado N+1 Subquery en favor de acceso directo por rowid
             # Fetch embedding
             v_cursor = conn.cursor()
             v_cursor.execute(
-                "SELECT embedding FROM vec_facts WHERE rowid = "
-                "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                (row["id"],),
+                "SELECT embedding FROM vec_facts WHERE rowid = ?",
+                (row["rowid"],),
             )
             v_row = v_cursor.fetchone()
             emb = np.frombuffer(v_row["embedding"], dtype=np.float32).tolist() if v_row else []
@@ -200,7 +233,7 @@ class SovereignVectorStoreL2:
                 is_diamond=bool(row["is_diamond"]),
                 is_bridge=bool(row["is_bridge"]),
                 confidence=row["confidence"],
-                success_rate=row["success_rate"],
+                cognitive_layer=row["cognitive_layer"] or "semantic",
                 metadata=json.loads(row["metadata"]) if row["metadata"] else {},
             )
             object.__setattr__(fact, "_recall_score", score)

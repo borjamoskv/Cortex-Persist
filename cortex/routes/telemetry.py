@@ -61,7 +61,7 @@ async def ast_oracle_ws(
     conn = await engine.get_conn()
     cursor = await conn.execute("SELECT MAX(id) FROM facts")
     row = await cursor.fetchone()
-    last_id = (row[0] or 0) - 100  # look back a bit
+    last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
     if last_id < 0:
         last_id = 0
 
@@ -94,7 +94,7 @@ async def fiat_stream_ws(
             "SELECT MAX(id) FROM facts WHERE fact_type = 'fiat_transaction'"
         ) as cursor:
             row = await cursor.fetchone()
-            last_id = row[0] or 0
+            last_id = row[0] or 0  # type: ignore[reportOptionalSubscript]
 
     try:
         while True:

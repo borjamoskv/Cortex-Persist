@@ -32,9 +32,9 @@ def _header() -> str:
         "> **Auto-generated from `cortex/axioms/registry.py`"
         " — do not edit manually.**\n\n"
         "### Axiom Zero (α₀)\n\n"
-        "> *\"Every axiom without a CI gate is, at best, "
+        '> *"Every axiom without a CI gate is, at best, '
         "an aspiration; at worst, a hallucination "
-        "with persistence.\"*\n\n---\n\n"
+        'with persistence."*\n\n---\n\n'
         "## Taxonomy\n\n"
         "| Layer | IDs | Nature | Count |\n"
         "|:---|:---|:---|:---:|\n"
@@ -51,30 +51,18 @@ def _section(title: str, emoji: str, category: AxiomCategory) -> str:
     lines = [f"## {emoji} {title} ({len(axioms)})\n"]
 
     if category == AxiomCategory.OPERATIONAL:
-        lines.append(
-            "| ID | Name | Mandate | CI Gate |\n"
-            "|:---|:---|:---|:---|\n"
-        )
+        lines.append("| ID | Name | Mandate | CI Gate |\n|:---|:---|:---|:---|\n")
         for ax in axioms:
             gate = ax.ci_gate or "—"
             mandate = ax.mandate[:80]
             ellip = "…" if len(ax.mandate) > 80 else ""
-            lines.append(
-                f"| **{ax.id}** | {ax.name} "
-                f"| {mandate}{ellip} | {gate} |\n"
-            )
+            lines.append(f"| **{ax.id}** | {ax.name} | {mandate}{ellip} | {gate} |\n")
     else:
-        lines.append(
-            "| ID | Name | Mandate |\n"
-            "|:---|:---|:---|\n"
-        )
+        lines.append("| ID | Name | Mandate |\n|:---|:---|:---|\n")
         for ax in axioms:
             mandate = ax.mandate[:100]
             ellip = "…" if len(ax.mandate) > 100 else ""
-            lines.append(
-                f"| **{ax.id}** | {ax.name} "
-                f"| {mandate}{ellip} |\n"
-            )
+            lines.append(f"| **{ax.id}** | {ax.name} | {mandate}{ellip} |\n")
 
     lines.append("\n---\n\n")
     return "".join(lines)
@@ -121,11 +109,13 @@ def generate() -> str:
         _header(),
         _section("Constitutional", "🔴", AxiomCategory.CONSTITUTIONAL),
         _section(
-            "Operational — CI-Enforced", "🔵",
+            "Operational — CI-Enforced",
+            "🔵",
             AxiomCategory.OPERATIONAL,
         ),
         _section(
-            "Aspirational — Vision", "🟡",
+            "Aspirational — Vision",
+            "🟡",
             AxiomCategory.ASPIRATIONAL,
         ),
         _ttl_section(),

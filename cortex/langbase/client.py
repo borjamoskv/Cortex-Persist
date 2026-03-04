@@ -43,6 +43,11 @@ class LangbaseError(Exception):
         super().__init__(f"Langbase API error {status_code}: {detail}")
 
 
+# Default model for Langbase Pipes. SovereignLLM is preferred but Langbase requires
+# a specific provider:model string. This can be overridden in the constructor.
+DEFAULT_MODEL = "openai:gpt-4o-mini"
+
+
 class LangbaseClient:
     """Async HTTP client for the Langbase API.
 
@@ -58,12 +63,14 @@ class LangbaseClient:
         base_url: str = DEFAULT_BASE_URL,
         *,
         timeout: float = DEFAULT_TIMEOUT,
+        default_model: str = DEFAULT_MODEL,
     ):
         if not api_key:
             raise ValueError("LANGBASE_API_KEY is required")
 
         self._api_key = api_key
         self._base_url = base_url.rstrip("/")
+        self._default_model = default_model
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
             headers={
@@ -162,7 +169,7 @@ class LangbaseClient:
         name: str,
         *,
         description: str = "",
-        model: str = "openai:gpt-4o-mini",
+        model: str | None = None,
         system_prompt: str = "",
         memory: list[dict] | None = None,
     ) -> dict:
@@ -171,15 +178,17 @@ class LangbaseClient:
         Args:
             name: Unique pipe name
             description: Human-readable description
-            model: LLM model identifier (e.g. "openai:gpt-4o-mini")
+            model: LLM model identifier (e.g. \"openai:gpt-4o-mini\").
+                If None, uses client.default_model.
             system_prompt: System prompt for the agent
             memory: Optional list of memory refs to attach
         """
         body: dict[str, Any] = {
             "name": name,
             "description": description,
-            "model": model,
+            "model": model or self._default_model,
         }
+
         if system_prompt:
             body["systemPrompt"] = system_prompt
         if memory:

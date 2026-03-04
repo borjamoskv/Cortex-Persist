@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Final
+from typing import Any, Final
 
 import aiosqlite
 
@@ -50,10 +50,13 @@ logger = logging.getLogger("cortex.db")
 # ─── Configuration ────────────────────────────────────────────────────
 
 # How long to wait (ms) for a locked database before raising OperationalError.
-BUSY_TIMEOUT_MS: Final[int] = 5000
+# Raised to 30s to handle bursts of >10 concurrent CLI processes competing
+# for SQLite write lock (WAL allows concurrent reads but only 1 writer).
+# At 13 processes × 5s window ≈ 65s total contention; 30s covers p95.
+BUSY_TIMEOUT_MS: Final[int] = 30_000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
-CONNECT_TIMEOUT_S: Final[int] = 10
+CONNECT_TIMEOUT_S: Final[int] = 35
 
 # Memory-mapped I/O size (~20 GB). SQLite reads via kernel page cache
 # instead of userspace read() syscalls. Zero-copy for hot paths.
@@ -97,10 +100,12 @@ def _apply_pragmas_sync(
 def connect(
     db_path: str,
     *,
+    uri: bool = False,
     check_same_thread: bool = False,
-    row_factory: type | None = None,
+    row_factory: Any | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
+    isolation_level: str | None = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 
@@ -113,6 +118,7 @@ def connect(
         row_factory: Optional row factory (e.g., sqlite3.Row).
         timeout: Connection timeout in seconds.
         read_only: If True, enforce query_only=1 (no writes allowed).
+        isolation_level: Optional isolation level for the connection.
 
     Returns:
         A fully-configured sqlite3.Connection.
@@ -122,6 +128,8 @@ def connect(
             db_path,
             timeout=timeout,
             check_same_thread=check_same_thread,
+            uri=uri,
+            isolation_level=isolation_level,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
@@ -137,6 +145,7 @@ def connect(
 def connect_writer(
     db_path: str,
     *,
+    uri: bool = False,
     check_same_thread: bool = False,
     timeout: int = CONNECT_TIMEOUT_S,
 ) -> sqlite3.Connection:
@@ -158,6 +167,7 @@ def connect_writer(
             db_path,
             timeout=timeout,
             check_same_thread=check_same_thread,
+            uri=uri,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):

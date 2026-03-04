@@ -58,56 +58,11 @@ class TransactionMixin:
                     meta={"error": str(e)},
                 )
 
-        return tx_id
+        return tx_id  # type: ignore[reportReturnType]
 
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import ImmutableLedger
 
-            self._ledger = ImmutableLedger(await self.get_conn())
+            self._ledger = ImmutableLedger(await self.get_conn())  # type: ignore[reportAttributeAccessIssue]
         return await self._ledger.verify_integrity_async()
-
-    async def process_graph_outbox_async(self, limit: int = 10) -> int:
-        from cortex.graph.backends.neo4j import Neo4jBackend
-
-        conn = await self.get_conn()
-        async with conn.execute(
-            "SELECT id, fact_id, action FROM graph_outbox WHERE status = 'pending' LIMIT ?",
-            (limit,),
-        ) as cursor:
-            events = await cursor.fetchall()
-
-        if not events:
-            return 0
-
-        processed_count = 0
-        try:
-            neo4j = Neo4jBackend()
-            if not neo4j._initialized:
-                return 0
-        except ImportError:
-            return 0
-
-        for event_id, fact_id, action in events:
-            try:
-                success = False
-                if action == "deprecate_fact":
-                    success = await neo4j.delete_fact_elements(fact_id)
-
-                status = "processed" if success else "failed"
-                await conn.execute(
-                    "UPDATE graph_outbox SET status = ?, processed_at = ?, "
-                    "retry_count = retry_count + 1 WHERE id = ?",
-                    (status, now_iso(), event_id),
-                )
-                processed_count += 1
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
-                logger.error("Failed to process CDC event %d: %s", event_id, e)
-                await conn.execute(
-                    "UPDATE graph_outbox SET status = 'failed', "
-                    "retry_count = retry_count + 1 WHERE id = ?",
-                    (event_id,),
-                )
-
-        await conn.commit()
-        return processed_count

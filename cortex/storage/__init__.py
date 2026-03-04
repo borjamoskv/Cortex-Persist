@@ -23,6 +23,7 @@ logger = logging.getLogger("cortex.storage")
 class StorageMode(str, Enum):
     LOCAL = "local"
     TURSO = "turso"
+    POSTGRES = "postgres"
 
 
 @runtime_checkable
@@ -32,34 +33,6 @@ class StorageBackend(Protocol):
     Any backend must implement these methods to be compatible
     with CortexConnectionPool and AsyncCortexEngine.
     """
-
-    async def execute(self, sql: str, params: tuple = ()) -> list[dict]:
-        """Execute a single SQL statement and return rows as dicts."""
-        ...
-
-    async def execute_insert(self, sql: str, params: tuple = ()) -> int:
-        """Execute an INSERT and return the last row ID."""
-        ...
-
-    async def executemany(self, sql: str, params_list: list[tuple]) -> None:
-        """Execute a statement with multiple parameter sets."""
-        ...
-
-    async def executescript(self, script: str) -> None:
-        """Execute a multi-statement SQL script."""
-        ...
-
-    async def commit(self) -> None:
-        """Commit the current transaction."""
-        ...
-
-    async def close(self) -> None:
-        """Close the connection."""
-        ...
-
-    async def health_check(self) -> bool:
-        """Return True if the connection is alive."""
-        ...
 
 
 def get_storage_mode() -> StorageMode:
@@ -93,7 +66,18 @@ def get_storage_config() -> dict:
                 "Get it from: turso db tokens create <db-name>"
             )
 
-        config["url"] = url
-        config["token"] = token
+        config["url"] = url  # type: ignore[reportArgumentType]
+        config["token"] = token  # type: ignore[reportArgumentType]
+
+    elif mode == StorageMode.POSTGRES:
+        dsn = os.environ.get("POSTGRES_DSN", "")
+
+        if not dsn:
+            raise ValueError(
+                "POSTGRES_DSN is required when CORTEX_STORAGE=postgres. "
+                "Example: postgresql://user:pass@host:5432/cortex"
+            )
+
+        config["dsn"] = dsn  # type: ignore[reportArgumentType]
 
     return config

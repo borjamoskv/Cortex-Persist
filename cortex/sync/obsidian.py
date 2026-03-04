@@ -282,7 +282,7 @@ def _write_vault(
     # 1. Individual fact notes
     for f in facts:
         folder = TYPE_FOLDERS.get(f["type"], f["type"])
-        folder_path = vault_path / folder
+        folder_path = vault_path / folder  # type: ignore[reportOperatorIssue]
         folder_path.mkdir(parents=True, exist_ok=True)
         filename = f"{f['type']}-{f['id']}.md"
         (folder_path / filename).write_text(_render_fact_note(f), encoding="utf-8")
@@ -339,7 +339,7 @@ async def export_obsidian(
     ) as cursor:
         rows = await cursor.fetchall()
 
-    facts = _parse_fact_rows(rows)
+    facts = _parse_fact_rows(rows)  # type: ignore[reportArgumentType]
     by_project, by_tag, type_counts = _group_facts(facts)
     notes_created = _write_vault(vault_path, facts, by_project, by_tag, type_counts)
 

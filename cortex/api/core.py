@@ -18,9 +18,11 @@ import cortex.api.state as api_state
 from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
+    ImmuneMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
     SecurityHeadersMiddleware,
+    TracingMiddleware,
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
@@ -77,6 +79,9 @@ from cortex.routes import (
     tips as tips_router,
 )
 from cortex.routes import (
+    topology_ws as topology_ws_router,
+)
+from cortex.routes import (
     translate as translate_router,
 )
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
@@ -127,7 +132,7 @@ async def lifespan(app: FastAPI):
     # 3. Global Auth Registration
     import cortex.auth
 
-    cortex.auth.manager._auth_manager = auth_manager
+    cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 
     # 4. Temporal Tracking
     from cortex.database.core import connect as db_connect
@@ -151,7 +156,7 @@ async def lifespan(app: FastAPI):
     from cortex.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
-    api_state.notification_bus = notification_bus
+    api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
     try:
         yield
@@ -161,11 +166,11 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth.manager._auth_manager = None
+        cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
-        api_state.notification_bus = None
+        api_state.notification_bus = None  # type: ignore[reportAttributeAccessIssue]
 
 
 app = FastAPI(
@@ -195,6 +200,8 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(SecurityFraudMiddleware)
+app.add_middleware(TracingMiddleware)
+app.add_middleware(ImmuneMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)
@@ -282,6 +289,7 @@ app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
 app.include_router(hive_router)
 app.include_router(notch_ws_router.router)
+app.include_router(topology_ws_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

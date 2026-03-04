@@ -66,7 +66,7 @@ class HealingMixin:
             MAX_CONSECUTIVE_FAILURES,
         )
 
-        file_config = self._load_config()
+        file_config = self._load_config()  # type: ignore[reportAttributeAccessIssue]
         healed = False
 
         try:
@@ -107,13 +107,13 @@ class HealingMixin:
 
     def _heal_ghost(self, cfg: dict) -> None:
         self.ghost_watcher = GhostWatcher(
-            self.config_dir / "ghosts.json",
+            self.config_dir / "ghosts.json",  # type: ignore[reportAttributeAccessIssue]
             cfg.get("stale_hours", DEFAULT_STALE_HOURS),
         )
 
     def _heal_memory(self, cfg: dict) -> None:
         self.memory_syncer = MemorySyncer(
-            self.config_dir / "system.json",
+            self.config_dir / "system.json",  # type: ignore[reportAttributeAccessIssue]
             cfg.get("memory_stale_hours", DEFAULT_MEMORY_STALE_HOURS),
         )
 
@@ -142,21 +142,21 @@ class HealingMixin:
             projects=cfg.get("entropy_projects", cfg.get("auto_mejoralo_projects", {})),
             interval_seconds=cfg.get("entropy_interval", 1800),
             threshold=90,
-            engine=self._shared_engine,
+            engine=self._shared_engine,  # type: ignore[reportAttributeAccessIssue]
         )
 
     def _heal_mejoralo(self, cfg: dict) -> None:
         self.auto_mejoralo = AutonomousMejoraloMonitor(
             projects=cfg.get("auto_mejoralo_projects", {}),
             interval_seconds=cfg.get("auto_mejoralo_interval", 1800),
-            engine=self._shared_engine,
+            engine=self._shared_engine,  # type: ignore[reportAttributeAccessIssue]
         )
 
     def _heal_perception(self, cfg: dict) -> None:
         self.perception_monitor = PerceptionMonitor(
             workspace=cfg.get("watch_path", str(Path.home() / "cortex")),
             interval_seconds=cfg.get("perception_interval", 300),
-            engine=self._shared_engine,
+            engine=self._shared_engine,  # type: ignore[reportAttributeAccessIssue]
         )
 
     def _heal_neural(self, _cfg: dict) -> None:

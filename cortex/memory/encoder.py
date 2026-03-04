@@ -34,7 +34,7 @@ class AsyncEncoder:
 
     async def encode(self, text: str) -> list[float]:
         """Encode a single text to a 384-dim vector (async, thread-isolated)."""
-        return await asyncio.to_thread(self._embedder.embed, text)
+        return await asyncio.to_thread(self._embedder.embed, text)  # type: ignore[reportReturnType]
 
     async def encode_batch(self, texts: list[str]) -> list[list[float]]:
         """Encode multiple texts (async, thread-isolated)."""
@@ -46,3 +46,12 @@ class AsyncEncoder:
     def dimension(self) -> int:
         """Embedding dimension (384 for all-MiniLM-L6-v2)."""
         return EMBEDDING_DIM
+
+    @property
+    def model_identity_hash(self) -> str:
+        """SHA-256 identity hash of the underlying embedding model.
+
+        Used to version TopologicalAnchors — if this changes,
+        reference signatures are invalid and must be recalculated cold.
+        """
+        return self._embedder.model_identity_hash

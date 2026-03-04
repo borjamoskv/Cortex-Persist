@@ -2,7 +2,32 @@
 CORTEX v5.0 — SQLite Schema Definitions.
 
 All tables, indexes, and virtual tables for the sovereign memory engine.
+Extended tables (consensus, episodes, signals, entity_events, evolution_state)
+live in schema_extensions.py to satisfy the Landauer LOC barrier.
 """
+
+# Re-export extended tables for backward compat
+from cortex.database.schema_extensions import (
+    CREATE_AGENTS,
+    CREATE_CONTEXT_SNAPSHOTS,
+    CREATE_CONTEXT_SNAPSHOTS_INDEX,
+    CREATE_ENTITY_EVENTS,
+    CREATE_ENTITY_EVENTS_INDEXES,
+    CREATE_EPISODES,
+    CREATE_EPISODES_FTS,
+    CREATE_EPISODES_INDEXES,
+    CREATE_EVOLUTION_STATE,
+    CREATE_EVOLUTION_STATE_INDEX,
+    CREATE_OUTCOMES,
+    CREATE_PROCEDURAL_ENGRAMS,
+    CREATE_RWC_INDEXES,
+    CREATE_SIGNALS,
+    CREATE_SIGNALS_INDEXES,
+    CREATE_TRUST_EDGES,
+    CREATE_VOTES,
+    CREATE_VOTES_V2,
+    EXTENSION_SCHEMA,
+)
 
 __all__ = [
     "ALL_SCHEMA",
@@ -11,6 +36,8 @@ __all__ = [
     "CREATE_CONTEXT_SNAPSHOTS",
     "CREATE_CONTEXT_SNAPSHOTS_INDEX",
     "CREATE_EMBEDDINGS",
+    "CREATE_ENTITY_EVENTS",
+    "CREATE_ENTITY_EVENTS_INDEXES",
     "CREATE_EVOLUTION_STATE",
     "CREATE_EVOLUTION_STATE_INDEX",
     "CREATE_SPECULAR_EMBEDDINGS",
@@ -21,21 +48,22 @@ __all__ = [
     "CREATE_FACTS_INDEXES",
     "CREATE_GHOSTS",
     "CREATE_GHOSTS_INDEX",
-    "CREATE_GRAPH_OUTBOX",
-    "CREATE_GRAPH_OUTBOX_INDEXES",
     "CREATE_HEARTBEATS",
     "CREATE_HEARTBEATS_INDEX",
     "CREATE_META",
     "CREATE_OUTCOMES",
     "CREATE_RWC_INDEXES",
     "CREATE_SESSIONS",
+    "CREATE_SIGNALS",
+    "CREATE_SIGNALS_INDEXES",
     "CREATE_TIME_ENTRIES",
     "CREATE_TIME_ENTRIES_INDEX",
     "CREATE_TRANSACTIONS",
     "CREATE_TRANSACTIONS_INDEX",
     "CREATE_TRUST_EDGES",
-    "CREATE_VOTES",
-    "CREATE_VOTES_V2",
+    CREATE_VOTES,
+    CREATE_VOTES_V2,
+    "CREATE_PROCEDURAL_ENGRAMS",
     "CREATE_TENANTS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
@@ -43,7 +71,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.1.0"
+SCHEMA_VERSION = "5.2.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -68,7 +96,9 @@ CREATE TABLE IF NOT EXISTS facts (
     quarantine_reason TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    tx_id       INTEGER REFERENCES transactions(id)
+    tx_id       INTEGER REFERENCES transactions(id),
+    is_tombstoned INTEGER NOT NULL DEFAULT 0,
+    tombstoned_at TEXT
 );
 """
 
@@ -80,6 +110,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_valid ON facts(valid_from, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence);
 CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
+CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────
@@ -111,7 +142,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 """
 
-# ─── Transaction Ledger (append-only, hash-chained) ──────────────────
+# ─── Transaction Ledger ───────────────────────────────────────────────
 CREATE_TRANSACTIONS = """
 CREATE TABLE IF NOT EXISTS transactions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,9 +160,15 @@ CREATE_TRANSACTIONS_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
+
+CREATE TRIGGER IF NOT EXISTS prevent_tx_update BEFORE UPDATE ON transactions
+BEGIN SELECT RAISE(ABORT, 'Immunitas-Omega: Ledger UPDATE prohibited'); END;
+
+CREATE TRIGGER IF NOT EXISTS prevent_tx_delete BEFORE DELETE ON transactions
+BEGIN SELECT RAISE(ABORT, 'Immunitas-Omega: Ledger DELETE prohibited'); END;
 """
 
-# ─── Heartbeats (activity pulses for time tracking) ──────────────────
+# ─── Heartbeats ───────────────────────────────────────────────────────
 CREATE_HEARTBEATS = """
 CREATE TABLE IF NOT EXISTS heartbeats (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,7 +190,7 @@ CREATE INDEX IF NOT EXISTS idx_hb_timestamp ON heartbeats(timestamp);
 CREATE INDEX IF NOT EXISTS idx_hb_category ON heartbeats(category);
 """
 
-# ─── Time Entries (grouped heartbeat blocks) ─────────────────────────
+# ─── Time Entries ─────────────────────────────────────────────────────
 CREATE_TIME_ENTRIES = """
 CREATE TABLE IF NOT EXISTS time_entries (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -175,7 +212,7 @@ CREATE INDEX IF NOT EXISTS idx_te_project ON time_entries(project);
 CREATE INDEX IF NOT EXISTS idx_te_start ON time_entries(start_time);
 """
 
-# ─── Metadata Table ──────────────────────────────────────────────────
+# ─── Metadata Table ───────────────────────────────────────────────────
 CREATE_META = """
 CREATE TABLE IF NOT EXISTS cortex_meta (
     key     TEXT PRIMARY KEY,
@@ -183,93 +220,7 @@ CREATE TABLE IF NOT EXISTS cortex_meta (
 );
 """
 
-# ─── Consensus Votes (Neural Swarm Consensus) ───────────────────────
-CREATE_VOTES = """
-CREATE TABLE IF NOT EXISTS consensus_votes (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id INTEGER NOT NULL REFERENCES facts(id),
-    agent   TEXT NOT NULL,
-    vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
-    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(fact_id, agent)
-);
-"""
-
-# ─── Reputation-Weighted Consensus (v2) ─────────────────────────────
-CREATE_AGENTS = """
-CREATE TABLE IF NOT EXISTS agents (
-    id              TEXT PRIMARY KEY,
-    public_key      TEXT NOT NULL,
-    name            TEXT NOT NULL,
-    agent_type      TEXT NOT NULL DEFAULT 'ai',
-    tenant_id       TEXT NOT NULL DEFAULT 'default',
-    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    reputation_score    REAL NOT NULL DEFAULT 0.5,
-    reputation_stake    REAL NOT NULL DEFAULT 0.0,
-    total_votes         INTEGER DEFAULT 0,
-    successful_votes    INTEGER DEFAULT 0,
-    disputed_votes      INTEGER DEFAULT 0,
-    last_active_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    is_active           BOOLEAN DEFAULT TRUE,
-    is_verified         BOOLEAN DEFAULT FALSE,
-    meta                TEXT DEFAULT '{}'
-);
-"""
-
-CREATE_VOTES_V2 = """
-CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id         INTEGER NOT NULL REFERENCES facts(id),
-    agent_id        TEXT NOT NULL REFERENCES agents(id),
-    vote            INTEGER NOT NULL,
-    vote_weight     REAL NOT NULL,
-    agent_rep_at_vote   REAL NOT NULL,
-    stake_at_vote       REAL DEFAULT 0.0,
-    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    decay_factor    REAL DEFAULT 1.0,
-    vote_reason     TEXT,
-    meta            TEXT DEFAULT '{}',
-    UNIQUE(fact_id, agent_id)
-);
-"""
-
-CREATE_TRUST_EDGES = """
-CREATE TABLE IF NOT EXISTS trust_edges (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    source_agent    TEXT NOT NULL REFERENCES agents(id),
-    target_agent    TEXT NOT NULL REFERENCES agents(id),
-    trust_weight    REAL NOT NULL,
-    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(source_agent, target_agent)
-);
-"""
-
-CREATE_OUTCOMES = """
-CREATE TABLE IF NOT EXISTS consensus_outcomes (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id         INTEGER NOT NULL REFERENCES facts(id),
-    final_state     TEXT NOT NULL,
-    final_score     REAL NOT NULL,
-    resolved_at     TEXT NOT NULL DEFAULT (datetime('now')),
-    total_votes     INTEGER NOT NULL,
-    unique_agents   INTEGER NOT NULL,
-    reputation_sum  REAL NOT NULL,
-    resolution_method   TEXT DEFAULT 'reputation_weighted',
-    meta                TEXT DEFAULT '{}'
-);
-"""
-
-CREATE_RWC_INDEXES = """
-CREATE INDEX IF NOT EXISTS idx_agents_reputation ON agents(reputation_score DESC);
-CREATE INDEX IF NOT EXISTS idx_agents_active ON agents(is_active, last_active_at);
-CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
-CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
-CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
-CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
-"""
-
-# ─── Ghosts (Unresolved Entities) ────────────────────────────────────
+# ─── Ghosts ───────────────────────────────────────────────────────────
 CREATE_GHOSTS = """
 CREATE TABLE IF NOT EXISTS ghosts (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -277,7 +228,7 @@ CREATE TABLE IF NOT EXISTS ghosts (
     reference       TEXT NOT NULL,
     context         TEXT,
     project         TEXT NOT NULL,
-    status          TEXT NOT NULL DEFAULT 'open', -- open, resolved
+    status          TEXT NOT NULL DEFAULT 'open',
     target_id       INTEGER,
     confidence      REAL DEFAULT 0.0,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
@@ -291,28 +242,14 @@ CREATE_GHOSTS_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_ghosts_ref ON ghosts(reference);
 """
 
-# ─── Graph CDC Outbox (Consistency) ──────────────────────────────────
-CREATE_GRAPH_OUTBOX = """
-CREATE TABLE IF NOT EXISTS graph_outbox (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id     INTEGER NOT NULL,
-    action      TEXT NOT NULL, -- e.g. 'deprecate'
-    payload     TEXT,
-    status      TEXT NOT NULL DEFAULT 'pending', -- pending, processed, failed
-    retry_count INTEGER DEFAULT 0,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    processed_at TEXT
-);
-"""
-
-# ─── Compactor Logs (Memory Optimization tracking) ────────────────────
+# ─── Compactor Logs ───────────────────────────────────────────────────
 CREATE_COMPACTION_LOG = """
 CREATE TABLE IF NOT EXISTS compaction_log (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     tenant_id       TEXT NOT NULL DEFAULT 'default',
     project         TEXT NOT NULL,
     strategy        TEXT NOT NULL,
-    original_ids    TEXT, -- JSON list
+    original_ids    TEXT,
     new_fact_id     INTEGER,
     facts_before    INTEGER,
     facts_after     INTEGER,
@@ -320,66 +257,7 @@ CREATE TABLE IF NOT EXISTS compaction_log (
 );
 """
 
-CREATE_GRAPH_OUTBOX_INDEXES = """
-CREATE INDEX IF NOT EXISTS idx_graph_outbox_status ON graph_outbox(status);
-CREATE INDEX IF NOT EXISTS idx_graph_outbox_fact ON graph_outbox(fact_id);
-"""
-
-# ─── Context Snapshots (Ambient Intelligence) ────────────────────────
-CREATE_CONTEXT_SNAPSHOTS = """
-CREATE TABLE IF NOT EXISTS context_snapshots (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id       TEXT NOT NULL DEFAULT 'default',
-    active_project  TEXT,
-    confidence      TEXT NOT NULL,
-    signals_used    INTEGER NOT NULL,
-    summary         TEXT NOT NULL,
-    signals_json    TEXT,
-    projects_json   TEXT,
-    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
-);
-"""
-
-CREATE_CONTEXT_SNAPSHOTS_INDEX = """
-CREATE INDEX IF NOT EXISTS idx_ctx_snap_project ON context_snapshots(active_project);
-CREATE INDEX IF NOT EXISTS idx_ctx_snap_created ON context_snapshots(created_at);
-"""
-
-# ─── Episodic Memory (Native Persistent Memory) ─────────────────────
-CREATE_EPISODES = """
-CREATE TABLE IF NOT EXISTS episodes (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id   TEXT NOT NULL DEFAULT 'default',
-    session_id  TEXT NOT NULL,
-    event_type  TEXT NOT NULL,
-    content     TEXT NOT NULL,
-    project     TEXT,
-    emotion     TEXT DEFAULT 'neutral',
-    tags        TEXT DEFAULT '[]',
-    meta        TEXT DEFAULT '{}',
-    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
-);
-"""
-
-CREATE_EPISODES_INDEXES = """
-CREATE INDEX IF NOT EXISTS idx_ep_tenant ON episodes(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_ep_session ON episodes(session_id);
-CREATE INDEX IF NOT EXISTS idx_ep_project_type ON episodes(project, event_type);
-CREATE INDEX IF NOT EXISTS idx_ep_created ON episodes(created_at);
-CREATE INDEX IF NOT EXISTS idx_ep_event_type ON episodes(event_type);
-"""
-
-CREATE_EPISODES_FTS = """
-CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
-    content,
-    event_type,
-    project,
-    content='episodes',
-    content_rowid='id'
-);
-"""
-
-# ─── Threat Intelligence (Blacklist) ─────────────────────────────────
+# ─── Threat Intelligence ──────────────────────────────────────────────
 CREATE_THREAT_INTEL = """
 CREATE TABLE IF NOT EXISTS threat_intel (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -395,7 +273,7 @@ CREATE_THREAT_INTEL_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
 """
 
-# ─── Tenants (Multi-Tenancy) ─────────────────────────────────────────
+# ─── Tenants ──────────────────────────────────────────────────────────
 CREATE_TENANTS = """
 CREATE TABLE IF NOT EXISTS tenants (
     id          TEXT PRIMARY KEY,
@@ -406,31 +284,14 @@ CREATE TABLE IF NOT EXISTS tenants (
 );
 """
 
-# ─── Signature Migration (add columns to existing facts tables) ──────
+# ─── Signature Migration ──────────────────────────────────────────────
 MIGRATE_ADD_SIGNATURE_COLUMNS = """
 ALTER TABLE facts ADD COLUMN signature TEXT;
 ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 """
 
-# ─── Evolution State (Continuous Improvement Engine) ─────────────────
-CREATE_EVOLUTION_STATE = """
-CREATE TABLE IF NOT EXISTS evolution_state (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    cycle       INTEGER NOT NULL,
-    agent_domain TEXT NOT NULL,
-    agent_json  TEXT NOT NULL,
-    saved_at    TEXT NOT NULL DEFAULT (datetime('now'))
-);
-"""
-
-CREATE_EVOLUTION_STATE_INDEX = """
-CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
-CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
-"""
-
-
-# ─── All statements in order ─────────────────────────────────────────
-ALL_SCHEMA = [
+# ─── All statements in order ──────────────────────────────────────────
+_CORE_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
     CREATE_EMBEDDINGS,
@@ -443,28 +304,16 @@ ALL_SCHEMA = [
     CREATE_TIME_ENTRIES,
     CREATE_TIME_ENTRIES_INDEX,
     CREATE_META,
-    CREATE_VOTES,
-    CREATE_AGENTS,
-    CREATE_VOTES_V2,
-    CREATE_TRUST_EDGES,
-    CREATE_OUTCOMES,
-    CREATE_RWC_INDEXES,
     CREATE_GHOSTS,
     CREATE_GHOSTS_INDEX,
-    CREATE_GRAPH_OUTBOX,
-    CREATE_GRAPH_OUTBOX_INDEXES,
     CREATE_COMPACTION_LOG,
-    CREATE_CONTEXT_SNAPSHOTS,
-    CREATE_CONTEXT_SNAPSHOTS_INDEX,
-    CREATE_EPISODES,
-    CREATE_EPISODES_INDEXES,
-    CREATE_EPISODES_FTS,
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
     CREATE_TENANTS,
-    CREATE_EVOLUTION_STATE,
-    CREATE_EVOLUTION_STATE_INDEX,
 ]
+
+# Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)
+ALL_SCHEMA = _CORE_SCHEMA + EXTENSION_SCHEMA
 
 
 # Late import to avoid circular dependency (auth imports from config)

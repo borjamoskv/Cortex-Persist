@@ -151,7 +151,9 @@ class TestTier3Platform:
         assert "twilio_key" in r.matches
 
     def test_sendgrid_key(self):
-        r = classify_content("SG.abcdefghijklmnopqrstuv.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr")
+        r = classify_content(
+            "SG.abcdefghijklmnopqrstuv.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr"
+        )
         assert r.score >= 0.8
         assert "sendgrid_key" in r.matches
 
@@ -224,10 +226,7 @@ class TestMultiplePatterns:
 
     def test_pii_overrides_platform(self):
         """PII tier should override standard tier scores."""
-        r = classify_content(
-            "api_key: 'sk_1234567890abcdef1234567890abcdef' "
-            "and SSN 123-45-6789"
-        )
+        r = classify_content("api_key: 'sk_1234567890abcdef1234567890abcdef' and SSN 123-45-6789")
         assert r.score >= 0.9  # PII overrides standard's 0.7
 
 

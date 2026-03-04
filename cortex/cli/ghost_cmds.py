@@ -2,13 +2,14 @@ import json
 import sqlite3
 import subprocess
 import sys
-from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
 
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from cortex.core.paths import SKILLS_DIR
 
 __all__ = [
     "GHOST_SKILL_PATH",
@@ -26,7 +27,7 @@ __all__ = [
 
 console = Console()
 
-GHOST_SKILL_PATH = Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
+GHOST_SKILL_PATH = SKILLS_DIR / "ghost-control" / "ghost.py"
 
 
 def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:
@@ -78,8 +79,37 @@ def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str)
 
 @click.group(name="ghost")
 def ghost_cmds():
-    """👻 GHOST-1: The Invisible Hand (Sovereign macOS OS Control)."""
+    """👻 GHOST-1: OS Control & Songlines Architecture."""
     pass
+
+
+@ghost_cmds.command()
+@click.option("--dir", "root_dir", default=".", help="Directory to scan")
+def field(root_dir):
+    """Scan the topography for active Songline ghosts (Ω₁)."""
+    import asyncio
+    from pathlib import Path
+
+    from cortex.cli.common import get_engine
+
+    engine = get_engine()
+    try:
+        active = asyncio.run(engine.list_active_ghosts(Path(root_dir)))
+        if not active:
+            console.print("[yellow]No active ghosts found in the field.[/yellow]")
+            return
+
+        table = Table(title=f"👻 Ghost Field: {root_dir}")
+        table.add_column("ID", style="dim")
+        table.add_column("Intent", style="noir.gold")
+        table.add_column("Project", style="noir.yinmn")
+        table.add_column("Source File", style="noir.cyber")
+
+        for g in active:
+            table.add_row(g["id"], g["intent"], g["project"], g["source_file"])
+        console.print(table)
+    finally:
+        asyncio.run(engine.close())
 
 
 @ghost_cmds.command()

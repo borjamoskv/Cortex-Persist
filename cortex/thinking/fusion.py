@@ -194,7 +194,6 @@ class ThoughtFusion:
             return None
         for attempt in range(self.JUDGE_MAX_RETRIES + 1):
             try:
-                # El proveedor debe soportar el método complete asíncrono
                 return await asyncio.wait_for(
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,
@@ -337,7 +336,7 @@ class ThoughtFusion:
                 confidence=min(agreement + 0.3, 1.0),
                 sources=all_responses,
                 agreement_score=agreement,
-                meta={"judge": self._judge.provider_name + ":" + self._judge.model},
+                meta={"judge": self._judge.provider_name + ":" + self._judge.model},  # type: ignore[reportOptionalMemberAccess]
             )
         logger.error("Juez de síntesis falló tras retries — fallback a majority")
         return self._fuse_majority(valid, all_responses, agreement, FusionStrategy.SYNTHESIS)
@@ -404,7 +403,7 @@ class ThoughtFusion:
                 sources=all_responses,
                 agreement_score=agreement,
                 meta={
-                    "judge": self._judge.provider_name + ":" + self._judge.model,
+                    "judge": self._judge.provider_name + ":" + self._judge.model,  # type: ignore[reportOptionalMemberAccess]
                     "all_scores": {r.label: round(s, 4) for r, s in scored},
                 },
             )

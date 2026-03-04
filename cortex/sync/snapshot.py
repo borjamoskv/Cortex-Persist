@@ -30,7 +30,13 @@ def _safe_parse_tags(raw: str | None) -> list[str]:
         return [t.strip() for t in raw.split(",") if t.strip()]
 
 
-async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) -> Path:
+async def export_snapshot(
+    engine: CortexEngine,
+    out_path: Path | None = None,
+    project_filter: str | None = None,
+    min_confidence: float | None = None,
+    fact_types: list[str] | None = None,
+) -> Path:
     """Exporta un snapshot legible de toda la memoria activa de CORTEX.
 
     Genera un archivo markdown que el agente IA puede leer al inicio
@@ -39,6 +45,9 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     Args:
         engine: Instancia de CortexEngine.
         out_path: Ruta de salida. Por defecto ~/.cortex/context-snapshot.md
+        project_filter: Filtrar por un proyecto específico.
+        min_confidence: Omitir facts con menor confianza (impacto).
+        fact_types: Lista de fact_types permitidos (para aislar capas).
 
     Returns:
         Path del archivo generado.
@@ -46,32 +55,49 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     if out_path is None:
         out_path = CORTEX_DIR / "context-snapshot.md"
 
-    conn = await engine.get_conn()
-    async with conn.execute(
-        "SELECT project, content, fact_type, tags, confidence "
-        "FROM facts WHERE valid_until IS NULL "
-        "ORDER BY project, fact_type, id"
-    ) as cursor:
-        rows = await cursor.fetchall()
+    query = (
+        "SELECT project, content, fact_type, tags, confidence FROM facts WHERE valid_until IS NULL "
+    )
+    params = []
 
-    # Agrupar por proyecto
+    if project_filter:
+        query += " AND project = ?"
+        params.append(project_filter)
+    if fact_types:
+        query += f" AND fact_type IN ({','.join('?' * len(fact_types))})"
+        params.extend(fact_types)
+    if min_confidence is not None:
+        query += " AND (confidence IS NOT NULL AND CAST(confidence AS REAL) >= ?)"
+        params.append(min_confidence)
+
+    query += " ORDER BY project, fact_type, id"
+
     by_project: dict[str, list] = {}
-    for row in rows:
-        project = row[0]
-        by_project.setdefault(project, []).append(
-            {
-                "content": row[1],
-                "type": row[2],
-                "tags": _safe_parse_tags(row[3]),
-                "confidence": row[4],
-            }
-        )
+    total_facts = 0
+
+    conn = await engine.get_conn()
+    async with conn.execute(query, params) as cursor:
+        while True:
+            batch = await cursor.fetchmany(1000)
+            if not batch:
+                break
+            for row in batch:
+                project, content, fact_type, tags, confidence = row
+                by_project.setdefault(project, []).append(
+                    {
+                        "content": content,
+                        "type": fact_type,
+                        "tags": _safe_parse_tags(tags),
+                        "confidence": confidence,
+                    }
+                )
+                total_facts += 1
 
     lines = [
         "# 🧠 CORTEX — Snapshot de Memoria",
         "",
         f"> Generado automáticamente: {now_iso()}",
-        f"> Total: {len(rows)} facts activos en {len(by_project)} proyectos",
+        f"> Total: {total_facts} facts activos en {len(by_project)} proyectos",
         "",
     ]
 
@@ -100,7 +126,7 @@ async def export_snapshot(engine: CortexEngine, out_path: Path | None = None) ->
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
-    logger.info("Snapshot exportado a %s (%d facts)", out_path, len(rows))
+    logger.info("Snapshot exportado a %s (%d facts)", out_path, total_facts)
     return out_path
 
 

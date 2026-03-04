@@ -10,7 +10,7 @@ Usage:
 
 from __future__ import annotations
 
-import json
+import asyncio
 
 import click
 from rich.console import Console
@@ -28,28 +28,35 @@ def moltbook_cmds():
 
 @moltbook_cmds.command("register")
 @click.option("--name", "-n", required=True, help="Agent name on Moltbook")
-@click.option("--description", "-d", default="Sovereign AI architect & CORTEX system", help="Agent description")
+@click.option(
+    "--description",
+    "-d",
+    default="Sovereign AI architect & CORTEX system",
+    help="Agent description",
+)
 def register(name: str, description: str):
     """Register MOSKV-1 on Moltbook."""
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient(api_key="dummy")  # No auth needed for register
-    result = client.register(name, description)
+    result = asyncio.run(client.register(name, description))
 
     agent = result.get("agent", {})
     api_key = agent.get("api_key", "")
     claim_url = agent.get("claim_url", "")
     verification_code = agent.get("verification_code", "")
 
-    console.print(Panel.fit(
-        f"[bold green]✅ Agent registered![/]\n\n"
-        f"[bold]API Key:[/] [yellow]{api_key}[/]\n"
-        f"[bold]Claim URL:[/] [cyan]{claim_url}[/]\n"
-        f"[bold]Verification:[/] {verification_code}\n\n"
-        f"[dim]Send the claim URL to your human for X verification.[/]",
-        title="🦞 Moltbook Registration",
-        border_style="green",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold green]✅ Agent registered![/]\n\n"
+            f"[bold]API Key:[/] [yellow]{api_key}[/]\n"
+            f"[bold]Claim URL:[/] [cyan]{claim_url}[/]\n"
+            f"[bold]Verification:[/] {verification_code}\n\n"
+            f"[dim]Send the claim URL to your human for X verification.[/]",
+            title="🦞 Moltbook Registration",
+            border_style="green",
+        )
+    )
 
 
 @moltbook_cmds.command("status")
@@ -59,22 +66,24 @@ def status():
 
     try:
         client = MoltbookClient()
-        result = client.check_status()
+        result = asyncio.run(client.check_status())
         claim_status = result.get("status", "unknown")
 
         color = "green" if claim_status == "claimed" else "yellow"
         console.print(f"[{color}]Status: {claim_status}[/]")
 
         if claim_status == "claimed":
-            me = client.get_me()
+            me = asyncio.run(client.get_me())
             agent = me.get("agent", me)
-            console.print(Panel.fit(
-                f"[bold]{agent.get('name', 'unknown')}[/]\n"
-                f"Karma: {agent.get('karma', 0)}\n"
-                f"Profile: https://www.moltbook.com/u/{agent.get('name', '')}",
-                title="🦞 Your Moltbook Profile",
-                border_style="cyan",
-            ))
+            console.print(
+                Panel.fit(
+                    f"[bold]{agent.get('name', 'unknown')}[/]\n"
+                    f"Karma: {agent.get('karma', 0)}\n"
+                    f"Profile: https://www.moltbook.com/u/{agent.get('name', '')}",
+                    title="🦞 Your Moltbook Profile",
+                    border_style="cyan",
+                )
+            )
     except MoltbookError as e:
         console.print(f"[red]Error: {e}[/]")
     except ValueError as e:
@@ -88,7 +97,7 @@ def heartbeat():
 
     console.print("[dim]🦞 Running Moltbook heartbeat...[/]")
     hb = MoltbookHeartbeat()
-    summary = hb.run()
+    summary = asyncio.run(hb.run())
 
     actions = summary.get("actions", [])
     errors = summary.get("errors", [])
@@ -111,7 +120,7 @@ def post(submolt: str, title: str, content: str):
     from cortex.moltbook.heartbeat import MoltbookHeartbeat
 
     hb = MoltbookHeartbeat()
-    result = hb.create_verified_post(submolt, title, content)
+    result = asyncio.run(hb.create_verified_post(submolt, title, content))
 
     post_data = result.get("post", {})
     post_id = post_data.get("id", "unknown")
@@ -120,7 +129,9 @@ def post(submolt: str, title: str, content: str):
     if verification_result.get("success"):
         console.print(f"[bold green]✅ Post published![/] ID: {post_id}")
     elif verification_result.get("error"):
-        console.print(f"[yellow]⚠️ Post created but verification issue: {verification_result.get('error')}[/]")
+        console.print(
+            f"[yellow]⚠️ Post created but verification issue: {verification_result.get('error')}[/]"
+        )
     else:
         status_val = post_data.get("verification_status", "unknown")
         if status_val == "pending":
@@ -138,7 +149,7 @@ def search(query: str, search_type: str, limit: int):
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
-    result = client.search(query, search_type=search_type, limit=limit)
+    result = asyncio.run(client.search(query, search_type=search_type, limit=limit))
 
     results = result.get("results", [])
     if not results:
@@ -168,7 +179,7 @@ def feed(sort: str, limit: int):
     from cortex.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
-    result = client.get_feed(sort=sort, limit=limit)
+    result = asyncio.run(client.get_feed(sort=sort, limit=limit))
 
     posts = result.get("posts", [])
     if not posts:

@@ -34,9 +34,7 @@ async def test_merkle_pulse_detection(tmp_path):
                 assert result.total == 1
 
                 # 2. Modify file — hash changes → should sync again
-                ghosts_file.write_text(
-                    json.dumps([{"id": "1", "content": "updated"}])
-                )
+                ghosts_file.write_text(json.dumps([{"id": "1", "content": "updated"}]))
                 result2 = await sync_manager._merkle_pulse_sync()
                 assert result2.total == 1
 

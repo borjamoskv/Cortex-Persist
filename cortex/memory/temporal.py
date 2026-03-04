@@ -108,7 +108,7 @@ def time_travel_filter(
         prefix = ""
 
     return (
-        f"{prefix}tx_id <= ? AND ("
+        f"{prefix}tx_id <= ? AND ("  # nosec B608 — parameterized query
         f"{prefix}valid_until IS NULL OR "
         f"{prefix}valid_until > (SELECT timestamp FROM transactions WHERE id = ?))",
         [tx_id, tx_id],

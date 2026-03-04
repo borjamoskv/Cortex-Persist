@@ -3,13 +3,15 @@
     "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     "default_model": "qwen-plus",
     "env_key": "DASHSCOPE_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["code", "general"]
   },
   "openai": {
     "base_url": "https://api.openai.com/v1",
     "default_model": "gpt-4o-mini",
     "env_key": "OPENAI_API_KEY",
-    "context_window": 128000
+    "context_window": 128000,
+    "specialization": ["reasoning", "code", "creative", "general"]
   },
   "anthropic": {
     "base_url": "https://api.anthropic.com/v1",
@@ -18,144 +20,230 @@
     "context_window": 200000,
     "extra_headers": {
       "anthropic-version": "2023-06-01"
-    }
+    },
+    "specialization": ["code", "reasoning"]
   },
   "gemini": {
     "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
     "default_model": "gemini-2.0-flash",
     "env_key": "GEMINI_API_KEY",
-    "context_window": 1000000
+    "context_window": 1000000,
+    "specialization": ["reasoning", "creative", "general"]
+  },
+  "kimi": {
+    "base_url": "https://api.moonshot.cn/v1",
+    "default_model": "moonshot-v1-128k",
+    "env_key": "MOONSHOT_API_KEY",
+    "context_window": 128000,
+    "specialization": ["reasoning", "code"]
   },
   "mistral": {
     "base_url": "https://api.mistral.ai/v1",
     "default_model": "mistral-large-latest",
     "env_key": "MISTRAL_API_KEY",
-    "context_window": 128000
+    "context_window": 128000,
+    "specialization": ["code", "reasoning"]
   },
   "deepseek": {
     "base_url": "https://api.deepseek.com/v1",
     "default_model": "deepseek-chat",
     "env_key": "DEEPSEEK_API_KEY",
-    "context_window": 128000
+    "context_window": 128000,
+    "specialization": ["reasoning", "code"]
   },
   "xai": {
     "base_url": "https://api.x.ai/v1",
-    "default_model": "grok-2-latest",
+    "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["code", "reasoning", "creative", "general"],
+    "intent_model_map": {
+      "code":      "grok-4.1-fast",
+      "reasoning": "grok-4.1",
+      "creative":  "grok-4.1",
+      "general":   "grok-4.1-fast"
+    }
   },
   "cohere": {
     "base_url": "https://api.cohere.com/compatibility/v1",
     "default_model": "command-r-plus",
     "env_key": "COHERE_API_KEY",
-    "context_window": 128000
+    "context_window": 128000,
+    "specialization": ["reasoning", "general"]
   },
   "zhipu": {
     "base_url": "https://open.bigmodel.cn/api/paas/v4",
     "default_model": "glm-5",
     "env_key": "ZHIPU_API_KEY",
-    "context_window": 128000
+    "context_window": 128000,
+    "specialization": ["reasoning", "code"]
   },
   "openrouter": {
     "base_url": "https://openrouter.ai/api/v1",
     "default_model": "qwen/qwen-2.5-72b-instruct",
     "env_key": "OPENROUTER_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "anthropic/claude-sonnet-4-20250514",
+      "reasoning": "deepseek/deepseek-r1",
+      "creative":  "anthropic/claude-sonnet-4-20250514",
+      "general":   "google/gemini-2.5-flash-preview"
+    }
   },
   "groq": {
     "base_url": "https://api.groq.com/openai/v1",
     "default_model": "llama-3.3-70b-versatile",
     "env_key": "GROQ_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "qwen-qwq-32b",
+      "reasoning": "deepseek-r1-distill-llama-70b",
+      "creative":  "llama-3.3-70b-versatile",
+      "general":   "llama-3.3-70b-versatile"
+    }
   },
   "together": {
     "base_url": "https://api.together.xyz/v1",
     "default_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "env_key": "TOGETHER_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "deepseek-ai/DeepSeek-V3-0324",
+      "reasoning": "deepseek-ai/DeepSeek-R1",
+      "creative":  "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "general":   "deepseek-ai/DeepSeek-V3-0324"
+    }
   },
   "fireworks": {
     "base_url": "https://api.fireworks.ai/inference/v1",
     "default_model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     "env_key": "FIREWORKS_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "accounts/fireworks/models/deepseek-v3",
+      "reasoning": "accounts/fireworks/models/deepseek-r1",
+      "creative":  "accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "general":   "accounts/fireworks/models/deepseek-v3"
+    }
   },
   "deepinfra": {
     "base_url": "https://api.deepinfra.com/v1/openai",
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "DEEPINFRA_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "deepseek-ai/DeepSeek-V3-0324",
+      "reasoning": "deepseek-ai/DeepSeek-R1",
+      "creative":  "meta-llama/Llama-3.3-70B-Instruct",
+      "general":   "deepseek-ai/DeepSeek-V3-0324"
+    }
   },
   "anyscale": {
     "base_url": "https://api.endpoints.anyscale.com/v1",
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "ANYSCALE_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "perplexity": {
     "base_url": "https://api.perplexity.ai",
     "default_model": "sonar-pro",
     "env_key": "PERPLEXITY_API_KEY",
-    "context_window": 200000
+    "context_window": 200000,
+    "specialization": ["reasoning", "general"]
   },
   "cerebras": {
     "base_url": "https://api.cerebras.ai/v1",
     "default_model": "llama-3.3-70b",
     "env_key": "CEREBRAS_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "sambanova": {
     "base_url": "https://api.sambanova.ai/v1",
     "default_model": "Meta-Llama-3.3-70B-Instruct",
     "env_key": "SAMBANOVA_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "lepton": {
     "base_url": "https://llama3-3-70b.lepton.run/api/v1",
     "default_model": "llama3-3-70b",
     "env_key": "LEPTON_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "hyperbolic": {
     "base_url": "https://api.hyperbolic.xyz/v1",
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "HYPERBOLIC_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "novita": {
     "base_url": "https://api.novita.ai/v3/openai",
     "default_model": "meta-llama/llama-3.3-70b-instruct",
     "env_key": "NOVITA_API_KEY",
-    "context_window": 131072
+    "context_window": 131072,
+    "specialization": ["general"]
   },
   "ollama": {
     "base_url": "http://localhost:11434/v1",
     "default_model": "qwen2.5",
     "env_key": "",
-    "context_window": 32768
+    "context_window": 32768,
+    "specialization": ["general"]
   },
   "lmstudio": {
     "base_url": "http://localhost:1234/v1",
     "default_model": "local-model",
     "env_key": "",
-    "context_window": 32768
+    "context_window": 32768,
+    "specialization": ["general"]
   },
   "llamacpp": {
     "base_url": "http://localhost:8080/v1",
     "default_model": "local-model",
     "env_key": "",
-    "context_window": 32768
+    "context_window": 32768,
+    "specialization": ["general"]
   },
   "vllm": {
     "base_url": "http://localhost:8000/v1",
     "default_model": "local-model",
     "env_key": "",
-    "context_window": 32768
+    "context_window": 32768,
+    "specialization": ["general"]
   },
   "jan": {
     "base_url": "http://localhost:1337/v1",
     "default_model": "local-model",
     "env_key": "",
-    "context_window": 32768
+    "context_window": 32768,
+    "specialization": ["general"]
+  },
+  "ernie": {
+    "base_url": "https://api.aimlapi.com/v1",
+    "default_model": "baidu/ernie-5-0-thinking-latest",
+    "env_key": "AIMLAPI_KEY",
+    "context_window": 32768,
+    "specialization": ["reasoning", "architect", "general"]
+  },
+  "venice": {
+    "base_url": "https://api.venice.ai/api/v1",
+    "default_model": "llama-3.3-70b",
+    "env_key": "VENICE_API_KEY",
+    "context_window": 131072,
+    "specialization": ["reasoning", "creative", "general"],
+    "intent_model_map": {
+      "reasoning": "llama-3.3-70b",
+      "creative": "llama-3.3-70b",
+      "general": "llama-3.3-70b"
+    }
   }
 }

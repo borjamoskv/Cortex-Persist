@@ -141,6 +141,19 @@ CORTEX implements **Weighted Byzantine Fault Tolerance**:
 
 ---
 
+## Engine Evolution: The Omega Manifold (Ω)
+
+En la transición hacia las **v7 y v8**, CORTEX introduce el **Manifold Omega**, una capa de orquestación 4D que unifica percepción, decisión y acción.
+
+Los pilares fundamentales:
+- **KETER-Ω**: Meta-orquestación soberana. (`engine/keter.py`)
+- **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
+- **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
+
+Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOLD.md).
+
+---
+
 ## Module Reference
 
 ### Engine Layer

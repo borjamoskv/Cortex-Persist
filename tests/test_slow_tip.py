@@ -91,6 +91,7 @@ class TestSlowOpTipEmitter:
     def test_never_crashes_on_import_error(self, monkeypatch):
         """_emit_tip must never raise — tips are non-critical."""
         import sys
+
         # Simulate tips import failure
         monkeypatch.setitem(sys.modules, "cortex.cli.tips", None)
 
@@ -104,6 +105,7 @@ class TestTipOnSlowDecorator:
 
     def test_decorator_preserves_return_value(self):
         """Decorated function must return the same value."""
+
         @tip_on_slow(threshold=60.0)
         def _fast():
             return 42
@@ -112,14 +114,16 @@ class TestTipOnSlowDecorator:
 
     def test_decorator_preserves_function_name(self):
         """@functools.wraps must be applied."""
+
         @tip_on_slow(threshold=60.0)
         def my_func():
-            pass
+            return "sovereign"
 
         assert my_func.__name__ == "my_func"
 
     def test_decorator_passes_args_kwargs(self):
         """Args and kwargs must reach the wrapped function."""
+
         @tip_on_slow(threshold=60.0)
         def add(a, b, c=0):
             return a + b + c
@@ -128,6 +132,7 @@ class TestTipOnSlowDecorator:
 
     def test_decorator_propagates_exceptions(self):
         """Exceptions from the wrapped function must propagate."""
+
         @tip_on_slow(threshold=60.0)
         def boom():
             raise ValueError("intentional")

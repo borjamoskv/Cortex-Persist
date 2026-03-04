@@ -206,7 +206,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
         score = 0.5
 
     # Decrypt encrypted content
-    content = row[1] or ""
+    content = row[1] or ""  # type: ignore[reportGeneralTypeIssues]
     if content and str(content).startswith("v6_aesgcm:"):
         try:
             from cortex.crypto import get_default_encrypter
@@ -217,12 +217,12 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
             pass
 
     return SyncSearchResult(
-        fact_id=row[0],
+        fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]
         content=content,
-        project=row[2],
-        fact_type=row[3],
-        confidence=row[4],
-        source=row[5],
+        project=row[2],  # type: ignore[reportGeneralTypeIssues]
+        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
+        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
+        source=row[5],  # type: ignore[reportGeneralTypeIssues]
         tags=tags,
         score=score,
     )
@@ -297,7 +297,7 @@ def hybrid_search_sync(
             result_map[result.fact_id] = result
 
     # Sort by RRF score descending
-    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]
+    sorted_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)[:top_k]  # type: ignore[reportCallIssue,reportArgumentType]
 
     merged = []
     for fact_id in sorted_ids:

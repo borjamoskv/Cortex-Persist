@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
+
+from cortex.core.paths import (
+    AGENT_DIR,
+    CORTEX_DB,
+    CORTEX_DIR,
+)
+from cortex.core.paths import (
+    DAEMON_CONFIG_FILE as CONFIG_FILE,
+)
+from cortex.core.paths import (
+    DAEMON_STATUS_FILE as STATUS_FILE,
+)
 
 __all__ = [
     "AGENT_DIR",
@@ -12,6 +23,7 @@ __all__ = [
     "CORTEX_DB",
     "CORTEX_DIR",
     "CertAlert",
+    "DriftAlert",
     "CloudSyncAlert",
     "CompactionAlert",
     "DEFAULT_CERT_WARN_DAYS",
@@ -34,7 +46,10 @@ __all__ = [
     "RETRY_BACKOFF",
     "STATUS_FILE",
     "SecurityAlert",
+    "SignalAlert",
     "SiteStatus",
+    "TombstoneAlert",
+    "DriftAlert",
 ]
 
 # ─── Constants ────────────────────────────────────────────────────────
@@ -48,11 +63,6 @@ DEFAULT_RETRIES = 1  # HTTP retry count before declaring failure
 RETRY_BACKOFF = 2.0  # seconds between retries
 DEFAULT_CERT_WARN_DAYS = 14  # warn if SSL expires within 14 days
 DEFAULT_DISK_WARN_MB = 500  # warn if cortex dir exceeds 500 MB
-CORTEX_DIR = Path.home() / ".cortex"
-CORTEX_DB = CORTEX_DIR / "cortex.db"
-AGENT_DIR = Path.home() / ".agent"
-CONFIG_FILE = CORTEX_DIR / "daemon_config.json"
-STATUS_FILE = AGENT_DIR / "memory" / "daemon_status.json"
 BUNDLE_ID = "com.moskv.daemon"
 
 
@@ -191,6 +201,36 @@ class NeuralIntentAlert:
 
 
 @dataclass
+class SignalAlert:
+    """Alert triggered by a Signal Reactor reflex."""
+
+    event_type: str
+    message: str
+    project: str | None = None
+    payload: dict = field(default_factory=dict)
+
+
+@dataclass
+class TombstoneAlert:
+    """Alert triggered when physical tombstone sweep completes."""
+
+    deleted_facts: int
+    freed_mb: float
+    message: str
+
+
+@dataclass
+class DriftAlert:
+    """Alert triggered when L2 vector space topological health degrades."""
+
+    health: float
+    centroid_drift: float
+    spectral_ratio: float
+    n_vectors: int
+    message: str
+
+
+@dataclass
 class DaemonStatus:
     """Full daemon check result — persisted to disk."""
 
@@ -209,6 +249,9 @@ class DaemonStatus:
     perception_alerts: list[PerceptionAlert] = field(default_factory=list)
     neural_alerts: list[NeuralIntentAlert] = field(default_factory=list)
     security_alerts: list[SecurityAlert] = field(default_factory=list)
+    signal_alerts: list[SignalAlert] = field(default_factory=list)
+    tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
+    drift_alerts: list[DriftAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -226,6 +269,9 @@ class DaemonStatus:
             and len(self.perception_alerts) == 0
             and len(self.neural_alerts) == 0
             and len(self.security_alerts) == 0
+            and len(self.signal_alerts) == 0
+            and len(self.tombstone_alerts) == 0
+            and len(self.drift_alerts) == 0
             and len(self.errors) == 0
         )
 
@@ -341,6 +387,33 @@ class DaemonStatus:
                     "timestamp": s.timestamp,
                 }
                 for s in self.security_alerts
+            ],
+            "signal_alerts": [
+                {
+                    "event_type": s.event_type,
+                    "message": s.message,
+                    "project": s.project,
+                    "payload": s.payload,
+                }
+                for s in self.signal_alerts
+            ],
+            "tombstone_alerts": [
+                {
+                    "deleted_facts": t.deleted_facts,
+                    "freed_mb": round(t.freed_mb, 2),
+                    "message": t.message,
+                }
+                for t in self.tombstone_alerts
+            ],
+            "drift_alerts": [
+                {
+                    "health": round(d.health, 4),
+                    "centroid_drift": round(d.centroid_drift, 6),
+                    "spectral_ratio": round(d.spectral_ratio, 4),
+                    "n_vectors": d.n_vectors,
+                    "message": d.message,
+                }
+                for d in self.drift_alerts
             ],
             "errors": self.errors,
         }

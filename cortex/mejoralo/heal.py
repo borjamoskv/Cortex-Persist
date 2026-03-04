@@ -64,7 +64,7 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-    engine: "MejoraloEngine" | None = None,
+    engine: "MejoraloEngine" | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
 ) -> str | None:
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
@@ -87,7 +87,7 @@ def _apply_and_verify(
     iteration: int,
     console: Any,
     current_score: int,
-    engine: "MejoraloEngine" | None = None,
+    engine: "MejoraloEngine" | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
@@ -96,7 +96,7 @@ def _apply_and_verify(
 
     try:
         original_code = abs_path.read_text(errors="replace")
-    except Exception:
+    except (OSError, UnicodeDecodeError):
         logger.exception("Failed to read original code for %s", top_file_rel)
         return False
 
@@ -123,7 +123,7 @@ def _run_functional_inquisitor(
     original_code: str,
     top_file_rel: str,
     console: Any,
-    engine: "MejoraloEngine" | None,
+    engine: "MejoraloEngine" | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
     abs_path: Path,
 ) -> bool:
@@ -163,7 +163,7 @@ def _run_delta_testing(
     original_code: str,
     abs_path: Path,
     console: Any,
-    engine: "MejoraloEngine" | None,
+    engine: "MejoraloEngine" | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
 ) -> bool:
     pytest_cmd = ["pytest"]
@@ -240,7 +240,7 @@ def heal_project(
     path: str | Path,
     target_score: int,
     scan_result: ScanResult,
-    engine: "MejoraloEngine" | None = None,
+    engine: "MejoraloEngine" | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -292,7 +292,7 @@ def _run_healing_iteration(
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
-    engine: "MejoraloEngine" | None = None,
+    engine: "MejoraloEngine" | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.mejoralo.scan import scan

@@ -32,10 +32,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.sync")
 
-AGENT_DIR = Path.home() / ".agent"
-MEMORY_DIR = AGENT_DIR / "memory"
-CORTEX_DIR = Path.home() / ".cortex"
-SYNC_STATE_FILE = CORTEX_DIR / "sync_state.json"
+from cortex.core.paths import (  # noqa: E402
+    AGENT_DIR,
+    CORTEX_DIR,
+    MEMORY_DIR,
+    SYNC_STATE_FILE,
+)
 
 
 @dataclass

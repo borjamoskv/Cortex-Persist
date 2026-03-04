@@ -74,7 +74,13 @@ class HDCVectorStoreL2:
                 err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
                 raise RuntimeError(err)
 
-            self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
+            self._conn = sqlite3.connect(
+                self._db_path,
+                check_same_thread=False,
+                timeout=30,  # opening-policy: max wait if file is OS-locked
+            )
+            # runtime-policy: wait up to 30s for WAL write-lock contention
+            self._conn.execute("PRAGMA busy_timeout=30000")
             self._conn.enable_load_extension(True)
             sqlite_vec.load(self._conn)
             self._conn.row_factory = sqlite3.Row
@@ -253,7 +259,7 @@ class HDCVectorStoreL2:
             cursor = conn.cursor()
             placeholders = ",".join(["?"] * len(inhibit_ids))
             cursor.execute(
-                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "
+                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "  # nosec B608 — parameterized query
                 f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
                 inhibit_ids,
             )
@@ -353,7 +359,6 @@ class HDCVectorStoreL2:
             (tenant_id, project_id, limit),
         )
         ids = [row["id"] for row in cursor.fetchall()]
-        # print(f"DEBUG: Found {len(ids)} toxic IDs for {tenant_id}/{project_id}")
         return ids
 
     def extract_traces(self, fact: CortexFactModel) -> dict[str, Any]:

@@ -9,6 +9,7 @@ This example shows the core CORTEX workflow:
 Usage:
     python examples/quickstart/basic_memory.py
 """
+
 from __future__ import annotations
 
 import asyncio

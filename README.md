@@ -2,8 +2,8 @@
 
 # CORTEX — Trust Infrastructure for Autonomous AI
 
-> **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
-> *CORTEX is to AI memory what SSL/TLS is to web communications.*
+> **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
+> *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and EU AI Act compliance out of the box.*
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -16,24 +16,51 @@
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
+### ⚡ The Numbers
+
+| | |
+|:---|:---|
+| **<20ms** retrieval | In-process SQLite. No HTTP. No network. |
+| **$258K/yr** saved | Context-reconstruction debt eliminated for a 10-dev team |
+| **1,162+** tests | Production-grade from day one |
+| **Zero** attack surface | No HTTP endpoints. No cloud dependency. No CVSS 9.1. |
+
 ---
 
 ## The Problem
 
-AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
+AI agents are making millions of decisions per day. **Nobody can prove those decisions are correct.**
 
-- **Mem0** stores what agents remember. But can you prove the memory wasn't tampered with?
-- **Zep** builds knowledge graphs. But can you audit the full chain of reasoning?
-- **Letta** manages agent state. But can you generate a compliance report for regulators?
+- **Mem0** stores memories — with [CVSS 9.1 vulnerabilities](https://github.com/mem0ai/mem0/issues) open in production (SSRF, arbitrary file read). Can you trust it with enterprise data?
+- **Zep** builds knowledge graphs. Can you audit the full chain of reasoning? Generate a compliance report?
+- **Letta** manages agent state. But nothing is hash-chained, nothing is tamper-proof.
 
-The **EU AI Act (Article 12, enforced August 2026)** requires:
+Meanwhile, the **EU AI Act (Article 12, enforcement: August 2026)** demands:
 
 - ✅ Automatic logging of all agent decisions
-- ✅ Tamper-proof storage of decision records
+- ✅ **Tamper-proof** storage of decision records
 - ✅ Full traceability and explainability
 - ✅ Periodic integrity verification
 
-**Fines: up to €30M or 6% of global revenue.**
+**Fines: up to €30M or 6% of global revenue.** The clock is ticking.
+
+## What CORTEX Makes Impossible
+
+> *The most valuable guarantee of a system is not what it does — it's what it makes architecturally unreachable.*
+
+| Failure | Without CORTEX | Guarantee |
+|:--------|:--------------|:---------:|
+| **Session Amnesia** | Every session is T₀. Months of decisions vanish. Agents reconstruct from hallucination. | `STRUCTURAL` |
+| **Repeated Errors** | Same architectural mistake, re-diagnosed from scratch. Learning curve resets per conversation. | `BEHAVIORAL` |
+| **Fabricated History** | LLM invents coherent rationale for decisions never made. Indistinguishable from truth. | `CRYPTOGRAPHIC` |
+| **Ghost Accumulation** | Incomplete work is invisible. Work restarts silently from scratch. Infinite waste loop. | `STRUCTURAL` |
+| **Multi-Agent Divergence** | Two agents build different realities. Silent conflict until production. | `CONSENSUS` |
+
+**CORTEX doesn't test whether your agent behaves like it remembers. It makes not-remembering structurally impossible.**
+
+→ Full technical reference: [docs/impossible-failures.md](docs/impossible-failures.md)
+
+---
 
 ## The Solution
 
@@ -45,6 +72,7 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
    CORTEX Trust Engine v7
         ├── 🧬 Biological Core (Autopoiesis/Endocrine)
         ├── 🛡️ Zero-Trust Guards (Connection/Storage)
+        ├── 🚀 SHIPPER-Ω (Automated Deployment Orchestration)
         ├── 🔗 SHA-256 hash-chained ledger
         ├── Merkle tree checkpoints
         ├── Reputation-weighted WBFT consensus
@@ -187,7 +215,8 @@ block-beta
 | **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Multi-Tenant (v6)** | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial |
-| **Cost** | **Free** | $249/mo | $$$ | Free | $$$ |
+| **Cost** | **Free (Apache 2.0)** | $249/mo | $$$ | Free | $$$ |
+| **SSRF Vulnerabilities** | **None** | CVSS 9.1 (Feb 2026) | — | — | — |
 
 ---
 
@@ -224,6 +253,16 @@ CORTEX runs natively on any environment without Docker:
 - **Windows** (Task Scheduler & PowerShell)
 
 See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
+
+---
+
+## Why CORTEX? Why Now?
+
+1. **EU AI Act enforcement: August 2026.** Companies without audit trails face €30M fines.
+2. **Competitor vulnerabilities are public.** Mem0 SSRF (CVSS 9.1) remains open.
+3. **Context-reconstruction costs compound daily.** 45 min/dev/day × 230 days = $258K/yr for 10 engineers.
+4. **Local-first is non-negotiable** for defense, healthcare, banking, and legal.
+5. **CORTEX is free.** Apache 2.0. Zero risk to evaluate. 30 seconds to install.
 
 ---
 

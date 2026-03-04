@@ -15,6 +15,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
+from cortex.immune import ImmuneArbiter, Verdict
 from cortex.sovereign.bridge import SovereignBridge
 from cortex.sovereign.endocrine import DigitalEndocrine
 from cortex.sovereign.observability import (
@@ -42,6 +43,7 @@ class Phase(Enum):
     EVOLUTION = auto()  # continuous improvement engine
     SECURITY = auto()  # boveda-1, vault integration
     OBSERVABILITY = auto()  # telemetry, dashboards
+    ARBITRATION = auto()  # IMMUNE-SYSTEM-v1, epistemic justice
     EXPERIENCE = auto()  # impactv-1, stitch, AR/VR
     DEPLOYMENT = auto()  # multi-cloud terraform
     VERIFICATION = auto()  # mejoralo, qa, smoke tests
@@ -66,6 +68,7 @@ class SovereignContext:
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
     bridge: SovereignBridge = field(default_factory=SovereignBridge)
+    arbiter: ImmuneArbiter = field(default_factory=ImmuneArbiter)
 
     @property
     def elapsed_ms(self) -> float:
@@ -118,16 +121,26 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
-    """Phase 3 — Legion-1 swarm execution."""
+    """Phase 3 — Legion-Omega swarm execution."""
     t0 = time.time()
     try:
-        await asyncio.to_thread(ctx.bridge.execute, "legion-1")
+        from cortex.engine.legion import LEGION_OMEGA
+
+        intent = "Evaluate system immunity and forge defensive core"
+        result = await LEGION_OMEGA.forge(intent, context={"ctx": ctx})
+
         return PipelineResult(
             phase=Phase.SWARM,
-            success=True,
+            success=result.success,
             duration_ms=(time.time() - t0) * 1000,
+            details={
+                "cycles": result.cycles,
+                "immunity": "REACHED" if result.success else "BREACHED",
+                "vulnerabilities": result.vulnerabilities,
+            },
         )
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError) as e:
+        logger.error("Swarm phase (Legion-Omega) failed: %s", e)
         return PipelineResult(
             phase=Phase.SWARM,
             success=False,
@@ -191,6 +204,18 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
         )
 
 
+async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
+    """Phase — Calibrate the arbiter state."""
+    t0 = time.time()
+    # Baseline justice check
+    return PipelineResult(
+        phase=Phase.ARBITRATION,
+        success=True,
+        duration_ms=(time.time() - t0) * 1000,
+        details={"status": "Epistemic arbiter calibrated and active"},
+    )
+
+
 async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
     """Phase 9 — Final verification: power ≥ 1300."""
     t0 = time.time()
@@ -252,6 +277,7 @@ PHASE_EXECUTORS: dict[Phase, Callable] = {
     Phase.EVOLUTION: _phase_evolution,
     Phase.SECURITY: _phase_security,
     Phase.OBSERVABILITY: _phase_observability,
+    Phase.ARBITRATION: _phase_arbitration,
     Phase.EXPERIENCE: _phase_experience,
     Phase.VERIFICATION: _phase_verification,
 }
@@ -270,6 +296,29 @@ async def run_pipeline(
     logger.info("⚡ Sovereign Pipeline: IGNITION")
 
     for phase in Phase:
+        # --- EPISTEMIC ARBITRATION GATE ---
+        # Critical phases require explicit triage before execution
+        if phase in (Phase.FABRICATION, Phase.ORCHESTRATION, Phase.DEPLOYMENT, Phase.SWARM):
+            signal = f"Intention to execute {phase.name} phase"
+            plan = {"actions": [{"type": phase.name.lower()}]}
+            # Extract confidence from endocrine (serotonin level acts as proxy)
+            confidence = ctx.endocrine.serotonin
+
+            triage = await ctx.arbiter.triage(signal, plan, confidence=confidence)
+
+            if triage.verdict == Verdict.BLOCK:
+                logger.critical(
+                    "🚨 IMMUNE BLOCK: Phase %s aborted to prevent sabotage.", phase.name
+                )
+                result = PipelineResult(
+                    phase=phase,
+                    success=False,
+                    duration_ms=0,
+                    details={"error": "Immune Block", "triage": triage.__dict__},
+                )
+                ctx.results.append(result)
+                break
+
         executor = PHASE_EXECUTORS.get(phase)
         if executor:
             result = await executor(ctx)

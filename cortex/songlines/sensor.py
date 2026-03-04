@@ -3,11 +3,23 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
 
 from cortex.songlines.decay import DecayEngine
 
 logger = logging.getLogger("cortex.songlines.sensor")
+
+
+class GhostTrace(TypedDict):
+    """Structured telemetry payload for embedded ghosts."""
+
+    id: str
+    strength: float
+    source_file: str
+    created_at: float
+    half_life: float
+    intent: str
+    project: str
 
 
 class TopographicSensor:
@@ -20,20 +32,34 @@ class TopographicSensor:
     def __init__(self):
         self.prefix = "user.cortex.ghost"
 
-    def scan_field(self, root_dir: Path) -> list[dict[str, Any]]:
+    def scan_field(self, root_dir: Path) -> list[GhostTrace]:
         """Scan the project topography for active ghosts."""
         resonances = []
+        ignored = {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", ".cortex"}
 
-        # 1. Recursive scan of files
-        for path in root_dir.rglob("*"):
-            if path.is_file() and not self._is_ignored(path):
+        # 1. Faster recursive scan avoiding ignored directories
+        for root, dirs, files in os.walk(root_dir):
+            dirs[:] = [d for d in dirs if d not in ignored]
+            
+            # Check for fallback manifests in this directory
+            if ".songlines" in files:
+                manifest_path = Path(root) / ".songlines"
+                resonances.extend(self._scan_single_manifest(manifest_path))
+
+            for file in files:
+                if file in ignored:
+                    continue
+                path = Path(root) / file
+                try:
+                    if path.stat().st_size > 1024 * 1024:
+                        continue
+                except OSError:
+                    continue
+                
                 file_ghosts = self._read_ghosts_from_file(path)
                 resonances.extend(file_ghosts)
 
-        # 2. Scan fallback manifests (.songlines)
-        resonances.extend(self._scan_fallback_manifests(root_dir))
-
-        # 3. Deduplicate and clean (by ghost ID)
+        # 2. Deduplicate and clean (by ghost ID)
         unique_ghosts = {}
         for ghost in resonances:
             gid = ghost["id"]
@@ -42,7 +68,7 @@ class TopographicSensor:
 
         return list(unique_ghosts.values())
 
-    def _read_ghosts_from_file(self, file_path: Path) -> list[dict[str, Any]]:
+    def _read_ghosts_from_file(self, file_path: Path) -> list[GhostTrace]:
         """Read ghosts from macOS xattrs or xattr CLI."""
         results = []
         attr_names = self._get_attr_names(file_path)
@@ -58,18 +84,36 @@ class TopographicSensor:
 
     def _get_attr_names(self, file_path: Path) -> list[str]:
         """Fetch matching attribute names via os or CLI."""
-        # 1. Try native os.listxattr
+        # 1. Try native os.listxattr (Linux mostly)
         if hasattr(os, "listxattr"):
             try:
+                # type: ignore[reportAttributeAccessIssue]
                 return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
             except OSError:
                 pass
-
-        # 2. Try xattr CLI
+                
+        # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
-            out = subprocess.check_output(["xattr", str(file_path)], stderr=subprocess.DEVNULL)
-            return [a for a in out.decode("utf-8").splitlines() if a.startswith(self.prefix)]
-        except (subprocess.SubprocessError, FileNotFoundError):
+            import xattr
+            try:
+                attrs = xattr.listxattr(str(file_path))
+                return [a for a in attrs if a.startswith(self.prefix)]
+            except OSError:
+                pass
+        except ImportError:
+            pass
+
+        # 2. Try xattr CLI (Chronos Sniper: added timeout)
+        try:
+            out = subprocess.check_output(
+                ["xattr", str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
+            )
+            return [
+                a
+                for a in out.decode("utf-8", errors="ignore").splitlines()
+                if a.startswith(self.prefix)
+            ]
+        except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return []
 
     def _get_attr_payload(self, file_path: Path, attr: str) -> bytes | None:
@@ -77,24 +121,40 @@ class TopographicSensor:
         # 1. Try native os.getxattr
         if hasattr(os, "getxattr"):
             try:
-                return os.getxattr(str(file_path), attr)
+                return os.getxattr(str(file_path), attr)  # type: ignore[reportAttributeAccessIssue]
             except OSError:
                 pass
 
-        # 2. Try xattr CLI -p
+        # 1.5 Try native python xattr package (macOS mostly) if installed
+        try:
+            import xattr
+            try:
+                return xattr.getxattr(str(file_path), attr)
+            except OSError:
+                pass
+        except ImportError:
+            pass
+
+        # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:
             return subprocess.check_output(
-                ["xattr", "-p", attr, str(file_path)], stderr=subprocess.DEVNULL
+                ["xattr", "-p", attr, str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
             )
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return None
 
     def _parse_ghost_payload(
         self, file_path: Path, attr: str, payload_bytes: bytes
-    ) -> dict[str, Any] | None:
+    ) -> GhostTrace | None:
         """Decode payload and handle decay/evaporation."""
         try:
-            ghost = json.loads(payload_bytes.decode("utf-8"))
+            # Entropy Demon Guard: Handle malformed UTF-8 or unexpected JSON
+            payload_str = payload_bytes.decode("utf-8", errors="replace")
+            ghost = json.loads(payload_str)
+
+            if not isinstance(ghost, dict) or "created_at" not in ghost or "half_life" not in ghost:
+                return None
+
             strength = DecayEngine.calculate_resonance(ghost["created_at"], ghost["half_life"])
 
             if strength < 0.05:
@@ -112,6 +172,7 @@ class TopographicSensor:
         """Helper to delete an xattr."""
         if hasattr(os, "removexattr"):
             try:
+                # type: ignore[reportAttributeAccessIssue]
                 os.removexattr(str(file_path), attr_name)
                 return
             except OSError:
@@ -122,31 +183,23 @@ class TopographicSensor:
         except Exception:
             pass
 
-    def _scan_fallback_manifests(self, root_dir: Path) -> list[dict[str, Any]]:
-        """Read ghosts from .songlines fallback files."""
+    def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
+        """Read ghosts from a single .songlines fallback file."""
         results = []
-        for manifest in root_dir.rglob(".songlines"):
-            try:
-                with open(manifest) as f:
-                    data = json.load(f)
-                    # data is { filename: { attr_name: payload_str } }
-                    for filename, attrs in data.items():
-                        for _, payload_str in attrs.items():
-                            ghost = json.loads(payload_str)
-                            strength = DecayEngine.calculate_resonance(
-                                ghost["created_at"], ghost["half_life"]
-                            )
-                            if strength < 0.05:
-                                continue
-                            ghost["strength"] = strength
-                            ghost["source_file"] = str(manifest.parent / filename)
-                            results.append(ghost)
-            except Exception:
-                pass
+        try:
+            with open(manifest) as f:
+                data = json.load(f)
+                for filename, attrs in data.items():
+                    for _, payload_str in attrs.items():
+                        ghost = json.loads(payload_str)
+                        strength = DecayEngine.calculate_resonance(
+                            ghost["created_at"], ghost["half_life"]
+                        )
+                        if strength < 0.05:
+                            continue
+                        ghost["strength"] = strength
+                        ghost["source_file"] = str(manifest.parent / filename)
+                        results.append(ghost)
+        except Exception:
+            pass
         return results
-
-    def _is_ignored(self, path: Path) -> bool:
-        """Basic ignore logic for hidden dirs and common noise."""
-        parts = path.parts
-        ignored = {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", ".cortex"}
-        return any(part in ignored for part in parts)

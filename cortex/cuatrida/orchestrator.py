@@ -20,7 +20,7 @@ class CuatridaOrchestrator:
 
     def __init__(self, engine: AsyncCortexEngine):
         self.engine = engine
-        self.mejoralo = MejoraloEngine(engine=engine)
+        self.mejoralo = MejoraloEngine(engine=engine)  # type: ignore[reportArgumentType]
         self.metrics = CuatridaMetrics()
         self._last_tx_id: int | None = None
 
@@ -134,9 +134,9 @@ class CuatridaOrchestrator:
         Dimension A: Zero-Friction Sync.
         Interfaces with ghost-control to ensure the system is in a pre-cognitive state.
         """
-        ghost_path = (
-            Path.home() / ".gemini" / "antigravity" / "skills" / "ghost-control" / "ghost.py"
-        )
+        from cortex.core.paths import SKILLS_DIR
+
+        ghost_path = SKILLS_DIR / "ghost-control" / "ghost.py"
         latency = 0.0
         status = "unknown"
 

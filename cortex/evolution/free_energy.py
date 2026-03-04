@@ -274,7 +274,7 @@ class FreeEnergyMonitor:
         # Record history for trend analysis
         self._history.append(states)
         if len(self._history) > self._max_history:
-            self._history = self._history[-self._max_history:]
+            self._history = self._history[-self._max_history :]
 
         return states
 
@@ -299,8 +299,7 @@ class FreeEnergyMonitor:
         """
         metrics = self._metrics.get_domain(domain)
         efes = [
-            compute_strategy_efe(name, delta, metrics)
-            for name, delta in strategy_mutations.items()
+            compute_strategy_efe(name, delta, metrics) for name, delta in strategy_mutations.items()
         ]
         efes.sort(key=lambda e: e.expected_free_energy)
         return efes
@@ -316,7 +315,7 @@ class FreeEnergyMonitor:
         if len(self._history) < 2:
             return 0.0
 
-        recent = self._history[-min(window, len(self._history)):]
+        recent = self._history[-min(window, len(self._history)) :]
         deltas = []
         for i in range(1, len(recent)):
             prev_f = recent[i - 1].get(domain, FreeEnergyState()).free_energy

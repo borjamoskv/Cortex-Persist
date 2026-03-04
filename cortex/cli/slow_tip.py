@@ -125,7 +125,6 @@ class SlowOpTipEmitter:
     def _emit_tip(self) -> None:
         """Emit a single tip to Rich console. Fully isolated — never crashes."""
         try:
-            import asyncio
             from rich.panel import Panel
 
             from cortex.cli.common import console
@@ -137,7 +136,7 @@ class SlowOpTipEmitter:
                 include_dynamic=False,
             )
             # Fetch random tip synchronously in current thread
-            tip = asyncio.run(tips_engine.random())
+            tip = tips_engine.random_sync()
             console.print()
             console.print(
                 Panel(

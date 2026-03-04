@@ -23,7 +23,7 @@ EVENT_TYPES: Final[frozenset[str]] = frozenset(
         "insight",  # General realization or meta-comment.
         "milestone",  # Feature completion or ship event.
         "flow_state",  # Period of high-density productive activity.
-        "blocked",  # Stuck on a bug or missing information.
+        "blocked",
     }
 )
 
@@ -55,6 +55,8 @@ class Episode:
     tags: list[str]
     meta: dict[str, Any]
     created_at: str
+    actors: list[str] = field(default_factory=list)
+    intent: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-serializable representation."""
@@ -68,6 +70,8 @@ class Episode:
             "tags": self.tags,
             "meta": self.meta,
             "created_at": self.created_at,
+            "actors": self.actors,
+            "intent": self.intent,
         }
 
 

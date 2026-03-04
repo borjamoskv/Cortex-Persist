@@ -79,5 +79,8 @@ CORTEX assumes:
 | Memory tampering | SHA-256 hash chain + Merkle checkpoints |
 | Unauthorized access | RBAC + API key + JWT authentication |
 | Secret leakage | Privacy Shield (11 regex patterns at ingress) |
+| **Composition leakage** | **Holistic cross-field correlation analysis at ingress** |
 | Malicious LLM code output | AST Sandbox (no eval/exec) |
 | Cross-tenant data access | Tenant ID scoping on all queries |
+
+> **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.

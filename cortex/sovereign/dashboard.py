@@ -28,7 +28,7 @@ async def get_power_level() -> dict[str, Any]:
     try:
         from cortex.mejoralo.scan import scan  # real scanner
 
-        result = scan("cortex/")
+        result = scan("cortex/")  # type: ignore[reportCallIssue]
         # Map scan result dimensions to our Dimension enum
         for dim in Dimension:
             scores[dim.value] = result.get(dim.value, result.get("score", 0))
@@ -73,7 +73,7 @@ async def health() -> dict[str, str]:
 @router.get("/skills")
 async def list_skills() -> dict[str, Any]:
     """List all discovered sovereign skills."""
-    from cortex.sovereign.engine import discover_skills
+    from cortex.sovereign.engine import discover_skills  # type: ignore[reportAttributeAccessIssue]
 
     skills = discover_skills()
     return {

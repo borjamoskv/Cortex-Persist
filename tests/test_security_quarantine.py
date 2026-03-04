@@ -19,7 +19,6 @@ import pytest_asyncio
 from cortex.database.schema import ALL_SCHEMA
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 
-
 # ═══════════════════════════════════════════════════════════════════
 # Fixtures
 # ═══════════════════════════════════════════════════════════════════
@@ -81,9 +80,7 @@ class TestMigration018:
             "VALUES ('test', 'test content here', 'knowledge', datetime('now'))"
         )
         migrated_db.commit()
-        cursor = migrated_db.execute(
-            "SELECT is_quarantined FROM facts WHERE project = 'test'"
-        )
+        cursor = migrated_db.execute("SELECT is_quarantined FROM facts WHERE project = 'test'")
         row = cursor.fetchone()
         assert row[0] == 0
 
@@ -236,22 +233,16 @@ async def test_ghost_reaper_expires_old_ghosts(tmp_path):
         """)
 
         # Insert an old ghost (60 days ago)
-        old_date = (
-            datetime.now(timezone.utc) - timedelta(days=60)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        old_date = (datetime.now(timezone.utc) - timedelta(days=60)).strftime("%Y-%m-%dT%H:%M:%S")
         await conn.execute(
-            "INSERT INTO ghosts (reference, context, project, created_at) "
-            "VALUES (?, ?, ?, ?)",
+            "INSERT INTO ghosts (reference, context, project, created_at) VALUES (?, ?, ?, ?)",
             ("stale-entity", "old context", "test-project", old_date),
         )
 
         # Insert a fresh ghost (1 day ago)
-        fresh_date = (
-            datetime.now(timezone.utc) - timedelta(days=1)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        fresh_date = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S")
         await conn.execute(
-            "INSERT INTO ghosts (reference, context, project, created_at) "
-            "VALUES (?, ?, ?, ?)",
+            "INSERT INTO ghosts (reference, context, project, created_at) VALUES (?, ?, ?, ?)",
             ("fresh-entity", "new context", "test-project", fresh_date),
         )
         await conn.commit()
@@ -294,12 +285,10 @@ async def test_ghost_reaper_respects_explicit_ttl(tmp_path):
         """)
 
         # Old ghost but with future expires_at
-        old_date = (
-            datetime.now(timezone.utc) - timedelta(days=60)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
-        future_date = (
-            datetime.now(timezone.utc) + timedelta(days=30)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        old_date = (datetime.now(timezone.utc) - timedelta(days=60)).strftime("%Y-%m-%dT%H:%M:%S")
+        future_date = (datetime.now(timezone.utc) + timedelta(days=30)).strftime(
+            "%Y-%m-%dT%H:%M:%S"
+        )
         await conn.execute(
             "INSERT INTO ghosts (reference, context, project, created_at, expires_at) "
             "VALUES (?, ?, ?, ?, ?)",
@@ -379,14 +368,11 @@ async def test_bridge_guard_source_extraction():
     """BridgeGuard correctly extracts source project from content."""
     from cortex.engine.bridge_guard import BridgeGuard
 
-    assert BridgeGuard._extract_source_project(
-        "Pattern: X from naroa-web → live-notch", "live-notch"
-    ) == "naroa-web"
+    assert (
+        BridgeGuard._extract_source_project("Pattern: X from naroa-web → live-notch", "live-notch")
+        == "naroa-web"
+    )
 
-    assert BridgeGuard._extract_source_project(
-        "moskvbot → cortex", "cortex"
-    ) == "moskvbot"
+    assert BridgeGuard._extract_source_project("moskvbot → cortex", "cortex") == "moskvbot"
 
-    assert BridgeGuard._extract_source_project(
-        "No bridge pattern here", "project"
-    ) is None
+    assert BridgeGuard._extract_source_project("No bridge pattern here", "project") is None

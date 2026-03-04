@@ -6,7 +6,6 @@ It follows the classic Closed → Open → Half‑Open state machine with config
 error thresholds and cooldown periods.
 """
 
-import asyncio
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -107,21 +106,42 @@ class CircuitBreaker:
 circuit_breaker = CircuitBreaker()
 
 
-async def call_external_compact() -> None:
-    """Placeholder for the external compaction service.
+async def call_external_compact(
+    engine: Any | None = None,
+    project: str = "default",
+    db_path: str | None = None,
+) -> None:
+    """Execute compaction through the circuit breaker.
 
-    In a real deployment this would perform an HTTP request or RPC call to
-    ``cortex.compactor.compact``. Here we simulate a call that may fail
-    randomly to demonstrate the breaker.
+    Delegates to ``cortex.compaction.compactor.compact`` when available.
+    Falls back to a basic WAL checkpoint if the compactor module is unavailable.
     """
+    import asyncio
 
-    async def dummy_call():
-        # Simulate occasional failure
-        import random
+    async def _real_compact():
+        try:
+            from cortex.compaction.compactor import compact
 
-        await asyncio.sleep(0.1)
-        if random.random() < 0.2:
-            raise RuntimeError("Simulated external compaction failure")
+            if engine is not None:
+                # compact() is sync — run in thread to avoid blocking event loop
+                return await asyncio.to_thread(compact, engine, project)
+        except ImportError:
+            pass
+
+        # Fallback: direct SQLite WAL checkpoint
+        if db_path:
+
+            def _checkpoint():
+                from cortex.database.core import connect as db_connect
+
+                conn = db_connect(db_path, timeout=10)  # type: ignore[reportArgumentType]
+                try:
+                    conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                    LOGGER.info("Fallback WAL checkpoint completed for %s", db_path)
+                finally:
+                    conn.close()
+
+            await asyncio.to_thread(_checkpoint)
         return "ok"
 
-    await circuit_breaker.call(dummy_call)
+    await circuit_breaker.call(_real_compact)

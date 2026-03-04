@@ -1,0 +1,91 @@
+"""
+CORTEX V5 - Byzantine Consensus (LEGION-Ω)
+Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
+"""
+
+import hashlib
+from typing import TypeVar
+
+T = TypeVar("T")
+
+
+class ByzantineNode:
+    def __init__(self, node_id: str, reputation: float = 1.0):
+        self.node_id = node_id
+        self.reputation = reputation
+
+
+class ByzantineConsensus:
+    """
+    Implements Zero-Trust consensus for multi-model / multi-agent swarms.
+    Operates under the absolute premise that peripheral nodes hallucinate or lie.
+    """
+
+    def __init__(self, tolerance_threshold: float = 0.67):
+        # By default, a 2/3 majority weighted by reputation is required.
+        self.tolerance_threshold = tolerance_threshold
+        self.nodes: dict[str, ByzantineNode] = {}
+
+    def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
+        self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
+
+    def execute_consensus(self, proposals: dict[str, T]) -> T | None:
+        """
+        Takes proposals from multiple nodes. Validates them via reputation-weighted
+        thresholding. Returns the absolute truth or None if BFT consensus fails.
+        """
+        if not proposals:
+            return None
+
+        vote_tally: dict[str, float] = {}
+        hash_to_proposal: dict[str, T] = {}
+        total_reputation = 0.0
+
+        proposal_hashes: dict[T, str] = {}
+        for node_id, proposal in proposals.items():
+            if node_id not in self.nodes:
+                continue
+
+            rep = self.nodes[node_id].reputation
+            total_reputation += rep
+
+            # O(1) hashing for duplicate proposals
+            if proposal not in proposal_hashes:
+                proposal_hashes[proposal] = hashlib.sha256(str(proposal).encode()).hexdigest()
+            proposal_hash = proposal_hashes[proposal]
+
+            vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
+            hash_to_proposal[proposal_hash] = proposal
+
+        if total_reputation == 0.0:
+            return None
+
+        # Find winning proposal
+        winning_hash = max(vote_tally.keys(), key=lambda k: vote_tally[k])
+        winning_weight = vote_tally[winning_hash]
+
+        # Check against Byantine tolerance threshold
+        if (winning_weight / total_reputation) >= self.tolerance_threshold:
+            # Consensus achieved
+            self._update_reputations(winning_hash, proposals)
+            return hash_to_proposal[winning_hash]
+
+        # Consensus failed (Shattered Trust)
+        return None
+
+    def _update_reputations(self, winning_hash: str, proposals: dict[str, T]) -> None:
+        """
+        Zero-trust reputation slashing. Nodes that hallucinated or Byzantine-lied
+        lose reputation. Nodes that proposed the truth gain.
+        """
+        for node_id, proposal in proposals.items():
+            if node_id not in self.nodes:
+                continue
+
+            proposal_hash = hashlib.sha256(str(proposal).encode()).hexdigest()
+            if proposal_hash == winning_hash:
+                # Reward
+                self.nodes[node_id].reputation = min(1.0, self.nodes[node_id].reputation * 1.05)
+            else:
+                # Slash
+                self.nodes[node_id].reputation *= 0.8

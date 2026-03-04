@@ -394,7 +394,8 @@ class ASTSandbox:
                 signal.alarm(self._timeout)
 
             try:
-                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102
+                # nosec B102 — guarded by AST whitelist + timeout + restricted builtins
+                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102  # nosec B102 — exec() in sandboxed namespace — explicit design decision for REPL
             finally:
                 if hasattr(signal, "SIGALRM"):
                     signal.alarm(0)

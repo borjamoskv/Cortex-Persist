@@ -14,9 +14,11 @@ import sqlite_vec
 from cortex.config import DEFAULT_DB_PATH
 from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
+from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
-from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.query_mixin import _FACT_COLUMNS, _FACT_JOIN
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
+from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
@@ -27,10 +29,11 @@ logger = logging.getLogger("cortex")
 
 from cortex.consensus.manager import ConsensusManager  # noqa: E402
 from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
+from cortex.engine.lock import SovereignLock  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
+class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
@@ -38,6 +41,7 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         db_path: str | Path = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
+        super().__init__()
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
@@ -48,11 +52,13 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
+        self._persistence = PersistenceSupervisor(self)
 
         # Composition layers
         self.facts = FactManager(self)
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
+        self.lock_sovereign = SovereignLock(self)
 
     # ─── Security: Filesystem Permission Enforcement ──────────────
 
@@ -70,7 +76,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
                 os.chmod(parent, 0o700)
                 logger.info(
                     "SECURITY: Fixed dir perms %o → 700 on %s",
-                    current_dir_mode, parent,
+                    current_dir_mode,
+                    parent,
                 )
 
             # DB file: rw------- (600) — only if it exists
@@ -80,7 +87,8 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
                     os.chmod(self._db_path, 0o600)
                     logger.info(
                         "SECURITY: Fixed DB perms %o → 600 on %s",
-                        current_file_mode, self._db_path,
+                        current_file_mode,
+                        self._db_path,
                     )
         except OSError as e:
             logger.warning("SECURITY: Could not enforce permissions: %s", e)
@@ -89,14 +97,19 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
 
     @staticmethod
     def _audit_log(
-        action: str, fact_type: str = "",
-        project: str = "", tenant_id: str = "default",
+        action: str,
+        fact_type: str = "",
+        project: str = "",
+        tenant_id: str = "default",
     ) -> None:
         """Append-only audit log for CLI/SDK access to CORTEX memory."""
         audit_logger = logging.getLogger("cortex.audit")
         audit_logger.info(
             "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
-            action, fact_type, project, tenant_id,
+            action,
+            fact_type,
+            project,
+            tenant_id,
         )
 
     @asynccontextmanager
@@ -145,12 +158,13 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         return self._conn
 
     def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()
+        return self.get_conn()  # type: ignore[reportReturnType]
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
-        from cortex.database.core import connect
         import sqlite3
+
+        from cortex.database.core import connect
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)
         conn.enable_load_extension(True)
@@ -204,6 +218,12 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     def hybrid_search_sync(self, *args, **kwargs):
         return self._run_sync(self.search(*args, **kwargs))
 
+    def graph_sync(self, *args, **kwargs):
+        return self._run_sync(self.graph(*args, **kwargs))
+
+    def query_entity_sync(self, *args, **kwargs):
+        return self._run_sync(self.query_entity(*args, **kwargs))
+
     def close_sync(self):
         return self._run_sync(self.close())
 
@@ -220,56 +240,42 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
     async def store_many(self, *args, **kwargs):
         return await self.facts.store_many(*args, **kwargs)
 
-    async def search(self, *args, **kwargs):
-        return await self.facts.search(*args, **kwargs)
-
     async def recall(self, *args, **kwargs):
         self._audit_log(
             "recall",
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await self.facts.recall(*args, **kwargs)
+        return await super().recall(*args, **kwargs)
 
-    async def update(self, *args, **kwargs):
-        return await self.facts.update(*args, **kwargs)
+    async def get_fact(self, *args, **kwargs):
+        res = await super().get_fact(*args, **kwargs)
+        if not res:
+            return None
+        from cortex.engine.models import Fact
 
-    async def deprecate(self, *args, **kwargs):
-        return await self.facts.deprecate(*args, **kwargs)
-
-    async def history(self, *args, **kwargs):
-        return await self.facts.history(*args, **kwargs)
-
-    async def time_travel(self, *args, **kwargs):
-        return await self.facts.time_travel(*args, **kwargs)
-
-    async def reconstruct_state(self, *args, **kwargs):
-        return await self.facts.reconstruct_state(*args, **kwargs)
+        return Fact(**{k: v for k, v in res.items() if k != "type"})
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.utils.errors import FactNotFound
 
         conn = await self.get_conn()
-        cursor = await conn.execute(
-            f"SELECT {_FACT_COLUMNS} {_FACT_JOIN} WHERE f.id = ?", (fact_id,)
-        )
+        cursor = await conn.execute(f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,))
         row = await cursor.fetchone()
-        fact = row_to_fact(row) if row else None
+        fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
         if not fact or fact.valid_until:
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
 
-    async def get_context_subgraph(self, *args, **kwargs):
-        return await self.facts.get_context_subgraph(*args, **kwargs)
-
-    async def find_path(self, *args, **kwargs):
-        return await self.facts.find_path(*args, **kwargs)
-
     async def vote(self, *args, **kwargs):
         return await self.consensus.vote(*args, **kwargs)
 
-    async def stats(self):
-        return await self.facts.stats()
+    async def get_all_active_facts(self, *args, **kwargs):
+        """Retrieve all active facts across all projects, wrapped in models."""
+        results = await super().get_all_active_facts(*args, **kwargs)
+        from cortex.engine.models import Fact
+
+        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
@@ -316,8 +322,9 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
             )
         await conn.commit()
 
-        self._ledger = ImmutableLedger(conn)
+        self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
         await self._init_memory_subsystem(self._db_path, conn)
+        await self._persistence.start()
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
 
@@ -327,18 +334,30 @@ class CortexEngine(StoreMixin, MemoryMixin, TransactionMixin):
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.sync.snapshot import export_snapshot
 
-        return export_snapshot(self, out_path)
+        return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
-    @staticmethod
-    def _row_to_fact(row) -> Fact:
-        return row_to_fact(row)
+    def _row_to_fact(  # type: ignore[override]
+        self,
+        row: aiosqlite.Row | dict,
+        tenant_id: str = "default",
+    ) -> dict:
+        """Delegate to MixinBase (supports tenant-scoped decryption)."""
+        return super()._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
 
     # ─── Lifecycle ────────────────────────────────────────────────
 
     async def close(self):
         if self._memory_manager:
-            await self._memory_manager.wait_for_background()
+            try:
+                await asyncio.wait_for(
+                    self._memory_manager.wait_for_background(),  # type: ignore
+                    timeout=5.0,
+                )
+            except (asyncio.TimeoutError, Exception):
+                logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
+        if self._persistence:
+            await self._persistence.stop()
         if self._conn:
             await self._conn.close()
             self._conn = None

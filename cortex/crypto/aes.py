@@ -11,7 +11,7 @@ import logging
 import os
 from typing import Any
 
-from cryptography.exceptions import InvalidKey
+from cryptography.exceptions import InvalidKey, InvalidTag
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
@@ -55,7 +55,7 @@ class CortexEncrypter:
             salt=b"cortex_v6_tenant_isolation_salt",
             info=tenant_id.encode("utf-8"),
         )
-        tenant_key = hkdf.derive(self._master_key)
+        tenant_key = hkdf.derive(self._master_key)  # type: ignore[reportArgumentType]
         self._tenant_keys[tenant_id] = tenant_key
         return tenant_key
 
@@ -100,11 +100,11 @@ class CortexEncrypter:
             aesgcm = AESGCM(key)
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
-        except InvalidKey as e:
+        except (InvalidKey, InvalidTag) as e:
             raise ValueError(
-                f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt."
+                f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt or corrupted data."
             ) from e
-        except (ValueError, TypeError, base64.binascii.Error) as e:
+        except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
     def encrypt_json(self, data: dict[str, Any] | None, tenant_id: str = "default") -> str | None:

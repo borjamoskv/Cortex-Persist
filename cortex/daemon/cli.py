@@ -218,14 +218,38 @@ def check(ctx: click.Context) -> None:
 
 
 @cli.command()
-def status() -> None:
+@click.option("--json", "as_json", is_flag=True, help="Output raw JSON for automation")
+def status(as_json: bool) -> None:
     """Show last check results."""
     last = MoskvDaemon.load_status()
     if not last:
-        console.print("[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]")
+        if as_json:
+            click.echo('{"error": "no status found"}')
+        else:
+            console.print("[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]")
         sys.exit(1)
 
-    # Build a Rich table from the persisted status
+    # JSON mode: dump and exit
+    if as_json:
+        import json
+
+        # Enrich with telemetry if available
+        try:
+            from cortex.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
+
+            last["telemetry"] = {
+                "spans_total": len(collector),
+                "spans_recent": [
+                    {"name": s.name, "duration_ms": round(s.duration_ms, 1), "ok": s.ok}
+                    for s in collector.spans[-10:]
+                ],
+            }
+        except ImportError:
+            pass
+        click.echo(json.dumps(last, indent=2, ensure_ascii=False))
+        sys.exit(0 if last.get("all_healthy") else 1)
+
+    # Rich table mode (existing behavior)
     table = Table(title="MOSKV-1 — Last Status", show_header=True, header_style="bold")
     table.add_column("Field", style="cyan")
     table.add_column("Value")

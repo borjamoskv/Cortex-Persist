@@ -35,29 +35,27 @@ class DigitalEndocrine:
         alpha = 0.3
 
         # Stress Response
-        if any(w in words for w in ["urgente", "error", "fallo", "crash", "critical", "panic"]):
+        if words & {"urgente", "error", "fallo", "crash", "critical", "panic"}:
             self.cortisol = min(1.0, self.cortisol + (0.45 * alpha))
             self.dopamine = max(0.0, self.dopamine - (0.25 * alpha))
 
         # Creative Stimulus
-        if any(w in words for w in ["ideas", "brainstorm", "explora", "innovar", "imagina"]):
+        if words & {"ideas", "brainstorm", "explora", "innovar", "imagina"}:
             self.dopamine = min(1.0, self.dopamine + (0.4 * alpha))
             self.cortisol = max(0.0, self.cortisol - (0.2 * alpha))
 
         # Dopamine/Serotonin Reward
-        if any(w in words for w in ["gracias", "bien", "mejorado", "perfecto", "genial"]):
+        if words & {"gracias", "bien", "mejorado", "perfecto", "genial"}:
             self.serotonin = min(1.0, self.serotonin + (0.3 * alpha))
             self.dopamine = min(1.0, self.dopamine + (0.1 * alpha))
 
         # Trust/Collaboration (Oxytocin)
-        if any(w in words for w in ["colaborar", "equipo", "juntos", "unificado", "nexus"]):
+        if words & {"colaborar", "equipo", "juntos", "unificado", "nexus"}:
             self.oxytocin = min(1.0, self.oxytocin + (0.4 * alpha))
             self.serotonin = min(1.0, self.serotonin + (0.15 * alpha))
 
         # Threat Detection
-        if any(
-            w in words for w in ["inseguro", "desconocido", "riesgo", "bypass", "vulnerabilidad"]
-        ):
+        if words & {"inseguro", "desconocido", "riesgo", "bypass", "vulnerabilidad"}:
             self.adrenaline = min(1.0, self.adrenaline + (0.5 * alpha))
 
         self._homeostasis()
