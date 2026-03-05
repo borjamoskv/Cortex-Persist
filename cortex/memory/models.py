@@ -10,7 +10,7 @@ Tripartite Memory Architecture (KETER-∞ Frontera 2):
 
 from __future__ import annotations
 
-import uuid
+from cortex.axioms.topological_id import flake_gen
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
@@ -51,7 +51,7 @@ class MemoryEntry:
     """
 
     content: str
-    id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    id: str = field(default_factory=flake_gen.next_lexicographic_id)
     project: str | None = None
     source: str = "episodic"  # episodic | fact | reflection | ghost
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -111,7 +111,7 @@ class MemoryEvent(BaseModel):
     """
 
     event_id: str = Field(
-        default_factory=lambda: str(uuid.uuid4()),
+        default_factory=flake_gen.next_lexicographic_id,
         description="Unique identifier for this event.",
     )
     timestamp: datetime = Field(
@@ -139,7 +139,7 @@ class EpisodicSnapshot(BaseModel):
     """
 
     snapshot_id: str = Field(
-        default_factory=lambda: str(uuid.uuid4()),
+        default_factory=flake_gen.next_lexicographic_id,
         description="Unique identifier for this episode.",
     )
     summary: str = Field(description="Compressed textual summary of the events.")
@@ -166,7 +166,7 @@ class CortexFactModel(BaseModel):
     """
 
     id: str = Field(
-        default_factory=lambda: str(uuid.uuid4()),
+        default_factory=flake_gen.next_lexicographic_id,
         description="Unique identifier for the fact.",
     )
     tenant_id: str = Field(..., description="Absolute Zero-Trust Isolation.")
@@ -181,6 +181,9 @@ class CortexFactModel(BaseModel):
     # Stratified Memory (Inspiration: Letta RFC #3179)
     cognitive_layer: COGNITIVE_LAYER = Field(
         default="semantic", description="Target cognitive layer for this fact."
+    )
+    parent_decision_id: str | None = Field(
+        default=None, description="Causal anchor to the parent decision."
     )
 
     # Sovereign Metadata

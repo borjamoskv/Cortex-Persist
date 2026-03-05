@@ -127,6 +127,7 @@ Input → guard validation → AES encrypt(content, meta)
 | `skills/` | Agent skill registry and execution |
 | `hive/` | Collective intelligence aggregation |
 | `alma/` | Soul engine — personality and identity persistence |
+| `definitions/` | LYNX-Ω, TOM, OLIVER — declarative agent roles (YAML) |
 
 #### LLM Router Architecture (DNS Analogy)
 The router implements a deterministic cascade to prevent capability degradation:

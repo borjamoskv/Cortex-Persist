@@ -217,7 +217,7 @@ class EpisodicMemory:
             sql += " AND created_at >= ?"
             params.append(since)
 
-        sql += " ORDER BY created_at DESC LIMIT ?"
+        sql += " ORDER BY id DESC LIMIT ?"
         params.append(limit)
 
         async with self._conn.execute(sql, params) as cursor:
@@ -308,7 +308,7 @@ class EpisodicMemory:
                 id, session_id, event_type, content, project, emotion, tags, meta, created_at 
             FROM episodes 
             WHERE session_id = ? 
-            ORDER BY created_at ASC
+            ORDER BY id ASC
         """
         async with self._conn.execute(sql, (session_id,)) as cursor:
             rows = await cursor.fetchall()

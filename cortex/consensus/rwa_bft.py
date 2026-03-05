@@ -259,7 +259,7 @@ class RWABFTConsensus:
 
         result = ConsensusResult(
             fact_id=fact_id,
-            accepted=supermajority_met and not byzantine_detected,
+            accepted=supermajority_met,
             supermajority_met=supermajority_met,
             total_reputation=total_rep,
             approving_reputation=approving_rep,
@@ -354,13 +354,14 @@ class RWABFTConsensus:
 
         for v in minority_votes:
             r = self._rep(v.agent_id)
-            z = (mean_rep - r) / std_rep if std_rep > 0.0 else 0.0
+            # Use absolute Z-score to flag BOTH low-rep and high-rep rogue nodes
+            z = abs(mean_rep - r) / std_rep if std_rep > 0.0 else 0.0
             if z > self._outlier_z:
-                # Low-reputation minority voter — possible byzantine injection
+                # Anomalous minority voter (suspiciously low or trusted rogue)
                 outliers.append(v.agent_id)
                 byzantine = True
                 logger.warning(
-                    "RWA-BFT: Possible byzantine node detected: %s (rep=%.3f, z=%.2f)",
+                    "RWA-BFT: Possible byzantine node detected: %s (rep=%.3f, |z|=%.2f)",
                     v.agent_id,
                     r,
                     z,

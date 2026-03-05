@@ -98,6 +98,18 @@ async def _fetch_dense_results(
     layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
+        # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
+        if getattr(manager, "_hologram", None) is not None and manager._hologram.is_ready:  # type: ignore
+            # O(1) in-RAM lookup without I/O
+            logger.debug("🌌 Querying Holographic Memory (RAM-resident)")
+            return await manager._hologram.recall_holographic(  # type: ignore
+                query=query,
+                limit=max_episodes,
+                tenant_id=tenant_id,
+                project_id=project_id,
+                layer=layer,
+            )
+
         if hasattr(manager._l2, "recall_secure"):
             if manager._dynamic_space:
                 return await manager._dynamic_space.recall_and_pulse(

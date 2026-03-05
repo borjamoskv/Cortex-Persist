@@ -77,10 +77,10 @@ class HDCVectorStoreL2:
             self._conn = sqlite3.connect(
                 self._db_path,
                 check_same_thread=False,
-                timeout=30,  # opening-policy: max wait if file is OS-locked
+                timeout=5.0,  # opening-policy: O(1) fail-fast
             )
-            # runtime-policy: wait up to 30s for WAL write-lock contention
-            self._conn.execute("PRAGMA busy_timeout=30000")
+            # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
+            self._conn.execute("PRAGMA busy_timeout=5000")
             self._conn.enable_load_extension(True)
             sqlite_vec.load(self._conn)
             self._conn.row_factory = sqlite3.Row
@@ -354,7 +354,7 @@ class HDCVectorStoreL2:
             SELECT id FROM hdc_facts_meta
             WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)
             AND fact_type = 'error' AND metadata LIKE '%"is_toxic": true%'
-            ORDER BY timestamp DESC LIMIT ?
+            ORDER BY rowid DESC LIMIT ?
             """,
             (tenant_id, project_id, limit),
         )

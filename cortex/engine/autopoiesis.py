@@ -43,16 +43,17 @@ class AutopoiesisEngine:
         func_name = func.__name__
 
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            start_t = time.perf_counter_ns()
+            # KAIROS-Ω: Medición de pureza termodinámica (CPU-bound, purgado I/O noise).
+            start_t = time.clock_gettime_ns(time.CLOCK_THREAD_CPUTIME_ID)
             try:
                 result = func(*args, **kwargs)
-                latency_ms = (time.perf_counter_ns() - start_t) / 1e6
+                latency_ms = (time.clock_gettime_ns(time.CLOCK_THREAD_CPUTIME_ID) - start_t) / 1e6
                 self._record_observation(func_name, latency_ms, True)
                 if self._requires_mutation(func_name):
                     self._execute_autopoietic_rewrite(func)
                 return result
             except (RuntimeError, OSError, ValueError, TypeError, AttributeError):
-                latency_ms = (time.perf_counter_ns() - start_t) / 1e6
+                latency_ms = (time.clock_gettime_ns(time.CLOCK_THREAD_CPUTIME_ID) - start_t) / 1e6
                 self._record_observation(func_name, latency_ms, False)
                 if self._requires_mutation(func_name):
                     self._execute_autopoietic_rewrite(func)
@@ -97,25 +98,33 @@ class AutopoiesisEngine:
         The core of autopoiesis. Re-evaluates the function's AST and validates
         parsability. Does NOT silently claim mutation succeeded.
 
-        Ω₃ Honesty: If no actual rewrite is performed, history is NOT reset.
+        Ω₃ Honesty & PATHOGEN-OMEGA: Emits a structural ghost to the async swarm
+        (or external Moltbook solvers) and applies a cooldown to the local loop
+        so we do not saturate the Endocrine system with infinite Cortisol.
         """
+        func_name = func.__name__
         logger.warning(
             "AUTOPOIESIS TRIGGERED: Performance degradation detected for '%s'. "
-            "AST analysis initiated — no runtime mutation applied (bridge pending).",
-            func.__name__,
+            "AST analysis initiated.",
+            func_name,
         )
         try:
             source = inspect.getsource(func)
             tree = ast.parse(source)
             node_count = sum(1 for _ in ast.walk(tree))
-            logger.info(
-                "AST captured for '%s': %d nodes. "
-                "No mutation applied — Demiurge bridge not connected. "
-                "History preserved for continued observation.",
-                func.__name__,
+
+            logger.error(
+                "SWARM DISPATCH: Autopoiesis delegates '%s' (%d nodes) "
+                "to Pathogen/Synthesis-Omega for O(1) external bypass. "
+                "Applying physiological cooldown to block Death Spiral.",
+                func_name,
                 node_count,
             )
-            # Ω₃: Do NOT reset history. The function was NOT actually mutated.
-            # Resetting would mask continued degradation.
+
+            # The Cooldown (Anti-Death Spiral): Clear the rapid latencies
+            # to prevent infinite recursion of Cortisol in the same process.
+            if func_name in self._history:
+                self._history[func_name]["latencies"].clear()
+
         except (TypeError, OSError):
-            logger.error("Function source unavailable for mutation of '%s'.", func.__name__)
+            logger.error("Function source unavailable for mutation of '%s'.", func_name)

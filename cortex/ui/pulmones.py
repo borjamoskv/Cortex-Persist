@@ -5,6 +5,9 @@ Visual/UI/UX: KAIROS-Ω, Fluid Dynamics, NotchLive integration.
 
 import math
 from dataclasses import dataclass
+from datetime import datetime
+
+import psutil
 
 
 @dataclass
@@ -74,3 +77,40 @@ class NotchFluidDynamics:
         corner_radius = min(new_width, new_height) * 0.5
 
         return new_width, new_height, corner_radius
+
+
+class SystemRespiration:
+    """
+    KAIROS-Ω physical integration (PULMONES).
+    Determines how 'deeply' the background system should breathe (execute).
+    If the human is active or load is high, it yields (shallow breath).
+    If the system is idle or during maintenance hours, it expands (deep breath).
+    """
+
+    @staticmethod
+    def get_current_state() -> tuple[float, int, bool]:
+        """
+        Returns:
+            throttle_multiplier (float): 1.0 (normal) to 5.0 (slowed down).
+            swarm_size_limit (int): Max agents to spawn (e.g. 5 up to 50).
+            ok_to_run (bool): False if CPU load is critically high.
+        """
+        now = datetime.now()
+        cpu_percent = psutil.cpu_percent(interval=None)
+        
+        if cpu_percent > 85.0:
+            # Critical load: choke background tasks
+            return 5.0, 3, False
+
+        # 03:00 to 05:00 is deep maintenance window
+        if 3 <= now.hour < 5:
+            return 0.5, 50, True
+
+        # Working hours (09:00 to 19:00) throttle back
+        if 9 <= now.hour <= 19:
+            throttle = 2.0 if cpu_percent > 40 else 1.0
+            return throttle, 10, True
+
+        # Evening / Night 
+        return 1.0, 20, True
+

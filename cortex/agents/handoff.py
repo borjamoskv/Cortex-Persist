@@ -61,7 +61,7 @@ async def generate_handoff(
         "SELECT id, project, content, created_at, tenant_id "
         "FROM facts "
         "WHERE fact_type = 'decision' AND valid_until IS NULL "
-        "ORDER BY created_at DESC LIMIT ?",
+        "ORDER BY id DESC LIMIT ?",
         (MAX_DECISIONS,),
     ) as cursor:
         decision_rows = await cursor.fetchall()
@@ -85,7 +85,7 @@ async def generate_handoff(
         "SELECT id, project, reference, context "
         "FROM ghosts "
         "WHERE status = 'open' "
-        "ORDER BY created_at DESC LIMIT ?",
+        "ORDER BY id DESC LIMIT ?",
         (MAX_GHOSTS,),
     ) as cursor:
         ghost_rows = await cursor.fetchall()
@@ -99,7 +99,7 @@ async def generate_handoff(
         "SELECT id, project, content, created_at, tenant_id "
         "FROM facts "
         "WHERE fact_type IN ('error', 'mistake') AND valid_until IS NULL "
-        "ORDER BY created_at DESC LIMIT ?",
+        "ORDER BY id DESC LIMIT ?",
         (MAX_ERRORS,),
     ) as cursor:
         error_rows = await cursor.fetchall()

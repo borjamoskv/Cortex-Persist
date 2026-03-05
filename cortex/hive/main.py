@@ -60,7 +60,7 @@ def get_hive_graph(
             """
             SELECT id, content, project, fact_type, created_at
             FROM facts
-            ORDER BY created_at DESC
+            ORDER BY id DESC
             LIMIT ?
             """,
             (limit,),

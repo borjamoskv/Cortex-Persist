@@ -52,11 +52,12 @@ logger = logging.getLogger("cortex.db")
 # How long to wait (ms) for a locked database before raising OperationalError.
 # Raised to 30s to handle bursts of >10 concurrent CLI processes competing
 # for SQLite write lock (WAL allows concurrent reads but only 1 writer).
-# At 13 processes × 5s window ≈ 65s total contention; 30s covers p95.
-BUSY_TIMEOUT_MS: Final[int] = 30_000
+# Reduced to 5000ms to allow the immune system to raise actionable errors 
+# instead of hanging indefinitely, making lock contention visible.
+BUSY_TIMEOUT_MS: Final[int] = 5000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
-CONNECT_TIMEOUT_S: Final[int] = 35
+CONNECT_TIMEOUT_S: Final[int] = 5
 
 # Memory-mapped I/O size (~20 GB). SQLite reads via kernel page cache
 # instead of userspace read() syscalls. Zero-copy for hot paths.
@@ -198,7 +199,7 @@ async def connect_async(
         A fully-configured aiosqlite.Connection.
     """
     try:
-        conn = await aiosqlite.connect(db_path)
+        conn = await aiosqlite.connect(db_path, timeout=5.0)
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e

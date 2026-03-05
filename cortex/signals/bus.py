@@ -139,7 +139,7 @@ class AsyncSignalBus:
             query += " AND created_at >= ?"
             params.append(since.isoformat())
 
-        query += " ORDER BY created_at DESC LIMIT ?"
+        query += " ORDER BY rowid DESC LIMIT ?"
         params.append(limit)
 
         cursor = await self._conn.execute(query, params)
@@ -175,7 +175,7 @@ class AsyncSignalBus:
             query += " AND consumed_by NOT LIKE ?"
             params.append(f'%"{unconsumed_by}"%')
 
-        query += " ORDER BY created_at ASC LIMIT ?"
+        query += " ORDER BY rowid ASC LIMIT ?"
         params.append(limit)
 
         cursor = await self._conn.execute(query, params)
@@ -411,7 +411,7 @@ class SignalBus:
             query += " AND created_at >= ?"
             params.append(since.isoformat())
 
-        query += " ORDER BY created_at DESC LIMIT ?"
+        query += " ORDER BY rowid DESC LIMIT ?"
         params.append(limit)
 
         cursor = self._conn.execute(query, params)
@@ -510,7 +510,7 @@ class SignalBus:
             query += " AND consumed_by NOT LIKE ?"
             params.append(f'%"{unconsumed_by}"%')
 
-        query += " ORDER BY created_at ASC LIMIT ?"
+        query += " ORDER BY rowid ASC LIMIT ?"
         params.append(limit)
 
         cursor = self._conn.execute(query, params)

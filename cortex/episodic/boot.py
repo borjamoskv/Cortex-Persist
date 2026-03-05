@@ -251,7 +251,7 @@ async def _get_reflections(
             SELECT id, project, content, fact_type, created_at
             FROM facts
             WHERE {where_clause}
-            ORDER BY created_at DESC
+            ORDER BY id DESC
             LIMIT ?
         """
         params.append(top_k)

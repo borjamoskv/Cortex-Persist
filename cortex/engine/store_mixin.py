@@ -90,9 +90,42 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         content = validate_content(project, content, fact_type)
 
         if not (meta and meta.get("previous_fact_id")):
+            # 1. Exact Structural Hash Dedup (O(1))
             if (existing_id := await check_dedup(conn, tenant_id, project, content)) is not None:
-                return existing_id, meta, content
+                return existing_id, meta, content, fact_type
 
+            # 2. Semantic Deduplication (O(N) Vector Search) - V8 Data Governance
+            manager = getattr(self, "_memory_manager", None)
+            if manager is not None:
+                try:
+                    # L2 recall handles decay, success_rate and cosine similarity natively
+                    similar_facts = await manager.recall(
+                        query=content,
+                        limit=1,
+                        project=project,
+                        tenant_id=tenant_id,
+                    )
+                    if similar_facts:
+                        top_match = similar_facts[0]
+                        score = getattr(top_match, "_recall_score", 0.0)
+                        
+                        # Threshold > 0.92 means extreme similarity (almost identical meaning)
+                        if score > 0.92:
+                            logger.info(
+                                "🛡️ [V8 Governance] Semantic deduplication blocked insert "
+                                "(Score: %.3f). ID: %s", score, top_match.id
+                            )
+                            try:
+                                fact_id_int = int(top_match.id)
+                                await conn.execute(
+                                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id = ?", 
+                                    (fact_id_int,)
+                                )
+                                return fact_id_int, meta, content, fact_type
+                            except (ValueError, TypeError):
+                                logger.warning("Non-integer ID returned from vector store. Skipping dedup.")
+                except Exception as e:
+                    logger.debug("Semantic deduplication skipped due to internal error: %s", e)
         meta = self._apply_privacy_shield(content, project, meta)
         meta = run_security_guards(content, project, source, meta)
 

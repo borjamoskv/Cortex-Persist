@@ -187,7 +187,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
             cursor = await conn.execute(
                 f"SELECT id, project, content, fact_type, created_at, tags "  # nosec B608 — parameterized query
                 f"FROM facts WHERE {where} "
-                f"ORDER BY created_at DESC LIMIT 1",
+                f"ORDER BY id DESC LIMIT 1",
                 params,
             )
             target = await cursor.fetchone()
@@ -228,7 +228,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "WHERE project = ? AND deprecated_at IS NULL "
                 "AND created_at <= ? "
                 "AND id != ? "
-                "ORDER BY created_at DESC LIMIT 20",
+                "ORDER BY id DESC LIMIT 20",
                 (tproj, tcreated, tid),
             )
             predecessors = await cursor.fetchall()
@@ -239,7 +239,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "FROM facts "
                 "WHERE project = ? AND deprecated_at IS NULL "
                 "AND created_at > ? "
-                "ORDER BY created_at ASC LIMIT 10",
+                "ORDER BY id ASC LIMIT 10",
                 (tproj, tcreated),
             )
             successors = await cursor.fetchall()

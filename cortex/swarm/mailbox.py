@@ -57,7 +57,7 @@ class AtomicMailbox:
         async with conn.execute(
             """
             SELECT agent_id, payload, timestamp FROM messages
-            WHERE topic = ? ORDER BY timestamp ASC
+            WHERE topic = ? ORDER BY id ASC
             """,
             (topic,),
         ) as cursor:
