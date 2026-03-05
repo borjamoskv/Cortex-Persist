@@ -1,4 +1,7 @@
-import sys, trace
+import sys
+import trace
+
+
 def main():
     import pytest
     pytest.main(["tests/test_ghost_integration.py", "-s"])

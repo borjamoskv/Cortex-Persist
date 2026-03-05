@@ -86,7 +86,7 @@ def prune():
     console.print("[noir.gold]✂️ INICIANDO PODA SOBERANA (Protocolo Ω₂)...[/noir.gold]")
 
     async def _do_prune():
-        conn = await engine._get_conn()
+        conn = await engine.get_conn()
         # 1. Decalcify: apply decay logic and tombstone terminal entropy
         count = await decalcifier.decalcify_cycle(conn)
         return count

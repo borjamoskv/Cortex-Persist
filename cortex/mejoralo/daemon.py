@@ -18,7 +18,7 @@ from cortex.cli import get_engine
 from cortex.daemon.monitors.canary import CanaryMonitor
 from cortex.mejoralo.engine import MejoraloEngine
 from cortex.telemetry.metrics import MetricsRegistry
-from cortex.thinking.context_fusion import ContextFusion
+from cortex.thinking.fusion import ContextFusion
 
 logger = logging.getLogger("cortex.mejoralo.daemon")
 

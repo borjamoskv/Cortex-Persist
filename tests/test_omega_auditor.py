@@ -1,12 +1,13 @@
 import asyncio
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from cortex.guards.omega_auditor import run_omega_audit
+
 
 async def test_omega():
     print("🚀 [OMEGA AUDITOR] Deep Test starting...")

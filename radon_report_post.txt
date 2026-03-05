@@ -1,0 +1,180 @@
+cortex/consensus/rwa_bft.py
+    M 199:4 RWABFTConsensus.evaluate - C
+cortex/mejoralo/swarm.py
+    M 145:4 MejoraloSwarm._select_specialists - C
+cortex/mejoralo/heal.py
+    F 121:0 _run_functional_inquisitor - C
+cortex/mejoralo/antipatterns.py
+    F 333:0 scan_antipatterns - C
+cortex/mejoralo/effectiveness.py
+    M 127:4 EffectivenessTracker.decay_risk - C
+    M 71:4 EffectivenessTracker.project_trend - C
+cortex/mejoralo/scan.py
+    F 228:0 _score_dimensions - C
+cortex/mejoralo/ship.py
+    F 91:0 _seal_a11y - C
+cortex/mejoralo/_scanner_visitors.py
+    M 35:4 _BroadExceptionVisitor.visit_ExceptHandler - C
+cortex/mejoralo/daemon.py
+    M 96:4 MejoraloDaemon._execute_cycle - C
+cortex/llm/metacognitive_boundary.py
+    F 159:0 build_epistemic_preamble - C
+cortex/llm/_hedging.py
+    C 28:0 HedgedRequestStrategy - C
+    M 40:4 HedgedRequestStrategy.race - C
+cortex/llm/provider.py
+    M 110:4 LLMProvider._init_preset - C
+    M 260:4 LLMProvider._extract_retry_delay - C
+cortex/context/inference.py
+    M 50:4 ContextInference.infer - C
+cortex/core/lineage.py
+    M 37:4 LineageVerifier.get_lineage - C
+cortex/sap/mapper.py
+    M 120:4 SAPMapper.diff_entities - C
+cortex/memory/homeostasis.py
+    M 162:4 HomeostaticScaler.scale - C
+cortex/memory/dream.py
+    M 218:4 AssociativeDreamEngine._detect_clusters - D
+    M 294:4 AssociativeDreamEngine._fuse_redundant - C
+cortex/memory/navigator.py
+    M 291:4 SemanticNavigator.explore_cluster - C
+cortex/memory/sparse.py
+    M 55:4 MushroomBodyEncoder.encode - C
+cortex/memory/metamemory.py
+    M 487:4 MetamemoryMonitor.calibration_report - C
+    M 173:4 MetamemoryMonitor.judge_fok - C
+cortex/memory/memory_retrieval.py
+    F 136:0 retrieve_episodic_context - C
+cortex/memory/manager.py
+    M 256:4 CortexMemoryManager.store - C
+cortex/security/threat_feed.py
+    M 368:4 ThreatFeedEngine._extract_nvd_signatures - C
+    M 410:4 ThreatFeedEngine._extract_github_signatures - C
+cortex/red_team/discovery.py
+    M 110:4 DiscoveryProvider._generate_seed_inputs - C
+    M 68:4 DiscoveryProvider._scan_module - C
+cortex/compaction/strategies/merge_errors.py
+    F 21:0 execute_merge_errors - C
+cortex/utils/export.py
+    F 46:0 _export_notebooklm - C
+cortex/cli/bibliotecario_cmds.py
+    F 51:0 _ingest_and_organize - C
+cortex/cli/notebooklm_cmds.py
+    F 202:0 sync_cmd - C
+cortex/cli/memory_cmds.py
+    F 118:0 search - C
+cortex/cli/compact_cmds.py
+    F 80:0 compact_cmd - C
+cortex/cli/trust_cmds.py
+    F 406:0 audit - C
+    F 208:0 compliance_report - C
+cortex/moltbook/verification.py
+    F 156:0 _extract_numbers_and_op - D
+cortex/moltbook/client.py
+    M 82:4 MoltbookClient._request - C
+cortex/moltbook/eclipse.py
+    M 62:4 EclipseSnapshot.dominant_error - C
+cortex/moltbook/preflight.py
+    F 68:0 preflight_check - C
+cortex/moltbook/skills/sovereign-code-scorer/scripts/sovereign_scorer_dimensions.py
+    F 19:0 score_semantics - D
+    F 127:0 score_tests - D
+cortex/moltbook/skills/sovereign-code-scorer/scripts/sovereign_scorer.py
+    F 174:0 score_consistency - C
+    F 231:0 score_aesthetics - C
+    F 109:0 score_syntax - C
+    F 363:0 print_report - C
+cortex/moltbook/skills/cortex-memory/scripts/memory_engine.py
+    F 378:0 main - C
+    F 230:0 recall - C
+cortex/search/sync.py
+    F 59:0 semantic_search_sync - C
+    F 196:0 _parse_row - C
+cortex/search/vector.py
+    F 101:0 _row_to_result - C
+    F 147:0 semantic_search_sync - C
+cortex/search/federation.py
+    F 85:0 _search_attached_db - C
+cortex/adk/runner.py
+    F 115:0 run_cli - C
+cortex/vex/receipt.py
+    F 24:0 verify_receipt - C
+cortex/immune/membrane.py
+    M 73:4 ImmuneMembrane._triage - C
+cortex/thinking/orchestra.py
+    M 355:4 ThoughtOrchestra.think - C
+    M 186:4 ThoughtOrchestra._resolve_mode_aware_fallbacks - C
+cortex/thinking/fusion.py
+    M 181:4 ThoughtFusion.fuse - C
+    M 336:4 ThoughtFusion._fuse_majority - C
+cortex/thinking/orchestra_introspection.py
+    M 163:4 OrchestraIntrospectionMixin.stats - C
+cortex/daemon/models.py
+    C 234:0 DaemonStatus - C
+    M 258:4 DaemonStatus.all_healthy - C
+    M 278:4 DaemonStatus.to_dict - C
+cortex/daemon/cli.py
+    F 156:0 check - C
+    F 222:0 status - C
+cortex/daemon/monitors/tombstone.py
+    M 41:4 TombstoneMonitor.check - C
+cortex/ha/raft.py
+    M 250:4 RaftNode._start_election - C
+cortex/sovereign/observability.py
+    F 201:0 run_security_scans - C
+cortex/evolution/shannon_metrics.py
+    M 179:4 CortexMetrics._query_batch - D
+cortex/evolution/cortex_metrics.py
+    F 219:0 fetch_domain_metrics - C
+cortex/evolution/engine.py
+    M 106:4 EvolutionEngine.cycle - C
+    M 438:4 EvolutionEngine._process_sovereign - C
+cortex/songlines/sensor.py
+    M 35:4 TopographicSensor.scan_field - C
+    M 85:4 TopographicSensor._get_attr_names - C
+cortex/skills/registry.py
+    M 265:4 SkillRegistry._build_manifest - C
+cortex/skills/router.py
+    M 35:4 SkillRouter.route_intent - C
+cortex/sync/write.py
+    F 123:0 _writeback_system - C
+cortex/sync/snapshot.py
+    F 33:0 export_snapshot - C
+cortex/facts/manager.py
+    M 26:4 FactManager.store - C
+cortex/engine/apotheosis.py
+    M 290:4 ApotheosisEngine._policy_pulse - C
+    M 177:4 ApotheosisEngine._metamemory_audit - C
+    M 371:4 ApotheosisEngine._process_workspace - C
+    M 407:4 ApotheosisEngine._heal_file_or_prune - C
+cortex/engine/forgetting_oracle.py
+    M 366:4 ForgettingOracle._derive_recommendation - C
+    M 439:4 ForgettingOracle._verify_evidence_chain - C
+cortex/engine/search_mixin.py
+    M 90:4 SearchMixin._enrich_with_graph_context - C
+cortex/engine/keter.py
+    M 347:4 KeterEngine.ignite - C
+    M 258:4 KeterEngine._dispatch_skill - C
+cortex/engine/fact_store_core.py
+    F 19:0 insert_fact_record - C
+cortex/engine/reaper.py
+    M 100:4 GhostReaper._reap_manifest - C
+cortex/engine/decalcifier.py
+    M 52:4 SovereignDecalcifier.decalcify_cycle - C
+cortex/engine/store_mixin.py
+    M 75:4 StoreMixin._run_store_validation - C
+cortex/engine/metacognition.py
+    M 72:4 DoubtCircuit._calculate_semantic_variance - C
+cortex/protocols/zenon_1.py
+    M 75:4 ZenonDetector.absorb_iteration - C
+cortex/guards/analysis.py
+    F 89:0 find_violations - C
+cortex/guards/noqa_audit.py
+    F 242:0 format_report - D
+cortex/guards/seals.py
+    F 234:0 check_gate_11_cobbler - C
+cortex/guards/contradiction_guard.py
+    F 237:0 detect_contradictions - C
+
+102 blocks (classes, functions, methods) analyzed.
+Average complexity: C (13.980392156862745)
