@@ -57,7 +57,7 @@ class NeuralGrowthEngine:
             logger.info("🔗 [GROWTH] Consolidating %d duplicate bridges in %s", cnt, project)
             inner_cursor = await conn.execute(
                 "SELECT id FROM facts WHERE project = ? AND content = ? "
-                "AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY created_at ASC",
+                "AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY id ASC",
                 (project, content),
             )
             rows = await inner_cursor.fetchall()

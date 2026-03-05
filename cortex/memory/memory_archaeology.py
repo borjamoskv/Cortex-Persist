@@ -1,0 +1,193 @@
+"""
+CORTEX v7 — Anamnesis-Ω Semantic Deduplicator (Memory Archaeology).
+
+Finds isolated, isomorphic facts across the timeline and condenses them
+into unified "crystallized" patterns. Transfers causal links (parent_decision_id).
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import sqlite3
+import time
+from typing import Any
+
+import numpy as np
+
+from cortex.llm.sovereign import SovereignLLM
+
+logger = logging.getLogger("cortex.memory.archaeology")
+
+
+class MemoryArchaeologist:
+    """Consolidates disjoint semantic facts into a single dense engram."""
+
+    def __init__(self, engine: Any) -> None:
+        self.engine = engine
+        self.llm = SovereignLLM()
+
+    async def run_archaeology(
+        self, project: str, similarity_threshold: float = 0.88, simulate: bool = False
+    ) -> dict[str, int]:
+        """Runs the semantic clustering and deduction.
+        
+        Returns {"condensed": X, "tombstoned": Y}.
+        """
+        # Initialize memory subsystem (L2) explicitly before accessing
+        await self.engine.get_conn()
+        conn = self.engine._get_sync_conn()
+        
+        # 1. Fetch all active semantic facts for the project
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            SELECT id, content, parent_decision_id
+            FROM facts
+            WHERE project = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
+            ''',
+            (project,)
+        )
+        l3_rows = cursor.fetchall()
+
+        if not l3_rows:
+            return {"condensed": 0, "tombstoned": 0}
+
+        l3_map = {str(r["id"]): r for r in l3_rows}
+
+        l2_conn = self.engine.memory._l2._get_conn()
+        c2 = l2_conn.cursor()
+        c2.execute("SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid WHERE m.project_id = ?", (project,))
+        
+        # 2. Extract vectors and build distance matrix
+        facts = []
+        vecs = []
+        for r in c2.fetchall():
+            str_id = str(r["id"])
+            if str_id not in l3_map:
+                continue
+                
+            l3_rec = l3_map[str_id]
+            facts.append({
+                "id": str_id,
+                "content": l3_rec["content"],
+                "parent_decision_id": str(l3_rec["parent_decision_id"]) if l3_rec["parent_decision_id"] else None,
+            })
+            emb = np.frombuffer(r["embedding"], dtype=np.float32)
+            # Normalize for cosine similarity
+            norm = np.linalg.norm(emb)
+            if norm > 0:
+                emb = emb / norm
+            vecs.append(emb)
+
+        if not vecs:
+            return {"condensed": 0, "tombstoned": 0}
+            
+        vecs_matrix = np.vstack(vecs)
+        
+        # O(N^2) dot product for cosine similarity
+        sim_matrix = np.dot(vecs_matrix, vecs_matrix.T)
+        
+        # 3. Simple Greedy Clustering
+        visited = set()
+        clusters = []
+
+        n = len(facts)
+        for i in range(n):
+            if i in visited:
+                continue
+                
+            # Find neighbors
+            neighbors = [j for j in range(n) if sim_matrix[i, j] >= similarity_threshold]
+            if len(neighbors) > 1:
+                clusters.append(neighbors)
+                visited.update(neighbors)
+            else:
+                visited.add(i)
+                
+        if not clusters:
+            return {"condensed": 0, "tombstoned": 0}
+            
+        # 4. Synthesize clusters and perform database operations
+        condensed_count = 0
+        tombstoned_count = 0
+        
+        for cluster_indices in clusters:
+            cluster_facts = [facts[idx] for idx in cluster_indices]
+            # LLM Synthesize
+            content_list = [f"- {f['content']}" for f in cluster_facts]
+            prompt = (
+                "You are an expert memory consolidator for CORTEX. "
+                "Synthesize the following redundant facts into a single, dense, highly accurate 'Crystallized Pattern'. "
+                "Retain all critical information, names, values, and relations, but remove redundancy.\n\n"
+            ) + "\n".join(content_list)
+            
+            logger.info(f"Synthesizing cluster of size {len(cluster_facts)}...")
+            res = await self.llm.agenerate(prompt)
+            condensed_content = res.text.strip()
+            
+            parent_ids = [f["parent_decision_id"] for f in cluster_facts if f["parent_decision_id"]]
+            primary_parent_id = parent_ids[0] if parent_ids else None
+            old_ids = [f["id"] for f in cluster_facts]
+            
+            if not simulate:
+                # Prevent concurrent DB locks
+                new_fact_id = await self.engine.store(
+                    project=project,
+                    content=condensed_content,
+                    fact_type="knowledge",
+                    confidence="C5",
+                    source="cortex_archaeologist",
+                    meta={"archaeology_merged_from": old_ids}
+                )
+                
+                try:
+                    c3 = conn.cursor()
+                    placeholders = ",".join("?" for _ in old_ids)
+                    
+                    # Tombstone old ones
+                    c3.execute(
+                        f"UPDATE facts SET is_tombstoned = 1, valid_until = ? WHERE id IN ({placeholders})",
+                        [time.strftime("%Y-%m-%dT%H:%M:%S%z")] + old_ids
+                    )
+                    
+                    if primary_parent_id:
+                        c3.execute(
+                            "UPDATE facts SET parent_decision_id = ? WHERE id = ?",
+                            (primary_parent_id, new_fact_id)
+                        )
+                        cl2 = l2_conn.cursor()
+                        cl2.execute(
+                            "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
+                            (primary_parent_id, new_fact_id)
+                        )
+                    
+                    # Delete tombstoned old ones from L2 to free up vector space
+                    cl2 = l2_conn.cursor()
+                    str_old_ids = [str(x) for x in old_ids]
+                    cl2.execute(
+                        f"DELETE FROM facts_meta WHERE id IN ({placeholders})", 
+                        str_old_ids
+                    )
+                    cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
+                    c3.execute(
+                        f"UPDATE facts SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
+                        [new_fact_id] + old_ids
+                    )
+                    cl2 = l2_conn.cursor()
+                    cl2.execute(
+                        f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
+                        [new_fact_id] + old_ids
+                    )
+                    
+                    conn.commit()
+                    l2_conn.commit()
+                except sqlite3.Error as e:
+                    logger.error(f"Archaeology DB update failed: {e}")
+                    conn.rollback()
+                    continue
+                    
+            condensed_count += 1
+            tombstoned_count += len(cluster_facts)
+
+        return {"condensed": condensed_count, "tombstoned": tombstoned_count}

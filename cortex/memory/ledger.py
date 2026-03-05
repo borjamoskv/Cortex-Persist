@@ -82,7 +82,7 @@ class EventLedgerL3:
         cursor = await self._conn.execute(
             """SELECT signature FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY timestamp DESC, event_id DESC
+               ORDER BY event_id DESC
                LIMIT 1""",
             (tenant_id,),
         )
@@ -147,7 +147,7 @@ class EventLedgerL3:
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE session_id = ?
-               ORDER BY timestamp ASC
+               ORDER BY event_id ASC
                LIMIT ?""",
             (session_id, limit),
         )
@@ -161,7 +161,7 @@ class EventLedgerL3:
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
-               ORDER BY timestamp ASC
+               ORDER BY event_id ASC
                LIMIT ?""",
             (limit,),
         )
@@ -193,7 +193,7 @@ class EventLedgerL3:
             """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
                FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY timestamp ASC, rowid ASC""",
+               ORDER BY event_id ASC""",
             (tenant_id,),
         )
 

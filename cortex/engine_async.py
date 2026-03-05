@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import random
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -74,17 +76,31 @@ class AsyncCortexEngine(
         """
         if self._writer and self._writer.is_running:
             return await self._writer.execute(sql, params)
-        # Fallback: direct pool write (legacy path)
-        try:
-            async with self.session() as conn:
-                cursor = await conn.execute(sql, params)
-                await conn.commit()
-                # Return lastrowid for inserts to support tx_id tracking
-                if sql.strip().upper().startswith("INSERT"):
-                    return Ok(cursor.lastrowid)  # type: ignore[reportReturnType]
-                return Ok(cursor.rowcount)
-        except (sqlite3.Error, OSError) as e:
-            return Err(f"Pool write error: {e}")
+        
+        # Protocolo TRAMPOLIN: Triangulación antifrágil con Jitter (Axioma Ω6)
+        max_retries = 3
+        for attempt in range(max_retries + 1):
+            try:
+                async with self.session() as conn:
+                    cursor = await conn.execute(sql, params)
+                    await conn.commit()
+                    # Return lastrowid for inserts to support tx_id tracking
+                    if sql.strip().upper().startswith("INSERT"):
+                        return Ok(cursor.lastrowid)  # type: ignore[reportReturnType]
+                    return Ok(cursor.rowcount)
+            except (sqlite3.Error, OSError) as e:
+                if "database is locked" not in str(e).lower() or attempt >= max_retries:
+                    return Err(f"Pool write error: {e}")
+                
+                # Jitter asimétrico: backoff de 0.5s, 1.5s, 4.5s + entropía
+                sleep_time = (0.5 * (3 ** attempt)) + random.uniform(0.1, 0.5)
+                logger.warning(
+                    "TRAMPOLIN: WAL Locked en write(). Exhalando %.2fs (intento %d/%d)...",
+                    sleep_time, attempt + 1, max_retries
+                )
+                await asyncio.sleep(sleep_time)
+                
+        return Err("Pool write error: Exceeded max retries for DB Lock.")
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:

@@ -325,7 +325,7 @@ class TipsEngine:
                 FROM facts
                 WHERE fact_type = ?
                   AND valid_until IS NULL
-                ORDER BY created_at DESC
+                ORDER BY id DESC
                 LIMIT ?
                 """,
                 (spec.fact_type, limit * 3),

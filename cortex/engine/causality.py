@@ -255,7 +255,7 @@ class CausalGraph:
 
             cursor = self._conn.execute(
                 "SELECT id, fact_id, parent_id, signal_id, edge_type, project, tenant_id, created_at "
-                "FROM causal_edges WHERE fact_id = ? ORDER BY created_at DESC LIMIT 1",
+                "FROM causal_edges WHERE fact_id = ? ORDER BY id DESC LIMIT 1",
                 (current,),
             )
             row = cursor.fetchone()
@@ -292,7 +292,7 @@ class CausalGraph:
 
             cursor = self._conn.execute(
                 "SELECT id, fact_id, parent_id, signal_id, edge_type, project, tenant_id, created_at "
-                "FROM causal_edges WHERE parent_id = ? ORDER BY created_at ASC",
+                "FROM causal_edges WHERE parent_id = ? ORDER BY id ASC",
                 (current,),
             )
             for row in cursor.fetchall():

@@ -220,7 +220,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
 
     cfg = config or MCPServerConfig()
-    mcp = FastMCP("CORTEX Trust Engine")  # type: ignore[reportOptionalCall]
+    mcp = FastMCP("CORTEX Trust Engine", host=cfg.host, port=cfg.port)  # type: ignore[reportOptionalCall]
     ctx = _MCPContext(cfg)
 
     # Core memory tools
@@ -255,7 +255,7 @@ def run_server(config: MCPServerConfig | None = None) -> None:
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
-        mcp.run(transport="sse", host=cfg.host, port=cfg.port)
+        mcp.run(transport="sse")
     else:
         logger.info("Starting CORTEX MCP server v2 (stdio)")
         mcp.run()

@@ -280,7 +280,30 @@ def history(project, as_of, db) -> None:
             else:
                 is_active = f.is_active()
                 fid, valid_from, content = f.id, f.valid_from[:10], f.content[:80]
-            status = "[green]●[/]" if is_active else "[red]○[/]"
             console.print(f"  {status} [dim]#{fid}[/] [{valid_from}] {content}")
     finally:
         _run_async(engine.close())
+
+
+@cli.command()
+@click.argument("project")
+@click.option("--threshold", default=0.88, help="Cosine similarity threshold (0.0 to 1.0)")
+@click.option("--simulate", is_flag=True, default=False, help="Do not save changes, just list them")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
+    """Run Memory Archaeology to deduplicate and crystallize facts."""
+    from cortex.memory.memory_archaeology import MemoryArchaeologist
+
+    engine = get_engine(db)
+    try:
+        with console.status(f"[noir.violet]Running memory archaeology for {project}...[/]"):
+            archaeologist = MemoryArchaeologist(engine)
+            res = _run_async(archaeologist.run_archaeology(project, threshold, simulate))
+        
+        if simulate:
+            console.print(f"[bold yellow]Simulation Complete:[/] Would condense {res['condensed']} clusters and tombstone {res['tombstoned']} facts.")
+        else:
+            console.print(f"[[noir.cyber]✓[/]] [bold green]Archaeology Complete:[/] '{project}' optimized. Condensed {res['condensed']} items, tombstoned {res['tombstoned']}.")
+    finally:
+        _run_async(engine.close())
+

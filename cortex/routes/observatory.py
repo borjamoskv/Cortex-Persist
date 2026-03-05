@@ -117,7 +117,7 @@ def _get_recent_decisions() -> list[dict[str, Any]]:
                     "SELECT id, project, content, created_at "
                     "FROM facts "
                     "WHERE fact_type = 'decision' AND valid_until IS NULL "
-                    "ORDER BY created_at DESC LIMIT 10"
+                    "ORDER BY id DESC LIMIT 10"
                 ).fetchall()
                 return [
                     {

@@ -58,6 +58,12 @@ class StoreRequest(BaseModel):
         None, max_length=200, description="Source of the fact (e.g. agent name)"
     )
     meta: dict | None = Field(None, description="Optional JSON metadata")
+    confidence: str = Field(
+        "stated", max_length=50, description="Confidence level (e.g., C5 Confirmed, C2 Speculative)"
+    )
+    provenance: str | None = Field(
+        None, max_length=255, description="Origin tracing string or URI for data governance"
+    )
 
     @field_validator("project", "content")
     @classmethod
@@ -220,6 +226,10 @@ class DeepHealthResponse(BaseModel):
     schema_version: str
     checks: dict[str, HealthCheckDetail]
     latency_ms: float
+    
+    # V8 Evaluation Metrics
+    p95_latency_ms: float | None = Field(default=None, description="p95 latency of ambient context boot")
+    stale_ratio: float | None = Field(default=None, description="Ratio of facts older than 180 days with no hits")
 
 
 class ApiKeyResponse(BaseModel):

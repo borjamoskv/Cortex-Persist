@@ -71,7 +71,7 @@ def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dic
             "FROM facts "
             "WHERE project = ? AND fact_type = 'decision' "
             "AND tags LIKE '%mejoralo%' AND valid_until IS NULL "
-            "ORDER BY created_at DESC LIMIT ?",
+            "ORDER BY id DESC LIMIT ?",
             (project, limit),
         ).fetchall()
     finally:
@@ -125,7 +125,7 @@ def get_scars(
             "WHERE project = ? AND fact_type = 'scar' "
             "AND json_extract(meta, '$.file_path') = ? "
             "AND tags LIKE '%mejoralo%' AND valid_until IS NULL "
-            "ORDER BY created_at DESC LIMIT ?",
+            "ORDER BY id DESC LIMIT ?",
             (project, file_path, limit),
         ).fetchall()
     finally:

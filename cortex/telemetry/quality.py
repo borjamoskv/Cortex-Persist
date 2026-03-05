@@ -51,11 +51,10 @@ class MemoryQualityEvaluator:
         cursor = conn.cursor()
 
         try:
-            # Note: Assuming CORTEX facts_meta has a timestamp or last_accessed column.
-            # Below query depends on the actual schema, using timestamp as proxy if last_accessed doesn't exist.
+            # Corrected: Targeting the physical 'facts' table and correct columns
             cursor.execute(
-                "SELECT COUNT(*) as tot, SUM(CASE WHEN timestamp < ? THEN 1 ELSE 0 END) as stl "
-                "FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
+                "SELECT COUNT(*) as tot, SUM(CASE WHEN created_at < ? THEN 1 ELSE 0 END) as stl "
+                "FROM facts WHERE tenant_id = ? AND project = ?",
                 (stale_cutoff, tenant_id, project_id),
             )
             row = cursor.fetchone()

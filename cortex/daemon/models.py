@@ -39,8 +39,10 @@ __all__ = [
     "EngineHealthAlert",
     "EntropyAlert",
     "GhostAlert",
+    "JulesAlert",
     "MejoraloAlert",
     "MemoryAlert",
+    "EvaluationAlert",
     "NeuralIntentAlert",
     "PerceptionAlert",
     "RETRY_BACKOFF",
@@ -138,6 +140,16 @@ class MejoraloAlert:
 
 
 @dataclass
+class EvaluationAlert:
+    """Alert triggered by the V8 Evaluation Monitor (Stale-Memory or Contradiction)."""
+
+    stale_ratio: float
+    stale_count: int
+    contradictions_found: int
+    message: str
+
+
+@dataclass
 class CompactionAlert:
     """Alert triggered when a project undergoes autonomous compaction."""
 
@@ -220,6 +232,16 @@ class TombstoneAlert:
 
 
 @dataclass
+class JulesAlert:
+    """Alert triggered when Jules completes or fails an autonomous task."""
+
+    task_id: str
+    title: str
+    status: str
+    message: str
+
+
+@dataclass
 class DriftAlert:
     """Alert triggered when L2 vector space topological health degrades."""
 
@@ -243,6 +265,7 @@ class DaemonStatus:
     engine_alerts: list[EngineHealthAlert] = field(default_factory=list)
     disk_alerts: list[DiskAlert] = field(default_factory=list)
     mejoralo_alerts: list[MejoraloAlert] = field(default_factory=list)
+    evaluation_alerts: list[EvaluationAlert] = field(default_factory=list)
     entropy_alerts: list[EntropyAlert] = field(default_factory=list)
     compaction_alerts: list[CompactionAlert] = field(default_factory=list)
     cloud_sync_alerts: list[CloudSyncAlert] = field(default_factory=list)
@@ -252,6 +275,7 @@ class DaemonStatus:
     signal_alerts: list[SignalAlert] = field(default_factory=list)
     tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
     drift_alerts: list[DriftAlert] = field(default_factory=list)
+    jules_alerts: list[JulesAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -263,6 +287,7 @@ class DaemonStatus:
             and len(self.cert_alerts) == 0
             and len(self.engine_alerts) == 0
             and len(self.disk_alerts) == 0
+            and len(self.evaluation_alerts) == 0
             and len(self.entropy_alerts) == 0
             and len(self.compaction_alerts) == 0
             and len(self.cloud_sync_alerts) == 0
@@ -330,6 +355,15 @@ class DaemonStatus:
                     "total_loc": m.total_loc,
                 }
                 for m in self.mejoralo_alerts
+            ],
+            "evaluation_alerts": [
+                {
+                    "stale_ratio": round(e.stale_ratio, 4),
+                    "stale_count": e.stale_count,
+                    "contradictions_found": e.contradictions_found,
+                    "message": e.message,
+                }
+                for e in self.evaluation_alerts
             ],
             "entropy_alerts": [
                 {

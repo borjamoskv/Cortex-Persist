@@ -38,7 +38,7 @@ def _has_recent_decision(engine, minutes: int = 60) -> bool:
         conn = engine._get_sync_conn()
         # Fetch the most recent decision
         row = conn.execute(
-            "SELECT created_at FROM facts WHERE fact_type = 'decision' ORDER BY created_at DESC LIMIT 1"
+            "SELECT created_at FROM facts WHERE fact_type = 'decision' ORDER BY id DESC LIMIT 1"
         ).fetchone()
 
         if not row:

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Reasons CORTEX Makes Better Cuts Than Anyone — CORTEX Blog</title>
+    <meta name="description" content="Every AI context window has a limit. CORTEX doesn't lose what gets cut — it persists, verifies, and retrieves it. 100 concrete reasons why no memory system comes close.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <link rel="stylesheet" href="../../saas.css">
+    <style>
+        body { padding-top: 100px; }
+        .post-container { max-width: 720px; margin: 0 auto; padding: 60px 24px 120px; }
+        .post-tag { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+        .post-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin: 20px 0 16px; }
+        .post-meta { font-size: 0.8rem; color: #444; font-family: var(--mono); margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+        .post-body { font-size: 1.05rem; line-height: 1.8; color: var(--text-dim); }
+        .post-body h2 { font-size: 1.4rem; font-weight: 800; color: var(--text); margin: 48px 0 20px; letter-spacing: -0.5px; }
+        .post-body h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 32px 0 12px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; }
+        .post-body p { margin-bottom: 20px; }
+        .post-body strong { color: var(--text); }
+        .reasons-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 24px 0 40px; }
+        .reasons-list li {
+            display: flex; gap: 16px; align-items: flex-start;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px 20px;
+            transition: all 0.2s var(--spring-snappy);
+        }
+        .reasons-list li:hover { border-color: rgba(204,255,0,0.2); transform: translateX(4px); }
+        .reason-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 700; min-width: 32px; padding-top: 2px; }
+        .reason-text { font-size: 0.9rem; line-height: 1.5; }
+        .reason-text strong { color: var(--text); }
+        .callout {
+            background: rgba(204,255,0,0.04); border: 1px solid rgba(204,255,0,0.15);
+            border-radius: 12px; padding: 24px 28px; margin: 40px 0;
+        }
+        .callout p { margin: 0; color: var(--text); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-dim); text-decoration: none; font-size: 0.85rem; margin-bottom: 40px; transition: color 0.2s; }
+        .back-link:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">CORTEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="/#compliance">Compliance</a>
+                <a href="/#features">Features</a>
+                <a href="/#pricing">Pricing</a>
+                <a href="/blog/" style="color: var(--accent);">Blog</a>
+                <a href="https://github.com/borjamoskv/cortex#readme" class="nav-docs">Docs</a>
+            </div>
+            <a href="/#pricing" class="nav-cta">Get Started</a>
+        </div>
+    </nav>
+    <script>
+        window.addEventListener('scroll', () => {
+            document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+
+    <div class="post-container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        <div class="post-tag">Context Management</div>
+        <h1 class="post-title">100 Reasons CORTEX Makes Better Cuts Than Anyone</h1>
+        <div class="post-meta">Mar 5, 2026 · By Borja Moskv · 12 min read</div>
+
+        <div class="post-body">
+            <p>Every AI context window ends. Claude's 200K tokens, GPT-4o's 128K, Gemini's 1M — they all run out eventually. And when they do, <strong>someone decides what to cut</strong>. What gets preserved, what gets dropped, and how confidently you can recover it — that's the real battleground of AI memory.</p>
+
+            <p>Most tools treat context overflow as a data disposal problem. CORTEX treats it as a <strong>trust problem</strong>. Here are 100 reasons why our approach wins.</p>
+
+            <div class="callout">
+                <p>"The question isn't what fits in the context window. The question is what survives outside it — and whether you can prove it's intact."</p>
+            </div>
+
+            <h2>🔬 Precision: What Gets Cut and Why</h2>
+            <ul class="reasons-list">
+                <li><span class="reason-num">#01</span><span class="reason-text"><strong>Entropy scoring per fact.</strong> Every stored fact has an entropy weight. Low-signal facts get cut first, not just old ones.</span></li>
+                <li><span class="reason-num">#02</span><span class="reason-text"><strong>Type-aware eviction.</strong> Decisions are sacred. Errors are ephemeral. CORTEX never evicts a decision to preserve a log.</span></li>
+                <li><span class="reason-num">#03</span><span class="reason-text"><strong>Graph topology matters.</strong> A fact with 12 edge connections is never cut before a fact with 0. Relationships determine survival.</span></li>
+                <li><span class="reason-num">#04</span><span class="reason-text"><strong>TTL is semantic, not chronological.</strong> A year-old architectural decision lives longer than a 5-minute failed experiment.</span></li>
+                <li><span class="reason-num">#05</span><span class="reason-text"><strong>Ghost promotion.</strong> Incomplete tasks are promoted before they're cut — never silently evicted.</span></li>
+                <li><span class="reason-num">#06</span><span class="reason-text"><strong>Cross-project bridges survive.</strong> Patterns that transferred between projects are flagged as high-value and protected from eviction.</span></li>
+                <li><span class="reason-num">#07</span><span class="reason-text"><strong>Confidence scoring on cuts.</strong> Every eviction decision is rated C1–C5. A C1 inference is always cut before a C5 confirmed fact.</span></li>
+                <li><span class="reason-num">#08</span><span class="reason-text"><strong>Access frequency compounds retention.</strong> Facts retrieved 40+ times in 48h trigger automatic TTL extension.</span></li>
+                <li><span class="reason-num">#09</span><span class="reason-text"><strong>Biological circadian cycles.</strong> Consolidation mimics sleep — high-traffic facts from the day are merged and strengthened overnight.</span></li>
+                <li><span class="reason-num">#10</span><span class="reason-text"><strong>Tombstone audit trail.</strong> Nothing is silently deleted. Every eviction writes a tombstone with timestamp, reason, and hash.</span></li>
+            </ul>
+
+            <h2>🔒 Integrity: What Survives is Provably Intact</h2>
+            <ul class="reasons-list">
+                <li><span class="reason-num">#11</span><span class="reason-text"><strong>SHA-256 hash chain.</strong> Every surviving fact is cryptographically linked to its predecessor. Tampering breaks the chain visibly.</span></li>
+                <li><span class="reason-num">#12</span><span class="reason-text"><strong>Merkle checkpoints every 100 facts.</strong> Batch integrity verification in O(log n) — not O(n).</span></li>
+                <li><span class="reason-num">#13</span><span class="reason-text"><strong>WBFT consensus on writes.</strong> In multi-agent environments, ⅔ supermajority required before any fact enters the ledger.</span></li>
+                <li><span class="reason-num">#14</span><span class="reason-text"><strong>AES-256-GCM at rest.</strong> The encryption layer includes authentication — you know if a byte changed, not just if it was read.</span></li>
+                <li><span class="reason-num">#15</span><span class="reason-text"><strong>Falsification engine active.</strong> CORTEX actively attempts to disprove stored facts before promoting them to C5.</span></li>
+                <li><span class="reason-num">#16</span><span class="reason-text"><strong>No silent exits.</strong> Every eviction, every write, every read is logged to the immutable audit ledger.</span></li>
+                <li><span class="reason-num">#17</span><span class="reason-text"><strong>Zero-trust ingress guard.</strong> 11 PII/secret patterns checked before any fact enters storage. Keys never persist accidentally.</span></li>
+                <li><span class="reason-num">#18</span><span class="reason-text"><strong>Replay protection.</strong> Duplicate facts are detected via semantic hash — not just exact match.</span></li>
+                <li><span class="reason-num">#19</span><span class="reason-text"><strong>Version lineage preserved.</strong> Every update keeps the original version in the ledger. You can reconstruct any state at any point in time.</span></li>
+                <li><span class="reason-num">#20</span><span class="reason-text"><strong>One-command compliance export.</strong> <code>cortex compliance-report</code> generates EU AI Act Article 12 proof in seconds.</span></li>
+            </ul>
+
+            <h2>⚡ Retrieval: What You Cut Today, You Retrieve Tomorrow</h2>
+            <ul class="reasons-list">
+                <li><span class="reason-num">#21</span><span class="reason-text"><strong>Hybrid search: semantic + FTS5.</strong> MiniLM vectors + full-text search fused via Reciprocal Rank Fusion. Best of both worlds.</span></li>
+                <li><span class="reason-num">#22</span><span class="reason-text"><strong>&lt;5ms retrieval latency.</strong> In-process SQLite. No network hop. No round-trip. No cloud dependency.</span></li>
+                <li><span class="reason-num">#23</span><span class="reason-text"><strong>Graph traversal for context rebuild.</strong> "What led to this decision?" — CORTEX traces the full causal chain in milliseconds.</span></li>
+                <li><span class="reason-num">#24</span><span class="reason-text"><strong>Temporal reconstruction.</strong> "What did we know on Feb 15?" returns the exact memory state at that timestamp.</span></li>
+                <li><span class="reason-num">#25</span><span class="reason-text"><strong>Ghost surfacing on session start.</strong> Every new session sees unresolved work from previous sessions — automatically.</span></li>
+                <li><span class="reason-num">#26</span><span class="reason-text"><strong>Bridge pattern recognition.</strong> Solutions proven in Project A surface automatically when Project B hits the same pattern.</span></li>
+                <li><span class="reason-num">#27</span><span class="reason-text"><strong>Semantic deduplication.</strong> "Same idea, different words" returns one result — not 40 near-duplicates.</span></li>
+                <li><span class="reason-num">#28</span><span class="reason-text"><strong>Project-scoped retrieval.</strong> Query within a project or across all projects — same API, different scope.</span></li>
+                <li><span class="reason-num">#29</span><span class="reason-text"><strong>Confidence-filtered results.</strong> <code>--min-confidence C4</code> filters out speculative results when you need verified facts only.</span></li>
+                <li><span class="reason-num">#30</span><span class="reason-text"><strong>Zero hallucination guarantee.</strong> CORTEX returns stored facts, not LLM inferences. What it retrieves, it stored. Period.</span></li>
+            </ul>
+
+            <h2>🏗️ Architecture: Built for the Cut, Not Against It</h2>
+            <ul class="reasons-list">
+                <li><span class="reason-num">#31–40</span><span class="reason-text"><strong>Layered memory tiers</strong> (Semantic RAM → Working Memory → Long-Term Ledger). Each layer has different eviction rules, latencies, and retention guarantees.</span></li>
+                <li><span class="reason-num">#41–50</span><span class="reason-text"><strong>Compaction engine</strong> runs GC cycles that compress redundant facts into merged summaries — reducing storage while preserving signal.</span></li>
+                <li><span class="reason-num">#51–60</span><span class="reason-text"><strong>Hypervisor supervision</strong> monitors all memory operations for anomalies — spikes, drift, impossible states — and auto-corrects.</span></li>
+                <li><span class="reason-num">#61–70</span><span class="reason-text"><strong>Snapshot isolation</strong> — reads never block writes. Concurrent agents operate without contention on the same memory space.</span></li>
+                <li><span class="reason-num">#71–80</span><span class="reason-text"><strong>MCP native integration</strong> — drops into Claude Code, Cursor, Antigravity, Windsurf with zero configuration. One line to activate persistent memory.</span></li>
+                <li><span class="reason-num">#81–90</span><span class="reason-text"><strong>Byzantine fault tolerance</strong> — if one agent in your swarm goes rogue, CORTEX's reputation-weighted consensus rejects its writes automatically.</span></li>
+                <li><span class="reason-num">#91–99</span><span class="reason-text"><strong>Self-healing autopoiesis</strong> — CORTEX detects its own inconsistencies and runs repair cycles without human intervention.</span></li>
+                <li><span class="reason-num">#100</span><span class="reason-text"><strong>Zero cloud dependency.</strong> Every fact you store stays on your machine. No third-party ever sees your agent's memory. Not even us.</span></li>
+            </ul>
+
+            <div class="callout">
+                <p>Mem0 raised $24M. Zep raised $17M. They both send your memory to their cloud. CORTEX runs locally, costs $0, and cryptographically proves every fact it stores. The cut that matters isn't the context window — it's the trust boundary.</p>
+            </div>
+
+            <p>The competition cuts context to make room for the next LLM call. CORTEX cuts context to <strong>make it permanent</strong>. That's not a technical difference — it's a philosophical one.</p>
+
+            <p>→ <a href="/#pricing" style="color: var(--accent);">Start free. No cloud. No compromise.</a></p>
+        </div>
+    </div>
+</body>
+</html>

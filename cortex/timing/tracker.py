@@ -76,13 +76,13 @@ class TimingTracker:
         if latest_end:
             rows = self._conn.execute(
                 "SELECT id, project, entity, category, timestamp "
-                "FROM heartbeats WHERE timestamp > ? ORDER BY timestamp ASC",
+                "FROM heartbeats WHERE timestamp > ? ORDER BY id ASC",
                 (latest_end,),
             ).fetchall()
         else:
             rows = self._conn.execute(
                 "SELECT id, project, entity, category, timestamp "
-                "FROM heartbeats ORDER BY timestamp ASC"
+                "FROM heartbeats ORDER BY id ASC"
             ).fetchall()
 
         if not rows:

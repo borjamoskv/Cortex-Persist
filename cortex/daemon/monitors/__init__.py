@@ -3,6 +3,7 @@ from cortex.daemon.monitors.cloud import CloudSyncMonitor
 from cortex.daemon.monitors.compaction import CompactionMonitor
 from cortex.daemon.monitors.disk import DiskMonitor
 from cortex.daemon.monitors.engine import EngineHealthCheck
+from cortex.daemon.monitors.evaluation import EvaluationMonitor
 from cortex.daemon.monitors.ghosts import GhostWatcher
 from cortex.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
 from cortex.daemon.monitors.memory import MemorySyncer
@@ -25,6 +26,7 @@ __all__ = [
     "DiskMonitor",
     "EngineHealthCheck",
     "EntropyMonitor",
+    "EvaluationMonitor",
     "GhostWatcher",
     "MemorySyncer",
     "NeuralIntentMonitor",

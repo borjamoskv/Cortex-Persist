@@ -10,6 +10,8 @@ from typing import TypedDict
 
 from pydantic import BaseModel, Field
 
+from cortex.engine.aleph_omega import AxiomaticLeapEngine
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.swarm.byzantine import ByzantineConsensus
 
 __all__ = [
@@ -105,6 +107,7 @@ class CentauroEngine:
         self.consensus = ByzantineConsensus(tolerance_threshold=tolerance)
         self.agents: dict[str, VirtualAgent] = {}
         self._active_missions: dict[str, asyncio.Future] = {}
+        self._aleph = AxiomaticLeapEngine()
 
     def spawn_squad(self, size: int, formation: str = Formation.BLITZ) -> dict[str, VirtualAgent]:
         """Spawn a squad of virtual agents with specialized focus."""
@@ -185,15 +188,23 @@ class CentauroEngine:
             logger.info(
                 "Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation
             )
+            # 🧬 Endocrine modulation: High ADRENALINE forces BLITZ regardless of intention
+            adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
+            if adrenaline > 0.7 and formation not in [Formation.BLITZ, Formation.GHOST]:
+                logger.warning("🧬 [ENDOCRINE] High Adrenaline (%.2f). Forcing BLITZ formation.", adrenaline)
+                formation = Formation.BLITZ
+
             size = self._FORMATION_SIZES.get(formation, 3)
             squad = self.spawn_squad(size, formation=formation)
-            logger.info("Spawned %d agents in %s formation.", len(squad), formation)
+            logger.info("Spawned %d agents in %s formation. (Adrenaline: %.2f)", len(squad), formation, adrenaline)
 
             winning, agents_used = await self._run_consensus(squad, mission)
 
             result: CentauroMissionResult
             if winning:
                 logger.info("Consensus Achieved (UNANIMOUS or MAJORITY).")
+                # 🧬 Dopamine Reward
+                ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.1, reason="Consensus Success")
                 result = {
                     "status": "success",
                     "solution": winning,
@@ -201,13 +212,25 @@ class CentauroEngine:
                     "formation": formation,
                 }
             else:
-                logger.warning("Consensus Failed (DEADLOCK or SPLIT).")
-                result = {
-                    "status": "failure",
-                    "reason": "Byzantine Consensus Threshold Not Reached",
-                    "agents_used": agents_used,
-                    "formation": formation,
-                }
+                ENDOCRINE.pulse(HormoneType.CORTISOL, 0.2, reason="Consensus Failed")
+                logger.warning("Consensus Failed (DEADLOCK or SPLIT). Triggering ALEPH-Ω Leap...")
+                try:
+                    leap = await self._aleph.execute_leap(mission)
+                    result = {
+                        "status": "aleph_breakthrough",
+                        "solution": leap["solution"],
+                        "agents_used": agents_used,
+                        "formation": f"{formation}+ALEPH",
+                        "reason": f"Paradigm Shift: {leap['paradigm_shift']}",
+                    }
+                except Exception as leap_e:
+                    logger.error("ALEPH-Ω Leap failed: %s", leap_e)
+                    result = {
+                        "status": "failure",
+                        "reason": "Byzantine Consensus Threshold Not Reached, tracking leap failure.",
+                        "agents_used": agents_used,
+                        "formation": formation,
+                    }
 
             mission_future.set_result(result)
             return result

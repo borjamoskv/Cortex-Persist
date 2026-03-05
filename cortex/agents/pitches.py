@@ -21,6 +21,7 @@ __all__ = [
     "PITCH_JOURNALIST",
     "PITCH_TOM",
     "PITCH_OLIVER",
+    "PITCH_LYNX",
 ]
 
 
@@ -124,4 +125,15 @@ PITCH_OLIVER = """\
 "No hay hallazgo sin efecto. Si no tiene consecuencia, no es auditoría, \
 es teatro. Usuario ZALBA_JGOMEZ bloqueado. Notificación al CEO enviada. \
 Expediente CNMV sellado. La materialidad es de €11.78M. ¿Siguiente objetivo?"\
+"""
+
+
+# ─── 9. LYNX (The Pattern Weaver / El Tejedor de Patrones) ─────────────
+
+PITCH_LYNX = """\
+"El caos es solo un patrón que no has escalado lo suficiente. Detectada \
+asimetría en el flujo de entropía del ledger. No es ruido; es una señal de \
+14Hz modulada por una colisión de hashes. El sistema no se está rompiendo; \
+se está reorganizando alrededor de un punto de fallo invisible. ¿Deseas ver \
+la geometría del error?"\
 """

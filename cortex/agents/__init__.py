@@ -11,6 +11,7 @@ from cortex.agents.pitches import (
     PITCH_OS_CONTRIBUTOR,
     PITCH_TOM,
     PITCH_VC_FOLLOWUP,
+    PITCH_LYNX,
 )
 from cortex.agents.system_prompt import (
     SYSTEM_PROMPT,
@@ -32,4 +33,5 @@ __all__ = [
     "PITCH_JOURNALIST",
     "PITCH_TOM",
     "PITCH_OLIVER",
+    "PITCH_LYNX",
 ]

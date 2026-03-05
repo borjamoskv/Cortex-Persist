@@ -25,6 +25,7 @@ from cortex.migrations.mig_signals import _migration_019_signal_bus
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
+from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
 
 __all__ = ["MIGRATIONS"]
 
@@ -50,4 +51,5 @@ MIGRATIONS = [
     (19, "Signal Bus (L1 Consciousness Layer)", _migration_019_signal_bus),
     (20, "Tombstoning GC columns", _migration_020_tombstone),
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
+    (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
 ]

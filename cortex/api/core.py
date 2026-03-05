@@ -220,6 +220,15 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     logger.error("Sovereign DB Error: %s", exc)
+
+    # PULMONES: Map WAL locks to graceful 503 (Triangulación Antifrágil)
+    if "database is locked" in str(exc).lower():
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "CORTEX_BUSY: Database is under heavy load. Retry in 2s."},
+            headers={"Retry-After": "2"}
+        )
+
     return JSONResponse(status_code=500, content={"detail": get_trans("error_internal_db", lang)})
 
 
@@ -253,10 +262,22 @@ async def root_node(request: Request) -> dict:
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    cortisol = 0.0
+    growth = 0.0
+    try:
+        engine = getattr(request.app.state, "engine", None)
+        if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
+            cortisol = engine.manager._endocrine.cortisol_level
+            growth = engine.manager._endocrine.neural_growth
+    except Exception:
+        pass
+
     return {
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
         "version": __version__,
+        "cortisol": round(cortisol, 3),
+        "neuroplasticity": round(growth, 3),
     }
 
 
