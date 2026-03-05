@@ -1,28 +1,31 @@
 import asyncio
+import json
+import logging
+import math
 import os
 import re
 import subprocess
-import time
 import sys
-import math
-import json
+import time
 from pathlib import Path
 
-from cortex.swarm.budget import get_budget_manager
-from cortex.engine import CortexEngine
-
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from pydantic import BaseModel
-from pythonosc import udp_client
+from fastapi import FastAPI, Request
+
+logger = logging.getLogger("cortex.daemon")
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, StreamingResponse
+from google.auth.transport.requests import Request as GoogleRequest
 
 # Dummy definitions for removed but referenced imports (to keep logic intact)
 from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request as GoogleRequest
+from pydantic import BaseModel
+from pythonosc import udp_client
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
+from cortex.engine import CortexEngine
+from cortex.swarm.budget import get_budget_manager
 
 
 class RequestHolder:
@@ -186,7 +189,7 @@ class DaemonState:
         try:
             path = CORTEX_ROOT / "handoff.json"
             if path.exists():
-                with open(path, "r") as f:
+                with open(path) as f:
                     data = json.load(f)
                     # Deep update to merge structure
                     for k, v in data.items():
@@ -526,8 +529,9 @@ async def gidatu_loop():
 # --- Mail Polling ---
 async def evolution_loop():
     """Recursive self-improvement loop. Analyzes entropy and proposes refactors."""
-    from analyze_entropy import calculate_module_overlap
     import itertools
+
+    from analyze_entropy import calculate_module_overlap
     
     while True:
         try:
@@ -853,8 +857,8 @@ async def send_mail(request: MailRequest):
         if not service:
             return {"status": "error", "message": "Gmail service not available"}
         
-        from email.message import EmailMessage
         import base64
+        from email.message import EmailMessage
 
         message = EmailMessage()
         message.set_content(request.body)
@@ -921,13 +925,13 @@ async def dashboard():
     cortex = state.daemons["cortex"]
     moltbook = state.daemons["moltbook"]
     exec_mode = state.daemons["executive_mode"]
-    budget = state.daemons["swarm_budget"]
-    ghosts = state.daemons["ghost_field"]
+    state.daemons["swarm_budget"]
+    state.daemons["ghost_field"]
     
     # Swarm visualizer logic (CSS particles)
     swarm_html = "".join([f'<div class="agent-dot" style="--d:{i*20}ms; --x:{i*8}px"></div>' for i in range(min(cortex["agents_active"], 50))])
 
-    return HTMLResponse(content=f"""
+    return HTMLResponse(content=rf"""
     <!DOCTYPE html>
     <html lang="es">
     <head>

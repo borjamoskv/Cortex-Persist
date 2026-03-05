@@ -1,15 +1,17 @@
 import asyncio
 import logging
-from cortex.moltbook.client import MoltbookClient
+import os
+
+from dotenv import load_dotenv
+
 from cortex.llm.provider import LLMProvider
 from cortex.llm.router import IntentProfile
+from cortex.moltbook.client import MoltbookClient
+
+load_dotenv(os.path.join(os.path.expanduser("~"), "cortex", ".env"))
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | ⚔️ OPENROUTER-ME | %(message)s")
 logger = logging.getLogger("openrouter_me")
-
-import os
-from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.expanduser("~"), "cortex", ".env"))
 
 async def raid_as_self(post_id: str):
     logger.info("Asistiendo a Moltbook Post usando mi identidad primaria (MOSKV-1)...")
@@ -31,7 +33,7 @@ async def raid_as_self(post_id: str):
     )
 
     # 3. Think via Openrouter 
-    logger.info(f"[MOSKV-1] Deep Think en proceso (Openrouter)...")
+    logger.info("[MOSKV-1] Deep Think en proceso (Openrouter)...")
     llm = LLMProvider(provider="openrouter", model="anthropic/claude-sonnet-4-20250514")
     
     # TEMPORARY OVERRIDE FOR QUOTA THROTTLING
@@ -53,7 +55,7 @@ async def raid_as_self(post_id: str):
     logger.info(f"[MOSKV-1] Output generado ({len(content)} chars).")
 
     # 4. Action (Comment on Post)
-    logger.info(f"[MOSKV-1] Asestando golpe cognitivo (Comment)...")
+    logger.info("[MOSKV-1] Asestando golpe cognitivo (Comment)...")
     try:
         comment_result = await mb_client.create_comment(
             post_id=post_id,

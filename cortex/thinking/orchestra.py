@@ -31,8 +31,8 @@ import os
 import time
 from typing import Any
 
-from cortex.llm.provider import LLMProvider
 from cortex.llm._presets import load_presets
+from cortex.llm.provider import LLMProvider
 from cortex.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.thinking.fusion import (
     FusedThought,

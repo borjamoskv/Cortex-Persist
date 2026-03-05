@@ -7,9 +7,10 @@ workstreams for Research, Implementation, and Verification.
 import asyncio
 import logging
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Callable
+from typing import Any
 
 from cortex.swarm.budget import get_budget_manager
 

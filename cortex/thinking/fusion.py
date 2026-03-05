@@ -21,6 +21,7 @@ import logging
 from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
+
 from cortex.llm.boundary import ImmuneBoundary
 from cortex.thinking.fusion_models import (
     FusedThought,

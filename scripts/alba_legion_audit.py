@@ -7,8 +7,9 @@ Fase: Forensic Investigation & Regulatory Compliance (Art. 12 EU AI Act).
 import asyncio
 import logging
 from pathlib import Path
+
 from cortex.engine.legion import LegionOmegaEngine
-from cortex.engine.legion_vectors import OOMKiller, Intruder, EntropyDemon, ChronosSniper
+from cortex.engine.legion_vectors import ChronosSniper, EntropyDemon, Intruder, OOMKiller
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - ALBA-AUDIT - %(levelname)s - %(message)s")
 logger = logging.getLogger("ALBA-LEGION")
