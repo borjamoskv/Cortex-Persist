@@ -8,9 +8,8 @@ This guard audits new decisions against the ENTIRE system snapshot.
 from __future__ import annotations
 
 import logging
-import os
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
 from cortex.llm.provider import LLMProvider
 from cortex.llm.router import CortexPrompt, IntentProfile

@@ -115,15 +115,15 @@ def _is_false_positive(line, path):
     if "os.environ" in line or "json()" in line or "auth.create_key" in line:
         return True
     if "innerHTML" in line and (
-        "school.js" in path or "AsciiEffect.js" in path or "academy.js" in path
+        "school.js" in str(path) or "AsciiEffect.js" in str(path) or "academy.js" in str(path)
     ):
         return True
-    if "xoxb-123456789012-" in line and "test_privacy_classifier.py" in path:
+    if "xoxb-123456789012-" in line and "test_privacy_classifier.py" in str(path):
         return True
-    if "eval(" in line and "test_" in path:
+    if "eval(" in line and "test_" in str(path):
         return True
     files_ok = ["test_", "verify", "quickstart", "integration", "seed_"]
-    if "api_key" in line and any(f in path for f in files_ok):
+    if "api_key" in line and any(f in str(path) for f in files_ok):
         return True
     return False
 
@@ -280,7 +280,7 @@ def measure_psi():
 
 
 def measure_testing():
-    test_files = sum(1 for p in iter_files([".py"]) if "test" in p)
+    test_files = sum(1 for p in iter_files([".py"]) if "test" in str(p))
     code_files = sum(1 for _ in iter_files([".py"]))
 
     if code_files == 0:

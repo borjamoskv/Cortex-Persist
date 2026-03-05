@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.llm.provider import _load_presets
+from cortex.llm.provider import load_presets as _load_presets
 from cortex.thinking.fusion import (
     FusedThought,
     FusionStrategy,

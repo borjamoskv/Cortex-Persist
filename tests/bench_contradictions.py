@@ -1,13 +1,13 @@
 import asyncio
 import sys
-import os
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from cortex.guards.contradiction_guard import detect_contradictions, ConflictReport
+from cortex.guards.contradiction_guard import ConflictReport, detect_contradictions
+
 
 @dataclass
 class TestCase:
