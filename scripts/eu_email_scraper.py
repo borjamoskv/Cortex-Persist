@@ -748,53 +748,62 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
     domains.sort(key=lambda d: not any(d.endswith(t) for t in TLD_PRIORITY_SLUGS))
     log.info(f"⛏️  Mining {len(domains)} domains (Prioritizing EU Legal Pages)...")
 
-    results_leads = []
-    sem = asyncio.Semaphore(5)
+    results_leads: list[CompanyLead] = []
+    sem = asyncio.Semaphore(10)  # Sovereign Throughput
 
-    async def safe_process(domain: str):
+    async def safe_process(domain: str) -> list[CompanyLead]:
         async with sem:
             url = f"https://{domain}"
-            pairs = await crawler.crawl(url)
-            if not pairs:
-                if await verify_mx(domain):
-                    return [
-                        CompanyLead(
-                            email=f"{p}@{domain}",
-                            domain=domain,
-                            source="mx_pattern",
-                            country=infer_country(domain),
-                            website=url,
-                            is_public_contact=True,
-                        )
-                        for p in ["info", "contact", "sales"]
-                    ]
-                return []
-            results = [
-                CompanyLead(
-                    email=email,
-                    domain=domain,
-                    page_found=page_found,
-                    company_name=legal.get("name") or "",
-                    legal_officers=legal.get("officers") or "",
-                    phone=legal.get("phone") or "",
-                    vat_id=legal.get("vat") or "",
-                    registration=legal.get("reg") or "",
-                    source="domain_crawl",
-                    country=infer_country(domain),
-                    website=url,
-                    is_public_contact=is_public_contact(email),
-                    is_legal_source=is_legal_source,
-                    has_legal_id=legal.get("has_legal_id", False),
-                )
-                for email, page_found, legal, is_legal_source in pairs
-            ]
+            try:
+                pairs = await crawler.crawl(url)
+                if not pairs:
+                    if await verify_mx(domain):
+                        return [
+                            CompanyLead(
+                                email=f"{p}@{domain}",
+                                domain=domain,
+                                source="mx_pattern",
+                                country=infer_country(domain),
+                                website=url,
+                                is_public_contact=True,
+                            )
+                            for p in ["info", "contact", "sales"]
+                        ]
+                    return []
 
-            for r in results:
-                if isinstance(r, list):
-                    for lead in r:
-                        lead.priority_score = score_lead(lead)
-                        results_leads.append(lead)
-            return results_leads
+                return [
+                    CompanyLead(
+                        email=email,
+                        domain=domain,
+                        page_found=page_found,
+                        company_name=legal.get("name") or "",
+                        legal_officers=legal.get("officers") or "",
+                        phone=legal.get("phone") or "",
+                        vat_id=legal.get("vat") or "",
+                        registration=legal.get("reg") or "",
+                        source="domain_crawl",
+                        country=infer_country(domain),
+                        website=url,
+                        is_public_contact=is_public_contact(email),
+                        is_legal_source=is_legal_source,
+                        has_legal_id=legal.get("has_legal_id", False),
+                    )
+                    for email, page_found, legal, is_legal_source in pairs
+                ]
+            except Exception as e:
+                log.debug(f"Mining error {domain}: {e}")
+                return []
+
+    # Parallel Execution Pattern (Ω₁)
+    tasks = [safe_process(d) for d in domains]
+    batch_results = await asyncio.gather(*tasks)
+
+    for leads_list in batch_results:
+        for lead in leads_list:
+            lead.priority_score = score_lead(lead)
+            results_leads.append(lead)
+
+    return results_leads
 
 
 async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead]:

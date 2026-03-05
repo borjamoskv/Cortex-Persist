@@ -150,7 +150,6 @@ class AnalysisEngine(BaseEngine):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 atom_id = f"{path.stem}::{node.name}"
 
-                # DERIVATION: Ω₂ (Entropic Asymmetry) -> Direct O(N) internal ast walk
                 deps = self._extract_dependencies(node)
                 complexity = self._calculate_complexity(node)
 
@@ -158,7 +157,7 @@ class AnalysisEngine(BaseEngine):
                     id=atom_id,
                     source_path=path,
                     ast_node=node,
-                    complexity_score=complexity,
+                    complexity_score=float(complexity),
                     dependencies=deps,
                     dependents=set(),
                     semantic_signature="",
@@ -178,10 +177,20 @@ class AnalysisEngine(BaseEngine):
         return deps
 
     def _calculate_complexity(self, node: ast.AST) -> float:
+        """Calculates approximate cyclomatic complexity (McCabe)."""
         complexity = 1.0
         for child in ast.walk(node):
             if isinstance(
-                child, (ast.If, ast.While, ast.For, ast.ExceptHandler, ast.With, ast.comprehension)
+                child,
+                (
+                    ast.If,
+                    ast.While,
+                    ast.For,
+                    ast.ExceptHandler,
+                    ast.With,
+                    ast.Assert,
+                    ast.comprehension,
+                ),
             ):
                 complexity += 1.0
             elif isinstance(child, ast.BoolOp):
@@ -199,13 +208,39 @@ class AnalysisEngine(BaseEngine):
                     if target_aid != aid:
                         atoms[target_aid].dependents.add(aid)
 
-    def _build_coupling_graph(
-        self, atoms: dict[str, StructuralAtom]
-    ) -> dict[str, dict[str, list[str]]]:
-        return {
-            aid: {"in": list(atom.dependents), "out": list(atom.dependencies)}
-            for aid, atom in atoms.items()
-        }
+    def _build_coupling_graph(self, atoms: dict[str, StructuralAtom]) -> dict:
+        """DERIVATION: Ω₁ (Multi-Scale Causality) -> Bi-directional context."""
+        graph = {aid: {"in": set(), "out": atoms[aid].dependencies} for aid in atoms}
+        for aid, atom in atoms.items():
+            for other_id, other_atom in atoms.items():
+                if other_id != aid and any(d in other_atom.id for d in atom.dependencies):
+                    graph[aid]["in"].add(other_id)
+        return graph
+
+    def _detect_clusters(self, graph: dict) -> list[set[str]]:
+        """Detects high-coupling modules using BFS."""
+        clusters = []
+        visited = set()
+        for node in graph:
+            if node not in visited:
+                cluster = self._bfs_cluster(graph, node, visited)
+                if len(cluster) > 2:
+                    clusters.append(cluster)
+        return clusters
+
+    def _bfs_cluster(self, graph: dict, start: str, visited: set) -> set[str]:
+        cluster = {start}
+        queue = [start]
+        visited.add(start)
+        while queue:
+            current = queue.pop(0)
+            neighbors = graph[current]["in"] | graph[current]["out"]
+            for neighbor in neighbors:
+                if neighbor not in visited and neighbor in graph:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+                    cluster.add(neighbor)
+        return cluster
 
 
 class ExtractionEngine(BaseEngine):

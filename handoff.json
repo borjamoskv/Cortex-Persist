@@ -1,0 +1,92 @@
+{
+    "cortex": {
+        "handshake": "active",
+        "agents_active": 400,
+        "memory_sync": "100%",
+        "tech_debt": 40,
+        "tip": "\u03a9\u2087: The Ouroboros Loop \u2014 Every end is a new beginning. Embrace the cycle.",
+        "model": "Antigravity (Gemini 2.1 Flash)",
+        "task_mode": "Sovereign Execution",
+        "waste_counter": 2467,
+        "last_click_time": 0,
+        "last_exec_announcement": 1772660063.2859142
+    },
+    "gidatu": {
+        "status": "online",
+        "active_app": "Electron",
+        "window_title": "None",
+        "current_context": "None",
+        "context_map": {}
+    },
+    "audio_mixer": {
+        "status": "online",
+        "master": 63,
+        "lines": {
+            "Spotify": {
+                "vol": 73,
+                "active": false
+            },
+            "Music": {
+                "vol": 50,
+                "active": false
+            },
+            "Chrome": {
+                "vol": 50,
+                "active": false
+            }
+        },
+        "spatial": {
+            "x": 0,
+            "y": 0
+        },
+        "now_playing": {
+            "artist": "Unknown",
+            "track": "None",
+            "app": null,
+            "artwork_url": null
+        }
+    },
+    "peripherals": {
+        "status": "online",
+        "devices": {
+            "AirPods": {
+                "battery": "??",
+                "connected": true
+            }
+        }
+    },
+    "git_watcher": {
+        "status": "online",
+        "last_event": "01:09:13"
+    },
+    "swarm_budget": {
+        "total_cost": 0.00075,
+        "input_tokens": 300,
+        "output_tokens": 150,
+        "request_count": 3
+    },
+    "mailtv_1_daemon": {
+        "status": "online",
+        "unread": 22
+    },
+    "moltbook": {
+        "status": "offline",
+        "activity_level": 0,
+        "last_pulse": 1772587689
+    },
+    "executive_mode": "idle",
+    "breath": 0.8892907174774058,
+    "mute": false,
+    "ghost_field": {
+        "active_ghosts": 1,
+        "resonances": [
+            {
+                "id": "ed665bffca984f43",
+                "project": "proj",
+                "intent": "ref: context",
+                "strength": 0.6576596932723899,
+                "source": ".cortex_field"
+            }
+        ]
+    }
+}
