@@ -194,10 +194,17 @@
   },
   "ollama": {
     "base_url": "http://localhost:11434/v1",
-    "default_model": "qwen2.5",
+    "default_model": "qwen2.5-coder:7b",
     "env_key": "",
     "context_window": 32768,
-    "specialization": ["general"]
+    "specialization": ["code", "reasoning", "general"],
+    "intent_model_map": {
+      "code":      "qwen2.5-coder:32b",
+      "architect": "qwen2.5-coder:32b",
+      "reasoning": "qwen2.5-coder:32b",
+      "creative":  "qwen2.5-coder:7b",
+      "general":   "qwen2.5-coder:7b"
+    }
   },
   "lmstudio": {
     "base_url": "http://localhost:1234/v1",

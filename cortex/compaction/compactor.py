@@ -244,6 +244,18 @@ _TYPE_ORDER = [
 ]
 
 
+def _cortex_decay(
+    is_diamond: int, timestamp: float, current_time: float, half_life: float
+) -> float:
+    """Calcula el decaimiento temporal soberano (Axiom L4)."""
+    if is_diamond:
+        return 1.0
+    if not timestamp:
+        return 0.0
+    age = max(0.0, current_time - timestamp)
+    return float((0.5) ** (age / half_life))
+
+
 async def compact_session(
     engine: CortexEngine,
     project: str,
@@ -252,17 +264,29 @@ async def compact_session(
     """Prepare compressed context string for LLM re-injection.
 
     Instead of sending 500 facts to the LLM, we send a categorized,
-    compacted view.
+    compacted view using Unified L4 Temporal Decay.
     """
+    import time
+
     conn = await engine.get_conn()
+
+    # ─── AXIOM L4: Unified Temporal Decay ──────────────────────────────
+    try:
+        await conn.create_function("cortex_decay", 4, _cortex_decay)
+    except Exception:
+        pass  # Already registered
+
+    now = time.time()
+    half_life = 7 * 24 * 3600  # 7 days in seconds
+
     cursor = await conn.execute(
         "SELECT fact_type, content, consensus_score, created_at "
         "FROM facts "
         "WHERE project = ? AND valid_until IS NULL "
         "ORDER BY (consensus_score * 0.7 + "
-        "(1.0 / (1.0 + (julianday('now') - julianday(created_at)))) * 0.3) DESC "
+        "cortex_decay(0, CAST(strftime('%s', created_at) AS REAL), ?, ?) * 0.3) DESC "
         "LIMIT ?",
-        (project, max_facts),
+        (project, now, half_life, max_facts),
     )
     rows = await cursor.fetchall()
 
@@ -322,7 +346,7 @@ async def get_compaction_stats(
     if project:
         query += " WHERE project = ?"
         params.append(project)
-    query += " ORDER BY timestamp DESC LIMIT 20"
+    query += " ORDER BY id DESC LIMIT 20"
 
     cursor = await conn.execute(query, params)
     rows = await cursor.fetchall()

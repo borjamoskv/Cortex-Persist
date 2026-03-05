@@ -140,7 +140,7 @@ class MissionOrchestrator:
             query += " AND project = ?"
             params.append(project)
 
-        query += " ORDER BY created_at DESC LIMIT 20"
+        query += " ORDER BY id DESC LIMIT 20"
 
         rows = conn.execute(query, params).fetchall()
         return [

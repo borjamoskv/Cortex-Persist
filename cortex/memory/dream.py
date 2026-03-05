@@ -198,7 +198,7 @@ class AssociativeDreamEngine:
         result.bridges_created = len(bridges)
 
         # Phase 4: Emotional Re-weighting
-        result.engrams_reweighted = await self._emotional_reweight(engrams)
+        result.engrams_reweighted = self._emotional_reweight(engrams)
 
         result.duration_ms = (time.monotonic() - start) * 1000
 
@@ -216,78 +216,82 @@ class AssociativeDreamEngine:
     # ─── Phase 1: Cluster Detection ───────────────────────────────
 
     def _detect_clusters(self, engrams: list[Any]) -> list[SemanticCluster]:
-        """Greedy agglomerative clustering based on semantic similarity.
-
-        O(n²) in engram count — acceptable for nightly batches of < 1000.
-        For larger scales, use approximate methods.
-        """
+        """Greedy agglomerative clustering based on semantic similarity."""
         if not engrams:
             return []
 
-        # Build adjacency by similarity
         assigned: set[int] = set()
         clusters: list[SemanticCluster] = []
         cluster_idx = 0
 
-        for i, engram_a in enumerate(engrams):
-            if i in assigned:
+        # Pre-extract embeddings for faster iteration
+        embs = [getattr(e, "embedding", None) for e in engrams]
+
+        for i, emb_a in enumerate(embs):
+            if i in assigned or not emb_a:
                 continue
 
-            emb_a = getattr(engram_a, "embedding", None)
-            if not emb_a:
-                continue
-
-            # Start new cluster
-            cluster_members = [i]
-            assigned.add(i)
-
-            for j, engram_b in enumerate(engrams):
-                if j in assigned or j == i:
-                    continue
-
-                emb_b = getattr(engram_b, "embedding", None)
-                if not emb_b:
-                    continue
-
-                sim = _cosine_similarity(emb_a, emb_b)
-                if sim >= self._cluster_threshold:
-                    cluster_members.append(j)
-                    assigned.add(j)
+            cluster_members = self._expand_cluster(i, emb_a, embs, assigned)
 
             if len(cluster_members) >= MIN_CLUSTER_SIZE:
-                member_embeddings = [getattr(engrams[m], "embedding", []) for m in cluster_members]
-                centroid = _compute_centroid([e for e in member_embeddings if e])
-
-                # Detect dominant project
-                projects: dict[str, int] = defaultdict(int)
-                for m in cluster_members:
-                    pid = getattr(engrams[m], "project_id", "unknown")
-                    projects[pid] += 1
-                dominant = max(projects, key=projects.get) if projects else ""  # type: ignore[arg-type]
-
-                avg_sim = 0.0
-                if len(cluster_members) > 1:
-                    sims: list[float] = []
-                    for ci in range(len(cluster_members)):
-                        for cj in range(ci + 1, len(cluster_members)):
-                            ea = getattr(engrams[cluster_members[ci]], "embedding", [])
-                            eb = getattr(engrams[cluster_members[cj]], "embedding", [])
-                            if ea and eb:
-                                sims.append(_cosine_similarity(ea, eb))
-                    avg_sim = sum(sims) / len(sims) if sims else 0.0
-
-                clusters.append(
-                    SemanticCluster(
-                        cluster_id=f"cluster_{cluster_idx}",
-                        member_ids=[getattr(engrams[m], "id", str(m)) for m in cluster_members],
-                        centroid=centroid,
-                        avg_similarity=avg_sim,
-                        dominant_project=dominant,
-                    )
-                )
+                clusters.append(self._build_cluster(cluster_members, engrams, cluster_idx))
                 cluster_idx += 1
 
         return clusters
+
+    def _expand_cluster(
+        self, i: int, emb_a: list[float], embs: list[Any], assigned: set[int]
+    ) -> list[int]:
+        """Find all engrams similar to the centroid candidate."""
+        members = [i]
+        assigned.add(i)
+
+        for j in range(i + 1, len(embs)):
+            if j in assigned or not embs[j]:
+                continue
+            if _cosine_similarity(emb_a, embs[j]) >= self._cluster_threshold:
+                members.append(j)
+                assigned.add(j)
+        return members
+
+    def _build_cluster(self, members: list[int], engrams: list[Any], idx: int) -> SemanticCluster:
+        """Construct a SemanticCluster from its constituents."""
+        e_embs = [getattr(engrams[m], "embedding", []) for m in members]
+        centroid = _compute_centroid([e for e in e_embs if e])
+        dominant = self._compute_dominant_project(members, engrams)
+        avg_sim = self._compute_cluster_avg_similarity(members, engrams)
+
+        return SemanticCluster(
+            cluster_id=f"cluster_{idx}",
+            member_ids=[getattr(engrams[m], "id", str(m)) for m in members],
+            centroid=centroid,
+            avg_similarity=avg_sim,
+            dominant_project=dominant,
+        )
+
+    def _compute_dominant_project(self, cluster_members: list[int], engrams: list[Any]) -> str:
+        """Find the most frequent project_id in a cluster."""
+        projects: dict[str, int] = defaultdict(int)
+        for m in cluster_members:
+            pid = getattr(engrams[m], "project_id", "unknown")
+            projects[pid] += 1
+        return max(projects, key=projects.get) if projects else ""  # type: ignore[arg-type]
+
+    def _compute_cluster_avg_similarity(
+        self, cluster_members: list[int], engrams: list[Any]
+    ) -> float:
+        """Compute the average pairwise cosine similarity of all engrams in the cluster."""
+        if len(cluster_members) <= 1:
+            return 0.0
+
+        sims: list[float] = []
+        for ci in range(len(cluster_members)):
+            for cj in range(ci + 1, len(cluster_members)):
+                ea = getattr(engrams[cluster_members[ci]], "embedding", [])
+                eb = getattr(engrams[cluster_members[cj]], "embedding", [])
+                if ea and eb:
+                    sims.append(_cosine_similarity(ea, eb))
+        return sum(sims) / len(sims) if sims else 0.0
 
     # ─── Phase 2: Redundancy Fusion ───────────────────────────────
 
@@ -310,30 +314,7 @@ class AssociativeDreamEngine:
             members = [id_to_engram.get(mid) for mid in cluster.member_ids]
             members = [m for m in members if m is not None]
 
-            to_delete: set[str] = set()
-            for i, ea in enumerate(members):
-                if getattr(ea, "id", "") in to_delete:
-                    continue
-                emb_a = getattr(ea, "embedding", [])
-                if not emb_a:
-                    continue
-
-                for j in range(i + 1, len(members)):
-                    eb = members[j]
-                    if getattr(eb, "id", "") in to_delete:
-                        continue
-                    emb_b = getattr(eb, "embedding", [])
-                    if not emb_b:
-                        continue
-
-                    sim = _cosine_similarity(emb_a, emb_b)
-                    if sim > 0.95:
-                        # Keep the newer one (higher timestamp)
-                        ts_a = getattr(ea, "timestamp", 0)
-                        ts_b = getattr(eb, "timestamp", 0)
-                        victim_id = getattr(ea if ts_a < ts_b else eb, "id", "")
-                        if victim_id:
-                            to_delete.add(victim_id)
+            to_delete = self._identify_redundant_engrams(members)
 
             # Delete redundant engrams
             if to_delete and self._vs and hasattr(self._vs, "delete"):
@@ -344,15 +325,46 @@ class AssociativeDreamEngine:
 
         return fused
 
-    # ─── Phase 3: Synthetic Bridging ──────────────────────────────
+    def _identify_redundant_engrams(self, members: list[Any]) -> set[str]:
+        """Identify older engrams in a cluster that are near-identical to newer ones >0.95 sim."""
+        to_delete: set[str] = set()
+
+        valid = [
+            (getattr(m, "id", ""), getattr(m, "embedding", []), getattr(m, "timestamp", 0))
+            for m in members
+            if getattr(m, "id", "") and getattr(m, "embedding", [])
+        ]
+
+        for i, (id_a, emb_a, ts_a) in enumerate(valid):
+            if id_a in to_delete:
+                continue
+            self._mark_redundancies(i, id_a, emb_a, ts_a, valid, to_delete)
+
+        return to_delete
+
+    def _mark_redundancies(
+        self,
+        i: int,
+        id_a: str,
+        emb_a: list[float],
+        ts_a: float,
+        valid: list[Any],
+        to_delete: set[str],
+    ) -> None:
+        """Mark identical pairs for deletion."""
+        for j in range(i + 1, len(valid)):
+            id_b, emb_b, ts_b = valid[j]
+            if id_b in to_delete:
+                continue
+
+            if _cosine_similarity(emb_a, emb_b) > 0.95:
+                to_delete.add(id_a if ts_a < ts_b else id_b)
 
     def _generate_bridges(self, clusters: list[SemanticCluster]) -> list[SyntheticBridge]:
         """Generate creative bridges between distant clusters.
 
         The "sweet spot" for creativity: clusters that are neither too
         similar (boring) nor too different (nonsensical).
-
-        Distance in [BRIDGE_MIN, BRIDGE_MAX] → candidate bridge.
         """
         bridges: list[SyntheticBridge] = []
 
@@ -365,32 +377,37 @@ class AssociativeDreamEngine:
                 if not cluster_b.centroid:
                     continue
 
-                sim = _cosine_similarity(cluster_a.centroid, cluster_b.centroid)
-                distance = 1.0 - sim
-
-                if self._bridge_min <= distance <= self._bridge_max:
-                    # Sweet spot — create bridge hypothesis
-                    bridge = SyntheticBridge(
-                        source_cluster_id=cluster_a.cluster_id,
-                        target_cluster_id=cluster_b.cluster_id,
-                        source_engram_id=(cluster_a.member_ids[0] if cluster_a.member_ids else ""),
-                        target_engram_id=(cluster_b.member_ids[0] if cluster_b.member_ids else ""),
-                        semantic_distance=round(distance, 4),
-                        bridge_hypothesis=(
-                            f"What connects {cluster_a.dominant_project} "
-                            f"and {cluster_b.dominant_project}?"
-                        ),
-                    )
+                bridge = self._create_bridge_if_eligible(cluster_a, cluster_b)
+                if bridge:
                     bridges.append(bridge)
-
                     if len(bridges) >= MAX_BRIDGES_PER_CYCLE:
                         return bridges
 
         return bridges
 
+    def _create_bridge_if_eligible(
+        self, ca: SemanticCluster, cb: SemanticCluster
+    ) -> SyntheticBridge | None:
+        """Create a bridge hypothesis if semantic distance is in sweet spot."""
+        sim = _cosine_similarity(ca.centroid, cb.centroid)
+        distance = 1.0 - sim
+
+        if self._bridge_min <= distance <= self._bridge_max:
+            return SyntheticBridge(
+                source_cluster_id=ca.cluster_id,
+                target_cluster_id=cb.cluster_id,
+                source_engram_id=(ca.member_ids[0] if ca.member_ids else ""),
+                target_engram_id=(cb.member_ids[0] if cb.member_ids else ""),
+                semantic_distance=round(distance, 4),
+                bridge_hypothesis=(
+                    f"What connects {ca.dominant_project} and {cb.dominant_project}?"
+                ),
+            )
+        return None
+
     # ─── Phase 4: Emotional Re-weighting ──────────────────────────
 
-    async def _emotional_reweight(self, engrams: list[Any]) -> int:
+    def _emotional_reweight(self, engrams: list[Any]) -> int:
         """Adjust emotional valence based on global coherence.
 
         Engrams that are well-connected (high entangled_refs) get

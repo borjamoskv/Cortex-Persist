@@ -324,7 +324,7 @@ def _get_audit_trail(conn, project: str, limit: int):
         FROM facts f
         LEFT JOIN transactions t ON f.tx_id = t.id
         WHERE {where_clause}
-        ORDER BY f.created_at DESC
+        ORDER BY f.id DESC
         LIMIT ?
     """
     rows = conn.execute(query, params).fetchall()

@@ -71,7 +71,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.2.0"
+SCHEMA_VERSION = "5.3.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -82,6 +82,10 @@ CREATE TABLE IF NOT EXISTS facts (
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
     tags        TEXT NOT NULL DEFAULT '[]',
+    cognitive_layer TEXT DEFAULT 'semantic' CHECK(
+        cognitive_layer IN ('working', 'episodic', 'semantic', 'relationship', 'emotional')
+    ),
+    parent_decision_id INTEGER REFERENCES facts(id),
     confidence  TEXT NOT NULL DEFAULT 'stated',
     valid_from  TEXT NOT NULL,
     valid_until TEXT,

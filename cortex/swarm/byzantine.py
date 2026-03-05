@@ -4,7 +4,8 @@ Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 
 import hashlib
-from typing import TypeVar
+import json
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -29,6 +30,15 @@ class ByzantineConsensus:
     def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
+    def _get_proposal_hash(self, proposal: Any) -> str:
+        """Deterministic hashing for any generic type."""
+        try:
+            # Handle dicts/lists deterministically
+            serialized = json.dumps(proposal, sort_keys=True, default=str)
+        except (TypeError, ValueError):
+            serialized = str(proposal)
+        return hashlib.sha256(serialized.encode()).hexdigest()
+
     def execute_consensus(self, proposals: dict[str, T]) -> T | None:
         """
         Takes proposals from multiple nodes. Validates them via reputation-weighted
@@ -41,7 +51,6 @@ class ByzantineConsensus:
         hash_to_proposal: dict[str, T] = {}
         total_reputation = 0.0
 
-        proposal_hashes: dict[T, str] = {}
         for node_id, proposal in proposals.items():
             if node_id not in self.nodes:
                 continue
@@ -49,10 +58,7 @@ class ByzantineConsensus:
             rep = self.nodes[node_id].reputation
             total_reputation += rep
 
-            # O(1) hashing for duplicate proposals
-            if proposal not in proposal_hashes:
-                proposal_hashes[proposal] = hashlib.sha256(str(proposal).encode()).hexdigest()
-            proposal_hash = proposal_hashes[proposal]
+            proposal_hash = self._get_proposal_hash(proposal)
 
             vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
             hash_to_proposal[proposal_hash] = proposal
@@ -82,7 +88,7 @@ class ByzantineConsensus:
             if node_id not in self.nodes:
                 continue
 
-            proposal_hash = hashlib.sha256(str(proposal).encode()).hexdigest()
+            proposal_hash = self._get_proposal_hash(proposal)
             if proposal_hash == winning_hash:
                 # Reward
                 self.nodes[node_id].reputation = min(1.0, self.nodes[node_id].reputation * 1.05)

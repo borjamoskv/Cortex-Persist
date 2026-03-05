@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import uuid
+from cortex.axioms.topological_id import flake_gen
 from datetime import datetime, timezone
 from typing import Any
 
@@ -86,7 +86,7 @@ class FactMutationEngine:
         Returns:
             The UUID of the newly created event.
         """
-        event_id = str(uuid.uuid4())
+        event_id = flake_gen.next_lexicographic_id()
         ts = datetime.now(timezone.utc).isoformat()
         payload_str = json.dumps(payload, sort_keys=True, default=str)
 
@@ -139,10 +139,7 @@ class FactMutationEngine:
     ) -> str:
         """Fetch the signature of the most recent event for this entity."""
         cursor = await conn.execute(
-            "SELECT signature FROM entity_events "
-            "WHERE entity_id = ? "
-            "ORDER BY timestamp DESC, rowid DESC "
-            "LIMIT 1",
+            "SELECT signature FROM entity_events WHERE entity_id = ? ORDER BY id DESC LIMIT 1",
             (entity_id,),
         )
         row = await cursor.fetchone()
@@ -332,7 +329,7 @@ class FactMutationEngine:
             "prev_hash, signature "
             "FROM entity_events "
             "WHERE entity_id = ? "
-            "ORDER BY timestamp ASC, rowid ASC",
+            "ORDER BY id ASC",
             (entity_id,),
         )
 
@@ -385,8 +382,7 @@ class FactMutationEngine:
         params: list[Any] = [entity_id]
         if as_of:
             query += "AND timestamp <= ? "
-            params.append(as_of)
-        query += "ORDER BY timestamp ASC, rowid ASC"
+        query += "ORDER BY id ASC"
 
         cursor = await conn.execute(query, params)
 

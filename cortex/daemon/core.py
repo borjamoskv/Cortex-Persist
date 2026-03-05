@@ -34,6 +34,7 @@ from cortex.daemon.monitors import (
     CompactionMonitor,
     DiskMonitor,
     EngineHealthCheck,
+    EvaluationMonitor,
     GhostWatcher,
     MemorySyncer,
     NeuralIntentMonitor,
@@ -46,6 +47,33 @@ from cortex.daemon.monitors import (
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
+
+try:
+    from cortex.jules.daemon import JulesDaemon, JulesMonitor
+    from cortex.jules.queue import TaskQueue
+    _JULES_AVAILABLE = True
+except ImportError:
+    _JULES_AVAILABLE = False
+
+try:
+    from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
+    from cortex.daemon.centaur.queue import EntropicQueue
+    from cortex.swarm.centauro_engine import CentauroEngine
+    _CENTAUR_AVAILABLE = True
+except ImportError:
+    _CENTAUR_AVAILABLE = False
+
+try:
+    from cortex.daemon.entropic_wake import EntropicWakeDaemon
+    _ENTROPIC_WAKE_AVAILABLE = True
+except ImportError:
+    _ENTROPIC_WAKE_AVAILABLE = False
+
+try:
+    from cortex.daemon.frontier import FrontierDaemon
+    _FRONTIER_AVAILABLE = True
+except ImportError:
+    _FRONTIER_AVAILABLE = False
 
 __all__ = ["MoskvDaemon"]
 
@@ -90,6 +118,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             config_dir / "system.json",
             file_config.get("memory_stale_hours", memory_stale_hours),
         )
+        self.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)  # Added EvaluationMonitor
         # Single shared engine instance to prevent memory leaks (HIGH-004)
         try:
             from cortex.engine import CortexEngine
@@ -172,6 +201,74 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             engine=self._shared_engine,
         )
 
+        # Jules — autonomous background coding agent
+        self._jules_daemon: JulesDaemon | None = None
+        self.jules_monitor: JulesMonitor | None = None
+        if _JULES_AVAILABLE and file_config.get("jules_enabled", False):
+            try:
+                jules_queue = TaskQueue()
+                self._jules_daemon = JulesDaemon(
+                    queue=jules_queue,
+                    poll_interval=file_config.get("jules_poll_interval", 60),
+                    max_concurrent=file_config.get("jules_max_concurrent", 2),
+                    llm_provider=file_config.get("jules_llm_provider", "qwen"),
+                    github_token=file_config.get("jules_github_token"),
+                    github_repos=file_config.get("jules_github_repos", []),
+                )
+                self.jules_monitor = JulesMonitor(self._jules_daemon)
+                logger.info("🤖 Jules autonomous agent ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init Jules daemon: %s", e)
+
+        # Centaur Heartbeat Engine
+        self.heartbeat_daemon = None
+        if _CENTAUR_AVAILABLE:
+            try:
+                db_path = file_config.get("db_path", str(CORTEX_DB))
+                centaur_queue = EntropicQueue(db_path=Path(db_path).parent / "entropic_queue.db")
+                centauro_engine = CentauroEngine()
+                self.heartbeat_daemon = HeartbeatDaemon(
+                    queue=centaur_queue,
+                    engine=centauro_engine,
+                    poll_interval=float(file_config.get("heartbeat_interval", 30.0)),
+                )
+                logger.info("❤️  HeartbeatDaemon (Continuous Autopoiesis) ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init HeartbeatDaemon: %s", e)
+
+        # Entropic Wake (Void Daemon)
+        self.entropic_wake_daemon = None
+        if _ENTROPIC_WAKE_AVAILABLE:
+            try:
+                self.entropic_wake_daemon = EntropicWakeDaemon(
+                    engine=self._shared_engine,
+                    check_interval_hours=float(
+                        file_config.get("entropic_wake_interval_hours", 4.0)
+                    ),
+                    zenon_threshold=float(file_config.get("zenon_threshold", 1.0))
+                )
+                logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init Entropic Wake Daemon: %s", e)
+
+        # Frontier Daemon (R&D & Metabolism)
+        self.frontier_daemon = None
+        if _FRONTIER_AVAILABLE:
+            try:
+                self.frontier_daemon = FrontierDaemon(
+                    engine=self._shared_engine,
+                    metabolism_interval_hours=float(
+                        file_config.get("frontier_metabolism_interval_hours", 12.0)
+                    ),
+                    ingestion_interval_hours=float(
+                        file_config.get("frontier_ingestion_interval_hours", 24.0)
+                    ),
+                    allow_commits=file_config.get("frontier_allow_commits", True) # User granted autonomy
+                )
+                logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init Frontier Daemon: %s", e)
+
         self._last_alerts: dict[str, float] = {}
         self._cooldown = file_config.get("cooldown", cooldown)
 
@@ -210,6 +307,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._run_monitor(status, "cert_alerts", self.cert_monitor, self._alert_certs)
         self._run_monitor(status, "engine_alerts", self.engine_health, self._alert_engine)
         self._run_monitor(status, "disk_alerts", self.disk_monitor, self._alert_disk)
+        self._run_monitor(
+            status, "evaluation_alerts", self.evaluation_monitor, self._alert_evaluation
+        )
         # Run Unified Mejoralo/Entropy sweep (OMEGA-SINGULARITY)
         self._run_monitor(status, "mejoralo_alerts", self.mejoralo_monitor, self._alert_mejoralo)
         self._run_monitor(
@@ -224,6 +324,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync
         )
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
+        if self.jules_monitor is not None:
+            self._run_monitor(status, "jules_alerts", self.jules_monitor, self._alert_jules)
 
         self._auto_sync(status)
         self._flush_timer()
@@ -311,6 +413,16 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
 
+        # Start Jules daemon thread
+        if self._jules_daemon is not None:
+            jules_thread = threading.Thread(
+                target=self._jules_daemon.start,
+                name="JulesAgent",
+                daemon=True,
+            )
+            jules_thread.start()
+            self._threads.append(jules_thread)
+
         # Start helper threads
         neural_thread = threading.Thread(
             target=self._run_neural_loop, name="NeuralSync", daemon=True
@@ -326,6 +438,27 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         if self.fiat_oracle:
             t = threading.Thread(
                 target=self.fiat_oracle.run_sync_loop, name="FiatOracle", daemon=True
+            )
+            t.start()
+            self._threads.append(t)
+
+        if self.heartbeat_daemon:
+            t = threading.Thread(
+                target=self._run_heartbeat_loop, name="HeartbeatDaemon", daemon=True
+            )
+            t.start()
+            self._threads.append(t)
+
+        if self.entropic_wake_daemon:
+            t = threading.Thread(
+                target=self._run_entropic_wake_loop, name="EntropicWakeDaemon", daemon=True
+            )
+            t.start()
+            self._threads.append(t)
+
+        if self.frontier_daemon:
+            t = threading.Thread(
+                target=self._run_frontier_loop, name="FrontierDaemon", daemon=True
             )
             t.start()
             self._threads.append(t)
@@ -347,6 +480,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             pass
         finally:
             logger.info("MOSKV-1 Daemon stopped")
+            if self.entropic_wake_daemon:
+                self.entropic_wake_daemon.stop()
+            if self.frontier_daemon:
+                self.frontier_daemon.stop()
 
     def _run_neural_loop(self) -> None:
         """Fast polling loop for zero-latency neural intent ingestion."""
@@ -378,6 +515,37 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         except Exception as e:
             logger.error("AST Oracle loop error: %s", e)
 
+    def _run_heartbeat_loop(self) -> None:
+        """Runs the HeartbeatDaemon event loop."""
+        if not self.heartbeat_daemon:
+            return
+            
+        import asyncio
+        logger.info("❤️  Heartbeat thread started")
+        
+        async def _lifecycle():
+            task = asyncio.create_task(self.heartbeat_daemon.start())
+            while not self._shutdown:
+                await asyncio.sleep(1.0)
+            await self.heartbeat_daemon.stop()
+            try:
+                await task
+            except asyncio.CancelledError:
+                raise
+
+        try:
+            asyncio.run(_lifecycle())
+        except Exception as e:
+            logger.error("Heartbeat loop error: %s", e)
+
+    def _run_entropic_wake_loop(self) -> None:
+        """Runs the Entropic Wake Daemon event loop."""
+        logger.info("🌌 Entropic Wake thread started")
+        try:
+            self.entropic_wake_daemon.run_loop()
+        except Exception as e:
+            logger.error("Entropic Wake loop error: %s", e)
+
     def _run_sentinel_oracle_loop(self) -> None:
         """Runs the Sentinel Oracle polling loop."""
         import asyncio
@@ -387,6 +555,15 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             asyncio.run(self.sentinel_oracle.run_loop())
         except Exception as e:
             logger.error("Sentinel Oracle loop error: %s", e)
+
+    def _run_frontier_loop(self) -> None:
+        """Runs the Frontier Daemon event loop."""
+        import asyncio
+        logger.info("🚀 Frontier thread started")
+        try:
+            asyncio.run(self.frontier_daemon.run_loop())
+        except Exception as e:
+            logger.error("Frontier loop error: %s", e)
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts."""

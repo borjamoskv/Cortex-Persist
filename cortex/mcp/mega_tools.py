@@ -87,7 +87,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 SELECT content FROM facts
                 WHERE project = ? AND fact_type = 'decision'
                   AND is_tombstoned = 0 AND created_at > ?
-                ORDER BY created_at DESC LIMIT 5
+                ORDER BY id DESC LIMIT 5
                 """,
                 (project, cutoff_30d),
             )
@@ -99,7 +99,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 SELECT content FROM facts
                 WHERE project = ? AND fact_type = 'ghost'
                   AND is_tombstoned = 0
-                ORDER BY created_at DESC LIMIT 5
+                ORDER BY id DESC LIMIT 5
                 """,
                 (project,),
             )
@@ -111,7 +111,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 SELECT content FROM facts
                 WHERE project = ? AND fact_type = 'bridge'
                   AND is_tombstoned = 0
-                ORDER BY created_at DESC LIMIT 3
+                ORDER BY id DESC LIMIT 3
                 """,
                 (project,),
             )
@@ -164,11 +164,13 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         if ghosts:
             lines.append(
-                f"| `{project}/debt/` | [DIR] | Ghost Resolution ({len(ghosts)} pending) | CRITICAL |"
+                f"| `{project}/debt/` | [DIR] | "
+                f"Ghost Resolution ({len(ghosts)} pending) | CRITICAL |"
             )
         if bridges:
             lines.append(
-                f"| `{project}/bridges/` | [DIR] | Bridge Integration ({len(bridges)} active) | MEDIUM |"
+                f"| `{project}/bridges/` | [DIR] | "
+                f"Bridge Integration ({len(bridges)} active) | MEDIUM |"
             )
 
         lines.append(f"| `{project}/README.md` | [FILE] | Reality Manifest | HIGH |")
@@ -177,7 +179,8 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
         ghost_warning = f" ⚠️ {len(ghosts)} ghost(s) need resolution first." if ghosts else ""
         lines.append(
             f"> [!IMPORTANT]\n"
-            f"> Reality Weaver grounded this intent in {total if type_rows else 0} existing facts.{ghost_warning}"
+            f"> Reality Weaver grounded this intent in "
+            f"{total if type_rows else 0} existing facts.{ghost_warning}"
         )
 
         ctx.metrics.record_request()

@@ -280,6 +280,8 @@ async def deep_health_check(
             detail="Health check failed",
         ) from None
 
+    from cortex.routes.context import get_p95_context_latency
+
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     result = DeepHealthResponse(
         status="healthy" if overall_healthy else "degraded",
@@ -287,6 +289,8 @@ async def deep_health_check(
         schema_version=SCHEMA_VERSION,
         checks=checks,
         latency_ms=elapsed_ms,
+        p95_latency_ms=get_p95_context_latency(),
+        stale_ratio=None,
     )
 
     if not overall_healthy:

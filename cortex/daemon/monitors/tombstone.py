@@ -55,11 +55,12 @@ class TombstoneMonitor:
         try:
             from cortex.database.core import connect as db_connect
 
-            # Using basic sqlite3 to bypass connection pools / WAL constraints if needed
+            # Fix HIGH-005 lock contention: use auto-commit mode (isolation_level=None)
+            # to avoid taking a write-lock on the first SELECT. We'll manage transactions manually.
             with db_connect(
                 self.db_path,
-                timeout=30,
-                isolation_level="IMMEDIATE",  # Exclusive write transaction
+                timeout=5,
+                isolation_level=None,  # Manual transaction control
             ) as conn:
                 cursor = conn.cursor()
 
@@ -89,6 +90,7 @@ class TombstoneMonitor:
                     id_list = ",".join("?" * len(batch))
 
                     try:
+                        cursor.execute("BEGIN IMMEDIATE")
                         cursor.execute(
                             f"DELETE FROM fact_embeddings WHERE fact_id IN ({id_list})", batch
                         )
@@ -97,6 +99,7 @@ class TombstoneMonitor:
                         conn.commit()
                         total_deleted += len(batch)
                     except sqlite3.Error as batch_err:
+                        conn.rollback()
                         logger.warning(
                             "Batch sweep issue (might be ignored if tables missing): %s", batch_err
                         )

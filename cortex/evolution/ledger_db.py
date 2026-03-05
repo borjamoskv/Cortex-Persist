@@ -163,7 +163,7 @@ class EvolutionLedgerDB:
                     """
                     SELECT * FROM mutations 
                     WHERE agent_id = ? 
-                    ORDER BY timestamp DESC 
+                    ORDER BY rowid DESC 
                     LIMIT ?
                 """,
                     (agent_id, limit),
@@ -184,7 +184,7 @@ class EvolutionLedgerDB:
                     """
                     SELECT value, timestamp FROM metrics 
                     WHERE agent_id = ? AND metric_name = ?
-                    ORDER BY timestamp DESC 
+                    ORDER BY id DESC 
                     LIMIT ?
                 """,
                     (agent_id, metric_name, limit),

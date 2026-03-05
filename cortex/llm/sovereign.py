@@ -46,7 +46,8 @@ import os
 import time
 from dataclasses import dataclass, field
 
-from cortex.llm.provider import LLMProvider, _load_presets
+from cortex.llm.provider import LLMProvider
+from cortex.llm._presets import load_presets
 from cortex.llm.router import IntentProfile
 
 __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
@@ -177,7 +178,7 @@ class SovereignLLM:
         chain: list[str] = []
         errors: list[str] = []
         # D3 fix: cache presets once per generate() call
-        presets = _load_presets()
+        presets = load_presets()
 
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
@@ -339,7 +340,7 @@ class SovereignLLM:
     ) -> SovereignResult | None:
         """Attempt a single provider. Returns None on failure."""
         if presets is None:
-            presets = _load_presets()
+            presets = load_presets()
 
         preset = presets.get(provider_name)
         if not preset:

@@ -79,6 +79,7 @@ class CortexMemoryManager:
         "_max_bg_tasks",
         "_fusion",
         "_dynamic_space",
+        "_hologram",
         "_bus",
         "thalamus",
         "_resonance_gate",
@@ -113,6 +114,15 @@ class CortexMemoryManager:
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
         self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
+
+        try:
+            from cortex.memory.hologram import HolographicMemory
+            self._hologram = HolographicMemory(self._l2) if self._l2 else None
+            if self._hologram:
+                # We do not await it here, we let it lazy-load or load in background upon first recall
+                pass
+        except ImportError:
+            self._hologram = None
 
         self._endocrine = DigitalEndocrine()
         self._schema_engine = SchemaEngine()
@@ -261,6 +271,7 @@ class CortexMemoryManager:
         fact_type: str = "general",
         metadata: dict[str, Any] | None = None,
         layer: str = "semantic",
+        parent_decision_id: str | int | None = None,
         use_bus: bool = False,
     ) -> str:
         """Directly persist a high-value fact to L2 memory layers.
@@ -307,6 +318,7 @@ class CortexMemoryManager:
             timestamp=time.time(),
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
+            parent_decision_id=str(parent_decision_id) if parent_decision_id else None,
         )
 
         # 3. Process through Adaptive Resonance Gate (ART-v2)

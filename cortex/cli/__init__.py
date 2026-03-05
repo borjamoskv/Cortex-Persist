@@ -123,6 +123,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.compact_cmds",
     "cortex.cli.crud",
     "cortex.cli.entropy_cmds",
+    "cortex.cli.eval_cmds",
     "cortex.cli.handoff_cmds",
     "cortex.cli.init_cmds",
     "cortex.cli.launchpad_cmds",
@@ -136,6 +137,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.security_hardening_cmds",
     "cortex.cli.session_cmds",
     "cortex.cli.signal_cmds",
+    "cortex.cli.spawn_cmds",
     "cortex.cli.status_cmds",
     "cortex.cli.storage_cmds",
     "cortex.cli.swarm_cmds",
@@ -176,6 +178,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("roi", "cortex.cli.roi_cmds", "roi", "ROI metrics dashboard."),
     ("security", "cortex.cli.security_cmds", "security_cli", "Security audit commands."),
     ("sovereign", "cortex.cli.keter_cmds", "sovereign_cmds", "Sovereign engine control."),
+    ("mcp", "cortex.cli.mcp_cmds", "mcp_cmds", "Model Context Protocol tools."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

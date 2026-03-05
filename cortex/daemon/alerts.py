@@ -221,7 +221,32 @@ class AlertHandlerMixin:
             logger.debug(a.message)
             logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
 
+    def _alert_jules(self, alerts: list) -> None:
+        """Handler for JulesAlert — autonomous coding task completions."""
+        for a in alerts:
+            emoji = "✅" if a.status == "done" else "❌"
+            logger.info(
+                "%s Jules task [%s] %s: %s", emoji, a.task_id, a.status, a.title
+            )
+            if self._should_alert(f"jules:{a.task_id}"):  # type: ignore[reportAttributeAccessIssue]
+                sound = "Glass" if a.status == "done" else "Basso"
+                Notifier.notify(
+                    f"{emoji} Jules — {a.status}",
+                    f"{a.title[:80]}: {a.message[:120]}",
+                    sound=sound,
+                )
+
+    def _alert_evaluation(self, alerts: list) -> None:
+        """Handler for EvaluationAlert from EvaluationMonitor."""
+        for a in alerts:
+            logger.info("📡 Evaluation Metrics: Stale_Ratio=%.2f, Contradictions=%d", a.stale_ratio, a.contradictions_found)
+            if a.stale_ratio >= 0.5 or a.contradictions_found > 0:
+                if self._should_alert("evaluation:stale_cont"):  # type: ignore[reportAttributeAccessIssue]
+                    msg = f"{a.message} | Contradictions: {a.contradictions_found}"
+                    Notifier.notify("⚠️ Memory Evaluation Alert", msg, sound="Basso")
+
     def _flush_timer(self) -> None:
+
         """Flush accumulated time tracker heartbeats."""
         if not getattr(self, "tracker", None):
             return

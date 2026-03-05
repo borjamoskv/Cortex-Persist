@@ -316,12 +316,12 @@ class TrustService:
         conn = self._get_conn()
         if project:
             cursor = conn.execute(
-                "SELECT * FROM transactions WHERE project = ? ORDER BY timestamp DESC LIMIT ?",
+                "SELECT * FROM transactions WHERE project = ? ORDER BY id DESC LIMIT ?",
                 (project, limit),
             )
         else:
             cursor = conn.execute(
-                "SELECT * FROM transactions ORDER BY timestamp DESC LIMIT ?",
+                "SELECT * FROM transactions ORDER BY id DESC LIMIT ?",
                 (limit,),
             )
         return [dict(row) for row in cursor.fetchall()]
