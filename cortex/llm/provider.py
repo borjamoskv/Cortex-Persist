@@ -30,7 +30,6 @@ import json
 import logging
 import os
 import re
-from pathlib import Path
 from typing import Any, Final
 
 import httpx
@@ -38,39 +37,14 @@ import httpx
 from cortex.llm.quota import SovereignQuotaManager
 from cortex.llm.router import BaseProvider, CortexPrompt, IntentProfile
 
+from cortex.llm._presets import get_preset_info, list_providers, load_presets
+
 __all__ = ["LLMProvider"]
 
 logger = logging.getLogger("cortex.llm")
 
-# ─── Configuration & Presets ──────────────────────────────────────────
-
-_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent.parent / "config" / "llm_presets.json")
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
-
-# Global cache for presets to avoid redundant I/O
-_PRESETS_CACHE: dict[str, dict[str, Any]] = {}
-
 _QUOTA_MANAGER = SovereignQuotaManager()
-
-
-def _load_presets() -> dict[str, dict[str, Any]]:
-    """Lazy-load provider presets from assets with error recovery."""
-    global _PRESETS_CACHE
-    if not _PRESETS_CACHE:
-        try:
-            # Handle absolute path for robustness
-            path = Path(_ASSET_PATH).resolve()
-            if not path.exists():
-                logger.error("Sovereign Failure: LLM presets missing at %s", path)
-                return {}
-
-            with path.open(encoding="utf-8") as f:
-                _PRESETS_CACHE = json.load(f)
-                logger.debug("LLM: Loaded %d presets from assets", len(_PRESETS_CACHE))
-        except (json.JSONDecodeError, OSError) as exc:
-            logger.critical("LLM: Failed to load presets: %s", exc)
-            return {}
-    return _PRESETS_CACHE
 
 
 # ─── Implementation ───────────────────────────────────────────────────
@@ -95,7 +69,7 @@ class LLMProvider(BaseProvider):
         model: str | None = None,
         base_url: str | None = None,
     ):
-        presets = _load_presets()
+        presets = load_presets()
 
         if provider == "custom":
             self._init_custom(api_key, model, base_url)
@@ -517,10 +491,11 @@ class LLMProvider(BaseProvider):
     @classmethod
     def list_providers(cls) -> list[str]:
         """Return all available preset provider names + 'custom'."""
-        presets = _load_presets()
-        return sorted(list(presets.keys()) + ["custom"])
+        from cortex.llm._presets import list_providers as _list_providers
+        return _list_providers()
 
     @classmethod
     def get_preset_info(cls, provider: str) -> dict[str, Any] | None:
         """Return preset config for a provider, or None if not found."""
-        return _load_presets().get(provider)
+        from cortex.llm._presets import get_preset_info as _get_preset_info
+        return _get_preset_info(provider)

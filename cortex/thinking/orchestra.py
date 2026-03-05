@@ -31,7 +31,8 @@ import os
 import time
 from typing import Any
 
-from cortex.llm.provider import LLMProvider, _load_presets
+from cortex.llm.provider import LLMProvider
+from cortex.llm._presets import load_presets
 from cortex.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.thinking.fusion import (
     FusedThought,
@@ -134,7 +135,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
     @staticmethod
     def _detect_available_providers() -> list[str]:
         """Detecta providers con API key configurada."""
-        presets = _load_presets()
+        presets = load_presets()
         return [
             name
             for name, preset in presets.items()
@@ -150,7 +151,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             except (OSError, ValueError, KeyError) as e:
                 logger.warning("Juez %s no disponible: %s", judge_name, e)
 
-        presets = _load_presets()
+        presets = load_presets()
         for fallback in ["openai", "anthropic", "gemini", "qwen", "deepseek"]:
             if fallback in available:
                 try:
@@ -166,7 +167,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         mode_key = ThinkingMode(mode) if isinstance(mode, str) else mode
         candidates = self._routing.get(mode_key, [])
 
-        presets = _load_presets()
+        presets = load_presets()
         resolved = []
         for provider_name, model in candidates:
             preset = presets.get(provider_name)
@@ -207,7 +208,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         except ValueError:
             candidates = []
 
-        presets = _load_presets()
+        presets = load_presets()
         for provider_name, model in candidates:
             if provider_name == primary_provider_name:
                 continue  # never add primary as its own fallback

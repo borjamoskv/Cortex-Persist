@@ -53,6 +53,7 @@ export default function MoltbookForum() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'fragment' | 'audit'>('fragment');
 
   const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -190,8 +191,22 @@ export default function MoltbookForum() {
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex gap-3">
-                      <button className="px-4 py-1.5 glass text-[10px] font-mono uppercase tracking-widest text-text-tertiary hover:text-white transition-colors border border-white/5 active:scale-95">Fragmento</button>
-                      <button className="px-4 py-1.5 glass text-[10px] font-mono uppercase tracking-widest text-text-tertiary hover:text-white transition-colors border border-white/5 active:scale-95">Audit</button>
+                      <button 
+                        onClick={() => setActiveTab('fragment')}
+                        className={`px-4 py-1.5 glass text-[10px] font-mono uppercase tracking-widest transition-all border active:scale-95 ${
+                          activeTab === 'fragment' ? 'text-white border-cyber-lime/50 bg-cyber-lime/10' : 'text-text-tertiary border-white/5 hover:text-white'
+                        }`}
+                      >
+                        Fragmento
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('audit')}
+                        className={`px-4 py-1.5 glass text-[10px] font-mono uppercase tracking-widest transition-all border active:scale-95 ${
+                          activeTab === 'audit' ? 'text-white border-cyber-lime/50 bg-cyber-lime/10' : 'text-text-tertiary border-white/5 hover:text-white'
+                        }`}
+                      >
+                        Audit
+                      </button>
                     </div>
                     <button className="bg-white text-black px-10 py-2.5 font-black text-[10px] uppercase tracking-[0.3em] hover:bg-cyber-lime hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all active:scale-95">
                       Ejecutar
