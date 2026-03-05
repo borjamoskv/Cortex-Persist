@@ -1,7 +1,7 @@
 import { Shield, Github, Menu, X, ArrowRight, Scale, MessageSquare } from 'lucide-react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useCallback, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   onBuy?: () => void;
@@ -9,17 +9,29 @@ interface NavbarProps {
 
 export function Navbar({ onBuy }: NavbarProps) {
   const { scrollY } = useScroll();
+  const location = useLocation();
   const yOffset = useTransform(scrollY, [0, 100], [0, 12]);
   const scale = useTransform(scrollY, [0, 100], [1, 0.98]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const scrollTo = useCallback((id: string) => {
     setMobileOpen(false);
+    // If not on home page, go home first with the hash
+    if (location.pathname !== '/') {
+      window.location.href = `/#${id}`;
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-  }, []);
+  }, [location.pathname]);
+
+  const activeLink = useMemo(() => {
+    if (location.pathname === '/foro') return 'moltbook';
+    if (location.pathname === '/audit') return 'audit';
+    return '';
+  }, [location.pathname]);
 
   return (
     <>
@@ -45,25 +57,51 @@ export function Navbar({ onBuy }: NavbarProps) {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-1.5 text-sm font-sans">
-              <button onClick={() => scrollTo('architecture')} className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest">
+              <button 
+                onClick={() => scrollTo('architecture')} 
+                className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest relative"
+              >
                 Architecture
               </button>
-              <button onClick={() => scrollTo('pricing')} className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest">
+              <button 
+                onClick={() => scrollTo('pricing')} 
+                className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest relative"
+              >
                 Pricing
               </button>
               <Link 
                 to="/foro" 
-                className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest flex items-center gap-2"
+                className={`px-4 py-2 transition-all rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link ${
+                  activeLink === 'moltbook' 
+                    ? 'text-cyber-lime bg-cyber-lime/10' 
+                    : 'text-text-secondary hover:text-white hover:bg-white/5'
+                }`}
               >
-                <MessageSquare className="w-3.5 h-3.5" />
+                <MessageSquare className={`w-3.5 h-3.5 ${activeLink === 'moltbook' ? 'text-cyber-lime' : ''}`} />
                 Moltbook
+                {activeLink === 'moltbook' && (
+                  <motion.div 
+                    layoutId="activeGlow"
+                    className="absolute inset-0 rounded-full border border-cyber-lime/30 shadow-[0_0_15px_rgba(204,255,0,0.2)] pointer-events-none" 
+                  />
+                )}
               </Link>
               <Link 
                 to="/audit" 
-                className="px-4 py-2 text-industrial-gold hover:text-white transition-colors rounded-full hover:bg-industrial-gold/10 font-mono text-[11px] uppercase tracking-widest flex items-center gap-2"
+                className={`px-4 py-2 transition-all rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link ${
+                  activeLink === 'audit' 
+                    ? 'text-industrial-gold bg-industrial-gold/10' 
+                    : 'text-text-secondary hover:text-white hover:bg-white/5'
+                }`}
               >
-                <Scale className="w-3.5 h-3.5" />
+                <Scale className={`w-3.5 h-3.5 ${activeLink === 'audit' ? 'text-industrial-gold' : ''}`} />
                 Compliance Audit
+                {activeLink === 'audit' && (
+                  <motion.div 
+                    layoutId="activeGlow"
+                    className="absolute inset-0 rounded-full border border-industrial-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)] pointer-events-none" 
+                  />
+                )}
               </Link>
 
               <div className="h-4 w-px bg-white/10 mx-2" />
@@ -79,7 +117,7 @@ export function Navbar({ onBuy }: NavbarProps) {
               </a>
 
               <button
-                onClick={onBuy ? onBuy : undefined}
+                onClick={onBuy}
                 className="ml-2 flex items-center gap-2 bg-cyber-lime text-black px-6 py-2 rounded-full transition-all border border-cyber-lime group relative overflow-hidden font-mono text-[11px] font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(204,255,0,0.4)]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
@@ -122,9 +160,21 @@ export function Navbar({ onBuy }: NavbarProps) {
             ))}
 
             <Link
+              to="/foro"
+              onClick={() => setMobileOpen(false)}
+              className={`text-4xl font-black font-sans uppercase tracking-tighter italic transition-colors ${
+                activeLink === 'moltbook' ? 'text-cyber-lime' : 'text-white hover:text-cyber-lime'
+              }`}
+            >
+              Moltbook
+            </Link>
+
+            <Link
               to="/audit"
               onClick={() => setMobileOpen(false)}
-              className="text-4xl font-black font-sans text-industrial-gold hover:text-white transition-colors uppercase tracking-tighter italic"
+              className={`text-4xl font-black font-sans uppercase tracking-tighter italic transition-colors ${
+                activeLink === 'audit' ? 'text-industrial-gold' : 'text-white hover:text-industrial-gold'
+              }`}
             >
               Compliance Audit
             </Link>

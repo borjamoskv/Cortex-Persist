@@ -37,7 +37,7 @@ from cortex.memory.working import WorkingMemoryL1
 from cortex.routes.notch_ws import notify_notch_pruning
 from cortex.sovereign.endocrine import DigitalEndocrine
 from cortex.telemetry.metrics import metrics
-from cortex.thinking.context_fusion import ContextFusion
+from cortex.thinking.fusion import ContextFusion
 
 try:
     from cortex.memory.semantic_ram import DynamicSemanticSpace
