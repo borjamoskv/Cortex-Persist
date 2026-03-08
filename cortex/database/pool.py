@@ -94,7 +94,7 @@ class CortexConnectionPool:
             await conn.load_extension(sqlite_vec.loadable_path())
             await conn.enable_load_extension(False)
         except (ImportError, OSError, AttributeError) as e:
-            logger.debug(f"sqlite-vec not available for connection: {e}")
+            logger.debug("sqlite-vec not available for connection: %s", e)
 
         return conn
 
