@@ -124,7 +124,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                                 return fact_id_int, meta, content, fact_type
                             except (ValueError, TypeError):
                                 logger.warning("Non-integer ID returned from vector store. Skipping dedup.")
-                except Exception as e:
+                except (RuntimeError, ValueError, TypeError, OSError) as e:
                     logger.debug("Semantic deduplication skipped due to internal error: %s", e)
         meta = self._apply_privacy_shield(content, project, meta)
         meta = run_security_guards(content, project, source, meta)
