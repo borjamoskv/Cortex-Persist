@@ -1,9 +1,12 @@
 🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
 
-# CORTEX — Trust Infrastructure for Autonomous AI
-
-> **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
-> *CORTEX is to AI memory what SSL/TLS is to web communications.*
+<div align="center">
+  <img src="./docs/assets/cortex_sovereign_hero_banner.png" alt="CORTEX Sovereign OS Header" width="100%">
+  
+  <h1>CORTEX <sub>v8.0</sub></h1>
+  <p><strong>Trust Infrastructure for Autonomous AI.<br>Zero-Trust. O(1) Cognitive Resolution. 100% Deterministic.</strong></p>
+  <p><em>CORTEX is to AI memory what SSL/TLS is to web communications.</em></p>
+</div>
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -35,6 +38,24 @@ The **EU AI Act (Article 12, enforced August 2026)** requires:
 
 **Fines: up to €30M or 6% of global revenue.**
 
+---
+
+## The 7 Axioms (Peano Soberano v3)
+
+CORTEX is governed by a strict philosophical and mechanical framework designed for sovereign operation:
+
+| Ω | Axiom | Invocation |
+|:---:|:---|:---|
+| **Ω₀** | Self-Reference | *"If I write it, I execute it"* |
+| **Ω₁** | Multi-Scale Causality | *"Wrong scale, not wrong place"* |
+| **Ω₂** | Entropic Asymmetry | *"Does it reduce or displace?"* |
+| **Ω₃** | Byzantine Default | *"I verify, then trust. Never reversed."* |
+| **Ω₄** | Aesthetic Integrity | *"Ugly = incomplete"* |
+| **Ω₅** | Antifragile by Default | *"What antibody does this failure forge?"* |
+| **Ω₆** | Zenón's Razor | *"Did the conclusion mutate? No → execute."* |
+
+---
+
 ## The Solution
 
 CORTEX doesn't replace your memory layer — it **certifies** it.
@@ -42,15 +63,15 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ```
 Your Memory Layer (Mem0 / Zep / Letta / Custom)
         ↓
-   CORTEX Trust Engine v7
+   CORTEX Trust Engine v8
         ├── 🧬 Biological Core (Autopoiesis/Endocrine)
-        ├── 🛡️ Zero-Trust Guards (Connection/Storage)
+        ├── 🛡️ Zero-Trust Guards (Immune Membrane Ω₃)
         ├── 🔗 SHA-256 hash-chained ledger
-        ├── Merkle tree checkpoints
-        ├── Reputation-weighted WBFT consensus
-        ├── Privacy Shield (11-pattern secret detection)
-        ├── AST Sandbox (safe LLM code execution)
-        └── EU AI Act compliance reports
+        ├── 🌳 Merkle tree checkpoints
+        ├── 🤝 Reputation-weighted WBFT consensus
+        ├── 🔐 Privacy Shield (11-pattern secret detection)
+        ├── 📐 AST Sandbox (structural LLM code analysis)
+        └── 📊 EU AI Act compliance reports
 ```
 
 ### Core Capabilities

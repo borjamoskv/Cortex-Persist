@@ -1,7 +1,9 @@
-.PHONY: help install dev test lint format build serve docs deploy clean bench
+.PHONY: help install dev test lint format build serve docs deploy clean bench audit sign
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "\033[38;2;204;255;0mCORTEX Sovereign OS — Operations Ledger\033[0m"
+	@echo "----------------------------------------"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[38;2;0;255;255m%-15s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install CORTEX
 	pip install -e .
@@ -49,6 +51,14 @@ clean: ## Clean build artifacts
 
 bench: ## Run benchmarks
 	python benchmarks/bench_search.py
+
+audit: ## Run Sovereign Security Audit (dependencies + known CVEs)
+	@echo "🛡️ Running deep dependency audit..."
+	uvx pip-audit
+
+sign: ## Generate deterministic signature of the primary configuration
+	@echo "🔐 Deriving SHA-256 Cryptographic Signature..."
+	@sha256sum pyproject.toml | cut -d' ' -f1
 
 docker: ## Build Docker image
 	docker build -t cortex:latest .

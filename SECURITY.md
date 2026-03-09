@@ -59,7 +59,16 @@ Every CI pipeline run scans the Docker image with **[Trivy](https://trivy.dev/)*
 
 CI runs **[pip-audit](https://github.com/pypa/pip-audit)** on every push to detect known vulnerabilities in Python dependencies. Any finding fails the build.
 
-## Threat Model
+## Threat Model (Byzantine Default Ω₃)
+
+CORTEX assumes a **Zero-Trust hostile environment** at all times.
+
+- The local SQLite database is protected by the host filesystem, but verifiable via SHA-256.
+- Network APIs require authentication (API keys or JWT).
+- Multi-tenant deployments enforce strict tenant isolation via `tenant_id` scoping.
+- **Untrusted plugins** execute in containerized sandboxes with no host network access.
+- **Supply chain attacks** are mitigated by Sigstore signing + pip-audit + Trivy.
+- **LLM Hallucinations & Injections** are blocked at the structural level by the Immune Membrane.
 
 CORTEX assumes:
 
