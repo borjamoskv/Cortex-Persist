@@ -1,4 +1,4 @@
-"""Tests for cortex.aether.task_queue — SQLite-backed task queue.
+"""Tests for cortex.aether.queue — SQLite-backed task queue.
 
 Uses tmp_path for isolated database per test. No network, no LLM.
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from cortex.aether.models import AgentTask, TaskStatus
-from cortex.aether.task_queue import TaskQueue
+from cortex.aether.queue import TaskQueue
 
 
 @pytest.fixture

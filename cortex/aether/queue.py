@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -54,7 +53,6 @@ class TaskQueue:
                 legacy_path.rename(db_path)
         self._db_path = Path(db_path)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._lock = threading.Lock()
         self._init_db()
 
     @contextmanager
@@ -104,34 +102,34 @@ class TaskQueue:
         return task
 
     def pop_next(self) -> AgentTask | None:
-        """Atomically grab the oldest pending task and mark it as planning.
+        """Atomically pop the oldest pending task and mark it as planning.
 
-        Returns None if no pending tasks exist.
+        Uses SQLite 3.35+ UPDATE ... RETURNING for true process-level O(1)
+        atomicity, bypassing the need for thread locks. Zero race conditions
+        even if multiple MOSKV-1 agents pull from the queue simultaneously.
         """
-        with self._lock:
-            with self._conn() as conn:
-                row = conn.execute(
-                    """
-                    SELECT * FROM agent_tasks
+        now = datetime.now(timezone.utc).isoformat()
+
+        with self._conn() as conn:
+            row = conn.execute(
+                """
+                UPDATE agent_tasks
+                SET status = ?, updated_at = ?
+                WHERE id = (
+                    SELECT id FROM agent_tasks
                     WHERE status = 'pending'
-                    ORDER BY id ASC
+                    ORDER BY created_at ASC
                     LIMIT 1
-                    """
-                ).fetchone()
-
-                if not row:
-                    return None
-
-                now = datetime.now(timezone.utc).isoformat()
-                conn.execute(
-                    "UPDATE agent_tasks SET status = ?, updated_at = ? WHERE id = ?",
-                    (TaskStatus.PLANNING, now, row["id"]),
                 )
+                RETURNING *
+                """,
+                (TaskStatus.PLANNING, now),
+            ).fetchone()
 
-                task = AgentTask.from_dict(dict(row))
-                task.status = TaskStatus.PLANNING
-                task.updated_at = now
-                return task
+            if not row:
+                return None
+
+            return AgentTask.from_dict(dict(row))
 
     def update(self, task_id: str, **fields) -> None:
         """Update arbitrary fields on a task."""
