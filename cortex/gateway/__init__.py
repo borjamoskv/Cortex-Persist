@@ -198,6 +198,18 @@ class GatewayRouter:
                 exc,
                 exc_info=True,
             )
+            # Ω₅: Auto-persist error as ghost for Josu/Aether processing
+            try:
+                from cortex.immune.error_boundary import ErrorBoundary
+                boundary = ErrorBoundary(
+                    f"gateway.{request.intent.value}",
+                    project=request.project or "CORTEX",
+                    reraise=False,
+                    extra_meta={"request_id": request.request_id, "source": request.source},
+                )
+                await boundary._persist(exc)
+            except Exception:
+                pass  # boundary persistence must never break the gateway
             return GatewayResponse(
                 ok=False,
                 error=str(exc),
