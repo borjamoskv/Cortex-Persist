@@ -142,17 +142,21 @@ class SovereignReporter:
                         last_version = current_version
                         yield await self.collect_metrics()
         except asyncio.CancelledError:
-            pass
+            raise
         except Exception as e:
             logger.error("Error in stream_metrics: %s", e)
 
     async def export_json(self, output_path: str):
         """Export status to a JSON file for frontend consumption."""
         status = await self.collect_metrics()
-        # Rest of export code...
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, "w") as f:
-            json.dump(asdict(status), f, indent=2)
+        data = asdict(status)
+
+        def _write() -> None:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+
+        await asyncio.to_thread(_write)
         logger.info("Dynamic documentation exported to %s", output_path)
 
     async def generate_markdown_report(self) -> str:
