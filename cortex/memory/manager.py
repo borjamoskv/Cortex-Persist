@@ -302,7 +302,7 @@ class CortexMemoryManager:
         if matched_schema:
             content = self._schema_engine.apply_encoding_schema(matched_schema, content)
             _meta["active_schema"] = matched_schema.name
-            logger.debug(f"Applied Schema '{matched_schema.name}' to Fact Encoding")
+            logger.debug("Applied Schema '%s' to Fact Encoding", matched_schema.name)
 
         # 1. Encode Content for Resonance Verification
         vector = await self._encoder.encode(content)

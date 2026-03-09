@@ -179,6 +179,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("security", "cortex.cli.security_cmds", "security_cli", "Security audit commands."),
     ("sovereign", "cortex.cli.keter_cmds", "sovereign_cmds", "Sovereign engine control."),
     ("mcp", "cortex.cli.mcp_cmds", "mcp_cmds", "Model Context Protocol tools."),
+    ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

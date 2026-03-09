@@ -26,7 +26,7 @@ class EvolutionaryFalsifier:
         Attempts to falsify a theory (a function) by mutating its inputs
         until it breaks. If it survives, it is temporarily considered true.
         """
-        logger.info(f"Initiating falsification protocol on {target_func.__name__}")
+        logger.info("Initiating falsification protocol on %s", target_func.__name__)
 
         mutations = self._generate_mutations(seed_inputs)
         failures = 0
@@ -42,10 +42,10 @@ class EvolutionaryFalsifier:
                 self._capture_autopsy(target_func.__name__, mutant, e)
 
                 if failures >= self.failure_tolerance:
-                    logger.critical(f"Target {target_func.__name__} Falsified (Collapsed).")
+                    logger.critical("Target %s Falsified (Collapsed).", target_func.__name__)
                     return False
 
-        logger.info(f"Target {target_func.__name__} survived falsification. Immunity verified.")
+        logger.info("Target %s survived falsification. Immunity verified.", target_func.__name__)
         return True
 
     def _generate_mutations(self, base_inputs: dict[str, Any]) -> list[dict[str, Any]]:
@@ -98,7 +98,7 @@ class EvolutionaryFalsifier:
         }
         self._autopsies.append(autopsy)
         logger.warning(
-            f"Autopsy captured: {autopsy['collapse_type']} -> {autopsy['collapse_trace']}"
+            "Autopsy captured: %s -> %s", autopsy['collapse_type'], autopsy['collapse_trace']
         )
 
     def get_antibodies(self) -> list[dict[str, Any]]:

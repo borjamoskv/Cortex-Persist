@@ -13,7 +13,7 @@ TARGET_PROJECTS = ["cortex", "Cortex"]
 
 def collapse_namespaces():
     if not DB_PATH.exists():
-        logger.error(f"Base de datos no encontrada en {DB_PATH}")
+        logger.error("Base de datos no encontrada en %s", DB_PATH)
         return
 
     conn = sqlite3.connect(str(DB_PATH))
@@ -32,13 +32,13 @@ def collapse_namespaces():
     modified_rows = 0
 
     try:
-        logger.info(f"🚀 Iniciando colapso de namespaces {TARGET_PROJECTS} -> {CANONICAL_PROJECT}")
+        logger.info("🚀 Iniciando colapso de namespaces %s -> %s", TARGET_PROJECTS, CANONICAL_PROJECT)
 
         for table in tables_to_update:
             # Verificar si la tabla existe
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
             if not cursor.fetchone():
-                logger.warning(f"  ⚠️ Tabla '{table}' no existe, omitiendo.")
+                logger.warning("  ⚠️ Tabla '%s' no existe, omitiendo.", table)
                 continue
 
             for target in TARGET_PROJECTS:
@@ -48,7 +48,7 @@ def collapse_namespaces():
                 rows = cursor.rowcount
                 if rows > 0:
                     logger.info(
-                        f"  ✅ {table}: {rows} filas migradas ({target} -> {CANONICAL_PROJECT})"
+                        "  ✅ %s: %s filas migradas (%s -> %s)", table, rows, target, CANONICAL_PROJECT
                     )
                     modified_rows += rows
 
@@ -73,15 +73,15 @@ def collapse_namespaces():
                         )
                     except sqlite3.Error:
                         logger.warning(
-                            f"  ⚠️ No se pudo actualizar {fts_table} directamente (esperado en FTS)."
+                            "  ⚠️ No se pudo actualizar %s directamente (esperado en FTS).", fts_table
                         )
 
         conn.commit()
-        logger.info(f"✨ Colapso completado. {modified_rows} filas afectadas.")
+        logger.info("✨ Colapso completado. %s filas afectadas.", modified_rows)
 
     except sqlite3.Error as e:
         conn.rollback()
-        logger.error(f"❌ Error durante la migración: {e}")
+        logger.error("❌ Error durante la migración: %s", e)
     finally:
         conn.close()
 

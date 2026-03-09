@@ -110,8 +110,7 @@ class ImmutableVoteLedger:
                 await conn.commit()
 
             logger.info(
-                f"Voto inmutable sellado: Fact {fact_id} | Agent {agent_id} | Hash {entry_hash[:8]}..."
-            )
+                "Voto inmutable sellado: Fact %s | Agent %s | Hash %s...", fact_id, agent_id, entry_hash[:8])
             await self._maybe_create_checkpoint(conn)
 
             return VoteEntry(
@@ -128,7 +127,7 @@ class ImmutableVoteLedger:
         except (sqlite3.Error, OSError) as e:
             if should_commit:
                 await conn.rollback()
-            logger.error(f"Fallo al registrar voto inmutable: {e}")
+            logger.error("Fallo al registrar voto inmutable: %s", e)
             raise
         finally:
             await self._release_conn(conn)
@@ -239,7 +238,7 @@ class ImmutableVoteLedger:
             (start_id, end_id, root_hash, len(hashes), ts),
         )
 
-        logger.info(f"Punto de control Merkle creado: {start_id}-{end_id} -> {root_hash}")
+        logger.info("Punto de control Merkle creado: %s-%s -> %s", start_id, end_id, root_hash)
         return root_hash
 
     async def verify_merkle_roots(self) -> list[dict[str, Any]]:

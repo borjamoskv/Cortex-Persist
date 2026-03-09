@@ -46,7 +46,7 @@ class ImmuneMembrane:
 
     async def intercept(self, intent: Any, context: dict[str, Any]) -> TriageReport:
         """Evaluate a proposed intent against all immunological filters in parallel."""
-        logger.info(f"Intercepting intent: {intent}")
+        logger.info("Intercepting intent: %s", intent)
 
         # Parallel evaluation via asyncio.gather
         tasks = [f.evaluate(intent, context) for f in self._filters]
@@ -55,7 +55,7 @@ class ImmuneMembrane:
         filter_results: list[FilterResult] = []
         for res in results:
             if isinstance(res, Exception):
-                logger.error(f"Filter failure: {res}")
+                logger.error("Filter failure: %s", res)
                 # Failure counts as BLOCK to be safe
                 filter_results.append(
                     FilterResult(
@@ -113,5 +113,5 @@ class ImmuneMembrane:
             cortex_persistence=final_verdict != Verdict.PASS,
         )
 
-        logger.info(f"Triage complete: {final_verdict.value} (Score: {total_score:.1f})")
+        logger.info("Triage complete: %s (Score: %.1f)", final_verdict.value, total_score)
         return report

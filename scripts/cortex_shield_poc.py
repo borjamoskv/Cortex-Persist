@@ -19,12 +19,12 @@ class MockMem0:
 
     def delete(self, memory_id):
         # Simula el comportamiento erróneo reportado en mem0 #3245
-        logger.info(f"SIMULANDO MEM0 NATIVO: Deleting {memory_id} from Vector Store...")
+        logger.info("SIMULANDO MEM0 NATIVO: Deleting %s from Vector Store...", memory_id)
         if memory_id in self.vector_store:
             del self.vector_store[memory_id]
             self.history.append({"id": memory_id, "action": "DELETE", "timestamp": time.time()})
             # ❌ FALLO: No borra del grafo (Neo4j)
-            logger.warning(f"⚠️ BUG #3245 DETECTADO: {memory_id} persiste en Graph Store!")
+            logger.warning("⚠️ BUG #3245 DETECTADO: %s persiste en Graph Store!", memory_id)
             return True
         return False
 
@@ -45,24 +45,24 @@ class CortexShield:
             "timestamp": time.time(),
         }
         self.ledger.append(fact)
-        logger.info(f"FACT STORED: [{fact_type}] - {content}")
+        logger.info("FACT STORED: [%s] - %s", fact_type, content)
 
     def delete_with_integrity(self, memory_id):
         """
         Garantiza Integridad Referencial Cognitiva (Atomic Deletion).
         Axioma: Un hecho no puede estar parcialmente muerto.
         """
-        logger.info(f"CORTEX-SHIELD: Atomatizing deletion for {memory_id}")
+        logger.info("CORTEX-SHIELD: Atomatizing deletion for %s", memory_id)
 
         # 1. Auditoría Pre-colapso (D1: Percepción)
         if memory_id not in self.mem0.graph_store and memory_id not in self.mem0.vector_store:
-            logger.error(f"Integrity Error: {memory_id} not found in any store.")
+            logger.error("Integrity Error: %s not found in any store.", memory_id)
             return False
 
         # 2. Cleanup del Grafo PRIMERO (D4: Validación)
         # En una implementación real, aquí haríamos el MATCH (n) DETACH DELETE
         if memory_id in self.mem0.graph_store:
-            logger.info(f"SHIELD PROTECT: Detaching relationships in Neo4j for {memory_id}")
+            logger.info("SHIELD PROTECT: Detaching relationships in Neo4j for %s", memory_id)
             del self.mem0.graph_store[memory_id]
 
         # 3. Delegar al motor subyacente (D3: Creación)

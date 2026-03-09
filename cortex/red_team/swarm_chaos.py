@@ -29,7 +29,7 @@ class RedTeamSwarm:
         """
         Injects a failure into a target function and captures the antibody if it collapses.
         """
-        logger.info(f"Red Team Swarm: Targeting {target_service}.{target_func.__name__}")
+        logger.info("Red Team Swarm: Targeting %s.%s", target_service, target_func.__name__)
 
         # Perform falsification (adversarial mutation)
         survived = self.falsifier.falsify_target(target_func, seed_inputs)
@@ -51,12 +51,12 @@ class RedTeamSwarm:
                 reason = f"Collapse detected in {target_service} via {latest['collapse_type']}"
 
                 logger.critical(
-                    f"Red Team Swarm: Falsification SUCCESS for {target_func.__name__}. Generating antibody."
+                    "Red Team Swarm: Falsification SUCCESS for %s. Generating antibody.", target_func.__name__
                 )
                 NemesisProtocol.append_antibody(pattern, reason)
                 return True
 
-        logger.info(f"Red Team Swarm: {target_func.__name__} survived chaos injection.")
+        logger.info("Red Team Swarm: %s survived chaos injection.", target_func.__name__)
         return False
 
     async def chaos_loop(self, interval_seconds: int = 3600):

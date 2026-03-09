@@ -78,7 +78,7 @@ async def sync_fact_to_repo(
         return True
 
     except (OSError, ValueError, KeyError) as e:
-        logger.error(f"Failed to sync GitOps memory for {project}: {e}")
+        logger.error("Failed to sync GitOps memory for %s: %s", project, e)
         return False
 
 
@@ -125,7 +125,7 @@ async def export_gitops_memory(engine, project: str) -> bool:
     """Regenera la carpeta .cortex/ y los archivos knowledge.json y context-snapshot.md desde SQLite."""
     repo_path = _locate_repo_root(project)
     if not repo_path:
-        logger.error(f"Cannot export: project directory not found for {project}")
+        logger.error("Cannot export: project directory not found for %s", project)
         return False
 
     cortex_dir = _get_cortex_dir(repo_path)
@@ -150,5 +150,5 @@ async def export_gitops_memory(engine, project: str) -> bool:
         _render_snapshot(cortex_dir, facts_list, project)
         return True
     except (OSError, ValueError, KeyError) as e:
-        logger.error(f"Export fell down: {e}")
+        logger.error("Export fell down: %s", e)
         return False

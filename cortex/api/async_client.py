@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 
 from cortex.api.client import CortexError, Fact
+from cortex.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["AsyncCortexClient"]
 
@@ -48,6 +49,7 @@ class AsyncCortexClient:
         )
         # Límite estricto para escalar a 1k rpm sin timeout
         self._semaphore = asyncio.Semaphore(100)
+        self.chaos_gate = ChaosGate(name=f"api_client:{self.base_url}")
 
     def _headers(self) -> dict[str, str]:
         h = {"Content-Type": "application/json"}
@@ -63,7 +65,14 @@ class AsyncCortexClient:
         for attempt in range(max_retries):
             try:
                 async with self._semaphore:
-                    resp = await self._client.request(method, path, **kwargs)
+                    # Chaos Interceptor Logic-Bomb
+                    resp = await async_interceptor(
+                        self.chaos_gate,
+                        self._client.request,
+                        method,
+                        path,
+                        **kwargs,
+                    )
 
                 if resp.status_code >= 500:
                     # Server error, maybe retry

@@ -45,18 +45,18 @@ class FrontierDaemon:
 
             test_file = target_path / "daemon/core.py"
             if test_file.exists():
-                logger.info(f"[FRONTIER] Metabolizing {test_file.name}...")
+                logger.info("[FRONTIER] Metabolizing %s...", test_file.name)
                 engine = OuroborosOmega(str(test_file), dry_run=not self.allow_commits)
                 result = await engine.execute_atomic_cycle()
 
                 status = result.get("status", "UNKNOWN")
-                logger.info(f"[FRONTIER] Metabolism result: {status}")
+                logger.info("[FRONTIER] Metabolism result: %s", status)
 
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
                     self._log_evolution("metabolism", msg)
         except Exception as e:
-            logger.error(f"[FRONTIER] Metabolism cycle failed: {e}")
+            logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
     async def _run_ingestion(self):
         """Ingests new intelligence to forge skills."""
@@ -67,7 +67,7 @@ class FrontierDaemon:
         ]
 
         for source in sources:
-            logger.info(f"[FRONTIER] Analyzing source: {source}")
+            logger.info("[FRONTIER] Analyzing source: %s", source)
             msg = f"Analyzed {source} for potential skill emancipation."
             self._log_evolution("ingestion", msg)
 
@@ -83,9 +83,9 @@ class FrontierDaemon:
                 (f"[{type.upper()}] {content}", time.time())
             )
             conn.commit()
-            logger.info(f"[FRONTIER] Evolution event logged to CORTEX: {type}")
+            logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
         except Exception as e:
-            logger.error(f"[FRONTIER] Failed to log evolution: {e}")
+            logger.error("[FRONTIER] Failed to log evolution: %s", e)
 
     async def run_loop(self):
         """Main Frontier loop."""

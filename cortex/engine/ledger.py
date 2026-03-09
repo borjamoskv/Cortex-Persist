@@ -288,7 +288,7 @@ class ImmutableLedger:
             status = "ok" if not violations else "violation"
 
             if violations:
-                logger.error(f"Integrity check failed: {len(violations)} violations found")
+                logger.error("Integrity check failed: %s violations found", len(violations))
 
             # Record check
             await conn.execute(  # type: ignore[reportAttributeAccessIssue]

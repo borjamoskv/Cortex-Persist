@@ -13,6 +13,7 @@ import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from cortex.immune.chaos import ChaosGate, async_interceptor
 import aiosqlite
 
 __all__ = ["CortexConnectionPool"]
@@ -46,6 +47,7 @@ class CortexConnectionPool:
         self.max_idle_time = max_idle_time
         self.read_only = read_only
 
+        self.chaos_gate = ChaosGate(name=f"sqlite_pool:{self.db_path}")
         self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue()
         self._active_count = 0
         self._lock = asyncio.Lock()
@@ -151,12 +153,15 @@ class CortexConnectionPool:
         return new_conn
 
     async def _is_healthy(self, conn: aiosqlite.Connection) -> bool:
-        """Check if connection is alive."""
-        try:
+        """Check if connection is alive. Logic-bombed by chaos_gate."""
+        async def _check():
             async with conn.execute("SELECT 1") as cursor:
                 await cursor.fetchone()
             return True
-        except (sqlite3.Error, OSError):
+
+        try:
+            return await async_interceptor(self.chaos_gate, _check)
+        except (sqlite3.Error, OSError, ConnectionError, TimeoutError):
             return False
 
     async def _close_conn(self, conn: aiosqlite.Connection) -> None:

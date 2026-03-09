@@ -72,7 +72,7 @@ class ByzantineAuthLayer:
         logger.error("🛑 [AXIOM 3] HALT. Destructive intent '%s' requires human verification.", intent)
         logger.error("   Review and modify status to 'APPROVED' in: %s", challenge_path)
         
-        # Simulate an async wait loop for the user to approve it via Jules/CLI
+        # Simulate an async wait loop for the user to approve it via Aether/CLI
         for _ in range(30):  # Wait up to 5 minutes (30 * 10s)
             await asyncio.sleep(10.0)
             if not challenge_path.exists():

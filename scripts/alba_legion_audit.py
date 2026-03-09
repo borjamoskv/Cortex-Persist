@@ -24,7 +24,7 @@ async def run_alba_audit(repo_paths: list[Path]):
     reports = []
 
     for repo in repo_paths:
-        logger.info(f"🔎 Analizando repositorio: {repo.name}")
+        logger.info("🔎 Analizando repositorio: %s", repo.name)
         # En un escenario real, aquí iteraríamos por los archivos relevantes del repo
         # Para el piloto de ALBA, nos enfocamos en el scoring engine y risk models.
         
@@ -43,7 +43,7 @@ async def run_alba_audit(repo_paths: list[Path]):
         })
         total_findings += len(result["findings"])
 
-    logger.info(f"✅ Auditoría completada. Hallazgos totales: {total_findings}")
+    logger.info("✅ Auditoría completada. Hallazgos totales: %s", total_findings)
     return reports
 
 if __name__ == "__main__":

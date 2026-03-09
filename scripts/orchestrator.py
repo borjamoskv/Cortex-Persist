@@ -25,7 +25,7 @@ logger = logging.getLogger("orchestrator")
 
 def main():
     logger.info("🐉 INITIALIZING GOD MODE ORCHESTRATOR [520 AGENTS]")
-    logger.info(f"Connecting to Cortex: {DEFAULT_DB_PATH}")
+    logger.info("Connecting to Cortex: %s", DEFAULT_DB_PATH)
 
     db_path = str(DEFAULT_DB_PATH)
 
@@ -33,7 +33,7 @@ def main():
 
     try:
         while True:
-            logger.info(f"\n🌀 STARTING WAVE {iteration} (TURBO MODE)")
+            logger.info("\n🌀 STARTING WAVE %s (TURBO MODE)", iteration)
 
             # Re-instantiate engine per loop to ensure fresh connection/avoid locks
             engine = CortexEngine(db_path=db_path)
@@ -48,7 +48,7 @@ def main():
             )
 
             try:
-                logger.info(f"Launching Swarm Wave {iteration} with 520 agents...")
+                logger.info("Launching Swarm Wave %s with 520 agents...", iteration)
                 result = orchestrator.launch(
                     project="cortex",
                     goal=mission_goal,
@@ -58,20 +58,20 @@ def main():
                 )
 
                 status = result.get("status")
-                logger.info(f"Wave {iteration} Complete. Status: {status}")
+                logger.info("Wave %s Complete. Status: %s", iteration, status)
 
                 if status == "success":
-                    logger.info(f"Result ID: {result.get('result_id')}")
+                    logger.info("Result ID: %s", result.get('result_id'))
                     # In Turbo mode, we don't wait long.
                     logger.info("Cooling down for 2s (Turbo)...")
                     time.sleep(2)
                 else:
-                    logger.warning(f"Wave failed. Error: {result.get('error')}")
+                    logger.warning("Wave failed. Error: %s", result.get('error'))
                     logger.info("Retrying in 5s...")
                     time.sleep(5)
 
             except Exception as e:
-                logger.error(f"Orchestration error: {e}")
+                logger.error("Orchestration error: %s", e)
                 time.sleep(10)
             finally:
                 engine.close()

@@ -102,11 +102,11 @@ class CortexSecureMemoryCache:
             self._persist_to_storage(key, data, audit_entry)
 
         except Exception as e:
-            logger.error(f"🚨 [INTEGRITY BREACH] Secure eviction failed for {key}: {e}")
+            logger.error("🚨 [INTEGRITY BREACH] Secure eviction failed for %s: %s", key, e)
 
     def _persist_to_storage(self, key: str, data: dict[str, Any], audit: dict[str, Any]) -> None:
         """Commit data and decisional proof to persistent storage."""
-        logger.info(f"🛡️ [SOVEREIGN CACHE] Evicting {key} | Proof: {audit['current_proof'][:16]}...")
+        logger.info("🛡️ [SOVEREIGN CACHE] Evicting %s | Proof: %s...", key, audit['current_proof'][:8])
 
         if self.persistence_callback:
             self.persistence_callback(key, data, audit)

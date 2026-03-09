@@ -488,10 +488,10 @@ class HTTPClient:
                 elif resp.status_code in (301, 302, 403, 404, 410):
                     return None
             except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError) as exc:
-                log.debug(f"[{attempt + 1}/{self._max_retries}] {url}: {exc}")
+                log.debug("[%s/%s] %s: %s", attempt + 1, self._max_retries, url, exc)
                 await asyncio.sleep(2**attempt)
             except Exception as exc:
-                log.debug(f"Unexpected: {exc}")
+                log.debug("Unexpected: %s", exc)
                 break
 
         return None
@@ -621,7 +621,7 @@ class CompanyCrawler:
                 if email not in found or (is_legal and not found[email][2]):
                     found[email] = (page_url, best_legal_data.copy(), is_legal)
                     log.debug(
-                        f"    [+] {email} ({'LEGAL' if is_legal else 'GENERIC'}) ← {page_url}"
+                        "    [+] %s (%s) ← %s", email, 'LEGAL' if is_legal else 'GENERIC', page_url
                     )
 
             # Optimization: If we have a quality lead from a legal source WITH legal ID, we might stop early
@@ -653,7 +653,7 @@ async def serpapi_search(
             f"&api_key={api_key}"
             f"&engine=google"
         )
-        log.info(f"🔑 SerpAPI page {page_num + 1}: {query}")
+        log.info("🔑 SerpAPI page %s: %s", page_num + 1, query)
 
         assert client
         html = await client.get(url)
@@ -670,7 +670,7 @@ async def serpapi_search(
         except json.JSONDecodeError:
             log.warning("SerpAPI: Invalid JSON response")
 
-    log.info(f"  → SerpAPI: {len(results)} URLs")
+    log.info("  → SerpAPI: %s URLs", len(results))
     return results
 
 
@@ -736,7 +736,7 @@ async def _process_serpapi_mode(args, http) -> list[dict]:
 async def _process_hunter_mode(args, http) -> list[CompanyLead]:
     if not (args.hunter and args.domain):
         return []
-    log.info(f"🎯 Hunter.io: {args.domain}")
+    log.info("🎯 Hunter.io: %s", args.domain)
     return await hunter_domain_search(args.domain, args.hunter, http)
 
 
@@ -746,7 +746,7 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
 
     # SORTING: Prioritize high-ROI EU domains (.de, .es, .fr, etc.)
     domains.sort(key=lambda d: not any(d.endswith(t) for t in TLD_PRIORITY_SLUGS))
-    log.info(f"⛏️  Mining {len(domains)} domains (Prioritizing EU Legal Pages)...")
+    log.info("⛏️  Mining %s domains (Prioritizing EU Legal Pages)...", len(domains))
 
     results_leads: list[CompanyLead] = []
     sem = asyncio.Semaphore(10)  # Sovereign Throughput
@@ -791,7 +791,7 @@ async def _process_domain_mining(args, crawler, domains) -> list[CompanyLead]:
                     for email, page_found, legal, is_legal_source in pairs
                 ]
             except Exception as e:
-                log.debug(f"Mining error {domain}: {e}")
+                log.debug("Mining error %s: %s", domain, e)
                 return []
 
     # Parallel Execution Pattern (Ω₁)
@@ -819,7 +819,7 @@ async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead
         "amazon.com",
     }
     filtered = [r for r in company_urls if not any(skip in r.get("url", "") for skip in SKIP)]
-    log.info(f"🌐 Crawling {len(filtered)} curated company sites...")
+    log.info("🌐 Crawling %s curated company sites...", len(filtered))
 
     leads = []
     for company in filtered:
@@ -852,7 +852,7 @@ async def _process_url_crawling(args, crawler, company_urls) -> list[CompanyLead
                 lead.priority_score = score_lead(lead)
                 leads.append(lead)
         except Exception as exc:
-            log.debug(f"Crawl error {url}: {exc}")
+            log.debug("Crawl error %s: %s", url, exc)
     return leads
 
 
@@ -914,7 +914,7 @@ def save_csv(leads: list[CompanyLead], path: Path) -> None:
         writer.writeheader()
         for lead in leads:
             writer.writerow(lead.to_dict())
-    log.info(f"💾 CSV → {path} ({len(leads)} rows)")
+    log.info("💾 CSV → %s (%s rows)", path, len(leads))
 
 
 def print_table(leads: list[CompanyLead], max_rows: int = 50) -> None:
@@ -1105,7 +1105,7 @@ async def main() -> None:
             json.dumps([lead.to_dict() for lead in leads], indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
-        log.info(f"💾 JSON → {jp}")
+        log.info("💾 JSON → %s", jp)
 
     print(f"  ⏱️  {elapsed:.1f}s | 📧 {len(leads)} unique emails\n")
 

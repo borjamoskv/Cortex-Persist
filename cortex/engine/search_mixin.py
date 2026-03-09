@@ -74,7 +74,7 @@ class SearchMixin(EngineMixinBase):
                 return results
 
             except (sqlite3.Error, OSError, RuntimeError) as e:
-                logger.exception(f"Hybrid Graph-RAG search failed: {e}")
+                logger.exception("Hybrid Graph-RAG search failed: %s", e)
                 # Ultimate fallback to basic text search
                 return await text_search(
                     conn,
