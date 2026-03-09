@@ -67,7 +67,7 @@ class IntentAlchemist(SovereignPhase):
         if len(intent) < 5:
             logger.warning("⚠️ [KETER] Intent density too low. Escalating analysis...")
 
-        logger.info(f"🔮 [KETER] Alquimia de intencion: '{intent}' -> Spec 130/100")
+        logger.info("🔮 [KETER] Alquimia de intencion: '%s' -> Spec 130/100", intent)
         payload["spec_130_100"] = f"SOVEREIGN_SPEC_v5:{intent.upper()}"
         return payload
 
@@ -399,7 +399,7 @@ class KeterEngine:
             self._reservoir.set(mission_id, payload)
             logger.info("🌌 [KETER] Ecosistema tejido. Friccion cero.")
         except CortexError as e:
-            logger.error(f"🔥 [KETER] Colapso de singularidad: {e}")
+            logger.error("🔥 [KETER] Colapso de singularidad: %s", e)
             raise
         except (RuntimeError, OSError, TypeError, ValueError) as e:
             logger.critical("💀 [KETER] Error fatal no controlado: %s", e)

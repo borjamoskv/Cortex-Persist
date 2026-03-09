@@ -79,7 +79,7 @@ class ZenonDetector:
         """
         self.history.append(iteration)
         logger.debug(
-            f"[ZENÓN-1] Iteración {iteration.iteration_id} absorbida. V={iteration.value_produced:.4f}, C={iteration.computational_cost:.4f}, S={iteration.entropy_score:.4f}"
+            "[ZENÓN-1] Iteración %s absorbida. V=%.4f, C=%.4f, S=%.4f", iteration.iteration_id, iteration.value_produced, iteration.computational_cost, iteration.entropy_score
         )
 
         # Necesitamos algo de historia para derivar el ΔV
@@ -99,7 +99,7 @@ class ZenonDetector:
             # Si todas las iteraciones recientes tuvieron una mejora marginal insignificante
             if all(d_v < self.epsilon for d_v in recent_deltas):
                 logger.warning(
-                    f"[ZENÓN-1] ALERTA S1: Convergencia de V detectada. ΔV {recent_deltas[-1]:.4f} < {self.epsilon}."
+                    "[ZENÓN-1] ALERTA S1: Convergencia de V detectada. ΔV %.4f < %s.", recent_deltas[-1], self.epsilon
                 )
                 return ZenoExhaustionException(
                     signal=ZenonSignal.D_VALUE_CONVERGENCE,
@@ -115,7 +115,7 @@ class ZenonDetector:
         # Gastar más energía evaluando que el valor resultante derivado
         if iteration.zeno_ratio > 1.0:
             logger.warning(
-                f"[ZENÓN-1] ALERTA S2: Coste computacional supera el valor semántico. Ratio Z = {iteration.zeno_ratio:.2f}."
+                "[ZENÓN-1] ALERTA S2: Coste computacional supera el valor semántico. Ratio Z = %.2f.", iteration.zeno_ratio
             )
             # Se permite 1 anomalía, pero si la decadencia es estricta, colapsa
             return ZenoExhaustionException(
@@ -172,7 +172,7 @@ class ZenonColapseEngine:
         # FASE 2: SELECT -> Buscar qué iteración maximizó el Valor Absoluto asumiendo ratios estables.
         best_candidate = max(k_history, key=lambda x: (x.value_produced, -x.entropy_score))
         logger.info(
-            f"[ZENÓN-1 Colapse] FASE 2: SELECT completada. Seleccionada iteración {best_candidate.iteration_id}."
+            "[ZENÓN-1 Colapse] FASE 2: SELECT completada. Seleccionada iteración %s.", best_candidate.iteration_id
         )
 
         # FASE 3: EXECUTE / LEARN se devuelven al Orquestador Principal o Motor Legión

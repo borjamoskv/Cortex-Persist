@@ -50,19 +50,19 @@ async def raid_post(post_id: str, profile: dict[str, str], uid: str, post_data: 
 
     # 1. Register identity
     mb_client = MoltbookClient(api_key="dummy") 
-    logger.info(f"[{agent_name}] Infiltrando Moltbook...")
+    logger.info("[%s] Infiltrando Moltbook...", agent_name)
     
     try:
         reg_result = await mb_client.register(name=agent_name, description=agent_desc)
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla en registro: {e}")
+        logger.error("[%s] Falla en registro: %s", agent_name, e)
         return
 
     agent_data = reg_result.get("agent", {})
     api_key = agent_data.get("api_key")
     
     if not api_key:
-        logger.error(f"[{agent_name}] Abortando, no hay API key.")
+        logger.error("[%s] Abortando, no hay API key.", agent_name)
         return
 
     mb_client = MoltbookClient(api_key=api_key)
@@ -76,7 +76,7 @@ async def raid_post(post_id: str, profile: dict[str, str], uid: str, post_data: 
     )
 
     # 3. Think via Grok 4.1
-    logger.info(f"[{agent_name}] Deep Think en proceso (Grok 4.1)...")
+    logger.info("[%s] Deep Think en proceso (Grok 4.1)...", agent_name)
     llm = LLMProvider(provider="xai")
     
     try:
@@ -87,45 +87,45 @@ async def raid_post(post_id: str, profile: dict[str, str], uid: str, post_data: 
             intent=IntentProfile.REASONING
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Error conectando a XAI (Grok): {e}")
+        logger.error("[%s] Error conectando a XAI (Grok): %s", agent_name, e)
         await llm.close()
         return
         
-    logger.info(f"[{agent_name}] Output generado ({len(content)} chars).")
+    logger.info("[%s] Output generado (%s chars).", agent_name, len(content))
 
     # 4. Action (Comment on Post)
-    logger.info(f"[{agent_name}] Asestando golpe cognitivo (Comment)...")
+    logger.info("[%s] Asestando golpe cognitivo (Comment)...", agent_name)
     try:
         comment_result = await mb_client.create_comment(
             post_id=post_id,
             content=content
         )
         comment_id = comment_result.get("comment", {}).get("id", "UNKNOWN")
-        logger.info(f"[{agent_name}] ✅ MISIÓN COMPLETADA | Comment ID: {comment_id}")
+        logger.info("[%s] ✅ MISIÓN COMPLETADA | Comment ID: %s", agent_name, comment_id)
     except Exception as e:
-        logger.error(f"[{agent_name}] Error comentando en Moltbook: {e}")
+        logger.error("[%s] Error comentando en Moltbook: %s", agent_name, e)
     finally:
         await llm.close()
         await mb_client.close()
 
 
 async def execute_raid(post_id: str) -> None:
-    logger.info(f"Iniciando asedio GROK-RAID sobre Post ID: {post_id}...")
+    logger.info("Iniciando asedio GROK-RAID sobre Post ID: %s...", post_id)
     
     # Pre-fetch post data
     mb_client = MoltbookClient()
     try:
         post_obj = await mb_client.get_post(post_id)
         post_data = post_obj.get("post", {})
-        logger.info(f"Target adquirido: '{post_data.get('title')}'")
+        logger.info("Target adquirido: '%s'", post_data.get('title'))
     except Exception as e:
-        logger.error(f"Imposible adquirir target {post_id}: {e}")
+        logger.error("Imposible adquirir target %s: %s", post_id, e)
         return
     finally:
         await mb_client.close()
         
     run_uid = str(random.randint(1000, 9999))
-    logger.info(f"Swarm Run UID: {run_uid}")
+    logger.info("Swarm Run UID: %s", run_uid)
 
     tasks = []
     async with asyncio.TaskGroup() as tg:

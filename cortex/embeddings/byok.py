@@ -53,7 +53,7 @@ class BYOKEmbedder:
                 embeddings = [data.embedding for data in response.data]
                 return embeddings[0] if isinstance(text, str) else embeddings
             except (RuntimeError, OSError, ValueError, TypeError) as e:
-                logger.error(f"BYOK Embedding failed: {e}. Falling back to default if permitted.")  # noqa: G004
+                logger.error("BYOK Embedding failed: %s. Falling back to default if permitted.", e)  # noqa: G004
                 # We can decide to either bounce or fallback
 
         # Fallback to local (requires strict rate limits upstream)

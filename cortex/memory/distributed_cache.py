@@ -29,6 +29,9 @@ from collections.abc import AsyncIterator, Callable, Coroutine
 from contextlib import asynccontextmanager
 from typing import Any
 
+from cortex.immune.chaos import ChaosGate, async_interceptor
+from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
 try:
     import redis.asyncio as aioredis
     from redis.asyncio.client import PubSub
@@ -81,7 +84,7 @@ local new_tip = redis.sha256hex(proof_material)
 redis.call("SET", tip_key, new_tip)
 
 -- Log into the persistent Hydra Stream
-redis.call("XADD", stream_key, "*", 
+redis.call("XADD", stream_key, "*",
     "eviction_id", count,
     "agent_key", agent_key,
     "prev_proof", prev_tip,
@@ -115,6 +118,7 @@ class DistributedSovereignCache:
         self._consumer_task: asyncio.Task[None] | None = None
         self._notification_task: asyncio.Task[None] | None = None
         self._is_available = True
+        self.chaos_gate = ChaosGate(name="redis_l1_cache")
 
         self._hydra_advance_script = self._r.register_script(_LUA_HYDRA_ADVANCE)
 
@@ -160,11 +164,21 @@ class DistributedSovereignCache:
             return None
         try:
             shadow_key = f"{_SHADOW_KEY_PREFIX}{key}"
-            raw = await self._r.get(shadow_key)
+            raw = await async_interceptor(self.chaos_gate, self._r.get, shadow_key)
             return json.loads(raw) if raw else None
-        except Exception as exc:
+        except (ValueError, TypeError, OSError) as exc:
             logger.warning("⚡ [REDIS MISS] get(%s): %s", key, exc)
             self._is_available = False
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:get", project="CORTEX_SYSTEM"
+            )
+            return None
+        except Exception as exc:
+            logger.warning("⚡ [REDIS MISS UNEXPECTED] get(%s): %s", key, exc)
+            self._is_available = False
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:get", project="CORTEX_SYSTEM"
+            )
             return None
 
     async def put(self, key: str, data: dict[str, Any], ttl: int = _DEFAULT_TTL_SECONDS) -> bool:
@@ -179,13 +193,23 @@ class DistributedSovereignCache:
             async with self._r.pipeline(transaction=True) as pipe:
                 pipe.set(shadow_key, serialized, ex=ttl + 60)
                 pipe.set(trigger_key, "1", ex=ttl)
-                await pipe.execute()
+                await async_interceptor(self.chaos_gate, pipe.execute)
 
             self._is_available = True
             return True
-        except Exception as exc:
+        except (ValueError, TypeError, OSError) as exc:
             logger.error("🚨 [HYDRA PUT FAIL] %s: %s", key, exc)
             self._is_available = False
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:put", project="CORTEX_SYSTEM"
+            )
+            return False
+        except Exception as exc:
+            logger.error("🚨 [HYDRA PUT UNEXPECTED] %s: %s", key, exc)
+            self._is_available = False
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:put", project="CORTEX_SYSTEM"
+            )
             return False
 
     # ─── Reliable Audit Advancement ──────────────────────────────────────────
@@ -200,7 +224,9 @@ class DistributedSovereignCache:
         now = str(time.time())
 
         try:
-            prev_tip, new_tip, count = await self._hydra_advance_script(
+            prev_tip, new_tip, count = await async_interceptor(
+                self.chaos_gate,
+                self._hydra_advance_script,
                 keys=[_CHAIN_TIP_KEY, _CHAIN_COUNT_KEY, _AUDIT_STREAM_KEY],
                 args=[_GENESIS_HASH, key, ph, self._node_id, event_type, now],
             )
@@ -213,19 +239,27 @@ class DistributedSovereignCache:
                 "payload_hash": ph,
                 "event": event_type,
             }
-        except Exception as exc:
+        except (ValueError, TypeError, OSError) as exc:
             logger.error("🚨 [HYDRA ADVANCE FAIL] %s", exc)
             return {"error": str(exc), "event": f"{event_type}_DEGRADED"}
+        except Exception as exc:
+            logger.error("🚨 [HYDRA ADVANCE UNEXPECTED] %s", exc)
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:advance", project="CORTEX_SYSTEM"
+            )
+            return {"error": str(exc), "event": f"{event_type}_FATAL"}
 
     # ─── Background Orchestration ────────────────────────────────────────────
 
     async def _start_notification_handoff(self) -> None:
         """Listener: Notifications -> Stream."""
+        await asyncio.sleep(0)
         self._notification_task = asyncio.ensure_future(self._handoff_loop())
         logger.info("🐉 [HYDRA-LOG] Notification handoff active.")
 
     async def _start_stream_consumer(self) -> None:
         """Worker: Stream -> PostgreSQL Callback."""
+        await asyncio.sleep(0)
         self._consumer_task = asyncio.ensure_future(self._consumer_loop())
         logger.info("🐲 [HYDRA-LOG] Reliable stream consumer group active.")
 
@@ -260,7 +294,7 @@ class DistributedSovereignCache:
 
                 # Rescue data
                 shadow_key = f"{_SHADOW_KEY_PREFIX}{agent_key}"
-                raw = await self._r.get(shadow_key)
+                raw = await async_interceptor(self.chaos_gate, self._r.get, shadow_key)
 
                 payload = json.loads(raw) if raw else {"_type": "TOMBSTONE", "key": agent_key}
 
@@ -269,14 +303,19 @@ class DistributedSovereignCache:
                 await self._reliable_advance_chain(agent_key, payload, "EVICTION")
 
                 # Cleanup shadow
-                await self._r.delete(shadow_key)
+                await async_interceptor(self.chaos_gate, self._r.delete, shadow_key)
 
         except asyncio.CancelledError:
             await pubsub.unsubscribe()
             await pubsub.aclose()
             raise
+        except (ValueError, TypeError, OSError) as exc:
+            logger.error("🚨 [HANDOFF FAIL] %s", exc)
         except Exception as exc:
-            logger.error("🚨 [HANDOFF CRASH] %s", exc, exc_info=True)
+            logger.error("🚨 [HANDOFF UNEXPECTED] %s", exc, exc_info=True)
+            ErrorGhostPipeline().capture_sync(
+                exc, source="distributed_cache:handoff", project="CORTEX_SYSTEM"
+            )
 
     # ─── Loop 2: Reliable Consumer (The Auditor) ─────────────────────────────
 
@@ -290,8 +329,14 @@ class DistributedSovereignCache:
         while True:
             try:
                 # 1. Read pending / new messages (XREADGROUP)
-                items = await self._r.xreadgroup(
-                    _AUDIT_GROUP_NAME, consumer_id, {_AUDIT_STREAM_KEY: ">"}, count=10, block=1000
+                items = await async_interceptor(
+                    self.chaos_gate,
+                    self._r.xreadgroup,
+                    _AUDIT_GROUP_NAME,
+                    consumer_id,
+                    {_AUDIT_STREAM_KEY: ">"},
+                    count=10,
+                    block=1000,
                 )
 
                 if not items:
@@ -307,36 +352,61 @@ class DistributedSovereignCache:
                                 # Data in stream already has the proofs calculated by Lua
                                 await self._audit_callback(agent_key, {}, data)
                                 # 3. Acknowledge (Safe now)
-                                await self._r.xack(_AUDIT_STREAM_KEY, _AUDIT_GROUP_NAME, msg_id)
+                                await async_interceptor(
+                                    self.chaos_gate,
+                                    self._r.xack,
+                                    _AUDIT_STREAM_KEY,
+                                    _AUDIT_GROUP_NAME,
+                                    msg_id,
+                                )
                                 logger.info(
                                     "✅ [HYDRA AUDIT] ACKed %s proof=%s",
                                     agent_key,
                                     data["current_proof"][:8],
                                 )
-                            except Exception as e:
+                            except (ValueError, TypeError, ConnectionError, OSError) as e:
                                 logger.error("🚨 [CALLBACK FAIL] %s", e)
-                                # We DON'T ACK here so it stays in the PEL (Pending Entires List)
-                                # for another consumer to grab or for retry in next loop.
                                 await asyncio.sleep(1)  # Backoff
+                            except Exception as e:
+                                logger.error("🚨 [CALLBACK UNEXPECTED] %s", e)
+                                ErrorGhostPipeline().capture_sync(
+                                    e,
+                                    source="distributed_cache:callback",
+                                    project="CORTEX_SYSTEM",
+                                )
+                                await asyncio.sleep(1)
 
             except asyncio.CancelledError:
                 raise
+            except (ValueError, TypeError, OSError) as exc:
+                logger.error("🚨 [CONSUMER RECOVERABLE CRASH] %s", exc)
+                await asyncio.sleep(5)
             except Exception as exc:
-                logger.error("🚨 [CONSUMER CRASH] %s", exc)
+                logger.error("🚨 [CONSUMER UNEXPECTED CRASH] %s", exc)
+                ErrorGhostPipeline().capture_sync(
+                    exc,
+                    source="distributed_cache:consumer",
+                    project="CORTEX_SYSTEM",
+                )
                 await asyncio.sleep(5)
 
     async def prove_forgetting(self) -> dict[str, Any]:
         try:
-            tip = await self._r.get(_CHAIN_TIP_KEY) or _GENESIS_HASH
-            count = int(await self._r.get(_CHAIN_COUNT_KEY) or 0)
+            tip = await async_interceptor(self.chaos_gate, self._r.get, _CHAIN_TIP_KEY)
+            tip = tip or _GENESIS_HASH
+            count_raw = await async_interceptor(self.chaos_gate, self._r.get, _CHAIN_COUNT_KEY)
+            count = int(count_raw or 0)
             return {"tip": tip, "count": count, "status": "HYDRA_VALIDATED"}
-        except Exception:
+        except (ValueError, TypeError, OSError):
             return {"status": "UNAVAILABLE"}
+        except Exception as e:
+            ErrorGhostPipeline().capture_sync(
+                e, source="distributed_cache:prove", project="CORTEX_SYSTEM"
+            )
+            return {"status": "UNAVAILABLE_FATAL"}
 
 
 def make_fastapi_lifespan(audit_callback: AuditCallback | None = None) -> Any:
-    from contextlib import asynccontextmanager
-
     from fastapi import FastAPI as _FastAPI
 
     @asynccontextmanager

@@ -192,7 +192,7 @@ class LedgerPoisoner:
                     logger.debug("LedgerPoisoner Delete rejected by DB (expected): %s", e)
 
         except Exception as e:
-            logger.debug(f"LedgerPoisoner execution error: {e}")
+            logger.debug("LedgerPoisoner execution error: %s", e)
 
         return findings
 
@@ -219,7 +219,7 @@ class VaultCracker:
                 pass  # Success = Tag caught it
                 
         except Exception as e:
-            logger.debug(f"VaultCracker error: {e}")
+            logger.debug("VaultCracker error: %s", e)
 
         return findings
 

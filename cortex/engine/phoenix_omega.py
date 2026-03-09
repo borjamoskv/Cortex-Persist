@@ -107,7 +107,7 @@ class AnalysisEngine(BaseEngine):
         self.complexity_threshold = complexity_threshold
 
     async def execute(self, state: PhoenixState, target_paths: list[Path]) -> PhoenixState:
-        logger.info(f"🔬 PHOENIX ANALYSIS: Scanning {len(target_paths)} targets")
+        logger.info("🔬 PHOENIX ANALYSIS: Scanning %s targets", len(target_paths))
 
         atoms: dict[str, StructuralAtom] = state.atoms.copy()
         for path in target_paths:
@@ -116,9 +116,9 @@ class AnalysisEngine(BaseEngine):
                     file_atoms = await self._parse_file(path)
                     atoms.update(file_atoms)
                 except SyntaxError as e:
-                    logger.error(f"SyntaxError inside {path}: {e}")
+                    logger.error("SyntaxError inside %s: %s", path, e)
                 except Exception as e:
-                    logger.error(f"Failed to read {path}: {e}")
+                    logger.error("Failed to read %s: %s", path, e)
 
         # O(1) Graph linking
         self._link_dependencies(atoms)

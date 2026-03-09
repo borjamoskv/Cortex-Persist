@@ -93,7 +93,7 @@ class FiatOracle:
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
                     logger.critical(
-                        f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}"
+                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s", tx_file.name
                     )
                     await asyncio.to_thread(tx_file.unlink)  # Delete malicious file immediately
                     continue
@@ -101,7 +101,7 @@ class FiatOracle:
                 # 2. Idempotency Check
                 tx_id = data.get("tx_id")
                 if tx_id in self.processed_txs:
-                    logger.warning(f"🛡️ [FIAT_ORACLE] Prevented replay attack para TX: {tx_id}")
+                    logger.warning("🛡️ [FIAT_ORACLE] Prevented replay attack para TX: %s", tx_id)
                     await asyncio.to_thread(tx_file.unlink)
                     continue
 
@@ -113,7 +113,7 @@ class FiatOracle:
                 await asyncio.to_thread(tx_file.unlink)  # Cleanup only after successful commit
 
             except json.JSONDecodeError:
-                logger.error(f"❌ [FIAT_ORACLE] Payload corrupto en {tx_file.name}")
+                logger.error("❌ [FIAT_ORACLE] Payload corrupto en %s", tx_file.name)
                 try:
                     await asyncio.to_thread(tx_file.unlink)
                 except OSError:
@@ -132,7 +132,7 @@ class FiatOracle:
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
                     logger.critical(
-                        f"🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: {tx_file.name}"
+                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s", tx_file.name
                     )
                     tx_file.unlink()
                     continue
@@ -140,7 +140,7 @@ class FiatOracle:
                 # 2. Idempotency Check
                 tx_id = data.get("tx_id")
                 if tx_id in self.processed_txs:
-                    logger.warning(f"🛡️ [FIAT_ORACLE] Prevented replay attack para TX: {tx_id}")
+                    logger.warning("🛡️ [FIAT_ORACLE] Prevented replay attack para TX: %s", tx_id)
                     tx_file.unlink()
                     continue
 
@@ -152,7 +152,7 @@ class FiatOracle:
                 tx_file.unlink()
 
             except json.JSONDecodeError:
-                logger.error(f"❌ [FIAT_ORACLE] Payload corrupto en {tx_file.name}")
+                logger.error("❌ [FIAT_ORACLE] Payload corrupto en %s", tx_file.name)
                 tx_file.unlink()
             except (OSError, ValueError, CortexError, KeyError) as e:
                 logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
@@ -164,7 +164,7 @@ class FiatOracle:
         source = payload.get("source", "BUNQ_REDIRECT")
         tx_id = payload.get("tx_id", "UNKNOWN")
 
-        logger.info(f"💰 [FIAT_STREAM] Detected {amount} {currency} from {source} [TX:{tx_id}]")
+        logger.info("💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id)
 
         meta = {
             "oracle": "fiat_oracle_v1.3.0",
@@ -192,12 +192,12 @@ class FiatOracle:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + rng.uniform(0.1, 1.618 ** (attempt + 1))
                 logger.error(
-                    f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
+                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs", e, attempt + 1, MAX_RETRIES, delay
                 )
                 await asyncio.sleep(delay)
 
         logger.critical(
-            f"💀 [FIAT_ORACLE] Falla catastrófica almacenando TX {tx_id} tras {MAX_RETRIES} intentos."
+            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.", tx_id, MAX_RETRIES
         )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 
@@ -208,7 +208,7 @@ class FiatOracle:
         source = payload.get("source", "BUNQ_REDIRECT")
         tx_id = payload.get("tx_id", "UNKNOWN")
 
-        logger.info(f"💰 [FIAT_STREAM] Detected {amount} {currency} from {source} [TX:{tx_id}]")
+        logger.info("💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id)
 
         meta = {
             "oracle": "fiat_oracle_v1.3.0",
@@ -233,12 +233,12 @@ class FiatOracle:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
                 logger.error(
-                    f"⚙️ [FIAT_ORACLE] DB lock o error: {e}. Reintento {attempt + 1}/{MAX_RETRIES} en {delay:.2f}s"
+                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs", e, attempt + 1, MAX_RETRIES, delay
                 )
                 time.sleep(delay)
 
         logger.critical(
-            f"💀 [FIAT_ORACLE] Falla catastrófica almacenando TX {tx_id} tras {MAX_RETRIES} intentos."
+            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.", tx_id, MAX_RETRIES
         )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 

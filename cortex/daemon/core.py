@@ -49,11 +49,11 @@ from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 try:
-    from cortex.jules.daemon import JulesDaemon, JulesMonitor
-    from cortex.jules.queue import TaskQueue
-    _JULES_AVAILABLE = True
+    from cortex.aether.daemon import AetherDaemon, AetherMonitor
+    from cortex.aether.queue import TaskQueue
+    _AETHER_AVAILABLE = True
 except ImportError:
-    _JULES_AVAILABLE = False
+    _AETHER_AVAILABLE = False
 
 try:
     from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
@@ -201,24 +201,24 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             engine=self._shared_engine,
         )
 
-        # Jules — autonomous background coding agent
-        self._jules_daemon: JulesDaemon | None = None
-        self.jules_monitor: JulesMonitor | None = None
-        if _JULES_AVAILABLE and file_config.get("jules_enabled", False):
+        # Aether — autonomous background coding agent
+        self._aether_daemon: AetherDaemon | None = None
+        self.aether_monitor: AetherMonitor | None = None
+        if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
             try:
-                jules_queue = TaskQueue()
-                self._jules_daemon = JulesDaemon(
-                    queue=jules_queue,
-                    poll_interval=file_config.get("jules_poll_interval", 60),
-                    max_concurrent=file_config.get("jules_max_concurrent", 2),
-                    llm_provider=file_config.get("jules_llm_provider", "qwen"),
-                    github_token=file_config.get("jules_github_token"),
-                    github_repos=file_config.get("jules_github_repos", []),
+                aether_queue = TaskQueue()
+                self._aether_daemon = AetherDaemon(
+                    queue=aether_queue,
+                    poll_interval=file_config.get("aether_poll_interval", 60),
+                    max_concurrent=file_config.get("aether_max_concurrent", 2),
+                    llm_provider=file_config.get("aether_llm_provider", "qwen"),
+                    github_token=file_config.get("aether_github_token"),
+                    github_repos=file_config.get("aether_github_repos", []),
                 )
-                self.jules_monitor = JulesMonitor(self._jules_daemon)
-                logger.info("🤖 Jules autonomous agent ENABLED")
+                self.aether_monitor = AetherMonitor(self._aether_daemon)
+                logger.info("🤖 Aether autonomous agent ENABLED")
             except Exception as e:
-                logger.warning("Failed to init Jules daemon: %s", e)
+                logger.warning("Failed to init Aether daemon: %s", e)
 
         # Centaur Heartbeat Engine
         self.heartbeat_daemon = None
@@ -324,8 +324,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             status, "cloud_sync_alerts", self.cloud_sync_monitor, self._alert_cloud_sync
         )
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
-        if self.jules_monitor is not None:
-            self._run_monitor(status, "jules_alerts", self.jules_monitor, self._alert_jules)
+        if self.aether_monitor is not None:
+            self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
 
         self._auto_sync(status)
         self._flush_timer()
@@ -413,15 +413,15 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
 
         logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
 
-        # Start Jules daemon thread
-        if self._jules_daemon is not None:
-            jules_thread = threading.Thread(
-                target=self._jules_daemon.start,
-                name="JulesAgent",
+        # Start Aether daemon thread
+        if self._aether_daemon is not None:
+            aether_thread = threading.Thread(
+                target=self._aether_daemon.start,
+                name="AetherAgent",
                 daemon=True,
             )
-            jules_thread.start()
-            self._threads.append(jules_thread)
+            aether_thread.start()
+            self._threads.append(aether_thread)
 
         # Start helper threads
         neural_thread = threading.Thread(

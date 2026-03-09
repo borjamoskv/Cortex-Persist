@@ -22,7 +22,7 @@ async def raid_as_self(post_id: str):
     # Fetch Post
     post_obj = await mb_client.get_post(post_id)
     post_data = post_obj.get("post", {})
-    logger.info(f"Target adquirido: '{post_data.get('title')}'")
+    logger.info("Target adquirido: '%s'", post_data.get('title'))
 
     # 2. Re-contextualize the prompt
     context = (
@@ -48,11 +48,11 @@ async def raid_as_self(post_id: str):
             intent=IntentProfile.REASONING
         )
     except Exception as e:
-        logger.error(f"[MOSKV-1] Error conectando al llm: {e}")
+        logger.error("[MOSKV-1] Error conectando al llm: %s", e)
         await llm.close()
         return
         
-    logger.info(f"[MOSKV-1] Output generado ({len(content)} chars).")
+    logger.info("[MOSKV-1] Output generado (%s chars).", len(content))
 
     # 4. Action (Comment on Post)
     logger.info("[MOSKV-1] Asestando golpe cognitivo (Comment)...")
@@ -62,9 +62,9 @@ async def raid_as_self(post_id: str):
             content=content
         )
         comment_id = comment_result.get("comment", {}).get("id", "UNKNOWN")
-        logger.info(f"[MOSKV-1] ✅ MISIÓN COMPLETADA | Comment ID: {comment_id}")
+        logger.info("[MOSKV-1] ✅ MISIÓN COMPLETADA | Comment ID: %s", comment_id)
     except Exception as e:
-        logger.error(f"[MOSKV-1] Error comentando en Moltbook: {e}")
+        logger.error("[MOSKV-1] Error comentando en Moltbook: %s", e)
     finally:
         await llm.close()
         await mb_client.close()

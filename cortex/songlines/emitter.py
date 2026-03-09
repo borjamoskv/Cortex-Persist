@@ -51,7 +51,7 @@ class ResonanceEmitter:
         if hasattr(os, "setxattr"):
             try:
                 os.setxattr(str(target_file), attr_name, encoded_payload)  # type: ignore[reportAttributeAccessIssue]
-                logger.info(f"Embedded ghost {ghost_id} on {target_file.name} (os.setxattr)")
+                logger.info("Embedded ghost %s on %s (os.setxattr)", ghost_id, target_file.name)
                 return
             except OSError:
                 pass
@@ -66,7 +66,7 @@ class ResonanceEmitter:
                 check=True,
                 capture_output=True,
             )
-            logger.info(f"Embedded ghost {ghost_id} on {target_file.name} (xattr cli)")
+            logger.info("Embedded ghost %s on %s (xattr cli)", ghost_id, target_file.name)
             return
         except (subprocess.SubprocessError, FileNotFoundError):
             pass
@@ -93,4 +93,4 @@ class ResonanceEmitter:
 
         with open(songline_file, "w") as f:
             json.dump(data, f, indent=2)
-        logger.info(f"Fallback: Stored ghost for {target_file.name} in {songline_file}")
+        logger.info("Fallback: Stored ghost for %s in %s", target_file.name, songline_file)

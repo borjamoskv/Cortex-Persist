@@ -1,0 +1,183 @@
+# ─────────────────────────────────────────────────────────────────────
+# CORTEX Knowledge Membrane — MCP Toolbox for Databases Configuration
+#
+# Read-only exposure of cortex.db for any MCP-compatible client.
+# Writes go through the CORTEX MCP server (Python) to avoid
+# SQLite write-lock contention.
+#
+# Usage:
+#   toolbox --tools-file cortex/mcp/toolbox/tools.yaml
+# ─────────────────────────────────────────────────────────────────────
+
+# ── Source ────────────────────────────────────────────────────────────
+
+kind: sources
+name: cortex-db
+type: sqlite
+file: ${CORTEX_DB:~/.cortex/cortex.db}
+
+---
+# ── Tools ─────────────────────────────────────────────────────────────
+
+kind: tools
+name: query-facts
+type: sqlite-sql
+source: cortex-db
+description: >
+  Search CORTEX facts by project, type, and confidence level.
+  Returns knowledge, decisions, errors, bridges, and ghost facts.
+  Use fact_type values: knowledge, decision, error, ghost, bridge.
+  Confidence values: C1 (hypothesis), C2 (speculative), C3 (inferred),
+  C4 (probable), C5 (confirmed), or legacy: stated, derived, inferred.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project name (exact match). Leave empty for all projects."
+  - name: fact_type
+    type: string
+    description: "Filter by fact type: knowledge, decision, error, ghost, bridge."
+  - name: min_confidence
+    type: string
+    description: "Minimum confidence level, e.g. C3. Filters >= this value alphabetically."
+  - name: limit
+    type: integer
+    description: "Maximum number of results to return (default 50)."
+statement: |
+  SELECT id, project, content, fact_type, tags, confidence, source,
+         cognitive_layer, consensus_score, created_at
+  FROM facts
+  WHERE is_tombstoned = 0
+    AND is_quarantined = 0
+    AND ($1 IS NULL OR $1 = '' OR project = $1)
+    AND ($2 IS NULL OR $2 = '' OR fact_type = $2)
+    AND ($3 IS NULL OR $3 = '' OR confidence >= $3)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN $4 IS NULL OR $4 = 0 THEN 50 ELSE $4 END;
+
+---
+
+kind: tools
+name: query-ghosts
+type: sqlite-sql
+source: cortex-db
+description: >
+  Get CORTEX ghosts (unresolved knowledge gaps) by status and project.
+  Ghosts represent things the system suspects but cannot confirm.
+  Status values: open, resolved.
+parameters:
+  - name: status
+    type: string
+    description: "Ghost status filter: 'open' or 'resolved'. Defaults to open if empty."
+  - name: project
+    type: string
+    description: "Filter by project name. Leave empty for all projects."
+  - name: limit
+    type: integer
+    description: "Maximum number of results (default 20)."
+statement: |
+  SELECT id, reference, context, project, status, confidence,
+         created_at, resolved_at, expires_at
+  FROM ghosts
+  WHERE (($1 IS NULL OR $1 = '') AND status = 'open' OR status = $1)
+    AND ($2 IS NULL OR $2 = '' OR project = $2)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN $3 IS NULL OR $3 = 0 THEN 20 ELSE $3 END;
+
+---
+
+kind: tools
+name: query-decisions
+type: sqlite-sql
+source: cortex-db
+description: >
+  Retrieve sovereign decisions persisted in CORTEX.
+  Decisions are facts with fact_type = 'decision' — architectural choices,
+  design rationale, and resolved trade-offs.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project name. Leave empty for all."
+  - name: limit
+    type: integer
+    description: "Maximum number of results (default 30)."
+statement: |
+  SELECT id, project, content, confidence, source, tags, created_at
+  FROM facts
+  WHERE fact_type = 'decision'
+    AND is_tombstoned = 0
+    AND is_quarantined = 0
+    AND ($1 IS NULL OR $1 = '' OR project = $1)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN $2 IS NULL OR $2 = 0 THEN 30 ELSE $2 END;
+
+---
+
+kind: tools
+name: query-signals
+type: sqlite-sql
+source: cortex-db
+description: >
+  Read recent signal bus events from CORTEX's L1 consciousness layer.
+  Signals are cross-tool reactive events (file changes, test results,
+  deployment triggers, etc.).
+parameters:
+  - name: event_type
+    type: string
+    description: "Filter by signal event type. Leave empty for all."
+  - name: project
+    type: string
+    description: "Filter by project. Leave empty for all."
+  - name: limit
+    type: integer
+    description: "Maximum number of signals (default 30)."
+statement: |
+  SELECT id, event_type, payload, source, project, created_at
+  FROM signals
+  WHERE ($1 IS NULL OR $1 = '' OR event_type = $1)
+    AND ($2 IS NULL OR $2 = '' OR project = $2)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN $3 IS NULL OR $3 = 0 THEN 30 ELSE $3 END;
+
+---
+
+kind: tools
+name: cortex-stats
+type: sqlite-sql
+source: cortex-db
+description: >
+  Get aggregate statistics about CORTEX's knowledge base.
+  Returns counts of facts by type, ghost counts by status,
+  total signals, and latest activity timestamp.
+parameters: []
+statement: |
+  SELECT
+    (SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0) AS total_facts,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'knowledge' AND is_tombstoned = 0) AS knowledge_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND is_tombstoned = 0) AS decision_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'error' AND is_tombstoned = 0) AS error_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0) AS ghost_fact_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'bridge' AND is_tombstoned = 0) AS bridge_count,
+    (SELECT COUNT(*) FROM ghosts WHERE status = 'open') AS open_ghosts,
+    (SELECT COUNT(*) FROM ghosts WHERE status = 'resolved') AS resolved_ghosts,
+    (SELECT COUNT(*) FROM signals) AS total_signals,
+    (SELECT MAX(created_at) FROM facts) AS latest_fact,
+    (SELECT MAX(created_at) FROM ghosts) AS latest_ghost;
+
+---
+# ── Toolsets ──────────────────────────────────────────────────────────
+
+kind: toolsets
+name: cortex-readonly
+tools:
+  - query-facts
+  - query-ghosts
+  - query-decisions
+  - query-signals
+  - cortex-stats
+
+---
+
+kind: toolsets
+name: cortex-summary
+tools:
+  - cortex-stats

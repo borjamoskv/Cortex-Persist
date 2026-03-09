@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import time
+import sqlite3
 from dataclasses import dataclass, field
 from typing import ClassVar, Final
 
@@ -123,8 +124,25 @@ class ProceduralMemory:
                     last_invoked=row["last_invoked"],
                     permanent=bool(row["permanent"]),
                 )
-        except Exception:
-            pass  # Table might not exist yet if DB wasn't initialized cleanly
+        except sqlite3.OperationalError as e:
+            if "no such table" not in str(e):
+                import logging
+                logging.getLogger("cortex.memory.procedural").error(
+                    "DB Operational error on load: %s", e
+                )
+                from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+                ErrorGhostPipeline().capture_sync(
+                    e, source="procedural:load", project="CORTEX_SYSTEM"
+                )
+        except Exception as e:
+            import logging
+            logging.getLogger("cortex.memory.procedural").error(
+                "Unexpected procedural load error: %s", e
+            )
+            from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+            ErrorGhostPipeline().capture_sync(
+                e, source="procedural:load", project="CORTEX_SYSTEM"
+            )
         finally:
             conn.close()
 

@@ -30,7 +30,7 @@ class MemoryQualityEvaluator:
 
     async def run_quality_scan(self, tenant_id: str, project_id: str) -> None:
         """Trigger a complete quality scan over the specified boundary."""
-        logger.info(f"Starting Quality Scan for [{tenant_id}/{project_id}]")
+        logger.info("Starting Quality Scan for [%s/%s]", tenant_id, project_id)
 
         await self._calculate_stale_memory_ratio(tenant_id, project_id)
 
@@ -74,7 +74,7 @@ class MemoryQualityEvaluator:
             )
 
             # Add to stale cleared if we decide to prune here (for now just reporting)
-            logger.debug(f"Stale memory ratio for [{tenant_id}/{project_id}]: {ratio:.2%}")
+            logger.debug("Stale memory ratio for [%s/%s]: %s", tenant_id, project_id, ratio)
         except Exception as e:
             logger.error("Failed to calculate stale memory ratio: %s", e)
 
@@ -83,6 +83,6 @@ class MemoryQualityEvaluator:
         # For an MVP V8 async heuristic, we can track exact conflicting updates
         # based on key metadata if they share the same topic but conflict.
         # Deep semantic contradiction requires full LLM pass. Example skeleton:
-        logger.debug(f"Contradiction detection pass running on [{tenant_id}/{project_id}]...")
+        logger.debug("Contradiction detection pass running on [%s/%s]...", tenant_id, project_id)
         # (Implementation details for contradiction logic will rely on ContextFusion or equivalent)
         pass

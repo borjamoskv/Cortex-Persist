@@ -26,7 +26,7 @@ OUTPUT_DIR = Path("/Users/borjafernandezangulo/cortex/data/training")
 OUTPUT_FILE = OUTPUT_DIR / "agent_trajectories.jsonl"
 
 async def generate_data():
-    logger.info(f"Connecting to CORTEX DB at {DB_PATH}")
+    logger.info("Connecting to CORTEX DB at %s", DB_PATH)
     
     if not os.path.exists(DB_PATH):
         logger.error("DB file not found! Please ensure CORTEX has episodes recorded.")
@@ -43,7 +43,7 @@ async def generate_data():
             rows = await cursor.fetchall()
             session_ids = [row[0] for row in rows]
 
-        logger.info(f"Processing {len(session_ids)} sessions: {session_ids}")
+        logger.info("Processing %s sessions: %s", len(session_ids), session_ids)
 
         trajectories = []
         for sid in session_ids:
@@ -52,14 +52,14 @@ async def generate_data():
                 if traj and traj.actions:
                     # Calculate reward
                     traj.reward = reward_engine.calculate_reward(traj)
-                    logger.info(f"Session {sid} -> Reward: {traj.reward:.2f}, Actions: {len(traj.actions)}")
+                    logger.info("Session %s -> Reward: %.2f, Actions: %s", sid, traj.reward, len(traj.actions))
                     
                     # We only keep trajectories with positive reward for SFT
                     if traj.reward > 0.1:
                         trajectories.append(traj)
-                        logger.info(f"Added trajectory for {sid} (Reward: {traj.reward:.2f})")
+                        logger.info("Added trajectory for %s (Reward: %.2f)", sid, traj.reward)
             except Exception as e:
-                logger.warning(f"Failed to process session {sid}: {e}")
+                logger.warning("Failed to process session %s: %s", sid, e)
 
         # 2. Export to SFT format
         if not trajectories:
@@ -75,7 +75,7 @@ async def generate_data():
             for item in sft_data:
                 f.write(json.dumps(item) + "\n")
         
-        logger.info(f"Successfully exported {len(trajectories)} trajectories to {OUTPUT_FILE}")
+        logger.info("Successfully exported %s trajectories to %s", len(trajectories), OUTPUT_FILE)
 
 if __name__ == "__main__":
     asyncio.run(generate_data())

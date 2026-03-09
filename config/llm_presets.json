@@ -98,8 +98,8 @@
     "context_window": 131072,
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
-      "code":      "qwen-qwq-32b",
-      "reasoning": "deepseek-r1-distill-llama-70b",
+      "code":      "llama-3.3-70b-versatile",
+      "reasoning": "llama-3.3-70b-versatile",
       "creative":  "llama-3.3-70b-versatile",
       "general":   "llama-3.3-70b-versatile"
     }

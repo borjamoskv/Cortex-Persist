@@ -58,7 +58,7 @@ class SentinelMonitor:
                 )
                 await proc.communicate()
         except Exception as e:
-            logger.error(f"Failed to send OS notification on {sys.platform}: {e}")
+            logger.error("Failed to send OS notification on %s: %s", sys.platform, e)
 
     def _log_fact(self, tx_hash: str, to_addr: str, value: str, asset: str) -> None:
         """Store a high-priority Fact in CORTEX about the movement."""
@@ -80,7 +80,7 @@ class SentinelMonitor:
                 meta={"tx_hash": tx_hash, "from": TARGET_ADDRESS, "to": to_addr, "value": value},
             )
         except Exception as e:
-            logger.error(f"Failed to store sentinel fact: {e}")
+            logger.error("Failed to store sentinel fact: %s", e)
 
     async def _fetch_txlist(
         self, session: aiohttp.ClientSession, action: str
@@ -103,7 +103,7 @@ class SentinelMonitor:
                     if data.get("status") == "1" and isinstance(data.get("result"), list):
                         return data["result"]
         except Exception as e:
-            logger.warning(f"Fetch failed for {action}: {e}")
+            logger.warning("Fetch failed for %s: %s", action, e)
         return []
 
     async def _check_movements(self, session: aiohttp.ClientSession) -> None:
@@ -139,7 +139,7 @@ class SentinelMonitor:
                     value = f"{raw_val / (10**18):.4f}"
 
                 msg = f"Movement Detected! {value} {asset} sent to {to_addr}"
-                logger.critical(f"SENTINEL ALERT: {msg} (Tx: {tx_hash})")
+                logger.critical("SENTINEL ALERT: %s (Tx: %s)", msg, tx_hash)
 
                 await self._notify_os("⚠️ CORTEX SENTINEL ALERT ⚠️", msg)
                 self._log_fact(tx_hash, to_addr, value, asset)
@@ -149,7 +149,7 @@ class SentinelMonitor:
     async def run_loop(self) -> None:
         """Main async loop."""
         self.is_running = True
-        logger.info(f"Sentinel Monitor started for {TARGET_ADDRESS}")
+        logger.info("Sentinel Monitor started for %s", TARGET_ADDRESS)
 
         # If we start from 0, we might get thousands of historical txs.
         # In a real scenario, we'd initialize this to the current block.
@@ -167,10 +167,10 @@ class SentinelMonitor:
                         if data.get("result"):
                             self.last_block_scanned = int(data["result"], 16)
                             logger.info(
-                                f"Sentinel baseline established at block {self.last_block_scanned}"
+                                "Sentinel baseline established at block %s", self.last_block_scanned
                             )
             except Exception as e:
-                logger.warning(f"Could not establish baseline block: {e}")
+                logger.warning("Could not establish baseline block: %s", e)
 
             while self.is_running:
                 try:
@@ -179,6 +179,6 @@ class SentinelMonitor:
                     self.is_running = False
                     raise
                 except Exception as e:
-                    logger.error(f"Error in Sentinel loop: {e}")
+                    logger.error("Error in Sentinel loop: %s", e)
 
                 await asyncio.sleep(self.check_interval)
