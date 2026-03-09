@@ -64,7 +64,7 @@ class AetherAgent:
         try:
             toolkit = AgentToolkit(task.repo_path, allowed_tools=self._allowed_tools)
         except FileNotFoundError as e:
-            return self._fail(task, queue, str(e))
+            return await self._fail(task, queue, str(e))
 
         # ── 0. Create branch ──────────────────────────────────────────
         branch_result = toolkit.git_create_branch(branch)
@@ -79,19 +79,22 @@ class AetherAgent:
             queue.update(task.id, plan=plan.to_prompt_str())
             logger.info("📋 Plan: %s — %d steps", plan.summary, len(plan.steps))
         except Exception as e:
-            return self._fail(task, queue, f"Planner error: {e}")
+            return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
         if plan.repro_test:
             logger.info("🔬 [Ω₆] Identified pathogen: %s", plan.repro_test)
-            logger.info("     Verifying pathogen existence and failure before execution...")
+            logger.info(
+                "     Verifying pathogen existence and failure before execution..."
+            )
             setup_res = toolkit.bash(plan.repro_test)
             if "[FAIL]" not in setup_res:
                 logger.warning("🚨 [Ω₆] Pathogen did NOT fail. Aborting fix.")
-                return self._fail(
-                    task, queue, 
+                return await self._fail(
+                    task,
+                    queue,
                     f"Ω₆ Siege-Verification aborted: '{plan.repro_test}' "
-                    "passed/not verified. Hallucinated repair averted."
+                    "passed/not verified. Hallucinated repair averted.",
                 )
 
         # ── 2. Execute (with Critic retry) ────────────────────────────
@@ -108,12 +111,12 @@ class AetherAgent:
                         f"[Ω₆ MANDATORY] First, ensure the reproduction test '{plan.repro_test}' exists and FAILS. "
                         "If it exists and passes, do NOT apply the fix; instead, investigate or conclude."
                     )
-                
+
                 execute_result = await self._executor.execute(
                     plan, instruction, toolkit
                 )
             except Exception as e:
-                return self._fail(task, queue, f"Executor error: {e}")
+                return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────
             queue.update(task.id, status=TaskStatus.CRITIQUING)
@@ -180,10 +183,10 @@ class AetherAgent:
         )
 
         # CORTEX persistence
-        self._persist_to_cortex(task, result_msg)
+        await self._persist_to_cortex(task, result_msg)
 
         # macOS notification
-        self._notify(f"Aether ✅ [{task.id}]", task.title)
+        await self._notify(f"Aether ✅ [{task.id}]", task.title)
 
         logger.info("🎉 Task [%s] DONE on branch %s", task.id, branch)
         task.status = TaskStatus.DONE
@@ -199,68 +202,79 @@ class AetherAgent:
 
     # ── Private helpers ────────────────────────────────────────────────
 
-    def _fail(self, task: AgentTask, queue: TaskQueue, error: str) -> AgentTask:
+    async def _fail(self, task: AgentTask, queue: TaskQueue, error: str) -> AgentTask:
         logger.error("❌ Task [%s] FAILED: %s", task.id, error)
         queue.update(task.id, status=TaskStatus.FAILED, error=error)
-        self._notify(f"Aether ❌ [{task.id}]", f"Failed: {error[:80]}")
-        self._persist_error_to_cortex(task, error)
+        await self._notify(f"Aether ❌ [{task.id}]", f"Failed: {error[:80]}")
+        await self._persist_error_to_cortex(task, error)
         task.status = TaskStatus.FAILED
         task.error = error
         return task
 
     @staticmethod
-    def _persist_to_cortex(task: AgentTask, result: str) -> None:
-        """Persist completion decision to CORTEX."""
+    async def _persist_to_cortex(task: AgentTask, result: str) -> None:
+        """Persist completion decision to CORTEX asynchronously."""
         try:
-            import subprocess
-
             msg = f"Aether completed task [{task.id}]: {task.title}. Branch: {task.branch}. Result: {result[:200]}"
-            subprocess.run(
-                [
-                    "python", "-m", "cortex.cli", "store",
-                    "--type", "decision",
-                    "--source", "agent:aether",
-                    "Aether", msg,
-                ],
+            proc = await asyncio.create_subprocess_exec(
+                "python",
+                "-m",
+                "cortex.cli",
+                "store",
+                "--type",
+                "decision",
+                "--source",
+                "agent:aether",
+                "Aether",
+                msg,
                 cwd=str(Path.home() / "cortex"),
-                capture_output=True,
-                timeout=10,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            # Fire and forget / bounded wait
+            await asyncio.wait_for(proc.communicate(), timeout=10.0)
         except Exception as e:
             logger.debug("CORTEX persist failed: %s", e)
 
     @staticmethod
-    def _persist_error_to_cortex(task: AgentTask, error: str) -> None:
-        """Persist error to CORTEX."""
+    async def _persist_error_to_cortex(task: AgentTask, error: str) -> None:
+        """Persist error to CORTEX asynchronously."""
         try:
-            import subprocess
-
             msg = f"Aether failed task [{task.id}]: {task.title}. Error: {error[:300]}"
-            subprocess.run(
-                [
-                    "python", "-m", "cortex.cli", "store",
-                    "--type", "error",
-                    "--source", "agent:aether",
-                    "Aether", msg,
-                ],
+            proc = await asyncio.create_subprocess_exec(
+                "python",
+                "-m",
+                "cortex.cli",
+                "store",
+                "--type",
+                "error",
+                "--source",
+                "agent:aether",
+                "Aether",
+                msg,
                 cwd=str(Path.home() / "cortex"),
-                capture_output=True,
-                timeout=10,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            await asyncio.wait_for(proc.communicate(), timeout=10.0)
         except Exception as e:
             logger.debug("CORTEX error persist failed: %s", e)
 
     @staticmethod
-    def _notify(title: str, body: str) -> None:
-        """macOS notification via osascript."""
+    async def _notify(title: str, body: str) -> None:
+        """macOS notification via osascript asynchronously (Ω₁)."""
         try:
-            import subprocess
+            safe_title = title.replace('"', '\\"')
+            safe_body = body[:200].replace('"', '\\"')
+            script = f'display notification "{safe_body}" with title "{safe_title}"'
 
-            script = f'display notification "{body[:200]}" with title "{title}"'
-            subprocess.run(
-                ["osascript", "-e", script],
-                capture_output=True,
-                timeout=5,
+            proc = await asyncio.create_subprocess_exec(
+                "osascript",
+                "-e",
+                script,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            await asyncio.wait_for(proc.communicate(), timeout=5.0)
         except Exception:
             pass
