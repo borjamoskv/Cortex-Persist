@@ -36,8 +36,9 @@ Be strict but fair. Approve only if:
 class CriticAgent:
     """Reviews the git diff and approves or requests fixes."""
 
-    def __init__(self, llm) -> None:
+    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
         self._llm = llm
+        self._base_system = base_system_prompt
 
     async def critique(
         self,
@@ -58,9 +59,13 @@ class CriticAgent:
             "Review the diff and output your JSON verdict:"
         )
 
+        sys_prompt = _SYSTEM
+        if self._base_system:
+            sys_prompt = f"{self._base_system}\n\n[MANDATORY FORMAT INSTRUCTIONS]\n{_SYSTEM.split('Output ONLY valid JSON:')[1]}"
+
         raw = await self._llm.complete(
             prompt,
-            system=_SYSTEM,
+            system=sys_prompt,
             temperature=0.1,
             max_tokens=800,
             intent=IntentProfile.REASONING,

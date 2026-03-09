@@ -38,8 +38,9 @@ _MAX_FILE_READ = 3000
 class PlannerAgent:
     """Analyzes a repo and emits a structured PlanOutput."""
 
-    def __init__(self, llm) -> None:
+    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
         self._llm = llm
+        self._base_system = base_system_prompt
 
     async def plan(self, task_description: str, toolkit: AgentToolkit) -> PlanOutput:
         """Generate an implementation plan for the given task."""
@@ -52,9 +53,13 @@ class PlannerAgent:
 
         from cortex.llm.router import IntentProfile
 
+        sys_prompt = _SYSTEM
+        if self._base_system:
+            sys_prompt = f"{self._base_system}\n\n[MANDATORY FORMAT INSTRUCTIONS]\n{_SYSTEM.split('Output ONLY valid JSON')[1]}"
+
         raw = await self._llm.complete(
             prompt,
-            system=_SYSTEM,
+            system=sys_prompt,
             temperature=0.2,
             max_tokens=1500,
             intent=IntentProfile.ARCHITECT,

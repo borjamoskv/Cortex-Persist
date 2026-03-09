@@ -34,13 +34,23 @@ class AetherAgent:
         agent.run_task_sync(task, queue)
     """
 
-    def __init__(self, llm_provider: str = "qwen") -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
         from cortex.llm.provider import LLMProvider
+        from cortex.agents.registry import AgentRegistry
 
         self._llm = LLMProvider(provider=llm_provider)
-        self._planner = PlannerAgent(self._llm)
-        self._executor = ExecutorAgent(self._llm)
-        self._critic = CriticAgent(self._llm)
+
+        system_prompt = None
+        if agent_id:
+            registry = AgentRegistry()
+            # Ensure registries are loaded (safe to call multiple times)
+            registry.load_all()
+            if agent_def := registry.get(agent_id):
+                system_prompt = agent_def.system_prompt
+
+        self._planner = PlannerAgent(self._llm, system_prompt)
+        self._executor = ExecutorAgent(self._llm, system_prompt)
+        self._critic = CriticAgent(self._llm, system_prompt)
         self._tester = TesterAgent()
 
     async def run_task(self, task: AgentTask, queue: TaskQueue) -> AgentTask:
