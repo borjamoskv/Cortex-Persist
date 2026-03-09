@@ -276,6 +276,7 @@ class DaemonStatus:
     tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
     drift_alerts: list[DriftAlert] = field(default_factory=list)
     aether_alerts: list[AetherAlert] = field(default_factory=list)
+    auto_immune_alerts: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -297,6 +298,7 @@ class DaemonStatus:
             and len(self.signal_alerts) == 0
             and len(self.tombstone_alerts) == 0
             and len(self.drift_alerts) == 0
+            and len(self.auto_immune_alerts) == 0
             and len(self.errors) == 0
         )
 
@@ -449,5 +451,6 @@ class DaemonStatus:
                 }
                 for d in self.drift_alerts
             ],
+            "auto_immune_alerts": self.auto_immune_alerts,
             "errors": self.errors,
         }

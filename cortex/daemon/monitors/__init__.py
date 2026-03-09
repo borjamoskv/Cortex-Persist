@@ -1,3 +1,4 @@
+from cortex.daemon.monitors.auto_immune import AutoImmuneMonitor
 from cortex.daemon.monitors.cert import CertMonitor
 from cortex.daemon.monitors.cloud import CloudSyncMonitor
 from cortex.daemon.monitors.compaction import CompactionMonitor
@@ -19,6 +20,7 @@ AutonomousMejoraloMonitor = UnifiedMejoraloMonitor
 EntropyMonitor = UnifiedMejoraloMonitor
 
 __all__ = [
+    "AutoImmuneMonitor",
     "AutonomousMejoraloMonitor",
     "CertMonitor",
     "CloudSyncMonitor",

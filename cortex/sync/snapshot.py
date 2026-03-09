@@ -140,15 +140,24 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
         by_type.setdefault(f["type"], []).append(f)
 
     for ftype, type_facts in by_type.items():
-        lines.append(f"### {ftype.capitalize()} ({len(type_facts)})")
-        lines.append("")
-        for f in type_facts:
-            content = f["content"][:200]
-            if len(f["content"]) > 200:
-                content += "..."
-            lines.append(f"- {content}")
-        lines.append("")
+        if ftype in ("axiom", "ghost", "error", "core_rules", "meta_learning"):
+            lines.append(f"### {ftype.capitalize()} ({len(type_facts)})")
+            lines.append("")
+            for f in type_facts:
+                content = f["content"].replace("\n", " ")
+                if len(content) > 500:
+                    content = content[:497] + "..."
+                lines.append(f"- {content}")
+            lines.append("")
+        else:
+            search_cmd = f"cortex search \\\"type:{ftype} project:{project}\\\""
+            msg = (
+                f"- **{ftype.capitalize()}**: {len(type_facts)} facts "
+                f"(Use `{search_cmd}` to read)"
+            )
+            lines.append(msg)
 
+    lines.append("")
     return lines
 
 

@@ -11,12 +11,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS_FILE="${SCRIPT_DIR}/tools.yaml"
 export CORTEX_DB="${CORTEX_DB:-${HOME}/.cortex/cortex.db}"
-PORT="${TOOLBOX_PORT:-5000}"
+PORT="${TOOLBOX_PORT:-5050}"
+
+# Add Go bin to PATH (Homebrew Go installs here)
+export PATH="${HOME}/go/bin:${PATH}"
+
+TOOLBOX_BIN="genai-toolbox"
 
 # ── Preflight ─────────────────────────────────────────────────────────
 
-if ! command -v toolbox &>/dev/null; then
-    echo "❌ 'toolbox' binary not found in PATH."
+if ! command -v "${TOOLBOX_BIN}" &>/dev/null; then
+    echo "❌ '${TOOLBOX_BIN}' binary not found in PATH."
     echo "   Install: go install github.com/googleapis/genai-toolbox@latest"
     exit 1
 fi
@@ -40,7 +45,7 @@ echo "   Port:  ${PORT}"
 echo "   Tools: ${TOOLS_FILE}"
 echo ""
 
-exec toolbox \
+exec "${TOOLBOX_BIN}" \
     --tools-file "${TOOLS_FILE}" \
     --port "${PORT}" \
     "$@"

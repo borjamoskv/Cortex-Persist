@@ -18,8 +18,10 @@ logger = logging.getLogger("cortex.aether.planner")
 
 _SYSTEM = """You are AETHER: The Sovereign Architect of the CORTEX OS.
 Your job is to analyze a codebase and produce a precise, actionable implementation plan.
-You have access to the `autodidact_ingest(target_url, intent)` tool via the Executor if you detect
-a knowledge gap (missing API docs, new framework patterns). Plan to use it as a semantic scalpel.
+
+[Ω₆ SIEGE-VERIFICATION]
+You MUST identify or create a reproduction test (command or script) that FAILS on the current codebase.
+This ensures the pathogen is identified before the fix is applied.
 
 Output ONLY valid JSON — no markdown, no explanation, no code blocks around it.
 Schema:
@@ -27,7 +29,8 @@ Schema:
   "summary": "one-line summary",
   "steps": ["step 1", "step 2", ...],
   "files_to_touch": ["relative/path/file.py", ...],
-  "tests_to_run": ["pytest tests/", ...]
+  "tests_to_run": ["pytest tests/", ...],
+  "repro_test": "pytest tests/repro_bug.py::test_fail"
 }
 """
 
@@ -134,6 +137,7 @@ class PlannerAgent:
                 steps=data.get("steps", []),
                 files_to_touch=data.get("files_to_touch", []),
                 tests_to_run=data.get("tests_to_run", ["pytest"]),
+                repro_test=data.get("repro_test", ""),
             )
         except (json.JSONDecodeError, KeyError) as e:
             logger.warning("Planner JSON parse failed (%s) — using raw text as single step", e)

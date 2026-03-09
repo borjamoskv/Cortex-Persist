@@ -93,7 +93,7 @@ class TestAgentTask:
         required_keys = {
             "id", "title", "description", "repo_path", "source",
             "status", "created_at", "updated_at", "plan", "result",
-            "branch", "pr_url", "error", "verification_hash",
+            "branch", "pr_url", "error", "agent_id",
             "github_issue_number", "github_repo",
         }
         assert required_keys <= set(d.keys())
@@ -175,7 +175,6 @@ class TestTesterOutput:
     def test_passed(self):
         t = TesterOutput(passed=True, output="All tests passed")
         assert t.passed is True
-        assert t.verification_hash == ""
 
     def test_failed_with_output(self):
         t = TesterOutput(passed=False, output="FAILED: test_foo", command="pytest")

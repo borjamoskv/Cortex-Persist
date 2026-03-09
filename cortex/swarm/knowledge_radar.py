@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import re
+import json
 import yaml
 
 logger = logging.getLogger("cortex.swarm.knowledge_radar")
@@ -119,14 +121,39 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
                 "ORDER BY timestamp DESC LIMIT 10"
             )
         else:
-            logger.warning("📡 [RADAR] No compatible DB interface for ghost scan")
+            msg = (
+                "Fallo en ciclo de descubrimiento: No compatible DB interface. "
+                "CORTEX mantiene integridad vía ErrorGhostPipeline."
+            )
+            logger.critical(msg)
             return []
 
         for r in results or []:
             content = getattr(r, "content", "") if hasattr(r, "content") else str(r)
+            
+            # --- Ω₄ Aesthetic Cleaning (Parser) ---
+            # 1. Try to extract URL from content
+            url_match = re.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', content)
+            if url_match:
+                target_str = url_match.group(0)
+            # 2. Try to parse as JSON if it looks like it
+            elif content.strip().startswith("{"):
+                try:
+                    data = json.loads(content)
+                    # Extract common fields
+                    target_str = (
+                        data.get("url") or data.get("target") or data.get("query") or content[:500]
+                    )
+                except json.JSONDecodeError:
+                    target_str = content[:500]
+            # 3. Strip artifact headers
+            else:
+                target_str = re.sub(r'═══.*?═══', '', content).strip()
+                target_str = target_str[:500]
+
             targets.append(
                 CrystalTarget(
-                    target=content[:500],
+                    target=target_str,
                     intent="search_gap",
                     priority=3,
                     source="ghost_gap",

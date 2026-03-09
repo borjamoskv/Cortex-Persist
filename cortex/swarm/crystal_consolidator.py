@@ -73,7 +73,7 @@ class ConsolidationResult:
 # ── Strategy 1: Cold Purge ────────────────────────────────────────────────
 
 
-def _execute_cold_purge(
+async def _execute_cold_purge(
     db_conn: Any,
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
@@ -135,7 +135,7 @@ def _execute_cold_purge(
 # ── Strategy 2: Semantic Merge ────────────────────────────────────────────
 
 
-def _execute_semantic_merge(
+async def _execute_semantic_merge(
     db_conn: Any,
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
@@ -143,23 +143,25 @@ def _execute_semantic_merge(
 ) -> None:
     """Merge near-duplicate crystals (cosine > threshold).
 
-    For each merge group, keeps the crystal with highest temperature
-    and appends content from the others.
+    Uses LLM synthesis to fuse content if they are highly similar,
+    preserving unique details from both.
     """
+    from cortex.swarm.crystal_synthesis import synthesize_crystals
+
     # Only merge crystals that have embeddings available
     mergeable = [v for v in vitals if v.recommendation != "PURGE"]
     if len(mergeable) < 2:
         return
 
-    # Load embeddings for merge candidates
+    # Load content and embeddings
     try:
         cursor = db_conn.cursor()
-        embeddings: dict[str, list[float]] = {}
+        data: dict[str, dict[str, Any]] = {}
 
         for v in mergeable:
             cursor.execute(
                 """
-                SELECT v.embedding FROM facts_meta f
+                SELECT f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
                 WHERE f.id = ?
                 """,
@@ -167,17 +169,19 @@ def _execute_semantic_merge(
             )
             row = cursor.fetchone()
             if row:
-                embeddings[v.fact_id] = np.frombuffer(row[0], dtype=np.float32).tolist()
+                data[v.fact_id] = {
+                    "content": row[0],
+                    "embedding": np.frombuffer(row[1], dtype=np.float32)
+                }
     except Exception as e:
-        logger.error("🔗 [MERGE] Failed to load embeddings: %s", e)
+        logger.error("🔗 [MERGE] Failed to load data: %s", e)
         return
 
-    if len(embeddings) < 2:
+    if len(data) < 2:
         return
 
-    # Find merge pairs
     merged_ids: set[str] = set()
-    ids = list(embeddings.keys())
+    ids = list(data.keys())
 
     for i in range(len(ids)):
         if ids[i] in merged_ids:
@@ -186,51 +190,58 @@ def _execute_semantic_merge(
             if ids[j] in merged_ids:
                 continue
 
-            vec_a = np.array(embeddings[ids[i]], dtype=np.float32)
-            vec_b = np.array(embeddings[ids[j]], dtype=np.float32)
+            id_a, id_b = ids[i], ids[j]
+            vec_a, vec_b = data[id_a]["embedding"], data[id_b]["embedding"]
 
-            norm_a = np.linalg.norm(vec_a)
-            norm_b = np.linalg.norm(vec_b)
+            norm_a, norm_b = np.linalg.norm(vec_a), np.linalg.norm(vec_b)
             if norm_a < 1e-10 or norm_b < 1e-10:
                 continue
 
             sim = float(np.dot(vec_a, vec_b) / (norm_a * norm_b))
 
             if sim >= SEMANTIC_MERGE_THRESHOLD:
-                # Merge j into i (keep i — the older/first one)
-                if not dry_run:
-                    try:
+                # Alchemist Merge: Fuse content via LLM
+                logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
+                
+                try:
+                    synthesis = await synthesize_crystals(
+                        primary_content=data[id_a]["content"],
+                        secondary_content=data[id_b]["content"]
+                    )
+                    new_content = synthesis.get("fused_content", data[id_a]["content"])
+
+                    if not dry_run:
                         cursor = db_conn.cursor()
+                        # Update primary with fused content
+                        cursor.execute(
+                            "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
+                            (new_content, time.time(), id_a),
+                        )
+                        # Delete the secondary
                         cursor.execute(
                             "DELETE FROM vec_facts WHERE rowid IN "
                             "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                            (ids[j],),
+                            (id_b,),
                         )
-                        cursor.execute(
-                            "DELETE FROM facts_meta WHERE id = ?",
-                            (ids[j],),
-                        )
+                        cursor.execute("DELETE FROM facts_meta WHERE id = ?", (id_b,))
                         db_conn.commit()
-                    except Exception as e:
-                        logger.error("🔗 [MERGE] Delete failed for %s: %s", ids[j], e)
-                        result.errors += 1
-                        continue
 
-                merged_ids.add(ids[j])
-                result.merged += 1
-                logger.info(
-                    "🔗 [MERGE] %s ← %s (sim=%.4f)%s",
-                    ids[i],
-                    ids[j],
-                    sim,
-                    " (DRY)" if dry_run else "",
-                )
+                    merged_ids.add(id_b)
+                    result.merged += 1
+                    logger.info(
+                        "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
+                        id_a, id_b, " (DRY)" if dry_run else "",
+                    )
+                except Exception as e:
+                    logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, e)
+                    result.errors += 1
+                    continue
 
 
 # ── Strategy 3: Diamond Promotion ─────────────────────────────────────────
 
 
-def _execute_diamond_promotion(
+async def _execute_diamond_promotion(
     db_conn: Any,
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
@@ -310,14 +321,14 @@ async def consolidate(
         return result
 
     # Strategy 1: Cold Purge
-    _execute_cold_purge(db_conn, vitals, result, dry_run)
+    await _execute_cold_purge(db_conn, vitals, result, dry_run)
 
     # Strategy 2: Semantic Merge (skip purged crystals)
     remaining = [v for v in vitals if v.recommendation != "PURGE"]
-    _execute_semantic_merge(db_conn, remaining, result, dry_run)
+    await _execute_semantic_merge(db_conn, remaining, result, dry_run)
 
     # Strategy 3: Diamond Promotion
-    _execute_diamond_promotion(db_conn, remaining, result, dry_run)
+    await _execute_diamond_promotion(db_conn, remaining, result, dry_run)
 
     # Count skipped
     result.skipped = result.total_scanned - (result.purged + result.merged + result.promoted)

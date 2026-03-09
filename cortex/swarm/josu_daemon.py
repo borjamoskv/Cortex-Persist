@@ -14,9 +14,10 @@ Architecture:
                               └─> _create_review_request()
 
 Axiom Derivations:
+    Ω₀ (Self-Reference): The system manages its own infrastructure.
     Ω₂ (Entropic Asymmetry): Only targets below complexity threshold are attempted.
     Ω₃ (Byzantine Default): Pulse results validated before any merge.
-    Ω₅ (Antifragile by Default): Failed fixes become stronger ghosts with context.
+    Ω₅ (Antifragile): Failed fixes become stronger ghosts with context.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from cortex.swarm.swarm_heartbeat import SWARM_HEARTBEAT
@@ -85,17 +86,49 @@ class JosuProactiveDaemon:
         await daemon.proactive_loop()  # Runs forever
     """
 
-    __slots__ = ("db", "workspace_manager", "_results", "_active_tasks")
+    __slots__ = (
+        "db",
+        "workspace_manager",
+        "_results",
+        "_active_tasks",
+        "_toolbox_watchdog",
+    )
 
-    def __init__(self, cortex_db: Any, workspace_manager: Any = None) -> None:
+    def __init__(
+        self,
+        cortex_db: Any,
+        workspace_manager: Any = None,
+    ) -> None:
         self.db = cortex_db
         self.workspace_manager = workspace_manager
         self._results: list[FixResult] = []
         self._active_tasks: int = 0
+        self._toolbox_watchdog: Any | None = None
 
     async def proactive_loop(self) -> None:
-        """Lifecycle loop. Scans → Filters → Spawns → Sleeps. Forever."""
+        """Lifecycle loop. Scans → Filters → Spawns → Sleeps."""
         logger.info("⚡️ [JOSU] Code Sniper Daemon Activated.")
+
+        # Co-launch Toolbox watchdog (Ω₀ self-reference)
+        try:
+            from cortex.mcp.toolbox_watchdog import (
+                ToolboxWatchdog,
+            )
+
+            self._toolbox_watchdog = ToolboxWatchdog()
+            watcher = asyncio.create_task(
+                self._toolbox_watchdog.run(),
+                name="toolbox-watchdog",
+            )
+            # prevent GC of the background task
+            self._toolbox_watcher_task = watcher
+            logger.info(
+                "🔭 [JOSU] Toolbox watchdog co-launched.",
+            )
+        except ImportError:
+            logger.debug(
+                "[JOSU] Toolbox watchdog not available.",
+            )
 
         while True:
             try:

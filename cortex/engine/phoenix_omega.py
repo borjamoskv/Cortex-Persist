@@ -168,34 +168,23 @@ class AnalysisEngine(BaseEngine):
         return file_atoms
 
     def _extract_dependencies(self, node: ast.AST) -> set[str]:
-        deps = set()
-        for child in ast.walk(node):
-            if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Load):
-                deps.add(child.id)
-            elif isinstance(child, ast.Attribute) and isinstance(child.ctx, ast.Load):
-                deps.add(child.attr)
-        return deps
+        return {
+            child.id if isinstance(child, ast.Name) else child.attr
+            for child in ast.walk(node)
+            if (isinstance(child, ast.Name) and isinstance(child.ctx, ast.Load))
+            or (isinstance(child, ast.Attribute) and isinstance(child.ctx, ast.Load))
+        }
 
     def _calculate_complexity(self, node: ast.AST) -> float:
         """Calculates approximate cyclomatic complexity (McCabe)."""
-        complexity = 1.0
-        for child in ast.walk(node):
+        return 1.0 + sum(
+            len(child.values) - 1.0 if isinstance(child, ast.BoolOp) else 1.0
+            for child in ast.walk(node)
             if isinstance(
                 child,
-                (
-                    ast.If,
-                    ast.While,
-                    ast.For,
-                    ast.ExceptHandler,
-                    ast.With,
-                    ast.Assert,
-                    ast.comprehension,
-                ),
-            ):
-                complexity += 1.0
-            elif isinstance(child, ast.BoolOp):
-                complexity += len(child.values) - 1.0
-        return complexity
+                (ast.If, ast.While, ast.For, ast.ExceptHandler, ast.With, ast.Assert, ast.comprehension, ast.BoolOp)
+            )
+        )
 
     def _link_dependencies(self, atoms: dict[str, StructuralAtom]):
         """DERIVATION: O(1) O Muerte -> Uses dict/set intersection"""
@@ -209,38 +198,34 @@ class AnalysisEngine(BaseEngine):
                         atoms[target_aid].dependents.add(aid)
 
     def _build_coupling_graph(self, atoms: dict[str, StructuralAtom]) -> dict:
-        """DERIVATION: Ω₁ (Multi-Scale Causality) -> Bi-directional context."""
-        graph = {aid: {"in": set(), "out": atoms[aid].dependencies} for aid in atoms}
-        for aid, atom in atoms.items():
-            for other_id, other_atom in atoms.items():
-                if other_id != aid and any(d in other_atom.id for d in atom.dependencies):
-                    graph[aid]["in"].add(other_id)
-        return graph
+        """DERIVATION: Ω₁ (Multi-Scale Causality) -> Bi-directional context in O(1)."""
+        return {
+            aid: {"in": atom.dependents, "out": atom.dependencies}
+            for aid, atom in atoms.items()
+        }
 
     def _detect_clusters(self, graph: dict) -> list[set[str]]:
-        """Detects high-coupling modules using BFS."""
+        """Detects high-coupling modules using inline BFS for lower entropy."""
         clusters = []
         visited = set()
         for node in graph:
-            if node not in visited:
-                cluster = self._bfs_cluster(graph, node, visited)
-                if len(cluster) > 2:
-                    clusters.append(cluster)
+            if node in visited:
+                continue
+            
+            cluster = {node}
+            queue = [node]
+            visited.add(node)
+            while queue:
+                current = queue.pop(0)
+                neighbors = (graph.get(current, {}).get("in", set()) | 
+                             graph.get(current, {}).get("out", set())) - visited
+                visited.update(neighbors)
+                queue.extend(neighbors)
+                cluster.update(neighbors)
+                
+            if len(cluster) > 2:
+                clusters.append(cluster)
         return clusters
-
-    def _bfs_cluster(self, graph: dict, start: str, visited: set) -> set[str]:
-        cluster = {start}
-        queue = [start]
-        visited.add(start)
-        while queue:
-            current = queue.pop(0)
-            neighbors = graph[current]["in"] | graph[current]["out"]
-            for neighbor in neighbors:
-                if neighbor not in visited and neighbor in graph:
-                    visited.add(neighbor)
-                    queue.append(neighbor)
-                    cluster.add(neighbor)
-        return cluster
 
 
 class ExtractionEngine(BaseEngine):
@@ -376,7 +361,6 @@ class PhoenixOrchestrator:
     async def ignite(self, target_paths: list[Path]) -> PhoenixState:
         logger.info("🔥 PHOENIX IGNITION: Starting Sovereign Metamorphosis")
 
-        # Initial State
         state = PhoenixState(
             phase=AtomicPhase.ANALYSIS,
             status=PhaseStatus.PENDING,
@@ -385,28 +369,19 @@ class PhoenixOrchestrator:
             metrics={},
         )
 
-        # Phase 1
-        state = await self.analyzer.execute(state, target_paths)
-        if state.status != PhaseStatus.COMPLETED:
-            return state
+        stages = [
+            (self.analyzer, [target_paths]),
+            (self.extractor, []),
+            (self.reconstructor, []),
+            (self.scaler, []),
+            (self.verifier, []),
+        ]
 
-        # Phase 2
-        state = await self.extractor.execute(state)
-        if state.status != PhaseStatus.COMPLETED:
-            return state
-
-        # Phase 3
-        state = await self.reconstructor.execute(state)
-        if state.status != PhaseStatus.COMPLETED:
-            return state
-
-        # Phase 4
-        state = await self.scaler.execute(state)
-        if state.status != PhaseStatus.COMPLETED:
-            return state
-
-        # Phase 5
-        state = await self.verifier.execute(state)
+        for engine, args in stages:
+            state = await engine.execute(state, *args)
+            if state.status != PhaseStatus.COMPLETED:
+                logger.error(f"❌ PHOENIX HALTED at {engine.__class__.__name__}")
+                break
 
         return state
 

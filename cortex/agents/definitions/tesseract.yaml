@@ -51,3 +51,4 @@ tools:
   - void_collapse
   - spawn_legion
   - singularity_forge
+  - toolbox_membrane
