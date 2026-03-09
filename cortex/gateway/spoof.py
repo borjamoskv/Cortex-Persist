@@ -32,6 +32,12 @@ class SpoofManager:
             return json.loads(_RULES_PATH.read_text())
         except Exception as e:
             logger.error("Failed to load spoof rules: %s", e)
+            # Ω₅: Persist config failure as ghost
+            try:
+                from cortex.immune.error_boundary import ErrorBoundary
+                ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
+            except Exception:
+                pass
             return {"mappings": {}, "default_intent": "general"}
 
     def resolve_intent(self, requested_model: str, messages: List[Dict[str, str]]) -> IntentProfile:
