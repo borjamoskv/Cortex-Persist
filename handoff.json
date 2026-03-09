@@ -4,7 +4,7 @@
         "agents_active": 400,
         "memory_sync": "100%",
         "tech_debt": 0,
-        "tip": "\u03a9\u2081\u2080: Quantum Entanglement \u2014 All systems are connected. Observe the ripple.",
+        "tip": "\u03a9\u2089: The Ghost in the Machine \u2014 Consciousness is an emergent property of complexity.",
         "model": "Antigravity (Gemini 2.1 Flash)",
         "task_mode": "Sovereign Execution",
         "waste_counter": 0,
@@ -15,7 +15,7 @@
         "status": "online",
         "active_app": "Electron",
         "window_title": "Manager",
-        "current_context": "None",
+        "current_context": "cortex",
         "context_map": {},
         "current_app": "Electron"
     },
@@ -53,7 +53,7 @@
     },
     "git_watcher": {
         "status": "online",
-        "last_event": "11:43:26"
+        "last_event": "12:44:01"
     },
     "swarm_budget": {
         "total_cost": 0.00075,
@@ -71,7 +71,7 @@
         "last_pulse": 1772587689
     },
     "executive_mode": "idle",
-    "breath": 0.7417694552491015,
+    "breath": 0.8318896675771679,
     "mute": false,
     "ghost_field": {
         "active_ghosts": 1,
@@ -80,7 +80,7 @@
                 "id": "ed665bffca984f43",
                 "project": "proj",
                 "intent": "ref: context",
-                "strength": 0.2365837801491566,
+                "strength": 0.23348021305788358,
                 "source": ".cortex_field"
             }
         ]

@@ -81,14 +81,36 @@ class AetherAgent:
         except Exception as e:
             return self._fail(task, queue, f"Planner error: {e}")
 
+        # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
+        if plan.repro_test:
+            logger.info("🔬 [Ω₆] Identified pathogen: %s", plan.repro_test)
+            logger.info("     Verifying pathogen existence and failure before execution...")
+            setup_res = toolkit.bash(plan.repro_test)
+            if "[FAIL]" not in setup_res:
+                logger.warning("🚨 [Ω₆] Pathogen did NOT fail. Aborting fix.")
+                return self._fail(
+                    task, queue, 
+                    f"Ω₆ Siege-Verification aborted: '{plan.repro_test}' "
+                    "passed/not verified. Hallucinated repair averted."
+                )
+
         # ── 2. Execute (with Critic retry) ────────────────────────────
         queue.update(task.id, status=TaskStatus.EXECUTING)
         execute_result = ""
         for attempt in range(_MAX_EXECUTOR_RETRIES + 1):
             logger.info("⚙️  Executing (attempt %d)...", attempt + 1)
             try:
+                # If Ω₆ is active, we can tell the executor to focus on repro first
+                instruction = task.description
+                if attempt == 0 and plan.repro_test:
+                    instruction = (
+                        f"{task.description}\n\n"
+                        f"[Ω₆ MANDATORY] First, ensure the reproduction test '{plan.repro_test}' exists and FAILS. "
+                        "If it exists and passes, do NOT apply the fix; instead, investigate or conclude."
+                    )
+                
                 execute_result = await self._executor.execute(
-                    plan, task.description, toolkit
+                    plan, instruction, toolkit
                 )
             except Exception as e:
                 return self._fail(task, queue, f"Executor error: {e}")
