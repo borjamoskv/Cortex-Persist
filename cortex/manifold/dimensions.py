@@ -41,8 +41,8 @@ class PerceptionDimension:
 class DecisionDimension:
     """D2: Architecture & Intent (Wraps PlannerAgent)."""
 
-    def __init__(self, llm) -> None:
-        self.planner = PlannerAgent(llm)
+    def __init__(self, llm, system_prompt: str | None = None) -> None:
+        self.planner = PlannerAgent(llm, system_prompt)
         self.redteam = RedTeamAgent(llm)
 
     async def process(
@@ -77,8 +77,8 @@ class DecisionDimension:
 class CreationDimension:
     """D3: Construction / Materialization (Wraps ExecutorAgent)."""
 
-    def __init__(self, llm) -> None:
-        self.executor = ExecutorAgent(llm)
+    def __init__(self, llm, system_prompt: str | None = None) -> None:
+        self.executor = ExecutorAgent(llm, system_prompt)
 
     async def process(
         self,
@@ -108,8 +108,8 @@ class CreationDimension:
 class ValidationDimension:
     """D4: Siege & Entropy (Wraps CriticAgent & TesterAgent)."""
 
-    def __init__(self, llm) -> None:
-        self.critic = CriticAgent(llm)
+    def __init__(self, llm, system_prompt: str | None = None) -> None:
+        self.critic = CriticAgent(llm, system_prompt)
         self.tester = TesterAgent()
 
     async def process(
