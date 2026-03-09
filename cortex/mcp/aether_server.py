@@ -139,16 +139,17 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
             return f"❌ File not found: {filepath}"
             
         limit = min(abs(max_lines), 50000)
-        
-        try:
+
+        def _read() -> str:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-                
             if len(lines) > limit:
                 content = "".join(lines[:limit])
                 return f"⚠️ Output truncated to first {limit} lines (total length was {len(lines)} lines).\n\n{content}"
-                
             return "".join(lines)
+
+        try:
+            return await asyncio.to_thread(_read)
         except UnicodeDecodeError:
             return f"❌ File {filepath} is binary or not UTF-8."
         except Exception as e:
