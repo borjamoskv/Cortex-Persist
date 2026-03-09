@@ -1,0 +1,81 @@
+/* ==========================================================================
+   CORTEX-PERSIST // INDUSTRIAL NOIR DESIGN SYSTEM
+   ========================================================================== */
+   @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+   :root {
+     /* Core Palette */
+     --cx-bg-void: #020202;
+     --cx-bg-surface: #0A0A0A;
+     --cx-bg-elevated: #1A1A1A;
+     
+     /* Accents */
+     --cx-lime: #CCFF00;
+     --cx-violet: #6600FF;
+     --cx-gold: #D4AF37;
+     --cx-blue: #2E5090;
+     --cx-error: #FF3366;
+     
+     /* Typography */
+     --cx-font-data: 'Fira Code', monospace;
+     --cx-font-narrative: 'Inter', sans-serif;
+     
+     /* Motion - Semantic Springs */
+     --cx-spring-fast: 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+     --cx-spring-bounce: 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+   }
+   
+   body {
+     background-color: var(--cx-bg-void);
+     color: #E0E0E0;
+     font-family: var(--cx-font-data);
+     -webkit-font-smoothing: antialiased;
+     margin: 0;
+     padding: 0;
+     overflow-x: hidden;
+   }
+   
+   /* Glassmorphism & Membrane Borders */
+   .sovereign-panel {
+     background: rgba(10, 10, 10, 0.85);
+     backdrop-filter: blur(12px);
+     border: 1px solid rgba(204, 255, 0, 0.1);
+     border-radius: 4px;
+     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+     transition: border-color var(--cx-spring-fast);
+     padding: 24px;
+     margin-bottom: 24px;
+   }
+   
+   .sovereign-panel:hover {
+     border-color: rgba(204, 255, 0, 0.4);
+   }
+   
+   .data-accent {
+     color: var(--cx-lime);
+     text-shadow: 0 0 8px rgba(204, 255, 0, 0.3);
+   }
+
+   .data-narrative {
+     font-family: var(--cx-font-narrative);
+     color: #999;
+     line-height: 1.6;
+   }
+   
+   /* Status Indicators */
+   .status-indicator {
+     display: inline-block;
+     width: 12px;
+     height: 12px;
+     border-radius: 50%;
+     margin-right: 8px;
+   }
+   .status-confirmed { background-color: var(--cx-lime); box-shadow: 0 0 10px var(--cx-lime); }
+   .status-corrupted { background-color: var(--cx-error); box-shadow: 0 0 10px var(--cx-error); }
+   .status-idle { background-color: #555; }
+   .status-verifying { background-color: var(--cx-gold); animation: pulse 1s infinite alternate; }
+   
+   @keyframes pulse {
+     from { opacity: 0.6; box-shadow: 0 0 4px var(--cx-gold); }
+     to { opacity: 1; box-shadow: 0 0 12px var(--cx-gold); }
+   }
