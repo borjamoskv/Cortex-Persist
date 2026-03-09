@@ -41,12 +41,14 @@ class AetherAgent:
         self._llm = LLMProvider(provider=llm_provider)
 
         system_prompt = None
+        self._allowed_tools: list[str] | None = None
         if agent_id:
             registry = AgentRegistry()
             # Ensure registries are loaded (safe to call multiple times)
             registry.load_all()
             if agent_def := registry.get(agent_id):
                 system_prompt = agent_def.system_prompt
+                self._allowed_tools = agent_def.tools
 
         self._planner = PlannerAgent(self._llm, system_prompt)
         self._executor = ExecutorAgent(self._llm, system_prompt)
@@ -60,7 +62,7 @@ class AetherAgent:
         branch = f"aether/{task.id}"
 
         try:
-            toolkit = AgentToolkit(task.repo_path)
+            toolkit = AgentToolkit(task.repo_path, allowed_tools=self._allowed_tools)
         except FileNotFoundError as e:
             return self._fail(task, queue, str(e))
 
