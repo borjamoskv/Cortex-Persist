@@ -26,14 +26,23 @@ logger = logging.getLogger("cortex.manifold.core")
 class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
-    def __init__(self, llm_provider: str = "qwen") -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
         from cortex.llm.provider import LLMProvider
+        from cortex.agents.registry import AgentRegistry
 
         self._llm = LLMProvider(provider=llm_provider)
+
+        system_prompt = None
+        if agent_id:
+            registry = AgentRegistry()
+            registry.load_all()
+            if agent_def := registry.get(agent_id):
+                system_prompt = agent_def.system_prompt
+
         self.d1 = PerceptionDimension()
-        self.d2 = DecisionDimension(self._llm)
-        self.d3 = CreationDimension(self._llm)
-        self.d4 = ValidationDimension(self._llm)
+        self.d2 = DecisionDimension(self._llm, system_prompt)
+        self.d3 = CreationDimension(self._llm, system_prompt)
+        self.d4 = ValidationDimension(self._llm, system_prompt)
         self.max_cycles = 5
 
     async def run(self, task: AgentTask, toolkit: AgentToolkit) -> AgentTask:
