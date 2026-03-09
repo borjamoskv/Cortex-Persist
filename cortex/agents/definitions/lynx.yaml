@@ -41,3 +41,4 @@ tools:
   - cortex_search
   - cortex_shannon_report
   - analyze_entropy
+  - toolbox_membrane

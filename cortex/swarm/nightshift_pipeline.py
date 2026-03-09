@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import logging
 import time
+import re
+import json
 from typing import Any
 
 logger = logging.getLogger("cortex.swarm.nightshift_pipeline")
@@ -41,6 +43,31 @@ class PlannerNode:
 
     name = "planner"
 
+    def _clean_target(self, target: str) -> str:
+        """Aesthetic Cleaning: Extract clean URL/Query from raw strings."""
+        if not isinstance(target, str):
+            return str(target)
+            
+        # 1. URL extraction
+        url_match = re.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', target)
+        if url_match:
+            return url_match.group(0)
+            
+        # 2. JSON unpacking
+        if target.strip().startswith("{"):
+            try:
+                data = json.loads(target)
+                return data.get("url") or data.get("target") or data.get("query") or target[:200]
+            except json.JSONDecodeError:
+                pass
+                
+        # 3. Artifact header stripping
+        clean = re.sub(r'═══.*?═══', '', target).strip()
+        # 4. Remove leading/trailing markdown code blocks
+        clean = re.sub(r'^```\w*\n|```$', '', clean).strip()
+        
+        return clean[:500]
+
     async def execute(self, state: dict[str, Any]) -> dict[str, Any]:
         """Build execution plan from targets."""
         targets = state.get("targets", [])
@@ -56,7 +83,7 @@ class PlannerNode:
                 plan.append(
                     {
                         "id": f"crystal-{int(time.time())}-{i}",
-                        "target": target.target,
+                        "target": self._clean_target(target.target),
                         "intent": target.intent,
                         "priority": target.priority,
                         "source": target.source,
@@ -67,7 +94,7 @@ class PlannerNode:
                 plan.append(
                     {
                         "id": f"crystal-{int(time.time())}-{i}",
-                        "target": target["target"],
+                        "target": self._clean_target(target["target"]),
                         "intent": target.get("intent", intent_fallback or "quick_read"),
                         "priority": target.get("priority", 5),
                         "source": target.get("source", "manual"),
@@ -79,7 +106,7 @@ class PlannerNode:
                 plan.append(
                     {
                         "id": f"crystal-{int(time.time())}-{i}",
-                        "target": target,
+                        "target": self._clean_target(target),
                         "intent": intent_fallback or "quick_read",
                         "priority": 5,
                         "source": "manual",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import signal
@@ -29,6 +30,7 @@ from cortex.daemon.models import (
     DaemonStatus,
 )
 from cortex.daemon.monitors import (
+    AutoImmuneMonitor,
     CertMonitor,
     CloudSyncMonitor,
     CompactionMonitor,
@@ -107,26 +109,45 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._threads: list[threading.Thread] = []
 
         file_config = self._load_config()
-        resolved_sites = sites or file_config.get("sites", [])
+        self._cooldown = file_config.get("cooldown", cooldown)
+        self._last_alerts: dict[str, float] = {}
 
+        self._init_core_monitors(file_config, sites, stale_hours, memory_stale_hours)
+        self._init_advanced_monitors(file_config)
+        self._init_external_oracles(file_config, resolved_sites=[])  # sites used in certs
+        self._init_background_agents(file_config)
+        self._init_autopoiesis(file_config)
+        self._init_persistence_checkers(file_config)
+
+    def _init_core_monitors(
+        self,
+        file_config: dict,
+        sites: list[str] | None,
+        stale_hours: float,
+        memory_stale_hours: float,
+    ) -> None:
+        """Initialize basic status monitors."""
+        resolved_sites = sites or file_config.get("sites", [])
         self.site_monitor = SiteMonitor(resolved_sites)
         self.ghost_watcher = GhostWatcher(
-            config_dir / "ghosts.json",
+            self.config_dir / "ghosts.json",
             file_config.get("stale_hours", stale_hours),
         )
         self.memory_syncer = MemorySyncer(
-            config_dir / "system.json",
+            self.config_dir / "system.json",
             file_config.get("memory_stale_hours", memory_stale_hours),
         )
-        self.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)  # Added EvaluationMonitor
-        # Single shared engine instance to prevent memory leaks (HIGH-004)
+        self.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)
+
+        # Shared engine
         try:
             from cortex.engine import CortexEngine
-
             self._shared_engine = CortexEngine()
         except ImportError:
             self._shared_engine = None
 
+    def _init_advanced_monitors(self, file_config: dict) -> None:
+        """Initialize optimization and analysis monitors."""
         self.mejoralo_monitor = UnifiedMejoraloMonitor(
             projects=file_config.get("auto_mejoralo_projects", {}),
             interval_seconds=file_config.get("auto_mejoralo_interval", 1800),
@@ -149,6 +170,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
             threshold=file_config.get("security_threshold", 0.85),
         )
+
+    def _init_external_oracles(self, file_config: dict, resolved_sites: list[str]) -> None:
+        """Initialize oracles and external connectivity monitors."""
         self.signal_monitor = SignalMonitor(
             db_path=file_config.get("db_path", str(CORTEX_DB)),
             engine=self._shared_engine,
@@ -191,17 +215,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             cert_hostnames,
             file_config.get("cert_warn_days", DEFAULT_CERT_WARN_DAYS),
         )
-        self.engine_health = EngineHealthCheck(Path(file_config.get("db_path", str(CORTEX_DB))))
-        self.disk_monitor = DiskMonitor(
-            Path(file_config.get("watch_path", str(CORTEX_DIR))),
-            file_config.get("disk_warn_mb", DEFAULT_DISK_WARN_MB),
-        )
-        self.cloud_sync_monitor = CloudSyncMonitor(
-            interval_seconds=file_config.get("cloud_sync_interval", 15),
-            engine=self._shared_engine,
-        )
 
-        # Aether — autonomous background coding agent
+    def _init_background_agents(self, file_config: dict) -> None:
+        """Initialize autonomous background agents like Aether."""
         self._aether_daemon: AetherDaemon | None = None
         self.aether_monitor: AetherMonitor | None = None
         if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
@@ -216,11 +232,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                     github_repos=file_config.get("aether_github_repos", []),
                 )
                 self.aether_monitor = AetherMonitor(self._aether_daemon)
+                self.auto_immune_monitor = AutoImmuneMonitor(queue=aether_queue)
                 logger.info("🤖 Aether autonomous agent ENABLED")
             except Exception as e:
                 logger.warning("Failed to init Aether daemon: %s", e)
 
-        # Centaur Heartbeat Engine
+    def _init_autopoiesis(self, file_config: dict) -> None:
+        """Initialize Heartbeat and metabolism engines."""
         self.heartbeat_daemon = None
         if _CENTAUR_AVAILABLE:
             try:
@@ -236,7 +254,35 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
             except Exception as e:
                 logger.warning("Failed to init HeartbeatDaemon: %s", e)
 
-        # Entropic Wake (Void Daemon)
+        self.frontier_daemon = None
+        if _FRONTIER_AVAILABLE:
+            try:
+                self.frontier_daemon = FrontierDaemon(
+                    engine=self._shared_engine,
+                    metabolism_interval_hours=float(
+                        file_config.get("frontier_metabolism_interval_hours", 12.0)
+                    ),
+                    ingestion_interval_hours=float(
+                        file_config.get("frontier_ingestion_interval_hours", 24.0)
+                    ),
+                    allow_commits=file_config.get("frontier_allow_commits", True),
+                )
+                logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init Frontier Daemon: %s", e)
+
+    def _init_persistence_checkers(self, file_config: dict) -> None:
+        """Initialize checks related to data persistence and timing."""
+        self.engine_health = EngineHealthCheck(Path(file_config.get("db_path", str(CORTEX_DB))))
+        self.disk_monitor = DiskMonitor(
+            Path(file_config.get("watch_path", str(CORTEX_DIR))),
+            file_config.get("disk_warn_mb", DEFAULT_DISK_WARN_MB),
+        )
+        self.cloud_sync_monitor = CloudSyncMonitor(
+            interval_seconds=file_config.get("cloud_sync_interval", 15),
+            engine=self._shared_engine,
+        )
+
         self.entropic_wake_daemon = None
         if _ENTROPIC_WAKE_AVAILABLE:
             try:
@@ -250,27 +296,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
                 logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
             except Exception as e:
                 logger.warning("Failed to init Entropic Wake Daemon: %s", e)
-
-        # Frontier Daemon (R&D & Metabolism)
-        self.frontier_daemon = None
-        if _FRONTIER_AVAILABLE:
-            try:
-                self.frontier_daemon = FrontierDaemon(
-                    engine=self._shared_engine,
-                    metabolism_interval_hours=float(
-                        file_config.get("frontier_metabolism_interval_hours", 12.0)
-                    ),
-                    ingestion_interval_hours=float(
-                        file_config.get("frontier_ingestion_interval_hours", 24.0)
-                    ),
-                    allow_commits=file_config.get("frontier_allow_commits", True) # User granted autonomy
-                )
-                logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
-            except Exception as e:
-                logger.warning("Failed to init Frontier Daemon: %s", e)
-
-        self._last_alerts: dict[str, float] = {}
-        self._cooldown = file_config.get("cooldown", cooldown)
 
         # Time Tracker
         try:
@@ -326,6 +351,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
         if self.aether_monitor is not None:
             self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
+            if hasattr(self, "auto_immune_monitor"):
+                self._run_monitor(
+                    status,
+                    "auto_immune_alerts",
+                    self.auto_immune_monitor,
+                    self._alert_auto_immune,
+                )
 
         self._auto_sync(status)
         self._flush_timer()
@@ -356,6 +388,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         monitor_name = type(monitor).__name__
         try:
             results = getattr(monitor, method)()
+
+            # Handle async monitors
+            if asyncio.iscoroutine(results):
+                results = asyncio.run(results)
+
             if isinstance(results, list):
                 setattr(status, attr, results)
             alert_fn(results)
@@ -519,19 +556,15 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin):
         """Runs the HeartbeatDaemon event loop."""
         if not self.heartbeat_daemon:
             return
-            
-        import asyncio
+
         logger.info("❤️  Heartbeat thread started")
-        
+
         async def _lifecycle():
             task = asyncio.create_task(self.heartbeat_daemon.start())
             while not self._shutdown:
                 await asyncio.sleep(1.0)
             await self.heartbeat_daemon.stop()
-            try:
-                await task
-            except asyncio.CancelledError:
-                raise
+            await task
 
         try:
             asyncio.run(_lifecycle())

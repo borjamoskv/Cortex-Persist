@@ -36,6 +36,8 @@ TEMPERATURE_HOT = 0.1       # recalls/day — above this is "hot"
 TEMPERATURE_COLD = 0.01     # below this is "cold"
 RESONANCE_HIGH = 0.5        # cosine sim vs axioms — above is "resonant"
 RESONANCE_LOW = 0.2         # below this is "irrelevant"
+AXIOMATIC_INERTIA_THRESHOLD = 0.8  # Ω₃: structural knowledge threshold
+TEMPERATURE_TIBIA = 0.1     # min "warm" temperature for axiomatic facts
 MIN_AGE_DAYS_FOR_PURGE = 14  # Don't purge anything younger than 2 weeks
 MIN_AGE_DAYS_FOR_PROMOTE = 7  # Must survive 7 days to earn diamond status
 
@@ -196,6 +198,18 @@ def measure_crystal_sync(
 ) -> CrystalVitals:
     """Synchronous crystal health measurement (resonance pre-computed)."""
     temperature = calculate_temperature(recall_count, age_days)
+    
+    # Ω₃: Axiomatic Inertia (Byzantine Default)
+    # Structural knowledge maintains a minimum "warm" (Tibia) temperature 
+    # regardless of usage frequency to prevent democratic decay loops.
+    if resonance >= AXIOMATIC_INERTIA_THRESHOLD:
+        if temperature < TEMPERATURE_TIBIA:
+            logger.debug(
+                "🛡️ [THERMOMETER] Axiomatic Inertia: keeping %s warm (res=%.3f)", 
+                fact_id, resonance
+            )
+            temperature = TEMPERATURE_TIBIA
+
     quadrant = classify_quadrant(temperature, resonance)
     recommendation = determine_recommendation(
         quadrant, is_diamond, age_days, temperature, resonance,

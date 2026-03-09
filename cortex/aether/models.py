@@ -108,15 +108,18 @@ class PlanOutput:
     files_to_touch: list[str]
     tests_to_run: list[str]
     summary: str = ""
+    repro_test: str = ""  # For Ω₆: A test that fails BEFORE the fix.
 
     def to_prompt_str(self) -> str:
         steps = "\n".join(f"  {i+1}. {s}" for i, s in enumerate(self.steps))
         files = ", ".join(self.files_to_touch) or "unknown"
         tests = ", ".join(self.tests_to_run) or "pytest"
+        repro = f"\nReproduction Test (must fail first): {self.repro_test}" if self.repro_test else ""
         return (
             f"PLAN:\n{steps}\n\n"
             f"Files to touch: {files}\n"
             f"Tests to run: {tests}"
+            f"{repro}"
         )
 
 

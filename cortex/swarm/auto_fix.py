@@ -213,10 +213,26 @@ class AutoFixPipeline:
                 tests_passed=True,
             )
         else:
+            error_msg = result.get("error", "validation failed")
+            
+            # Check for Ω₆ early aborts
+            if "Ω₆ Siege-Verification aborted" in error_msg:
+                logger.info("🛡️  [AUTOFIX] Ω₆ prevented hallucination for ghost [%s].", ghost_id)
+                return FixAttempt(
+                    ghost_id=ghost_id,
+                    classification=classification,
+                    success=False,
+                    branch=result.get("branch", ""),
+                    summary="Aborted: Repro test passed (Hallucination averted)",
+                    error=error_msg,
+                    duration_ms=elapsed,
+                    tests_passed=result.get("tests_passed", False),
+                )
+
             # Ω₅: Escalate failed fix
             await self._escalate(
                 ghost_id, classification,
-                result.get("error", "tests failed"), project,
+                error_msg, project,
             )
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -224,7 +240,7 @@ class AutoFixPipeline:
                 success=False,
                 branch=result.get("branch", ""),
                 summary=result.get("summary", ""),
-                error=result.get("error", "validation failed"),
+                error=error_msg,
                 duration_ms=elapsed,
                 tests_passed=result.get("tests_passed", False),
             )

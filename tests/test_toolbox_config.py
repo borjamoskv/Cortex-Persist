@@ -78,9 +78,12 @@ def test_has_source(sources: list[dict]) -> None:
 
 def test_has_tools(tools: list[dict]) -> None:
     """Must have at least the 5 planned tools."""
-    assert len(tools) >= 5
     names = {t["name"] for t in tools}
-    expected = {"query-facts", "query-ghosts", "query-decisions", "query-signals", "cortex-stats"}
+    expected = {
+        "query-facts", "query-ghosts", "query-decisions",
+        "query-signals", "cortex-stats", "trace-impact",
+        "cluster-signals", "ghost-mapping",
+    }
     assert expected.issubset(names), f"Missing tools: {expected - names}"
 
 
@@ -111,10 +114,11 @@ def test_toolset_references(tools: list[dict], toolsets: list[dict]) -> None:
 
 
 def test_has_toolsets(toolsets: list[dict]) -> None:
-    """Must have cortex-readonly and cortex-summary toolsets."""
+    """Must have cortex-readonly, cortex-summary, and graph-analysis toolsets."""
     names = {ts["name"] for ts in toolsets}
     assert "cortex-readonly" in names
     assert "cortex-summary" in names
+    assert "graph-analysis" in names
 
 
 # ─── SQL Validation Tests ─────────────────────────────────────────────
@@ -122,7 +126,11 @@ def test_has_toolsets(toolsets: list[dict]) -> None:
 
 @pytest.mark.parametrize(
     "tool_name",
-    ["query-facts", "query-ghosts", "query-decisions", "query-signals", "cortex-stats"],
+    [
+        "query-facts", "query-ghosts", "query-decisions",
+        "query-signals", "cortex-stats", "trace-impact",
+        "cluster-signals", "ghost-mapping"
+    ],
 )
 def test_sql_prepares(
     tool_name: str, tools: list[dict], cortex_db: sqlite3.Connection
@@ -134,10 +142,8 @@ def test_sql_prepares(
     tool = next(t for t in tools if t["name"] == tool_name)
     stmt = tool["statement"]
 
-    # Replace Toolbox-style $N placeholders with NULL for prepare check
-    import re
-
-    prepared = re.sub(r"\$\d+", "NULL", stmt)
+    # Replace Toolbox-style ? placeholders with NULL for prepare check
+    prepared = stmt.replace("?", "NULL")
 
     try:
         cortex_db.execute(prepared)

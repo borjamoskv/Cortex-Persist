@@ -10,6 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
+from cortex.immune.filters.base import Verdict
+from cortex.immune.membrane import ImmuneMembrane
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.trust_tools import register_trust_tools
@@ -44,7 +46,7 @@ class _MCPContext:
     that owns its lifecycle.
     """
 
-    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized")
+    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized", "membrane")
 
     def __init__(self, cfg: MCPServerConfig) -> None:
         self.cfg = cfg
@@ -52,6 +54,7 @@ class _MCPContext:
         self.executor = ThreadPoolExecutor(max_workers=cfg.max_workers)
         self.pool = AsyncConnectionPool(cfg.db_path, max_connections=cfg.max_workers)
         self.search_cache = SimpleAsyncCache(maxsize=cfg.query_cache_size)
+        self.membrane = ImmuneMembrane()
         self._initialized = False
 
     async def ensure_ready(self) -> None:
@@ -87,7 +90,17 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         except ValueError as e:
             ctx.metrics.record_error()
             logger.warning("MCP Guard rejected store: %s", e)
-            return f"❌ Rejected: {e}"
+            return f"❌ Rejected by Guard: {e}"
+
+        # Immune Membrane Interception (Ω₃ Byzantine Default)
+        intent_payload = f"Store Fact [{fact_type}]: {content}"
+        context_payload = {"project": project, "tags": parsed_tags, "source": source}
+        triage = await ctx.membrane.intercept(intent_payload, context_payload)
+
+        if triage.verdict != Verdict.PASS:
+            ctx.metrics.record_error(is_immune_rejection=True)
+            logger.warning("Immune Membrane rejected store: %s", triage.risks_assumed)
+            return f"❌ Rejected by Immune System ({triage.verdict.value}): {triage.risks_assumed}"
 
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
@@ -124,7 +137,32 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         except ValueError as e:
             ctx.metrics.record_error()
             logger.warning("MCP Guard rejected search: %s", e)
-            return f"❌ Rejected: {e}"
+            return f"❌ Rejected by Guard: {e}"
+
+        # 1. Immune Membrane Interception (Ω₃)
+        context = {
+            "source": "mcp_search",
+            "project": project or "global",
+            "is_external_source": True,  # MCP calls are effectively external
+            "complexity_added": 1.0,     # Minimal entropy added by a read
+            "complexity_removed": 0.0,
+            "query_length": len(query),
+        }
+        
+        # For search, we might want to flag highly adversarial-looking queries
+        # even before the DB is hit.
+        triage = await ctx.membrane.intercept(query, context)
+        
+        if triage.verdict == Verdict.BLOCK:
+            ctx.metrics.record_error(is_immune_rejection=True)
+            logger.warning(
+                "MCP Immune System rejected search: %s\nRisks: %s", 
+                query, triage.risks_assumed
+            )
+            return f"❌ Rejected by Immune System (Ω₃): {', '.join(triage.risks_assumed)}"
+        elif triage.verdict == Verdict.HOLD:
+            # We can allow HOLD for search, but log it
+            logger.info("Search passed with HOLD warnings: %s", triage.risks_assumed)
 
         cache_key = f"{query}:{project}:{top_k}"
         cached_result = ctx.search_cache.get(cache_key)

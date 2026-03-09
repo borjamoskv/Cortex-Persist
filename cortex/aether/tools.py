@@ -188,6 +188,9 @@ class AgentToolkit:
                 env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
             )
             output = (result.stdout + result.stderr).strip()
+            if result.returncode != 0:
+                output = f"[FAIL] (exit code: {result.returncode})\n{output}"
+            
             if len(output) > _MAX_OUTPUT:
                 output = output[:_MAX_OUTPUT] + "\n... [truncated]"
             return output or "(no output)"
