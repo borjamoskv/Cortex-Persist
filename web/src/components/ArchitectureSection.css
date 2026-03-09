@@ -1,0 +1,82 @@
+.architecture-section {
+  padding: var(--space-xxl) 0;
+  position: relative;
+  z-index: 10;
+}
+
+.arch-header {
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.arch-features-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.arch-main-feature {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: var(--space-lg);
+  border-color: rgba(204, 255, 0, 0.2);
+}
+
+.main-icon {
+  color: var(--accent-lime);
+  flex-shrink: 0;
+}
+
+.arch-main-feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.arch-list {
+  list-style: none;
+  margin-top: 1rem;
+}
+
+.arch-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.arch-feature {
+  padding: var(--space-md);
+}
+
+.arch-icon {
+  margin-bottom: 1rem;
+}
+
+.arch-feature h4 {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .arch-main-feature {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .arch-list li {
+    justify-content: center;
+  }
+}

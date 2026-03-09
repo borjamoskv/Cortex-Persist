@@ -1,0 +1,118 @@
+.terminal-section {
+  position: relative;
+  z-index: 10;
+}
+
+.terminal-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.terminal-wrapper {
+  max-width: 900px;
+  margin: 0 auto var(--space-xl);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--glass-border);
+}
+
+.terminal-topbar {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.control.minimize { background-color: #FF5F56; }
+.control.maximize { background-color: #FFBD2E; }
+.control.close { background-color: #27C93F; }
+
+.terminal-title {
+  flex: 2;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Add an empty flex item to balance the layout */
+.terminal-topbar::after {
+  content: '';
+  flex: 1;
+}
+
+.terminal-body {
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  min-height: 250px;
+}
+
+.terminal-line {
+  margin-bottom: 0.5rem;
+  color: #E0E0E0;
+}
+
+.prompt {
+  color: var(--accent-blue);
+  margin-right: 0.5rem;
+  font-weight: 700;
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: var(--space-xl);
+}
+
+.feature-card {
+  transition: transform var(--spring-smooth), box-shadow var(--spring-smooth);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(102, 0, 255, 0.15);
+  border-color: rgba(204, 255, 0, 0.2);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-weight: 900;
+}
