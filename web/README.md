@@ -1,16 +1,26 @@
-# React + Vite
+# Cortex Persist Web Frontend
+> Sovereign State OS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend inmutable diseñado bajo el paradigma **Industrial Noir 2026**.
 
-Currently, two official plugins are available:
+## 🚀 Arquitectura
+- **Framework:** Vite + React (O(1) dev server) 
+- **Estética:** Industrial Noir (Deep Blacks, Cyber Lime, Glassmorphism, Semantic Springs <200ms).
+- **Entropía:** Cero componentes genéricos. Todo es custom CSS variables.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Desarrollo Local
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+## 🌐 Despliegue en Cloudflare Pages
+Garantiza O(1) distribuyendo el frontend globalmente conectado a la rama `main`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Conecta tu fork/repositorio a Cloudflare Pages.
+2. **Framework preset:** `Vite`
+3. **Build command:** `npm run build`
+4. **Build output directory:** `dist`
+5. _Root directory (Si aplica):_ `/web`
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+> 💡 **[SOVEREIGN TIP]** Implementa cabeceras CSP rígidas en Cloudflare para lograr el 100% de inmunidad a ataques de inyección, en sincronía con tu matriz de seguridad 6/6.
