@@ -40,7 +40,7 @@ async def run_training_class(episodic, agent_name, complexity, scenario):
     session_id = f"class-{agent_name.lower()}-{uuid.uuid4().hex[:8]}"
     project = "DISEKTV-ACADEMY"
     
-    logger.info(f"Starting Private Class for [{agent_name}] -> {scenario[0]} ({scenario[1]})")
+    logger.info("Starting Private Class for [%s] -> %s (%s)", agent_name, scenario[0], scenario[1])
     
     # 1. Initial intent
     await episodic.record(
@@ -103,7 +103,7 @@ async def run_training_class(episodic, agent_name, complexity, scenario):
             project=project,
             meta={"tests_passed": True, "valuation": scenario[2]}
         )
-        logger.info(f"🎓 [{agent_name}] PASSED {scenario[0]} [Score {success_chance:.2f}]. Valuation awarded: ${scenario[2]:,}")
+        logger.info("🎓 [%s] PASSED %s [Score %.2f]. Valuation awarded: $%s", agent_name, scenario[0], success_chance, scenario[2])
     else:
         await episodic.record(
             session_id=session_id,
@@ -112,7 +112,7 @@ async def run_training_class(episodic, agent_name, complexity, scenario):
             project=project,
             meta={"tests_passed": False}
         )
-        logger.warning(f"❌ [{agent_name}] FAILED {scenario[0]}. Retrying in future classes.")
+        logger.warning("❌ [%s] FAILED %s. Retrying in future classes.", agent_name, scenario[0])
 
 async def daemon_loop():
     engine = CortexEngine()

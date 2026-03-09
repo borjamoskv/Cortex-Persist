@@ -261,7 +261,7 @@ class ConsensusManager:
             # Pulse the reality degradation check
             if alignment_score < 0:
                 logger.warning(
-                    f"Entropic drift detected in agent {agent_id} (Vote rejected by WBFT Consensus)."
+                    "Entropic drift detected in agent %s (Vote rejected by WBFT Consensus).", agent_id
                 )
                 if self._signal_bus:
                     self._signal_bus.emit(

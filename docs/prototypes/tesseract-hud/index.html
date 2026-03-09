@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>◈ TESSERACT-Ω MANIFOLD SUPERVISOR</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap');
+
+        :root {
+            /* Industrial Noir 2026 Palette */
+            --bg-base: #050505;
+            --bg-surface: #0A0A0A;
+            --bg-panel: rgba(26, 26, 26, 0.6);
+            --c-cyber-lime: #CCFF00;
+            --c-yinmn-blue: #2E5090;
+            --c-gold: #D4AF37;
+            --c-violet: #6600FF;
+            --c-text: #F0F0F0;
+            --c-text-muted: #888888;
+            --c-error: #FF3366;
+            
+            --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --glass: blur(12px);
+            --border-glow: 0 0 15px rgba(204, 255, 0, 0.15);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-base);
+            color: var(--c-text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 320px 1fr 350px;
+            grid-template-rows: 60px 1fr 200px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            background-image: 
+                radial-gradient(circle at 50% -20%, rgba(46, 80, 144, 0.15), transparent 60%),
+                linear-gradient(rgba(204, 255, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(204, 255, 0, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        * { box-sizing: border-box; }
+
+        /* Typography */
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .mono { font-family: monospace; font-size: 0.85rem; color: var(--c-cyber-lime); }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s var(--spring), box-shadow 0.3s var(--spring);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--c-yinmn-blue), transparent);
+            opacity: 0.5;
+        }
+
+        .panel.active { border-color: rgba(204, 255, 0, 0.4); box-shadow: var(--border-glow); }
+
+        /* Layout Grid Placement */
+        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        .hud-title { display: flex; align-items: center; gap: 1rem; }
+        .status-badge { background: rgba(204, 255, 0, 0.1); color: var(--c-cyber-lime); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--c-cyber-lime); font-size: 0.8rem; font-weight: 600; letter-spacing: 2px;}
+
+        .dimensions { grid-column: 1; grid-row: 2 / 4; gap: 1rem; display: flex; flex-direction: column; }
+        .viewport { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: center; perspective: 1000px; position: relative; }
+        .telemetry { grid-column: 2; grid-row: 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .event-log { grid-column: 3; grid-row: 2 / 4; }
+
+        /* Dimension Nodes */
+        .dim-node {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.4s var(--spring);
+            opacity: 0.6;
+        }
+        .dim-node.active {
+            opacity: 1;
+            border-color: var(--c-cyber-lime);
+            transform: translateX(10px);
+            background: linear-gradient(90deg, rgba(204, 255, 0, 0.05), transparent);
+        }
+        .dim-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .dim-bar-bg { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .dim-bar { height: 100%; background: var(--c-yinmn-blue); width: 0%; transition: width 0.5s ease; }
+        .dim-node.active .dim-bar { background: var(--c-cyber-lime); }
+
+        /* Tesseract 3D CSS Visualization */
+        .cube-container {
+            width: 200px; height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate_cube 15s infinite linear;
+        }
+
+        .cube-container.converging {
+            animation: rotate_cube 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .face {
+            position: absolute; width: 200px; height: 200px;
+            border: 2px solid var(--c-yinmn-blue);
+            background: rgba(46, 80, 144, 0.05);
+            box-shadow: inset 0 0 20px rgba(46, 80, 144, 0.2);
+            transition: all 0.5s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .cube-container.converging .face {
+            border-color: var(--c-cyber-lime);
+            background: rgba(204, 255, 0, 0.1);
+            box-shadow: inset 0 0 40px rgba(204, 255, 0, 0.3), 0 0 20px rgba(204, 255, 0, 0.2);
+        }
+
+        .front  { transform: translateZ(100px); }
+        .back   { transform: rotateY(180deg) translateZ(100px); }
+        .right  { transform: rotateY(90deg) translateZ(100px); }
+        .left   { transform: rotateY(-90deg) translateZ(100px); }
+        .top    { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        /* Inner Cube (The Hypercube representation) */
+        .inner-cube {
+            position: absolute; top: 50px; left: 50px;
+            width: 100px; height: 100px;
+            transform-style: preserve-3d;
+            animation: rotate_inner 8s infinite linear reverse;
+        }
+        .inner-face {
+            position: absolute; width: 100px; height: 100px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.02);
+            transition: all 0.5s ease;
+        }
+
+        .cube-container.converging .inner-face {
+            border-color: var(--c-gold);
+            background: rgba(212, 175, 55, 0.2);
+        }
+
+        .i-front  { transform: translateZ(50px); }
+        .i-back   { transform: rotateY(180deg) translateZ(50px); }
+        .i-right  { transform: rotateY(90deg) translateZ(50px); }
+        .i-left   { transform: rotateY(-90deg) translateZ(50px); }
+        .i-top    { transform: rotateX(90deg) translateZ(50px); }
+        .i-bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        @keyframes rotate_cube { 0% { transform: rotateX(0) rotateY(0) rotateZ(0); } 100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(180deg); } }
+        @keyframes rotate_inner { 0% { transform: rotateX(0) rotateY(0); } 100% { transform: rotateX(-360deg) rotateY(-360deg); } }
+
+        /* Telemetry blocks */
+        .metric {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-left: 3px solid var(--c-yinmn-blue);
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .metric h3 { font-size: 0.8rem; color: var(--c-text-muted); }
+        .metric .val { font-size: 2rem; font-family: 'Outfit'; font-weight: 700; color: white; display:flex; align-items: baseline; gap: 0.5rem;}
+        .metric .val span { font-size: 0.8rem; color: var(--c-cyber-lime); }
+
+        /* Event Log */
+        .log-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; height: calc(100% - 30px); }
+        .log-entry { font-size: 0.85rem; padding: 0.8rem; border-left: 2px solid var(--c-yinmn-blue); background: rgba(46, 80, 144, 0.05); animation: fade_in 0.3s ease; }
+        .log-entry.success { border-left-color: var(--c-cyber-lime); background: rgba(204, 255, 0, 0.05); }
+        .log-entry.warning { border-left-color: var(--c-gold); background: rgba(212, 175, 55, 0.05); }
+        .log-entry.error { border-left-color: var(--c-error); background: rgba(255, 51, 102, 0.05); }
+        .log-time { color: var(--c-text-muted); font-size: 0.7rem; margin-bottom: 0.2rem; display:block; }
+        
+        .log-list::-webkit-scrollbar { width: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        @keyframes fade_in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Ring visualizer back */
+        .ring {
+            position: absolute;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255,255,255,0.1);
+            animation: spin 30s linear infinite;
+            z-index: -1;
+        }
+        .ring2 { width: 450px; height: 450px; border: 1px solid rgba(46, 80, 144, 0.2); animation: spin 20s linear infinite reverse;}
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Glitch effect on convergence */
+        .glitch-text { position: relative; }
+        .converging .glitch-text::before, .converging .glitch-text::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .converging .glitch-text::before { left: 2px; text-shadow: -1px 0 var(--c-cyber-lime); animation: glitch-anim-1 2s infinite linear alternate-reverse; }
+        .converging .glitch-text::after { left: -2px; text-shadow: -1px 0 var(--c-error); animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+
+        @keyframes glitch-anim-1 { 0% { clip: rect(20px, 9999px, 85px, 0); } 100% { clip: rect(65px, 9999px, 140px, 0); } }
+        @keyframes glitch-anim-2 { 0% { clip: rect(10px, 9999px, 30px, 0); } 100% { clip: rect(80px, 9999px, 10px, 0); } }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="hud-title">
+            <h1 class="glitch-text" data-text="TESSERACT-Ω">TESSERACT-Ω</h1>
+            <span class="mono">v5.0.0-rc</span>
+        </div>
+        <div class="status-badge" id="global-status">STANDING WAVE: IGNITED</div>
+    </header>
+
+    <div class="panel dimensions">
+        <h2>DIMENSIONAL FOLDS</h2>
+        <div style="height: 1rem;"></div>
+        
+        <div class="dim-node" id="d1-node">
+            <div class="dim-header">
+                <h3>D1: PERCEPTION</h3>
+                <span class="mono" id="d1-val">0.0</span>
+            </div>
+            <div class="mono" style="color:var(--c-text-muted); margin-bottom: 0.5rem;">CORTEX / Anamnesis Predix</div>
+            <div class="dim-bar-bg"><div class="dim-bar" id="d1-bar"></div></div>
+        </div>
+
+        <div class="dim-node" id="d2-node">
+            <div class="dim-header">
+                <h3>D2: DECISION</h3>
+                <span class="mono" id="d2-val">0.0</span>
+            </div>
+            <div class="mono" style="color:var(--c-text-muted); margin-bottom: 0.5rem;">Intent Vectorization (Planner)</div>
+            <div class="dim-bar-bg"><div class="dim-bar" id="d2-bar"></div></div>
+        </div>
+
+        <div class="dim-node" id="d3-node">
+            <div class="dim-header">
+                <h3>D3: CREATION</h3>
+                <span class="mono" id="d3-val">0.0</span>
+            </div>
+            <div class="mono" style="color:var(--c-text-muted); margin-bottom: 0.5rem;">Materializer (Executor loop)</div>
+            <div class="dim-bar-bg"><div class="dim-bar" id="d3-bar"></div></div>
+        </div>
+
+        <div class="dim-node" id="d4-node">
+            <div class="dim-header">
+                <h3>D4: VALIDATION</h3>
+                <span class="mono" id="d4-val">0.0</span>
+            </div>
+            <div class="mono" style="color:var(--c-text-muted); margin-bottom: 0.5rem;">Siege Survival (Critic/Tests)</div>
+            <div class="dim-bar-bg"><div class="dim-bar" id="d4-bar"></div></div>
+        </div>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <div class="ring"></div>
+        <div class="ring ring2"></div>
+        
+        <div class="cube-container" id="hypercube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+            
+            <div class="inner-cube">
+                <div class="inner-face i-front"></div>
+                <div class="inner-face i-back"></div>
+                <div class="inner-face i-right"></div>
+                <div class="inner-face i-left"></div>
+                <div class="inner-face i-top"></div>
+                <div class="inner-face i-bottom"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel telemetry">
+        <div class="metric">
+            <h3>ENTROPY Δ</h3>
+            <div class="val" id="met-entropy">+1.24 <span>bits</span></div>
+        </div>
+        <div class="metric">
+            <h3>FITNESS SCORE</h3>
+            <div class="val" id="met-fitness">0.42 <span>/ 1.0</span></div>
+        </div>
+        <div class="metric">
+            <h3>SIEGE SURVIVAL</h3>
+            <div class="val" id="met-siege">0.0% <span>pass rate</span></div>
+        </div>
+    </div>
+
+    <div class="panel event-log">
+        <h2 style="margin-bottom: 1rem;">O(1) EVENT STREAM</h2>
+        <ul class="log-list" id="log-list">
+            <!-- Logs will spawn here -->
+        </ul>
+    </div>
+
+    <script>
+        const DOM = {
+            d1: { node: document.getElementById('d1-node'), bar: document.getElementById('d1-bar'), val: document.getElementById('d1-val') },
+            d2: { node: document.getElementById('d2-node'), bar: document.getElementById('d2-bar'), val: document.getElementById('d2-val') },
+            d3: { node: document.getElementById('d3-node'), bar: document.getElementById('d3-bar'), val: document.getElementById('d3-val') },
+            d4: { node: document.getElementById('d4-node'), bar: document.getElementById('d4-bar'), val: document.getElementById('d4-val') },
+            cube: document.getElementById('hypercube'),
+            viewport: document.getElementById('viewport'),
+            log: document.getElementById('log-list'),
+            met: { entropy: document.getElementById('met-entropy'), fitness: document.getElementById('met-fitness'), siege: document.getElementById('met-siege') },
+            status: document.getElementById('global-status')
+        };
+
+        function addLog(msg, type = 'normal') {
+            const li = document.createElement('li');
+            li.className = `log-entry ${type}`;
+            const time = new Date().toISOString().split('T')[1].substring(0, 12);
+            li.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
+            DOM.log.appendChild(li);
+            DOM.log.scrollTop = DOM.log.scrollHeight;
+        }
+
+        function setDim(dim, val, active = false) {
+            DOM[dim].val.innerText = val.toFixed(2);
+            DOM[dim].bar.style.width = (val * 100) + "%";
+            if (active) DOM[dim].node.classList.add('active');
+            else DOM[dim].node.classList.remove('active');
+        }
+
+        function updateMetrics(ent, fit, sge) {
+            DOM.met.entropy.innerHTML = `${ent > 0 ? '+' : ''}${ent.toFixed(2)} <span>bits</span>`;
+            DOM.met.fitness.innerHTML = `${fit.toFixed(2)} <span>/ 1.0</span>`;
+            DOM.met.siege.innerHTML = `${(sge * 100).toFixed(0)}% <span>pass</span>`;
+            
+            if (ent <= 0) DOM.met.entropy.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
+            else DOM.met.entropy.parentNode.style.borderLeftColor = 'var(--c-yinmn-blue)';
+            
+            if (fit >= 0.85) DOM.met.fitness.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
+            if (sge >= 0.95) DOM.met.siege.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
+        }
+
+        // --- Demo Simulation -----------------
+        addLog("TESSERACT-Ω Local Manifold Initialized.", 'success');
+        addLog("Target: CORTEX core rewrite - Phase 1");
+        
+        setTimeout(() => {
+            addLog("Executing CYCLE 1...", 'warning');
+            setDim('d1', 0.8, true);
+            updateMetrics(0.8, 0.4, 0.2);
+        }, 1500);
+
+        setTimeout(() => {
+            addLog("D1: Context & predictions gathered.");
+            setDim('d1', 1.0, false);
+            setDim('d2', 0.7, true);
+            updateMetrics(0.7, 0.5, 0.4);
+        }, 3000);
+
+        setTimeout(() => {
+            addLog("D2: Architecture generated. 4 files mapped.", 'success');
+            setDim('d2', 1.0, false);
+            setDim('d3', 0.3, true);
+        }, 4500);
+
+        setTimeout(() => {
+            addLog("D3: Materializing code...");
+            setDim('d3', 0.6, true);
+            updateMetrics(0.3, 0.6, 0.4);
+        }, 6000);
+
+        setTimeout(() => {
+            addLog("D3: Scaffolding resolved.", 'success');
+            setDim('d3', 1.0, false);
+            setDim('d4', 0.5, true);
+            updateMetrics(0.1, 0.7, 0.5);
+        }, 7500);
+
+        setTimeout(() => {
+            addLog("D4: Immunitas Siege running...", 'warning');
+            updateMetrics(0.05, 0.8, 0.7);
+            setDim('d4', 0.8, true);
+        }, 9000);
+
+        setTimeout(() => {
+            addLog("D4 Siege Failed: Type ambiguity in core.py.", 'error');
+            addLog("Divergence trigger. Emitting wave decay feedback...");
+            setDim('d4', 0.0, false);
+            updateMetrics(0.6, 0.5, 0.0);
+            DOM.cube.classList.remove('converging');
+        }, 11000);
+
+        setTimeout(() => {
+            addLog("CYCLE 2: Auto-routing feedback to D3...", 'warning');
+            setDim('d3', 0.2, true);
+        }, 13000);
+
+        setTimeout(() => {
+            setDim('d3', 1.0, false);
+            addLog("D3: Code refactored against D4 feedback.", 'success');
+            setDim('d4', 0.5, true);
+            updateMetrics(0.1, 0.85, 0.8);
+        }, 15000);
+
+        setTimeout(() => {
+            setDim('d4', 1.0, true);
+            addLog("D4 Siege: 100% Passed. Zero Vulnerabilities.", 'success');
+            updateMetrics(-0.35, 0.98, 1.0);
+            
+            DOM.cube.classList.add('converging');
+            DOM.viewport.classList.add('converging');
+            document.querySelector('header').classList.add('converging');
+            
+            DOM.status.innerText = "CONVERGED. STATE CRYSTALLIZED.";
+            DOM.status.style.background = 'rgba(204,255,0,0.2)';
+            DOM.status.style.color = 'var(--c-cyber-lime)';
+            DOM.status.style.boxShadow = '0 0 20px rgba(204,255,0,0.4)';
+            
+            addLog("◈ MANIFOLD CONVERGENCE ACHIEVED.", 'success');
+            addLog("State persisting to CORTEX db.");
+        }, 17500);
+
+    </script>
+</body>
+</html>

@@ -121,7 +121,7 @@ class SkillRouter:
                 if dep_manifest:
                     _dfs(dep_manifest)
                 else:
-                    logger.warning(f"Dependency {dep_slug} for {node.slug} not found.")
+                    logger.warning("Dependency %s for %s not found.", dep_slug, node.slug)
 
             for req in node.requirements:
                 req_manifest = self.registry.get(req.skill_name)

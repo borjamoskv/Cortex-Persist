@@ -35,7 +35,7 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
     try:
         action = gate._get_action(action_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
-        logger.error(f"Failed to retrieve action {action_id}: {e}")
+        logger.error("Failed to retrieve action %s: %s", action_id, e)
         return False
 
     if gate.policy == GatePolicy.DISABLED:

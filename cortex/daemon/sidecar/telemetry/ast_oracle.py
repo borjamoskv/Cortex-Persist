@@ -38,14 +38,14 @@ class ASTOracle:
     async def start(self) -> None:
         """Invokes the Oracle's eye."""
         self._running = True
-        logger.info(f"👁️ AST ORACLE ONLINE. Quantum Surveillance on: {self.watch_dir}")
+        logger.info("👁️ AST ORACLE ONLINE. Quantum Surveillance on: %s", self.watch_dir)
         await self._pre_warm_cache()
 
         while self._running:
             try:
                 await self._patrol_fs()
             except Exception as e:
-                logger.error(f"AST ORACLE BLINDED (Transient): {e}")
+                logger.error("AST ORACLE BLINDED (Transient): %s", e)
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:
@@ -155,7 +155,7 @@ class ASTOracle:
                 },
             )
             logger.info(
-                f"🧠 [AST ORACLE] Mutation Collapsed into CORTEX Ledger: {path.name} -> {severity}"
+                "🧠 [AST ORACLE] Mutation Collapsed into CORTEX Ledger: %s -> %s", path.name, severity
             )
         except Exception as e:
-            logger.error(f"AST Oracle Injection failed on {path.name}: {e}")
+            logger.error("AST Oracle Injection failed on %s: %s", path.name, e)

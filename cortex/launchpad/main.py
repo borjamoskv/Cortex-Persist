@@ -50,7 +50,7 @@ class MissionOrchestrator:
 
         # Use sync method
         fact_id = self.engine.store_sync(**intent_fact)
-        logger.info(f"Recorded mission intent #{fact_id} for project {project}")
+        logger.info("Recorded mission intent #%s for project %s", fact_id, project)
 
         # 2. Build the command
         cmd = ["node", str(self.swarm_path)]
@@ -70,7 +70,7 @@ class MissionOrchestrator:
         try:
             from cortex.gate import ActionLevel, get_gate
 
-            logger.info(f"Executing swarm mission: {' '.join(cmd)}")
+            logger.info("Executing swarm mission: %s", ' '.join(cmd))
 
             gate = get_gate()
             action = gate.request_approval(
@@ -126,7 +126,7 @@ class MissionOrchestrator:
             }
 
         except (sqlite3.Error, OSError, RuntimeError) as e:
-            logger.error(f"Failed to launch mission: {e}")
+            logger.error("Failed to launch mission: %s", e)
             return {"intent_id": fact_id, "status": "error", "error": str(e)}
 
     def list_missions(self, project: str | None = None) -> list[dict[str, Any]]:

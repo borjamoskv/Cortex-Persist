@@ -72,9 +72,9 @@ class EntropicWakeDaemon:
             entropy_score += (db_ghosts * 0.15)
 
         except Exception as e:
-            logger.error(f"RADAR-Ω Entropic query failed: {e}")
+            logger.error("RADAR-Ω Entropic query failed: %s", e)
 
-        logger.debug(f"Current Zenón Entropy τ_z: {entropy_score}")
+        logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
 
     def ignite_purification_agent(self, target: str = "modulo_entropico"):
@@ -82,7 +82,7 @@ class EntropicWakeDaemon:
         Spawn the headless agent.
         Todo ocurre sin un solo Input Field.
         """
-        logger.warning(f"THRESHOLD EXCEEDED. Imploding execution context for {target}.")
+        logger.warning("THRESHOLD EXCEEDED. Imploding execution context for %s.", target)
         intent = "Aniquilación y extracción O(1) vía OUROBOROS-Ω y Berreraiki."
         command = [
             "cortex", "spawn",
@@ -102,7 +102,7 @@ class EntropicWakeDaemon:
             # Log the action in memory
             self._log_action_to_cortex(target)
         except Exception as e:
-            logger.error(f"Failed to ignite purification agent: {e}")
+            logger.error("Failed to ignite purification agent: %s", e)
 
     def _log_action_to_cortex(self, target: str):
         """Register the autonomous action into CORTEX-DB."""
@@ -123,7 +123,7 @@ class EntropicWakeDaemon:
             conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")
         except Exception as e:
-            logger.error(f"Failed to log to cortex DB: {e}")
+            logger.error("Failed to log to cortex DB: %s", e)
 
     def run_loop(self):
         """The main continuous loop for the Void Daemon."""
@@ -136,7 +136,7 @@ class EntropicWakeDaemon:
                     highest_entropy_target = "cortex_router"  # Placeholder
                     self.ignite_purification_agent(highest_entropy_target)
             except Exception as e:
-                logger.error(f"Entropic Wake encountered an error: {e}")
+                logger.error("Entropic Wake encountered an error: %s", e)
 
             # Sleep until next pulse
             time.sleep(self.interval_seconds)

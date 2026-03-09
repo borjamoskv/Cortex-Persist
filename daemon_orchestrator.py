@@ -176,13 +176,35 @@ class DaemonState:
 
     def save_state(self):
         """Immortal Memory: Persists live state to disk."""
+        # [Ω₂] REDUNDANCY: 0 — Entropic Asymmetry
+        manifest_path = CORTEX_ROOT / "manifest.json"
+        if manifest_path.exists():
+            try:
+                with open(manifest_path) as mf:
+                    manifest = json.load(mf)
+                policy = manifest.get(
+                    "sovereign_config", {}
+                ).get("redundancy_policy")
+                hs = self.daemons.get(
+                    "cortex", {}
+                ).get("handshake")
+                if (
+                    policy == "ZERO_LOCAL_ON_HANDSHAKE"
+                    and hs == "remote"
+                ):
+                    return
+            except Exception:
+                pass
+
         try:
             path = CORTEX_ROOT / "handoff.json"
-            # We filter out transient state if needed, but for now we save everything
             with open(path, "w") as f:
                 json.dump(self.daemons, f, indent=4)
         except Exception as e:
-            print(f"ERROR: Immortal Memory failure (save): {e}", flush=True)
+            print(
+                f"ERROR: Immortal Memory failure: {e}",
+                flush=True,
+            )
 
     def load_state(self):
         """Immortal Memory: Restores state from disk."""
@@ -437,7 +459,7 @@ async def capture_context(project_name: str):
                     await speak(f"Contexto capturado para {project_name}: {app_name}.")
                     state.save_state()
     except Exception as e:
-        logger.error(f"Capture Context Error: {e}")
+        logger.error("Capture Context Error: %s", e)
 
 async def restore_context(project_name: str):
     """Brings saved windows for the project to front and restores bounds (Deep Restore)."""
@@ -478,7 +500,7 @@ async def restore_context(project_name: str):
                 await run_osascript(script)
             await asyncio.sleep(0.5)
         except Exception as e:
-            logger.error(f"Restore Error ({app_name}): {e}")
+            logger.error("Restore Error (%s): %s", app_name, e)
 
 async def gidatu_loop():
     """Proactive Gidatu loop (Ghost Control) - Merged and Cleaned (Ω₁)."""
@@ -769,6 +791,33 @@ async def set_volume(app_name: str, volume: int):
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
     return {"status": "ok"}
+
+
+@app.post("/system/reset_debt")
+async def reset_debt():
+    """Entropy Purge (Ω₂)."""
+    state.daemons["cortex"]["tech_debt"] = 0
+    state.daemons["cortex"]["waste_counter"] = 0
+    state.save_state()
+    if not state.daemons.get("mute", False):
+        await speak(
+            "Entropía purgada. Nodo recalibrado.",
+            voice="Jorge", rate=130,
+        )
+    return {"status": "purged", "incidents": 0}
+
+
+@app.post("/system/handshake")
+async def toggle_handshake(mode: str = "remote"):
+    """Toggle: 'local' or 'remote'."""
+    state.daemons["cortex"]["handshake"] = mode
+    state.save_state()
+    if not state.daemons.get("mute", False):
+        await speak(
+            f"Handshake en modo {mode}.",
+            voice="Jorge", rate=130,
+        )
+    return {"status": "ok", "mode": mode}
 
 
 @app.get("/events")

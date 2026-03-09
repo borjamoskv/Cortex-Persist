@@ -221,17 +221,17 @@ class AlertHandlerMixin:
             logger.debug(a.message)
             logger.info("🧠 CORTEX Sleep Cycle: %s", a.message)
 
-    def _alert_jules(self, alerts: list) -> None:
-        """Handler for JulesAlert — autonomous coding task completions."""
+    def _alert_aether(self, alerts: list) -> None:
+        """Handler for AetherAlert — autonomous coding task completions."""
         for a in alerts:
             emoji = "✅" if a.status == "done" else "❌"
             logger.info(
-                "%s Jules task [%s] %s: %s", emoji, a.task_id, a.status, a.title
+                "%s Aether task [%s] %s: %s", emoji, a.task_id, a.status, a.title
             )
-            if self._should_alert(f"jules:{a.task_id}"):  # type: ignore[reportAttributeAccessIssue]
+            if self._should_alert(f"aether:{a.task_id}"):  # type: ignore[reportAttributeAccessIssue]
                 sound = "Glass" if a.status == "done" else "Basso"
                 Notifier.notify(
-                    f"{emoji} Jules — {a.status}",
+                    f"{emoji} Aether — {a.status}",
                     f"{a.title[:80]}: {a.message[:120]}",
                     sound=sound,
                 )

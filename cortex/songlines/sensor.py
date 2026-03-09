@@ -158,7 +158,7 @@ class TopographicSensor:
             strength = DecayEngine.calculate_resonance(ghost["created_at"], ghost["half_life"])
 
             if strength < 0.05:
-                logger.info(f"Ghost {ghost['id']} evaporated from {file_path.name}")
+                logger.info("Ghost %s evaporated from %s", ghost['id'], file_path.name)
                 self._delete_xattr(file_path, attr)
                 return None
 

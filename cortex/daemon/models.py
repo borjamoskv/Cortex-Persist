@@ -39,7 +39,7 @@ __all__ = [
     "EngineHealthAlert",
     "EntropyAlert",
     "GhostAlert",
-    "JulesAlert",
+    "AetherAlert",
     "MejoraloAlert",
     "MemoryAlert",
     "EvaluationAlert",
@@ -232,8 +232,8 @@ class TombstoneAlert:
 
 
 @dataclass
-class JulesAlert:
-    """Alert triggered when Jules completes or fails an autonomous task."""
+class AetherAlert:
+    """Alert triggered when Aether completes or fails an autonomous task."""
 
     task_id: str
     title: str
@@ -275,7 +275,7 @@ class DaemonStatus:
     signal_alerts: list[SignalAlert] = field(default_factory=list)
     tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
     drift_alerts: list[DriftAlert] = field(default_factory=list)
-    jules_alerts: list[JulesAlert] = field(default_factory=list)
+    aether_alerts: list[AetherAlert] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property

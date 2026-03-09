@@ -50,7 +50,7 @@ class AxiomaticLeapEngine:
         
         # Select a stochastic paradigm
         paradigm = random.choice(self.PARADIGMS)
-        logger.warning(f"🌀 [ALEPH-Ω] Paradigm Shift Selected: {paradigm}")
+        logger.warning("🌀 [ALEPH-Ω] Paradigm Shift Selected: %s", paradigm)
         
         # Simulate execution of the leap (latency scales down with entropy)
         execution_time = 2.0 * (1.0 - current_entropy)

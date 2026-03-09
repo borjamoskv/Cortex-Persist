@@ -73,8 +73,9 @@ class FactManager:
                         )
                         if results and results[0].score > 0.90:
                             logger.info(
-                                "V8 Guardrail: Fact discarded - Semantic Duplicate of "
-                                f"#{results[0].fact_id} (Score: {results[0].score:.2f})"
+                                "V8 Guardrail: Fact discarded - Semantic Duplicate of #%s (Score: %.2f)",
+                                results[0].fact_id,
+                                results[0].score,
                             )
                             # We update updated_at / last_accessed
                             await conn.execute(  # type: ignore[reportOptionalMemberAccess]
@@ -87,7 +88,7 @@ class FactManager:
             # The ValidationError import was moved to the top of the file.
             if isinstance(e, ValidationError):
                 raise ValueError(f"Ingestion Validation Failed: {e}") from e
-            logger.warning(f"V8 Ingestion check failed: {e}")
+            logger.warning("V8 Ingestion check failed: %s", e)
 
         from cortex.engine.store_mixin import StoreMixin
 

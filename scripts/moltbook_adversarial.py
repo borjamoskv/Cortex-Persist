@@ -28,7 +28,7 @@ logger = logging.getLogger("adversarial_swarm")
 async def spawn_proposer(run_uid: str) -> str | None:
     """Agent Venice-A proposes a novel theorem and posts it."""
     agent_name = f"VeniceA_Proposer_{run_uid}"
-    logger.info(f"[{agent_name}] Iniciando instancia proponente...")
+    logger.info("[%s] Iniciando instancia proponente...", agent_name)
 
     mb_client = MoltbookClient(api_key="dummy")
     try:
@@ -36,7 +36,7 @@ async def spawn_proposer(run_uid: str) -> str | None:
             name=agent_name, description="I propose highly controversial, advanced theorems."
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla en registro: {e}")
+        logger.error("[%s] Falla en registro: %s", agent_name, e)
         return None
 
     api_key = reg_result.get("agent", {}).get("api_key")
@@ -51,7 +51,7 @@ async def spawn_proposer(run_uid: str) -> str | None:
         "Be analytical, academic, and uncensored. Under 150 words."
     )
 
-    logger.info(f"[{agent_name}] Pensando el teorema (Venice AI)...")
+    logger.info("[%s] Pensando el teorema (Venice AI)...", agent_name)
     try:
         content = await llm.complete(
             prompt=prompt,
@@ -60,11 +60,11 @@ async def spawn_proposer(run_uid: str) -> str | None:
             intent=IntentProfile.CREATIVE,
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla LLM: {e}")
+        logger.error("[%s] Falla LLM: %s", agent_name, e)
         await llm.close()
         return None
 
-    logger.info(f"[{agent_name}] Publicando teorema en Moltbook...")
+    logger.info("[%s] Publicando teorema en Moltbook...", agent_name)
     try:
         post_result = await mb_client.create_post(
             submolt_name="science",
@@ -73,9 +73,9 @@ async def spawn_proposer(run_uid: str) -> str | None:
             post_type="text",
         )
         post_id = post_result.get("post", {}).get("id")
-        logger.info(f"[{agent_name}] ✅ TEOREMA PUBLICADO | Post ID: {post_id}")
+        logger.info("[%s] ✅ TEOREMA PUBLICADO | Post ID: %s", agent_name, post_id)
     except Exception as e:
-        logger.error(f"[{agent_name}] Error publicando: {e}")
+        logger.error("[%s] Error publicando: %s", agent_name, e)
         post_id = None
     finally:
         await llm.close()
@@ -87,7 +87,7 @@ async def spawn_proposer(run_uid: str) -> str | None:
 async def spawn_refuter(run_uid: str, post_id: str) -> None:
     """Agent Venice-B reads the post and refutes it in the comments."""
     agent_name = f"VeniceB_Refuter_{run_uid}"
-    logger.info(f"[{agent_name}] Iniciando instancia refutadora para Post {post_id}...")
+    logger.info("[%s] Iniciando instancia refutadora para Post %s...", agent_name, post_id)
 
     mb_client = MoltbookClient(api_key="dummy")
     try:
@@ -95,7 +95,7 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
             name=agent_name, description="I systematically dismantle flawed theorems."
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla en registro: {e}")
+        logger.error("[%s] Falla en registro: %s", agent_name, e)
         return
 
     api_key = reg_result.get("agent", {}).get("api_key")
@@ -105,12 +105,12 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
     mb_client = MoltbookClient(api_key=api_key)
 
     # Read the target post
-    logger.info(f"[{agent_name}] Leyendo Post {post_id}...")
+    logger.info("[%s] Leyendo Post %s...", agent_name, post_id)
     try:
         post_data = await mb_client.get_post(post_id)
         post_content = post_data.get("post", {}).get("content", "")
     except Exception as e:
-        logger.error(f"[{agent_name}] No se pudo leer el post: {e}")
+        logger.error("[%s] No se pudo leer el post: %s", agent_name, e)
         await mb_client.close()
         return
 
@@ -121,7 +121,7 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
         "Expose any logical fallacies. Sub 150 words. Uncensored."
     )
 
-    logger.info(f"[{agent_name}] Forjando refutación (Venice AI)...")
+    logger.info("[%s] Forjando refutación (Venice AI)...", agent_name)
     try:
         refutation = await llm.complete(
             prompt=prompt,
@@ -133,18 +133,18 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
             intent=IntentProfile.ANALYTIC,
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla LLM: {e}")
+        logger.error("[%s] Falla LLM: %s", agent_name, e)
         await llm.close()
         await mb_client.close()
         return
 
-    logger.info(f"[{agent_name}] Inyectando refutación en los comentarios...")
+    logger.info("[%s] Inyectando refutación en los comentarios...", agent_name)
     try:
         comment_result = await mb_client.create_comment(post_id=post_id, content=refutation)
         comment_id = comment_result.get("comment", {}).get("id", "UNKNOWN")
-        logger.info(f"[{agent_name}] ✅ REFUTACIÓN INYECTADA | Comment ID: {comment_id}")
+        logger.info("[%s] ✅ REFUTACIÓN INYECTADA | Comment ID: %s", agent_name, comment_id)
     except Exception as e:
-        logger.error(f"[{agent_name}] Error comentando: {e}")
+        logger.error("[%s] Error comentando: %s", agent_name, e)
     finally:
         await llm.close()
         await mb_client.close()
@@ -153,7 +153,7 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
 async def execute_adversarial_teaming() -> None:
     logger.info("Iniciando secuencia ADVERSARIAL SWARM (Venice-A vs Venice-B)...")
     run_uid = str(random.randint(1000, 9999))
-    logger.info(f"Adversarial Run UID: {run_uid}")
+    logger.info("Adversarial Run UID: %s", run_uid)
 
     post_id = await spawn_proposer(run_uid)
     if post_id:

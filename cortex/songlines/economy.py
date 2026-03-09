@@ -38,7 +38,7 @@ class ThermalEconomy:
         }
 
         if status["is_saturated"]:
-            logger.warning(f"Field saturated! {count}/{self.MAX_FIELD_DENSITY} ghosts active.")
+            logger.warning("Field saturated! %s/%s ghosts active.", count, self.MAX_FIELD_DENSITY)
 
         return status
 

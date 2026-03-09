@@ -46,7 +46,7 @@ class DistributedEventBus:
         if topic not in self._subscribers:
             self._subscribers[topic] = []
         self._subscribers[topic].append(callback)
-        logger.debug(f"Subscribed to topic: {topic}")
+        logger.debug("Subscribed to topic: %s", topic)
 
     async def publish(self, topic: str, payload: dict[str, Any]) -> None:
         """Publish a message to all local (and eventually remote) subscribers."""

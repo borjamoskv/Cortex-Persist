@@ -96,10 +96,10 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
             # 2. Semantic Deduplication (O(N) Vector Search) - V8 Data Governance
             manager = getattr(self, "_memory_manager", None)
-            if manager is not None:
+            if manager is not None and getattr(manager, "_l2", None) is not None:
                 try:
                     # L2 recall handles decay, success_rate and cosine similarity natively
-                    similar_facts = await manager.recall(
+                    similar_facts = await manager._l2.recall(
                         query=content,
                         limit=1,
                         project=project,

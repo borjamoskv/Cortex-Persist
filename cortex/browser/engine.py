@@ -63,11 +63,11 @@ class BrowserEngine:
         if not self._page:
             raise RuntimeError("Browser Engine not started.")
         try:
-            LOG.info(f"BROWSER: Navigating to {url}")
+            LOG.info("BROWSER: Navigating to %s", url)
             await self._page.goto(url, wait_until="networkidle")
             return True
         except Exception as e:
-            LOG.error(f"BROWSER: Navigation failed: {e}")
+            LOG.error("BROWSER: Navigation failed: %s", e)
             raise RuntimeError(f"BROWSER: Navigation to {url} failed: {e}") from e
 
     async def parse_dom(self) -> dict[str, Any]:
@@ -179,7 +179,7 @@ class BrowserEngine:
             await self._page.wait_for_load_state("networkidle")
             return True
         except Exception as e:
-            LOG.error(f"BROWSER: Failed to click element {cortex_id}: {e}")
+            LOG.error("BROWSER: Failed to click element %s: %s", cortex_id, e)
             raise RuntimeError(f"BROWSER: Click operation failed on node {cortex_id}: {e}") from e
 
     async def type(self, cortex_id: int, text: str) -> bool:
@@ -191,7 +191,7 @@ class BrowserEngine:
             await self._page.fill(selector, text, timeout=5000)
             return True
         except Exception as e:
-            LOG.error(f"BROWSER: Failed to type in element {cortex_id}: {e}")
+            LOG.error("BROWSER: Failed to type in element %s: %s", cortex_id, e)
             raise RuntimeError(f"BROWSER: Type operation failed on node {cortex_id}: {e}") from e
 
     async def get_page_content(self) -> str:
@@ -202,5 +202,5 @@ class BrowserEngine:
             text = await self._page.evaluate("() => document.body.innerText")
             return text
         except Exception as e:
-            LOG.error(f"BROWSER: Failed to extract page content: {e}")
+            LOG.error("BROWSER: Failed to extract page content: %s", e)
             raise RuntimeError(f"BROWSER: Page content extraction failed: {e}") from e

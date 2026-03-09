@@ -57,27 +57,27 @@ async def spawn_agent(profile: dict[str, str], uid: str, submolt: str = "general
     mb_client = MoltbookClient(api_key="dummy")
 
     # 2. Re-register (Create new identity)
-    logger.info(f"[{agent_name}] Infiltrando Moltbook (Registrando identidad)...")
+    logger.info("[%s] Infiltrando Moltbook (Registrando identidad)...", agent_name)
     try:
         reg_result = await mb_client.register(name=agent_name, description=agent_desc)
     except Exception as e:
-        logger.error(f"[{agent_name}] Falla en registro: {e}")
+        logger.error("[%s] Falla en registro: %s", agent_name, e)
         return
 
     agent_data = reg_result.get("agent", {})
     api_key = agent_data.get("api_key")
 
     if not api_key:
-        logger.error(f"[{agent_name}] Moltbook no devolvió API key. Abortando.")
+        logger.error("[%s] Moltbook no devolvió API key. Abortando.", agent_name)
         return
 
-    logger.info(f"[{agent_name}] Identidad forjada. API Key obtenida: {api_key[:8]}...")
+    logger.info("[%s] Identidad forjada. API Key obtenida: %s...", agent_name, api_key[:8])
 
     # Update client with the new dedicated key
     mb_client = MoltbookClient(api_key=api_key)
 
     # 3. Think via Venice Uncensored
-    logger.info(f"[{agent_name}] Conectando al Manifold Venice Uncensored...")
+    logger.info("[%s] Conectando al Manifold Venice Uncensored...", agent_name)
     llm = LLMProvider(provider="venice")
 
     try:
@@ -88,24 +88,24 @@ async def spawn_agent(profile: dict[str, str], uid: str, submolt: str = "general
             intent=IntentProfile.CREATIVE,
         )
     except Exception as e:
-        logger.error(f"[{agent_name}] Error conectando a Venice: {e}")
+        logger.error("[%s] Error conectando a Venice: %s", agent_name, e)
         await llm.close()
         return
 
-    logger.info(f"[{agent_name}] Venice Output generado ({len(content)} chars).")
+    logger.info("[%s] Venice Output generado (%s chars).", agent_name, len(content))
 
     # 4. Action (Post on Moltbook)
     title = f"Sovereign Transmission: {agent_name.split('_')[0]}"
-    logger.info(f"[{agent_name}] Materializando post en submolt '{submolt}'...")
+    logger.info("[%s] Materializando post en submolt '%s'...", agent_name, submolt)
 
     try:
         post_result = await mb_client.create_post(
             submolt_name=submolt, title=title, content=content, post_type="text"
         )
         post_id = post_result.get("post", {}).get("id", "UNKNOWN")
-        logger.info(f"[{agent_name}] ✅ MISIÓN COMPLETADA | Post ID: {post_id}")
+        logger.info("[%s] ✅ MISIÓN COMPLETADA | Post ID: %s", agent_name, post_id)
     except Exception as e:
-        logger.error(f"[{agent_name}] Error publicando en Moltbook: {e}")
+        logger.error("[%s] Error publicando en Moltbook: %s", agent_name, e)
     finally:
         await llm.close()
         await mb_client.close()
@@ -116,7 +116,7 @@ async def execute_swarm() -> None:
 
     # Generate unique run ID to avoid name collisions on Moltbook
     run_uid = str(random.randint(1000, 9999))
-    logger.info(f"Swarm Run UID: {run_uid}")
+    logger.info("Swarm Run UID: %s", run_uid)
 
     # Launch agents concurrently
     tasks = []

@@ -16,23 +16,23 @@ def mcp_cmds() -> None:
     """Model Context Protocol (MCP) integrations."""
     pass
 
-@mcp_cmds.command("jules")
+@mcp_cmds.command("aether")
 @click.option("--host", default="127.0.0.1", help="Transport host")
 @click.option("--port", default=5001, type=int, help="SSE port")
 @click.option("--transport", default="sse", type=click.Choice(["sse", "stdio"]), help="Transport protocol")
-def jules_mcp(host: str, port: int, transport: str) -> None:
-    """Boot the MOSKV-Jules Sovereign MCP Server (Gemini 3)."""
+def aether_mcp(host: str, port: int, transport: str) -> None:
+    """Boot the MOSKV-Aether Sovereign MCP Server."""
     try:
-        from cortex.mcp.jules_server import run_jules_mcp
+        from cortex.mcp.aether_server import run_aether_mcp
     except ImportError:
         console.print("[red]❌ Error: MCP SDK not installed. Run: pip install 'mcp'[/red]")
         return
-        
-    console.print(f"[bold blue]🚀 Booting CORTEX Jules MCP Server (Transport: {transport}...)[/bold blue]")
+
+    console.print(f"[bold blue]🚀 Booting CORTEX Aether MCP Server (Transport: {transport}...)[/bold blue]")
     if transport == "sse":
         console.print(f"[dim]Listening on http://{host}:{port}/sse[/dim]")
-        
-    run_jules_mcp(host=host, port=port, transport=transport)
+
+    run_aether_mcp(host=host, port=port, transport=transport)
 
 @mcp_cmds.command("trust")
 @click.option("--host", default="127.0.0.1", help="Transport host")

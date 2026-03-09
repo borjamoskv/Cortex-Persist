@@ -61,7 +61,7 @@ def _has_recent_decision(engine, minutes: int = 60) -> bool:
     except Exception as e:
         import logging
 
-        logging.debug(f"Failed to fetch recent decision: {e}")
+        logging.debug("Failed to fetch recent decision: %s", e)
         return True  # Default to true to not block if there's an error
 
 

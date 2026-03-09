@@ -122,7 +122,7 @@ class MemoryArchaeologist:
                 "Retain all critical information, names, values, and relations, but remove redundancy.\n\n"
             ) + "\n".join(content_list)
             
-            logger.info(f"Synthesizing cluster of size {len(cluster_facts)}...")
+            logger.info("Synthesizing cluster of size %s...", len(cluster_facts))
             res = await self.llm.agenerate(prompt)
             condensed_content = res.text.strip()
             
@@ -183,7 +183,7 @@ class MemoryArchaeologist:
                     conn.commit()
                     l2_conn.commit()
                 except sqlite3.Error as e:
-                    logger.error(f"Archaeology DB update failed: {e}")
+                    logger.error("Archaeology DB update failed: %s", e)
                     conn.rollback()
                     continue
                     

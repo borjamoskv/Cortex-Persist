@@ -150,10 +150,10 @@ class SovereignLedger:
             self.conn.commit()
             return new_hash
         except sqlite3.IntegrityError as e:
-            logger.error(f"Ledger collision or duplicate: {e}")
+            logger.error("Ledger collision or duplicate: %s", e)
             raise
         except sqlite3.Error as e:
-            logger.error(f"Ledger OS/IO Failure: {e}")
+            logger.error("Ledger OS/IO Failure: %s", e)
             raise
 
     def create_checkpoint(self, batch_size: int = 100) -> str | None:

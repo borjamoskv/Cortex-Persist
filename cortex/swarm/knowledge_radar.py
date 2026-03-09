@@ -1,0 +1,254 @@
+"""CORTEX v8.0 — Knowledge Radar (NightShift Target Discovery).
+
+Discovers crystallization targets from 3 sovereign sources:
+    1. Ghost Knowledge Gaps — CORTEX DB facts tagged 'knowledge_gap'/'auto_ghost'
+    2. Curated Queue — YAML file with explicit URLs/queries
+    3. Semantic Gap Detection — Projects with sparse L2 coverage
+
+Axiom Derivations:
+    Ω₂ (Entropic Asymmetry): Only targets that reduce uncertainty survive.
+    Ω₃ (Byzantine Default): Every target is verified before pipeline entry.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+logger = logging.getLogger("cortex.swarm.knowledge_radar")
+
+# ── Default Paths ─────────────────────────────────────────────────────────
+
+_DEFAULT_QUEUE_PATH = Path(__file__).resolve().parents[2] / "cortex_iturria" / "nightshift_queue.yaml"
+
+
+# ── Data Models ───────────────────────────────────────────────────────────
+
+
+@dataclass
+class CrystalTarget:
+    """A target for autonomous knowledge crystallization."""
+
+    target: str
+    intent: str = "quick_read"
+    priority: int = 5
+    source: str = "curated"  # curated | ghost_gap | semantic_gap
+    metadata: dict[str, Any] = field(default_factory=dict)
+    processed: bool = False
+
+    @property
+    def sort_key(self) -> int:
+        """Lower priority number = higher urgency."""
+        return self.priority
+
+
+# ── Source 1: Curated YAML Queue ──────────────────────────────────────────
+
+
+def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarget]:
+    """Read targets from the curated YAML queue file.
+
+    Expected format:
+        targets:
+          - target: "https://example.com/docs"
+            intent: "deep_learn"
+            priority: 3
+    """
+    path = Path(queue_path) if queue_path else _DEFAULT_QUEUE_PATH
+
+    if not path.exists():
+        logger.info("📡 [RADAR] No curated queue at %s", path)
+        return []
+
+    try:
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not raw or "targets" not in raw:
+            return []
+
+        targets: list[CrystalTarget] = []
+        for entry in raw["targets"]:
+            if not isinstance(entry, dict) or "target" not in entry:
+                continue
+            targets.append(
+                CrystalTarget(
+                    target=entry["target"],
+                    intent=entry.get("intent", "quick_read"),
+                    priority=entry.get("priority", 5),
+                    source="curated",
+                    metadata=entry.get("metadata", {}),
+                )
+            )
+
+        logger.info("📡 [RADAR] Found %d curated targets", len(targets))
+        return targets
+
+    except Exception as e:
+        logger.error("📡 [RADAR] Error reading queue %s: %s", path, e)
+        return []
+
+
+# ── Source 2: Ghost Knowledge Gaps ────────────────────────────────────────
+
+
+async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
+    """Query CORTEX DB for ghosts tagged as knowledge gaps.
+
+    Looks for facts with tags containing 'knowledge_gap' or 'auto_ghost'
+    that haven't been resolved yet.
+    """
+    targets: list[CrystalTarget] = []
+
+    try:
+        # Query via the CortexEngine/DB interface
+        if hasattr(cortex_db, "recall"):
+            results = await cortex_db.recall(
+                query="knowledge gap unresolved",
+                limit=10,
+                project="system",
+            )
+        elif hasattr(cortex_db, "query"):
+            results = cortex_db.query(
+                "SELECT id, content, project_id, metadata FROM facts "
+                "WHERE (metadata LIKE '%knowledge_gap%' OR metadata LIKE '%auto_ghost%') "
+                "AND metadata NOT LIKE '%nightshift_processed%' "
+                "ORDER BY timestamp DESC LIMIT 10"
+            )
+        else:
+            logger.warning("📡 [RADAR] No compatible DB interface for ghost scan")
+            return []
+
+        for r in results or []:
+            content = getattr(r, "content", "") if hasattr(r, "content") else str(r)
+            targets.append(
+                CrystalTarget(
+                    target=content[:500],
+                    intent="search_gap",
+                    priority=3,
+                    source="ghost_gap",
+                    metadata={"ghost_id": getattr(r, "id", "unknown")},
+                )
+            )
+
+        logger.info("📡 [RADAR] Found %d ghost knowledge gaps", len(targets))
+
+    except Exception as e:
+        logger.error("📡 [RADAR] Ghost scan failed: %s", e)
+
+    return targets
+
+
+# ── Source 3: Semantic Gap Detection ──────────────────────────────────────
+
+
+async def scan_semantic_gaps(cortex_db: Any, min_facts: int = 5) -> list[CrystalTarget]:
+    """Detect projects with sparse L2 coverage.
+
+    If a project has fewer than `min_facts` facts, generate a search_gap
+    target to enrich it.
+    """
+    targets: list[CrystalTarget] = []
+
+    try:
+        if hasattr(cortex_db, "query"):
+            rows = cortex_db.query(
+                "SELECT project_id, COUNT(*) as cnt FROM facts "
+                "GROUP BY project_id HAVING cnt < ? "
+                "ORDER BY cnt ASC LIMIT 5",
+                (min_facts,),
+            )
+            for row in rows or []:
+                project = row[0] if isinstance(row, (list, tuple)) else getattr(row, "project_id", "unknown")
+                targets.append(
+                    CrystalTarget(
+                        target=f"best practices and architecture for {project}",
+                        intent="search_gap",
+                        priority=7,
+                        source="semantic_gap",
+                        metadata={"project": project},
+                    )
+                )
+
+        logger.info("📡 [RADAR] Found %d semantic gaps", len(targets))
+
+    except Exception as e:
+        logger.error("📡 [RADAR] Semantic gap scan failed: %s", e)
+
+    return targets
+
+
+# ── Merge & Prioritize ────────────────────────────────────────────────────
+
+
+def deduplicate_targets(targets: list[CrystalTarget]) -> list[CrystalTarget]:
+    """Remove duplicate targets based on normalized target string."""
+    seen: set[str] = set()
+    unique: list[CrystalTarget] = []
+
+    for t in targets:
+        key = t.target.strip().lower()
+        if key not in seen:
+            seen.add(key)
+            unique.append(t)
+
+    return unique
+
+
+def merge_and_prioritize(
+    *target_lists: list[CrystalTarget],
+    max_n: int = 5,
+) -> list[CrystalTarget]:
+    """Merge multiple target lists, deduplicate, sort by priority, cap at max_n."""
+    all_targets: list[CrystalTarget] = []
+    for tl in target_lists:
+        all_targets.extend(tl)
+
+    unique = deduplicate_targets(all_targets)
+    sorted_targets = sorted(unique, key=lambda t: t.sort_key)
+
+    result = sorted_targets[:max_n]
+    logger.info(
+        "📡 [RADAR] Merged %d → %d unique → %d selected",
+        len(all_targets),
+        len(unique),
+        len(result),
+    )
+    return result
+
+
+# ── Public API ────────────────────────────────────────────────────────────
+
+
+async def discover(
+    cortex_db: Any | None = None,
+    max_targets: int = 5,
+    queue_path: Path | str | None = None,
+) -> list[CrystalTarget]:
+    """Full radar scan: curated + ghosts + semantic gaps → merged targets.
+
+    Args:
+        cortex_db: CORTEX database handle (optional for curated-only mode).
+        max_targets: Maximum targets to return.
+        queue_path: Override path to YAML queue file.
+
+    Returns:
+        List of CrystalTarget sorted by priority, capped at max_targets.
+    """
+    logger.info("📡 [RADAR] Starting full spectrum scan (max=%d)", max_targets)
+
+    # Source 1: Always available
+    curated = scan_curated_queue(queue_path)
+
+    # Sources 2 & 3: Only if DB is available
+    ghosts: list[CrystalTarget] = []
+    semantic: list[CrystalTarget] = []
+
+    if cortex_db is not None:
+        ghosts = await scan_ghost_gaps(cortex_db)
+        semantic = await scan_semantic_gaps(cortex_db)
+
+    return merge_and_prioritize(curated, ghosts, semantic, max_n=max_targets)
