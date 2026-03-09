@@ -65,10 +65,32 @@ class AgentToolkit:
         3. Timeout ceiling at ``_BASH_TIMEOUT`` seconds.
     """
 
-    def __init__(self, repo_path: str | Path) -> None:
+    def __init__(self, repo_path: str | Path, allowed_tools: list[str] | None = None) -> None:
         self.repo_path = Path(repo_path).resolve()
         if not self.repo_path.exists():
             raise FileNotFoundError(f"Repo path does not exist: {self.repo_path}")
+        
+        # Capability expansion (Standardizing high-level tokens to low-level methods)
+        if allowed_tools is not None:
+            expanded = set()
+            mappings = {
+                "filesystem": {"read_file", "write_file", "list_dir"},
+                "bash": {"bash"},
+                "git": {
+                    "git_diff", "git_status", "git_log", 
+                    "git_commit", "git_create_branch", "git_push"
+                },
+                "web": {"web_search", "autodidact_ingest"},
+                "mcp": {"toolbox_membrane"},
+            }
+            for tool in allowed_tools:
+                if tool in mappings:
+                    expanded.update(mappings[tool])
+                else:
+                    expanded.add(tool)
+            self.allowed_tools = list(expanded)
+        else:
+            self.allowed_tools = None
 
     # ── Path helpers ──────────────────────────────────────────────────
 
@@ -251,6 +273,9 @@ class AgentToolkit:
 
     def dispatch(self, tool_name: str, args: dict[str, str]) -> str:
         """Dispatch a tool call by name. Returns string result."""
+        if self.allowed_tools is not None and tool_name not in self.allowed_tools:
+            logger.warning("Tool %s intercepted: not in allowed_tools list.", tool_name)
+            return f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
         handlers: dict[str, callable] = {
             "read_file": lambda a: self.read_file(a.get("path", "")),
             "write_file": lambda a: self.write_file(a.get("path", ""), a.get("content", "")),

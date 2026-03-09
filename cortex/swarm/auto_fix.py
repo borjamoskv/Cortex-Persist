@@ -191,16 +191,24 @@ class AutoFixPipeline:
         # 5. Validate
         elapsed = (time.monotonic() - t0) * 1000
         if result.get("tests_passed", False) and result.get("status") == "done":
+            branch = result.get("branch", "")
+            
+            # Ω₂: Autonomous Ouroboros Merge
+            merge_result = ""
+            if branch:
+                merged = await self._autonomous_merge(branch)
+                merge_result = " (Merged to main)" if merged else " (Merge failed, branch preserved)"
+
             logger.info(
-                "✅ [AUTOFIX] Ghost [%s] resolved → branch=%s (%.0fms)",
-                ghost_id, result.get("branch", ""), elapsed,
+                "✅ [AUTOFIX] Ghost [%s] resolved → branch=%s%s (%.0fms)",
+                ghost_id, branch, merge_result, elapsed,
             )
             return FixAttempt(
                 ghost_id=ghost_id,
                 classification=classification,
                 success=True,
-                branch=result.get("branch", ""),
-                summary=result.get("summary", ""),
+                branch=branch,
+                summary=result.get("summary", "") + merge_result,
                 duration_ms=elapsed,
                 tests_passed=True,
             )
@@ -319,6 +327,59 @@ class AutoFixPipeline:
                 "error": str(e),
                 "tests_passed": False,
             }
+
+    # ── Absorption (Ω₂) ───────────────────────────────────────────────
+
+    async def _autonomous_merge(self, branch_name: str) -> bool:
+        """Attempt to merge the fixed branch back into the main line via --ff-only.
+
+        Ω₂: Reduce entropy by absorbing the fix natively.
+        Returns True if successful, False if it requires human resolution.
+        """
+        import subprocess
+
+        cwd = str(self._repo_path)
+        try:
+            # Detect primary branch
+            proc_branch = await asyncio.to_thread(
+                subprocess.run,
+                ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                timeout=5,
+            )
+            main_branch = proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "master"
+
+            # Merge with --ff-only to guarantee no conflict resolution is needed
+            logger.info("🧬 [AUTOFIX] Attempting Ouroboros merge: %s into %s", branch_name, main_branch)
+            proc_merge = await asyncio.to_thread(
+                subprocess.run,
+                ["git", "merge", "--ff-only", branch_name],
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                timeout=10,
+            )
+
+            if proc_merge.returncode == 0:
+                logger.info("🧬 [AUTOFIX] Merged successfully.")
+                # Clean up the branch
+                await asyncio.to_thread(
+                    subprocess.run,
+                    ["git", "branch", "-d", branch_name],
+                    capture_output=True,
+                    cwd=cwd,
+                    timeout=5,
+                )
+                return True
+            else:
+                logger.error("🛑 [AUTOFIX] Merge failed (requires human): %s", proc_merge.stderr)
+                return False
+
+        except Exception as e:
+            logger.error("☠️ [AUTOFIX] Merge exception: %s", e)
+            return False
 
     # ── Escalation (Ω₅) ──────────────────────────────────────────────
 
