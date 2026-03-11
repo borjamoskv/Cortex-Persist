@@ -137,6 +137,10 @@ class SovereignLedger:
         ts = datetime.now(timezone.utc).isoformat()
 
         try:
+            # Enforce an EXCLUSIVE lock to prevent race conditions (Chain Forking)
+            # during the read-compute-write cycle of the hash chain.
+            self.conn.execute("BEGIN EXCLUSIVE")
+
             cursor = self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
             row = cursor.fetchone()
             prev_hash = row[0] if row else "GENESIS"
@@ -181,10 +185,13 @@ class SovereignLedger:
         cursor = self.conn.execute(
             "SELECT id, project, action, detail, prev_hash, hash, timestamp FROM transactions ORDER BY id"
         )
-        txs = cursor.fetchall()
         expected_prev = "GENESIS"
-        for row in txs:
+        tx_count = 0
+
+        # Iterate over the cursor directly (streaming) instead of `fetchall()` to prevent OOM
+        for row in cursor:
             tid, proj, act, det, prev, h, ts = row
+            tx_count += 1
             if prev != expected_prev:
                 violations.append(
                     {"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "actual": prev}
@@ -206,4 +213,4 @@ class SovereignLedger:
                 violations.append(
                     {"range": f"{start}-{end}", "type": "MERKLE_MISMATCH", "stored": stored_root}
                 )
-        return {"valid": not violations, "violations": violations, "tx_count": len(txs)}
+        return {"valid": not violations, "violations": violations, "tx_count": tx_count}
