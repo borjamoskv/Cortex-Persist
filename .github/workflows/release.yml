@@ -23,6 +23,11 @@ jobs:
       - run: pip install build
       - run: python -m build
 
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: 'dist/*'
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1  # trusted publisher — keep tag
 

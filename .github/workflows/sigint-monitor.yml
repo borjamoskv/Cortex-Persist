@@ -10,6 +10,9 @@ on:
         required: false
         default: '0.05'
 
+permissions:
+  contents: read
+
 env:
   PYTHON_VERSION: '3.12'
 
