@@ -1,11 +1,5 @@
-# CORTEX CODEOWNERS
-# Enforces review by @borjamoskv for critical paths
+* @borjamoskv
 
-# Global default
-*       @borjamoskv
-
-# Critical Paths
-/.github/           @borjamoskv
-/scripts/           @borjamoskv
-/cortex/            @borjamoskv
-/tests/             @borjamoskv
+/cortex/ @borjamoskv
+/scripts/ @borjamoskv
+/.github/ @borjamoskv

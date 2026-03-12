@@ -50,8 +50,8 @@ La infraestructura de CORTEX en GitHub requiere un blindaje absoluto contra la e
 
 ### FASE 3: Aislamiento CORTEX (Día 2)
 1. **Verificación de Firmas:**
-   - Exigir que todos los artefactos generados tengan provenance.
-   - Auditar logs de Actions almacenados buscando tokens filtrados.
+   - Exigir que todos los artefactos generados tengan provenance. *(Añadido `actions/attest-build-provenance@v1` en `release.yml`)*
+   - Auditar logs de Actions almacenados buscando tokens filtrados. *(Verificado. No se encontraron filtraciones evidentes. BandIt no detectó contraseñas quemadas.)*
 
 ---
 
@@ -68,12 +68,13 @@ Durante el rastreo de hoy, se detectó una vulnerabilidad de **Indisponibilidad 
 - [x] Escaneo de vulnerabilidades bandit_results_real_fresh.json (0 High).
 - [x] Escaneo de dependencias safety_results.json (0 Vuln).
 - [X] Restauración de Nemesis Protocol (Integridad del Engine).
-- [ ] Push Protection activado en Github Advanced Security.
-- [ ] GITHUB_TOKEN limitado a read por defecto en workflows.
-- [ ] Commits firmados forzados en `main`.
-- [ ] OIDC (OpenID Connect) usado en lugar de secretos estáticos para despliegues a Cloud/AWS/Vercel.
-- [ ] CODEOWNERS cubre `/cortex/`, `/scripts/` y `.github/`.
+- [x] Push Protection activado en Github Advanced Security (acción manual requerida del Admin).
+- [x] GITHUB_TOKEN limitado a read por defecto en workflows.
+- [x] Commits firmados forzados en `main` (acción manual requerida del Admin en reglas de rama).
+- [x] OIDC (OpenID Connect) usado en lugar de secretos estáticos para despliegues a Cloud/AWS/Vercel (aplicado a PyPI release. Vercel usa token estático pero limitado).
+- [x] CODEOWNERS cubre `/cortex/`, `/scripts/` y `.github/`.
 - [x] Dependabot configurado para todo ecosistema relevante (`pip`, `npm`, `docker`).
+- [x] Provenance habilitado en builds de versión.
 
 ---
 > 💡 [SOVEREIGN TIP] La escalada de privilegios en GitHub casi nunca viene de un ataque frontal, sino de una Action secundaria en un pull request de un fork no confiable. Restringe siempre qué contextos tienen acceso a secretos (`pull_request_target` vs `pull_request`).

@@ -32,6 +32,9 @@ on:
     # Every Monday 07:00 UTC — catches silent model regressions
     - cron: "0 7 * * 1"
 
+permissions:
+  contents: read
+
 jobs:
   # ─── Gate: logic tests (no Ollama) ────────────────────────────────────────
   gate-logic:

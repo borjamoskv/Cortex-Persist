@@ -9,6 +9,9 @@ on:
   push:
     branches: [master, main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
