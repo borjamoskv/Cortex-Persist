@@ -13,15 +13,15 @@
     },
     "gidatu": {
         "status": "online",
-        "active_app": "Electron",
-        "window_title": "Manager",
+        "active_app": "OsxFL",
+        "window_title": "",
         "current_context": "cortex",
         "context_map": {},
-        "current_app": "Electron"
+        "current_app": "OsxFL"
     },
     "audio_mixer": {
         "status": "online",
-        "master": 19,
+        "master": 88,
         "lines": {
             "Spotify": {
                 "vol": 73,
@@ -74,7 +74,7 @@
     "breath": 0.8318896675771679,
     "mute": false,
     "ghost_field": {
-        "active_ghosts": 1,
+        "active_ghosts": 13,
         "resonances": [
             {
                 "id": "ed665bffca984f43",
@@ -82,6 +82,90 @@
                 "intent": "ref: context",
                 "strength": 0.23348021305788358,
                 "source": ".cortex_field"
+            },
+            {
+                "id": "REF-684",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (40%) between engine_optimized.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-684",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and __init__.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-684",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-684",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and migrate.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-739",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (40%) between engine_optimized.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-739",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and __init__.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-739",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-739",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and migrate.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-763",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (40%) between engine_optimized.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-763",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and __init__.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-763",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and engine_async.py",
+                "source": "evolution_loop",
+                "strength": 0.8
+            },
+            {
+                "id": "REF-763",
+                "project": "cortex",
+                "intent": "Refactor tight coupling (100%) between nexus_v8.py and migrate.py",
+                "source": "evolution_loop",
+                "strength": 0.8
             }
         ]
     }

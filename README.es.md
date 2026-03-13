@@ -231,4 +231,4 @@ Consulta [LICENSE](LICENSE) para más detalles.
 
 ---
 
-*Creado por [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com)*
+*Creado por [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*

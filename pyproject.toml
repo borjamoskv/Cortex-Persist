@@ -3,11 +3,10 @@ name = "cortex-memory"
 version = "0.3.0b1"
 description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
 readme = "README.md"
-license = "Apache-2.0"
-license-files = ["LICENSE"]
+license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Borja Moskv", email = "borja@moskv.com"},
+    {name = "borjamoskv.com", email = "borja@moskv.com"},
 ]
 keywords = [
     "ai", "memory", "agents", "trust", "compliance",
@@ -39,6 +38,7 @@ dependencies = [
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
     "keyring>=25.7.0",
     "cryptography>=46.0.5",
+    "watchdog>=6.0.0",
 ]
 
 [project.urls]
@@ -74,8 +74,12 @@ cloud = [
     "redis>=5.0",
     "qdrant-client>=1.9",
 ]
+trends = [
+    "pytrends>=4.9",
+    "pandas>=2.0",
+]
 all = [
-    "cortex-memory[api,dev,adk,toolbox,billing,cloud]",
+    "cortex-memory[api,dev,adk,toolbox,billing,cloud,trends]",
 ]
 
 [project.scripts]

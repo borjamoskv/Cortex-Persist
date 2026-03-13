@@ -1,6 +1,6 @@
-import os
 import json
-import time
+import os
+
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -65,7 +65,7 @@ def send_heartbeat():
             print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")
             return False
             
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — Web3 transaction boundary
         print(f"[Web3 Oracle] ❌ Oracle execution error: {e}")
         return False
 

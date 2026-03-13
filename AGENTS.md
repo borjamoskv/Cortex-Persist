@@ -123,7 +123,7 @@ Input → guard validation → AES encrypt(content, meta)
 | `thinking/` | Reasoning chains and inference (10 files) |
 | `perception/` | Environmental perception and sensor fusion |
 | `evolution/` | Self-improvement, mutation engine, fitness evaluation (14 files) |
-| `axioms/` | Foundational system axioms (Peano Soberano, Ω₀–Ω₆) |
+| `axioms/` | Foundational system axioms (Peano Soberano, Ω₀–Ω₇) |
 | `skills/` | Agent skill registry and execution |
 | `hive/` | Collective intelligence aggregation |
 | `alma/` | Soul engine — personality and identity persistence |

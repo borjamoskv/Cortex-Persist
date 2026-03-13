@@ -20,7 +20,7 @@ __all__ = ["GossipProtocol", "StateRecord", "SemanticDigest"]
 logger = logging.getLogger("cortex.ha.gossip")
 
 
-@dataclass(slots=True)
+@dataclass()
 class StateRecord:
     """A record of state conceptually tracked by Gossip."""
 
@@ -37,7 +37,7 @@ class StateRecord:
         return hashlib.sha256(f"{self.key}:{self.version}:{canonical_json}".encode()).hexdigest()
 
 
-@dataclass(slots=True)
+@dataclass()
 class SemanticDigest:
     """Summary of node state for anti-entropy exchange."""
 

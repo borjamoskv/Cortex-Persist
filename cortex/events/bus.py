@@ -59,7 +59,7 @@ class DistributedEventBus:
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
                 )
-            except Exception:
+            except Exception:  # noqa: BLE001 — persistence must not break event delivery
                 logger.warning(
                     "Signal Bus persistence failed for topic %s",
                     topic,

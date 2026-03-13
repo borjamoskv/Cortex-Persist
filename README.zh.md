@@ -231,4 +231,4 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 
 ---
 
-*由 [Borja Moskv](https://github.com/borjamoskv) 开发 · [cortexpersist.com](https://cortexpersist.com)*
+*由 [borjamoskv.com](https://borjamoskv.com) 开发 · [cortexpersist.com](https://cortexpersist.com)*

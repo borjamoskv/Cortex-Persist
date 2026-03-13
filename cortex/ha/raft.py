@@ -27,7 +27,7 @@ class NodeRole(Enum):
     CANDIDATE = "candidate"
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class PreVoteResult:
     """Result of the pre-vote phase."""
 
@@ -321,7 +321,7 @@ class RaftNode:
                 granted = task.result()
                 if granted:
                     votes_received += 1
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.debug("Vote request failed: %s", exc)
 
         # If term changed while we were voting (split-brain / higher term), abort

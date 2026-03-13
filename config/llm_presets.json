@@ -4,37 +4,64 @@
     "default_model": "qwen-plus",
     "env_key": "DASHSCOPE_API_KEY",
     "context_window": 131072,
-    "specialization": ["code", "general"]
+    "tier": "high",
+    "cost_class": "low",
+    "specialization": ["code", "general"],
+    "intent_model_map": {
+      "code":      "qwen-plus",
+      "reasoning": "qwen-plus",
+      "general":   "qwen-plus"
+    }
   },
   "openai": {
     "base_url": "https://api.openai.com/v1",
     "default_model": "gpt-4o",
     "env_key": "OPENAI_API_KEY",
     "context_window": 128000,
-    "specialization": ["reasoning", "code", "creative", "general"]
+    "tier": "frontier",
+    "cost_class": "high",
+    "specialization": ["reasoning", "code", "creative", "general"],
+    "intent_model_map": {
+      "code":      "gpt-4o",
+      "reasoning": "o3",
+      "creative":  "gpt-4o",
+      "architect": "o3",
+      "general":   "gpt-4o"
+    }
   },
   "anthropic": {
     "base_url": "https://api.anthropic.com/v1",
     "default_model": "claude-sonnet-4-20250514",
     "env_key": "ANTHROPIC_API_KEY",
     "context_window": 200000,
+    "tier": "frontier",
+    "cost_class": "high",
     "extra_headers": {
       "anthropic-version": "2023-06-01"
     },
-    "specialization": ["code", "reasoning"]
+    "specialization": ["code", "reasoning", "architect"],
+    "intent_model_map": {
+      "code":      "claude-sonnet-4-20250514",
+      "reasoning": "claude-sonnet-4-20250514",
+      "creative":  "claude-sonnet-4-20250514",
+      "architect": "claude-sonnet-4-20250514",
+      "general":   "claude-sonnet-4-20250514"
+    }
   },
   "gemini": {
     "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
-    "default_model": "gemini-2.5-pro",
+    "default_model": "gemini-3.1-pro-preview",
     "env_key": "GEMINI_API_KEY",
-    "context_window": 1000000,
+    "context_window": 2000000,
+    "tier": "frontier",
+    "cost_class": "medium",
     "specialization": ["reasoning", "creative", "code", "architect", "general"],
     "intent_model_map": {
-      "reasoning": "gemini-2.5-pro",
-      "creative": "gemini-2.5-pro",
-      "code": "gemini-3.1-pro",
-      "architect": "gemini-3.1-pro",
-      "general": "gemini-2.5-pro"
+      "reasoning": "gemini-3.1-pro-preview",
+      "creative":  "gemini-3.1-pro-preview",
+      "code":      "gemini-3.1-pro-preview",
+      "architect": "gemini-3.1-pro-preview",
+      "general":   "gemini-3.1-pro-preview"
     }
   },
   "kimi": {
@@ -42,27 +69,52 @@
     "default_model": "moonshot-v1-128k",
     "env_key": "MOONSHOT_API_KEY",
     "context_window": 128000,
-    "specialization": ["reasoning", "code"]
+    "tier": "high",
+    "cost_class": "low",
+    "specialization": ["reasoning", "code"],
+    "intent_model_map": {
+      "code":      "moonshot-v1-128k",
+      "reasoning": "moonshot-v1-128k",
+      "general":   "moonshot-v1-128k"
+    }
   },
   "mistral": {
     "base_url": "https://api.mistral.ai/v1",
     "default_model": "mistral-large-latest",
     "env_key": "MISTRAL_API_KEY",
     "context_window": 128000,
-    "specialization": ["code", "reasoning"]
+    "tier": "frontier",
+    "cost_class": "medium",
+    "specialization": ["code", "reasoning"],
+    "intent_model_map": {
+      "code":      "codestral-latest",
+      "reasoning": "mistral-large-latest",
+      "architect": "mistral-large-latest",
+      "general":   "mistral-large-latest"
+    }
   },
   "deepseek": {
     "base_url": "https://api.deepseek.com/v1",
     "default_model": "deepseek-chat",
     "env_key": "DEEPSEEK_API_KEY",
     "context_window": 128000,
-    "specialization": ["reasoning", "code"]
+    "tier": "frontier",
+    "cost_class": "low",
+    "specialization": ["reasoning", "code"],
+    "intent_model_map": {
+      "code":      "deepseek-chat",
+      "reasoning": "deepseek-reasoner",
+      "architect": "deepseek-reasoner",
+      "general":   "deepseek-chat"
+    }
   },
   "xai": {
     "base_url": "https://api.x.ai/v1",
     "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
     "context_window": 131072,
+    "tier": "frontier",
+    "cost_class": "high",
     "specialization": ["code", "reasoning", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "grok-4.1-fast",
@@ -77,20 +129,35 @@
     "default_model": "command-r-plus",
     "env_key": "COHERE_API_KEY",
     "context_window": 128000,
-    "specialization": ["reasoning", "general"]
+    "tier": "high",
+    "cost_class": "medium",
+    "specialization": ["reasoning", "general"],
+    "intent_model_map": {
+      "reasoning": "command-r-plus",
+      "general":   "command-r-plus"
+    }
   },
   "zhipu": {
     "base_url": "https://open.bigmodel.cn/api/paas/v4",
     "default_model": "glm-5",
     "env_key": "ZHIPU_API_KEY",
     "context_window": 128000,
-    "specialization": ["reasoning", "code"]
+    "tier": "high",
+    "cost_class": "low",
+    "specialization": ["reasoning", "code"],
+    "intent_model_map": {
+      "code":      "codegeex-4",
+      "reasoning": "glm-5",
+      "general":   "glm-5"
+    }
   },
   "openrouter": {
     "base_url": "https://openrouter.ai/api/v1",
     "default_model": "qwen/qwen-2.5-72b-instruct",
     "env_key": "OPENROUTER_API_KEY",
     "context_window": 131072,
+    "tier": "frontier",
+    "cost_class": "variable",
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "anthropic/claude-sonnet-4-20250514",
@@ -105,6 +172,8 @@
     "default_model": "llama-3.3-70b-versatile",
     "env_key": "GROQ_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "free",
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
       "code":      "llama-3.3-70b-versatile",
@@ -118,6 +187,8 @@
     "default_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "env_key": "TOGETHER_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
       "code":      "deepseek-ai/DeepSeek-V3-0324",
@@ -131,6 +202,8 @@
     "default_model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     "env_key": "FIREWORKS_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
       "code":      "accounts/fireworks/models/deepseek-v3",
@@ -144,6 +217,8 @@
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "DEEPINFRA_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["reasoning", "code", "creative", "general"],
     "intent_model_map": {
       "code":      "deepseek-ai/DeepSeek-V3-0324",
@@ -157,6 +232,8 @@
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "ANYSCALE_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["general"]
   },
   "perplexity": {
@@ -164,13 +241,21 @@
     "default_model": "sonar-pro",
     "env_key": "PERPLEXITY_API_KEY",
     "context_window": 200000,
-    "specialization": ["reasoning", "general"]
+    "tier": "frontier",
+    "cost_class": "medium",
+    "specialization": ["reasoning", "general"],
+    "intent_model_map": {
+      "reasoning": "sonar-pro",
+      "general":   "sonar-pro"
+    }
   },
   "cerebras": {
     "base_url": "https://api.cerebras.ai/v1",
     "default_model": "llama-3.3-70b",
     "env_key": "CEREBRAS_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "sambanova": {
@@ -178,6 +263,8 @@
     "default_model": "Meta-Llama-3.3-70B-Instruct",
     "env_key": "SAMBANOVA_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "lepton": {
@@ -185,6 +272,8 @@
     "default_model": "llama3-3-70b",
     "env_key": "LEPTON_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["general"]
   },
   "hyperbolic": {
@@ -192,6 +281,8 @@
     "default_model": "meta-llama/Llama-3.3-70B-Instruct",
     "env_key": "HYPERBOLIC_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["general"]
   },
   "novita": {
@@ -199,6 +290,8 @@
     "default_model": "meta-llama/llama-3.3-70b-instruct",
     "env_key": "NOVITA_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["general"]
   },
   "ollama": {
@@ -206,6 +299,8 @@
     "default_model": "qwen2.5-coder:7b",
     "env_key": "",
     "context_window": 32768,
+    "tier": "local",
+    "cost_class": "free",
     "specialization": ["code", "reasoning", "general"],
     "intent_model_map": {
       "code":      "qwen2.5-coder:32b",
@@ -220,6 +315,8 @@
     "default_model": "local-model",
     "env_key": "",
     "context_window": 32768,
+    "tier": "local",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "llamacpp": {
@@ -227,6 +324,8 @@
     "default_model": "local-model",
     "env_key": "",
     "context_window": 32768,
+    "tier": "local",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "vllm": {
@@ -234,6 +333,8 @@
     "default_model": "local-model",
     "env_key": "",
     "context_window": 32768,
+    "tier": "local",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "jan": {
@@ -241,6 +342,8 @@
     "default_model": "local-model",
     "env_key": "",
     "context_window": 32768,
+    "tier": "local",
+    "cost_class": "free",
     "specialization": ["general"]
   },
   "ernie": {
@@ -248,18 +351,27 @@
     "default_model": "baidu/ernie-5-0-thinking-latest",
     "env_key": "AIMLAPI_KEY",
     "context_window": 32768,
-    "specialization": ["reasoning", "architect", "general"]
+    "tier": "high",
+    "cost_class": "medium",
+    "specialization": ["reasoning", "architect", "general"],
+    "intent_model_map": {
+      "reasoning": "baidu/ernie-5-0-thinking-latest",
+      "architect": "baidu/ernie-5-0-thinking-latest",
+      "general":   "baidu/ernie-5-0-thinking-latest"
+    }
   },
   "venice": {
     "base_url": "https://api.venice.ai/api/v1",
     "default_model": "llama-3.3-70b",
     "env_key": "VENICE_API_KEY",
     "context_window": 131072,
+    "tier": "high",
+    "cost_class": "low",
     "specialization": ["reasoning", "creative", "general"],
     "intent_model_map": {
       "reasoning": "llama-3.3-70b",
-      "creative": "llama-3.3-70b",
-      "general": "llama-3.3-70b"
+      "creative":  "llama-3.3-70b",
+      "general":   "llama-3.3-70b"
     }
   }
 }

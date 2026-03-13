@@ -1,0 +1,34 @@
+# Genesis Spec — Microservice Module
+#
+# Usage: cortex genesis from-yaml cortex/genesis/specs/microservice.yaml
+---
+name: my_service
+description: "A CORTEX microservice with models, store, API routes, and CLI."
+system_type: module
+auto_cli: true
+auto_tests: true
+tags: [genesis, microservice]
+
+components:
+  - name: models
+    component_type: dataclass
+    docstring: "Data models and DTOs."
+    interfaces: [to_dict, from_dict, validate]
+
+  - name: store
+    component_type: mixin
+    docstring: "Persistence mixin (CortexEngine integration)."
+    interfaces: [store, retrieve, delete, list_all]
+    dependencies: [models]
+
+  - name: service
+    component_type: module
+    docstring: "Business logic orchestrator."
+    interfaces: [create, get, update, remove]
+    dependencies: [models, store]
+
+  - name: routes
+    component_type: module
+    docstring: "FastAPI route handlers."
+    interfaces: [register_routes]
+    dependencies: [models, service]

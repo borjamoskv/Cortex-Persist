@@ -27,8 +27,8 @@ class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.llm.provider import LLMProvider
         from cortex.agents.registry import AgentRegistry
+        from cortex.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
@@ -188,7 +188,7 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=10,
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("CORTEX persist failed: %s", e)
 
     def _persist_ghost(self, task: AgentTask, reason: str) -> None:
@@ -214,7 +214,7 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=10,
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("CORTEX ghost persist failed: %s", e)
 
     @staticmethod
@@ -229,5 +229,5 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=5,
             )
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             pass
