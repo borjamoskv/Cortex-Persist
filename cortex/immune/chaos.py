@@ -6,9 +6,10 @@ Generalized 'Logic-Bomb' pattern for external dependencies.
 from __future__ import annotations
 
 import logging
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger("cortex.immune.chaos")
 
@@ -74,7 +75,7 @@ class ChaosGate:
 
 
 async def async_interceptor(
-    gate: ChaosGate, func: Callable[..., T], *args: Any, **kwargs: Any
+    gate: ChaosGate, func: Callable[..., Awaitable[T]], *args: Any, **kwargs: Any
 ) -> T:
     """Wraps an async call with a ChaosGate."""
     gate.check()
@@ -94,10 +95,10 @@ async def async_interceptor(
                 res["chaos_corrupted"] = True
                 res["content"] = "!!CORRUPTED_BYZANTINE_PAYLOAD!!"
             elif isinstance(res, str):
-                res = "!!CORRUPTED_STRING_BY_CHAOS_GATE!!"
+                res = "!!CORRUPTED_STRING_BY_CHAOS_GATE!!"  # type: ignore[assignment]
 
         return res
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — chaos gate must intercept and re-raise all failures
         # Re-check gate state
         gate.check()
         raise e

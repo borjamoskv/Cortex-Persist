@@ -31,7 +31,7 @@ __all__ = [
 # ═══════════════════════════════════════
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SecurityEvent:
     """An event to be analyzed for anomalies."""
 
@@ -46,7 +46,7 @@ class SecurityEvent:
             object.__setattr__(self, "timestamp", time.time())
 
 
-@dataclass(slots=True)
+@dataclass()
 class AnomalyReport:
     """Report of detected anomaly."""
 
@@ -68,7 +68,7 @@ class AnomalyReport:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class ProjectBaseline:
     """Behavioral baseline for a project."""
 

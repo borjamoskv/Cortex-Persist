@@ -39,7 +39,7 @@ SOVEREIGN_MARKERS: frozenset[str] = frozenset(
 )
 
 
-@dataclass(slots=True)
+@dataclass()
 class DependencyViolation:
     """A detected Axiom 4 violation."""
 

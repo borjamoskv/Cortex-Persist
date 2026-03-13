@@ -12,14 +12,84 @@ logger = logging.getLogger("cortex.immune.falsification")
 
 
 class EvolutionaryFalsifier:
+    """Submits claims and code to falsification analysis.
+
+    Popperian criterion: a claim is scientific only if it is falsifiable.
     """
-    Submits code to extreme mutated variations and Red Team attacks until collapse.
-    Captures the autopsy and introduces resistance in the next compilation.
-    """
+
+    # Patterns that indicate unfalsifiable claims
+    _UNFALSIFIABLE_PATTERNS = (
+        "always works",
+        "never fails",
+        "in my experience",
+        "everyone knows",
+        "it is obvious",
+        "self-evident",
+        "by definition",
+        "it just works",
+        "trust me",
+        "impossible to test",
+    )
+
+    # Patterns that indicate testable, falsifiable claims
+    _FALSIFIABLE_INDICATORS = (
+        "if",
+        "when",
+        "should",
+        "must",
+        "will return",
+        "within",
+        "less than",
+        "greater than",
+        "exactly",
+        "at least",
+        "at most",
+        "before",
+        "after",
+        "%",
+    )
 
     def __init__(self, failure_tolerance: int = 3):
         self.failure_tolerance = failure_tolerance
         self._autopsies: list[dict[str, Any]] = []
+
+    def is_falsifiable(self, claim: str) -> bool:
+        """Check if a claim is falsifiable (testable).
+
+        Uses heuristic pattern matching:
+        - Detects unfalsifiable patterns (tautologies, subjectivity)
+        - Detects falsifiable indicators (conditionals, bounds, time)
+
+        Returns True if the claim appears testable.
+        """
+        lower = claim.lower().strip()
+        if not lower or len(lower) < 5:
+            return False
+
+        # Check for unfalsifiable patterns
+        for pattern in self._UNFALSIFIABLE_PATTERNS:
+            if pattern in lower:
+                logger.debug(
+                    "Unfalsifiable pattern '%s' in: %s",
+                    pattern, claim[:60],
+                )
+                return False
+
+        # Check for falsifiable indicators
+        for indicator in self._FALSIFIABLE_INDICATORS:
+            if indicator in lower:
+                return True
+
+        # Numeric claims are generally falsifiable
+        if any(c.isdigit() for c in claim):
+            return True
+
+        # Short claims without indicators are suspect
+        if len(lower) < 30:
+            return False
+
+        # Default: give benefit of doubt for longer claims
+        return True
 
     def falsify_target(self, target_func: Callable, seed_inputs: dict[str, Any]) -> bool:
         """
@@ -37,7 +107,7 @@ class EvolutionaryFalsifier:
                 target_func(**mutant)
                 # In a real Red Team environment, we also validate if the result
                 # matches the structural boundaries (tether.md), not just if it didn't raise.
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — expect target fail
                 failures += 1
                 self._capture_autopsy(target_func.__name__, mutant, e)
 

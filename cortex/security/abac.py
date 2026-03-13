@@ -45,7 +45,7 @@ class PolicyViolationError(Exception):
     """Raised when ABAC denies access."""
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Policy:
     """An ABAC policy rule.
 
