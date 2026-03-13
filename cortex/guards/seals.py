@@ -343,13 +343,31 @@ async def check_gate_11_cobbler() -> bool:
 
 
 async def main() -> int:
+    import os
+
     printer.head("11 SEALS — CORTEX QUALITY GATES")
+
+    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=4)
+    # Useful when the test suite is too slow for SSH keepalive during git push.
+    # Tests always run in CI — this only affects the local pre-push hook.
+    _skip = {
+        int(g.strip())
+        for g in os.environ.get("SKIP_GATES", "").split(",")
+        if g.strip().isdigit()
+    }
+
+    async def _gate4() -> bool:
+        if 4 in _skip:
+            printer.seal(4, "SKIPPED", "Tests — skipped via SKIP_GATES")
+            printer.warn("Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.")
+            return True
+        return await check_gate_4_tests()
 
     results = await asyncio.gather(
         check_gate_1_lint(),
         check_gate_2_type(),
         check_gate_3_security(),
-        check_gate_4_tests(),
+        _gate4(),
         check_gate_5_ledger(),
         check_gate_6_connection(),
         check_gate_7_async(),
@@ -376,3 +394,4 @@ async def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))
+
