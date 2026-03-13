@@ -5,7 +5,7 @@ and auto-persists decisions, errors, and ghosts to CORTEX — without
 the agent needing a prompt rule to tell it. The prompt becomes unnecessary
 because the product enforces the behavior.
 
-Copyright 2026 Borja Moskv — Apache-2.0
+Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations

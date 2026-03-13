@@ -117,7 +117,7 @@ class ToolboxWatchdog:
                 self._shutdown = True
                 self._kill()
                 raise
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — supervisor catches all crashes
                 logger.error(
                     "☠️ [WATCHDOG] Crash detected: %s", exc,
                 )
@@ -202,7 +202,7 @@ class ToolboxWatchdog:
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "toolbox.log"
         self._rotate_logs(log_file)
-        
+
         self._log_fd = open(log_file, "a")
 
         self._process = subprocess.Popen(
@@ -282,6 +282,6 @@ class ToolboxWatchdog:
         if self._log_fd:
             try:
                 self._log_fd.close()
-            except Exception:
+            except OSError:
                 pass
             self._log_fd = None
