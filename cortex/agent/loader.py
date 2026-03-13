@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.agent.schema import AgentRole
 from cortex.memory.frequency import BIFTRouter, ContinuousMemorySystem
@@ -43,10 +43,10 @@ class AgentInstance:
         role: AgentRole,
         working_memory: WorkingMemoryL1,
         guardrail: SessionGuardrail,
-        art_gate: AdaptiveResonanceGate | None,
+        art_gate: Optional[AdaptiveResonanceGate],
         bift_router: BIFTRouter,
-        cms: ContinuousMemorySystem | None,
-        sparse_encoder: MushroomBodyEncoder | None,
+        cms: Optional[ContinuousMemorySystem],
+        sparse_encoder: Optional[MushroomBodyEncoder],
         vector_store: Any = None,
     ):
         self.role = role

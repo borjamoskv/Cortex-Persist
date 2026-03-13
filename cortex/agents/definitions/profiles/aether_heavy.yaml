@@ -1,5 +1,7 @@
 name: "AETHER-HEAVY"
 model: "gemini-2.5-pro"
+provider: "gemini"
+intent: "code"
 tenant_id: "default"
 project_id: "system"
 system_prompt: |

@@ -1,5 +1,7 @@
 name: "LYNX-Ω"
 model: "gemini-2.5-pro"
+provider: "gemini"
+intent: "reasoning"
 tenant_id: "default"
 project_id: "system"
 system_prompt: |
