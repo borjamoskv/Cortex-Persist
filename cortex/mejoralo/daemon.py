@@ -16,6 +16,11 @@ from typing import Any
 
 from cortex.cli import get_engine
 from cortex.daemon.monitors.canary import CanaryMonitor
+from cortex.mejoralo.constants import (
+    DAEMON_DEFAULT_SCAN_INTERVAL,
+    DAEMON_DEFAULT_TARGET_SCORE,
+    DAEMON_DIM_SCORE_THRESHOLD,
+)
 from cortex.mejoralo.engine import MejoraloEngine
 from cortex.telemetry.metrics import MetricsRegistry
 from cortex.thinking.fusion import ContextFusion
@@ -32,8 +37,8 @@ class MejoraloDaemon:
         self,
         project: str,
         base_path: str | Path,
-        scan_interval: int = 1800,  # 30 minutes
-        target_score: int = 100,
+        scan_interval: int = DAEMON_DEFAULT_SCAN_INTERVAL,
+        target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
         metrics: MetricsRegistry | None = None,
         db_path: str | Path | None = None,
     ):
@@ -46,7 +51,9 @@ class MejoraloDaemon:
         # 🛡️ Sovereign Security & Context
         from cortex.config import DEFAULT_DB_PATH
 
-        self.cortex_engine = get_engine(db_path or DEFAULT_DB_PATH)  # type: ignore[reportArgumentType]
+        self.cortex_engine = get_engine(
+            db_path or DEFAULT_DB_PATH,
+        )  # type: ignore[reportArgumentType]
         self.engine = MejoraloEngine(engine=self.cortex_engine)
         self.canary = CanaryMonitor(self.base_path)  # type: ignore[reportCallIssue]
         self.fusion = ContextFusion(self.cortex_engine)
@@ -83,8 +90,10 @@ class MejoraloDaemon:
             try:
                 await self._execute_cycle()
             except (RuntimeError, OSError, ValueError) as e:
-                logger.error("Daemon cycle failure: %s", e, exc_info=True)
-                self.metrics.increment("mejoralo_daemon_errors")  # type: ignore[reportAttributeAccessIssue]
+                logger.exception("Daemon cycle failure: %s", e)
+                self.metrics.increment(  # type: ignore[reportAttributeAccessIssue]
+                    "mejoralo_daemon_errors",
+                )
 
             elapsed = time.monotonic() - start_time
             sleep_time = max(0, self.scan_interval - elapsed)
@@ -99,7 +108,9 @@ class MejoraloDaemon:
         self.canary.capture_baselines()  # type: ignore[reportAttributeAccessIssue]
 
         # 1. Pre-scan: capture baseline score
-        result = await self.engine.scan(self.project, self.base_path)  # type: ignore[reportGeneralTypeIssues]
+        result = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+            self.project, self.base_path,
+        )
         score_before = result.score
         self.metrics.set_gauge("cortex_code_score", score_before)
 
@@ -114,8 +125,14 @@ class MejoraloDaemon:
 
         # 2. Memory/KI Context Fusion + Causal Analysis
         fused_context = await self.fusion.fuse_context(  # type: ignore[reportCallIssue]
-            query=" ".join([d.name for d in result.dimensions if d.score < 7])  # type: ignore[reportCallIssue]
-            if any(d.score < 7 for d in result.dimensions)
+            query=" ".join(
+                d.name for d in result.dimensions
+                if d.score < DAEMON_DIM_SCORE_THRESHOLD
+            )
+            if any(
+                d.score < DAEMON_DIM_SCORE_THRESHOLD
+                for d in result.dimensions
+            )
             else "refactoring"
         )
         fused_context = await self._ouroboros_analyze(result, fused_context)
@@ -139,7 +156,9 @@ class MejoraloDaemon:
             )
 
         # 4. Post-heal verification: re-scan to measure real impact
-        result_after = await self.engine.scan(self.project, self.base_path)  # type: ignore[reportGeneralTypeIssues]
+        result_after = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+            self.project, self.base_path,
+        )
         score_after = result_after.score
         delta = score_after - score_before
 

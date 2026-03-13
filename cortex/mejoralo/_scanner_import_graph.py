@@ -11,7 +11,7 @@ import ast
 import os
 from pathlib import Path
 
-from cortex.mejoralo.constants import SKIP_DIRS
+from cortex.mejoralo.constants import MAX_FAN_OUT, SKIP_DIRS
 from cortex.mejoralo.models import AntipatternFinding
 
 __all__ = [
@@ -21,8 +21,6 @@ __all__ = [
     "run_graph_scanners",
     "MAX_FAN_OUT",
 ]
-
-MAX_FAN_OUT = 12
 
 
 def _get_file_deps(fp: Path) -> set[str]:

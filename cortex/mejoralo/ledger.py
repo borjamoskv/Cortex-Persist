@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from cortex.engine import CortexEngine
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
 __all__ = ["record_session", "get_history", "record_scar", "get_scars"]
 
@@ -67,17 +68,28 @@ def get_history(engine: CortexEngine, project: str, limit: int = 20) -> list[dic
     conn = engine._get_sync_conn()
     try:
         rows = conn.execute(
-            "SELECT id, content, created_at, meta "
-            "FROM facts "
-            "WHERE project = ? AND fact_type = 'decision' "
-            "AND tags LIKE '%mejoralo%' AND valid_until IS NULL "
-            "ORDER BY id DESC LIMIT ?",
+            f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
+            "WHERE f.project = ? AND f.fact_type = 'decision' "
+            "AND f.tags LIKE '%mejoralo%' AND f.valid_until IS NULL "
+            "ORDER BY f.id DESC LIMIT ?",
             (project, limit),
         ).fetchall()
+        facts = [engine._row_to_fact(row, tenant_id=row[1]) for row in rows]
     finally:
         conn.close()
 
-    return [_row_to_session(row) for row in rows]
+    return [
+        {
+            "id": f["id"],
+            "content": f["content"],
+            "created_at": f["created_at"],
+            "score_before": f.get("meta", {}).get("score_before"),
+            "score_after": f.get("meta", {}).get("score_after"),
+            "delta": f.get("meta", {}).get("delta"),
+            "actions": f.get("meta", {}).get("actions", []),
+        }
+        for f in facts
+    ]
 
 
 def record_scar(
@@ -99,7 +111,7 @@ def record_scar(
     fact_id = engine.store_sync(
         project=project,
         content=content,
-        fact_type="scar",
+        fact_type="error",
         tags=["mejoralo", "scar", f"v{_VERSION}"],
         confidence="verified",
         source="cortex-mejoralo",
@@ -120,27 +132,31 @@ def get_scars(
     conn = engine._get_sync_conn()
     try:
         rows = conn.execute(
-            "SELECT id, content, created_at, meta "
-            "FROM facts "
-            "WHERE project = ? AND fact_type = 'scar' "
-            "AND json_extract(meta, '$.file_path') = ? "
-            "AND tags LIKE '%mejoralo%' AND valid_until IS NULL "
-            "ORDER BY id DESC LIMIT ?",
-            (project, file_path, limit),
+            f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
+            "WHERE f.project = ? AND f.fact_type = 'error' "
+            "AND f.tags LIKE '%mejoralo%' AND f.valid_until IS NULL "
+            "ORDER BY f.id DESC",
+            (project,),
         ).fetchall()
+        facts = [engine._row_to_fact(row, tenant_id=row[1]) for row in rows]
     finally:
         conn.close()
 
-    return [
-        {
-            "id": row[0],
-            "content": row[1],
-            "created_at": row[2],
-            "file_path": _parse_meta(row[3]).get("file_path"),
-            "error_trace": _parse_meta(row[3]).get("error_trace"),
-        }
-        for row in rows
-    ]
+    scars = []
+    for f in facts:
+        if f.get("meta", {}).get("file_path") == file_path:
+            scars.append(
+                {
+                    "id": f["id"],
+                    "content": f["content"],
+                    "created_at": f["created_at"],
+                    "file_path": file_path,
+                    "error_trace": f.get("meta", {}).get("error_trace"),
+                }
+            )
+            if len(scars) >= limit:
+                break
+    return scars
 
 
 def _row_to_session(row: tuple[Any, ...]) -> dict[str, Any]:

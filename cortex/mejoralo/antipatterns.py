@@ -24,7 +24,7 @@ from cortex.mejoralo._scanner_visitors import (
     _AsyncIntegrityVisitor,
     _BroadExceptionVisitor,
 )
-from cortex.mejoralo.constants import SKIP_DIRS
+from cortex.mejoralo.constants import MAX_FUNC_PARAMS, SKIP_DIRS, TOTAL_SCANNER_COUNT
 from cortex.mejoralo.models import AntipatternFinding, AntipatternReport
 
 __all__ = ["scan_antipatterns"]
@@ -51,9 +51,6 @@ _BLOCKING_CALLS: dict[str, str] = {
 
 # Magic number whitelist — common constants that are acceptable
 _MAGIC_WHITELIST = {0, 1, 2, -1, 100, 0.5}
-
-# Max allowed fan-out (imports from other local modules)
-_MAX_FAN_OUT = 12
 
 
 logger = logging.getLogger("cortex.mejoralo.antipatterns")
@@ -204,14 +201,17 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
         # Subtract 'self' or 'cls'
         if total > 0 and args.args and args.args[0].arg in ("self", "cls"):
             total -= 1
-        if total > 5:
+        if total > MAX_FUNC_PARAMS:
             self.findings.append(
                 AntipatternFinding(
                     scanner="ImplicitAssumption",
                     severity="medium",
                     file=self.rel,
                     line=node.lineno,
-                    message=f"Function `{node.name}()` has {total} parameters (max recommended: 5)",
+                    message=(
+                        f"Function `{node.name}()` has {total} parameters "
+                        f"(max recommended: {MAX_FUNC_PARAMS})"
+                    ),
                     fix_hint="Consider grouping parameters into a dataclass or config object.",
                 )
             )
@@ -387,6 +387,6 @@ def scan_antipatterns(
             f.line,
         ),
     )
-    report.scanners_run = 6
+    report.scanners_run = TOTAL_SCANNER_COUNT
 
     return report
