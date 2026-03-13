@@ -301,27 +301,21 @@ class AssociativeDreamEngine:
         Near-identical = similarity > 0.95. Keeps the newer engram
         and marks the older one for deletion.
         """
-        fused = 0
+        if not self._vs or not hasattr(self._vs, "delete"):
+            return 0
 
         # Build ID → engram lookup
-        id_to_engram: dict[str, Any] = {}
-        for e in engrams:
-            eid = getattr(e, "id", None)
-            if eid:
-                id_to_engram[eid] = e
+        id_to_engram: dict[str, Any] = {e.id: e for e in engrams if getattr(e, "id", None)}
 
+        fused = 0
         for cluster in clusters:
-            members = [id_to_engram.get(mid) for mid in cluster.member_ids]
-            members = [m for m in members if m is not None]
-
+            members = [id_to_engram[mid] for mid in cluster.member_ids if mid in id_to_engram]
             to_delete = self._identify_redundant_engrams(members)
 
-            # Delete redundant engrams
-            if to_delete and self._vs and hasattr(self._vs, "delete"):
-                for vid in to_delete:
-                    await self._vs.delete(vid)
-                    fused += 1
-                    logger.debug("REM fused redundant engram: %s", vid)
+            for vid in to_delete:
+                await self._vs.delete(vid)
+                fused += 1
+                logger.debug("REM fused redundant engram: %s", vid)
 
         return fused
 
