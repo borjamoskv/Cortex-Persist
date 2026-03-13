@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import aiosqlite
 
@@ -227,7 +227,7 @@ class AsyncSignalBus:
 
     async def gc(self, max_age_days: int = 30) -> int:
         await self.ensure_table()
-        cutoff = (datetime.now() - timedelta(days=max_age_days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         cursor = await self._conn.execute(
             """DELETE FROM signals
                WHERE consumed_by != '[]'
@@ -397,7 +397,7 @@ class SignalBus:
 
     def gc(self, max_age_days: int = 30) -> int:
         self.ensure_table()
-        cutoff = (datetime.now() - timedelta(days=max_age_days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         cursor = self._conn.execute(
             """DELETE FROM signals
                WHERE consumed_by != '[]'

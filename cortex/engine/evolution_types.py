@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol
 
 
 @dataclass
@@ -85,3 +85,12 @@ class SovereignAgent:
 
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable evolutionary improvement strategies."""
+
+    def evaluate(
+        self,
+        sovereign: SovereignAgent,
+        subagent: SubAgent,
+        metrics: DomainMetrics,
+        cortex_metrics: Any,
+    ) -> dict[str, Any] | None:
+        ...

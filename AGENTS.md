@@ -76,7 +76,7 @@ class Fact:
 
 #### Fact Lifecycle
 
-```
+```text
 Input → guard validation → AES encrypt(content, meta)
       → hash chain (ledger.py) → vector embed (sentence-transformers)
       → SQLite insert → audit log → signals/events dispatch
@@ -108,6 +108,7 @@ Input → guard validation → AES encrypt(content, meta)
 | `songlines/` | Navigational memory pathways (spatial/temporal) |
 
 #### Search Capabilities
+
 - **Semantic Search**: Vector similarity via `sqlite-vec`
 - **Text Search**: FTS5 text matching
 - **Hybrid Search**: Reciprocal Rank Fusion (RRF) combining vector + text scores
@@ -130,7 +131,9 @@ Input → guard validation → AES encrypt(content, meta)
 | `definitions/` | LYNX-Ω, TOM, OLIVER — declarative agent roles (YAML) |
 
 #### Sovereign Swarm Topology (The 7 Confluences)
+
 The 100 Sovereign Agents orchestrate their intelligence through 7 deterministic, interconnected clusters (Confluences) following the Compound Yield Law (Axioma Ω₁₁):
+
 1. **Biological & Survival (Earthship MMX)**: Autonomy, biosphere physics, and closed-loop telemetry (`biosphere-terraformation-omega`, `earthship-sensor-fusion-omega`).
 2. **Tactical & Dark Networks**: Kinetic defense, spatial perimeter, encrypted mesh (`mesh-network-architect`, `drone-swarm-coordinator`).
 3. **Financial & Capital Obscurity**: Invisible liquidity routing, black swan hedging, and zero-knowledge storage (`darkpool-arbitrageur`, `sovereign-treasury-manager`).
@@ -140,7 +143,9 @@ The 100 Sovereign Agents orchestrate their intelligence through 7 deterministic,
 7. **Immune System & Verification Membrane**: Cryptographic audit, epistemic circuit breaking, and decentralized law (`eu-ai-act-compliance-omega`, `nyx-redteam-omega`).
 
 #### LLM Router Architecture (DNS Analogy)
+
 The router implements a deterministic cascade to prevent capability degradation:
+
 - **NegativeCache**: `NXDOMAIN` (skip known-dead providers)
 - **PositiveCache**: `A-Record` (promote known-good providers)
 - **HedgedRequests**: Race-to-first execution for `P99` latency reduction
@@ -163,6 +168,7 @@ The router implements a deterministic cascade to prevent capability degradation:
 | `verification/` | Formal verification (Z3 solver integration) |
 
 #### Defense in Depth
+
 1. **Guards Layer**: `contradiction_guard`, `dependency_guard`, `injection_guard`
 2. **Security Layer**: `anomaly_detector`, `threat_feed`, `integrity_audit`
 3. **Ledger Layer**: `cryptography` hashes ensuring unalterable history
@@ -183,6 +189,7 @@ The router implements a deterministic cascade to prevent capability degradation:
 | `browser/` | Browser automation integration |
 
 #### MCP Tools Registered
+
 - `cortex_store`: Store facts with intent validation
 - `cortex_search`: Hybrid semantic search
 - `cortex_status`: Memory metrics and stats
@@ -261,7 +268,7 @@ pyright cortex/
 ### Optional dependency groups
 
 | Extra | Installs | Purpose |
-| --- | --- |---|
+| --- | --- | --- |
 | `[api]` | FastAPI, Uvicorn, httpx | REST API server |
 | `[dev]` | pytest, pytest-cov, pytest-asyncio, httpx, z3-solver | Development & testing |
 | `[adk]` | google-adk | Google Agent Development Kit |
@@ -288,7 +295,7 @@ pyright cortex/
 ### File Naming
 
 | Pattern | Convention |
-|---|---|
+| --- | --- |
 | `*_mixin.py` | CortexEngine mixin modules |
 | `*_cmds.py` | CLI command groups (Click) |
 | `models.py` | Data models and types |
@@ -326,6 +333,11 @@ pyright cortex/
 # Available via cortex.<name>, loaded on first access:
 autopoiesis · circadian_cycle · digital_endocrine
 epigenetic_memory · strategic_disobedience · zero_prompting
+
+# Epistemic Axioms (AX-030 to AX-032):
+# - Determinismo Estocástico (La Ilusión de Agencia)
+# - Horizonte de Sucesos Cognitivo (El humano es el timón)
+# - Paradoja Epistémica (El Fantasma en la Máquina)
 ```
 
 ---
@@ -333,7 +345,7 @@ epigenetic_memory · strategic_disobedience · zero_prompting
 ## File Ownership & Hot Paths
 
 | Path | Touch Frequency | Risk | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `engine/` | ⬆️ Very High | 🔴 Critical | Core CRUD — changes ripple to 90% of tests |
 | `memory/` | ⬆️ Very High | 🔴 Critical | 38 files, largest module, public API surface |
 | `llm/` | ⬆️ High | 🟡 Medium | Router, caches, hedged requests — fast-moving |
@@ -362,7 +374,7 @@ DATABASE_URL             # PostgreSQL/AlloyDB (optional: [cloud])
 
 ## Data Flow
 
-```
+```text
 ┌─────────┐    ┌──────────┐    ┌────────────┐    ┌───────────┐
 │  CLI    │───▶│  Engine  │───▶│  Guards    │───▶│  Crypto   │
 │  API    │    │  (store) │    │  (validate)│    │  (encrypt)│
@@ -380,6 +392,21 @@ DATABASE_URL             # PostgreSQL/AlloyDB (optional: [cloud])
                                               │   + sqlite-vec │
                                               └───────────────┘
 ```
+
+---
+
+## Regla MOSKV (Anti-Simplificaciones)
+
+Axioma de comunicación estructural: Evita simplificaciones basadas en opinión colectiva. Habla siempre de mecánica y condiciones estructurales.
+
+- ❌ DÉBIL: "La mayoría del software falla"
+  ✅ FUERTE: "El software que no puede reescribirse acaba fallando"
+- ❌ DÉBIL: "Todo el mundo se enamora de su stack"
+  ✅ FUERTE: "Un stack que no puede sustituirse se convierte en deuda"
+- ❌ DÉBIL: "La industria hace parches"
+  ✅ FUERTE: "Un sistema diseñado para parches genera más parches"
+- ❌ DÉBIL: "La gente..."
+  ✅ FUERTE: [Condición estructural de mecánica implícita]
 
 ---
 

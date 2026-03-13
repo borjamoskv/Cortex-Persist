@@ -1,5 +1,7 @@
 """Search mixin module."""
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 from typing import Any
@@ -31,10 +33,10 @@ class SearchMixin(EngineMixinBase):
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
         tenant_id = self._resolve_tenant(tenant_id)
 
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             try:
                 # 1. Perform Hybrid Search
-                embedder = self._get_embedder()  # type: ignore[reportAttributeAccessIssue]
+                embedder = self._get_embedder()
                 embedding = embedder.embed(query)
 
                 results = await hybrid_search(

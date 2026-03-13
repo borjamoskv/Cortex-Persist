@@ -1,8 +1,8 @@
 import { motion, useInView } from 'framer-motion';
 import { AlertOctagon, Clock, Shield, Skull, ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-
-const ease = [0.16, 1, 0.3, 1] as const;
+// Biological spring physics
+const ease = [0.25, 1, 0.5, 1] as const;
 
 function CountdownBlock() {
   const ref = useRef(null);
@@ -18,7 +18,7 @@ function CountdownBlock() {
     >
       <div className="absolute inset-0 bg-industrial-gold/[0.02] -skew-x-12 transform group-hover:bg-industrial-gold/[0.05] transition-colors duration-700" />
       
-      <div className="glass-strong rounded-none border border-industrial-gold/15 p-8 relative overflow-hidden backdrop-blur-3xl shadow-[0_0_50px_rgba(212,175,55,0.05)]">
+      <div className="glass-strong rounded-[4px] border border-industrial-gold/15 p-8 relative overflow-hidden backdrop-blur-3xl shadow-[0_0_50px_rgba(212,175,55,0.08)]">
         {/* Corner accents */}
         <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-industrial-gold/40" />
         <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-industrial-gold/40" />
@@ -97,8 +97,8 @@ export function Trigger() {
         </h1>
       </div>
 
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] rounded-[100%] bg-[image:radial-gradient(circle,rgba(212,175,55,0.03)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 z-0 pointer-events-none origin-center transform -skew-y-3 mix-blend-screen">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[700px] rounded-[100%] bg-[image:radial-gradient(ellipse,rgba(212,175,55,0.05)_0%,transparent_60%)] animate-pulse-slow object-cover" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -112,7 +112,7 @@ export function Trigger() {
             {/* Structural line */}
             <div className="absolute -left-6 top-10 bottom-0 w-px bg-industrial-gold/20 hidden md:block" />
 
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none border-l-2 border-industrial-gold bg-industrial-gold/[0.08] text-industrial-gold font-mono text-[10px] uppercase tracking-[0.3em] mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] border-l-2 border-industrial-gold bg-industrial-gold/[0.08] text-industrial-gold font-mono text-[10px] uppercase tracking-[0.3em] mb-12">
               <AlertOctagon className="w-3.5 h-3.5" />
               European Union AI Act
             </div>
@@ -141,7 +141,7 @@ export function Trigger() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 bg-industrial-gold text-black font-mono font-black text-sm uppercase tracking-widest flex items-center gap-3 transition-all hover:shadow-[0_0_40px_rgba(212,175,55,0.4)]"
+              className="px-8 py-4 bg-industrial-gold text-abyssal-900 rounded-[4px] font-mono font-black text-sm uppercase tracking-widest flex items-center gap-3 transition-all duration-500 ease-out border border-industrial-gold/80 hover:shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:-translate-y-[1px] active:translate-y-0"
             >
               Start Compliance Audit
               <ArrowRight className="w-4 h-4" />

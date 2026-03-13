@@ -18,6 +18,8 @@ from cortex.database.schema_extensions import (
     CREATE_EPISODES_INDEXES,
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
+    CREATE_FACTS_FTS,
+    CREATE_MERKLE_ROOTS,
     CREATE_OUTCOMES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_RWC_INDEXES,
@@ -60,10 +62,12 @@ __all__ = [
     "CREATE_TIME_ENTRIES_INDEX",
     "CREATE_TRANSACTIONS",
     "CREATE_TRANSACTIONS_INDEX",
-    "CREATE_TRUST_EDGES",
+    CREATE_TRUST_EDGES,
     CREATE_VOTES,
     CREATE_VOTES_V2,
-    "CREATE_PROCEDURAL_ENGRAMS",
+    CREATE_PROCEDURAL_ENGRAMS,
+    CREATE_FACTS_FTS,
+    CREATE_MERKLE_ROOTS,
     "CREATE_TENANTS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
@@ -82,27 +86,16 @@ CREATE TABLE IF NOT EXISTS facts (
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
     tags        TEXT NOT NULL DEFAULT '[]',
-    cognitive_layer TEXT DEFAULT 'semantic' CHECK(
-        cognitive_layer IN ('working', 'episodic', 'semantic', 'relationship', 'emotional')
-    ),
-    parent_decision_id INTEGER REFERENCES facts(id),
-    confidence  TEXT NOT NULL DEFAULT 'stated',
-    valid_from  TEXT NOT NULL,
+    meta        TEXT DEFAULT '{}',
+    hash        TEXT,
+    valid_from  TEXT,
     valid_until TEXT,
     source      TEXT,
-    meta        TEXT DEFAULT '{}',
-    consensus_score REAL DEFAULT 1.0,
-    hash        TEXT,
-    signature   TEXT,
-    signer_pubkey TEXT,
-    is_quarantined INTEGER NOT NULL DEFAULT 0,
-    quarantined_at TEXT,
-    quarantine_reason TEXT,
+    confidence  TEXT DEFAULT 'C3',
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    tx_id       INTEGER REFERENCES transactions(id),
     is_tombstoned INTEGER NOT NULL DEFAULT 0,
-    tombstoned_at TEXT
+    is_quarantined INTEGER NOT NULL DEFAULT 0
 );
 """
 
@@ -111,11 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_tenant ON facts(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_facts_project ON facts(project);
 CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
-CREATE INDEX IF NOT EXISTS idx_facts_valid ON facts(valid_from, valid_until);
-CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence);
-CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
-CREATE INDEX IF NOT EXISTS idx_facts_parent_decision ON facts(parent_decision_id);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────

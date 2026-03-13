@@ -69,6 +69,7 @@ class ByzantineConsensus:
             hash_to_proposal[proposal_hash] = proposal
 
         import math
+
         if math.isclose(total_reputation, 0.0, abs_tol=1e-9):
             return None
 
@@ -77,9 +78,12 @@ class ByzantineConsensus:
         winning_weight = vote_tally[winning_hash]
 
         import math
+
         # Check against Byantine tolerance threshold
         ratio = winning_weight / total_reputation
-        if ratio > self.tolerance_threshold or math.isclose(ratio, self.tolerance_threshold, rel_tol=1e-9):
+        if ratio > self.tolerance_threshold or math.isclose(
+            ratio, self.tolerance_threshold, rel_tol=1e-9
+        ):
             # Consensus achieved
             await self._update_reputations(winning_hash, proposals)
             return hash_to_proposal[winning_hash]

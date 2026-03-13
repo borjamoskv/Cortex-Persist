@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 
 from cortex.core.paths import (
@@ -53,7 +54,6 @@ __all__ = [
     "TombstoneAlert",
     "TrendsAlert",
     "WorkflowAlert",
-    "DriftAlert",
 ]
 
 # ─── Constants ────────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ class WorkflowAlert:
 
     workflow: str
     reason: str
-    confidence: str = "C3\u001b[33m"
+    confidence: str = "C3"
     priority: int = 5
     tags: list[str] = field(default_factory=list)
 
@@ -308,7 +308,7 @@ class DaemonStatus:
     @property
     def all_healthy(self) -> bool:
         return all(s.healthy for s in self.sites) and not any(
-            [
+            (
                 self.stale_ghosts,
                 self.memory_alerts,
                 self.cert_alerts,
@@ -325,35 +325,15 @@ class DaemonStatus:
                 self.tombstone_alerts,
                 self.drift_alerts,
                 self.trends_alerts,
+                self.aether_alerts,
+                self.workflow_alerts,
                 self.auto_immune_alerts,
                 self.errors,
-            ]
+            )
         )
 
     def to_dict(self) -> dict:
-        return {
-            "checked_at": self.checked_at,
-            "check_duration_ms": round(self.check_duration_ms, 1),
-            "all_healthy": self.all_healthy,
-            "sites": [s.__dict__ for s in self.sites],
-            "stale_ghosts": [g.__dict__ for g in self.stale_ghosts],
-            "memory_alerts": [m.__dict__ for m in self.memory_alerts],
-            "cert_alerts": [c.__dict__ for c in self.cert_alerts],
-            "engine_alerts": [e.__dict__ for e in self.engine_alerts],
-            "disk_alerts": [d.__dict__ for d in self.disk_alerts],
-            "mejoralo_alerts": [m.__dict__ for m in self.mejoralo_alerts],
-            "evaluation_alerts": [e.__dict__ for e in self.evaluation_alerts],
-            "entropy_alerts": [e.__dict__ for e in self.entropy_alerts],
-            "compaction_alerts": [c.__dict__ for c in self.compaction_alerts],
-            "cloud_sync_alerts": [s.__dict__ for s in self.cloud_sync_alerts],
-            "perception_alerts": [p.__dict__ for p in self.perception_alerts],
-            "neural_alerts": [n.__dict__ for n in self.neural_alerts],
-            "security_alerts": [s.__dict__ for s in self.security_alerts],
-            "signal_alerts": [s.__dict__ for s in self.signal_alerts],
-            "tombstone_alerts": [t.__dict__ for t in self.tombstone_alerts],
-            "trends_alerts": [t.__dict__ for t in self.trends_alerts],
-            "drift_alerts": [d.__dict__ for d in self.drift_alerts],
-            "workflow_alerts": [w.__dict__ for w in self.workflow_alerts],
-            "auto_immune_alerts": self.auto_immune_alerts,
-            "errors": self.errors,
-        }
+        raw = dataclasses.asdict(self)
+        raw["all_healthy"] = self.all_healthy
+        raw["check_duration_ms"] = round(self.check_duration_ms, 1)
+        return raw

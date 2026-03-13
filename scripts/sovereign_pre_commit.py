@@ -7,9 +7,10 @@ Catches what .gitignore cannot — including `git add -f`.
 
 DERIVATION: Ω₃ Byzantine Default — verify, then trust.
 """
+
+import re
 import subprocess
 import sys
-import re
 
 # ── Forbidden patterns (case-insensitive) ─────────────────────
 FORBIDDEN_PATTERNS: list[re.Pattern] = [
@@ -70,9 +71,7 @@ def check_file_contents(files: list[str]) -> list[str]:
             diff_content = result.stdout
             for pattern in CONTENT_PATTERNS:
                 if pattern.search(diff_content):
-                    violations.append(
-                        f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'"
-                    )
+                    violations.append(f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'")
                     break
         except Exception:
             pass  # Binary files or access errors — skip
@@ -96,7 +95,7 @@ def main() -> int:
         for v in violations:
             print(f"{RED}{v}{RESET}")
         print(f"\n{YELLOW}If this is a false positive, bypass with:{RESET}")
-        print(f"  git commit --no-verify\n")
+        print("  git commit --no-verify\n")
         print(f"{RED}⚠️  Bots drain exposed wallet seeds in <600ms.{RESET}\n")
         return 1
 

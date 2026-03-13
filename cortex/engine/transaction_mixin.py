@@ -8,13 +8,24 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.memory.temporal import now_iso
+
+__all__ = ["TransactionMixin"]
 
 logger = logging.getLogger("cortex.transactions")
 
 
-class TransactionMixin:
-    """Sovereign Ledger Transaction and CDC (Change Data Capture) management."""
+class TransactionMixin(EngineMixinBase):
+    """Sovereign Ledger — Immutable Transaction Log with Cryptographic Hash Chain.
+
+    Every write operation produces a transaction record chained to its predecessor
+    via ``compute_tx_hash(prev_hash, project, action, detail, timestamp)``.
+    The chain is verified by ``ImmutableLedger.verify_integrity_async()``.
+
+    CDC Pattern: ``_log_transaction()`` is the single write-path for all
+    state mutations (store, deprecate, quarantine, unquarantine).
+    """
 
     async def _log_transaction(
         self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
@@ -58,11 +69,12 @@ class TransactionMixin:
                     meta={"error": str(e)},
                 )
 
-        return tx_id  # type: ignore[reportReturnType]
+        return int(tx_id) if tx_id is not None else 0
 
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import ImmutableLedger
 
-            self._ledger = ImmutableLedger(await self.get_conn())  # type: ignore[reportAttributeAccessIssue]
+            conn = await self.get_conn()
+            self._ledger = ImmutableLedger(conn)
         return await self._ledger.verify_integrity_async()

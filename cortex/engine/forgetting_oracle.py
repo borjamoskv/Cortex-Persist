@@ -5,8 +5,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import sqlite3
 import time
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from cortex.engine.forgetting_models import (
@@ -202,31 +204,98 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             evidence_tip="NO_EVICTIONS",
         )
 
-    def should_protect(self, fact_id: int) -> bool:
-        """Pre-eviction guard: returns True if evicting this fact would be regretted.
+    def calculate_semantic_gravity(self, fact_id: int) -> float:
+        """Calculate thermodynamic decay based on Ebbinghaus curve (Masa-Energía)."""
+        try:
+            fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)
+            if not fact:
+                return 0.0
 
-        Called by the cache layer BEFORE eviction. Prevents the regret cycle
-        instead of just detecting it post-hoc.
+            base_mass = self.CAUSAL_WEIGHT_MAP.get(fact.get("fact_type"), self.DEFAULT_WEIGHT)
 
-        Criteria:
-        1. Causal root: fact has descendants (depth > 0)
-        2. High-access: fact is in L1 hot tier
-        3. Critical type: decision, error, axiom
+            created_at_iso = fact.get("created_at")
+            if not created_at_iso:
+                return base_mass
+
+            try:
+                # Intenta parsear ISO
+                created_dt = datetime.fromisoformat(created_at_iso.replace("Z", "+00:00"))
+                created_at_ts = created_dt.timestamp()
+            except (ValueError, TypeError, AttributeError):
+                created_at_ts = time.time()
+
+            time_delta_hours = max((time.time() - created_at_ts) / 3600.0, 0.0)
+
+            # Lambda rate: Axioms decaen muy lentamente, ghosts decaen rápido
+            lambda_rate = 0.001 if fact.get("fact_type") == "axiom" else 0.05
+
+            decay_factor = math.exp(-lambda_rate * time_delta_hours)
+            return base_mass * decay_factor
+
+        except Exception as e:
+            logger.debug("[ORACLE] Error calculating semantic gravity: %s", e)
+            return 1.0  # Safe default on error
+
+    async def evaporate_fact(self, fact_id: int) -> bool:
+        """Transmuta un facto de cero gravedad en un fantasma (Autonomous Ghosting).
+
+        Preserva la criptografía pero muta su fact_type a 'ghost' para sacarlo del L1
+        y del vector space principal, sin destruir la entropía subyacente.
         """
         try:
-            chain = self._engine.get_causal_chain_sync(
-                fact_id=fact_id,
-                direction="down",
-                max_depth=1,
-            )
-            if chain and len(chain) > 0:
+            fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)
+            if not fact or fact.get("fact_type") == "ghost":
+                return False
+
+            async with self._engine.session() as conn:
+                await conn.execute(
+                    "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
+                    (datetime.now(timezone.utc).isoformat(), fact_id),
+                )
+                await self._engine._log_transaction(
+                    conn,
+                    fact.get("project", "SYSTEM"),
+                    "MUTATE_TO_GHOST",
+                    {"fact_id": fact_id, "original_type": fact.get("fact_type")},
+                )
+                await conn.commit()
+
+            logger.info("🔮 [ORACLE] Fact %d evaporated into a ghost.", fact_id)
+            return True
+
+        except Exception as e:
+            logger.error("🔮 [ORACLE] Failed to evaporate fact %d: %s", fact_id, e)
+            return False
+
+    def should_protect(self, fact_id: int) -> bool:
+        r"""Pre-eviction guard: returns True if evicting this fact would be regretted.
+
+        Criteria:
+        1. Semantic Gravity: Evaluates the thermodynamic curve Ebbinghaus ($e^{-\lambda t}$).
+        2. Causal Graph Centrality: Protects broad bridges/hubs (depth > 1).
+        3. High-access: fact is in L1 hot tier.
+        """
+        try:
+            # 1. Continuous Thermodynamic Decay
+            gravity = self.calculate_semantic_gravity(fact_id)
+            if gravity > 0.4:  # Threshold of semantic relevance
                 return True
 
-            if self._l1 and hasattr(self._l1, "get"):
-                if self._l1.get(fact_id) is not None:
+            # 2. Graph Centrality Shield (Expanded Cone)
+            get_chain = getattr(self._engine, "get_causal_chain_sync", None)
+            if get_chain:
+                chain = get_chain(fact_id=fact_id, direction="down", max_depth=3)
+                if chain and len(chain) >= 2:
+                    # It's a load-bearing wall in the graph (Centrality Bridge)
                     return True
 
-            fact = self._engine.get_fact_sync(fact_id)
+            # 3. L1 Hot Tier access
+            if self._l1 and hasattr(self._l1, "get"):
+                if self._l1.get(fact_id) is not None:  # pyright: ignore[reportAttributeAccessIssue]
+                    return True
+
+            # Types check
+            fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)
             if fact and fact.get("fact_type") in ("decision", "error", "axiom"):
                 return True
 

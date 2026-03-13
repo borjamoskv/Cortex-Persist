@@ -23,11 +23,13 @@ from cortex.migrations.mig_ledger import (
 )
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_signals import _migration_019_signal_bus
+from cortex.migrations.mig_simplify_facts import migrate_simplify_facts
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
 
 __all__ = ["MIGRATIONS"]
+
 
 MIGRATIONS = [
     (1, "Add updated_at column", _migration_001_add_updated_at),
@@ -52,4 +54,5 @@ MIGRATIONS = [
     (20, "Tombstoning GC columns", _migration_020_tombstone),
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
+    (23, "Simplify Facts Table", migrate_simplify_facts),
 ]

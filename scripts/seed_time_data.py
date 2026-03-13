@@ -140,7 +140,7 @@ def seed():
 
                 conn.execute(
                     """
-                    INSERT INTO heartbeats 
+                    INSERT INTO heartbeats
                     (timestamp, project, entity, category, branch, language, meta)
                     VALUES (?, ?, ?, ?, ?, ?, '{}')
                     """,

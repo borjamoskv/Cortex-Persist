@@ -3,6 +3,7 @@
 
 import json
 import logging
+import tempfile
 import time
 from pathlib import Path
 
@@ -103,15 +104,23 @@ class DaemonState:
                 hs = self.daemons.get("cortex", {}).get("handshake")
                 if policy == "ZERO_LOCAL_ON_HANDSHAKE" and hs == "remote":
                     return
-            except Exception:
+            except (json.JSONDecodeError, OSError, KeyError):
                 pass
 
         try:
             path = CORTEX_ROOT / "handoff.json"
-            with open(path, "w") as f:
-                json.dump(self.daemons, f, indent=4)
-        except Exception as e:
-            print(f"ERROR: Immortal Memory failure: {e}", flush=True)
+            CORTEX_ROOT.mkdir(parents=True, exist_ok=True)
+            # Atomic write: temp file + rename
+            fd, tmp_path = tempfile.mkstemp(dir=str(CORTEX_ROOT), suffix=".tmp")
+            try:
+                with open(fd, "w") as f:
+                    json.dump(self.daemons, f, indent=4)
+                Path(tmp_path).replace(path)
+            except BaseException:
+                Path(tmp_path).unlink(missing_ok=True)
+                raise
+        except (OSError, TypeError, ValueError) as e:
+            logger.error("Immortal Memory failure: %s", e)
 
     def load_state(self):
         try:
@@ -125,10 +134,10 @@ class DaemonState:
                                 self.daemons[k].update(v)
                             else:
                                 self.daemons[k] = v
-                print("HANDOFF: Inmortal memory restored.", flush=True)
+                logger.info("HANDOFF: Immortal memory restored.")
                 return True
-        except Exception as e:
-            print(f"ERROR: Immortal Memory failure (load): {e}", flush=True)
+        except (json.JSONDecodeError, OSError, KeyError) as e:
+            logger.error("Immortal Memory failure (load): %s", e)
         return False
 
 

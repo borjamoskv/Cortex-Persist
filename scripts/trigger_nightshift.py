@@ -1,6 +1,8 @@
 import asyncio
-from cortex.swarm.nightshift_daemon import NightShiftCrystalDaemon
+
 from cortex.cli.common import get_engine
+from cortex.swarm.nightshift_daemon import NightShiftCrystalDaemon
+
 
 async def main():
     engine = get_engine()
@@ -10,10 +12,11 @@ async def main():
     print("NightShift Report:")
     for k, v in report.items():
         print(f"{k}: {v}")
-    if report.get('consolidation'):
+    if report.get("consolidation"):
         print("\nConsolidation phase:")
-        for k, v in report['consolidation'].items():
+        for k, v in report["consolidation"].items():
             print(f"{k}: {v}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

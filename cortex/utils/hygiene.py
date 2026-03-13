@@ -1,7 +1,8 @@
 import logging
 import os
 import subprocess
-from datetime import datetime
+import sys
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ def get_snapshot_age():
     snapshot_path = CORTEX_DIR / "context-snapshot.md"
     if not snapshot_path.exists():
         return float("inf")
-    mtime = datetime.fromtimestamp(snapshot_path.stat().st_mtime)
-    age = (datetime.now() - mtime).total_seconds() / 60
+    mtime = datetime.fromtimestamp(snapshot_path.stat().st_mtime, tz=timezone.utc)
+    age = (datetime.now(timezone.utc) - mtime).total_seconds() / 60
     return age
 
 
@@ -44,7 +45,7 @@ def check_system_health():
 
 if __name__ == "__main__":
     health = check_system_health()
-    print("Hygiene Status:")
-    print(f" - Orphaned Browsers: {health['orphans']}")
-    print(f" - Snapshot Age: {health['snapshot_age_min']:.1f} min")
-    print(f" - Load Average: {health['load_average']}")
+    sys.stdout.write("Hygiene Status:\n")
+    sys.stdout.write(f" - Orphaned Browsers: {health['orphans']}\n")
+    sys.stdout.write(f" - Snapshot Age: {health['snapshot_age_min']:.1f} min\n")
+    sys.stdout.write(f" - Load Average: {health['load_average']}\n")

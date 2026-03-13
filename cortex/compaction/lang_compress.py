@@ -37,14 +37,73 @@ __all__ = [
 # ─── Language Detection (Zero-Dep Heuristic) ─────────────────────────
 
 # Common Spanish stopwords/patterns (high entropy markers)
-_ES_MARKERS: frozenset[str] = frozenset({
-    "que", "los", "las", "del", "para", "con", "por", "una", "como", "más", "pero", "fue", "son",
-    "está", "todo", "también", "cuando", "sobre", "entre", "después", "desde", "donde", "cada",
-    "puede", "este", "esta", "estos", "estas", "ese", "esa", "esos", "esas", "aquel", "aquella",
-    "muy", "hay", "tiene", "hace", "siendo", "otro", "otra", "otros", "otras", "mismo", "misma",
-    "hacia", "sino", "según", "durante", "aunque", "porque", "mientras", "además", "así", "mejor",
-    "algún", "ningún", "parte", "decisión", "error", "proyecto", "memoria", "sesión"
-})
+_ES_MARKERS: frozenset[str] = frozenset(
+    {
+        "que",
+        "los",
+        "las",
+        "del",
+        "para",
+        "con",
+        "por",
+        "una",
+        "como",
+        "más",
+        "pero",
+        "fue",
+        "son",
+        "está",
+        "todo",
+        "también",
+        "cuando",
+        "sobre",
+        "entre",
+        "después",
+        "desde",
+        "donde",
+        "cada",
+        "puede",
+        "este",
+        "esta",
+        "estos",
+        "estas",
+        "ese",
+        "esa",
+        "esos",
+        "esas",
+        "aquel",
+        "aquella",
+        "muy",
+        "hay",
+        "tiene",
+        "hace",
+        "siendo",
+        "otro",
+        "otra",
+        "otros",
+        "otras",
+        "mismo",
+        "misma",
+        "hacia",
+        "sino",
+        "según",
+        "durante",
+        "aunque",
+        "porque",
+        "mientras",
+        "además",
+        "así",
+        "mejor",
+        "algún",
+        "ningún",
+        "parte",
+        "decisión",
+        "error",
+        "proyecto",
+        "memoria",
+        "sesión",
+    }
+)
 
 # Common Basque markers (agglutinative morphology = high token tax)
 _EU_MARKERS: frozenset[str] = frozenset(
@@ -120,6 +179,7 @@ _TOKEN_TAX_RATIOS: dict[str, float] = {
     "ru": 1.50,  # Russian: ~50% more
 }
 
+
 def detect_language(text: str) -> str:
     """Detect language using zero-dependency heuristic.
 
@@ -184,6 +244,7 @@ def detect_language(text: str) -> str:
 
     return "en"
 
+
 def estimate_token_savings(text: str, lang: str) -> dict[str, Any]:
     """Estimate token savings from compressing to English.
 
@@ -208,7 +269,9 @@ def estimate_token_savings(text: str, lang: str) -> dict[str, Any]:
         "word_count": word_count,
     }
 
+
 # ─── Compression Result ─────────────────────────────────────────────
+
 
 @dataclass
 class CompressionResult:
@@ -222,6 +285,7 @@ class CompressionResult:
     savings_pct: float
     was_compressed: bool = True
     error: str | None = None
+
 
 @dataclass
 class BatchCompressionResult:
@@ -238,7 +302,9 @@ class BatchCompressionResult:
     results: list[CompressionResult] = field(default_factory=list)
     dry_run: bool = False
 
+
 # ─── Core Compressor ─────────────────────────────────────────────────
+
 
 class LangCompressor:
     """Sovereign Language Compression Engine.

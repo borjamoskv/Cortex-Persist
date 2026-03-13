@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
@@ -235,13 +235,17 @@ class EventLedgerL3:
 
             last_sig = sig
 
+        integrity = 1.0
+        if is_corrupt and count > 0:
+            integrity = (count - len(audit_log)) / count
+
         return {
             "tenant_id": tenant_id,
             "status": "VALID" if not is_corrupt else "CORRUPT",
             "events_audited": count,
-            "integrity_score": 1.0 if not is_corrupt else (count - len(audit_log)) / count,
+            "integrity_score": integrity,
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 

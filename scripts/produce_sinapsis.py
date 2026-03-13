@@ -27,7 +27,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from cortex.music_engine.dsp_apotheosis import DSPApotheosis
 from cortex.music_engine.orchestrator import (
-    DEFAULT_BPM,
     GRAMMYOrchestrator,
     TrackContext,
     TrackState,
@@ -66,6 +65,7 @@ TRACKLIST = [
 
 # ── Synthetic Audio Generator (Simulation Mode) ──────────────────────
 
+
 def generate_synthetic_audio(
     bpm: int,
     key: str,
@@ -82,10 +82,18 @@ def generate_synthetic_audio(
     """
     # Key -> fundamental frequency mapping (approximate, A4=440Hz basis)
     key_freq_map = {
-        "C minor": 130.81, "C# minor": 138.59, "D minor": 146.83,
-        "D# minor": 155.56, "E minor": 164.81, "F minor": 174.61,
-        "F# minor": 185.00, "G minor": 196.00, "G# minor": 207.65,
-        "A minor": 220.00, "B♭ minor": 233.08, "B minor": 246.94,
+        "C minor": 130.81,
+        "C# minor": 138.59,
+        "D minor": 146.83,
+        "D# minor": 155.56,
+        "E minor": 164.81,
+        "F minor": 174.61,
+        "F# minor": 185.00,
+        "G minor": 196.00,
+        "G# minor": 207.65,
+        "A minor": 220.00,
+        "B♭ minor": 233.08,
+        "B minor": 246.94,
     }
     fundamental = key_freq_map.get(key, 130.81)
     n_samples = int(duration_seconds * sample_rate)
@@ -102,10 +110,8 @@ def generate_synthetic_audio(
         decay_len = min(int(0.15 * sample_rate), n_samples - idx_start)
         if decay_len > 0:
             decay = np.exp(-np.linspace(0, 8, decay_len))
-            kick_hit = 0.6 * np.sin(
-                2 * np.pi * 60 * np.linspace(0, 0.15, decay_len)
-            ) * decay
-            kick[idx_start:idx_start + decay_len] += kick_hit
+            kick_hit = 0.6 * np.sin(2 * np.pi * 60 * np.linspace(0, 0.15, decay_len)) * decay
+            kick[idx_start : idx_start + decay_len] += kick_hit
 
     # Filtered noise for texture (bandpass 2-8 kHz feel)
     noise = 0.05 * np.random.randn(n_samples)
@@ -117,15 +123,18 @@ def generate_synthetic_audio(
     mono = mono / (np.max(np.abs(mono)) + 1e-10)  # Normalize
 
     # Stereo with slight phase offset
-    stereo = np.column_stack([
-        mono,
-        np.roll(mono, int(0.0003 * sample_rate))  # ~0.3ms ITD
-    ])
+    stereo = np.column_stack(
+        [
+            mono,
+            np.roll(mono, int(0.0003 * sample_rate)),  # ~0.3ms ITD
+        ]
+    )
 
     return stereo.astype(np.float64)
 
 
 # ── Production Pipeline ──────────────────────────────────────────────
+
 
 async def produce_track(
     orchestrator: GRAMMYOrchestrator,
@@ -153,9 +162,7 @@ async def produce_track(
     # 2. Audio Generation
     if simulate:
         logger.info("[2/5] Simulation Mode: Generating synthetic audio...")
-        audio = generate_synthetic_audio(
-            bpm=track.bpm, key=track.key, duration_seconds=30.0
-        )
+        audio = generate_synthetic_audio(bpm=track.bpm, key=track.key, duration_seconds=30.0)
         track.metadata["raw_audio_uri"] = f"sim://sinapsis/{track.id}.wav"
         track.stems = {
             "master": f"sim://sinapsis/{track.id}_master.wav",
@@ -175,9 +182,7 @@ async def produce_track(
         track.stems = stems
         track.state = TrackState.TRACKING
         # In live mode, we'd download the audio here
-        audio = generate_synthetic_audio(
-            bpm=track.bpm, key=track.key, duration_seconds=30.0
-        )
+        audio = generate_synthetic_audio(bpm=track.bpm, key=track.key, duration_seconds=30.0)
 
     # 3. DSP Apotheosis (Deterministic Mastering)
     logger.info("[3/5] DSP Apotheosis: Deterministic mastering pipeline...")
@@ -216,7 +221,10 @@ async def produce_track(
     logger.info("[5/5] Track production complete.")
     logger.info(
         "  Result: %s | GRI: %.3f | LUFS: %.2f | Peak: %.4f",
-        track.state.value, track.gri_score, post_lufs, peak,
+        track.state.value,
+        track.gri_score,
+        post_lufs,
+        peak,
     )
 
     return track
@@ -246,7 +254,11 @@ async def produce_album(
     results = []
     for tid, title, bpm, key in selected:
         track = TrackContext(
-            id=tid, title=title, bpm=bpm, key=key, state=TrackState.CONCEPT,
+            id=tid,
+            title=title,
+            bpm=bpm,
+            key=key,
+            state=TrackState.CONCEPT,
         )
         try:
             result = await produce_track(orchestrator, track, simulate=simulate)
@@ -272,17 +284,24 @@ async def produce_album(
         status = "✅" if t.state == TrackState.MASTERED else "❌"
         logger.info(
             "║  %s %s — GRI: %.3f | LUFS: %s",
-            status, t.title, t.gri_score,
+            status,
+            t.title,
+            t.gri_score,
             t.metadata.get("post_master_lufs", "N/A"),
         )
     logger.info("╠══════════════════════════════════════════════════════════╣")
     logger.info("║  Global GRI: %.3f", avg_gri)
     logger.info("║  Elapsed: %.1fs", elapsed)
-    logger.info("║  Verdict: %s", (
-        "✦ GRAMMY CONTENDER ✦" if avg_gri >= 0.85
-        else "COMPETITIVE" if avg_gri >= 0.70
-        else "NEEDS ITERATION"
-    ))
+    logger.info(
+        "║  Verdict: %s",
+        (
+            "✦ GRAMMY CONTENDER ✦"
+            if avg_gri >= 0.85
+            else "COMPETITIVE"
+            if avg_gri >= 0.70
+            else "NEEDS ITERATION"
+        ),
+    )
     logger.info("╚══════════════════════════════════════════════════════════╝")
 
     # Close adapters
@@ -291,19 +310,22 @@ async def produce_album(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="GRAMMY-Ω Production Run: Sinapsis de Neón"
-    )
+    parser = argparse.ArgumentParser(description="GRAMMY-Ω Production Run: Sinapsis de Neón")
     parser.add_argument(
-        "--simulate", action="store_true", default=True,
+        "--simulate",
+        action="store_true",
+        default=True,
         help="Use synthetic audio instead of real API calls (default: True)",
     )
     parser.add_argument(
-        "--live", action="store_true",
+        "--live",
+        action="store_true",
         help="Use real API calls (requires SUNO_API_KEY, UDIO_API_KEY, etc.)",
     )
     parser.add_argument(
-        "--tracks", type=str, default="",
+        "--tracks",
+        type=str,
+        default="",
         help="Comma-separated track indices (0-9). Empty = all tracks.",
     )
     args = parser.parse_args()

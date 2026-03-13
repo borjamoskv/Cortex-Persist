@@ -95,7 +95,7 @@ class ASTOracle:
         while self._running:
             try:
                 await self._process_events()
-            except Exception as e:  # noqa: BLE001
+            except (OSError, asyncio.CancelledError, RuntimeError) as e:
                 logger.error("AST ORACLE BLINDED (Transient): %s", e)
             await asyncio.sleep(self.poll_interval)
 
@@ -167,7 +167,7 @@ class ASTOracle:
             with open(path, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(path))
             return {ast.dump(node) for node in ast.walk(tree)}
-        except Exception:  # noqa: BLE001
+        except (SyntaxError, UnicodeDecodeError, RecursionError, OSError):
             return set()
 
     def _compute_semantic_diff(self, old_nodes: set[str], new_nodes: set[str]) -> list[str]:
@@ -220,5 +220,5 @@ class ASTOracle:
                 path.name,
                 severity,
             )
-        except Exception as e:  # noqa: BLE001
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("AST Oracle Injection failed on %s: %s", path.name, e)

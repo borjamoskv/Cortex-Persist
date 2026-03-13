@@ -193,7 +193,7 @@ class NemesisProtocol:
                         source="nemesis-protocol",
                         project="system",
                     )
-            except Exception as e:  # noqa: BLE001 — signal emission failure should not crash analysis
+            except Exception as e:  # noqa: BLE001 — must not crash analysis
                 logger.debug("Failed to emit assimilation signal: %s", e)
 
         return True
@@ -208,6 +208,5 @@ class NemesisProtocol:
             with open(cls.NEMESIS_PATH, "a") as f:
                 f.write(new_row)
         except OSError as e:
-            # Fallback to printer if logger fails during bootstrap
-            # This is Ω₅: survive at all costs.
-            print(f"Error appending antibody to nemesis.md: {e}")
+            # Ω₅: survive at all costs — log but do not crash.
+            logger.error("Error appending antibody to nemesis.md: %s", e)

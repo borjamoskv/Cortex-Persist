@@ -8,6 +8,7 @@ Implements the two-layer persistence strategy:
 import asyncio
 import atexit
 import logging
+import sys
 from typing import Any
 
 logger = logging.getLogger("cortex.durability")
@@ -42,15 +43,17 @@ class PersistenceSupervisor:
             await self.flush()
             logger.info("PersistenceSupervisor: C5 layer hibernated.")
 
-    async def enqueue(self, fact_data: dict[str, Any]):
+    async def enqueue(self, fact_data: dict[str, Any]) -> None:
         """Non-blocking queueing of facts for persistent storage."""
+        should_flush = False
         async with self._lock:
             self._queue.append(fact_data)
-            # 150/100: Pressure trigger
-            if len(self._queue) > 50:
-                asyncio.create_task(self.flush(reason="queue_pressure"))
+            # Pressure trigger: check threshold, flush *after* releasing lock
+            should_flush = len(self._queue) > 50
+        if should_flush:
+            await self.flush(reason="queue_pressure")
 
-    async def flush(self, reason: str = "interval"):
+    async def flush(self, reason: str = "interval") -> None:
         """Commits all enqueued facts to the CORTEX ledger."""
         async with self._lock:
             if not self._queue:
@@ -59,23 +62,15 @@ class PersistenceSupervisor:
             to_store = self._queue.copy()
             self._queue.clear()
 
-            logger.debug(
-                "PersistenceSupervisor: Flushing %d facts (Reason: %s)", len(to_store), reason
-            )
-            try:
-                # Store them using the sync connection to ensure durability if loop fails
-                sync_conn = self._engine._get_sync_conn()
-                with sync_conn:
-                    for fact in to_store:
-                        # Direct injection bypassing mixins for speed
-                        await self._engine.store(
-                            conn=None,  # Will use its own session
-                            **fact,
-                        )
-                logger.info("PersistenceSupervisor: Flush complete.")
-            except (OSError, RuntimeError) as e:
-                logger.error("PersistenceSupervisor: Flush failed: %s", e)
-                # Re-queue on failure? Optional.
+        logger.debug("PersistenceSupervisor: Flushing %d facts (Reason: %s)", len(to_store), reason)
+        try:
+            for fact in to_store:
+                await self._engine.store(**fact)
+            logger.info("PersistenceSupervisor: Flushed %d facts.", len(to_store))
+        except (OSError, RuntimeError) as e:
+            logger.error("PersistenceSupervisor: Flush failed: %s", e)
+            # Re-queue failed facts for next cycle
+            async with self._lock:
                 self._queue.extend(to_store)
 
     async def _loop(self):
@@ -91,19 +86,18 @@ class PersistenceSupervisor:
             except (OSError, RuntimeError) as e:
                 logger.error("PersistenceSupervisor: Heartbeat loop error: %s", e)
 
-    def _atexit_fallback(self):
-        """C4 Fallback: Emergency flush on process exit."""
+    def _atexit_fallback(self) -> None:
+        """C4 Fallback: Emergency flush on process exit.
+
+        Uses sys.stderr because logging handlers may already be torn down.
+        """
         if not self._queue:
             return
 
-        print(f"⚠️ [CORTEX] Emergency flush: {len(self._queue)} facts pending...")
+        sys.stderr.write(f"⚠️ [CORTEX] Emergency flush: {len(self._queue)} facts pending...\n")
         try:
-            # Synchronous emergency store
-            sync_conn = self._engine._get_sync_conn()
-            with sync_conn:
-                for fact in self._queue:
-                    # We use store_sync or manual SQL
-                    self._engine.store_sync(**fact)
-            print("✅ [CORTEX] Emergency flush successful.")
+            for fact in self._queue:
+                self._engine.store_sync(**fact)
+            sys.stderr.write("✅ [CORTEX] Emergency flush successful.\n")
         except (OSError, RuntimeError) as e:
-            print(f"❌ [CORTEX] Emergency flush failed: {e}")
+            sys.stderr.write(f"❌ [CORTEX] Emergency flush failed: {e}\n")

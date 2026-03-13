@@ -81,31 +81,40 @@ async def insert_fact_record(
                 project,
             )
 
+    # Re-pack legacy fields into meta JSON payload
+    meta = meta or {}
+    if confidence != "stated":
+        meta["confidence"] = confidence
+    if source:
+        meta["source"] = source
+    if parent_decision_id:
+        meta["parent_decision_id"] = parent_decision_id
+    if tx_id:
+        meta["tx_id"] = tx_id
+    if sig_b64:
+        meta["signature"] = sig_b64
+    if pub_b64:
+        meta["signer_pubkey"] = pub_b64
+
+    encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
+
     cursor = await conn.execute(
-        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
-        "valid_from, source, meta, hash, signature, signer_pubkey, "
-        "created_at, updated_at, tx_id, parent_decision_id) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, hash, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
             encrypted_content,
             fact_type,
             tags_json,
-            confidence,
-            ts,
-            source,
             encrypted_meta,
             f_hash,
-            sig_b64,
-            pub_b64,
             ts,
             ts,
-            tx_id,
-            parent_decision_id,
         ),
     )
     fact_id = cursor.lastrowid
+    assert fact_id is not None
 
     # FTS Update
     try:

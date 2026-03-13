@@ -94,7 +94,10 @@ async def gidatu_loop(state):
     try:
         while True:
             try:
-                script = 'tell application "System Events" to name of first process whose frontmost is true'
+                script = (
+                    'tell application "System Events" to name of '
+                    "first process whose frontmost is true"
+                )
                 app_name = await run_osascript(script)
                 app_name = app_name.strip() if app_name else ""
                 state.daemons["gidatu"]["active_app"] = app_name
@@ -103,9 +106,13 @@ async def gidatu_loop(state):
                 win_title = ""
                 if app_name:
                     try:
-                        title_script = f'tell application "System Events" to tell process "{app_name}" to get name of window 1'
+                        title_script = (
+                            f'tell application "System Events" '
+                            f'to tell process "{app_name}" '
+                            f"to get name of window 1"
+                        )
                         win_title = await run_osascript(title_script)
-                    except Exception:
+                    except OSError:
                         pass
                 state.daemons["gidatu"]["window_title"] = win_title
 
@@ -123,7 +130,7 @@ async def gidatu_loop(state):
 
                 await asyncio.sleep(2)
             except Exception as e:
-                print(f"Gidatu Loop Error: {e}")
+                logger.error("Gidatu Loop Error: %s", e)
                 await asyncio.sleep(5)
     except asyncio.CancelledError:
         state.daemons["gidatu"]["status"] = "offline"

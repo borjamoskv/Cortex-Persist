@@ -147,9 +147,22 @@ def move_project_data(project_name, src_conn, dest_path):
 
 
 def main():
+    import sys
+
+    force = "--force" in sys.argv
+
     if not os.path.exists(DB_PATH):
         print(f"DB not found at {DB_PATH}")
         return
+
+    if not force:
+        print("⚠️  WARNING: This script will DELETE data from the main CORTEX database.")
+        print(f"   Source: {DB_PATH}")
+        print(f"   Projects to move: {len(PERSONAL_PROJECTS)} personal + {len(COLD_PROJECTS)} cold")
+        confirm = input("   Type 'YES' to proceed: ")
+        if confirm != "YES":
+            print("Aborted.")
+            return
 
     ensure_db_copy(DB_PATH, PERSONAL_DB_PATH)
     ensure_db_copy(DB_PATH, COLD_DB_PATH)

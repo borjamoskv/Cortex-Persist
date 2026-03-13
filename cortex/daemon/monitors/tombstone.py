@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from cortex.daemon.models import TombstoneAlert
@@ -17,15 +17,15 @@ class TombstoneMonitor:
     """Physically deletes logically tombstoned facts during the late-night maintenance window.
 
     Protects daytime IOPs by restricting heavy DELETE and VACUUM/OPTIMIZE operations
-    to the 03:00 - 05:00 local time window.
+    to the 03:00 - 05:00 UTC window.
     """
 
     def __init__(
         self,
         db_path: Path | str,
         interval_seconds: int = 3600,  # check every hour
-        start_hour: int = 3,  # 03:00 AM
-        end_hour: int = 5,  # 05:00 AM
+        start_hour: int = 3,  # 03:00 UTC
+        end_hour: int = 5,  # 05:00 UTC
     ):
         self.db_path = Path(db_path)
         self.interval_seconds = interval_seconds
@@ -34,8 +34,8 @@ class TombstoneMonitor:
         self._last_run: float = 0
 
     def _in_maintenance_window(self) -> bool:
-        """Check if current local time is within the maintenance window."""
-        now = datetime.now()  # Local time
+        """Check if current UTC time is within the maintenance window."""
+        now = datetime.now(timezone.utc)
         return self.start_hour <= now.hour < self.end_hour
 
     def check(self) -> list[TombstoneAlert]:

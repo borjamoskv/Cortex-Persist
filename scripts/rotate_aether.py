@@ -8,7 +8,6 @@ Dynamically rotates the Aether agent profile to prevent token exhaustion.
 import logging
 import os
 import re
-import shutil
 import sys
 from pathlib import Path
 
@@ -41,7 +40,7 @@ def get_active_facts() -> int:
         match = re.search(r"Facts activos:\s*(\d+)", content, re.IGNORECASE)
         if match:
             return int(match.group(1))
-        
+
         # Fallback check
         match = re.search(r">\s*Total:\s*(\d+)\s*facts activos", content, re.IGNORECASE)
         if match:
@@ -49,7 +48,7 @@ def get_active_facts() -> int:
 
     except Exception as e:
         logger.error(f"Failed to read snapshot: {e}")
-        
+
     logger.warning("Could not parse active facts count. Defaulting to 0.")
     return 0
 
@@ -58,12 +57,19 @@ def record_decision(msg: str) -> None:
     """Record a decision in the CORTEX database."""
     try:
         import subprocess
+
         subprocess.run(
             [
-                sys.executable, "-m", "cortex.cli", "store",
-                "--type", "decision",
-                "--source", "agent:system",
-                "AETHER-ROTATION", msg,
+                sys.executable,
+                "-m",
+                "cortex.cli",
+                "store",
+                "--type",
+                "decision",
+                "--source",
+                "agent:system",
+                "AETHER-ROTATION",
+                msg,
             ],
             cwd=str(CORTEX_SRC),
             capture_output=True,
@@ -88,7 +94,9 @@ def main():
         source_profile = LIGHT_PROFILE
         profile_type = "LIGHT"
     else:
-        logger.info(f"Context weight is NORMAL (<= {HEAVY_THRESHOLD_FACTS}). Selecting HEAVY profile.")
+        logger.info(
+            f"Context weight is NORMAL (<= {HEAVY_THRESHOLD_FACTS}). Selecting HEAVY profile."
+        )
         source_profile = HEAVY_PROFILE
         profile_type = "HEAVY"
 
@@ -98,28 +106,34 @@ def main():
         if TARGET_PROFILE.is_symlink():
             current_symlink_target = TARGET_PROFILE.readlink()
             if current_symlink_target == source_profile:
-                logger.info(f"Aether is already using the {profile_type} profile. No action needed.")
+                logger.info(
+                    f"Aether is already using the {profile_type} profile. No action needed."
+                )
                 return
         else:
             # We don't want to destroy a valid file if it's not a symlink, so copy the content.
             # Compare contents to skip overwrite
             try:
                 if TARGET_PROFILE.read_bytes() == source_profile.read_bytes():
-                     logger.info(f"Aether is already using the {profile_type} profile content. No action needed.")
-                     return
+                    logger.info(
+                        f"Aether is already using the {profile_type} profile content. No action needed."
+                    )
+                    return
             except Exception:
                 pass
-                
+
     try:
         if TARGET_PROFILE.exists() or TARGET_PROFILE.is_symlink():
             if TARGET_PROFILE.is_symlink():
-                 TARGET_PROFILE.unlink()
+                TARGET_PROFILE.unlink()
             else:
-                 TARGET_PROFILE.unlink() # Delete existing text file
-        
+                TARGET_PROFILE.unlink()  # Delete existing text file
+
         # Symlink is the cleanest approach, dynamic reloading via OS.
         os.symlink(source_profile, TARGET_PROFILE)
-        msg = f"Aether dynamically rotated to {profile_type} profile (Active facts: {active_facts})."
+        msg = (
+            f"Aether dynamically rotated to {profile_type} profile (Active facts: {active_facts})."
+        )
         logger.info(msg)
         record_decision(msg)
         print(f"✅ {msg}")

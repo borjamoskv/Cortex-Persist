@@ -149,7 +149,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 
         # Update mejora_loop_state.json if it exists
         import json
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         from cortex.core.paths import CORTEX_DIR
 
@@ -163,7 +163,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"].append(
                     {
                         "project": project,
-                        "timestamp": datetime.now().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,
                         "delta": delta,

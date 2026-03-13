@@ -67,7 +67,7 @@ class SovereignSanitizer:
         # 3. Validation & Purity Seal
         try:
             # We construct the PureEngram. The Config(extra='forbid') will reject invalid fields.
-            pure_engram = PureEngram(original_raw_hash=raw_hash, **raw_engram)
+            pure_engram = PureEngram(original_raw_hash=raw_hash, log=log, **raw_engram)
         except Exception as e:  # noqa: BLE001 — byzantine input quarantine boundary
             # If the dict is severely malformed, we create an error engram instead of crashing
             # Axiom Ω5 (Antifragility): System requires stress as fuel.
@@ -78,6 +78,7 @@ class SovereignSanitizer:
                 content=f"Engram digestion failed due to Byzantine input: {str(e)}",
                 metadata={"raw_length": original_size},
                 original_raw_hash=raw_hash,
+                log=log,
             )
             log.level = MembraneLogLevel.CRITICAL
             log.details = "Byzantine input rejected and quarantined."

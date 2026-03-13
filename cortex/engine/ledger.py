@@ -14,7 +14,7 @@ import json
 import logging
 import time
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -106,7 +106,9 @@ class ImmutableLedger:
 
         async with self._acquire_conn() as conn:
             # Find last checkpointed transaction
-            cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")  # type: ignore[reportAttributeAccessIssue]
+            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                "SELECT MAX(tx_end_id) FROM merkle_roots"
+            )
             row = await cursor.fetchone()
             last_tx = row[0] or 0 if row else 0
 
@@ -229,7 +231,8 @@ class ImmutableLedger:
         async with self._acquire_conn() as conn:
             # 1. Verify Hash Chain (Chunked to avoid OOM)
             cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT id, prev_hash, hash, project, action, detail, timestamp FROM transactions ORDER BY id"
+                "SELECT id, prev_hash, hash, project, action, "
+                "detail, timestamp FROM transactions ORDER BY id"
             )
 
             current_prev = "GENESIS"
@@ -292,13 +295,15 @@ class ImmutableLedger:
 
             # Record check
             await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO integrity_checks "
+                "(check_type, status, details, started_at, completed_at) "
+                "VALUES (?, ?, ?, ?, ?)",
                 (
                     "full",
                     status,
                     json.dumps(violations),
-                    datetime.now().isoformat(),
-                    datetime.now().isoformat(),
+                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(timezone.utc).isoformat(),
                 ),
             )
             await conn.commit()  # type: ignore[reportAttributeAccessIssue]

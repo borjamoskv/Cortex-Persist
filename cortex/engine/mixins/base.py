@@ -17,11 +17,10 @@ logger = logging.getLogger("cortex.engine")
 
 # Canonical Fact query structure
 FACT_COLUMNS = (
-    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
-    "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
-    "f.created_at, f.updated_at, f.tx_id, f.parent_decision_id, t.hash"
+    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.meta, "
+    "f.hash, f.created_at, f.updated_at, f.is_tombstoned"
 )
-FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
+FACT_JOIN = "FROM facts f"
 
 
 class EngineMixinBase:
@@ -31,7 +30,31 @@ class EngineMixinBase:
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         """Provide a transactional session from the connection pool."""
         # This will be implemented by AsyncCortexEngine
+        if False:
+            yield  # type: ignore
         raise NotImplementedError("Mixins must be used with a class that implements session()")
+
+    def _get_embedder(self) -> Any:
+        """Provide the embedding model."""
+        raise NotImplementedError
+
+    def _get_sync_conn(self) -> Any:
+        """Provide a synchronous database connection."""
+        raise NotImplementedError
+
+    def get_conn(self) -> Any:
+        """Provide an asynchronous database connection."""
+        raise NotImplementedError
+
+    async def _log_transaction(
+        self, conn: aiosqlite.Connection, project: str, action: str, details: dict[str, Any]
+    ) -> int:
+        """Log a transaction to the ledger."""
+        raise NotImplementedError
+
+    async def search(self, *args, **kwargs) -> Any:
+        """Perform hybrid search."""
+        raise NotImplementedError
 
     def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
         """Convert a database row to a decrypted fact dictionary.
@@ -50,16 +73,16 @@ class EngineMixinBase:
             "fact_type": fact.fact_type,
             "type": fact.fact_type,  # API compat alias
             "tags": fact.tags,
-            "confidence": fact.confidence,
-            "valid_from": fact.valid_from,
-            "valid_until": fact.valid_until,
-            "source": fact.source,
+            "confidence": fact.meta.get("confidence", "C5") if fact.meta else "C5",
+            "valid_from": fact.meta.get("valid_from") if fact.meta else fact.created_at,
+            "valid_until": "9999-12-31T23:59:59Z" if fact.is_tombstoned else None,
+            "source": fact.meta.get("source", "system") if fact.meta else "system",
             "meta": fact.meta,
-            "consensus_score": fact.consensus_score,
+            "consensus_score": fact.meta.get("consensus_score", 1.0) if fact.meta else 1.0,
             "created_at": fact.created_at,
             "updated_at": fact.updated_at,
-            "tx_id": fact.tx_id,
-            "parent_decision_id": fact.parent_decision_id,
+            "tx_id": fact.meta.get("tx_id") if fact.meta else None,
+            "parent_decision_id": fact.meta.get("parent_decision_id") if fact.meta else None,
             "hash": fact.hash,
         }
 

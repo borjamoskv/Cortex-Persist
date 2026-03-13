@@ -89,9 +89,7 @@ class ZeroPromptingDaemon:
             success = await asyncio.to_thread(ouroboros.execute_atomic_cycle)
             return {"action": "ouroboros_atomic_cycle", "success": success}
 
-    async def _measure_improvement(
-        self, state_before: dict, action_result: dict
-    ) -> dict[str, Any]:
+    async def _measure_improvement(self, state_before: dict, action_result: dict) -> dict[str, Any]:
         """Rigorously measures if the mutation improved the metrics."""
         state_after = await self._observe()
         entropy_diff = state_before["entropy_score"] - state_after["entropy_score"]
@@ -112,9 +110,7 @@ class ZeroPromptingDaemon:
                 "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'ZeroPrompt', ?, ?, 'C5')",
                 (
-                    f"Evolved: {hypothesis}. "
-                    f"Action: {action}. "
-                    f"Improvement: {improvement}",
+                    f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}",
                     time.time(),
                 ),
             )

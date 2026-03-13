@@ -4,20 +4,20 @@
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-abyssal-900: #050505; /* Blacker than black */
-  --color-abyssal-800: #0a0a0a;
-  --color-abyssal-700: #111111;
-  --color-abyssal-600: #1a1a1a;
-  --color-abyssal-500: #222222;
+  --color-abyssal-900: #090808; /* Carbon organico */
+  --color-abyssal-800: #121010;
+  --color-abyssal-700: #1B1918;
+  --color-abyssal-600: #262322;
+  --color-abyssal-500: #2A2726; /* Dim structure */
+  
   --color-cyber-lime: #CCFF00;
   --color-cyber-lime-dim: rgba(204, 255, 0, 0.6);
-  --color-cyber-violet: #6600FF;
-  --color-industrial-gold: #D4AF37;
-  --color-yinmn-blue: #2E5090;
-  --color-yinmn-light: #4A73B5;
-  --color-text-primary: #FAFAFA;
-  --color-text-secondary: rgba(250, 250, 250, 0.6);
-  --color-text-tertiary: rgba(250, 250, 250, 0.35);
+  --color-tungsten-glow: #FF6B00; /* Warm tungsten filament */
+  --color-amber-terminal: #FFBF00; /* Living data */
+  
+  --color-text-primary: #FAF8F5; /* Hueso / Text pure */
+  --color-text-secondary: #EBE7E0;
+  --color-text-tertiary: #8C8681; /* Ceniza orgánico */
 
   --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float: float 6s ease-in-out infinite;
@@ -83,7 +83,7 @@
     color: black;
   }
 
-  /* Zero-Default Scrollbar */
+  /* Zero-Default Scrollbar - now softer, less aggressive */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -92,11 +92,11 @@
     background: var(--color-abyssal-900);
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(204, 255, 0, 0.3);
-    border-radius: 10px;
+    background: rgba(255, 107, 0, 0.2);
+    border-radius: 4px; /* Organically constrained, not 10px fully round */
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(204, 255, 0, 0.6);
+    background: rgba(255, 107, 0, 0.5); /* Warmer thumb on hover */
   }
 
   /* Zero-Default Focus */
@@ -111,17 +111,17 @@
 }
 
 @layer utilities {
-  /* Semantic Motion Physics */
+  /* Semantic Motion Physics - The Organic Amendment (Out Quart / Spring-like) */
   .transition, .transition-all, .transition-colors, .transition-opacity, .transition-shadow, .transition-transform {
     transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
   }
 
   .glass {
-    @apply bg-abyssal-800/40 backdrop-blur-2xl border border-white/[0.03];
+    @apply bg-abyssal-800/40 backdrop-blur-2xl border border-white/[0.04] shadow-[0_4px_32px_rgba(255,107,0,0.02)];
   }
 
   .glass-strong {
-    @apply bg-abyssal-700/60 backdrop-blur-3xl border border-white/[0.06];
+    @apply bg-abyssal-700/60 backdrop-blur-3xl border border-white/[0.06] shadow-[0_8px_32px_rgba(255,107,0,0.04)];
   }
   
   .glass-pill {
@@ -129,15 +129,15 @@
   }
 
   .glow-lime {
-    box-shadow: 0 0 30px rgba(204, 255, 0, 0.15), 0 0 60px rgba(204, 255, 0, 0.07);
+    box-shadow: 0 0 30px rgba(204, 255, 0, 0.12), 0 0 60px rgba(204, 255, 0, 0.05); /* Softer */
   }
 
   .glow-lime-strong {
     box-shadow: 0 0 40px rgba(204, 255, 0, 0.2), 0 0 80px rgba(204, 255, 0, 0.08);
   }
 
-  .glow-violet {
-    box-shadow: 0 0 30px rgba(102, 0, 255, 0.15), 0 0 60px rgba(102, 0, 255, 0.07);
+  .glow-tungsten {
+    box-shadow: 0 0 35px rgba(255, 107, 0, 0.15), 0 0 70px rgba(255, 107, 0, 0.08); /* Warm analogue leak */
   }
 
   .text-gradient-lime {

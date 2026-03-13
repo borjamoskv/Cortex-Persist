@@ -93,6 +93,9 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
 
 # Model constants to avoid literal duplication
 ERNIE_5_0 = "baidu/ernie-5-0-thinking-latest"
+CHATGPT_5_2 = "chatgpt-5.2"
+CODEX_5_2 = "codex-5.2"
+OPENAI_O3 = "o3"
 
 # modo → lista de (provider, model) a consultar.
 # Solo se usarán los que tengan API key configurada.
@@ -100,31 +103,27 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.DEEP_REASONING: [
         ("ollama", "qwen2.5-coder:32b"),
         ("gemini", "gemini-3.1-pro-preview"),
-        ("openai", "gpt-4o"),
+        ("openai", CHATGPT_5_2),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-reasoner"),
         ("ernie", ERNIE_5_0),
         ("zhipu", "glm-5"),
-        ("kimi", "moonshot-v1-128k"),
         ("qwen", "qwen-max"),
     ],
     ThinkingMode.CODE: [
         ("ollama", "qwen2.5-coder:32b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-chat"),
+        ("deepseek", "deepseek-v3"),
         ("zhipu", "glm-5"),
-        ("kimi", "moonshot-v1-128k"),
         ("qwen", "qwen-coder-plus"),
-        ("openai", "gpt-4o"),
-        ("fireworks", "accounts/fireworks/models/deepseek-coder-v2"),
+        ("openai", CODEX_5_2),
+        ("fireworks", "accounts/fireworks/models/deepseek-v3"),
     ],
     ThinkingMode.CREATIVE: [
         ("gemini", "gemini-3.1-pro-preview"),
-        ("openai", "gpt-4o"),
+        ("openai", CHATGPT_5_2),
         ("xai", "grok-2-latest"),
-        ("kimi", "moonshot-v1-128k"),
-        ("cohere", "command-r-plus"),
         ("qwen", "qwen-plus"),
     ],
     ThinkingMode.SPEED: [
@@ -139,10 +138,9 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.CONSENSUS: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("zhipu", "glm-5"),
-        ("openai", "gpt-4o"),
-        ("kimi", "moonshot-v1-128k"),
+        ("openai", CHATGPT_5_2),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-chat"),
+        ("deepseek", "deepseek-v3"),
         ("ernie", ERNIE_5_0),
         ("qwen", "qwen-plus"),
         ("groq", "llama-3.3-70b-versatile"),
@@ -153,17 +151,16 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.METACOGNITIVE: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("openai", "gpt-4o"),
+        ("openai", CHATGPT_5_2),
         ("deepseek", "deepseek-reasoner"),
-        ("kimi", "moonshot-v1-128k"),
     ],
     ThinkingMode.OMEGA: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("deepseek", "deepseek-reasoner"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("ernie", ERNIE_5_0),
-        ("openai", "o1-preview"),
-        ("openai", "gpt-4o"),
+        ("openai", OPENAI_O3),
+        ("openai", CHATGPT_5_2),
     ],
 }
 
@@ -203,8 +200,11 @@ class OrchestraConfig:
 # Kept here so presets remain the single source of truth for prompts.
 
 METACOGNITIVE_PREAMBLE_TEMPLATE: str = (
-    "The CORTEX memory system has completed a metacognitive assessment. "
-    "The results are injected below as [CORTEX EPISTEMIC STATE]. "
-    "Read it before generating your response. "
-    "Your response MUST be consistent with the Verdict and confidence levels shown."
+    "[CORTEX EPISTEMIC STATE] follows. It contains Feeling-of-Knowing (FOK), "
+    "Judgment-of-Learning (JOL), retrieval confidence, and a binding Verdict "
+    "(RESPOND | SEARCH_MORE | ABSTAIN). "
+    "Parse it BEFORE generating any output. "
+    "Obey the Verdict unconditionally: ABSTAIN → refuse; SEARCH_MORE → hedge explicitly; "
+    "RESPOND → answer with calibrated confidence matching the evidence. "
+    "Zero confabulation. Ω₃ active."
 )

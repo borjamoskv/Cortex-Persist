@@ -380,10 +380,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
             if hasattr(self, "auto_immune_monitor"):
                 self._run_monitor(
-                    status,
-                    "auto_immune_alerts",
-                    self.auto_immune_monitor,
-                    self._alert_auto_immune,
+                    status, "auto_immune_alerts", self.auto_immune_monitor, self._alert_auto_immune
                 )
 
         self._auto_sync(status)

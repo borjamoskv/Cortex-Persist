@@ -120,6 +120,7 @@ class _LazyGroup(_LazyCommand, click.Group):
 # We defer their import until the CLI actually needs them.
 
 _SELF_REGISTERING_MODULES: list[str] = [
+    "cortex.cli.anomaly_cmds",
     "cortex.cli.compact_cmds",
     "cortex.cli.crud",
     "cortex.cli.dashboard_cmds",
@@ -198,6 +199,8 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "fingerprint",
         "🧬 Cognitive Fingerprint — extract decision patterns.",
     ),
+    ("github", "cortex.cli.github_cmds", "github_cmds", "GitHub ↔ CORTEX bridge sync."),
+    ("scraper", "cortex.cli.scraper_cmds", "scraper", "🕷️ SCRAPER-Ω: Sovereign web extraction."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

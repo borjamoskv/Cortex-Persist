@@ -2,8 +2,11 @@
 # Licensed under the Apache License, Version 2.0.
 
 import asyncio
+import logging
 import re
 import subprocess
+
+logger = logging.getLogger("cortex.daemon.loops.peripherals")
 
 
 async def peripheral_loop(state):
@@ -24,6 +27,6 @@ async def peripheral_loop(state):
                     "connected": True,
                 }
             state.daemons["peripherals"]["devices"] = devices
-        except Exception:
-            pass
+        except OSError as exc:
+            logger.debug("Peripheral scan error: %s", exc)
         await asyncio.sleep(10)

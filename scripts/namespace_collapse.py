@@ -32,7 +32,9 @@ def collapse_namespaces():
     modified_rows = 0
 
     try:
-        logger.info("🚀 Iniciando colapso de namespaces %s -> %s", TARGET_PROJECTS, CANONICAL_PROJECT)
+        logger.info(
+            "🚀 Iniciando colapso de namespaces %s -> %s", TARGET_PROJECTS, CANONICAL_PROJECT
+        )
 
         for table in tables_to_update:
             # Verificar si la tabla existe
@@ -48,7 +50,11 @@ def collapse_namespaces():
                 rows = cursor.rowcount
                 if rows > 0:
                     logger.info(
-                        "  ✅ %s: %s filas migradas (%s -> %s)", table, rows, target, CANONICAL_PROJECT
+                        "  ✅ %s: %s filas migradas (%s -> %s)",
+                        table,
+                        rows,
+                        target,
+                        CANONICAL_PROJECT,
                     )
                     modified_rows += rows
 
@@ -73,7 +79,8 @@ def collapse_namespaces():
                         )
                     except sqlite3.Error:
                         logger.warning(
-                            "  ⚠️ No se pudo actualizar %s directamente (esperado en FTS).", fts_table
+                            "  ⚠️ No se pudo actualizar %s directamente (esperado en FTS).",
+                            fts_table,
                         )
 
         conn.commit()

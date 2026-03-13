@@ -11,7 +11,7 @@ Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
 from __future__ import annotations
 
 import asyncio
-import subprocess
+import os
 import sys
 from pathlib import Path
 
@@ -24,6 +24,7 @@ from cortex.guards.sovereign_seals import (
     check_gate_20_noir,
     check_gate_21_preservation,
 )
+
 
 class SealPrinter:
     def head(self, title: str) -> None:
@@ -44,10 +45,12 @@ class SealPrinter:
     def warn(self, msg: str) -> None:
         print(f"   [🟡 WARN] {msg}")
 
+
 printer = SealPrinter()
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 _VENV_BIN = ROOT_DIR / ".venv" / "bin"
+
 
 def _resolve_cmd(tool: str) -> str:
     """Resolve a CLI tool: prefer .venv/bin, fall back to system PATH."""
@@ -56,19 +59,70 @@ def _resolve_cmd(tool: str) -> str:
         return str(venv_path)
     return tool
 
-def run_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
-    """Run a subprocess and return (exit_code, output)."""
-    # Auto-resolve first element to venv binary if available
+
+async def arun_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
+    """Run a subprocess asynchronously and return (exit_code, output)."""
     resolved = [_resolve_cmd(cmd[0])] + cmd[1:]
     try:
-        proc = subprocess.run(resolved, cwd=cwd, capture_output=True, text=True, check=False)
-        return proc.returncode, proc.stdout + proc.stderr
+        proc = await asyncio.create_subprocess_exec(
+            *resolved,
+            cwd=str(cwd),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        stdout, _ = await proc.communicate()
+        return proc.returncode or 0, stdout.decode(errors="replace")
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"
 
+
+class GlobalSourceCache:
+    """O(1) Memory Cache for Python Source Files to Annihilate Repeated O(N) Disk I/O."""
+    _instance = None
+    _loaded = False
+    files: dict[Path, str] = {}
+
+    def __new__(cls) -> GlobalSourceCache:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    @classmethod
+    async def load(cls) -> None:
+        """Loads all Python files into memory concurrently. Called exactly once."""
+        if cls._loaded:
+            return
+        
+        cortex_dir = ROOT_DIR / "cortex"
+        
+        def _get_files() -> list[Path]:
+            # synchronous scan is unavoidable, but we do it only once
+            return [
+                f for f in cortex_dir.rglob("*.py")
+                if "test" not in str(f) and ".pyc" not in str(f)
+            ]
+        
+        target_files = await asyncio.to_thread(_get_files)
+        
+        async def _read_file(p: Path) -> tuple[Path, str | None]:
+            try:
+                # Use to_thread to prevent blocking event loop on disk I/O
+                content = await asyncio.to_thread(p.read_text, encoding="utf-8")
+                return p, content
+            except OSError:
+                return p, None
+
+        results = await asyncio.gather(*(_read_file(p) for p in target_files))
+        for p, content in results:
+            if content is not None:
+                cls.files[p] = content
+                
+        cls._loaded = True
+
+
 async def check_gate_1_lint() -> bool:
     printer.seal(1, "AX-011 Entropy Death", "Lint (Ruff)")
-    code, out = run_cmd(["ruff", "check", "cortex/", "--output-format", "concise"])
+    code, out = await arun_cmd(["ruff", "check", "cortex/", "--output-format", "concise"])
     if code == 0:
         printer.success("Ruff checks passed.")
         return True
@@ -80,13 +134,14 @@ async def check_gate_1_lint() -> bool:
         print(out[:2000])  # Cap output to avoid flooding
         return False
 
+
 async def check_gate_2_type() -> bool:
     printer.seal(2, "AX-012 Type Safety", "Type Check (Pyright)")
     # Prefer pyright (configured in pyproject.toml). Fall back to mypy.
-    code, out = run_cmd(["pyright", "cortex/", "--outputjson"])
+    code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
     if code == 127:
         # pyright not available, try mypy
-        code, out = run_cmd(["mypy", "cortex/", "--ignore-missing-imports", "--no-error-summary"])
+        code, out = await arun_cmd(["mypy", "cortex/", "--ignore-missing-imports", "--no-error-summary"])
         if code == 127:
             printer.warn("No type checker found (pyright/mypy) — skipping")
             return True
@@ -98,9 +153,10 @@ async def check_gate_2_type() -> bool:
         print(out[:2000])
         return False
 
+
 async def check_gate_3_security() -> bool:
     printer.seal(3, "AX-010 Zero Trust", "Security Scan (Bandit)")
-    code, out = run_cmd(
+    code, out = await arun_cmd(
         ["bandit", "-r", "cortex/", "-q", "--severity-level", "high", "--confidence-level", "high"]
     )
     if code == 0:
@@ -114,6 +170,7 @@ async def check_gate_3_security() -> bool:
         print(out[:2000])
         return False
 
+
 async def check_gate_4_tests() -> bool:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
@@ -121,7 +178,7 @@ async def check_gate_4_tests() -> bool:
         python_cmd = Path(sys.executable)
     # --timeout requires pytest-timeout; excluded for compatibility
     cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short", "-p", "no:timeout"]
-    code, out = run_cmd(cmd)
+    code, out = await arun_cmd(cmd)
     if code == 0:
         printer.success("All tests passed.")
         return True
@@ -129,6 +186,7 @@ async def check_gate_4_tests() -> bool:
         printer.fail("Tests failed.")
         print(out[:3000])
         return False
+
 
 async def check_gate_5_ledger() -> bool:
     printer.seal(5, "AX-017 Ledger Integrity", "Schema Initialization")
@@ -144,10 +202,11 @@ async def check_gate_5_ledger() -> bool:
         printer.fail(f"Ledger initialization threw error: {e}")
         return False
 
+
 async def check_gate_6_connection() -> bool:
     printer.seal(6, "AX-017 Ledger Integrity", "Connection Guard")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
-    code, out = run_cmd(
+    code, out = await arun_cmd(
         [str(python_cmd), "-m", "cortex.database.connection_guard", "--root", "cortex"]
     )
     if code == 0:
@@ -157,6 +216,7 @@ async def check_gate_6_connection() -> bool:
         printer.fail("Connection guard failed.")
         print(out)
         return False
+
 
 async def check_gate_7_async() -> bool:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
@@ -182,15 +242,14 @@ async def check_gate_7_async() -> bool:
         ]
     )
     violations = []
-    for py_file in ROOT_DIR.joinpath("cortex").rglob("*.py"):
-        if "test" in str(py_file) or ".pyc" in str(py_file):
-            continue
+    
+    # Use cached files in O(1) loop
+    for py_file, content in GlobalSourceCache.files.items():
         if py_file.name in _ASYNC_EXCLUDE_FILES:
             continue
-        with open(py_file, encoding="utf-8") as f:
-            for i, line in enumerate(f, 1):
-                if "time.sleep" in line and not line.strip().startswith("#"):
-                    violations.append(f"{py_file.name}:{i}")
+        for i, line in enumerate(content.splitlines(), 1):
+            if "time.sleep" in line and not line.strip().startswith("#"):
+                violations.append(f"{py_file.name}:{i}")
 
     if not violations:
         printer.success("No blocking time.sleep() found.")
@@ -199,28 +258,26 @@ async def check_gate_7_async() -> bool:
         printer.fail(f"Found blocking time.sleep(): {violations}")
         return False
 
+
 async def check_gate_8_loc() -> bool:
     printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤500 max)")
     blocked = 0
     warnings = 0
-    for py_file in ROOT_DIR.joinpath("cortex").rglob("*.py"):
-        if "test" in str(py_file) or ".pyc" in str(py_file):
-            continue
-        try:
-            with open(py_file, encoding="utf-8") as f:
-                lines = sum(1 for _ in f)
-                if lines > 500:
-                    printer.fail(f"{py_file.name} exceeds 500 LOC ({lines})")
-                    blocked += 1
-                elif lines > 300:
-                    warnings += 1
-        except OSError:
-            pass
+    
+    # Use cached files in O(1) loop
+    for py_file, content in GlobalSourceCache.files.items():
+        lines = content.count('\n') + 1
+        if lines > 500:
+            printer.fail(f"{py_file.name} exceeds 500 LOC ({lines})")
+            blocked += 1
+        elif lines > 300:
+            warnings += 1
 
     if blocked == 0:
         printer.success(f"All files within entropy limits. ({warnings} warnings >300 LOC)")
         return True
     return False
+
 
 async def check_gate_9_registry() -> bool:
     printer.seal(9, "Registry Integrity", "Axiom Registry Sync")
@@ -245,6 +302,7 @@ async def check_gate_9_registry() -> bool:
         printer.fail(f"Registry error: {e}")
         return False
 
+
 async def check_gate_10_prompt_size() -> bool:
     printer.seal(10, "Heuristic", "Prompt Size Check")
     prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"
@@ -252,12 +310,18 @@ async def check_gate_10_prompt_size() -> bool:
         printer.warn("No SYSTEM_PROMPT.md found.")
         return True
 
-    tokens = len(prompt_file.read_text("utf-8").split())
-    if tokens > 500:
-        printer.warn(f"System prompt is {tokens} words (target: <200).")
-    else:
-        printer.success(f"System prompt within targets ({tokens} words).")
+    try:
+        content = await asyncio.to_thread(prompt_file.read_text, encoding="utf-8")
+        tokens = len(content.split())
+        if tokens > 500:
+            printer.warn(f"System prompt is {tokens} words (target: <200).")
+        else:
+            printer.success(f"System prompt within targets ({tokens} words).")
+    except OSError:
+        printer.warn("Could not read SYSTEM_PROMPT.md")
+        
     return True
+
 
 async def check_gate_11_cobbler() -> bool:
     """Seal 11 — Cobbler's Compliance (Ω₃ Byzantine Default).
@@ -274,7 +338,6 @@ async def check_gate_11_cobbler() -> bool:
 
     _NOQA_MARKERS = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
-    engine_dir = ROOT_DIR / "cortex" / "engine"
 
     try:
         from cortex.engine.legion_vectors import EntropyDemon, Intruder
@@ -287,18 +350,14 @@ async def check_gate_11_cobbler() -> bool:
     demon_violations: list[str] = []
     intruder_violations: list[str] = []
 
-    py_files = [
-        f
-        for f in engine_dir.rglob("*.py")
-        if f.name not in _EXCLUDE and "__pycache__" not in f.parts
-    ]
+    # Filter Global Cache for Engine files
+    engine_parts = ("cortex", "engine")
+    engine_files = {
+        p: content for p, content in GlobalSourceCache.files.items()
+        if all(part in p.parts for part in engine_parts) and p.name not in _EXCLUDE
+    }
 
-    for py_file in py_files:
-        try:
-            source = py_file.read_text(encoding="utf-8")
-        except OSError:
-            continue
-
+    async def _audit(py_file: Path, source: str) -> None:
         # Strip intentionally-annotated lines before handing to the demon
         cleaned = "\n".join(
             line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
@@ -313,6 +372,9 @@ async def check_gate_11_cobbler() -> bool:
         if intruder_hits:
             intruder_violations.append(f"{py_file.name}: {intruder_hits}")
 
+    # Launch audit concurrently
+    await asyncio.gather(*(_audit(p, c) for p, c in engine_files.items()))
+    
     passed = True
 
     if demon_violations:
@@ -321,7 +383,7 @@ async def check_gate_11_cobbler() -> bool:
             print(f"      ↳ {v}")
         passed = False
     else:
-        printer.success(f"EntropyDemon: engine source is clean ({len(py_files)} files scanned).")
+        printer.success(f"EntropyDemon: engine source is clean ({len(engine_files)} files scanned).")
 
     if intruder_violations:
         printer.fail(
@@ -334,6 +396,7 @@ async def check_gate_11_cobbler() -> bool:
         printer.success("Intruder: no eval/exec/os.system in engine source.")
 
     return passed
+
 
 async def check_gate_12_determinism() -> bool:
     """Seal 12: Temperature Determinism Gate.
@@ -348,9 +411,14 @@ async def check_gate_12_determinism() -> bool:
     violations = []
     # Heuristic: temperature must be 0 for reasoning tasks
     for path in critical_files:
-        if not path.exists():
+        # Check cache before disk
+        if path in GlobalSourceCache.files:
+            content = GlobalSourceCache.files[path]
+        elif path.exists():
+            content = await asyncio.to_thread(path.read_text, encoding="utf-8")
+        else:
             continue
-        content = path.read_text()
+            
         if (
             "temperature" in content
             and "temperature=0" not in content
@@ -367,6 +435,7 @@ async def check_gate_12_determinism() -> bool:
 
     printer.success("Seal 12: Temperature Determinism Gate intact.")
     return True
+
 
 async def check_gate_13_latency() -> bool:
     """Seal 13: A-Record Latency Drift.
@@ -394,6 +463,7 @@ async def check_gate_13_latency() -> bool:
     printer.success("Seal 13: A-Record Latency Gate intact (<200ms).")
     return True
 
+
 async def check_gate_14_aesthetic() -> bool:
     """Seal 14: Sovereign Aesthetic Gate.
 
@@ -401,11 +471,11 @@ async def check_gate_14_aesthetic() -> bool:
     """
     forbidden = ["FIXME", "TODO: placeholder", "MVP style"]
     # Check README and a few core docs
-    targets = [Path("README.md"), Path("AGENTS.md")]
+    targets = [ROOT_DIR / "README.md", ROOT_DIR / "AGENTS.md"]
     violations = []
     for t in targets:
         if t.exists():
-            content = t.read_text().lower()
+            content = (await asyncio.to_thread(t.read_text, encoding="utf-8")).lower()
             for f in forbidden:
                 if f.lower() in content:
                     violations.append(f"{t.name} contains '{f}'")
@@ -418,10 +488,12 @@ async def check_gate_14_aesthetic() -> bool:
     printer.success("Seal 14: Sovereign Aesthetic Gate intact.")
     return True
 
-async def main() -> int:
-    import os
 
+async def main() -> int:
     printer.head("21 SEALS — CORTEX QUALITY GATES")
+    
+    # Pre-cache all Python files into memory concurrently. O(1) file traversals moving forward.
+    await GlobalSourceCache.load()
 
     # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=4)
     # Useful when the test suite is too slow for SSH keepalive during git push.
@@ -474,6 +546,7 @@ async def main() -> int:
     else:
         printer.success("ALL 21 SEALS INTACT. Ready for launch.")
         return 0
+
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))

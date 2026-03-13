@@ -3,8 +3,13 @@
 
 import asyncio
 import itertools
+import logging
 import time
 from pathlib import Path
+
+logger = logging.getLogger("cortex.daemon.loops.evolution")
+
+_MAX_RESONANCES = 100
 
 
 async def evolution_loop(state, cortex_root, speak_func):
@@ -31,23 +36,36 @@ async def evolution_loop(state, cortex_root, speak_func):
                                     {
                                         "id": ghost_id,
                                         "project": project,
-                                        "intent": f"Refactor tight coupling ({int(overlap * 100)}%) between {Path(f1).name} and {Path(f2).name}",
+                                        "intent": (
+                                            f"Refactor tight coupling"
+                                            f" ({int(overlap * 100)}%)"
+                                            f" between {Path(f1).name}"
+                                            f" and {Path(f2).name}"
+                                        ),
                                         "source": "evolution_loop",
                                         "strength": 0.8,
                                     }
                                 )
+                                # Cap resonances to prevent OOM
+                                res = state.daemons["ghost_field"]["resonances"]
+                                if len(res) > _MAX_RESONANCES:
+                                    state.daemons["ghost_field"]["resonances"] = res[
+                                        -_MAX_RESONANCES:
+                                    ]
                                 state.daemons["ghost_field"]["active_ghosts"] = len(
                                     state.daemons["ghost_field"]["resonances"]
                                 )
                                 if not state.daemons.get("mute", False):
                                     await speak_func(
                                         state,
-                                        f"Entropía detectada en proyecto {project}. Sugerencia refactor {ghost_id} generada.",
+                                        f"Entropía detectada en proyecto"
+                                        f" {project}. Sugerencia refactor"
+                                        f" {ghost_id} generada.",
                                         voice="Jorge",
                                         rate=150,
                                     )
 
             await asyncio.sleep(600)
         except Exception as e:
-            print(f"Evolution Loop Error: {e}")
+            logger.error("Evolution Loop Error: %s", e)
             await asyncio.sleep(60)

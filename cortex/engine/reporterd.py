@@ -42,7 +42,11 @@ class ManifoldDaemon:
                     dead_clients = set()
                     for client_ref in list(self.clients):
                         client = client_ref()
-                        if client is None or client.task.done():
+                        if client is None:
+                            dead_clients.add(client_ref)
+                            continue
+                        client_task = getattr(client, "task", None)
+                        if client_task and client_task.done():
                             dead_clients.add(client_ref)
                             continue
                         try:
@@ -108,7 +112,9 @@ class ManifoldDaemon:
         for client_ref in self.clients:
             client = client_ref()
             if client:
-                client.task.cancel()
+                client_task = getattr(client, "task", None)
+                if client_task:
+                    client_task.cancel()
 
 
 async def main():

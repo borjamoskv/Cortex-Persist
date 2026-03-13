@@ -8,19 +8,32 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-try:
-    from watchdog.events import FileSystemEvent, FileSystemEventHandler
-    from watchdog.observers import Observer
+if TYPE_CHECKING:
+    from watchdog.events import FileSystemEvent as FileSystemEvent
+    from watchdog.events import FileSystemEventHandler as FileSystemEventHandler
+    from watchdog.observers import Observer as Observer
+
+    from cortex.engine import CortexEngine
 
     _HAS_WATCHDOG = True
-except ImportError:
-    _HAS_WATCHDOG = False
-    FileSystemEventHandler = object  # type: ignore[assignment,misc]
-    FileSystemEvent = None  # type: ignore[assignment,misc]
-    Observer = None  # type: ignore[assignment,misc]
+else:
+    try:
+        from watchdog.events import FileSystemEvent, FileSystemEventHandler
+        from watchdog.observers import Observer
 
-if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+        _HAS_WATCHDOG = True
+    except ImportError:
+        _HAS_WATCHDOG = False
+
+        class FileSystemEventHandler:  # type: ignore
+            pass
+
+        class FileSystemEvent:  # type: ignore
+            pass
+
+        class Observer:  # type: ignore
+            pass
+
 
 from cortex.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from cortex.engine.cognitive import scan_file_entropy
@@ -90,19 +103,18 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         self._oracle = None  # ForgettingOracle (lazy init)
         self._trust = None
         self._notebooklm = None
-        self._immune = ImmuneMembrane()
+        self._immune = ImmuneMembrane(engine=cortex_engine)
         self._file_event_queue: asyncio.Queue[Path] | None = None
-        self._observer: Observer | None = None
+        self._observer: Any = None
 
         if cortex_engine:
             db_path = str(getattr(cortex_engine, "_db_path", ""))
             if db_path:
                 self._trust = TrustService(db_path)
                 self._notebooklm = NotebookLMService(db_path)
-            if hasattr(cortex_engine, "db"):
-                self._rem = REMCoordinator(cortex_engine.db)
             db = getattr(cortex_engine, "db", None)
             if db:
+                self._rem = REMCoordinator(db)
                 try:
                     sync_conn = getattr(db, "_conn", db)
                     if isinstance(sync_conn, sqlite3.Connection):
@@ -111,11 +123,12 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 except (sqlite3.OperationalError, OSError, AttributeError) as err:
                     logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)
 
-    def _spawn_reflex(self, coro: Any) -> None:
+    def _spawn_reflex(self, coro: Any) -> asyncio.Task[Any]:
         """Create a background reflex task with auto-cleanup."""
         task = asyncio.create_task(coro)
         self._reflex_tasks.add(task)
         task.add_done_callback(self._reflex_tasks.discard)
+        return task
 
     _SLEEP_MIN: float = 0.1
     _SLEEP_MAX: float = 60.0
@@ -344,10 +357,12 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         # Mount Event Horizon Watcher
         self._file_event_queue = asyncio.Queue()
         event_handler = _WorkspaceEventHandler(_loop, self._file_event_queue)
-        self._observer = Observer()
-        if self._observer:
-            self._observer.schedule(event_handler, str(self.workspace), recursive=True)
-            self._observer.start()
+
+        if _HAS_WATCHDOG:
+            self._observer = Observer()
+            if self._observer:
+                self._observer.schedule(event_handler, str(self.workspace), recursive=True)
+                self._observer.start()
 
         _loop.create_task(self._omniscience_loop())
         logger.info("[APOTHEOSIS-Ω] Latencia Negativa (Ω₇) — OS Hooks Mounted.")

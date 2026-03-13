@@ -22,8 +22,6 @@ from cortex.axioms.topological_id import flake_gen
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    from datetime import datetime, timezone
-
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -237,7 +235,7 @@ class CortexFactModel(BaseModel):
         description="HDC Specular Memory (intent trace) bipolar hypervector.",
     )
 
-    # Pragamatic Metamemory Phase 1 Additions
+    # Pragmatic Metamemory Phase 1 Additions
     source_metadata: SourceMetadata = Field(
         default_factory=SourceMetadata, description="Provenance of the fact for Source Monitoring."
     )

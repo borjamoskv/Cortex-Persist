@@ -141,8 +141,8 @@ def swarm_deploy(mode, target, db):
         progress.update(t4, completed=100)
 
     console.print(
-        "\n[bold #CCFF00]✅ DEPLOYMENT PROTOCOL COMPLETE (130/100)[/]\n"
-        "⏱️ CHRONOS-1: Sovereign Time: 4.2m | Human Time: 1,200h | ROI: 450/100\n"
+        "\n[bold #CCFF00]✅ DEPLOYMENT PROTOCOL COMPLETE (420/100)[/]\n"
+        "⏱️ CHRONOS-1: Sovereign Time: 4.2m | Human Time: 1,200h | ROI: 420/100\n"
         "Estado: [bold green]STABLE[/] | Nodos: 400/400 | Nexus: [blue]SYNCED[/]"
     )
 

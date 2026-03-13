@@ -390,7 +390,7 @@ class CausalOracle:
         try:
             with db_connect(db_path) as conn:
                 bus = SignalBus(conn)
-                recent = bus.history(project=project, tenant_id=tenant_id, limit=5)
+                recent = bus.history(project=project, limit=5)
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                         return sig.id

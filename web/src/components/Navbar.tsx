@@ -40,7 +40,7 @@ export function Navbar({ onBuy: _onBuy }: NavbarProps) {
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
         <motion.nav
           style={{ y: yOffset, scale }}
-          className="glass-pill rounded-full pointer-events-auto w-full max-w-5xl"
+          className="glass-pill rounded-[6px] pointer-events-auto w-full max-w-5xl transition-transform duration-700 ease-out"
         >
           <div className="px-6 h-16 flex items-center justify-between">
             <Link
@@ -58,16 +58,16 @@ export function Navbar({ onBuy: _onBuy }: NavbarProps) {
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1.5 text-sm font-sans">
+            <div className="hidden md:flex items-center gap-2 text-sm font-sans">
               <button 
                 onClick={() => scrollTo('architecture')} 
-                className="px-4 py-2 text-text-secondary hover:text-white transition-all duration-300 rounded-full hover:bg-white/5 active:scale-[0.98] font-mono text-[11px] uppercase tracking-widest relative"
+                className="px-4 py-2 text-text-secondary hover:text-white transition-all duration-500 ease-out rounded-[4px] hover:bg-white/5 active:scale-[0.98] font-mono text-[11px] uppercase tracking-widest relative"
               >
                 Architecture
               </button>
               <Link 
                 to="/pricing" 
-                className={`px-4 py-2 transition-all duration-300 rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
+                className={`px-4 py-2 transition-all duration-500 ease-out rounded-[4px] font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
                   activeLink === 'pricing' 
                     ? 'text-cyber-lime bg-cyber-lime/10' 
                     : 'text-text-secondary hover:text-white hover:bg-white/5'
@@ -134,11 +134,11 @@ export function Navbar({ onBuy: _onBuy }: NavbarProps) {
 
               <Link
                 to="/pricing"
-                className="ml-2 flex items-center gap-2 bg-cyber-lime text-black px-6 py-2 rounded-full transition-all duration-300 border border-cyber-lime group relative overflow-hidden font-mono text-[11px] font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(204,255,0,0.4)] active:scale-[0.98]"
+                className="ml-4 flex items-center gap-2 bg-cyber-lime text-abyssal-900 px-6 py-2 rounded-[4px] transition-all duration-500 ease-out border border-cyber-lime/80 group relative overflow-hidden font-mono text-[11px] font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] hover:-translate-y-[1px] active:scale-[0.97] active:translate-y-0"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
                 Get Started
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-500 ease-out" />
               </Link>
             </div>
 
@@ -153,14 +153,14 @@ export function Navbar({ onBuy: _onBuy }: NavbarProps) {
         </motion.nav>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - Warm dark matter */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[45] bg-abyssal-900/95 backdrop-blur-2xl flex flex-col items-center justify-center gap-8 md:hidden p-6"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(24px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            className="fixed inset-0 z-[45] bg-abyssal-900/90 flex flex-col items-center justify-center gap-8 md:hidden p-6"
           >
             <button
               onClick={() => scrollTo('architecture')}

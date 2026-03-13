@@ -258,6 +258,28 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
 
+# ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
+CREATE_FACTS_FTS = """
+CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
+    content,
+    project,
+    tags,
+    fact_type
+);
+"""
+
+# ─── Immutable Ledger (Merkle) ──────────────────────────────────────
+CREATE_MERKLE_ROOTS = """
+CREATE TABLE IF NOT EXISTS merkle_roots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    root_hash       TEXT NOT NULL,
+    tx_start_id     INTEGER NOT NULL,
+    tx_end_id       INTEGER NOT NULL,
+    tx_count        INTEGER NOT NULL,
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
 # ─── Procedural Engrams (Ω₃ Immutability) ─────────────────────────────
 CREATE_PROCEDURAL_ENGRAMS = """
 CREATE TABLE IF NOT EXISTS procedural_engrams (
@@ -317,4 +339,6 @@ EXTENSION_SCHEMA = [
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
     CREATE_PROCEDURAL_ENGRAMS,
+    CREATE_FACTS_FTS,
+    CREATE_MERKLE_ROOTS,
 ]

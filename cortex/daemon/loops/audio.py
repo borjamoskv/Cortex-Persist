@@ -2,8 +2,11 @@
 # Licensed under the Apache License, Version 2.0.
 
 import asyncio
+import logging
 
 from cortex.daemon.utils import run_osascript
+
+logger = logging.getLogger("cortex.daemon.loops.audio")
 
 
 async def audio_mixer_loop(state):
@@ -37,6 +40,6 @@ async def audio_mixer_loop(state):
             if res:
                 state.daemons["audio_mixer"]["master"] = int(res)
 
-        except Exception:
-            pass
+        except (OSError, ValueError) as exc:
+            logger.debug("Audio mixer poll error: %s", exc)
         await asyncio.sleep(5)

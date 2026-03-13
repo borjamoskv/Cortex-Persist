@@ -14,7 +14,7 @@ import logging
 import os
 import shutil
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
@@ -57,7 +57,7 @@ def digest_cmd(output: str):
 
     async def _digest():
         facts = await _get_engine_active_facts()
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         projects_data = defaultdict(list)
         for f in facts:
             projects_data[f.project].append(f)
@@ -132,7 +132,7 @@ def fragment_cmd(output_dir: str):
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
         facts = await _get_engine_active_facts()
-        ts = datetime.now().strftime("%Y-%m-%d")
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         # Classify facts by domain (O(1) with defaultdict)
         domain_facts = defaultdict(list)
@@ -214,7 +214,7 @@ def sync_cmd(drive_path: str | None, mode: str):
         target, provider_name = detected
 
     target.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now().strftime("%Y-%m-%d")
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     synced_files = []
 
     if mode in ("digest", "both"):
@@ -316,7 +316,7 @@ def status_cmd():
 
     # Staleness warning
     if DIGEST_FILE.exists():
-        age_h = (datetime.now().timestamp() - os.path.getmtime(DIGEST_FILE)) / 3600
+        age_h = (datetime.now(timezone.utc).timestamp() - os.path.getmtime(DIGEST_FILE)) / 3600
         if age_h > 48:
             console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
         elif age_h > 24:

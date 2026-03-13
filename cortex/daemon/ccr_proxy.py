@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 # CORTEX L2 Membrane
+from cortex.engine import CortexEngine
+from cortex.immune.membrane import ImmuneMembrane, Verdict
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
@@ -173,6 +175,31 @@ async def messages_endpoint(request: Request):
             f"🛡️ **CORTEX ENTROPIC SHIELD (Isotherma alcanzada: {similitud:.4f})**\n\n"
             f"Julen-Omega ha detectado que esta operación es redundante. "
             f"La resolución ya existe en el Sovereign Ledger (L2):\n\n> {cached_resolution}"
+        )
+        return JSONResponse(content=_build_anthropic_response(response_text))
+
+    # ─── 1.5 CORTEX IMMUNE MEMBRANE (L3) ───
+    if not hasattr(app.state, "immune_membrane"):
+        db_path = os.getenv("CORTEX_DB_PATH", os.path.expanduser("~/.cortex/cortex.db"))
+        engine = CortexEngine(db_path, auto_embed=False)
+        app.state.immune_membrane = ImmuneMembrane(engine=engine)
+
+    membrane: ImmuneMembrane = app.state.immune_membrane
+    context = {
+        "source": "ccr_proxy",
+        "project": "global",
+        "is_external_source": True,
+        "confidence_level": 4,
+    }
+
+    triage = await membrane.intercept(last_user_msg, context)
+    if triage.verdict == Verdict.BLOCK:
+        logger.warning("🚫 [IMMUNE BLOCK] CCR Proxy intercepted pathogen: %s", triage.risks_assumed)
+        response_text = (
+            f"🚫 **CORTEX IMMUNE SYSTEM (BLOCKED)**\n\n"
+            f"La membrana ha interceptado esta solicitud y la ha clasificado como Patógeno.\n"
+            f"El incidente ha sido registrado y aislado autónomamente (O(1)) en el Master Ledger mediante el Transaction Mixin.\n"
+            f"**Motivos del aislamiento:** {triage.risks_assumed}"
         )
         return JSONResponse(content=_build_anthropic_response(response_text))
 

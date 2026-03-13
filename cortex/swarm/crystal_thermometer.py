@@ -196,7 +196,7 @@ async def scan_all_crystals(
                 try:
                     embedding = np.frombuffer(embedding_data, dtype=np.float32).tolist()
                     resonance = await calculate_resonance(embedding, axiom_embeddings)
-                except Exception:
+                except Exception:  # noqa: BLE001 — corrupt embedding must not crash scan
                     pass
 
             vital = measure_crystal_sync(

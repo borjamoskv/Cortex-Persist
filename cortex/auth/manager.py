@@ -7,6 +7,7 @@ import hashlib
 import json
 import logging
 import secrets
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -266,13 +267,16 @@ class AuthManager:
 # ─── Singleton ────────────────────────────────────────────────────────
 
 _auth_manager: AuthManager | None = None
+_auth_lock = threading.Lock()
 
 
 def get_auth_manager() -> AuthManager:
-    """Lazy-load the global AuthManager instance."""
+    """Lazy-load the global AuthManager instance (thread-safe)."""
     global _auth_manager  # noqa: PLW0603
     if _auth_manager is None:
-        _auth_manager = AuthManager()
+        with _auth_lock:
+            if _auth_manager is None:
+                _auth_manager = AuthManager()
     return _auth_manager
 
 

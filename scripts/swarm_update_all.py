@@ -62,7 +62,8 @@ REGLAS ESTRICTAS:
 3. Añade una sección `## 🐝 Especialistas del Enjambre` si no existe, con:
    - Mínimo 3 especialistas nombrados relevantes al dominio del skill
    - Su trigger de activación y su misión específica
-4. Añade/refuerza referencias a formaciones LEGIØN-1 (BLITZ, PHALANX, HYDRA, SIEGE) donde sea semánticamente correcto.
+4. Añade/refuerza referencias a formaciones LEGIØN-1 (BLITZ, PHALANX, HYDRA,
+    SIEGE) donde sea semánticamente correcto.
 5. Aplica "Zero Fluff": elimina relleno, metáforas vacías, frases sin acción.
 6. Estilo: imperativo, denso, contundente. Filosofía 130/100.
 7. Responde SOLO con el Markdown procesado — sin bloques delimitadores externos.

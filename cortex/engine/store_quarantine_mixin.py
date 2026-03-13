@@ -11,6 +11,7 @@ import logging
 
 import aiosqlite
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.memory.temporal import now_iso
 
 __all__ = ["QuarantineMixin"]
@@ -18,9 +19,13 @@ __all__ = ["QuarantineMixin"]
 logger = logging.getLogger("cortex")
 
 
-class QuarantineMixin:
-    """Forensic isolation layer. Quarantined facts are excluded from
-    recall, search, and dedup but remain in DB for immutable audit."""
+class QuarantineMixin(EngineMixinBase):
+    """Forensic Isolation Layer — Quarantine Without Deletion.
+
+    Quarantined facts are excluded from recall, search, and dedup
+    but remain in the database for immutable audit trail compliance.
+    All mutations flow through ``MutationEngine.apply()`` for ledger integrity.
+    """
 
     async def quarantine(
         self,
@@ -61,7 +66,7 @@ class QuarantineMixin:
                 signer="store_mixin:quarantine",
                 commit=False,
             )
-            await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
+            await self._log_transaction(
                 c,
                 "system",
                 "quarantine",
@@ -71,8 +76,8 @@ class QuarantineMixin:
             return True
 
         if conn:
-            return await _impl(conn)
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await _impl(conn)  # type: ignore[reportArgumentType]
+        async with self.session() as conn:
             return await _impl(conn)  # type: ignore[reportArgumentType]
 
     async def unquarantine(
@@ -105,7 +110,7 @@ class QuarantineMixin:
                 signer="store_mixin:unquarantine",
                 commit=False,
             )
-            await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
+            await self._log_transaction(
                 c,
                 "system",
                 "unquarantine",
@@ -115,6 +120,6 @@ class QuarantineMixin:
             return True
 
         if conn:
-            return await _impl(conn)
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            return await _impl(conn)  # type: ignore[reportArgumentType]
+        async with self.session() as conn:
             return await _impl(conn)  # type: ignore[reportArgumentType]

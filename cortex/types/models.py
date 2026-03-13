@@ -54,16 +54,7 @@ class StoreRequest(BaseModel):
         "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
-    source: str | None = Field(
-        None, max_length=200, description="Source of the fact (e.g. agent name)"
-    )
     meta: dict | None = Field(None, description="Optional JSON metadata")
-    confidence: str = Field(
-        "stated", max_length=50, description="Confidence level (e.g., C5 Confirmed, C2 Speculative)"
-    )
-    provenance: str | None = Field(
-        None, max_length=255, description="Origin tracing string or URI for data governance"
-    )
 
     @field_validator("project", "content")
     @classmethod
@@ -108,12 +99,9 @@ class SearchResult(BaseModel):
     fact_type: str
     score: float
     tags: list[str]
-    consensus_score: float = 1.0
     created_at: str
     updated_at: str
-    valid_from: str | None = None
-    valid_until: str | None = None
-    tx_id: int | None = None
+    meta: dict | None = None
     hash: str | None = None
     context: dict | None = Field(
         None, description="Graph-RAG context (subgraph or related entities)"
@@ -136,7 +124,6 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
-    confidence: str | None = None
     status: str = "recorded"
 
 
@@ -169,12 +156,8 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
-    valid_from: str | None = None
-    valid_until: str | None = None
-    metadata: dict | None = None
-    confidence: str = "stated"
-    consensus_score: float = 1.0
-    tx_id: int | None = None
+    meta: dict | None = None
+    is_tombstoned: bool = False
     hash: str | None = None
 
 

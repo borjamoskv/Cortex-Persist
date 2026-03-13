@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import threading
 from typing import Any
 
 from cryptography.exceptions import InvalidKey, InvalidTag
@@ -128,15 +129,18 @@ class CortexEncrypter:
 
 
 _default_encrypter_instance = None
+_encrypter_lock = threading.Lock()
 
 
 def get_default_encrypter() -> CortexEncrypter:
-    """Returns a lazily-initialized singleton encrypter instance."""
+    """Returns a lazily-initialized singleton encrypter instance (thread-safe)."""
     global _default_encrypter_instance
     if _default_encrypter_instance is None:
-        from cortex.crypto.keyring import get_master_key
+        with _encrypter_lock:
+            if _default_encrypter_instance is None:
+                from cortex.crypto.keyring import get_master_key
 
-        _default_encrypter_instance = CortexEncrypter(get_master_key())
+                _default_encrypter_instance = CortexEncrypter(get_master_key())
     return _default_encrypter_instance
 
 

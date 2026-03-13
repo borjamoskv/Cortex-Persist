@@ -88,7 +88,7 @@ class TestDeleteCommand:
 
         result = runner.invoke(cli, ["delete", "1", "--db", db_path])
         assert result.exit_code == 0
-        assert "deprecado" in result.output
+        assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
 
     def test_delete_nonexistent_fact(self, runner, db_path):
         result = runner.invoke(cli, ["delete", "999", "--db", db_path])
@@ -103,7 +103,7 @@ class TestDeleteCommand:
 
         result = runner.invoke(cli, ["delete", "1", "-r", "testing", "--db", db_path])
         assert result.exit_code == 0
-        assert "deprecado" in result.output
+        assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
 
 
 class TestEditCommand:

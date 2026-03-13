@@ -2,6 +2,7 @@
 CORTEX v5.0 — SovereignGate Core Logic.
 """
 
+import collections
 import hashlib
 import hmac
 import json
@@ -9,6 +10,7 @@ import logging
 import os
 import secrets
 import subprocess
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
@@ -21,6 +23,7 @@ __all__ = ["SovereignGate", "get_gate", "reset_gate"]
 
 logger = logging.getLogger("cortex.gate")
 _gate_instance: Optional["SovereignGate"] = None
+_gate_lock = threading.Lock()
 
 
 class SovereignGate:
@@ -56,8 +59,14 @@ class SovereignGate:
             secret or os.environ.get("CORTEX_GATE_SECRET") or os.environ.get("CORTEX_VAULT_KEY")
         )
         if not self._secret:
+            if policy == GatePolicy.ENFORCE:
+                raise GateError(
+                    "CORTEX_GATE_SECRET is required in ENFORCE mode. "
+                    "Set CORTEX_GATE_SECRET or CORTEX_VAULT_KEY env var."
+                )
             logger.warning(
-                "No CORTEX_GATE_SECRET set. Using ephemeral random secret for this session."
+                "No CORTEX_GATE_SECRET set. Using ephemeral secret (acceptable in %s mode).",
+                policy.value,
             )
             self._secret = secrets.token_hex(32)
 
@@ -65,7 +74,7 @@ class SovereignGate:
             self._secret = self._secret.encode("utf-8")
 
         self._pending: dict[str, PendingAction] = {}
-        self._audit_log: list[dict[str, Any]] = []
+        self._audit_log: collections.deque[dict[str, Any]] = collections.deque(maxlen=10_000)
 
         logger.info(
             "SovereignGate initialized — policy=%s timeout=%ds",
@@ -102,7 +111,11 @@ class SovereignGate:
             sort_keys=True,
         )
 
-        challenge = hmac.new(self._secret, payload.encode("utf-8"), hashlib.sha256).hexdigest()  # type: ignore[reportArgumentType]
+        challenge = hmac.new(
+            self._secret,  # type: ignore[arg-type]
+            payload.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
 
         action = PendingAction(
             action_id=action_id,
@@ -271,7 +284,7 @@ class SovereignGate:
 
     def get_audit_log(self, limit: int = 50) -> list[dict[str, Any]]:
         """Return the most recent audit log entries."""
-        return self._audit_log[-limit:]
+        return list(self._audit_log)[-limit:]
 
     def get_status(self) -> dict[str, Any]:
         """Return gate status summary."""
@@ -325,14 +338,16 @@ def get_gate(
     secret: str | None = None,
     timeout: float = SovereignGate.DEFAULT_TIMEOUT,
 ) -> SovereignGate:
-    """Get or create the global SovereignGate singleton."""
+    """Get or create the global SovereignGate singleton (thread-safe)."""
     global _gate_instance
     if _gate_instance is None:
-        _gate_instance = SovereignGate(
-            policy=policy,
-            secret=secret,
-            timeout=timeout,
-        )
+        with _gate_lock:
+            if _gate_instance is None:
+                _gate_instance = SovereignGate(
+                    policy=policy,
+                    secret=secret,
+                    timeout=timeout,
+                )
     return _gate_instance
 
 

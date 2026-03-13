@@ -25,15 +25,15 @@ except ImportError as e:
 console = Console()
 
 SYSTEM_PROMPT: Final[str] = """Eres el Algoritmo MEJORAlo 130/100 de CORTEX.
-Tu deber es aplicar rigor absoluto: destilar cada iteración aportando perfección, concisión 
+Tu deber es aplicar rigor absoluto: destilar cada iteración aportando perfección, concisión
 y estética Industrial Noir. Si es código: erradica ineficiencias, hazlo seguro, tipeado rigurosamente.
 Si es prosa o documentación: purga las excusas, hazlo directo, poderoso.
-REGLA DE HIERRO: NO incluyas explicaciones de la mejora. Entrega ÚNICAMENTE 
+REGLA DE HIERRO: NO incluyas explicaciones de la mejora. Entrega ÚNICAMENTE
 el resultado evolucionado, listo para sustituir al original o volver a entrar en el bucle."""
 
 JUDGE_PROMPT: Final[str] = """Eres el Árbitro Soberano de CORTEX.
 Evalúa el texto o código provisto basándote ESTRICTAMENTE en el estándar Industrial Noir 130/100.
-Requisitos: 
+Requisitos:
 - Densidad de información absoluta (cada palabra/línea tiene un propósito).
 - Estética afilada, directa y poderosa (cero redundancia).
 - Precisión técnica incuestionable.

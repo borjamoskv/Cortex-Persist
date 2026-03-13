@@ -16,6 +16,19 @@
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
+### ⚡ The "Aha" Moment
+
+AI agents hallucinate past actions. CORTEX stops this mathematically.
+
+```bash
+$ cortex store --type decision --project fin-agent "Approved loan #4292"
+[+] Fact stored. Ledger hash: 8f4a2b9e...
+
+$ cortex verify 8f4a2b9e
+[✔] VERIFIED: Hash chain intact. Merkle root sealed.
+[✔] EU AI Act (Art. 12) Audit Trail valid.
+```
+
 ### ⚡ The Numbers
 
 | | |

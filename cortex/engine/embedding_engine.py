@@ -3,6 +3,8 @@ Embedding Engine - Asynchronous fact embedding and Specular Memory.
 Ω₁: G10 Specular Memory (HDC-Native).
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import sqlite3

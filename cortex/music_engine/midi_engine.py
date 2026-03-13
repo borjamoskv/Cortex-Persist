@@ -52,6 +52,7 @@ KICK_DECAY_MS = 180
 SNARE_NOISE_MS = 120
 HAT_NOISE_MS = 30
 
+
 class SynthType(str, Enum):
     """Waveform types for pure-Python synthesis."""
 
@@ -63,6 +64,7 @@ class SynthType(str, Enum):
     SNARE_DRUM = "snare_drum"
     HIHAT = "hihat"
 
+
 @dataclass
 class MIDIEvent:
     """A single MIDI event."""
@@ -72,6 +74,7 @@ class MIDIEvent:
     note: int
     velocity: int
     channel: int = 0
+
 
 @dataclass
 class MIDITrack:
@@ -83,6 +86,7 @@ class MIDITrack:
     def sort(self) -> None:
         """Sort events by tick time."""
         self.events.sort(key=lambda e: (e.tick, 0 if e.event_type == "off" else 1))
+
 
 @dataclass
 class MIDISequence:
@@ -107,7 +111,9 @@ class MIDISequence:
             default=0,
         )
 
+
 # ─── Euclidean Rhythm ────────────────────────────────────────────────────
+
 
 def euclidean_rhythm(steps: int, pulses: int, offset: int = 0) -> list[int]:
     """
@@ -140,7 +146,9 @@ def euclidean_rhythm(steps: int, pulses: int, offset: int = 0) -> list[int]:
         pattern = pattern[-offset:] + pattern[:-offset]
     return pattern
 
+
 # ─── MIDI Generation Functions ───────────────────────────────────────────
+
 
 def generate_euclidean_groove(
     bpm: float = DEFAULT_BPM,
@@ -230,6 +238,7 @@ def generate_euclidean_groove(
 
     return seq
 
+
 def generate_harmonic_sequence(
     key_root: int = 60,  # Middle C
     scale_type: str = "minor",
@@ -304,6 +313,7 @@ def generate_harmonic_sequence(
     seq.tracks.append(chord_track)
     return seq
 
+
 def generate_texture_layer(
     bars: int = BARS_DEFAULT,
     bpm: float = DEFAULT_BPM,
@@ -342,7 +352,9 @@ def generate_texture_layer(
     seq.tracks.append(texture_track)
     return seq
 
+
 # ─── WAV Synthesis (Pure Python / NumPy) ─────────────────────────────────
+
 
 def render_sequence_to_wav(
     sequence: MIDISequence,
@@ -440,6 +452,7 @@ def render_sequence_to_wav(
 
     logger.info("Rendered WAV: %s (%.1fs, %d samples)", output_path, len(audio) / sr, len(audio))
     return os.path.abspath(output_path)
+
 
 def save_sequence_as_midi(sequence: MIDISequence, output_path: str) -> str:
     """

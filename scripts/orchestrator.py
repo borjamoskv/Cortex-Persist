@@ -61,12 +61,12 @@ def main():
                 logger.info("Wave %s Complete. Status: %s", iteration, status)
 
                 if status == "success":
-                    logger.info("Result ID: %s", result.get('result_id'))
+                    logger.info("Result ID: %s", result.get("result_id"))
                     # In Turbo mode, we don't wait long.
                     logger.info("Cooling down for 2s (Turbo)...")
                     time.sleep(2)
                 else:
-                    logger.warning("Wave failed. Error: %s", result.get('error'))
+                    logger.warning("Wave failed. Error: %s", result.get("error"))
                     logger.info("Retrying in 5s...")
                     time.sleep(5)
 

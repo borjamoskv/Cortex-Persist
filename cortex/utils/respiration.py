@@ -20,12 +20,11 @@ import logging
 import threading
 import time
 from collections.abc import Callable
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger("cortex.respiration")
 
-P = ParamSpec("P")
-R = TypeVar("R")
+F = TypeVar("F", bound=Callable[..., Any])
 
 __all__ = ["breathe", "oxygenate"]
 
@@ -62,7 +61,7 @@ def oxygenate(min_interval: float = 0.1):
     sync_lock = threading.Lock()
     next_allowed_time = [time.monotonic()]
 
-    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+    def decorator(func: F) -> F:
         if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
@@ -89,6 +88,6 @@ def oxygenate(min_interval: float = 0.1):
                 threading.Event().wait(deficit)
             return func(*args, **kwargs)
 
-        return sync_wrapper  # type: ignore[reportReturnType]
+        return sync_wrapper  # type: ignore[return-value]
 
     return decorator

@@ -64,12 +64,17 @@ guardrails:
   warn_threshold: 0.9
   max_turns: 100
 
+module: "cortex.scraper"
 tools:
   - filesystem
   - terminal
   - mcp
   - cortex_store
   - cortex_search
+  - cortex_scrape
+  - cortex_scrape_batch
+  - cortex_scrape_map
+  - scraper_engine
   - http_client
   - browser_interaction
   - html_parser

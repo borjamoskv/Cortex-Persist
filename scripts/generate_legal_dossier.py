@@ -55,6 +55,7 @@ Sincerely,
 {VICTIM_CONTACT}
 """
 
+
 def generate_dossier(victim_wallet: str, victim_name: str, victim_contact: str) -> str:
     date_str = datetime.now().strftime("%B %d, %Y")
     dossier = TEMPLATE_EN.format(
@@ -76,6 +77,7 @@ def generate_dossier(victim_wallet: str, victim_name: str, victim_contact: str) 
         "Para automatizar su envío usando MAILTV-1, ejecuta el workflow correspondiente o despáchalo manualmente a legal@kucoin.com."
     )
     return out_path
+
 
 if __name__ == "__main__":
     generate_dossier(

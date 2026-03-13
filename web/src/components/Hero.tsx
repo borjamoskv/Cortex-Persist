@@ -32,15 +32,15 @@ export function Hero() {
       {/* 3D WebGL Nivel Igloo Canvas */}
       <SovereignCanvas />
 
-      {/* Radial Glow Orbs - More dynamic and asymmetrical */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
+      {/* Radial Glow Orbs - More dynamic, biological, asymmetric, and warm */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
         <motion.div 
-          animate={{ y: mouseY * -50 }}
-          className="absolute top-[20%] right-[10%] w-[600px] h-[600px] rounded-full animate-pulse-slow bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)] will-change-transform" 
+          animate={{ y: mouseY * -30, x: mouseY * 15 }}
+          className="absolute top-[10%] right-[10%] w-[700px] h-[500px] rounded-[100%] animate-pulse-slow bg-[image:radial-gradient(ellipse,rgba(204,255,0,0.03)_0%,transparent_70%)] will-change-transform opacity-70" 
         />
         <motion.div 
-          animate={{ y: mouseY * 50 }}
-          className="absolute bottom-[10%] left-[5%] w-[800px] h-[800px] rounded-full animate-pulse-slow [animation-delay:2s] bg-[image:radial-gradient(circle,rgba(138,43,226,0.05)_0%,transparent_70%)] will-change-transform" 
+          animate={{ y: mouseY * 40, x: mouseY * -20 }}
+          className="absolute bottom-[5%] left-[5%] w-[900px] h-[600px] rounded-[100%] animate-pulse-slow [animation-delay:2s] bg-[image:radial-gradient(ellipse,rgba(255,107,0,0.04)_0%,transparent_70%)] will-change-transform" 
         />
       </div>
 
@@ -65,8 +65,8 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 0.8, ease }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-cyber-lime/20 bg-cyber-lime/[0.04] text-cyber-lime text-xs font-mono uppercase tracking-[0.2em]"
+            transition={{ duration: 1, ease }}
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-sm border border-cyber-lime/10 bg-cyber-lime/[0.02] text-text-primary text-xs font-mono uppercase tracking-[0.2em]"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-lime opacity-75" />
@@ -99,15 +99,15 @@ export function Hero() {
           </motion.p>
 
             {/* Action Buttons — SaaS-first hierarchy */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 pt-8">
               {/* PRIMARY: SaaS entry point */}
               <button
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="group relative overflow-hidden rounded-none border border-cyber-lime bg-cyber-lime text-black px-8 py-5 flex items-center justify-center gap-3 transition-all duration-300 hover:shadow-[0_0_50px_rgba(204,255,0,0.5)] hover:scale-[1.02] active:scale-[0.98] flex-1 sm:flex-none font-mono font-black text-sm uppercase tracking-widest"
+                className="group relative overflow-hidden rounded-[4px] border border-cyber-lime/80 bg-cyber-lime text-abyssal-900 px-8 py-5 flex items-center justify-center gap-3 transition-transform duration-500 ease-out glow-lime hover:scale-[0.98] active:scale-[0.96] flex-1 sm:flex-none font-sans font-semibold text-[15px] tracking-wide"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                 Stop the €30M Risk
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-500 ease-out" />
               </button>
 
               {/* SECONDARY: Compliance Audit */}
@@ -138,11 +138,11 @@ export function Hero() {
               </button>
             </div>
 
-            <div className="flex items-center gap-8 pt-4">
-              <div className="flex -space-x-2">
+            <div className="flex items-center gap-8 pt-6">
+              <div className="flex -space-x-3">
                 {[1,2,3,4].map(i => (
-                  <div key={i} className="w-7 h-7 rounded-full border-2 border-abyssal-900 bg-abyssal-700 flex items-center justify-center">
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-white/10 to-transparent" />
+                  <div key={i} className="w-8 h-8 rounded-sm border-2 border-abyssal-900 bg-abyssal-700 flex items-center justify-center opacity-80 hover:opacity-100 hover:-translate-y-1 transition-all duration-500">
+                    <div className="w-full h-full rounded-sm bg-gradient-to-br from-white/5 to-transparent" />
                   </div>
                 ))}
               </div>
@@ -183,15 +183,14 @@ export function Hero() {
                </div>
             </div>
 
-            {/* Floating UI Card */}
             <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 -right-10 glass-strong p-4 border border-cyber-lime/30 glow-lime shadow-2xl hidden xl:block"
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-10 -right-10 glass-strong p-5 rounded-[4px] border-t border-[rgba(255,107,0,0.15)] border-l border-[rgba(255,255,255,0.05)] shadow-[0_12px_40px_rgba(0,0,0,0.8)] glow-tungsten hidden xl:block z-20"
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-2 h-2 rounded-full bg-cyber-lime animate-pulse" />
-                <span className="text-[10px] font-mono text-white tracking-widest">ART. 12 COMPLIANT</span>
+              <div className="flex items-center gap-3 mb-2 opacity-90">
+                <div className="w-1.5 h-1.5 rounded-full bg-tungsten-glow animate-pulse-slow shadow-[0_0_10px_rgba(255,107,0,0.8)]" />
+                <span className="text-[10px] font-mono text-text-primary tracking-widest uppercase">ART. 12 COMPLIANT</span>
               </div>
               <div className="text-xs text-text-tertiary">99.9% Verification Rate</div>
             </motion.div>

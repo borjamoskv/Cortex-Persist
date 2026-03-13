@@ -3,15 +3,28 @@
 from __future__ import annotations
 
 import logging
+import sqlite3
 from pathlib import Path
 
 import aiosqlite
 
+from cortex.engine.mixins.base import EngineMixinBase
+
+__all__ = ["MemoryMixin"]
+
 logger = logging.getLogger("cortex.memory")
 
 
-class MemoryMixin:
-    """Cognitive Memory Subsystem (Frontera 2) for CORTEX."""
+class MemoryMixin(EngineMixinBase):
+    """Cognitive Memory Subsystem (Frontera 2) — Tripartite L1/L2/L3 Architecture.
+
+    L1 (Working Memory): In-process ephemeral buffer with access frequency tracking.
+    L2 (Vector Store): Sovereign sqlite-vec ANN index + optional HDC hypervectors.
+    L3 (Event Ledger): Append-only temporal event log for causal replay.
+
+    Initialization is lazy: L2/HDC are skipped when ``auto_embed=False``
+    to avoid the ~30s ML model load penalty during tests.
+    """
 
     async def _init_memory_subsystem(self, db_path: Path, conn: aiosqlite.Connection) -> None:
         """Initialize the Tripartite Cognitive Memory Architecture.
@@ -35,10 +48,10 @@ class MemoryMixin:
         try:
             # We use the engine's _get_sync_conn if available, or create one.
             # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()
-            sync_conn = self._get_sync_conn()  # type: ignore[reportAttributeAccessIssue]
+            sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
             bus.ensure_table()
-        except Exception as e:  # noqa: BLE001 — L1 memory fallback ignores SignalBus failure
+        except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
             logger.warning("SignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
@@ -64,7 +77,7 @@ class MemoryMixin:
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             vector_path = db_path.parent / "vectors"
-            encoder = AsyncEncoder(self._get_embedder())  # type: ignore[reportAttributeAccessIssue]
+            encoder = AsyncEncoder(self._get_embedder())
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)

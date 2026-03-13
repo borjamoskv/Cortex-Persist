@@ -5,6 +5,8 @@
 
 """Full-text search implementation."""
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 
@@ -56,7 +58,17 @@ async def text_search(
     return _rows_to_results(rows, is_fts=use_fts)
 
 
-async def _fts5_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
+async def _fts5_search(
+    conn: aiosqlite.Connection,
+    query: str,
+    tenant_id: str,
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+) -> list:
     fts_query = _sanitize_fts_query(query)
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
@@ -86,14 +98,24 @@ async def _fts5_search(conn, query, tenant_id, project, fact_type, tags, limit, 
             params.append(f"%{tag}%")
     if confidence:
         sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        params.append(confidence)
     sql += " ORDER BY rank ASC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
     return await cursor.fetchall()
 
 
-async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
+async def _like_search(
+    conn: aiosqlite.Connection,
+    query: str,
+    tenant_id: str,
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+) -> list:
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.meta,
@@ -120,7 +142,7 @@ async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, 
             params.append(f"%{tag}%")
     if confidence:
         sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        params.append(confidence)
     sql += " ORDER BY f.updated_at DESC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)

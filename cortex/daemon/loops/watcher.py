@@ -48,8 +48,11 @@ class GitWatcherHandler(FileSystemEventHandler):
                                 self.state,
                                 f"Atención: {count} ghosts detectados en zona de mutación.",
                             )
-                except Exception:
-                    pass
+                except (ImportError, OSError, ValueError) as exc:
+                    logger.debug(
+                        "Ghost check skipped: %s",
+                        exc,
+                    )
 
             if self.loop:
                 asyncio.run_coroutine_threadsafe(

@@ -13,7 +13,7 @@ import os
 import sqlite3
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
@@ -68,18 +68,21 @@ class SovereignReporter:
 
                 # 1. Causality Stats
                 cursor = await conn.execute("SELECT COUNT(*) FROM causal_edges")
-                total_edges = (await cursor.fetchone())[0]
+                row = await cursor.fetchone()
+                total_edges = row[0] if row else 0
                 causal_stats = {"total_edges": total_edges}
 
                 # 2. Signals Stats
                 cursor = await conn.execute("SELECT COUNT(*) FROM signals")
-                total_signals = (await cursor.fetchone())[0]
+                row = await cursor.fetchone()
+                total_signals = row[0] if row else 0
 
                 # Anomaly specific signal detection
                 cursor = await conn.execute(
                     "SELECT COUNT(*) FROM signals WHERE event_type='sap_anomaly'"
                 )
-                anomaly_count = (await cursor.fetchone())[0]
+                row = await cursor.fetchone()
+                anomaly_count = row[0] if row else 0
 
                 signal_stats = {"total": total_signals, "sap_anomaly": bool(anomaly_count > 0)}
 
@@ -88,11 +91,13 @@ class SovereignReporter:
 
                 # 4. Active Ghosts
                 cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE fact_type='ghost'")
-                ghost_count = (await cursor.fetchone())[0]
+                row = await cursor.fetchone()
+                ghost_count = row[0] if row else 0
 
                 # 5. Architecture Integrity
                 cursor = await conn.execute("SELECT COUNT(*) FROM facts")
-                fact_count = (await cursor.fetchone())[0]
+                row = await cursor.fetchone()
+                fact_count = row[0] if row else 0
                 integrity = (total_edges / max(1, fact_count)) * 100.0
 
                 db_size_mb = 0.0
@@ -100,7 +105,7 @@ class SovereignReporter:
                     db_size_mb = os.path.getsize(self.db_path) / (1024 * 1024)
 
                 return ManifoldStatus(
-                    timestamp=datetime.now().isoformat(),
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                     project=self.project,
                     causality=causal_stats,
                     efficiency={
@@ -175,11 +180,12 @@ class SovereignReporter:
 if __name__ == "__main__":
     db = os.path.expanduser("~/.cortex/cortex.db")
     if not os.path.exists(db):
-        print(f"Error: Database not found at {db}")
+        sys.stderr.write(f"Error: Database not found at {db}\n")
         sys.exit(1)
 
     reporter = SovereignReporter(db)
     # Export for web dashboard
-    reporter.export_json("docs/data/manifold_status.json")
+    asyncio.run(reporter.export_json("docs/data/manifold_status.json"))
     # Print for console integration
-    print(reporter.generate_markdown_report())
+    report = asyncio.run(reporter.generate_markdown_report())
+    sys.stdout.write(report)

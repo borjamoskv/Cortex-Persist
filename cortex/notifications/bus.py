@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 from typing import TYPE_CHECKING
 
 from cortex.notifications.events import CortexEvent, EventSeverity
@@ -117,16 +118,19 @@ class NotificationBus:
 # ─── Process-level singleton ─────────────────────────────────────────
 
 _bus: NotificationBus | None = None
+_bus_lock = threading.Lock()
 
 
 def get_notification_bus() -> NotificationBus:
-    """Return the process-level NotificationBus singleton.
+    """Return the process-level NotificationBus singleton (thread-safe).
 
     First call creates an unconfigured bus. Register adapters at startup.
     """
     global _bus
     if _bus is None:
-        _bus = NotificationBus()
+        with _bus_lock:
+            if _bus is None:
+                _bus = NotificationBus()
     return _bus
 
 

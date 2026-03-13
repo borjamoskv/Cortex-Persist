@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import logging
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
@@ -83,7 +83,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         state = {
             "version": SCHEMA_VERSION,
             "cycle": cycle,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "agents": [_serialize_agent(a) for a in agents],
         }
 
@@ -154,6 +154,46 @@ def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[SovereignAgent], i
     return None
 
 
+def _parse_mutations(raw: list[dict]) -> list[Mutation]:
+    """Parse a list of raw mutation dicts into Mutation objects."""
+    mutations: list[Mutation] = []
+    for m_data in raw:
+        try:
+            m_type = MutationType[m_data["type"]]
+        except KeyError:
+            continue
+        mutations.append(
+            Mutation(
+                mutation_id=m_data["id"],
+                mutation_type=m_type,
+                description=m_data["desc"],
+                delta_fitness=m_data["delta"],
+                timestamp=m_data["ts"],
+                epigenetic_tags=m_data.get("tags", {}),
+            )
+        )
+    return mutations
+
+
+def _reconstruct_subagent(s_data: dict) -> SubAgent | None:
+    """Reconstruct a SubAgent from a serialized dict."""
+    try:
+        s_domain = AgentDomain[s_data["domain"]]
+    except KeyError:
+        return None
+
+    sub = SubAgent(
+        id=s_data["id"],
+        domain=s_domain,
+        name=s_data["name"],
+    )
+    sub.fitness = s_data.get("fitness", 0.0)
+    sub.generation = s_data.get("generation", 0)
+    sub.parameters = s_data.get("params", {})
+    sub.mutations = _parse_mutations(s_data.get("mutations", []))
+    return sub
+
+
 def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
     """Helper para reconstruir objetos desde el dict del estado persistido."""
     sovereigns = []
@@ -167,56 +207,13 @@ def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
         sovereign.fitness = data.get("fitness", 0.0)
         sovereign.generation = data.get("generation", 0)
         sovereign._cycle_count = data.get("cycle_count", 0)
-
-        for mut_data in data.get("mutations", []):
-            try:
-                m_type = MutationType[mut_data["type"]]
-            except KeyError:
-                continue
-            sovereign.mutations.append(
-                Mutation(
-                    mutation_id=mut_data["id"],
-                    mutation_type=m_type,
-                    description=mut_data["desc"],
-                    delta_fitness=mut_data["delta"],
-                    timestamp=mut_data["ts"],
-                    epigenetic_tags=mut_data.get("tags", {}),
-                )
-            )
+        sovereign.mutations = _parse_mutations(data.get("mutations", []))
 
         subagents = []
         for s_data in data.get("subagents", []):
-            try:
-                s_domain = AgentDomain[s_data["domain"]]
-            except KeyError:
-                continue
-
-            sub = SubAgent(
-                id=s_data["id"],
-                domain=s_domain,
-                name=s_data["name"],
-            )
-            sub.fitness = s_data.get("fitness", 0.0)
-            sub.generation = s_data.get("generation", 0)
-            sub.parameters = s_data.get("params", {})
-
-            for mut_data in s_data.get("mutations", []):
-                try:
-                    m_type = MutationType[mut_data["type"]]
-                except KeyError:
-                    continue
-                sub.mutations.append(
-                    Mutation(
-                        mutation_id=mut_data["id"],
-                        mutation_type=m_type,
-                        description=mut_data["desc"],
-                        delta_fitness=mut_data["delta"],
-                        timestamp=mut_data["ts"],
-                        epigenetic_tags=mut_data.get("tags", {}),
-                    )
-                )
-
-            subagents.append(sub)
+            sub = _reconstruct_subagent(s_data)
+            if sub is not None:
+                subagents.append(sub)
 
         sovereign.subagents = subagents
         sovereigns.append(sovereign)

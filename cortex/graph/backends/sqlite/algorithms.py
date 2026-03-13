@@ -1,5 +1,7 @@
 """SQLite Graph Algorithms Mixin."""
 
+from collections import deque
+
 __all__ = ["SQLiteAlgorithmsMixin"]
 
 
@@ -19,17 +21,24 @@ class SQLiteAlgorithmsMixin:
 
         start_id = id_map[source]
         end_id = id_map[target]
-        queue = [(start_id, [])]
+        queue: deque[tuple] = deque([(start_id, [])])
         visited = {start_id}
 
         while queue:
-            curr_id, path = queue.pop(0)
+            curr_id, path = queue.popleft()
             if len(path) >= max_depth:
                 continue
 
-            q_neighbors = """SELECT e.id, e.name, er.relation_type, er.weight FROM entity_relations er
-                             JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
-                             WHERE er.tenant_id = ? AND (er.source_entity_id = ? OR er.target_entity_id = ?)"""
+            q_neighbors = (
+                "SELECT e.id, e.name, er.relation_type, er.weight "
+                "FROM entity_relations er "
+                "JOIN entities e ON ("
+                "CASE WHEN er.source_entity_id = ? "
+                "THEN er.target_entity_id "
+                "ELSE er.source_entity_id END = e.id) "
+                "WHERE er.tenant_id = ? "
+                "AND (er.source_entity_id = ? OR er.target_entity_id = ?)"
+            )
             neighbors = await self._fetch_rows(q_neighbors, [curr_id, tenant_id, curr_id, curr_id])
 
             for nid, nname, rtype, weight in neighbors:
@@ -81,11 +90,16 @@ class SQLiteAlgorithmsMixin:
         return {"nodes": [{"name": k, **v} for k, v in nodes.items()], "edges": edges}
 
     async def _fetch_rows(self, query: str, params: list) -> list:
-        """Execute a query and return all rows, handling async/sync branching."""
-        if self._is_async:  # type: ignore[reportAttributeAccessIssue]
-            async with self.conn.execute(query, params) as cursor:  # type: ignore[reportAttributeAccessIssue]
-                return await cursor.fetchall()
-        return self.conn.execute(query, params).fetchall()  # type: ignore[reportAttributeAccessIssue]
+        """Execute a query and return all rows."""
+        if self._is_async:  # type: ignore[attr-defined]
+            cursor = self.conn.execute(  # type: ignore[attr-defined]
+                query, params
+            )
+            async with cursor as cur:
+                return await cur.fetchall()
+        return self.conn.execute(  # type: ignore[attr-defined]
+            query, params
+        ).fetchall()
 
     async def _expand_subgraph_layer(
         self,
@@ -98,10 +112,12 @@ class SQLiteAlgorithmsMixin:
         """Expand one layer of the subgraph BFS. Returns next layer IDs."""
         phs = ",".join(["?"] * len(current_ids))
         q = (
-            "SELECT e1.name, e1.entity_type, e1.id, e2.name, e2.entity_type, e2.id, er.relation_type, er.weight\n"
-            "FROM entity_relations er\n"
-            "JOIN entities e1 ON er.source_entity_id = e1.id\n"
-            "JOIN entities e2 ON er.target_entity_id = e2.id\n"
+            "SELECT e1.name, e1.entity_type, e1.id, "
+            "e2.name, e2.entity_type, e2.id, "
+            "er.relation_type, er.weight "
+            "FROM entity_relations er "
+            "JOIN entities e1 ON er.source_entity_id = e1.id "
+            "JOIN entities e2 ON er.target_entity_id = e2.id "
             "WHERE er.tenant_id = ? AND (er.source_entity_id IN ("
             + phs
             + ") OR target_entity_id IN ("

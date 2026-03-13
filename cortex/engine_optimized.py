@@ -120,10 +120,6 @@ class SovereignTLRUCache:
         for entry in evidence_list:
             if entry["prev_proof"] != current_tip:
                 return False, current_tip
-            # Note: We can't recompute v_repr here because we don't have the value,
-            # but we can verify consistency of the hashes provided in the audit trails
-            # if they were signed or if we cross-reference with the ledger.
-            # For now, we verify the chain link integrity.
             current_tip = entry["current_proof"]
         return True, current_tip
 
@@ -173,19 +169,10 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             if not rows:
                 return {"status": "NO_EVICTIONS_TO_AUDIT"}
 
-            # Parse audit trails (newest to oldest)
-            trails = []
-            for row in rows:
-                try:
-                    trails.append(json.loads(row[0])["audit_trail"])
-                except (KeyError, json.JSONDecodeError):
-                    continue
-
+            trails = self._parse_audit_trails(rows)
             if not trails:
                 return {"status": "NO_VALID_AUDITS_FOUND"}
 
-            # Reverse to process chronologically
-            trails.reverse()
             initial_tip = trails[0]["prev_proof"]
             valid, calculated_tip = SovereignTLRUCache.verify_proof(initial_tip, trails)
 
@@ -200,6 +187,16 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                     calculated_tip[:16],
                 )
                 return {"status": "TAMPERED", "expected": actual_tip, "calculated": calculated_tip}
+
+    def _parse_audit_trails(self, rows):
+        trails = []
+        for row in rows:
+            try:
+                trails.append(json.loads(row[0])["audit_trail"])
+            except (KeyError, json.JSONDecodeError):
+                continue
+        trails.reverse()
+        return trails
 
     async def start(self):
         if self._buffer_task is None:
@@ -222,21 +219,22 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                 if item is None:
                     break
                 batch.append(item)
-                while len(batch) < 100:
-                    try:
-                        item = self._write_buffer.get_nowait()
-                        if item is None:
-                            break
-                        batch.append(item)
-                    except asyncio.QueueEmpty:
-                        break
-                if batch:
-                    await self._flush_batch(batch)
-                    batch = []
+                self._process_batch(batch)
             except asyncio.TimeoutError:
-                if batch:
-                    await self._flush_batch(batch)
-                    batch = []
+                self._process_batch(batch)
+
+    def _process_batch(self, batch):
+        while len(batch) < 100:
+            try:
+                item = self._write_buffer.get_nowait()
+                if item is None:
+                    break
+                batch.append(item)
+            except asyncio.QueueEmpty:
+                break
+        if batch:
+            asyncio.create_task(self._flush_batch(batch))
+            batch.clear()
 
     async def _flush_batch(self, batch: list):
         async with self.session() as conn:

@@ -13,22 +13,29 @@ if TYPE_CHECKING:
 
 import aiosqlite
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.songlines.economy import ThermalEconomy
 from cortex.songlines.emitter import ResonanceEmitter
 from cortex.songlines.sensor import TopographicSensor
 
+__all__ = ["GhostMixin"]
+
 logger = logging.getLogger("cortex.ghosts")
 
 
-class GhostMixin:
-    """Logic for managing ghost facts (mentions of entities not yet stored).
+class GhostMixin(EngineMixinBase):
+    """Distributed Ghost Field — Filesystem-Embedded Entity References.
 
-    NOW POWERED BY: Distributed Songlines (The Ghost Field).
-    Ghosts live as radioactive traces on the filesystem, not in a central DB.
+    Ghosts are radioactive traces on the filesystem (xattrs/manifest),
+    not centralized DB records. Powered by the Songlines subsystem:
+
+    - ``ResonanceEmitter``: Embeds ghost traces onto target files.
+    - ``TopographicSensor``: Scans the field for active ghosts.
+    - ``ThermalEconomy``: Rate-limits emissions to prevent O(N) field saturation.
     """
 
     def __init__(self, *args, **kwargs):
-        # We assume the consuming class will have a path context
+        super().__init__(*args, **kwargs)
         self._emitter = ResonanceEmitter()
         self._sensor = TopographicSensor()
         self._economy = ThermalEconomy(sensor=self._sensor)

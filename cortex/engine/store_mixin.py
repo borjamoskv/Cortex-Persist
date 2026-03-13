@@ -19,7 +19,6 @@ from cortex.engine.fact_store_core import (
     resolve_causality_async,
 )
 from cortex.engine.ghost_mixin import GhostMixin
-from cortex.engine.mixins.base import EngineMixinBase
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.engine.store_guards import run_security_guards
@@ -32,8 +31,16 @@ __all__ = ["StoreMixin"]
 logger = logging.getLogger("cortex")
 
 
-class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
-    """Sovereign Storage Layer. Handles facts lifecycle with Zero-Trust isolation."""
+class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
+    """Sovereign Storage Layer — Fact Lifecycle with Zero-Trust Isolation.
+
+    Inherits from ``PrivacyMixin``, ``GhostMixin``, ``QuarantineMixin``
+    (all of which inherit from ``EngineMixinBase``), providing:
+    - ``store()``: Single-fact persistence with dedup + guards.
+    - ``store_many()``: Batch persistence (M facts in 1 transaction).
+    - ``update()``: Temporal versioning (deprecate → replace).
+    - ``deprecate()``: Soft-delete with audit trail.
+    """
 
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
 
@@ -56,25 +63,39 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
 
-        kwargs = {
-            "project": project,
-            "content": content,
-            "tenant_id": tenant_id,
-            "fact_type": fact_type,
-            "tags": tags,
-            "confidence": confidence,
-            "source": source,
-            "meta": meta,
-            "valid_from": valid_from,
-            "commit": commit,
-            "tx_id": tx_id,
-            "parent_decision_id": parent_decision_id,
-        }
         if conn:
-            return await self._store_impl(conn, **kwargs)
+            return await self._store_impl(
+                conn,
+                project=project,
+                content=content,
+                tenant_id=tenant_id,
+                fact_type=fact_type,
+                tags=tags,
+                confidence=confidence,
+                source=source,
+                meta=meta,
+                valid_from=valid_from,
+                commit=commit,
+                tx_id=tx_id,
+                parent_decision_id=parent_decision_id,
+            )
 
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await self._store_impl(conn, **kwargs)  # type: ignore[reportArgumentType]
+        async with self.session() as _conn:
+            return await self._store_impl(
+                _conn,
+                project=project,
+                content=content,
+                tenant_id=tenant_id,
+                fact_type=fact_type,
+                tags=tags,
+                confidence=confidence,
+                source=source,
+                meta=meta,
+                valid_from=valid_from,
+                commit=commit,
+                tx_id=tx_id,
+                parent_decision_id=parent_decision_id,
+            )
 
     async def _run_store_validation(
         self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -178,7 +199,9 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                     fact_type = "bridge"
                     # Prescriptive pattern adoption: ensure bridge content follows BridgeGuard format
                     if "→" not in content and "->" not in content:
-                        content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
+                        content = (
+                            f"Pattern from {source_proj} → {project}. Adaptation: {content}"
+                        )
 
         if fact_type == "bridge":
             bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
@@ -248,7 +271,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                     "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                     (str(resolved_parent), fact_id),
                 )
-        except Exception:  # noqa: BLE001
+        except (aiosqlite.Error, OSError):
             # facts_meta may not exist yet (pre-embed) — fire and forget
             pass
 
@@ -257,10 +280,10 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         # optional deps (watchdog via ast_oracle). Store must never fail
         # because an optional daemon dep is missing. (Ghost #4731)
         try:
-            from cortex.daemon.epistemic_breaker import EpistemicCircuitBreaker
-
-            await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)
-        except (ImportError, ModuleNotFoundError) as _ecb_err:
+            from cortex.daemon.epistemic_breaker import EpistemicBreakerDaemon
+            EpistemicCircuitBreaker = EpistemicBreakerDaemon
+            await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)  # type: ignore[reportAttributeAccessIssue]
+        except (ImportError, ModuleNotFoundError, AttributeError) as _ecb_err:
             logger.debug("[STORE] EpistemicCircuitBreaker skipped (missing dep): %s", _ecb_err)
 
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
@@ -269,7 +292,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                 fact_id,
                 project,
                 content,
-                self._get_embedder(),  # type: ignore[reportAttributeAccessIssue]
+                self._get_embedder(),
                 getattr(self, "_memory_manager", None),
                 tenant_id,
             )
@@ -298,14 +321,14 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             ids = []
             try:
                 for fact in facts:
                     ids.append(await self.store(commit=False, conn=conn, **fact))
                 await conn.commit()
                 return ids
-            except Exception:  # noqa: BLE001
+            except (aiosqlite.Error, ValueError, OSError):
                 # Deliberate boundary: rollback any store failure atomically, then re-raise
                 await conn.rollback()
                 raise
@@ -320,10 +343,11 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         tenant_id = self._resolve_tenant(tenant_id)
 
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             query = (
-                "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
-                "FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL"
+                "SELECT tenant_id, project, content, fact_type, tags, "
+                "json_extract(meta, '$.confidence'), json_extract(meta, '$.source'), meta "
+                "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
             cursor = await conn.execute(query, (fact_id, tenant_id))
             row = await cursor.fetchone()
@@ -351,13 +375,15 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                 if raw_old_meta_json
                 else {}
             )
+            if new_meta is None:
+                new_meta = {}
             if meta:
-                new_meta.update(meta)  # type: ignore[reportOptionalMemberAccess]
-            new_meta["previous_fact_id"] = fact_id  # type: ignore[reportOptionalSubscript]
+                new_meta.update(meta)
+            new_meta["previous_fact_id"] = fact_id
 
             new_id = await self.store(
                 project=project,
-                content=content if content is not None else old_content,  # type: ignore[reportArgumentType]
+                content=content if content is not None else str(old_content or ""),  
                 tenant_id=db_tenant_id,
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),
@@ -387,9 +413,13 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
         if conn:
             return await self._deprecate_impl(conn, fact_id, reason, tenant_id)
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            res = await self._deprecate_impl(conn, fact_id, reason, tenant_id)  # type: ignore[reportArgumentType]
-            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
+
+        import typing
+
+        async with self.session() as _raw_conn:
+            _conn = typing.cast(aiosqlite.Connection, _raw_conn)
+            res = await self._deprecate_impl(_conn, fact_id, reason, tenant_id)
+            await _conn.commit()
             return res
 
     async def _deprecate_impl(
@@ -399,7 +429,8 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
         ts = now_iso()
         cursor = await conn.execute(
-            "SELECT tenant_id, project FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL",
+            "SELECT tenant_id, project FROM facts "
+            "WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
             (fact_id, tenant_id),
         )
         row = await cursor.fetchone()
@@ -419,7 +450,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
         except aiosqlite.Error as _fts_err:  # FTS table may not exist in all deployments
             logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
-        await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
+        await self._log_transaction(
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
         )
         return True

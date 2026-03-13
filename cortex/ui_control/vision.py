@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
 try:
@@ -55,7 +55,7 @@ class VisionEngine:
             return InteractionResult(success=False, error="Failed to capture screen")
 
         # Save to file
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"capture_{timestamp}.png"
         path = os.path.join(self._screenshots_dir, filename)
 

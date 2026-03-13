@@ -125,13 +125,20 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
-    def __init__(self, vectors: list[AttackVector] | None = None):
-        self.vectors = vectors or RED_TEAM_SWARM
+    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 100):
+        self.vectors = vectors or list(RED_TEAM_SWARM.values())
+        # Enforce the 100 Sovereign Agents Topology
+        self.replica_count = replica_count
 
     async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
-        """Subject code to all attack vectors in parallel."""
-        bicameral.log_limbic("⚔️ Iniciando asedio de enjambre...", source="RED")
-        tasks = [v.attack(code, context) for v in self.vectors]
+        """Subject code to all attack vectors in parallel using a 100-agent swarm."""
+        total_agents = len(self.vectors) * self.replica_count
+        msg = f"⚔️ Iniciando asedio con enjambre de {total_agents} agentes..."
+        bicameral.log_limbic(msg, source="RED")
+        tasks = []
+        for _ in range(self.replica_count):
+            for v in self.vectors:
+                tasks.append(v.attack(code, context))
         results = await asyncio.gather(*tasks)
 
         # Flatten results
@@ -142,11 +149,15 @@ class RedTeamSwarm:
 class LegionOmegaEngine:
     """⚖️ LEGION-OMEGA: The Sovereign Arbiter."""
 
-    def __init__(self, max_cycles: int = 3, vectors: list[AttackVector] | None = None):
+    def __init__(
+        self,
+        max_cycles: int = 3,
+        vectors: list[AttackVector] | Mapping[str, AttackVector] | None = None,
+    ):
         self.blue_team = BlueTeamAgent()
         # Normalización de vectores: asegurar que sea una lista de objetos, no un dict
         _vectors = vectors or RED_TEAM_SWARM
-        if isinstance(_vectors, dict):
+        if isinstance(_vectors, Mapping):
             self.vectors_list = list(_vectors.values())
         else:
             self.vectors_list = list(_vectors)
@@ -162,7 +173,7 @@ class LegionOmegaEngine:
         previous_code = ""
         previous_v_count = float("inf")
 
-        bicameral.log_motor("LEGION-OMEGA: Forjando '%s'", action="FORGE")
+        bicameral.log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
 
         for cycle in range(1, self.max_cycles + 1):
             # Blue Team Synthesis
@@ -180,14 +191,14 @@ class LegionOmegaEngine:
             v_count = len(vulnerabilities)
 
             if not vulnerabilities:
-                bicameral.log_motor("Inmunidad Química alcanzada en ciclo %d", cycle, action="Ω₆")
+                bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
 
-            # ─── Entropy Regression Check ───
-            # Si el número de vulnerabilidades aumenta o se estanca, el feedback es inefectivo.
+            # Entropy Regression Check
+            # Si el número de vulnerabilidades aumenta o se estanca...
             if v_count >= previous_v_count and cycle > 1:
                 logger.warning(
-                    "⚠️ [LEGION] Stagnation detected in cycle %d (%d vs %d). Breaking thermal loop.",
+                    "⚠️ [LEGION] Stagnation in cycle %d (%d vs %d). Breaking thermal loop.",
                     cycle,
                     v_count,
                     previous_v_count,

@@ -21,9 +21,9 @@ async def speak(state, text: str, voice: str = "Jorge", rate: int = 140):
             rate = 95
             text = f"Ejem... oye... {text}"
         await asyncio.create_subprocess_exec("say", "-v", voice, "-r", str(rate), text)
-        print(f"SPEAK ({voice}/{rate}): {text}")
-    except Exception as e:
-        print(f"Speak error: {e}")
+        logger.debug("SPEAK (%s/%s): %s", voice, rate, text)
+    except OSError as e:
+        logger.error("Speak error: %s", e)
 
 
 async def play_ping(state):
@@ -37,7 +37,7 @@ async def play_ping(state):
             stderr=subprocess.PIPE,
         )
         await proc.wait()
-    except Exception:
+    except OSError:
         pass
 
 
@@ -62,7 +62,8 @@ def get_gmail_credentials():
 
                 with open(TOKEN_PATH, "w") as token:
                     token.write(creds.to_json())
-            except Exception:
+            except (OSError, ValueError) as exc:
+                logger.warning("Gmail token refresh failed: %s", exc)
                 return None
         return creds
     return None

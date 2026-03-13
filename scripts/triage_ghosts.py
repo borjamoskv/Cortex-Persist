@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.expanduser("~/cortex"))
 
 from cortex.engine import CortexEngine
 
+
 async def main():
     async with CortexEngine() as engine:
         print("Buscando ghosts activos...")
@@ -29,6 +30,7 @@ async def main():
                 content = ghost.content or ""
                 gid = ghost.id or "?"
                 print(f"  {i}. [ID:{gid}] {content}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

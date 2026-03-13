@@ -201,7 +201,10 @@ class CortexEngine(
             nonlocal result, exception
             try:
                 result = asyncio.run(coro)
-            except Exception as e:  # noqa: BLE001 — sync wrapper must catch all async errors to propagate
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                # noqa: BLE001 — sync wrapper must catch all async errors to propagate
                 exception = e
 
         t = threading.Thread(target=_worker)

@@ -6,7 +6,7 @@ Extracted from notebooklm_cmds.py to keep CLI command handlers < 500 LOC.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -325,6 +325,6 @@ def _format_fact_obj(fact: Any) -> str:
 
 def _sovereign_signature() -> str:
     """Apply Byzantine Defense (Ω₃): A tamper-evident signature for the export."""
-    ts = datetime.now().isoformat()
+    ts = datetime.now(timezone.utc).isoformat()
     hex_sig = ts.encode().hex()[:16]
     return f"\n\n---\n**SOVEREIGN_SIGNATURE**: `sha256:{hex_sig}` | CORTEX v8.0-Sovereign\n"

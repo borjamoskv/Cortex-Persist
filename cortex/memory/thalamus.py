@@ -103,9 +103,15 @@ class ThalamusGate:
         fact_type: str,
     ) -> int:
         """Count how many children of a given type a parent decision has."""
-        cursor = await conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE parent_decision_id = ? AND fact_type = ?",
-            (parent_id, fact_type),
-        )
-        row = await cursor.fetchone()
+
+        def execute_query():
+            cursor = conn.execute(
+                "SELECT COUNT(*) FROM facts_meta WHERE parent_decision_id = ? AND fact_type = ?",
+                (str(parent_id), fact_type),
+            )
+            return cursor.fetchone()
+
+        import asyncio
+
+        row = await asyncio.to_thread(execute_query)
         return row[0] if row else 0

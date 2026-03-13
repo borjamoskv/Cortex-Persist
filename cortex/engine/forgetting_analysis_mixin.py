@@ -18,6 +18,9 @@ logger = logging.getLogger("cortex.oracle.forgetting.analysis")
 class ForgettingAnalysisMixin:
     """Core analysis logic for the ForgettingOracle."""
 
+    _engine: Any
+    _l1: Any
+
     async def _fetch_eviction_records(self, window: int) -> list[dict[str, Any]]:
         """Fetch the last *window* eviction records from the ledger."""
         try:

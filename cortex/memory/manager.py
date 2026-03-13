@@ -90,8 +90,8 @@ class CortexMemoryManager:
     def __init__(
         self,
         l1: WorkingMemoryL1,
-        l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
-        l3: EventLedgerL3,
+        l2: VectorStoreL2,
+        l3: EventLedgerL3,  # type: ignore[reportInvalidTypeForm]
         encoder: AsyncEncoder,
         hdc_l2: HDCVectorStoreL2 | None = None,
         hdc_encoder: HDCEncoder | None = None,
@@ -113,11 +113,7 @@ class CortexMemoryManager:
         )
         self._bg_workers: list[asyncio.Task[Any]] = []
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = (
-            DynamicSemanticSpace(self._l2, manager=self)  # type: ignore[reportOptionalCall]
-            if self._l2
-            else None
-        )
+        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
 
         try:
             from cortex.memory.hologram import HolographicMemory
@@ -306,12 +302,20 @@ class CortexMemoryManager:
         decisions, and formal proof counterexamples.
         """
         tenant_id = tenant_id or get_tenant_id()
+        conn = None
+        if hasattr(self._l2, "_get_conn"):
+            try:
+                conn = self._l2._get_conn()
+            except Exception as e:
+                logger.warning("CortexMemoryManager: Could not get L2 conn for thalamus: %s", e)
+
         should_process, action, _ = await self.thalamus.filter(
             content=content,
             project_id=project_id,
             tenant_id=tenant_id,
             fact_type=fact_type,
             parent_decision_id=int(parent_decision_id) if parent_decision_id else None,
+            conn=conn,
         )
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
@@ -449,11 +453,7 @@ class CortexMemoryManager:
 
     # ─── NREM Consolidation ─────────────────────────────────────────
 
-    async def nrem_consolidation(
-        self,
-        tenant_id: str,
-        project_id: str | None = None,
-    ) -> dict:
+    async def nrem_consolidation(self, tenant_id: str, project_id: str | None = None) -> dict:
         """Run a full NREM consolidation cycle.
 
         Orchestrates maturation, pruning, STDP decay, and
@@ -470,15 +470,9 @@ class CortexMemoryManager:
         stdp = getattr(self, "_stdp_engine", None)
 
         cycle = NREMConsolidationCycle(
-            consolidator=consolidator,
-            pruner=pruner,
-            stdp_engine=stdp,
-            homeostatic_scaler=scaler,
+            consolidator=consolidator, pruner=pruner, stdp_engine=stdp, homeostatic_scaler=scaler
         )
-        report = await cycle.run(
-            tenant_id=tenant_id,
-            project_id=project_id,
-        )
+        report = await cycle.run(tenant_id=tenant_id, project_id=project_id)
         logger.info("NREM consolidation complete: %s", report)
         return {
             "matured": report.matured,

@@ -621,7 +621,7 @@ class CompanyCrawler:
                 if email not in found or (is_legal and not found[email][2]):
                     found[email] = (page_url, best_legal_data.copy(), is_legal)
                     log.debug(
-                        "    [+] %s (%s) ← %s", email, 'LEGAL' if is_legal else 'GENERIC', page_url
+                        "    [+] %s (%s) ← %s", email, "LEGAL" if is_legal else "GENERIC", page_url
                     )
 
             # Optimization: If we have a quality lead from a legal source WITH legal ID, we might stop early

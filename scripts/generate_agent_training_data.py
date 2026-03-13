@@ -2,7 +2,7 @@
 """
 CORTEX v5.2 — Agent Training Data Generator.
 
-Processes episodic memory to extract high-reward trajectories, 
+Processes episodic memory to extract high-reward trajectories,
 formatted for Qwen2.5-Coder SFT and RL training.
 """
 
@@ -10,8 +10,9 @@ import asyncio
 import json
 import logging
 import os
-import aiosqlite
 from pathlib import Path
+
+import aiosqlite
 
 from cortex.config import DB_PATH
 from cortex.episodic.main import EpisodicMemory
@@ -25,9 +26,10 @@ logger = logging.getLogger("cortex.training.data_gen")
 OUTPUT_DIR = Path("/Users/borjafernandezangulo/cortex/data/training")
 OUTPUT_FILE = OUTPUT_DIR / "agent_trajectories.jsonl"
 
+
 async def generate_data():
     logger.info("Connecting to CORTEX DB at %s", DB_PATH)
-    
+
     if not os.path.exists(DB_PATH):
         logger.error("DB file not found! Please ensure CORTEX has episodes recorded.")
         return
@@ -52,8 +54,13 @@ async def generate_data():
                 if traj and traj.actions:
                     # Calculate reward
                     traj.reward = reward_engine.calculate_reward(traj)
-                    logger.info("Session %s -> Reward: %.2f, Actions: %s", sid, traj.reward, len(traj.actions))
-                    
+                    logger.info(
+                        "Session %s -> Reward: %.2f, Actions: %s",
+                        sid,
+                        traj.reward,
+                        len(traj.actions),
+                    )
+
                     # We only keep trajectories with positive reward for SFT
                     if traj.reward > 0.1:
                         trajectories.append(traj)
@@ -74,8 +81,9 @@ async def generate_data():
         with open(OUTPUT_FILE, "w") as f:
             for item in sft_data:
                 f.write(json.dumps(item) + "\n")
-        
+
         logger.info("Successfully exported %s trajectories to %s", len(trajectories), OUTPUT_FILE)
+
 
 if __name__ == "__main__":
     asyncio.run(generate_data())

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import math
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
@@ -59,7 +59,11 @@ class ConsciousRecurrenceEngine:
         self._l1_budget_max_ratio = 0.20  # L1 gets max 20% of L0 time
 
     async def execute_with_awareness(
-        self, task_fn: Callable[..., Awaitable[R]], intention: IntentionVector, *args, **kwargs
+        self,
+        task_fn: Callable[..., Coroutine[Any, Any, R]],
+        intention: IntentionVector,
+        *args,
+        **kwargs,
     ) -> dict[str, Any]:
         """
         Executes a task while maintaining a parallel L1 metacognitive observer.

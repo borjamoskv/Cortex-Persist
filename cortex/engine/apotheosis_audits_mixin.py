@@ -18,6 +18,13 @@ logger = logging.getLogger("cortex.engine.apotheosis.audits")
 class ApotheosisAuditsMixin:
     """Mixin for background audits, REM operations, and singularity checks."""
 
+    _trust: Any
+    _notebooklm: Any
+    _cortex: Any
+    _signal_bus: Any
+    _oracle: Any
+    _memory_l1: Any
+
     async def _check_singularity_state(self, dopamine: float, growth: float) -> None:
         if dopamine > 0.9 and growth > 0.8:
             logger.warning("🌌 [SINGULARITY-Ω] High Coherent.")

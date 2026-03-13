@@ -39,7 +39,7 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
     if is_diamond:
         return 1.0
     age = max(0.0, current_time - timestamp)
-    return float((0.5) ** (age / half_life))
+    return float(0.5 ** (age / half_life))
 
 
 class SovereignVectorStoreL2:
@@ -178,28 +178,30 @@ class SovereignVectorStoreL2:
         """
         conn = self._get_conn()
 
+        # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
+        sanitized_content = fact.content
+        sanitized_meta = dict(fact.metadata) if fact.metadata else {}
+
+        sanitizer = self._get_sanitizer()
+        if sanitizer and fact.content:
+            # We use to_thread because complex Regex or NLP blocks the event loop
+            report = await asyncio.to_thread(
+                sanitizer.sanitize, fact.content, tenant_id=fact.tenant_id
+            )
+            if report.has_pii:
+                sanitized_content = report.sanitized
+                if report.encrypted_fragments:
+                    sanitized_meta["_pii_fragments"] = report.encrypted_fragments
+                    sanitized_meta["_pii_categories"] = [c.value for c in report.pii_categories]
+                logger.info(
+                    "PII detected in fact [%s] for tenant %s — %d fragments encrypted.",
+                    fact.id,
+                    fact.tenant_id,
+                    len(report.encrypted_fragments),
+                )
+        # ──────────────────────────────────────────────────────────────
+
         async with self._lock:
-            # ─── PII Sanitization Gate ─────────────────────────────────────
-            sanitized_content = fact.content
-            sanitized_meta = dict(fact.metadata) if fact.metadata else {}
-
-            sanitizer = self._get_sanitizer()
-            if sanitizer and fact.content:
-                report = sanitizer.sanitize(fact.content, tenant_id=fact.tenant_id)
-                if report.has_pii:
-                    sanitized_content = report.sanitized
-                    # Store encrypted fragments in metadata for recovery
-                    if report.encrypted_fragments:
-                        sanitized_meta["_pii_fragments"] = report.encrypted_fragments
-                        sanitized_meta["_pii_categories"] = [c.value for c in report.pii_categories]
-                    logger.info(
-                        "PII detected in fact [%s] for tenant %s — %d fragments encrypted.",
-                        fact.id,
-                        fact.tenant_id,
-                        len(report.encrypted_fragments),
-                    )
-            # ──────────────────────────────────────────────────────────────
-
             embedding_bytes = np.array(fact.embedding, dtype=np.float32).tobytes()
 
             cursor = conn.cursor()
@@ -266,6 +268,7 @@ class SovereignVectorStoreL2:
                 m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
                 m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
                 m.cognitive_layer, m.parent_decision_id, m.metadata,
+                v.embedding,
                 ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
                  cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                  m.success_rate) as final_score
@@ -290,15 +293,9 @@ class SovereignVectorStoreL2:
         for row in rows:
             score = row["final_score"]
 
-            # LEGION-OMEGA (Entropy Demon): N+1 Subquery eliminated via direct rowid
-            # Fetch embedding
-            v_cursor = conn.cursor()
-            v_cursor.execute(
-                "SELECT embedding FROM vec_facts WHERE rowid = ?",
-                (row["rowid"],),
-            )
-            v_row = v_cursor.fetchone()
-            emb = np.frombuffer(v_row["embedding"], dtype=np.float32).tolist() if v_row else []
+            # LEGION-OMEGA (Entropy Demon): N+1 Subquery actually eliminated.
+            emb_bytes = row["embedding"]
+            emb = np.frombuffer(emb_bytes, dtype=np.float32).tolist() if emb_bytes else []
 
             fact = CortexFactModel(
                 id=row["id"],

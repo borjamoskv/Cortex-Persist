@@ -5,6 +5,8 @@
 
 """Vector search implementation."""
 
+from __future__ import annotations
+
 import json
 import logging
 import sqlite3
@@ -98,7 +100,7 @@ def _build_semantic_query(
     return sql, params
 
 
-def _row_to_result(row: tuple, enc: "CortexEncrypter", tenant_id: str) -> SearchResult:
+def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchResult:
     """Helper to parse a search result row with decryption and metadata processing."""
     try:
         tags = json.loads(row[7]) if row[7] else []

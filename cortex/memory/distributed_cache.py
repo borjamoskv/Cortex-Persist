@@ -20,6 +20,7 @@ Hydra-Log Architecture:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import json
 import logging
@@ -171,7 +172,7 @@ class DistributedSovereignCache:
                     await asyncio.wait_for(self._r.ping(), timeout=1.0)
                     self._is_available = True
                     logger.info("🐉 [HYDRA-LOG] Circuit Breaker reset. Cache is back online.")
-                except Exception:
+                except Exception:  # noqa: BLE001 — circuit breaker probe must never raise
                     # Still dead, fail fast without waiting
                     pass
             return None
@@ -277,7 +278,6 @@ class DistributedSovereignCache:
         logger.info("🐲 [HYDRA-LOG] Reliable stream consumer group active.")
 
     async def _stop_background_tasks(self) -> None:
-        import contextlib
         for t in [self._notification_task, self._consumer_task]:
             if t and not t.done():
                 t.cancel()

@@ -30,6 +30,8 @@ class AttackVector(Protocol):
 
     name: str
 
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]: ...
+
 
 class OOMKiller:
     """Vector: Memory Exhaustion (The OOM Killer)."""
@@ -43,7 +45,7 @@ class OOMKiller:
             tree = ast.parse(code)
             # Search for infinite loops or massive allocations
             for node in ast.walk(tree):
-                if isinstance(node, ast.While | ast.For):
+                if isinstance(node, (ast.While, ast.For)):
                     if not any(isinstance(n, ast.Break) for n in ast.walk(node)):
                         findings.append(
                             "Potential infinite loop: loop without break statement detected."
@@ -151,6 +153,8 @@ class SiegeVector(Protocol):
     """Runtime Siege Vector Interface for live system attacks."""
 
     name: str
+
+    async def attack(self, system: Any, context: Mapping[str, Any]) -> list[str]: ...
 
 
 class LedgerPoisoner:

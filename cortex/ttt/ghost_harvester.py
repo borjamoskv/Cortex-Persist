@@ -1,7 +1,10 @@
 import json
+import logging
 import os
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+logger = logging.getLogger("cortex.ttt.ghost_harvester")
 
 # CORTEX DB Hardcoded Path for local daemon
 DB_PATH = os.path.expanduser("~/.cortex/cortex.db")
@@ -27,7 +30,7 @@ def fetch_recent_anomalies(cursor, days=7):
     """
     Fetch `error`, `ghost`, and `decision` types from the past `days` days.
     """
-    cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+    cutoff_date = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
     query = """
         SELECT fact_type, content, meta
@@ -58,7 +61,7 @@ def format_for_lora(rows):
 
     master_key = os.environ.get("CORTEX_MASTER_KEY")
     if not master_key:
-        print("[TTT Forge] ⚠️ No CORTEX_MASTER_KEY found! Only unencrypted facts will be exported.")
+        logger.warning("No CORTEX_MASTER_KEY found! Only unencrypted facts will be exported.")
         crypto = None
     else:
         crypto = CortexEncrypter(master_key)
@@ -104,7 +107,7 @@ def format_for_lora(rows):
 
 
 def generate_nightly_dataset():
-    print("[TTT Forge] ⚙️ Booting Ouroboros Nightly Extraction...")
+    logger.info("Booting Ouroboros Nightly Extraction...")
     ensure_folders()
     conn = connect_db()
     cursor = conn.cursor()
@@ -112,23 +115,24 @@ def generate_nightly_dataset():
     try:
         rows = fetch_recent_anomalies(cursor, days=7)
         count = len(rows)
-        print(f"[TTT Forge] 👁️ Found {count} mutable states (Errors/Decisions) in the last 7 days.")
+        logger.info("Found %d mutable states in the last 7 days.", count)
 
         if count == 0:
-            print("[TTT Forge] ⚖️ Entropy is Zero. No structural mutation required today.")
+            logger.info("Entropy is Zero. No structural mutation required.")
             return
 
         dataset = format_for_lora(rows)
         file_out = os.path.join(
-            OUTPUT_PATH, f"moskv_nightly_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
+            OUTPUT_PATH,
+            f"moskv_nightly_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl",
         )
 
         with open(file_out, "w", encoding="utf-8") as f:
             for item in dataset:
                 f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
-        print(f"[TTT Forge] 🔥 Dataset forged for MLX LoRA at: {file_out}")
-        print(f"[TTT Forge] ➔ Next Step: Launch `mlx_lm.lora --train --data {OUTPUT_PATH}`")
+        logger.info("Dataset forged for MLX LoRA at: %s", file_out)
+        logger.info("Next Step: Launch `mlx_lm.lora --train --data %s`", OUTPUT_PATH)
 
     finally:
         conn.close()

@@ -1,9 +1,9 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b1"
+version = "0.3.0b2"
 description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 requires-python = ">=3.10"
 authors = [
     {name = "borjamoskv.com", email = "borja@moskv.com"},
@@ -119,6 +119,7 @@ ignore = ["E501", "B008", "W291", "W293", "S", "BLE001"]
 "cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.pyright]
+pythonVersion = "3.10"
 typeCheckingMode = "basic"
 exclude = [
     "**/node_modules",

@@ -48,7 +48,7 @@ def _export_notebooklm(facts: list[Fact]) -> str:
     if not facts:
         return ""
 
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     # Group by project
     projects: dict[str, list[Fact]] = {}
@@ -57,7 +57,7 @@ def _export_notebooklm(facts: list[Fact]) -> str:
             projects[f.project] = []
         projects[f.project].append(f)
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     lines = ["# CORTEX Master Digest\n", f"> Snapshot Date: {now}\n", "---\n"]
 
     for project, p_facts in sorted(projects.items()):

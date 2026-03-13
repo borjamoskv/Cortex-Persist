@@ -5,11 +5,20 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from cortex.engine.mixins.base import EngineMixinBase
+
+__all__ = ["PrivacyMixin"]
+
 logger = logging.getLogger("cortex.privacy")
 
 
-class PrivacyMixin:
-    """Zero-Trust Privacy Shield logic for data storage."""
+class PrivacyMixin(EngineMixinBase):
+    """Zero-Trust Privacy Shield — Pre-storage Content Classification.
+
+    Scans incoming content for sensitive patterns (API keys, private keys,
+    connection strings) and injects audit metadata before persistence.
+    Degrades gracefully if the classifier module is not installed.
+    """
 
     @staticmethod
     def _apply_privacy_shield(
