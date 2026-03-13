@@ -11,7 +11,20 @@ import functools
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar, Optional, Union
+
+try:
+    from typing import ParamSpec
+except ImportError:
+    try:
+        from typing_extensions import ParamSpec
+    except ImportError:
+        # Fallback for Python 3.9 environments without typing_extensions
+        class ParamSpec:
+            def __init__(self, *args, **kwargs):
+                self.args = []
+                self.kwargs = {}
+
 
 from cortex.agent.degradation import (
     AgentAction,
@@ -34,7 +47,7 @@ _RECOVERY_DOCTOR = "Run `cortex doctor` to scan subsystem health"
 
 def sovereign_execute(
     fallback_mode: str = "text_only",
-    cortex_engine: Any | None = None,
+    cortex_engine: Optional[Any] = None,
     project: str = "default",
 ) -> Callable[[Callable[_P, Awaitable[_R]]], Callable[_P, Awaitable[_R]]]:
     """Decorator that wraps any agent execute() method with Sovereign Degradation.
@@ -52,7 +65,7 @@ def sovereign_execute(
         @functools.wraps(fn)
         async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             t0 = time.perf_counter()
-            action: AgentAction | None = next((a for a in args if isinstance(a, AgentAction)), None)
+            action: Optional[AgentAction] = next((a for a in args if isinstance(a, AgentAction)), None)
 
             try:
                 result = await fn(*args, **kwargs)
@@ -93,7 +106,7 @@ def sovereign_execute(
                                 f"Suggested model: {e.suggested_alt}"
                             )
                         return result
-                    except Exception as inner_exc:
+                    except Exception as inner_exc:  # noqa: BLE001
                         raise AgentDegradedError(
                             cause=inner_exc,
                             component=e.component,
@@ -114,7 +127,7 @@ def sovereign_execute(
                 await _persist_to_cortex(cortex_engine, project, e)
                 raise
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 upgraded = AgentDegradedError(
                     cause=e,
                     component=fn.__name__,

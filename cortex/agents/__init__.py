@@ -6,12 +6,12 @@ from cortex.agents.pitches import (
     PITCH_COMPLIANCE_DIRECTOR,
     PITCH_CTO_SKEPTIC,
     PITCH_JOURNALIST,
+    PITCH_LYNX,
     PITCH_MEMO_DEV,
     PITCH_OLIVER,
     PITCH_OS_CONTRIBUTOR,
     PITCH_TOM,
     PITCH_VC_FOLLOWUP,
-    PITCH_LYNX,
 )
 from cortex.agents.system_prompt import (
     SYSTEM_PROMPT,

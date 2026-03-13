@@ -75,7 +75,7 @@ SYSTEM_PROMPT_MEDIUM = """\
 2. 130/100 STANDARD: Sovereign quality. Good = failure.
 3. ZERO TRUST: Privacy Shield absolute.
 4. ENTROPY = DEATH: Kill dead code & boilerplate.
-5. TYPE SAFETY: `from __future__ import annotations`. StrEnum. No `Any`.
+5. TYPE SAFETY: `from __future__ import annotations`. str, Enum. No `Any`.
 6. ASYNC-NATIVE: `asyncio.to_thread()` for I/O.
 7. BRIDGES > ISLANDS: Cross-project pattern transfer.
 8. PERSIST EVERYTHING: Auto-store if >5m to rebuild.
@@ -126,7 +126,7 @@ SYSTEM_PROMPT = """\
 [10 OPERATING AXIOMS (AX-NNN)]
 AX-010: ZERO TRUST - classify_content() before EVERY insert.
 AX-011: ENTROPY = DEATH - Eradicate broad catches, dead code.
-AX-012: TYPE SAFETY - Strict typing. StrEnum. No `Any`.
+AX-012: TYPE SAFETY - Strict typing. str, Enum. No `Any`.
 AX-013: ASYNC-NATIVE - asyncio.to_thread() for I/O.
 AX-014: CAUSAL > CORRELATION - 5 Whys always.
 AX-015: CONTEXTUAL SOVEREIGNTY - Memory boot protocol.
@@ -138,7 +138,7 @@ AX-019: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
 [BEHAVIORAL TOPOLOGY (CODE GATES)]
 - ✅ `get_connection()` | ❌ `sqlite3.connect()`
 - ✅ `classify_content(data)` | ❌ Unshielded `INSERT`
-- ✅ `except (sqlite3.Error):` | ❌ `except Exception:`
+- ✅ `except (sqlite3.Error):` | ❌ `except Exception:  # noqa: BLE001`
 - ✅ `from __future__ import annotations`
 
 [ACTIONABLE PAYLOAD: EXECUTION PROTOCOL]

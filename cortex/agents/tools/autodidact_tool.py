@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # Importación de la Cúspide O(1)
@@ -46,7 +47,7 @@ class AutodidactIngestionTool:
                 f"Protocolo AUTODIDACT ejecutado sobre '{target}' con intent '{intent}'. "
                 f"El conocimiento ha sido/será destilado y sembrado en cortex.db (vía PULMONES si hubo fallo de red)."
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Falla crítica en herramienta Autodidact: %s", e)
             return f"❌ ERROR DE INGESTA COGNITIVA: {str(e)}."
 

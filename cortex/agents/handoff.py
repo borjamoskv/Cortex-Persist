@@ -147,9 +147,9 @@ async def generate_handoff(
                         "project": episode.project,
                         "summary": episode.summary,
                     })
-            except Exception:
+            except (AttributeError, KeyError, TypeError):
                 continue  # Skip facts without parent chains
-    except Exception as e:
+    except (RuntimeError, ImportError, OSError) as e:
         logger.debug("Causal episode tracing skipped: %s", e)
 
     # ── Causal Chains (compact DAG via get_causal_chain) ──────────
@@ -178,7 +178,7 @@ async def generate_handoff(
                         for f in chain
                     ],
                 })
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.debug("Causal chain extraction skipped: %s", e)
 
     # ── Active Projects (with activity in last 24h) ───────────────

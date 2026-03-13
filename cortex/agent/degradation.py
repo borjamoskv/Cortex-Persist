@@ -41,7 +41,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional, Union
 
 __all__ = [
     # Exception hierarchy
@@ -111,9 +111,9 @@ class SovereignAgentError(Exception):
         *,
         component: str,
         recovery_steps: list[str],
-        suggested_alt: str | None = None,
-        cause: BaseException | None = None,
-        context: dict[str, Any] | None = None,
+        suggested_alt: Optional[str] = None,
+        cause: Optional[BaseException] = None,
+        context: dict[str, Optional[Any]] = None,
     ) -> None:
         super().__init__(message)
         self.component = component
@@ -158,8 +158,8 @@ class SchemaIncompatibilityError(SovereignAgentError):
         *,
         model: str,
         required_schema: str,
-        actual_schema: str | None = None,
-        cause: BaseException | None = None,
+        actual_schema: Optional[str] = None,
+        cause: Optional[BaseException] = None,
     ) -> None:
         self._model = model
         super().__init__(
@@ -185,7 +185,7 @@ class ToolRegistrationError(SovereignAgentError):
 
     level = DegradationLevel.L3_ACTIONABLE
 
-    def __init__(self, *, tool_name: str, cause: BaseException | None = None) -> None:
+    def __init__(self, *, tool_name: str, cause: Optional[BaseException] = None) -> None:
         super().__init__(
             f"Tool '{tool_name}' failed to register",
             component="tool_registry",
@@ -211,7 +211,7 @@ class ModelUnavailableError(SovereignAgentError):
         model: str,
         reason: str,
         fallback_model: str = "gemini-2.0-flash",
-        cause: BaseException | None = None,
+        cause: Optional[BaseException] = None,
     ) -> None:
         super().__init__(
             f"Model '{model}' unavailable: {reason}",
@@ -241,8 +241,8 @@ class AgentDegradedError(SovereignAgentError):
         *,
         cause: BaseException,
         component: str,
-        suggested_model: str | None = None,
-        recovery_steps: list[str] | None = None,
+        suggested_model: Optional[str] = None,
+        recovery_steps: Optional[list[str]] = None,
     ) -> None:
         super().__init__(
             f"Agent degraded after failure in {component}: {cause}",
@@ -290,7 +290,7 @@ class AgentCalcificationError(SovereignAgentError):
 # ─── Data Contracts ───────────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class AgentAction:
     """An action request to an agent (input contract).
 
@@ -314,7 +314,7 @@ class AgentAction:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentResult:
     """The result of an executed agent action.
 
@@ -327,7 +327,7 @@ class AgentResult:
     output: Any = None
     degradation_level: DegradationLevel = DegradationLevel.L4_GRACEFUL
     warnings: list[str] = field(default_factory=list)
-    cortex_fact_id: int | None = None  # If side-effect persisted to CORTEX
+    cortex_fact_id: Optional[int] = None  # If side-effect persisted to CORTEX
     latency_ms: float = 0.0
 
     def with_warning(self, message: str) -> AgentResult:
@@ -340,7 +340,7 @@ class AgentResult:
         return bool(self.warnings) or self.degradation_level < DegradationLevel.L4_GRACEFUL
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class DegradationReport:
     """Structured report emitted when degradation occurs.
 
@@ -351,7 +351,7 @@ class DegradationReport:
     component: str
     message: str
     recovery_steps: list[str]
-    suggested_alt: str | None
+    suggested_alt: Optional[str]
     context: dict[str, Any]
     timestamp: float
 
