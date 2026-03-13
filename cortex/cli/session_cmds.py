@@ -1,5 +1,6 @@
 """CLI commands for session management and rejection logic."""
 
+import sqlite3
 import subprocess
 import sys
 import time
@@ -28,7 +29,7 @@ def _get_uncommitted_changes() -> list[str]:
             if line:
                 changes.append(line)
         return changes
-    except Exception:
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return []
 
 
@@ -58,7 +59,7 @@ def _has_recent_decision(engine, minutes: int = 60) -> bool:
         age_minutes = (current_time - dt_timestamp) / 60.0
 
         return age_minutes <= minutes
-    except Exception as e:
+    except (sqlite3.Error, OSError, ValueError) as e:
         import logging
 
         logging.debug("Failed to fetch recent decision: %s", e)

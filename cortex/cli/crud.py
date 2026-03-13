@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sqlite3
 
 import click
 from rich.table import Table
@@ -29,7 +30,7 @@ def delete(fact_id, reason, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except (KeyError, ValueError, sqlite3.Error):
             err_fact_not_found(fact_id)
             return
 
@@ -132,7 +133,7 @@ def edit(fact_id, new_content, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except (KeyError, ValueError, sqlite3.Error):
             err_fact_not_found(fact_id)
             return
 

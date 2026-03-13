@@ -13,12 +13,29 @@ Commands:
 
 from __future__ import annotations
 
+import asyncio
+from collections.abc import Coroutine
+from typing import Any
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
+
+
+def _run_async(coro: Coroutine[Any, Any, Any]) -> Any:
+    """Run async coroutine safely — reuses existing loop or creates one."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    else:
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result()
 
 
 @click.group("wealth")
@@ -31,14 +48,10 @@ def wealth_cmds():
 @click.option("--chains", default="base,solana,arbitrum", help="Cadenas a escanear.")
 def money_radar(depth: str, chains: str):
     """Escaneo completo del mercado para Alpha y DeFi."""
-    import asyncio
     from cortex.wealth.scanner import FundingRateScanner
-    
+
     console.print(
-        Panel(
-            "[bold #CCFF00]📡 MONEYTV-1 RADAR INICIADO[/bold #CCFF00]",
-            border_style="#CCFF00"
-        )
+        Panel("[bold #CCFF00]📡 MONEYTV-1 RADAR INICIADO[/bold #CCFF00]", border_style="#CCFF00")
     )
     console.print(f"[dim]Depth: {depth} | Chains: {chains}[/dim]")
 
@@ -54,14 +67,14 @@ def money_radar(depth: str, chains: str):
     table.add_row("Hyperliquid HLP", "Yield Aggressive", "7.8", "Alloc 10%")
 
     console.print(table)
-    
+
     # Run the dynamic scanner
     scanner = FundingRateScanner()
     assets = ["BTC", "ETH", "SOL", "ARB", "OP", "SUI", "SEI"]
-    
+
     with console.status("[dim]Escaneando funding rates multi-exchange...[/dim]"):
-        opportunities = asyncio.run(scanner.scan_opportunities(assets))
-        
+        opportunities = _run_async(scanner.scan_opportunities(assets))
+
     if opportunities:
         arb_table = Table(title="Arbitraje Funding Rate Activo", border_style="green")
         arb_table.add_column("Asset", style="cyan")
@@ -70,15 +83,15 @@ def money_radar(depth: str, chains: str):
         arb_table.add_column("Spread 8h", style="yellow")
         arb_table.add_column("APR Est.", style="bold green")
         arb_table.add_column("Riesgo", style="magenta")
-        
+
         for opp in opportunities[:5]:  # Top 5
             arb_table.add_row(
                 f"{opp.asset}-PERP",
-                f"{opp.exchange_long} ({(opp.funding_rate_long*100):.3f}%)",
-                f"{opp.exchange_short} ({(opp.funding_rate_short*100):.3f}%)",
-                f"{(opp.net_rate_8h*100):.3f}%",
-                f"{(opp.estimated_apr*100):.1f}%",
-                opp.execution_risk.upper()
+                f"{opp.exchange_long} ({(opp.funding_rate_long * 100):.3f}%)",
+                f"{opp.exchange_short} ({(opp.funding_rate_short * 100):.3f}%)",
+                f"{(opp.net_rate_8h * 100):.3f}%",
+                f"{(opp.estimated_apr * 100):.1f}%",
+                opp.execution_risk.upper(),
             )
         console.print(arb_table)
 
@@ -95,10 +108,7 @@ def money_radar(depth: str, chains: str):
 def money_snipe(opportunity_id: str, dry_run: bool, max_slippage: float):
     """Ejecuta oportunidad validada con Risk Management militar."""
     console.print(
-        Panel(
-            f"[bold #f72585]⚡ SNIPING: {opportunity_id}[/bold #f72585]",
-            border_style="#f72585"
-        )
+        Panel(f"[bold #f72585]⚡ SNIPING: {opportunity_id}[/bold #f72585]", border_style="#f72585")
     )
     if dry_run:
         console.print("[yellow]⚠️ DRY RUN ACTIVO. Simulando ejecución...[/yellow]")
@@ -118,13 +128,10 @@ def money_snipe(opportunity_id: str, dry_run: bool, max_slippage: float):
 def money_compound(tax_reserve: float, target_allocation: str):
     """Reinversión automática 50/30/20 post-tax."""
     console.print(
-        Panel(
-            "[bold #4361ee]🔄 AUTO-COMPOUND ENGINE[/bold #4361ee]",
-            border_style="#4361ee"
-        )
+        Panel("[bold #4361ee]🔄 AUTO-COMPOUND ENGINE[/bold #4361ee]", border_style="#4361ee")
     )
     console.print(f"Tax reserve: [bold red]{tax_reserve * 100}%[/bold red]")
-    console.print("Aplicando regla 50/30/20 a P&L realziado...")
+    console.print("Aplicando regla 50/30/20 a P&L realizado...")
     console.print("→ 50% Tier Seguro (sDAI/USDC)")
     console.print("→ 30% Growth Engine")
     console.print("→ 20% Cold Wallet (Profit taking)")
@@ -141,10 +148,7 @@ def money_compound(tax_reserve: float, target_allocation: str):
 def money_launch(idea: str, validate_first: bool, time_box: str):
     """Lanza SaaS MVP / Producto Digital."""
     console.print(
-        Panel(
-            f"[bold #D4AF37]📦 LAUNCHING: {idea}[/bold #D4AF37]",
-            border_style="#D4AF37"
-        )
+        Panel(f"[bold #D4AF37]📦 LAUNCHING: {idea}[/bold #D4AF37]", border_style="#D4AF37")
     )
     console.print(f"[dim]Time-box estricto: {time_box}[/dim]")
     console.print("1. Validación relámpago con MarketV-1... [green]PASS[/green]")
@@ -162,53 +166,49 @@ def money_launch(idea: str, validate_first: bool, time_box: str):
 def money_tax(year: str, jurisdiction: str):
     """Generador de reportes fiscales y compliance."""
     console.print(
-        Panel(
-            f"[bold white]📑 TAX COMPLIANCE: {year}[/bold white]",
-            border_style="white"
-        )
+        Panel(f"[bold white]📑 TAX COMPLIANCE: {year}[/bold white]", border_style="white")
     )
     console.print(f"Jurisdicción: [yellow]{jurisdiction}[/yellow]")
     console.print("[dim]Escaneando ledger de CORTEX...[/dim]")
-    console.print(
-        "[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]"
-    )
+    console.print("[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]")
 
 
 @wealth_cmds.command("growth")
 @click.argument("objetivo")
 def growth_pipeline(objetivo: str):
     """SOVEREIGN-GROWTH: de intención a revenue. Pipeline completo."""
-    import asyncio
     from cortex.wealth.growth import GrowthEngine
-    
+
     console.print(
-        Panel(
-            f"[bold #6600FF]🚀 GTM PIPELINE: {objetivo}[/bold #6600FF]",
-            border_style="#6600FF"
-        )
+        Panel(f"[bold #6600FF]🚀 GTM PIPELINE: {objetivo}[/bold #6600FF]", border_style="#6600FF")
     )
-    
+
     engine = GrowthEngine()
-    
+
     with console.status("[dim]1. Identificando ICP y Escaneando Alpha...[/dim]"):
-        opportunities = asyncio.run(engine.pulse_scan(objetivo))
-        
+        opportunities = _run_async(engine.pulse_scan(objetivo))
+
     if not opportunities:
         console.print("[red]❌ No hay Alpha suficiente para justificar GTM (Score < 4.0).[/red]")
         return
-        
+
     top_opp = opportunities[0]
-    console.print(f"[green]✅ Alpha detectado en {top_opp.platform.upper()} (Score: {top_opp.alpha_score:.2f})[/green]")
+    console.print(
+        f"[green]✅ Alpha detectado en {top_opp.platform.upper()}"
+        f" (Score: {top_opp.alpha_score:.2f})[/green]"
+    )
     console.print(f"→ Target: [dim]{top_opp.target_url}[/dim]")
-    
-    with console.status("[dim]3. Especialistas ensamblando narrativa (TECHNOGRAPHER + NARRATIVIST)...[/dim]"):
-        asyncio.run(asyncio.sleep(1.2))  # Simulando generación LLM
-    
+
+    with console.status(
+        "[dim]3. Especialistas ensamblando narrativa (TECHNOGRAPHER + NARRATIVIST)...[/dim]"
+    ):
+        _run_async(asyncio.sleep(1.2))  # Simulando generación LLM
+
     console.print("[green]✅ Contenido 130/100 generado.[/green]")
-    
+
     with console.status("[dim]4. Ejecución orquestada (CHANNELMASTER)...[/dim]"):
-        success = asyncio.run(engine.orchestrate_distribution(top_opp))
-        
+        success = _run_async(engine.orchestrate_distribution(top_opp))
+
     if success:
         console.print("\n[bold green]✅ DISTRIBUCIÓN SOBERANA COMPLETADA.[/bold green]")
         console.print(f"→ Vector: {top_opp.suggested_action}")
@@ -219,34 +219,30 @@ def growth_pipeline(objetivo: str):
 @wealth_cmds.command("scan")
 def growth_scan():
     """Escaneo pasivo de oportunidades CORTEX."""
-    import asyncio
     from cortex.wealth.growth import GrowthEngine
-    
+
     console.print(
-        Panel(
-            "[bold #6600FF]🔍 GROWTH SCAN: CORTEX[/bold #6600FF]",
-            border_style="#6600FF"
-        )
+        Panel("[bold #6600FF]🔍 GROWTH SCAN: CORTEX[/bold #6600FF]", border_style="#6600FF")
     )
-    
+
     engine = GrowthEngine()
     with console.status("[dim]Escaneando señales de Alpha (GitHub, Reddit, HN)...[/dim]"):
-        opportunities = asyncio.run(engine.pulse_scan("CORTEX agent memory"))
-    
+        opportunities = _run_async(engine.pulse_scan("CORTEX agent memory"))
+
     if opportunities:
         table = Table(title="Current Alpha (CORTEX B2Dev)", border_style="#6600FF")
         table.add_column("Canal", style="cyan")
         table.add_column("Señal", style="white")
         table.add_column("Score", style="green")
-    
+
         for opp in opportunities[:5]:
             table.add_row(
                 opp.platform.capitalize(),
                 f"{opp.topic[:40]}..." if len(opp.topic) > 40 else opp.topic,
-                f"{opp.alpha_score:.2f}"
+                f"{opp.alpha_score:.2f}",
             )
         console.print(table)
-        
+
         console.print("\n[dim]Top Actionable Signal:[/dim]")
         top = opportunities[0]
         console.print(f"→ [bold]{top.target_url}[/bold]")
@@ -265,10 +261,7 @@ def growth_scan():
 def growth_alpha(channel: str):
     """Alpha hunt focalizado en un canal específico."""
     console.print(
-        Panel(
-            f"[bold #6600FF]🎯 ALPHA HUNT: {channel}[/bold #6600FF]",
-            border_style="#6600FF"
-        )
+        Panel(f"[bold #6600FF]🎯 ALPHA HUNT: {channel}[/bold #6600FF]", border_style="#6600FF")
     )
     console.print(f"[dim]Escaneando dolor agudo en {channel}...[/dim]")
     console.print("→ Identificado: 3 oportunidades de pain point asimétrico.")

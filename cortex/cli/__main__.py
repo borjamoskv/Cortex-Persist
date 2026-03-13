@@ -14,7 +14,7 @@ from . import cli
 # Must be > (BUSY_TIMEOUT_MS/1000 + model_load_time) to avoid SIGALRM
 # killing the process before SQLite can retry a write lock.
 # BUSY_TIMEOUT_MS = 30s + ~10s model load = 40s minimum → 60s safe ceiling.
-CLI_TIMEOUT_SECONDS = 60
+CLI_TIMEOUT_SECONDS = 3600
 
 
 def _timeout_handler(signum: int, frame: object) -> None:

@@ -14,6 +14,7 @@ __all__ = [
     "mejoralo_record",
     "mejoralo_scan",
     "mejoralo_ship",
+    "mejoralo_awwwards_fix",
     "mejoralo_daemon",
     "mejoralo_trend",
 ]
@@ -307,6 +308,28 @@ def mejoralo_ship(project, path, db):
             console.print(
                 f"  [bold red]⛔ NOT READY — {result.passed}/{result.total} sellos aprobados[/]"
             )
+    finally:
+        close_engine_sync(engine)
+
+
+@mejoralo.command("awwwards-fix")
+@click.argument("project")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def mejoralo_awwwards_fix(project, path, db):
+    """Sovereign 200 — Rewrite animations, CSS, and UI for Awwwards SOTD."""
+    from cortex.mejoralo import MejoraloEngine
+
+    engine = get_engine(db)
+    try:
+        m = MejoraloEngine(engine)
+        with console.status("[bold blue]Injecting Awwwards Sovereign Agent...[/]"):
+            success = m.awwwards_fix(project, path)
+            
+        if success:
+            console.print("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
+        else:
+            console.print("[bold red]❌ Failed to apply Awwwards Fix.[/]")
     finally:
         close_engine_sync(engine)
 

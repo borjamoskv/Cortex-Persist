@@ -59,7 +59,7 @@ class TipCategory(str, Enum):
     META = "meta"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Tip:
     """A single contextual tip."""
 

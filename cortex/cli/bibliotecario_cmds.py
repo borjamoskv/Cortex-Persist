@@ -57,7 +57,7 @@ async def _ingest_and_organize(path: Path) -> str:
     if path.is_file():
         try:
             content = path.read_text(encoding="utf-8")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"Error reading file {path}: {e}"
     elif path.is_dir():
         for root, _, files in os.walk(path):
@@ -68,7 +68,7 @@ async def _ingest_and_organize(path: Path) -> str:
                 try:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
-                except Exception:
+                except (UnicodeDecodeError, OSError):
                     pass
 
     # Truncate to avoid context window explosion

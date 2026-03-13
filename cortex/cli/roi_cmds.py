@@ -93,7 +93,7 @@ def _parse_chronos_meta(raw_meta: Any, enc: Any) -> dict[str, Any] | None:
         return None
     try:
         meta = enc.decrypt_json(raw_meta)
-    except Exception:
+    except (ValueError, TypeError, json.JSONDecodeError):
         # Could be unencrypted legacy or corrupted
         try:
             meta = json.loads(raw_meta) if isinstance(raw_meta, str) else {}

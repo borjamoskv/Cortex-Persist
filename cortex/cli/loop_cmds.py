@@ -40,7 +40,7 @@ from rich.text import Text
 
 from cortex.cli.common import DEFAULT_DB, cli, console
 from cortex.cli.loop_engine import ExecutionLoop
-from cortex.cli.loop_models import TaskStatus
+from cortex.cli.loop_models import TaskResult, TaskStatus
 
 __all__ = ["loop"]
 
@@ -110,7 +110,8 @@ def loop(project: str, mode: str, task: str | None, no_persist: bool, db: str) -
         if mode == "sovereign":
             console.print(
                 Panel(
-                    "[bold green]SOVEREIGN MEMBRANE ACTIVE[/bold green]\n[dim]All engrams undergo Zero-Trust purification (Axiom Ω3).[/dim]",
+                    "[bold green]SOVEREIGN MEMBRANE ACTIVE[/bold green]\n"
+                    "[dim]All engrams undergo Zero-Trust purification (Axiom Ω3).[/dim]",
                     border_style="green",
                 )
             )
@@ -121,6 +122,38 @@ def loop(project: str, mode: str, task: str | None, no_persist: bool, db: str) -
             _run_interactive(loop_engine)
     finally:
         loop_engine.close()
+
+
+def _render_session_status(loop_engine: ExecutionLoop) -> None:
+    session = loop_engine._session
+    console.print(
+        f"[dim white]Session: {session.project} │ "
+        f"Tasks: [{CYBER_LIME}]{session.tasks_completed}✓[/] [red]{session.tasks_failed}✗[/] │ "
+        f"Facts: [{GOLD}]{session.total_persisted}💾[/][/]"
+    )
+
+
+def _render_result(result: TaskResult) -> None:
+    if result.status == TaskStatus.COMPLETED:
+        console.print(
+            Panel(
+                result.output,
+                title=f"[bold {CYBER_LIME}]✓ SUCCESS[/] ({result.duration_ms:.0f}ms)",
+                border_style=CYBER_LIME,
+            )
+        )
+    elif result.status == TaskStatus.FAILED:
+        console.print(
+            Panel(
+                result.output,
+                title=f"[bold red]✗ FAILED[/] ({result.duration_ms:.0f}ms)",
+                border_style="red",
+            )
+        )
+        for err in result.errors:
+            console.print(f"[dim red]{err}[/]")
+    elif result.status == TaskStatus.CANCELLED:
+        console.print(f"[{GOLD}]⊘ Task cancelled ({result.duration_ms:.0f}ms)[/]")
 
 
 def _run_batch(loop_engine: ExecutionLoop, task: str) -> None:
@@ -138,7 +171,7 @@ def _run_batch(loop_engine: ExecutionLoop, task: str) -> None:
     )
 
     result = loop_engine.execute_task(task)
-    loop_engine.render_result(result)  # type: ignore[reportAttributeAccessIssue]
+    _render_result(result)
 
 
 def _run_interactive(loop_engine: ExecutionLoop) -> None:
@@ -148,7 +181,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
     while True:
         try:
             console.print()
-            loop_engine.render_session_status()  # type: ignore[reportAttributeAccessIssue]
+            _render_session_status(loop_engine)
 
             task = Prompt.ask(
                 f"\n[bold {CYBER_LIME}]⚡ TASK[/]",
@@ -165,7 +198,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
             with console.status(f"[{ELECTRIC_VIOLET}]Executing...[/]", spinner="dots"):
                 result = loop_engine.execute_task(task)
 
-            loop_engine.render_result(result)  # type: ignore[reportAttributeAccessIssue]
+            _render_result(result)
 
         except KeyboardInterrupt:
             console.print(f"\n[{GOLD}]⊘ Interrupted. Type 'exit' to close.[/]")

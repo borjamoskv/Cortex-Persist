@@ -147,7 +147,7 @@ class SlowOpTipEmitter:
                     padding=(0, 2),
                 )
             )
-        except Exception:  # noqa: BLE001
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001
             pass  # Tips are non-critical; never break the CLI
 
 
