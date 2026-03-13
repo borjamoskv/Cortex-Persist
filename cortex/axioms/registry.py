@@ -15,7 +15,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class AxiomCategory(str, Enum):
@@ -35,7 +34,7 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
-    ci_gate: Optional[str] = None
+    ci_gate: str | None = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

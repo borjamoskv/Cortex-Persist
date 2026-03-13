@@ -187,6 +187,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("routing", "cortex.cli.routing_cmds", "routing", "LLM routing — tier/cost-aware selection."),
     ("maestro", "cortex.cli.maestro_cmds", "maestro", "Autonomous Mac automation agent."),
     ("grammy", "cortex.cli.grammy_cmds", "grammy_cmds", "🎵 GRAMMY-Ω: Producción de música soberana."),
+    ("fingerprint", "cortex.cli.fingerprint_cmds", "fingerprint", "🧬 Cognitive Fingerprint — extract decision patterns."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

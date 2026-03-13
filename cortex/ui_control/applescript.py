@@ -1,13 +1,16 @@
 import asyncio
 import logging
-from typing import Optional
 
-from cortex.ui_control.models import AppleScriptExecutionError, AppNotRunningError, UIElementNotFoundError
+from cortex.ui_control.models import (
+    AppleScriptExecutionError,
+    AppNotRunningError,
+    UIElementNotFoundError,
+)
 
 logger = logging.getLogger("cortex.ui_control")
 
 
-async def run_applescript(script: str, require_success: bool = True) -> Optional[str]:
+async def run_applescript(script: str, require_success: bool = True) -> str | None:
     """
     Executes an AppleScript asynchronously using osascript.
 

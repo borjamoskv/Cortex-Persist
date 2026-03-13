@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 try:
-    import Quartz.CoreGraphics as CG
     import ImageIO
+    import Quartz.CoreGraphics as CG
     from MobileCoreServices import kUTTypePNG
 except ImportError:
     CG = None

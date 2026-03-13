@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 try:
     import ApplicationServices
@@ -8,7 +8,7 @@ except ImportError:
     ApplicationServices = None
     NSWorkspace = None
 
-from cortex.ui_control.models import AXElement, AppTarget, InteractionResult
+from cortex.ui_control.models import AXElement, InteractionResult
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -30,7 +30,7 @@ class AccessibilityEngine:
             return False
         return ApplicationServices.AXIsProcessTrusted()
 
-    def _get_app_element(self, app_name: str) -> Optional[Any]:
+    def _get_app_element(self, app_name: str) -> Any | None:
         """Returns the base AXUIElement for a running application."""
         if not NSWorkspace:
             return None
@@ -41,7 +41,7 @@ class AccessibilityEngine:
                 return ApplicationServices.AXUIElementCreateApplication(app.processIdentifier())
         return None
 
-    def find_element(self, app_name: str, identifier: str) -> Optional[AXElement]:
+    def find_element(self, app_name: str, identifier: str) -> AXElement | None:
         """
         Recursively searches for an element with a specific AXIdentifier.
         This is the preferred way to find elements as it's language-independent.
@@ -59,7 +59,7 @@ class AccessibilityEngine:
             return value
         return None
 
-    def _search_recursive(self, element: Any, target_id: str) -> Optional[AXElement]:
+    def _search_recursive(self, element: Any, target_id: str) -> AXElement | None:
         """Internal recursive search for AXIdentifier."""
         # Check current element
         eid = self._get_attribute(element, "AXIdentifier")

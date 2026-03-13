@@ -4,6 +4,7 @@ Sovereign Electronic Music Production.
 """
 
 import asyncio
+
 import click
 from rich.console import Console
 from rich.panel import Panel

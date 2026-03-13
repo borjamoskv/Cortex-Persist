@@ -22,15 +22,15 @@ from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
 from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.memory_compression import compress_and_store, raw_concat
-from cortex.memory.memory_retrieval import fact_to_dict, retrieve_episodic_context
+from cortex.memory.memory_compression import compress_and_store
+from cortex.memory.memory_retrieval import retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
 from cortex.memory.resonance import AdaptiveResonanceGate
-from cortex.security.tenant import get_tenant_id
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 from cortex.routes.notch_ws import notify_notch_pruning
+from cortex.security.tenant import get_tenant_id
 from cortex.sovereign.endocrine import DigitalEndocrine
 from cortex.telemetry.metrics import metrics
 from cortex.thinking.fusion import ContextFusion

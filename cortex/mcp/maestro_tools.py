@@ -1,10 +1,10 @@
 import logging
-from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
+
+from cortex.mcp.utils import get_engine
 from cortex.ui_control.maestro import MaestroUI
 from cortex.ui_control.models import AppTarget
-from cortex.mcp.utils import get_engine
 
 logger = logging.getLogger("cortex.mcp.maestro")
 

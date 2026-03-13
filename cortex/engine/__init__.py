@@ -333,6 +333,39 @@ class CortexEngine(
 
         return await EntropyReport.analyze(self, project)
 
+    async def fingerprint(
+        self,
+        project: str | None = None,
+        top_domains: int = 15,
+    ):
+        """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
+
+        Returns a CognitiveFingerprint with:
+        - PatternVector: 7 behavioral dimensions (risk, caution, synthesis…)
+        - DomainPreferences: top active (project × fact_type) signatures
+        - Archetype: sovereign_architect / obsessive_executor / etc.
+        - to_agent_prompt(): ready for LLM system prompt injection
+
+        Args:
+            project: Optional project filter.
+            top_domains: Max domain preferences to extract.
+        """
+        from cortex.fingerprint.extractor import FingerprintExtractor
+
+        return await FingerprintExtractor.extract(self, project, top_domains)
+
+    def fingerprint_sync(self, *args, **kwargs):
+        return self._run_sync(self.fingerprint(*args, **kwargs))
+
+    async def immortality_index(self, project: str | None = None) -> dict:
+        """Immortality Index (ι) — cognitive crystallization metric."""
+        from cortex.shannon.immortality import ImmortalityIndex
+
+        return await ImmortalityIndex.compute(self, project)
+
+    def immortality_index_sync(self, *args, **kwargs):
+        return self._run_sync(self.immortality_index(*args, **kwargs))
+
     async def prioritize(
         self,
         project: str | None = None,

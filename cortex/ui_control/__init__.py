@@ -1,9 +1,9 @@
-from cortex.ui_control.applescript import run_applescript, is_app_running
+from cortex.ui_control.applescript import is_app_running, run_applescript
 from cortex.ui_control.maestro import MaestroUI
 from cortex.ui_control.models import (
+    AppleScriptExecutionError,
     AppNotRunningError,
     AppTarget,
-    AppleScriptExecutionError,
     InteractionResult,
     Point,
     UIControlError,
