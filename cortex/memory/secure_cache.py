@@ -101,7 +101,7 @@ class CortexSecureMemoryCache:
             # 4. Persistence
             self._persist_to_storage(key, data, audit_entry)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("🚨 [INTEGRITY BREACH] Secure eviction failed for %s: %s", key, e)
 
     def _persist_to_storage(self, key: str, data: dict[str, Any], audit: dict[str, Any]) -> None:

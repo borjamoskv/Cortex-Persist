@@ -59,7 +59,7 @@ PRUNE_THRESHOLD: Final[float] = 0.01
 # ─── Data Models ──────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class SynapticEdge:
     """A weighted, temporally-aware edge between two nodes.
 

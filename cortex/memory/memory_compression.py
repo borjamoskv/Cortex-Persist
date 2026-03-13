@@ -128,4 +128,4 @@ async def compress_and_store(
             "active" if manager._hdc else "inactive",
         )
     except (OSError, RuntimeError, ValueError, TypeError) as e:
-        logger.error("L2 compression failed: %s", e, exc_info=True)
+        logger.exception("L2 compression failed: %s", e)

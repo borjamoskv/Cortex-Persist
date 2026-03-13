@@ -26,6 +26,7 @@ from cortex.memory.memory_compression import compress_and_store, raw_concat
 from cortex.memory.memory_retrieval import fact_to_dict, retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
 from cortex.memory.resonance import AdaptiveResonanceGate
+from cortex.security.tenant import get_tenant_id
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
@@ -153,7 +154,7 @@ class CortexMemoryManager:
         content: str,
         session_id: str,
         token_count: int,
-        tenant_id: str = "default_tenant",
+        tenant_id: str | None = None,
         project_id: str = "default_project",
         metadata: dict[str, Any] | None = None,
     ) -> MemoryEvent:
@@ -163,6 +164,7 @@ class CortexMemoryManager:
         2. Push to L1 (working memory)
         3. If overflow → compress and embed to L2 in background
         """
+        tenant_id = tenant_id or get_tenant_id()
         _meta = metadata or {}
         _meta["tenant_id"] = tenant_id
         _meta["project_id"] = project_id
@@ -179,7 +181,7 @@ class CortexMemoryManager:
         await self._l3.append_event(event)
 
         # Ingest into Digital Endocrine system [v6.2]
-        self._endocrine.ingest_context(content, metadata=_meta)
+        self._endocrine.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
 
         overflowed = self._l1.add_event(event)
 
@@ -262,9 +264,9 @@ class CortexMemoryManager:
 
     async def store(
         self,
-        tenant_id: str,
-        project_id: str,
-        content: str,
+        tenant_id: str | None = None,
+        project_id: str = "default",
+        content: str = "",
         fact_type: str = "general",
         metadata: dict[str, Any] | None = None,
         layer: str = "semantic",
@@ -276,6 +278,7 @@ class CortexMemoryManager:
         Bypasses the L1 working memory buffer. Useful for errors,
         decisions, and formal proof counterexamples.
         """
+        tenant_id = tenant_id or get_tenant_id()
         should_process, action, _ = await self.thalamus.filter(
             content=content,
             project_id=project_id,
@@ -353,8 +356,9 @@ class CortexMemoryManager:
     async def reconcile_experience(self, signal: Any) -> str:
         """Process an experience signal from the bus and commit it to L2."""
         payload = signal.payload
+        tenant_id = payload.get("tenant_id") or get_tenant_id()
         return await self.store(
-            tenant_id=payload.get("tenant_id", "default"),
+            tenant_id=tenant_id,
             project_id=payload.get("project_id", "unknown"),
             content=payload.get("content", ""),
             fact_type=payload.get("fact_type", "general"),
@@ -365,15 +369,16 @@ class CortexMemoryManager:
 
     async def assemble_context(
         self,
-        tenant_id: str,
-        project_id: str,
+        tenant_id: str | None = None,
+        project_id: str = "default",
         query: str | None = None,
         max_episodes: int = 3,
         fuse_context: bool = False,
         layer: str | None = None,
     ) -> dict[str, Any]:
         """Build an optimized context for LLM injection."""
-        working_set = self._l1.get_context()
+        tenant_id = tenant_id or get_tenant_id()
+        working_set = self._l1.get_context(tenant_id=tenant_id)
 
         _start_recall = time.perf_counter()
         episodic_facts = await retrieve_episodic_context(
@@ -398,11 +403,12 @@ class CortexMemoryManager:
 
         return context
 
-    def get_context_vector(self) -> Any | None:
+    def get_context_vector(self, tenant_id: str | None = None) -> Any | None:
         """Return the current context as a bundled hypervector (Vector Alpha)."""
+        tenant_id = tenant_id or get_tenant_id()
         if not self._hdc_encoder:
             return None
-        events = list(self._l1._buffer)
+        events = self._l1.get_context(tenant_id=tenant_id)
         if not events:
             return None
         hvs = [self._hdc_encoder.encode_text(e.content) for e in events]

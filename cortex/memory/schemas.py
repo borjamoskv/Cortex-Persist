@@ -47,7 +47,7 @@ class MemorySchema(BaseModel):
     )
 
 
-@dataclass(slots=True)
+@dataclass()
 class SchemaEngineConfig:
     enabled: bool = True
     match_threshold: float = 0.5  # Unused if simple keyword match

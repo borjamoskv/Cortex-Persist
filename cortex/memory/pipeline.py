@@ -1,21 +1,3 @@
-"""CORTEX v8 — Neuromorphic Pipeline Orchestrator.
-
-Wires the 6 core memory subsystems into a coherent cognitive pipeline:
-
-  Query Path:
-    SchemaEngine (top-down bias) → EpistemicVoidDetector → MetamemoryMonitor (FOK/JOL)
-
-  Store Path:
-    SchemaEngine (encoding filter) → Valence tagging → SystemsConsolidator (dual-trace)
-    → STDPEngine (co-activation plasticity)
-
-Pure Python, no I/O — delegates to existing components.
-Each subsystem remains independently testable; the pipeline is glue.
-
-DERIVATION: Ω₂ (Entropic Asymmetry — net negative entropy per operation)
-           + Ω₄ (Aesthetic Integrity — ugly = incomplete integration)
-"""
-
 from __future__ import annotations
 
 import logging
@@ -40,17 +22,8 @@ from cortex.memory.void_detector import (
 logger = logging.getLogger("cortex.memory.pipeline")
 
 
-# ─── Result Models ───────────────────────────────────────────────────
-
-
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class QueryResult:
-    """Result of a full neuromorphic query assessment.
-
-    Combines epistemic analysis, metacognitive judgment, and schema context
-    into a single decision object that downstream code can act on.
-    """
-
     epistemic: EpistemicAnalysis
     judgment: MetaJudgment
     fok_directive: FOKDirective
@@ -60,21 +33,17 @@ class QueryResult:
 
     @property
     def safe_to_respond(self) -> bool:
-        """Conservative gate: only respond if BOTH epistemic + metacognitive agree."""
         return (
             self.epistemic.is_safe_to_respond and self.fok_directive != FOKDirective.EXTERNAL_SEARCH
         )
 
     @property
     def should_search_more(self) -> bool:
-        """The system believes knowledge exists but retrieval was insufficient."""
         return self.fok_directive == FOKDirective.RETRIEVE_WITH_VERIFICATION
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class StoreResult:
-    """Result of processing content through the store pipeline."""
-
     valence: ValenceRecord
     schema_applied: str | None = None
     filtered_content: str = ""
@@ -82,36 +51,7 @@ class StoreResult:
     pipeline_ms: float = 0.0
 
 
-# ─── Pipeline Engine ─────────────────────────────────────────────────
-
-
 class NeuromorphicPipeline:
-    """Orchestrates the neuromorphic memory subsystems.
-
-    Designed as a stateless coordinator — all state lives in the
-    individual subsystems (MetamemoryMonitor, STDPEngine, etc.).
-
-    Usage::
-
-        pipeline = NeuromorphicPipeline()
-
-        # Query assessment
-        result = pipeline.assess_query(
-            query="How does CORTEX handle encryption?",
-            query_embedding=[0.1, 0.2, ...],
-            candidates=[...],
-        )
-        if result.safe_to_respond:
-            ...  # formulate response
-
-        # Store processing
-        result = pipeline.process_store(
-            content="Decided to use AES-256-GCM for fact encryption",
-            fact_type="decision",
-            fact_id="fact_123",
-        )
-    """
-
     __slots__ = ("_metamemory", "_void_detector", "_schema_engine", "_stdp")
 
     def __init__(
@@ -126,8 +66,6 @@ class NeuromorphicPipeline:
         self._schema_engine = schema_engine or SchemaEngine()
         self._stdp = stdp or STDPEngine()
 
-    # ── Query Path ────────────────────────────────────────────────
-
     def assess_query(
         self,
         query: str,
@@ -136,33 +74,14 @@ class NeuromorphicPipeline:
         *,
         engrams: list[Any] | None = None,
     ) -> QueryResult:
-        """Full neuromorphic query assessment.
-
-        Pipeline:
-          1. SchemaEngine: detect active schema, augment query
-          2. EpistemicVoidDetector: analyze search result topology
-          3. MetamemoryMonitor: FOK/JOL introspection
-
-        Args:
-            query: Raw query text.
-            query_embedding: Query vector for FOK assessment.
-            candidates: Search results as dicts with 'score', 'content', 'id'.
-            engrams: Optional engram objects for metamemory (if available).
-        """
         t0 = time.monotonic()
 
-        # Step 1: Schema detection + query augmentation
         schema = self._schema_engine.match_schema(query)
-        augmented = query
-        schema_name: str | None = None
-        if schema:
-            augmented = self._schema_engine.apply_retrieval_schema(schema, query)
-            schema_name = schema.name
+        augmented = self._schema_engine.apply_retrieval_schema(schema, query) if schema else query
+        schema_name = schema.name if schema else None
 
-        # Step 2: Epistemic void detection on raw search results
         epistemic = self._void_detector.analyze(candidates)
 
-        # Step 3: Metacognitive introspection
         engram_list = engrams or []
         judgment = self._metamemory.introspect(
             query_embedding=query_embedding,
@@ -170,7 +89,6 @@ class NeuromorphicPipeline:
             retrieval_score=epistemic.top_similarity,
         )
 
-        # Step 4: FOK directive
         directive = self._metamemory.fok_recommendation(judgment.fok_score)
 
         elapsed = (time.monotonic() - t0) * 1000
@@ -192,7 +110,6 @@ class NeuromorphicPipeline:
         project_id: str = "default_project",
         retrieval_score: float = 0.0,
     ) -> None:
-        """Feed retrieval outcomes back to the metamemory calibration system."""
         self._metamemory.record_outcome(
             RetrievalOutcome(
                 query=query,
@@ -203,8 +120,6 @@ class NeuromorphicPipeline:
             )
         )
 
-    # ── Store Path ────────────────────────────────────────────────
-
     def process_store(
         self,
         content: str,
@@ -212,33 +127,14 @@ class NeuromorphicPipeline:
         fact_id: str = "",
         related_fact_ids: list[str] | None = None,
     ) -> StoreResult:
-        """Process content through the store pipeline before persistence.
-
-        Pipeline:
-          1. SchemaEngine: detect schema, apply encoding filter
-          2. Valence: classify emotional charge
-          3. STDP: record co-activation with related facts
-
-        Args:
-            content: Raw fact content to store.
-            fact_type: CORTEX fact type (decision, error, bridge, etc).
-            fact_id: Unique ID for STDP co-activation tracking.
-            related_fact_ids: Other facts co-activated with this one.
-        """
         t0 = time.monotonic()
 
-        # Step 1: Schema-guided encoding
         schema = self._schema_engine.match_schema(content)
-        filtered = content
-        schema_name: str | None = None
-        if schema:
-            filtered = self._schema_engine.apply_encoding_schema(schema, content)
-            schema_name = schema.name
+        filtered = self._schema_engine.apply_encoding_schema(schema, content) if schema else content
+        schema_name = schema.name if schema else None
 
-        # Step 2: Emotional valence classification
         valence = classify_valence(content, fact_type)
 
-        # Step 3: STDP co-activation (strengthens edges between related concepts)
         edges_updated = 0
         if fact_id:
             self._stdp.record_activation(fact_id)
@@ -257,21 +153,16 @@ class NeuromorphicPipeline:
             pipeline_ms=round(elapsed, 2),
         )
 
-    # ── Accessors ─────────────────────────────────────────────────
-
     @property
     def metamemory(self) -> MetamemoryMonitor:
-        """Direct access to the metamemory monitor for calibration reports."""
         return self._metamemory
 
     @property
     def stdp(self) -> STDPEngine:
-        """Direct access to the STDP engine for graph inspection."""
         return self._stdp
 
     @property
     def calibration_score(self) -> float:
-        """Brier score of confidence predictions. Lower = better."""
         return self._metamemory.calibration_score()
 
     def __repr__(self) -> str:

@@ -21,7 +21,7 @@ from .models import CausalEpisode, SourceMetadata
 logger = logging.getLogger("cortex.memory.episodic")
 
 
-@dataclass(slots=True)
+@dataclass()
 class EpisodicFrame:
     """A single bounded moment in time before it becomes a semantic fact.
 
@@ -56,7 +56,7 @@ class EpisodicBuffer:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class EpisodeSummary:
     """A compressed temporal episode (e.g., one day's work)."""
 

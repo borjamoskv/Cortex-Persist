@@ -57,7 +57,7 @@ _TOT_FAILURE_THRESHOLD: Final[int] = 2
 
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class MetaJudgment:
     """Frozen metacognitive assessment of a knowledge state."""
 
@@ -70,7 +70,7 @@ class MetaJudgment:
     source: str = "introspect"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class RetrievalOutcome:
     """Ground-truth record of a retrieval attempt for calibration tracking."""
 

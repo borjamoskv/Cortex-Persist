@@ -98,7 +98,7 @@ class HindsightBridge:
             )
             self._available = False
             return False
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight unexpected connect error: %s", exc)
             self._available = False
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
@@ -189,7 +189,7 @@ class HindsightBridge:
         except (ValueError, TypeError, ConnectionError, OSError) as exc:
             logger.warning("Hindsight retain failed (non-blocking): %s", exc)
             return False
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight retain unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
             ErrorGhostPipeline().capture_sync(
@@ -235,7 +235,7 @@ class HindsightBridge:
         except (ValueError, TypeError, ConnectionError, OSError) as exc:
             logger.warning("Hindsight recall failed (non-blocking): %s", exc)
             return []
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight recall unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
             ErrorGhostPipeline().capture_sync(
@@ -267,7 +267,7 @@ class HindsightBridge:
         except (ValueError, TypeError, ConnectionError, OSError) as exc:
             logger.warning("Hindsight reflect failed (non-blocking): %s", exc)
             return None
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight reflect unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
             ErrorGhostPipeline().capture_sync(
@@ -284,7 +284,7 @@ class HindsightBridge:
                 self._server.__exit__(None, None, None)
             except (OSError, RuntimeError):
                 pass
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
                 ErrorGhostPipeline().capture_sync(
                     e, source="hindsight:close", project="CORTEX_SYSTEM"

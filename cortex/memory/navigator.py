@@ -51,7 +51,7 @@ _ISLAND_THRESHOLD: Final[float] = 0.2
 # ─── Models ───────────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class NavigationState:
     """Snapshot of the navigator's current position in semantic space."""
 
@@ -71,7 +71,7 @@ class NavigationState:
         return self.density < _SPARSE_THRESHOLD
 
 
-@dataclass(slots=True)
+@dataclass()
 class ClusterInfo:
     """Metadata about a semantic cluster."""
 
@@ -88,7 +88,7 @@ class ClusterInfo:
         return self.centroid_content[:60]
 
 
-@dataclass(slots=True)
+@dataclass()
 class SemanticBridge:
     """A connection between two otherwise separate clusters."""
 
@@ -98,7 +98,7 @@ class SemanticBridge:
     bridge_strength: float = 0.0
 
 
-@dataclass(slots=True)
+@dataclass()
 class SemanticPath:
     """A route through semantic space from source to target."""
 

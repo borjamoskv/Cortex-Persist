@@ -56,7 +56,7 @@ REWEIGHT_FACTOR: Final[float] = 0.1
 # ─── Data Models ──────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class DreamResult:
     """Result of a single REM dream cycle."""
 
@@ -77,7 +77,7 @@ class DreamResult:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class SemanticCluster:
     """A group of semantically related engrams discovered during dreaming."""
 
@@ -88,7 +88,7 @@ class SemanticCluster:
     dominant_project: str = ""
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class SyntheticBridge:
     """A creative connection between two distant engram clusters."""
 

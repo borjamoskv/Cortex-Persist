@@ -65,7 +65,7 @@ class EpistemicState(str, enum.Enum):
     CONTRADICTION = "contradiction"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ConflictPair:
     """Two engrams with high similarity but opposing content signals."""
 
@@ -76,7 +76,7 @@ class ConflictPair:
     similarity: float
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class EpistemicAnalysis:
     """Result of the epistemic void analysis for a query."""
 
