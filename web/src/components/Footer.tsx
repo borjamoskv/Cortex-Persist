@@ -16,8 +16,8 @@ export function Footer() {
         <div className="absolute inset-0 dot-grid animate-grid-fade" />
 
         {/* Central glow — brighter, more urgent */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyber-lime/[0.04] rounded-full blur-[200px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-cyber-lime/[0.08] rounded-full blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full bg-[image:radial-gradient(circle,rgba(204,255,0,0.08)_0%,transparent_70%)]" />
 
         <div className="max-w-3xl mx-auto px-6 relative z-10 text-center">
           {/* Eyebrow */}

@@ -55588,7 +55588,7 @@ var lottie = (() => {
         }
         i4 += 1;
       }
-      if ((typeof char === "string" && char.charCodeAt(0) !== 13 || !char) && console && console.warn && // eslint-disable-line no-console
+      if ((typeof char === "string" && char.charCodeAt(0) !== 13 || !char) && console && console.warn &&  
       !this._warned) {
         this._warned = true;
         console.warn("Missing character from exported characters list: ", char, style, font);

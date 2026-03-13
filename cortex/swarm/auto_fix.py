@@ -195,10 +195,13 @@ class AutoFixPipeline:
         """Classify a ghost description into a GhostClass."""
         desc_lower = description.lower()
         scores = {
-            cls: sum(1 for p in patterns if p in desc_lower)
+            cls: sum(1 for p in patterns if p.lower() in desc_lower)
             for cls, patterns in _CLASS_PATTERNS.items()
         }
-        return max(scores, key=scores.get, default=GhostClass.UNKNOWN)
+        max_score = max(scores.values(), default=0)
+        if max_score == 0:
+            return GhostClass.UNKNOWN
+        return max(scores, key=scores.get)
 
     def ghost_to_task(
         self,

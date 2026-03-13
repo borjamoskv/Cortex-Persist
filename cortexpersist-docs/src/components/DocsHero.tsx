@@ -9,21 +9,8 @@ export function DocsHero() {
       <div className="absolute inset-0 dot-grid opacity-30" />
 
       <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
-        <div 
-          className="absolute top-[15%] right-[20%] w-[500px] h-[500px] animate-pulse-slow object-contain"
-          style={{
-            background: 'radial-gradient(circle, rgba(204,255,0,0.04) 0%, rgba(204,255,0,0) 70%)',
-            willChange: 'transform, opacity'
-          }}
-        />
-        <div 
-          className="absolute bottom-[20%] left-[10%] w-[600px] h-[600px] animate-pulse-slow object-contain" 
-          style={{ 
-            animationDelay: '2s',
-            background: 'radial-gradient(circle, rgba(46,80,144,0.04) 0%, rgba(46,80,144,0) 70%)',
-            willChange: 'transform, opacity'
-          }} 
-        />
+        <div className="absolute top-[15%] right-[20%] w-[500px] h-[500px] animate-pulse-slow object-contain bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)] [will-change:transform,opacity]" />
+        <div className="absolute bottom-[20%] left-[10%] w-[600px] h-[600px] animate-pulse-slow object-contain [animation-delay:2s] bg-[image:radial-gradient(circle,rgba(46,80,144,0.04)_0%,transparent_70%)] [will-change:transform,opacity]" />
       </div>
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center pointer-events-none z-[1] opacity-50">

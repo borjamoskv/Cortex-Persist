@@ -10,21 +10,8 @@ export function OrgHero() {
 
       {/* Cyber Lime glow orbs - Hardware Accelerated (Sovereign 200) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
-        <div 
-          className="absolute top-[20%] right-[15%] w-[600px] h-[600px] animate-pulse-slow object-contain"
-          style={{
-            background: 'radial-gradient(circle, rgba(204,255,0,0.06) 0%, rgba(204,255,0,0) 70%)',
-            willChange: 'transform, opacity'
-          }} 
-        />
-        <div 
-          className="absolute bottom-[10%] left-[10%] w-[700px] h-[700px] animate-pulse-slow object-contain" 
-          style={{ 
-            animationDelay: '2s',
-            background: 'radial-gradient(circle, rgba(204,255,0,0.04) 0%, rgba(204,255,0,0) 70%)',
-            willChange: 'transform, opacity'
-          }} 
-        />
+        <div className="absolute top-[20%] right-[15%] w-[600px] h-[600px] animate-pulse-slow object-contain bg-[image:radial-gradient(circle,rgba(204,255,0,0.06)_0%,transparent_70%)] [will-change:transform,opacity]" />
+        <div className="absolute bottom-[10%] left-[10%] w-[700px] h-[700px] animate-pulse-slow object-contain [animation-delay:2s] bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)] [will-change:transform,opacity]" />
       </div>
 
       {/* Watermark */}

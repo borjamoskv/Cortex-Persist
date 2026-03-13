@@ -129,6 +129,16 @@ Input → guard validation → AES encrypt(content, meta)
 | `alma/` | Soul engine — personality and identity persistence |
 | `definitions/` | LYNX-Ω, TOM, OLIVER — declarative agent roles (YAML) |
 
+#### Sovereign Swarm Topology (The 7 Confluences)
+The 100 Sovereign Agents orchestrate their intelligence through 7 deterministic, interconnected clusters (Confluences) following the Compound Yield Law (Axioma Ω₁₁):
+1. **Biological & Survival (Earthship MMX)**: Autonomy, biosphere physics, and closed-loop telemetry (`biosphere-terraformation-omega`, `earthship-sensor-fusion-omega`).
+2. **Tactical & Dark Networks**: Kinetic defense, spatial perimeter, encrypted mesh (`mesh-network-architect`, `drone-swarm-coordinator`).
+3. **Financial & Capital Obscurity**: Invisible liquidity routing, black swan hedging, and zero-knowledge storage (`darkpool-arbitrageur`, `sovereign-treasury-manager`).
+4. **Physical Engineering**: Hardware compilation, additive/subtractive manufacturing, and sub-micron fabrication (`additive-manufacturing-omega`, `swarm-hardware-compiler`).
+5. **Esthetic & Memetic Warfare**: Oscar/Grammy-grade cultural projection, and sovereign structural beauty (`oscar-director-omega`, `awwwards-sovereign-agent`).
+6. **Cognitive & Metasystem Evolution**: Infinite loop reasoning, theorem proving, and absolute self-hosting (`cortex-omega-prime`, `hilbert-omega`).
+7. **Immune System & Verification Membrane**: Cryptographic audit, epistemic circuit breaking, and decentralized law (`eu-ai-act-compliance-omega`, `nyx-redteam-omega`).
+
 #### LLM Router Architecture (DNS Analogy)
 The router implements a deterministic cascade to prevent capability degradation:
 - **NegativeCache**: `NXDOMAIN` (skip known-dead providers)

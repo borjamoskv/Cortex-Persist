@@ -254,7 +254,8 @@ class TestConsolidationResult:
 
 
 class TestColdPurge:
-    def test_purges_dead_weight(self, in_memory_db) -> None:
+    @pytest.mark.asyncio
+    async def test_purges_dead_weight(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-1", "obsolete info", age_days=30, recall_count=0)
 
         vitals = [
@@ -272,7 +273,7 @@ class TestColdPurge:
         ]
 
         result = ConsolidationResult()
-        _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+        await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
 
         assert result.purged == 1
         # Verify actually deleted from DB
@@ -280,7 +281,8 @@ class TestColdPurge:
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dead-1'")
         assert cursor.fetchone()[0] == 0
 
-    def test_dry_run_preserves(self, in_memory_db) -> None:
+    @pytest.mark.asyncio
+    async def test_dry_run_preserves(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-2", "obsolete info", age_days=30)
 
         vitals = [
@@ -298,7 +300,7 @@ class TestColdPurge:
         ]
 
         result = ConsolidationResult()
-        _execute_cold_purge(in_memory_db, vitals, result, dry_run=True)
+        await _execute_cold_purge(in_memory_db, vitals, result, dry_run=True)
 
         assert result.purged == 1
         # Verify NOT deleted
@@ -306,7 +308,8 @@ class TestColdPurge:
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dead-2'")
         assert cursor.fetchone()[0] == 1
 
-    def test_diamond_immune(self, in_memory_db) -> None:
+    @pytest.mark.asyncio
+    async def test_diamond_immune(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "diamond-1", "axiom", age_days=30, is_diamond=True)
 
         vitals = [
@@ -324,7 +327,7 @@ class TestColdPurge:
         ]
 
         result = ConsolidationResult()
-        _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+        await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
 
         assert result.purged == 0
 
@@ -333,7 +336,8 @@ class TestColdPurge:
 
 
 class TestDiamondPromotion:
-    def test_promotes_qualifying_crystal(self, in_memory_db) -> None:
+    @pytest.mark.asyncio
+    async def test_promotes_qualifying_crystal(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
 
         vitals = [
@@ -351,7 +355,7 @@ class TestDiamondPromotion:
         ]
 
         result = ConsolidationResult()
-        _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
+        await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
 
         assert result.promoted == 1
         cursor = in_memory_db.cursor()

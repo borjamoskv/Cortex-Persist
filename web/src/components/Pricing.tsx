@@ -163,7 +163,7 @@ export function Pricing() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText('pip install cortex-engine');
+    navigator.clipboard.writeText('pip install cortex-persist');
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   }, []);
@@ -181,7 +181,7 @@ export function Pricing() {
       </div>
 
       {/* Central glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-cyber-lime/[0.02] rounded-[100%] blur-[200px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-[100%] pointer-events-none bg-[image:radial-gradient(circle,rgba(204,255,0,0.02)_0%,transparent_70%)]" />
 
       {/* Clipboard toast */}
       <AnimatePresence>

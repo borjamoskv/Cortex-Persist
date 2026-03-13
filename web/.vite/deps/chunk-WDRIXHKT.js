@@ -14834,15 +14834,15 @@ var require_react_reconciler_development = __commonJS({
               case REACT_OFFSCREEN_TYPE:
                 return createFiberFromOffscreen(pendingProps, mode, lanes, key);
               case REACT_LEGACY_HIDDEN_TYPE:
-              // eslint-disable-next-line no-fallthrough
+               
               case REACT_SCOPE_TYPE:
-              // eslint-disable-next-line no-fallthrough
+               
               case REACT_CACHE_TYPE:
-              // eslint-disable-next-line no-fallthrough
+               
               case REACT_TRACING_MARKER_TYPE:
-              // eslint-disable-next-line no-fallthrough
+               
               case REACT_DEBUG_TRACING_MODE_TYPE:
-              // eslint-disable-next-line no-fallthrough
+               
               default: {
                 if (typeof type === "object" && type !== null) {
                   switch (type.$$typeof) {

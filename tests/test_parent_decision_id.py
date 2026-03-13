@@ -468,7 +468,7 @@ class TestMCP:
                 "..",
                 "cortex",
                 "mcp",
-                "server.py",
+                "core_tools.py",
             )
         ) as f:
             src = f.read()

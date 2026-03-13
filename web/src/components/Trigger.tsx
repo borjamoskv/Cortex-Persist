@@ -98,7 +98,7 @@ export function Trigger() {
       </div>
 
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-industrial-gold/[0.03] rounded-[100%] blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] rounded-[100%] bg-[image:radial-gradient(circle,rgba(212,175,55,0.03)_0%,transparent_70%)]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">

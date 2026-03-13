@@ -8,8 +8,6 @@ Covers all 3 dimensions:
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from cortex.health.collector import (
@@ -409,37 +407,38 @@ class TestInvariants:
 
 
 class TestHealthMixin:
-    def _run(self, coro):
-        return asyncio.get_event_loop().run_until_complete(coro)
-
-    def test_health_check_grade_is_string(self):
+    @pytest.mark.asyncio
+    async def test_health_check_grade_is_string(self):
         class E(HealthMixin):
             _db_path = "/tmp/nonexistent.db"
 
-        result = self._run(E().health_check())
+        result = await E().health_check()
         assert isinstance(result["grade"], str)
 
-    def test_health_score_returns_grade_enum(self):
+    @pytest.mark.asyncio
+    async def test_health_score_returns_grade_enum(self):
         class E(HealthMixin):
             _db_path = "/tmp/nonexistent.db"
 
-        hs = self._run(E().health_score())
+        hs = await E().health_score()
         assert isinstance(hs.grade, Grade)
 
-    def test_health_report_has_trend(self):
+    @pytest.mark.asyncio
+    async def test_health_report_has_trend(self):
         class E(HealthMixin):
             _db_path = "/tmp/nonexistent.db"
 
-        rep = self._run(E().health_report())
+        rep = await E().health_report()
         assert rep.trend in {"improving", "stable", "degrading"}
 
-    def test_collector_cached(self):
+    @pytest.mark.asyncio
+    async def test_collector_cached(self):
         class E(HealthMixin):
             _db_path = "/tmp/nonexistent.db"
 
         e = E()
-        self._run(e.health_check())
+        await e.health_check()
         c1 = e._health_collector
-        self._run(e.health_check())
+        await e.health_check()
         c2 = e._health_collector
         assert c1 is c2

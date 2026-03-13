@@ -72,7 +72,7 @@ export function ImpossibleFailures() {
       <div className="absolute inset-0 dot-grid opacity-20" />
 
       {/* Radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-cyber-lime/[0.02] rounded-full blur-[200px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] rounded-full pointer-events-none bg-[image:radial-gradient(circle,rgba(204,255,0,0.02)_0%,transparent_70%)]" />
 
       {/* Watermark */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center pointer-events-none z-[1] opacity-[0.03]">

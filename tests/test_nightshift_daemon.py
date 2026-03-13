@@ -85,7 +85,7 @@ class TestNightShiftCrystalDaemon:
     @patch("cortex.swarm.nightshift_daemon.discover", new_callable=AsyncMock)
     async def test_radar_failure(self, mock_discover, mock_db) -> None:
         """Test cycle handles radar exceptions gracefully."""
-        mock_discover.side_effect = Exception("Radar offline")
+        mock_discover.side_effect = ValueError("Radar offline")
 
         daemon = NightShiftCrystalDaemon(cortex_db=mock_db)
         report = await daemon.run_cycle()
@@ -99,7 +99,7 @@ class TestNightShiftCrystalDaemon:
     async def test_pipeline_failure(self, mock_run, mock_discover, mock_db) -> None:
         """Test cycle handles pipeline exceptions gracefully."""
         mock_discover.return_value = [{"type": "web"}]
-        mock_run.side_effect = Exception("Pipeline blown")
+        mock_run.side_effect = ValueError("Pipeline blown")
 
         daemon = NightShiftCrystalDaemon(cortex_db=mock_db)
         report = await daemon.run_cycle()
@@ -117,7 +117,7 @@ class TestNightShiftCrystalDaemon:
         """Test that consolidation error doesn't completely fail the cycle report."""
         mock_discover.return_value = [{"type": "web"}]
         mock_run.return_value = {"crystals_count": 1}
-        mock_scan.side_effect = Exception("DB timeout during scan")
+        mock_scan.side_effect = ValueError("DB timeout during scan")
 
         daemon = NightShiftCrystalDaemon(cortex_db=mock_db)
         report = await daemon.run_cycle()

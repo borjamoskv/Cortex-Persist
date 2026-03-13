@@ -14,7 +14,7 @@ export function Success() {
       <main className="flex-1 flex items-center justify-center pt-24 pb-20 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 dot-grid opacity-20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyber-lime/[0.04] rounded-[100%] blur-[150px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-[100%] pointer-events-none bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)]" />
         
         <div className="w-full max-w-3xl mx-auto px-6 relative z-10">
           <motion.div
@@ -24,7 +24,7 @@ export function Success() {
             className="glass-strong rounded-none border border-cyber-lime/30 p-10 md:p-14 text-center relative overflow-hidden"
           >
             {/* Success indicator */}
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-cyber-lime/20 to-transparent blur-[60px] pointer-events-none" />
+            <div className="absolute -top-20 -right-20 w-64 h-64 pointer-events-none bg-[image:radial-gradient(circle_at_top_right,rgba(204,255,0,0.2)_0%,transparent_60%)]" />
             
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -50,7 +50,7 @@ export function Success() {
                 <div className="bg-abyssal-900 border border-white/5 p-4 font-mono text-xs text-text-secondary select-all mb-4">
                   <div className="flex gap-2">
                     <span className="text-cyber-lime">$</span>
-                    <span>pip install cortex-engine</span>
+                    <span>pip install cortex-persist</span>
                   </div>
                   <div className="flex gap-2 mt-1">
                     <span className="text-cyber-lime">$</span>

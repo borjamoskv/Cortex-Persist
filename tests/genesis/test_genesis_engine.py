@@ -16,28 +16,18 @@ from cortex.genesis.engine import GenesisEngine
 from cortex.genesis.models import ComponentSpec, SystemSpec
 from cortex.genesis.validator import GenesisValidator
 
-# All tests use /tmp to avoid polluting the real codebase
-_TEST_ROOT = Path("/tmp/genesis_test_workspace")
-
-
-@pytest.fixture(autouse=True)
-def clean_workspace() -> None:
-    """Ensure clean workspace before each test."""
-    if _TEST_ROOT.exists():
-        shutil.rmtree(_TEST_ROOT)
-    _TEST_ROOT.mkdir(parents=True, exist_ok=True)
-    yield  # type: ignore[misc]
-    # Cleanup after test
-    if _TEST_ROOT.exists():
-        shutil.rmtree(_TEST_ROOT)
+@pytest.fixture
+def test_root(tmp_path: Path) -> Path:
+    """Isolated workspace for each test."""
+    return tmp_path / "genesis_test_workspace"
 
 
 class TestGenesisEngineCreate:
     """Core create() flow tests."""
 
-    def test_create_minimal_module(self) -> None:
+    def test_create_minimal_module(self, test_root: Path) -> None:
         """Create a system with a single module component."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="mini",
             system_type="module",
@@ -52,12 +42,12 @@ class TestGenesisEngineCreate:
         assert result.hours_saved > 0
 
         # Verify files on disk
-        assert (_TEST_ROOT / "mini" / "__init__.py").exists()
-        assert (_TEST_ROOT / "mini" / "core.py").exists()
+        assert (test_root / "mini" / "__init__.py").exists()
+        assert (test_root / "mini" / "core.py").exists()
 
-    def test_create_with_multiple_components(self) -> None:
+    def test_create_with_multiple_components(self, test_root: Path) -> None:
         """Create a system with 3 components including dependencies."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="complex",
             components=[
@@ -79,13 +69,13 @@ class TestGenesisEngineCreate:
         assert result.validation_passed
         # __init__.py + models.py + store.py + manager.py = 4
         assert len(result.files_created) >= 4
-        assert (_TEST_ROOT / "complex" / "models.py").exists()
-        assert (_TEST_ROOT / "complex" / "store.py").exists()
-        assert (_TEST_ROOT / "complex" / "manager.py").exists()
+        assert (test_root / "complex" / "models.py").exists()
+        assert (test_root / "complex" / "store.py").exists()
+        assert (test_root / "complex" / "manager.py").exists()
 
-    def test_create_with_auto_tests(self) -> None:
+    def test_create_with_auto_tests(self, test_root: Path) -> None:
         """Auto-test generation creates test stubs."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="tested",
             auto_tests=True,
@@ -100,9 +90,9 @@ class TestGenesisEngineCreate:
         test_files = [f for f in result.files_created if "test_" in f]
         assert len(test_files) >= 1
 
-    def test_create_skill_type(self) -> None:
+    def test_create_skill_type(self, test_root: Path) -> None:
         """Create a skill-type system (SKILL.md)."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="my_skill",
             system_type="skill",
@@ -119,9 +109,9 @@ class TestGenesisEngineCreate:
         assert result.validation_passed
         assert any("SKILL.md" in f for f in result.files_created)
 
-    def test_create_agent_type(self) -> None:
+    def test_create_agent_type(self, test_root: Path) -> None:
         """Create an agent-type system (YAML definition)."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="scout_agent",
             system_type="agent",
@@ -134,9 +124,9 @@ class TestGenesisEngineCreate:
         assert result.validation_passed
         assert any(".yaml" in f for f in result.files_created)
 
-    def test_create_from_dict(self) -> None:
+    def test_create_from_dict(self, test_root: Path) -> None:
         """Create from a raw dictionary (YAML-like input)."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         d = {
             "name": "from_dict",
             "system_type": "module",
@@ -149,9 +139,9 @@ class TestGenesisEngineCreate:
         assert result.validation_passed
         assert result.spec.name == "from_dict"
 
-    def test_failed_files_reported(self) -> None:
+    def test_failed_files_reported(self, test_root: Path) -> None:
         """Components with no matching template report failures gracefully."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="robust",
             components=[
@@ -185,9 +175,9 @@ class TestGenesisEngineSelfCreate:
         assert "assembler" in comp_names
         assert "validator" in comp_names
 
-    def test_self_create_assembles_in_tmp(self) -> None:
+    def test_self_create_assembles_in_tmp(self, test_root: Path) -> None:
         """The self-spec can be assembled into a real directory."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = engine.self_create()
         result = engine.create(spec)
 
@@ -196,7 +186,7 @@ class TestGenesisEngineSelfCreate:
         assert result.hours_saved > 0
 
         # The generated genesis should contain __init__.py
-        assert (_TEST_ROOT / "genesis" / "__init__.py").exists()
+        assert (test_root / "genesis" / "__init__.py").exists()
 
     def test_self_create_spec_roundtrips(self) -> None:
         """self_create spec serializes and deserializes cleanly."""
@@ -234,9 +224,9 @@ class TestGenesisEnginePreview:
 class TestChronosCalculation:
     """CHRONOS-1 yield calculation tests."""
 
-    def test_chronos_positive_for_any_creation(self) -> None:
+    def test_chronos_positive_for_any_creation(self, test_root: Path) -> None:
         """Any genesis operation should report positive hours saved."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         spec = SystemSpec(
             name="chrono_test",
             components=[ComponentSpec(name="a", component_type="module")],
@@ -244,9 +234,9 @@ class TestChronosCalculation:
         result = engine.create(spec)
         assert result.hours_saved > 0
 
-    def test_chronos_scales_with_complexity(self) -> None:
+    def test_chronos_scales_with_complexity(self, test_root: Path) -> None:
         """More components = more hours saved."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
 
         simple = SystemSpec(
             name="simple",
@@ -310,10 +300,10 @@ class TestTopologicalSort:
 class TestGenesisValidator:
     """Post-creation validator tests."""
 
-    def test_validates_existing_files(self) -> None:
+    def test_validates_existing_files(self, test_root: Path) -> None:
         validator = GenesisValidator()
         # Create a file with system name in the path
-        test_dir = _TEST_ROOT / "validator_test"
+        test_dir = test_root / "validator_test"
         test_dir.mkdir(parents=True, exist_ok=True)
         test_file = test_dir / "valid.py"
         test_file.write_text("x = 1\n", encoding="utf-8")
@@ -330,10 +320,10 @@ class TestGenesisValidator:
         assert not passed
         assert any("does not exist" in e for e in errors)
 
-    def test_catches_syntax_errors(self) -> None:
+    def test_catches_syntax_errors(self, test_root: Path) -> None:
         validator = GenesisValidator()
-        bad_file = _TEST_ROOT / "bad.py"
-        _TEST_ROOT.mkdir(parents=True, exist_ok=True)
+        bad_file = test_root / "bad.py"
+        test_root.mkdir(parents=True, exist_ok=True)
         bad_file.write_text("def broken(\n", encoding="utf-8")
 
         spec = SystemSpec(name="bad_syntax", system_type="workflow")
@@ -345,9 +335,9 @@ class TestGenesisValidator:
 class TestGenesisExtend:
     """Incremental genesis tests (#1)."""
 
-    def test_extend_adds_components(self) -> None:
+    def test_extend_adds_components(self, test_root: Path) -> None:
         """extend() adds new files to an existing system."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         # First create a base system
         base_spec = SystemSpec(
             name="extendable",
@@ -355,7 +345,7 @@ class TestGenesisExtend:
         )
         engine.create(base_spec)
 
-        base_dir = _TEST_ROOT / "extendable"
+        base_dir = test_root / "extendable"
         assert base_dir.exists()
 
         # Now extend with a new component
@@ -372,9 +362,9 @@ class TestGenesisExtend:
         assert (base_dir / "extra.py").exists()
         assert len(result.files_created) >= 1
 
-    def test_extend_skips_existing(self) -> None:
+    def test_extend_skips_existing(self, test_root: Path) -> None:
         """extend() does not overwrite existing files."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
 
         base_spec = SystemSpec(
             name="skiptest",
@@ -382,7 +372,7 @@ class TestGenesisExtend:
         )
         engine.create(base_spec)
 
-        base_dir = _TEST_ROOT / "skiptest"
+        base_dir = test_root / "skiptest"
         original = (base_dir / "core.py").read_text(encoding="utf-8")
 
         # Extend with the SAME component — should skip
@@ -395,9 +385,9 @@ class TestGenesisExtend:
         assert original == after  # Not overwritten
         assert len(result.files_created) == 0
 
-    def test_extend_missing_dir_raises(self) -> None:
+    def test_extend_missing_dir_raises(self, test_root: Path) -> None:
         """extend() raises FileNotFoundError for missing dirs."""
-        engine = GenesisEngine(cortex_root=_TEST_ROOT)
+        engine = GenesisEngine(cortex_root=test_root)
         with pytest.raises(FileNotFoundError):
             engine.extend(
                 Path("/tmp/nonexistent_genesis_dir"),

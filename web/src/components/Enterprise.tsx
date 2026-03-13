@@ -20,7 +20,7 @@ export function Enterprise() {
       <div className="absolute inset-0 dot-grid opacity-15" />
 
       {/* Gold ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-industrial-gold/[0.02] rounded-[100%] blur-[200px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-[100%] pointer-events-none bg-[image:radial-gradient(circle,rgba(212,175,55,0.02)_0%,transparent_70%)]" />
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         <motion.div

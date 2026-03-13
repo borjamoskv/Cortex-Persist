@@ -5402,7 +5402,7 @@ function normalizeRedirectLocation(location2, currentUrl, basename, historyInsta
     "devtools:",
     "file:",
     "filesystem:",
-    // eslint-disable-next-line no-script-url
+     
     "javascript:"
   ];
   if (isAbsoluteUrl(location2)) {

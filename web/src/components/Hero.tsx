@@ -19,7 +19,7 @@ export function Hero() {
   }, []);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText('pip install cortex-engine');
+    navigator.clipboard.writeText('pip install cortex-persist');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, []);
@@ -36,12 +36,11 @@ export function Hero() {
       <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
         <motion.div 
           animate={{ y: mouseY * -50 }}
-          className="absolute top-[20%] right-[10%] w-[600px] h-[600px] bg-cyber-lime/[0.04] rounded-full blur-[150px] animate-pulse-slow" 
+          className="absolute top-[20%] right-[10%] w-[600px] h-[600px] rounded-full animate-pulse-slow bg-[image:radial-gradient(circle,rgba(204,255,0,0.04)_0%,transparent_70%)] will-change-transform" 
         />
         <motion.div 
           animate={{ y: mouseY * 50 }}
-          className="absolute bottom-[10%] left-[5%] w-[800px] h-[800px] bg-cyber-violet/[0.05] rounded-full blur-[200px] animate-pulse-slow" 
-          style={{ animationDelay: '2s' }} 
+          className="absolute bottom-[10%] left-[5%] w-[800px] h-[800px] rounded-full animate-pulse-slow [animation-delay:2s] bg-[image:radial-gradient(circle,rgba(138,43,226,0.05)_0%,transparent_70%)] will-change-transform" 
         />
       </div>
 
@@ -163,7 +162,7 @@ export function Hero() {
         >
           <div className="relative group">
             {/* Image Container with Glow */}
-            <div className="absolute -inset-4 bg-cyber-lime/20 blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="absolute -inset-4 opacity-20 group-hover:opacity-40 transition-opacity bg-[image:radial-gradient(circle,rgba(204,255,0,0.2)_0%,transparent_60%)]" />
             <div className="relative border border-white/10 overflow-hidden bg-abyssal-800">
                <img 
                  src="/assets/cortex_hero.png" 

@@ -48,7 +48,7 @@ export function GetInvolved() {
       <div className="absolute inset-0 bg-abyssal-900" />
       <div className="absolute inset-0 dot-grid opacity-15" />
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-yinmn-blue/[0.03] rounded-[100%] blur-[200px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-[100%] pointer-events-none bg-[image:radial-gradient(circle,rgba(46,80,144,0.03)_0%,transparent_70%)]" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="text-center mb-20">

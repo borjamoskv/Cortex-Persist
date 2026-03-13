@@ -2,8 +2,11 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { BackgroundEffects } from '../components/BackgroundEffects';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export function Diario() {
+  const [mutationVar] = useState(() => Math.random().toString(36).substring(7));
+
   return (
     <>
       <BackgroundEffects />
@@ -58,7 +61,7 @@ export function Diario() {
               className="glass p-8 border-l-4 border-l-cyber-lime relative group"
             >
               <div className="absolute top-0 right-0 p-4 text-xs font-mono text-cyber-lime/50">
-                VAR: {Math.random().toString(36).substring(7)}
+                VAR: {mutationVar}
               </div>
               <h2 className="text-2xl font-bold mb-2">Entropía Rara</h2>
               <p className="text-text-secondary mb-6 font-mono text-sm">Fecha: 10 de Marzo de 2026 // Estado: MUTANTE</p>

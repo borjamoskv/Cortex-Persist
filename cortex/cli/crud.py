@@ -12,6 +12,7 @@ from rich.table import Table
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
 from cortex.sync import export_to_json
+from cortex.utils.errors import FactNotFound
 
 __all__ = ["delete", "list_facts", "edit"]
 
@@ -30,7 +31,7 @@ def delete(fact_id, reason, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except (KeyError, ValueError, sqlite3.Error):
+        except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 
@@ -133,7 +134,7 @@ def edit(fact_id, new_content, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except (KeyError, ValueError, sqlite3.Error):
+        except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 
