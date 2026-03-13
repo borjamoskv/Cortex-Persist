@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # ─── Result type ──────────────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class PreflightResult:
     """Immutable result of a pre-flight suspension check.
 
@@ -137,7 +137,7 @@ async def preflight_check(
 
         return PreflightResult(clear=True, source="api", latency_ms=elapsed_ms)
 
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         elapsed_ms = (time.perf_counter() - t0) * 1_000
         logger.error("PREFLIGHT probe failed (defaulting to CLEAR): %s", exc)
         return PreflightResult(

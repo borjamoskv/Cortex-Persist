@@ -115,6 +115,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_valid ON facts(valid_from, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_confidence ON facts(confidence);
 CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
+CREATE INDEX IF NOT EXISTS idx_facts_parent_decision ON facts(parent_decision_id);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────

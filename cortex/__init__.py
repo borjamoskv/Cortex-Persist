@@ -15,7 +15,7 @@ except ImportError:
     pass
 
 __version__ = "0.3.0b1"
-__author__ = "Borja Moskv"
+__author__ = "by borjamoskv.com"
 
 # Lazy imports — CortexEngine and experimental modules load on first access
 _LAZY_IMPORTS = {

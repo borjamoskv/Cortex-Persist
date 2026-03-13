@@ -6,17 +6,16 @@ CortexLLMRouter resiliente. Zero single-point-of-failure.
 Axiom Ω₅: Antifragile by Default — el aprendizaje nunca se detiene por un 401.
 """
 
-from typing import Any
-
 import json
 import logging
 import os
 import re
 import time
+from typing import Any
 
+from cortex.llm._models import CortexPrompt
 from cortex.llm.provider import LLMProvider
 from cortex.llm.router import CortexLLMRouter, IntentProfile
-from cortex.llm._models import CortexPrompt
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
@@ -30,9 +29,21 @@ logger = logging.getLogger("CORTEX.AUTODIDACT.SYNTHESIS")
 ISOTHERMAL_THRESHOLD = 0.94  # Ω₂: Si es > 94% similar, Isoterma absoluta.
 GRADIENT_THRESHOLD = 0.85  # Entre 0.85 y 0.94 entra en fricción dialéctica.
 
+# LLM Synthesis Parameters
+DEFAULT_SYNTHESIS_TEMPERATURE = 0.0
+DEFAULT_SYNTHESIS_MAX_TOKENS = 4000
+MAX_RAW_DATA_INPUT = 180_000
+FALLBACK_CONTENT_LENGTH = 5000
+
+# Timeouts and Retries
+TIMEOUT_ENCODER = 10.0
+TIMEOUT_DISTILL = 90.0
+RETRIES_ENCODER = 2
+RETRIES_DISTILL = 1
+
 # Providers ordered by synthesis affinity (reasoning-heavy tasks)
 _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
-    "qwen", "deepinfra", "groq", "together", "openrouter",
+    "groq", "gemini", "qwen", "deepinfra", "together", "openrouter",
 )
 
 encode_engine = AsyncEncoder()
@@ -83,7 +94,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
 # ==============================================================================
 # 1. LA MEMBRANA SEMÁNTICA (Native CORTEX Embeddings) -> Tier 🔵
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=10.0, max_retries=2)
+@sovereign_circuit_breaker(timeout=TIMEOUT_ENCODER, max_retries=RETRIES_ENCODER)
 async def generate_cortex_embedding(text: str) -> list[float]:
     """Genera el embedding usando el motor nativo de CORTEX (384-dim)."""
     logger.info("🔵 [ENCODER] Calculando densidad semántica L2...")
@@ -104,11 +115,11 @@ async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None
             if similitud > ISOTHERMAL_THRESHOLD:
                 msg = (
                     "🛡️ [ENTROPIC SHIELD] ❄️ Zona Isoterma "
-                    "Alcanzada (ΔS=%.4f)." % similitud
+                    f"Alcanzada (ΔS={similitud:.4f})."
                 )
                 logger.warning(msg)
                 return True, nearest[0].id
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — redundancy check failure must not crash synthesis
         logger.error("Error checking redundancy L2: %s", e)
 
     return False, None
@@ -117,7 +128,7 @@ async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None
 # ==============================================================================
 # 2. EL CRISOL DE DESTILACIÓN (CortexLLMRouter Resiliente) -> Tier 🟢
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=90.0, max_retries=1)
+@sovereign_circuit_breaker(timeout=TIMEOUT_DISTILL, max_retries=RETRIES_DISTILL)
 async def distill_sovereign_memo(
     raw_data: str, source_url: str, intent: str = ""
 ) -> dict[str, Any]:
@@ -135,10 +146,13 @@ async def distill_sovereign_memo(
     router = _get_synthesis_router()
 
     # ── Intent Directive Láser (El Diferenciador de CORTEX) ──
-    intent_directive = (
-        f"ENFOQUE LÁSER EN EL INTENT DEL AGENTE: '{intent}'. "
-        "Filtra todo lo que no resuelva directa o indirectamente esta necesidad."
-    ) if intent else "ENFOQUE GENERAL: Extracción de todos los patrones útiles."
+    if intent:
+        intent_directive = (
+            f"ENFOQUE LÁSER EN EL INTENT DEL AGENTE: '{intent}'. "
+            "Filtra todo lo que no resuelva directa o indirectamente esta necesidad."
+        )
+    else:
+        intent_directive = "ENFOQUE GENERAL: Extracción de todos los patrones útiles."
 
     system_prompt = (
         "ERES AUTODIDACT-Ω. MODO: CRISTALIZACIÓN DE DIAMANTE (130/100).\n"
@@ -164,12 +178,10 @@ async def distill_sovereign_memo(
         system_instruction=system_prompt,
         working_memory=[{
             "role": "user",
-            "content": "SOURCE: %s\n\nRAW DATA:\n%s" % (
-                source_url, raw_data[:180_000]
-            ),
+            "content": f"SOURCE: {source_url}\n\nRAW DATA:\n{raw_data[:MAX_RAW_DATA_INPUT]}",
         }],
-        temperature=0.0,
-        max_tokens=4000,
+        temperature=DEFAULT_SYNTHESIS_TEMPERATURE,
+        max_tokens=DEFAULT_SYNTHESIS_MAX_TOKENS,
         intent=IntentProfile.REASONING,
         project="autodidact_synthesis",
     )
@@ -178,7 +190,7 @@ async def distill_sovereign_memo(
 
     if result.is_err():
         logger.error("❌ [SYNTHESIS] Cascade exhausted: %s", result.error)
-        return {"content_markdown": raw_data[:5000], "error": result.error}
+        return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": result.error}
 
     text_content = result.unwrap()
 
@@ -191,9 +203,9 @@ async def distill_sovereign_memo(
             "entities": [],
             "resonancia_axiomatica": "Fail JSON"
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — parsing failure must fall back to raw content
         logger.error("Error parseando cristal: %s", e)
-        return {"content_markdown": raw_data[:5000], "error": str(e)}
+        return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": str(e)}
 
 
 # ==============================================================================
@@ -208,7 +220,12 @@ async def execute_cognitive_synthesis(
         logger.info("❄️ Isoterma detectada: %s", existing_id)
         return existing_id
 
-    cristal = await distill_sovereign_memo(raw_data, source, intent)
+    cristal_raw = await distill_sovereign_memo(raw_data, source, intent)
+    if isinstance(cristal_raw, dict) and "status" in cristal_raw:
+        cristal = cristal_raw.get("data", cristal_raw)
+    else:
+        cristal = cristal_raw
+
     memo_content = cristal.get("content_markdown", "")
     entities = cristal.get("entities", [])
     resonancia = cristal.get("resonancia_axiomatica", "")
@@ -221,12 +238,12 @@ async def execute_cognitive_synthesis(
     )
 
     embed_result = await generate_cortex_embedding(memo_content)
-    final_embedding = (
-        embed_result if isinstance(embed_result, list)
-        else await encode_engine.encode(memo_content)
-    )
+    if isinstance(embed_result, list):
+        final_embedding = embed_result
+    else:
+        final_embedding = await encode_engine.encode(memo_content)
 
-    memo_id = "MEMO_%s" % os.urandom(4).hex().upper()
+    memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
     fact = CortexFactModel(
         id=memo_id,
         tenant_id="sovereign",
@@ -236,7 +253,7 @@ async def execute_cognitive_synthesis(
         timestamp=time.time(),
         is_diamond=True,
         confidence="C5",
-        cognitive_layer="synthesized_memo",
+        cognitive_layer="semantic",
         metadata={
             "source": source,
             "tier": "sovereign_distilled",

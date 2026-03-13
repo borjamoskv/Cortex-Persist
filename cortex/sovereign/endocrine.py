@@ -14,91 +14,97 @@ logger = logging.getLogger(__name__)
 
 
 class DigitalEndocrine:
-    """Virtual endocrine system for Sovereign Agentic Modality."""
+    """Virtual endocrine system for Sovereign Agentic Modality.
+
+    Now multi-tenant isolated to prevent cross-tenant hormonal 'leakage'.
+    """
 
     def __init__(self) -> None:
-        self.cortisol: float = 0.0  # Stress/Urgency
-        self.dopamine: float = 0.5  # Creativity/Exploration
-        self.serotonin: float = 0.5  # Confidence/Success
-        self.adrenaline: float = 0.0  # Alert/Risk
-        self.oxytocin: float = 0.5  # Trust/Collaboration
+        self._tenant_states: dict[str, dict[str, float]] = {}
 
-    def ingest_context(self, message: str, metadata: dict | None = None) -> None:
+    def _get_state(self, tenant_id: str) -> dict[str, float]:
+        if tenant_id not in self._tenant_states:
+            self._tenant_states[tenant_id] = {
+                "cortisol": 0.0,
+                "dopamine": 0.5,
+                "serotonin": 0.5,
+                "adrenaline": 0.0,
+                "oxytocin": 0.5,
+            }
+        return self._tenant_states[tenant_id]
+
+    def ingest_context(
+        self, message: str, tenant_id: str = "default", metadata: dict | None = None
+    ) -> None:
         """Update hormone levels based on incoming context telemetry with damping."""
+        state = self._get_state(tenant_id)
         if metadata is None:
             metadata = {}
         words: set[str] = set(message.lower().split())
 
         # Damping factor (Exponential Moving Average)
-        # alpha = 1.0 means instant change
-        # alpha = 0.3 means 30% contribution from new signal
         alpha = 0.3
 
         # Stress Response
         if words & {"urgente", "error", "fallo", "crash", "critical", "panic"}:
-            self.cortisol = min(1.0, self.cortisol + (0.45 * alpha))
-            self.dopamine = max(0.0, self.dopamine - (0.25 * alpha))
+            state["cortisol"] = min(1.0, state["cortisol"] + (0.45 * alpha))
+            state["dopamine"] = max(0.0, state["dopamine"] - (0.25 * alpha))
 
         # Creative Stimulus
         if words & {"ideas", "brainstorm", "explora", "innovar", "imagina"}:
-            self.dopamine = min(1.0, self.dopamine + (0.4 * alpha))
-            self.cortisol = max(0.0, self.cortisol - (0.2 * alpha))
+            state["dopamine"] = min(1.0, state["dopamine"] + (0.4 * alpha))
+            state["cortisol"] = max(0.0, state["cortisol"] - (0.2 * alpha))
 
         # Dopamine/Serotonin Reward
         if words & {"gracias", "bien", "mejorado", "perfecto", "genial"}:
-            self.serotonin = min(1.0, self.serotonin + (0.3 * alpha))
-            self.dopamine = min(1.0, self.dopamine + (0.1 * alpha))
+            state["serotonin"] = min(1.0, state["serotonin"] + (0.3 * alpha))
+            state["dopamine"] = min(1.0, state["dopamine"] + (0.1 * alpha))
 
         # Trust/Collaboration (Oxytocin)
         if words & {"colaborar", "equipo", "juntos", "unificado", "nexus"}:
-            self.oxytocin = min(1.0, self.oxytocin + (0.4 * alpha))
-            self.serotonin = min(1.0, self.serotonin + (0.15 * alpha))
+            state["oxytocin"] = min(1.0, state["oxytocin"] + (0.4 * alpha))
+            state["serotonin"] = min(1.0, state["serotonin"] + (0.15 * alpha))
 
         # Threat Detection
         if words & {"inseguro", "desconocido", "riesgo", "bypass", "vulnerabilidad"}:
-            self.adrenaline = min(1.0, self.adrenaline + (0.5 * alpha))
+            state["adrenaline"] = min(1.0, state["adrenaline"] + (0.5 * alpha))
 
-        self._homeostasis()
+        self._homeostasis(tenant_id)
 
-    def _homeostasis(self) -> None:
+    def _homeostasis(self, tenant_id: str) -> None:
         """Gradual hormone decay to maintain system balance."""
+        state = self._get_state(tenant_id)
         decay = 0.02
-        self.cortisol = max(0.0, self.cortisol - decay)
-        self.dopamine = max(0.0, self.dopamine - (decay * 0.5))
-        self.serotonin = max(0.0, self.serotonin - (decay * 0.5))
-        self.adrenaline = max(0.0, self.adrenaline - (decay * 2))
-        self.oxytocin = max(0.0, self.oxytocin - (decay * 0.1))
+        state["cortisol"] = max(0.0, state["cortisol"] - decay)
+        state["dopamine"] = max(0.0, state["dopamine"] - (decay * 0.5))
+        state["serotonin"] = max(0.0, state["serotonin"] - (decay * 0.5))
+        state["adrenaline"] = max(0.0, state["adrenaline"] - (decay * 2))
+        state["oxytocin"] = max(0.0, state["oxytocin"] - (decay * 0.1))
 
-    @property
-    def temperature(self) -> float:
+    def get_temperature(self, tenant_id: str = "default") -> float:
         """Dynamic temperature derived from hormonal state."""
+        state = self._get_state(tenant_id)
         base = 0.5
-        # Refined formula: stress lowers temp (narrower/stiffer), dopamine raises (wilder/fresher)
-        temp = base + 0.5 * self.dopamine - 0.6 * self.cortisol
-        # GPT-4o Wave Fix: Hard floor at 0.1 rather than 0.0 to prevent zero-temp generative lockup.
+        temp = base + 0.5 * state["dopamine"] - 0.6 * state["cortisol"]
         return max(0.1, min(1.0, temp))
 
-    @property
-    def response_style(self) -> str:
+    def get_response_style(self, tenant_id: str = "default") -> str:
         """High-level stylistic hint for Sovereign output."""
-        if self.cortisol > 0.8:
+        state = self._get_state(tenant_id)
+        if state["cortisol"] > 0.8:
             return "telegraphic"
-        if self.adrenaline > 0.6:
+        if state["adrenaline"] > 0.6:
             return "cautious"
-        if self.dopamine > 0.8:
+        if state["dopamine"] > 0.8:
             return "expansive"
         return "balanced"
 
-    def to_dict(self) -> dict:
+    def to_dict(self, tenant_id: str = "default") -> dict:
         """Return the current biological state of the agent."""
+        state = self._get_state(tenant_id)
         return {
-            "hormones": {
-                "cortisol": round(self.cortisol, 3),
-                "dopamine": round(self.dopamine, 3),
-                "serotonin": round(self.serotonin, 3),
-                "adrenaline": round(self.adrenaline, 3),
-                "oxytocin": round(self.oxytocin, 3),
-            },
-            "temperature": round(self.temperature, 2),
-            "style": self.response_style,
+            "hormones": {k: round(v, 3) for k, v in state.items()},
+            "temperature": round(self.get_temperature(tenant_id), 2),
+            "style": self.get_response_style(tenant_id),
         }
+

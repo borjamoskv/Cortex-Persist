@@ -78,11 +78,11 @@ def detect_relationships(content: str, entities: list[dict]) -> list[dict]:
     return relationships
 
 
-async def _upsert_entity(conn, ent: dict, project: str, timestamp: str) -> int:
+async def _upsert_entity(conn, ent: dict, project: str, timestamp: str, tenant_id: str = "default") -> int:
     """Upsert a single entity, returning its ID."""
     cursor = await conn.execute(
-        "SELECT id, mention_count FROM entities WHERE name = ? AND project = ?",
-        (ent["name"], project),
+        "SELECT id, mention_count FROM entities WHERE name = ? AND project = ? AND tenant_id = ?",
+        (ent["name"], project, tenant_id),
     )
     row = await cursor.fetchone()
     if row:
@@ -94,21 +94,21 @@ async def _upsert_entity(conn, ent: dict, project: str, timestamp: str) -> int:
         return entity_id
     cursor = await conn.execute(
         "INSERT INTO entities "
-        "(name, entity_type, project, first_seen, last_seen, mention_count) "
-        "VALUES (?, ?, ?, ?, ?, 1)",
-        (ent["name"], ent["entity_type"], project, timestamp, timestamp),
+        "(name, entity_type, project, tenant_id, first_seen, last_seen, mention_count) "
+        "VALUES (?, ?, ?, ?, ?, ?, 1)",
+        (ent["name"], ent["entity_type"], project, tenant_id, timestamp, timestamp),
     )
     return cursor.lastrowid  # type: ignore[return-value]
 
 
 async def _upsert_relation(
-    conn, sid: int, tid: int, relation_type: str, timestamp: str, fact_id: int
+    conn, sid: int, tid: int, relation_type: str, timestamp: str, fact_id: int, tenant_id: str = "default"
 ) -> None:
     """Upsert a single relation between two entities."""
     cursor = await conn.execute(
         "SELECT id, weight FROM entity_relations "
-        "WHERE source_entity_id = ? AND target_entity_id = ?",
-        (sid, tid),
+        "WHERE source_entity_id = ? AND target_entity_id = ? AND tenant_id = ?",
+        (sid, tid, tenant_id),
     )
     row = await cursor.fetchone()
     if row:
@@ -121,14 +121,14 @@ async def _upsert_relation(
         await conn.execute(
             "INSERT INTO entity_relations "
             "(source_entity_id, target_entity_id, relation_type, "
-            "weight, first_seen, source_fact_id) "
-            "VALUES (?, ?, ?, 1.0, ?, ?)",
-            (sid, tid, relation_type, timestamp, fact_id),
+            "weight, first_seen, source_fact_id, tenant_id) "
+            "VALUES (?, ?, ?, 1.0, ?, ?, ?)",
+            (sid, tid, relation_type, timestamp, fact_id, tenant_id),
         )
 
 
 async def process_fact_graph(
-    conn, fact_id: int, content: str, project: str, timestamp: str
+    conn, fact_id: int, content: str, project: str, timestamp: str, tenant_id: str = "default"
 ) -> tuple[int, int]:
     """Process a fact for graph extraction (async)."""
     entities = extract_entities(content)
@@ -139,22 +139,24 @@ async def process_fact_graph(
     try:
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            entity_ids[ent["name"]] = await _upsert_entity(conn, ent, project, timestamp)
+            entity_ids[ent["name"]] = await _upsert_entity(conn, ent, project, timestamp, tenant_id)
 
         for rel in relationships:
             sid = entity_ids.get(rel["source_name"])
             tid = entity_ids.get(rel["target_name"])
             if sid and tid:
-                await _upsert_relation(conn, sid, tid, rel["relation_type"], timestamp, fact_id)
+                await _upsert_relation(
+                    conn, sid, tid, rel["relation_type"], timestamp, fact_id, tenant_id
+                )
 
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:
-        logger.warning("Graph processing failed for fact %d: %s", fact_id, e)
+        logger.warning("Graph processing failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e)
         return 0, 0
 
 
 def process_fact_graph_sync(
-    conn, fact_id: int, content: str, project: str, timestamp: str
+    conn, fact_id: int, content: str, project: str, timestamp: str, tenant_id: str = "default"
 ) -> tuple[int, int]:
     """Process a fact for graph extraction (sync)."""
     entities = extract_entities(content)
@@ -166,7 +168,9 @@ def process_fact_graph_sync(
         backend = get_backend(conn)
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            eid = backend.upsert_entity_sync(ent["name"], ent["entity_type"], project, timestamp)  # type: ignore[reportAttributeAccessIssue]
+            eid = backend.upsert_entity_sync(  # type: ignore[reportAttributeAccessIssue]
+                ent["name"], ent["entity_type"], project, timestamp, tenant_id
+            )
             entity_ids[ent["name"]] = eid
 
         for rel in relationships:
@@ -174,64 +178,78 @@ def process_fact_graph_sync(
             target_id = entity_ids.get(rel["target_name"])
             if source_id and target_id:
                 backend.upsert_relationship_sync(  # type: ignore[reportAttributeAccessIssue]
-                    source_id, target_id, rel["relation_type"], fact_id, timestamp
+                    source_id, target_id, rel["relation_type"], fact_id, timestamp, tenant_id
                 )
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:
-        logger.warning("Graph processing sync failed for fact %d: %s", fact_id, e)
+        logger.warning(
+            "Graph processing sync failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e
+        )
         return 0, 0
 
 
-async def get_graph(conn, project: str | None = None, limit: int = 50) -> dict:
+async def get_graph(
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+) -> dict:
     """Get graph data for a project or all projects.
 
     Args:
         conn: Active database connection.
         project: Optional project filter.
         limit: Maximum entities to return.
+        tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.get_graph(project, limit)
+    return await backend.get_graph(project, limit, tenant_id)
 
 
-def get_graph_sync(conn, project: str | None = None, limit: int = 50) -> dict:
+def get_graph_sync(conn, project: str | None = None, limit: int = 50, tenant_id: str = "default") -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
-    return backend.get_graph_sync(project, limit)  # type: ignore[reportAttributeAccessIssue]
+    return backend.get_graph_sync(project, limit, tenant_id)  # type: ignore[reportAttributeAccessIssue]
 
 
-async def query_entity(conn, name: str, project: str | None = None) -> dict | None:
+async def query_entity(
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
     """Query a specific entity by name.
 
     Args:
         conn: Active database connection.
         name: Entity name to search for.
         project: Optional project filter.
+        tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.query_entity(name, project)
+    return await backend.query_entity(name, project, tenant_id)
 
 
-def query_entity_sync(conn, name: str, project: str | None = None) -> dict | None:
+def query_entity_sync(
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
-    return backend.query_entity_sync(name, project)  # type: ignore[reportAttributeAccessIssue]
+    return backend.query_entity_sync(name, project, tenant_id)  # type: ignore[reportAttributeAccessIssue]
 
 
-async def find_path(conn, source: str, target: str, max_depth: int = 3) -> list[dict]:
+async def find_path(
+    conn, source: str, target: str, max_depth: int = 3, tenant_id: str = "default"
+) -> list[dict]:
     """Find meaningful paths between two entities.
 
     Useful for explaining connections (e.g., "How is Project A related to Library B?").
     """
     backend = get_backend(conn)
-    return await backend.find_path(source, target, max_depth)
+    return await backend.find_path(source, target, max_depth, tenant_id)
 
 
-async def get_context_subgraph(conn, seeds: list[str], depth: int = 2, max_nodes: int = 50) -> dict:
+async def get_context_subgraph(
+    conn, seeds: list[str], depth: int = 2, max_nodes: int = 50, tenant_id: str = "default"
+) -> dict:
     """Retrieve a subgraph context for RAG.
 
     Given a list of seed entities (e.g. from a user query), expand the graph
     to find relevant context.
     """
     backend = get_backend(conn)
-    return await backend.find_context_subgraph(seeds, depth, max_nodes)
+    return await backend.find_context_subgraph(seeds, depth, max_nodes, tenant_id)

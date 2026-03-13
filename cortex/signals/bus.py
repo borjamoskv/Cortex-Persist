@@ -1,32 +1,3 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
-# Change Date: 2030-01-01 (Transitions to Apache 2.0)
-
-"""CORTEX v6.0 — Persistent Signal Bus (L1 Consciousness Layer).
-
-SQLite-backed signal persistence that survives process boundaries.
-Tools emit signals; other tools poll/subscribe to react.
-
-Architecture:
-    ┌─────────────────────────────────────────────┐
-    │              CORTEX SIGNAL BUS              │
-    │  (SQLite WAL — 0 external dependencies)     │
-    ├─────────────────────────────────────────────┤
-    │  emit("plan:done", {project, files})        │
-    │  emit("error:critical", {trace, context})   │
-    │  emit("bridge:detected", {from, to})        │
-    │  emit("build:result", {status, metrics})    │
-    │                                             │
-    │  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐       │
-    │  │arki │  │legi │  │velo │  │tram │  ...   │
-    │  │tetv │  │on   │  │citv │  │polin│        │
-    │  └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘       │
-    │     └────────┴────────┴────────┘            │
-    │          subscribe / poll                   │
-    └─────────────────────────────────────────────┘
-"""
-
 from __future__ import annotations
 
 import json
@@ -44,12 +15,12 @@ logger = logging.getLogger("cortex.signals.bus")
 
 _CREATE_TABLE = """\
 CREATE TABLE IF NOT EXISTS signals (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    event_type  TEXT NOT NULL,
-    payload     TEXT NOT NULL DEFAULT '{}',
-    source      TEXT NOT NULL,
-    project     TEXT,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL DEFAULT '{}',
+    source TEXT NOT NULL,
+    project TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
     consumed_by TEXT NOT NULL DEFAULT '[]'
 );
 """
@@ -62,24 +33,47 @@ CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 """
 
 
-# ── Async Signal Bus ──────────────────────────────────────────────────
+def _build_query(
+    *,
+    event_type: str | None = None,
+    source: str | None = None,
+    project: str | None = None,
+    unconsumed_by: str | None = None,
+    order: str = "ASC",
+    limit: int = 50,
+) -> tuple[str, list]:
+    query = (
+        "SELECT id, event_type, payload, source, project,"
+        " created_at, consumed_by FROM signals WHERE 1=1"
+    )
+    params: list = []
+    if event_type:
+        query += " AND event_type = ?"
+        params.append(event_type)
+    if source:
+        query += " AND source = ?"
+        params.append(source)
+    if project:
+        query += " AND project = ?"
+        params.append(project)
+    if unconsumed_by:
+        query += " AND consumed_by NOT LIKE ?"
+        params.append(f'%"{unconsumed_by}"%')
+    query += f" ORDER BY rowid {order} LIMIT ?"
+    params.append(limit)
+    return query, params
 
 
 class AsyncSignalBus:
-    """Async variant of the Signal Bus using aiosqlite.
-
-    Optimized for high-concurrency environments where blocking the
-    event loop is a fatal structural error (Ω₆).
-    """
-
-    __slots__ = ("_conn", "_ready")
+    __slots__ = ("_conn", "_ready", "session_emitted", "session_errors")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self._conn = conn
         self._ready = False
+        self.session_emitted = 0
+        self.session_errors = 0
 
     async def ensure_table(self) -> None:
-        """Create the signals table asynchronously."""
         if self._ready:
             return
         await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
@@ -94,20 +88,24 @@ class AsyncSignalBus:
         source: str = "cli",
         project: str | None = None,
     ) -> int:
-        """Persist a signal asynchronously."""
-        await self.ensure_table()
-        cursor = await self._conn.execute(
-            """INSERT INTO signals (event_type, payload, source, project)
-               VALUES (?, ?, ?, ?)""",
-            (
-                event_type,
-                json.dumps(payload or {}, default=str),
-                source,
-                project,
-            ),
-        )
-        await self._conn.commit()
-        return cursor.lastrowid  # type: ignore[reportReturnType]
+        try:
+            await self.ensure_table()
+            cursor = await self._conn.execute(
+                """INSERT INTO signals (event_type, payload, source, project)
+                   VALUES (?, ?, ?, ?)""",
+                (
+                    event_type,
+                    json.dumps(payload or {}, default=str),
+                    source,
+                    project,
+                ),
+            )
+            await self._conn.commit()
+            self.session_emitted += 1
+            return cursor.lastrowid
+        except Exception:  # noqa: BLE001
+            self.session_errors += 1
+            raise
 
     async def history(
         self,
@@ -118,30 +116,17 @@ class AsyncSignalBus:
         since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Query history asynchronously."""
         await self.ensure_table()
-        query = (
-            "SELECT id, event_type, payload, source, project,"
-            " created_at, consumed_by FROM signals WHERE 1=1"
+        query, params = _build_query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            order="DESC",
+            limit=limit,
         )
-        params: list = []
-
-        if event_type:
-            query += " AND event_type = ?"
-            params.append(event_type)
-        if source:
-            query += " AND source = ?"
-            params.append(source)
-        if project:
-            query += " AND project = ?"
-            params.append(project)
         if since:
-            query += " AND created_at >= ?"
-            params.append(since.isoformat())
-
-        query += " ORDER BY rowid DESC LIMIT ?"
-        params.append(limit)
-
+            query = query.replace(" ORDER BY", " AND created_at >= ? ORDER BY", 1)
+            params.insert(-1, since.isoformat())
         cursor = await self._conn.execute(query, params)
         rows = await cursor.fetchall()
         return [signal_from_row(row) for row in rows]
@@ -155,29 +140,13 @@ class AsyncSignalBus:
         unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Build and execute a filtered query."""
-        query = (
-            "SELECT id, event_type, payload, source, project,"
-            " created_at, consumed_by FROM signals WHERE 1=1"
+        query, params = _build_query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            unconsumed_by=unconsumed_by,
+            limit=limit,
         )
-        params: list = []
-
-        if event_type:
-            query += " AND event_type = ?"
-            params.append(event_type)
-        if source:
-            query += " AND source = ?"
-            params.append(source)
-        if project:
-            query += " AND project = ?"
-            params.append(project)
-        if unconsumed_by:
-            query += " AND consumed_by NOT LIKE ?"
-            params.append(f'%"{unconsumed_by}"%')
-
-        query += " ORDER BY rowid ASC LIMIT ?"
-        params.append(limit)
-
         cursor = await self._conn.execute(query, params)
         rows = await cursor.fetchall()
         return [signal_from_row(row) for row in rows]
@@ -191,7 +160,6 @@ class AsyncSignalBus:
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
-        """Fetch unconsumed signals asynchronously and mark them as consumed."""
         await self.ensure_table()
         signals = await self._query(
             event_type=event_type,
@@ -221,7 +189,6 @@ class AsyncSignalBus:
         consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Fetch signals asynchronously without consuming them."""
         await self.ensure_table()
         return await self._query(
             event_type=event_type,
@@ -231,36 +198,68 @@ class AsyncSignalBus:
             limit=limit,
         )
 
+    async def stats(self) -> dict:
+        await self.ensure_table()
+        result: dict = {
+            "session_emitted": self.session_emitted,
+            "session_errors": self.session_errors,
+        }
 
-# ── Sync Signal Bus (Legacy/CLI) ──────────────────────────────────────
+        row = await (await self._conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
+        result["total"] = row[0] if row else 0
+
+        cursor = await self._conn.execute(
+            "SELECT event_type, COUNT(*) FROM signals GROUP BY event_type ORDER BY COUNT(*) DESC"
+        )
+        result["by_type"] = {r[0]: r[1] for r in await cursor.fetchall()}
+
+        cursor = await self._conn.execute(
+            "SELECT source, COUNT(*) FROM signals GROUP BY source ORDER BY COUNT(*) DESC"
+        )
+        result["by_source"] = {r[0]: r[1] for r in await cursor.fetchall()}
+
+        row = await (
+            await self._conn.execute("SELECT COUNT(*) FROM signals WHERE consumed_by = '[]'")
+        ).fetchone()
+        result["unconsumed"] = row[0] if row else 0
+
+        return result
+
+    async def gc(self, max_age_days: int = 30) -> int:
+        await self.ensure_table()
+        cutoff = (datetime.now() - timedelta(days=max_age_days)).isoformat()
+        cursor = await self._conn.execute(
+            """DELETE FROM signals
+               WHERE consumed_by != '[]'
+               AND created_at < ?""",
+            (cutoff,),
+        )
+        await self._conn.commit()
+        pruned = cursor.rowcount
+        if pruned:
+            logger.info(
+                "GC: pruned %d consumed signal(s) older than %d days",
+                pruned,
+                max_age_days,
+            )
+        return pruned
 
 
 class SignalBus:
-    """Persistent signal bus backed by SQLite.
-
-    Sync-first design (matches CLI usage pattern). For async contexts,
-    wrap calls with `asyncio.to_thread()` or use the existing
-    `DistributedEventBus` with the persistence bridge.
-
-    Args:
-        conn: A sqlite3 connection (from `cortex.engine` or standalone).
-    """
-
-    __slots__ = ("_conn", "_ready")
+    __slots__ = ("_conn", "_ready", "session_emitted", "session_errors")
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self._conn = conn
         self._ready = False
+        self.session_emitted = 0
+        self.session_errors = 0
 
     def ensure_table(self) -> None:
-        """Create the signals table if it doesn't exist (idempotent)."""
         if self._ready:
             return
         self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
         self._conn.commit()
         self._ready = True
-
-    # ── Emit ─────────────────────────────────────────────────────────
 
     def emit(
         self,
@@ -270,39 +269,31 @@ class SignalBus:
         source: str = "cli",
         project: str | None = None,
     ) -> int:
-        """Persist a signal. Returns the signal ID.
-
-        Args:
-            event_type: Dotted event name (e.g. 'plan:done', 'error:critical').
-            payload: Arbitrary JSON-serializable data.
-            source: Emitter identity (e.g. 'arkitetv-1', 'agent:gemini').
-            project: Optional project scope.
-
-        Returns:
-            The auto-generated signal ID.
-        """
-        self.ensure_table()
-        cursor = self._conn.execute(
-            """INSERT INTO signals (event_type, payload, source, project)
-               VALUES (?, ?, ?, ?)""",
-            (
+        try:
+            self.ensure_table()
+            cursor = self._conn.execute(
+                """INSERT INTO signals (event_type, payload, source, project)
+                   VALUES (?, ?, ?, ?)""",
+                (
+                    event_type,
+                    json.dumps(payload or {}, default=str),
+                    source,
+                    project,
+                ),
+            )
+            self._conn.commit()
+            signal_id = cursor.lastrowid
+            logger.info(
+                "Signal emitted: %s (#%d) from %s",
                 event_type,
-                json.dumps(payload or {}, default=str),
+                signal_id,
                 source,
-                project,
-            ),
-        )
-        self._conn.commit()
-        signal_id = cursor.lastrowid
-        logger.info(
-            "Signal emitted: %s (#%d) from %s",
-            event_type,
-            signal_id,
-            source,
-        )
-        return signal_id  # type: ignore[reportReturnType]
-
-    # ── Poll (consume) ───────────────────────────────────────────────
+            )
+            self.session_emitted += 1
+            return signal_id
+        except Exception:  # noqa: BLE001
+            self.session_errors += 1
+            raise
 
     def poll(
         self,
@@ -313,21 +304,6 @@ class SignalBus:
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
-        """Fetch unconsumed signals and mark them as consumed.
-
-        This is an atomic read-and-mark operation: each signal is only
-        delivered once per consumer.
-
-        Args:
-            event_type: Filter by event type.
-            source: Filter by emitter.
-            project: Filter by project.
-            consumer: Identity of the consuming tool/agent.
-            limit: Maximum signals to return.
-
-        Returns:
-            List of Signal objects that were newly consumed.
-        """
         self.ensure_table()
         signals = self._query(
             event_type=event_type,
@@ -337,7 +313,6 @@ class SignalBus:
             limit=limit,
         )
 
-        # Mark as consumed atomically
         for sig in signals:
             new_consumed = sig.consumed_by + [consumer]
             self._conn.execute(
@@ -354,8 +329,6 @@ class SignalBus:
 
         return signals
 
-    # ── Peek (no consume) ────────────────────────────────────────────
-
     def peek(
         self,
         *,
@@ -365,11 +338,6 @@ class SignalBus:
         consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Fetch signals without consuming them.
-
-        If consumer is specified, only shows signals not yet consumed
-        by that consumer.
-        """
         self.ensure_table()
         return self._query(
             event_type=event_type,
@@ -378,8 +346,6 @@ class SignalBus:
             unconsumed_by=consumer,
             limit=limit,
         )
-
-    # ── History ──────────────────────────────────────────────────────
 
     def history(
         self,
@@ -390,80 +356,46 @@ class SignalBus:
         since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Query all signals (including consumed), newest first."""
         self.ensure_table()
-        query = (
-            "SELECT id, event_type, payload, source, project,"
-            " created_at, consumed_by FROM signals WHERE 1=1"
+        query, params = _build_query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            order="DESC",
+            limit=limit,
         )
-        params: list = []
-
-        if event_type:
-            query += " AND event_type = ?"
-            params.append(event_type)
-        if source:
-            query += " AND source = ?"
-            params.append(source)
-        if project:
-            query += " AND project = ?"
-            params.append(project)
         if since:
-            query += " AND created_at >= ?"
-            params.append(since.isoformat())
-
-        query += " ORDER BY rowid DESC LIMIT ?"
-        params.append(limit)
-
+            query = query.replace(" ORDER BY", " AND created_at >= ? ORDER BY", 1)
+            params.insert(-1, since.isoformat())
         cursor = self._conn.execute(query, params)
         return [signal_from_row(row) for row in cursor.fetchall()]
 
-    # ── Stats ────────────────────────────────────────────────────────
-
     def stats(self) -> dict:
-        """Aggregate signal statistics.
-
-        Returns:
-            Dict with total, by_type, by_source, unconsumed counts.
-        """
         self.ensure_table()
-        result: dict = {}
+        result: dict = {
+            "session_emitted": self.session_emitted,
+            "session_errors": self.session_errors,
+        }
 
-        # Total count
         row = self._conn.execute("SELECT COUNT(*) FROM signals").fetchone()
         result["total"] = row[0] if row else 0
 
-        # By type
         cursor = self._conn.execute(
             "SELECT event_type, COUNT(*) FROM signals GROUP BY event_type ORDER BY COUNT(*) DESC"
         )
         result["by_type"] = {r[0]: r[1] for r in cursor.fetchall()}
 
-        # By source
         cursor = self._conn.execute(
             "SELECT source, COUNT(*) FROM signals GROUP BY source ORDER BY COUNT(*) DESC"
         )
         result["by_source"] = {r[0]: r[1] for r in cursor.fetchall()}
 
-        # Unconsumed (consumed_by == '[]')
         row = self._conn.execute("SELECT COUNT(*) FROM signals WHERE consumed_by = '[]'").fetchone()
         result["unconsumed"] = row[0] if row else 0
 
         return result
 
-    # ── Garbage Collection ──────────────────────────────────────────
-
     def gc(self, max_age_days: int = 30) -> int:
-        """Prune consumed signals older than threshold.
-
-        Only deletes signals that have been consumed by at least one
-        consumer. Unconsumed signals are never garbage collected.
-
-        Args:
-            max_age_days: Age threshold in days.
-
-        Returns:
-            Number of signals pruned.
-        """
         self.ensure_table()
         cutoff = (datetime.now() - timedelta(days=max_age_days)).isoformat()
         cursor = self._conn.execute(
@@ -478,8 +410,6 @@ class SignalBus:
             logger.info("GC: pruned %d consumed signal(s) older than %d days", pruned, max_age_days)
         return pruned
 
-    # ── Internal Query Builder ──────────────────────────────────────
-
     def _query(
         self,
         *,
@@ -489,29 +419,12 @@ class SignalBus:
         unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
-        """Build and execute a filtered query."""
-        query = (
-            "SELECT id, event_type, payload, source, project,"
-            " created_at, consumed_by FROM signals WHERE 1=1"
+        query, params = _build_query(
+            event_type=event_type,
+            source=source,
+            project=project,
+            unconsumed_by=unconsumed_by,
+            limit=limit,
         )
-        params: list = []
-
-        if event_type:
-            query += " AND event_type = ?"
-            params.append(event_type)
-        if source:
-            query += " AND source = ?"
-            params.append(source)
-        if project:
-            query += " AND project = ?"
-            params.append(project)
-        if unconsumed_by:
-            # JSON array does NOT contain the consumer string
-            query += " AND consumed_by NOT LIKE ?"
-            params.append(f'%"{unconsumed_by}"%')
-
-        query += " ORDER BY rowid ASC LIMIT ?"
-        params.append(limit)
-
         cursor = self._conn.execute(query, params)
         return [signal_from_row(row) for row in cursor.fetchall()]

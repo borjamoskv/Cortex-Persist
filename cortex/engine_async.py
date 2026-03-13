@@ -19,8 +19,6 @@ from cortex.engine.history import HistoryMixin
 from cortex.engine.ledger import ImmutableLedger
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
-
-# Mixins
 from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
 from cortex.memory.temporal import now_iso
@@ -37,11 +35,6 @@ TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
 class AsyncCortexEngine(
     StoreMixin, QueryMixin, SearchMixin, AgentMixin, ConsensusMixin, HistoryMixin
 ):
-    """
-    Native async database engine for CORTEX.
-    Protocol: MEJORAlo God Mode 8.0 - Wave 3 Structural Correction
-    """
-
     def __init__(
         self,
         pool: CortexConnectionPool,
@@ -54,57 +47,66 @@ class AsyncCortexEngine(
         self._embedder: LocalEmbedder | None = None
         self._ledger: ImmutableLedger | None = None
 
-        # Dimension A-D: The Cuátrida Entity
         from cortex.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
 
     @property
     def cuatrida(self) -> Any:
-        """Access the Cuátrida Orchestrator (Dimensions A-D)."""
         return self._cuatrida
 
     @property
     def writer(self) -> SqliteWriteWorker | None:
-        """Access the sovereign write worker (Single Writer Queue)."""
         return self._writer
 
     async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
-        """Execute a write via the sovereign writer if available, else via pool.
-
-        Returns Result[int, str] — Ok(rowcount) or Err(message).
-        """
         if self._writer and self._writer.is_running:
             return await self._writer.execute(sql, params)
-        
-        # Protocolo TRAMPOLIN: Triangulación antifrágil con Jitter (Axioma Ω6)
+        return await self._attempt_write_with_retries(sql, params)
+
+    async def _attempt_write_with_retries(
+        self, sql: str, params: tuple[Any, ...]
+    ) -> Result[int, str]:
         max_retries = 3
         for attempt in range(max_retries + 1):
-            try:
-                async with self.session() as conn:
-                    cursor = await conn.execute(sql, params)
-                    await conn.commit()
-                    # Return lastrowid for inserts to support tx_id tracking
-                    if sql.strip().upper().startswith("INSERT"):
-                        return Ok(cursor.lastrowid)  # type: ignore[reportReturnType]
-                    return Ok(cursor.rowcount)
-            except (sqlite3.Error, OSError) as e:
-                if "database is locked" not in str(e).lower() or attempt >= max_retries:
-                    return Err(f"Pool write error: {e}")
-                
-                # Jitter asimétrico: backoff de 0.5s, 1.5s, 4.5s + entropía
-                sleep_time = (0.5 * (3 ** attempt)) + random.uniform(0.1, 0.5)
-                logger.warning(
-                    "TRAMPOLIN: WAL Locked en write(). Exhalando %.2fs (intento %d/%d)...",
-                    sleep_time, attempt + 1, max_retries
-                )
-                await asyncio.sleep(sleep_time)
-                
+            result = await self._try_execute_write(sql, params, attempt, max_retries)
+            if result is not None:
+                return result
         return Err("Pool write error: Exceeded max retries for DB Lock.")
+
+    async def _try_execute_write(
+        self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
+    ) -> Result[int, str] | None:
+        try:
+            result = await self._execute_write(sql, params)
+            if result:
+                return result
+        except (sqlite3.Error, OSError) as e:
+            if "database is locked" not in str(e).lower() or attempt >= max_retries:
+                return Err(f"Pool write error: {e}")
+            await self._backoff(attempt)
+        return None
+
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str] | None:
+        async with self.session() as conn:
+            cursor = await conn.execute(sql, params)
+            await conn.commit()
+            if sql.strip().upper().startswith("INSERT"):
+                return Ok(cursor.lastrowid)
+            return Ok(cursor.rowcount)
+
+    async def _backoff(self, attempt: int):
+        sleep_time = (0.5 * (3**attempt)) + random.uniform(0.1, 0.5)
+        logger.warning(
+            "TRAMPOLIN: WAL Locked en write(). Exhalando %.2fs (intento %d/%d)...",
+            sleep_time,
+            attempt + 1,
+            3,
+        )
+        await asyncio.sleep(sleep_time)
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
-        """Proporciona una sesión transaccional (conexión) desde el pool."""
         async with self._pool.acquire() as conn:
             yield conn
 
@@ -114,7 +116,6 @@ class AsyncCortexEngine(
         return self._embedder
 
     async def get_conn(self) -> aiosqlite.Connection:
-        """Alias for compatibility with standard CORTEX mixins."""
         return await self._pool.acquire().__aenter__()
 
     def _get_ledger(self) -> ImmutableLedger:
@@ -127,35 +128,20 @@ class AsyncCortexEngine(
     ) -> int:
         dj = canonical_json(detail)
         ts = now_iso()
-        async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
-            prev = await cursor.fetchone()
-            ph = prev[0] if prev else "GENESIS"
-
-        th = compute_tx_hash(ph, project, action, dj, ts)
+        prev_hash = await self._get_previous_hash(conn)
+        th = compute_tx_hash(prev_hash, project, action, dj, ts)
 
         cursor = await conn.execute(
             "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions ORDER BY id DESC LIMIT 1), "
-            "'GENESIS'), ?, ?)",
-            (project, action, dj, th, ts),
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (project, action, dj, prev_hash, th, ts),
         )
-        # Re-calc hash with actual ph from the DB to be absolute
-        async with conn.execute(
-            "SELECT prev_hash FROM transactions WHERE id = ?", (cursor.lastrowid,)
-        ) as c2:
-            row = await c2.fetchone()
-            actual_ph = row[0] if row else ph
-            if actual_ph != ph:
-                # Re-hash if it changed under our feet
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
-                await conn.execute(
-                    "UPDATE transactions SET hash = ? WHERE id = ?", (th, cursor.lastrowid)
-                )
-
+        await self._update_transaction_hash_if_needed(
+            conn, cursor.lastrowid, project, action, dj, ts, prev_hash
+        )
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()
 
-        # Cuátrida Hook: Dimension B (Temporal Sovereignty)
         if self._cuatrida:
             await self._cuatrida.log_decision(
                 project=project,
@@ -164,13 +150,29 @@ class AsyncCortexEngine(
                 metadata={"tx_id": tx_id, "detail": detail},
                 conn=conn,
             )
+        return tx_id
 
-        return tx_id  # type: ignore[reportReturnType]
+    async def _get_previous_hash(self, conn: aiosqlite.Connection) -> str:
+        async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+            prev = await cursor.fetchone()
+            return prev[0] if prev else "GENESIS"
 
-    # store() and deprecate() are now provided by StoreMixin
-    # register_agent(), get_agent(), list_agents() are now provided by AgentMixin
-    # search() is now provided by SearchMixin
-    # All core fact operations (recall, search, retrieve, stats) are now provided by mixins
+    async def _update_transaction_hash_if_needed(
+        self,
+        conn: aiosqlite.Connection,
+        tx_id: int,
+        project: str,
+        action: str,
+        dj: str,
+        ts: str,
+        initial_ph: str,
+    ):
+        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as c2:
+            row = await c2.fetchone()
+            actual_ph = row[0] if row else initial_ph
+            if actual_ph != initial_ph:
+                th = compute_tx_hash(actual_ph, project, action, dj, ts)
+                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
 
     async def verify_ledger(self) -> dict[str, Any]:
         return await self._get_ledger().verify_integrity_async()

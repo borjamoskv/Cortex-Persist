@@ -65,7 +65,7 @@ class MoltbookClient:
             try:
                 data = json.loads(_CREDENTIALS_PATH.read_text())
                 return data.get("api_key")
-            except Exception:
+            except (OSError, json.JSONDecodeError):
                 return None
         return None
 

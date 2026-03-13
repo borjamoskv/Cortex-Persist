@@ -1,6 +1,6 @@
+import glob
 import os
 import subprocess
-import glob
 
 # The Ouroboros TTT (Test-Time Training) Local MLX Forge
 # Derivation: Axiom Ω₅ (Antifragile by Default) + Mac-Forge-Omega

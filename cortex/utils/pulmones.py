@@ -1,11 +1,12 @@
 import asyncio
-import sqlite3
-import time
 import json
 import logging
-from typing import Callable, Any, Awaitable, Optional
+import sqlite3
+import time
+from collections.abc import Awaitable, Callable
 from functools import wraps
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger("CORTEX.PULMONES")
 
@@ -111,7 +112,7 @@ def sovereign_circuit_breaker(
                         return {"status": "queued", "reason": "max_retries_exceeded"}
                     await asyncio.sleep(2 ** attempt) # Exponential backoff
                 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     # Ω₃: Excepciones de negocio o código no activan el circuit breaker, solo timeouts/red
                     logger.critical("💀 [PULMONES] Falla interna no recuperable en %s: %s", func.__name__, str(e))
                     raise e

@@ -180,7 +180,7 @@ class TopographicSensor:
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
-        except Exception:
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
             pass
 
     def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
@@ -200,6 +200,6 @@ class TopographicSensor:
                         ghost["strength"] = strength
                         ghost["source_file"] = str(manifest.parent / filename)
                         results.append(ghost)
-        except Exception:
+        except (json.JSONDecodeError, KeyError, OSError):
             pass
         return results

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.telemetry.pulse")
 
 
-@dataclass(slots=True)
+@dataclass()
 class PulseMetric:
     """A metric derived from the system pulse."""
 
@@ -67,7 +67,7 @@ class PulseRegistry:
                     with self._lock:
                         for signal in signals:
                             self._process_signal(signal)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — pulse observer loop must not crash
                 logger.error("[PULSE] Pulse scan failed: %s", e)
             await asyncio.sleep(interval)
 

@@ -149,11 +149,11 @@ def emit_fact_stored(
                     project,
                     unconsumed,
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("compact:needed check failed: %s", e)
 
         conn.close()
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # Never propagate — this hook must never break the store operation.
         logger.debug("fact:stored signal emission failed: %s", e)

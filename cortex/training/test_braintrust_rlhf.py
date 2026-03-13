@@ -1,14 +1,12 @@
 import asyncio
-import os
-import uuid
-from typing import Any
-
-from cortex.episodic.base import Episode
-from cortex.training.collector import TrajectoryCollector, Trajectory, Action
-from cortex.training.reward_engine import RewardEngine
-from cortex.aether.sovereign_apis import SovereignTriad
-
 import datetime
+import uuid
+
+from cortex.aether.sovereign_apis import SovereignTriad
+from cortex.episodic.base import Episode
+from cortex.training.collector import TrajectoryCollector
+from cortex.training.reward_engine import RewardEngine
+
 
 class MockEpisodicMemory:
     """Mock for episodic memory to simulate session extraction."""
@@ -58,7 +56,7 @@ async def run_triad_rlhf_sandbox():
         print("Fallo recolectando trayectoria.")
         return
         
-    print(f"2. Trayectoria Extraída:")
+    print("2. Trayectoria Extraída:")
     print(f"   - Proyecto: {trajectory.project}")
     print(f"   - Acciones: {len(trajectory.actions)}")
     print(f"   - Outcome Inferido: {trajectory.outcome}")

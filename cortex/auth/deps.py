@@ -51,6 +51,12 @@ async def require_auth(
     if not result.authenticated:
         error_msg = get_trans("error_invalid_revoked_key", lang) if result.error else result.error
         raise HTTPException(status_code=401, detail=error_msg)
+
+    # SECURE LINK: Bind the dynamic tenant context to the authenticated identity
+    from cortex.security.tenant import tenant_id_var
+
+    tenant_id_var.set(result.tenant_id)
+
     return result
 
 

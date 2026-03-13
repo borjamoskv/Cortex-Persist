@@ -14,10 +14,11 @@ Categories:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
+from typing import Optional
 
 
-class AxiomCategory(StrEnum):
+class AxiomCategory(str, Enum):
     """Three-layer axiom taxonomy."""
 
     CONSTITUTIONAL = "constitutional"
@@ -25,7 +26,7 @@ class AxiomCategory(StrEnum):
     ASPIRATIONAL = "aspirational"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Axiom:
     """A single, canonical axiom definition."""
 
@@ -34,7 +35,7 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
-    ci_gate: str | None = None
+    ci_gate: Optional[str] = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -104,7 +105,7 @@ _OPERATIONAL: list[Axiom] = [
         id="AX-012",
         name="Type Safety",
         mandate=(
-            "from __future__ import annotations. StrEnum for semantic keys. "
+            "from __future__ import annotations. str, Enum for semantic keys. "
             "Zero Any types. mypy --strict."
         ),
         category=AxiomCategory.OPERATIONAL,
@@ -269,6 +270,17 @@ _ASPIRATIONAL: list[Axiom] = [
         ),
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Vector Alpha implementation.",
+    ),
+    Axiom(
+        id="AX-029",
+        name="Zero-Prompting Evolution (Ω₇)",
+        mandate=(
+            "The system predicts entropy before it occurs, executes the necessary "
+            "CORTEX mutation, purges ghosts, and leaves only a cryptographic report "
+            "of what was resolved — without user prompts. Ablación Semántica."
+        ),
+        category=AxiomCategory.ASPIRATIONAL,
+        enforcement="ZeroPromptingEvolutionStrategy in CortexEvolutionEngine.",
     ),
 ]
 

@@ -6,10 +6,12 @@ __all__ = ["SQLiteAlgorithmsMixin"]
 class SQLiteAlgorithmsMixin:
     """Mixin for graph algorithm operations."""
 
-    async def find_path(self, source: str, target: str, max_depth: int = 3) -> list:
+    async def find_path(
+        self, source: str, target: str, max_depth: int = 3, tenant_id: str = "default"
+    ) -> list:
         """Find paths between entities using BFS."""
-        q_ids = "SELECT id, name FROM entities WHERE name IN (?, ?)"
-        id_rows = await self._fetch_rows(q_ids, [source, target])
+        q_ids = "SELECT id, name FROM entities WHERE name IN (?, ?) AND tenant_id = ?"
+        id_rows = await self._fetch_rows(q_ids, [source, target, tenant_id])
         id_map = {row[1]: row[0] for row in id_rows}
 
         if source not in id_map or target not in id_map:
@@ -27,8 +29,8 @@ class SQLiteAlgorithmsMixin:
 
             q_neighbors = """SELECT e.id, e.name, er.relation_type, er.weight FROM entity_relations er
                              JOIN entities e ON (CASE WHEN er.source_entity_id = ? THEN er.target_entity_id ELSE er.source_entity_id END = e.id)
-                             WHERE er.source_entity_id = ? OR er.target_entity_id = ?"""
-            neighbors = await self._fetch_rows(q_neighbors, [curr_id, curr_id, curr_id])
+                             WHERE er.tenant_id = ? AND (er.source_entity_id = ? OR er.target_entity_id = ?)"""
+            neighbors = await self._fetch_rows(q_neighbors, [curr_id, tenant_id, curr_id, curr_id])
 
             for nid, nname, rtype, weight in neighbors:
                 new_step = {
@@ -45,7 +47,7 @@ class SQLiteAlgorithmsMixin:
         return []
 
     async def find_context_subgraph(
-        self, seed_entities: list, depth: int = 2, max_nodes: int = 50
+        self, seed_entities: list, depth: int = 2, max_nodes: int = 50, tenant_id: str = "default"
     ) -> dict:
         """Retrieve a subgraph around seed entities."""
         if not seed_entities:
@@ -55,8 +57,12 @@ class SQLiteAlgorithmsMixin:
         visited_ids: set[int] = set()
 
         placeholders = ",".join(["?"] * len(seed_entities))
-        q_init = "SELECT id, name, entity_type FROM entities WHERE name IN (" + placeholders + ")"
-        rows = await self._fetch_rows(q_init, seed_entities)
+        q_init = (
+            "SELECT id, name, entity_type FROM entities WHERE tenant_id = ? AND name IN ("
+            + placeholders
+            + ")"
+        )
+        rows = await self._fetch_rows(q_init, [tenant_id] + seed_entities)
 
         current_layer_ids = []
         for eid, name, etype in rows:
@@ -68,10 +74,7 @@ class SQLiteAlgorithmsMixin:
             if not current_layer_ids or len(nodes) >= max_nodes:
                 break
             current_layer_ids = await self._expand_subgraph_layer(
-                current_layer_ids,
-                nodes,
-                edges,
-                visited_ids,
+                current_layer_ids, nodes, edges, visited_ids, tenant_id
             )
             if len(nodes) >= max_nodes:
                 break
@@ -90,6 +93,7 @@ class SQLiteAlgorithmsMixin:
         nodes: dict[str, dict],
         edges: list[dict],
         visited_ids: set[int],
+        tenant_id: str,
     ) -> list[int]:
         """Expand one layer of the subgraph BFS. Returns next layer IDs."""
         phs = ",".join(["?"] * len(current_ids))
@@ -98,9 +102,13 @@ class SQLiteAlgorithmsMixin:
             "FROM entity_relations er\n"
             "JOIN entities e1 ON er.source_entity_id = e1.id\n"
             "JOIN entities e2 ON er.target_entity_id = e2.id\n"
-            "WHERE er.source_entity_id IN (" + phs + ") OR target_entity_id IN (" + phs + ")"
+            "WHERE er.tenant_id = ? AND (er.source_entity_id IN ("
+            + phs
+            + ") OR target_entity_id IN ("
+            + phs
+            + "))"
         )
-        rel_rows = await self._fetch_rows(q, current_ids + current_ids)
+        rel_rows = await self._fetch_rows(q, [tenant_id] + current_ids + current_ids)
 
         next_ids: list[int] = []
         for s_name, s_type, s_id, t_name, t_type, t_id, r_type, weight in rel_rows:

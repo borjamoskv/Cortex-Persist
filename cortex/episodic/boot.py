@@ -55,7 +55,7 @@ _EVENT_EMOJI: Final[dict[str, str]] = {
 # ─── Models ──────────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class BootPayload:
     """Complete session boot payload."""
 

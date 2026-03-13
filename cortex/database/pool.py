@@ -13,8 +13,9 @@ import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from cortex.immune.chaos import ChaosGate, async_interceptor
 import aiosqlite
+
+from cortex.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 

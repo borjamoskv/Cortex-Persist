@@ -8,7 +8,7 @@ calls from CORTEX module code. Used by:
 
 This is a build-time guard, not runtime — pragmatic and zero-overhead.
 
-Copyright 2026 Borja Moskv — Apache-2.0
+Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations

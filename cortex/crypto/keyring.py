@@ -44,7 +44,7 @@ def get_master_key() -> bytes | None:
                 )
                 return None
             return raw
-        except (ValueError, Exception):
+        except (ValueError, Exception):  # noqa: BLE001
             logger.error("Master key is not valid base64.")
             return None
 

@@ -26,19 +26,19 @@ class SovereignBrowserAgent:
 
     async def run(self, start_url: str):
         """Runs the autonomous browsing loop."""
-        LOG.info(f"BROWSER-Ω: Objective initialized -> {self.objective}")
+        LOG.info("BROWSER-Ω: Objective initialized -> %s", self.objective)
         await self.engine.start()
 
         try:
             await self.engine.goto(start_url)
         except RuntimeError as e:
-            LOG.error(f"BROWSER-Ω: Failed to reach start URL: {e}")
+            LOG.error("BROWSER-Ω: Failed to reach start URL: %s", e)
             await self.engine.stop()
             raise
 
         try:
             for step in range(self.max_steps):
-                LOG.info(f"BROWSER-Ω: Step {step + 1}/{self.max_steps}")
+                LOG.info("BROWSER-Ω: Step %d/%d", step + 1, self.max_steps)
 
                 # 1. Observe
                 parse_result = await self.engine.parse_dom()
@@ -48,12 +48,12 @@ class SovereignBrowserAgent:
 
                 # 2. Reason
                 action = await self._decide_next_action(dom_tree)
-                LOG.info(f"BROWSER-Ω: Decided action -> {action}")
+                LOG.info("BROWSER-Ω: Decided action -> %s", action)
 
                 # 3. Act
                 cmd = action.get("cmd")
                 if cmd == "done":
-                    LOG.info(f"BROWSER-Ω: Objective complete. Result: {action.get('result')}")
+                    LOG.info("BROWSER-Ω: Objective complete. Result: %s", action.get('result'))
                     break
                 elif cmd == "click":
                     cortex_id = action.get("cortex_id")
@@ -74,7 +74,7 @@ class SovereignBrowserAgent:
                     )
                     break
                 else:
-                    LOG.error(f"BROWSER-Ω: Unknown command {cmd}")
+                    LOG.error("BROWSER-Ω: Unknown command %s", cmd)
 
                 await asyncio.sleep(1)  # Small pause for stability
 
@@ -129,7 +129,7 @@ What is your next action?
 
             return json.loads(clean_text)
         except json.JSONDecodeError as decode_err:
-            LOG.error(f"BROWSER-Ω: Failed to parse LLM JSON response: {decode_err}")
+            LOG.error("BROWSER-Ω: Failed to parse LLM JSON response: %s", decode_err)
             raise ValueError(
                 f"BROWSER-Ω: Invalid JSON structure from LLM -> {decode_err}"
             ) from decode_err

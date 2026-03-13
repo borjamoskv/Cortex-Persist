@@ -42,7 +42,7 @@ EMOTIONS: Final[frozenset[str]] = frozenset(
 )
 
 
-@dataclass(slots=True)
+@dataclass()
 class Episode:
     """A single episodic memory event."""
 
@@ -75,7 +75,7 @@ class Episode:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class Pattern:
     """A recurring theme detected across sessions."""
 

@@ -77,7 +77,7 @@ def _decrypt(data: str) -> str:
         ciphertext = raw_bytes[12:]
         decrypted = aesgcm.decrypt(nonce, ciphertext, None)
         return decrypted.decode("utf-8")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # In governance mode, we'd log this as a potential tampering attempt
         return f"[[DECRYPTION_ERROR: {e}]]"
 

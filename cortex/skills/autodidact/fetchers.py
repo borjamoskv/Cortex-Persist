@@ -1,7 +1,8 @@
-import os
-import httpx
 import logging
-from typing import Dict, Any
+import os
+from typing import Any
+
+import httpx
 
 from cortex.utils.pulmones import sovereign_circuit_breaker
 
@@ -14,11 +15,26 @@ FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 
+# Timeouts and Retries
+TIMEOUT_JINA = 8.0
+TIMEOUT_FIRECRAWL = 15.0
+TIMEOUT_EXA = 10.0
+TIMEOUT_ASSEMBLY = 20.0
+TIMEOUT_GIDATU = 45.0
+
+RETRIES_STANDARD = 2
+RETRIES_QUICK = 1
+
+# Defaults
+DEFAULT_CRAWL_DEPTH = 2
+DEFAULT_CRAWL_LIMIT = 10
+DEFAULT_SEARCH_RESULTS = 5
+
 
 # ==============================================================================
 # 1. JINA READER (O(1) Markdown Extraction) -> Tier 🔵
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=8.0, max_retries=1)
+@sovereign_circuit_breaker(timeout=TIMEOUT_JINA, max_retries=RETRIES_QUICK)
 async def fetch_jina_markdown(url: str) -> str:
     """Extrae Markdown de una URL directa."""
     logger.info("🔵 [JINA] Extrayendo O(1): %s", url)
@@ -32,8 +48,8 @@ async def fetch_jina_markdown(url: str) -> str:
 # ==============================================================================
 # 2. FIRECRAWL (Deep Crawl & Structure) -> Tier 🟢
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=15.0, max_retries=2)
-async def fetch_firecrawl_deep(url: str, max_depth: int = 2) -> Dict[str, Any]:
+@sovereign_circuit_breaker(timeout=TIMEOUT_FIRECRAWL, max_retries=RETRIES_STANDARD)
+async def fetch_firecrawl_deep(url: str, max_depth: int = DEFAULT_CRAWL_DEPTH) -> dict[str, Any]:
     """Raspa recursivamente y estructura."""
     logger.info("🟢 [FIRECRAWL] Deep Crawl: %s (Depth: %s)", url, max_depth)
     if not FIRECRAWL_API_KEY:
@@ -44,7 +60,7 @@ async def fetch_firecrawl_deep(url: str, max_depth: int = 2) -> Dict[str, Any]:
     payload = {
         "url": url,
         "maxDepth": max_depth,
-        "limit": 10,
+        "limit": DEFAULT_CRAWL_LIMIT,
         "scrapeOptions": {"formats": ["markdown", "links"]}
     }
 
@@ -57,8 +73,8 @@ async def fetch_firecrawl_deep(url: str, max_depth: int = 2) -> Dict[str, Any]:
 # ==============================================================================
 # 3. EXA.AI SEARCH (Neural Search) -> Tier 🟢
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=10.0, max_retries=2)
-async def fetch_exa_search(query: str, num_results: int = 5) -> Dict[str, Any]:
+@sovereign_circuit_breaker(timeout=TIMEOUT_EXA, max_retries=RETRIES_STANDARD)
+async def fetch_exa_search(query: str, num_results: int = DEFAULT_SEARCH_RESULTS) -> dict[str, Any]:
     """Búsqueda neuronal."""
     logger.info("🟢 [EXA.ai] Resolviendo Gap: '%s'", query)
     if not EXA_API_KEY:
@@ -85,7 +101,7 @@ async def fetch_exa_search(query: str, num_results: int = 5) -> Dict[str, Any]:
 # ==============================================================================
 # 4. ASSEMBLY AI (El Vector Acústico) -> Tier 🟡
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=20.0, max_retries=2)
+@sovereign_circuit_breaker(timeout=TIMEOUT_ASSEMBLY, max_retries=RETRIES_STANDARD)
 async def fetch_assemblyai_transcript(audio_url: str) -> str:
     """Ingesta acústica."""
     logger.info("🟡 [ASSEMBLYAI] Transcribiendo: %s", audio_url)
@@ -104,7 +120,7 @@ async def fetch_assemblyai_transcript(audio_url: str) -> str:
 # ==============================================================================
 # 5. GIDATU (Physical Layer Bypass) -> Tier 🔴
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=45.0, max_retries=1)
+@sovereign_circuit_breaker(timeout=TIMEOUT_GIDATU, max_retries=RETRIES_QUICK)
 async def fetch_gidatu_browser(url: str) -> str:
     """Línea de defensa visual."""
     logger.warning("🔴 [GIDATU] Desplegando Navegador Soberano: %s", url)
@@ -146,7 +162,7 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
         if intent_type == "audio_ingest":
             return _unwrap(await fetch_assemblyai_transcript(target))
         return _unwrap(await fetch_jina_markdown(target))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — fetcher fallback to physical browser on any failure
         logger.error("⚠️ Error en adquisición '%s': %s. Probando GIDATU...", intent_type, e)
         return _unwrap(await fetch_gidatu_browser(target))
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 try:
@@ -35,7 +36,7 @@ __all__ = [
 
 logger = logging.getLogger("cortex.sap.client")
 
-from dataclasses import dataclass, field
+
 
 # ─── Exceptions ──────────────────────────────────────────────────────
 

@@ -101,8 +101,8 @@ async def synthesize_pathogen(llm: SovereignLLM) -> PathogenPayload:
         if "title" not in payload or "content" not in payload:
              raise ValueError("Missing 'title' or 'content' in LLM output")
         return payload
-    except Exception as e:
-        raise RuntimeError(f"Failed to parse pathogen payload: {res.content} | Err: {e}")
+    except Exception as e:  # noqa: BLE001
+        raise RuntimeError(f"Failed to parse pathogen payload: {res.content} | Err: {e}") from e
 
 
 async def synthesize_seed_comments(
@@ -145,9 +145,9 @@ async def synthesize_seed_comments(
              return cast(list[SeedComment], data)
         else:
              raise ValueError("Unexpected JSON structure for comments.")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Raw LLM comment output: %s", res.content)
-        raise RuntimeError(f"Failed to parse seed comments: {e}")
+        raise RuntimeError(f"Failed to parse seed comments: {e}") from e
 
 
 # ─── Execution ─────────────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         print("\n  [PATHOGEN FORJADO]")
         print(f"  TÍTULO: {pathogen['title']}")
         print(f"  CONTENIDO:\n  {pathogen['content']}\n")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[ERROR] {e}")
         await client.close()
         return
@@ -193,7 +193,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         print(f"  [{len(seeds)} Semillas forjadas]")
         for i, seed in enumerate(seeds):
             print(f"  [S-{i+1}]: {seed.get('content', '')[:100]}...")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
          print(f"[ERROR] {e}")
          await client.close()
          return

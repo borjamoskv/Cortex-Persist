@@ -60,12 +60,11 @@ class SignalReactor:
                 # Small breath between signals to avoid flooding the loop
                 await breathe(0.01)
             except (ValueError, AttributeError, RuntimeError, OSError) as e:
-                logger.error(
+                logger.exception(
                     "Reactor failed to process signal #%d (%s): %s",
                     signal.id,
                     signal.event_type,
                     e,
-                    exc_info=True,
                 )
 
         return processed
@@ -95,7 +94,7 @@ class SignalReactor:
             logger.info("Reactor: Reconciling experience signal #%d", signal.id)
             await self.engine.memory.reconcile_experience(signal)
         except (RuntimeError, OSError, AttributeError) as e:
-            logger.error("Failed to reconcile experience reflex: %s", e)
+            logger.exception("Failed to reconcile experience reflex: %s", e)
 
     async def _handle_compact_needed(self, signal: Any) -> None:
         """Reflex: Automate memory compaction."""
@@ -115,7 +114,7 @@ class SignalReactor:
             if result:
                 logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
         except (ImportError, RuntimeError, OSError) as e:
-            logger.error("Failed to run compaction reflex: %s", e)
+            logger.exception("Failed to run compaction reflex: %s", e)
 
     async def _handle_fact_stored(self, signal: Any) -> None:
         """Reflex: Regenerate snapshot (with cooldown)."""
@@ -132,7 +131,7 @@ class SignalReactor:
             self._last_snapshot_time = now
             logger.info("Reflex: Snapshot updated.")
         except (ImportError, RuntimeError, OSError) as e:
-            logger.error("Failed to run snapshot reflex: %s", e)
+            logger.exception("Failed to run snapshot reflex: %s", e)
 
     async def run_loop(self, interval: float = 5.0) -> None:
         """Start a non-blocking infinite loop for standalone usage. (PULMONES)"""
@@ -143,6 +142,6 @@ class SignalReactor:
                 if count > 0:
                     logger.debug("Reactor: Processed %d signal(s)", count)
             except (RuntimeError, OSError, ValueError) as e:
-                logger.error("Reactor loop error: %s", e)
+                logger.exception("Reactor loop error: %s", e)
 
             await breathe(interval)

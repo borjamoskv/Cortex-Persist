@@ -130,6 +130,7 @@ async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, 
 def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
+    tenant_id: str = "default",
     project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -142,9 +143,9 @@ def text_search_sync(
                 SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                        f.source, f.tags, bm25(facts_fts) AS rank
                 FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
-                WHERE fts.content MATCH ? AND f.valid_until IS NULL
+                WHERE f.tenant_id = ? AND fts.content MATCH ? AND f.valid_until IS NULL
             """
-            params: list = [fts_query]
+            params: list = [tenant_id, fts_query]
             if project:
                 sql += _PROJECT_FILTER
                 params.append(project)
@@ -153,9 +154,9 @@ def text_search_sync(
         else:
             sql = (
                 "SELECT id, content, project, fact_type, confidence, source, tags "
-                "FROM facts WHERE content LIKE ? AND valid_until IS NULL"
+                "FROM facts WHERE tenant_id = ? AND content LIKE ? AND valid_until IS NULL"
             )
-            params = [f"%{query}%"]
+            params = [tenant_id, f"%{query}%"]
             if project:
                 sql += " AND project = ?"
                 params.append(project)

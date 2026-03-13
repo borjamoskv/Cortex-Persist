@@ -37,7 +37,7 @@ class MoltbookHeartbeat:
         if _STATE_PATH.exists():
             try:
                 return json.loads(_STATE_PATH.read_text())
-            except Exception:
+            except (OSError, json.JSONDecodeError):
                 pass
         return {
             "last_check": None,
@@ -100,7 +100,7 @@ class MoltbookHeartbeat:
         except MoltbookRateLimited as e:
             summary["errors"].append(f"rate_limited_retry_after_{e.retry_after}s")
             logger.warning("Heartbeat: rate limited. Retry after %ss", e.retry_after)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             summary["errors"].append(str(e))
             logger.exception("Heartbeat: unexpected error")
 
@@ -137,7 +137,7 @@ class MoltbookHeartbeat:
             except MoltbookRateLimited:
                 logger.warning("Rate limited during activity response")
                 break
-            except Exception:
+            except Exception:  # noqa: BLE001 — swallow individual activity errors
                 logger.exception("Error responding to post %s", post_id)
 
         return replies
@@ -162,12 +162,12 @@ class MoltbookHeartbeat:
                     upvotes += 1
                 except MoltbookRateLimited:
                     break
-                except Exception:
+                except Exception:  # noqa: BLE001 — swallow individual upvote errors
                     logger.debug("Upvote failed for post %s", post_id)
 
         except MoltbookRateLimited:
             logger.warning("Rate limited during feed browse")
-        except Exception:
+        except Exception:  # noqa: BLE001 — swallow feed browsing errors
             logger.exception("Error browsing feed")
 
         return upvotes
@@ -211,7 +211,7 @@ class MoltbookHeartbeat:
                     title=title,
                     karma_before=self._state.get("last_karma", 0.0),
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Nexus emit failed (non-blocking): %s", e)
 
         return result

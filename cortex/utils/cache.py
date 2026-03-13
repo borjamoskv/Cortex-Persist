@@ -134,7 +134,7 @@ class SovereignCache(Generic[T]):
                 task.add_done_callback(self._eviction_tasks.discard)
             else:
                 self._on_evict(key, value, self._evidence_hash, self._eviction_count)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("SovereignCache: Eviction hook failed for key %s: %s", key, e)
 
     def get_forgetting_proof(self) -> dict[str, Any]:
