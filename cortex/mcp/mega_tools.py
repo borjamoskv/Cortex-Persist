@@ -328,7 +328,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                     (project, project),
                 )
                 tx_stats = await cursor.fetchone()
-            except Exception:
+            except Exception:  # noqa: BLE001 — fallback if stats query fails
                 tx_stats = (0, "N/A", "N/A")
 
             # 2. Ghost density (active unresolved work)

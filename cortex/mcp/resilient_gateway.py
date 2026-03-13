@@ -12,15 +12,36 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
+try:
+    import aiohttp
+
+    _HAS_AIOHTTP = True
+except ImportError:
+    aiohttp = None  # type: ignore[assignment]
+    _HAS_AIOHTTP = False
+
 import httpx
-import aiohttp
-import markdownify
-from bs4 import BeautifulSoup
+
+try:
+    import markdownify
+
+    _HAS_MARKDOWNIFY = True
+except ImportError:
+    markdownify = None  # type: ignore[assignment]
+    _HAS_MARKDOWNIFY = False
+
+try:
+    from bs4 import BeautifulSoup
+
+    _HAS_BS4 = True
+except ImportError:
+    BeautifulSoup = None  # type: ignore[assignment]
+    _HAS_BS4 = False
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -177,7 +198,7 @@ class ResilientFetcher:
                 errors.append(f"{provider.name}: TIMEOUT ({timeout}s)")
                 logger.warning("⏱️ [GATEWAY] %s timed out on %s", provider.name, url[:80])
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — catches all provider-specific HTTP errors
                 provider.circuit_breaker.record_failure()
                 error_msg = f"{provider.name}: {type(e).__name__}: {e}"
                 errors.append(error_msg)
@@ -211,10 +232,25 @@ class ResilientFetcher:
 
 def _html_to_markdown(html: str) -> str:
     """Convert HTML to clean markdown, stripping nav/script/style noise."""
+    if not _HAS_BS4 or not _HAS_MARKDOWNIFY:
+        # Fallback: basic tag stripping via regex
+        import re
+
+        text = re.sub(
+            r"<(script|style|nav|footer|header|noscript|iframe)[^>]*>.*?</\1>",
+            "",
+            html,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        text = re.sub(r"<[^>]+>", " ", text)
+        return re.sub(r"\s+", " ", text).strip()
+
     soup = BeautifulSoup(html, "html.parser")
 
     # Strip noise elements (Ω₂: reduce entropy)
-    for tag in soup.find_all(["script", "style", "nav", "footer", "header", "noscript", "iframe"]):
+    for tag in soup.find_all(
+        ["script", "style", "nav", "footer", "header", "noscript", "iframe"]
+    ):
         tag.decompose()
 
     # Prefer <main> or <article> if present
@@ -230,6 +266,9 @@ def _html_to_markdown(html: str) -> str:
 
 def _extract_with_selector(html: str, css_selector: str) -> str:
     """Extract content matching a CSS selector, then convert to markdown."""
+    if not _HAS_BS4 or not _HAS_MARKDOWNIFY:
+        return _html_to_markdown(html)
+
     soup = BeautifulSoup(html, "html.parser")
     elements = soup.select(css_selector)
     if not elements:
@@ -256,7 +295,7 @@ def _get_fetcher() -> ResilientFetcher:
 def create_resilient_gateway(
     host: str = "127.0.0.1",
     port: int = 5002,
-) -> "FastMCP":
+) -> FastMCP:
     """Create the Resilient Gateway FastMCP server."""
     if FastMCP is None:
         raise ImportError("FastMCP not available. Install with: pip install mcp")
@@ -341,7 +380,7 @@ def create_resilient_gateway(
                 ) as client:
                     resp = await client.get(url)
                     raw_content = _extract_with_selector(resp.text, css_selector)
-            except Exception:
+            except httpx.RequestError:
                 pass  # Degrade to full markdown content
 
         truncated = len(raw_content) > max_chars

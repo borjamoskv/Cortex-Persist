@@ -226,8 +226,8 @@ def toolbox_health_check(
     Uses stdlib urllib — zero external deps. Hits GET /api/toolset/
     and expects a 200 response within `timeout` seconds.
     """
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     probe = f"{url.rstrip('/')}/api/toolset/"
     try:

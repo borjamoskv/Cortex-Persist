@@ -78,7 +78,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     except subprocess.TimeoutExpired:
         logger.error("Axiom 3 Verification Timed out after 5 minutes.")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Axiom 3 Verification OSAScript failed: %s", e)
         return False
 
@@ -141,7 +141,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
         limit = min(abs(max_lines), 50000)
 
         def _read() -> str:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 lines = f.readlines()
             if len(lines) > limit:
                 content = "".join(lines[:limit])
@@ -152,7 +152,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
             return await asyncio.to_thread(_read)
         except UnicodeDecodeError:
             return f"❌ File {filepath} is binary or not UTF-8."
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"❌ Error reading file: {e}"
 
     @mcp.tool()
@@ -215,7 +215,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
                 res += f"STDERR:\n{err_output}\n"
                 
             return res
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"❌ Subprocess error: {e}"
 
     return mcp
