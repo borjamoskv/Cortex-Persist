@@ -74,7 +74,7 @@ _INTENT_PRIORITY: dict[IntentType, Priority] = {
 }
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class WorldMutation:
     """Immutable, typed, hashed record of a change to the World Model."""
 

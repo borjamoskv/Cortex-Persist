@@ -24,7 +24,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Sequence, TypeVar
+from collections.abc import Sequence
+from typing import Any, TypeVar
 
 __all__ = [
     "rerank_search_results",

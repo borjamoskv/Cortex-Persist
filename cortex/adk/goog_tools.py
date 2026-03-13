@@ -38,7 +38,7 @@ def goog_quota() -> dict[str, Any]:
             "free_gb": round(usage.free / (1024**3), 2),
             "percent_used": round((usage.used / usage.total) * 100, 1),
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {"status": "error", "message": f"Could not check quota: {e}"}
 
 
@@ -69,7 +69,7 @@ def goog_sync_notebooklm(mode: str = "both") -> dict[str, Any]:
                 "message": "Sync command failed.",
                 "stderr": result.stderr.strip(),
             }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {"status": "error", "message": f"Sync process failed: {e}"}
 
 
@@ -114,7 +114,7 @@ def goog_backup_cortex() -> dict[str, Any]:
             "path": str(dest_path),
             "size_mb": round(os.path.getsize(dest_path) / (1024**2), 2),
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {"status": "error", "message": f"Backup failed: {e}"}
 
 

@@ -27,7 +27,7 @@ class MoltbookEdgeProxy:
             post = await self.client.get_post(post_id)
             self._cache[post_id] = post
             return post
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("🛡️ [MOLTBOOK-PROXY] API Fallback active for %s: %s", post_id, e)
             # Ω₃: Fallback to CORTEX intervention cache if present
             return self._cache.get(post_id, {"status": "error", "reason": "moltbook_offline"})
@@ -41,6 +41,6 @@ class MoltbookEdgeProxy:
                 if pid:
                     self._cache[pid] = post
             return feed
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("🛡️ [MOLTBOOK-PROXY] Feed sync failed: %s", e)
             return {"posts": list(self._cache.values())[:limit]}

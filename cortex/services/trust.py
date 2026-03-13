@@ -23,7 +23,7 @@ logger = logging.getLogger("cortex.services.trust")
 # ---------------------------------------------------------------------------
 
 
-@dataclasses.dataclass(frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class TrustSnapshot:
     """Immutable snapshot of system compliance and integrity."""
 
@@ -40,7 +40,7 @@ class TrustSnapshot:
         return self.eu_ai_act_score >= 0.80 and self.chain_integrity
 
 
-@dataclasses.dataclass(frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class FactVerification:
     """Result of a single fact cryptographic verification."""
 

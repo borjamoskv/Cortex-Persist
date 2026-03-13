@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Signal:
     """An immutable signal persisted in SQLite."""
 
@@ -38,7 +38,7 @@ class Signal:
         return consumer in self.consumed_by
 
 
-@dataclass(slots=True)
+@dataclass()
 class SignalFilter:
     """Query filter for signal retrieval."""
 

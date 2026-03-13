@@ -136,7 +136,7 @@ def get_provider_configs() -> dict[str, dict[str, Any]]:
                 "Loaded %d embedding providers from presets", len(_CONFIGS_CACHE)
             )
             return _CONFIGS_CACHE
-    except Exception:
+    except (ImportError, KeyError, OSError):
         logger.debug("Could not load embedding presets, using fallback configs")
 
     _CONFIGS_CACHE = _FALLBACK_CONFIGS.copy()

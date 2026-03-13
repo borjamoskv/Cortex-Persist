@@ -26,7 +26,7 @@ from cortex.core.paths import (
 # ─── Configuration Dataclass ─────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass
 class CortexConfig:
     """Immutable configuration loaded from environment variables."""
 

@@ -119,7 +119,7 @@ def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
     if content and str(content).startswith(V6_PREFIX):
         try:
             return enc.decrypt_str(content, tenant_id=tenant_id)
-        except Exception:
+        except (ValueError, TypeError, OSError):
             logger.debug("Decryption failed for row content")
             # Fall back to content or empty string
     return content or ""
@@ -134,7 +134,7 @@ def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
     if meta_str.startswith(V6_PREFIX):
         try:
             return enc.decrypt_json(meta_raw, tenant_id=tenant_id) or {}
-        except Exception:
+        except (ValueError, TypeError, OSError):
             return {}
 
     try:

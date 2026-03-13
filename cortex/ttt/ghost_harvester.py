@@ -1,7 +1,6 @@
-import sqlite3
 import json
 import os
-import sys
+import sqlite3
 from datetime import datetime, timedelta
 
 # CORTEX DB Hardcoded Path for local daemon
@@ -49,7 +48,7 @@ def format_for_lora(rows):
         # Fallback to key file if exist
         key_path = os.path.expanduser("~/.cortex/cortex.key")
         if os.path.exists(key_path):
-            with open(key_path, 'r') as f:
+            with open(key_path) as f:
                 os.environ['CORTEX_MASTER_KEY'] = f.read().strip()
                 
     master_key = os.environ.get('CORTEX_MASTER_KEY')
@@ -68,7 +67,7 @@ def format_for_lora(rows):
         if content.startswith("v6_aesgcm:"):
             try:
                 content = crypto.decrypt(content)
-            except Exception as e:
+            except Exception:  # noqa: BLE001 — decryption failure on corrupted memory item skip
                 continue # If we can't decrypt, skip this fact to not poison the model
         
         if f_type == "error":

@@ -200,6 +200,106 @@ class MemoryScanner:
             row = await cursor.fetchone()
             return row[0] if row else 0
 
+    # ── Immortality Index queries ───────────────────────────────────
+
+    async def domain_coverage(self) -> tuple[int, int]:
+        """Filled vs. theoretical max (fact_type × project) pairs.
+
+        Returns:
+            (filled_pairs, theoretical_max) — coverage = filled / max.
+        """
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT COUNT(DISTINCT fact_type || '::' || project) "  # nosec B608
+                f"FROM facts WHERE {_ACTIVE}"
+            )
+            row = await cursor.fetchone()
+            filled = row[0] if row else 0
+
+            cursor = await conn.execute(
+                "SELECT COUNT(DISTINCT fact_type), COUNT(DISTINCT project) "  # nosec B608
+                f"FROM facts WHERE {_ACTIVE}"
+            )
+            row = await cursor.fetchone()
+            n_types = row[0] if row else 0
+            n_projects = row[1] if row else 0
+            theoretical = n_types * n_projects
+
+            return filled, max(theoretical, 1)
+
+    async def temporal_gap_days(
+        self,
+        project: str | None = None,
+    ) -> tuple[float, float, int]:
+        """Largest gap between consecutive facts and total time span.
+
+        Returns:
+            (max_gap_days, total_span_days, active_days) — continuity = 1 - max_gap/span.
+        """
+        where = _ACTIVE
+        params: list[str] = []
+        if project:
+            where += _PROJECT_FILTER
+            params.append(project)
+
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT DATE(created_at) AS day "  # nosec B608
+                f"FROM facts WHERE {where} "
+                "GROUP BY day ORDER BY day",
+                params,
+            )
+            rows = await cursor.fetchall()
+            if not rows or len(rows) < 2:
+                return 0.0, max(1.0, float(len(rows))), len(rows)
+
+            from datetime import date as dt_date
+
+            days = [dt_date.fromisoformat(r[0]) for r in rows if r[0]]
+            if len(days) < 2:
+                return 0.0, 1.0, len(days)
+
+            gaps = [(days[i + 1] - days[i]).days for i in range(len(days) - 1)]
+            max_gap = float(max(gaps)) if gaps else 0.0
+            total_span = float((days[-1] - days[0]).days) or 1.0
+
+            return max_gap, total_span, len(days)
+
+    async def confidence_weight_sum(
+        self,
+        project: str | None = None,
+    ) -> tuple[float, int]:
+        """Sum of confidence-weighted facts and total count.
+
+        Weights: C5=1.0, C4=0.8, C3=0.6, C2=0.4, C1=0.2.
+
+        Returns:
+            (weighted_sum, total_facts) — quality = weighted / total.
+        """
+        where = _ACTIVE
+        params: list[str] = []
+        if project:
+            where += _PROJECT_FILTER
+            params.append(project)
+
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT confidence, COUNT(*) "  # nosec B608
+                f"FROM facts WHERE {where} "
+                "GROUP BY confidence",
+                params,
+            )
+            rows = await cursor.fetchall()
+
+        weights = {"C5": 1.0, "C4": 0.8, "C3": 0.6, "C2": 0.4, "C1": 0.2}
+        weighted = 0.0
+        total = 0
+        for conf, count in rows:
+            total += count
+            weighted += weights.get(str(conf), 0.3) * count
+
+        return weighted, max(total, 1)
+
     # ── Internal helpers ─────────────────────────────────────────────
 
     async def _grouped_count(

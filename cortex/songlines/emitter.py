@@ -82,7 +82,7 @@ class ResonanceEmitter:
             try:
                 with open(songline_file) as f:
                     data = json.load(f)
-            except Exception:
+            except (json.JSONDecodeError, OSError):
                 pass
 
         file_key = target_file.name

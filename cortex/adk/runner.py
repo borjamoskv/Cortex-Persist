@@ -154,7 +154,8 @@ def run_cli(
     print(f"   Model: {agent.model}{toolbox_status}")
     print("   Type 'quit' to exit\n")
 
-    session = session_service.create_session(app_name="cortex", user_id="moskv-1")
+    session_obj = session_service.create_session(app_name="cortex", user_id="moskv-1")
+    session = asyncio.run(session_obj) if asyncio.iscoroutine(session_obj) else session_obj
 
     while True:
         try:
@@ -180,13 +181,15 @@ def run_cli(
         print()
         for event in runner.run(
             user_id="moskv-1",
-            session_id=session.id,
+            session_id=session.id,  # type: ignore[union-attr]
             new_message=content,
         ):
             if event.is_final_response():
-                for part in event.content.parts:
-                    if part.text:
-                        print(part.text)
+                if event.content:
+                    parts = getattr(event.content, "parts", []) or []
+                    for part in parts:
+                        if part.text:
+                            print(part.text)
         print()
 
 

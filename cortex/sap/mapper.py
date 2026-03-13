@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.sap.mapper")
 _SAP_META_KEYS = frozenset({"__metadata", "__deferred", "__count", "results"})
 
 
-@dataclass(slots=True)
+@dataclass()
 class SyncDiff:
     """Result of diffing CORTEX facts against SAP entities."""
 

@@ -6,8 +6,8 @@ Replaces UUIDv4. Generates lexicographically sortable, distributed IDs.
 Ensures perfect causal order without relying on absolute timestamps.
 """
 
-import time
 import threading
+import time
 
 
 class SovereignFlake:

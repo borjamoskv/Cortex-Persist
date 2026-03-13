@@ -8,6 +8,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING
 
+from cortex.crypto.aes import get_default_encrypter
 from cortex.memory.temporal import now_iso
 from cortex.sync.common import (
     MEMORY_DIR,
@@ -17,7 +18,6 @@ from cortex.sync.common import (
     load_sync_state,
     save_sync_state,
 )
-from cortex.crypto.aes import get_default_encrypter
 
 __all__ = ["export_to_json"]
 
@@ -34,13 +34,13 @@ def _decrypt_json(val: str | None) -> dict:
             enc = get_default_encrypter()
             res = enc.decrypt_json(val)
             return res if isinstance(res, dict) else {}
-        except Exception as e:
+        except (ValueError, TypeError, json.JSONDecodeError) as e:
             logger.warning("Decryption failed for json meta: %s", e)
             return {}
     try:
         res = json.loads(val)
         return res if isinstance(res, dict) else {}
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return {}
 
 def _decrypt_json_list(val: str | None) -> list:
@@ -53,13 +53,13 @@ def _decrypt_json_list(val: str | None) -> list:
             if decrypted:
                 res = json.loads(decrypted)
                 return res if isinstance(res, list) else []
-        except Exception as e:
+        except (ValueError, TypeError, json.JSONDecodeError) as e:
             logger.warning("Decryption failed for json list: %s", e)
         return []
     try:
         res = json.loads(val)
         return res if isinstance(res, list) else []
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return []
 
 

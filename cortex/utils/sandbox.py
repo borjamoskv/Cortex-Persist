@@ -200,7 +200,7 @@ _BLOCKED_ATTRS = frozenset(
 # ─── Data Models ─────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SandboxVerdict:
     """Result of AST validation."""
 
@@ -214,7 +214,7 @@ class SandboxVerdict:
         return f"SandboxVerdict(UNSAFE, {len(self.violations)} violations)"
 
 
-@dataclass(slots=True)
+@dataclass()
 class ExecResult:
     """Result of sandboxed execution."""
 
@@ -408,7 +408,7 @@ class ASTSandbox:
                 stdout=captured.getvalue(),
                 duration_ms=(_time.monotonic() - start) * 1000,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — sandbox restriction catches all dynamic execution errors
             return ExecResult(
                 success=False,
                 error=f"{type(e).__name__}: {e}",

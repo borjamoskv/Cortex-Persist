@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass(slots=True)
+@dataclass()
 class ActionItem:
     """A scored, prioritized action derived from CORTEX memory.
 
@@ -61,7 +61,7 @@ ACTION_TYPE_MAP: dict[str, str] = {
 }
 
 
-@dataclass(slots=True)
+@dataclass()
 class PolicyConfig:
     """Tunable parameters for the Bellman value function.
 

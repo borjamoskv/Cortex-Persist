@@ -111,7 +111,9 @@ def _apply_dedup_strategy(
     from cortex.compaction.strategies.dedup import execute_dedup
 
     prev_count = len(result.deprecated_ids)
-    execute_dedup(engine, project, result, dry_run, similarity_threshold)  # type: ignore[reportUnusedCoroutine]
+    execute_dedup(  # type: ignore[reportUnusedCoroutine]
+        engine, project, result, dry_run, similarity_threshold,
+    )
     if len(result.deprecated_ids) > prev_count:
         result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
@@ -273,8 +275,8 @@ async def compact_session(
     # ─── AXIOM L4: Unified Temporal Decay ──────────────────────────────
     try:
         await conn.create_function("cortex_decay", 4, _cortex_decay)
-    except Exception:
-        pass  # Already registered
+    except (sqlite3.Error, AttributeError):
+        pass  # Already registered or unsupported
 
     now = time.time()
     half_life = 7 * 24 * 3600  # 7 days in seconds

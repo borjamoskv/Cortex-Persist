@@ -122,7 +122,7 @@ def detect_language(text: str) -> str:
 
     # Try optional langdetect if available
     try:
-        from langdetect import detect as _detect   # type: ignore[import-untyped]
+        from langdetect import detect as _detect  # type: ignore[import-untyped]
         detected = _detect(text[:500])
         if detected in _TOKEN_TAX_RATIOS:
             return detected

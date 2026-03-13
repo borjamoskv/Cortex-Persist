@@ -129,7 +129,7 @@ def _search_attached_db(
         if str(content_raw).startswith(v6_prefix):
             try:
                 content = enc.decrypt_str(content_raw, tenant_id="default")
-            except Exception:
+            except (ValueError, TypeError, OSError):
                 continue
         else:
             content = str(content_raw)

@@ -83,7 +83,7 @@ _IGNORE_PATTERNS: Final[re.Pattern] = re.compile(
 )
 
 
-@dataclass(slots=True)
+@dataclass()
 class FileEvent:
     """A single file system event after debouncing."""
 
@@ -99,7 +99,7 @@ class FileEvent:
         return Path(self.path).name
 
 
-@dataclass(slots=True)
+@dataclass()
 class BehavioralSnapshot:
     """Inferred user behavior from a window of file events."""
 

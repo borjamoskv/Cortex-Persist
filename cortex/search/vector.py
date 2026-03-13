@@ -148,6 +148,7 @@ def semantic_search_sync(
     conn: sqlite3.Connection,
     query_embedding: list[float],
     top_k: int = 5,
+    tenant_id: str = "default",
     project: str | None = None,
     confidence: str | None = None,
 ) -> list[SearchResult]:
@@ -160,11 +161,12 @@ def semantic_search_sync(
             f.source, f.tags, ve.distance
         FROM fact_embeddings AS ve
         JOIN facts AS f ON f.id = ve.fact_id
-        WHERE ve.embedding MATCH ?
+        WHERE f.tenant_id = ?
+            AND ve.embedding MATCH ?
             AND k = ?
             AND f.valid_until IS NULL
     """
-    params: list = [embedding_json, top_k * 3]
+    params: list = [tenant_id, embedding_json, top_k * 3]
     if project:
         sql += _FILTER_PROJECT
         params.append(project)
@@ -194,7 +196,7 @@ def semantic_search_sync(
         content = row[1]
         if content and str(content).startswith(enc.PREFIX):
             try:
-                content = enc.decrypt_string(content)  # type: ignore[reportAttributeAccessIssue]
+                content = enc.decrypt_str(content, tenant_id=tenant_id)
             except (ValueError, OSError):
                 pass
 

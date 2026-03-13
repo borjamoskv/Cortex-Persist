@@ -5,6 +5,7 @@ from cortex.migrations.mig_base import (
     _migration_004_vector_index,
     _migration_005_fts5_setup,
 )
+from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
 from cortex.migrations.mig_consensus import (
     _migration_007_consensus_layer,
     _migration_008_consensus_refinement,
@@ -25,7 +26,6 @@ from cortex.migrations.mig_signals import _migration_019_signal_bus
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
-from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
 
 __all__ = ["MIGRATIONS"]
 

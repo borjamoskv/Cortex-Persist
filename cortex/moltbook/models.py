@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class MoltbookCredentials:
     """Stored API credentials."""
 
@@ -13,7 +13,7 @@ class MoltbookCredentials:
     agent_name: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Verification:
     """AI verification challenge from Moltbook."""
 
@@ -23,7 +23,7 @@ class Verification:
     instructions: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Author:
     """Post/comment author."""
 
@@ -31,7 +31,7 @@ class Author:
     id: str | None = None
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Submolt:
     """Community info."""
 
@@ -39,7 +39,7 @@ class Submolt:
     display_name: str | None = None
 
 
-@dataclass(slots=True)
+@dataclass()
 class Post:
     """A Moltbook post."""
 
@@ -57,7 +57,7 @@ class Post:
     created_at: str | None = None
 
 
-@dataclass(slots=True)
+@dataclass()
 class Comment:
     """A Moltbook comment."""
 
@@ -72,7 +72,7 @@ class Comment:
     verification: Verification | None = None
 
 
-@dataclass(slots=True)
+@dataclass()
 class HeartbeatState:
     """Tracks heartbeat check-in timestamps."""
 
@@ -82,7 +82,7 @@ class HeartbeatState:
     skill_version: str = "1.12.0"
 
 
-@dataclass(slots=True)
+@dataclass()
 class HomeResponse:
     """Parsed /home dashboard response."""
 
