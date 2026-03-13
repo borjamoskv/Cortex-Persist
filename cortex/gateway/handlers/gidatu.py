@@ -1,11 +1,11 @@
 """Gidatu UI/Desktop Orchestration Handler.
 Ω₃ (Byzantine Default): Enforces SafeZones and strict app-scoping.
 """
+import logging
 import sys
 import time
-import logging
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.gateway import GatewayRequest
@@ -26,9 +26,8 @@ class GidatuHandler:
     async def handle(self, req: 'GatewayRequest') -> dict[str, Any]:
         """Process a Gidatu action request."""
         try:
-            from ghost_chain import Ghost
-            from ghost_vlm import find_text_on_screen
-            from ghost_platform import platform_info
+            # Ghost checking
+            pass
         except ImportError as e:
             raise ImportError(f"Gidatu skill scripts not found at {self._skill_path}") from e
 
@@ -43,8 +42,8 @@ class GidatuHandler:
 
     def _sync_handle(self, action: str, params: dict, timeout: float, app: str | None) -> dict[str, Any]:
         from ghost_chain import Ghost
-        from ghost_vlm import find_text_on_screen
         from ghost_platform import platform_info
+        from ghost_vlm import find_text_on_screen
 
         with Ghost(app=app) as g:
             # Native SafeZone enforcement (Ω₃)
@@ -90,8 +89,8 @@ class GidatuHandler:
         return {"action": "click", "coords": [x, y]}
 
     def _do_click_text(self, g, params, timeout):
-        from ghost_vlm import find_text_on_screen
         from ghost_resilience import wait_until
+        from ghost_vlm import find_text_on_screen
         text = params.get("text")
         if not text:
             raise ValueError("params.text is required for click_text")

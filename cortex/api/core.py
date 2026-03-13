@@ -27,6 +27,7 @@ from cortex.api.middleware import (
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
 from cortex.hive.main import router as hive_router
+from cortex.metering.middleware import MeteringMiddleware
 from cortex.routes import (
     admin as admin_router,
 )
@@ -54,18 +55,22 @@ from cortex.routes import (
 from cortex.routes import (
     graph as graph_router,
 )
+from cortex.routes import health as health_index_router
 from cortex.routes import (
     ledger as ledger_router,
 )
 from cortex.routes import (
     mejoralo as mejoralo_router,
 )
+from cortex.routes import memories as memories_router
 from cortex.routes import (
     missions as missions_router,
 )
 from cortex.routes import (
     notch_ws as notch_ws_router,
 )
+from cortex.routes import onboarding as onboarding_router
+from cortex.routes import oracle as oracle_router
 from cortex.routes import (
     search as search_router,
 )
@@ -84,6 +89,7 @@ from cortex.routes import (
 from cortex.routes import (
     translate as translate_router,
 )
+from cortex.routes import usage as usage_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.timing import TimingTracker
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
@@ -206,6 +212,7 @@ app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
+app.add_middleware(MeteringMiddleware)
 
 
 # ─── Exception Handlers ──────────────────────────────────────────────
@@ -269,7 +276,25 @@ async def health_check(request: Request) -> dict:
         if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
             cortisol = engine.manager._endocrine.cortisol_level
             growth = engine.manager._endocrine.neural_growth
-    except Exception:
+    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — health check must never crash
+        pass
+
+    # Health Index integration
+    health_score = 0.0
+    health_grade = "F"
+    try:
+        from cortex.health import HealthCollector, HealthScorer
+
+        db_path = ""
+        engine = getattr(request.app.state, "engine", None)
+        if engine:
+            db_path = str(getattr(engine, "_db_path", ""))
+        collector = HealthCollector(db_path=db_path)
+        metrics_snap = collector.collect_all()
+        hs = HealthScorer.score(metrics_snap)
+        health_score = round(hs.score, 2)
+        health_grade = hs.grade
+    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001
         pass
 
     return {
@@ -278,6 +303,11 @@ async def health_check(request: Request) -> dict:
         "version": __version__,
         "cortisol": round(cortisol, 3),
         "neuroplasticity": round(growth, 3),
+        "health_index": {
+            "score": health_score,
+            "grade": health_grade,
+            "healthy": health_score >= 40.0,
+        },
     }
 
 
@@ -297,6 +327,7 @@ app.include_router(ask_router.router)
 app.include_router(admin_router.router)
 app.include_router(timing_router.router)
 app.include_router(translate_router.router)
+app.include_router(oracle_router.router)
 app.include_router(daemon_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(agents_router.router)
@@ -311,6 +342,10 @@ app.include_router(telemetry_router.router)
 app.include_router(hive_router)
 app.include_router(notch_ws_router.router)
 app.include_router(topology_ws_router.router)
+app.include_router(memories_router.router)
+app.include_router(usage_router.router)
+app.include_router(onboarding_router.router)
+app.include_router(health_index_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

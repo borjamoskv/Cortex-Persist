@@ -9,14 +9,13 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
-from cortex.llm.sovereign import SovereignLLM
 from cortex.gateway.spoof import SpoofManager
+from cortex.llm.sovereign import SovereignLLM
 
 logger = logging.getLogger("cortex.gateway.openai")
 
@@ -30,14 +29,14 @@ _spoof_manager = SpoofManager()
 class OpenAIMessage(BaseModel):
     role: str
     content: str
-    name: Optional[str] = None
+    name: str | None = None
 
 class OpenAICompletionRequest(BaseModel):
     model: str
     messages: list[OpenAIMessage]
-    temperature: Optional[float] = 0.3
-    max_tokens: Optional[int] = 4096
-    stream: Optional[bool] = False
+    temperature: float | None = 0.3
+    max_tokens: int | None = 4096
+    stream: bool | None = False
 
 # --- Routes ---
 
@@ -45,7 +44,7 @@ class OpenAICompletionRequest(BaseModel):
 async def openai_chat_completions(
     request: Request,
     body: OpenAICompletionRequest,
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
     
@@ -91,7 +90,7 @@ async def openai_chat_completions(
                         ]
                     }
                     yield f"data: {JSONResponse(data).body.decode()}\n\n"
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)
                 yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
 
@@ -139,7 +138,7 @@ async def openai_chat_completions(
             ],
             "system_fingerprint": "cortex-sovereign-v5"
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — endpoint boundary
         logger.error("Spoof Completion Error: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
