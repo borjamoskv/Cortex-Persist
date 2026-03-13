@@ -1,9 +1,12 @@
 import logging
 import uuid
-from typing import Any, Dict, List, Literal, Optional, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
+
 try:
-    from langgraph.graph import StateGraph, END
+    from langgraph.graph import END, StateGraph
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     StateGraph = None
@@ -17,15 +20,15 @@ class NightShiftState(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     session_id: str
-    messages: List[Dict[str, Any]] = []
-    variables: Dict[str, Any] = {}
+    messages: list[dict[str, Any]] = []
+    variables: dict[str, Any] = {}
     next_node: str = "planner"
     retry_count: int = 0
     max_retries: int = 3
     is_paused: bool = False
     
     @classmethod
-    def create(cls, session_id: Optional[str] = None):
+    def create(cls, session_id: str | None = None):
         return cls(session_id=session_id or str(uuid.uuid4()))
 
 class SupervisorNode:
@@ -51,7 +54,7 @@ class CortexLangGraphSupervisor:
             raise LangGraphSupervisorError("LangGraph no está instalado. Ejecute 'pip install langgraph'.")
             
         self.name = name
-        self.nodes: Dict[str, SupervisorNode] = {}
+        self.nodes: dict[str, SupervisorNode] = {}
         self.graph_builder = StateGraph(NightShiftState)
         self.compiled_app = None
         
@@ -70,7 +73,7 @@ class CortexLangGraphSupervisor:
         """Define una arista incondicional."""
         self.graph_builder.add_edge(source, target)
 
-    def add_conditional_edges(self, source: str, decision_func, edge_map: Dict[str, str]):
+    def add_conditional_edges(self, source: str, decision_func, edge_map: dict[str, str]):
         """Define bifurcación predictible."""
         self.graph_builder.add_conditional_edges(source, decision_func, edge_map)
 
@@ -91,6 +94,6 @@ class CortexLangGraphSupervisor:
             # LangGraph astream returns chunks of updates
             async for state_update in self.compiled_app.astream(initial_state):
                 yield state_update
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error("☠️ [SUPERVISOR] Fallo de Ejecución Duradera: %s", e)
             raise LangGraphSupervisorError(f"Colapso en grafo: {e}") from e

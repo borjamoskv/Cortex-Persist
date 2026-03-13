@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -161,8 +162,8 @@ class JosuProactiveDaemon:
             except asyncio.CancelledError:
                 logger.info("🛑 [JOSU] Daemon shutdown signal received.")
                 raise
-            except Exception as e:
-                logger.error("☠️ [JOSU] Loop error: %s", e, exc_info=True)
+            except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
+                logger.exception("☠️ [JOSU] Loop error: %s", e)
 
             await asyncio.sleep(POLL_INTERVAL_S)
 
@@ -172,7 +173,15 @@ class JosuProactiveDaemon:
         """Process a single ghost target with semaphore-controlled concurrency."""
         async with semaphore:
             self._active_tasks += 1
+            source_id = f"josu-{target.id[:8]}"
             try:
+                # Signal planning
+                async with self.db.session() as conn:
+                    from cortex.signals.bus import AsyncSignalBus
+                    await bus.emit(
+                        "swarm:plan", {"task": f"Analyzing {target.id[:8]}"}, source=source_id
+                    )
+
                 result = await self._execute_in_isolation(target)
                 self._results.append(result)
 
@@ -183,6 +192,10 @@ class JosuProactiveDaemon:
                         result.beats_used,
                         result.duration_ms,
                     )
+                    async with self.db.session() as conn:
+                        bus = AsyncSignalBus(conn)
+                        await bus.emit("swarm:complete", {"result": "Resolved"}, source=source_id)
+
                     await self._create_review_request(target, result)
                 else:
                     logger.warning(
@@ -192,6 +205,33 @@ class JosuProactiveDaemon:
                         target.max_attempts,
                         result.error or "Pulse flatlined.",
                     )
+                    
+                    async with self.db.session() as conn:
+                        bus = AsyncSignalBus(conn)
+                        if target.attempts + 1 >= target.max_attempts:
+                            await bus.emit(
+                                "swarm:halt",
+                                {
+                                    "reason": result.error
+                                    or "Max attempts reached. Human review required."
+                                },
+                                source=source_id,
+                            )
+                            # Invoke HumanEscalationPulse structurally
+                            from cortex.swarm.escalation import HumanEscalationPulse
+
+                            raise HumanEscalationPulse(
+                                source_id,
+                                f"Failed to fix {target.id} after {target.max_attempts} "
+                                f"attempts. Error: {result.error}",
+                            )
+                        else:
+                            await bus.emit(
+                                "swarm:error",
+                                {"error": result.error or "Pulse failed"},
+                                source=source_id,
+                            )
+
             finally:
                 self._active_tasks -= 1
 
@@ -199,12 +239,21 @@ class JosuProactiveDaemon:
         """Spawn an ephemeral Pulse agent inside an isolated worktree."""
         branch_name = f"josu/fix-{target.id}-{int(time.time())}"
         start = time.monotonic()
+        source_id = f"josu-{target.id[:8]}"
 
         try:
             async with isolated_worktree(
                 branch_name=branch_name, base_path=target.repo_path
             ) as wt_path:
                 logger.info("🌿 [JOSU] Worktree lab created at %s", wt_path)
+
+                async with self.db.session() as conn:
+                    from cortex.signals.bus import AsyncSignalBus
+
+                    bus = AsyncSignalBus(conn)
+                    await bus.emit(
+                        "swarm:worktree_enter", {"branch": branch_name}, source=source_id
+                    )
 
                 # Import Pulse lazily to avoid circular deps
                 from cortex.engine.metabolism import Metabolism
@@ -224,8 +273,16 @@ class JosuProactiveDaemon:
 
                 toolkit = AgentToolkit(wt_path)
 
+                async with self.db.session() as conn:
+                    bus = AsyncSignalBus(conn)
+                    await bus.emit(
+                        "swarm:verify", {"action": "Running baseline tests"}, source=source_id
+                    )
+
                 # Run tests to detect baseline state
-                test_output = toolkit.bash("python -m pytest --tb=short -q 2>&1 || true", timeout=30)
+                test_output = toolkit.bash(
+                    "python -m pytest --tb=short -q 2>&1 || true", timeout=30
+                )
                 diag = metabolism.metabolize(test_output, "action")
 
                 elapsed = (time.monotonic() - start) * 1000
@@ -238,7 +295,7 @@ class JosuProactiveDaemon:
                     duration_ms=elapsed,
                 )
 
-        except Exception as e:
+        except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
             elapsed = (time.monotonic() - start) * 1000
             return FixResult(
                 ghost_id=target.id,
@@ -270,7 +327,7 @@ class JosuProactiveDaemon:
                         except json.JSONDecodeError:
                             meta = {}
                     meta = meta or {}
-                    
+
                     targets.append(
                         GhostTarget(
                             id=str(r[0]),
@@ -281,7 +338,7 @@ class JosuProactiveDaemon:
                         )
                     )
                 return targets
-        except Exception as e:
+        except (sqlite3.Error, ValueError, TypeError) as e:
             logger.error("⚠️ [JOSU] Database scan failed: %s", e)
             return []
 
@@ -294,8 +351,39 @@ class JosuProactiveDaemon:
             target.id,
             result.summary[:100],
         )
-        # TODO: Persist walkthrough.md to CORTEX DB as review_request
-        # TODO: Notify via AetherAlert pipeline
+
+        # [DESTRUCTOR-OMEGA] Technical debt resolved: Authored the persistence layer
+        try:
+            content = (
+                f"Josu Daemon Fix for Ghost [{target.id}]\n"
+                f"Success: {result.success}\n"
+                f"Beats: {result.beats_used}\n"
+                f"Duration: {result.duration_ms:.1f}ms\n\n"
+                f"Summary:\n{result.summary}"
+            )
+            if result.error:
+                content += f"\n\nError: {result.error}"
+
+            meta = {
+                "ghost_id": target.id,
+                "beats_used": result.beats_used,
+                "duration_ms": result.duration_ms,
+                "workflow": "josu_proactive",
+            }
+
+            # Attempt to persist to CORTEX DB
+            if hasattr(self.db, "store"):
+                await self.db.store(
+                    project=target.project,
+                    content=content,
+                    fact_type="review_request",
+                    source="agent:josu_daemon",
+                    meta=meta,
+                    tags=["josu", "code_sniper_review", target.id],
+                )
+            logger.info("🚨 [AETHER-ALERT] Walkthrough review generated for %s.", target.id)
+        except (sqlite3.Error, ValueError, TypeError) as e:
+            logger.error("☠️ [JOSU] Error generating review request: %s", e)
 
     # ── Introspection ─────────────────────────────────────────────────
 

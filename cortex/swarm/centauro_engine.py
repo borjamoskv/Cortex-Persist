@@ -144,7 +144,7 @@ class CentauroEngine:
         async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
             try:
                 return (a_id, await a.execute("M-01", mission))
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 return (a_id, exc)
 
         agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
@@ -223,7 +223,7 @@ class CentauroEngine:
                         "formation": f"{formation}+ALEPH",
                         "reason": f"Paradigm Shift: {leap['paradigm_shift']}",
                     }
-                except Exception as leap_e:
+                except Exception as leap_e:  # noqa: BLE001
                     logger.error("ALEPH-Ω Leap failed: %s", leap_e)
                     result = {
                         "status": "failure",
@@ -235,7 +235,7 @@ class CentauroEngine:
             mission_future.set_result(result)
             return result
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if not mission_future.done():
                 mission_future.set_exception(e)
             raise

@@ -1,18 +1,7 @@
 """CORTEX v8.0 — Conflict Resolution Protocol (LEGION-Ω).
 
-Sovereign autonomous conflict resolution for multi-agent swarms.
-When agents propose contradictory solutions, this protocol resolves
-disagreements via a 4-tier escalation ladder:
-
-    Tier 1: Factual Triangulation (verify against 3+ sources)
-    Tier 2: Weighted Voting (domain expertise × track record × confidence × recency)
-    Tier 3: Architect Arbitration (LLM-as-judge with >80% confidence gate)
-    Tier 4: Heuristic Deadlock Breaker (reversibility + cost + confidence scoring)
-
-Axiom Derivations:
-    Ω₃ (Byzantine Default): Zero-trust voting — no agent's word is taken at face value.
-    Ω₂ (Entropic Asymmetry): Prefer the option with lower entropy delta.
-    Ω₅ (Antifragile by Default): Every conflict generates an antibody (decision record).
+4-tier escalation: Triangulation → Weighted Vote → Architect → Heuristic Deadlock.
+Axioms: Ω₃ (Byzantine), Ω₂ (Entropic Asymmetry), Ω₅ (Antifragile).
 """
 
 from __future__ import annotations
@@ -21,16 +10,13 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 logger = logging.getLogger("cortex.swarm.conflict_resolution")
 
 
-# ── Enums ──────────────────────────────────────────────────────────────────
-
-
-class ConflictType(StrEnum):
+class ConflictType(str, Enum):
     """Classification of conflict nature."""
 
     FACTUAL = "factual"          # Verifiable, e.g. version numbers
@@ -39,7 +25,7 @@ class ConflictType(StrEnum):
     PRIORITY = "priority"        # Ordering disputes
 
 
-class ResolutionMethod(StrEnum):
+class ResolutionMethod(str, Enum):
     """How the conflict was ultimately resolved."""
 
     TRIANGULATION = "triangulation"
@@ -49,10 +35,7 @@ class ResolutionMethod(StrEnum):
     HUMAN_ESCALATION = "human-escalation"
 
 
-# ── Data Models ────────────────────────────────────────────────────────────
-
-
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ConflictOption:
     """A single proposed solution in a conflict."""
 
@@ -64,7 +47,7 @@ class ConflictOption:
     estimated_cost: float = 0.0      # Abstract cost units
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentProfile:
     """Lightweight agent profile for vote weight calculation."""
 
@@ -75,7 +58,7 @@ class AgentProfile:
     recency_score: float = 0.0       # How recently active in this domain [0, 1]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class WeightedVote:
     """A vote cast with computed weight."""
 
@@ -89,7 +72,7 @@ class WeightedVote:
     recency_component: float
 
 
-@dataclass(slots=True)
+@dataclass()
 class ConflictResolution:
     """Full resolution record — persisted as a knowledge item."""
 
@@ -117,7 +100,7 @@ class ConflictResolution:
         }
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ResolutionResult:
     """Outcome of a conflict resolution round."""
 
@@ -139,9 +122,6 @@ class ResolutionResult:
         }
 
 
-# ── Vote Weight Calculator ────────────────────────────────────────────────
-
-
 # Weight distribution constants (sum = 1.0)
 _W_DOMAIN: float = 0.40
 _W_TRACK: float = 0.30
@@ -150,12 +130,7 @@ _W_RECENCY: float = 0.10
 
 
 def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> WeightedVote | None:
-    """Compute reputation-weighted vote score for an agent.
-
-    DECISION: Ω₃ + Ω₂ → Domain expertise dominates (40%) because
-    a security expert's opinion on security > a UX agent's opinion on security.
-    Track record (30%) ensures agents with proven accuracy are amplified.
-    """
+    """Compute reputation-weighted vote score for an agent."""
     domain_match = 1.0 if agent.specialty.lower() == conflict_domain.lower() else 0.3
 
     d = domain_match * _W_DOMAIN
@@ -176,20 +151,8 @@ def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> Weighted
     )
 
 
-# ── Deadlock Breaker ──────────────────────────────────────────────────────
-
-
 class DeadlockBreaker:
-    """Last-resort heuristic resolver when consensus fails.
-
-    Axiom Ω₂: Prefer the option with lower thermodynamic cost.
-    Axiom Ω₆ (Zenón's Razor): When deliberation costs exceed production, collapse into action.
-
-    Heuristic scoring:
-        0.4 × reversibility  (prefer undoable choices)
-        0.3 × (1 - relative_cost)  (prefer cheaper)
-        0.3 × confidence  (prefer more certain)
-    """
+    """Last-resort heuristic resolver: 0.4×reversibility + 0.3×(1-cost) + 0.3×confidence."""
 
     __slots__ = ("_budget",)
 
@@ -234,32 +197,10 @@ class DeadlockBreaker:
         return round(rev + cost + conf, 4)
 
 
-# ── Conflict Resolution Engine ────────────────────────────────────────────
-
-
 class ConflictResolver:
-    """The Sovereign Conflict Resolution Engine.
+    """Sovereign Conflict Resolution Engine (4-tier escalation ladder)."""
 
-    Implements the 4-tier escalation ladder:
-        1. Factual → Triangulation
-        2. Multi-agent → Weighted Vote
-        3. Architect → LLM Arbitration (stub for integration)
-        4. Deadlock → Heuristic Breaker
-
-    Usage::
-
-        resolver = ConflictResolver()
-        result = await resolver.resolve(
-            conflict_type=ConflictType.STRATEGIC,
-            options=[opt_a, opt_b],
-            agents={"agent-001": (profile_001, "plan-a"), ...},
-            conflict_domain="architecture",
-        )
-    """
-
-    # Consensus threshold: 70% weighted agreement = resolution
     CONSENSUS_THRESHOLD: float = 0.70
-    # Architect confidence gate: only decides if >80% sure
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
 
     __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
@@ -267,7 +208,7 @@ class ConflictResolver:
     def __init__(self, budget: float = 100.0) -> None:
         self._history: list[ConflictResolution] = []
         self._deadlock_breaker = DeadlockBreaker(budget=budget)
-        self._conflict_counter: int = 0
+        self._conflict_counter = 0
 
     async def resolve(
         self,
@@ -278,18 +219,7 @@ class ConflictResolver:
         conflict_domain: str = "general",
         architect_judge: Any | None = None,
     ) -> ConflictResolution:
-        """Execute the full escalation ladder.
-
-        Args:
-            conflict_type: Classification of the conflict.
-            options: The competing proposals.
-            agents: Map of agent_id → (profile, vote_for_option_id).
-            conflict_domain: Domain tag for expertise matching.
-            architect_judge: Optional async callable for Tier 3 (LLM arbitration).
-
-        Returns:
-            ConflictResolution with full audit trail.
-        """
+        """Execute the full escalation ladder."""
         self._conflict_counter += 1
         conflict_id = self._generate_id()
         now = time.time()
@@ -300,12 +230,12 @@ class ConflictResolver:
             conflict_id, conflict_type.value, len(options), len(agents),
         )
 
-        # ── Tier 1: Factual Triangulation ──────────────────────────
+        # Tier 1: Factual Triangulation
         if conflict_type == ConflictType.FACTUAL:
             result = await self._triangulate(options, agents)
             return self._record(conflict_id, now, conflict_type, participants, options, result)
 
-        # ── Tier 2: Weighted Voting ────────────────────────────────
+        # Tier 2: Weighted Voting
         votes, result = self._weighted_vote(options, agents, conflict_domain)
 
         if result.consensus_level >= self.CONSENSUS_THRESHOLD:
@@ -319,7 +249,7 @@ class ConflictResolver:
             result.consensus_level * 100, self.CONSENSUS_THRESHOLD * 100,
         )
 
-        # ── Tier 3: Architect Arbitration ──────────────────────────
+        # Tier 3: Architect Arbitration
         if architect_judge is not None:
             arb_result = await self._architect_arbitrate(options, architect_judge)
             if arb_result is not None:
@@ -327,26 +257,19 @@ class ConflictResolver:
                 record.votes = votes
                 return record
 
-        # ── Tier 4: Deadlock Heuristic ─────────────────────────────
+        # Tier 4: Deadlock Heuristic
         logger.warning("🔧 Deadlock: applying heuristic breaker (Ω₆ Zenón's Razor)")
         dl_result = self._deadlock_breaker.resolve(options)
         record = self._record(conflict_id, now, conflict_type, participants, options, dl_result)
         record.votes = votes
         return record
 
-    # ── Tier 1: Triangulation ──────────────────────────────────────────────
-
     async def _triangulate(
         self,
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],
     ) -> ResolutionResult:
-        """Resolve factual conflicts by evidence weight.
-
-        For factual disputes, each option's 'vote count' from agents
-        acts as a proxy for source triangulation. The option with more
-        independent sources wins.
-        """
+        """Resolve factual conflicts by evidence weight."""
         option_votes: dict[str, int] = {o.id: 0 for o in options}
         for _, (_, chosen_id) in agents.items():
             if chosen_id in option_votes:
@@ -375,19 +298,13 @@ class ConflictResolver:
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
 
-    # ── Tier 2: Weighted Voting ────────────────────────────────────────────
-
     def _weighted_vote(
         self,
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],
         conflict_domain: str,
     ) -> tuple[list[WeightedVote], ResolutionResult]:
-        """Execute reputation-weighted voting.
-
-        Returns:
-            (votes, result) — votes for audit trail, result with winner.
-        """
+        """Execute reputation-weighted voting."""
         # O(1) accumulator per option
         option_weights: dict[str, float] = {o.id: 0.0 for o in options}
         all_votes: list[WeightedVote] = []
@@ -439,21 +356,12 @@ class ConflictResolver:
             total_weight_against=total_weight - winner_weight,
         )
 
-    # ── Tier 3: Architect Arbitration ──────────────────────────────────────
-
     async def _architect_arbitrate(
         self,
         options: list[ConflictOption],
         judge: Any,
     ) -> ResolutionResult | None:
-        """Invoke an LLM-as-judge for complex strategic decisions.
-
-        The judge must return a dict with:
-            {"winner_id": str, "confidence": float, "reasoning": str}
-
-        If judge confidence < ARCHITECT_CONFIDENCE_GATE, returns None
-        (escalate to Tier 4).
-        """
+        """Invoke LLM-as-judge for complex strategic decisions."""
         try:
             options_desc = "\n".join(
                 f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
@@ -497,11 +405,9 @@ class ConflictResolver:
                 reasoning=f"Architect decision (conf={confidence:.2f}): {reasoning}",
             )
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Architect arbitration failed: %s", exc)
             return None
-
-    # ── Recording & Audit ──────────────────────────────────────────────────
 
     def _record(
         self,

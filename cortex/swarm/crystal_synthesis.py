@@ -14,9 +14,9 @@ import logging
 import re
 from typing import Any
 
+from cortex.llm._models import CortexPrompt
 from cortex.llm.provider import LLMProvider
 from cortex.llm.router import CortexLLMRouter, IntentProfile
-from cortex.llm._models import CortexPrompt
 
 logger = logging.getLogger("cortex.swarm.crystal_synthesis")
 
@@ -42,11 +42,13 @@ def _get_synthesis_router() -> CortexLLMRouter:
                 primary = provider
             else:
                 fallbacks.append(provider)
-        except Exception:
+        except (ValueError, OSError, ImportError):
             continue
 
     if primary is None:
-        raise RuntimeError("No LLM providers available for crystal synthesis.")
+        raise RuntimeError(
+            "No LLM providers available for crystal synthesis."
+        ) from None
 
     _synthesis_router = CortexLLMRouter(primary, fallbacks)
     return _synthesis_router
@@ -62,9 +64,9 @@ async def synthesize_crystals(
     Fuses the two contents into a single, dense, and non-redundant markdown.
     """
     logger.info("🧬 [SYNTHESIS] Fusing crystals... Context: %s", context)
-    
+
     router = _get_synthesis_router()
-    
+
     system_prompt = (
         "ERES EL SINTETIZADOR DE CORTEX (AUTODIDACT-Ω).\n"
         "MODO: FUSIÓN DE CRISTALES COGNITIVOS (Ω₂).\n\n"
@@ -88,7 +90,10 @@ async def synthesize_crystals(
         system_instruction=system_prompt,
         working_memory=[{
             "role": "user",
-            "content": f"PRIMARY CRYSTAL:\n{primary_content}\n\nSECONDARY CRYSTAL (REDUNDANT):\n{secondary_content}",
+            "content": (
+                f"PRIMARY CRYSTAL:\n{primary_content}\n\n"
+                f"SECONDARY CRYSTAL (REDUNDANT):\n{secondary_content}"
+            ),
         }],
         temperature=0.0,
         max_tokens=2000,
@@ -99,7 +104,10 @@ async def synthesize_crystals(
     result = await router.execute_resilient(prompt)
     if result.is_err():
         logger.error("❌ [SYNTHESIS] Failed to fuse crystals: %s", result.error)
-        return {"fused_content": primary_content + "\n\n" + secondary_content, "error": result.error}
+        return {
+            "fused_content": primary_content + "\n\n" + secondary_content,
+            "error": result.error,
+        }
 
     text_content = result.unwrap()
     try:
@@ -107,7 +115,7 @@ async def synthesize_crystals(
         if json_match:
             return json.loads(json_match.group(0))
         return {"fused_content": text_content}
-    except Exception as e:
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
         logger.error("Error parsing fused crystal: %s", e)
         # Fallback to simple concatenation if JSON fails
         return {"fused_content": primary_content + "\n\n" + secondary_content, "error": str(e)}

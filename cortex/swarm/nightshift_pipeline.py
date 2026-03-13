@@ -22,10 +22,10 @@ Axiom Derivations:
 
 from __future__ import annotations
 
-import logging
-import time
-import re
 import json
+import logging
+import re
+import time
 from typing import Any
 
 logger = logging.getLogger("cortex.swarm.nightshift_pipeline")
@@ -179,7 +179,7 @@ class ExecutorNode:
                         result.get("error", estado),
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — boundary for autodidact execution
                 logger.error("❌ [EXECUTOR] Fatal: %s → %s", task_id, e)
                 results.append(
                     {

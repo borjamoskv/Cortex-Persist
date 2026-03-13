@@ -226,7 +226,7 @@ def sovereign_quality_gate(
 
             try:
                 result = func(*args, **kwargs)
-            except Exception as exc:
+            except (TypeError, ValueError, KeyError, AttributeError, RuntimeError) as exc:
                 elapsed = time.monotonic() - t0
                 _circuit_record_failure(tool_name)
                 _end_run_tree(run_tree, error=str(exc), latency_ms=elapsed * 1000)
@@ -272,7 +272,7 @@ def sovereign_quality_gate_async(
 
             try:
                 result = await func(*args, **kwargs)
-            except Exception as exc:
+            except (TypeError, ValueError, KeyError, AttributeError, RuntimeError) as exc:
                 elapsed = time.monotonic() - t0
                 _circuit_record_failure(tool_name)
                 _end_run_tree(run_tree, error=str(exc), latency_ms=elapsed * 1000)
@@ -313,7 +313,7 @@ def _maybe_create_run_tree(
         )
         rt.post()
         return rt
-    except Exception:
+    except (ImportError, ValueError, RuntimeError):
         logger.debug("RunTree creation failed — continuing without trace", exc_info=True)
         return None
 
@@ -365,7 +365,7 @@ def _evaluate_and_finalize(
     if evaluator is not None:
         try:
             score = evaluator(kwargs, output_val)
-        except Exception as eval_exc:
+        except (TypeError, ValueError, KeyError, AttributeError) as eval_exc:
             logger.warning("Evaluator crashed for [%s]: %s", tool_name, eval_exc)
             # 150/100: Evaluator crash is a high-entropy event
             ErrorGhostPipeline().capture_sync(
