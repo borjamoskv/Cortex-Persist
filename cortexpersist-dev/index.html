@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX Persist | The Sovereign Ledger</title>
+    <meta name="description" content="Persistent memory is not a vector dump. CORTEX Persist is cryptographic, deterministic memory. Built for sovereign systems.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    <div class="scanlines"></div>
+
+    <nav class="top-nav fade-in">
+        <div class="brand">CORTEX<span class="accent">.dev</span></div>
+        <div class="nav-links">
+            <a href="https://github.com/borjamoskv/cortex-persist" target="_blank" rel="noopener">Read the Spec</a>
+            <a href="https://cortexpersist.com" target="_blank">.com</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero content-section">
+            <div class="system-badge reveal-item">
+                <span class="blinking-dot"></span>
+                <span>SYSTEM V0.3 ACTIVE · O(1) COMPLEXITY</span>
+            </div>
+            
+            <h1 class="hero-title reveal-item">Memory is identity.<br><span class="text-gradient">Zero entropy.</span></h1>
+            
+            <p class="hero-subtitle reveal-item">
+                LLM context windows are ephemeral. RAG is statistically noisy.<br>
+                CORTEX Persist provides cryptographic, deterministic memory for autonomous systems.
+            </p>
+
+            <div class="cta-group reveal-item">
+                <a href="#mechanics" class="btn btn-primary">
+                    <span class="btn-text">Architecture</span>
+                </a>
+                <a href="https://github.com/borjamoskv/cortex-persist" target="_blank" rel="noopener" class="btn btn-secondary">
+                    <span class="btn-text">GitHub</span>
+                </a>
+            </div>
+        </section>
+
+        <section id="mechanics" class="mechanics content-section">
+            <h2 class="section-label reveal-item">// MECHANICS ALGORITHM (Axiom Ω)</h2>
+            
+            <div class="bento-grid">
+                <div class="bento-card reveal-item" style="--delay: 1">
+                    <div class="card-icon">[ 01 ]</div>
+                    <h3>Immutable Ledger</h3>
+                    <p>Facts are not just embedded; they are cryptographically signed and hash-chained. Alteration corrupts the chain. Trust is verified, not assumed.</p>
+                </div>
+                
+                <div class="bento-card reveal-item" style="--delay: 2">
+                    <div class="card-icon">[ 02 ]</div>
+                    <h3>Temporal Truth</h3>
+                    <p>Information decays. CORTEX implements temporal physics, maintaining valid-from/until bounds. A system that cannot forget is structurally flawed.</p>
+                </div>
+                
+                <div class="bento-card reveal-item" style="--delay: 3">
+                    <div class="card-icon">[ 03 ]</div>
+                    <h3>O(1) Retrieval</h3>
+                    <p>Local-first SQLite + sqlite-vec engine. No cloud dependency. No network latency on the hot path. Pure sovereign execution.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="terminal-section content-section">
+            <h2 class="section-label reveal-item" style="--delay: 1">// INIT SYSTEM</h2>
+            <div class="terminal reveal-item" style="--delay: 2">
+                <div class="terminal-header">
+                    <div class="dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="terminal-title">cortex-cli</div>
+                </div>
+                <div class="terminal-body">
+                    <pre><code><span class="prompt">$</span> pip install cortex-persist
+<span class="prompt">$</span> cortex store --type axiom "Never trust unverified context."
+<span class="output text-tertiary"># Generating embedding via ONNX Runtime...</span>
+<span class="output text-tertiary"># AES-256 Encrypting payload...</span>
+<span class="output text-tertiary"># Appending to Merkle tree...</span>
+<span class="output accent">✓ Fact stored. TX_ID: 1045. Hash: 3f8b...</span></code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer fade-in">
+        <div class="footer-grid">
+            <div class="footer-left">
+                <div class="brand">CORTEX<span class="accent">.dev</span></div>
+                <div class="copyright">© 2026 MOSKV-1 SOVEREIGN SYSTEMS</div>
+            </div>
+            <div class="footer-links">
+                <a href="https://cortexpersist.com" target="_blank">.com</a>
+                <a href="https://github.com/borjamoskv/cortex-persist" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
