@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Terminal, Copy, Check, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SovereignCanvas from './SovereignCanvas';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -27,6 +28,9 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden noise">
       {/* Dot Grid Background */}
       <div className="absolute inset-0 dot-grid animate-grid-fade" />
+
+      {/* 3D WebGL Nivel Igloo Canvas */}
+      <SovereignCanvas />
 
       {/* Radial Glow Orbs - More dynamic and asymmetrical */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
@@ -100,7 +104,7 @@ export function Hero() {
               {/* PRIMARY: SaaS entry point */}
               <button
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="group relative overflow-hidden rounded-none border border-cyber-lime bg-cyber-lime text-black px-8 py-5 flex items-center justify-center gap-3 transition-all hover:shadow-[0_0_50px_rgba(204,255,0,0.5)] hover:scale-[1.02] flex-1 sm:flex-none font-mono font-black text-sm uppercase tracking-widest"
+                className="group relative overflow-hidden rounded-none border border-cyber-lime bg-cyber-lime text-black px-8 py-5 flex items-center justify-center gap-3 transition-all duration-300 hover:shadow-[0_0_50px_rgba(204,255,0,0.5)] hover:scale-[1.02] active:scale-[0.98] flex-1 sm:flex-none font-mono font-black text-sm uppercase tracking-widest"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 Stop the €30M Risk
@@ -110,7 +114,7 @@ export function Hero() {
               {/* SECONDARY: Compliance Audit */}
               <Link
                 to="/audit"
-                className="group relative overflow-hidden rounded-none border border-industrial-gold bg-industrial-gold/10 text-white px-8 py-5 flex items-center justify-center gap-3 transition-all hover:bg-industrial-gold/20 flex-1 sm:flex-none font-mono font-black text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(212,175,55,0.1)] hover:shadow-[0_0_40px_rgba(212,175,55,0.2)]"
+                className="group relative overflow-hidden rounded-none border border-industrial-gold bg-industrial-gold/10 text-white px-8 py-5 flex items-center justify-center gap-3 transition-all duration-300 hover:bg-industrial-gold/20 flex-1 sm:flex-none font-mono font-black text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(212,175,55,0.1)] hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] active:scale-[0.98]"
               >
                 <ShieldCheck className="w-5 h-5 text-industrial-gold" />
                 Analyze Compliance
@@ -119,7 +123,7 @@ export function Hero() {
               {/* TERTIARY: CLI for power users */}
               <button
                 onClick={handleCopy}
-                className="group relative overflow-hidden rounded-none border border-white/10 bg-black/30 backdrop-blur-md px-8 py-5 flex items-center gap-3 transition-all hover:border-cyber-lime/40 hover:shadow-[0_0_20px_rgba(204,255,0,0.08)] flex-1 sm:flex-none text-left"
+                className="group relative overflow-hidden rounded-none border border-white/10 bg-black/30 backdrop-blur-md px-8 py-5 flex items-center gap-3 transition-all duration-300 hover:border-cyber-lime/40 hover:shadow-[0_0_20px_rgba(204,255,0,0.08)] active:scale-[0.98] flex-1 sm:flex-none text-left"
               >
                 <Terminal className="w-4 h-4 text-text-tertiary group-hover:text-cyber-lime transition-colors flex-shrink-0" />
                 <span className="font-mono text-sm text-text-tertiary group-hover:text-white transition-colors">

@@ -7,7 +7,7 @@ interface NavbarProps {
   onBuy?: () => void;
 }
 
-export function Navbar({ onBuy }: NavbarProps) {
+export function Navbar({ onBuy: _onBuy }: NavbarProps) {
   const { scrollY } = useScroll();
   const location = useLocation();
   const yOffset = useTransform(scrollY, [0, 100], [0, 12]);
@@ -30,6 +30,8 @@ export function Navbar({ onBuy }: NavbarProps) {
   const activeLink = useMemo(() => {
     if (location.pathname === '/foro') return 'moltbook';
     if (location.pathname === '/audit') return 'audit';
+    if (location.pathname === '/pricing') return 'pricing';
+    if (location.pathname === '/oracle') return 'oracle';
     return '';
   }, [location.pathname]);
 
@@ -59,19 +61,23 @@ export function Navbar({ onBuy }: NavbarProps) {
             <div className="hidden md:flex items-center gap-1.5 text-sm font-sans">
               <button 
                 onClick={() => scrollTo('architecture')} 
-                className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest relative"
+                className="px-4 py-2 text-text-secondary hover:text-white transition-all duration-300 rounded-full hover:bg-white/5 active:scale-[0.98] font-mono text-[11px] uppercase tracking-widest relative"
               >
                 Architecture
               </button>
-              <button 
-                onClick={() => scrollTo('pricing')} 
-                className="px-4 py-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 font-mono text-[11px] uppercase tracking-widest relative"
+              <Link 
+                to="/pricing" 
+                className={`px-4 py-2 transition-all duration-300 rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
+                  activeLink === 'pricing' 
+                    ? 'text-cyber-lime bg-cyber-lime/10' 
+                    : 'text-text-secondary hover:text-white hover:bg-white/5'
+                }`}
               >
                 Pricing
-              </button>
+              </Link>
               <Link 
                 to="/foro" 
-                className={`px-4 py-2 transition-all rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link ${
+                className={`px-4 py-2 transition-all duration-300 rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
                   activeLink === 'moltbook' 
                     ? 'text-cyber-lime bg-cyber-lime/10' 
                     : 'text-text-secondary hover:text-white hover:bg-white/5'
@@ -88,7 +94,7 @@ export function Navbar({ onBuy }: NavbarProps) {
               </Link>
               <Link 
                 to="/audit" 
-                className={`px-4 py-2 transition-all rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link ${
+                className={`px-4 py-2 transition-all duration-300 rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
                   activeLink === 'audit' 
                     ? 'text-industrial-gold bg-industrial-gold/10' 
                     : 'text-text-secondary hover:text-white hover:bg-white/5'
@@ -103,6 +109,16 @@ export function Navbar({ onBuy }: NavbarProps) {
                   />
                 )}
               </Link>
+              <Link 
+                to="/oracle" 
+                className={`px-4 py-2 transition-all duration-300 rounded-full font-mono text-[11px] uppercase tracking-widest flex items-center gap-2 relative group/link active:scale-[0.98] ${
+                  activeLink === 'oracle' 
+                    ? 'text-cyan-400 bg-cyan-400/10' 
+                    : 'text-text-secondary hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Oracle SaaS
+              </Link>
 
               <div className="h-4 w-px bg-white/10 mx-2" />
 
@@ -111,19 +127,19 @@ export function Navbar({ onBuy }: NavbarProps) {
                 target="_blank"
                 rel="noreferrer noopener"
                 title="GitHub Repository"
-                className="flex items-center gap-2 text-text-tertiary hover:text-white transition-colors p-2"
+                className="flex items-center gap-2 text-text-tertiary hover:text-white transition-all duration-300 active:scale-[0.98] p-2"
               >
                 <Github className="w-4 h-4" />
               </a>
 
-              <button
-                onClick={onBuy}
-                className="ml-2 flex items-center gap-2 bg-cyber-lime text-black px-6 py-2 rounded-full transition-all border border-cyber-lime group relative overflow-hidden font-mono text-[11px] font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(204,255,0,0.4)]"
+              <Link
+                to="/pricing"
+                className="ml-2 flex items-center gap-2 bg-cyber-lime text-black px-6 py-2 rounded-full transition-all duration-300 border border-cyber-lime group relative overflow-hidden font-mono text-[11px] font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(204,255,0,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
                 Get Started
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </Link>
             </div>
 
             {/* Mobile hamburger */}
@@ -146,18 +162,28 @@ export function Navbar({ onBuy }: NavbarProps) {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[45] bg-abyssal-900/95 backdrop-blur-2xl flex flex-col items-center justify-center gap-8 md:hidden p-6"
           >
-            {[
-              { label: 'Architecture', id: 'architecture' },
-              { label: 'Pricing', id: 'pricing' },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className="text-4xl font-black font-sans hover:text-cyber-lime transition-colors uppercase tracking-tighter italic"
-              >
-                {item.label}
-              </button>
-            ))}
+            <button
+              onClick={() => scrollTo('architecture')}
+              className="text-4xl font-black font-sans hover:text-cyber-lime transition-colors uppercase tracking-tighter italic"
+            >
+              Architecture
+            </button>
+
+            <Link
+              to="/pricing"
+              onClick={() => setMobileOpen(false)}
+              className="text-4xl font-black font-sans hover:text-cyber-lime transition-colors uppercase tracking-tighter italic"
+            >
+              Pricing
+            </Link>
+
+            <Link
+              to="/oracle"
+              onClick={() => setMobileOpen(false)}
+              className="text-4xl font-black font-sans hover:text-cyan-400 transition-colors uppercase tracking-tighter italic"
+            >
+              Oracle SaaS
+            </Link>
 
             <Link
               to="/foro"
@@ -179,15 +205,15 @@ export function Navbar({ onBuy }: NavbarProps) {
               Compliance Audit
             </Link>
             
-            <button
+            <Link
+              to="/pricing"
               onClick={() => {
                 setMobileOpen(false);
-                onBuy?.();
               }}
-              className="mt-4 w-full bg-cyber-lime text-black py-6 font-black text-xl uppercase tracking-widest italic"
+              className="mt-4 flex justify-center w-full bg-cyber-lime text-black py-6 font-black text-xl uppercase tracking-widest italic"
             >
               Buy CORTEX
-            </button>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>

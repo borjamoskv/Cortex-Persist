@@ -79,9 +79,40 @@
     background-color: var(--color-cyber-lime);
     color: black;
   }
+
+  /* Zero-Default Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-abyssal-900);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(204, 255, 0, 0.3);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(204, 255, 0, 0.6);
+  }
+
+  /* Zero-Default Focus */
+  :focus {
+    outline: none;
+  }
+  
+  :focus-visible {
+    outline: 1px solid var(--color-cyber-lime);
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
+  /* Semantic Motion Physics */
+  .transition, .transition-all, .transition-colors, .transition-opacity, .transition-shadow, .transition-transform {
+    transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+  }
+
   .glass {
     @apply bg-abyssal-800/40 backdrop-blur-2xl border border-white/[0.03];
   }
