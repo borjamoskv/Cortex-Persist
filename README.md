@@ -273,4 +273,4 @@ See [LICENSE](LICENSE) for details.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com)*
+*Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*

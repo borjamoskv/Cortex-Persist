@@ -1,9 +1,9 @@
 import asyncio
-import os
-import json
-import time
 import hashlib
-from typing import Dict, Any, Callable
+import json
+import os
+import time
+from collections.abc import Callable
 
 # Standard library fallback since protobuf might need to be generated via protoc
 # In pure O(1) spirit, if we don't compile intent_pb2, we can just use length-prefixed struct packing.
@@ -20,12 +20,12 @@ class BCI_Daemon:
     Listens on a Unix socket for pure binary intentions from the CORTEX Agent.
     No conversational parsing. Absolute execution.
     """
-    def __init__(self, action_handlers: Dict[int, Callable]):
+    def __init__(self, action_handlers: dict[int, Callable]):
         self.action_handlers = action_handlers
         self.server = None
 
     async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        peer = writer.get_extra_info('peername')
+        __ = writer.get_extra_info('peername')
         try:
             # 1. Read header length (4 bytes)
             header_bytes = await reader.readexactly(4)
@@ -44,7 +44,7 @@ class BCI_Daemon:
             instruction = data.get("instruction", "")
             raw_cargo = data.get("payload", "") # In actual BCI, this would be raw bytes. Here we encode via b64 or text
 
-            test_str = f"{derivation}:{action}:{instruction}:{raw_cargo}".encode('utf-8')
+            test_str = f"{derivation}:{action}:{instruction}:{raw_cargo}".encode()
             calculated_hash = hashlib.sha256(test_str).hexdigest()
 
             if expected_hash and calculated_hash != expected_hash:
@@ -63,7 +63,7 @@ class BCI_Daemon:
 
         except asyncio.IncompleteReadError:
             print("[BCI] ❌ Byte buffer terminated unexpectedly.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[BCI] ❌ Error processing intent: {e}")
             writer.write(b"\x00")
         finally:
@@ -91,7 +91,7 @@ class BCI_Transmitter:
     """
     @staticmethod
     async def send_intent(derivation: str, action: int, instruction: str, payload: str):
-        test_str = f"{derivation}:{action}:{instruction}:{payload}".encode('utf-8')
+        test_str = f"{derivation}:{action}:{instruction}:{payload}".encode()
         calculated_hash = hashlib.sha256(test_str).hexdigest()
 
         packet = {
@@ -121,7 +121,7 @@ class BCI_Transmitter:
             else:
                 return False
                 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[BCI-CLIENT] Failed to inject intent: {e}")
             return False
         finally:

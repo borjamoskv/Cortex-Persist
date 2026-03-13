@@ -36,6 +36,13 @@ def calculate_overlap(set_a, set_b):
     return len(intersection) / min(len(set_a), len(set_b))
 
 
+def calculate_module_overlap(f1_path, f2_path):
+    """Bridge for evolution_loop: calculates overlap between two files."""
+    s1 = get_ast_identifiers(f1_path)
+    s2 = get_ast_identifiers(f2_path)
+    return calculate_overlap(s1, s2)
+
+
 def main():
     base_dir = Path("/Users/borjafernandezangulo/cortex")
     target_dir = base_dir / "cortex"
