@@ -6,10 +6,9 @@ Implements Darwinian Code Mutation (Axiom Ω₂) with fully atomic rollback.
 from __future__ import annotations
 
 import ast
+import copy
 import hashlib
 import logging
-import py_compile
-import copy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -182,7 +181,7 @@ class OuroborosOmega:
         if not self.target_path.exists():
             raise FileNotFoundError(f"Target not found: {self.target_path}")
             
-        with open(self.target_path, "r", encoding="utf-8") as f:
+        with open(self.target_path, encoding="utf-8") as f:
             self.original_source = f.read()
             
         self.original_hash = hashlib.sha256(self.original_source.encode()).hexdigest()
@@ -268,7 +267,7 @@ class OuroborosOmega:
             try:
                 ast.parse(mutated_source)  # Syntax
                 compile(mutated_source, filename="<ast>", mode="exec") # Bytecode
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — verification phase expected to fail on invalid syntax
                 logger.error("Phase 5 [Verification] Failed syntax/bytecode: %s", e)
                 return {"status": "ROLLED_BACK", "reason": str(e)}
                 
@@ -296,14 +295,13 @@ class OuroborosOmega:
             logger.info("Ouroboros-Omega cycle SUCCESS for %s", self.target_path.name)
             return {"status": "SUCCESS", "delta": entropy_delta}
             
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — atomic cycle caught unhandled exception, triggering apoptosis
             logger.exception("Apoptosis: Unhandled exception during cycle.")
             return {"status": "ROLLED_BACK", "reason": str(e)}
 
 if __name__ == "__main__":
-    import sys
-    import asyncio
     import argparse
+    import asyncio
     import json
     
     parser = argparse.ArgumentParser(description="Ouroboros-Omega")

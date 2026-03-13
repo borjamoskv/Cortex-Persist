@@ -1,9 +1,9 @@
-import os
-import json
-import logging
 import asyncio
+import logging
+import os
+from typing import Any
+
 import httpx
-from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class SovereignTriad:
             except httpx.RequestError as e:
                 return f"[ERROR] Exa Fallo de red: {str(e)}"
 
-    async def neural_search_exa(self, query: str, num_results: int = 5) -> List[Dict[str, Any]]:
+    async def neural_search_exa(self, query: str, num_results: int = 5) -> list[dict[str, Any]]:
         """
         [Exa.ai] Caza semántica. Pide contexto como un ser humano, recupera nodos precisos.
         """
@@ -148,7 +148,7 @@ class SovereignTriad:
                 logger.error("EXA Neural Search Fallo de Red: %s", str(e))
                 return []
 
-    async def log_braintrust_trace(self, project_name: str, span_name: str, input_data: Any, output_data: Any, metadata: Optional[Dict[str, Any]] = None) -> bool:
+    async def log_braintrust_trace(self, project_name: str, span_name: str, input_data: Any, output_data: Any, metadata: dict[str, Any] | None = None) -> bool:
         """
         [Braintrust] Telemetría silenciosa. Axioma 3: Mide la ejecución. Graba inputs/outputs para RLHF futuro.
         Requiere Braintrust REST API o el braintrust SDK.

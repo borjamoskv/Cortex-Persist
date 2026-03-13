@@ -21,10 +21,10 @@ Usage::
     agent.run_task(queue.pop_next())
 """
 
+from cortex.aether.daemon import AetherDaemon, AetherMonitor
 from cortex.aether.models import AgentTask, TaskStatus
 from cortex.aether.queue import TaskQueue
 from cortex.aether.runner import AetherAgent
-from cortex.aether.daemon import AetherDaemon, AetherMonitor
 
 __all__ = [
     "AgentTask",

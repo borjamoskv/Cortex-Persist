@@ -64,7 +64,7 @@ class TaskQueue:
         try:
             yield conn
             conn.commit()
-        except Exception:
+        except Exception:  # noqa: BLE001 — rollback transaction before raising
             conn.rollback()
             raise
         finally:

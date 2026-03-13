@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import threading
 
-from cortex.aether.models import AgentTask, AetherAlert, TaskStatus
+from cortex.aether.models import AetherAlert, AgentTask, TaskStatus
 from cortex.aether.queue import TaskQueue
 from cortex.aether.runner import AetherAgent
 
@@ -120,7 +120,7 @@ class AetherDaemon:
         while not self._stop_event.is_set():
             try:
                 ingestor.poll()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("GitHub ingestor error: %s", e)
             self._stop_event.wait(timeout=300)  # poll every 5 minutes
 
