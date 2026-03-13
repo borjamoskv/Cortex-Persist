@@ -26,7 +26,7 @@ async def run_applescript(script: str, require_success: bool = True) -> str | No
         UIElementNotFoundError: If a targeted UI element was not found.
         AppleScriptExecutionError: For other generic execution errors.
     """
-    logger.debug(f"Executing AppleScript:\n{script}")
+    logger.debug("Executing AppleScript:\n%s", script)
 
     process = await asyncio.create_subprocess_exec(
         "osascript", "-e", script,
