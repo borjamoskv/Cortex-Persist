@@ -69,7 +69,9 @@ class CortexConfig:
     # Embeddings
     EMBEDDINGS_MODE: str = "local"
     EMBEDDINGS_PROVIDER: str = "gemini"
-    EMBEDDINGS_DIMENSION: int = 384
+    EMBEDDINGS_DIMENSION: int = 768
+    EMBEDDINGS_MODEL: str = ""  # Override model name (empty = provider default)
+    EMBEDDINGS_TASK_TYPE: str = "RETRIEVAL_DOCUMENT"
 
     # L2 Vector Store
     VECTOR_STORE_PATH: str = ""
@@ -133,7 +135,7 @@ class CortexConfig:
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
                 "CORTEX_ALLOWED_ORIGINS",
-                "http://localhost:3000,http://localhost:5173",
+                "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173",
             ).split(","),
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
@@ -151,7 +153,11 @@ class CortexConfig:
             TURSO_AUTH_TOKEN=os.environ.get("TURSO_AUTH_TOKEN", ""),
             EMBEDDINGS_MODE=os.environ.get("CORTEX_EMBEDDINGS", "local"),
             EMBEDDINGS_PROVIDER=os.environ.get("CORTEX_EMBEDDINGS_PROVIDER", "gemini"),
-            EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "384")),
+            EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "768")),
+            EMBEDDINGS_MODEL=os.environ.get("CORTEX_EMBEDDINGS_MODEL", ""),
+            EMBEDDINGS_TASK_TYPE=os.environ.get(
+                "CORTEX_EMBEDDINGS_TASK_TYPE", "RETRIEVAL_DOCUMENT"
+            ),
             VECTOR_STORE_PATH=os.environ.get(
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
