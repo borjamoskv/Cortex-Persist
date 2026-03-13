@@ -41,7 +41,7 @@ async def run_applescript(script: str, require_success: bool = True) -> str | No
 
     if process.returncode != 0:
         if not require_success:
-            logger.warning(f"AppleScript failed (Exit {process.returncode}): {decoded_err}")
+            logger.warning("AppleScript failed (Exit %s): %s", process.returncode, decoded_err)
             return None
 
         error_lower = decoded_err.lower()
