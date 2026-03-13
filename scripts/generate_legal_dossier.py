@@ -80,6 +80,6 @@ def generate_dossier(victim_wallet: str, victim_name: str, victim_contact: str) 
 if __name__ == "__main__":
     generate_dossier(
         victim_wallet="[INSERTA LAS WALLETS QUE TE HACKEARON AQUÍ]",
-        victim_name="Borja Fernandez Angulo (Borja Moskv)",
+        victim_name="Borja Fernandez Angulo (borjamoskv.com)",
         victim_contact="borja@moskv.co",
     )

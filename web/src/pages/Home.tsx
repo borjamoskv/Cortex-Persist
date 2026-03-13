@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
+import PanoramicOuroboros from '../components/PanoramicOuroboros';
 import { Trigger } from '../components/Trigger';
 import { HowItWorks } from '../components/HowItWorks';
 import { Engine } from '../components/Engine';
@@ -12,17 +12,14 @@ import { Footer } from '../components/Footer';
 import { BackgroundEffects } from '../components/BackgroundEffects';
 
 export function Home() {
-  const handleBuy = useCallback(() => {
-    const el = document.getElementById('pricing');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  }, []);
 
   return (
     <>
       <BackgroundEffects />
-      <Navbar onBuy={handleBuy} />
+      <Navbar />
       <main>
         <Hero />
+        <PanoramicOuroboros />
         <Trigger />
         <HowItWorks />
         <Engine />
