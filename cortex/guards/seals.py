@@ -25,7 +25,6 @@ from cortex.guards.sovereign_seals import (
     check_gate_21_preservation,
 )
 
-
 class SealPrinter:
     def head(self, title: str) -> None:
         print(f"\n{'━' * 60}")
@@ -45,13 +44,10 @@ class SealPrinter:
     def warn(self, msg: str) -> None:
         print(f"   [🟡 WARN] {msg}")
 
-
 printer = SealPrinter()
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-
 _VENV_BIN = ROOT_DIR / ".venv" / "bin"
-
 
 def _resolve_cmd(tool: str) -> str:
     """Resolve a CLI tool: prefer .venv/bin, fall back to system PATH."""
@@ -59,7 +55,6 @@ def _resolve_cmd(tool: str) -> str:
     if venv_path.exists():
         return str(venv_path)
     return tool
-
 
 def run_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
     """Run a subprocess and return (exit_code, output)."""
@@ -70,7 +65,6 @@ def run_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
         return proc.returncode, proc.stdout + proc.stderr
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"
-
 
 async def check_gate_1_lint() -> bool:
     printer.seal(1, "AX-011 Entropy Death", "Lint (Ruff)")
@@ -85,7 +79,6 @@ async def check_gate_1_lint() -> bool:
         printer.fail("Ruff linting failed.")
         print(out[:2000])  # Cap output to avoid flooding
         return False
-
 
 async def check_gate_2_type() -> bool:
     printer.seal(2, "AX-012 Type Safety", "Type Check (Pyright)")
@@ -105,7 +98,6 @@ async def check_gate_2_type() -> bool:
         print(out[:2000])
         return False
 
-
 async def check_gate_3_security() -> bool:
     printer.seal(3, "AX-010 Zero Trust", "Security Scan (Bandit)")
     code, out = run_cmd(
@@ -121,7 +113,6 @@ async def check_gate_3_security() -> bool:
         printer.fail("Security vulnerabilities detected.")
         print(out[:2000])
         return False
-
 
 async def check_gate_4_tests() -> bool:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
@@ -139,7 +130,6 @@ async def check_gate_4_tests() -> bool:
         print(out[:3000])
         return False
 
-
 async def check_gate_5_ledger() -> bool:
     printer.seal(5, "AX-017 Ledger Integrity", "Schema Initialization")
     try:
@@ -154,7 +144,6 @@ async def check_gate_5_ledger() -> bool:
         printer.fail(f"Ledger initialization threw error: {e}")
         return False
 
-
 async def check_gate_6_connection() -> bool:
     printer.seal(6, "AX-017 Ledger Integrity", "Connection Guard")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
@@ -168,7 +157,6 @@ async def check_gate_6_connection() -> bool:
         printer.fail("Connection guard failed.")
         print(out)
         return False
-
 
 async def check_gate_7_async() -> bool:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
@@ -211,7 +199,6 @@ async def check_gate_7_async() -> bool:
         printer.fail(f"Found blocking time.sleep(): {violations}")
         return False
 
-
 async def check_gate_8_loc() -> bool:
     printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤500 max)")
     blocked = 0
@@ -234,7 +221,6 @@ async def check_gate_8_loc() -> bool:
         printer.success(f"All files within entropy limits. ({warnings} warnings >300 LOC)")
         return True
     return False
-
 
 async def check_gate_9_registry() -> bool:
     printer.seal(9, "Registry Integrity", "Axiom Registry Sync")
@@ -259,7 +245,6 @@ async def check_gate_9_registry() -> bool:
         printer.fail(f"Registry error: {e}")
         return False
 
-
 async def check_gate_10_prompt_size() -> bool:
     printer.seal(10, "Heuristic", "Prompt Size Check")
     prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"
@@ -273,7 +258,6 @@ async def check_gate_10_prompt_size() -> bool:
     else:
         printer.success(f"System prompt within targets ({tokens} words).")
     return True
-
 
 async def check_gate_11_cobbler() -> bool:
     """Seal 11 — Cobbler's Compliance (Ω₃ Byzantine Default).
@@ -351,7 +335,6 @@ async def check_gate_11_cobbler() -> bool:
 
     return passed
 
-
 async def check_gate_12_determinism() -> bool:
     """Seal 12: Temperature Determinism Gate.
 
@@ -385,7 +368,6 @@ async def check_gate_12_determinism() -> bool:
     printer.success("Seal 12: Temperature Determinism Gate intact.")
     return True
 
-
 async def check_gate_13_latency() -> bool:
     """Seal 13: A-Record Latency Drift.
 
@@ -412,7 +394,6 @@ async def check_gate_13_latency() -> bool:
     printer.success("Seal 13: A-Record Latency Gate intact (<200ms).")
     return True
 
-
 async def check_gate_14_aesthetic() -> bool:
     """Seal 14: Sovereign Aesthetic Gate.
 
@@ -436,7 +417,6 @@ async def check_gate_14_aesthetic() -> bool:
 
     printer.success("Seal 14: Sovereign Aesthetic Gate intact.")
     return True
-
 
 async def main() -> int:
     import os
@@ -494,7 +474,6 @@ async def main() -> int:
     else:
         printer.success("ALL 21 SEALS INTACT. Ready for launch.")
         return 0
-
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))

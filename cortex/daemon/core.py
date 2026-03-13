@@ -52,36 +52,23 @@ from cortex.daemon.monitors import (
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
-try:
-    from cortex.aether.daemon import AetherDaemon, AetherMonitor
-    from cortex.aether.queue import TaskQueue
+# fmt: off
+try: from cortex.aether.daemon import AetherDaemon, AetherMonitor; from cortex.aether.queue import TaskQueue; _AETHER_AVAILABLE = True
+except ImportError: _AETHER_AVAILABLE = False
+try: from cortex.daemon.centaur.heartbeat import HeartbeatDaemon; from cortex.daemon.centaur.queue import EntropicQueue; from cortex.swarm.centauro_engine import CentauroEngine; _CENTAUR_AVAILABLE = True
+except ImportError: _CENTAUR_AVAILABLE = False
+try: from cortex.daemon.entropic_wake import EntropicWakeDaemon; _ENTROPIC_WAKE_AVAILABLE = True
+except ImportError: _ENTROPIC_WAKE_AVAILABLE = False
+try: from cortex.daemon.frontier import FrontierDaemon; _FRONTIER_AVAILABLE = True
+except ImportError: _FRONTIER_AVAILABLE = False
+try: from cortex.daemon.zero_prompting import ZeroPromptingDaemon; _ZERO_PROMPTING_AVAILABLE = True
+except ImportError: _ZERO_PROMPTING_AVAILABLE = False
+try: from cortex.daemon.sidecar.telemetry.iot_oracle import IoTOracle; _IOT_ORACLE_AVAILABLE = True
+except ImportError: _IOT_ORACLE_AVAILABLE = False
+try: from cortex.daemon.epistemic_breaker import EpistemicBreakerDaemon; _EPISTEMIC_BREAKER_AVAILABLE = True
+except ImportError: _EPISTEMIC_BREAKER_AVAILABLE = False
+# fmt: on
 
-    _AETHER_AVAILABLE = True
-except ImportError:
-    _AETHER_AVAILABLE = False
-
-try:
-    from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
-    from cortex.daemon.centaur.queue import EntropicQueue
-    from cortex.swarm.centauro_engine import CentauroEngine
-
-    _CENTAUR_AVAILABLE = True
-except ImportError:
-    _CENTAUR_AVAILABLE = False
-
-try:
-    from cortex.daemon.entropic_wake import EntropicWakeDaemon
-
-    _ENTROPIC_WAKE_AVAILABLE = True
-except ImportError:
-    _ENTROPIC_WAKE_AVAILABLE = False
-
-try:
-    from cortex.daemon.frontier import FrontierDaemon
-
-    _FRONTIER_AVAILABLE = True
-except ImportError:
-    _FRONTIER_AVAILABLE = False
 
 __all__ = ["MoskvDaemon"]
 
@@ -200,6 +187,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 engine=self._async_engine,
                 watch_dir=Path(file_config.get("watch_path", str(CORTEX_DIR))),
             )
+            if _IOT_ORACLE_AVAILABLE:
+                self.iot_oracle = IoTOracle(
+                    engine=self._async_engine,
+                    poll_interval=float(file_config.get("iot_interval", 10.0)),
+                    enable_simulated_sensors=file_config.get("iot_simulated", True),
+                )
             self.fiat_oracle = FiatOracle(
                 engine=self._shared_engine,
                 interval=file_config.get("fiat_interval", 30.0),
@@ -277,6 +270,36 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Frontier Daemon: %s", e)
+
+        self.zero_prompting_daemon = None
+        if _ZERO_PROMPTING_AVAILABLE:
+            try:
+                self.zero_prompting_daemon = ZeroPromptingDaemon(
+                    engine=self._shared_engine,
+                    workspace_root=Path(file_config.get("watch_path", str(CORTEX_DIR))),
+                    cycle_interval_hours=float(
+                        file_config.get("zero_prompting_interval_hours", 24.0)
+                    ),
+                )
+                logger.info("🧠 Zero-Prompting Evolution Daemon (Axioma Ω₇) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Zero-Prompting Daemon: %s", e)
+
+        self.epistemic_breaker_daemon = None
+        if _EPISTEMIC_BREAKER_AVAILABLE:
+            try:
+                self.epistemic_breaker_daemon = EpistemicBreakerDaemon(
+                    engine=self._shared_engine,
+                    check_interval_seconds=int(
+                        file_config.get("epistemic_breaker_interval_seconds", 300)
+                    ),
+                    max_entropy_threshold=float(
+                        file_config.get("epistemic_breaker_max_entropy", 0.85)
+                    ),
+                )
+                logger.info("🛡️ Sovereign Epistemic Circuit Breaker (Axioma Ω₂, Ω₃) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Epistemic Breaker Daemon: %s", e)
 
     def _init_persistence_checkers(self, file_config: dict) -> None:
         """Initialize checks related to data persistence and timing."""
@@ -429,6 +452,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
         if self.ast_oracle:
             self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
+        if getattr(self, "iot_oracle", None):
+            self._spawn_thread(self._run_iot_oracle_loop, "IoTOracle")
+
         if self.fiat_oracle:
             self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
         if self.heartbeat_daemon:
@@ -437,6 +463,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._spawn_thread(self._run_entropic_wake_loop, "EntropicWakeDaemon")
         if self.frontier_daemon:
             self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
+        if getattr(self, "zero_prompting_daemon", None):
+            self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
+        if getattr(self, "epistemic_breaker_daemon", None):
+            self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
+
         if getattr(self, "sentinel_oracle", None):
             self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
 
@@ -457,6 +488,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 self.entropic_wake_daemon.stop()
             if self.frontier_daemon:
                 self.frontier_daemon.stop()
+            if getattr(self, "zero_prompting_daemon", None):
+                self.zero_prompting_daemon.stop()
+            if getattr(self, "epistemic_breaker_daemon", None):
+                self.epistemic_breaker_daemon.stop()
 
     def _save_status(self, status: DaemonStatus) -> None:
         """Persist status to disk."""

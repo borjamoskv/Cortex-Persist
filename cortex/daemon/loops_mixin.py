@@ -91,6 +91,38 @@ class LoopsMixin:
         except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
             logger.error("Frontier loop error: %s", e)
 
+    def _run_iot_oracle_loop(self) -> None:
+        """Runs the IoT Oracle event loop for physical entanglement."""
+        logger.info("📡 IoT Oracle thread started")
+
+        async def _lifecycle():
+            task = asyncio.create_task(self.iot_oracle.start())
+            while not self._shutdown:
+                await asyncio.sleep(1.0)
+            await self.iot_oracle.stop()
+            await task
+
+        try:
+            asyncio.run(_lifecycle())
+        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
+            logger.error("IoT Oracle loop error: %s", e)
+
+    def _run_zero_prompting_loop(self) -> None:
+        """Runs the Zero-Prompting Evolution Daemon event loop."""
+        logger.info("🧠 Zero-Prompting thread started")
+        try:
+            asyncio.run(self.zero_prompting_daemon.run_loop())
+        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
+            logger.error("Zero-Prompting loop error: %s", e)
+
+    def _run_epistemic_breaker_loop(self) -> None:
+        """Runs the Epistemic Circuit Breaker Daemon event loop."""
+        logger.info("🛡️ Epistemic Breaker thread started")
+        try:
+            asyncio.run(self.epistemic_breaker_daemon.run())
+        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
+            logger.error("Epistemic Breaker loop error: %s", e)
+
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
         if not self._shared_engine:

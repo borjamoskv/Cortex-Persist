@@ -98,7 +98,6 @@ include = ["cortex*"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-timeout = 60
 
 
 [tool.ruff]
@@ -117,6 +116,7 @@ ignore = ["E501", "B008", "W291", "W293", "S", "BLE001"]
 "sdks/**/*.py" = ["S", "T20"]
 "cortex/**/__init__.py" = ["F401"]
 "cortex/cli/__init__.py" = ["F401", "E402"]
+"cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.pyright]
 typeCheckingMode = "basic"

@@ -41,8 +41,8 @@
     overflow-x: hidden;
   }
   ::selection {
-    background-color: var(--color-yinmn-blue);
-    color: white;
+    background-color: var(--color-cyber-lime);
+    color: var(--color-abyssal-900);
   }
 }
 
@@ -53,11 +53,11 @@
   .glass-strong {
     @apply bg-abyssal-700/60 backdrop-blur-3xl border border-white/[0.06];
   }
-  .glow-blue {
-    box-shadow: 0 0 30px rgba(46, 80, 144, 0.15), 0 0 60px rgba(46, 80, 144, 0.07);
+  .glow-lime {
+    box-shadow: 0 0 30px rgba(204, 255, 0, 0.15), 0 0 60px rgba(204, 255, 0, 0.07);
   }
-  .text-gradient-blue {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-yinmn-blue via-yinmn-light to-white;
+  .text-gradient-lime {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyber-lime via-white to-gray-400;
   }
   .dot-grid {
     background-image: radial-gradient(rgba(250, 250, 250, 0.04) 1px, transparent 1px);

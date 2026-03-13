@@ -94,5 +94,5 @@ async def test_tenant_isolation_update_and_deprecate(engine):
 
     token_alice = tenant_id_var.set("tenant-alice")
     alice_fact = await engine.get_fact(fact_id_alice)
-    assert alice_fact["content"] == "Alice's initial draft"
+    assert alice_fact.content == "Alice's initial draft"
     tenant_id_var.reset(token_alice)

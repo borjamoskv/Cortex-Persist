@@ -82,7 +82,9 @@ class PersistenceSupervisor:
         """The heartbeat of the persistence layer."""
         while not self._stop_event.is_set():
             try:
-                await asyncio.sleep(self._interval)
+                await asyncio.wait_for(self._stop_event.wait(), timeout=self._interval)
+                break  # Event was set, exit loop
+            except asyncio.TimeoutError:
                 await self.flush(reason="heartbeat")
             except asyncio.CancelledError:
                 break

@@ -6,7 +6,7 @@ import { OrgFooter } from './components/OrgFooter';
 
 function App() {
   return (
-    <div className="min-h-screen bg-abyssal-900 text-white font-sans antialiased selection:bg-yinmn-blue selection:text-white">
+    <div className="min-h-screen bg-abyssal-900 text-white font-sans antialiased selection:bg-cyber-lime selection:text-abyssal-900">
       <main>
         <OrgHero />
         <Mission />

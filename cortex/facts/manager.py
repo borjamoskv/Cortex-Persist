@@ -40,6 +40,7 @@ class FactManager:
         **kwargs,
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
+        tenant_id = self.engine._resolve_tenant(tenant_id)
         conn = conn or await self.engine.get_conn()
 
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)

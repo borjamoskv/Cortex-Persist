@@ -40,6 +40,7 @@ class LLMProvider(BaseProvider):
         answer = await provider.complete("What is CORTEX?")
     """
 
+    # Note: Enforces temperature=0.0 in prompts to guarantee deterministic swarm behavior
     def __init__(
         self,
         provider: str = "qwen",

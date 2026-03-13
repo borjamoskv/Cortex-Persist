@@ -7,6 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from cortex.mcp.resilient_gateway import (
+    _HAS_BS4,
+    _HAS_MARKDOWNIFY,
     ResilientFetcher,
     _extract_with_selector,
     _html_to_markdown,
@@ -161,6 +163,10 @@ class TestCircuitBreaker:
 class TestCssExtraction:
     """Content extraction via CSS selectors."""
 
+    @pytest.mark.skipif(
+        not (_HAS_BS4 and _HAS_MARKDOWNIFY),
+        reason="bs4 and markdownify required for accurate HTML extraction",
+    )
     def test_extract_with_selector_filters_content(self):
         result = _extract_with_selector(SAMPLE_HTML, ".details")
         assert "Extra detail" in result
@@ -177,6 +183,10 @@ class TestCssExtraction:
 class TestMarkdownConversion:
     """HTML is properly cleaned and converted to markdown."""
 
+    @pytest.mark.skipif(
+        not (_HAS_BS4 and _HAS_MARKDOWNIFY),
+        reason="bs4 and markdownify required for accurate HTML extraction",
+    )
     def test_strips_noise_elements(self):
         md = _html_to_markdown(SAMPLE_HTML)
         assert "var x" not in md
