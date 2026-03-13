@@ -9,8 +9,8 @@ historical reliability.
 from __future__ import annotations
 
 import math
-import time
 import sqlite3
+import time
 from dataclasses import dataclass, field
 from typing import ClassVar, Final
 
@@ -30,7 +30,7 @@ _DECAY_HALFLIFE_SECONDS: Final[float] = 30 * 24 * 3600.0
 # ─── Models ─────────────────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ProceduralEngram:
     """Frozen representation of a skill's reinforcement history."""
 
@@ -134,7 +134,7 @@ class ProceduralMemory:
                 ErrorGhostPipeline().capture_sync(
                     e, source="procedural:load", project="CORTEX_SYSTEM"
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             import logging
             logging.getLogger("cortex.memory.procedural").error(
                 "Unexpected procedural load error: %s", e

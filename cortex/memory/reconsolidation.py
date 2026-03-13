@@ -26,7 +26,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
 from typing import Final
 
 logger = logging.getLogger("cortex.memory.reconsolidation")
@@ -56,7 +56,7 @@ _BIAS_MIN_EVENTS: Final[int] = 5
 # ─── Event Types ─────────────────────────────────────────────────────
 
 
-class ReconsolidationOutcome(StrEnum):
+class ReconsolidationOutcome(str, Enum):
     """Outcome of a labilization window resolution."""
 
     CONFIRMED = "confirmed"  # Re-stabilized → energy boost
@@ -67,7 +67,7 @@ class ReconsolidationOutcome(StrEnum):
 # ─── Audit Record ────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ReconsolidationEvent:
     """Immutable audit record of a single reconsolidation state transition.
 
@@ -103,7 +103,7 @@ class ReconsolidationEvent:
 # ─── Labilization Record (v2) ────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class LabilizationRecord:
     """Tracks the labile state of an accessed engram (v2).
 

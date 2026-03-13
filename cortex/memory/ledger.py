@@ -22,6 +22,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.memory.models import MemoryEvent
+from cortex.security.tenant import get_tenant_id
 
 __all__ = ["EventLedgerL3"]
 
@@ -46,8 +47,8 @@ _CREATE_INDEX_SQL = """
 CREATE INDEX IF NOT EXISTS idx_memory_events_session
     ON memory_events(session_id);
 
-CREATE INDEX IF NOT EXISTS idx_memory_events_tenant
-    ON memory_events(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_event_desc
+    ON memory_events(tenant_id, event_id DESC);
 """
 
 
@@ -138,46 +139,52 @@ class EventLedgerL3:
     async def get_session_events(
         self,
         session_id: str,
+        tenant_id: str | None = None,
         limit: int = 100,
     ) -> list[MemoryEvent]:
-        """Retrieve events for a session in chronological order."""
+        """Retrieve events for a session in chronological order, scoped by tenant."""
+        tenant_id = tenant_id or get_tenant_id()
         await self.ensure_table()
         cursor = await self._conn.execute(
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
-               WHERE session_id = ?
+               WHERE session_id = ? AND tenant_id = ?
                ORDER BY event_id ASC
                LIMIT ?""",
-            (session_id, limit),
+            (session_id, tenant_id, limit),
         )
         rows = await cursor.fetchall()
         return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
 
-    async def replay(self, limit: int = 1000) -> list[MemoryEvent]:
-        """Replay all events in chronological order for state reconstruction."""
+    async def replay(self, tenant_id: str, limit: int = 1000) -> list[MemoryEvent]:
+        """Replay events for a specific tenant in chronological order for state reconstruction."""
         await self.ensure_table()
         cursor = await self._conn.execute(
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
+               WHERE tenant_id = ?
                ORDER BY event_id ASC
                LIMIT ?""",
-            (limit,),
+            (tenant_id, limit),
         )
         rows = await cursor.fetchall()
         return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
 
-    async def count(self, session_id: str | None = None) -> int:
-        """Count events, optionally filtered by session."""
+    async def count(self, tenant_id: str, session_id: str | None = None) -> int:
+        """Count events for a tenant, optionally filtered by session."""
         await self.ensure_table()
         if session_id:
             cursor = await self._conn.execute(
-                "SELECT COUNT(*) FROM memory_events WHERE session_id = ?",
-                (session_id,),
+                "SELECT COUNT(*) FROM memory_events WHERE tenant_id = ? AND session_id = ?",
+                (tenant_id, session_id),
             )
         else:
-            cursor = await self._conn.execute("SELECT COUNT(*) FROM memory_events")
+            cursor = await self._conn.execute(
+                "SELECT COUNT(*) FROM memory_events WHERE tenant_id = ?",
+                (tenant_id,),
+            )
         row = await cursor.fetchone()
         return row[0] if row else 0
 

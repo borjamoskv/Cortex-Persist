@@ -60,7 +60,7 @@ _FOK_MAX_THRESHOLD: float = 0.70
 # ─── Models ────────────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class SleepCycleReport:
     """Composite report of a full NREM + REM sleep cycle."""
 

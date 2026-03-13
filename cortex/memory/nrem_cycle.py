@@ -30,7 +30,7 @@ __all__ = ["NREMConsolidationCycle", "NREMReport"]
 MAX_ENGRAMS_PER_CYCLE: Final[int] = 10_000
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class NREMReport:
     """Immutable report from a single NREM consolidation cycle."""
 

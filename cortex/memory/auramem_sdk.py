@@ -6,10 +6,11 @@ Zero-drift Semantic RAM Client. Connects to the AuraMem edge API
 to provide O(1) deduplication before facts ever hit the local vector store.
 """
 
-import aiohttp
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+import aiohttp
 
 logger = logging.getLogger("cortex.auramem_sdk")
 
@@ -19,7 +20,7 @@ class AuraMemClient:
     Requires AURAMEM_API_KEY to be set in the environment or passed during initialization.
     """
 
-    def __init__(self, api_key: Optional[str] = None, base_url: str = "http://localhost:3000/api/v1"):
+    def __init__(self, api_key: str | None = None, base_url: str = "http://localhost:3000/api/v1"):
         self.api_key = api_key or os.environ.get("AURAMEM_API_KEY")
         if not self.api_key:
             logger.warning("AURA-MEM: No API key provided. Operating in detached mode (will fail if used).")
@@ -30,7 +31,7 @@ class AuraMemClient:
             "Content-Type": "application/json"
         }
 
-    async def store(self, agent_id: str, fact: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def store(self, agent_id: str, fact: str, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         """
         Submits a fact to AuraMem for O(1) deduplication and storage.
         
@@ -67,13 +68,13 @@ class AuraMemClient:
             except aiohttp.ClientError as e:
                 logger.error("AURA-MEM ❌: Edge submission failed - %s", e)
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("AURA-MEM ❌: Edge submission unexpected error - %s", e)
                 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
                 ErrorGhostPipeline().capture_sync(e, source="auramem:store", project="CORTEX_SYSTEM")
                 raise
 
-    async def recall(self, agent_id: str, query: str) -> Dict[str, Any]:
+    async def recall(self, agent_id: str, query: str) -> dict[str, Any]:
         """
         Retrieves context from AuraMem.
         """
@@ -98,7 +99,7 @@ class AuraMemClient:
              except aiohttp.ClientError as e:
                  logger.error("AURA-MEM ❌: Edge recall failed - %s", e)
                  raise
-             except Exception as e:
+             except Exception as e:  # noqa: BLE001
                  logger.error("AURA-MEM ❌: Edge recall unexpected error - %s", e)
                  from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
                  ErrorGhostPipeline().capture_sync(e, source="auramem:recall", project="CORTEX_SYSTEM")

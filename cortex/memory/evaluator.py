@@ -1,12 +1,11 @@
 """V8 Governance: Memory Evaluator."""
 
 import random
-from typing import Dict, Any
-from cortex.engine import logging
 import sqlite3
+from typing import Any
 
 
-def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> Dict[str, Any]:
+def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> dict[str, Any]:
     """Calculates Semantic Recall@K Precision on existing memory facts using synchronous engine."""
     
     # We access the raw db connection strictly for reading sample rows autonomously

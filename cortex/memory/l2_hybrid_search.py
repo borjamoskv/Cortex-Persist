@@ -144,7 +144,7 @@ class L2HybridSearch:
 
     __slots__ = ("_store",)
 
-    def __init__(self, store: "SovereignVectorStoreL2") -> None:
+    def __init__(self, store: SovereignVectorStoreL2) -> None:
         self._store = store
 
     # ─── Schema Bootstrap ─────────────────────────────────────────────────────

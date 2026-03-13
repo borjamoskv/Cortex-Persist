@@ -13,7 +13,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Literal
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -27,7 +27,7 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-@dataclass(slots=True)
+@dataclass()
 class CausalEpisode:
     """A DAG of causally-linked facts forming a coherent temporal episode.
 
@@ -74,7 +74,7 @@ COGNITIVE_LAYER = Literal[
 # ─── Legacy L2 Payload (Qdrant-compatible) ────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class MemoryEntry:
     """Atomic unit of vector-stored memory.
 
@@ -119,7 +119,7 @@ class SourceMetadata(BaseModel):
 class MemoryAccessStats(BaseModel):
     """Metamemory statistics tracking retrieval and encoding health."""
 
-    last_successful_retrieval: datetime | None = Field(
+    last_successful_retrieval: Optional[datetime] = Field(
         default=None, description="UTC time of last hit."
     )
     retrieval_failure_count: int = Field(default=0, description="Consecutive or total failures.")
@@ -127,7 +127,7 @@ class MemoryAccessStats(BaseModel):
     average_retrieval_latency_ms: float = Field(
         default=0.0, description="Average time to retrieve."
     )
-    decay_predicted_date: datetime | None = Field(
+    decay_predicted_date: Optional[datetime] = Field(
         default=None, description="When will this be pruned?"
     )
 
@@ -214,7 +214,7 @@ class CortexFactModel(BaseModel):
     cognitive_layer: COGNITIVE_LAYER = Field(
         default="semantic", description="Target cognitive layer for this fact."
     )
-    parent_decision_id: int | None = Field(
+    parent_decision_id: Optional[int] = Field(
         default=None, description="Causal anchor to the parent decision."
     )
 
@@ -229,7 +229,7 @@ class CortexFactModel(BaseModel):
         default_factory=dict,
         description="Optional structured metadata (session_id, tool calls, etc).",
     )
-    specular_embedding: list[int] | None = Field(
+    specular_embedding: Optional[list[int]] = Field(
         default=None,
         description="HDC Specular Memory (intent trace) bipolar hypervector.",
     )

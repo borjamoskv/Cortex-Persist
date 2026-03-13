@@ -88,7 +88,7 @@ class SemanticMutator:
                 await self._worker_task
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("SemanticMutator shutdown error: %s", e)
             self._pool.shutdown(wait=True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
@@ -175,7 +175,7 @@ class SemanticMutator:
                 self._mutate_batch(cursor, batch, now)
 
                 conn.commit()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # Si una DB lock o constraint quiebra la query, asegura rollback de BEGIN IMMEDIATE
                 conn.rollback()
                 logger.error("SemanticMutator: Unrecoverable mutation error: %s", e)
@@ -315,7 +315,7 @@ class DynamicSemanticSpace:
                 await self._heartbeat_task
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("DynamicSemanticSpace shutdown error: %s", e)
             logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
 
@@ -327,7 +327,7 @@ class DynamicSemanticSpace:
                 await self.force_autonomic_flush(reason="Standard Heartbeat")
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("DynamicSemanticSpace: Heartbeat failure: %s", e)
 
     async def force_autonomic_flush(self, reason: str = "Unknown") -> None:

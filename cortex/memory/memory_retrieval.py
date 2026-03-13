@@ -126,7 +126,7 @@ async def _fetch_dense_results(
                 limit=max_episodes,
                 layer=layer,
             )
-        return await manager._l2.recall(query=query, limit=max_episodes)
+        return await manager._l2.recall(query=query, limit=max_episodes, tenant_id=tenant_id)
     except (OSError, RuntimeError, ValueError) as e:
         logger.warning("Dense L2 recall failed: %s", e)
         return []
