@@ -5,8 +5,8 @@ Endpoints for ambient context inference, raw signals, and snapshot history.
 """
 
 import logging
-import time
 import math
+import time
 from collections import deque
 
 from fastapi import APIRouter, Depends, Query, Request

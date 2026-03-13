@@ -5,7 +5,7 @@ Protects the operator from accidental data leaks and behavioral tracking.
 
 import logging
 import re
-from typing import Dict, List, Any
+from typing import Any
 
 logger = logging.getLogger("cortex.gateway.shield")
 
@@ -19,7 +19,7 @@ SENSITIVE_PATTERNS = [
 
 class APIShield:
     @staticmethod
-    def strip_telemetry_headers(headers: Dict[str, str]) -> Dict[str, str]:
+    def strip_telemetry_headers(headers: dict[str, str]) -> dict[str, str]:
         """Remove identifying headers often sent by IDEs and enterprise proxies."""
         cleaned = {}
         blocked = []
@@ -56,7 +56,7 @@ class APIShield:
         return shielded
 
     @staticmethod
-    def mask_usage(data: Dict[str, Any]) -> Dict[str, Any]:
+    def mask_usage(data: dict[str, Any]) -> dict[str, Any]:
         """Ensure token usage doesn't lean toward identifying complexity."""
         # Optional: Jitter the token counts to prevent side-channel timing attacks
         if "usage" in data:

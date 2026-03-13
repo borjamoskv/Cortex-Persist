@@ -42,7 +42,7 @@ class TopologyManager:
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — websocket send boundary
                 logger.error("Failed to send to websocket: %s", e)
 
     async def notify_new_memory(self, node_data: dict, neighbors: list[dict] = None):

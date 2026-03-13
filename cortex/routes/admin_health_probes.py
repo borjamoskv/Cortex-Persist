@@ -109,7 +109,7 @@ def build_health_probes(
                     "total_facts": total,
                 },
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — health probe boundary isolates failures
             return "error", False, {"detail": str(e)}
 
     return {

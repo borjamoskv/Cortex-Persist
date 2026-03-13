@@ -38,7 +38,7 @@ class SecurityAuditMiddleware:
             status_code = response.status_code
             status = "SUCCESS" if 200 <= status_code < 400 else f"FAILED_{status_code}"
 
-        except Exception as e:  # deliberate boundary — middleware must capture all for audit log
+        except Exception as e:  # noqa: BLE001 — deliberate boundary — middleware must capture all for audit log
             logger.error("Request failed: %s", e)
             status = "CRASHED"
             raise

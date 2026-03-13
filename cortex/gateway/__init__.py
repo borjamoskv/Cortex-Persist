@@ -194,12 +194,11 @@ class GatewayRouter:
             )
         except Exception as exc:  # noqa: BLE001
             latency = (time.perf_counter() - t0) * 1000
-            logger.error(
+            logger.exception(
                 "Gateway [%s] %s → error: %s",
                 request.request_id,
                 intent_str,
                 exc,
-                exc_info=True,
             )
             # Ω₅: Auto-persist error as ghost for Josu/Aether processing
             try:
@@ -212,8 +211,8 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:
-                pass  # boundary persistence must never break the gateway
+            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
+                pass
             return GatewayResponse(
                 ok=False,
                 error=str(exc),
