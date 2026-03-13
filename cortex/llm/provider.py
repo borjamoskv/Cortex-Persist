@@ -495,14 +495,3 @@ class LLMProvider(BaseProvider):
             return f"LLMProvider(provider={self._provider!r}, models=[{models}])"
         return f"LLMProvider(provider={self._provider!r}, model={self._model!r})"
 
-    @classmethod
-    def list_providers(cls) -> list[str]:
-        """Return all available preset provider names + 'custom'."""
-        from cortex.llm._presets import list_providers as _list_providers
-        return _list_providers()
-
-    @classmethod
-    def get_preset_info(cls, provider: str) -> dict[str, Any] | None:
-        """Return preset config for a provider, or None if not found."""
-        from cortex.llm._presets import get_preset_info as _get_preset_info
-        return _get_preset_info(provider)

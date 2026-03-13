@@ -48,7 +48,6 @@ __all__ = ["CortexMemoryManager"]
 
 logger = logging.getLogger("cortex.memory.manager")
 
-
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
 
@@ -496,9 +495,6 @@ class CortexMemoryManager:
                 task.cancel()
         self._background_tasks.clear()
 
-    # Backward-compat delegates
-    _raw_concat = staticmethod(raw_concat)
-    _fact_to_dict = staticmethod(fact_to_dict)
-
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"
+

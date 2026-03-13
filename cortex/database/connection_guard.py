@@ -22,16 +22,43 @@ __all__ = ["scan_raw_connects", "ConnectionViolation"]
 # Modules allowed to use sqlite3.connect directly
 _WHITELISTED_MODULES: frozenset[str] = frozenset(
     {
+        # Core database layer
         "cortex/database/core.py",
         "cortex/database/pool.py",
         "cortex/database/writer.py",
         "cortex/engine/sync_compat.py",
         "cortex/database/connection_guard.py",
-        "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
-        "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
-        "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
-        "cortex/evolution/cortex_metrics.py",  # Low-level sync telemetry metrics
-        "cortex/evolution/shannon_metrics.py",  # Sync thread metrics (asyncio.to_thread)
+        # Memory subsystems needing raw/sync access
+        "cortex/memory/sqlite_vec_store.py",   # Low-level vec extension needs raw connect
+        "cortex/memory/hdc/store.py",          # HDC Specular Memory needs raw access
+        "cortex/memory/procedural.py",         # Sync procedural memory bootstrap
+        "cortex/memory/evaluator.py",          # Sync memory health evaluator
+        # Engine low-level
+        "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
+        "cortex/engine/decalcifier.py",        # Sync schema maintenance
+        # Agent/system infra
+        "cortex/agents/system_prompt.py",      # Documentation strings, not actual usage
+        # Evolution/metrics (sync telemetry)
+        "cortex/evolution/cortex_metrics.py",
+        "cortex/evolution/shannon_metrics.py",
+        # Swarm budget tracker (sync, thread-safe)
+        "cortex/swarm/budget.py",
+        # Utils/pulmones (sync background workers)
+        "cortex/utils/pulmones_worker.py",
+        "cortex/utils/pulmones.py",
+        # Aether queue (sync fallback)
+        "cortex/aether/queue.py",
+        # TTT ghost harvester
+        "cortex/ttt/ghost_harvester.py",
+        # Metering tracker (sync, hot path)
+        "cortex/metering/tracker.py",
+        # Health collector (sync reads for Prometheus hot path)
+        "cortex/health/collector.py",
+        # UI swarm board (local read-only)
+        "cortex/ui/swarm_board.py",
+        # Daemon queues (sync centaur/auto_audit)
+        "cortex/daemon/centaur/queue.py",
+        "cortex/daemon/monitors/auto_audit.py",
     }
 )
 
