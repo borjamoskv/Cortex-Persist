@@ -10,10 +10,11 @@ __all__ = ["PolicyRecommendation", "EvictionVerdict", "OracleReport"]
 class PolicyRecommendation(Enum):
     """Ajuste de política sugerido por el Oracle."""
 
-    OPTIMAL = "OPTIMAL"  # El sistema olvida correctamente
-    INCREASE_TTL = "INCREASE_TTL"  # Olvida demasiado pronto (regret rate alto)
-    REDUCE_CAPACITY = "REDUCE_CAPACITY"  # Olvida demasiado tarde (utilización OOM risk)
-    PRIORITIZE_CAUSAL = "PRIORITIZE_CAUSAL"  # Olvida hechos causalmente críticos
+    OPTIMAL = "OPTIMAL"
+    INCREASE_TTL = "INCREASE_TTL"
+    REDUCE_CAPACITY = "REDUCE_CAPACITY"
+    PRIORITIZE_CAUSAL = "PRIORITIZE_CAUSAL"
+    PROTECT_CAUSAL_ROOTS = "PROTECT_CAUSAL_ROOTS"
 
 
 @dataclass
@@ -23,10 +24,11 @@ class EvictionVerdict:
     key: str
     eviction_id: int
     reason: str
-    was_regrettable: bool  # ¿Fue eviccionado algo que se necesitó después?
-    causal_weight: float  # 0.0 = sin peso causal, 1.0 = axioma crítico
-    access_frequency_score: float  # 0.0 = nunca accedido, 1.0 = muy frecuente
-    eviction_value: float  # Score compuesto de qué tan costosa fue la decisión
+    was_regrettable: bool
+    causal_weight: float  # 0.0→1.0 (type + depth bonus)
+    causal_depth: int  # descendant count (0 = leaf)
+    access_frequency_score: float  # 0.0→1.0
+    eviction_value: float  # composite cost score
     details: dict[str, Any] = field(default_factory=dict)
 
 
@@ -44,8 +46,15 @@ class OracleReport:
     suggested_capacity_delta: int  # +N items o -N items
     evidence_chain_valid: bool
     evidence_tip: str
+    system_load_factor: float = 1.0  # OS-level pressure factor (sysload)
 
     def to_dict(self) -> dict[str, Any]:
+        regrettable = [
+            v for v in self.verdicts if v.was_regrettable
+        ]
+        causal_roots = [
+            v for v in regrettable if v.causal_depth > 0
+        ]
         return {
             "audited_at": self.audited_at,
             "window_size": self.window_size,
@@ -57,5 +66,6 @@ class OracleReport:
             "evidence_chain_valid": self.evidence_chain_valid,
             "evidence_tip": self.evidence_tip,
             "verdict_count": len(self.verdicts),
-            "regrettable_evictions": sum(1 for v in self.verdicts if v.was_regrettable),
+            "regrettable_evictions": len(regrettable),
+            "causal_root_evictions": len(causal_roots),
         }

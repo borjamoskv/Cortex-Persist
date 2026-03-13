@@ -29,10 +29,7 @@ class SearchMixin(EngineMixinBase):
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
-        if tenant_id == "default":
-            from cortex.security.tenant import get_tenant_id
-
-            tenant_id = get_tenant_id()
+        tenant_id = self._resolve_tenant(tenant_id)
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             try:
@@ -68,7 +65,7 @@ class SearchMixin(EngineMixinBase):
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
                     await SearchMixin._enrich_with_graph_context(
-                        self, conn, results, query, graph_depth
+                        self, conn, results, query, graph_depth, tenant_id=tenant_id
                     )
 
                 return results
@@ -88,7 +85,7 @@ class SearchMixin(EngineMixinBase):
                 )
 
     async def _enrich_with_graph_context(
-        self, conn, results: list[Any], query: str, graph_depth: int
+        self, conn, results: list[Any], query: str, graph_depth: int, tenant_id: str = "default"
     ) -> None:
         """Helper to enrich search results with graph context."""
         entities = extract_entities(query)
@@ -100,7 +97,9 @@ class SearchMixin(EngineMixinBase):
             seeds = [e["name"] for e in top_entities]
 
         if seeds:
-            subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth or 1, max_nodes=50)
+            subgraph = await get_context_subgraph(
+                conn, seeds, depth=graph_depth or 1, max_nodes=50, tenant_id=tenant_id
+            )
 
             if results and (subgraph.get("nodes") or subgraph.get("edges")):
                 results[0].graph_context = {"graph": subgraph, "seeds": seeds}

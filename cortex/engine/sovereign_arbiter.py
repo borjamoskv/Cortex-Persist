@@ -99,7 +99,7 @@ class SovereignArbiter:
             logger.warning("🛡️ Sovereign Arbiter Block: %s", msg)
             return False, msg
             
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — execution arbiter must catch all fatal compilation errors
             msg = f"[BLOQUEO BIZANTINO - Ω₃] Compilation Failed: {e}"
             logger.error("🛡️ Sovereign Arbiter Compilation Block: %s", msg)
             return False, msg

@@ -18,13 +18,17 @@ logger = logging.getLogger("cortex")
 def _guard_injection(
     content: str,
     project: str,
+    source: str | None,
     meta: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
-    """Scan content for injection attacks."""
+    """Scan content for injection attacks.
+
+    Passes ``source`` to the guard so trusted agents bypass L1/L5.
+    """
     try:
         from cortex.security.injection_guard import GUARD
 
-        report = GUARD.scan(content)
+        report = GUARD.scan(content, source=source)
         if not report.is_safe:
             logger.warning(
                 "🛡️ INJECTION GUARD: %d threats (highest: %s) in [%s]",
@@ -128,7 +132,7 @@ def run_security_guards(
 
     Returns the (potentially enriched) metadata dict.
     """
-    meta = _guard_injection(content, project, meta)
+    meta = _guard_injection(content, project, source, meta)
     meta = _guard_anomaly(content, project, source, meta)
     meta = _guard_honeypot(content, meta)
     return meta

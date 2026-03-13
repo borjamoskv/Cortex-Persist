@@ -143,7 +143,7 @@ class SovereignReporter:
                         yield await self.collect_metrics()
         except asyncio.CancelledError:
             raise
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — stream boundary must not crash system
             logger.error("Error in stream_metrics: %s", e)
 
     async def export_json(self, output_path: str):

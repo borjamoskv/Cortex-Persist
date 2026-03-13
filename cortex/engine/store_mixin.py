@@ -54,6 +54,8 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         parent_decision_id: int | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
+        tenant_id = self._resolve_tenant(tenant_id)
+
         kwargs = {
             "project": project,
             "content": content,
@@ -110,7 +112,6 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                     if similar_facts:
                         top_match = similar_facts[0]
                         score = getattr(top_match, "_recall_score", 0.0)
-                        
                         # Threshold > 0.92 means extreme similarity (almost identical meaning)
                         if score > 0.92:
                             logger.info(
@@ -120,8 +121,9 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                             try:
                                 fact_id_int = int(top_match.id)
                                 await conn.execute(
-                                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id = ?", 
-                                    (fact_id_int,)
+                                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP "
+                                    "WHERE id = ?",
+                                    (fact_id_int,),
                                 )
                                 return fact_id_int, meta, content, fact_type
                             except (ValueError, TypeError):
@@ -152,9 +154,11 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         meta = await resolve_causality_async(conn, project, meta)
 
         # Ω₆: Nemesis Analysis must be async to prevent loop starvation
-        if rej := await NemesisProtocol.analyze_async(content, conn=conn):
-            logger.warning("NEMESIS REJECTION: %s", rej)
-            raise ValueError(rej)
+        # Skip nemesis for errors and ghosts as stack traces/records might contain anti-patterns
+        if fact_type not in ("error", "ghost"):
+            if rej := await NemesisProtocol.analyze_async(content, conn=conn):
+                logger.warning("NEMESIS REJECTION: %s", rej)
+                raise ValueError(rej)
 
         # Ω₁: Bridge Elevation — Prescriptive pattern elevation for cross-project duplicates
         if fact_type in ("knowledge", "decision", "rule", "ghost"):
@@ -308,19 +312,22 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
+        tenant_id: str = "default",
     ) -> int:
+        tenant_id = self._resolve_tenant(tenant_id)
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = (
                 "SELECT tenant_id, project, content, fact_type, tags, confidence, source, meta "
-                "FROM facts WHERE id = ? AND valid_until IS NULL"
+                "FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL"
             )
-            cursor = await conn.execute(query, (fact_id,))
+            cursor = await conn.execute(query, (fact_id, tenant_id))
             row = await cursor.fetchone()
             if not row:
-                raise ValueError(f"Fact {fact_id} not found")
+                raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
 
             (
-                tenant_id,
+                db_tenant_id,
                 project,
                 raw_old_content,
                 fact_type,
@@ -333,10 +340,10 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
             enc = get_default_encrypter()
             old_content = (
-                enc.decrypt_str(raw_old_content, tenant_id=tenant_id) if raw_old_content else ""
+                enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id) if raw_old_content else ""
             )
             new_meta = (
-                enc.decrypt_json(raw_old_meta_json, tenant_id=tenant_id)
+                enc.decrypt_json(raw_old_meta_json, tenant_id=db_tenant_id)
                 if raw_old_meta_json
                 else {}
             )
@@ -347,7 +354,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             new_id = await self.store(
                 project=project,
                 content=content if content is not None else old_content,  # type: ignore[reportArgumentType]
-                tenant_id=tenant_id,
+                tenant_id=db_tenant_id,
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),
                 confidence=confidence,
@@ -356,39 +363,43 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn=conn,
                 commit=False,
             )
-            await self.deprecate(fact_id, reason=f"updated_by_{new_id}", conn=conn)
+            await self.deprecate(fact_id, reason=f"updated_by_{new_id}", conn=conn, tenant_id=db_tenant_id)
             await conn.commit()
             return new_id
 
     async def deprecate(
-        self, fact_id: int, reason: str | None = None, conn: aiosqlite.Connection | None = None
+        self, fact_id: int, reason: str | None = None, conn: aiosqlite.Connection | None = None, tenant_id: str = "default"
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
+
+        tenant_id = self._resolve_tenant(tenant_id)
+            
         if conn:
-            return await self._deprecate_impl(conn, fact_id, reason)
+            return await self._deprecate_impl(conn, fact_id, reason, tenant_id)
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            res = await self._deprecate_impl(conn, fact_id, reason)  # type: ignore[reportArgumentType]
+            res = await self._deprecate_impl(conn, fact_id, reason, tenant_id)  # type: ignore[reportArgumentType]
             await conn.commit()  # type: ignore[reportOptionalMemberAccess]
             return res
 
     async def _deprecate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:  # type: ignore[reportReturnType]
         from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         ts = now_iso()
         cursor = await conn.execute(
-            "SELECT tenant_id, project FROM facts WHERE id = ? AND valid_until IS NULL", (fact_id,)
+            "SELECT tenant_id, project FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL", 
+            (fact_id, tenant_id)
         )
         row = await cursor.fetchone()
         if not row:
             return False
-        tenant_id, project = row[0], row[1]
+        db_tenant_id, project = row[0], row[1]
         await MUTATION_ENGINE.apply(
             conn,
             fact_id=fact_id,
-            tenant_id=tenant_id,
+            tenant_id=db_tenant_id,
             event_type="deprecate",
             payload={"reason": reason or "deprecated", "timestamp": ts},
             signer="store_mixin:deprecate",

@@ -72,7 +72,7 @@ _EPIGENETIC_RULES = [
             "def safe_execute(func, *args):\n"
             "    try:\n"
             "        return func(*args)\n"
-            "    except Exception as e:\n"
+            "    except Exception as e:  # noqa: BLE001\n"
             "        return str(e)"
         ),
     ),

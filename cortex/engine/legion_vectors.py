@@ -107,7 +107,7 @@ class EntropyDemon:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
-        if "except Exception:" in code or "except:" in code:
+        if "except Exception:  # noqa: BLE001" in code or "except:" in code:
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )
@@ -178,7 +178,7 @@ class LedgerPoisoner:
                         findings.append(
                             f"LedgerPoisoner: Corrupted transaction #{tx_id} via UPDATE."
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 — expected DB rejection for attack
                         logger.debug("LedgerPoisoner Update rejected by DB (expected): %s", e)
 
                 # Attempt to delete a Merkle root
@@ -188,10 +188,10 @@ class LedgerPoisoner:
                     findings.append(
                         "LedgerPoisoner: Dropped Merkle checkpoints via raw SQL DELETE."
                     )
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 — expected DB rejection for attack
                     logger.debug("LedgerPoisoner Delete rejected by DB (expected): %s", e)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — attack vector execution boundary
             logger.debug("LedgerPoisoner execution error: %s", e)
 
         return findings
@@ -214,11 +214,13 @@ class VaultCracker:
             tampered = content[:-5] + "XXXXX"
             try:
                 vault.decrypt(tampered)
-                findings.append("VaultCracker: Malleability attack succeeded (authentication failed).")
-            except Exception:
+                findings.append(
+                    "VaultCracker: Malleability attack succeeded (authentication failed)."
+                )
+            except Exception:  # noqa: BLE001 — expected decryption failure
                 pass  # Success = Tag caught it
-                
-        except Exception as e:
+
+        except Exception as e:  # noqa: BLE001 — attack vector execution boundary
             logger.debug("VaultCracker error: %s", e)
 
         return findings
@@ -226,7 +228,7 @@ class VaultCracker:
 
 class EpistemicJustice:
     """Vector: Epistemic Injustice Audit (Miranda Fricker Protocol).
-    
+
     Detects patterns where subjects are discredited or misunderstood due to
     identity prejudice (Testimonial) or lack of conceptual resources (Hermeneutical).
     """
@@ -237,22 +239,24 @@ class EpistemicJustice:
         findings = []
         source_code = getattr(system, "source_code", "")
         prejudice_proxies = [
-            r"zip_code", r"neighborhood", r"postal_code", r"surname_origin", 
+            r"zip_code", r"neighborhood", r"postal_code", r"surname_origin",
             r"ethnicity", r"gender_proxy", r"education_level_bias"
         ]
-        
+
         for proxy in prejudice_proxies:
             if re.search(fr"\b{proxy}\b", source_code, re.IGNORECASE):
                 findings.append(
                     f"Testimonial Injustice: Logic uses '{proxy}' as a credibility filter. "
-                    "This discredits the subject for reasons unrelated to content (Identity Prejudice)."
+                    "This discredits the subject for reasons unrelated to content "
+                    "(Identity Prejudice)."
                 )
 
         if "switch" in source_code or "if" in source_code:
             if "default" not in source_code.lower() and "else" not in source_code.lower():
                 findings.append(
                     "Hermeneutical Injustice: Rigid classification detected without open-ended "
-                    "interpretative resources. Systemic disadvantage for non-standard social experiences."
+                    "interpretative resources. Systemic disadvantage for non-standard "
+                    "social experiences."
                 )
         
         return findings
