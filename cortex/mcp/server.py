@@ -76,8 +76,13 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         fact_type: str = "knowledge",
         tags: str = "[]",
         source: str = "",
+        parent_decision_id: int = 0,
     ) -> str:
-        """Store a fact in CORTEX memory."""
+        """Store a fact in CORTEX memory.
+
+        Args:
+            parent_decision_id: Causal link to parent fact (0 = auto-resolve).
+        """
         await ctx.ensure_ready()
 
         try:
@@ -94,13 +99,29 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
 
         # Immune Membrane Interception (Ω₃ Byzantine Default)
         intent_payload = f"Store Fact [{fact_type}]: {content}"
-        context_payload = {"project": project, "tags": parsed_tags, "source": source}
-        triage = await ctx.membrane.intercept(intent_payload, context_payload)
+        context_payload = {
+            "project": project,
+            "tags": parsed_tags,
+            "source": source,
+        }
+        triage = await ctx.membrane.intercept(
+            intent_payload, context_payload,
+        )
 
         if triage.verdict != Verdict.PASS:
             ctx.metrics.record_error(is_immune_rejection=True)
-            logger.warning("Immune Membrane rejected store: %s", triage.risks_assumed)
-            return f"❌ Rejected by Immune System ({triage.verdict.value}): {triage.risks_assumed}"
+            logger.warning(
+                "Immune Membrane rejected store: %s",
+                triage.risks_assumed,
+            )
+            return (
+                f"❌ Rejected by Immune System "
+                f"({triage.verdict.value}): "
+                f"{triage.risks_assumed}"
+            )
+
+        # Normalize parent_decision_id: 0 means None (auto-resolve)
+        parent_id = parent_decision_id if parent_decision_id > 0 else None
 
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
@@ -113,6 +134,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
                 parsed_tags,
                 "stated",
                 source or None,
+                parent_decision_id=parent_id,
             )
 
         ctx.metrics.record_request()
@@ -245,6 +267,334 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
+# ─── Causal Episode Tracing (Epoch 8) ────────────────────────────────
+
+
+def _register_trace_episode_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register the ``cortex_trace_episode`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_trace_episode(
+        query: str = "",
+        fact_id: int = 0,
+        project: str = "",
+        limit: int = 3,
+    ) -> str:
+        """Trace causal episodes in CORTEX memory.
+
+        Two modes:
+        - If fact_id > 0: Trace the full causal DAG from that fact.
+        - If query is provided: Find facts matching the query and
+          reconstruct their causal episodes (why did X happen?).
+
+        Returns the causal chain showing decision → consequence → fix.
+        """
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
+            engine._conn = conn
+
+            if fact_id > 0:
+                episode = await engine.trace_episode(fact_id)
+                return (
+                    f"Causal Episode from fact #{fact_id}:\n"
+                    f"  Root: #{episode.root_fact_id}\n"
+                    f"  Depth: {episode.depth}\n"
+                    f"  Nodes: {len(episode.fact_chain)}\n"
+                    f"  Entropy: {episode.entropy_density:.2f}\n"
+                    f"  Project: {episode.project}\n\n"
+                    f"{episode.summary}"
+                )
+
+            if query:
+                episodes = await engine.recall_episode(
+                    query, project, min(max(limit, 1), 10)
+                )
+                if not episodes:
+                    return "No causal episodes found."
+
+                lines = [f"Found {len(episodes)} causal episode(s):\n"]
+                for ep in episodes:
+                    lines.append(
+                        f"--- Episode (root=#{ep.root_fact_id}, "
+                        f"depth={ep.depth}, "
+                        f"entropy={ep.entropy_density:.2f}) ---\n"
+                        f"{ep.summary}\n"
+                    )
+                return "\n".join(lines)
+
+            return "Provide either a query or a fact_id."
+
+
+# ─── Causal Chain Traversal ──────────────────────────────────────────
+
+
+def _register_trace_chain_tool(
+    mcp: "FastMCP", ctx: _MCPContext,  # type: ignore[reportInvalidTypeForm]
+) -> None:
+    """Register the ``cortex_trace_chain`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_trace_chain(
+        fact_id: int,
+        direction: str = "down",
+        max_depth: int = 10,
+    ) -> str:
+        """Traverse the causal chain from a fact.
+
+        Args:
+            fact_id: Starting fact ID.
+            direction: 'up' (toward root) or 'down' (toward leaves).
+            max_depth: Maximum recursion depth.
+
+        Returns the causal DAG as a formatted chain.
+        """
+        await ctx.ensure_ready()
+
+        if direction not in ("up", "down"):
+            return "❌ direction must be 'up' or 'down'"
+
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(
+                ctx.cfg.db_path, auto_embed=False,
+            )
+            engine._conn = conn
+            chain = await engine.get_causal_chain(
+                fact_id,
+                direction=direction,
+                max_depth=min(max(max_depth, 1), 50),
+            )
+
+        if not chain:
+            return f"No causal chain from fact #{fact_id}."
+
+        arrow = "↑" if direction == "up" else "↓"
+        lines = [
+            f"Causal Chain {arrow} from #{fact_id} "
+            f"({len(chain)} nodes):\n",
+        ]
+        for f in chain:
+            depth = f.get("causal_depth", "?")
+            fid = f.get("id", "?")
+            ftype = f.get("fact_type", "?")
+            content = f.get("content", "")[:60]
+            parent = f.get("parent_decision_id")
+            parent_str = f"←#{parent}" if parent else "ROOT"
+            lines.append(
+                f"  [{depth}] #{fid} ({ftype}) "
+                f"{parent_str}: {content}"
+            )
+
+        return "\n".join(lines)
+
+
+# ─── Shannon Entropy Report (Epoch 13) ───────────────────────────────
+
+
+def _register_shannon_report_tool(
+    mcp: "FastMCP", ctx: _MCPContext,  # type: ignore[reportInvalidTypeForm]
+) -> None:
+    """Register the ``cortex_shannon_report`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_shannon_report(
+        project: str = "",
+    ) -> str:
+        """Analyze Shannon entropy of CORTEX memory.
+
+        Returns information-theoretic metrics: total entropy H(X),
+        compression ratio, redundancy index, and per-type distribution.
+        Useful for detecting knowledge bloat or semantic drift.
+        """
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
+            engine._conn = conn
+            report = await engine.shannon_report(
+                project or None,
+            )
+
+        lines = ["CORTEX Shannon Entropy Report:\n"]
+        for key, value in report.items():
+            if isinstance(value, float):
+                lines.append(f"  {key}: {value:.4f}")
+            elif isinstance(value, dict):
+                lines.append(f"  {key}:")
+                for k, v in value.items():
+                    lines.append(f"    {k}: {v}")
+            else:
+                lines.append(f"  {key}: {value}")
+        return "\n".join(lines)
+
+
+# ─── Session Handoff (Epoch 13) ──────────────────────────────────────
+
+
+def _register_handoff_tool(
+    mcp: "FastMCP", ctx: _MCPContext,  # type: ignore[reportInvalidTypeForm]
+) -> None:
+    """Register the ``cortex_handoff`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_handoff() -> str:
+        """Generate a session handoff with hot decisions, causal episodes,
+        active ghosts, and recent errors.
+
+        This produces the context an incoming agent needs to resume work
+        without loss of situational awareness.
+        """
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
+            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
+            engine._conn = conn
+
+            from cortex.agents.handoff import generate_handoff
+            handoff = await generate_handoff(engine)
+
+        lines = [
+            f"CORTEX Handoff v{handoff.get('version', '?')}:\n",
+            f"  Generated: {handoff.get('generated_at', '?')}\n",
+            f"  Active Projects: {', '.join(handoff.get('active_projects', []))}\n",
+            f"\n  Hot Decisions ({len(handoff.get('hot_decisions', []))}):",
+        ]
+        for d in handoff.get("hot_decisions", [])[:5]:
+            lines.append(f"    #{d['id']} [{d['project']}]: {d['content'][:80]}")
+
+        episodes = handoff.get("causal_episodes", [])
+        if episodes:
+            lines.append(f"\n  Causal Episodes ({len(episodes)}):")
+            for ep in episodes[:3]:
+                lines.append(
+                    f"    root=#{ep['root_fact_id']} "
+                    f"depth={ep['depth']} entropy={ep['entropy']:.2f}"
+                )
+
+        ghosts = handoff.get("active_ghosts", [])
+        if ghosts:
+            lines.append(f"\n  Active Ghosts ({len(ghosts)}):")
+            for g in ghosts[:5]:
+                lines.append(f"    #{g['id']} [{g['project']}]: {g['reference']}")
+
+        stats = handoff.get("stats", {})
+        lines.append(
+            f"\n  Stats: {stats.get('total_facts', 0)} facts, "
+            f"{stats.get('total_projects', 0)} projects, "
+            f"{stats.get('db_size_mb', 0):.1f} MB"
+        )
+        return "\n".join(lines)
+
+
+# ─── Embedding Tools (Gemini Embedding 2) ────────────────────────────
+
+
+def _register_embed_tool(
+    mcp: "FastMCP", ctx: _MCPContext,  # type: ignore[reportInvalidTypeForm]
+) -> None:
+    """Register the ``cortex_embed`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_embed(
+        text: str = "",
+        task_type: str = "RETRIEVAL_DOCUMENT",
+    ) -> str:
+        """Generate an embedding vector for text using the configured provider.
+
+        Returns the embedding dimension and first 5 values as preview.
+        When CORTEX_EMBEDDINGS=api and provider=gemini-v2, supports
+        multimodal Matryoshka embeddings (768/1536/3072 dims).
+
+        Args:
+            text: Text to embed.
+            task_type: Embedding task type (RETRIEVAL_DOCUMENT,
+                RETRIEVAL_QUERY, SEMANTIC_SIMILARITY, CLASSIFICATION,
+                CLUSTERING, CODE_RETRIEVAL_QUERY).
+        """
+        await ctx.ensure_ready()
+
+        if not text.strip():
+            return "❌ text cannot be empty"
+
+        try:
+            from cortex import config
+            from cortex.embeddings.api_embedder import APIEmbedder
+
+            if config.EMBEDDINGS_MODE != "api":
+                return (
+                    "❌ Embedding via MCP requires API mode. "
+                    "Set CORTEX_EMBEDDINGS=api"
+                )
+
+            embedder = APIEmbedder(
+                provider=config.EMBEDDINGS_PROVIDER,
+                target_dimension=config.EMBEDDINGS_DIMENSION,
+                task_type=task_type,
+            )
+
+            try:
+                vector = await embedder.embed(text)
+            finally:
+                await embedder.close()
+
+            preview = [f"{v:.4f}" for v in vector[:5]]
+            return (
+                f"✅ Embedding generated\n"
+                f"  Provider: {config.EMBEDDINGS_PROVIDER}\n"
+                f"  Dimension: {len(vector)}\n"
+                f"  Task: {task_type}\n"
+                f"  Preview: [{', '.join(preview)}, ...]"
+            )
+        except Exception as e:
+            ctx.metrics.record_error()
+            logger.error("Embedding failed: %s", e)
+            return f"❌ Embedding failed: {e}"
+
+
+def _register_embed_status_tool(
+    mcp: "FastMCP", ctx: _MCPContext,  # type: ignore[reportInvalidTypeForm]
+) -> None:
+    """Register the ``cortex_embed_status`` tool on *mcp*."""
+
+    @mcp.tool()
+    async def cortex_embed_status() -> str:
+        """Show the current embedding provider configuration.
+
+        Reports active provider, dimension, multimodal support,
+        MRL capabilities, and all registered providers from presets.
+        """
+        try:
+            from cortex import config
+            from cortex.embeddings.api_embedder import get_provider_configs
+
+            configs = get_provider_configs()
+            active = config.EMBEDDINGS_PROVIDER
+
+            lines = [
+                "CORTEX Embedding Status:\n",
+                f"  Mode: {config.EMBEDDINGS_MODE}",
+                f"  Active Provider: {active}",
+                f"  Target Dimension: {config.EMBEDDINGS_DIMENSION}",
+                f"  Task Type: {config.EMBEDDINGS_TASK_TYPE}\n",
+                f"  Registered Providers ({len(configs)}):",
+            ]
+
+            for name, cfg in configs.items():
+                marker = "→ " if name == active else "  "
+                mm = "🎨" if cfg.get("supports_multimodal") else "📝"
+                mrl = "🪆" if cfg.get("supports_mrl") else ""
+                dim = cfg.get("native_dimension", "?")
+                lines.append(
+                    f"  {marker}{mm}{mrl} {name}: "
+                    f"dim={dim}"
+                )
+
+            return "\n".join(lines)
+        except Exception as e:
+            return f"❌ Error loading embed status: {e}"
+
+
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
@@ -258,7 +608,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
 
     cfg = config or MCPServerConfig()
-    mcp = FastMCP("CORTEX Trust Engine", host=cfg.host, port=cfg.port)  # type: ignore[reportOptionalCall]
+    mcp = FastMCP(  # type: ignore[reportOptionalCall]
+        "CORTEX Trust Engine", host=cfg.host, port=cfg.port,
+    )
     ctx = _MCPContext(cfg)
 
     # Core memory tools
@@ -266,6 +618,20 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     _register_search_tool(mcp, ctx)
     _register_status_tool(mcp, ctx)
     _register_ledger_tool(mcp, ctx)
+
+    # Causal Episodic Trace (Epoch 8)
+    _register_trace_episode_tool(mcp, ctx)
+
+    # Causal Chain Traversal
+    _register_trace_chain_tool(mcp, ctx)
+
+    # Shannon Entropy & Session Handoff (Epoch 13)
+    _register_shannon_report_tool(mcp, ctx)
+    _register_handoff_tool(mcp, ctx)
+
+    # Embedding Tools (Gemini Embedding 2)
+    _register_embed_tool(mcp, ctx)
+    _register_embed_status_tool(mcp, ctx)
 
     # Trust & Compliance tools (EU AI Act Art. 12)
     register_trust_tools(mcp, ctx)
