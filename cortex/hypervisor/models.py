@@ -13,7 +13,7 @@ from typing import Literal
 __all__ = ["Memory", "HealthReport", "Receipt"]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Memory:
     """A single unit of recalled knowledge.
 
@@ -27,7 +27,7 @@ class Memory:
     source: str  # human-readable origin
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Receipt:
     """Opaque confirmation that a memory was stored.
 
@@ -40,7 +40,7 @@ class Receipt:
     stored_at: datetime
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class HealthReport:
     """Project health — legible, no internal metrics exposed.
 

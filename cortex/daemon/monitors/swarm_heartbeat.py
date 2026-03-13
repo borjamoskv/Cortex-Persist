@@ -17,6 +17,7 @@ logger = logging.getLogger("cortex.monitors.swarm_heartbeat")
 @dataclass
 class HeartbeatAlert:
     """Alert for a daemon thread that missed its heartbeat window."""
+
     node_id: str
     thread_name: str
     status: str  # "SUSPECT" or "DEAD"
@@ -39,19 +40,21 @@ class SwarmHeartbeatMonitor:
 
         for node in transitioned:
             severity = "CRITICAL" if node.status == NodeStatus.DEAD else "WARNING"
-            alerts.append(HeartbeatAlert(
-                node_id=node.node_id,
-                thread_name=node.thread_name,
-                status=node.status.value,
-                age_seconds=node.age_seconds,
-                miss_count=node.miss_count,
-                pulse_count=node.pulse_count,
-                message=(
-                    f"💀 [{severity}] Thread '{node.thread_name}' ({node.node_id}) "
-                    f"status={node.status.value} — no pulse for {node.age_seconds:.0f}s "
-                    f"({node.miss_count} misses, {node.pulse_count} total pulses)"
-                ),
-            ))
+            alerts.append(
+                HeartbeatAlert(
+                    node_id=node.node_id,
+                    thread_name=node.thread_name,
+                    status=node.status.value,
+                    age_seconds=node.age_seconds,
+                    miss_count=node.miss_count,
+                    pulse_count=node.pulse_count,
+                    message=(
+                        f"💀 [{severity}] Thread '{node.thread_name}' ({node.node_id}) "
+                        f"status={node.status.value} — no pulse for {node.age_seconds:.0f}s "
+                        f"({node.miss_count} misses, {node.pulse_count} total pulses)"
+                    ),
+                )
+            )
 
         # Log summary every check
         summary = SWARM_HEARTBEAT.status_summary()

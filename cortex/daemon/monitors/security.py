@@ -86,7 +86,7 @@ class SecurityMonitor:
                 c5_alerts = [a for a in alerts if a.confidence == "C5"]
                 if c5_alerts:
                     await self._blacklist_ips(c5_alerts)
-        except Exception as e:
+        except (sqlite3.Error, OSError) as e:
             logger.error("SecurityMonitor check_async failed: %s", e)
         return alerts
 
@@ -136,8 +136,8 @@ class SecurityMonitor:
                     await self._save_threat(conn, alert)
                 await conn.commit()
                 logger.error("🔥 KILL SWITCH: Blacklisted %d IPs.", len(alerts))
-        except Exception:
-            logger.error("Failed to save threat intel to DB")
+        except sqlite3.Error as e:
+            logger.error("Failed to save threat intel to DB: %s", e)
 
     async def _save_threat(self, conn: Any, alert: SecurityAlert) -> None:
         """Save a single threat to the DB."""

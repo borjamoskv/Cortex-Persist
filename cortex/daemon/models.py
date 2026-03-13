@@ -51,6 +51,8 @@ __all__ = [
     "SignalAlert",
     "SiteStatus",
     "TombstoneAlert",
+    "TrendsAlert",
+    "WorkflowAlert",
     "DriftAlert",
 ]
 
@@ -66,7 +68,6 @@ RETRY_BACKOFF = 2.0  # seconds between retries
 DEFAULT_CERT_WARN_DAYS = 14  # warn if SSL expires within 14 days
 DEFAULT_DISK_WARN_MB = 500  # warn if cortex dir exceeds 500 MB
 BUNDLE_ID = "com.moskv.daemon"
-
 
 # ─── Data Classes ─────────────────────────────────────────────────────
 
@@ -232,6 +233,18 @@ class TombstoneAlert:
 
 
 @dataclass
+class TrendsAlert:
+    """Alert for a new trending topic detected by the Trends Oracle."""
+
+    keyword: str
+    traffic_volume: str
+    geo: str
+    category: str
+    trend_type: str
+    timestamp: str
+
+
+@dataclass
 class AetherAlert:
     """Alert triggered when Aether completes or fails an autonomous task."""
 
@@ -239,6 +252,17 @@ class AetherAlert:
     title: str
     status: str
     message: str
+
+
+@dataclass
+class WorkflowAlert:
+    """Recommendation to deploy a specific workflow based on system state."""
+
+    workflow: str
+    reason: str
+    confidence: str = "C3\u001b[33m"
+    priority: int = 5
+    tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -275,31 +299,35 @@ class DaemonStatus:
     signal_alerts: list[SignalAlert] = field(default_factory=list)
     tombstone_alerts: list[TombstoneAlert] = field(default_factory=list)
     drift_alerts: list[DriftAlert] = field(default_factory=list)
+    trends_alerts: list[TrendsAlert] = field(default_factory=list)
     aether_alerts: list[AetherAlert] = field(default_factory=list)
+    workflow_alerts: list[WorkflowAlert] = field(default_factory=list)
     auto_immune_alerts: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
     def all_healthy(self) -> bool:
-        return (
-            all(s.healthy for s in self.sites)
-            and len(self.stale_ghosts) == 0
-            and len(self.memory_alerts) == 0
-            and len(self.cert_alerts) == 0
-            and len(self.engine_alerts) == 0
-            and len(self.disk_alerts) == 0
-            and len(self.evaluation_alerts) == 0
-            and len(self.entropy_alerts) == 0
-            and len(self.compaction_alerts) == 0
-            and len(self.cloud_sync_alerts) == 0
-            and len(self.perception_alerts) == 0
-            and len(self.neural_alerts) == 0
-            and len(self.security_alerts) == 0
-            and len(self.signal_alerts) == 0
-            and len(self.tombstone_alerts) == 0
-            and len(self.drift_alerts) == 0
-            and len(self.auto_immune_alerts) == 0
-            and len(self.errors) == 0
+        return all(s.healthy for s in self.sites) and not any(
+            [
+                self.stale_ghosts,
+                self.memory_alerts,
+                self.cert_alerts,
+                self.engine_alerts,
+                self.disk_alerts,
+                self.evaluation_alerts,
+                self.entropy_alerts,
+                self.compaction_alerts,
+                self.cloud_sync_alerts,
+                self.perception_alerts,
+                self.neural_alerts,
+                self.security_alerts,
+                self.signal_alerts,
+                self.tombstone_alerts,
+                self.drift_alerts,
+                self.trends_alerts,
+                self.auto_immune_alerts,
+                self.errors,
+            ]
         )
 
     def to_dict(self) -> dict:
@@ -307,150 +335,25 @@ class DaemonStatus:
             "checked_at": self.checked_at,
             "check_duration_ms": round(self.check_duration_ms, 1),
             "all_healthy": self.all_healthy,
-            "sites": [
-                {
-                    "url": s.url,
-                    "healthy": s.healthy,
-                    "status_code": s.status_code,
-                    "response_ms": round(s.response_ms, 1),
-                    "error": s.error,
-                    "checked_at": s.checked_at,
-                }
-                for s in self.sites
-            ],
-            "stale_ghosts": [
-                {
-                    "project": g.project,
-                    "last_activity": g.last_activity,
-                    "hours_stale": round(g.hours_stale, 1),
-                    "mood": g.mood,
-                    "blocked_by": g.blocked_by,
-                }
-                for g in self.stale_ghosts
-            ],
-            "memory_alerts": [
-                {
-                    "file": m.file,
-                    "last_updated": m.last_updated,
-                    "hours_stale": round(m.hours_stale, 1),
-                }
-                for m in self.memory_alerts
-            ],
-            "cert_alerts": [
-                {
-                    "hostname": c.hostname,
-                    "expires_at": c.expires_at,
-                    "days_remaining": c.days_remaining,
-                }
-                for c in self.cert_alerts
-            ],
-            "engine_alerts": [{"issue": e.issue, "detail": e.detail} for e in self.engine_alerts],
-            "disk_alerts": [
-                {"path": d.path, "size_mb": round(d.size_mb, 1), "threshold_mb": d.threshold_mb}
-                for d in self.disk_alerts
-            ],
-            "mejoralo_alerts": [
-                {
-                    "project": m.project,
-                    "score": m.score,
-                    "dead_code": m.dead_code,
-                    "total_loc": m.total_loc,
-                }
-                for m in self.mejoralo_alerts
-            ],
-            "evaluation_alerts": [
-                {
-                    "stale_ratio": round(e.stale_ratio, 4),
-                    "stale_count": e.stale_count,
-                    "contradictions_found": e.contradictions_found,
-                    "message": e.message,
-                }
-                for e in self.evaluation_alerts
-            ],
-            "entropy_alerts": [
-                {
-                    "project": e.project,
-                    "file_path": e.file_path,
-                    "complexity_score": e.complexity_score,
-                    "message": e.message,
-                }
-                for e in self.entropy_alerts
-            ],
-            "compaction_alerts": [
-                {
-                    "project": c.project,
-                    "reduction": c.reduction,
-                    "deprecated": c.deprecated,
-                    "message": c.message,
-                }
-                for c in self.compaction_alerts
-            ],
-            "cloud_sync_alerts": [
-                {
-                    "synced_count": s.synced_count,
-                    "last_id": s.last_id,
-                    "message": s.message,
-                    "latency_ms": round(s.latency_ms, 2),
-                }
-                for s in self.cloud_sync_alerts
-            ],
-            "perception_alerts": [
-                {
-                    "project": p.project,
-                    "intent": p.intent,
-                    "emotion": p.emotion,
-                    "confidence": p.confidence,
-                    "summary": p.summary,
-                }
-                for p in self.perception_alerts
-            ],
-            "neural_alerts": [
-                {
-                    "intent": n.intent,
-                    "confidence": n.confidence,
-                    "trigger": n.trigger,
-                    "summary": n.summary,
-                }
-                for n in self.neural_alerts
-            ],
-            "security_alerts": [
-                {
-                    "ip_address": s.ip_address,
-                    "payload": s.payload,
-                    "similarity_score": round(s.similarity_score, 4),
-                    "confidence": s.confidence,
-                    "summary": s.summary,
-                    "timestamp": s.timestamp,
-                }
-                for s in self.security_alerts
-            ],
-            "signal_alerts": [
-                {
-                    "event_type": s.event_type,
-                    "message": s.message,
-                    "project": s.project,
-                    "payload": s.payload,
-                }
-                for s in self.signal_alerts
-            ],
-            "tombstone_alerts": [
-                {
-                    "deleted_facts": t.deleted_facts,
-                    "freed_mb": round(t.freed_mb, 2),
-                    "message": t.message,
-                }
-                for t in self.tombstone_alerts
-            ],
-            "drift_alerts": [
-                {
-                    "health": round(d.health, 4),
-                    "centroid_drift": round(d.centroid_drift, 6),
-                    "spectral_ratio": round(d.spectral_ratio, 4),
-                    "n_vectors": d.n_vectors,
-                    "message": d.message,
-                }
-                for d in self.drift_alerts
-            ],
+            "sites": [s.__dict__ for s in self.sites],
+            "stale_ghosts": [g.__dict__ for g in self.stale_ghosts],
+            "memory_alerts": [m.__dict__ for m in self.memory_alerts],
+            "cert_alerts": [c.__dict__ for c in self.cert_alerts],
+            "engine_alerts": [e.__dict__ for e in self.engine_alerts],
+            "disk_alerts": [d.__dict__ for d in self.disk_alerts],
+            "mejoralo_alerts": [m.__dict__ for m in self.mejoralo_alerts],
+            "evaluation_alerts": [e.__dict__ for e in self.evaluation_alerts],
+            "entropy_alerts": [e.__dict__ for e in self.entropy_alerts],
+            "compaction_alerts": [c.__dict__ for c in self.compaction_alerts],
+            "cloud_sync_alerts": [s.__dict__ for s in self.cloud_sync_alerts],
+            "perception_alerts": [p.__dict__ for p in self.perception_alerts],
+            "neural_alerts": [n.__dict__ for n in self.neural_alerts],
+            "security_alerts": [s.__dict__ for s in self.security_alerts],
+            "signal_alerts": [s.__dict__ for s in self.signal_alerts],
+            "tombstone_alerts": [t.__dict__ for t in self.tombstone_alerts],
+            "trends_alerts": [t.__dict__ for t in self.trends_alerts],
+            "drift_alerts": [d.__dict__ for d in self.drift_alerts],
+            "workflow_alerts": [w.__dict__ for w in self.workflow_alerts],
             "auto_immune_alerts": self.auto_immune_alerts,
             "errors": self.errors,
         }

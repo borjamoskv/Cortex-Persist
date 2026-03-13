@@ -3,9 +3,10 @@ Frontier Daemon (R&D & Metabolism)
 The engine that ensures CORTEX is always at the bleeding edge.
 """
 
-import logging
-import time
 import asyncio
+import logging
+import sqlite3
+import time
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +26,7 @@ class FrontierDaemon:
         engine: Any = None,
         metabolism_interval_hours: int = 12,
         ingestion_interval_hours: int = 24,
-        allow_commits: bool = True
+        allow_commits: bool = True,
     ):
         self.engine = engine
         self.metabolism_interval = metabolism_interval_hours * 3600
@@ -55,7 +56,7 @@ class FrontierDaemon:
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
                     self._log_evolution("metabolism", msg)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — Isolate metabolism cycle failures from daemon boundary
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
     async def _run_ingestion(self):
@@ -63,7 +64,7 @@ class FrontierDaemon:
         logger.info("[FRONTIER] Scanning frontier for Cognitive Ingestion...")
         sources = [
             "https://github.com/google-deepmind/jules",
-            "https://docs.anthropic.com/en/docs/agents-and-tools/computer-use"
+            "https://docs.anthropic.com/en/docs/agents-and-tools/computer-use",
         ]
 
         for source in sources:
@@ -80,11 +81,11 @@ class FrontierDaemon:
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.time())
+                (f"[{type.upper()}] {content}", time.time()),
             )
             conn.commit()
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("[FRONTIER] Failed to log evolution: %s", e)
 
     async def run_loop(self):

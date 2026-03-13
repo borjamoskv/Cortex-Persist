@@ -66,7 +66,7 @@ class CircuitBreaker:
 
         try:
             result = await func(*args, **kwargs)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             await self._record_failure(exc)
             raise
         else:

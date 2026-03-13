@@ -72,7 +72,7 @@ class ThermodynamicMemoryMonitor:
                         pruned_count,
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Thermodynamic Memory monitor failed on %s: %s", tenant, e)
 
         return alerts
