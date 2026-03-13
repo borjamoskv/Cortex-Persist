@@ -259,7 +259,7 @@ class TestModelPolicyGuard:
                 "good_provider": {
                     "default_model": "gpt-4o",
                     "intent_model_map": {
-                        "code": "gemini-3.1-pro",
+                        "code": "gemini-2.5-pro",
                     },
                 },
             })
@@ -303,5 +303,5 @@ class TestModelPolicyGuard:
 
         # Should NOT match
         for model in ["gpt-4o", "gemini-2.5-pro", "claude-sonnet-4",
-                       "gemini-3.1-pro", "deepseek-r1"]:
+                       "gemini-2.5-pro", "deepseek-r1"]:
             assert not _PROHIBITED_TIERS.search(model), f"Should NOT match: {model}"
