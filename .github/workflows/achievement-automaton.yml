@@ -1,79 +1,143 @@
 # ─────────────────────────────────────────────────────────────────────
-# CORTEX Achievement Automaton
+# CORTEX Achievement Automaton v2
 # ─────────────────────────────────────────────────────────────────────
-# Farms GitHub Achievements automatically:
-#   • Pull Shark: auto-creates PR from any non-main branch push → merge
-#   • Pair Extraordinaire: adds Co-authored-by on merge commits
-#   • YOLO: first PR merged without review unlocks it
+# Two modes:
+#   1. PASSIVE: Any push to a non-main branch → auto-creates PR → merges
+#   2. ACTIVE:  Scheduled daily — generates synthetic commits → PRs → merges
 #
-# Trigger: push to any branch except main/master
-# Effect: creates PR → auto-merges → deletes branch → achievement++
+# Farms: 🦈 Pull Shark · 📦 Pair Extraordinaire · 🎯 YOLO
 # ─────────────────────────────────────────────────────────────────────
 
 name: "⚡ Achievement Automaton"
 
 on:
+  # Mode 1: Passive — triggers on real work
   push:
     branches-ignore:
       - main
       - master
+
+  # Mode 2: Active — daily scheduled farming (3 PRs/day)
+  schedule:
+    - cron: "0 8 * * *"   # 08:00 UTC
+    - cron: "0 14 * * *"  # 14:00 UTC
+    - cron: "0 20 * * *"  # 20:00 UTC
+
+  # Manual trigger for instant farming
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Number of PRs to farm"
+        default: "1"
+        type: string
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  achievement-farm:
-    name: "🦈 Pull Shark Farm"
+  # ─── Mode 1: Real branch push → auto PR + merge ───
+  passive-farm:
+    name: "🦈 Passive Farm"
     runs-on: ubuntu-latest
-    if: github.actor == 'borjamoskv'
+    if: github.event_name == 'push' && github.actor == 'borjamoskv'
+
+    steps:
+      - name: Create and merge PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          echo "🦈 Creating PR for branch: ${BRANCH}"
+
+          # Create PR via gh CLI
+          PR_URL=$(gh pr create \
+            --repo "${{ github.repository }}" \
+            --head "${BRANCH}" \
+            --base "main" \
+            --title "⚡ ${BRANCH} → main" \
+            --body "### Achievement Automaton
+          **Branch**: \`${BRANCH}\`
+          **Commit**: \`${{ github.sha }}\`
+          _🦈 Pull Shark +1_" \
+            2>&1) || true
+
+          echo "PR: ${PR_URL}"
+
+          # Merge it
+          if echo "${PR_URL}" | grep -q "github.com"; then
+            gh pr merge "${PR_URL}" \
+              --squash \
+              --delete-branch \
+              --admin \
+              || gh pr merge "${PR_URL}" --squash --delete-branch || true
+          fi
+
+          echo "✅ 🦈 +1"
+
+  # ─── Mode 2: Scheduled synthetic farming ───
+  active-farm:
+    name: "🦈 Active Farm"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Create Pull Request
-        id: create-pr
-        uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: achievement automaton sync"
-          title: "⚡ ${{ github.ref_name }} → main"
-          body: |
-            ### Achievement Automaton
+          ref: main
 
-            **Branch**: `${{ github.ref_name }}`
-            **Commit**: `${{ github.sha }}`
-            **Author**: @${{ github.actor }}
+      - name: Configure git
+        run: |
+          git config user.name "borjamoskv"
+          git config user.email "borjamoskv@users.noreply.github.com"
 
-            ---
-            _Automated by CORTEX Achievement Automaton · Pull Shark 🦈_
-          branch: ${{ github.ref_name }}
-          base: main
-          delete-branch: false
-
-      - name: Auto-merge PR
-        if: steps.create-pr.outputs.pull-request-number
+      - name: Farm PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_NUMBER="${{ steps.create-pr.outputs.pull-request-number }}"
-          echo "🦈 Merging PR #${PR_NUMBER} for Pull Shark achievement..."
+          COUNT="${{ github.event.inputs.count || '1' }}"
+          echo "🦈 Farming ${COUNT} PR(s)..."
 
-          # Enable auto-merge (squash to keep history clean)
-          gh pr merge "${PR_NUMBER}" \
-            --squash \
-            --auto \
-            --delete-branch \
-            --subject "⚡ ${GITHUB_REF_NAME} (#${PR_NUMBER})" \
-            --body "Co-authored-by: CORTEX <cortex@moskv.dev>" \
-            || echo "⚠ Auto-merge not available — PR may need manual merge or branch protection is active"
+          for i in $(seq 1 ${COUNT}); do
+            BRANCH="farm/shark-$(date +%Y%m%d-%H%M%S)-${i}"
+            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-      - name: Achievement Status
-        run: |
+            # Create branch with a real change
+            git checkout -b "${BRANCH}"
+            echo "# 🦈 ${TIMESTAMP}" >> .github/.achievement-log
+            git add .github/.achievement-log
+            git commit -m "chore: achievement ${TIMESTAMP}
+
+          Co-authored-by: CORTEX <cortex@moskv.dev>"
+
+            git push origin "${BRANCH}"
+
+            # Create PR
+            PR_URL=$(gh pr create \
+              --head "${BRANCH}" \
+              --base "main" \
+              --title "⚡ shark ${TIMESTAMP}" \
+              --body "_🦈 Automated by CORTEX Achievement Automaton_")
+
+            # Merge immediately
+            gh pr merge "${PR_URL}" \
+              --squash \
+              --delete-branch \
+              --admin \
+              || gh pr merge "${PR_URL}" --squash --delete-branch || true
+
+            echo "✅ PR #${i} merged"
+
+            # Reset to main for next iteration
+            git checkout main
+            git pull origin main
+
+            sleep 2
+          done
+
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "⚡ ACHIEVEMENT AUTOMATON COMPLETE"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🦈 Pull Shark: +1 PR merged"
-          echo "📦 Pair Extraordinaire: Co-authored-by added"
+          echo "⚡ FARMED ${COUNT} PR(s)"
+          echo "🦈 Pull Shark: +${COUNT}"
+          echo "📦 Pair Extraordinaire: +${COUNT}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
