@@ -9,6 +9,16 @@ import numpy as np
 
 DEFAULT_SR = 44100
 
+# Drum synthesis constants
+KICK_AMPLITUDE = 0.8
+HAT_AMPLITUDE = 0.15
+SNARE_AMPLITUDE = 0.5
+KICK_FREQ_START = 150.0
+KICK_FREQ_END = 45.0
+KICK_DECAY_MS = 180
+SNARE_NOISE_MS = 120
+HAT_NOISE_MS = 30
+
 def _synth_sine(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:
     """Generate a sine wave."""
     t = np.arange(int(sr * duration_s)) / sr

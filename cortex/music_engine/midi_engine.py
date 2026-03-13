@@ -13,7 +13,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
-from cortex.music_engine._synth import _synth_sine, _synth_square, _synth_kick, _synth_snare, _synth_hihat, _note_to_freq
+
+from cortex.music_engine._synth import (
+    _note_to_freq,
+    _synth_hihat,
+    _synth_kick,
+    _synth_sine,
+    _synth_snare,
+)
 
 logger = logging.getLogger(__name__)
 
