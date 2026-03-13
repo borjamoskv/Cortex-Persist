@@ -210,7 +210,7 @@ def get_default_signer() -> Ed25519Signer | None:
             _default_signer = Ed25519Signer(private_key_bytes=priv_bytes)
             logger.info("Ed25519 signer loaded")
             return _default_signer
-        except (ValueError, Exception) as exc:
+        except (ValueError, Exception) as exc:  # noqa: BLE001
             logger.warning("Failed to load Ed25519 key: %s", exc)
 
     return None

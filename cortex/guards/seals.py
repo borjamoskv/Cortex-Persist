@@ -111,7 +111,7 @@ async def check_gate_5_ledger() -> bool:
         await engine.close()
         printer.success("Ledger schema initialized successfully.")
         return True
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — test execution boundary
         printer.fail(f"Ledger initialization threw error: {e}")
         return False
 
@@ -211,7 +211,7 @@ async def check_gate_9_registry() -> bool:
 
         printer.success(f"Registry load OK: {total} axioms, {enf} CI-enforced.")
         return True
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — registry loading boundary
         printer.fail(f"Registry error: {e}")
         return False
 

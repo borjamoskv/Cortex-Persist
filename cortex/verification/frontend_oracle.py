@@ -21,7 +21,7 @@ class FrontendOracle:
         try:
             with open(filepath, encoding="utf-8") as f:
                 content = f.read()
-        except Exception:
+        except OSError:
             return violations
 
         # Extract JS blocks from .html or use full content for .js/.ts

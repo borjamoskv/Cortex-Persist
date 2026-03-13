@@ -32,7 +32,7 @@ __all__ = [
 # ═══════════════════════════════════════
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TamperedFact:
     """A fact with invalid integrity."""
 
@@ -43,7 +43,7 @@ class TamperedFact:
     content_preview: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class ChainStatus:
     """Status of the hash chain."""
 
@@ -54,7 +54,7 @@ class ChainStatus:
     orphaned_facts: list[TamperedFact] = field(default_factory=list)
 
 
-@dataclass(slots=True)
+@dataclass()
 class AuditReport:
     """Full integrity audit report."""
 

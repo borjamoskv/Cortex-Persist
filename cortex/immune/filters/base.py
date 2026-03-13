@@ -16,7 +16,7 @@ class Verdict(Enum):
     BLOCK = "BLOCK"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class FilterResult:
     filter_id: str
     verdict: Verdict

@@ -18,7 +18,7 @@ logger = logging.getLogger("cortex.guards.omega")
 
 SNAPSHOT_PATH = Path.home() / ".cortex" / "context-snapshot.md"
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class OmegaConflict:
     fact_id: str | None
     summary: str
@@ -39,7 +39,7 @@ class OmegaAuditor:
 
         try:
             snapshot_text = SNAPSHOT_PATH.read_text(encoding="utf-8")
-        except Exception as e:
+        except OSError as e:
             logger.error("OmegaAuditor: Failed to read snapshot: %s", e)
             return []
 
@@ -92,7 +92,7 @@ INSTRUCTIONS:
                 return [OmegaConflict(**c) for c in data]
             
             return []
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — LLM invocation boundary
             logger.error("OmegaAuditor: Deep audit failed: %s", e)
             return []
 

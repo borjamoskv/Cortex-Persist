@@ -137,6 +137,7 @@ class MockRedisClient:
         mock.psubscribe = AsyncMock()
         mock.unsubscribe = AsyncMock()
         mock.aclose = AsyncMock()
+
         async def listen():
             yield {"type": "subscribe"}
         mock.listen = listen
@@ -160,11 +161,11 @@ class HydraChaosEngine:
         ghost_pipeline.reset()
 
         start_ts = time.perf_counter_ns()
-        
+
         # Scenario logic
         critical_interrupted = False
         error_type = None
-        metadata = {"phase": "siege_execution"}
+        metadata: dict[str, Any] = {"phase": "siege_execution"}
 
         try:
             if scenario == ChaosScenario.KILL:
@@ -189,7 +190,7 @@ class HydraChaosEngine:
             logger.error("🚨 [HYDRA-CHAOS] Engine failure: %s", e)
             critical_interrupted = True
             error_type = "AssertionError"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("🚨 [HYDRA-CHAOS] Unexpected failure: %s", e)
             critical_interrupted = True
             error_type = type(e).__name__

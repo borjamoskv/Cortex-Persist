@@ -19,7 +19,7 @@ from cortex.immune.filters.reversibility import ReversibilityFilter
 logger = logging.getLogger("cortex.immune.membrane")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TriageReport:
     """Consolidated result from the immune membrane triage."""
 

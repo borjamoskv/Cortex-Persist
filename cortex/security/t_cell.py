@@ -1,7 +1,7 @@
 import ast
-import re
 import logging
-from typing import Dict, Any, Tuple, Optional
+import re
+from typing import Any
 
 logger = logging.getLogger("cortex.security.t_cell")
 
@@ -20,7 +20,7 @@ class BabestuTCell:
     HEX_HEURISTIC = re.compile(r'(\\x[0-9a-fA-F]{2}){15,}')
     
     @classmethod
-    def analyze_python_ast(cls, code: str) -> Tuple[bool, str]:
+    def analyze_python_ast(cls, code: str) -> tuple[bool, str]:
         """Convierte en AST y busca vectores letales en O(N) de los nodos."""
         try:
             tree = ast.parse(code)
@@ -48,7 +48,7 @@ class BabestuTCell:
         return True, ""
 
     @classmethod
-    def scan_payload(cls, raw_text: str) -> Dict[str, Any]:
+    def scan_payload(cls, raw_text: str) -> dict[str, Any]:
         """
         Punto de entrada O(1).
         1. Busca ofuscaciones superficiales (Base64, Hex).
@@ -70,7 +70,7 @@ class BabestuTCell:
         return cls._veredicto("LIMPIO", 0, None, "AST estático y heurísticas O(1) superadas", raw_text)
 
     @staticmethod
-    def _veredicto(estado: str, nivel: int, firma: Optional[str], razon: str, contenido_saneado: Optional[str] = None) -> Dict[str, Any]:
+    def _veredicto(estado: str, nivel: int, firma: str | None, razon: str, contenido_saneado: str | None = None) -> dict[str, Any]:
         return {
             "estado": estado,
             "nivel_amenaza": nivel,

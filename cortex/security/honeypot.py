@@ -95,7 +95,7 @@ class HoneypotManager:
                 for item in data:
                     decoy = DecoyFact.from_dict(item)
                     self._active_honeypots[decoy.hash] = decoy
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to load honeypots: %s", e)
 
     def _save(self) -> None:
@@ -105,7 +105,7 @@ class HoneypotManager:
             data = [h.to_dict() for h in self._active_honeypots.values()]
             with open(self.storage_path, "w") as f:
                 json.dump(data, f, indent=2)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to save honeypots: %s", e)
 
     def generate_decoy(self, project: str) -> DecoyFact:
