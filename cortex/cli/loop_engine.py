@@ -142,7 +142,7 @@ class ExecutionLoop:
             result.output = "Task cancelled by user"
             result.duration_ms = (time.monotonic() - t0) * 1000
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             elapsed = (time.monotonic() - t0) * 1000
             result.status = TaskStatus.FAILED
             result.output = str(exc)
@@ -180,7 +180,7 @@ class ExecutionLoop:
                 parts.append(f"Quality: {payload['score_130_100']}/100")
             parts.append(f"Status: {payload.get('status', 'unknown')}")
             return " │ ".join(parts)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("KETER execution failed, storing as knowledge: %s", exc)
             return f"Task registered: {task}"
 

@@ -54,7 +54,7 @@ class BicameralConsole:
         try:
             with open(relay_path, "a") as f:
                 f.write(json.dumps(event) + "\n")
-        except Exception:
+        except OSError:
             pass  # Fail silently to avoid interrupting the agent loop
 
     def log_limbic(self, message: str, source: str = "LORE") -> None:

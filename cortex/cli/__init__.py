@@ -11,7 +11,7 @@ CLI boot: ~50ms (was 637ms).
 from __future__ import annotations
 
 import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import click
 
@@ -122,6 +122,8 @@ class _LazyGroup(_LazyCommand, click.MultiCommand):
 _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.compact_cmds",
     "cortex.cli.crud",
+    "cortex.cli.dashboard_cmds",
+    "cortex.cli.demiurge_cmds",
     "cortex.cli.entropy_cmds",
     "cortex.cli.eval_cmds",
     "cortex.cli.handoff_cmds",
@@ -180,6 +182,11 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("sovereign", "cortex.cli.keter_cmds", "sovereign_cmds", "Sovereign engine control."),
     ("mcp", "cortex.cli.mcp_cmds", "mcp_cmds", "Model Context Protocol tools."),
     ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
+    ("genesis", "cortex.cli.genesis_cmds", "genesis_group", "Genesis Engine — create systems."),
+    ("health", "cortex.cli.health_cmds", "health_group", "Health Index — system monitoring."),
+    ("routing", "cortex.cli.routing_cmds", "routing", "LLM routing — tier/cost-aware selection."),
+    ("maestro", "cortex.cli.maestro_cmds", "maestro", "Autonomous Mac automation agent."),
+    ("grammy", "cortex.cli.grammy_cmds", "grammy_cmds", "🎵 GRAMMY-Ω: Producción de música soberana."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

@@ -210,5 +210,5 @@ async def _check_pg_health(dsn: str, grid: Table) -> None:
             "[bold #CCFF00]\u2713 Connected[/]" if healthy else "[bold red]\u2717 Unreachable[/]"
         )
         grid.add_row("Health", status)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         grid.add_row("Health", f"[bold red]\u2717 Error: {exc}[/]")

@@ -12,7 +12,13 @@ import click
 from cortex.cli.common import _run_async, cli, close_engine_sync, console, get_engine
 from cortex.cli.errors import err_empty_results, err_platform, handle_cli_error
 
-__all__ = ["entropy", "entropy_install_hook", "entropy_report", "entropy_shannon"]
+__all__ = [
+    "entropy",
+    "entropy_immortality",
+    "entropy_install_hook",
+    "entropy_report",
+    "entropy_shannon",
+]
 
 
 @cli.group()
@@ -223,10 +229,108 @@ def _render_shannon_diagnosis(result: dict[str, Any]) -> None:
         )
 
 
+@entropy.command("immortality")
+@click.option("--project", "-p", default=None, help="Filter by project.")
+@click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
+@click.option("--verbose", "-v", is_flag=True, help="Dimension detail.")
+def entropy_immortality(
+    project: str | None,
+    as_json: bool,
+    verbose: bool,
+) -> None:
+    """Immortality Index (ι) — cognitive crystallization metric."""
+    from cortex.shannon.immortality import ImmortalityIndex
+
+    engine = get_engine()
+    try:
+        result = _run_async(ImmortalityIndex.compute(engine, project))
+
+        if as_json:
+            # Strip Rich markup from badge for clean JSON
+            clean = {k: v for k, v in result.items() if k != "badge"}
+            console.print_json(json_mod.dumps(clean, indent=2))
+            return
+
+        # ── Header ───────────────────────────────────────────
+        title = "⚡ IMMORTALITY INDEX (ι)"
+        if project:
+            title += f"  ·  {project}"
+        console.print(
+            f"\n[noir.cyber]{title}[/]  "
+            f"[dim]({result['total_facts']} facts · "
+            f"{result['active_days']} active days · "
+            f"{result['total_span_days']}d span)[/]\n"
+        )
+        console.print(f"  {result['badge']}\n")
+
+        # ── Dimension table ──────────────────────────────────
+        from rich.table import Table
+
+        dim_table = Table(show_header=True, header_style="bold cyan")
+        dim_table.add_column("Dimension", style="bold white")
+        dim_table.add_column("Symbol", justify="center")
+        dim_table.add_column("Score", justify="right")
+        dim_table.add_column("Weight", justify="right")
+        dim_table.add_column("Bar", min_width=22)
+
+        symbols = {
+            "diversity": "δ",
+            "continuity": "γ",
+            "density": "ρ",
+            "quality": "κ",
+            "coverage": "σ",
+        }
+        for name, dim in result["dimensions"].items():
+            score = dim["pct"]
+            color = (
+                "green" if score >= 75
+                else "yellow" if score >= 45
+                else "red"
+            )
+            dim_table.add_row(
+                name.capitalize(),
+                symbols.get(name, "?"),
+                f"[{color}]{score:.1f}%[/]",
+                f"{dim['weight']:.0%}",
+                f"[{color}]{dim['bar']}[/]",
+            )
+        console.print(dim_table)
+
+        # ── Weakest dimension ────────────────────────────────
+        from rich.panel import Panel
+
+        weak = result["weakest"]
+        console.print(
+            Panel(
+                f"[bold white]{weak['dimension'].upper()}[/] "
+                f"({weak['score']:.0%})\n\n"
+                f"[white]{weak['recommendation']}[/]",
+                title="[bold red]⚠ Weakest Dimension[/]",
+                border_style="red",
+                padding=(1, 2),
+            )
+        )
+
+        if verbose:
+            console.print(
+                f"\n[dim]Max temporal gap: "
+                f"{result['max_gap_days']}d[/]"
+            )
+            diag = result["diagnosis"].replace("_", " ").upper()
+            console.print(f"[dim]Diagnosis: {diag}[/]")
+
+    except (OSError, ValueError, RuntimeError) as e:
+        handle_cli_error(e, context="immortality index")
+    finally:
+        close_engine_sync(engine)
+
+
 @entropy.command("shannon")
 @click.option("--project", "-p", default=None, help="Filter by project.")
 @click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
-@click.option("--verbose", "-v", is_flag=True, help="Show per-category breakdown.")
+@click.option(
+    "--verbose", "-v", is_flag=True, help="Show per-category breakdown.",
+)
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
     """Shannon entropy analysis of CORTEX memory."""
     from cortex.shannon.report import EntropyReport

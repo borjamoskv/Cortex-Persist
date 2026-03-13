@@ -145,3 +145,13 @@ def swarm_deploy(mode, target, db):
         "⏱️ CHRONOS-1: Sovereign Time: 4.2m | Human Time: 1,200h | ROI: 450/100\n"
         "Estado: [bold green]STABLE[/] | Nodos: 400/400 | Nexus: [blue]SYNCED[/]"
     )
+
+
+@swarm.command("board")
+@click.option("--db", default="/Users/borjafernandezangulo/.cortex/cortex.db", help="Database path")
+def swarm_board_cmd(db):
+    """Launch the real-time Swarm Kanban TUI."""
+    from cortex.ui.swarm_board import SwarmBoard
+    
+    board = SwarmBoard(db)
+    board.start()

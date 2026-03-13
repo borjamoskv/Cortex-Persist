@@ -5,8 +5,10 @@ Registered under `cortex mcp`.
 
 from __future__ import annotations
 
-import click
 import logging
+
+import click
+
 from cortex.cli.common import cli, console
 
 logger = logging.getLogger("cortex.cli.mcp")

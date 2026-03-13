@@ -1,7 +1,9 @@
 """V8 Governance: Measurement CLI."""
 
 import click
-from cortex.cli.common import cli, console, get_engine, DEFAULT_DB, close_engine_sync
+
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+
 
 @cli.command("eval")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
@@ -11,7 +13,7 @@ def eval_cmd(db: str, limit: int, top_k: int) -> None:
     """Run V8 Recall Precision Proxy tests."""
     from cortex.memory.evaluator import calculate_recall_precision
     
-    console.print(f"[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
+    console.print("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
     console.print(f"Running Recall@{top_k} tests across {limit} samples...\n")
     
     engine = None

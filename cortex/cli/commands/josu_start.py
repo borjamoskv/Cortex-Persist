@@ -1,8 +1,10 @@
 import asyncio
 import logging
+
 import click
+
+from cortex.cli.common import DEFAULT_DB, console, get_engine
 from cortex.swarm.josu_daemon import JosuProactiveDaemon
-from cortex.cli.common import get_engine, DEFAULT_DB, console
 
 logger = logging.getLogger("cortex.cli.josu")
 

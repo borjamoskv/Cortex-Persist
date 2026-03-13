@@ -55,7 +55,7 @@ def agent_validate(config: str):
 
     try:
         role = AgentRole.from_yaml_file(config)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]❌ Validation failed: {e}[/red]")
         sys.exit(1)
 
@@ -137,7 +137,7 @@ def agent_run(config: str, dry_run: bool):
 
     try:
         agent = load_agent(config)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]❌ Failed to compile agent: {e}[/red]")
         sys.exit(1)
 
