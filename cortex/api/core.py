@@ -233,7 +233,7 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
         return JSONResponse(
             status_code=503,
             content={"detail": "CORTEX_BUSY: Database is under heavy load. Retry in 2s."},
-            headers={"Retry-After": "2"}
+            headers={"Retry-After": "2"},
         )
 
     return JSONResponse(status_code=500, content={"detail": get_trans("error_internal_db", lang)})

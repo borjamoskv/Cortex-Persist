@@ -18,7 +18,7 @@ class DemandValidator:
     """Simulates ad spend and tracking signups."""
 
     MIN_CONVERSION_RATE = Decimal("0.02")  # 2% conversion point to scale
-    MAX_SPEND = Decimal("20.00")           # $20 budget per test
+    MAX_SPEND = Decimal("20.00")  # $20 budget per test
 
     def __init__(self, random_seed: int | None = None) -> None:
         self._rng = random.Random(random_seed)
@@ -51,5 +51,5 @@ class DemandValidator:
             float(res.conversion_rate * 100),
             res.should_scale,
         )
-        
+
         return res

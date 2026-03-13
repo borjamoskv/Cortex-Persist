@@ -195,9 +195,7 @@ class TestMultimodalEmbed:
 
         with patch.object(embedder._client, "post", new_callable=AsyncMock) as mock_post:
             mock_post.return_value = mock_resp
-            result = await embedder.embed_multimodal(
-                [{"text": "multimodal text"}]
-            )
+            result = await embedder.embed_multimodal([{"text": "multimodal text"}])
 
         assert len(result) == 768
 
@@ -210,15 +208,17 @@ class TestMultimodalEmbed:
 
         with patch.object(embedder._client, "post", new_callable=AsyncMock) as mock_post:
             mock_post.return_value = mock_resp
-            result = await embedder.embed_multimodal([
-                {"text": "a cat"},
-                {
-                    "inline_data": {
-                        "mime_type": "image/png",
-                        "data": base64.b64encode(fake_img).decode(),
-                    }
-                },
-            ])
+            result = await embedder.embed_multimodal(
+                [
+                    {"text": "a cat"},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/png",
+                            "data": base64.b64encode(fake_img).decode(),
+                        }
+                    },
+                ]
+            )
 
         assert len(result) == 768
         # Verify the payload structure

@@ -94,7 +94,8 @@ async def test_continuity_large_gap(mock_scanner):
     """Large temporal gap → low continuity score."""
     mock_scanner.total_active_facts.return_value = 100
     mock_scanner.type_distribution.return_value = {
-        "decision": 50, "error": 50,
+        "decision": 50,
+        "error": 50,
     }
     # 80-day gap in 100-day span → continuity = 1 - 80/100 = 0.2
     mock_scanner.temporal_gap_days.return_value = (80.0, 100.0, 10)
@@ -115,7 +116,8 @@ async def test_confidence_weighting(mock_scanner):
     """Mix of C1-C5 → verify quality dimension."""
     mock_scanner.total_active_facts.return_value = 100
     mock_scanner.type_distribution.return_value = {
-        "decision": 50, "error": 50,
+        "decision": 50,
+        "error": 50,
     }
     mock_scanner.temporal_gap_days.return_value = (1.0, 30.0, 30)
     # 50 C1 (0.2 each) + 50 C5 (1.0 each) = 10 + 50 = 60 / 100 = 0.6
@@ -146,9 +148,17 @@ async def test_json_output_structure(mock_scanner):
     result = await ImmortalityIndex.compute(engine)
 
     expected_keys = {
-        "iota", "iota_pct", "diagnosis", "badge",
-        "total_facts", "active_days", "total_span_days",
-        "max_gap_days", "project_filter", "dimensions", "weakest",
+        "iota",
+        "iota_pct",
+        "diagnosis",
+        "badge",
+        "total_facts",
+        "active_days",
+        "total_span_days",
+        "max_gap_days",
+        "project_filter",
+        "dimensions",
+        "weakest",
     }
     assert expected_keys == set(result.keys())
 
@@ -158,6 +168,4 @@ async def test_json_output_structure(mock_scanner):
     for dim in result["dimensions"].values():
         assert {"score", "pct", "bar", "weight"} == set(dim.keys())
 
-    assert {"dimension", "score", "recommendation"} == set(
-        result["weakest"].keys()
-    )
+    assert {"dimension", "score", "recommendation"} == set(result["weakest"].keys())

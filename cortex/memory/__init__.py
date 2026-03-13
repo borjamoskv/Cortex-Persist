@@ -143,12 +143,14 @@ def __getattr__(name: str) -> object:
         # Special case: VectorStoreL2 has a fallback chain
         try:
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
             val = SovereignVectorStoreL2
         except ImportError:
             try:
                 from cortex.memory.vector_store import (
                     VectorStoreL2 as _VL2,  # type: ignore[import-not-found]
                 )
+
                 val = _VL2
             except ImportError:
                 val = None  # type: ignore[assignment]

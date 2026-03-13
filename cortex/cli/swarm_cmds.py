@@ -152,6 +152,6 @@ def swarm_deploy(mode, target, db):
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
     from cortex.ui.swarm_board import SwarmBoard
-    
+
     board = SwarmBoard(db)
     board.start()

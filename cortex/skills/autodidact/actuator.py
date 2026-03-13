@@ -19,6 +19,7 @@ def shannon_entropy(data: list) -> float:
     """Calcula la entropía de Shannon (bits por símbolo)."""
     import math
     from collections import Counter
+
     if not data:
         return 0.0
     entropy = 0
@@ -33,17 +34,16 @@ def shannon_entropy(data: list) -> float:
 def kolmogorov_ratio(text: str) -> float:
     """Aproxima la complejidad de Kolmogorov vía ratio de compresión zlib."""
     import zlib
+
     if not text:
         return 0.0
-    encoded = text.encode('utf-8', errors='ignore')
+    encoded = text.encode("utf-8", errors="ignore")
     compressed = zlib.compress(encoded)
     return len(compressed) / len(encoded) if len(encoded) > 0 else 0.0
 
 
 async def daemon_ingesta_soberana(
-    target_url: str,
-    intent: str = "Aprender",
-    force_bypass: bool = False
+    target_url: str, intent: str = "Aprender", force_bypass: bool = False
 ) -> dict[str, Any]:
     """Protocolo AUTODIDACT-Ω: Ingesta, Filtrado y Síntesis."""
     logger.info("🫁 [PULMONES] Iniciando Ingesta: %s (Intent: %s)", target_url, intent)
@@ -61,8 +61,7 @@ async def daemon_ingesta_soberana(
     # Reflexión Matemática: El Borde del Caos
     if 4.0 <= h_char <= 5.5 and 0.2 <= k_ratio <= 0.4:
         logger.info(
-            "🌌 [SOVEREIGN] Métrica óptima. Payload reside en el "
-            "Borde del Caos (ideal para LLMs)."
+            "🌌 [SOVEREIGN] Métrica óptima. Payload reside en el Borde del Caos (ideal para LLMs)."
         )
 
     if h_char < 2.0 or h_char > 7.0:
@@ -88,10 +87,7 @@ async def daemon_ingesta_soberana(
     try:
         logger.info("💎 [CORTEX] Cristalizando conocimiento en O(1)...")
         memo_id = await execute_cognitive_synthesis(
-            raw_data=texto_raw,
-            source=target_url,
-            force=force_bypass,
-            intent=intent
+            raw_data=texto_raw, source=target_url, force=force_bypass, intent=intent
         )
 
         if "MEMO" in str(memo_id):

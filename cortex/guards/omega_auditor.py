@@ -18,12 +18,14 @@ logger = logging.getLogger("cortex.guards.omega")
 
 SNAPSHOT_PATH = Path.home() / ".cortex" / "context-snapshot.md"
 
+
 @dataclass(frozen=True)
 class OmegaConflict:
     fact_id: str | None
     summary: str
     reasoning: str
     severity: str  # 'low' | 'medium' | 'high'
+
 
 class OmegaAuditor:
     """Sovereign Auditor for deep semantic health."""
@@ -34,7 +36,9 @@ class OmegaAuditor:
     async def audit_decision(self, content: str, project: str) -> list[OmegaConflict]:
         """Audit a candidate decision against the massive context of the snapshot."""
         if not SNAPSHOT_PATH.exists():
-            logger.warning("OmegaAuditor: Snapshot missing at %s. Skipping deep audit.", SNAPSHOT_PATH)
+            logger.warning(
+                "OmegaAuditor: Snapshot missing at %s. Skipping deep audit.", SNAPSHOT_PATH
+            )
             return []
 
         try:
@@ -69,32 +73,33 @@ INSTRUCTIONS:
      }}
    ]
 """
-        
+
         prompt = CortexPrompt(
             system_instruction="You are the CORTEX Omega Auditor. Your goal is absolute epistemic consistency.",
             working_memory=[{"role": "user", "content": prompt_text}],
             intent=IntentProfile.ARCHITECT,
-            temperature=0.1
+            temperature=0.1,
         )
 
         try:
             response = await self._llm.invoke(prompt)
             if "CLEAN" in response.upper() and "[" not in response:
                 return []
-            
+
             # Basic JSON extraction
             import json
             import re
-            
+
             json_match = re.search(r"\[.*\]", response, re.DOTALL)
             if json_match:
                 data = json.loads(json_match.group(0))
                 return [OmegaConflict(**c) for c in data]
-            
+
             return []
         except Exception as e:  # noqa: BLE001 — LLM invocation boundary
             logger.error("OmegaAuditor: Deep audit failed: %s", e)
             return []
+
 
 async def run_omega_audit(content: str, project: str) -> list[OmegaConflict]:
     """Convenience entry point for the Omega Auditor."""

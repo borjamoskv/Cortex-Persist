@@ -167,7 +167,7 @@ class FrontierAuditor:
             "directiva táctica corta y accionable para resolver el sangrado. \n"
             "No incluyas saludos. Usa el formato Industrial Noir 2026."
         )
-        
+
         sys_prompt = "Eres el motor de auto-diagnóstico de CORTEX. Extrae el root cause y dicta cómo sanar la entropía."
 
         async with SovereignLLM(
@@ -189,7 +189,7 @@ class FrontierAuditor:
                 content=res.content,
                 confidence=0.85,
             )
-            
+
         return {
             "status": "SUCCESS" if res.ok else "FALLBACK",
             "report_markdown": res.content,

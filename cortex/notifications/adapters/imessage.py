@@ -15,6 +15,7 @@ from cortex.notifications.events import CortexEvent
 
 logger = logging.getLogger("cortex.notifications.imessage")
 
+
 class IMessageAdapter(BaseAdapter):
     """Sends CortexEvents via iMessage using local Messages.app."""
 
@@ -41,7 +42,7 @@ class IMessageAdapter(BaseAdapter):
 
         # Escape double quotes for AppleScript
         applescript_msg = message.replace('"', '\\"')
-        
+
         script = f'''
         tell application "Messages"
             set targetBuddy to "{self.target}"
@@ -60,7 +61,7 @@ class IMessageAdapter(BaseAdapter):
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await proc.communicate()
-            
+
             if proc.returncode == 0:
                 logger.debug("iMessage sent to %s: %s", self.target, event.title)
             else:

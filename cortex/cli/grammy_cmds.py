@@ -14,6 +14,7 @@ from cortex.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, T
 
 console = Console()
 
+
 @click.group(name="grammy", help="🎵 GRAMMY-Ω: Producción de música electrónica soberana.")
 def grammy_cmds():
     """Grupo de comandos para GRAMMY-Ω."""
@@ -22,32 +23,35 @@ def grammy_cmds():
 
 @grammy_cmds.command("produce")
 @click.argument("title")
-@click.option("--concept", default="Avant-garde electronic masterpiece",
-              help="Concepto del álbum/track.")
+@click.option(
+    "--concept", default="Avant-garde electronic masterpiece", help="Concepto del álbum/track."
+)
 @click.option("--bpm", default=120, type=int, help="BPM objetivo.")
 @click.option("--key", default="C minor", help="Escala musical.")
 def produce_cmd(title, concept, bpm, key):
     """
     Dispara el pipeline de producción de GRAMMY-Ω para un nuevo track.
     """
-    console.print(Panel(
-        f"[bold #CCFF00]GRAMMY-Ω PRODUCTION CORE[/]\n"
-        f"Track: [white]{title}[/]\n"
-        f"Concepto: [italic]{concept}[/]\n"
-        f"Target: [bold]{bpm} BPM | {key}[/]",
-        border_style="#CCFF00"
-    ))
+    console.print(
+        Panel(
+            f"[bold #CCFF00]GRAMMY-Ω PRODUCTION CORE[/]\n"
+            f"Track: [white]{title}[/]\n"
+            f"Concepto: [italic]{concept}[/]\n"
+            f"Target: [bold]{bpm} BPM | {key}[/]",
+            border_style="#CCFF00",
+        )
+    )
 
     async def run():
         orchestrator = GRAMMYOrchestrator()
         await orchestrator.initialize_album(title="Singularity", concept=concept)
-        
+
         track = TrackContext(
             id=f"track_{title.lower().replace(' ', '_')}",
             title=title,
             bpm=bpm,
             key=key,
-            state=TrackState.CONCEPT
+            state=TrackState.CONCEPT,
         )
 
         with Progress(
@@ -55,12 +59,16 @@ def produce_cmd(title, concept, bpm, key):
             TextColumn("[progress.description]{task.description}"),
             transient=False,
         ) as progress:
-            task_id = progress.add_task("[bold #6600FF]Iniciando Pipeline de Síntesis...[/]", total=None)
-            
+            task_id = progress.add_task(
+                "[bold #6600FF]Iniciando Pipeline de Síntesis...[/]", total=None
+            )
+
             # Hook para reportar estados desde el orquestador
             # (En una versión Pro usaríamos señales de CORTEX)
-            
-            progress.update(task_id, description="[bold #6600FF]Generando matrices acústicas Ξ...[/]")
+
+            progress.update(
+                task_id, description="[bold #6600FF]Generando matrices acústicas Ξ...[/]"
+            )
             result_track = await orchestrator.run_pipeline(track)
 
             progress.update(task_id, description="[bold #06d6a0]Pipeline completado ✓[/]")

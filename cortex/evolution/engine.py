@@ -202,4 +202,3 @@ class EvolutionEngine(EvolutionOpsMixin):
             grace_injection=total_grace,
             lagrangian_index=avg_lagrangian,
         )
-

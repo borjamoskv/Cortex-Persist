@@ -6,13 +6,13 @@ import time
 
 import pytest
 
+from cortex.daemon.monitors.swarm_heartbeat import (
+    SwarmHeartbeatMonitor,
+)
 from cortex.swarm.swarm_heartbeat import (
     SWARM_HEARTBEAT,
     NodeStatus,
     SwarmHeartbeat,
-)
-from cortex.daemon.monitors.swarm_heartbeat import (
-    SwarmHeartbeatMonitor,
 )
 
 
@@ -151,9 +151,7 @@ class TestSwarmHeartbeatMonitor:
 
         # Use the global singleton for the monitor
         SWARM_HEARTBEAT.pulse("test_node", "TestThread")
-        SWARM_HEARTBEAT._registry["test_node"].last_pulse = (
-            time.monotonic() - 500
-        )
+        SWARM_HEARTBEAT._registry["test_node"].last_pulse = time.monotonic() - 500
 
         monitor = SwarmHeartbeatMonitor(timeout_seconds=60.0)
         # First check increments miss_count to 1 (status is still ALIVE)

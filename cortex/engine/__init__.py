@@ -36,7 +36,11 @@ from cortex.facts.manager import FactManager  # noqa: E402
 
 
 class CortexEngine(
-    StoreMixin, QueryMixin, MemoryMixin, TransactionMixin, HealthMixin,
+    StoreMixin,
+    QueryMixin,
+    MemoryMixin,
+    TransactionMixin,
+    HealthMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
@@ -426,7 +430,8 @@ class CortexEngine(
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
         return super()._row_to_fact(  # type: ignore[reportAttributeAccessIssue]
-            row, tenant_id=tenant_id,
+            row,
+            tenant_id=tenant_id,
         )
 
     # ─── Lifecycle ────────────────────────────────────────────────

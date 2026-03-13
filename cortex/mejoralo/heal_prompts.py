@@ -109,4 +109,3 @@ def get_files_per_iteration(level: int) -> int:
 def temperature_for_level(level: int) -> float:
     """Return LLM temperature for the given escalation level."""
     return HEAL_TEMPERATURES.get(level, SWARM_BASE_TEMPERATURE)
-

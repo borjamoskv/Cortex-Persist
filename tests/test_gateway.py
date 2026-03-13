@@ -1,6 +1,8 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from cortex.gateway import GatewayRouter, GatewayRequest, GatewayIntent
+
+import pytest
+
+from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 
 @pytest.mark.asyncio
@@ -13,7 +15,7 @@ async def test_gateway_router_store_success():
     req = GatewayRequest(
         intent=GatewayIntent.STORE,
         project="test_proj",
-        payload={"content": "test content", "type": "knowledge"}
+        payload={"content": "test content", "type": "knowledge"},
     )
 
     resp = await router.handle(req)
@@ -45,10 +47,7 @@ async def test_gateway_router_exception_handling():
     mock_engine.search.side_effect = ValueError("Mocked DB failure")
 
     router = GatewayRouter(engine=mock_engine)
-    req = GatewayRequest(
-        intent=GatewayIntent.SEARCH,
-        payload={"query": "test query"}
-    )
+    req = GatewayRequest(intent=GatewayIntent.SEARCH, payload={"query": "test query"})
 
     resp = await router.handle(req)
 

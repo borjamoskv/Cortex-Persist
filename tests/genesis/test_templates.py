@@ -12,9 +12,18 @@ class TestTemplateRegistry:
     def test_default_templates_registered(self) -> None:
         reg = TemplateRegistry()
         expected = {
-            "module", "dataclass", "mixin", "cli_command",
-            "test", "init", "skill", "workflow", "agent",
-            "protocol", "fastapi_route", "migration",
+            "module",
+            "dataclass",
+            "mixin",
+            "cli_command",
+            "test",
+            "init",
+            "skill",
+            "workflow",
+            "agent",
+            "protocol",
+            "fastapi_route",
+            "migration",
         }
         assert set(reg.names) == expected
 
@@ -220,4 +229,3 @@ class TestMigrationRenderer:
         assert "CREATE TABLE" in content
         assert "facts_v2" in content
         assert "CREATE INDEX" in content
-

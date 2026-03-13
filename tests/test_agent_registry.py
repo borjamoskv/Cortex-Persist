@@ -1,6 +1,5 @@
 """Tests for AgentRegistry (Phase 3)."""
 
-from pathlib import Path
 
 import pytest
 
@@ -35,9 +34,7 @@ def temp_definitions_dir(tmp_path):
 
     # Minimal agent (relies on defaults)
     agent2 = def_dir / "test_beta.yaml"
-    agent2.write_text(
-        "name: BETA-2\n"
-    )
+    agent2.write_text("name: BETA-2\n")
 
     # Invalid agent (not a dict)
     agent3 = def_dir / "invalid.yaml"
@@ -87,7 +84,7 @@ def test_agent_registry_singleton(temp_definitions_dir):
     r1 = AgentRegistry()
     r2 = AgentRegistry()
     assert r1 is r2  # Singleton check
-    
+
     # Needs clear between runs to be safe
     r1.clear()
 
@@ -102,5 +99,5 @@ def test_agent_registry_singleton(temp_definitions_dir):
     alpha = r1.get("test_alpha")
     assert alpha is not None
     assert alpha.name == "ALPHA-1"
-    
+
     assert r1.get("missing") is None

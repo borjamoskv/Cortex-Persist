@@ -30,6 +30,7 @@ logger = logging.getLogger("uvicorn.error")
 # Global tracking for CORTEX v8 Axis 1 (Evaluation Layer)
 _context_latencies: deque[float] = deque(maxlen=100)
 
+
 def get_p95_context_latency() -> float | None:
     """Return the 95th percentile latency of the last 100 context inferences."""
     if not _context_latencies:
@@ -48,7 +49,7 @@ async def infer_context(
 ) -> ContextSnapshotResponse:
     """Run ambient context inference and return the current context snapshot."""
     from cortex import config
-    
+
     start_time = time.monotonic()
 
     async with engine.session() as conn:

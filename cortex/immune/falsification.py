@@ -71,7 +71,8 @@ class EvolutionaryFalsifier:
             if pattern in lower:
                 logger.debug(
                     "Unfalsifiable pattern '%s' in: %s",
-                    pattern, claim[:60],
+                    pattern,
+                    claim[:60],
                 )
                 return False
 
@@ -168,7 +169,7 @@ class EvolutionaryFalsifier:
         }
         self._autopsies.append(autopsy)
         logger.warning(
-            "Autopsy captured: %s -> %s", autopsy['collapse_type'], autopsy['collapse_trace']
+            "Autopsy captured: %s -> %s", autopsy["collapse_type"], autopsy["collapse_trace"]
         )
 
     def get_antibodies(self) -> list[dict[str, Any]]:

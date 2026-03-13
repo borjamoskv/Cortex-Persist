@@ -14,23 +14,23 @@ from random import choice
 _PHYSICS_TIPS = [
     (
         "Ley de Landauer",
-        "Eliminar datos temporales reduce la disipación de calor asociada a cada bit borrado."
+        "Eliminar datos temporales reduce la disipación de calor asociada a cada bit borrado.",
     ),
     (
         "Segunda Ley de la Termodinámica",
-        "Reducir logs redundantes disminuye la entropía del sistema, ahorrando energía de I/O."
+        "Reducir logs redundantes disminuye la entropía del sistema, ahorrando energía de I/O.",
     ),
     (
         "Principio de Conservación de la Energía",
-        "Cada proceso extra consume energía; eliminar código muerto reduce el consumo total."
+        "Cada proceso extra consume energía; eliminar código muerto reduce el consumo total.",
     ),
     (
         "Principio de Ockham",
-        "Menos variables y funciones disminuyen la complejidad cognitiva y el coste computacional."
+        "Menos variables y funciones disminuyen la complejidad cognitiva y el coste computacional.",
     ),
     (
         "Ley de Maxwell (Demonio)",
-        "Un algoritmo que elimina ruido actúa como un demonio que reduce la entropía del registro."
+        "Un algoritmo que elimina ruido actúa como un demonio que reduce la entropía del registro.",
     ),
 ]
 

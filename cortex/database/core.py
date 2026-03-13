@@ -52,7 +52,7 @@ logger = logging.getLogger("cortex.db")
 # How long to wait (ms) for a locked database before raising OperationalError.
 # Raised to 30s to handle bursts of >10 concurrent CLI processes competing
 # for SQLite write lock (WAL allows concurrent reads but only 1 writer).
-# Reduced to 5000ms to allow the immune system to raise actionable errors 
+# Reduced to 5000ms to allow the immune system to raise actionable errors
 # instead of hanging indefinitely, making lock contention visible.
 BUSY_TIMEOUT_MS: Final[int] = 5000
 

@@ -45,16 +45,14 @@ class DecisionDimension:
         self.planner = PlannerAgent(llm, system_prompt)
         self.redteam = RedTeamAgent(llm)
 
-    async def process(
-        self, task: AgentTask, toolkit: AgentToolkit, state: DimensionalState
-    ) -> Any:
+    async def process(self, task: AgentTask, toolkit: AgentToolkit, state: DimensionalState) -> Any:
         """Expand intent and generate architecture plan."""
         logger.info("D2 (Decision): Expanding intent and generating architecture.")
 
         try:
             plan = await self.planner.plan(task.description, toolkit)
             state.messages.append(f"Generated plan with {len(plan.steps)} steps.")
-            
+
             if "refactor" in task.title.lower() or "ouroboros" in task.description.lower():
                 logger.info("D2 (Decision): Forging Golden Master Siege via Red Team...")
                 try:

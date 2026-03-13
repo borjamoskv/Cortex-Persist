@@ -93,18 +93,19 @@ def fingerprint_extract(
         p_table.add_column("Bar", min_width=22)
 
         dimensions = [
-            ("Risk Tolerance",   "τ", fp.pattern.risk_tolerance),
-            ("Caution Index",    "ψ", fp.pattern.caution_index),
-            ("Synthesis Drive",  "σ", fp.pattern.synthesis_drive),
-            ("Session Density",  "ρ", fp.pattern.session_density),
-            ("Recency Bias",     "β", fp.pattern.recency_bias),
-            ("Breadth",         "β̃", fp.pattern.breadth),
-            ("Depth",            "δ", fp.pattern.depth_preference),
+            ("Risk Tolerance", "τ", fp.pattern.risk_tolerance),
+            ("Caution Index", "ψ", fp.pattern.caution_index),
+            ("Synthesis Drive", "σ", fp.pattern.synthesis_drive),
+            ("Session Density", "ρ", fp.pattern.session_density),
+            ("Recency Bias", "β", fp.pattern.recency_bias),
+            ("Breadth", "β̃", fp.pattern.breadth),
+            ("Depth", "δ", fp.pattern.depth_preference),
         ]
         for label, sym, val in dimensions:
             color = _score_color(val)
             p_table.add_row(
-                label, sym,
+                label,
+                sym,
                 f"[{color}]{val:.0%}[/]",
                 f"[{color}]{_bar(val)}[/]",
             )
@@ -134,8 +135,7 @@ def fingerprint_extract(
             console.print(d_table)
 
         console.print(
-            "\n[dim]Run with --prompt to get agent injection · "
-            "--json for machine output[/]"
+            "\n[dim]Run with --prompt to get agent injection · --json for machine output[/]"
         )
 
     except (OSError, ValueError, RuntimeError) as e:

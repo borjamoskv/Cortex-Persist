@@ -140,7 +140,9 @@ def routing_cheapest(intent: str, limit: int) -> None:
         cost = info.get("cost_class", "?")
         tier = info.get("tier", "?")
         table.add_row(
-            str(i), name, model,
+            str(i),
+            name,
+            model,
             Text(cost, style=_COST_STYLE.get(cost, "white")),
             Text(tier, style=_TIER_STYLE.get(tier, "white")),
         )
@@ -170,7 +172,9 @@ def routing_frontier(intent: str) -> None:
         info = get_preset_info(name) or {}
         cost = info.get("cost_class", "?")
         table.add_row(
-            str(i), name, model,
+            str(i),
+            name,
+            model,
             Text(cost, style=_COST_STYLE.get(cost, "white")),
         )
 

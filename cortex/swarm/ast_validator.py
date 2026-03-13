@@ -22,30 +22,74 @@ from typing import Any
 # ── Constants ──────────────────────────────────────────────────────────────
 
 # AST nodes that are NEVER allowed in generated code (Ω₃: Zero Trust)
-FORBIDDEN_AST_NODES: frozenset[type] = frozenset({
-    ast.Global,         # No global state mutation
-})
+FORBIDDEN_AST_NODES: frozenset[type] = frozenset(
+    {
+        ast.Global,  # No global state mutation
+    }
+)
 
 # Function calls that are categorically banned
-FORBIDDEN_CALLS: frozenset[str] = frozenset({
-    "eval", "exec", "compile", "__import__",
-    "globals", "locals", "breakpoint", "exit", "quit",
-})
+FORBIDDEN_CALLS: frozenset[str] = frozenset(
+    {
+        "eval",
+        "exec",
+        "compile",
+        "__import__",
+        "globals",
+        "locals",
+        "breakpoint",
+        "exit",
+        "quit",
+    }
+)
 
 # Module imports that require explicit whitelisting
-FORBIDDEN_IMPORTS: frozenset[str] = frozenset({
-    "os", "subprocess", "shutil", "sys", "ctypes", "importlib",
-    "signal", "socket", "http", "urllib", "requests", "httpx",
-    "aiohttp", "pickle", "shelve", "marshal", "code", "codeop",
-    "compileall",
-})
+FORBIDDEN_IMPORTS: frozenset[str] = frozenset(
+    {
+        "os",
+        "subprocess",
+        "shutil",
+        "sys",
+        "ctypes",
+        "importlib",
+        "signal",
+        "socket",
+        "http",
+        "urllib",
+        "requests",
+        "httpx",
+        "aiohttp",
+        "pickle",
+        "shelve",
+        "marshal",
+        "code",
+        "codeop",
+        "compileall",
+    }
+)
 
 # Whitelisted imports (safe standard library + cortex internals)
-ALLOWED_IMPORT_PREFIXES: frozenset[str] = frozenset({
-    "typing", "collections", "dataclasses", "enum", "functools",
-    "itertools", "math", "hashlib", "json", "re", "abc",
-    "logging", "time", "datetime", "pathlib", "cortex.", "pydantic",
-})
+ALLOWED_IMPORT_PREFIXES: frozenset[str] = frozenset(
+    {
+        "typing",
+        "collections",
+        "dataclasses",
+        "enum",
+        "functools",
+        "itertools",
+        "math",
+        "hashlib",
+        "json",
+        "re",
+        "abc",
+        "logging",
+        "time",
+        "datetime",
+        "pathlib",
+        "cortex.",
+        "pydantic",
+    }
+)
 
 # Complexity ceilings
 MAX_LOOP_DEPTH: int = 4
@@ -171,8 +215,7 @@ class ASTValidator:
             call_name = _extract_call_name(node)
             if call_name and call_name in self._forbidden_calls:
                 violations.append(
-                    f"Forbidden call: {call_name}() at line "
-                    f"{getattr(node, 'lineno', '?')}"
+                    f"Forbidden call: {call_name}() at line {getattr(node, 'lineno', '?')}"
                 )
         return violations
 
@@ -183,15 +226,11 @@ class ASTValidator:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if not self._is_import_allowed(alias.name):
-                        violations.append(
-                            f"Forbidden import: '{alias.name}' at line {node.lineno}"
-                        )
+                        violations.append(f"Forbidden import: '{alias.name}' at line {node.lineno}")
             elif isinstance(node, ast.ImportFrom):
                 module = node.module or ""
                 if not self._is_import_allowed(module):
-                    violations.append(
-                        f"Forbidden import: 'from {module}' at line {node.lineno}"
-                    )
+                    violations.append(f"Forbidden import: 'from {module}' at line {node.lineno}")
         return violations
 
     def _is_import_allowed(self, module_name: str) -> bool:
@@ -223,14 +262,14 @@ def _check_forbidden_nodes(tree: ast.AST) -> list[str]:
     for node in ast.walk(tree):
         if type(node) in FORBIDDEN_AST_NODES:
             violations.append(
-                f"Forbidden AST node: {type(node).__name__} "
-                f"at line {getattr(node, 'lineno', '?')}"
+                f"Forbidden AST node: {type(node).__name__} at line {getattr(node, 'lineno', '?')}"
             )
     return violations
 
 
 def _check_complexity(
-    tree: ast.AST, code: str,
+    tree: ast.AST,
+    code: str,
 ) -> tuple[list[str], dict[str, Any]]:
     """Enforce complexity ceilings."""
     violations: list[str] = []
@@ -246,9 +285,7 @@ def _check_complexity(
     }
 
     if total_lines > MAX_TOTAL_LINES:
-        violations.append(
-            f"Total lines ({total_lines}) exceeds maximum ({MAX_TOTAL_LINES})"
-        )
+        violations.append(f"Total lines ({total_lines}) exceeds maximum ({MAX_TOTAL_LINES})")
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -258,8 +295,7 @@ def _check_complexity(
 
             if func_lines > MAX_FUNCTION_LINES:
                 violations.append(
-                    f"Function '{node.name}' has {func_lines} lines "
-                    f"(max {MAX_FUNCTION_LINES})"
+                    f"Function '{node.name}' has {func_lines} lines (max {MAX_FUNCTION_LINES})"
                 )
 
             complexity = cyclomatic_complexity(node)
@@ -277,8 +313,7 @@ def _check_complexity(
     stats["max_loop_depth"] = max_depth
     if max_depth > MAX_LOOP_DEPTH:
         violations.append(
-            f"Maximum loop nesting depth ({max_depth}) exceeds "
-            f"limit ({MAX_LOOP_DEPTH})"
+            f"Maximum loop nesting depth ({max_depth}) exceeds limit ({MAX_LOOP_DEPTH})"
         )
 
     return violations, stats
@@ -290,7 +325,12 @@ def cyclomatic_complexity(
     """Approximate McCabe cyclomatic complexity."""
     complexity = 1  # Base path
     branch_nodes = (
-        ast.If, ast.For, ast.While, ast.ExceptHandler, ast.With, ast.Assert,
+        ast.If,
+        ast.For,
+        ast.While,
+        ast.ExceptHandler,
+        ast.With,
+        ast.Assert,
     )
     for node in ast.walk(func_node):
         if isinstance(node, branch_nodes):

@@ -1,14 +1,12 @@
 """Tests for cortex.metering module — tracker, quotas, and middleware."""
 
 import os
-import sqlite3
 import tempfile
 
 import pytest
 
-from cortex.metering.quotas import PLAN_QUOTAS, QuotaCheckResult, QuotaEnforcer
+from cortex.metering.quotas import PLAN_QUOTAS, QuotaEnforcer
 from cortex.metering.tracker import UsageRecord, UsageTracker
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 
@@ -59,12 +57,14 @@ class TestUsageTracker:
     def test_multiple_records_aggregate(self, tracker):
         """Multiple records should accumulate in monthly summary."""
         for i in range(5):
-            tracker.record(UsageRecord(
-                tenant_id="tenant-a",
-                endpoint="/v1/memories",
-                method="POST",
-                tokens_used=10,
-            ))
+            tracker.record(
+                UsageRecord(
+                    tenant_id="tenant-a",
+                    endpoint="/v1/memories",
+                    method="POST",
+                    tokens_used=10,
+                )
+            )
 
         usage = tracker.get_usage("tenant-a")
         assert usage["calls_used"] == 5
@@ -95,13 +95,11 @@ class TestUsageTracker:
     def test_endpoint_breakdown(self, tracker):
         """Breakdown should group by endpoint and method."""
         for _ in range(3):
-            tracker.record(UsageRecord(
-                tenant_id="t1", endpoint="/v1/memories", method="POST"
-            ))
+            tracker.record(UsageRecord(tenant_id="t1", endpoint="/v1/memories", method="POST"))
         for _ in range(2):
-            tracker.record(UsageRecord(
-                tenant_id="t1", endpoint="/v1/memories/search", method="POST"
-            ))
+            tracker.record(
+                UsageRecord(tenant_id="t1", endpoint="/v1/memories/search", method="POST")
+            )
 
         breakdown = tracker.get_endpoint_breakdown("t1")
         assert len(breakdown) == 2
@@ -126,9 +124,9 @@ class TestQuotaEnforcer:
     def test_free_tier_blocks_over_limit(self, enforcer, tracker):
         """Free tier should block after 1000 calls."""
         for _ in range(1000):
-            tracker.record(UsageRecord(
-                tenant_id="heavy-user", endpoint="/v1/memories", method="POST"
-            ))
+            tracker.record(
+                UsageRecord(tenant_id="heavy-user", endpoint="/v1/memories", method="POST")
+            )
 
         result = enforcer.check("heavy-user", "free")
         assert result.allowed is False
@@ -143,9 +141,9 @@ class TestQuotaEnforcer:
     def test_team_tier_high_limit(self, enforcer, tracker):
         """Team tier should have high call limit (500K)."""
         for _ in range(100):
-            tracker.record(UsageRecord(
-                tenant_id="team-user", endpoint="/v1/memories", method="POST"
-            ))
+            tracker.record(
+                UsageRecord(tenant_id="team-user", endpoint="/v1/memories", method="POST")
+            )
 
         result = enforcer.check("team-user", "team")
         assert result.allowed is True

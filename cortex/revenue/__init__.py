@@ -23,8 +23,10 @@ def __getattr__(name: str):  # noqa: ANN001
     """Lazy imports to avoid heavy startup cost."""
     if name == "RevenueEngine":
         from cortex.revenue.engine import RevenueEngine
+
         return RevenueEngine
     if name in ("Opportunity", "ExecutionResult", "RevenueReport", "RevenueVector"):
         from cortex.revenue import models
+
         return getattr(models, name)
     raise AttributeError(f"module 'cortex.revenue' has no attribute {name!r}")

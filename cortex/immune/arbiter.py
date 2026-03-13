@@ -125,7 +125,9 @@ class ImmuneArbiter:
         )
 
     def _filter_adversarial(
-        self, signal: str, plan: dict[str, Any],
+        self,
+        signal: str,
+        plan: dict[str, Any],
     ) -> FilterResult:
         """F2: Detects poisoning, confirmation bias, unfalsifiable claims.
 
@@ -154,19 +156,13 @@ class ImmuneArbiter:
                         " assumptions are unfalsifiable."
                     )
                 else:
-                    justification = (
-                        f"{falsifiable}/{len(assumptions)}"
-                        " assumptions are falsifiable."
-                    )
+                    justification = f"{falsifiable}/{len(assumptions)} assumptions are falsifiable."
 
             # Check for signal/plan confirmation bias (min 3 actions)
             actions = plan.get("actions", [])
             if signal and len(actions) >= 3:
                 sig_lower = signal.lower()
-                echo_count = sum(
-                    1 for a in actions
-                    if sig_lower in str(a.get("type", "")).lower()
-                )
+                echo_count = sum(1 for a in actions if sig_lower in str(a.get("type", "")).lower())
                 if echo_count > len(actions) * 0.7:
                     score = min(score, 40.0)
                     verdict = Verdict.HOLD
@@ -222,8 +218,7 @@ class ImmuneArbiter:
                 penalty = min(50.0, len(missing) * 10.0)
                 score -= penalty
                 justification = (
-                    f"{len(missing)} missing prerequisite(s):"
-                    f" {', '.join(sorted(missing)[:3])}"
+                    f"{len(missing)} missing prerequisite(s): {', '.join(sorted(missing)[:3])}"
                 )
                 verdict = Verdict.HOLD
 
@@ -231,9 +226,7 @@ class ImmuneArbiter:
             dead_ends = produces - requires
             if dead_ends and len(dead_ends) > len(actions):
                 score -= 10.0
-                justification += (
-                    f" {len(dead_ends)} dead-end output(s)."
-                )
+                justification += f" {len(dead_ends)} dead-end output(s)."
 
         except Exception as e:  # noqa: BLE001
             logger.debug("F3 degraded to heuristic: %s", e)

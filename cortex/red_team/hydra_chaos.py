@@ -72,7 +72,7 @@ class MockRedisClient:
 
     async def xadd(self, _stream: str, fields: dict[str, Any], **_kwargs: Any) -> str:
         await asyncio.sleep(0)
-        return f"{int(time.time()*1000)}-0"
+        return f"{int(time.time() * 1000)}-0"
 
     async def xreadgroup(
         self, _group: str, _consumer: str, _streams: dict[str, str], **_kwargs: Any
@@ -93,6 +93,7 @@ class MockRedisClient:
 
     def register_script(self, _script: str) -> AsyncMock:
         """Return a mock Lua script executor."""
+
         async def execute(*, keys: list, args: list) -> tuple[str, str, int]:
             genesis = args[0]
             agent_key = args[1]
@@ -140,6 +141,7 @@ class MockRedisClient:
 
         async def listen():
             yield {"type": "subscribe"}
+
         mock.listen = listen
         return mock
 
@@ -196,7 +198,7 @@ class HydraChaosEngine:
             error_type = type(e).__name__
 
         latency_ns = time.perf_counter_ns() - start_ts
-        
+
         # Give background ghost tasks a tiny moment to register
         await asyncio.sleep(0.05)
 
@@ -211,9 +213,9 @@ class HydraChaosEngine:
             critical_process_interrupted=critical_interrupted,
             latency_ns=latency_ns,
             error_type=error_type,
-            metadata=metadata
+            metadata=metadata,
         )
-        
+
         if scenario == ChaosScenario.BYZANTINE:
             res.metadata["concurrent_ops"] = 3
 
@@ -222,6 +224,7 @@ class HydraChaosEngine:
 
     async def _scenario_redis_kill(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
+
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:alpha", {"context": "pre-kill"})
         cache.chaos_gate.arm(ChaosScenario.KILL)
@@ -229,6 +232,7 @@ class HydraChaosEngine:
 
     async def _scenario_stream_corruption(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
+
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:gamma", {"data": "clean"})
         cache.chaos_gate.arm(ChaosScenario.CORRUPTION)
@@ -236,6 +240,7 @@ class HydraChaosEngine:
 
     async def _scenario_partial_write(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
+
         cache = DistributedSovereignCache(mock_redis)
         cache.chaos_gate.arm(ChaosScenario.PARTIAL_FAILURE)
         result = await cache.put("agent:delta", {"c": 1})
@@ -243,6 +248,7 @@ class HydraChaosEngine:
 
     async def _scenario_consumer_stall(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
+
         cache = DistributedSovereignCache(mock_redis)
         cache.chaos_gate.arm(ChaosScenario.TIMEOUT)
         try:
@@ -254,6 +260,7 @@ class HydraChaosEngine:
 
     async def _scenario_cascade_failure(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
+
         cache = DistributedSovereignCache(mock_redis)
         cache.chaos_gate.arm(ChaosScenario.KILL, after_n=1)
         tasks = [cache.get("a"), cache.put("b", {"v": 1}), cache.prove_forgetting()]

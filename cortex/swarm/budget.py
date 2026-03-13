@@ -26,6 +26,7 @@ COST_PRICING = {
     "default": {"input": 0.001, "output": 0.003},
 }
 
+
 @dataclass(frozen=True)
 class MissionBudget:
     mission_id: str
@@ -34,6 +35,7 @@ class MissionBudget:
     total_cost_usd: float
     request_count: int
     last_update: float
+
 
 class SwarmBudgetManager:
     """Manages token budgets and costs for decentralized swarms."""
@@ -62,13 +64,13 @@ class SwarmBudgetManager:
             return
 
         pricing = COST_PRICING.get(provider, COST_PRICING["default"])
-        cost = (input_tokens / 1000 * pricing["input"]) + \
-               (output_tokens / 1000 * pricing["output"])
+        cost = (input_tokens / 1000 * pricing["input"]) + (output_tokens / 1000 * pricing["output"])
 
         now = time.time()
         try:
             with sqlite3.connect(self.db_path, timeout=5) as conn:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO mission_budget 
                     (mission_id, total_input_tokens, total_output_tokens, 
                      total_cost_usd, request_count, last_update)
@@ -79,8 +81,15 @@ class SwarmBudgetManager:
                         total_cost_usd = total_cost_usd + excluded.total_cost_usd,
                         request_count = request_count + 1,
                         last_update = excluded.last_update
-                """, (mission_id, input_tokens, output_tokens, cost, now))
-                logger.debug("Budget: %d tokens ($%.4f) reported for mission %s", input_tokens + output_tokens, cost, mission_id)
+                """,
+                    (mission_id, input_tokens, output_tokens, cost, now),
+                )
+                logger.debug(
+                    "Budget: %d tokens ($%.4f) reported for mission %s",
+                    input_tokens + output_tokens,
+                    cost,
+                    mission_id,
+                )
         except sqlite3.Error as e:
             logger.error("Budget: Failed to report usage: %s", e)
 
@@ -92,7 +101,7 @@ class SwarmBudgetManager:
                     """SELECT mission_id, total_input_tokens, total_output_tokens, 
                               total_cost_usd, request_count, last_update 
                        FROM mission_budget WHERE mission_id = ?""",
-                    (mission_id,)
+                    (mission_id,),
                 ).fetchone()
                 if row:
                     return MissionBudget(*row)
@@ -104,14 +113,18 @@ class SwarmBudgetManager:
         """List all missions tracked in the budget database."""
         try:
             with sqlite3.connect(self.db_path) as conn:
-                rows = conn.execute("SELECT * FROM mission_budget ORDER BY last_update DESC").fetchall()
+                rows = conn.execute(
+                    "SELECT * FROM mission_budget ORDER BY last_update DESC"
+                ).fetchall()
                 return [MissionBudget(*row) for row in rows]
         except sqlite3.Error as e:
             logger.error("Budget: Failed to list: %s", e)
             return []
 
+
 # Single instance for the process
 _instance = None
+
 
 def get_budget_manager() -> SwarmBudgetManager:
     global _instance

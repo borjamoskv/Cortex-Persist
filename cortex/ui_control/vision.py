@@ -46,7 +46,7 @@ class VisionEngine:
                 rect,
                 CG.kCGWindowListOptionOnScreenOnly,
                 CG.kCGNullWindowID,
-                CG.kCGWindowImageDefault
+                CG.kCGWindowImageDefault,
             )
         else:
             image = CG.CGDisplayCreateImage(CG.CGMainDisplayID())

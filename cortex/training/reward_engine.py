@@ -29,7 +29,7 @@ class RewardEngine:
             reward += 0.5
         elif trajectory.outcome == "failure":
             reward -= 0.5
-        
+
         # 2. Efficiency penalty (fewer steps are better)
         # Small penalty per step to encourage conciseness
         step_penalty = len(trajectory.actions) * 0.01

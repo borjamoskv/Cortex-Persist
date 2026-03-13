@@ -210,9 +210,12 @@ class SQLiteStoreMixin:
             ) as cursor:
                 return cursor.rowcount > 0
         else:
-            return self.conn.execute(
-                q, (timestamp, target_id, confidence, ghost_id, tenant_id)
-            ).rowcount > 0
+            return (
+                self.conn.execute(
+                    q, (timestamp, target_id, confidence, ghost_id, tenant_id)
+                ).rowcount
+                > 0
+            )
 
     async def delete_fact_elements(self, fact_id: int, tenant_id: str = "default") -> bool:
         q = "DELETE FROM entity_relations WHERE source_fact_id = ? AND tenant_id = ?"

@@ -43,7 +43,12 @@ RETRIES_DISTILL = 1
 
 # Providers ordered by synthesis affinity (reasoning-heavy tasks)
 _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
-    "groq", "gemini", "qwen", "deepinfra", "together", "openrouter",
+    "groq",
+    "gemini",
+    "qwen",
+    "deepinfra",
+    "together",
+    "openrouter",
 )
 
 encode_engine = AsyncEncoder()
@@ -78,8 +83,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
 
     if primary is None:
         raise RuntimeError(
-            "No LLM providers available for synthesis. "
-            "Configure at least one API key in .env"
+            "No LLM providers available for synthesis. Configure at least one API key in .env"
         )
 
     _synthesis_router = CortexLLMRouter(primary, fallbacks)
@@ -108,15 +112,12 @@ async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None
             query=text_snippet[:1000],
             limit=1,
             project="autodidact_knowledge",
-            tenant_id="sovereign"
+            tenant_id="sovereign",
         )
         if nearest:
             similitud = getattr(nearest[0], "_recall_score", 0.0)
             if similitud > ISOTHERMAL_THRESHOLD:
-                msg = (
-                    "🛡️ [ENTROPIC SHIELD] ❄️ Zona Isoterma "
-                    f"Alcanzada (ΔS={similitud:.4f})."
-                )
+                msg = f"🛡️ [ENTROPIC SHIELD] ❄️ Zona Isoterma Alcanzada (ΔS={similitud:.4f})."
                 logger.warning(msg)
                 return True, nearest[0].id
     except Exception as e:  # noqa: BLE001 — redundancy check failure must not crash synthesis
@@ -166,20 +167,22 @@ async def distill_sovereign_memo(
         "3. AXIOMATIC RESONANCE: Describe cómo esta información expande "
         "los horizontes del sistema.\n\n"
         "Responde en formato JSON estricto:\n"
-        '{\n'
+        "{\n"
         '    "content_markdown": "Texto destilado denso y técnico.",\n'
         '    "entities": ["Entidad A", "Protocolo B"],\n'
         '    "metadatos_extraidos": {"complexity": "tierra", "version": "1.0"},\n'
         '    "resonancia_axiomatica": "Impacto en Ω₀-Ω₆"\n'
-        '}'
+        "}"
     )
 
     prompt = CortexPrompt(
         system_instruction=system_prompt,
-        working_memory=[{
-            "role": "user",
-            "content": f"SOURCE: {source_url}\n\nRAW DATA:\n{raw_data[:MAX_RAW_DATA_INPUT]}",
-        }],
+        working_memory=[
+            {
+                "role": "user",
+                "content": f"SOURCE: {source_url}\n\nRAW DATA:\n{raw_data[:MAX_RAW_DATA_INPUT]}",
+            }
+        ],
         temperature=DEFAULT_SYNTHESIS_TEMPERATURE,
         max_tokens=DEFAULT_SYNTHESIS_MAX_TOKENS,
         intent=IntentProfile.REASONING,
@@ -195,13 +198,13 @@ async def distill_sovereign_memo(
     text_content = result.unwrap()
 
     try:
-        json_match = re.search(r'\{.*\}', text_content, re.DOTALL)
+        json_match = re.search(r"\{.*\}", text_content, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(0))
         return {
             "content_markdown": text_content,
             "entities": [],
-            "resonancia_axiomatica": "Fail JSON"
+            "resonancia_axiomatica": "Fail JSON",
         }
     except Exception as e:  # noqa: BLE001 — parsing failure must fall back to raw content
         logger.error("Error parseando cristal: %s", e)
@@ -232,10 +235,7 @@ async def execute_cognitive_synthesis(
 
     bytes_in, bytes_out = len(raw_data), len(memo_content)
     rendimiento = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0
-    logger.info(
-        "✅ Destilación: %.1f%% ruido eliminado. Entidades: %d",
-        rendimiento, len(entities)
-    )
+    logger.info("✅ Destilación: %.1f%% ruido eliminado. Entidades: %d", rendimiento, len(entities))
 
     embed_result = await generate_cortex_embedding(memo_content)
     if isinstance(embed_result, list):
@@ -258,8 +258,8 @@ async def execute_cognitive_synthesis(
             "source": source,
             "tier": "sovereign_distilled",
             "entities": entities,
-            "resonancia": resonancia
-        }
+            "resonancia": resonancia,
+        },
     )
 
     await vector_db.memorize(fact)

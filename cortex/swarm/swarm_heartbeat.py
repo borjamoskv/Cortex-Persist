@@ -29,6 +29,7 @@ logger = logging.getLogger("cortex.swarm.heartbeat")
 
 class NodeStatus(str, Enum):
     """Health status of a swarm node."""
+
     ALIVE = "ALIVE"
     SUSPECT = "SUSPECT"
     DEAD = "DEAD"
@@ -37,6 +38,7 @@ class NodeStatus(str, Enum):
 @dataclass
 class NodePulse:
     """Proof-of-life record for a single daemon node."""
+
     node_id: str
     thread_name: str
     last_pulse: float = field(default_factory=time.monotonic)
@@ -67,7 +69,7 @@ class SwarmHeartbeat:
         self._lock = threading.Lock()
         self._registry: dict[str, NodePulse] = {}
         self._suspect_threshold = suspect_threshold  # Miss cycles before SUSPECT
-        self._dead_threshold = dead_threshold          # Miss cycles before DEAD
+        self._dead_threshold = dead_threshold  # Miss cycles before DEAD
 
     def pulse(self, node_id: str, thread_name: str = "") -> None:
         """Record proof-of-life for a node. O(1)."""
@@ -82,7 +84,9 @@ class SwarmHeartbeat:
                 if node.status != NodeStatus.ALIVE:
                     logger.info(
                         "🫀 RESURRECTION: %s (%s → ALIVE) after %d misses",
-                        node_id, node.status, node.miss_count,
+                        node_id,
+                        node.status,
+                        node.miss_count,
                     )
                 node.status = NodeStatus.ALIVE
             else:
@@ -118,18 +122,21 @@ class SwarmHeartbeat:
                     alerts.append(node)
                     logger.error(
                         "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses, was %s)",
-                        node.node_id, node.thread_name, elapsed,
-                        node.miss_count, old_status,
+                        node.node_id,
+                        node.thread_name,
+                        elapsed,
+                        node.miss_count,
+                        old_status,
                     )
-                elif (
-                    node.miss_count >= self._suspect_threshold
-                    and node.status == NodeStatus.ALIVE
-                ):
+                elif node.miss_count >= self._suspect_threshold and node.status == NodeStatus.ALIVE:
                     node.status = NodeStatus.SUSPECT
                     alerts.append(node)
                     logger.warning(
                         "⚠️  NODE SUSPECT: %s [%s] — no pulse for %.0fs (%d misses)",
-                        node.node_id, node.thread_name, elapsed, node.miss_count,
+                        node.node_id,
+                        node.thread_name,
+                        elapsed,
+                        node.miss_count,
                     )
 
         return alerts
@@ -137,15 +144,18 @@ class SwarmHeartbeat:
     def get_vitals(self) -> dict[str, NodePulse]:
         """Snapshot of the full registry. Returns a copy."""
         with self._lock:
-            return {k: NodePulse(
-                node_id=v.node_id,
-                thread_name=v.thread_name,
-                last_pulse=v.last_pulse,
-                pulse_count=v.pulse_count,
-                status=v.status,
-                first_seen=v.first_seen,
-                miss_count=v.miss_count,
-            ) for k, v in self._registry.items()}
+            return {
+                k: NodePulse(
+                    node_id=v.node_id,
+                    thread_name=v.thread_name,
+                    last_pulse=v.last_pulse,
+                    pulse_count=v.pulse_count,
+                    status=v.status,
+                    first_seen=v.first_seen,
+                    miss_count=v.miss_count,
+                )
+                for k, v in self._registry.items()
+            }
 
     def status_summary(self) -> str:
         """One-line health summary string."""

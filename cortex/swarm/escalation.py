@@ -1,7 +1,7 @@
 """CORTEX v6.0 — Human Escalation Protocol.
 
 Provides the escalation mechanism when an agent enters
-an unrecoverable state or requires human intervention 
+an unrecoverable state or requires human intervention
 (e.g., repeating the same error, missing API key).
 """
 
@@ -22,20 +22,11 @@ async def emit_swarm_signal(bus, agent_id: str, event_type: str, payload: dict |
     """Helper to emit swarm signals asynchronously."""
     if bus is None:
         return
-    await bus.emit(
-        event_type=event_type,
-        payload=payload or {},
-        source=agent_id,
-        project="cortex"
-    )
+    await bus.emit(event_type=event_type, payload=payload or {}, source=agent_id, project="cortex")
+
 
 def emit_swarm_signal_sync(bus, agent_id: str, event_type: str, payload: dict | None = None):
     """Helper to emit swarm signals synchronously."""
     if bus is None:
         return
-    bus.emit(
-        event_type=event_type,
-        payload=payload or {},
-        source=agent_id,
-        project="cortex"
-    )
+    bus.emit(event_type=event_type, payload=payload or {}, source=agent_id, project="cortex")

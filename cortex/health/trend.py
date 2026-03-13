@@ -30,7 +30,8 @@ class TrendDetector:
         # Ensure maxlen matches window_size
         if self._scores.maxlen != self.window_size:
             object.__setattr__(
-                self, "_scores",
+                self,
+                "_scores",
                 deque(self._scores, maxlen=self.window_size),
             )
 

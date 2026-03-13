@@ -37,46 +37,146 @@ __all__ = [
 # ─── Language Detection (Zero-Dep Heuristic) ─────────────────────────
 
 # Common Spanish stopwords/patterns (high entropy markers)
-_ES_MARKERS: frozenset[str] = frozenset({
-    "que", "los", "las", "del", "para", "con", "por", "una", "como",
-    "más", "pero", "fue", "son", "está", "todo", "también", "cuando",
-    "sobre", "entre", "después", "desde", "donde", "cada", "puede",
-    "este", "esta", "estos", "estas", "ese", "esa", "esos", "esas",
-    "aquel", "aquella", "muy", "hay", "tiene", "hace", "siendo",
-    "otro", "otra", "otros", "otras", "mismo", "misma", "hacia",
-    "sino", "según", "durante", "aunque", "porque", "mientras",
-    "además", "así", "mejor", "algún", "ningún", "parte",
-    "decisión", "error", "proyecto", "memoria", "sesión",
-})
+_ES_MARKERS: frozenset[str] = frozenset(
+    {
+        "que",
+        "los",
+        "las",
+        "del",
+        "para",
+        "con",
+        "por",
+        "una",
+        "como",
+        "más",
+        "pero",
+        "fue",
+        "son",
+        "está",
+        "todo",
+        "también",
+        "cuando",
+        "sobre",
+        "entre",
+        "después",
+        "desde",
+        "donde",
+        "cada",
+        "puede",
+        "este",
+        "esta",
+        "estos",
+        "estas",
+        "ese",
+        "esa",
+        "esos",
+        "esas",
+        "aquel",
+        "aquella",
+        "muy",
+        "hay",
+        "tiene",
+        "hace",
+        "siendo",
+        "otro",
+        "otra",
+        "otros",
+        "otras",
+        "mismo",
+        "misma",
+        "hacia",
+        "sino",
+        "según",
+        "durante",
+        "aunque",
+        "porque",
+        "mientras",
+        "además",
+        "así",
+        "mejor",
+        "algún",
+        "ningún",
+        "parte",
+        "decisión",
+        "error",
+        "proyecto",
+        "memoria",
+        "sesión",
+    }
+)
 
 # Common Basque markers (agglutinative morphology = high token tax)
-_EU_MARKERS: frozenset[str] = frozenset({
-    "eta", "bat", "da", "ere", "hau", "bere", "dago", "dira",
-    "gara", "beste", "baino", "hori", "hura", "baina", "nola",
-    "zer", "zein", "nahi", "egin", "izan", "dut", "dugu",
-    "duzu", "dute", "zuen", "gure", "nire", "haien",
-    "bertan", "gainera", "beraz", "orduan", "orain", "gero",
-    "lehen", "aurrera", "atzera", "goian", "behean",
-    "bakoitzak", "guztiak", "batzuk", "gehiago", "gutxiago",
-    "azkar", "poliki", "ondo", "gaizki", "berri", "zahar",
-})
+_EU_MARKERS: frozenset[str] = frozenset(
+    {
+        "eta",
+        "bat",
+        "da",
+        "ere",
+        "hau",
+        "bere",
+        "dago",
+        "dira",
+        "gara",
+        "beste",
+        "baino",
+        "hori",
+        "hura",
+        "baina",
+        "nola",
+        "zer",
+        "zein",
+        "nahi",
+        "egin",
+        "izan",
+        "dut",
+        "dugu",
+        "duzu",
+        "dute",
+        "zuen",
+        "gure",
+        "nire",
+        "haien",
+        "bertan",
+        "gainera",
+        "beraz",
+        "orduan",
+        "orain",
+        "gero",
+        "lehen",
+        "aurrera",
+        "atzera",
+        "goian",
+        "behean",
+        "bakoitzak",
+        "guztiak",
+        "batzuk",
+        "gehiago",
+        "gutxiago",
+        "azkar",
+        "poliki",
+        "ondo",
+        "gaizki",
+        "berri",
+        "zahar",
+    }
+)
 
 # Minimum word count for reliable detection
 _MIN_WORDS_FOR_DETECTION = 4
 
 # Token ratio estimates (non-English tokens / English tokens for same meaning)
 _TOKEN_TAX_RATIOS: dict[str, float] = {
-    "es": 1.35,   # Spanish: ~35% more tokens
-    "eu": 2.50,   # Basque: ~150% more tokens (agglutinative)
-    "fr": 1.25,   # French: ~25% more
-    "de": 1.30,   # German: ~30% more (compounds)
-    "pt": 1.30,   # Portuguese: ~30% more
-    "it": 1.25,   # Italian: ~25% more
-    "ja": 1.80,   # Japanese: ~80% more
-    "zh": 1.50,   # Chinese: ~50% more
-    "ko": 1.70,   # Korean: ~70% more
-    "ar": 1.60,   # Arabic: ~60% more
-    "ru": 1.50,   # Russian: ~50% more
+    "es": 1.35,  # Spanish: ~35% more tokens
+    "eu": 2.50,  # Basque: ~150% more tokens (agglutinative)
+    "fr": 1.25,  # French: ~25% more
+    "de": 1.30,  # German: ~30% more (compounds)
+    "pt": 1.30,  # Portuguese: ~30% more
+    "it": 1.25,  # Italian: ~25% more
+    "ja": 1.80,  # Japanese: ~80% more
+    "zh": 1.50,  # Chinese: ~50% more
+    "ko": 1.70,  # Korean: ~70% more
+    "ar": 1.60,  # Arabic: ~60% more
+    "ru": 1.50,  # Russian: ~50% more
 }
 
 
@@ -92,9 +192,21 @@ def detect_language(text: str) -> str:
 
     # Code detection: skip anything that looks like code
     code_indicators = (
-        "def ", "class ", "import ", "from ", "return ",
-        "func ", "fn ", "pub ", "let ", "const ", "var ",
-        "SELECT ", "INSERT ", "CREATE ", "```",
+        "def ",
+        "class ",
+        "import ",
+        "from ",
+        "return ",
+        "func ",
+        "fn ",
+        "pub ",
+        "let ",
+        "const ",
+        "var ",
+        "SELECT ",
+        "INSERT ",
+        "CREATE ",
+        "```",
     )
     if any(indicator in text for indicator in code_indicators):
         return "en"
@@ -123,6 +235,7 @@ def detect_language(text: str) -> str:
     # Try optional langdetect if available
     try:
         from langdetect import detect as _detect  # type: ignore[import-untyped]
+
         detected = _detect(text[:500])
         if detected in _TOKEN_TAX_RATIOS:
             return detected
@@ -209,6 +322,7 @@ class LangCompressor:
         if self._client is None:
             try:
                 from google import genai
+
                 self._client = genai.Client()
             except (ImportError, ValueError, OSError, RuntimeError) as e:
                 raise RuntimeError(
@@ -337,12 +451,14 @@ class LangCompressor:
         )
 
     def _decode_fact_row(
-        self, row: tuple,
+        self,
+        row: tuple,
     ) -> tuple[int, str, dict[str, Any]]:
         """Decode a raw DB row into (fact_id, content, meta)."""
         fact_id, raw_content, meta_json = row[0], row[1], row[2]
         try:
             from cortex.crypto import get_default_encrypter
+
             enc = get_default_encrypter()
             content = enc.decrypt_str(raw_content, tenant_id="default") if raw_content else ""
             meta = enc.decrypt_json(meta_json, tenant_id="default") if meta_json else {}
@@ -429,9 +545,8 @@ class LangCompressor:
             batch.results.append(result)
 
         if batch.compressed > 0:
-            batch.avg_savings_pct = sum(
-                r.savings_pct for r in batch.results if r.was_compressed
-            ) / batch.compressed
+            batch.avg_savings_pct = (
+                sum(r.savings_pct for r in batch.results if r.was_compressed) / batch.compressed
+            )
 
         return batch
-

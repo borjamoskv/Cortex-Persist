@@ -1,7 +1,7 @@
 """Autonomous Market-Making Agent (Idea #9).
 
-Full-cycle autonomous engine that detects pre-viral signals, 
-scores opportunities, generates MVPs, validates demand, 
+Full-cycle autonomous engine that detects pre-viral signals,
+scores opportunities, generates MVPs, validates demand,
 and scales or kills experiments.
 """
 
@@ -26,11 +26,11 @@ def __getattr__(name: str) -> object:
     """Lazy imports for all public symbols."""
     # Models
     if name in (
-        "Experiment", 
-        "ExperimentStatus", 
-        "MVPArtifact", 
-        "Opportunity", 
-        "TrendSignal", 
+        "Experiment",
+        "ExperimentStatus",
+        "MVPArtifact",
+        "Opportunity",
+        "TrendSignal",
         "Verdict",
     ):
         from cortex.market_maker.models import (

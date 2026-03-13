@@ -80,9 +80,14 @@ def test_has_tools(tools: list[dict]) -> None:
     """Must have at least the 5 planned tools."""
     names = {t["name"] for t in tools}
     expected = {
-        "query-facts", "query-ghosts", "query-decisions",
-        "query-signals", "cortex-stats", "trace-impact",
-        "cluster-signals", "ghost-mapping",
+        "query-facts",
+        "query-ghosts",
+        "query-decisions",
+        "query-signals",
+        "cortex-stats",
+        "trace-impact",
+        "cluster-signals",
+        "ghost-mapping",
     }
     assert expected.issubset(names), f"Missing tools: {expected - names}"
 
@@ -108,9 +113,7 @@ def test_toolset_references(tools: list[dict], toolsets: list[dict]) -> None:
     tool_names = {t["name"] for t in tools}
     for ts in toolsets:
         for ref in ts.get("tools", []):
-            assert ref in tool_names, (
-                f"Toolset '{ts['name']}' references non-existent tool '{ref}'"
-            )
+            assert ref in tool_names, f"Toolset '{ts['name']}' references non-existent tool '{ref}'"
 
 
 def test_has_toolsets(toolsets: list[dict]) -> None:
@@ -127,14 +130,17 @@ def test_has_toolsets(toolsets: list[dict]) -> None:
 @pytest.mark.parametrize(
     "tool_name",
     [
-        "query-facts", "query-ghosts", "query-decisions",
-        "query-signals", "cortex-stats", "trace-impact",
-        "cluster-signals", "ghost-mapping"
+        "query-facts",
+        "query-ghosts",
+        "query-decisions",
+        "query-signals",
+        "cortex-stats",
+        "trace-impact",
+        "cluster-signals",
+        "ghost-mapping",
     ],
 )
-def test_sql_prepares(
-    tool_name: str, tools: list[dict], cortex_db: sqlite3.Connection
-) -> None:
+def test_sql_prepares(tool_name: str, tools: list[dict], cortex_db: sqlite3.Connection) -> None:
     """Each tool's SQL statement must prepare successfully against the schema.
 
     We replace $N placeholders with NULL for syntax validation only.

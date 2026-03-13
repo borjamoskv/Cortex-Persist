@@ -38,25 +38,25 @@ class PatternVector:
     """
 
     # Risk tolerance: ratio of C3/C4/C5 facts vs C1/C2
-    risk_tolerance: float          # 0.0 = risk-averse, 1.0 = bold experimenter
+    risk_tolerance: float  # 0.0 = risk-averse, 1.0 = bold experimenter
 
     # Caution index: ratio of 'error' + 'ghost' facts vs total
-    caution_index: float           # 0.0 = never marks failures, 1.0 = obsessive
+    caution_index: float  # 0.0 = never marks failures, 1.0 = obsessive
 
     # Bridge-building tendency: ratio of 'bridge' + 'discovery' facts
-    synthesis_drive: float         # 0.0 = pure executor, 1.0 = pure architect
+    synthesis_drive: float  # 0.0 = pure executor, 1.0 = pure architect
 
     # Session density: avg facts per active day
-    session_density: float         # 0.0 = sporadic, 1.0 (capped at 10/day)
+    session_density: float  # 0.0 = sporadic, 1.0 (capped at 10/day)
 
     # Recency bias: ratio of facts in last 30 days vs all facts
-    recency_bias: float            # 0.0 = archaeologist, 1.0 = presentist
+    recency_bias: float  # 0.0 = archaeologist, 1.0 = presentist
 
     # Cross-project spread: normalized distinct projects touched
-    breadth: float                 # 0.0 = mono-domain, 1.0 = polymath
+    breadth: float  # 0.0 = mono-domain, 1.0 = polymath
 
     # Depth preference: avg content length (chars), normalized at 500
-    depth_preference: float        # 0.0 = micro-notes, 1.0 = extensive
+    depth_preference: float  # 0.0 = micro-notes, 1.0 = extensive
 
 
 def _fmt_dim(label: str, value: float, hi: str, mid: str, lo: str) -> str:
@@ -101,8 +101,8 @@ class CognitiveFingerprint:
     domain_preferences: list[DomainPreference] = field(default_factory=list)
 
     # Derived metacognitive labels
-    archetype: str = "unknown"        # e.g. "sovereign_architect", "obsessive_executor"
-    archetype_confidence: float = 0.0 # 0.0-1.0
+    archetype: str = "unknown"  # e.g. "sovereign_architect", "obsessive_executor"
+    archetype_confidence: float = 0.0  # 0.0-1.0
 
     # Stats
     total_facts_analyzed: int = 0
@@ -154,20 +154,45 @@ class CognitiveFingerprint:
             f"across {self.active_domains} domains.",
             "",
             "### Decision-Making Patterns",
-            _fmt_dim("Risk Tolerance", p.risk_tolerance, "takes bold bets",
-                    "validates carefully", "extremely cautious"),
-            _fmt_dim("Caution Index", p.caution_index,
-                    "deeply marks failures/ghosts", "rarely flags errors", ""),
-            _fmt_dim("Synthesis Drive", p.synthesis_drive,
-                    "builds bridges and patterns", "executes decisions", ""),
-            _fmt_dim("Session Density", p.session_density,
-                    "intensive crystallization", "selective recording", ""),
-            _fmt_dim("Recency Bias", p.recency_bias, "lives in present",
-                    "integrates historical context", ""),
-            _fmt_dim("Breadth", p.breadth, "polymath across many domains",
-                    "deep specialist", ""),
-            _fmt_dim("Depth", p.depth_preference, "writes extensive facts",
-                    "prefers concise facts", ""),
+            _fmt_dim(
+                "Risk Tolerance",
+                p.risk_tolerance,
+                "takes bold bets",
+                "validates carefully",
+                "extremely cautious",
+            ),
+            _fmt_dim(
+                "Caution Index",
+                p.caution_index,
+                "deeply marks failures/ghosts",
+                "rarely flags errors",
+                "",
+            ),
+            _fmt_dim(
+                "Synthesis Drive",
+                p.synthesis_drive,
+                "builds bridges and patterns",
+                "executes decisions",
+                "",
+            ),
+            _fmt_dim(
+                "Session Density",
+                p.session_density,
+                "intensive crystallization",
+                "selective recording",
+                "",
+            ),
+            _fmt_dim(
+                "Recency Bias",
+                p.recency_bias,
+                "lives in present",
+                "integrates historical context",
+                "",
+            ),
+            _fmt_dim("Breadth", p.breadth, "polymath across many domains", "deep specialist", ""),
+            _fmt_dim(
+                "Depth", p.depth_preference, "writes extensive facts", "prefers concise facts", ""
+            ),
             "",
             "### Active Domain Preferences (Top 5)",
         ]

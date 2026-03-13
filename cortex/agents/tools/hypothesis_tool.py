@@ -164,6 +164,4 @@ class HypothesisEngineTool:
             return f"❌ HYPOTHESIS ENGINE FAILURE: {e}"
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
-        raise NotImplementedError(
-            "HypothesisEngineTool is async-only (Ω₂ Landauer). Use _arun."
-        )
+        raise NotImplementedError("HypothesisEngineTool is async-only (Ω₂ Landauer). Use _arun.")

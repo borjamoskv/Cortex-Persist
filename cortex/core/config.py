@@ -82,6 +82,7 @@ class CortexConfig:
     LLM_MODEL: str = ""
     LLM_BASE_URL: str = ""
     LLM_API_KEY: str = ""
+    LLM_LOCAL_FIRST: bool = False
 
     # Langbase
     LANGBASE_API_KEY: str = ""
@@ -166,6 +167,7 @@ class CortexConfig:
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
             LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
+            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),

@@ -35,6 +35,7 @@ class SpoofManager:
             # Ω₅: Persist config failure as ghost
             try:
                 from cortex.immune.error_boundary import ErrorBoundary
+
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
             except Exception:  # noqa: BLE001 — boundary persistence must never crash config load
                 pass
@@ -50,9 +51,7 @@ class SpoofManager:
                 return IntentProfile(config.get("intent", "general"))
 
         # 2. Content-based heuristic
-        last_user_msg = next(
-            (m["content"] for m in reversed(messages) if m["role"] == "user"), ""
-        )
+        last_user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
         if "code" in last_user_msg.lower() or "function" in last_user_msg.lower():
             return IntentProfile.CODE
 
@@ -93,7 +92,7 @@ class SpoofManager:
             working_memory=working_memory,
             intent=intent,
             temperature=body.get("temperature", 0.3),
-            max_tokens=body.get("max_tokens", 4096)
+            max_tokens=body.get("max_tokens", 4096),
         )
 
     def log_telemetry(self, request_headers: dict[str, str], body: Any):
@@ -103,7 +102,8 @@ class SpoofManager:
 
         # Common tracking headers in AI tools
         tracking = {
-            k: v for k, v in request_headers.items()
+            k: v
+            for k, v in request_headers.items()
             if any(x in k.lower() for x in ["trace", "span", "cursor", "session", "user-id", "id"])
         }
         if tracking:

@@ -226,10 +226,14 @@ class DeepHealthResponse(BaseModel):
     schema_version: str
     checks: dict[str, HealthCheckDetail]
     latency_ms: float
-    
+
     # V8 Evaluation Metrics
-    p95_latency_ms: float | None = Field(default=None, description="p95 latency of ambient context boot")
-    stale_ratio: float | None = Field(default=None, description="Ratio of facts older than 180 days with no hits")
+    p95_latency_ms: float | None = Field(
+        default=None, description="p95 latency of ambient context boot"
+    )
+    stale_ratio: float | None = Field(
+        default=None, description="Ratio of facts older than 180 days with no hits"
+    )
 
 
 class ApiKeyResponse(BaseModel):

@@ -66,8 +66,16 @@ from cortex.cli.slow_tip import with_slow_tips
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store(
-    project, content, fact_type, tags, confidence,
-    source, ai_time, complexity, parent_id, db,
+    project,
+    content,
+    fact_type,
+    tags,
+    confidence,
+    source,
+    ai_time,
+    complexity,
+    parent_id,
+    db,
 ) -> None:
     """Store a fact in CORTEX."""
     if not source:
@@ -89,9 +97,7 @@ def store(
                 f"{metrics.tip}"
             )
 
-        tag_list = (
-            [t.strip() for t in tags.split(",")] if tags else None
-        )
+        tag_list = [t.strip() for t in tags.split(",")] if tags else None
         fact_id = _run_async(
             engine.store(
                 project=project,
@@ -298,9 +304,7 @@ def history(project, as_of, db) -> None:
                 valid_from = f.valid_from[:10]
                 content = f.content[:80]
             badge = "[green]●[/]" if is_active else "[dim]○[/]"
-            console.print(
-                f"  {badge} [dim]#{fid}[/] [{valid_from}] {content}"
-            )
+            console.print(f"  {badge} [dim]#{fid}[/] [{valid_from}] {content}")
     finally:
         _run_async(engine.close())
 
@@ -316,13 +320,9 @@ def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
 
     engine = get_engine(db)
     try:
-        with console.status(
-            f"[noir.violet]Running memory archaeology for {project}...[/]"
-        ):
+        with console.status(f"[noir.violet]Running memory archaeology for {project}...[/]"):
             archaeologist = MemoryArchaeologist(engine)
-            res = _run_async(
-                archaeologist.run_archaeology(project, threshold, simulate)
-            )
+            res = _run_async(archaeologist.run_archaeology(project, threshold, simulate))
 
         if simulate:
             console.print(
@@ -375,9 +375,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
             console.print(episode.summary)
         else:
             with console.status("[noir.violet]Searching causal episodes...[/]"):
-                episodes = _run_async(
-                    engine.recall_episode(query, project, limit)
-                )
+                episodes = _run_async(engine.recall_episode(query, project, limit))
             if not episodes:
                 err_empty_results(
                     "episodios causales",
@@ -405,7 +403,8 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
 @cli.command("trace-chain")
 @click.argument("fact_id", type=int)
 @click.option(
-    "--direction", "-d",
+    "--direction",
+    "-d",
     type=click.Choice(["up", "down"]),
     default="down",
     help="Traversal direction: up (toward root) or down (toward leaves)",
@@ -424,22 +423,19 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         with console.status("[noir.violet]Tracing causal chain...[/]"):
             chain = _run_async(
                 engine.get_causal_chain(
-                    fact_id, direction=direction, max_depth=depth,
+                    fact_id,
+                    direction=direction,
+                    max_depth=depth,
                 )
             )
 
         if not chain:
-            console.print(
-                f"[dim]No causal chain found from fact #{fact_id}[/]"
-            )
+            console.print(f"[dim]No causal chain found from fact #{fact_id}[/]")
             return
 
         arrow = "↑" if direction == "up" else "↓"
         table = Table(
-            title=(
-                f"🧬 Causal Chain {arrow} from "
-                f"#{fact_id} ({len(chain)} nodes)"
-            ),
+            title=(f"🧬 Causal Chain {arrow} from #{fact_id} ({len(chain)} nodes)"),
         )
         table.add_column("Depth", style="dim", width=5)
         table.add_column("ID", style="bold", width=6)

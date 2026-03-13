@@ -213,9 +213,7 @@ class CausalTracer:
             root_id = ancestors[0][0]  # First row = deepest ancestor
 
         # 2. Walk DOWN from root to get full tree
-        cursor = await self._conn.execute(
-            _TRACE_DOWN_SQL, (root_id, depth)
-        )
+        cursor = await self._conn.execute(_TRACE_DOWN_SQL, (root_id, depth))
         rows = await cursor.fetchall()
 
         chain: list[dict] = []
@@ -226,13 +224,15 @@ class CausalTracer:
 
         for row in rows:
             fid, content, fact_type, parent_id, d = row
-            chain.append({
-                "id": fid,
-                "content": content[:300],
-                "fact_type": fact_type,
-                "parent_id": parent_id,
-                "depth": d,
-            })
+            chain.append(
+                {
+                    "id": fid,
+                    "content": content[:300],
+                    "fact_type": fact_type,
+                    "parent_id": parent_id,
+                    "depth": d,
+                }
+            )
             if fact_type == "ghost":
                 ghost_count += 1
             elif fact_type == "decision":
@@ -242,9 +242,7 @@ class CausalTracer:
 
         # Fetch project from root fact
         if root_id:
-            cursor = await self._conn.execute(
-                "SELECT project FROM facts WHERE id = ?", (root_id,)
-            )
+            cursor = await self._conn.execute("SELECT project FROM facts WHERE id = ?", (root_id,))
             row = await cursor.fetchone()
             if row:
                 project = row[0] or ""
@@ -272,10 +270,7 @@ class CausalTracer:
         Deduplicates episodes by root_fact_id.
         """
         # Find matching facts via FTS5
-        sql = (
-            "SELECT id FROM facts "
-            "WHERE content LIKE ? "
-        )
+        sql = "SELECT id FROM facts WHERE content LIKE ? "
         params: list = [f"%{query}%"]
         if project:
             sql += "AND project = ? "
@@ -309,11 +304,7 @@ class CausalTracer:
         for node in chain[:15]:
             indent = "  " * node["depth"]
             marker = "🔴" if node["fact_type"] == "ghost" else "🟢"
-            lines.append(
-                f"{indent}{marker} [{node['fact_type']}] "
-                f"{node['content'][:80]}"
-            )
+            lines.append(f"{indent}{marker} [{node['fact_type']}] {node['content'][:80]}")
         if len(chain) > 15:
             lines.append(f"  ... and {len(chain) - 15} more nodes")
         return "\n".join(lines)
-

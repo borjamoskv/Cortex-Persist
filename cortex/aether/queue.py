@@ -92,10 +92,21 @@ class TaskQueue:
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    task.id, task.title, task.description, task.repo_path,
-                    task.source, task.status, task.created_at, task.updated_at,
-                    task.plan, task.result, task.branch, task.pr_url,
-                    task.error, task.github_issue_number, task.github_repo,
+                    task.id,
+                    task.title,
+                    task.description,
+                    task.repo_path,
+                    task.source,
+                    task.status,
+                    task.created_at,
+                    task.updated_at,
+                    task.plan,
+                    task.result,
+                    task.branch,
+                    task.pr_url,
+                    task.error,
+                    task.github_issue_number,
+                    task.github_repo,
                 ),
             )
         logger.info("✅ Enqueued task [%s] — %s", task.id, task.title)
@@ -140,16 +151,12 @@ class TaskQueue:
         set_clause = ", ".join(f"{k} = ?" for k in fields)
         values = list(fields.values()) + [task_id]
         with self._conn() as conn:
-            conn.execute(
-                f"UPDATE agent_tasks SET {set_clause} WHERE id = ?", values
-            )
+            conn.execute(f"UPDATE agent_tasks SET {set_clause} WHERE id = ?", values)
 
     def get(self, task_id: str) -> AgentTask | None:
         """Fetch a task by ID."""
         with self._conn() as conn:
-            row = conn.execute(
-                "SELECT * FROM agent_tasks WHERE id = ?", (task_id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM agent_tasks WHERE id = ?", (task_id,)).fetchone()
         if row is None:
             return None
         return AgentTask.from_dict(dict(row))
@@ -163,8 +170,7 @@ class TaskQueue:
         with self._conn() as conn:
             if status:
                 rows = conn.execute(
-                    "SELECT * FROM agent_tasks WHERE status = ? "
-                    "ORDER BY id DESC LIMIT ?",
+                    "SELECT * FROM agent_tasks WHERE status = ? ORDER BY id DESC LIMIT ?",
                     (status, limit),
                 ).fetchall()
             else:

@@ -61,7 +61,7 @@ async def fetch_firecrawl_deep(url: str, max_depth: int = DEFAULT_CRAWL_DEPTH) -
         "url": url,
         "maxDepth": max_depth,
         "limit": DEFAULT_CRAWL_LIMIT,
-        "scrapeOptions": {"formats": ["markdown", "links"]}
+        "scrapeOptions": {"formats": ["markdown", "links"]},
     }
 
     async with httpx.AsyncClient() as client:
@@ -85,12 +85,12 @@ async def fetch_exa_search(query: str, num_results: int = DEFAULT_SEARCH_RESULTS
         "query": query,
         "useAutoprompt": True,
         "numResults": num_results,
-        "contents": {"text": True}
+        "contents": {"text": True},
     }
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "x-api-key": EXA_API_KEY
+        "x-api-key": EXA_API_KEY,
     }
     async with httpx.AsyncClient() as client:
         response = await client.post(endpoint, json=payload, headers=headers)
@@ -113,7 +113,7 @@ async def fetch_assemblyai_transcript(audio_url: str) -> str:
         post_url = "https://api.assemblyai.com/v2/transcript"
         response = await client.post(post_url, json={"audio_url": audio_url}, headers=headers)
         response.raise_for_status()
-        transcript_id = response.json()['id']
+        transcript_id = response.json()["id"]
         return f"[TRANSCRIPT_ID_PENDING]: {transcript_id}"
 
 
@@ -165,4 +165,3 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
     except Exception as e:  # noqa: BLE001 — fetcher fallback to physical browser on any failure
         logger.error("⚠️ Error en adquisición '%s': %s. Probando GIDATU...", intent_type, e)
         return _unwrap(await fetch_gidatu_browser(target))
-

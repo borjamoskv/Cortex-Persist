@@ -60,10 +60,7 @@ class MacMaestroAgent:
         # Parse JSON
         script_data = self._parse_json_response(response)
         if not script_data or "script" not in script_data:
-            return {
-                "success": False,
-                "error": f"Failed to parse JSON. Raw output: {response}"
-            }
+            return {"success": False, "error": f"Failed to parse JSON. Raw output: {response}"}
 
         script_code = script_data["script"]
         explanation = script_data.get("explanation", "Extracted AppleScript.")
@@ -77,7 +74,7 @@ class MacMaestroAgent:
             "explanation": explanation,
             "stdout": stdout,
             "stderr": stderr,
-            "script": script_code
+            "script": script_code,
         }
 
     def _parse_json_response(self, text: str) -> dict[str, Any] | None:

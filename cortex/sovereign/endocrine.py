@@ -107,4 +107,3 @@ class DigitalEndocrine:
             "temperature": round(self.get_temperature(tenant_id), 2),
             "style": self.get_response_style(tenant_id),
         }
-

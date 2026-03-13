@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.sync")
 
+
 def _decrypt_json(val: str | None) -> dict:
     if not val or not str(val).strip():
         return {}
@@ -42,6 +43,7 @@ def _decrypt_json(val: str | None) -> dict:
         return res if isinstance(res, dict) else {}
     except (json.JSONDecodeError, ValueError):
         return {}
+
 
 def _decrypt_json_list(val: str | None) -> list:
     if not val or not str(val).strip():

@@ -298,9 +298,7 @@ def sovereign_quality_gate_async(
 # ═════════════════════════════════════════════════════════════════════════
 
 
-def _maybe_create_run_tree(
-    tool_name: str, args: tuple, kwargs: dict[str, Any]
-) -> Any | None:
+def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) -> Any | None:
     """Create a LangSmith RunTree if the SDK is available and configured."""
     if not _HAS_LANGSMITH or not os.getenv("LANGCHAIN_API_KEY"):
         return None
@@ -387,7 +385,5 @@ def _evaluate_and_finalize(
         outputs={"score": round(score, 4), "output_type": type(output_val).__name__},
         latency_ms=latency_ms,
     )
-    logger.debug(
-        "Gate [%s] PASSED: score=%.3f latency=%.1fms", tool_name, score, latency_ms
-    )
+    logger.debug("Gate [%s] PASSED: score=%.3f latency=%.1fms", tool_name, score, latency_ms)
     return result

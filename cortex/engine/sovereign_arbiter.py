@@ -14,11 +14,11 @@ logger = logging.getLogger("cortex.engine.sovereign_arbiter")
 
 class ImportPolicyVisitor(ast.NodeVisitor):
     """AST Visitor to enforce CORTEX Phase 3 Import Policy.
-    
-    Axiom Ω₃: Byzantine Default. Reject all code that attempts to bypass 
+
+    Axiom Ω₃: Byzantine Default. Reject all code that attempts to bypass
     the SovereignSys exoskeleton via raw os/subprocess.
     """
-    
+
     BLOCKED_MODULES = frozenset({"os", "subprocess", "shutil", "telnetlib", "smtplib", "urllib"})
 
     def __init__(self):
@@ -27,12 +27,16 @@ class ImportPolicyVisitor(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
             if alias.name.split(".")[0] in self.BLOCKED_MODULES:
-                self.violations.append(f"Forbidden Import: '{alias.name}' (Use SovereignSys instead).")
+                self.violations.append(
+                    f"Forbidden Import: '{alias.name}' (Use SovereignSys instead)."
+                )
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom):
         if node.module and node.module.split(".")[0] in self.BLOCKED_MODULES:
-            self.violations.append(f"Forbidden Import: 'from {node.module} import ...' (Use SovereignSys).")
+            self.violations.append(
+                f"Forbidden Import: 'from {node.module} import ...' (Use SovereignSys)."
+            )
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call):
@@ -45,13 +49,15 @@ class ImportPolicyVisitor(ast.NodeVisitor):
 
 class SovereignArbiter:
     """Invoked by Aether Tool Action: write_file.
-    
+
     Acts as an immune system, preventing the persistence of syntactically
     broken or malicious code (EXOSKELETON Policy) onto the local filesystem.
     """
 
     # Files allowed to use core OS utilities (The "Trusted Base").
-    _TRUSTED_BASE = frozenset({"cortex/utils/syscall.py", "cortex/crypto/vault.py", "cortex/guards/"})
+    _TRUSTED_BASE = frozenset(
+        {"cortex/utils/syscall.py", "cortex/crypto/vault.py", "cortex/guards/"}
+    )
 
     @classmethod
     def validate_mutation(cls, code_string: str, file_path: str | Path) -> tuple[bool, str]:
@@ -60,7 +66,7 @@ class SovereignArbiter:
 
         if path.endswith(".py"):
             return cls._validate_python(code_string, path)
-            
+
         return True, ""
 
     @classmethod
@@ -69,7 +75,7 @@ class SovereignArbiter:
         try:
             # 1. AST Structural parsing
             tree = ast.parse(code_string, filename=file_path)
-            
+
             # 2. Strict C-level byte compilation check
             compile(code_string, file_path, "exec")
 
@@ -86,9 +92,9 @@ class SovereignArbiter:
                     )
                     logger.warning("🛡️ Policy Block: %s", msg)
                     return False, msg
-            
+
             return True, ""
-            
+
         except SyntaxError as e:
             msg = (
                 f"[BLOQUEO BIZANTINO - Ω₃] SyntaxError on mutated code:\n"
@@ -98,7 +104,7 @@ class SovereignArbiter:
             )
             logger.warning("🛡️ Sovereign Arbiter Block: %s", msg)
             return False, msg
-            
+
         except Exception as e:  # noqa: BLE001 — execution arbiter must catch all fatal compilation errors
             msg = f"[BLOQUEO BIZANTINO - Ω₃] Compilation Failed: {e}"
             logger.error("🛡️ Sovereign Arbiter Compilation Block: %s", msg)

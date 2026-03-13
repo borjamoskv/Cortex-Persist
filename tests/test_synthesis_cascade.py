@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.llm._models import CortexPrompt, IntentProfile
+from cortex.llm._models import IntentProfile
 from cortex.llm.router import CortexLLMRouter
 from cortex.utils.result import Ok
 
-
 # ─── Helper: build a fake router ──────────────────────────────────────────────
+
 
 def _mock_provider(name: str = "mock-primary") -> MagicMock:
     p = MagicMock()
@@ -27,13 +27,12 @@ class TestGetSynthesisRouter:
     def test_router_returned_when_providers_exist(self):
         """Ω₅: With at least one available provider, the router builds."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
         mock_prov = _mock_provider("qwen")
 
-        with patch.object(
-            syn, "LLMProvider", side_effect=[mock_prov, ValueError("no key")]
-        ):
+        with patch.object(syn, "LLMProvider", side_effect=[mock_prov, ValueError("no key")]):
             with patch.object(syn, "_SYNTHESIS_PROVIDERS", ("qwen", "bad")):
                 router = syn._get_synthesis_router()
 
@@ -44,11 +43,10 @@ class TestGetSynthesisRouter:
     def test_router_raises_when_no_providers(self):
         """Ω₃: Raises RuntimeError when ALL providers lack keys."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
-        with patch.object(
-            syn, "LLMProvider", side_effect=ValueError("no key")
-        ):
+        with patch.object(syn, "LLMProvider", side_effect=ValueError("no key")):
             with pytest.raises(RuntimeError, match="No LLM providers"):
                 syn._get_synthesis_router()
 
@@ -57,6 +55,7 @@ class TestGetSynthesisRouter:
     def test_router_is_singleton(self):
         """Lazy singleton — same instance on repeated calls."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
         mock_prov = _mock_provider()
@@ -76,6 +75,7 @@ class TestDistillSovereignMemo:
     async def test_distill_does_not_require_anthropic_key(self):
         """The refactored pipeline must NOT fail with ANTHROPIC_API_KEY missing."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
         mock_router = MagicMock(spec=CortexLLMRouter)
@@ -108,6 +108,7 @@ class TestDistillSovereignMemo:
     async def test_intent_directive_is_injected(self):
         """The intent laser directive must appear in the system prompt."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
         mock_router = MagicMock(spec=CortexLLMRouter)
@@ -131,6 +132,7 @@ class TestDistillSovereignMemo:
     async def test_general_mode_when_no_intent(self):
         """Without an intent, should use GENERAL extraction mode."""
         import cortex.skills.autodidact.synthesis as syn
+
         syn._synthesis_router = None
 
         mock_router = MagicMock(spec=CortexLLMRouter)

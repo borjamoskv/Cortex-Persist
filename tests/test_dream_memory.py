@@ -1,5 +1,7 @@
-import pytest
 from dataclasses import dataclass, field
+
+import pytest
+
 from cortex.memory.dream import AssociativeDreamEngine, DreamResult
 
 

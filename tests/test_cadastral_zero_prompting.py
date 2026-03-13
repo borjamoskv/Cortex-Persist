@@ -5,8 +5,19 @@ from __future__ import annotations
 
 import pytest
 
+from cortex.engine.evolution_metrics import CortexMetrics
+from cortex.engine.evolution_types import (
+    DomainMetrics,
+    Mutation,
+    SovereignAgent,
+    SubAgent,
+)
+from cortex.engine.zero_prompting import (
+    ResolutionReport,
+    ZeroPromptingEvolutionStrategy,
+)
+from cortex.skills.cadastral.engine import CadastralEngine
 from cortex.skills.cadastral.models import (
-    BlindSpot,
     CadastralReport,
     Coordinate,
     ExpropiationStatus,
@@ -15,19 +26,6 @@ from cortex.skills.cadastral.models import (
     RiskLevel,
     ZoneClassification,
 )
-from cortex.skills.cadastral.engine import CadastralEngine
-from cortex.engine.zero_prompting import (
-    ResolutionReport,
-    ZeroPromptingEvolutionStrategy,
-)
-from cortex.engine.evolution_metrics import CortexMetrics
-from cortex.engine.evolution_types import (
-    DomainMetrics,
-    Mutation,
-    SovereignAgent,
-    SubAgent,
-)
-
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # FIXTURES
@@ -177,24 +175,18 @@ class TestCadastralReport:
 
 
 class TestCadastralEngine:
-    def test_register_and_status(
-        self, engine: CadastralEngine, sovereign_parcel: Parcel
-    ) -> None:
+    def test_register_and_status(self, engine: CadastralEngine, sovereign_parcel: Parcel) -> None:
         engine.register_parcel(sovereign_parcel)
         status = engine.get_status()
         assert status["registered_parcels"] == 1
 
-    def test_assess_risk_sovereign(
-        self, engine: CadastralEngine, sovereign_parcel: Parcel
-    ) -> None:
+    def test_assess_risk_sovereign(self, engine: CadastralEngine, sovereign_parcel: Parcel) -> None:
         assessment = engine.assess_risk(sovereign_parcel)
         assert assessment.risk == RiskLevel.SOVEREIGN
         assert assessment.risk_score < 0.15
         assert "DEPLOY" in assessment.recommendation
 
-    def test_assess_risk_forbidden(
-        self, engine: CadastralEngine, forbidden_parcel: Parcel
-    ) -> None:
+    def test_assess_risk_forbidden(self, engine: CadastralEngine, forbidden_parcel: Parcel) -> None:
         assessment = engine.assess_risk(forbidden_parcel)
         assert assessment.risk == RiskLevel.FORBIDDEN
         assert assessment.risk_score >= 0.85
@@ -271,9 +263,7 @@ class TestZeroPromptingEvolution:
         high_entropy_metrics: DomainMetrics,
     ) -> None:
         m = Mutation(mutation_id="low-fit", parameters={})
-        sub = SubAgent(
-            agent_id="low-fit", mutation=m, domain_id="TEST", fitness=30.0
-        )
+        sub = SubAgent(agent_id="low-fit", mutation=m, domain_id="TEST", fitness=30.0)
         sov = SovereignAgent(sovereign_id="sov", domain_id="TEST", subagents=[sub])
         strategy = ZeroPromptingEvolutionStrategy()
         cortex_metrics = CortexMetrics(":memory:")
@@ -352,6 +342,7 @@ class TestZeroPromptingEvolution:
 class TestAxiomRegistry:
     def test_ax029_registered(self) -> None:
         from cortex.axioms.registry import AXIOM_REGISTRY
+
         ax = AXIOM_REGISTRY.get("AX-029")
         assert ax is not None
         assert "Zero-Prompting" in ax.name
@@ -359,6 +350,7 @@ class TestAxiomRegistry:
 
     def test_total_axiom_count(self) -> None:
         from cortex.axioms.registry import AXIOM_REGISTRY
+
         assert len(AXIOM_REGISTRY) == 23  # 3 + 10 + 10 (was 22, now 23)
 
 

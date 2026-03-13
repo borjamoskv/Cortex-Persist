@@ -127,22 +127,24 @@ class ProceduralMemory:
         except sqlite3.OperationalError as e:
             if "no such table" not in str(e):
                 import logging
+
                 logging.getLogger("cortex.memory.procedural").error(
                     "DB Operational error on load: %s", e
                 )
                 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
                 ErrorGhostPipeline().capture_sync(
                     e, source="procedural:load", project="CORTEX_SYSTEM"
                 )
         except Exception as e:  # noqa: BLE001
             import logging
+
             logging.getLogger("cortex.memory.procedural").error(
                 "Unexpected procedural load error: %s", e
             )
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
-            ErrorGhostPipeline().capture_sync(
-                e, source="procedural:load", project="CORTEX_SYSTEM"
-            )
+
+            ErrorGhostPipeline().capture_sync(e, source="procedural:load", project="CORTEX_SYSTEM")
         finally:
             conn.close()
 

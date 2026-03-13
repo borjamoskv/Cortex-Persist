@@ -77,9 +77,7 @@ def click_menu_cmd(app_name: str, menu_path: tuple[str, ...]):
 
     async def _run():
         if len(menu_path) < 2:
-            console.print(
-                "[red]✘ Menu path must have at least top-level menu and item.[/red]"
-            )
+            console.print("[red]✘ Menu path must have at least top-level menu and item.[/red]")
             return
 
         engine = get_engine()

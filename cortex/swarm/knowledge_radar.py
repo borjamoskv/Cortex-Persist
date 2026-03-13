@@ -25,7 +25,9 @@ logger = logging.getLogger("cortex.swarm.knowledge_radar")
 
 # ── Default Paths ─────────────────────────────────────────────────────────
 
-_DEFAULT_QUEUE_PATH = Path(__file__).resolve().parents[2] / "cortex_iturria" / "nightshift_queue.yaml"
+_DEFAULT_QUEUE_PATH = (
+    Path(__file__).resolve().parents[2] / "cortex_iturria" / "nightshift_queue.yaml"
+)
 
 
 # ── Data Models ───────────────────────────────────────────────────────────
@@ -129,7 +131,7 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
 
         for r in results or []:
             content = getattr(r, "content", "") if hasattr(r, "content") else str(r)
-            
+
             # --- Ω₄ Aesthetic Cleaning (Parser) ---
             # 1. Try to extract URL from content
             url_match = re.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', content)
@@ -147,7 +149,7 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
                     target_str = content[:500]
             # 3. Strip artifact headers
             else:
-                target_str = re.sub(r'═══.*?═══', '', content).strip()
+                target_str = re.sub(r"═══.*?═══", "", content).strip()
                 target_str = target_str[:500]
 
             targets.append(
@@ -188,7 +190,11 @@ async def scan_semantic_gaps(cortex_db: Any, min_facts: int = 5) -> list[Crystal
                 (min_facts,),
             )
             for row in rows or []:
-                project = row[0] if isinstance(row, (list, tuple)) else getattr(row, "project_id", "unknown")
+                project = (
+                    row[0]
+                    if isinstance(row, (list, tuple))
+                    else getattr(row, "project_id", "unknown")
+                )
                 targets.append(
                     CrystalTarget(
                         target=f"best practices and architecture for {project}",

@@ -86,44 +86,28 @@ class HealthMixin:
 
         for m in hs.metrics:
             if m.value < t.critical:
-                warnings.append(
-                    f"{m.name}: CRITICAL ({m.value:.0%})"
-                )
+                warnings.append(f"{m.name}: CRITICAL ({m.value:.0%})")
             elif m.value < t.degraded:
-                warnings.append(
-                    f"{m.name}: degraded ({m.value:.0%})"
-                )
+                warnings.append(f"{m.name}: degraded ({m.value:.0%})")
             elif m.value < t.improve:
-                recommendations.append(
-                    f"{m.name}: could improve ({m.value:.0%})"
-                )
+                recommendations.append(f"{m.name}: could improve ({m.value:.0%})")
 
         if hs.grade <= Grade.FAILED:
             warnings.append(
-                f"Overall health is FAILED ({hs.grade.letter}) "
-                "— immediate investigation required"
+                f"Overall health is FAILED ({hs.grade.letter}) — immediate investigation required"
             )
         elif hs.grade <= Grade.DEGRADED:
-            warnings.append(
-                f"Overall health is DEGRADED ({hs.grade.letter})"
-            )
+            warnings.append(f"Overall health is DEGRADED ({hs.grade.letter})")
         elif hs.grade <= Grade.ACCEPTABLE:
-            recommendations.append(
-                "Run `cortex compact` to reduce entropy"
-            )
+            recommendations.append("Run `cortex compact` to reduce entropy")
         elif hs.grade <= Grade.GOOD:
-            recommendations.append(
-                "Health is Good — consider ledger verification"
-            )
+            recommendations.append("Health is Good — consider ledger verification")
 
         trend = self._get_trend_detector()
         drift = trend.detect_drift()
 
         if drift == "degrading":
-            warnings.append(
-                f"Health trend is DEGRADING "
-                f"(slope={trend.slope():.2f})"
-            )
+            warnings.append(f"Health trend is DEGRADING (slope={trend.slope():.2f})")
 
         db_path = str(getattr(self, "_db_path", ""))
         return HealthReport(

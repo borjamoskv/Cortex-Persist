@@ -29,11 +29,11 @@ logger = logging.getLogger("cortex.trust")
 
 # Confidence → (α₀, β₀) priors — start from empirical base rates
 _PRIORS: dict[str, tuple[float, float]] = {
-    "C5": (9.0, 1.0),   # Very strong prior toward trust
+    "C5": (9.0, 1.0),  # Very strong prior toward trust
     "C4": (7.0, 3.0),
-    "C3": (5.0, 5.0),   # Symmetric — uncertain
+    "C3": (5.0, 5.0),  # Symmetric — uncertain
     "C2": (3.0, 7.0),
-    "C1": (1.0, 9.0),   # Very strong prior toward distrust
+    "C1": (1.0, 9.0),  # Very strong prior toward distrust
     "unknown": (2.0, 2.0),
 }
 
@@ -48,17 +48,18 @@ _THRESHOLDS: list[tuple[float, str]] = [
 
 # Update weights per signal type
 _SIGNAL_WEIGHTS: dict[str, tuple[float, float]] = {
-    "confirm":      (2.0, 0.0),   # Strong evidence for
-    "weak_confirm": (1.0, 0.0),   # Weak evidence for
-    "contradict":   (0.0, 2.0),   # Strong evidence against
-    "weak_contradict": (0.0, 1.0),# Weak evidence against
-    "replicate":    (1.5, 0.0),   # Independent replication
-    "deprecate":    (0.0, 3.0),   # Explicit invalidation
+    "confirm": (2.0, 0.0),  # Strong evidence for
+    "weak_confirm": (1.0, 0.0),  # Weak evidence for
+    "contradict": (0.0, 2.0),  # Strong evidence against
+    "weak_contradict": (0.0, 1.0),  # Weak evidence against
+    "replicate": (1.5, 0.0),  # Independent replication
+    "deprecate": (0.0, 3.0),  # Explicit invalidation
 }
 
 
 class Signal(str, Enum):
     """Evidence signal for a stored fact."""
+
     CONFIRM = "confirm"
     WEAK_CONFIRM = "weak_confirm"
     CONTRADICT = "contradict"
@@ -70,15 +71,16 @@ class Signal(str, Enum):
 @dataclass
 class TrustUpdate:
     """Result of a Bayesian trust update."""
+
     fact_id: int
     signal: str
     old_confidence: str
     new_confidence: str
     old_consensus_score: float
     new_consensus_score: float
-    alpha: float               # Posterior α
-    beta: float                # Posterior β
-    posterior_mean: float      # E[p] = α / (α + β)
+    alpha: float  # Posterior α
+    beta: float  # Posterior β
+    posterior_mean: float  # E[p] = α / (α + β)
     posterior_variance: float  # Var[p] = αβ / (α+β)²(α+β+1)
     confidence_changed: bool
 
@@ -173,7 +175,13 @@ class BayesianTrustUpdater:
 
         logger.info(
             "BayesTrust: fact=%d signal=%s %s→%s (mean=%.3f α=%.1f β=%.1f)",
-            fact_id, sig.value, old_conf, new_conf, mean, alpha, beta,
+            fact_id,
+            sig.value,
+            old_conf,
+            new_conf,
+            mean,
+            alpha,
+            beta,
         )
         return result
 
@@ -228,12 +236,10 @@ def _upgrades_needed(current: str) -> dict:
     order = ["C1", "C2", "C3", "C4", "C5"]
     idx = order.index(current) if current in order else 2
     result = {}
-    for target in order[idx + 1:]:
+    for target in order[idx + 1 :]:
         a0, b0 = _PRIORS.get(current, _PRIORS["C3"])
         # Simulate confirms until posterior mean crosses next threshold
-        threshold, _ = next(
-            ((t, lbl) for t, lbl in _THRESHOLDS if lbl == target), (0.85, "C5")
-        )
+        threshold, _ = next(((t, lbl) for t, lbl in _THRESHOLDS if lbl == target), (0.85, "C5"))
         a, b = a0, b0
         needed = 0
         while _posterior_mean(a, b) < threshold and needed < 100:

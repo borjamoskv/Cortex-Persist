@@ -1,5 +1,5 @@
 [project]
-name = "cortex-memory"
+name = "cortex-persist"
 version = "0.3.0b1"
 description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
 readme = "README.md"
@@ -79,7 +79,7 @@ trends = [
     "pandas>=2.0",
 ]
 all = [
-    "cortex-memory[api,dev,adk,toolbox,billing,cloud,trends]",
+    "cortex-persist[api,dev,adk,toolbox,billing,cloud,trends]",
 ]
 
 [project.scripts]

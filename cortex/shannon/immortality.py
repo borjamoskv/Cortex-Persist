@@ -133,12 +133,8 @@ class ImmortalityIndex:
         # ── Gather raw data ──────────────────────────────────────
         total = await scanner.total_active_facts(project)
         type_dist = await scanner.type_distribution(project)
-        max_gap, total_span, active_days = (
-            await scanner.temporal_gap_days(project)
-        )
-        weighted_sum, conf_total = (
-            await scanner.confidence_weight_sum(project)
-        )
+        max_gap, total_span, active_days = await scanner.temporal_gap_days(project)
+        weighted_sum, conf_total = await scanner.confidence_weight_sum(project)
         filled, theoretical = await scanner.domain_coverage()
 
         # ── Edge case: empty database ────────────────────────────

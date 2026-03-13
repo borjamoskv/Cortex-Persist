@@ -108,8 +108,14 @@ class PlannerAgent:
         except PermissionError:
             return ""
         ignore = {
-            ".git", "__pycache__", ".venv", "node_modules", ".build",
-            "dist", ".mypy_cache", ".pytest_cache"
+            ".git",
+            "__pycache__",
+            ".venv",
+            "node_modules",
+            ".build",
+            "dist",
+            ".mypy_cache",
+            ".pytest_cache",
         }
         for e in entries:
             if e.name in ignore or e.name.startswith("."):

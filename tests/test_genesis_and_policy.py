@@ -5,9 +5,9 @@ No temp database required — Genesis operates on the filesystem.
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
 
 # ─── Models ──────────────────────────────────────────────────────────
 
@@ -16,12 +16,14 @@ class TestSystemSpec:
     def test_from_dict_minimal(self):
         from cortex.genesis.models import SystemSpec
 
-        spec = SystemSpec.from_dict({
-            "name": "test_module",
-            "components": [
-                {"name": "core", "component_type": "module"},
-            ],
-        })
+        spec = SystemSpec.from_dict(
+            {
+                "name": "test_module",
+                "components": [
+                    {"name": "core", "component_type": "module"},
+                ],
+            }
+        )
         assert spec.name == "test_module"
         assert len(spec.components) == 1
         assert spec.components[0].name == "core"
@@ -29,28 +31,30 @@ class TestSystemSpec:
     def test_from_dict_full(self):
         from cortex.genesis.models import SystemSpec
 
-        spec = SystemSpec.from_dict({
-            "name": "sovereign",
-            "description": "Test system",
-            "system_type": "agent",
-            "auto_tests": True,
-            "auto_cli": True,
-            "tags": ["test", "agent"],
-            "components": [
-                {
-                    "name": "models",
-                    "component_type": "dataclass",
-                    "docstring": "Data models",
-                    "interfaces": ["Fact", "Query"],
-                    "dependencies": [],
-                },
-                {
-                    "name": "engine",
-                    "component_type": "module",
-                    "dependencies": ["models"],
-                },
-            ],
-        })
+        spec = SystemSpec.from_dict(
+            {
+                "name": "sovereign",
+                "description": "Test system",
+                "system_type": "agent",
+                "auto_tests": True,
+                "auto_cli": True,
+                "tags": ["test", "agent"],
+                "components": [
+                    {
+                        "name": "models",
+                        "component_type": "dataclass",
+                        "docstring": "Data models",
+                        "interfaces": ["Fact", "Query"],
+                        "dependencies": [],
+                    },
+                    {
+                        "name": "engine",
+                        "component_type": "module",
+                        "dependencies": ["models"],
+                    },
+                ],
+            }
+        )
         assert spec.system_type == "agent"
         assert spec.auto_tests is True
         assert len(spec.components) == 2
@@ -116,9 +120,12 @@ class TestGenesisValidator:
         from cortex.genesis.validator import GenesisValidator
 
         v = GenesisValidator()
-        spec = SystemSpec(name="empty", components=[
-            ComponentSpec(name="core"),
-        ])
+        spec = SystemSpec(
+            name="empty",
+            components=[
+                ComponentSpec(name="core"),
+            ],
+        )
         passed, errors = v.validate(spec, [], Path("/tmp"))
         # Should still pass with warnings about missing files
         assert isinstance(passed, bool)
@@ -252,56 +259,77 @@ class TestGenesisEngine:
 class TestModelPolicyGuard:
     def test_clean_presets_no_warnings(self, caplog):
         import logging
+
         from cortex.llm._presets import _validate_model_policy
 
         with caplog.at_level(logging.WARNING, logger="cortex.llm.presets"):
-            _validate_model_policy({
-                "good_provider": {
-                    "default_model": "gpt-4o",
-                    "intent_model_map": {
-                        "code": "gemini-2.5-pro",
+            _validate_model_policy(
+                {
+                    "good_provider": {
+                        "default_model": "gpt-4o",
+                        "intent_model_map": {
+                            "code": "gemini-2.5-pro",
+                        },
                     },
-                },
-            })
+                }
+            )
         assert "MODEL POLICY" not in caplog.text
 
     def test_prohibited_default_model_warns(self, caplog):
         import logging
+
         from cortex.llm._presets import _validate_model_policy
 
         with caplog.at_level(logging.WARNING, logger="cortex.llm.presets"):
-            _validate_model_policy({
-                "bad_provider": {
-                    "default_model": "gpt-4o-mini",
-                },
-            })
+            _validate_model_policy(
+                {
+                    "bad_provider": {
+                        "default_model": "gpt-4o-mini",
+                    },
+                }
+            )
         assert "MODEL POLICY" in caplog.text
         assert "gpt-4o-mini" in caplog.text
 
     def test_prohibited_intent_model_warns(self, caplog):
         import logging
+
         from cortex.llm._presets import _validate_model_policy
 
         with caplog.at_level(logging.WARNING, logger="cortex.llm.presets"):
-            _validate_model_policy({
-                "bad": {
-                    "default_model": "claude-opus",
-                    "intent_model_map": {
-                        "code": "claude-haiku",
+            _validate_model_policy(
+                {
+                    "bad": {
+                        "default_model": "claude-opus",
+                        "intent_model_map": {
+                            "code": "claude-haiku",
+                        },
                     },
-                },
-            })
+                }
+            )
         assert "claude-haiku" in caplog.text
 
     def test_prohibited_tier_patterns(self):
         from cortex.llm._presets import _PROHIBITED_TIERS
 
         # Should match
-        for model in ["gpt-4o-mini", "gemini-flash", "claude-haiku",
-                       "gemini-nano", "model-tiny", "something-small", "x-lite"]:
+        for model in [
+            "gpt-4o-mini",
+            "gemini-flash",
+            "claude-haiku",
+            "gemini-nano",
+            "model-tiny",
+            "something-small",
+            "x-lite",
+        ]:
             assert _PROHIBITED_TIERS.search(model), f"Should match: {model}"
 
         # Should NOT match
-        for model in ["gpt-4o", "gemini-2.5-pro", "claude-sonnet-4",
-                       "gemini-2.5-pro", "deepseek-r1"]:
+        for model in [
+            "gpt-4o",
+            "gemini-2.5-pro",
+            "claude-sonnet-4",
+            "gemini-2.5-pro",
+            "deepseek-r1",
+        ]:
             assert not _PROHIBITED_TIERS.search(model), f"Should NOT match: {model}"

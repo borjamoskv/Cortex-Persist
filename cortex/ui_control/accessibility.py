@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.ui_control.accessibility")
 
+
 class AccessibilityEngine:
     """
     Direct bridge to macOS Accessibility APIs using PyObjC.
@@ -85,7 +86,7 @@ class AccessibilityEngine:
             title=self._get_attribute(element, "AXTitle"),
             description=self._get_attribute(element, "AXDescription"),
             identifier=self._get_attribute(element, "AXIdentifier"),
-            native_ref=element
+            native_ref=element,
         )
 
     async def perform_click(self, element: AXElement) -> InteractionResult:
@@ -93,9 +94,7 @@ class AccessibilityEngine:
         if not element.native_ref:
             return InteractionResult(success=False, error="No native reference found")
 
-        error = ApplicationServices.AXUIElementPerformAction(
-            element.native_ref, "AXPress", None
-        )
+        error = ApplicationServices.AXUIElementPerformAction(element.native_ref, "AXPress", None)
 
         if error == 0:
             return InteractionResult(success=True)

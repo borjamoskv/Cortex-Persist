@@ -20,18 +20,19 @@ logger = logging.getLogger(__name__)
 
 # ─── Plan Definitions ────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class PlanQuota:
     """Immutable quota definition for a billing plan."""
 
     name: str
-    calls_limit: int          # Monthly API call limit (-1 = unlimited)
-    projects_limit: int       # Max projects (-1 = unlimited)
-    storage_bytes: int        # Max storage in bytes (-1 = unlimited)
-    rate_limit: int           # Requests per minute
-    search_depth: int         # Max graph_depth for search
-    batch_size: int           # Max items per batch request
-    ledger_verify: bool       # Can verify ledger integrity
+    calls_limit: int  # Monthly API call limit (-1 = unlimited)
+    projects_limit: int  # Max projects (-1 = unlimited)
+    storage_bytes: int  # Max storage in bytes (-1 = unlimited)
+    rate_limit: int  # Requests per minute
+    search_depth: int  # Max graph_depth for search
+    batch_size: int  # Max items per batch request
+    ledger_verify: bool  # Can verify ledger integrity
 
 
 PLAN_QUOTAS: dict[str, PlanQuota] = {
@@ -70,6 +71,7 @@ PLAN_QUOTAS: dict[str, PlanQuota] = {
 
 # ─── Quota Check Result ──────────────────────────────────────────────
 
+
 @dataclass
 class QuotaCheckResult:
     """Result of a quota check."""
@@ -83,6 +85,7 @@ class QuotaCheckResult:
 
 
 # ─── Enforcer ────────────────────────────────────────────────────────
+
 
 class QuotaEnforcer:
     """Enforces plan-based quotas against tracked usage.

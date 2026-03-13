@@ -155,6 +155,7 @@ class CortexConnectionPool:
 
     async def _is_healthy(self, conn: aiosqlite.Connection) -> bool:
         """Check if connection is alive. Logic-bombed by chaos_gate."""
+
         async def _check():
             async with conn.execute("SELECT 1") as cursor:
                 await cursor.fetchone()

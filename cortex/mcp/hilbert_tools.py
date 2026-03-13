@@ -32,8 +32,11 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
         # Add scripts dir to path
         skills_dir = os.path.join(
             os.path.expanduser("~"),
-            ".gemini", "antigravity", "skills",
-            "hilbert-omega", "scripts",
+            ".gemini",
+            "antigravity",
+            "skills",
+            "hilbert-omega",
+            "scripts",
         )
         if skills_dir not in sys.path:
             sys.path.insert(0, skills_dir)
@@ -41,34 +44,36 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
         try:
             if attack == "conjectures":
                 from conjectures import run_all_conjectures
+
                 results = run_all_conjectures()
                 lines = ["Hilbert-Ω Conjectures Report:\n"]
                 for r in results:
                     icon = "🟢" if r.counterexample is None else "🔴"
-                    lines.append(
-                        f"  {icon} {r.name}: {r.detail} "
-                        f"[{r.elapsed_ms:.0f}ms]"
-                    )
+                    lines.append(f"  {icon} {r.name}: {r.detail} [{r.elapsed_ms:.0f}ms]")
 
                 # Persist summary to CORTEX
                 await ctx.ensure_ready()
                 from cortex.engine import CortexEngine
+
                 async with ctx.pool.acquire() as conn:
                     engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
                     engine._conn = conn
                     summary = "; ".join(
-                        f"{r.name}: {'OK' if not r.counterexample else 'FAIL'}"
-                        for r in results
+                        f"{r.name}: {'OK' if not r.counterexample else 'FAIL'}" for r in results
                     )
                     await engine.store(
-                        "HILBERT-OMEGA", summary,
-                        "knowledge", ["math", "conjectures"],
-                        "C4", "agent:hilbert-omega",
+                        "HILBERT-OMEGA",
+                        summary,
+                        "knowledge",
+                        ["math", "conjectures"],
+                        "C4",
+                        "agent:hilbert-omega",
                     )
                 return "\n".join(lines)
 
             elif attack == "millennium":
                 from millennium_assault import MillenniumAssaultEngine
+
                 eng = MillenniumAssaultEngine()
                 await eng.run_global_assault()
                 lines = ["Millennium Assault Report:\n"]
@@ -85,19 +90,18 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                 if not problem:
                     return "❌ Specify a theorem name with 'problem' arg."
                 from hilbert_engine import attack_theorem
+
                 try:
                     from z3 import Ints
-                    x, y = Ints('x y')
+
+                    x, y = Ints("x y")
                     if problem == "euclides":
-                        hypothesis = (x + y == y + x)
+                        hypothesis = x + y == y + x
                         result = attack_theorem(
                             "Propiedad Conmutativa de la Adición Entera",
                             hypothesis,
                         )
-                        return (
-                            f"{'✅ DEMOSTRADO' if result else '❌ REFUTADO'}: "
-                            f"{problem}"
-                        )
+                        return f"{'✅ DEMOSTRADO' if result else '❌ REFUTADO'}: {problem}"
                     return f"❌ Theorem '{problem}' not in attack registry."
                 except ImportError:
                     return "❌ Z3 not installed."

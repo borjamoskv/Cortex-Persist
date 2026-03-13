@@ -30,17 +30,12 @@ def verify_health_system(
     # 1. Grade enum is exhaustive and ordered
     grades = list(Grade)
     if len(grades) != 6:
-        violations.append(
-            f"Grade enum must have 6 members, has {len(grades)}"
-        )
+        violations.append(f"Grade enum must have 6 members, has {len(grades)}")
 
     # Verify ordering is monotonically decreasing
     for i in range(len(grades) - 1):
         if grades[i].threshold <= grades[i + 1].threshold:
-            violations.append(
-                f"Grade ordering violated: {grades[i]} <= "
-                f"{grades[i+1]}"
-            )
+            violations.append(f"Grade ordering violated: {grades[i]} <= {grades[i + 1]}")
 
     # All grades must have unique letters
     letters = [g.letter for g in Grade]
@@ -51,10 +46,7 @@ def verify_health_system(
     for name in reg.list_collectors():
         collector = reg._collectors[name]
         if not isinstance(collector, MetricCollectorProtocol):
-            violations.append(
-                f"Collector '{name}' violates "
-                f"MetricCollectorProtocol"
-            )
+            violations.append(f"Collector '{name}' violates MetricCollectorProtocol")
 
     # 3. No duplicate collector names
     names = reg.list_collectors()
@@ -62,19 +54,13 @@ def verify_health_system(
         violations.append("Duplicate collector names detected")
 
     # 4. Total weight must be > 0
-    total_weight = sum(
-        reg._collectors[n].weight for n in reg.list_collectors()
-    )
+    total_weight = sum(reg._collectors[n].weight for n in reg.list_collectors())
     if total_weight <= 0:
-        violations.append(
-            f"Total collector weight must be > 0, got {total_weight}"
-        )
+        violations.append(f"Total collector weight must be > 0, got {total_weight}")
 
     # 5. Built-in collector count
     if len(reg) < 3:
-        violations.append(
-            f"Need at least 3 collectors, have {len(reg)}"
-        )
+        violations.append(f"Need at least 3 collectors, have {len(reg)}")
 
     # 6. Grade.from_score covers full range
     edge_cases = [0.0, 39.9, 40.0, 55.0, 70.0, 85.0, 95.0, 100.0]
@@ -82,10 +68,7 @@ def verify_health_system(
         try:
             g = Grade.from_score(score)
             if not isinstance(g, Grade):
-                violations.append(
-                    f"Grade.from_score({score}) returned "
-                    f"non-Grade: {type(g)}"
-                )
+                violations.append(f"Grade.from_score({score}) returned non-Grade: {type(g)}")
         except Exception as e:  # noqa: BLE001
             violations.append(f"Grade.from_score({score}) raised: {e}")
 

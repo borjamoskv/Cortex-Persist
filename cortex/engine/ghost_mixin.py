@@ -80,13 +80,13 @@ class GhostMixin:
     async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
         """Scan the topography for all active ghosts."""
         import asyncio
-        
+
         target_root = root_dir or Path.cwd()
         sensor = self._sensor
-        
+
         def _list() -> list[GhostTrace]:
             return sensor.scan_field(target_root)
-            
+
         return await asyncio.to_thread(_list)
 
     async def resolve_ghost(

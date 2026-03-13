@@ -42,7 +42,10 @@ class ChaosGate:
     pending_scenario: ChaosScenario | None = None
 
     def arm(
-        self, scenario: ChaosScenario, *, after_n: int | None = None,
+        self,
+        scenario: ChaosScenario,
+        *,
+        after_n: int | None = None,
     ) -> None:
         """Arm the gate to explode. Instant or delayed."""
         self.pending_scenario = scenario

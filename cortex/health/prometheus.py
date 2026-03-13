@@ -1,7 +1,7 @@
 """
 CORTEX — Prometheus Exposition.
 
-Converts a CORTEX HealthReport or HealthScore into the Prometheus 
+Converts a CORTEX HealthReport or HealthScore into the Prometheus
 text-based exposition format for ingestion by metrics scrapers.
 """
 
@@ -28,10 +28,10 @@ def _grade_to_numeric(grade: Grade) -> int:
 def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
     """
     Format a CORTEX health payload into Prometheus exposition format.
-    
+
     Args:
         score_or_report: The calculated HealthScore or HealthReport.
-        
+
     Returns:
         A multiline string compliant with Prometheus text exposition format.
     """
@@ -42,7 +42,7 @@ def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
         score = cast(HealthScore, score_or_report)
 
     lines: list[str] = []
-    
+
     # ── Overall Score ──────────────────────────────────────────
     lines.append("# HELP cortex_health_score_total Overall CORTEX health score (0-100)")
     lines.append("# TYPE cortex_health_score_total gauge")
@@ -71,7 +71,7 @@ def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
         for m in score.metrics:
             lines.append(f'cortex_health_metric_value{{collector="{m.name}"}} {m.value:.4f}')
         lines.append("")
-        
+
         # ── Individual Metrics (Latency) ───────────────────────
         lines.append("# HELP cortex_health_metric_latency_ms Individual collector latency (ms)")
         lines.append("# TYPE cortex_health_metric_latency_ms gauge")

@@ -122,9 +122,7 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_image"):
             raise RuntimeError("Current embedder does not support image embedding")
 
-        return await embedder.embed_image(
-            image_bytes, mime_type=mime_type, task_type=task_type
-        )
+        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)
 
     @property
     def dimension(self) -> int:

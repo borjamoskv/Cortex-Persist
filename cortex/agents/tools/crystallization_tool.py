@@ -19,8 +19,7 @@ class CrystallizationArgs(BaseModel):
     fact_type: str = Field(
         default="decision",
         description=(
-            "Type of fact: 'decision', 'error', 'ghost', 'bridge', "
-            "'discovery', or 'axiom'."
+            "Type of fact: 'decision', 'error', 'ghost', 'bridge', 'discovery', or 'axiom'."
         ),
     )
     project: str = Field(
@@ -91,6 +90,4 @@ class CrystallizationTool:
             return f"❌ CRYSTALLIZATION FAILURE: {e}"
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
-        raise NotImplementedError(
-            "CrystallizationTool is async-only (Ω₂ Landauer). Use _arun."
-        )
+        raise NotImplementedError("CrystallizationTool is async-only (Ω₂ Landauer). Use _arun.")

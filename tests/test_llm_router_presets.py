@@ -60,17 +60,13 @@ class TestPresetLoading:
         valid = {"frontier", "high", "local"}
         presets = load_presets()
         for name, cfg in presets.items():
-            assert cfg["tier"] in valid, (
-                f"{name} tier='{cfg['tier']}'"
-            )
+            assert cfg["tier"] in valid, f"{name} tier='{cfg['tier']}'"
 
     def test_cost_class_values_valid(self):
         valid = {"free", "low", "medium", "high", "variable"}
         presets = load_presets()
         for name, cfg in presets.items():
-            assert cfg["cost_class"] in valid, (
-                f"{name} cost_class='{cfg['cost_class']}'"
-            )
+            assert cfg["cost_class"] in valid, f"{name} cost_class='{cfg['cost_class']}'"
 
 
 # ─── Model Policy ────────────────────────────────────────────────────
@@ -81,6 +77,7 @@ class TestModelPolicy:
 
     def test_no_prohibited_defaults(self):
         import re
+
         pat = re.compile(
             r"\b(mini|flash|haiku|nano|tiny|small|lite)\b",
             re.IGNORECASE,
@@ -88,24 +85,19 @@ class TestModelPolicy:
         presets = load_presets()
         for name, cfg in presets.items():
             d = cfg.get("default_model", "")
-            assert not pat.search(d), (
-                f"{name}: '{d}' violates model policy"
-            )
+            assert not pat.search(d), f"{name}: '{d}' violates model policy"
 
     def test_no_prohibited_intent_models(self):
         import re
+
         pat = re.compile(
             r"\b(mini|flash|haiku|nano|tiny|small|lite)\b",
             re.IGNORECASE,
         )
         presets = load_presets()
         for name, cfg in presets.items():
-            for intent, model in cfg.get(
-                "intent_model_map", {}
-            ).items():
-                assert not pat.search(model), (
-                    f"{name}/{intent}: '{model}' prohibited"
-                )
+            for intent, model in cfg.get("intent_model_map", {}).items():
+                assert not pat.search(model), f"{name}/{intent}: '{model}' prohibited"
 
 
 # ─── Query APIs ───────────────────────────────────────────────────────
@@ -137,7 +129,6 @@ class TestBaseProviderDefaults:
 
     def test_default_tier(self):
         class Dummy(BaseProvider):
-
             @property
             def provider_name(self):
                 return "dummy"
@@ -153,7 +144,6 @@ class TestBaseProviderDefaults:
 
     def test_default_cost_class(self):
         class Dummy(BaseProvider):
-
             @property
             def provider_name(self):
                 return "dummy"
@@ -176,6 +166,7 @@ class TestLLMProviderProperties:
 
     def test_qwen_tier_and_cost(self):
         from cortex.llm.provider import LLMProvider
+
         p = LLMProvider(provider="qwen")
         assert p.tier == "high"
         assert p.cost_class == "low"
@@ -183,6 +174,7 @@ class TestLLMProviderProperties:
     def test_gemini_is_frontier(self):
         os.environ.setdefault("GEMINI_API_KEY", "test")
         from cortex.llm.provider import LLMProvider
+
         p = LLMProvider(provider="gemini")
         assert p.tier == "frontier"
 
@@ -199,6 +191,7 @@ class TestRouterOrdering:
         os.environ.setdefault("GROQ_API_KEY", "test")
         os.environ.setdefault("DEEPSEEK_API_KEY", "test")
         from cortex.llm.provider import LLMProvider
+
         return {
             "qwen": LLMProvider(provider="qwen"),
             "gemini": LLMProvider(provider="gemini"),
@@ -208,6 +201,7 @@ class TestRouterOrdering:
 
     def test_cost_ordering(self, _providers):
         from cortex.llm.router import CortexLLMRouter
+
         router = CortexLLMRouter(
             primary=_providers["qwen"],
             fallbacks=[
@@ -224,6 +218,7 @@ class TestRouterOrdering:
     def test_tier_tiebreaking_within_cost(self, _providers):
         """Same cost → frontier preferred over high."""
         from cortex.llm.router import CortexLLMRouter
+
         # deepseek=low/frontier, qwen=low/high
         router = CortexLLMRouter(
             primary=_providers["gemini"],
@@ -239,10 +234,12 @@ class TestRouterOrdering:
 
     def test_cost_order_constants(self):
         from cortex.llm.router import CortexLLMRouter
+
         o = CortexLLMRouter._COST_ORDER
         assert o["free"] < o["low"] < o["medium"] < o["high"]
 
     def test_tier_order_constants(self):
         from cortex.llm.router import CortexLLMRouter
+
         t = CortexLLMRouter._TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]

@@ -34,9 +34,7 @@ def load_embedding_presets() -> dict[str, dict[str, Any]]:
 
     path = Path(_ASSET_PATH)
     if not path.exists():
-        logger.warning(
-            "Embedding presets asset not found at %s. Using hardcoded defaults.", path
-        )
+        logger.warning("Embedding presets asset not found at %s. Using hardcoded defaults.", path)
         return {}
 
     try:

@@ -147,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Async API**: High-performance FastAPI backend with connection pooling and async SQLite
 - **Industrial Noir UI**: Dashboard with Cyber Lime (`#CCFF00`) and Abyssal Black (`#0A0A0A`) theme
 - **Internationalization**: Localized error messages (en, es)
-- **Python SDK** (`sdks/python/`): `pip install cortex-memory` public API
+- **Python SDK** (`sdks/python/`): `pip install cortex-persist` public API
 - **OpenAPI spec** (`openapi.yaml` — 70.5 KB): Full machine-readable API contract
 - **CI/CD** (`ci.yml`): GitHub Actions pipeline with pytest + ruff
 

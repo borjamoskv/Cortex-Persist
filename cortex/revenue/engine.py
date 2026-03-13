@@ -110,9 +110,7 @@ class RevenueEngine:
             all_opportunities.extend(result)
 
         # Filter by minimum ROI
-        viable = [
-            opp for opp in all_opportunities if opp.roi_score >= self.min_roi
-        ]
+        viable = [opp for opp in all_opportunities if opp.roi_score >= self.min_roi]
 
         # Sort by ROI descending
         viable.sort(key=lambda o: o.roi_score, reverse=True)
@@ -147,9 +145,7 @@ class RevenueEngine:
         """
         vector = self.vectors.get(opportunity.vector)
         if not vector:
-            raise ValueError(
-                f"Vector {opportunity.vector.value!r} not registered."
-            )
+            raise ValueError(f"Vector {opportunity.vector.value!r} not registered.")
 
         opportunity.status = OpportunityStatus.EXECUTING
         logger.info(
@@ -212,9 +208,7 @@ class RevenueEngine:
             List of execution results.
         """
         targets = opportunities or [
-            o
-            for o in self.opportunities
-            if o.status == OpportunityStatus.EVALUATED
+            o for o in self.opportunities if o.status == OpportunityStatus.EVALUATED
         ]
 
         if not targets:
@@ -289,9 +283,7 @@ class RevenueEngine:
             by_vector=by_vector,
         )
 
-    async def _persist_opportunities(
-        self, opportunities: list[Opportunity]
-    ) -> None:
+    async def _persist_opportunities(self, opportunities: list[Opportunity]) -> None:
         """Persist detected opportunities to CORTEX ledger."""
         try:
             from cortex.engine import CortexEngine

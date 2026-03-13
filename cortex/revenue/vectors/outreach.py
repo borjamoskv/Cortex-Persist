@@ -288,13 +288,15 @@ class OutreachVector:
 
         # Add to CRM pipeline
         self.contacted.add(website)
-        self.pipeline.append({
-            "company": company,
-            "website": website,
-            "status": "draft_ready",
-            "email": email,
-            "estimated_value": str(opportunity.estimated_value),
-        })
+        self.pipeline.append(
+            {
+                "company": company,
+                "website": website,
+                "status": "draft_ready",
+                "email": email,
+                "estimated_value": str(opportunity.estimated_value),
+            }
+        )
 
         logger.info(
             "📧 [OUTREACH] Draft ready for %s (est. €%s)",
@@ -328,19 +330,12 @@ class OutreachVector:
 
         if lead.lighthouse_score < 50:
             points.append(
-                f"Rendimiento web: {lead.lighthouse_score}/100 "
-                f"(Google penaliza esto en SEO)"
+                f"Rendimiento web: {lead.lighthouse_score}/100 (Google penaliza esto en SEO)"
             )
         if not lead.mobile_friendly:
-            points.append(
-                "La web no está optimizada para móvil "
-                "(60% del tráfico viene de móvil)"
-            )
+            points.append("La web no está optimizada para móvil (60% del tráfico viene de móvil)")
         if not lead.has_https:
-            points.append(
-                "Sin certificado HTTPS "
-                "(Chrome muestra 'No seguro' a tus clientes)"
-            )
+            points.append("Sin certificado HTTPS (Chrome muestra 'No seguro' a tus clientes)")
         if lead.design_age_years > 4:
             points.append(
                 f"El diseño tiene ~{lead.design_age_years:.0f} años "

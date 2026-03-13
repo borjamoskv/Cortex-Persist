@@ -50,15 +50,18 @@ class _WorkspaceEventHandler(FileSystemEventHandler):
             return
         src_path = event.src_path
         if isinstance(src_path, bytes):
-            src_path = src_path.decode('utf-8')
+            src_path = src_path.decode("utf-8")
         if not src_path.endswith(".py"):
             return
         path = Path(src_path)
         if not _SKIP_DIRS.intersection(path.parts):
             self.loop.call_soon_threadsafe(self.queue.put_nowait, path)
 
-    def on_modified(self, event: FileSystemEvent) -> None: self._enqueue(event)
-    def on_created(self, event: FileSystemEvent) -> None: self._enqueue(event)
+    def on_modified(self, event: FileSystemEvent) -> None:
+        self._enqueue(event)
+
+    def on_created(self, event: FileSystemEvent) -> None:
+        self._enqueue(event)
 
 
 class ApotheosisEngine(ApotheosisAuditsMixin):
@@ -164,7 +167,6 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
             if duration > 0.01:
                 await asyncio.sleep(duration)
-
 
     async def _policy_pulse(self) -> None:
         """Fetch priorities from PolicyEngine (Ω₃)."""

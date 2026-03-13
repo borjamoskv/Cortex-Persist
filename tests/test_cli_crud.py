@@ -24,16 +24,22 @@ def db_path(tmp_path):
     engine = CortexEngine(db_path=path)
     engine.init_db_sync()
     engine.store_sync(
-        "test-project", "First test fact for CORTEX validation",
-        fact_type="knowledge", source="cli",
+        "test-project",
+        "First test fact for CORTEX validation",
+        fact_type="knowledge",
+        source="cli",
     )
     engine.store_sync(
-        "test-project", "Second test fact for error tracking",
-        fact_type="error", source="cli",
+        "test-project",
+        "Second test fact for error tracking",
+        fact_type="error",
+        source="cli",
     )
     engine.store_sync(
-        "other-project", "Third test fact for ghost registering",
-        fact_type="ghost", source="cli",
+        "other-project",
+        "Third test fact for ghost registering",
+        fact_type="ghost",
+        source="cli",
     )
     engine.close_sync()
     return str(path)

@@ -182,7 +182,16 @@ class AnalysisEngine(BaseEngine):
             for child in ast.walk(node)
             if isinstance(
                 child,
-                (ast.If, ast.While, ast.For, ast.ExceptHandler, ast.With, ast.Assert, ast.comprehension, ast.BoolOp)
+                (
+                    ast.If,
+                    ast.While,
+                    ast.For,
+                    ast.ExceptHandler,
+                    ast.With,
+                    ast.Assert,
+                    ast.comprehension,
+                    ast.BoolOp,
+                ),
             )
         )
 
@@ -200,8 +209,7 @@ class AnalysisEngine(BaseEngine):
     def _build_coupling_graph(self, atoms: dict[str, StructuralAtom]) -> dict:
         """DERIVATION: Ω₁ (Multi-Scale Causality) -> Bi-directional context in O(1)."""
         return {
-            aid: {"in": atom.dependents, "out": atom.dependencies}
-            for aid, atom in atoms.items()
+            aid: {"in": atom.dependents, "out": atom.dependencies} for aid, atom in atoms.items()
         }
 
     def _detect_clusters(self, graph: dict) -> list[set[str]]:
@@ -211,18 +219,20 @@ class AnalysisEngine(BaseEngine):
         for node in graph:
             if node in visited:
                 continue
-            
+
             cluster = {node}
             queue = [node]
             visited.add(node)
             while queue:
                 current = queue.pop(0)
-                neighbors = (graph.get(current, {}).get("in", set()) | 
-                             graph.get(current, {}).get("out", set())) - visited
+                neighbors = (
+                    graph.get(current, {}).get("in", set())
+                    | graph.get(current, {}).get("out", set())
+                ) - visited
                 visited.update(neighbors)
                 queue.extend(neighbors)
                 cluster.update(neighbors)
-                
+
             if len(cluster) > 2:
                 clusters.append(cluster)
         return clusters

@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
-name = "cortex-memory"
+name = "cortex-persist"
 version = "0.1.0"
 description = "Python SDK for the CORTEX Memory API — persistent memory for AI agents"
 readme = "README.md"
@@ -32,7 +32,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://cortex.moskv.com"
 Documentation = "https://docs.cortex.moskv.com"
-Repository = "https://github.com/borjamoskv/cortex-memory"
+Repository = "https://github.com/borjamoskv/cortex-persist"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "pytest-httpx"]

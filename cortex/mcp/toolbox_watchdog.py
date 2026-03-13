@@ -100,8 +100,7 @@ class ToolboxWatchdog:
             return
 
         logger.info(
-            "🔭 [WATCHDOG] Starting Toolbox supervisor "
-            "(port=%d, db=%s)",
+            "🔭 [WATCHDOG] Starting Toolbox supervisor (port=%d, db=%s)",
             self._port,
             self._db_path,
         )
@@ -119,7 +118,8 @@ class ToolboxWatchdog:
                 raise
             except Exception as exc:  # noqa: BLE001 — supervisor catches all crashes
                 logger.error(
-                    "☠️ [WATCHDOG] Crash detected: %s", exc,
+                    "☠️ [WATCHDOG] Crash detected: %s",
+                    exc,
                 )
 
             if not self._shutdown:
@@ -129,8 +129,7 @@ class ToolboxWatchdog:
                     _MAX_BACKOFF_S,
                 )
                 logger.warning(
-                    "♻️ [WATCHDOG] Restart #%d in %.0fs "
-                    "(backoff)",
+                    "♻️ [WATCHDOG] Restart #%d in %.0fs (backoff)",
                     self._restart_count,
                     wait,
                 )
@@ -144,10 +143,7 @@ class ToolboxWatchdog:
     @property
     def is_alive(self) -> bool:
         """Check if the managed process is running."""
-        return (
-            self._process is not None
-            and self._process.poll() is None
-        )
+        return self._process is not None and self._process.poll() is None
 
     @property
     def restart_count(self) -> int:
@@ -194,8 +190,10 @@ class ToolboxWatchdog:
 
         cmd = [
             binary,
-            "--tools-file", str(self._tools_yaml),
-            "--port", str(self._port),
+            "--tools-file",
+            str(self._tools_yaml),
+            "--port",
+            str(self._port),
         ]
 
         log_dir = Path.home() / ".cortex" / "logs"
@@ -241,11 +239,7 @@ class ToolboxWatchdog:
             await asyncio.sleep(_HEALTH_INTERVAL_S)
 
             if not self.is_alive:
-                rc = (
-                    self._process.returncode
-                    if self._process
-                    else -1
-                )
+                rc = self._process.returncode if self._process else -1
                 logger.warning(
                     "💀 [WATCHDOG] Process exited (rc=%s).",
                     rc,
@@ -261,8 +255,7 @@ class ToolboxWatchdog:
                 url=f"http://127.0.0.1:{self._port}",
             ):
                 logger.warning(
-                    "⚠️ [WATCHDOG] Health probe failed "
-                    "but process alive — possible hang.",
+                    "⚠️ [WATCHDOG] Health probe failed but process alive — possible hang.",
                 )
 
     def _kill(self) -> None:

@@ -42,11 +42,11 @@ class ZoneClassification(str, Enum):
 class RiskLevel(str, Enum):
     """Existential risk level for swarm operations in a zone."""
 
-    SOVEREIGN = "sovereign"    # Full autonomy, no legal friction
-    LOW = "low"                # Minor bureaucratic risk
-    MEDIUM = "medium"          # Requires human review
-    HIGH = "high"              # Likely prosecution or seizure
-    FORBIDDEN = "forbidden"    # Absolute prohibition
+    SOVEREIGN = "sovereign"  # Full autonomy, no legal friction
+    LOW = "low"  # Minor bureaucratic risk
+    MEDIUM = "medium"  # Requires human review
+    HIGH = "high"  # Likely prosecution or seizure
+    FORBIDDEN = "forbidden"  # Absolute prohibition
 
 
 class OwnershipType(str, Enum):

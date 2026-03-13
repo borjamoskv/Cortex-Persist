@@ -276,9 +276,7 @@ def _score_dimensions(
     if not has_files:
         sec_score = 0
     else:
-        sec_score = max(
-            0, 100 - min(100, len(security_findings) * SECURITY_PENALTY_PER_FINDING)
-        )
+        sec_score = max(0, 100 - min(100, len(security_findings) * SECURITY_PENALTY_PER_FINDING))
     dimensions.append(
         DimensionResult(
             name="Seguridad",

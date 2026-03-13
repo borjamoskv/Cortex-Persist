@@ -206,7 +206,9 @@ def list_templates() -> None:
 @click.argument("path", type=click.Path(exists=True))
 @click.argument("components", nargs=-1, required=True)
 @click.option(
-    "--type", "component_type", default="module",
+    "--type",
+    "component_type",
+    default="module",
     help="Component type for all new components.",
 )
 @click.option("--tests/--no-tests", "auto_tests", default=False)
@@ -224,10 +226,7 @@ def extend(
     from cortex.genesis import ComponentSpec, GenesisEngine
 
     engine = GenesisEngine()
-    new_comps = [
-        ComponentSpec(name=name, component_type=component_type)
-        for name in components
-    ]
+    new_comps = [ComponentSpec(name=name, component_type=component_type) for name in components]
 
     result = engine.extend(Path(path), new_comps, auto_tests=auto_tests)
 
@@ -239,14 +238,9 @@ def extend(
         for f in result.files_created:
             console.print(f"   [dim]{f}[/]")
     else:
-        console.print(
-            "\n[yellow]No new files added[/] — "
-            "all components already exist."
-        )
+        console.print("\n[yellow]No new files added[/] — all components already exist.")
 
-    console.print(
-        f"   CHRONOS-1: [yellow]{result.hours_saved:.2f}h[/]"
-    )
+    console.print(f"   CHRONOS-1: [yellow]{result.hours_saved:.2f}h[/]")
 
 
 @genesis_group.command("compose")
@@ -254,7 +248,9 @@ def extend(
 @click.argument("templates_list", nargs=-1, required=True)
 @click.option("--system", "system_name", default="cortex")
 def compose(
-    name: str, templates_list: tuple[str, ...], system_name: str,
+    name: str,
+    templates_list: tuple[str, ...],
+    system_name: str,
 ) -> None:
     """Compose multiple templates for a single component.
 
@@ -265,13 +261,12 @@ def compose(
 
     engine = GenesisEngine()
     result = engine.compose_templates(
-        list(templates_list), name=name, system_name=system_name,
+        list(templates_list),
+        name=name,
+        system_name=system_name,
     )
 
-    console.print(
-        f"\n[bold]Composed {len(result)} files "
-        f"for '{name}':[/]\n"
-    )
+    console.print(f"\n[bold]Composed {len(result)} files for '{name}':[/]\n")
     for filename, content in result.items():
         lines = content.count("\n") + 1
         console.print(f"  [cyan]{filename}[/] ({lines} lines)")
@@ -289,10 +284,7 @@ def list_specs() -> None:
     yaml_files = sorted(specs_dir.glob("*.yaml"))
     console.print("\n[bold]Available Genesis Specs:[/]\n")
     for f in yaml_files:
-        console.print(
-            f"  [cyan]{f.stem:20s}[/] "
-            f"cortex genesis from-yaml {f}"
-        )
+        console.print(f"  [cyan]{f.stem:20s}[/] cortex genesis from-yaml {f}")
     console.print()
 
 
@@ -304,7 +296,8 @@ def _default_components_for_type(system_type: str) -> list:
         return [
             ComponentSpec(name="models", component_type="dataclass"),
             ComponentSpec(
-                name="manager", component_type="module",
+                name="manager",
+                component_type="module",
                 dependencies=["models"],
             ),
         ]

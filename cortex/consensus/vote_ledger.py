@@ -110,7 +110,11 @@ class ImmutableVoteLedger:
                 await conn.commit()
 
             logger.info(
-                "Voto inmutable sellado: Fact %s | Agent %s | Hash %s...", fact_id, agent_id, entry_hash[:8])
+                "Voto inmutable sellado: Fact %s | Agent %s | Hash %s...",
+                fact_id,
+                agent_id,
+                entry_hash[:8],
+            )
             await self._maybe_create_checkpoint(conn)
 
             return VoteEntry(

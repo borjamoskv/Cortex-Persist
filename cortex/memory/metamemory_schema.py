@@ -379,7 +379,8 @@ class MetacognitiveJudge:
         return Verdict.ABSTAIN
 
     def judge_with_rationale(
-        self, retrieved: list[MemoryCard],
+        self,
+        retrieved: list[MemoryCard],
     ) -> tuple[Verdict, dict[str, Any]]:
         """Like judge(), but returns structured rationale for audit."""
         verdict = self.judge(retrieved)

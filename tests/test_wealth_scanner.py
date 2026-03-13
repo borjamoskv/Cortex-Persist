@@ -39,9 +39,7 @@ class TestDeterminism:
 
 class TestSorting:
     async def test_sorted_by_apr_descending(self, scanner):
-        results = await scanner.scan_opportunities(
-            ["BTC", "ETH", "SOL", "ARB", "OP"]
-        )
+        results = await scanner.scan_opportunities(["BTC", "ETH", "SOL", "ARB", "OP"])
         if len(results) > 1:
             for i in range(len(results) - 1):
                 assert results[i].estimated_apr >= results[i + 1].estimated_apr

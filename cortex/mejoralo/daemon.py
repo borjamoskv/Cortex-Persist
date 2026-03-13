@@ -109,7 +109,8 @@ class MejoraloDaemon:
 
         # 1. Pre-scan: capture baseline score
         result = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
-            self.project, self.base_path,
+            self.project,
+            self.base_path,
         )
         score_before = result.score
         self.metrics.set_gauge("cortex_code_score", score_before)
@@ -126,13 +127,9 @@ class MejoraloDaemon:
         # 2. Memory/KI Context Fusion + Causal Analysis
         fused_context = await self.fusion.fuse_context(  # type: ignore[reportCallIssue]
             query=" ".join(
-                d.name for d in result.dimensions
-                if d.score < DAEMON_DIM_SCORE_THRESHOLD
+                d.name for d in result.dimensions if d.score < DAEMON_DIM_SCORE_THRESHOLD
             )
-            if any(
-                d.score < DAEMON_DIM_SCORE_THRESHOLD
-                for d in result.dimensions
-            )
+            if any(d.score < DAEMON_DIM_SCORE_THRESHOLD for d in result.dimensions)
             else "refactoring"
         )
         fused_context = await self._ouroboros_analyze(result, fused_context)
@@ -157,7 +154,8 @@ class MejoraloDaemon:
 
         # 4. Post-heal verification: re-scan to measure real impact
         result_after = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
-            self.project, self.base_path,
+            self.project,
+            self.base_path,
         )
         score_after = result_after.score
         delta = score_after - score_before

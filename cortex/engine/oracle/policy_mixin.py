@@ -25,7 +25,9 @@ class PolicyMixin:
         return sum(1 for v in verdicts if v.was_regrettable) / len(verdicts)
 
     def _derive_recommendation(
-        self, verdicts: list[EvictionVerdict], regret_rate: float,
+        self,
+        verdicts: list[EvictionVerdict],
+        regret_rate: float,
     ) -> PolicyRecommendation:
         """Derive policy recommendation from verdicts."""
         if regret_rate <= 0.05:
@@ -47,7 +49,9 @@ class PolicyMixin:
         return PolicyRecommendation.REDUCE_CAPACITY
 
     def _calc_policy_deltas(
-        self, regret_rate: float, verdicts: list[EvictionVerdict],
+        self,
+        regret_rate: float,
+        verdicts: list[EvictionVerdict],
     ) -> tuple[float, int]:
         """Calculate TTL and capacity adjustment deltas proportional to error rate."""
         if regret_rate <= 0.05:

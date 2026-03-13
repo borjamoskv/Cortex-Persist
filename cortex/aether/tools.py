@@ -17,40 +17,42 @@ __all__ = ["AgentToolkit"]
 
 logger = logging.getLogger("cortex.aether.tools")
 
-_MAX_OUTPUT = 8000   # chars truncated to avoid flooding context
-_BASH_TIMEOUT = 60   # seconds
+_MAX_OUTPUT = 8000  # chars truncated to avoid flooding context
+_BASH_TIMEOUT = 60  # seconds
 
 # ── Sovereign Command Guard (Ω₃: Byzantine Default) ──────────────────────
 # Destructive patterns that autonomous agents must NEVER execute.
 # Checked via substring match on the normalized command string.
-FORBIDDEN_BASH_PATTERNS: frozenset[str] = frozenset({
-    "rm -rf /",
-    "rm -rf ~",
-    "rm -rf .",
-    "mkfs",
-    "dd if=",
-    "> /dev/",
-    "chmod 777",
-    "chmod -R 777",
-    "curl | sh",
-    "curl | bash",
-    "wget | sh",
-    "wget | bash",
-    "shutdown",
-    "reboot",
-    "kill -9",
-    "killall",
-    "pkill -9",
-    "launchctl unload",
-    "systemctl stop",
-    "sudo rm",
-    "sudo dd",
-    ":(){ :|:& };:",  # fork bomb
-    "mv / ",
-    "format c:",
-    "> /etc/",
-    "ssh-keygen -R",
-})
+FORBIDDEN_BASH_PATTERNS: frozenset[str] = frozenset(
+    {
+        "rm -rf /",
+        "rm -rf ~",
+        "rm -rf .",
+        "mkfs",
+        "dd if=",
+        "> /dev/",
+        "chmod 777",
+        "chmod -R 777",
+        "curl | sh",
+        "curl | bash",
+        "wget | sh",
+        "wget | bash",
+        "shutdown",
+        "reboot",
+        "kill -9",
+        "killall",
+        "pkill -9",
+        "launchctl unload",
+        "systemctl stop",
+        "sudo rm",
+        "sudo dd",
+        ":(){ :|:& };:",  # fork bomb
+        "mv / ",
+        "format c:",
+        "> /etc/",
+        "ssh-keygen -R",
+    }
+)
 
 
 class AgentToolkit:
@@ -69,7 +71,7 @@ class AgentToolkit:
         self.repo_path = Path(repo_path).resolve()
         if not self.repo_path.exists():
             raise FileNotFoundError(f"Repo path does not exist: {self.repo_path}")
-        
+
         # Capability expansion (Standardizing high-level tokens to low-level methods)
         if allowed_tools is not None:
             expanded = set()
@@ -77,8 +79,12 @@ class AgentToolkit:
                 "filesystem": {"read_file", "write_file", "list_dir"},
                 "bash": {"bash"},
                 "git": {
-                    "git_diff", "git_status", "git_log", 
-                    "git_commit", "git_create_branch", "git_push"
+                    "git_diff",
+                    "git_status",
+                    "git_log",
+                    "git_commit",
+                    "git_create_branch",
+                    "git_push",
                 },
                 "web": {"web_search", "autodidact_ingest"},
                 "mcp": {"toolbox_membrane"},
@@ -190,7 +196,7 @@ class AgentToolkit:
             output = (result.stdout + result.stderr).strip()
             if result.returncode != 0:
                 output = f"[FAIL] (exit code: {result.returncode})\n{output}"
-            
+
             if len(output) > _MAX_OUTPUT:
                 output = output[:_MAX_OUTPUT] + "\n... [truncated]"
             return output or "(no output)"
@@ -265,6 +271,7 @@ class AgentToolkit:
 
                 if loop.is_running():
                     import nest_asyncio
+
                     nest_asyncio.apply(loop)
                 return asyncio.run(autodidact_pipeline(target_url, intent, force=False))
 
@@ -279,7 +286,9 @@ class AgentToolkit:
         """Dispatch a tool call by name. Returns string result."""
         if self.allowed_tools is not None and tool_name not in self.allowed_tools:
             logger.warning("Tool %s intercepted: not in allowed_tools list.", tool_name)
-            return f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
+            return (
+                f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
+            )
         handlers: dict[str, callable] = {
             "read_file": lambda a: self.read_file(a.get("path", "")),
             "write_file": lambda a: self.write_file(a.get("path", ""), a.get("content", "")),

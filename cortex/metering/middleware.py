@@ -21,8 +21,14 @@ logger = logging.getLogger(__name__)
 
 # Paths that should NOT be metered (health, docs, billing, onboarding)
 _EXCLUDED_PREFIXES = (
-    "/health", "/docs", "/redoc", "/openapi.json", "/metrics",
-    "/v1/stripe", "/v1/signup", "/v1/usage",
+    "/health",
+    "/docs",
+    "/redoc",
+    "/openapi.json",
+    "/metrics",
+    "/v1/stripe",
+    "/v1/signup",
+    "/v1/usage",
 )
 
 
@@ -42,9 +48,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         # Skip non-API and excluded paths
-        if not path.startswith("/v1/") or any(
-            path.startswith(p) for p in _EXCLUDED_PREFIXES
-        ):
+        if not path.startswith("/v1/") or any(path.startswith(p) for p in _EXCLUDED_PREFIXES):
             return await call_next(request)
 
         # Extract tenant from auth result (set by auth dependency)
@@ -60,7 +64,10 @@ class MeteringMiddleware(BaseHTTPMiddleware):
         if not check.allowed:
             logger.warning(
                 "Quota exceeded: tenant=%s plan=%s used=%d limit=%d",
-                tenant_id, plan, check.used, check.limit,
+                tenant_id,
+                plan,
+                check.used,
+                check.limit,
             )
             return JSONResponse(
                 status_code=429,
@@ -103,9 +110,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
         # ── Inject Usage Headers ──
         if check.limit > 0:
             response.headers["X-RateLimit-Limit"] = str(check.limit)
-            response.headers["X-RateLimit-Remaining"] = str(
-                max(0, check.remaining - 1)
-            )
+            response.headers["X-RateLimit-Remaining"] = str(max(0, check.remaining - 1))
             response.headers["X-RateLimit-Reset"] = check.reset_at
 
         return response

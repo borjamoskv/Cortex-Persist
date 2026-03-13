@@ -53,7 +53,8 @@ class StoreMemoryRequest(BaseModel):
     source: str | None = Field(None, description="Origin (e.g., 'agent:my-bot')")
     metadata: dict[str, Any] | None = Field(None)
     parent_decision_id: int | None = Field(
-        None, description="Causal parent fact ID for chain tracking",
+        None,
+        description="Causal parent fact ID for chain tracking",
     )
 
 
@@ -227,9 +228,7 @@ async def verify_memories(
         }
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Ledger verification failed")
-        raise HTTPException(
-            status_code=500, detail="Integrity verification failed"
-        ) from None
+        raise HTTPException(status_code=500, detail="Integrity verification failed") from None
 
 
 @router.get("/{memory_id}", response_model=MemoryResponse)
@@ -293,5 +292,6 @@ async def get_causal_chain(
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", memory_id)
         raise HTTPException(
-            status_code=500, detail="Causal chain query failed",
+            status_code=500,
+            detail="Causal chain query failed",
         ) from None

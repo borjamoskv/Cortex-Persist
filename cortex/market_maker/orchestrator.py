@@ -74,8 +74,8 @@ class MarketMakerOrchestrator:
 
             if opp.verdict != Verdict.EXECUTE:
                 log.debug(
-                    "Oportunidad '%s' descartada (Verdict=%s).", 
-                    exp.topic, 
+                    "Oportunidad '%s' descartada (Verdict=%s).",
+                    exp.topic,
                     opp.verdict.name,
                 )
                 exp.status = ExperimentStatus.KILLED
@@ -101,7 +101,7 @@ class MarketMakerOrchestrator:
             await self._persist_learning(exp)
 
         log.info(
-            "Market Maker Cycle completado. %d experimentos procesados.", 
+            "Market Maker Cycle completado. %d experimentos procesados.",
             len(active_experiments),
         )
         return active_experiments

@@ -29,9 +29,7 @@ async def run_applescript(script: str, require_success: bool = True) -> str | No
     logger.debug("Executing AppleScript:\n%s", script)
 
     process = await asyncio.create_subprocess_exec(
-        "osascript", "-e", script,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        "osascript", "-e", script, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
 
     stdout, stderr = await process.communicate()
@@ -48,10 +46,16 @@ async def run_applescript(script: str, require_success: bool = True) -> str | No
         if "is not running" in error_lower or "application isn’t running" in error_lower:
             raise AppNotRunningError(f"Target application is not running: {decoded_err}")
 
-        if "can’t get window" in error_lower or "can’t get menu" in error_lower or "can’t get UI element" in error_lower:
-             raise UIElementNotFoundError(f"Failed to locate UI element: {decoded_err}")
+        if (
+            "can’t get window" in error_lower
+            or "can’t get menu" in error_lower
+            or "can’t get UI element" in error_lower
+        ):
+            raise UIElementNotFoundError(f"Failed to locate UI element: {decoded_err}")
 
-        raise AppleScriptExecutionError("Failed to execute AppleScript", process.returncode or -1, decoded_err)
+        raise AppleScriptExecutionError(
+            "Failed to execute AppleScript", process.returncode or -1, decoded_err
+        )
 
     return decoded_out
 

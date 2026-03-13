@@ -239,12 +239,17 @@ class EpistemicJustice:
         findings = []
         source_code = getattr(system, "source_code", "")
         prejudice_proxies = [
-            r"zip_code", r"neighborhood", r"postal_code", r"surname_origin",
-            r"ethnicity", r"gender_proxy", r"education_level_bias"
+            r"zip_code",
+            r"neighborhood",
+            r"postal_code",
+            r"surname_origin",
+            r"ethnicity",
+            r"gender_proxy",
+            r"education_level_bias",
         ]
 
         for proxy in prejudice_proxies:
-            if re.search(fr"\b{proxy}\b", source_code, re.IGNORECASE):
+            if re.search(rf"\b{proxy}\b", source_code, re.IGNORECASE):
                 findings.append(
                     f"Testimonial Injustice: Logic uses '{proxy}' as a credibility filter. "
                     "This discredits the subject for reasons unrelated to content "
@@ -258,7 +263,7 @@ class EpistemicJustice:
                     "interpretative resources. Systemic disadvantage for non-standard "
                     "social experiences."
                 )
-        
+
         return findings
 
 

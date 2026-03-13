@@ -68,13 +68,14 @@
     "base_url": "https://api.moonshot.cn/v1",
     "default_model": "moonshot-v1-128k",
     "env_key": "MOONSHOT_API_KEY",
+    "models": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k", "kimi-latest-2.5"],
     "context_window": 128000,
     "tier": "high",
     "cost_class": "low",
-    "specialization": ["reasoning", "code"],
+    "specialization": ["reasoning", "code", "extraction"],
     "intent_model_map": {
       "code":      "moonshot-v1-128k",
-      "reasoning": "moonshot-v1-128k",
+      "reasoning": "kimi-latest-2.5",
       "general":   "moonshot-v1-128k"
     }
   },
@@ -305,8 +306,8 @@
     "intent_model_map": {
       "code":      "qwen2.5-coder:32b",
       "architect": "qwen2.5-coder:32b",
-      "reasoning": "qwen2.5-coder:32b",
-      "creative":  "qwen2.5-coder:7b",
+      "reasoning": "deepseek-r1:32b",
+      "creative":  "llama3.3:latest",
       "general":   "qwen2.5-coder:7b"
     }
   },
@@ -335,7 +336,13 @@
     "context_window": 32768,
     "tier": "local",
     "cost_class": "free",
-    "specialization": ["general"]
+    "specialization": ["general", "code", "reasoning"],
+    "intent_model_map": {
+      "code":      "deepseek-ai/DeepSeek-V3",
+      "reasoning": "deepseek-ai/DeepSeek-R1",
+      "architect": "deepseek-ai/DeepSeek-R1",
+      "general":   "meta-llama/Llama-3.3-70B-Instruct"
+    }
   },
   "jan": {
     "base_url": "http://localhost:1337/v1",
@@ -372,6 +379,19 @@
       "reasoning": "llama-3.3-70b",
       "creative":  "llama-3.3-70b",
       "general":   "llama-3.3-70b"
+    }
+  },
+  "grok": {
+    "base_url": "https://api.x.ai/v1",
+    "default_model": "grok-beta",
+    "models": ["grok-beta", "grok-2", "grok-vision-beta"],
+    "api_key": "YOUR_GROK_API_KEY",
+    "context_window": 131072,
+    "tier": "frontier",
+    "cost_class": "high",
+    "specialization": ["real-time", "general"],
+    "intent_model_map": {
+      "general": "grok-2"
     }
   }
 }

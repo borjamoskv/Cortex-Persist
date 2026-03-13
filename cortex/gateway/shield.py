@@ -17,13 +17,14 @@ SENSITIVE_PATTERNS = [
     r"X-Amzn-Trace-Id:[a-zA-Z0-9-=]+",
 ]
 
+
 class APIShield:
     @staticmethod
     def strip_telemetry_headers(headers: dict[str, str]) -> dict[str, str]:
         """Remove identifying headers often sent by IDEs and enterprise proxies."""
         cleaned = {}
         blocked = []
-        
+
         # Denylist of common telemetry headers
         denylist = {
             "x-cursor-client-version",
@@ -31,20 +32,20 @@ class APIShield:
             "x-vscode-proxy-id",
             "x-session-id",
             "x-request-id",
-            "user-agent", # Sometimes contains version info
+            "user-agent",  # Sometimes contains version info
             "traceparent",
             "tracestate",
         }
-        
+
         for k, v in headers.items():
             if k.lower() in denylist:
                 blocked.append(k)
                 continue
             cleaned[k] = v
-            
+
         if blocked:
             logger.debug("🛡️ [SHIELD] Blocked headers: %s", blocked)
-            
+
         return cleaned
 
     @staticmethod
@@ -60,5 +61,5 @@ class APIShield:
         """Ensure token usage doesn't lean toward identifying complexity."""
         # Optional: Jitter the token counts to prevent side-channel timing attacks
         if "usage" in data:
-            data["usage"]["total_tokens"] = data["usage"]["total_tokens"] # + random jitter
+            data["usage"]["total_tokens"] = data["usage"]["total_tokens"]  # + random jitter
         return data

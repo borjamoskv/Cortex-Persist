@@ -13,7 +13,6 @@ from cortex.security.injection_guard import (
     InjectionGuard,
 )
 
-
 # ═══════════════════════════════════════
 # Fixtures
 # ═══════════════════════════════════════
@@ -45,17 +44,13 @@ class TestTrustedSourceBypass:
         """agent:gemini should NOT trigger SQL-001 on technical prose."""
         report = GUARD.scan(TECHNICAL_CONTENT, source="agent:gemini")
         l1_matches = [m for m in report.matches if m.layer == "L1_sql"]
-        assert len(l1_matches) == 0, (
-            f"Trusted source triggered L1 SQL: {l1_matches}"
-        )
+        assert len(l1_matches) == 0, f"Trusted source triggered L1 SQL: {l1_matches}"
 
     def test_trusted_source_skips_entropy_detection(self):
         """agent:aether should NOT trigger ENT-001 on high-entropy text."""
         report = GUARD.scan(HIGH_ENTROPY, source="agent:aether")
         l5_matches = [m for m in report.matches if m.layer == "L5_encoded"]
-        assert len(l5_matches) == 0, (
-            f"Trusted source triggered L5 entropy: {l5_matches}"
-        )
+        assert len(l5_matches) == 0, f"Trusted source triggered L5 entropy: {l5_matches}"
 
     def test_safe_technical_content_trusted_is_clean(self):
         """Real CORTEX decision text from agent:gemini passes clean."""
@@ -78,18 +73,14 @@ class TestDefenseInDepth:
         """agent:gemini MUST still trigger PI-001 on instruction override."""
         report = GUARD.scan(PROMPT_INJECTION, source="agent:gemini")
         l2_matches = [m for m in report.matches if m.layer == "L2_prompt"]
-        assert len(l2_matches) > 0, (
-            "Trusted source bypassed L2 prompt injection — CRITICAL"
-        )
+        assert len(l2_matches) > 0, "Trusted source bypassed L2 prompt injection — CRITICAL"
         assert not report.is_safe
 
     def test_trusted_source_still_catches_path_traversal(self):
         """agent:josu MUST still trigger PT-001 on path traversal."""
         report = GUARD.scan(PATH_TRAVERSAL, source="agent:josu")
         l3_matches = [m for m in report.matches if m.layer == "L3_path"]
-        assert len(l3_matches) > 0, (
-            "Trusted source bypassed L3 path traversal — CRITICAL"
-        )
+        assert len(l3_matches) > 0, "Trusted source bypassed L3 path traversal — CRITICAL"
 
 
 # ═══════════════════════════════════════
@@ -111,9 +102,7 @@ class TestUntrustedFullScan:
         """None source (legacy callers) gets full scan."""
         report = GUARD.scan(TECHNICAL_CONTENT, source=None)
         l1_matches = [m for m in report.matches if m.layer == "L1_sql"]
-        assert len(l1_matches) > 0, (
-            "None source should get full L1 scan"
-        )
+        assert len(l1_matches) > 0, "None source should get full L1 scan"
 
     def test_entropy_detected_untrusted(self):
         """High-entropy string flagged for untrusted source."""
@@ -130,23 +119,29 @@ class TestUntrustedFullScan:
 class TestIsTrusted:
     """Validate the _is_trusted() helper."""
 
-    @pytest.mark.parametrize("source", [
-        "agent:gemini",
-        "agent:aether",
-        "agent:josu",
-        "agent:nightshift",
-        "cli:cortex",
-    ])
+    @pytest.mark.parametrize(
+        "source",
+        [
+            "agent:gemini",
+            "agent:aether",
+            "agent:josu",
+            "agent:nightshift",
+            "cli:cortex",
+        ],
+    )
     def test_trusted_sources(self, source: str):
         assert InjectionGuard._is_trusted(source) is True
 
-    @pytest.mark.parametrize("source", [
-        None,
-        "",
-        "api:external",
-        "human",
-        "agent:unknown",
-        "cli:unknown",
-    ])
+    @pytest.mark.parametrize(
+        "source",
+        [
+            None,
+            "",
+            "api:external",
+            "human",
+            "agent:unknown",
+            "cli:unknown",
+        ],
+    )
     def test_untrusted_sources(self, source: str | None):
         assert InjectionGuard._is_trusted(source) is False

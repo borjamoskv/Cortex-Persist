@@ -191,12 +191,19 @@ class CentauroEngine:
             # 🧬 Endocrine modulation: High ADRENALINE forces BLITZ regardless of intention
             adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
             if adrenaline > 0.7 and formation not in [Formation.BLITZ, Formation.GHOST]:
-                logger.warning("🧬 [ENDOCRINE] High Adrenaline (%.2f). Forcing BLITZ formation.", adrenaline)
+                logger.warning(
+                    "🧬 [ENDOCRINE] High Adrenaline (%.2f). Forcing BLITZ formation.", adrenaline
+                )
                 formation = Formation.BLITZ
 
             size = self._FORMATION_SIZES.get(formation, 3)
             squad = self.spawn_squad(size, formation=formation)
-            logger.info("Spawned %d agents in %s formation. (Adrenaline: %.2f)", len(squad), formation, adrenaline)
+            logger.info(
+                "Spawned %d agents in %s formation. (Adrenaline: %.2f)",
+                len(squad),
+                formation,
+                adrenaline,
+            )
 
             winning, agents_used = await self._run_consensus(squad, mission)
 

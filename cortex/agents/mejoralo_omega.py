@@ -169,9 +169,7 @@ class MejoraloOmegaAgent:
 
         # 3. Heal — escalate level based on stagnation
         level = self._escalation_level()
-        success = self._mejoralo.heal(
-            self.project, self.base_path, self.target_score, scan_result
-        )
+        success = self._mejoralo.heal(self.project, self.base_path, self.target_score, scan_result)
 
         # 4. Verify — re-scan
         result_after = self._mejoralo.scan(self.project, self.base_path)
@@ -180,7 +178,9 @@ class MejoraloOmegaAgent:
 
         # 5. Record + track stagnation
         self._mejoralo.record_session(
-            self.project, score_before, score_after,
+            self.project,
+            score_before,
+            score_after,
             actions=[f"omega_cycle_{self._cycle_count}_L{level}"],
         )
 

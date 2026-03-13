@@ -113,7 +113,9 @@ MAX_FINDINGS_COMPLEXITY = 15  # Cap on reported complexity findings
 FILES_PER_ITERATION: dict[int, int] = {1: 1, 2: 3}  # Level → files
 FILES_PER_ITERATION_DEFAULT = 5  # Fallback for Level 3+
 HEAL_TEMPERATURES: dict[int, float] = {
-    1: 0.1, 2: 0.2, 3: 0.3,
+    1: 0.1,
+    2: 0.2,
+    3: 0.3,
 }  # Level → LLM temperature
 
 # ─── Antipattern Constants ─────────────────────────────────────────

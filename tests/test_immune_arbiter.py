@@ -11,13 +11,12 @@ os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
 
-from cortex.immune.falsification import EvolutionaryFalsifier
+from cortex.engine.forgetting_models import PolicyRecommendation
 from cortex.immune.arbiter import (
     ImmuneArbiter,
     Verdict,
 )
-from cortex.engine.forgetting_models import PolicyRecommendation
-
+from cortex.immune.falsification import EvolutionaryFalsifier
 
 # ── EvolutionaryFalsifier ─────────────────────────────────────────────
 

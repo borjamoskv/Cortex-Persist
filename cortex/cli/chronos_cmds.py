@@ -102,7 +102,7 @@ def compound(project: str | None, persist: bool) -> None:
         table.add_column("Chain Size", justify="right", style="blue")
         table.add_column("Linear (H)", justify="right")
         table.add_column("Compound (H)", justify="right", style="bold yellow")
-        
+
         for idx, chain in enumerate(report.chains[:15], start=1):
             table.add_row(
                 str(idx),
@@ -114,13 +114,15 @@ def compound(project: str | None, persist: bool) -> None:
             )
 
         console.print(table)
-        
+
         summary = (
             f"\n[cyan]Total Linear (ΣH):[/cyan] [white]{report.total_linear:,.2f}h[/white]\n"
             f"[magenta]Total Compound (∏H):[/magenta] [bold yellow]{report.total_compound:,.2f}h[/bold yellow]\n"
             f"[green]Yield Multiplier:[/green] [bold white]{report.multiplier:.2f}x[/bold white]\n"
         )
-        console.print(Panel(summary, title="[bold cyan]Ω₁₁ Axiom Summary[/bold cyan]", expand=False))
+        console.print(
+            Panel(summary, title="[bold cyan]Ω₁₁ Axiom Summary[/bold cyan]", expand=False)
+        )
 
         if persist:
             fact_id = tracker.persist_report(report, project=project or "system")
@@ -159,7 +161,7 @@ def projection(years: int, base_hours: float, rate: float) -> None:
             yr_lin = report.yearly_linear[yr]
             yr_comp = report.yearly_compound[yr]
             yr_mult = yr_comp / yr_lin if yr_lin > 0 else 0
-            
+
             table.add_row(
                 str(yr + 1),
                 f"{yr_lin:,.0f}h",
@@ -168,14 +170,16 @@ def projection(years: int, base_hours: float, rate: float) -> None:
             )
 
         console.print(table)
-        
+
         summary = (
             f"\n[cyan]Final Linear Yield:[/cyan] [white]{report.total_linear:,.0f}h[/white]\n"
             f"[magenta]Final Compound Yield:[/magenta] [bold yellow]{report.total_compound:,.0f}h[/bold yellow]\n"
             f"[green]Decade Multiplier:[/green] [bold white]{report.multiplier:,.1f}x[/bold white]\n\n"
             f"[dim]Axiom Ω₁₁ confirms exponential mastery.[/dim]"
         )
-        console.print(Panel(summary, title="[bold magenta]10-Year Event Horizon[/bold magenta]", expand=False))
+        console.print(
+            Panel(summary, title="[bold magenta]10-Year Event Horizon[/bold magenta]", expand=False)
+        )
 
     except Exception as e:  # noqa: BLE001
         console.print(f"[red]Error:[/red] {e}")

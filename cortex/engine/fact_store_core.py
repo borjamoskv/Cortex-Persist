@@ -55,9 +55,7 @@ async def insert_fact_record(
     # ── Causal Infrastructure: Validate & Auto-Resolve parent_decision_id ──
     if parent_decision_id is not None:
         # FK validation — ensure parent exists
-        cursor = await conn.execute(
-            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
-        )
+        cursor = await conn.execute("SELECT id FROM facts WHERE id = ?", (parent_decision_id,))
         if await cursor.fetchone() is None:
             logger.warning(
                 "parent_decision_id=%d references non-existent fact — cleared",
@@ -78,7 +76,9 @@ async def insert_fact_record(
             parent_decision_id = row[0]
             logger.debug(
                 "Auto-resolved parent_decision_id=%d for %s in project=%s",
-                parent_decision_id, fact_type, project,
+                parent_decision_id,
+                fact_type,
+                project,
             )
 
     cursor = await conn.execute(

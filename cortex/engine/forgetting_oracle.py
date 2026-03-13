@@ -157,7 +157,9 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                     "causal_root_evictions": report_dict.get("causal_root_evictions", 0),
                     "evidence_chain_valid": report.evidence_chain_valid,
                 }
-                bus.emit("ORACLE_AUDIT", payload=payload, source="oracle:forgetting", project="SYSTEM")
+                bus.emit(
+                    "ORACLE_AUDIT", payload=payload, source="oracle:forgetting", project="SYSTEM"
+                )
                 if report.recommendation == PolicyRecommendation.PROTECT_CAUSAL_ROOTS:
                     bus.emit(
                         "CAUSAL_ROOT_THREAT",
@@ -213,7 +215,9 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         """
         try:
             chain = self._engine.get_causal_chain_sync(
-                fact_id=fact_id, direction="down", max_depth=1,
+                fact_id=fact_id,
+                direction="down",
+                max_depth=1,
             )
             if chain and len(chain) > 0:
                 return True

@@ -159,7 +159,7 @@ class LLMProvider(BaseProvider):
         self,
         prompt: str,
         system: str = "You are a helpful assistant.",
-        temperature: float = 0.3,
+        temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
@@ -363,7 +363,7 @@ class LLMProvider(BaseProvider):
         self,
         prompt: str,
         system: str = "You are a helpful assistant.",
-        temperature: float = 0.3,
+        temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
     ):
@@ -494,4 +494,3 @@ class LLMProvider(BaseProvider):
             models = ", ".join(f"{k.value}={v}" for k, v in self._intent_model_map.items())
             return f"LLMProvider(provider={self._provider!r}, models=[{models}])"
         return f"LLMProvider(provider={self._provider!r}, model={self._model!r})"
-

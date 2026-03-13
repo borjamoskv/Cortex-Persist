@@ -85,9 +85,7 @@ def _convert_preset(name: str, preset: dict[str, Any]) -> dict[str, Any]:
 
     config: dict[str, Any] = {
         "url": (
-            url_template.replace("{model}", model)
-            if "{model}" in url_template
-            else url_template
+            url_template.replace("{model}", model) if "{model}" in url_template else url_template
         ),
         "dimension": preset.get("native_dimension", 768),
         "native_dimension": preset.get("native_dimension", 768),
@@ -129,12 +127,9 @@ def get_provider_configs() -> dict[str, dict[str, Any]]:
         presets = load_embedding_presets()
         if presets:
             _CONFIGS_CACHE = {
-                name: _convert_preset(name, preset)
-                for name, preset in presets.items()
+                name: _convert_preset(name, preset) for name, preset in presets.items()
             }
-            logger.info(
-                "Loaded %d embedding providers from presets", len(_CONFIGS_CACHE)
-            )
+            logger.info("Loaded %d embedding providers from presets", len(_CONFIGS_CACHE))
             return _CONFIGS_CACHE
     except (ImportError, KeyError, OSError):
         logger.debug("Could not load embedding presets, using fallback configs")
@@ -172,10 +167,7 @@ class APIEmbedder:
     ):
         configs = get_provider_configs()
         if provider not in configs:
-            raise ValueError(
-                f"Unknown provider '{provider}'. "
-                f"Supported: {list(configs.keys())}"
-            )
+            raise ValueError(f"Unknown provider '{provider}'. Supported: {list(configs.keys())}")
 
         self._provider = provider
         self._config = configs[provider]
@@ -208,9 +200,7 @@ class APIEmbedder:
 
         raise ValueError(f"No embed implementation for {self._provider}")
 
-    async def embed_batch(
-        self, texts: list[str], _batch_size: int = 32
-    ) -> list[list[float]]:
+    async def embed_batch(self, texts: list[str], _batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         if not texts:
             return []
@@ -334,9 +324,7 @@ class APIEmbedder:
                         f"Supported: {sorted(SUPPORTED_IMAGE_MIMES)}"
                     )
                 b64_data = base64.b64encode(img_bytes).decode("ascii")
-                parts.append(
-                    {"inline_data": {"mime_type": mime, "data": b64_data}}
-                )
+                parts.append({"inline_data": {"mime_type": mime, "data": b64_data}})
 
         return await self.embed_multimodal(parts, task_type=task_type)
 
@@ -364,10 +352,7 @@ class APIEmbedder:
         values = data.get("embedding", {}).get("values", [])
 
         # Client-side truncation fallback (non-MRL providers)
-        if (
-            not self._config.get("supports_mrl")
-            and len(values) > self._target_dim
-        ):
+        if not self._config.get("supports_mrl") and len(values) > self._target_dim:
             values = values[: self._target_dim]
 
         return values
@@ -441,7 +426,4 @@ class APIEmbedder:
     def __repr__(self) -> str:
         mrl = f", mrl={self.supports_mrl}" if self.supports_mrl else ""
         mm = f", multimodal={self.supports_multimodal}" if self.supports_multimodal else ""
-        return (
-            f"APIEmbedder(provider={self._provider!r}, "
-            f"dim={self._target_dim}{mrl}{mm})"
-        )
+        return f"APIEmbedder(provider={self._provider!r}, dim={self._target_dim}{mrl}{mm})"

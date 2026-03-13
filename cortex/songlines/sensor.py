@@ -40,7 +40,7 @@ class TopographicSensor:
         # 1. Faster recursive scan avoiding ignored directories
         for root, dirs, files in os.walk(root_dir):
             dirs[:] = [d for d in dirs if d not in ignored]
-            
+
             # Check for fallback manifests in this directory
             if ".songlines" in files:
                 manifest_path = Path(root) / ".songlines"
@@ -55,7 +55,7 @@ class TopographicSensor:
                         continue
                 except OSError:
                     continue
-                
+
                 file_ghosts = self._read_ghosts_from_file(path)
                 resonances.extend(file_ghosts)
 
@@ -91,10 +91,11 @@ class TopographicSensor:
                 return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
             except OSError:
                 pass
-                
+
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
             import xattr
+
             try:
                 attrs = xattr.listxattr(str(file_path))
                 return [a for a in attrs if a.startswith(self.prefix)]
@@ -128,6 +129,7 @@ class TopographicSensor:
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
             import xattr
+
             try:
                 return xattr.getxattr(str(file_path), attr)
             except OSError:
@@ -158,7 +160,7 @@ class TopographicSensor:
             strength = DecayEngine.calculate_resonance(ghost["created_at"], ghost["half_life"])
 
             if strength < 0.05:
-                logger.info("Ghost %s evaporated from %s", ghost['id'], file_path.name)
+                logger.info("Ghost %s evaporated from %s", ghost["id"], file_path.name)
                 self._delete_xattr(file_path, attr)
                 return None
 

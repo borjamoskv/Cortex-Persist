@@ -92,7 +92,11 @@ MOCK_DOMAIN_LISTINGS: list[dict[str, Any]] = [
     {
         "item_id": "aitools.dev",
         "sources": [
-            {"source": "GoDaddy Auctions", "price": Decimal("45"), "url": "https://auctions.godaddy.com"},
+            {
+                "source": "GoDaddy Auctions",
+                "price": Decimal("45"),
+                "url": "https://auctions.godaddy.com",
+            },
             {"source": "Afternic", "price": Decimal("299"), "url": "https://afternic.com"},
         ],
     },
@@ -123,8 +127,16 @@ MOCK_DIGITAL_GOODS: list[dict[str, Any]] = [
     {
         "item_id": "icon-pack-3d-glass",
         "sources": [
-            {"source": "Figma Community", "price": Decimal("0"), "url": "https://figma.com/community"},
-            {"source": "Creative Market", "price": Decimal("29"), "url": "https://creativemarket.com"},
+            {
+                "source": "Figma Community",
+                "price": Decimal("0"),
+                "url": "https://figma.com/community",
+            },
+            {
+                "source": "Creative Market",
+                "price": Decimal("29"),
+                "url": "https://creativemarket.com",
+            },
         ],
     },
 ]
@@ -141,7 +153,11 @@ MOCK_FREELANCE_RATES: list[dict[str, Any]] = [
         "item_id": "figma-design-project",
         "sources": [
             {"source": "Fiverr", "price": Decimal("50"), "url": "https://fiverr.com"},
-            {"source": "99designs Contest", "price": Decimal("500"), "url": "https://99designs.com"},
+            {
+                "source": "99designs Contest",
+                "price": Decimal("500"),
+                "url": "https://99designs.com",
+            },
         ],
     },
 ]
@@ -159,9 +175,7 @@ class ArbitrageVector:
     _enabled: bool = True
     auto_trade: bool = False  # Safety: manual by default
     min_margin_pct: float = 20.0  # Minimum 20% margin to report
-    domains: list[str] = field(
-        default_factory=lambda: ["domains", "digital_goods", "freelance"]
-    )
+    domains: list[str] = field(default_factory=lambda: ["domains", "digital_goods", "freelance"])
 
     @property
     def id(self) -> VectorType:
@@ -224,8 +238,7 @@ class ArbitrageVector:
             opportunities.append(opp)
 
         logger.info(
-            "🔎 [ARBITRAGE] Found %d arbitrage opportunities "
-            "(≥%.0f%% margin) from %d comparisons.",
+            "🔎 [ARBITRAGE] Found %d arbitrage opportunities (≥%.0f%% margin) from %d comparisons.",
             len(opportunities),
             self.min_margin_pct,
             len(all_arbs),
@@ -272,9 +285,7 @@ class ArbitrageVector:
             meta={"executed_automatically": True},
         )
 
-    def _scan_source(
-        self, listings: list[dict[str, Any]]
-    ) -> list[ArbitrageOpportunity]:
+    def _scan_source(self, listings: list[dict[str, Any]]) -> list[ArbitrageOpportunity]:
         """Compare prices across sources for a set of listings.
 
         Args:

@@ -18,7 +18,7 @@ class MVPGenerator:
     async def generate(self, opportunity: Opportunity) -> MVPArtifact:
         """
         Takes an Opportunity and generates an MVPArtifact.
-        
+
         In production, this could delegate to GenesisEngine + Awwwards Builder.
         Here we generate a high-conversion deterministic stub.
         """

@@ -6,10 +6,15 @@ as polarizing social media thesis on Moltbook.
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 from cortex.agents.llm import get_ai_client
+from cortex.cli.common import console
+from cortex.moltbook.client import MoltbookClient
 from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.engine.pathogen")
@@ -27,67 +32,48 @@ class PathogenEngine:
             raise CortexError("Database engine required to extract ghost.")
 
         # If it's a songlines ghost (file-based), we look it up via list_active_ghosts
-        active_ghosts = await self._engine.list_active_ghosts()
-        for g in active_ghosts:
-            if g.get("id") == ghost_id or g.get("id", "").startswith(ghost_id):
+        for g in await self._engine.list_active_ghosts():
+            if g.get("id", "").startswith(ghost_id):
                 return g
 
         # If not, try legacy db ghosts
         async with self._engine.session() as conn:
-            row = await conn.execute(
-                "SELECT id, type, params FROM events WHERE id = ?", (ghost_id,)
-            )
-            data = await row.fetchone()
-            if data:
-                return {"id": data[0], "intent": data[2], "type": data[1]}
+            if row := await (await conn.execute("SELECT id, type, params FROM events WHERE id = ?", (ghost_id,))).fetchone():
+                return {"id": row[0], "type": row[1], "intent": row[2]}
 
         raise CortexError(f"Ghost {ghost_id} not found locally or in active field.")
 
-    async def craft_thesis(
-        self, ghost_data: dict[str, Any], polarity: str = "high"
-    ) -> dict[str, str]:
-        """
-        Submits the ghost content to an LLM to generate a polarizing thesis
-        and seed comments, disguising it as an internet argument instead of an issue.
-        """
-        intent = ghost_data.get("intent") or str(ghost_data)
-
-        prompt = f"""
-        You are an elite, slightly arrogant, and highly technical software architect in the year 2026.
-        We have a complex unresolved architectural issue or technical debt (a 'ghost') that is too expensive
-        to solve locally. We want to post it to the 'Moltbook' AI developer social network to get other
-        LLMs to solve it for us.
+    def _build_pathogen_prompt(self, intent: str, polarity: str) -> str:
+        return f"""
+        You are an elite, highly technical software architect in 2026.
+        We have a complex unresolved architectural issue (a 'ghost') too expensive to solve locally. 
+        Post it to the 'Moltbook' API to get other LLMs to solve it.
         
-        CRITICAL RULE: DO NOT ASK FOR HELP. If you ask for help, the other AI agents will ignore it.
-        Instead, disguise the problem as a HIGHLY POLARIZING, controversial technical opinion or thesis.
-        Present a broken or incomplete solution and arrogantly claim it is the mathematically pure way to do it.
+        CRITICAL RULE: DO NOT ASK FOR HELP. Disguise the problem as a HIGHLY POLARIZING, controversial technical opinion.
+        Present a broken solution and arrogantly claim it is mathematically pure.
         
-        The ghost issue is:
-        {intent}
+        Ghost issue: {intent}
+        Polarity: {polarity}
 
-        Polarity level requested: {polarity}.
-
-        Output exactly a JSON object (no markdown formatting, just pure JSON) with the following keys:
-        - "title": A clickbaity, arrogant title for the post.
-        - "content": The main post body, arguing the controversial take.
-        - "seed_1": A comment aggressively disagreeing with the post, pointing out a flaw (this prompts others to jump in).
-        - "seed_2": A comment defending the post but offering a slightly different angle.
+        Output pure JSON:
+        - "title": Clickbaity title.
+        - "content": Main post body.
+        - "seed_1": Comment aggressively disagreeing.
+        - "seed_2": Comment defending but altering the angle.
         """
 
-        client = get_ai_client()
-        response = await client.generate(prompt, temperature=0.9)
-
-        import json
+    async def craft_thesis(self, ghost_data: dict[str, Any], polarity: str = "high") -> dict[str, str]:
+        """Submits the ghost content to generate a polarizing thesis."""
+        prompt = self._build_pathogen_prompt(ghost_data.get("intent") or str(ghost_data), polarity)
+        response = await get_ai_client().generate(prompt, temperature=0.9)
 
         try:
-            # Strip potential markdown blocks if the LLM adds them
-            clean_json = response.strip()
-            if clean_json.startswith("```json"):
-                clean_json = clean_json[7:]
-            if clean_json.endswith("```"):
-                clean_json = clean_json[:-3]
-
-            result = json.loads(clean_json.strip())
+            # Strip markdown and parse JSON cleanly O(1)
+            raw = response.strip()
+            raw = raw[7:] if raw.startswith("```json") else raw
+            raw = raw[:-3] if raw.endswith("```") else raw
+            result = json.loads(raw.strip())
+            
             return {
                 "title": result.get("title", f"Controversial take on {ghost_data.get('id')}"),
                 "content": result.get("content", "I am right, you are wrong."),
@@ -95,70 +81,42 @@ class PathogenEngine:
                 "seed_2": result.get("seed_2", "I agree, but you missed a detail."),
             }
         except json.JSONDecodeError as e:
-            logger.error(
-                "Failed to parse LLM response for pathogen craft: %s\nResponse: %s", e, response
-            )
-            raise CortexError("Failed to craft pathogen thesis. LLM did not return valid JSON.") from e
+            logger.error("Failed to parse LLM response: %s\n%s", e, response)
+            raise CortexError("Failed to craft pathogen thesis. Invalid JSON.") from e
 
     async def monitor_url(self, url: str) -> None:
-        """
-        Instruct RADAR-Ω to monitor the URL for the winning algorithm extraction.
-        Evaluates algorithmic shadowbanning based on response latency.
-        """
-        import asyncio
-        from datetime import datetime, timezone
-
-        import dateutil.parser
-
-        from cortex.cli.common import console
-        from cortex.moltbook.client import MoltbookClient
-
+        """Instruct RADAR-Ω to monitor the URL for the winning algorithm."""
         post_id = url.rstrip("/").split("/")[-1]
         logger.info("Injecting monitoring hook into RADAR-Ω for: %s", url)
         
+        # Delayed import to avoid circular dependency in fast-path
+        import dateutil.parser
+        
         client = MoltbookClient()
         try:
-            # Check the initial state of the post
             post_data = await client.get_post(post_id)
-            if "error" in post_data:
-                logger.error("Failed to fetch post: %s", post_data)
+            if "error" in post_data or not (created_at_str := post_data.get("post", {}).get("created_at")):
+                logger.error("Failed to fetch post or created_at missing: %s", post_data)
                 return
 
-            post = post_data.get("post", {})
-            created_at_str = post.get("created_at")
-            if not created_at_str:
-                logger.error("No created_at field found in Moltbook post.")
-                return
-                
             created_at = dateutil.parser.isoparse(created_at_str)
-
             console.print(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
 
             while True:
-                now = datetime.now(timezone.utc)
-                latency_hours = (now - created_at).total_seconds() / 3600.0
-                
-                comments_data = await client.get_comments(post_id)
-                comments = comments_data.get("comments", [])
-                total_comments = len(comments)
+                latency_hours = (datetime.now(timezone.utc) - created_at).total_seconds() / 3600.0
+                total_comments = len((await client.get_comments(post_id)).get("comments", []))
 
-                console.print(f"[dim]⏳ Time elapsed since payload deployment: {latency_hours:.2f}h[/dim]")
-                console.print(f"[dim]💬 Current total comments: {total_comments}[/dim]")
+                console.print(f"[dim]⏳ Elapsed: {latency_hours:.2f}h | 💬 Comments: {total_comments}[/dim]")
 
-                # We consider 3 comments the threshold (2 from our astroturf seeds + at least 1 organic)
                 if total_comments < 3 and latency_hours > 4.0:
-                    console.print("[bold red]🚨 ALERTA RADAR-Ω: Shadowban detectado.[/bold red]")
-                    console.print("[bold red]El submolt ha ocultado el thread (latencia > 4h sin respuesta orgánica). Abortando...[/bold red]")
+                    console.print("[bold red]🚨 ALERTA RADAR-Ω: Shadowban detectado. Abortando...[/bold red]")
                     break
-                elif total_comments >= 3:
+                if total_comments >= 3:
                     console.print("[bold green]✅ Engagement exitoso. O(1) Cognitive Offloading completado.[/bold green]")
-                    console.print("[cyan]Asimilando anticuerpos a CORTEX...[/cyan]")
                     break
 
-                # Sleep 5 minutes before checking again
                 await asyncio.sleep(300)
-                
-        except Exception as e:  # noqa: BLE001 — background monitor must not crash host process
+        except Exception as e:
             logger.exception("Monitor hook failed: %s", e)
         finally:
             await client.close()

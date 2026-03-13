@@ -78,7 +78,9 @@ def detect_relationships(content: str, entities: list[dict]) -> list[dict]:
     return relationships
 
 
-async def _upsert_entity(conn, ent: dict, project: str, timestamp: str, tenant_id: str = "default") -> int:
+async def _upsert_entity(
+    conn, ent: dict, project: str, timestamp: str, tenant_id: str = "default"
+) -> int:
     """Upsert a single entity, returning its ID."""
     cursor = await conn.execute(
         "SELECT id, mention_count FROM entities WHERE name = ? AND project = ? AND tenant_id = ?",
@@ -102,7 +104,13 @@ async def _upsert_entity(conn, ent: dict, project: str, timestamp: str, tenant_i
 
 
 async def _upsert_relation(
-    conn, sid: int, tid: int, relation_type: str, timestamp: str, fact_id: int, tenant_id: str = "default"
+    conn,
+    sid: int,
+    tid: int,
+    relation_type: str,
+    timestamp: str,
+    fact_id: int,
+    tenant_id: str = "default",
 ) -> None:
     """Upsert a single relation between two entities."""
     cursor = await conn.execute(
@@ -203,7 +211,9 @@ async def get_graph(
     return await backend.get_graph(project, limit, tenant_id)
 
 
-def get_graph_sync(conn, project: str | None = None, limit: int = 50, tenant_id: str = "default") -> dict:
+def get_graph_sync(
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
     return backend.get_graph_sync(project, limit, tenant_id)  # type: ignore[reportAttributeAccessIssue]

@@ -13,7 +13,7 @@ __all__ = ["AetherDaemon", "AetherMonitor"]
 
 logger = logging.getLogger("cortex.aether.daemon")
 
-_DEFAULT_POLL = 60      # seconds between queue polls
+_DEFAULT_POLL = 60  # seconds between queue polls
 _DEFAULT_MAX_CONCURRENT = 2
 
 
@@ -47,7 +47,9 @@ class AetherDaemon:
 
     def start(self) -> None:
         """Start the polling loop (blocking). Run in a daemon thread."""
-        logger.info("🤖 Aether daemon started (poll=%ds, max=%d)", self._poll_interval, self._max_concurrent)
+        logger.info(
+            "🤖 Aether daemon started (poll=%ds, max=%d)", self._poll_interval, self._max_concurrent
+        )
 
         # Start GitHub ingestor if configured
         if self._github_token and self._github_repos:

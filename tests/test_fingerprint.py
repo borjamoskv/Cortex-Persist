@@ -46,10 +46,18 @@ def _mock_scanner(
     m = AsyncMock()
     m.total_facts.return_value = total
     m.fact_type_distribution.return_value = type_dist or {
-        "decision": 25, "error": 5, "bridge": 10, "discovery": 5, "ghost": 5,
+        "decision": 25,
+        "error": 5,
+        "bridge": 10,
+        "discovery": 5,
+        "ghost": 5,
     }
     m.confidence_distribution.return_value = conf_dist or {
-        "C5": 20, "C4": 10, "C3": 10, "C2": 5, "C1": 5,
+        "C5": 20,
+        "C4": 10,
+        "C3": 10,
+        "C2": 5,
+        "C1": 5,
     }
     m.distinct_projects.return_value = n_projects
     m.avg_content_length.return_value = avg_len
@@ -124,9 +132,7 @@ class TestPatternVector:
         Normalized: 2.0/10.0 = 0.20 (cap is 10 facts/day)."""
         engine = _make_engine()
         with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
-            MockScanner.return_value = _mock_scanner(
-                total=20, active_days=10
-            )
+            MockScanner.return_value = _mock_scanner(total=20, active_days=10)
             fp = await _run(engine)
 
         assert 0.0 <= fp.pattern.session_density <= 1.0
@@ -136,9 +142,7 @@ class TestPatternVector:
         """40 of 50 facts in last 30 days → recency_bias = 0.8."""
         engine = _make_engine()
         with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
-            MockScanner.return_value = _mock_scanner(
-                total=50, recent=40, total_count=50
-            )
+            MockScanner.return_value = _mock_scanner(total=50, recent=40, total_count=50)
             fp = await _run(engine)
 
         assert fp.pattern.recency_bias == pytest.approx(0.8, abs=0.01)
@@ -209,8 +213,15 @@ class TestSerialization:
         assert "archetype" in d
         assert "pattern" in d
         assert "domain_preferences" in d
-        for key in ("risk_tolerance", "caution_index", "synthesis_drive",
-                    "session_density", "recency_bias", "breadth", "depth_preference"):
+        for key in (
+            "risk_tolerance",
+            "caution_index",
+            "synthesis_drive",
+            "session_density",
+            "recency_bias",
+            "breadth",
+            "depth_preference",
+        ):
             assert key in d["pattern"]
 
     @pytest.mark.asyncio

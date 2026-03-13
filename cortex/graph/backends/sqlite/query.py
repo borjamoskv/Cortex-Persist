@@ -31,8 +31,7 @@ class SQLiteQueryMixin:
         self, project: str | None, limit: int, tenant_id: str
     ) -> tuple[list[dict], list[int]]:
         query_entities = (
-            "SELECT id, name, entity_type, project, mention_count FROM entities "
-            "WHERE tenant_id = ?"
+            "SELECT id, name, entity_type, project, mention_count FROM entities WHERE tenant_id = ?"
         )
         params_entities: list = [tenant_id]
         if project:
@@ -82,21 +81,13 @@ class SQLiteQueryMixin:
             q_rel_count = """SELECT COUNT(*) FROM entity_relations er
                              JOIN entities e ON er.source_entity_id = e.id
                              WHERE e.project = ? AND er.tenant_id = ?"""
-            total_entities = (
-                await self._fetch_rows(q_ent_count, [project, tenant_id])
-            )[0][0]  # type: ignore[reportAttributeAccessIssue]
-            total_rels = (
-                await self._fetch_rows(q_rel_count, [project, tenant_id])
-            )[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_entities = (await self._fetch_rows(q_ent_count, [project, tenant_id]))[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_rels = (await self._fetch_rows(q_rel_count, [project, tenant_id]))[0][0]  # type: ignore[reportAttributeAccessIssue]
         else:
             q_ent_count = "SELECT COUNT(*) FROM entities WHERE tenant_id = ?"
             q_rel_count = "SELECT COUNT(*) FROM entity_relations WHERE tenant_id = ?"
-            total_entities = (
-                await self._fetch_rows(q_ent_count, [tenant_id])
-            )[0][0]  # type: ignore[reportAttributeAccessIssue]
-            total_rels = (
-                await self._fetch_rows(q_rel_count, [tenant_id])
-            )[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_entities = (await self._fetch_rows(q_ent_count, [tenant_id]))[0][0]  # type: ignore[reportAttributeAccessIssue]
+            total_rels = (await self._fetch_rows(q_rel_count, [tenant_id]))[0][0]  # type: ignore[reportAttributeAccessIssue]
 
         return {"total_entities": total_entities, "total_relationships": total_rels}
 

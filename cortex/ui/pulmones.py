@@ -97,7 +97,7 @@ class SystemRespiration:
         """
         now = datetime.now()
         cpu_percent = psutil.cpu_percent(interval=None)
-        
+
         if cpu_percent > 85.0:
             # Critical load: choke background tasks
             return 5.0, 3, False
@@ -111,6 +111,5 @@ class SystemRespiration:
             throttle = 2.0 if cpu_percent > 40 else 1.0
             return throttle, 10, True
 
-        # Evening / Night 
+        # Evening / Night
         return 1.0, 20, True
-

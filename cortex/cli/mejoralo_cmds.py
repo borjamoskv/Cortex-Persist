@@ -325,7 +325,7 @@ def mejoralo_awwwards_fix(project, path, db):
         m = MejoraloEngine(engine)
         with console.status("[bold blue]Injecting Awwwards Sovereign Agent...[/]"):
             success = m.awwwards_fix(project, path)
-            
+
         if success:
             console.print("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
         else:

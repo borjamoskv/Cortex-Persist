@@ -49,12 +49,8 @@ class OracleReport:
     system_load_factor: float = 1.0  # OS-level pressure factor (sysload)
 
     def to_dict(self) -> dict[str, Any]:
-        regrettable = [
-            v for v in self.verdicts if v.was_regrettable
-        ]
-        causal_roots = [
-            v for v in regrettable if v.causal_depth > 0
-        ]
+        regrettable = [v for v in self.verdicts if v.was_regrettable]
+        causal_roots = [v for v in regrettable if v.causal_depth > 0]
         return {
             "audited_at": self.audited_at,
             "window_size": self.window_size,

@@ -27,9 +27,7 @@ class MouseEngine:
     def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
         self.engine = engine
 
-    def _post_event(
-        self, event_type: int, point: Point, button: int = 0
-    ) -> None:
+    def _post_event(self, event_type: int, point: Point, button: int = 0) -> None:
         """Helper to post a mouse event to the OS."""
         if not CG:
             return
@@ -37,9 +35,7 @@ class MouseEngine:
         # Default to Left Mouse Button if button is 0 and not specified
         # CG.kCGMouseButtonLeft is 0
 
-        event = CG.CGEventCreateMouseEvent(
-            None, event_type, (point.x, point.y), button
-        )
+        event = CG.CGEventCreateMouseEvent(None, event_type, (point.x, point.y), button)
         CG.CGEventPost(CG.kCGHIDEventTap, event)
 
     def click(self, x: int, y: int, button: str = "left") -> InteractionResult:

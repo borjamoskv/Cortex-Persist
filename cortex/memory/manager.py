@@ -48,6 +48,7 @@ __all__ = ["CortexMemoryManager"]
 
 logger = logging.getLogger("cortex.memory.manager")
 
+
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
 
@@ -110,14 +111,14 @@ class CortexMemoryManager:
         self.thalamus = ThalamusGate(self)
         self._dynamic_space = (
             DynamicSemanticSpace(self._l2, manager=self)  # type: ignore[reportOptionalCall]
-            if self._l2 else None
+            if self._l2
+            else None
         )
 
         try:
             from cortex.memory.hologram import HolographicMemory
-            self._hologram = (
-                HolographicMemory(self._l2) if self._l2 else None
-            )
+
+            self._hologram = HolographicMemory(self._l2) if self._l2 else None
         except ImportError:
             self._hologram = None
 
@@ -497,4 +498,3 @@ class CortexMemoryManager:
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"
-

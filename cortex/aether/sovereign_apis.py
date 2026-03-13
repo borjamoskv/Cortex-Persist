@@ -7,6 +7,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+
 class SovereignTriad:
     """
     [SOVEREIGN TRIAD] - AETHER COGNITIVE APIS
@@ -40,14 +41,16 @@ class SovereignTriad:
         headers = {}
         if self.jina_key:
             headers["Authorization"] = f"Bearer {self.jina_key}"
-        
+
         async with httpx.AsyncClient(timeout=self.timeout_s) as client:
             try:
                 response = await client.get(url, headers=headers)
                 response.raise_for_status()
                 return response.text
             except httpx.HTTPStatusError as e:
-                logger.error("JINA HTTP Error collapsando '%s': %s", target_url, e.response.status_code)
+                logger.error(
+                    "JINA HTTP Error collapsando '%s': %s", target_url, e.response.status_code
+                )
                 return f"[ERROR] Ingesta fallida (Status {e.response.status_code})"
             except httpx.RequestError as e:
                 logger.error("JINA Request Timeout/Fail en '%s': %s", target_url, str(e))
@@ -79,7 +82,7 @@ class SovereignTriad:
 
     async def extract_url_exa(self, target_url: str) -> str:
         """
-        [Exa.ai] Fallback táctico vía Search API. Si un Firewall (Cloudflare) bloquea 
+        [Exa.ai] Fallback táctico vía Search API. Si un Firewall (Cloudflare) bloquea
         la extracción directa, recuperamos el contenido directamente del índice neuronal de Exa.
         """
         if not self.exa_key:
@@ -89,12 +92,9 @@ class SovereignTriad:
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "x-api-key": self.exa_key
+            "x-api-key": self.exa_key,
         }
-        payload = {
-            "urls": [target_url],
-            "text": True
-        }
+        payload = {"urls": [target_url], "text": True}
 
         async with httpx.AsyncClient(timeout=self.timeout_s) as client:
             try:
@@ -125,14 +125,14 @@ class SovereignTriad:
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "x-api-key": self.exa_key
+            "x-api-key": self.exa_key,
         }
         payload = {
             "query": query,
             "useAutoprompt": True,
             "numResults": num_results,
             # Se puede añadir "contents": {"text": True, "highlights": True} para obtener snippets
-            "contents": {"text": True}
+            "contents": {"text": True},
         }
 
         async with httpx.AsyncClient(timeout=self.timeout_s) as client:
@@ -148,7 +148,14 @@ class SovereignTriad:
                 logger.error("EXA Neural Search Fallo de Red: %s", str(e))
                 return []
 
-    async def log_braintrust_trace(self, project_name: str, span_name: str, input_data: Any, output_data: Any, metadata: dict[str, Any] | None = None) -> bool:
+    async def log_braintrust_trace(
+        self,
+        project_name: str,
+        span_name: str,
+        input_data: Any,
+        output_data: Any,
+        metadata: dict[str, Any] | None = None,
+    ) -> bool:
         """
         [Braintrust] Telemetría silenciosa. Axioma 3: Mide la ejecución. Graba inputs/outputs para RLHF futuro.
         Requiere Braintrust REST API o el braintrust SDK.
@@ -164,16 +171,18 @@ class SovereignTriad:
         url = "https://api.braintrustdata.com/v1/log"
         headers = {
             "Authorization": f"Bearer {self.braintrust_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         payload = {
             "project_name": project_name,
-            "events": [{
-                "name": span_name,
-                "input": input_data,
-                "output": output_data,
-                "metadata": metadata or {}
-            }]
+            "events": [
+                {
+                    "name": span_name,
+                    "input": input_data,
+                    "output": output_data,
+                    "metadata": metadata or {},
+                }
+            ],
         }
 
         async with httpx.AsyncClient(timeout=self.timeout_s * 2) as client:
@@ -189,24 +198,28 @@ class SovereignTriad:
                 logger.error("Braintrust Timeout de red: %s", str(e))
                 return False
 
+
 # =====================================================================
 # EJECUCIÓN TÁCTICA (TEST INDIVIDUAL)
 # =====================================================================
 if __name__ == "__main__":
+
     async def run_triad_test():
         triad = SovereignTriad()
-        
+
         print("--- 1. Test Jina Extract ---")
         jina_res = await triad.extract_url_jina("https://news.ycombinator.com")
         print(f"Jina: {len(jina_res)} chars recibidos. Preview: {jina_res[:100]}...\n")
-        
+
         print("--- 2. Test Exa Search ---")
-        exa_res = await triad.neural_search_exa("best python agentic frameworks 2026", num_results=2)
+        exa_res = await triad.neural_search_exa(
+            "best python agentic frameworks 2026", num_results=2
+        )
         print(f"Exa: Encontrados {len(exa_res)} nodos.\n")
-        
+
         print("--- 3. Test Braintrust Telemetry ---")
         # braintrust_res = await triad.log_braintrust_trace("Aether-Agent-Test", "Test Run", "hello", "world")
         # print(f"Braintrust Log Status: {braintrust_res}")
         print("Braintrust no comprobado en este script local para evitar ruido.\n")
-        
+
     asyncio.run(run_triad_test())

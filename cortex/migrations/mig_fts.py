@@ -53,7 +53,8 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
                 )
 
         logger.info(
-            "Migration 017: Successfully repopulated facts_fts with %s decrypted facts", insert_count
+            "Migration 017: Successfully repopulated facts_fts with %s decrypted facts",
+            insert_count,
         )
 
     except sqlite3.OperationalError as e:

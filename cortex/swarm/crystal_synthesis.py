@@ -21,7 +21,11 @@ from cortex.llm.router import CortexLLMRouter, IntentProfile
 logger = logging.getLogger("cortex.swarm.crystal_synthesis")
 
 _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
-    "qwen", "deepinfra", "groq", "together", "openrouter",
+    "qwen",
+    "deepinfra",
+    "groq",
+    "together",
+    "openrouter",
 )
 
 _synthesis_router: CortexLLMRouter | None = None
@@ -46,9 +50,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
             continue
 
     if primary is None:
-        raise RuntimeError(
-            "No LLM providers available for crystal synthesis."
-        ) from None
+        raise RuntimeError("No LLM providers available for crystal synthesis.") from None
 
     _synthesis_router = CortexLLMRouter(primary, fallbacks)
     return _synthesis_router
@@ -79,22 +81,24 @@ async def synthesize_crystals(
         "2. ELIMINA LA GRASA: No repitas ideas. Si ambos dicen lo mismo, sintetiza una vez.\n"
         "3. MANTÉN EL TONO: Usa markdown técnico y denso.\n\n"
         "Responde en formato JSON estricto:\n"
-        '{\n'
+        "{\n"
         '    "fused_content": "Markdown sintetizado...",\n'
         '    "merged_entities": ["Entidad 1", "Entidad 2"],\n'
         '    "synthesis_logic": "Breve explicación de por qué se fusionaron."\n'
-        '}'
+        "}"
     )
 
     prompt = CortexPrompt(
         system_instruction=system_prompt,
-        working_memory=[{
-            "role": "user",
-            "content": (
-                f"PRIMARY CRYSTAL:\n{primary_content}\n\n"
-                f"SECONDARY CRYSTAL (REDUNDANT):\n{secondary_content}"
-            ),
-        }],
+        working_memory=[
+            {
+                "role": "user",
+                "content": (
+                    f"PRIMARY CRYSTAL:\n{primary_content}\n\n"
+                    f"SECONDARY CRYSTAL (REDUNDANT):\n{secondary_content}"
+                ),
+            }
+        ],
         temperature=0.0,
         max_tokens=2000,
         intent=IntentProfile.REASONING,
@@ -111,7 +115,7 @@ async def synthesize_crystals(
 
     text_content = result.unwrap()
     try:
-        json_match = re.search(r'\{.*\}', text_content, re.DOTALL)
+        json_match = re.search(r"\{.*\}", text_content, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(0))
         return {"fused_content": text_content}

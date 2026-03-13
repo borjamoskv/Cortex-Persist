@@ -26,14 +26,15 @@ from typing import Any
 logger = logging.getLogger("cortex.swarm.error_ghost_pipeline")
 
 # ── Constants ──────────────────────────────────────────────────────────
-_DEDUP_WINDOW_SIZE = 64          # Ring buffer: last N error hashes
-_RATE_LIMIT_SECONDS = 60.0       # Min interval between ghosts from same source
+_DEDUP_WINDOW_SIZE = 64  # Ring buffer: last N error hashes
+_RATE_LIMIT_SECONDS = 60.0  # Min interval between ghosts from same source
 _FALLBACK_DIR_NAME = ".error_ghosts"
 
 
 @dataclass(frozen=True)
 class GhostRecord:
     """Immutable record of a persisted error ghost."""
+
     fact_id: int
     source: str
     error_type: str
@@ -153,13 +154,10 @@ class ErrorGhostPipeline:
         tb_str = "".join(tb[-3:])  # Last 3 frames — enough for diagnosis
 
         content = (
-            f"AUTO-GHOST [{source}] {error_type}: {error}\n"
-            f"Traceback (last 3 frames):\n{tb_str}"
+            f"AUTO-GHOST [{source}] {error_type}: {error}\nTraceback (last 3 frames):\n{tb_str}"
         )
 
-        content_hash = hashlib.sha256(
-            f"{source}:{error_type}:{error}".encode()
-        ).hexdigest()[:16]
+        content_hash = hashlib.sha256(f"{source}:{error_type}:{error}".encode()).hexdigest()[:16]
 
         meta: dict[str, Any] = {
             "error_type": error_type,
@@ -181,9 +179,7 @@ class ErrorGhostPipeline:
             # 1. Content-hash dedup (ring buffer)
             if content_hash in self._seen_hashes:
                 self._total_deduped += 1
-                logger.debug(
-                    "AUTO-GHOST deduped [%s] (seen in window)", content_hash[:8]
-                )
+                logger.debug("AUTO-GHOST deduped [%s] (seen in window)", content_hash[:8])
                 return True
 
             # 2. Per-source rate limiting
@@ -199,9 +195,7 @@ class ErrorGhostPipeline:
 
         return False
 
-    def _record_emission(
-        self, content_hash: str, source: str, fact_id: int | None
-    ) -> None:
+    def _record_emission(self, content_hash: str, source: str, fact_id: int | None) -> None:
         """Record successful emission in dedup window and rate limiter."""
         now = time.monotonic()
         with self._lock:
@@ -259,9 +253,7 @@ class ErrorGhostPipeline:
         import asyncio
 
         try:
-            fact_id = asyncio.run(
-                self._persist_async(project, content, source, meta)
-            )
+            fact_id = asyncio.run(self._persist_async(project, content, source, meta))
             self._record_emission(content_hash, source, fact_id)
         except Exception as e:  # noqa: BLE001
             # Last resort — never let ghost persistence crash the daemon

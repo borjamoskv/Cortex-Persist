@@ -113,11 +113,11 @@ class TestMetricSnapshot:
         with pytest.raises(ValueError):
             MetricSnapshot(name="db", value=0.5, weight=-1.0)
 
-
     def test_remediation_field(self):
         hs = MetricSnapshot(name="db", value=1.0, remediation="Fix db")
         assert hs.remediation == "Fix db"
         assert hs.latency_ms == 0.0
+
 
 class TestHealthScore:
     def test_grade_must_be_enum(self):
@@ -129,12 +129,20 @@ class TestHealthScore:
         assert hs.score == 100.0
 
     def test_healthy_property(self):
-        assert HealthScore(
-            score=50.0, grade=Grade.ACCEPTABLE,
-        ).healthy is True
-        assert HealthScore(
-            score=30.0, grade=Grade.FAILED,
-        ).healthy is False
+        assert (
+            HealthScore(
+                score=50.0,
+                grade=Grade.ACCEPTABLE,
+            ).healthy
+            is True
+        )
+        assert (
+            HealthScore(
+                score=30.0,
+                grade=Grade.FAILED,
+            ).healthy
+            is False
+        )
 
     def test_to_dict_letter_not_enum(self):
         hs = HealthScore(score=85.0, grade=Grade.EXCELLENT)
@@ -154,7 +162,8 @@ class TestHealthReport:
     def test_is_critical_grade_degraded(self):
         report = HealthReport(
             score=HealthScore(
-                score=35.0, grade=Grade.FAILED,
+                score=35.0,
+                grade=Grade.FAILED,
             ),
         )
         assert report.is_critical is True
@@ -248,9 +257,14 @@ class TestCollectorRegistry:
 class TestProtocolEnforcement:
     def test_builtin_collectors_conform(self):
         from cortex.health.collector import SystemLoadCollector
+
         for cls in [
-            DbCollector, LedgerCollector, EntropyCollector,
-            FactCountCollector, WalCollector, SystemLoadCollector,
+            DbCollector,
+            LedgerCollector,
+            EntropyCollector,
+            FactCountCollector,
+            WalCollector,
+            SystemLoadCollector,
         ]:
             instance = cls()
             assert isinstance(instance, MetricCollectorProtocol)
@@ -299,7 +313,8 @@ class TestHealthScorer:
             MetricSnapshot(name="ledger", value=0.0, weight=1.0),
         ]
         hs = HealthScorer.score(
-            metrics, weights={"db": 100.0, "ledger": 0.001},
+            metrics,
+            weights={"db": 100.0, "ledger": 0.001},
         )
         assert hs.score > 95.0
 

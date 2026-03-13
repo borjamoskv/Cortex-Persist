@@ -9,21 +9,23 @@ import pytest
 
 from cortex.immune.error_boundary import ErrorBoundary, error_boundary
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────
 
 
 @pytest.fixture(autouse=True)
 def _reset_pipeline():
     """Reset singleton pipeline between tests."""
-    with patch(
-        "cortex.immune.error_boundary.ErrorBoundary._persist",
-        new_callable=AsyncMock,
-        return_value=42,
-    ) as mock_persist, patch(
-        "cortex.immune.error_boundary.ErrorBoundary._persist_sync",
-        new_callable=MagicMock,
-    ) as mock_persist_sync:
+    with (
+        patch(
+            "cortex.immune.error_boundary.ErrorBoundary._persist",
+            new_callable=AsyncMock,
+            return_value=42,
+        ) as mock_persist,
+        patch(
+            "cortex.immune.error_boundary.ErrorBoundary._persist_sync",
+            new_callable=MagicMock,
+        ) as mock_persist_sync,
+    ):
         yield mock_persist, mock_persist_sync
 
 

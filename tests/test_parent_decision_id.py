@@ -28,7 +28,6 @@ from cortex.engine.mixins.base import FACT_COLUMNS
 from cortex.engine.models import Fact
 from cortex.engine.query_mixin import QueryMixin
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
@@ -76,20 +75,38 @@ class TestDataModel:
 
     def test_fact_has_parent_decision_id_field(self):
         f = Fact(
-            id=1, tenant_id="t", project="p", content="c",
-            fact_type="knowledge", tags=[], confidence="C5",
-            valid_from="now", valid_until=None, source="test",
-            meta={}, created_at="now", updated_at="now",
+            id=1,
+            tenant_id="t",
+            project="p",
+            content="c",
+            fact_type="knowledge",
+            tags=[],
+            confidence="C5",
+            valid_from="now",
+            valid_until=None,
+            source="test",
+            meta={},
+            created_at="now",
+            updated_at="now",
             parent_decision_id=42,
         )
         assert f.parent_decision_id == 42
 
     def test_to_dict_includes_parent(self):
         f = Fact(
-            id=1, tenant_id="t", project="p", content="c",
-            fact_type="knowledge", tags=[], confidence="C5",
-            valid_from="now", valid_until=None, source="test",
-            meta={}, created_at="now", updated_at="now",
+            id=1,
+            tenant_id="t",
+            project="p",
+            content="c",
+            fact_type="knowledge",
+            tags=[],
+            confidence="C5",
+            valid_from="now",
+            valid_until=None,
+            source="test",
+            meta={},
+            created_at="now",
+            updated_at="now",
             parent_decision_id=7,
         )
         d = f.to_dict()
@@ -104,6 +121,7 @@ class TestDataModel:
 
     def test_store_mixin_signature(self):
         from cortex.engine.store_mixin import StoreMixin
+
         sig = inspect.signature(StoreMixin.store)
         assert "parent_decision_id" in sig.parameters
 
@@ -117,8 +135,17 @@ class TestFKValidation:
     @pytest.mark.asyncio
     async def test_invalid_parent_cleared(self, db):
         fid = await insert_fact_record(
-            db, "default", "proj", "test", "knowledge",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "test",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
             parent_decision_id=99999,
         )
         await db.commit()
@@ -132,13 +159,31 @@ class TestFKValidation:
     @pytest.mark.asyncio
     async def test_valid_parent_persists(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "parent", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "parent",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         d2 = await insert_fact_record(
-            db, "default", "proj", "child", "knowledge",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "child",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
             parent_decision_id=d1,
         )
         await db.commit()
@@ -155,8 +200,17 @@ class TestAutoResolve:
     @pytest.mark.asyncio
     async def test_first_decision_no_parent(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "first", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "first",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         cursor = await db.execute(
@@ -168,13 +222,31 @@ class TestAutoResolve:
     @pytest.mark.asyncio
     async def test_second_decision_links_to_first(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "first", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "first",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         d2 = await insert_fact_record(
-            db, "default", "proj", "second", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "second",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         cursor = await db.execute(
@@ -186,13 +258,31 @@ class TestAutoResolve:
     @pytest.mark.asyncio
     async def test_error_links_to_decision(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "decision", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "decision",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         e1 = await insert_fact_record(
-            db, "default", "proj", "error", "error",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "error",
+            "error",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         cursor = await db.execute(
@@ -204,13 +294,31 @@ class TestAutoResolve:
     @pytest.mark.asyncio
     async def test_knowledge_does_not_auto_resolve(self, db):
         await insert_fact_record(
-            db, "default", "proj", "decision", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "decision",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         k1 = await insert_fact_record(
-            db, "default", "proj", "knowledge", "knowledge",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "knowledge",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         cursor = await db.execute(
@@ -222,19 +330,46 @@ class TestAutoResolve:
     @pytest.mark.asyncio
     async def test_explicit_parent_overrides_auto(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "first", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "first",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         d2 = await insert_fact_record(
-            db, "default", "proj", "second", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "second",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         # Third decision explicitly points to d1, not d2
         d3 = await insert_fact_record(
-            db, "default", "proj", "third", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "third",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
             parent_decision_id=d1,
         )
         await db.commit()
@@ -253,7 +388,9 @@ class TestTypeReconciliation:
 
     def test_memory_model_type(self):
         import typing
+
         from cortex.memory.models import CortexFactModel
+
         field = CortexFactModel.model_fields["parent_decision_id"]
         args = typing.get_args(field.annotation)
         if args:
@@ -280,6 +417,7 @@ class TestEngineAPI:
 
     def test_sync_wrapper_exists(self):
         from cortex.engine import CortexEngine
+
         assert hasattr(CortexEngine, "get_causal_chain_sync")
 
 
@@ -291,11 +429,13 @@ class TestCLI:
 
     def test_store_has_parent_flag(self):
         from cortex.cli.memory_cmds import store
+
         params = {p.name for p in store.params}
         assert "parent_id" in params
 
     def test_trace_chain_exists(self):
         from cortex.cli.memory_cmds import trace_chain
+
         params = {p.name for p in trace_chain.params}
         assert "fact_id" in params
         assert "direction" in params
@@ -312,7 +452,10 @@ class TestMCP:
         with open(
             os.path.join(
                 os.path.dirname(__file__),
-                "..", "cortex", "mcp", "server.py",
+                "..",
+                "cortex",
+                "mcp",
+                "server.py",
             )
         ) as f:
             src = f.read()
@@ -322,7 +465,10 @@ class TestMCP:
         with open(
             os.path.join(
                 os.path.dirname(__file__),
-                "..", "cortex", "mcp", "server.py",
+                "..",
+                "cortex",
+                "mcp",
+                "server.py",
             )
         ) as f:
             src = f.read()
@@ -338,17 +484,36 @@ class TestCausalChainTraversal:
     @pytest.mark.asyncio
     async def test_recursive_cte_down(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "root", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "root",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         d2 = await insert_fact_record(
-            db, "default", "proj", "child", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "child",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
 
-        cursor = await db.execute("""
+        cursor = await db.execute(
+            """
             WITH RECURSIVE chain(id, depth) AS (
                 SELECT id, 0 FROM facts WHERE id = ?
                 UNION ALL
@@ -358,7 +523,9 @@ class TestCausalChainTraversal:
                 WHERE c.depth < 10
             )
             SELECT id, depth FROM chain ORDER BY depth
-        """, (d1,))
+        """,
+            (d1,),
+        )
         rows = await cursor.fetchall()
         ids = [r[0] for r in rows]
         assert d1 in ids
@@ -367,17 +534,36 @@ class TestCausalChainTraversal:
     @pytest.mark.asyncio
     async def test_recursive_cte_up(self, db):
         d1 = await insert_fact_record(
-            db, "default", "proj", "root", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "root",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
         d2 = await insert_fact_record(
-            db, "default", "proj", "child", "decision",
-            [], "C5", None, "test", {}, None,
+            db,
+            "default",
+            "proj",
+            "child",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
         )
         await db.commit()
 
-        cursor = await db.execute("""
+        cursor = await db.execute(
+            """
             WITH RECURSIVE chain(id, depth) AS (
                 SELECT id, 0 FROM facts WHERE id = ?
                 UNION ALL
@@ -387,7 +573,9 @@ class TestCausalChainTraversal:
                     AND c.depth < 10
             )
             SELECT id, depth FROM chain ORDER BY depth
-        """, (d2,))
+        """,
+            (d2,),
+        )
         rows = await cursor.fetchall()
         ids = [r[0] for r in rows]
         assert d2 in ids

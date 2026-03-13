@@ -47,12 +47,12 @@ class PlannerNode:
         """Aesthetic Cleaning: Extract clean URL/Query from raw strings."""
         if not isinstance(target, str):
             return str(target)
-            
+
         # 1. URL extraction
         url_match = re.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', target)
         if url_match:
             return url_match.group(0)
-            
+
         # 2. JSON unpacking
         if target.strip().startswith("{"):
             try:
@@ -60,12 +60,12 @@ class PlannerNode:
                 return data.get("url") or data.get("target") or data.get("query") or target[:200]
             except json.JSONDecodeError:
                 pass
-                
+
         # 3. Artifact header stripping
-        clean = re.sub(r'═══.*?═══', '', target).strip()
+        clean = re.sub(r"═══.*?═══", "", target).strip()
         # 4. Remove leading/trailing markdown code blocks
-        clean = re.sub(r'^```\w*\n|```$', '', clean).strip()
-        
+        clean = re.sub(r"^```\w*\n|```$", "", clean).strip()
+
         return clean[:500]
 
     async def execute(self, state: dict[str, Any]) -> dict[str, Any]:
@@ -241,9 +241,7 @@ class ValidatorNode:
         else:
             state["confidence"] = self.C3_INFERRED
             state["next_node"] = "human_gate"
-            state["validation_reason"] = (
-                f"Majority failed: {len(failed)}/{len(results)} tasks."
-            )
+            state["validation_reason"] = f"Majority failed: {len(failed)}/{len(results)} tasks."
             return state
 
         state["next_node"] = "persister"

@@ -8,11 +8,10 @@ import pytest
 
 from cortex.mcp.resilient_gateway import (
     ResilientFetcher,
-    _html_to_markdown,
     _extract_with_selector,
+    _html_to_markdown,
 )
 from cortex.utils.pulmones import CircuitBreaker
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 
@@ -52,6 +51,7 @@ def _mock_provider_fn(fetcher: ResilientFetcher, name: str, mock: AsyncMock) -> 
 
 # ─── Test: Primary Success ──────────────────────────────────────────
 
+
 class TestPrimarySuccess:
     """When httpx succeeds, no fallback is called."""
 
@@ -76,6 +76,7 @@ class TestPrimarySuccess:
 
 
 # ─── Test: Primary Fail → Fallback Success ──────────────────────────
+
 
 class TestFallbackCascade:
     """When httpx fails with 503, aiohttp takes over."""
@@ -104,6 +105,7 @@ class TestFallbackCascade:
 
 # ─── Test: Full Cascade Exhausted ───────────────────────────────────
 
+
 class TestCascadeExhausted:
     """When ALL providers fail, returns error trace."""
 
@@ -125,6 +127,7 @@ class TestCascadeExhausted:
 
 
 # ─── Test: Circuit Breaker Skips Failed Provider ────────────────────
+
 
 class TestCircuitBreaker:
     """After threshold failures, provider is skipped automatically."""
@@ -154,6 +157,7 @@ class TestCircuitBreaker:
 
 # ─── Test: CSS Selector Extraction ──────────────────────────────────
 
+
 class TestCssExtraction:
     """Content extraction via CSS selectors."""
 
@@ -168,6 +172,7 @@ class TestCssExtraction:
 
 
 # ─── Test: Markdown Conversion ──────────────────────────────────────
+
 
 class TestMarkdownConversion:
     """HTML is properly cleaned and converted to markdown."""

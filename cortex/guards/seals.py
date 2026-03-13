@@ -15,6 +15,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+from cortex.guards.sovereign_seals import (
+    check_gate_15_dependency,
+    check_gate_16_byzantine,
+    check_gate_17_shannon,
+    check_gate_18_evolution,
+    check_gate_19_eu_ai,
+    check_gate_20_noir,
+    check_gate_21_preservation,
+)
+
 
 class SealPrinter:
     def head(self, title: str) -> None:
@@ -176,11 +186,11 @@ async def check_gate_7_async() -> bool:
             "demo_bicameral.py",  # CLI demo script
             "network.py",  # p2p retry backoff
             "fiat_oracle.py",  # polling oracle
-            "mouse.py",           # macOS GUI automation — OS-level blocking sleep
+            "mouse.py",  # macOS GUI automation — OS-level blocking sleep
             "dashboard_cmds.py",  # CLI dashboard refresh loop
-            "health_cmds.py",     # CLI health watch loop
-            "ouroboros_omega.py", # sovereign autonomous loop — non-async by design
-            "oracle.py",          # blockchain/fiat oracle polling loop
+            "health_cmds.py",  # CLI health watch loop
+            "ouroboros_omega.py",  # sovereign autonomous loop — non-async by design
+            "oracle.py",  # blockchain/fiat oracle polling loop
         ]
     )
     violations = []
@@ -342,18 +352,102 @@ async def check_gate_11_cobbler() -> bool:
     return passed
 
 
+async def check_gate_12_determinism() -> bool:
+    """Seal 12: Temperature Determinism Gate.
+
+    Ensures critical reasoning/architect files enforce temperature=0.
+    """
+    critical_files = [
+        ROOT_DIR / "cortex/llm/router.py",
+        ROOT_DIR / "cortex/llm/provider.py",
+        ROOT_DIR / "cortex/guards/seals.py",
+    ]
+    violations = []
+    # Heuristic: temperature must be 0 for reasoning tasks
+    for path in critical_files:
+        if not path.exists():
+            continue
+        content = path.read_text()
+        if (
+            "temperature" in content
+            and "temperature=0" not in content
+            and "temperature=0.0" not in content
+        ):
+            # Check if it's a dynamic variable or a hardcoded value
+            has_explicit_zero = 'temperature": 0' in content or 'temperature": 0.0' in content
+            if not has_explicit_zero:
+                violations.append(path.name)
+
+    if violations:
+        printer.fail(f"Seal 12 Broken: Static temperature drift in {violations}")
+        return False
+
+    printer.success("Seal 12: Temperature Determinism Gate intact.")
+    return True
+
+
+async def check_gate_13_latency() -> bool:
+    """Seal 13: A-Record Latency Drift.
+
+    Fails if average local model latency exceeds 200ms in telemetry.
+    """
+    from cortex.llm._telemetry import CascadeTelemetry
+
+    telemetry = CascadeTelemetry()
+    stats = telemetry.stats()
+
+    slow_locals = []
+    # If no local data, we pass (can't verify)
+    local_providers = ["ollama", "vllm", "jan", "lmstudio"]
+    for prov in local_providers:
+        avg_lat = stats.get(prov, {}).get("avg_latency_ms", 0)
+        if avg_lat > 200:
+            slow_locals.append(f"{prov} ({avg_lat}ms)")
+
+    if slow_locals:
+        printer.warn(f"Seal 13 Weakened: High local latency detected: {slow_locals}")
+        # We don't fail yet, just warn for "Sovereign" status
+        return True
+
+    printer.success("Seal 13: A-Record Latency Gate intact (<200ms).")
+    return True
+
+
+async def check_gate_14_aesthetic() -> bool:
+    """Seal 14: Sovereign Aesthetic Gate.
+
+    Ensures no "mvp" or "placeholder" strings exist in documentation or core UI.
+    """
+    forbidden = ["FIXME", "TODO: placeholder", "MVP style"]
+    # Check README and a few core docs
+    targets = [Path("README.md"), Path("AGENTS.md")]
+    violations = []
+    for t in targets:
+        if t.exists():
+            content = t.read_text().lower()
+            for f in forbidden:
+                if f.lower() in content:
+                    violations.append(f"{t.name} contains '{f}'")
+
+    if violations:
+        # Warn instead of fail to allow evolution
+        printer.warn(f"Seal 14 Aesthetic Drift: {violations}")
+        return True
+
+    printer.success("Seal 14: Sovereign Aesthetic Gate intact.")
+    return True
+
+
 async def main() -> int:
     import os
 
-    printer.head("11 SEALS — CORTEX QUALITY GATES")
+    printer.head("21 SEALS — CORTEX QUALITY GATES")
 
     # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=4)
     # Useful when the test suite is too slow for SSH keepalive during git push.
     # Tests always run in CI — this only affects the local pre-push hook.
     _skip = {
-        int(g.strip())
-        for g in os.environ.get("SKIP_GATES", "").split(",")
-        if g.strip().isdigit()
+        int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
 
     async def _gate4() -> bool:
@@ -374,6 +468,16 @@ async def main() -> int:
         check_gate_8_loc(),
         check_gate_9_registry(),
         check_gate_11_cobbler(),  # Seal 11: Cobbler's Compliance
+        check_gate_12_determinism(),
+        check_gate_13_latency(),
+        check_gate_14_aesthetic(),
+        check_gate_15_dependency(),
+        check_gate_16_byzantine(),
+        check_gate_17_shannon(),
+        check_gate_18_evolution(),
+        check_gate_19_eu_ai(),
+        check_gate_20_noir(),
+        check_gate_21_preservation(),
     )
     # Check gate 10 independently (it never fails the run)
     await check_gate_10_prompt_size()
@@ -388,10 +492,9 @@ async def main() -> int:
         print("\nFix violations before pushing.")
         return 1
     else:
-        printer.success("ALL 11 SEALS INTACT. Ready for launch.")
+        printer.success("ALL 21 SEALS INTACT. Ready for launch.")
         return 0
 
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))
-

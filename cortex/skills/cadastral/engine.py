@@ -60,7 +60,7 @@ _OWNERSHIP_RISK_MODIFIER: dict[OwnershipType, float] = {
 _EXPROPIATION_MODIFIER: dict[ExpropiationStatus, float] = {
     ExpropiationStatus.NONE: 0.0,
     ExpropiationStatus.PENDING: -0.05,  # Transition state → opportunity
-    ExpropiationStatus.ACTIVE: -0.15,   # State is seizing → legal vacuum
+    ExpropiationStatus.ACTIVE: -0.15,  # State is seizing → legal vacuum
     ExpropiationStatus.COMPLETED: 0.05,
     ExpropiationStatus.REVERTED: -0.08,  # Abandoned process → ghost zone
 }
@@ -233,9 +233,7 @@ class CadastralEngine:
 
     # ── Blind-Spot Analysis ───────────────────────────────────────────────
 
-    def _detect_legal_gaps(
-        self, parcel: Parcel, assessment: RiskAssessment
-    ) -> list[str]:
+    def _detect_legal_gaps(self, parcel: Parcel, assessment: RiskAssessment) -> list[str]:
         """Identify specific legal gaps that create a blind spot."""
         gaps: list[str] = []
 

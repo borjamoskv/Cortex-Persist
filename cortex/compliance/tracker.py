@@ -178,9 +178,7 @@ class ComplianceTracker:
         integrity = self.verify_chain()
 
         # 2. Gather facts summary
-        facts_summary = self._engine._run_sync(
-            self._gather_facts_summary(proj)
-        )
+        facts_summary = self._engine._run_sync(self._gather_facts_summary(proj))
 
         # 3. Evaluate Article 12 compliance
         checks = self._evaluate_article_12(integrity, facts_summary)
@@ -203,9 +201,7 @@ class ComplianceTracker:
         }
 
         if include_facts:
-            all_facts = self._engine._run_sync(
-                self._gather_facts_list(proj)
-            )
+            all_facts = self._engine._run_sync(self._gather_facts_list(proj))
             report["facts"] = all_facts
 
         return report
@@ -217,9 +213,7 @@ class ComplianceTracker:
         conn = await self._engine.get_conn()
 
         # Total facts
-        cursor = await conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE project = ?", (project,)
-        )
+        cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = ?", (project,))
         row = await cursor.fetchone()
         total = row[0] if row else 0
 

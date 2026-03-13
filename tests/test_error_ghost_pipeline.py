@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import threading
-import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -32,9 +29,7 @@ class TestPrepare:
         try:
             raise ValueError("test error 42")
         except ValueError as e:
-            content, content_hash, meta = pipeline._prepare(
-                e, "daemon:SiteMonitor", None
-            )
+            content, content_hash, meta = pipeline._prepare(e, "daemon:SiteMonitor", None)
 
         assert "AUTO-GHOST [daemon:SiteMonitor]" in content
         assert "ValueError" in content
@@ -49,9 +44,7 @@ class TestPrepare:
         try:
             raise RuntimeError("boom")
         except RuntimeError as e:
-            _, _, meta = pipeline._prepare(
-                e, "test:source", {"custom_key": "custom_val"}
-            )
+            _, _, meta = pipeline._prepare(e, "test:source", {"custom_key": "custom_val"})
 
         assert meta["custom_key"] == "custom_val"
         assert meta["error_type"] == "RuntimeError"
@@ -149,9 +142,7 @@ class TestCapture:
             try:
                 raise ValueError("capture test")
             except ValueError as e:
-                fact_id = await pipeline.capture(
-                    e, source="test:capture", project="TEST"
-                )
+                fact_id = await pipeline.capture(e, source="test:capture", project="TEST")
 
         assert fact_id == 42
         assert pipeline.stats["total_captured"] == 1

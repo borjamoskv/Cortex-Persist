@@ -106,7 +106,9 @@ class CortexSecureMemoryCache:
 
     def _persist_to_storage(self, key: str, data: dict[str, Any], audit: dict[str, Any]) -> None:
         """Commit data and decisional proof to persistent storage."""
-        logger.info("🛡️ [SOVEREIGN CACHE] Evicting %s | Proof: %s...", key, audit['current_proof'][:8])
+        logger.info(
+            "🛡️ [SOVEREIGN CACHE] Evicting %s | Proof: %s...", key, audit["current_proof"][:8]
+        )
 
         if self.persistence_callback:
             self.persistence_callback(key, data, audit)

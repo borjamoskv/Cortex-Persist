@@ -156,7 +156,11 @@ def compliance_report(db: str) -> None:
         console.print(table)
 
         c1, c2, c3, c4, c5 = (
-            total_tx > 0, decisions > 0, chain_ok, checkpoints > 0, len(agents) > 0,
+            total_tx > 0,
+            decisions > 0,
+            chain_ok,
+            checkpoints > 0,
+            len(agents) > 0,
         )
 
         def icon(ok):
@@ -263,9 +267,11 @@ def audit(calcification: bool, frontend: bool, project: str, limit: int, db: str
     """Run audits or view Audit Trail."""
     if frontend:
         from cortex.cli.audit_helpers import audit_frontend
+
         audit_frontend()
     elif calcification:
         from cortex.cli.audit_helpers import audit_calcification_report
+
         audit_calcification_report(limit)
     else:
         _audit_trail(project, limit, db)
@@ -294,10 +300,12 @@ def siege(db: str) -> None:
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — vault key is optional, must not block siege
             pass
 
-        console.print(Panel(
-            "[bold red]INITIATING COMPLIANCE SIEGE — LEGION-Ω SWARM[/bold red]\n"
-            "[dim]Targeting CORTEX Ledger and Vault...[/dim]",
-        ))
+        console.print(
+            Panel(
+                "[bold red]INITIATING COMPLIANCE SIEGE — LEGION-Ω SWARM[/bold red]\n"
+                "[dim]Targeting CORTEX Ledger and Vault...[/dim]",
+            )
+        )
 
         tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM]
 
@@ -321,8 +329,7 @@ def siege(db: str) -> None:
         status = verification_report.get("valid")
         color = "green" if status else "red"
         verdict = (
-            "IMMUNITAS OMEGA: SYSTEM SURVIVED" if status
-            else "BREACH DETECTED: LEDGER CORRUPTED"
+            "IMMUNITAS OMEGA: SYSTEM SURVIVED" if status else "BREACH DETECTED: LEDGER CORRUPTED"
         )
 
         table = Table(title="Siege Results", show_header=False)

@@ -134,7 +134,9 @@ class FundingRateScanner:
             except (OSError, KeyError, ValueError) as exc:
                 log.warning(
                     "Fetch failed for %s on %s: %s",
-                    asset, exchange, exc,
+                    asset,
+                    exchange,
+                    exc,
                 )
         return rates
 

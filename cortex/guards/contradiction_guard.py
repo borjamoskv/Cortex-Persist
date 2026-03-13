@@ -79,8 +79,7 @@ class ConflictReport:
         if not self.has_conflicts:
             return "✅ No contradictions detected."
         lines = [
-            f"⚠️ {len(self.candidates)} potential contradiction(s) "
-            f"(severity: {self.severity}):",
+            f"⚠️ {len(self.candidates)} potential contradiction(s) (severity: {self.severity}):",
         ]
         for c in sorted(self.candidates, key=lambda x: -x.overlap_score):
             lines.append(f"  {c}")
@@ -94,23 +93,99 @@ class ConflictReport:
 
 # ── Noise filter ────────────────────────────────────────────────────
 _NOISE_PREFIXES = ("MAILTV-1: ARCHIVE",)
-_STOP_WORDS = frozenset({
-    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "shall", "can",
-    "de", "del", "la", "el", "los", "las", "en", "un", "una", "y", "o",
-    "que", "con", "por", "para", "se", "es", "no", "al", "su", "más",
-    "como", "pero", "sin", "sobre",
-    "to", "of", "in", "for", "on", "with", "at", "by", "from",
-    "and", "or", "not", "but", "this", "that", "it", "its",
-})
+_STOP_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "de",
+        "del",
+        "la",
+        "el",
+        "los",
+        "las",
+        "en",
+        "un",
+        "una",
+        "y",
+        "o",
+        "que",
+        "con",
+        "por",
+        "para",
+        "se",
+        "es",
+        "no",
+        "al",
+        "su",
+        "más",
+        "como",
+        "pero",
+        "sin",
+        "sobre",
+        "to",
+        "of",
+        "in",
+        "for",
+        "on",
+        "with",
+        "at",
+        "by",
+        "from",
+        "and",
+        "or",
+        "not",
+        "but",
+        "this",
+        "that",
+        "it",
+        "its",
+    }
+)
 
-_NEGATION_MARKERS = frozenset({
-    "no usar", "never use", "prohibido", "eliminado", "forbidden",
-    "deprecated", "removed", "replaced", "reemplazado", "obsolete",
-    "no utilizar", "don't use", "do not use", "eliminamos", "matado",
-    "killed", "purged", "deleted",
-})
+_NEGATION_MARKERS = frozenset(
+    {
+        "no usar",
+        "never use",
+        "prohibido",
+        "eliminado",
+        "forbidden",
+        "deprecated",
+        "removed",
+        "replaced",
+        "reemplazado",
+        "obsolete",
+        "no utilizar",
+        "don't use",
+        "do not use",
+        "eliminamos",
+        "matado",
+        "killed",
+        "purged",
+        "deleted",
+    }
+)
 
 _SUPERSESSION_MARKERS = re.compile(
     r"supersed|replac|obsolet|invalidat|deprecat|"
@@ -219,7 +294,11 @@ def _score_candidate(
         return None
 
     conflict_type, score = _classify_conflict(
-        new_content, content, new_tokens, existing_tokens, score,
+        new_content,
+        content,
+        new_tokens,
+        existing_tokens,
+        score,
     )
 
     return ConflictCandidate(
@@ -305,13 +384,24 @@ async def detect_contradictions(
         conn.row_factory = aiosqlite.Row
         try:
             rows = await _fetch_decision_rows(
-                conn, new_tokens, new_project, use_fts=not decrypt_fn,
+                conn,
+                new_tokens,
+                new_project,
+                use_fts=not decrypt_fn,
             )
             candidates = [
-                c for row in rows
-                if (c := _score_candidate(
-                    row, new_tokens, new_content, new_project, decrypt_fn, min_score,
-                ))
+                c
+                for row in rows
+                if (
+                    c := _score_candidate(
+                        row,
+                        new_tokens,
+                        new_content,
+                        new_project,
+                        decrypt_fn,
+                        min_score,
+                    )
+                )
             ]
             candidates.sort(key=lambda x: -x.overlap_score)
             report.candidates = candidates[:max_candidates]
@@ -396,7 +486,9 @@ def _process_token_bucket(
 
 
 def _compare_decisions(
-    a: dict, b: dict, min_score: float,
+    a: dict,
+    b: dict,
+    min_score: float,
 ) -> tuple[float, ConflictCandidate, ConflictCandidate] | None:
     """Score and classify a potential conflict between two decisions."""
     score = _jaccard(a["tokens"], b["tokens"])
@@ -413,12 +505,20 @@ def _compare_decisions(
         score *= 1.2
 
     ca = ConflictCandidate(
-        a["id"], a["project"], a["content"][:200], a["date"],
-        min(score, 1.0), ctype,
+        a["id"],
+        a["project"],
+        a["content"][:200],
+        a["date"],
+        min(score, 1.0),
+        ctype,
     )
     cb = ConflictCandidate(
-        b["id"], b["project"], b["content"][:200], b["date"],
-        min(score, 1.0), ctype,
+        b["id"],
+        b["project"],
+        b["content"][:200],
+        b["date"],
+        min(score, 1.0),
+        ctype,
     )
     return (score, ca, cb)
 
@@ -433,13 +533,15 @@ def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
         tokens = _tokenize(content)
         if len(tokens) < 3:
             continue
-        decisions.append({
-            "id": row["id"],
-            "project": row["project"],
-            "content": content,
-            "date": row["created_at"][:10],
-            "tokens": tokens,
-        })
+        decisions.append(
+            {
+                "id": row["id"],
+                "project": row["project"],
+                "content": content,
+                "date": row["created_at"][:10],
+                "tokens": tokens,
+            }
+        )
     return decisions
 
 

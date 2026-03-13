@@ -51,8 +51,14 @@ class SovereignVectorStoreL2:
     """
 
     __slots__ = (
-        "_db_path", "_encoder", "_conn", "_lock",
-        "_ready", "_half_life", "_hybrid", "_sanitizer",
+        "_db_path",
+        "_encoder",
+        "_conn",
+        "_lock",
+        "_ready",
+        "_half_life",
+        "_hybrid",
+        "_sanitizer",
     )
 
     def __init__(
@@ -69,7 +75,7 @@ class SovereignVectorStoreL2:
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
         # Lazy-initialized subsystems
-        self._hybrid = None   # L2HybridSearch — created after conn is ready
+        self._hybrid = None  # L2HybridSearch — created after conn is ready
         self._sanitizer = None  # PIISanitizer singleton
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -138,6 +144,7 @@ class SovereignVectorStoreL2:
         if self._hybrid is None:
             try:
                 from cortex.memory.l2_hybrid_search import L2HybridSearch
+
                 self._hybrid = L2HybridSearch(self)
                 self._hybrid.ensure_fts_table()
             except Exception as e:  # noqa: BLE001
@@ -156,6 +163,7 @@ class SovereignVectorStoreL2:
         if self._sanitizer is None:
             try:
                 from cortex.memory.pii_sanitizer import get_pii_sanitizer
+
                 self._sanitizer = get_pii_sanitizer()
             except ImportError:
                 pass
@@ -183,12 +191,12 @@ class SovereignVectorStoreL2:
                     # Store encrypted fragments in metadata for recovery
                     if report.encrypted_fragments:
                         sanitized_meta["_pii_fragments"] = report.encrypted_fragments
-                        sanitized_meta["_pii_categories"] = [
-                            c.value for c in report.pii_categories
-                        ]
+                        sanitized_meta["_pii_categories"] = [c.value for c in report.pii_categories]
                     logger.info(
                         "PII detected in fact [%s] for tenant %s — %d fragments encrypted.",
-                        fact.id, fact.tenant_id, len(report.encrypted_fragments),
+                        fact.id,
+                        fact.tenant_id,
+                        len(report.encrypted_fragments),
                     )
             # ──────────────────────────────────────────────────────────────
 
@@ -208,7 +216,7 @@ class SovereignVectorStoreL2:
                         fact.id,
                         fact.tenant_id,
                         fact.project_id,
-                        sanitized_content,    # PII-sanitized content
+                        sanitized_content,  # PII-sanitized content
                         fact.timestamp,
                         int(fact.is_diamond),
                         int(fact.is_bridge),

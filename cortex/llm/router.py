@@ -69,17 +69,23 @@ class CortexLLMRouter:
 
     # Cost class ordering for tiebreaking (cheaper first)
     _COST_ORDER: dict[str, int] = {
-        "free": 0, "low": 1, "medium": 2,
-        "high": 3, "variable": 4,
+        "free": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "variable": 4,
     }
 
     # Tier ordering (higher quality first)
     _TIER_ORDER: dict[str, int] = {
-        "frontier": 0, "high": 1, "local": 2,
+        "frontier": 0,
+        "high": 1,
+        "local": 2,
     }
 
     def _ordered_fallbacks(
-        self, intent: IntentProfile,
+        self,
+        intent: IntentProfile,
     ) -> list[BaseProvider]:
         """Ordena fallbacks: intent affinity → A-record → cost → tier.
 
@@ -98,10 +104,12 @@ class CortexLLMRouter:
 
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
-            typed_matches, intent,
+            typed_matches,
+            intent,
         )
         promoted_safety = self._promote_by_latency_then_cost(
-            safety_net, intent,
+            safety_net,
+            intent,
         )
 
         return promoted_typed + promoted_safety
@@ -112,20 +120,26 @@ class CortexLLMRouter:
         intent: IntentProfile,
     ) -> list[BaseProvider]:
         """A-record first (by latency), unknowns by (cost, tier)."""
-        promoted = self._cascade.promote_known_good(
-            providers, intent,
+        from cortex.config import LLM_LOCAL_FIRST
+
+        p_known = self._cascade.promote_known_good(
+            providers,
+            intent,
         )
         # promote_known_good: [known_good by latency] + [unknown]
-        known_count = sum(
-            1 for p in promoted
-            if self._cascade.get_a_record(p.provider_name)
-        )
-        known = promoted[:known_count]
-        unknown = promoted[known_count:]
+        known_count = sum(1 for p in p_known if self._cascade.get_a_record(p.provider_name))
+        known = p_known[:known_count]
+        unknown = p_known[known_count:]
+
+        # Dynamic tier order if local-first is active
+        tier_order = self._TIER_ORDER.copy()
+        if LLM_LOCAL_FIRST:
+            tier_order["local"] = -1  # Promote above frontier (0)
+
         unknown.sort(
             key=lambda p: (
                 self._COST_ORDER.get(p.cost_class, 4),
-                self._TIER_ORDER.get(p.tier, 2),
+                tier_order.get(p.tier, 2),
             )
         )
         return known + unknown
@@ -324,7 +338,10 @@ class CortexLLMRouter:
             from cortex.llm._presets import providers_for_intent
 
             return providers_for_intent(
-                intent, min_tier=min_tier, max_cost=max_cost, sort_by="cost",
+                intent,
+                min_tier=min_tier,
+                max_cost=max_cost,
+                sort_by="cost",
             )
         except ImportError:
             return []

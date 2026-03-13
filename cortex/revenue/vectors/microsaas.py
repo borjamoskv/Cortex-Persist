@@ -93,8 +93,7 @@ NICHE_CATALOG: list[dict[str, Any]] = [
     {
         "id": "screenshot_api",
         "title": "Website Screenshot API",
-        "description": "Capture full-page screenshots via API. "
-        "50 free/mo, €14.99/mo for 5k.",
+        "description": "Capture full-page screenshots via API. 50 free/mo, €14.99/mo for 5k.",
         "estimated_value": Decimal("700"),
         "effort_hours": 20.0,
         "tags": ["developer-tools", "api"],
@@ -226,9 +225,7 @@ class MicroSaaSVector:
                 error=str(e),
             )
 
-    def _generate_scaffold(
-        self, opportunity: Opportunity
-    ) -> list[dict[str, str]]:
+    def _generate_scaffold(self, opportunity: Opportunity) -> list[dict[str, str]]:
         """Generate the file scaffold for a micro-SaaS tool.
 
         Args:
@@ -353,9 +350,7 @@ function handleUpgrade() {{
             {"filename": "app.js", "content": app_js},
         ]
 
-    async def _deploy(
-        self, niche_id: str, files: list[dict[str, str]]
-    ) -> str:
+    async def _deploy(self, niche_id: str, files: list[dict[str, str]]) -> str:
         """Deploy files to Cloud Run.
 
         Args:

@@ -40,28 +40,66 @@ class SessionFact:
 # ─── Signal Detection Patterns ────────────────────────────────────
 
 _DECISION_SIGNALS: list[str] = [
-    r"\bdecided\b", r"\bdecision:\b", r"\bchose\b", r"\bselected\b",
-    r"\bapproved\b", r"\bwent with\b", r"\bopted for\b", r"\bwill use\b", r"\bcommitted to\b",
+    r"\bdecided\b",
+    r"\bdecision:\b",
+    r"\bchose\b",
+    r"\bselected\b",
+    r"\bapproved\b",
+    r"\bwent with\b",
+    r"\bopted for\b",
+    r"\bwill use\b",
+    r"\bcommitted to\b",
     # Spanish
-    r"\bdecidido\b", r"\bdecidimos\b", r"\bdecisión:\b", r"\belegido\b",
-    r"\bseleccionado\b", r"\baprobado\b", r"\boptamos por\b", r"\busaremos\b", r"\bmejora\b"
+    r"\bdecidido\b",
+    r"\bdecidimos\b",
+    r"\bdecisión:\b",
+    r"\belegido\b",
+    r"\bseleccionado\b",
+    r"\baprobado\b",
+    r"\boptamos por\b",
+    r"\busaremos\b",
+    r"\bmejora\b",
 ]
 
 _ERROR_SIGNALS: list[str] = [
-    r"\berror:\b", r"\bfailed:\b", r"\bbug:\b", r"\bexception:\b", r"\btraceback\b",
-    r"\bfix:\b", r"\bresolved:\b", r"\bcrashed\b", r"\bbroken\b",
+    r"\berror:\b",
+    r"\bfailed:\b",
+    r"\bbug:\b",
+    r"\bexception:\b",
+    r"\btraceback\b",
+    r"\bfix:\b",
+    r"\bresolved:\b",
+    r"\bcrashed\b",
+    r"\bbroken\b",
     # Spanish
-    r"\bfallo:\b", r"\bexcepción:\b", r"\bcorregido:\b", r"\bresuelto:\b",
-    r"\bha petado\b", r"\broto\b", r"\bfalló\b", r"\bsolucionado:\b"
+    r"\bfallo:\b",
+    r"\bexcepción:\b",
+    r"\bcorregido:\b",
+    r"\bresuelto:\b",
+    r"\bha petado\b",
+    r"\broto\b",
+    r"\bfalló\b",
+    r"\bsolucionado:\b",
 ]
 
 _GHOST_SIGNALS: list[str] = [
-    r"\bto" + "do:\b", r"\bfix" + "me:\b", r"\bha" + "ck:\b", r"\blater:\b",
-    r"\bincomplete\b", r"\bneeds work\b", r"\bfollow up\b", r"\bpending\b",
-    r"\bleft off\b", r"\bunfinished\b",
+    r"\bto" + "do:\b",
+    r"\bfix" + "me:\b",
+    r"\bha" + "ck:\b",
+    r"\blater:\b",
+    r"\bincomplete\b",
+    r"\bneeds work\b",
+    r"\bfollow up\b",
+    r"\bpending\b",
+    r"\bleft off\b",
+    r"\bunfinished\b",
     # Spanish
-    r"\bpara luego\b", r"\bincompleto\b", r"\bnecesita trabajo\b",
-    r"\bpendiente\b", r"\bdejamos en\b", r"\bsin terminar\b"
+    r"\bpara luego\b",
+    r"\bincompleto\b",
+    r"\bnecesita trabajo\b",
+    r"\bpendiente\b",
+    r"\bdejamos en\b",
+    r"\bsin terminar\b",
 ]
 
 
@@ -169,7 +207,7 @@ class AutoPersistHook:
         Priority: error > decision > ghost (errors are most critical).
         """
         import re
-        
+
         for pattern in _ERROR_SIGNALS:
             if re.search(pattern, msg_lower):
                 return "error"

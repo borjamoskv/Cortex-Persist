@@ -98,7 +98,7 @@ class TTTEngine:
             "trajectories_processed": len(session_ids),
             "golden_trajectories": len(golden_trajectories),
             "average_reward": round(avg_reward, 3),
-            "training_result": training_result
+            "training_result": training_result,
         }
 
     def _save_dataset(self, trajectories: list[Trajectory]) -> Path:
@@ -133,13 +133,21 @@ class TTTEngine:
         self.adapter_path.mkdir(parents=True, exist_ok=True)
 
         cmd = [
-            "python", "-m", "mlx_lm.lora",
-            "--model", self.base_model,
-            "--data", str(self.dataset_dir),
-            "--adapter-path", str(self.adapter_path),
-            "--iters", "100",
-            "--batch-size", "2",
-            "--lora-layers", "8"
+            "python",
+            "-m",
+            "mlx_lm.lora",
+            "--model",
+            self.base_model,
+            "--data",
+            str(self.dataset_dir),
+            "--adapter-path",
+            str(self.adapter_path),
+            "--iters",
+            "100",
+            "--batch-size",
+            "2",
+            "--lora-layers",
+            "8",
         ]
 
         try:
@@ -149,7 +157,7 @@ class TTTEngine:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minute timeout
+                timeout=600,  # 10 minute timeout
             )
 
             if process.returncode != 0:
@@ -157,10 +165,7 @@ class TTTEngine:
                 return {"status": "error", "error": process.stderr[:500]}
 
             logger.info("✅ MLX LoRA completed successfully.")
-            return {
-                "status": "success",
-                "output": process.stdout[-500:]
-            }
+            return {"status": "success", "output": process.stdout[-500:]}
 
         except subprocess.TimeoutExpired:
             logger.warning("MLX LoRA timed out.")

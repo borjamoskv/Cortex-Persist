@@ -129,7 +129,8 @@ class GenesisEngine:
         system_name = existing_dir.name
         logger.info(
             "GENESIS EXTEND: Adding %d components to '%s'",
-            len(new_components), system_name,
+            len(new_components),
+            system_name,
         )
 
         spec = SystemSpec(
@@ -344,10 +345,10 @@ class GenesisEngine:
         complexity = min(5, max(1, self._estimate_complexity(spec)))
 
         hours = (
-            (files_touched * 6)
-            + (codepaths_affected * 12)
-            + (validation_cost * 10)
-        ) * (complexity / 3) / 60
+            ((files_touched * 6) + (codepaths_affected * 12) + (validation_cost * 10))
+            * (complexity / 3)
+            / 60
+        )
 
         return round(hours, 2)
 
@@ -415,6 +416,4 @@ class GenesisEngine:
             )
         except Exception as e:  # noqa: BLE001 — best-effort persistence boundary
             # Best-effort — don't fail genesis if CORTEX is unavailable
-            logger.debug(
-                "CORTEX persistence skipped (non-critical): %s", e
-            )
+            logger.debug("CORTEX persistence skipped (non-critical): %s", e)

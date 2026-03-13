@@ -112,7 +112,11 @@ def _apply_dedup_strategy(
 
     prev_count = len(result.deprecated_ids)
     execute_dedup(  # type: ignore[reportUnusedCoroutine]
-        engine, project, result, dry_run, similarity_threshold,
+        engine,
+        project,
+        result,
+        dry_run,
+        similarity_threshold,
     )
     if len(result.deprecated_ids) > prev_count:
         result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))

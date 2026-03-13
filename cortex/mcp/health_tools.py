@@ -69,22 +69,14 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
 
         for m in hs.metrics:
             if m.value < 0.5:
-                warnings.append(
-                    f"{m.name}: critical ({m.value:.2f})"
-                )
+                warnings.append(f"{m.name}: critical ({m.value:.2f})")
             elif m.value < 0.8:
-                recommendations.append(
-                    f"{m.name}: could improve ({m.value:.2f})"
-                )
+                recommendations.append(f"{m.name}: could improve ({m.value:.2f})")
 
         if hs.score < 40:
-            warnings.append(
-                f"Overall health DEGRADED ({hs.grade})"
-            )
+            warnings.append(f"Overall health DEGRADED ({hs.grade})")
         elif hs.score < 70:
-            recommendations.append(
-                "Run cortex compact to reduce entropy"
-            )
+            recommendations.append("Run cortex compact to reduce entropy")
 
         report = HealthReport(
             score=hs,

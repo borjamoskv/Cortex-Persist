@@ -13,9 +13,9 @@ def test_export_prometheus_formats_correctly() -> None:
         ],
         sub_indices={"storage": 90.0},
     )
-    
+
     output = export_prometheus(score)
-    
+
     assert "cortex_health_score_total 82.50" in output
     assert "cortex_health_grade 4" in output  # EXCELLENT
     assert 'cortex_health_sub_index{index="storage"} 90.00' in output

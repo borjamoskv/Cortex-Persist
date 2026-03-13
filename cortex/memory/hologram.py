@@ -41,17 +41,17 @@ class HolographicMemory:
     def __init__(self, store: SovereignVectorStoreL2, half_life_days: int = 7):
         self._store = store
         self._lock = asyncio.Lock()
-        
+
         # Matrix E containing all embeddings (N, dimension).
         self._tensor: np.ndarray | None = None
-        
+
         # Parallel arrays for fast metadata lookup and scoring
         self._metadata: list[dict[str, Any]] = []
-        
+
         # Hash indexes for filtering
         self._tenant_idx: dict[str, set[int]] = {}
         self._project_idx: dict[str, set[int]] = {}
-        
+
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
 
@@ -64,13 +64,13 @@ class HolographicMemory:
         async with self._lock:
             if self._ready:
                 return
-            
+
             logger.info("🌌 Initializing Holographic Memory matrix...")
             start_time = time.monotonic()
-            
+
             # Access underlying DB directly to bypass async overhead for initial load
             conn = self._store._get_conn()
-            
+
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT
@@ -81,17 +81,17 @@ class HolographicMemory:
                 FROM facts_meta m
                 JOIN vec_facts v ON m.rowid = v.rowid
             """)
-            
+
             rows = cursor.fetchall()
-            
+
             embeddings = []
             for i, row in enumerate(rows):
                 emb = np.frombuffer(row["embedding"], dtype=np.float32)
                 embeddings.append(emb)
-                
+
                 tenant = row["tenant_id"]
                 project = row["project_id"]
-                
+
                 # Metadata record
                 meta_record = {
                     "id": row["id"],
@@ -108,12 +108,12 @@ class HolographicMemory:
                     "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
                 }
                 self._metadata.append(meta_record)
-                
+
                 # Indexes
                 if tenant not in self._tenant_idx:
                     self._tenant_idx[tenant] = set()
                 self._tenant_idx[tenant].add(i)
-                
+
                 if project not in self._project_idx:
                     self._project_idx[project] = set()
                 self._project_idx[project].add(i)
@@ -129,10 +129,9 @@ class HolographicMemory:
 
             self._ready = True
             dur = (time.monotonic() - start_time) * 1000
-            
+
             logger.info(
-                "🌌 Holographic Memory loaded: %d items mapped in %.1fms",
-                len(self._metadata), dur
+                "🌌 Holographic Memory loaded: %d items mapped in %.1fms", len(self._metadata), dur
             )
 
     def _cortex_decay(self, is_diamond: bool, timestamp: float, current_time: float) -> float:
@@ -168,7 +167,7 @@ class HolographicMemory:
         valid_indices = self._tenant_idx.get(tenant_id, set())
         if project_id:
             proj_idx = self._project_idx.get(project_id, set())
-            
+
             # Allow bridge items seamlessly
             bridge_idx = {i for i in valid_indices if self._metadata[i]["is_bridge"]}
             valid_indices = valid_indices.intersection(proj_idx).union(bridge_idx)
@@ -178,7 +177,7 @@ class HolographicMemory:
 
         # Convert to sorted array for subsetting
         indices_list = np.array(list(valid_indices), dtype=int)
-        
+
         # 3. Dense Matrix Math - Hardware Accelerated
         subset_tensor = self._tensor[indices_list]
         cosine_sim = np.dot(subset_tensor, q)
@@ -188,36 +187,36 @@ class HolographicMemory:
         now = time.time()
         for i, original_idx in enumerate(indices_list):
             meta = self._metadata[original_idx]
-            
+
             if layer and meta["cognitive_layer"] != layer:
                 final_scores.append(-1.0)
                 continue
-                
+
             sim = cosine_sim[i]
             # Match the SQLite function structure exactly
             decay = self._cortex_decay(meta["is_diamond"], meta["timestamp"], now)
-            
+
             # Translate SQL semantic: (1.0 - distance / 2.0) equals (sim + 1.0) / 2.0
-            semantic_score = (sim + 1.0) / 2.0 
+            semantic_score = (sim + 1.0) / 2.0
             final_score = semantic_score * decay * meta["success_rate"]
-            
+
             final_scores.append(final_score)
 
         final_scores_arr = np.array(final_scores)
         top_k_subset_idx = np.argsort(final_scores_arr)[::-1]
-        
+
         results = []
         for subset_idx in top_k_subset_idx:
             sc = float(final_scores_arr[subset_idx])
             if sc <= 0.0:
                 break
-                
+
             if len(results) >= limit:
                 break
-                
+
             orig_idx = indices_list[subset_idx]
             meta = self._metadata[orig_idx]
-            
+
             # Construct FactModel (Embedding retrieval omitted to save memory copies during fast context injection)
             fact = CortexFactModel(
                 id=meta["id"],

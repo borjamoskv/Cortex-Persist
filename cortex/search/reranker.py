@@ -76,9 +76,7 @@ class CrossEncoderReranker:
                 self._model_name,
             )
         except (ImportError, OSError, RuntimeError, ValueError) as e:
-            logger.warning(
-                "Cross-encoder unavailable (degrading to passthrough): %s", e
-            )
+            logger.warning("Cross-encoder unavailable (degrading to passthrough): %s", e)
             self._available = False
 
         return self._available

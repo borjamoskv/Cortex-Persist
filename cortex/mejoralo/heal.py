@@ -191,7 +191,10 @@ def _run_delta_testing(
 
     try:
         res = subprocess.run(
-            pytest_cmd, cwd=path, capture_output=True, text=True,
+            pytest_cmd,
+            cwd=path,
+            capture_output=True,
+            text=True,
             timeout=PYTEST_TIMEOUT_SECONDS,
         )
         if res.returncode != 0:
@@ -204,8 +207,7 @@ def _run_delta_testing(
         return True
     except subprocess.TimeoutExpired as e:
         console.print(
-            f"  [bold red]⏳ Timeout en {top_file_rel} "
-            f"tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
+            f"  [bold red]⏳ Timeout en {top_file_rel} tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
         )
         if engine and project:
             err_trace = (

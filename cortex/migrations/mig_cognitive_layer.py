@@ -21,7 +21,5 @@ def _migration_022_cognitive_layer(conn: sqlite3.Connection) -> None:
         logger.info("Added cognitive_layer column to facts table.")
 
     if "parent_decision_id" not in columns:
-        conn.execute(
-            "ALTER TABLE facts ADD COLUMN parent_decision_id INTEGER REFERENCES facts(id)"
-        )
+        conn.execute("ALTER TABLE facts ADD COLUMN parent_decision_id INTEGER REFERENCES facts(id)")
         logger.info("Added parent_decision_id column to facts table.")

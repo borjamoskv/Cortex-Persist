@@ -37,14 +37,15 @@ def dashboard(db_path: str | None) -> None:
     color = grade_colors.get(hs.grade, "white")
 
     console.print()
-    console.print(Panel(
-        f"[bold {color}]{hs.grade.emoji} {hs.score:.1f}/100  "
-        f"Grade {hs.grade.letter}[/]",
-        title="[bold]CORTEX HEALTH INDEX[/]",
-        subtitle=f"[dim]{path}[/]",
-        border_style=color,
-        width=60,
-    ))
+    console.print(
+        Panel(
+            f"[bold {color}]{hs.grade.emoji} {hs.score:.1f}/100  Grade {hs.grade.letter}[/]",
+            title="[bold]CORTEX HEALTH INDEX[/]",
+            subtitle=f"[dim]{path}[/]",
+            border_style=color,
+            width=60,
+        )
+    )
 
     # ─── Metrics Table ────────────────────────────────────
     table = Table(

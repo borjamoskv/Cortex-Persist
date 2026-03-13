@@ -16,6 +16,7 @@ from cortex.swarm.budget import get_budget_manager
 
 logger = logging.getLogger("cortex.swarm.manager")
 
+
 class TaskStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -32,6 +33,7 @@ class SwarmTask:
     result: Any = None
     error: str | None = None
 
+
 class CapatazOrchestrator:
     """The Capataz (Foreman). Coordinates a polyphony of agents."""
 
@@ -46,7 +48,7 @@ class CapatazOrchestrator:
         url: str,
         headers: dict[str, str],
         payload: dict[str, Any],
-        mission_id: str | None = None
+        mission_id: str | None = None,
     ) -> str:
         # This method is intended to be implemented later, likely involving
         # an HTTP call to an LLM endpoint and tracking its budget.
@@ -59,14 +61,14 @@ class CapatazOrchestrator:
         agent_name: str,
         coro_func: Callable,
         args: list | tuple = (),
-        kwargs: dict | None = None
+        kwargs: dict | None = None,
     ) -> Any:
         """Run a single task under the mission context."""
         task = SwarmTask(name=name, agent_name=agent_name, status=TaskStatus.RUNNING)
         self.tasks[task.id] = task
-        
+
         logger.info("[%s] Capataz: Deploying %s to task: %s", self.mission_id, agent_name, name)
-        
+
         try:
             kwargs = kwargs or {}
             result = await coro_func(*args, **kwargs)
@@ -91,7 +93,7 @@ class CapatazOrchestrator:
                     agent_name=td["agent_name"],
                     coro_func=td["func"],
                     args=td.get("args", ()),
-                    kwargs=td.get("kwargs", {})
+                    kwargs=td.get("kwargs", {}),
                 )
             )
         return await asyncio.gather(*loop_tasks, return_exceptions=True)
@@ -99,12 +101,16 @@ class CapatazOrchestrator:
     def _print_summary(self):
         budget_info = self.budget.get_mission_budget(self.mission_id)
         if budget_info:
-            logger.info("[%s] Mission Stats: %d reqs | $%.4f spent", 
-                        self.mission_id, budget_info.request_count, budget_info.total_cost_usd)
+            logger.info(
+                "[%s] Mission Stats: %d reqs | $%.4f spent",
+                self.mission_id,
+                budget_info.request_count,
+                budget_info.total_cost_usd,
+            )
 
     def get_status(self) -> dict[str, Any]:
         return {
             "mission_id": self.mission_id,
             "tasks": {tid: t.status.value for tid, t in self.tasks.items()},
-            "budget": self.budget.get_mission_budget(self.mission_id)
+            "budget": self.budget.get_mission_budget(self.mission_id),
         }

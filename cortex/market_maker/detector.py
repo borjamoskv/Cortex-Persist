@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 
 class HttpClient(Protocol):
     """Protocol for an injectable HTTP client."""
+
     async def get(self, url: str) -> dict[str, Any]: ...
 
 
@@ -36,10 +37,10 @@ class TrendDetector:
     async def scan(self, keywords: list[str]) -> list[TrendSignal]:
         """
         Escanea múltiples fuentes buscando convergencia (≥2 fuentes).
-        
+
         Args:
             keywords: Tópicos semilla a explorar.
-            
+
         Returns:
             Lista de señales que sobrevivieron al filtro de convergencia.
         """
@@ -47,7 +48,7 @@ class TrendDetector:
 
         for kw in keywords:
             sources: list[str] = []
-            
+
             # Simulated HTTP scanning for Phase 1 Engine
             if self._rng.random() > 0.4:
                 sources.append("google_trends")
@@ -69,14 +70,14 @@ class TrendDetector:
                 raw_signals.append(signal)
 
         converged = self._convergence_filter(raw_signals)
-        
+
         if raw_signals:
             log.info(
                 "Detectadas %d señales crudas, %d convergieron (≥2 fuentes)",
                 len(raw_signals),
                 len(converged),
             )
-            
+
         return converged
 
     def _convergence_filter(self, signals: list[TrendSignal]) -> list[TrendSignal]:

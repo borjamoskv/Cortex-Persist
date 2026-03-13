@@ -81,8 +81,7 @@ class TimingTracker:
             ).fetchall()
         else:
             rows = self._conn.execute(
-                "SELECT id, project, entity, category, timestamp "
-                "FROM heartbeats ORDER BY id ASC"
+                "SELECT id, project, entity, category, timestamp FROM heartbeats ORDER BY id ASC"
             ).fetchall()
 
         if not rows:

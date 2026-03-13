@@ -37,10 +37,10 @@ logger = logging.getLogger("cortex.swarm.josu_daemon")
 
 # ── Configuration ─────────────────────────────────────────────────────────
 
-POLL_INTERVAL_S: int = 600          # 10 min between scans
-MAX_COMPLEXITY: int = 5             # Only attempt ghosts with estimated_complexity ≤ 5
-MAX_PULSE_BEATS: int = 15           # Ephemeral agents die fast
-MAX_CONCURRENT_FIXES: int = 2       # Parallel Pulse agents cap
+POLL_INTERVAL_S: int = 600  # 10 min between scans
+MAX_COMPLEXITY: int = 5  # Only attempt ghosts with estimated_complexity ≤ 5
+MAX_PULSE_BEATS: int = 15  # Ephemeral agents die fast
+MAX_CONCURRENT_FIXES: int = 2  # Parallel Pulse agents cap
 
 
 # ── Data Models ───────────────────────────────────────────────────────────
@@ -167,9 +167,7 @@ class JosuProactiveDaemon:
 
             await asyncio.sleep(POLL_INTERVAL_S)
 
-    async def _process_target(
-        self, target: GhostTarget, semaphore: asyncio.Semaphore
-    ) -> None:
+    async def _process_target(self, target: GhostTarget, semaphore: asyncio.Semaphore) -> None:
         """Process a single ghost target with semaphore-controlled concurrency."""
         async with semaphore:
             self._active_tasks += 1
@@ -178,6 +176,7 @@ class JosuProactiveDaemon:
                 # Signal planning
                 async with self.db.session() as conn:
                     from cortex.signals.bus import AsyncSignalBus
+
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
                         "swarm:plan", {"task": f"Analyzing {target.id[:8]}"}, source=source_id
@@ -206,7 +205,7 @@ class JosuProactiveDaemon:
                         target.max_attempts,
                         result.error or "Pulse flatlined.",
                     )
-                    
+
                     async with self.db.session() as conn:
                         bus = AsyncSignalBus(conn)
                         if target.attempts + 1 >= target.max_attempts:
@@ -316,6 +315,7 @@ class JosuProactiveDaemon:
         )
         try:
             import json
+
             async with self.db.session() as conn:
                 cursor = await conn.execute(query)
                 rows = await cursor.fetchall()
@@ -343,9 +343,7 @@ class JosuProactiveDaemon:
             logger.error("⚠️ [JOSU] Database scan failed: %s", e)
             return []
 
-    async def _create_review_request(
-        self, target: GhostTarget, result: FixResult
-    ) -> None:
+    async def _create_review_request(self, target: GhostTarget, result: FixResult) -> None:
         """Deliver validation-first results for human context review."""
         logger.info(
             "📬 [JOSU] Review request for ghost [%s]: %s",

@@ -13,23 +13,22 @@ import time
 import numpy as np
 import pytest
 
+from cortex.swarm.crystal_consolidator import (
+    ConsolidationResult,
+    _execute_cold_purge,
+    _execute_diamond_promotion,
+    consolidate,
+)
 from cortex.swarm.crystal_thermometer import (
+    TEMPERATURE_COLD,
+    TEMPERATURE_HOT,
     CrystalVitals,
-    calculate_temperature,
     calculate_resonance,
+    calculate_temperature,
     classify_quadrant,
     determine_recommendation,
     measure_crystal_sync,
-    TEMPERATURE_HOT,
-    TEMPERATURE_COLD,
 )
-from cortex.swarm.crystal_consolidator import (
-    ConsolidationResult,
-    consolidate,
-    _execute_cold_purge,
-    _execute_diamond_promotion,
-)
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -131,7 +130,6 @@ class TestTemperature:
 
 
 class TestResonance:
-
     @pytest.mark.asyncio
     async def test_identical_vectors(self) -> None:
         vec = [1.0, 0.0, 0.0, 0.0]
@@ -163,7 +161,6 @@ class TestResonance:
 
 
 class TestQuadrantClassification:
-
     def test_active_quadrant(self) -> None:
         assert classify_quadrant(0.5, 0.7) == "ACTIVE"
 
@@ -181,7 +178,6 @@ class TestQuadrantClassification:
 
 
 class TestRecommendation:
-
     def test_purge_dead_weight(self) -> None:
         rec = determine_recommendation("DEAD_WEIGHT", False, 20.0, 0.001, 0.05)
         assert rec == "PURGE"
@@ -211,7 +207,6 @@ class TestRecommendation:
 
 
 class TestMeasureCrystalSync:
-
     def test_full_assessment(self) -> None:
         vitals = measure_crystal_sync(
             fact_id="test-1",
@@ -243,7 +238,6 @@ class TestMeasureCrystalSync:
 
 
 class TestConsolidationResult:
-
     def test_total_actions(self) -> None:
         result = ConsolidationResult(purged=2, merged=1, promoted=3)
         assert result.total_actions == 6
@@ -260,15 +254,22 @@ class TestConsolidationResult:
 
 
 class TestColdPurge:
-
     def test_purges_dead_weight(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-1", "obsolete info", age_days=30, recall_count=0)
 
-        vitals = [CrystalVitals(
-            fact_id="dead-1", content_preview="obsolete info",
-            temperature=0.0, resonance=0.05, quadrant="DEAD_WEIGHT",
-            recommendation="PURGE", age_days=30, recall_count=0, is_diamond=False,
-        )]
+        vitals = [
+            CrystalVitals(
+                fact_id="dead-1",
+                content_preview="obsolete info",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
 
         result = ConsolidationResult()
         _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
@@ -282,11 +283,19 @@ class TestColdPurge:
     def test_dry_run_preserves(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-2", "obsolete info", age_days=30)
 
-        vitals = [CrystalVitals(
-            fact_id="dead-2", content_preview="obsolete info",
-            temperature=0.0, resonance=0.05, quadrant="DEAD_WEIGHT",
-            recommendation="PURGE", age_days=30, recall_count=0, is_diamond=False,
-        )]
+        vitals = [
+            CrystalVitals(
+                fact_id="dead-2",
+                content_preview="obsolete info",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
 
         result = ConsolidationResult()
         _execute_cold_purge(in_memory_db, vitals, result, dry_run=True)
@@ -300,12 +309,19 @@ class TestColdPurge:
     def test_diamond_immune(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "diamond-1", "axiom", age_days=30, is_diamond=True)
 
-        vitals = [CrystalVitals(
-            fact_id="diamond-1", content_preview="axiom",
-            temperature=0.0, resonance=0.05, quadrant="DEAD_WEIGHT",
-            recommendation="DECAY",  # Diamonds never get PURGE
-            age_days=30, recall_count=0, is_diamond=True,
-        )]
+        vitals = [
+            CrystalVitals(
+                fact_id="diamond-1",
+                content_preview="axiom",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="DECAY",  # Diamonds never get PURGE
+                age_days=30,
+                recall_count=0,
+                is_diamond=True,
+            )
+        ]
 
         result = ConsolidationResult()
         _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
@@ -317,15 +333,22 @@ class TestColdPurge:
 
 
 class TestDiamondPromotion:
-
     def test_promotes_qualifying_crystal(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
 
-        vitals = [CrystalVitals(
-            fact_id="hot-1", content_preview="active knowledge",
-            temperature=2.0, resonance=0.7, quadrant="ACTIVE",
-            recommendation="PROMOTE", age_days=10, recall_count=20, is_diamond=False,
-        )]
+        vitals = [
+            CrystalVitals(
+                fact_id="hot-1",
+                content_preview="active knowledge",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
+            )
+        ]
 
         result = ConsolidationResult()
         _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
@@ -340,7 +363,6 @@ class TestDiamondPromotion:
 
 
 class TestFullConsolidation:
-
     @pytest.mark.asyncio
     async def test_consolidation_with_mixed_crystals(self, in_memory_db) -> None:
         """End-to-end: mix of dead, active, and similar crystals."""
@@ -351,14 +373,26 @@ class TestFullConsolidation:
 
         vitals = [
             CrystalVitals(
-                fact_id="dead-e2e", content_preview="obsolete",
-                temperature=0.0, resonance=0.05, quadrant="DEAD_WEIGHT",
-                recommendation="PURGE", age_days=30, recall_count=0, is_diamond=False,
+                fact_id="dead-e2e",
+                content_preview="obsolete",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
             ),
             CrystalVitals(
-                fact_id="hot-e2e", content_preview="valuable",
-                temperature=2.0, resonance=0.7, quadrant="ACTIVE",
-                recommendation="PROMOTE", age_days=10, recall_count=20, is_diamond=False,
+                fact_id="hot-e2e",
+                content_preview="valuable",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
             ),
         ]
 
@@ -375,11 +409,19 @@ class TestFullConsolidation:
     async def test_dry_run_no_side_effects(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dry-1", "should survive", age_days=30)
 
-        vitals = [CrystalVitals(
-            fact_id="dry-1", content_preview="should survive",
-            temperature=0.0, resonance=0.05, quadrant="DEAD_WEIGHT",
-            recommendation="PURGE", age_days=30, recall_count=0, is_diamond=False,
-        )]
+        vitals = [
+            CrystalVitals(
+                fact_id="dry-1",
+                content_preview="should survive",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
 
         result = await consolidate(in_memory_db, vitals, dry_run=True)
         assert result.purged == 1

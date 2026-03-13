@@ -35,12 +35,8 @@ class AgentTask:
     source: str = TaskSource.CLI
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     status: str = TaskStatus.PENDING
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
-    updated_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     agent_id: str | None = None
     plan: str = ""
     result: str = ""
@@ -111,16 +107,13 @@ class PlanOutput:
     repro_test: str = ""  # For Ω₆: A test that fails BEFORE the fix.
 
     def to_prompt_str(self) -> str:
-        steps = "\n".join(f"  {i+1}. {s}" for i, s in enumerate(self.steps))
+        steps = "\n".join(f"  {i + 1}. {s}" for i, s in enumerate(self.steps))
         files = ", ".join(self.files_to_touch) or "unknown"
         tests = ", ".join(self.tests_to_run) or "pytest"
-        repro = f"\nReproduction Test (must fail first): {self.repro_test}" if self.repro_test else ""
-        return (
-            f"PLAN:\n{steps}\n\n"
-            f"Files to touch: {files}\n"
-            f"Tests to run: {tests}"
-            f"{repro}"
+        repro = (
+            f"\nReproduction Test (must fail first): {self.repro_test}" if self.repro_test else ""
         )
+        return f"PLAN:\n{steps}\n\nFiles to touch: {files}\nTests to run: {tests}{repro}"
 
 
 @dataclass

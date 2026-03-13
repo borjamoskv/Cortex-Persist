@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cortex-memory-sdk"
+name = "cortex-persist-sdk"
 version = "0.1.0"
-description = "Thin Python SDK for the CORTEX Memory API — zero dependencies."
+description = "Thin Python SDK for the CORTEX Persist API — zero dependencies."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"

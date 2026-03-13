@@ -399,10 +399,10 @@ class SystemLoadCollector:
         try:
             load_1m, _, _ = os.getloadavg()
             cores = os.cpu_count() or 4
-            
+
             # Load > Cores means processes are waiting for CPU
             ratio = load_1m / cores
-            
+
             if ratio < 0.7:
                 val = 1.0
             elif ratio < 1.0:
@@ -411,12 +411,12 @@ class SystemLoadCollector:
                 val = 0.5
             else:
                 val = 0.2
-                
+
             return MetricSnapshot(
                 name=self.name,
                 value=val,
                 weight=self.weight,
-                description=f"Load: {load_1m:.2f} (Cores: {cores})"
+                description=f"Load: {load_1m:.2f} (Cores: {cores})",
             )
         except (OSError, AttributeError):
             return MetricSnapshot(

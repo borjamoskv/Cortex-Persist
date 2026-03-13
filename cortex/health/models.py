@@ -68,9 +68,7 @@ class Grade(enum.Enum):
             if grade.letter == letter:
                 return grade
         valid = [g.letter for g in cls]
-        raise ValueError(
-            f"Unknown grade letter '{letter}', valid: {valid}"
-        )
+        raise ValueError(f"Unknown grade letter '{letter}', valid: {valid}")
 
     def __repr__(self) -> str:
         return f"Grade.{self.name}({self.letter})"
@@ -103,18 +101,15 @@ class MetricSnapshot:
             raise ValueError("MetricSnapshot.name must be non-empty")
         if not (0.0 <= self.value <= 1.0):
             object.__setattr__(
-                self, "value", max(0.0, min(1.0, self.value)),
+                self,
+                "value",
+                max(0.0, min(1.0, self.value)),
             )
         if self.weight < 0:
-            raise ValueError(
-                f"MetricSnapshot.weight must be >= 0, got {self.weight}"
-            )
+            raise ValueError(f"MetricSnapshot.weight must be >= 0, got {self.weight}")
 
     def __repr__(self) -> str:
-        return (
-            f"MetricSnapshot({self.name}={self.value:.2f}, "
-            f"w={self.weight})"
-        )
+        return f"MetricSnapshot({self.name}={self.value:.2f}, w={self.weight})"
 
 
 @dataclass
@@ -135,9 +130,7 @@ class HealthScore:
     def __post_init__(self) -> None:
         self.score = max(0.0, min(100.0, self.score))
         if not isinstance(self.grade, Grade):
-            raise TypeError(
-                f"grade must be Grade enum, got {type(self.grade).__name__}"
-            )
+            raise TypeError(f"grade must be Grade enum, got {type(self.grade).__name__}")
 
     @property
     def healthy(self) -> bool:
@@ -164,10 +157,7 @@ class HealthScore:
         }
 
     def __repr__(self) -> str:
-        return (
-            f"HealthScore({self.score:.1f}, "
-            f"grade={self.grade.letter})"
-        )
+        return f"HealthScore({self.score:.1f}, grade={self.grade.letter})"
 
 
 @dataclass
@@ -183,10 +173,7 @@ class HealthReport:
     @property
     def is_critical(self) -> bool:
         """True if warnings exist or grade is DEGRADED/FAILED."""
-        return (
-            bool(self.warnings)
-            or self.score.grade <= Grade.DEGRADED
-        )
+        return bool(self.warnings) or self.score.grade <= Grade.DEGRADED
 
     def to_dict(self) -> dict:
         """Serialize to dict."""
@@ -214,14 +201,14 @@ class HealthThresholds:
     Change thresholds in ONE place, all surfaces respond.
     """
 
-    critical: float = 0.3    # Below: CRITICAL warning
-    degraded: float = 0.5    # Below: degraded warning
-    improve: float = 0.8     # Below: improvement recommendation
-    db_warn_mb: int = 500    # DB size warning
-    db_crit_mb: int = 1024   # DB size critical
-    wal_warn_mb: int = 10    # WAL size warning
-    wal_crit_mb: int = 50    # WAL size critical
-    fact_target: int = 50    # Ideal minimum active facts
+    critical: float = 0.3  # Below: CRITICAL warning
+    degraded: float = 0.5  # Below: degraded warning
+    improve: float = 0.8  # Below: improvement recommendation
+    db_warn_mb: int = 500  # DB size warning
+    db_crit_mb: int = 1024  # DB size critical
+    wal_warn_mb: int = 10  # WAL size warning
+    wal_crit_mb: int = 50  # WAL size critical
+    fact_target: int = 50  # Ideal minimum active facts
     type_diversity: int = 6  # Ideal distinct fact types
 
 
@@ -241,23 +228,23 @@ class HealthSLAViolation(Exception):
 @dataclass(frozen=True)
 class HealthSLA:
     """Service Level Agreement for CORTEX health.
-    
+
     Can be used by agents to demand a certain health level before
     performing risky or intensive operations.
     """
 
     target_grade: Grade
     enforce_sub_indices: bool = False
-    
+
     def evaluate(self, score: HealthScore) -> None:
         """Evaluate a score against this SLA.
-        
+
         Raises:
             HealthSLAViolation: If score is below target_grade.
         """
         if score.grade < self.target_grade:
             raise HealthSLAViolation(score, self.target_grade)
-            
+
         if self.enforce_sub_indices and score.sub_indices:
             # If sub-index enforcement is on, ensure no sub-index
             # is independently failing below the target threshold.

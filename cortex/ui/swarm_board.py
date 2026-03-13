@@ -46,24 +46,26 @@ class SwarmBoard:
         self.db_path = db_path
         self._conn = sqlite3.connect(db_path)
         self.bus = SignalBus(self._conn)
-        
+
         # Agent state tracking: source -> state dict
-        self.agents: dict[str, dict[str, Any]] = defaultdict(lambda: {
-            "state": STATE_INITIALIZING,
-            "task": "Booting...",
-            "last_seen": time.time(),
-            "failures": 0,
-        })
+        self.agents: dict[str, dict[str, Any]] = defaultdict(
+            lambda: {
+                "state": STATE_INITIALIZING,
+                "task": "Booting...",
+                "last_seen": time.time(),
+                "failures": 0,
+            }
+        )
         self._running = False
         self._stop_event = threading.Event()
 
     def fetch_latest_signals(self):
         """Poll the bus for new events related to swarm state."""
         # Polling events without consuming them globally (using peek)
-        # We only care about signals in the last few seconds to catch up, 
+        # We only care about signals in the last few seconds to catch up,
         # or we just consume them with a specific TUI consumer name.
         signals = self.bus.poll(consumer="swarm_kanban_tui", limit=100)
-        
+
         for sig in signals:
             source = sig.source
             if not source.startswith("agent:") and not source.startswith("josu"):
@@ -90,7 +92,7 @@ class SwarmBoard:
                 self.agents[source]["task"] = payload.get("result", "Done")
             elif event == "swarm:error":
                 self.agents[source]["failures"] += 1
-                
+
             self.agents[source]["last_seen"] = time.time()
 
     def generate_layout(self) -> Layout:
@@ -100,14 +102,14 @@ class SwarmBoard:
             Layout(name="header", size=3),
             Layout(name="main"),
         )
-        
+
         layout["header"].update(
             Panel(
                 "[bold #CCFF00]CORTEX SWARM KANBAN BOARD[/] | [dim]Real-time agent telemetry[/]",
-                border_style="#6600FF"
+                border_style="#6600FF",
             )
         )
-        
+
         # Build lanes
         lanes = {
             "PLANNING": Table(show_header=False, expand=True, box=box.SIMPLE),
@@ -115,16 +117,16 @@ class SwarmBoard:
             "VERIFYING": Table(show_header=False, expand=True, box=box.SIMPLE),
             "HALTED": Table(show_header=False, expand=True, box=box.SIMPLE),
         }
-        
+
         for table in lanes.values():
             table.add_column("Agent", style="cyan", width=15)
             table.add_column("Task")
-            
+
         for source, data in self.agents.items():
             state = data["state"]
             color = STATE_COLORS.get(state, "white")
             row = (f"[{color}]{source}[/]", f"[dim]{data['task']}[/]")
-            
+
             if state in (STATE_INITIALIZING, STATE_PLANNING):
                 lanes["PLANNING"].add_row(*row)
             elif state == STATE_ISOLATED:
@@ -133,15 +135,19 @@ class SwarmBoard:
                 lanes["VERIFYING"].add_row(*row)
             elif state == STATE_HALTED:
                 lanes["HALTED"].add_row(*row)
-                
+
         # Split main into 4 columns
         layout["main"].split_row(
             Layout(Panel(lanes["PLANNING"], title="[blue]PLANNING", border_style="blue")),
-            Layout(Panel(lanes["EXECUTING"], title="[yellow]ISOLATED (EXEC)", border_style="yellow")),
+            Layout(
+                Panel(lanes["EXECUTING"], title="[yellow]ISOLATED (EXEC)", border_style="yellow")
+            ),
             Layout(Panel(lanes["VERIFYING"], title="[magenta]CI / VERIFY", border_style="magenta")),
-            Layout(Panel(lanes["HALTED"], title="[bold red blink]HALTED (HUMAN)", border_style="red")),
+            Layout(
+                Panel(lanes["HALTED"], title="[bold red blink]HALTED (HUMAN)", border_style="red")
+            ),
         )
-        
+
         return layout
 
     def start(self):
@@ -156,6 +162,7 @@ class SwarmBoard:
         except KeyboardInterrupt:
             self._running = False
             console.print("[dim]Swarm Board terminated.[/]")
+
 
 if __name__ == "__main__":
     board = SwarmBoard("/Users/borjafernandezangulo/.cortex/cortex.db")

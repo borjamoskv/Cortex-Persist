@@ -84,7 +84,9 @@ class CuatridaOrchestrator:
             metadata=metadata,
         )
         self.metrics.decision_count += 1
-        logger.info("Sovereign Decision Sealed [%s] tx:%s: %s", dimension.value, actual_tx_id, intent)
+        logger.info(
+            "Sovereign Decision Sealed [%s] tx:%s: %s", dimension.value, actual_tx_id, intent
+        )
         return node
 
     async def validate_aesthetic(self, project: str, path: str | Path) -> bool:

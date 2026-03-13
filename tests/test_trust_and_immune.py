@@ -72,6 +72,7 @@ class TestEntropicQuarantineFilter:
         signal = "The quick brown fox jumps over the lazy dog, revealing secrets of the universe."
         result = await f.evaluate(signal, {})
         from cortex.immune.filters.base import Verdict
+
         assert result.verdict == Verdict.PASS
         assert result.score == 100.0
 
@@ -80,6 +81,7 @@ class TestEntropicQuarantineFilter:
         signal = "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         result = await f.evaluate(signal, {})
         from cortex.immune.filters.base import Verdict
+
         assert result.verdict == Verdict.BLOCK
         assert result.score == 0.0
 
@@ -91,6 +93,7 @@ class TestEntropicQuarantineFilter:
         # Better: use a balanced 8-char signal: H = log2(8) = 3.0 bits exactly.
         signal = "abcdefgh" * 40  # uniform 8-char dist → H=3.0 bits (2.5<3.0<3.5 → HOLD)
         from cortex.immune.filters.base import Verdict
+
         result = await f.evaluate(signal, {})
         assert result.verdict == Verdict.HOLD
 
@@ -99,15 +102,18 @@ class TestEntropicQuarantineFilter:
         signal = {"content": "The quick brown fox jumps over the lazy dog."}
         result = await f.evaluate(signal, {})
         from cortex.immune.filters.base import Verdict
+
         assert result.verdict == Verdict.PASS
 
     @pytest.mark.asyncio
     async def test_custom_threshold_via_context(self, f):
         """High threshold = 99 bits forces every real signal to BLOCK."""
         signal = "hello world"
-        result = await f.evaluate(signal, {"entropy_high_threshold": 99.0,
-                                           "entropy_mid_threshold": 98.0})
+        result = await f.evaluate(
+            signal, {"entropy_high_threshold": 99.0, "entropy_mid_threshold": 98.0}
+        )
         from cortex.immune.filters.base import Verdict
+
         assert result.verdict == Verdict.BLOCK
 
     @pytest.mark.asyncio
@@ -143,9 +149,9 @@ class TestBayesianTrustUpdater:
         engine = MagicMock()
         conn = AsyncMock()
         row = (conf, score)
-        conn.execute.return_value.__aenter__ = AsyncMock(return_value=AsyncMock(
-            fetchone=AsyncMock(return_value=row)
-        ))
+        conn.execute.return_value.__aenter__ = AsyncMock(
+            return_value=AsyncMock(fetchone=AsyncMock(return_value=row))
+        )
         conn.execute.return_value.__aexit__ = AsyncMock(return_value=False)
         engine.get_conn = AsyncMock(return_value=conn)
         return engine, conn
@@ -218,6 +224,7 @@ class TestHandoffV13:
         """Check that HANDOFF_VERSION constant is '1.3' using a regex on the source file."""
         import re
         from pathlib import Path
+
         src = Path("cortex/agents/handoff.py").read_text(encoding="utf-8")
         match = re.search(r'HANDOFF_VERSION\s*=\s*"([\d\.]+)"', src)
         assert match is not None, "HANDOFF_VERSION not found in handoff.py"
@@ -226,5 +233,6 @@ class TestHandoffV13:
     def test_cognitive_fingerprint_key_in_source(self):
         """Verify cognitive_fingerprint key was added to generate_handoff."""
         from pathlib import Path
+
         src = Path("cortex/agents/handoff.py").read_text(encoding="utf-8")
         assert '"cognitive_fingerprint"' in src, "cognitive_fingerprint section missing"

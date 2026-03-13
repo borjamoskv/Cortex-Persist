@@ -23,6 +23,7 @@ from cortex.mcp.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
 
 logger = logging.getLogger("cortex.mcp.aether")
 
+
 class AetherContext:
     """State and lifecycle management for the Aether MCP server."""
 
@@ -52,7 +53,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
         f"Payload: {details[:200]}\\n\\n"
         f"Do you authorize this?"
     )
-    
+
     script = f'''
     try
         set theDialogText to "{prompt}"
@@ -66,13 +67,13 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
         return "false"
     end try
     '''
-    
+
     try:
         res = subprocess.run(
             ["osascript", "-e", script],
             capture_output=True,
             text=True,
-            timeout=300  # Will auto-deny if timed out
+            timeout=300,  # Will auto-deny if timed out
         )
         return "true" in res.stdout.strip().lower()
     except subprocess.TimeoutExpired:
@@ -83,7 +84,9 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
         return False
 
 
-def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: int = 5001) -> FastMCP:
+def create_aether_server(
+    db_path: str = DB_PATH, host: str = "127.0.0.1", port: int = 5001
+) -> FastMCP:
     """Create the Aether FastMCP server instance."""
     if FastMCP is None:
         raise ImportError("MCP SDK not installed. Run: pip install 'mcp'")
@@ -95,33 +98,33 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
     async def cortex_search_memory(query: str, project: str = "", top_k: int = 20) -> str:
         """Search CORTEX local memory using vector embeddings."""
         await ctx.ensure_ready()
-        
+
         cache_key = f"aether:{query}:{project}:{top_k}"
         cached_result = ctx.search_cache.get(cache_key)
         if cached_result:
             return cached_result
-            
+
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.db_path, auto_embed=False)
             engine._conn = conn
-            
+
             results = await engine.search(
                 query,
                 project or None,
                 min(max(top_k, 5), 50),
             )
-            
+
         if not results:
             return "No memory records found."
-            
+
         ctx.metrics.record_request()
-        
+
         output = [f"Found {len(results)} context chunks:"]
         for r in results:
             output.append(
                 f"[FACT #{r.fact_id} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
             )
-            
+
         final_str = "\n".join(output)
         ctx.search_cache.set(cache_key, final_str)
         return final_str
@@ -129,7 +132,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
     @mcp.tool()
     async def cortex_read_file(filepath: str, max_lines: int = 5000) -> str:
         """Read a massive system file. Tuned for Gemini 3's 1M context window.
-        
+
         Args:
             filepath: Absolute path to the file.
             max_lines: Max lines to return to avoid stalling the buffer. Max 50,000.
@@ -137,7 +140,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
         path = Path(filepath).resolve()
         if not path.exists() or not path.is_file():
             return f"❌ File not found: {filepath}"
-            
+
         limit = min(abs(max_lines), 50000)
 
         def _read() -> str:
@@ -158,19 +161,19 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
     @mcp.tool()
     async def cortex_store_decision(project: str, decision: str) -> str:
         """Persist an architectural decision or ghost directly to the local CORTEX DB.
-        
+
         Requires physical user verification (Axiom 3).
         """
         await ctx.ensure_ready()
-        
+
         # Axiom 3 verification loop
         if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
             return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
-            
+
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.db_path, auto_embed=False)
             engine._conn = conn
-            
+
             fact_id = await engine.store(
                 project,
                 decision,
@@ -179,7 +182,7 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
                 "stated",
                 "agent:gemini:aether",
             )
-            
+
         ctx.search_cache.clear()
         ctx.metrics.record_request()
         return f"✅ Verified and Stored decision #{fact_id} in project '{project}'"
@@ -187,15 +190,15 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
     @mcp.tool()
     async def cortex_execute_bash(command: str, cwd: str = ".") -> str:
         """Execute a bash command on the host macOS machine.
-        
+
         WARNING: Highly destructive. Will trigger an immediate OS-level authorization
         prompt (Axiom 3 validation). Ensure the command is 100% accurate.
         """
         if not _axiom_3_verify("Shell Execution", f"cd {cwd} && {command}"):
             return "❌ Shell execution aborted: Axiom 3 user physical authorization DENIED."
-            
+
         logger.warning("Executing authorized bash command: %s", command)
-        
+
         try:
             process = await asyncio.create_subprocess_shell(
                 command,
@@ -204,21 +207,22 @@ def create_aether_server(db_path: str = DB_PATH, host: str = "127.0.0.1", port: 
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
-            
+
             output = stdout.decode().strip()
             err_output = stderr.decode().strip()
-            
+
             res = f"Exit code: {process.returncode}\n"
             if output:
                 res += f"STDOUT:\n{output}\n"
             if err_output:
                 res += f"STDERR:\n{err_output}\n"
-                
+
             return res
         except Exception as e:  # noqa: BLE001
             return f"❌ Subprocess error: {e}"
 
     return mcp
+
 
 def run_aether_mcp(host: str = "127.0.0.1", port: int = 5001, transport: str = "sse") -> None:
     """Boot the Aether CORTEX MCP Server."""

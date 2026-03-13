@@ -64,7 +64,6 @@ class SystemTemplate:
 # ─────────────────────────────────────────────────────
 
 
-
 # ─────────────────────────────────────────────────────
 # Template Registry
 # ─────────────────────────────────────────────────────
@@ -79,66 +78,90 @@ class TemplateRegistry:
 
     def _register_defaults(self) -> None:
         """Register the built-in templates."""
-        self.register(SystemTemplate(
-            name="module",
-            description="Standard Python module with manager class",
-            renderers={"{name}.py": _render_module},
-        ))
-        self.register(SystemTemplate(
-            name="dataclass",
-            description="Dataclass-based data model module",
-            renderers={"{name}.py": _render_dataclass},
-        ))
-        self.register(SystemTemplate(
-            name="mixin",
-            description="CortexEngine mixin module",
-            renderers={"{name}.py": _render_mixin},
-        ))
-        self.register(SystemTemplate(
-            name="cli_command",
-            description="Click CLI command group",
-            renderers={"{name}_cmds.py": _render_cli_command},
-        ))
-        self.register(SystemTemplate(
-            name="test",
-            description="Pytest test file stub",
-            renderers={"test_{name}.py": _render_test},
-        ))
-        self.register(SystemTemplate(
-            name="init",
-            description="Package __init__.py with exports",
-            renderers={"__init__.py": _render_init},
-        ))
-        self.register(SystemTemplate(
-            name="skill",
-            description="Antigravity skill (SKILL.md)",
-            renderers={"SKILL.md": _render_skill_md},
-        ))
-        self.register(SystemTemplate(
-            name="workflow",
-            description="Workflow markdown file",
-            renderers={"{name}.md": _render_workflow_md},
-        ))
-        self.register(SystemTemplate(
-            name="agent",
-            description="YAML agent definition for AgentRegistry",
-            renderers={"{name}.yaml": _render_agent_yaml},
-        ))
-        self.register(SystemTemplate(
-            name="protocol",
-            description="Python Protocol class (structural typing)",
-            renderers={"{name}.py": _render_protocol},
-        ))
-        self.register(SystemTemplate(
-            name="fastapi_route",
-            description="FastAPI APIRouter module",
-            renderers={"{name}_routes.py": _render_fastapi_route},
-        ))
-        self.register(SystemTemplate(
-            name="migration",
-            description="SQL migration script",
-            renderers={"{name}.sql": _render_migration},
-        ))
+        self.register(
+            SystemTemplate(
+                name="module",
+                description="Standard Python module with manager class",
+                renderers={"{name}.py": _render_module},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="dataclass",
+                description="Dataclass-based data model module",
+                renderers={"{name}.py": _render_dataclass},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="mixin",
+                description="CortexEngine mixin module",
+                renderers={"{name}.py": _render_mixin},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="cli_command",
+                description="Click CLI command group",
+                renderers={"{name}_cmds.py": _render_cli_command},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="test",
+                description="Pytest test file stub",
+                renderers={"test_{name}.py": _render_test},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="init",
+                description="Package __init__.py with exports",
+                renderers={"__init__.py": _render_init},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="skill",
+                description="Antigravity skill (SKILL.md)",
+                renderers={"SKILL.md": _render_skill_md},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="workflow",
+                description="Workflow markdown file",
+                renderers={"{name}.md": _render_workflow_md},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="agent",
+                description="YAML agent definition for AgentRegistry",
+                renderers={"{name}.yaml": _render_agent_yaml},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="protocol",
+                description="Python Protocol class (structural typing)",
+                renderers={"{name}.py": _render_protocol},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="fastapi_route",
+                description="FastAPI APIRouter module",
+                renderers={"{name}_routes.py": _render_fastapi_route},
+            )
+        )
+        self.register(
+            SystemTemplate(
+                name="migration",
+                description="SQL migration script",
+                renderers={"{name}.sql": _render_migration},
+            )
+        )
 
     def register(self, template: SystemTemplate) -> None:
         """Register a template by name."""
@@ -151,10 +174,7 @@ class TemplateRegistry:
 
     def list_templates(self) -> list[dict[str, str]]:
         """List all registered templates."""
-        return [
-            {"name": t.name, "description": t.description}
-            for t in self._templates.values()
-        ]
+        return [{"name": t.name, "description": t.description} for t in self._templates.values()]
 
     @property
     def names(self) -> list[str]:

@@ -37,8 +37,15 @@ class ConsciousRecurrenceEngine:
     Monitors process execution (L0) with a parallel observer (L1).
     """
 
-    def __init__(self, alpha: float = 0.5, beta: float = 0.3, gamma: float = 0.2,
-                 lambda1: float = 0.6, lambda2: float = 0.4, eta: float = 0.1):
+    def __init__(
+        self,
+        alpha: float = 0.5,
+        beta: float = 0.3,
+        gamma: float = 0.2,
+        lambda1: float = 0.6,
+        lambda2: float = 0.4,
+        eta: float = 0.1,
+    ):
         # Weights
         self.alpha = alpha
         self.beta = beta
@@ -52,10 +59,7 @@ class ConsciousRecurrenceEngine:
         self._l1_budget_max_ratio = 0.20  # L1 gets max 20% of L0 time
 
     async def execute_with_awareness(
-        self,
-        task_fn: Callable[..., Awaitable[R]],
-        intention: IntentionVector,
-        *args, **kwargs
+        self, task_fn: Callable[..., Awaitable[R]], intention: IntentionVector, *args, **kwargs
     ) -> dict[str, Any]:
         """
         Executes a task while maintaining a parallel L1 metacognitive observer.
@@ -84,11 +88,7 @@ class ConsciousRecurrenceEngine:
         state = self._evaluate_metacognition(intention, task_success, duration)
         self.history.append(state)
 
-        return {
-            "result": result,
-            "metacognitive_state": state,
-            "report": self.format_report()
-        }
+        return {"result": result, "metacognitive_state": state, "report": self.format_report()}
 
     def _evaluate_metacognition(
         self, intention: IntentionVector, success: bool, duration: float
@@ -106,7 +106,7 @@ class ConsciousRecurrenceEngine:
 
         # H(Obs): Shannon entropy of observation focus (assumed high if successful and quick)
         h_obs = 0.8 if duration < 5.0 else 0.4
-        
+
         # Meta Loss
         l_meta = (self.lambda1 * l_act) + (self.lambda2 * l_intent) - (self.eta * h_obs)
         l_meta = max(0.0, min(1.0, l_meta))  # Clamp 0-1
@@ -123,7 +123,7 @@ class ConsciousRecurrenceEngine:
             l_intent=l_intent,
             h_obs=h_obs,
             l_efficiency=l_efficiency,
-            total_loss=total_loss
+            total_loss=total_loss,
         )
 
     def format_report(self) -> str:
@@ -131,7 +131,7 @@ class ConsciousRecurrenceEngine:
             return "🧠 CONSCIOUSNESS PROXY: INACTIVE"
 
         latest = self.history[-1]
-        
+
         # Compute Proxy Scores
         self_knowledge = int((1.0 - latest.l_act) * 50)
         attention_health = int(latest.h_obs * 30)
@@ -144,17 +144,16 @@ class ConsciousRecurrenceEngine:
             stab_score = 15  # Default baseline
 
         total_proxy = self_knowledge + attention_health + stab_score
-        
-        return (f"🧠 CONSCIOUSNESS PROXY: {total_proxy}/100\n"
-                f"   ├─ Self-Knowledge:         {self_knowledge}/50\n"
-                f"   ├─ Attention Health:       {attention_health}/30\n"
-                f"   └─ Metacognitive Stability:{stab_score}/20")
+
+        return (
+            f"🧠 CONSCIOUSNESS PROXY: {total_proxy}/100\n"
+            f"   ├─ Self-Knowledge:         {self_knowledge}/50\n"
+            f"   ├─ Attention Health:       {attention_health}/30\n"
+            f"   └─ Metacognitive Stability:{stab_score}/20"
+        )
 
     async def run_nocturnal_cycle(
-        self,
-        session_ids: list[str],
-        episodic_memory: Any,
-        triad: Any = None
+        self, session_ids: list[str], episodic_memory: Any, triad: Any = None
     ) -> dict[str, Any]:
         """
         Executes the deep sleep cycle (Axiom 10: Auto-Evolution).
@@ -163,7 +162,7 @@ class ConsciousRecurrenceEngine:
         """
         logger.info("🧠 SLEEP CYCLE INITIATED: Triggering Test-Time Training (TTT)...")
         ttt = TTTEngine(episodic_memory=episodic_memory, triad=triad)
-        
+
         try:
             result = await ttt.run_nocturnal_consolidation(session_ids)
             logger.info("🧠 SLEEP CYCLE COMPLETE: %s", result["status"])

@@ -124,9 +124,7 @@ class GenesisValidator:
     ) -> list[str]:
         """Check that the number of created files is reasonable."""
         errors: list[str] = []
-        non_test_components = [
-            c for c in spec.components if c.component_type != "test"
-        ]
+        non_test_components = [c for c in spec.components if c.component_type != "test"]
 
         # For non-module types (skill, agent, workflow) the generated files
         # may be .md, .yaml, etc. — count all files with system name in path.
@@ -137,8 +135,7 @@ class GenesisValidator:
 
         if len(system_files) < min_expected:
             errors.append(
-                f"Expected at least {min_expected} files for '{spec.name}', "
-                f"got {len(system_files)}"
+                f"Expected at least {min_expected} files for '{spec.name}', got {len(system_files)}"
             )
 
         return errors

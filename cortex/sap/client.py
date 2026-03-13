@@ -37,7 +37,6 @@ __all__ = [
 logger = logging.getLogger("cortex.sap.client")
 
 
-
 # ─── Exceptions ──────────────────────────────────────────────────────
 
 
@@ -76,6 +75,7 @@ class SAPConfig:
     def base_url_normalized(self) -> str:
         """Return base URL without trailing slash."""
         return self.base_url.rstrip("/")
+
 
 # ─── Client ──────────────────────────────────────────────────────────
 

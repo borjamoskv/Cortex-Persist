@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 try:
     from langgraph.graph import END, StateGraph
+
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     StateGraph = None
@@ -15,10 +16,12 @@ except ImportError:
 
 logger = logging.getLogger("cortex.swarm.supervisor")
 
+
 class NightShiftState(BaseModel):
     """Estado persistente para ejecución duradera (Agent State)."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     session_id: str
     messages: list[dict[str, Any]] = []
     variables: dict[str, Any] = {}
@@ -26,13 +29,15 @@ class NightShiftState(BaseModel):
     retry_count: int = 0
     max_retries: int = 3
     is_paused: bool = False
-    
+
     @classmethod
     def create(cls, session_id: str | None = None):
         return cls(session_id=session_id or str(uuid.uuid4()))
 
+
 class SupervisorNode:
     """Clase base para Nodos de LangGraph."""
+
     def __init__(self, name: str):
         self.name = name
 
@@ -40,33 +45,37 @@ class SupervisorNode:
         """La mutación del estado O(1)."""
         raise NotImplementedError
 
+
 class LangGraphSupervisorError(Exception):
     pass
+
 
 class CortexLangGraphSupervisor:
     """
     Supervisor O(1) de LangGraph adaptado para CORTEX persistency.
     Implementa el paradigma "Night Shift": Durable Execution & Human-in-the-Loop.
     """
-    
+
     def __init__(self, name: str = "cortex-swarm-supervisor"):
         if not LANGGRAPH_AVAILABLE:
-            raise LangGraphSupervisorError("LangGraph no está instalado. Ejecute 'pip install langgraph'.")
-            
+            raise LangGraphSupervisorError(
+                "LangGraph no está instalado. Ejecute 'pip install langgraph'."
+            )
+
         self.name = name
         self.nodes: dict[str, SupervisorNode] = {}
         self.graph_builder = StateGraph(NightShiftState)
         self.compiled_app = None
-        
+
     def add_node(self, node: SupervisorNode):
         """Añade un nodo al grafo."""
         self.nodes[node.name] = node
-        
+
         # Envolvermos el async `execute` para adaptarlo a LangGraph
         async def node_wrapper(state: NightShiftState) -> NightShiftState:
             logger.info("🔄 [SUPERVISOR] Ejecutando nodo: %s", node.name)
             return await node.execute(state)
-            
+
         self.graph_builder.add_node(node.name, node_wrapper)
 
     def add_edge(self, source: str, target: str):
@@ -81,12 +90,14 @@ class CortexLangGraphSupervisor:
         """Compila la aplicación en un DAG O(1)."""
         self.compiled_app = self.graph_builder.compile(checkpointer=checkpointer)
         return self.compiled_app
-        
-    async def stream_execution(self, initial_state: NightShiftState) -> AsyncGenerator[NightShiftState, None]:
+
+    async def stream_execution(
+        self, initial_state: NightShiftState
+    ) -> AsyncGenerator[NightShiftState, None]:
         """Arranca el enjambre y cede estado por cada tick de progreso."""
         if not self.compiled_app:
             self.compile()
-            
+
         logger.info("🚀 [SUPERVISOR] Lanzando Night Shift (Session: %s)", initial_state.session_id)
         # En la API real de langgraph (langgraph>=0.0.x), astream funciona diferente dependiendo de la versión
         # Pero mockearemos este flujo para compatibilidad.

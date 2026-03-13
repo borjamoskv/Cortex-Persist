@@ -45,7 +45,7 @@ try:
     FastMCP = _FastMCP
 except ImportError:
     FastMCP = None  # type: ignore
-    logger.debug("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
+    logger.debug("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
 
 # ─── Server Context ──────────────────────────────────────────────────
@@ -285,7 +285,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     function focused on orchestration (cognitive complexity ≤ 5).
     """
     if not _MCP_AVAILABLE:
-        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
+        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
     cfg = config or MCPServerConfig()
     mcp = FastMCP(  # type: ignore[reportOptionalCall]

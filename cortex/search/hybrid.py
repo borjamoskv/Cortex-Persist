@@ -132,7 +132,9 @@ def hybrid_search_sync(
     sem_results = semantic_search_sync(
         conn, query_embedding, fetch_limit, tenant_id=tenant_id, project=project
     )
-    txt_results = text_search_sync(conn, query, tenant_id=tenant_id, project=project, limit=fetch_limit)
+    txt_results = text_search_sync(
+        conn, query, tenant_id=tenant_id, project=project, limit=fetch_limit
+    )
 
     total_w = vector_weight + text_weight
     w_vec = vector_weight / total_w

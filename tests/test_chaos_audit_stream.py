@@ -30,8 +30,8 @@ from cortex.red_team.hydra_chaos import (
 )
 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────
+
 
 @pytest.fixture(autouse=True)
 def fresh_ghost_pipeline():
@@ -58,6 +58,7 @@ def chaos_engine() -> HydraChaosEngine:
 
 # ── MockRedisClient Unit Tests ────────────────────────────────────────
 
+
 class TestMockRedisClient:
     """Verify the mock itself behaves correctly.
     Note: Failure logic moved to ChaosGate.
@@ -79,12 +80,15 @@ class TestMockRedisClient:
 
 # ── Chaos Scenario Tests ──────────────────────────────────────────────
 
+
 class TestRedisKillScenario:
     """Scenario 1: Redis daemon killed abruptly (SIGKILL simulation)."""
 
     @pytest.mark.asyncio
     async def test_redis_kill_captures_ghost(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """When Redis dies mid-operation, the error MUST become a Ghost."""
         with patch(
@@ -93,7 +97,8 @@ class TestRedisKillScenario:
             return_value=1,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.KILL, mock_redis,
+                ChaosScenario.KILL,
+                mock_redis,
             )
 
         assert result.ghost_captured, "Ghost MUST be captured on Redis kill"
@@ -104,7 +109,9 @@ class TestRedisKillScenario:
 
     @pytest.mark.asyncio
     async def test_redis_kill_latency_under_threshold(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """Ghost capture on Redis kill MUST complete in O(1) time (< 100ms)."""
         with patch(
@@ -113,7 +120,8 @@ class TestRedisKillScenario:
             return_value=1,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.KILL, mock_redis,
+                ChaosScenario.KILL,
+                mock_redis,
             )
 
         latency_ms = result.latency_ns / 1_000_000
@@ -125,7 +133,9 @@ class TestStreamCorruptionScenario:
 
     @pytest.mark.asyncio
     async def test_stream_corruption_captures_ghost(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """Corrupted stream data MUST be intercepted as a Ghost."""
         with patch(
@@ -134,7 +144,8 @@ class TestStreamCorruptionScenario:
             return_value=2,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.CORRUPTION, mock_redis,
+                ChaosScenario.CORRUPTION,
+                mock_redis,
             )
 
         assert result.ghost_captured, "Ghost MUST be captured on stream corruption"
@@ -144,7 +155,8 @@ class TestStreamCorruptionScenario:
 
     @pytest.mark.asyncio
     async def test_corruption_does_not_crash_cache(
-        self, mock_redis: MockRedisClient,
+        self,
+        mock_redis: MockRedisClient,
     ):
         """Corrupted JSON in cache MUST NOT crash the DistributedSovereignCache."""
         from cortex.memory.distributed_cache import DistributedSovereignCache
@@ -169,7 +181,9 @@ class TestPartialWriteScenario:
 
     @pytest.mark.asyncio
     async def test_partial_write_captures_ghost(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """Partial write MUST be captured as Ghost with data-in-limbo metadata."""
         with patch(
@@ -178,7 +192,8 @@ class TestPartialWriteScenario:
             return_value=3,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.PARTIAL_FAILURE, mock_redis,
+                ChaosScenario.PARTIAL_FAILURE,
+                mock_redis,
             )
 
         assert result.ghost_captured, "Partial write MUST generate Ghost"
@@ -189,7 +204,8 @@ class TestPartialWriteScenario:
 
     @pytest.mark.asyncio
     async def test_partial_write_marks_cache_unavailable(
-        self, mock_redis: MockRedisClient,
+        self,
+        mock_redis: MockRedisClient,
     ):
         """After partial write, cache MUST be marked unavailable."""
         from cortex.memory.distributed_cache import DistributedSovereignCache
@@ -207,7 +223,9 @@ class TestConsumerStallScenario:
 
     @pytest.mark.asyncio
     async def test_consumer_stall_captures_ghost(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """Consumer stall MUST be captured as Ghost without blocking."""
         with patch(
@@ -216,7 +234,8 @@ class TestConsumerStallScenario:
             return_value=4,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.TIMEOUT, mock_redis,
+                ChaosScenario.TIMEOUT,
+                mock_redis,
             )
 
         assert result.ghost_captured, "Consumer stall MUST generate Ghost"
@@ -230,7 +249,9 @@ class TestCascadeFailureScenario:
 
     @pytest.mark.asyncio
     async def test_cascade_failure_captures_all_ghosts(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """ALL concurrent failures MUST be captured — zero leaks."""
         with patch(
@@ -239,7 +260,8 @@ class TestCascadeFailureScenario:
             return_value=5,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.BYZANTINE, mock_redis,
+                ChaosScenario.BYZANTINE,
+                mock_redis,
             )
 
         assert result.ghost_captured, "Cascade MUST capture all Ghosts"
@@ -250,7 +272,9 @@ class TestCascadeFailureScenario:
 
     @pytest.mark.asyncio
     async def test_cascade_latency_bounded(
-        self, chaos_engine: HydraChaosEngine, mock_redis: MockRedisClient,
+        self,
+        chaos_engine: HydraChaosEngine,
+        mock_redis: MockRedisClient,
     ):
         """Cascade failure recovery MUST be O(1) — bounded latency."""
         with patch(
@@ -259,7 +283,8 @@ class TestCascadeFailureScenario:
             return_value=6,
         ):
             result = await chaos_engine.execute_scenario(
-                ChaosScenario.BYZANTINE, mock_redis,
+                ChaosScenario.BYZANTINE,
+                mock_redis,
             )
 
         latency_ms = result.latency_ns / 1_000_000
@@ -268,12 +293,14 @@ class TestCascadeFailureScenario:
 
 # ── Full Siege Test (Ouroboros Loop) ──────────────────────────────────
 
+
 class TestFullSiege:
     """Execute ALL chaos scenarios in sequence — the Ouroboros Loop."""
 
     @pytest.mark.asyncio
     async def test_full_siege_all_sovereign(
-        self, chaos_engine: HydraChaosEngine,
+        self,
+        chaos_engine: HydraChaosEngine,
     ):
         """Every chaos scenario MUST pass sovereignty check."""
         with patch(
@@ -303,7 +330,8 @@ class TestFullSiege:
 
     @pytest.mark.asyncio
     async def test_siege_report_structure(
-        self, chaos_engine: HydraChaosEngine,
+        self,
+        chaos_engine: HydraChaosEngine,
     ):
         """Report must contain structured data for all scenarios."""
         with patch(
@@ -325,6 +353,7 @@ class TestFullSiege:
 
 
 # ── ErrorGhostPipeline Integration ────────────────────────────────────
+
 
 class TestGhostPipelineIntegration:
     """Verify that chaos-generated errors actually flow through the ErrorGhostPipeline."""
@@ -390,7 +419,9 @@ class TestGhostPipelineIntegration:
                     raise ConnectionError("Redis connection refused: daemon killed (SIGKILL)")
                 except ConnectionError as e:
                     await pipeline.capture(
-                        e, source="chaos:cascade", project="TEST",
+                        e,
+                        source="chaos:cascade",
+                        project="TEST",
                     )
 
         # First should be captured, rest deduped or rate-limited
@@ -399,6 +430,7 @@ class TestGhostPipelineIntegration:
 
 
 # ── ChaosResult Dataclass Tests ───────────────────────────────────────
+
 
 class TestChaosResult:
     """Verify the ChaosResult sovereignty invariant."""

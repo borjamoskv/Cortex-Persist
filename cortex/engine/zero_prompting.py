@@ -276,8 +276,7 @@ class ZeroPromptingEvolutionStrategy:
         subagent.mutation.parameters[param_key] = correction_factor * 100
 
         desc = (
-            f"autonomous_mutation: correction={correction_factor:.2f}, "
-            f"+fitness={fitness_boost:.2f}"
+            f"autonomous_mutation: correction={correction_factor:.2f}, +fitness={fitness_boost:.2f}"
         )
         return desc
 

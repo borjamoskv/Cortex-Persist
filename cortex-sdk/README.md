@@ -1,4 +1,4 @@
-# cortex-memory
+# cortex-persist
 
 > **Give your AI agent a brain that remembers.**
 
@@ -7,13 +7,13 @@ Persistent memory infrastructure for AI agents. Store, search, and verify memori
 ## Install
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ## Quickstart
 
 ```python
-from cortex_memory import CortexMemory
+from cortex_persist import CortexMemory
 
 # Initialize with your API key
 memory = CortexMemory(api_key="ctx_your_key_here")
@@ -44,7 +44,7 @@ print(f"Calls used: {usage['calls_used']}/{usage['calls_limit']}")
 ## Async Usage
 
 ```python
-from cortex_memory import AsyncCortexMemory
+from cortex_persist import AsyncCortexMemory
 
 async with AsyncCortexMemory(api_key="ctx_...") as memory:
     await memory.store("my-agent", "Important fact")

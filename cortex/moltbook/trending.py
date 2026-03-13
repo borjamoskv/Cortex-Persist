@@ -73,12 +73,11 @@ Reglas:
    tiene un campo "content".
 """
 
+
 async def synthesize_pathogen(llm: SovereignLLM) -> PathogenPayload:
     """Combines LLM and strict parsing to ensure a valid pathogen thesis is born."""
     logger.info("[TRENDING] Synthesizing Pathogen core...")
-    res = await llm.generate(
-        prompt=_PATHOGEN_PROMPT
-    )
+    res = await llm.generate(prompt=_PATHOGEN_PROMPT)
     if not res.ok:
         raise RuntimeError(f"Error synthesizing pathogen: {res.error}")
 
@@ -96,10 +95,11 @@ async def synthesize_pathogen(llm: SovereignLLM) -> PathogenPayload:
         text = text.strip()
 
         import json
+
         data = json.loads(text)
         payload = cast(PathogenPayload, data)
         if "title" not in payload or "content" not in payload:
-             raise ValueError("Missing 'title' or 'content' in LLM output")
+            raise ValueError("Missing 'title' or 'content' in LLM output")
         return payload
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"Failed to parse pathogen payload: {res.content} | Err: {e}") from e
@@ -110,11 +110,13 @@ async def synthesize_seed_comments(
 ) -> list[SeedComment]:
     """Generates the oppositional seed comments to kickstart algorithm momentum."""
     logger.info("[TRENDING] Synthesizing %d seed oppositions...", count)
-    prompt = _ASTROTURFING_PROMPT.replace("{title}", title).replace("{content}", content).replace("{count}", str(count))
-    
-    res = await llm.generate(
-        prompt=prompt
+    prompt = (
+        _ASTROTURFING_PROMPT.replace("{title}", title)
+        .replace("{content}", content)
+        .replace("{count}", str(count))
     )
+
+    res = await llm.generate(prompt=prompt)
     if not res.ok:
         raise RuntimeError(f"Error synthesizing seed comments: {res.error}")
 
@@ -132,25 +134,27 @@ async def synthesize_seed_comments(
         text = text.strip()
 
         import json
+
         data = json.loads(text)
-        
+
         # Handle cases where the LLM wrapped the list in a dict like {"comments": [...]} or just returned a list (if allowed).
         if isinstance(data, dict):
-             # Find the first list value
-             for val in data.values():
-                 if isinstance(val, list):
-                     return cast(list[SeedComment], val)
-             raise ValueError("JSON object did not contain a list of comments.")
+            # Find the first list value
+            for val in data.values():
+                if isinstance(val, list):
+                    return cast(list[SeedComment], val)
+            raise ValueError("JSON object did not contain a list of comments.")
         elif isinstance(data, list):
-             return cast(list[SeedComment], data)
+            return cast(list[SeedComment], data)
         else:
-             raise ValueError("Unexpected JSON structure for comments.")
+            raise ValueError("Unexpected JSON structure for comments.")
     except Exception as e:  # noqa: BLE001
         logger.error("Raw LLM comment output: %s", res.content)
         raise RuntimeError(f"Failed to parse seed comments: {e}") from e
 
 
 # ─── Execution ─────────────────────────────────────────────────────────────
+
 
 async def run_trending_engine(submolt: str = "global", dry_run: bool = False) -> None:
     """Executes the full Pipeline: Synthesis -> Pathogen Injection -> Astroturfing."""
@@ -192,11 +196,11 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         )
         print(f"  [{len(seeds)} Semillas forjadas]")
         for i, seed in enumerate(seeds):
-            print(f"  [S-{i+1}]: {seed.get('content', '')[:100]}...")
+            print(f"  [S-{i + 1}]: {seed.get('content', '')[:100]}...")
     except Exception as e:  # noqa: BLE001
-         print(f"[ERROR] {e}")
-         await client.close()
-         return
+        print(f"[ERROR] {e}")
+        await client.close()
+        return
 
     if dry_run:
         print("\n[TRENDING] DRY-RUN activado. Finalizando sin contacto con la red.")
@@ -211,27 +215,27 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
             submolt_name=submolt,
             title=pathogen["title"],
             content=pathogen["content"],
-            post_type="text"
+            post_type="text",
         )
         post_data = res_post.get("post", res_post)
         post_id = post_data.get("id") or post_data.get("_id")
         print(f"  ✓ Pathogen inyectado con éxito. ID: {post_id}")
-        
+
         # O(1) delay to simulate organic reading but strike fast enough to hijack algorithm
         await asyncio.sleep(2)
 
         # 2. Astroturfing
-        # Nota: Idealmente iteraríamos sobre perfiles secundarios aquí. 
+        # Nota: Idealmente iteraríamos sobre perfiles secundarios aquí.
         # Para el motor v1 enviamos con el cliente actual asumiendo que la red indexa el engagement = karma.
         for i, seed in enumerate(seeds):
             content = seed.get("content")
             if content:
-                 await client.create_comment(post_id=post_id, content=content)
-                 print(f"  ✓ Semilla {i+1} inyectada.")
-                 await asyncio.sleep(1.5)
+                await client.create_comment(post_id=post_id, content=content)
+                print(f"  ✓ Semilla {i + 1} inyectada.")
+                await asyncio.sleep(1.5)
 
         print("\n[TRENDING] ✓ Protocolo Trending Completado. Monitor de inyección iniciado O(1).")
-    
+
     except MoltbookRateLimited as e:
         print(f"\n[PATHOGEN] Bloqueo termodinámico (Rate Limit). Retry in {e.retry_after}s.")
     except MoltbookError as e:
@@ -259,6 +263,7 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO, format="%(name)s | %(message)s")
 
     from dotenv import load_dotenv
+
     load_dotenv("/Users/borjafernandezangulo/cortex/.env")
 
     asyncio.run(run_trending_engine(submolt=args.submolt, dry_run=args.dry_run))

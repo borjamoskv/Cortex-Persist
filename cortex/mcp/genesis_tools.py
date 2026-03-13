@@ -101,9 +101,7 @@ def register_genesis_tools(
             f"  CHRONOS-1: {result.hours_saved:.2f}h saved",
         ]
         if result.validation_errors:
-            lines.append(
-                f"  Warnings: {len(result.validation_errors)}"
-            )
+            lines.append(f"  Warnings: {len(result.validation_errors)}")
         for f in result.files_created:
             lines.append(f"  → {f}")
 
@@ -123,12 +121,11 @@ def register_genesis_tools(
         from cortex.genesis import GenesisEngine, SystemSpec
         from cortex.genesis.models import ComponentSpec
 
-        comps = [
-            ComponentSpec(**c)
-            for c in _default_comps_for_type(system_type)
-        ]
+        comps = [ComponentSpec(**c) for c in _default_comps_for_type(system_type)]
         spec = SystemSpec(
-            name=name, system_type=system_type, components=comps,
+            name=name,
+            system_type=system_type,
+            components=comps,
         )
 
         engine = GenesisEngine()
@@ -156,9 +153,7 @@ def register_genesis_tools(
     @mcp.tool()
     async def cortex_genesis_specs() -> str:
         """List available YAML specification templates."""
-        specs_dir = (
-            Path(__file__).parent.parent / "genesis" / "specs"
-        )
+        specs_dir = Path(__file__).parent.parent / "genesis" / "specs"
         if not specs_dir.exists():
             return "No specs directory found."
 

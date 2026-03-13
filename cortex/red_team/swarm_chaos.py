@@ -51,7 +51,8 @@ class RedTeamSwarm:
                 reason = f"Collapse detected in {target_service} via {latest['collapse_type']}"
 
                 logger.critical(
-                    "Red Team Swarm: Falsification SUCCESS for %s. Generating antibody.", target_func.__name__
+                    "Red Team Swarm: Falsification SUCCESS for %s. Generating antibody.",
+                    target_func.__name__,
                 )
                 NemesisProtocol.append_antibody(pattern, reason)
                 return True

@@ -1,6 +1,7 @@
 """Gidatu UI/Desktop Orchestration Handler.
 Ω₃ (Byzantine Default): Enforces SafeZones and strict app-scoping.
 """
+
 import logging
 import sys
 import time
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
     from cortex.gateway import GatewayRequest
 
 logger = logging.getLogger("cortex.gateway.gidatu")
+
 
 class GidatuHandler:
     """Handles UI orchestration requests using the Gidatu skill."""
@@ -23,7 +25,7 @@ class GidatuHandler:
         if str(self._skill_path) not in sys.path:
             sys.path.insert(0, str(self._skill_path))
 
-    async def handle(self, req: 'GatewayRequest') -> dict[str, Any]:
+    async def handle(self, req: "GatewayRequest") -> dict[str, Any]:
         """Process a Gidatu action request."""
         try:
             # Ghost checking
@@ -38,9 +40,12 @@ class GidatuHandler:
 
         # logic for actions - Wrap in to_thread for non-blocking IO
         import asyncio
+
         return await asyncio.to_thread(self._sync_handle, action, params, timeout, app)
 
-    def _sync_handle(self, action: str, params: dict, timeout: float, app: str | None) -> dict[str, Any]:
+    def _sync_handle(
+        self, action: str, params: dict, timeout: float, app: str | None
+    ) -> dict[str, Any]:
         from ghost_chain import Ghost
         from ghost_platform import platform_info
         from ghost_vlm import find_text_on_screen
@@ -49,6 +54,7 @@ class GidatuHandler:
             # Native SafeZone enforcement (Ω₃)
             if "safe_zone" in params:
                 from ghost_guard import SafeZone
+
                 sz = params["safe_zone"]
                 g.guard_zone(SafeZone(sz["x"], sz["y"], sz["w"], sz["h"]))
 
@@ -91,6 +97,7 @@ class GidatuHandler:
     def _do_click_text(self, g, params, timeout):
         from ghost_resilience import wait_until
         from ghost_vlm import find_text_on_screen
+
         text = params.get("text")
         if not text:
             raise ValueError("params.text is required for click_text")

@@ -73,7 +73,7 @@ Tu Capa de Memoria (Mem0 / Zep / Letta / Custom)
 ### Instalar
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### Almacenar una Decisión y Verificarla

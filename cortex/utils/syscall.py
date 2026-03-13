@@ -56,7 +56,7 @@ class SovereignSys:
                 timeout=timeout,
                 shell=False,  # Hard requirement: no shell interpolation
                 check=False,
-                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
             )
             return (result.stdout + result.stderr).strip()
         except subprocess.TimeoutExpired:

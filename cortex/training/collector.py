@@ -49,7 +49,7 @@ class TrajectoryCollector:
 
         project = episodes[0].project or "unknown"
         issue_description = self._extract_issue_description(episodes)
-        
+
         actions, metadata = self._process_episodes(episodes)
         outcome = self._determine_outcome(episodes)
 
@@ -59,7 +59,7 @@ class TrajectoryCollector:
             issue_description=issue_description,
             actions=[a for a in actions if a.tool != "unknown"],
             outcome=outcome,
-            metadata=metadata
+            metadata=metadata,
         )
 
     def _extract_issue_description(self, episodes: list[Episode]) -> str:
@@ -83,13 +83,13 @@ class TrajectoryCollector:
             if ep.event_type == "decision":
                 if current_action:
                     actions.append(current_action)
-                
+
                 current_action = Action(
                     tool=ep.meta.get("tool", "unknown"),
                     input=ep.meta.get("input", {}),
-                    timestamp=datetime.fromisoformat(ep.created_at)
+                    timestamp=datetime.fromisoformat(ep.created_at),
                 )
-            
+
             elif ep.event_type in ("discovery", "insight", "error"):
                 if current_action and not current_action.observation:
                     prefix = "ERROR: " if ep.event_type == "error" else ""
@@ -99,7 +99,7 @@ class TrajectoryCollector:
 
         if current_action:
             actions.append(current_action)
-        
+
         return actions, metadata
 
     def _determine_outcome(self, episodes: list[Episode]) -> str:
@@ -122,27 +122,34 @@ class TrajectoryCollector:
                 continue
 
             conversation = [
-                {"from": "system", "value": f"Context: {traj.project}\nIssue: {traj.issue_description}"}
+                {
+                    "from": "system",
+                    "value": f"Context: {traj.project}\nIssue: {traj.issue_description}",
+                }
             ]
-            
+
             for action in traj.actions:
-                conversation.append({
-                    "from": "human",
-                    "value": f"Action: {action.tool}({json.dumps(action.input)})"
-                })
+                conversation.append(
+                    {"from": "human", "value": f"Action: {action.tool}({json.dumps(action.input)})"}
+                )
                 if action.observation:
-                    conversation.append({
-                        "from": "gpt",
-                        "value": action.observation
-                    })
-            
+                    conversation.append({"from": "gpt", "value": action.observation})
+
             if format_type == "sharegpt":
                 formatted_data.append({"conversations": conversation})
             elif format_type == "openai":
-                formatted_data.append({"messages": [
-                    {"role": "system" if c["from"] == "system" else ("user" if c["from"] == "human" else "assistant"),
-                     "content": c["value"]}
-                    for c in conversation
-                ]})
-        
+                formatted_data.append(
+                    {
+                        "messages": [
+                            {
+                                "role": "system"
+                                if c["from"] == "system"
+                                else ("user" if c["from"] == "human" else "assistant"),
+                                "content": c["value"],
+                            }
+                            for c in conversation
+                        ]
+                    }
+                )
+
         return json.dumps(formatted_data, indent=2)

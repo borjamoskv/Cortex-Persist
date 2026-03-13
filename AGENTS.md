@@ -3,7 +3,7 @@
 > **Trust Infrastructure for Autonomous AI**
 > Cryptographic verification · Audit trails · EU AI Act compliance · AI agent memory
 >
-> `cortex-memory` **v0.3.0b1** · Apache-2.0 · Python ≥3.10
+> `cortex-persist` **v0.3.0b1** · Apache-2.0 · Python ≥3.10
 
 ---
 
@@ -373,4 +373,4 @@ DATABASE_URL             # PostgreSQL/AlloyDB (optional: [cloud])
 
 ---
 
-*CORTEX Persist · `cortex-memory` v0.3.0b1 · Updated 2026-03-02*
+*CORTEX Persist · `cortex-persist` v0.3.0b1 · Updated 2026-03-02*

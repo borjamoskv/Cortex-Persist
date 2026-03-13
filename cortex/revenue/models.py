@@ -62,9 +62,7 @@ class Opportunity:
     source_url: str = ""
     meta: dict[str, Any] = field(default_factory=dict)
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def roi_score(self) -> float:
@@ -114,9 +112,7 @@ class ExecutionResult:
     error: str = ""
     duration_seconds: float = 0.0
     meta: dict[str, Any] = field(default_factory=dict)
-    executed_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    executed_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def net_profit(self) -> Decimal:
@@ -169,11 +165,7 @@ class RevenueReport:
         """Execution success rate as a percentage."""
         if self.total_executed == 0:
             return 0.0
-        successful = sum(
-            1
-            for v in self.by_vector.values()
-            if v.get("successful", 0) > 0
-        )
+        successful = sum(1 for v in self.by_vector.values() if v.get("successful", 0) > 0)
         return (successful / self.total_executed) * 100
 
 

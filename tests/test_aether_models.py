@@ -6,16 +6,15 @@ No I/O, no network, no database. Pure unit tests.
 from __future__ import annotations
 
 from cortex.aether.models import (
+    AetherAlert,
     AgentTask,
     CriticOutput,
-    AetherAlert,
     PlanOutput,
     TaskSource,
     TaskStatus,
     TesterOutput,
     ToolCall,
 )
-
 
 # ─── TaskStatus ──────────────────────────────────────────────────────
 
@@ -27,8 +26,16 @@ class TestTaskStatus:
         assert TaskStatus.FAILED == "failed"
 
     def test_all_statuses_exist(self):
-        expected = {"pending", "planning", "executing", "critiquing",
-                    "testing", "done", "failed", "cancelled"}
+        expected = {
+            "pending",
+            "planning",
+            "executing",
+            "critiquing",
+            "testing",
+            "done",
+            "failed",
+            "cancelled",
+        }
         actual = {s.value for s in TaskStatus}
         assert actual == expected
 
@@ -91,10 +98,22 @@ class TestAgentTask:
         task = AgentTask(title="T", description="D", repo_path="/tmp")
         d = task.to_dict()
         required_keys = {
-            "id", "title", "description", "repo_path", "source",
-            "status", "created_at", "updated_at", "plan", "result",
-            "branch", "pr_url", "error", "agent_id",
-            "github_issue_number", "github_repo",
+            "id",
+            "title",
+            "description",
+            "repo_path",
+            "source",
+            "status",
+            "created_at",
+            "updated_at",
+            "plan",
+            "result",
+            "branch",
+            "pr_url",
+            "error",
+            "agent_id",
+            "github_issue_number",
+            "github_repo",
         }
         assert required_keys <= set(d.keys())
 
@@ -145,7 +164,7 @@ class TestPlanOutput:
         plan = PlanOutput(steps=[], files_to_touch=[], tests_to_run=[])
         output = plan.to_prompt_str()
         assert "unknown" in output  # No files → "unknown"
-        assert "pytest" in output   # No tests → "pytest"
+        assert "pytest" in output  # No tests → "pytest"
 
 
 # ─── CriticOutput ────────────────────────────────────────────────────

@@ -26,10 +26,12 @@ _spoof_manager = SpoofManager()
 
 # --- OpenAI API Schemas ---
 
+
 class OpenAIMessage(BaseModel):
     role: str
     content: str
     name: str | None = None
+
 
 class OpenAICompletionRequest(BaseModel):
     model: str
@@ -38,7 +40,9 @@ class OpenAICompletionRequest(BaseModel):
     max_tokens: int | None = 4096
     stream: bool | None = False
 
+
 # --- Routes ---
+
 
 @router.post("/chat/completions")
 async def openai_chat_completions(
@@ -47,27 +51,28 @@ async def openai_chat_completions(
     authorization: str | None = Header(None),
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
-    
+
     # 1. Telemetry Strip & Logging
     _spoof_manager.log_telemetry(dict(request.headers), body.model_dump())
-    
+
     # 2. Translate to Sovereign Prompt
     prompt = _spoof_manager.to_cortex_prompt(body.model_dump())
-    
+
     start_time = time.time()
 
     if body.stream:
-        # Falling back to a simpler stream for now as SovereignLLM.stream is not fully implemented 
+        # Falling back to a simpler stream for now as SovereignLLM.stream is not fully implemented
         # in the same way as generate. But for high reliability, we prefer generate.
         # Actually, let's implement streaming in SovereignLLM?
         # For now, let's use the standard Manager for streaming and Sovereign for non-streaming.
         from cortex.llm.manager import LLMManager
+
         mgr = LLMManager()
-        
+
         async def event_generator():
-            request_id = f"chatcmpl-{int(time.time()*1000)}"
+            request_id = f"chatcmpl-{int(time.time() * 1000)}"
             created = int(time.time())
-            
+
             try:
                 async for chunk in mgr.stream(
                     prompt="\n".join([m["content"] for m in prompt.working_memory]),
@@ -82,17 +87,13 @@ async def openai_chat_completions(
                         "created": created,
                         "model": body.model,
                         "choices": [
-                            {
-                                "index": 0,
-                                "delta": {"content": chunk},
-                                "finish_reason": None
-                            }
-                        ]
+                            {"index": 0, "delta": {"content": chunk}, "finish_reason": None}
+                        ],
                     }
                     yield f"data: {JSONResponse(data).body.decode()}\n\n"
             except Exception as e:  # noqa: BLE001 — streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)
-                yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+                yield f'data: {{"error": "{str(e)}"}}\n\n'
 
             yield "data: [DONE]\n\n"
 
@@ -109,22 +110,25 @@ async def openai_chat_completions(
                 system=prompt.system_instruction,
                 intent=prompt.intent,
             )
-        
+
         latency = (time.time() - start_time) * 1000
         logger.info(
-            "🛡️ [SPOOF] Serviced %s via %s (%s) in %.2fms", 
-            body.model, result.provider, prompt.intent, latency
+            "🛡️ [SPOOF] Serviced %s via %s (%s) in %.2fms",
+            body.model,
+            result.provider,
+            prompt.intent,
+            latency,
         )
-        
+
         return {
-            "id": f"chatcmpl-{int(time.time()*1000)}",
+            "id": f"chatcmpl-{int(time.time() * 1000)}",
             "object": "chat.completion",
             "created": int(time.time()),
             "model": body.model,
             "usage": {
                 "prompt_tokens": len(str(prompt.working_memory)) // 4,
                 "completion_tokens": len(result.content) // 4,
-                "total_tokens": (len(str(prompt.working_memory)) + len(result.content)) // 4
+                "total_tokens": (len(str(prompt.working_memory)) + len(result.content)) // 4,
             },
             "choices": [
                 {
@@ -133,12 +137,11 @@ async def openai_chat_completions(
                         "content": result.content,
                     },
                     "finish_reason": "stop",
-                    "index": 0
+                    "index": 0,
                 }
             ],
-            "system_fingerprint": "cortex-sovereign-v5"
+            "system_fingerprint": "cortex-sovereign-v5",
         }
     except Exception as e:  # noqa: BLE001 — endpoint boundary
         logger.error("Spoof Completion Error: %s", e)
         raise HTTPException(status_code=500, detail=str(e)) from e
-

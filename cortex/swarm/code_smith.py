@@ -50,7 +50,9 @@ class SandboxExecutor(Protocol):
     async def write_file(self, path: str, content: str) -> None: ...
 
     async def run_command(
-        self, command: str, timeout_s: float = 30.0,
+        self,
+        command: str,
+        timeout_s: float = 30.0,
     ) -> SandboxResult: ...
     async def cleanup(self) -> None: ...
 
@@ -176,16 +178,15 @@ class LocalProcessSandbox:
     __slots__ = ("_tmp_dir",)
 
     def __init__(
-        self, tmp_dir: str | Path | None = None,
+        self,
+        tmp_dir: str | Path | None = None,
     ) -> None:
         import tempfile
 
         if tmp_dir:
             self._tmp_dir = Path(tmp_dir)
         else:
-            self._tmp_dir = Path(
-                tempfile.mkdtemp(prefix="code_smith_")
-            )
+            self._tmp_dir = Path(tempfile.mkdtemp(prefix="code_smith_"))
         self._tmp_dir.mkdir(parents=True, exist_ok=True)
 
     async def write_file(self, path: str, content: str) -> None:
@@ -236,6 +237,7 @@ class LocalProcessSandbox:
     async def cleanup(self) -> None:
         """Remove the sandbox directory."""
         import shutil
+
         shutil.rmtree(self._tmp_dir, ignore_errors=True)
 
 
@@ -313,7 +315,8 @@ class CodeSmith:
             result.phase_reached = SmithPhase.EDIT
             logger.info(
                 "🔨 CodeSmith [%d]: Generating code for '%s' → %s",
-                self._operation_count, change_request.description,
+                self._operation_count,
+                change_request.description,
                 change_request.target_file,
             )
 
@@ -340,16 +343,16 @@ class CodeSmith:
             result.phase_reached = SmithPhase.TEST
 
             # Generate test code
-            test_code = await self._generator.generate_tests(
-                generated_code, change_request.context
-            )
+            test_code = await self._generator.generate_tests(generated_code, change_request.context)
 
             # Write both to sandbox
             await self._sandbox.write_file(
-                "skill_module.py", generated_code,
+                "skill_module.py",
+                generated_code,
             )
             await self._sandbox.write_file(
-                "test_skill_module.py", test_code,
+                "test_skill_module.py",
+                test_code,
             )
 
             # Run tests in sandbox
@@ -361,8 +364,7 @@ class CodeSmith:
 
             if not test_result.success:
                 result.error = (
-                    f"Tests failed (exit={test_result.exit_code}): "
-                    f"{test_result.stderr[:500]}"
+                    f"Tests failed (exit={test_result.exit_code}): {test_result.stderr[:500]}"
                 )
                 logger.warning("❌ CodeSmith: %s", result.error)
                 return result
@@ -379,13 +381,12 @@ class CodeSmith:
             result.success = True
 
             # Record as new KGV
-            self._kgv_tracker.record(
-                change_request.target_file, generated_code, commit_hash
-            )
+            self._kgv_tracker.record(change_request.target_file, generated_code, commit_hash)
 
             logger.info(
                 "🎯 CodeSmith: Skill '%s' evolved successfully. Commit: %s",
-                change_request.skill_id, commit_hash,
+                change_request.skill_id,
+                commit_hash,
             )
 
         except Exception as exc:  # noqa: BLE001
@@ -448,9 +449,7 @@ class CodeSmith:
         if lines:
             error_line = lines[-1].strip()
             # Find the last file reference
-            file_refs = [
-                line.strip() for line in lines if "File " in line
-            ]
+            file_refs = [line.strip() for line in lines if "File " in line]
             if file_refs:
                 return f"{file_refs[-1]} → {error_line}"
             return error_line

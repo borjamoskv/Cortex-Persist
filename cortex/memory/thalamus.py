@@ -72,23 +72,26 @@ class ThalamusGate:
         # 3. Causal Saturation Check (Entropy Containment)
         if parent_decision_id and conn:
             try:
-                child_count = await self._count_children(
-                    conn, parent_decision_id, fact_type
-                )
+                child_count = await self._count_children(conn, parent_decision_id, fact_type)
                 if child_count >= self.max_causal_children:
                     logger.info(
                         "Thalamus: Discarding fact — causal saturation "
                         "(parent=%s, children=%d, type=%s)",
-                        parent_decision_id, child_count, fact_type,
+                        parent_decision_id,
+                        child_count,
+                        fact_type,
                     )
-                    return False, "discard:causal_saturation", {
-                        "parent_id": parent_decision_id,
-                        "children": child_count,
-                    }
+                    return (
+                        False,
+                        "discard:causal_saturation",
+                        {
+                            "parent_id": parent_decision_id,
+                            "children": child_count,
+                        },
+                    )
             except (OSError, RuntimeError, ValueError) as e:
                 logger.warning(
-                    "Thalamus: Causal saturation check failed "
-                    "(degrading gracefully): %s", e
+                    "Thalamus: Causal saturation check failed (degrading gracefully): %s", e
                 )
 
         return True, "encode:new", None
@@ -101,8 +104,7 @@ class ThalamusGate:
     ) -> int:
         """Count how many children of a given type a parent decision has."""
         cursor = await conn.execute(
-            "SELECT COUNT(*) FROM facts "
-            "WHERE parent_decision_id = ? AND fact_type = ?",
+            "SELECT COUNT(*) FROM facts WHERE parent_decision_id = ? AND fact_type = ?",
             (parent_id, fact_type),
         )
         row = await cursor.fetchone()

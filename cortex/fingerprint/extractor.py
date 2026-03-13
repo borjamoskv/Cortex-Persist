@@ -30,8 +30,8 @@ logger = logging.getLogger("cortex.fingerprint")
 
 # Normalization caps
 _SESSION_DENSITY_CAP = 10.0  # 10 facts/day = maximum density
-_DEPTH_CAP = 500.0            # 500 chars avg = maximum depth
-_BREADTH_CAP = 20.0           # 20 distinct projects = fully polymath
+_DEPTH_CAP = 500.0  # 500 chars avg = maximum depth
+_BREADTH_CAP = 20.0  # 20 distinct projects = fully polymath
 
 # Archetype decision boundaries (risk_tolerance, synthesis_drive, caution_index)
 _ARCHETYPES: list[tuple[str, dict]] = [
@@ -87,7 +87,7 @@ def _classify_archetype(
 
 def _fingerprint_completeness(total_facts: int, active_domains: int) -> float:
     """Estimate how complete the fingerprint is based on data volume."""
-    fact_score = _clamp(total_facts / 100.0)   # 100 facts = 100%
+    fact_score = _clamp(total_facts / 100.0)  # 100 facts = 100%
     domain_score = _clamp(active_domains / 10.0)  # 10 domains = 100%
     return round((fact_score * 0.7) + (domain_score * 0.3), 3)
 
@@ -170,15 +170,17 @@ class FingerprintExtractor:
         domain_prefs: list[DomainPreference] = []
         for dp in domain_profiles:
             vel = weekly_velocity.get((dp["project"], dp["fact_type"]), 0.0)
-            domain_prefs.append(DomainPreference(
-                project=dp["project"],
-                fact_type=dp["fact_type"],
-                count=dp["count"],
-                avg_confidence_weight=round(dp["avg_confidence_weight"], 3),
-                dominant_source=dp["dominant_source"],
-                store_frequency_per_week=vel,
-                recency_days=round(dp["recency_days"], 1),
-            ))
+            domain_prefs.append(
+                DomainPreference(
+                    project=dp["project"],
+                    fact_type=dp["fact_type"],
+                    count=dp["count"],
+                    avg_confidence_weight=round(dp["avg_confidence_weight"], 3),
+                    dominant_source=dp["dominant_source"],
+                    store_frequency_per_week=vel,
+                    recency_days=round(dp["recency_days"], 1),
+                )
+            )
 
         # ── Archetype ────────────────────────────────────────────────
         archetype, arch_confidence = _classify_archetype(pattern)

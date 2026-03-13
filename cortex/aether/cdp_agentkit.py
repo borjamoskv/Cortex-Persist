@@ -15,6 +15,7 @@ from typing import Any, Optional
 try:
     from cdp_langchain.agent_toolkits import CdpToolkit
     from cdp_langchain.utils import CdpAgentkitWrapper
+
     CDP_AVAILABLE = True
 except ImportError:
     CDP_AVAILABLE = False
@@ -25,8 +26,8 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # ── Spending Guardrails (Axiom Ω₃: Verify, then trust) ──────────
-MAX_TX_AMOUNT = Decimal("1.0")       # Max per-transaction (ETH equiv)
-MAX_TX_PER_SESSION = 10              # Circuit breaker per boot cycle
+MAX_TX_AMOUNT = Decimal("1.0")  # Max per-transaction (ETH equiv)
+MAX_TX_PER_SESSION = 10  # Circuit breaker per boot cycle
 _tx_count_this_session = 0
 
 
@@ -56,17 +57,12 @@ class CDPSovereignWallet:
         self.network_id = network_id
         self.seed_path = os.path.expanduser(seed_path)
         self.api_key_name = os.getenv("CDP_API_KEY_NAME", "")
-        self.private_key = os.getenv(
-            "CDP_API_KEY_PRIVATE_KEY", ""
-        ).replace("\\n", "\n")
+        self.private_key = os.getenv("CDP_API_KEY_PRIVATE_KEY", "").replace("\\n", "\n")
         self.agentkit: CdpAgentkitWrapper | None = None
         self.tools: list[Any] = []
 
         if not CDP_AVAILABLE:
-            logger.warning(
-                "cdp-langchain not installed. "
-                "Sovereign Wallet in stub-mode."
-            )
+            logger.warning("cdp-langchain not installed. Sovereign Wallet in stub-mode.")
 
     def initialize(self) -> bool:
         """Initialize the MPC wallet, restoring or creating seed."""
@@ -74,16 +70,11 @@ class CDPSovereignWallet:
             return True
 
         if not CDP_AVAILABLE:
-            logger.error(
-                "[CDP] cdp-langchain not installed."
-            )
+            logger.error("[CDP] cdp-langchain not installed.")
             return False
 
         if not self.api_key_name or not self.private_key:
-            logger.error(
-                "[CDP] Missing CDP_API_KEY_NAME or "
-                "CDP_API_KEY_PRIVATE_KEY in ENV."
-            )
+            logger.error("[CDP] Missing CDP_API_KEY_NAME or CDP_API_KEY_PRIVATE_KEY in ENV.")
             return False
 
         wallet_data = None
@@ -96,9 +87,7 @@ class CDPSovereignWallet:
                     self.seed_path,
                 )
             except OSError as e:
-                logger.error(
-                    "[CDP] Seed read failed, creating new: %s", e
-                )
+                logger.error("[CDP] Seed read failed, creating new: %s", e)
 
         try:
             self.agentkit = CdpAgentkitWrapper(
@@ -143,9 +132,7 @@ class CDPSovereignWallet:
         with open(self.seed_path, "w") as f:
             f.write(data)
         os.chmod(self.seed_path, stat.S_IRUSR | stat.S_IWUSR)
-        logger.info(
-            "[CDP] Seed persisted (0600): %s", self.seed_path
-        )
+        logger.info("[CDP] Seed persisted (0600): %s", self.seed_path)
 
     async def get_balance(self, asset: str = "eth") -> str:
         """Return balance for the given asset."""
@@ -155,7 +142,9 @@ class CDPSovereignWallet:
             wallet = self.agentkit.wallet
             loop = asyncio.get_running_loop()
             balance = await loop.run_in_executor(
-                None, wallet.balance, asset,
+                None,
+                wallet.balance,
+                asset,
             )
             return str(balance)
         except AttributeError as e:
@@ -186,20 +175,20 @@ class CDPSovereignWallet:
         if tx_amount > MAX_TX_AMOUNT:
             logger.error(
                 "[CDP] TX BLOCKED: %s exceeds MAX_TX_AMOUNT (%s)",
-                amount, MAX_TX_AMOUNT,
+                amount,
+                MAX_TX_AMOUNT,
             )
             return False
 
         if _tx_count_this_session >= MAX_TX_PER_SESSION:
             logger.error(
                 "[CDP] TX BLOCKED: Session limit reached (%d/%d)",
-                _tx_count_this_session, MAX_TX_PER_SESSION,
+                _tx_count_this_session,
+                MAX_TX_PER_SESSION,
             )
             return False
 
-        if not target_address.startswith("0x") or len(
-            target_address
-        ) != 42:
+        if not target_address.startswith("0x") or len(target_address) != 42:
             logger.error(
                 "[CDP] TX BLOCKED: Invalid address format: %s",
                 target_address,
@@ -208,7 +197,9 @@ class CDPSovereignWallet:
 
         logger.info(
             "[CDP TX] %s %s -> %s",
-            amount, asset.upper(), target_address,
+            amount,
+            asset.upper(),
+            target_address,
         )
 
         def _transfer():
@@ -223,7 +214,8 @@ class CDPSovereignWallet:
             _tx_count_this_session += 1
             logger.info(
                 "[CDP TX CONFIRMED] %d/%d this session",
-                _tx_count_this_session, MAX_TX_PER_SESSION,
+                _tx_count_this_session,
+                MAX_TX_PER_SESSION,
             )
             return True
         except ValueError as e:
@@ -238,6 +230,7 @@ class CDPSovereignWallet:
 
 
 if __name__ == "__main__":
+
     async def run_wallet_test():
         print("--- Testing CDP Sovereign Wallet V3 ---")
         wallet = CDPSovereignWallet(network_id="base-sepolia")

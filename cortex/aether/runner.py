@@ -84,9 +84,7 @@ class AetherAgent:
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
         if plan.repro_test:
             logger.info("🔬 [Ω₆] Identified pathogen: %s", plan.repro_test)
-            logger.info(
-                "     Verifying pathogen existence and failure before execution..."
-            )
+            logger.info("     Verifying pathogen existence and failure before execution...")
             setup_res = toolkit.bash(plan.repro_test)
             if "[FAIL]" not in setup_res:
                 logger.warning("🚨 [Ω₆] Pathogen did NOT fail. Aborting fix.")
@@ -112,9 +110,7 @@ class AetherAgent:
                         "If it exists and passes, do NOT apply the fix; instead, investigate or conclude."
                     )
 
-                execute_result = await self._executor.execute(
-                    plan, instruction, toolkit
-                )
+                execute_result = await self._executor.execute(plan, instruction, toolkit)
             except Exception as e:  # noqa: BLE001 — LLM execution failure boundary
                 return await self._fail(task, queue, f"Executor error: {e}")
 
@@ -162,10 +158,7 @@ class AetherAgent:
         if test_result and not test_result.passed:
             logger.warning("❌ Tests failed:\n%s", test_result.output[:500])
             # Non-blocking: we still deliver the branch, but flag in result
-            result_msg = (
-                f"{execute_result}\n\n"
-                f"⚠️  TESTS FAILED:\n{test_result.output[:1000]}"
-            )
+            result_msg = f"{execute_result}\n\n⚠️  TESTS FAILED:\n{test_result.output[:1000]}"
         else:
             result_msg = execute_result
 

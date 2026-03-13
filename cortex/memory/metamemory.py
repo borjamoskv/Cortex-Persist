@@ -44,7 +44,6 @@ __all__ = [
 ]
 
 
-
 _FOK_THRESHOLD: Final[float] = 0.3
 
 _JOL_MIN_EMBEDDING_NORM: Final[float] = 0.1
@@ -52,9 +51,6 @@ _MAX_OUTCOME_HISTORY: Final[int] = 4096
 _MIN_CALIBRATION_SAMPLES: Final[int] = 10
 _TOT_FOK_FLOOR: Final[float] = 0.5
 _TOT_FAILURE_THRESHOLD: Final[int] = 2
-
-
-
 
 
 @dataclass(frozen=True)
@@ -150,7 +146,9 @@ class MetamemoryMonitor:
         best_sim = max(similarities)
         fok = _compute_fok_score(similarities, best_sim, rho)
         accessibility = _compute_accessibility(
-            best_sim, similarities, candidate_engrams,
+            best_sim,
+            similarities,
+            candidate_engrams,
         )
 
         # TOT detection: high FOK but best match below threshold
@@ -184,8 +182,10 @@ class MetamemoryMonitor:
         """
         if not candidate_skills or not intent:
             return MetaJudgment(
-                fok_score=0.0, accessibility=0.0,
-                domain="procedural", source="procedural_fok",
+                fok_score=0.0,
+                accessibility=0.0,
+                domain="procedural",
+                source="procedural_fok",
             )
 
         intent_terms = set(intent.lower().replace("-", " ").split())
@@ -255,8 +255,7 @@ class MetamemoryMonitor:
             return -1.0
 
         total = sum(
-            (o.predicted_confidence - (1.0 if o.actual_success else 0.0)) ** 2
-            for o in outcomes
+            (o.predicted_confidence - (1.0 if o.actual_success else 0.0)) ** 2 for o in outcomes
         )
         return round(total / len(outcomes), 6)
 
@@ -321,9 +320,7 @@ class MetamemoryMonitor:
         total_outcomes = len(self._outcomes)
 
         project_ids = {o.project_id for o in self._outcomes}
-        active_segments = {
-            pid: self.calibration_score(project_id=pid) for pid in project_ids
-        }
+        active_segments = {pid: self.calibration_score(project_id=pid) for pid in project_ids}
 
         successes = sum(1 for o in self._outcomes if o.actual_success)
         avg_confidence = (
@@ -333,9 +330,7 @@ class MetamemoryMonitor:
         )
 
         tier = _calibration_tier(brier)
-        rounded_segments = {
-            k: round(v, 4) if v >= 0 else -1.0 for k, v in active_segments.items()
-        }
+        rounded_segments = {k: round(v, 4) if v >= 0 else -1.0 for k, v in active_segments.items()}
 
         return {
             "brier_score": brier,
@@ -366,7 +361,8 @@ class MetamemoryMonitor:
 
 
 def _compute_similarities(
-    query_embedding: list[float], candidate_engrams: list[Any],
+    query_embedding: list[float],
+    candidate_engrams: list[Any],
 ) -> list[float]:
     """Compute cosine similarities between query and candidate embeddings."""
     similarities: list[float] = []
@@ -378,7 +374,9 @@ def _compute_similarities(
 
 
 def _compute_fok_score(
-    similarities: list[float], best_sim: float, rho: float,
+    similarities: list[float],
+    best_sim: float,
+    rho: float,
 ) -> float:
     """Derive FOK score from similarity distribution."""
     above_threshold = sum(1 for s in similarities if s >= rho)
@@ -386,13 +384,16 @@ def _compute_fok_score(
 
     proximity_score = min(1.0, best_sim / max(rho, 1e-9))
     distribution_score = min(
-        1.0, (above_threshold + partial_matches * 0.5) / max(len(similarities), 1),
+        1.0,
+        (above_threshold + partial_matches * 0.5) / max(len(similarities), 1),
     )
     return 0.6 * proximity_score + 0.4 * distribution_score
 
 
 def _compute_accessibility(
-    best_sim: float, similarities: list[float], candidate_engrams: list[Any],
+    best_sim: float,
+    similarities: list[float],
+    candidate_engrams: list[Any],
 ) -> float:
     """Compute accessibility factoring in energy decay."""
     accessibility = best_sim

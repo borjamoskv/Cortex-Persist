@@ -21,7 +21,10 @@ def _register_trace_episode_tool(mcp, ctx: _MCPContext) -> None:
 
     @mcp.tool()
     async def cortex_trace_episode(
-        query: str = "", fact_id: int = 0, project: str = "", limit: int = 3,
+        query: str = "",
+        fact_id: int = 0,
+        project: str = "",
+        limit: int = 3,
     ) -> str:
         """Trace causal episodes in CORTEX memory."""
         await ctx.ensure_ready()
@@ -40,9 +43,7 @@ def _register_trace_episode_tool(mcp, ctx: _MCPContext) -> None:
                     f"{episode.summary}"
                 )
             if query:
-                episodes = await engine.recall_episode(
-                    query, project, min(max(limit, 1), 10)
-                )
+                episodes = await engine.recall_episode(query, project, min(max(limit, 1), 10))
                 if not episodes:
                     return "No causal episodes found."
                 lines = [f"Found {len(episodes)} causal episode(s):\n"]
@@ -62,7 +63,9 @@ def _register_trace_chain_tool(mcp, ctx: _MCPContext) -> None:
 
     @mcp.tool()
     async def cortex_trace_chain(
-        fact_id: int, direction: str = "down", max_depth: int = 10,
+        fact_id: int,
+        direction: str = "down",
+        max_depth: int = 10,
     ) -> str:
         """Traverse the causal chain from a fact."""
         await ctx.ensure_ready()
@@ -72,7 +75,9 @@ def _register_trace_chain_tool(mcp, ctx: _MCPContext) -> None:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
             chain = await engine.get_causal_chain(
-                fact_id, direction=direction, max_depth=min(max(max_depth, 1), 50),
+                fact_id,
+                direction=direction,
+                max_depth=min(max(max_depth, 1), 50),
             )
         if not chain:
             return f"No causal chain from fact #{fact_id}."
@@ -124,6 +129,7 @@ def _register_handoff_tool(mcp, ctx: _MCPContext) -> None:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
             from cortex.agents.handoff import generate_handoff
+
             handoff = await generate_handoff(engine)
         lines = [
             f"CORTEX Handoff v{handoff.get('version', '?')}:\n",
@@ -160,7 +166,8 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
 
     @mcp.tool()
     async def cortex_embed(
-        text: str = "", task_type: str = "RETRIEVAL_DOCUMENT",
+        text: str = "",
+        task_type: str = "RETRIEVAL_DOCUMENT",
     ) -> str:
         """Generate an embedding vector for text."""
         await ctx.ensure_ready()
@@ -169,6 +176,7 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
         try:
             from cortex import config
             from cortex.embeddings.api_embedder import APIEmbedder
+
             if config.EMBEDDINGS_MODE != "api":
                 return "❌ Embedding via MCP requires API mode. Set CORTEX_EMBEDDINGS=api"
             embedder = APIEmbedder(
@@ -203,6 +211,7 @@ def _register_embed_status_tool(mcp, ctx: _MCPContext) -> None:
         try:
             from cortex import config
             from cortex.embeddings.api_embedder import get_provider_configs
+
             configs = get_provider_configs()
             active = config.EMBEDDINGS_PROVIDER
             lines = [

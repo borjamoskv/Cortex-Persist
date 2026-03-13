@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.engine.apotheosis.audits")
 
+
 class ApotheosisAuditsMixin:
     """Mixin for background audits, REM operations, and singularity checks."""
 
@@ -137,7 +138,9 @@ class ApotheosisAuditsMixin:
 
     def _apply_hormonal_shifts(self, adrenaline: float, cortisol: float, dopamine: float) -> float:
         inertia = 1.0 - getattr(self, "_cognitive_weight", 0.0)
-        base_sleep = 0.0 if adrenaline > 0.5 else getattr(self, "_SLEEP_MIN", 0.1) * max(0.1, inertia)
+        base_sleep = (
+            0.0 if adrenaline > 0.5 else getattr(self, "_SLEEP_MIN", 0.1) * max(0.1, inertia)
+        )
         if adrenaline <= 0.5 and cortisol > 0.8:
             ENDOCRINE.pulse(HormoneType.CORTISOL, -0.1)
         if adrenaline < 0.2 and cortisol > 0.4:
@@ -158,7 +161,9 @@ class ApotheosisAuditsMixin:
             r_factor = 1.0 + (dopamine * 0.5)
             # After reset: base_sleep * (1.0 + growth) * r_factor
             # The exponential only kicks in on subsequent clean rounds below.
-            derived_sleep = min(base_sleep * (1.0 + growth) * r_factor, getattr(self, "_SLEEP_MAX", 60.0))
+            derived_sleep = min(
+                base_sleep * (1.0 + growth) * r_factor, getattr(self, "_SLEEP_MAX", 60.0)
+            )
         else:
             consecutive_clean = min(consecutive_clean + 1, 8)
             ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.02)

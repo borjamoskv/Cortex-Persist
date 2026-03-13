@@ -38,7 +38,9 @@ class HealthScorer:
         """Compute the aggregate health score."""
         if not metrics:
             return HealthScore(
-                score=0.0, grade=Grade.FAILED, metrics=[],
+                score=0.0,
+                grade=Grade.FAILED,
+                metrics=[],
             )
 
         resolved: list[tuple[MetricSnapshot, float]] = []
@@ -54,7 +56,9 @@ class HealthScorer:
         total_weight = sum(w for _, w in resolved)
         if total_weight <= 0:
             return HealthScore(
-                score=0.0, grade=Grade.FAILED, metrics=metrics,
+                score=0.0,
+                grade=Grade.FAILED,
+                metrics=metrics,
             )
 
         weighted_sum = sum(m.value * w for m, w in resolved)
@@ -70,10 +74,7 @@ class HealthScorer:
             "performance": {"wal"},
         }
         for name, metrics_in_index in mapping.items():
-            idx_metrics = [
-                (m, w) for m, w in resolved
-                if m.name in metrics_in_index
-            ]
+            idx_metrics = [(m, w) for m, w in resolved if m.name in metrics_in_index]
             if not idx_metrics:
                 continue
             idx_tw = sum(w for _, w in idx_metrics)
@@ -82,7 +83,9 @@ class HealthScorer:
                 sub_indices[name] = round(idx_w_sum / idx_tw * 100.0, 1)
 
         return HealthScore(
-            score=clamped, grade=grade, metrics=metrics,
+            score=clamped,
+            grade=grade,
+            metrics=metrics,
             sub_indices=sub_indices,
         )
 

@@ -43,9 +43,7 @@ class HindsightConfig:
         llm_api_key: str | None = None,
         embedded: bool = False,
     ) -> None:
-        self.base_url = base_url or os.getenv(
-            "CORTEX_HINDSIGHT_URL", "http://localhost:8888"
-        )
+        self.base_url = base_url or os.getenv("CORTEX_HINDSIGHT_URL", "http://localhost:8888")
         self.bank_id = bank_id or os.getenv("CORTEX_HINDSIGHT_BANK", "cortex-sovereign")
         self.llm_provider = llm_provider or os.getenv(
             "CORTEX_HINDSIGHT_LLM_PROVIDER",
@@ -93,15 +91,14 @@ class HindsightBridge:
                 return self._connect_embedded()
             return self._connect_remote()
         except (ImportError, OSError, ValueError, ConnectionError) as exc:
-            logger.warning(
-                "Hindsight unavailable — operating in CORTEX-only mode: %s", exc
-            )
+            logger.warning("Hindsight unavailable — operating in CORTEX-only mode: %s", exc)
             self._available = False
             return False
         except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight unexpected connect error: %s", exc)
             self._available = False
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
             ErrorGhostPipeline().capture_sync(
                 exc, source="hindsight:connect", project="CORTEX_SYSTEM"
             )
@@ -192,6 +189,7 @@ class HindsightBridge:
         except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight retain unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
             ErrorGhostPipeline().capture_sync(
                 exc, source="hindsight:retain", project="CORTEX_SYSTEM"
             )
@@ -238,6 +236,7 @@ class HindsightBridge:
         except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight recall unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
             ErrorGhostPipeline().capture_sync(
                 exc, source="hindsight:recall", project="CORTEX_SYSTEM"
             )
@@ -270,6 +269,7 @@ class HindsightBridge:
         except Exception as exc:  # noqa: BLE001
             logger.warning("Hindsight reflect unexpected error (non-blocking): %s", exc)
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
             ErrorGhostPipeline().capture_sync(
                 exc, source="hindsight:reflect", project="CORTEX_SYSTEM"
             )
@@ -286,6 +286,7 @@ class HindsightBridge:
                 pass
             except Exception as e:  # noqa: BLE001
                 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
                 ErrorGhostPipeline().capture_sync(
                     e, source="hindsight:close", project="CORTEX_SYSTEM"
                 )

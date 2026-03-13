@@ -29,7 +29,7 @@ from cortex.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 __all__ = ["EntropicQuarantineFilter"]
 
 HIGH_ENTROPY_THRESHOLD = 3.5  # bits — PASS, signal carries real information
-MID_ENTROPY_THRESHOLD = 2.5   # bits — HOLD, marginal signal
+MID_ENTROPY_THRESHOLD = 2.5  # bits — HOLD, marginal signal
 
 _SCORE_PASS = 100.0
 _SCORE_HOLD = 50.0
@@ -42,11 +42,7 @@ def _shannon_entropy(text: str) -> float:
         return 0.0
     counts = Counter(text)
     total = len(text)
-    return -sum(
-        (c / total) * math.log2(c / total)
-        for c in counts.values()
-        if c > 0
-    )
+    return -sum((c / total) * math.log2(c / total) for c in counts.values() if c > 0)
 
 
 def _extract_text(signal: Any) -> str:
@@ -90,8 +86,7 @@ class EntropicQuarantineFilter(ImmuneFilter):
                 verdict=Verdict.PASS,
                 score=_SCORE_PASS,
                 justification=(
-                    f"Entropy {entropy:.3f} bits ≥ {high_t} "
-                    "— signal carries real information."
+                    f"Entropy {entropy:.3f} bits ≥ {high_t} — signal carries real information."
                 ),
                 metadata={"entropy_bits": round(entropy, 4), "text_len": len(text)},
             )

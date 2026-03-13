@@ -1,8 +1,7 @@
 """Tests for the AutoFixPipeline (Phase 2)."""
 
-import asyncio
 from dataclasses import dataclass
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -22,42 +21,56 @@ class MockGhost(GhostProtocol):
 
 def test_classify_ghosts():
     """Test O(1) pattern classification for different errors."""
-    
+
     # 1. Code Bug
-    assert AutoFixPipeline.classify("TypeError: 'NoneType' object is not iterable") == GhostClass.CODE_BUG
+    assert (
+        AutoFixPipeline.classify("TypeError: 'NoneType' object is not iterable")
+        == GhostClass.CODE_BUG
+    )
     assert AutoFixPipeline.classify("ValueError: invalid literal for int()") == GhostClass.CODE_BUG
     assert AutoFixPipeline.classify("ZeroDivisionError: division by zero") == GhostClass.CODE_BUG
 
     # 2. Config Error
-    assert AutoFixPipeline.classify("FileNotFoundError: [Errno 2] No such file") == GhostClass.CONFIG_ERROR
+    assert (
+        AutoFixPipeline.classify("FileNotFoundError: [Errno 2] No such file")
+        == GhostClass.CONFIG_ERROR
+    )
     assert AutoFixPipeline.classify("Missing env var API_KEY") == GhostClass.CONFIG_ERROR
-    
+
     # 3. Import Error
-    assert AutoFixPipeline.classify("ModuleNotFoundError: No module named 'cortex.foo'") == GhostClass.IMPORT_ERROR
-    assert AutoFixPipeline.classify("ImportError: cannot import name 'X' from 'Y' (circular import)") == GhostClass.IMPORT_ERROR
+    assert (
+        AutoFixPipeline.classify("ModuleNotFoundError: No module named 'cortex.foo'")
+        == GhostClass.IMPORT_ERROR
+    )
+    assert (
+        AutoFixPipeline.classify("ImportError: cannot import name 'X' from 'Y' (circular import)")
+        == GhostClass.IMPORT_ERROR
+    )
 
     # 4. Test Failure
     assert AutoFixPipeline.classify("AssertionError: assert False") == GhostClass.TEST_FAILURE
-    assert AutoFixPipeline.classify("FAILED tests/test_foo.py::test_bar - AssertionError") == GhostClass.TEST_FAILURE
+    assert (
+        AutoFixPipeline.classify("FAILED tests/test_foo.py::test_bar - AssertionError")
+        == GhostClass.TEST_FAILURE
+    )
 
     # 5. Doc Gap
     assert AutoFixPipeline.classify("TODO: implement resilient retry") == GhostClass.DOC_GAP
     assert AutoFixPipeline.classify("FIXME: memory leak here") == GhostClass.DOC_GAP
 
     # 6. Unknown
-    assert AutoFixPipeline.classify("Something weird happened with the UI layout") == GhostClass.UNKNOWN
+    assert (
+        AutoFixPipeline.classify("Something weird happened with the UI layout")
+        == GhostClass.UNKNOWN
+    )
 
 
 def test_ghost_to_task():
     """Test that a ghost generates a valid AgentTask dict."""
     pipeline = AutoFixPipeline(repo_path="/testsuite/repo")
-    
-    ghost = MockGhost(
-        id="ghost-123",
-        description="TypeError in processing",
-        project="TESTPROJ"
-    )
-    
+
+    ghost = MockGhost(id="ghost-123", description="TypeError in processing", project="TESTPROJ")
+
     classification = GhostClass.CODE_BUG
     task_dict = pipeline.ghost_to_task(
         ghost_id=ghost.id,
@@ -65,7 +78,7 @@ def test_ghost_to_task():
         classification=classification,
         project=ghost.project,
     )
-    
+
     assert task_dict["id"] == "autofix-ghost-123"
     assert task_dict["repo_path"] == "/testsuite/repo"
     assert "TypeError in processing" in task_dict["description"]
@@ -90,17 +103,17 @@ async def test_process_ghost_success(mock_execute):
     ghost = MockGhost(
         id="ghost-999",
         description="AttributeError: 'str' object has no attribute 'foo'",
-        project="CORTEX"
+        project="CORTEX",
     )
 
     result = await pipeline.process_ghost(ghost)
-    
+
     assert result.success is True
     assert result.classification == GhostClass.CODE_BUG
     assert result.tests_passed is True
     assert result.branch == "autofix/ghost-999"
     assert result.ghost_id == "ghost-999"
-    
+
     mock_execute.assert_called_once()
 
 
@@ -110,16 +123,14 @@ async def test_process_ghost_success(mock_execute):
 async def test_process_ghost_execution_failure(mock_escalate, mock_execute):
     """Test failure during Aether execution escalates the ghost (Ω₅)."""
     mock_execute.side_effect = RuntimeError("Aether crash: OOM")
-    
+
     pipeline = AutoFixPipeline()
     ghost = MockGhost(
-        id="ghost-fail",
-        description="ImportError: No module named 'black'",
-        project="CORTEX"
+        id="ghost-fail", description="ImportError: No module named 'black'", project="CORTEX"
     )
 
     result = await pipeline.process_ghost(ghost)
-    
+
     assert result.success is False
     assert result.classification == GhostClass.IMPORT_ERROR
     assert "Aether crash: OOM" in result.error
@@ -136,15 +147,13 @@ async def test_process_ghost_unknown_classification():
     """Test that unknown ghosts bypass Aether and fail cleanly."""
     pipeline = AutoFixPipeline()
     ghost = MockGhost(
-        id="ghost-unk",
-        description="The frontend button is blue instead of red.",
-        project="CORTEX"
+        id="ghost-unk", description="The frontend button is blue instead of red.", project="CORTEX"
     )
 
     # _execute shouldn't even be called for UNKNOWN
     with patch("cortex.swarm.auto_fix.AutoFixPipeline._execute") as mock_exe:
         result = await pipeline.process_ghost(ghost)
-        
+
         assert result.success is False
         assert result.classification == GhostClass.UNKNOWN
         mock_exe.assert_not_called()

@@ -34,9 +34,7 @@ def audit_frontend() -> None:
         )
         return
 
-    console.print(
-        "[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5."
-    )
+    console.print("[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5.")
     for v in violations:
         console.print(
             f"  -> {v['file']} :: [yellow]{v['function']}[/yellow] (CC: {v['complexity']})"
@@ -59,14 +57,16 @@ def audit_calcification_report(limit: int) -> None:
     table.add_column("Status", justify="center", ratio=1)
 
     for r in results:
-        status = "[bold red]BONEY[/bold red]" if r["is_parasite"] else "[bold green]FLUID[/bold green]"
-        
+        status = (
+            "[bold red]BONEY[/bold red]" if r["is_parasite"] else "[bold green]FLUID[/bold green]"
+        )
+
         # Build subtree for parasite nodes
         if r["is_parasite"]:
             parasites = [n for n in r["nodes"] if n["is_parasite"]][:3]
             sub_lines = []
             for p in parasites:
-                lines = p['end_line'] - p['start_line'] + 1
+                lines = p["end_line"] - p["start_line"] + 1
                 sub_lines.append(
                     f"[dim]↳[/dim] [magenta]{p['name']}[/magenta] [dim]({p['type']})[/dim] "
                     f"→ [yellow]cx:{p['complexity']}[/yellow] "
@@ -74,11 +74,9 @@ def audit_calcification_report(limit: int) -> None:
                 )
             file_cell = f"{r['file']}\n" + "\n".join(sub_lines)
         else:
-            file_cell = r['file']
+            file_cell = r["file"]
 
-        table.add_row(
-            file_cell, str(r["loc"]), str(r["complexity"]), f"{r['score']:.2f}", status
-        )
+        table.add_row(file_cell, str(r["loc"]), str(r["complexity"]), f"{r['score']:.2f}", status)
 
     console.print(table)
     console.print(

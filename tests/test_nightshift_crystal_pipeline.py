@@ -6,11 +6,9 @@ ValidatorNode → PersisterNode, using mocked autodidact backend.
 
 from __future__ import annotations
 
-import asyncio
-import tempfile
 from pathlib import Path
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -20,16 +18,14 @@ from cortex.swarm.knowledge_radar import (
     merge_and_prioritize,
     scan_curated_queue,
 )
+from cortex.swarm.nightshift_daemon import NightShiftCrystalDaemon
 from cortex.swarm.nightshift_pipeline import (
     ExecutorNode,
-    HumanGateNode,
     NightShiftPipeline,
-    PlannerNode,
     PersisterNode,
+    PlannerNode,
     ValidatorNode,
 )
-from cortex.swarm.nightshift_daemon import NightShiftCrystalDaemon
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -76,6 +72,7 @@ def sample_targets() -> list[CrystalTarget]:
 @pytest.fixture
 def autodidact_success_mock():
     """Mock autodidact_pipeline to return success."""
+
     async def _mock(target: str, intent: str = "quick_read", force: bool = False) -> dict:
         return {"estado": "ASIMILADO", "memo_id": f"MEMO_{hash(target) % 10000:04X}"}
 
@@ -85,6 +82,7 @@ def autodidact_success_mock():
 @pytest.fixture
 def autodidact_failure_mock():
     """Mock autodidact_pipeline to return failure."""
+
     async def _mock(target: str, intent: str = "quick_read", force: bool = False) -> dict:
         return {"estado": "FALLO", "error": "Network timeout"}
 

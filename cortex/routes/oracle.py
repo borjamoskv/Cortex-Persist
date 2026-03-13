@@ -38,8 +38,10 @@ _llm_manager = LLMManager()
 
 # ─── Request / Response Models ───────────────────────────────────────
 
+
 class OracleRequest(BaseModel):
     """Request to trigger The Oracle audit on a target."""
+
     target_url: HttpUrl
     agent_type: str = "ariadne"  # e.g., 'ariadne', 'nyx', 'scavenger'
     depth: int = 1  # 1: Surface, 2: Deep, 3: Exhaustive
@@ -47,6 +49,7 @@ class OracleRequest(BaseModel):
 
 class OracleResponse(BaseModel):
     """The Oracle's audit report."""
+
     target: str
     agent: str
     report: str

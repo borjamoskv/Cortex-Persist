@@ -45,23 +45,31 @@ class TestStore:
         """Exact structural hash dedup should return the same fact_id."""
         content = "Deduplication test content unique enough to avoid cross-test collision."
         id1 = await engine.store(
-            project="test", content=content,
-            fact_type="knowledge", source="agent:test_suite",
+            project="test",
+            content=content,
+            fact_type="knowledge",
+            source="agent:test_suite",
         )
         id2 = await engine.store(
-            project="test", content=content,
-            fact_type="knowledge", source="agent:test_suite",
+            project="test",
+            content=content,
+            fact_type="knowledge",
+            source="agent:test_suite",
         )
         assert id1 == id2
 
     async def test_store_different_content_different_ids(self, engine):
         id1 = await engine.store(
-            project="test", content="Fact alpha for diff test.",
-            fact_type="knowledge", source="agent:test_suite",
+            project="test",
+            content="Fact alpha for diff test.",
+            fact_type="knowledge",
+            source="agent:test_suite",
         )
         id2 = await engine.store(
-            project="test", content="Fact beta for diff test.",
-            fact_type="knowledge", source="agent:test_suite",
+            project="test",
+            content="Fact beta for diff test.",
+            fact_type="knowledge",
+            source="agent:test_suite",
         )
         assert id1 != id2
 
@@ -70,8 +78,10 @@ class TestStore:
 
         with pytest.raises((ValueError, TypeError, GuardViolation)):
             await engine.store(
-                project="test", content="",
-                fact_type="knowledge", source="agent:test_suite",
+                project="test",
+                content="",
+                fact_type="knowledge",
+                source="agent:test_suite",
             )
 
 
@@ -104,8 +114,10 @@ class TestStoreMany:
 class TestDeprecate:
     async def test_deprecate_existing_fact(self, engine):
         fact_id = await engine.store(
-            project="test", content="Fact to deprecate.",
-            fact_type="knowledge", source="agent:test_suite",
+            project="test",
+            content="Fact to deprecate.",
+            fact_type="knowledge",
+            source="agent:test_suite",
         )
         result = await engine.deprecate(fact_id, reason="test")
         assert result is True
@@ -131,7 +143,8 @@ class TestUpdate:
             source="agent:test_suite",
         )
         updated_id = await engine.update(
-            original_id, content="Updated content v2.",
+            original_id,
+            content="Updated content v2.",
         )
         assert updated_id != original_id
         assert updated_id > original_id

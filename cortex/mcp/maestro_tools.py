@@ -8,6 +8,7 @@ from cortex.ui_control.models import AppTarget
 
 logger = logging.getLogger("cortex.mcp.maestro")
 
+
 def register_maestro_tools(mcp: FastMCP):
     """Registers MAC-Ω UI control tools."""
 
@@ -25,16 +26,16 @@ def register_maestro_tools(mcp: FastMCP):
         engine = await get_engine()
         m = MaestroUI(engine=engine)
         target = AppTarget(name=app_name)
-        
+
         # Focus first
         await m.activate_app(target)
-        
+
         success_count = 0
         for char in text:
             res = await m.inject_keystroke(target, char)
             if res.success:
                 success_count += 1
-        
+
         return f"Typed {success_count}/{len(text)} characters into {app_name}."
 
     @mcp.tool()
@@ -43,4 +44,6 @@ def register_maestro_tools(mcp: FastMCP):
         engine = await get_engine()
         m = MaestroUI(engine=engine)
         res = await m.click_menu_item(AppTarget(name=app_name), menu_path)
-        return f"Click menu item in {app_name}: {'Success' if res.success else f'Failed: {res.error}'}"
+        return (
+            f"Click menu item in {app_name}: {'Success' if res.success else f'Failed: {res.error}'}"
+        )

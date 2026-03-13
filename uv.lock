@@ -525,7 +525,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cortex-memory"
+name = "cortex-persist"
 version = "0.3.0b1"
 source = { editable = "." }
 dependencies = [
@@ -590,7 +590,7 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "asyncpg", marker = "extra == 'cloud'", specifier = ">=0.29" },
     { name = "click", specifier = ">=8.0" },
-    { name = "cortex-memory", extras = ["api", "dev", "adk", "toolbox", "billing", "cloud"], marker = "extra == 'all'" },
+    { name = "cortex-persist", extras = ["api", "dev", "adk", "toolbox", "billing", "cloud"], marker = "extra == 'all'" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
     { name = "google-adk", marker = "extra == 'adk'", specifier = ">=0.5.0" },

@@ -19,10 +19,10 @@ logger = logging.getLogger("cortex.swarm.conflict_resolution")
 class ConflictType(str, Enum):
     """Classification of conflict nature."""
 
-    FACTUAL = "factual"          # Verifiable, e.g. version numbers
-    STRATEGIC = "strategic"      # Trade-off dependent, e.g. mono vs micro
-    RESOURCE = "resource"        # Scheduling contention
-    PRIORITY = "priority"        # Ordering disputes
+    FACTUAL = "factual"  # Verifiable, e.g. version numbers
+    STRATEGIC = "strategic"  # Trade-off dependent, e.g. mono vs micro
+    RESOURCE = "resource"  # Scheduling contention
+    PRIORITY = "priority"  # Ordering disputes
 
 
 class ResolutionMethod(str, Enum):
@@ -42,9 +42,9 @@ class ConflictOption:
     id: str
     description: str
     proposer_id: str
-    confidence: float = 0.5          # Self-reported by agent [0, 1]
-    reversibility: float = 0.5       # How easily this can be undone [0, 1]
-    estimated_cost: float = 0.0      # Abstract cost units
+    confidence: float = 0.5  # Self-reported by agent [0, 1]
+    reversibility: float = 0.5  # How easily this can be undone [0, 1]
+    estimated_cost: float = 0.0  # Abstract cost units
 
 
 @dataclass()
@@ -53,9 +53,9 @@ class AgentProfile:
 
     agent_id: str
     specialty: str = "general"
-    success_rate: float = 0.5        # Historical accuracy [0, 1]
-    confidence: float = 0.5          # Current self-assessed confidence [0, 1]
-    recency_score: float = 0.0       # How recently active in this domain [0, 1]
+    success_rate: float = 0.5  # Historical accuracy [0, 1]
+    confidence: float = 0.5  # Current self-assessed confidence [0, 1]
+    recency_score: float = 0.0  # How recently active in this domain [0, 1]
 
 
 @dataclass(frozen=True)
@@ -106,7 +106,7 @@ class ResolutionResult:
 
     winner_id: str
     method: ResolutionMethod
-    consensus_level: float        # 0-1, fraction agreeing
+    consensus_level: float  # 0-1, fraction agreeing
     reasoning: str
     total_weight_for: float = 0.0
     total_weight_against: float = 0.0
@@ -227,7 +227,10 @@ class ConflictResolver:
 
         logger.info(
             "⚔️ Conflict %s detected: type=%s, %d options, %d agents",
-            conflict_id, conflict_type.value, len(options), len(agents),
+            conflict_id,
+            conflict_type.value,
+            len(options),
+            len(agents),
         )
 
         # Tier 1: Factual Triangulation
@@ -239,21 +242,26 @@ class ConflictResolver:
         votes, result = self._weighted_vote(options, agents, conflict_domain)
 
         if result.consensus_level >= self.CONSENSUS_THRESHOLD:
-            logger.info("✅ Consensus achieved: %s (%.1f%%)", result.winner_id, result.consensus_level * 100)
+            logger.info(
+                "✅ Consensus achieved: %s (%.1f%%)", result.winner_id, result.consensus_level * 100
+            )
             record = self._record(conflict_id, now, conflict_type, participants, options, result)
             record.votes = votes
             return record
 
         logger.warning(
             "⚠️ No consensus (%.1f%% < %.1f%%). Escalating...",
-            result.consensus_level * 100, self.CONSENSUS_THRESHOLD * 100,
+            result.consensus_level * 100,
+            self.CONSENSUS_THRESHOLD * 100,
         )
 
         # Tier 3: Architect Arbitration
         if architect_judge is not None:
             arb_result = await self._architect_arbitrate(options, architect_judge)
             if arb_result is not None:
-                record = self._record(conflict_id, now, conflict_type, participants, options, arb_result)
+                record = self._record(
+                    conflict_id, now, conflict_type, participants, options, arb_result
+                )
                 record.votes = votes
                 return record
 
@@ -371,7 +379,7 @@ class ConflictResolver:
                 "You are the Architect Arbiter. Two or more proposals cannot reach consensus. "
                 "Evaluate the trade-offs and select the best option.\n\n"
                 f"Options:\n{options_desc}\n\n"
-                "Respond with JSON: {\"winner_id\": \"...\", \"confidence\": 0.0-1.0, \"reasoning\": \"...\"}"
+                'Respond with JSON: {"winner_id": "...", "confidence": 0.0-1.0, "reasoning": "..."}'
             )
 
             # The judge is an async callable (e.g., an LLM completion function)
@@ -388,7 +396,8 @@ class ConflictResolver:
             if confidence < self.ARCHITECT_CONFIDENCE_GATE:
                 logger.warning(
                     "Architect confidence %.2f < gate %.2f — cannot decide",
-                    confidence, self.ARCHITECT_CONFIDENCE_GATE,
+                    confidence,
+                    self.ARCHITECT_CONFIDENCE_GATE,
                 )
                 return None
 
@@ -430,7 +439,9 @@ class ConflictResolver:
         self._history.append(record)
         logger.info(
             "📋 Conflict %s resolved: winner=%s method=%s consensus=%.1f%%",
-            conflict_id, result.winner_id, result.method.value,
+            conflict_id,
+            result.winner_id,
+            result.method.value,
             result.consensus_level * 100,
         )
         return record

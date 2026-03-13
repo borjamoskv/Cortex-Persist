@@ -15,9 +15,7 @@ console = Console()
 @click.option(
     "--target", required=True, help="Target module, file, or system for the agent to bind to."
 )
-@click.option(
-    "--intent", required=True, help="Primary directive for the autonomous execution."
-)
+@click.option("--intent", required=True, help="Primary directive for the autonomous execution.")
 def spawn_cmd(target: str, intent: str) -> None:
     """Ignite a headless sub-agent to execute an intent autonomously.
 

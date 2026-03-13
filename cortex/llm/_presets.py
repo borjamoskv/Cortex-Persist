@@ -8,27 +8,36 @@ from typing import Any, Final
 
 logger = logging.getLogger("cortex.llm.presets")
 
-_ASSET_PATH: Final[str] = str(
-    Path(__file__).parent.parent.parent / "config" / "llm_presets.json"
-)
+_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent.parent / "config" / "llm_presets.json")
 
 # Global cache for presets to avoid redundant I/O
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}
 
 # Model Policy: prohibited tier patterns (GEMINI.md §1.3)
 _PROHIBITED_TIERS: Final[re.Pattern[str]] = re.compile(
-    r"\b(mini|flash|haiku|nano|tiny|small|lite)\b", re.IGNORECASE,
+    r"\b(mini|flash|haiku|nano|tiny|small|lite)\b",
+    re.IGNORECASE,
 )
 
 # Valid tier values (ordered by capability)
-_VALID_TIERS: Final[frozenset[str]] = frozenset({
-    "frontier", "high", "local",
-})
+_VALID_TIERS: Final[frozenset[str]] = frozenset(
+    {
+        "frontier",
+        "high",
+        "local",
+    }
+)
 
 # Valid cost classes
-_VALID_COST_CLASSES: Final[frozenset[str]] = frozenset({
-    "free", "low", "medium", "high", "variable",
-})
+_VALID_COST_CLASSES: Final[frozenset[str]] = frozenset(
+    {
+        "free",
+        "low",
+        "medium",
+        "high",
+        "variable",
+    }
+)
 
 
 def _validate_model_policy(
@@ -44,9 +53,10 @@ def _validate_model_policy(
         tier = config.get("tier")
         if tier and tier not in _VALID_TIERS:
             logger.warning(
-                "⚠️ [MODEL POLICY] %s has invalid tier '%s'. "
-                "Valid: %s",
-                provider, tier, sorted(_VALID_TIERS),
+                "⚠️ [MODEL POLICY] %s has invalid tier '%s'. Valid: %s",
+                provider,
+                tier,
+                sorted(_VALID_TIERS),
             )
         elif not tier:
             logger.debug(
@@ -59,7 +69,8 @@ def _validate_model_policy(
         if cost and cost not in _VALID_COST_CLASSES:
             logger.warning(
                 "⚠️ [MODEL POLICY] %s has invalid cost_class '%s'.",
-                provider, cost,
+                provider,
+                cost,
             )
 
         # Regex defense: catch prohibited model name patterns
@@ -68,16 +79,18 @@ def _validate_model_policy(
             logger.warning(
                 "⚠️ [MODEL POLICY] %s default_model '%s' uses "
                 "prohibited tier. Update llm_presets.json.",
-                provider, default,
+                provider,
+                default,
             )
 
         intent_map = config.get("intent_model_map", {})
         for intent, model in intent_map.items():
             if _PROHIBITED_TIERS.search(model):
                 logger.warning(
-                    "⚠️ [MODEL POLICY] %s intent '%s' → '%s' "
-                    "uses prohibited tier.",
-                    provider, intent, model,
+                    "⚠️ [MODEL POLICY] %s intent '%s' → '%s' uses prohibited tier.",
+                    provider,
+                    intent,
+                    model,
                 )
 
 
@@ -99,7 +112,8 @@ def load_presets() -> dict[str, dict[str, Any]]:
         data = json.loads(path.read_text())
         if not isinstance(data, dict):
             logger.error(
-                "Invalid presets format in %s. Expected dict.", path,
+                "Invalid presets format in %s. Expected dict.",
+                path,
             )
             return {}
         _validate_model_policy(data)
@@ -239,23 +253,15 @@ def routing_matrix() -> dict[str, dict[str, str]]:
     return matrix
 
 
-
 def get_providers_by_tier(
     tier: str,
 ) -> list[str]:
     """Return provider names matching a tier (frontier/high/local)."""
-    return [
-        name for name, cfg in load_presets().items()
-        if cfg.get("tier") == tier
-    ]
+    return [name for name, cfg in load_presets().items() if cfg.get("tier") == tier]
 
 
 def get_providers_by_cost(
     cost_class: str,
 ) -> list[str]:
     """Return provider names matching a cost class."""
-    return [
-        name for name, cfg in load_presets().items()
-        if cfg.get("cost_class") == cost_class
-    ]
-
+    return [name for name, cfg in load_presets().items() if cfg.get("cost_class") == cost_class]

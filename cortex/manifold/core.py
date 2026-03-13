@@ -135,9 +135,7 @@ class TesseractManifold:
                     if critique:
                         issues = getattr(critique, "issues", [])
                     if issues:
-                        task.description += "\n\nSIEGE FEEDBACK:\n- " + "\n- ".join(
-                            issues
-                        )
+                        task.description += "\n\nSIEGE FEEDBACK:\n- " + "\n- ".join(issues)
 
         else:
             logger.warning(

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.oracle.forgetting.analysis")
 
+
 class ForgettingAnalysisMixin:
     """Core analysis logic for the ForgettingOracle."""
 
@@ -55,7 +56,8 @@ class ForgettingAnalysisMixin:
 
         # A. ¿Fue el key requerido de nuevo?
         was_regrettable = await self._detect_cache_miss_after_eviction(
-            target_key, record["ts"],
+            target_key,
+            record["ts"],
         )
 
         # B. Peso causal + profundidad de cadena
@@ -65,12 +67,15 @@ class ForgettingAnalysisMixin:
 
         # C. Frecuencia de acceso
         frequency_score = await self._estimate_access_frequency(
-            target_key, record["ts"],
+            target_key,
+            record["ts"],
         )
 
         # D. Valor compuesto
         eviction_value = self._compose_eviction_value(
-            was_regrettable, causal_weight, frequency_score,
+            was_regrettable,
+            causal_weight,
+            frequency_score,
         )
 
         return EvictionVerdict(
@@ -118,11 +123,7 @@ class ForgettingAnalysisMixin:
 
     async def _estimate_causal_weight(self, key: str) -> tuple[float, int]:
         """Estimate causal weight (0.0→1.0) and descendant count for *key*."""
-        project = (
-            key.replace("last_hash_", "")
-            if key.startswith("last_hash_")
-            else key
-        )
+        project = key.replace("last_hash_", "") if key.startswith("last_hash_") else key
         base_weight = getattr(self, "DEFAULT_WEIGHT", 0.2)
         depth_bonus = 0.0
         max_children = 0
@@ -143,7 +144,8 @@ class ForgettingAnalysisMixin:
                     dominant_type = row[0]
                     cmap = getattr(self, "CAUSAL_WEIGHT_MAP", {})
                     base_weight = cmap.get(
-                        dominant_type, getattr(self, "DEFAULT_WEIGHT", 0.2),
+                        dominant_type,
+                        getattr(self, "DEFAULT_WEIGHT", 0.2),
                     )
 
                 # B. Causal descendant count → depth bonus
@@ -201,7 +203,9 @@ class ForgettingAnalysisMixin:
         return await self._estimate_access_frequency_txn_fallback(project_id, eviction_ts)
 
     async def _estimate_access_frequency_txn_fallback(
-        self, project_id: str, eviction_ts: str,
+        self,
+        project_id: str,
+        eviction_ts: str,
     ) -> float:
         """Transaction-count approximation of access frequency (fallback when L1 unavailable)."""
         try:
@@ -225,7 +229,10 @@ class ForgettingAnalysisMixin:
             return 0.0
 
     def _compose_eviction_value(
-        self, was_regrettable: bool, causal_weight: float, frequency_score: float,
+        self,
+        was_regrettable: bool,
+        causal_weight: float,
+        frequency_score: float,
     ) -> float:
         """Composite score: 0.0 (correct eviction) → 1.0 (costly mistake)."""
         if not was_regrettable:

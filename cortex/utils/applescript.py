@@ -26,9 +26,11 @@ async def run_applescript(script: str, timeout_seconds: int = 30) -> tuple[bool,
 
     try:
         process = await asyncio.create_subprocess_exec(
-            "osascript", "-e", script,
+            "osascript",
+            "-e",
+            script,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
 
         try:

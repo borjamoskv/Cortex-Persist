@@ -69,6 +69,7 @@ _HEADERS: dict[str, str] = {
 
 # ─── Cascade Event Telemetry ────────────────────────────────────────
 
+
 @dataclass
 class FetchCascadeEvent:
     """Telemetry event for a single cascade resolution."""
@@ -82,6 +83,7 @@ class FetchCascadeEvent:
 
 
 # ─── Per-Provider Fetchers ──────────────────────────────────────────
+
 
 async def _fetch_httpx(url: str, timeout: float) -> tuple[str, int]:
     """Primary: httpx async client with HTTP/2 support."""
@@ -124,6 +126,7 @@ async def _fetch_urllib(url: str, timeout: float) -> tuple[str, int]:
 
 # ─── Provider Registry ─────────────────────────────────────────────
 
+
 @dataclass
 class _FetchProvider:
     """A named fetch function with its own circuit breaker."""
@@ -136,6 +139,7 @@ class _FetchProvider:
 
 
 # ─── ResilientFetcher ───────────────────────────────────────────────
+
 
 class ResilientFetcher:
     """Cascading URL fetcher with per-provider circuit breakers.
@@ -178,7 +182,11 @@ class ResilientFetcher:
 
                 logger.info(
                     "✅ [GATEWAY] %s resolved by %s (depth=%d, %.0fms, HTTP %s)",
-                    url[:80], provider.name, depth, latency_ms, status_code,
+                    url[:80],
+                    provider.name,
+                    depth,
+                    latency_ms,
+                    status_code,
                 )
 
                 markdown = _html_to_markdown(html)
@@ -218,7 +226,8 @@ class ResilientFetcher:
         )
         logger.error(
             "💀 [GATEWAY] Cascade exhausted for %s. Errors: %s",
-            url[:80], "; ".join(errors),
+            url[:80],
+            "; ".join(errors),
         )
         return {
             "status": "cascade_exhausted",
@@ -229,6 +238,7 @@ class ResilientFetcher:
 
 
 # ─── HTML → Markdown Conversion ────────────────────────────────────
+
 
 def _html_to_markdown(html: str) -> str:
     """Convert HTML to clean markdown, stripping nav/script/style noise."""
@@ -248,9 +258,7 @@ def _html_to_markdown(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
 
     # Strip noise elements (Ω₂: reduce entropy)
-    for tag in soup.find_all(
-        ["script", "style", "nav", "footer", "header", "noscript", "iframe"]
-    ):
+    for tag in soup.find_all(["script", "style", "nav", "footer", "header", "noscript", "iframe"]):
         tag.decompose()
 
     # Prefer <main> or <article> if present
@@ -291,6 +299,7 @@ def _get_fetcher() -> ResilientFetcher:
 
 
 # ─── MCP Server Factory ────────────────────────────────────────────
+
 
 def create_resilient_gateway(
     host: str = "127.0.0.1",
@@ -338,9 +347,9 @@ def create_resilient_gateway(
 
         return (
             f"❌ **Cascade exhausted** for {url}\n\n"
-            f"**Errors:**\n" +
-            "\n".join(f"- {e}" for e in result["errors"]) +
-            "\n\nThe request has been queued for deferred retry via PulmonesQueue."
+            f"**Errors:**\n"
+            + "\n".join(f"- {e}" for e in result["errors"])
+            + "\n\nThe request has been queued for deferred retry via PulmonesQueue."
         )
 
     @mcp.tool()
@@ -387,16 +396,13 @@ def create_resilient_gateway(
         content = raw_content[:max_chars]
 
         suffix = "\n\n*[Content truncated]*" if truncated else ""
-        return (
-            f"**Source:** {url}\n"
-            f"**Provider:** {result['provider']}\n\n"
-            f"---\n\n{content}{suffix}"
-        )
+        return f"**Source:** {url}\n**Provider:** {result['provider']}\n\n---\n\n{content}{suffix}"
 
     return mcp
 
 
 # ─── Standalone Entry Point ─────────────────────────────────────────
+
 
 def run_resilient_gateway(
     host: str = "127.0.0.1",

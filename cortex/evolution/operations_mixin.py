@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.evolution.engine.ops")
 
+
 class EvolutionOpsMixin:
     """Mixin for genetic operations, extinctions, and adversarial grounding."""
 
@@ -203,6 +204,7 @@ class EvolutionOpsMixin:
 
             try:
                 from cortex.routes.notch_ws import notch_hub
+
                 if notch_hub:
                     self._broadcast_task = asyncio.create_task(
                         notch_hub.broadcast('{"command": "shockwave", "intensity": 1.0}')

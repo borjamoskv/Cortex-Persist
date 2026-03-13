@@ -51,7 +51,12 @@ class UsageRecord:
     """A single API usage record."""
 
     __slots__ = (
-        "tenant_id", "endpoint", "method", "status_code", "tokens_used", "timestamp",
+        "tenant_id",
+        "endpoint",
+        "method",
+        "status_code",
+        "tokens_used",
+        "timestamp",
     )
 
     def __init__(
@@ -81,6 +86,7 @@ class UsageTracker:
     def __init__(self, db_path: str | None = None):
         if db_path is None:
             from cortex.config import DB_PATH
+
             db_path = DB_PATH
         self._db_path = db_path
         self._conn: sqlite3.Connection | None = None

@@ -131,19 +131,23 @@ class ExecutorAgent:
                 result = toolkit.dispatch(tool_call.name, tool_call.args)
                 state.tool_results.append(f"[{tool_call.name}] → {result[:500]}")
                 logger.debug("Tool [%s] result: %s", tool_call.name, result[:200])
-                state.messages.append({
-                    "role": "user",
-                    "content": f"Tool result:\n{result}\n\nContinue with the next step.",
-                })
+                state.messages.append(
+                    {
+                        "role": "user",
+                        "content": f"Tool result:\n{result}\n\nContinue with the next step.",
+                    }
+                )
             else:
                 # No tool call found — prompt agent to use a tool or finish
-                state.messages.append({
-                    "role": "user",
-                    "content": (
-                        "No tool call detected. Either call a tool using <tool_call>...</tool_call>"
-                        " or signal completion with <done/> if all work is done."
-                    ),
-                })
+                state.messages.append(
+                    {
+                        "role": "user",
+                        "content": (
+                            "No tool call detected. Either call a tool using <tool_call>...</tool_call>"
+                            " or signal completion with <done/> if all work is done."
+                        ),
+                    }
+                )
 
         if not state.done:
             logger.warning("Executor hit max iterations (%d)", _MAX_ITERATIONS)

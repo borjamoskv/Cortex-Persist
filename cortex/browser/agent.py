@@ -53,7 +53,7 @@ class SovereignBrowserAgent:
                 # 3. Act
                 cmd = action.get("cmd")
                 if cmd == "done":
-                    LOG.info("BROWSER-Ω: Objective complete. Result: %s", action.get('result'))
+                    LOG.info("BROWSER-Ω: Objective complete. Result: %s", action.get("result"))
                     break
                 elif cmd == "click":
                     cortex_id = action.get("cortex_id")

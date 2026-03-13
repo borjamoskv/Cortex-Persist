@@ -150,10 +150,9 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
                 lines.append(f"- {content}")
             lines.append("")
         else:
-            search_cmd = f"cortex search \\\"type:{ftype} project:{project}\\\""
+            search_cmd = f'cortex search \\"type:{ftype} project:{project}\\"'
             msg = (
-                f"- **{ftype.capitalize()}**: {len(type_facts)} facts "
-                f"(Use `{search_cmd}` to read)"
+                f"- **{ftype.capitalize()}**: {len(type_facts)} facts (Use `{search_cmd}` to read)"
             )
             lines.append(msg)
 

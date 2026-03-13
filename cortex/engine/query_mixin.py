@@ -45,9 +45,7 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.project, f.fact_type, f.id"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [
-                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def search(
         self,
@@ -136,14 +134,13 @@ class QueryMixin(EngineMixinBase):
         """Retrieve a specific fact by ID and tenant."""
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ? AND f.tenant_id = ?"
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
-                return (
-                    self._row_to_fact(row, tenant_id=tenant_id) if row else None
-                )  # type: ignore[reportAttributeAccessIssue]
+                return self._row_to_fact(row, tenant_id=tenant_id) if row else None  # type: ignore[reportAttributeAccessIssue]
 
     async def recall(
         self,
@@ -156,6 +153,7 @@ class QueryMixin(EngineMixinBase):
         """High-level recall with scoring and temporal relevance."""
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = f"""
@@ -187,9 +185,7 @@ class QueryMixin(EngineMixinBase):
 
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [
-                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def history(
         self,
@@ -200,6 +196,7 @@ class QueryMixin(EngineMixinBase):
         """Visualización histórica: hechos activos, borrados o actualizados."""
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -219,9 +216,7 @@ class QueryMixin(EngineMixinBase):
                 )
                 cursor = await conn.execute(query, (tenant_id, project))
             rows = await cursor.fetchall()
-            return [
-                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def reconstruct_state(
         self,
@@ -232,6 +227,7 @@ class QueryMixin(EngineMixinBase):
         """Reconstruct the state of a project at a specific transaction ID."""
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -260,9 +256,7 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [
-                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def time_travel(
         self,
@@ -272,6 +266,7 @@ class QueryMixin(EngineMixinBase):
         """Retrieve the whole world state at a specific transaction."""
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -285,9 +280,7 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, [tenant_id, *params])
             rows = await cursor.fetchall()
-            return [
-                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
     async def stats(self) -> dict:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -371,9 +364,7 @@ class QueryMixin(EngineMixinBase):
         from cortex.graph import query_entity
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await query_entity(
-                conn, name, project, tenant_id=tenant_id
-            )  # type: ignore[reportReturnType]
+            return await query_entity(conn, name, project, tenant_id=tenant_id)  # type: ignore[reportReturnType]
 
     async def find_path(
         self,
@@ -423,6 +414,7 @@ class QueryMixin(EngineMixinBase):
         """
         if tenant_id == "default":
             from cortex.security.tenant import get_tenant_id
+
             tenant_id = get_tenant_id()
 
         if direction == "up":
@@ -462,9 +454,7 @@ class QueryMixin(EngineMixinBase):
 
             # Fetch full fact data for each ID in the chain
             id_list = [row[0] for row in chain_ids if row[0] is not None]
-            depth_map = {
-                row[0]: row[1] for row in chain_ids if row[0] is not None
-            }
+            depth_map = {row[0]: row[1] for row in chain_ids if row[0] is not None}
 
             if not id_list:
                 return []
@@ -476,10 +466,7 @@ class QueryMixin(EngineMixinBase):
                 [*id_list, tenant_id],
             )
             rows = await cursor.fetchall()
-            facts = [
-                self._row_to_fact(row, tenant_id=tenant_id)
-                for row in rows
-            ]  # type: ignore[reportAttributeAccessIssue]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
 
             # Annotate with depth and sort
             for f in facts:

@@ -29,15 +29,15 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/engine/sync_compat.py",
         "cortex/database/connection_guard.py",
         # Memory subsystems needing raw/sync access
-        "cortex/memory/sqlite_vec_store.py",   # Low-level vec extension needs raw connect
-        "cortex/memory/hdc/store.py",          # HDC Specular Memory needs raw access
-        "cortex/memory/procedural.py",         # Sync procedural memory bootstrap
-        "cortex/memory/evaluator.py",          # Sync memory health evaluator
+        "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
+        "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
+        "cortex/memory/procedural.py",  # Sync procedural memory bootstrap
+        "cortex/memory/evaluator.py",  # Sync memory health evaluator
         # Engine low-level
         "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
-        "cortex/engine/decalcifier.py",        # Sync schema maintenance
+        "cortex/engine/decalcifier.py",  # Sync schema maintenance
         # Agent/system infra
-        "cortex/agents/system_prompt.py",      # Documentation strings, not actual usage
+        "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
         # Evolution/metrics (sync telemetry)
         "cortex/evolution/cortex_metrics.py",
         "cortex/evolution/shannon_metrics.py",

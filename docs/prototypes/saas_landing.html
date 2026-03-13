@@ -495,7 +495,7 @@
                     <li>Community support</li>
                 </ul>
                 <button class="btn btn-outline plan-btn btn-copy" id="btn-community" onclick="copyInstallCmd(this)">
-                    <span class="copy-text">pip install cortex-memory</span>
+                    <span class="copy-text">pip install cortex-persist</span>
                     <span class="copy-icon" style="margin-left:8px;">📋</span>
                 </button>
             </div>
@@ -597,7 +597,7 @@
     <script>
         // 1-Click Install function
         function copyInstallCmd(btn) {
-            navigator.clipboard.writeText('pip install cortex-memory').then(() => {
+            navigator.clipboard.writeText('pip install cortex-persist').then(() => {
                 const textSpan = btn.querySelector('.copy-text');
                 const iconSpan = btn.querySelector('.copy-icon');
                 const originalText = textSpan.innerText;
@@ -746,9 +746,9 @@
     (function() {
         const lines = [
             { type: 'prompt', text: '$ ', delay: 0 },
-            { type: 'cmd', text: 'pip install cortex-memory', delay: 40 },
+            { type: 'cmd', text: 'pip install cortex-persist', delay: 40 },
             { type: 'newline', delay: 600 },
-            { type: 'output', text: '✓ Installed cortex-memory 7.0.0', delay: 10 },
+            { type: 'output', text: '✓ Installed cortex-persist 7.0.0', delay: 10 },
             { type: 'newline', delay: 800 },
             { type: 'prompt', text: '$ ', delay: 0 },
             { type: 'cmd', text: 'cortex store --type decision "Chose OAuth2 PKCE for auth"', delay: 35 },

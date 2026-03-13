@@ -116,7 +116,9 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                         if score > 0.92:
                             logger.info(
                                 "🛡️ [V8 Governance] Semantic deduplication blocked insert "
-                                "(Score: %.3f). ID: %s", score, top_match.id
+                                "(Score: %.3f). ID: %s",
+                                score,
+                                top_match.id,
                             )
                             try:
                                 fact_id_int = int(top_match.id)
@@ -127,7 +129,9 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                                 )
                                 return fact_id_int, meta, content, fact_type
                             except (ValueError, TypeError):
-                                logger.warning("Non-integer ID returned from vector store. Skipping dedup.")
+                                logger.warning(
+                                    "Non-integer ID returned from vector store. Skipping dedup."
+                                )
                 except (RuntimeError, ValueError, TypeError, OSError) as e:
                     logger.debug("Semantic deduplication skipped due to internal error: %s", e)
         meta = self._apply_privacy_shield(content, project, meta)
@@ -241,8 +245,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             resolved_parent = row[0] if row else None
             if resolved_parent is not None:
                 await conn.execute(
-                    "UPDATE facts_meta SET parent_decision_id = ? "
-                    "WHERE id = ?",
+                    "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                     (str(resolved_parent), fact_id),
                 )
         except Exception:  # noqa: BLE001
@@ -255,6 +258,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         # because an optional daemon dep is missing. (Ghost #4731)
         try:
             from cortex.daemon.epistemic_breaker import EpistemicCircuitBreaker
+
             await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)
         except (ImportError, ModuleNotFoundError) as _ecb_err:
             logger.debug("[STORE] EpistemicCircuitBreaker skipped (missing dep): %s", _ecb_err)
@@ -363,18 +367,24 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn=conn,
                 commit=False,
             )
-            await self.deprecate(fact_id, reason=f"updated_by_{new_id}", conn=conn, tenant_id=db_tenant_id)
+            await self.deprecate(
+                fact_id, reason=f"updated_by_{new_id}", conn=conn, tenant_id=db_tenant_id
+            )
             await conn.commit()
             return new_id
 
     async def deprecate(
-        self, fact_id: int, reason: str | None = None, conn: aiosqlite.Connection | None = None, tenant_id: str = "default"
+        self,
+        fact_id: int,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
+        tenant_id: str = "default",
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
 
         tenant_id = self._resolve_tenant(tenant_id)
-            
+
         if conn:
             return await self._deprecate_impl(conn, fact_id, reason, tenant_id)
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -389,8 +399,8 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
 
         ts = now_iso()
         cursor = await conn.execute(
-            "SELECT tenant_id, project FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL", 
-            (fact_id, tenant_id)
+            "SELECT tenant_id, project FROM facts WHERE id = ? AND tenant_id = ? AND valid_until IS NULL",
+            (fact_id, tenant_id),
         )
         row = await cursor.fetchone()
         if not row:

@@ -172,10 +172,7 @@ class GRAMMYOrchestrator:
             "bpm": track.bpm,
             "key": track.key,
             "bars": 8,
-            "prompt_injection": (
-                "IDM deep techno, sub-bass 40Hz, solid groove, "
-                "analog warmth."
-            ),
+            "prompt_injection": ("IDM deep techno, sub-bass 40Hz, solid groove, analog warmth."),
             "expected_entropy": "medium",
             "sonic_vectors": {
                 "groove": "4/4 locked",
@@ -273,16 +270,10 @@ class GRAMMYOrchestrator:
         track.state = TrackState.PRE_PRODUCTION
 
         matrix = await self.generate_prompt_matrix(track)
-        track.metadata["sonic_vectors"] = matrix.get(
-            "sonic_vectors", {}
-        )
-        track.metadata["expected_entropy"] = matrix.get(
-            "expected_entropy", "medium"
-        )
+        track.metadata["sonic_vectors"] = matrix.get("sonic_vectors", {})
+        track.metadata["expected_entropy"] = matrix.get("expected_entropy", "medium")
 
-        target_model_key = matrix.get(
-            "target_model", "suno_v5"
-        ).lower()
+        target_model_key = matrix.get("target_model", "suno_v5").lower()
         if target_model_key not in self.adapters:
             logger.warning(
                 "Fallback. Modelo '%s' desconocido. Using 'local'.",
@@ -302,30 +293,20 @@ class GRAMMYOrchestrator:
         track.state = TrackState.POST_PRODUCTION
         track.gri_score = await self.evaluate_track_gri(track)
         track.state = TrackState.MASTERED
-        logger.info(
-            "Pipeline completado. GRI: %s", track.gri_score
-        )
+        logger.info("Pipeline completado. GRI: %s", track.gri_score)
         return track
 
-    async def run_pipeline_local(
-        self, track: TrackContext
-    ) -> TrackContext:
+    async def run_pipeline_local(self, track: TrackContext) -> TrackContext:
         """
         Offline pipeline — MIDI + DSP synthesis.
         No LLM, no external APIs.
         """
-        logger.info(
-            "--- Local Pipeline para %s ---", track.title
-        )
+        logger.info("--- Local Pipeline para %s ---", track.title)
         track.state = TrackState.PRE_PRODUCTION
 
         matrix = self._fallback_matrix(track)
-        track.metadata["sonic_vectors"] = matrix.get(
-            "sonic_vectors", {}
-        )
-        track.metadata["expected_entropy"] = matrix.get(
-            "expected_entropy", "medium"
-        )
+        track.metadata["sonic_vectors"] = matrix.get("sonic_vectors", {})
+        track.metadata["expected_entropy"] = matrix.get("expected_entropy", "medium")
 
         adapter = self.adapters["local"]
 
@@ -343,35 +324,23 @@ class GRAMMYOrchestrator:
             sr, audio_data = wavfile.read(wav_path)
             audio_float = audio_data.astype(np.float64) / 32767.0
 
-            mastered = self.dsp_engine.master_track(
-                audio_float, sr
-            )
+            mastered = self.dsp_engine.master_track(audio_float, sr)
 
-            mastered_path = wav_path.replace(
-                ".wav", "_mastered.wav"
-            )
+            mastered_path = wav_path.replace(".wav", "_mastered.wav")
             mastered_int16 = (mastered * 32767).astype(np.int16)
             wavfile.write(mastered_path, sr, mastered_int16)
             track.stems["mastered"] = mastered_path
 
-            lufs_in = (
-                mastered.reshape(-1, 1)
-                if mastered.ndim == 1
-                else mastered
-            )
+            lufs_in = mastered.reshape(-1, 1) if mastered.ndim == 1 else mastered
             lufs = self.dsp_engine.calculate_lufs(lufs_in, sr)
             track.metadata["lufs_integrated"] = lufs
-            logger.info(
-                "DSP mastering complete. LUFS: %.2f", lufs
-            )
+            logger.info("DSP mastering complete. LUFS: %.2f", lufs)
         except Exception as e:
             logger.error("DSP mastering failed: %s", e)
 
         track.gri_score = 0.45
         track.state = TrackState.MASTERED
-        logger.info(
-            "Local pipeline complete. Output: %s", wav_path
-        )
+        logger.info("Local pipeline complete. Output: %s", wav_path)
         return track
 
     async def compose_album_tracks(
@@ -390,8 +359,12 @@ class GRAMMYOrchestrator:
 
         if keys is None:
             keys = [
-                "C minor", "A minor", "D minor",
-                "F minor", "G minor", "E minor",
+                "C minor",
+                "A minor",
+                "D minor",
+                "F minor",
+                "G minor",
+                "E minor",
             ]
 
         for i in range(num_tracks):
@@ -415,9 +388,7 @@ class GRAMMYOrchestrator:
             album.tracks.append(track)
 
         if album.tracks:
-            album.global_gri = sum(
-                t.gri_score for t in album.tracks
-            ) / len(album.tracks)
+            album.global_gri = sum(t.gri_score for t in album.tracks) / len(album.tracks)
 
         self.current_album = album
         logger.info(
@@ -436,18 +407,18 @@ class GRAMMYOrchestrator:
         album = self.current_album
         tracks = []
         for t in album.tracks:
-            tracks.append({
-                "id": t.id,
-                "title": t.title,
-                "bpm": t.bpm,
-                "key": t.key,
-                "state": t.state.value,
-                "gri_score": t.gri_score,
-                "stems": list(t.stems.keys()),
-                "lufs": t.metadata.get(
-                    "lufs_integrated", "N/A"
-                ),
-            })
+            tracks.append(
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "bpm": t.bpm,
+                    "key": t.key,
+                    "state": t.state.value,
+                    "gri_score": t.gri_score,
+                    "stems": list(t.stems.keys()),
+                    "lufs": t.metadata.get("lufs_integrated", "N/A"),
+                }
+            )
 
         return {
             "album_id": album.id,
@@ -457,4 +428,3 @@ class GRAMMYOrchestrator:
             "total_tracks": len(album.tracks),
             "tracks": tracks,
         }
-

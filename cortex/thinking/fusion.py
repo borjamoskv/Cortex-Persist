@@ -1,5 +1,3 @@
-
-
 """Thought Fusion Engine — N model responses → 1 superior fused response."""
 
 from __future__ import annotations
@@ -101,8 +99,6 @@ class ContextFusion:
             logger.warning("ContextFusion failed, degrading to raw concatenation")
             return "\n".join(f.get("content", "") for f in retrieved_facts)
         return synthesized
-
-
 
 
 class ThoughtFusion:

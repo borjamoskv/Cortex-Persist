@@ -51,7 +51,7 @@ class MaestroUI:
                 "success": result.success,
                 "output": result.output,
                 "error": result.error,
-            }
+            },
         )
 
     async def activate_app(self, target: AppTarget) -> InteractionResult:

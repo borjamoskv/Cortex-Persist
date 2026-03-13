@@ -71,7 +71,7 @@ class L2SearchResult:
     """
 
     rank_index: int
-    internal_id: str           # The real UUID from facts_meta
+    internal_id: str  # The real UUID from facts_meta
     tenant_id: str
     project_id: str
     content: str
@@ -87,7 +87,7 @@ class L2SearchResult:
     def to_context_dict(self) -> dict:
         """Serialize for LLM injection. Uses rank_index, never raw UUIDs."""
         return {
-            "idx": self.rank_index,           # Clean index for LLM referencing
+            "idx": self.rank_index,  # Clean index for LLM referencing
             "content": self.content,
             "project": self.project_id,
             "layer": self.cognitive_layer,
@@ -362,7 +362,7 @@ class L2HybridSearch:
 
             results.append(
                 L2SearchResult(
-                    rank_index=rank_index,          # UUID Trick: clean 0-based index
+                    rank_index=rank_index,  # UUID Trick: clean 0-based index
                     internal_id=fact_id,
                     tenant_id=row[1],
                     project_id=row[2],

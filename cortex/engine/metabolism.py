@@ -19,12 +19,12 @@ from typing import Any
 class Vitals:
     """The agent's vital signs at any moment."""
 
-    heart_rate: float = 1.0      # Actions per cycle (1.0 = normal)
-    entropy: float = 0.0         # Accumulated noise (high = dying)
-    signal: float = 1.0          # Useful output ratio (0-1)
-    temperature: float = 0.5     # Exploration vs exploitation
-    age: int = 0                 # Total heartbeats
-    peak_signal: float = 0.0     # Best signal ever recorded
+    heart_rate: float = 1.0  # Actions per cycle (1.0 = normal)
+    entropy: float = 0.0  # Accumulated noise (high = dying)
+    signal: float = 1.0  # Useful output ratio (0-1)
+    temperature: float = 0.5  # Exploration vs exploitation
+    age: int = 0  # Total heartbeats
+    peak_signal: float = 0.0  # Best signal ever recorded
 
 
 class Metabolism:

@@ -282,11 +282,7 @@ def entropy_immortality(
         }
         for name, dim in result["dimensions"].items():
             score = dim["pct"]
-            color = (
-                "green" if score >= 75
-                else "yellow" if score >= 45
-                else "red"
-            )
+            color = "green" if score >= 75 else "yellow" if score >= 45 else "red"
             dim_table.add_row(
                 name.capitalize(),
                 symbols.get(name, "?"),
@@ -312,10 +308,7 @@ def entropy_immortality(
         )
 
         if verbose:
-            console.print(
-                f"\n[dim]Max temporal gap: "
-                f"{result['max_gap_days']}d[/]"
-            )
+            console.print(f"\n[dim]Max temporal gap: {result['max_gap_days']}d[/]")
             diag = result["diagnosis"].replace("_", " ").upper()
             console.print(f"[dim]Diagnosis: {diag}[/]")
 
@@ -329,7 +322,10 @@ def entropy_immortality(
 @click.option("--project", "-p", default=None, help="Filter by project.")
 @click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
 @click.option(
-    "--verbose", "-v", is_flag=True, help="Show per-category breakdown.",
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Show per-category breakdown.",
 )
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
     """Shannon entropy analysis of CORTEX memory."""

@@ -9,6 +9,7 @@ from rich.table import Table
 
 console = Console()
 
+
 def _find_transaction(conn, fact_id: int, fact_tx_id: int | None):
     """Look up the transaction for a fact, trying direct ID then join."""
     tx = None
@@ -51,6 +52,7 @@ def _check_merkle(conn, tx_id: int):
         ).fetchone()
     except (sqlite3.Error, OSError, RuntimeError):
         return None
+
 
 def _render_verification_certificate(
     fact: tuple, tx: tuple, chain_valid: bool, chain_msg: str, checkpoint: tuple | None
@@ -123,6 +125,7 @@ def _check_chain_integrity(conn) -> tuple[bool, int]:
         return True, 0
     violations = sum(1 for i in range(1, len(txs)) if txs[i][2] and txs[i][2] != txs[i - 1][1])
     return violations == 0, violations
+
 
 def _get_audit_trail(conn, project: str, limit: int):
     """Internal helper to get the audit trail rows."""

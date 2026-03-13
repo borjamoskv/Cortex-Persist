@@ -22,7 +22,11 @@ _PROJECT_FILTER = " AND project = ?"
 
 # Confidence → weight mapping
 _CONF_WEIGHTS: dict[str, float] = {
-    "C5": 1.0, "C4": 0.8, "C3": 0.6, "C2": 0.4, "C1": 0.2,
+    "C5": 1.0,
+    "C4": 0.8,
+    "C3": 0.6,
+    "C2": 0.4,
+    "C1": 0.2,
 }
 
 
@@ -35,25 +39,29 @@ class FingerprintScanner:
         self._engine = engine
 
     async def confidence_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Count facts per confidence level."""
         return await self._grouped_count("confidence", project)
 
     async def fact_type_distribution(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Count facts per fact_type."""
         return await self._grouped_count("fact_type", project)
 
     async def total_facts(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> int:
         """Count all active facts."""
         where, params = self._where(project)
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT COUNT(*) FROM facts WHERE {where}", params  # nosec B608
+                f"SELECT COUNT(*) FROM facts WHERE {where}",
+                params,  # nosec B608
             )
             row = await cursor.fetchone()
             return row[0] if row else 0
@@ -68,7 +76,8 @@ class FingerprintScanner:
             return row[0] if row else 0
 
     async def avg_content_length(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> float:
         """Average character length of fact content."""
         where, params = self._where(project)
@@ -101,7 +110,8 @@ class FingerprintScanner:
             recent = row[0] if row else 0
 
             cursor = await conn.execute(
-                f"SELECT COUNT(*) FROM facts WHERE {where}", params  # nosec B608
+                f"SELECT COUNT(*) FROM facts WHERE {where}",
+                params,  # nosec B608
             )
             row = await cursor.fetchone()
             total = row[0] if row else 0
@@ -109,7 +119,8 @@ class FingerprintScanner:
             return recent, max(total, 1)
 
     async def active_days(
-        self, project: str | None = None,
+        self,
+        project: str | None = None,
     ) -> tuple[int, float]:
         """Number of distinct days with ≥1 fact and total span in days.
 
@@ -190,20 +201,20 @@ class FingerprintScanner:
                     (*params, proj, ftype),
                 )
                 conf_rows = await cursor4.fetchall()
-                weighted = sum(
-                    _CONF_WEIGHTS.get(str(c), 0.3) * n for c, n in conf_rows
-                )
+                weighted = sum(_CONF_WEIGHTS.get(str(c), 0.3) * n for c, n in conf_rows)
                 avg_conf = weighted / max(cnt, 1)
 
-                profiles.append({
-                    "project": proj,
-                    "fact_type": ftype,
-                    "count": cnt,
-                    "avg_len": float(avg_len or 0),
-                    "recency_days": recency_days,
-                    "dominant_source": dominant_source or "unknown",
-                    "avg_confidence_weight": avg_conf,
-                })
+                profiles.append(
+                    {
+                        "project": proj,
+                        "fact_type": ftype,
+                        "count": cnt,
+                        "avg_len": float(avg_len or 0),
+                        "recency_days": recency_days,
+                        "dominant_source": dominant_source or "unknown",
+                        "avg_confidence_weight": avg_conf,
+                    }
+                )
             return profiles
 
     async def weekly_velocity_per_domain(
@@ -251,7 +262,4 @@ class FingerprintScanner:
                 params,
             )
             rows = await cursor.fetchall()
-            return {
-                (str(r[0]) if r[0] is not None else "unknown"): r[1]
-                for r in rows
-            }
+            return {(str(r[0]) if r[0] is not None else "unknown"): r[1] for r in rows}

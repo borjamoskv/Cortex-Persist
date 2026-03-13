@@ -19,6 +19,7 @@ KICK_DECAY_MS = 180
 SNARE_NOISE_MS = 120
 HAT_NOISE_MS = 30
 
+
 def _synth_sine(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:
     """Generate a sine wave."""
     t = np.arange(int(sr * duration_s)) / sr
@@ -74,5 +75,3 @@ def _synth_hihat(sr: int = DEFAULT_SR) -> np.ndarray:
 def _note_to_freq(note: int) -> float:
     """Convert MIDI note number to frequency (A4 = 440Hz)."""
     return 440.0 * (2.0 ** ((note - 69) / 12.0))
-
-

@@ -6,7 +6,6 @@ import pytest
 
 from cortex.utils.result import Err, Ok, safe, safe_async
 
-
 # ─── Ok / Err Construction ───────────────────────────────────────────
 
 

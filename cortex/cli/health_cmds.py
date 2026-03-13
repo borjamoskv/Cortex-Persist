@@ -45,10 +45,7 @@ def check(db_path: str | None) -> None:
     for m in hs.metrics:
         bar_len = int(m.value * 20)
         bar = "█" * bar_len + "░" * (20 - bar_len)
-        console.print(
-            f"  {m.name:12s} [{bar}] "
-            f"{m.value:.0%} (w={m.weight})"
-        )
+        console.print(f"  {m.name:12s} [{bar}] {m.value:.0%} (w={m.weight})")
     console.print()
 
 
@@ -136,7 +133,7 @@ def trend(db_path: str | None, samples: int, interval: float) -> None:
     spark = render_sparkline(scores)
     drift = detector.detect_drift()
     slope = detector.slope()
-    
+
     color = "green" if drift == "improving" else ("red" if drift == "degrading" else "yellow")
     console.print(f"\n📈 Trend: [{color}]{drift}[/] (slope: {slope:+.3f})")
     console.print(f"Sparkline: [cyan]{spark}[/]\n")

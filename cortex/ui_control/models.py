@@ -6,16 +6,19 @@ logger = logging.getLogger("cortex.ui_control")
 
 class UIControlError(Exception):
     """Base exception for all UI control errors."""
+
     pass
 
 
 class AppNotRunningError(UIControlError):
     """When the target application is not currently active."""
+
     pass
 
 
 class UIElementNotFoundError(UIControlError):
     """When an AppleScript cannot find the requested window, button, or element."""
+
     pass
 
 
@@ -31,6 +34,7 @@ class AppleScriptExecutionError(UIControlError):
 @dataclass
 class Point:
     """Represents a coordinate on the screen."""
+
     x: int
     y: int
 
@@ -38,6 +42,7 @@ class Point:
 @dataclass
 class AXElement:
     """Represents a macOS UI element from the Accessibility tree."""
+
     role: str
     subrole: str | None = None
     title: str | None = None
@@ -49,6 +54,7 @@ class AXElement:
 @dataclass
 class AppTarget:
     """Represents an application to target."""
+
     name: str  # The human readable name, e.g. "Safari"
     bundle_id: str | None = None  # e.g. "com.apple.Safari"
 
@@ -56,6 +62,7 @@ class AppTarget:
 @dataclass
 class InteractionResult:
     """Result of a UI interaction."""
+
     success: bool
     output: str | None = None
     error: str | None = None

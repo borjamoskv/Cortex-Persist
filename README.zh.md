@@ -73,7 +73,7 @@ CORTEX 不是替代你的记忆层——而是为其提供**认证**。
 ### 安装
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### 存储决策并验证

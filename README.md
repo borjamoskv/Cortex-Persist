@@ -104,7 +104,7 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
 ### Install
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### Store a Decision & Verify It

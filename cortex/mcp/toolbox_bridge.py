@@ -162,10 +162,7 @@ class ToolboxBridge:
     def __repr__(self) -> str:
         status = "connected" if self._client else "disconnected"
         n = len(self._tools)
-        return (
-            f"ToolboxBridge({status}, tools={n},"
-            f" url={self.config.server_url})"
-        )
+        return f"ToolboxBridge({status}, tools={n}, url={self.config.server_url})"
 
 
 # ─── Factory ──────────────────────────────────────────────────────────
@@ -206,8 +203,7 @@ async def cortex_self_bridge(
     """
     if not toolbox_health_check():
         logger.warning(
-            "Toolbox membrane unreachable at %s — "
-            "fallback to direct ORM.",
+            "Toolbox membrane unreachable at %s — fallback to direct ORM.",
             DEFAULT_SERVER_URL,
         )
         return None

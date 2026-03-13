@@ -55,8 +55,11 @@ class CausalEpisode:
 
 
 __all__ = [
-    "CausalEpisode", "CortexFactModel", "EpisodicSnapshot",
-    "MemoryEntry", "MemoryEvent",
+    "CausalEpisode",
+    "CortexFactModel",
+    "EpisodicSnapshot",
+    "MemoryEntry",
+    "MemoryEvent",
 ]
 
 

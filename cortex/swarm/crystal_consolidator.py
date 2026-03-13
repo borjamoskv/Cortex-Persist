@@ -82,10 +82,9 @@ async def _execute_cold_purge(
 ) -> None:
     """Remove dead weight crystals (cold + irrelevant + old + not diamond)."""
     purge_candidates = [
-        v for v in vitals
-        if v.recommendation == "PURGE"
-        and v.age_days >= MIN_AGE_FOR_PURGE_DAYS
-        and not v.is_diamond
+        v
+        for v in vitals
+        if v.recommendation == "PURGE" and v.age_days >= MIN_AGE_FOR_PURGE_DAYS and not v.is_diamond
     ]
 
     if not purge_candidates:
@@ -172,7 +171,7 @@ async def _execute_semantic_merge(
             if row:
                 data[v.fact_id] = {
                     "content": row[0],
-                    "embedding": np.frombuffer(row[1], dtype=np.float32)
+                    "embedding": np.frombuffer(row[1], dtype=np.float32),
                 }
     except (sqlite3.Error, ValueError, TypeError) as e:
         logger.error("🔗 [MERGE] Failed to load data: %s", e)
@@ -203,11 +202,11 @@ async def _execute_semantic_merge(
             if sim >= SEMANTIC_MERGE_THRESHOLD:
                 # Alchemist Merge: Fuse content via LLM
                 logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
-                
+
                 try:
                     synthesis = await synthesize_crystals(
                         primary_content=data[id_a]["content"],
-                        secondary_content=data[id_b]["content"]
+                        secondary_content=data[id_b]["content"],
                     )
                     new_content = synthesis.get("fused_content", data[id_a]["content"])
 
@@ -231,7 +230,9 @@ async def _execute_semantic_merge(
                     result.merged += 1
                     logger.info(
                         "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
-                        id_a, id_b, " (DRY)" if dry_run else "",
+                        id_a,
+                        id_b,
+                        " (DRY)" if dry_run else "",
                     )
                 except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
                     logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, e)
@@ -250,7 +251,8 @@ async def _execute_diamond_promotion(
 ) -> None:
     """Promote high-impact crystals to diamond (immune to decay)."""
     promote_candidates = [
-        v for v in vitals
+        v
+        for v in vitals
         if v.recommendation in ("PROMOTE", "PROTECT")
         and not v.is_diamond
         and v.age_days >= MIN_AGE_FOR_PROMOTE_DAYS

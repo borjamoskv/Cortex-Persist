@@ -43,7 +43,7 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ## Quick Start
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 cortex init
 cortex store my-agent "Chose OAuth2 PKCE for auth" --type decision
 cortex verify 1

@@ -67,9 +67,7 @@ class TestLifecycle:
 
 class TestWriteOperations:
     async def test_single_insert(self, writer: SqliteWriteWorker):
-        result = await writer.execute(
-            "INSERT INTO items (name, value) VALUES (?, ?)", ("alpha", 1)
-        )
+        result = await writer.execute("INSERT INTO items (name, value) VALUES (?, ?)", ("alpha", 1))
         assert isinstance(result, Ok)
         assert result.value >= 0  # rowcount
 
@@ -141,7 +139,9 @@ class TestTransaction:
 
         try:
             async with writer.transaction() as tx:
-                await tx.execute("INSERT INTO items (name, value) VALUES (?, ?)", ("rollback_me", 1))
+                await tx.execute(
+                    "INSERT INTO items (name, value) VALUES (?, ?)", ("rollback_me", 1)
+                )
                 raise ValueError("Simulated error")
         except ValueError:
             pass  # Expected

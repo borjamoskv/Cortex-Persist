@@ -63,11 +63,13 @@ class TestGenesisEngineCreate:
             components=[
                 ComponentSpec(name="models", component_type="dataclass"),
                 ComponentSpec(
-                    name="store", component_type="mixin",
+                    name="store",
+                    component_type="mixin",
                     dependencies=["models"],
                 ),
                 ComponentSpec(
-                    name="manager", component_type="module",
+                    name="manager",
+                    component_type="module",
                     dependencies=["models", "store"],
                 ),
             ],
@@ -359,10 +361,12 @@ class TestGenesisExtend:
         # Now extend with a new component
         result = engine.extend(
             base_dir,
-            [ComponentSpec(
-                name="extra",
-                component_type="dataclass",
-            )],
+            [
+                ComponentSpec(
+                    name="extra",
+                    component_type="dataclass",
+                )
+            ],
         )
 
         assert (base_dir / "extra.py").exists()
@@ -430,4 +434,3 @@ class TestComposeTemplates:
 
         assert "safe.py" in result
         assert len(result) == 1  # Only module rendered
-

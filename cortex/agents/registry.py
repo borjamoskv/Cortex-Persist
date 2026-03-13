@@ -24,6 +24,7 @@ _DEFINITIONS_DIR = Path(__file__).parent / "definitions"
 @dataclass
 class MemoryConfig:
     """Memory parameters for an agent."""
+
     art_rho: float = 0.95
     pruning_threshold: float = 0.1
     retrieval_band: str = "gamma"
@@ -49,6 +50,7 @@ class MemoryConfig:
 @dataclass
 class GuardrailsConfig:
     """Execution boundaries for an agent."""
+
     max_session_tokens: int = 100000
     warn_threshold: float = 0.8
     max_turns: int = 50
@@ -66,6 +68,7 @@ class GuardrailsConfig:
 @dataclass
 class AgentDefinition:
     """A sovereign agent loaded from a YAML definition."""
+
     id: str  # Filename stem without .yaml
     name: str
     model: str
@@ -115,6 +118,7 @@ class AgentDefinition:
                     info["cost_class"] = preset.get("cost_class", "medium")
             except ImportError as e:
                 import logging
+
                 logging.debug("Routing info preset resolution skipped: %s", e)
         return info
 
@@ -152,7 +156,7 @@ class AgentDefinition:
 
 class AgentRegistry:
     """Singleton registry for all CORTEX YAML agent definitions.
-    
+
     Loads definitions lazily upon first access.
     """
 
@@ -167,12 +171,12 @@ class AgentRegistry:
 
     def load_all(self, definitions_dir: Path | None = None) -> None:
         """Scan and load all .yaml definitions in the directory.
-        
+
         Args:
             definitions_dir: Override path, defaults to cortex/agents/definitions
         """
         directory = definitions_dir or _DEFINITIONS_DIR
-        
+
         if not directory.exists() or not directory.is_dir():
             logger.warning("🔍 [REGISTRY] Definitions dict not found: %s", directory)
             self._loaded = True

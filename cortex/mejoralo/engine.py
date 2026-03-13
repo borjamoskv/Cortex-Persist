@@ -99,12 +99,10 @@ class MejoraloEngine:
 
         logger.info("Executing Awwwards Fixer on %s", abs_path.name)
         swarm = MejoraloSwarm(level=2)
-        
+
         try:
             new_code = asyncio.run(
-                swarm.refactor_file(
-                    abs_path, findings, iteration=1, engine=self, project=project
-                )
+                swarm.refactor_file(abs_path, findings, iteration=1, engine=self, project=project)
             )
         except RuntimeError:
             new_code = None
@@ -113,13 +111,14 @@ class MejoraloEngine:
             return False
 
         from cortex.cli import console
+
         console.print(f"  [cyan]Applying Sovereign Aesthetics to {abs_path.name}...[/]")
         abs_path.write_text(new_code)
-        
+
         # Format the result
         if abs_path.suffix in (".py",):
             _apply_aesthetic_formatting(abs_path, console)
-            
+
         console.print(f"  [bold green]✅ {abs_path.name} is now Awwwards-grade.[/]")
         return True
 

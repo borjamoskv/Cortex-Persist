@@ -70,7 +70,7 @@ class MissionOrchestrator:
         try:
             from cortex.gate import ActionLevel, get_gate
 
-            logger.info("Executing swarm mission: %s", ' '.join(cmd))
+            logger.info("Executing swarm mission: %s", " ".join(cmd))
 
             gate = get_gate()
             action = gate.request_approval(
