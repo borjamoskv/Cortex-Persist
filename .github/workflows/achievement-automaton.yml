@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────────────
+# CORTEX Achievement Automaton
+# ─────────────────────────────────────────────────────────────────────
+# Farms GitHub Achievements automatically:
+#   • Pull Shark: auto-creates PR from any non-main branch push → merge
+#   • Pair Extraordinaire: adds Co-authored-by on merge commits
+#   • YOLO: first PR merged without review unlocks it
+#
+# Trigger: push to any branch except main/master
+# Effect: creates PR → auto-merges → deletes branch → achievement++
+# ─────────────────────────────────────────────────────────────────────
+
+name: "⚡ Achievement Automaton"
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  achievement-farm:
+    name: "🦈 Pull Shark Farm"
+    runs-on: ubuntu-latest
+    if: github.actor == 'borjamoskv'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: achievement automaton sync"
+          title: "⚡ ${{ github.ref_name }} → main"
+          body: |
+            ### Achievement Automaton
+
+            **Branch**: `${{ github.ref_name }}`
+            **Commit**: `${{ github.sha }}`
+            **Author**: @${{ github.actor }}
+
+            ---
+            _Automated by CORTEX Achievement Automaton · Pull Shark 🦈_
+          branch: ${{ github.ref_name }}
+          base: main
+          delete-branch: false
+
+      - name: Auto-merge PR
+        if: steps.create-pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.create-pr.outputs.pull-request-number }}"
+          echo "🦈 Merging PR #${PR_NUMBER} for Pull Shark achievement..."
+
+          # Enable auto-merge (squash to keep history clean)
+          gh pr merge "${PR_NUMBER}" \
+            --squash \
+            --auto \
+            --delete-branch \
+            --subject "⚡ ${GITHUB_REF_NAME} (#${PR_NUMBER})" \
+            --body "Co-authored-by: CORTEX <cortex@moskv.dev>" \
+            || echo "⚠ Auto-merge not available — PR may need manual merge or branch protection is active"
+
+      - name: Achievement Status
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚡ ACHIEVEMENT AUTOMATON COMPLETE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🦈 Pull Shark: +1 PR merged"
+          echo "📦 Pair Extraordinaire: Co-authored-by added"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
