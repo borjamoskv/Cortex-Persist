@@ -178,6 +178,7 @@ class JosuProactiveDaemon:
                 # Signal planning
                 async with self.db.session() as conn:
                     from cortex.signals.bus import AsyncSignalBus
+                    bus = AsyncSignalBus(conn)
                     await bus.emit(
                         "swarm:plan", {"task": f"Analyzing {target.id[:8]}"}, source=source_id
                     )
