@@ -72,6 +72,57 @@ class MejoraloEngine:
         )
         return heal_project(project, path, effective_target, scan_result, engine=self)
 
+    # ── Fase 3: Specialized ──────────────────────────────────────────
+
+    def awwwards_fix(self, project: str, file_path: str | Path) -> bool:
+        """
+        Active auto-correction targeting Awwwards standard (Sovereign 200).
+        Bypasses normal scan to directly rewrite animations/styles in a file.
+        """
+        import asyncio
+
+        from .heal import _apply_aesthetic_formatting
+        from .swarm import MejoraloSwarm
+
+        abs_path = Path(file_path).resolve()
+        if not abs_path.exists():
+            logger.error("Awwwards fix failed: file not found %s", abs_path)
+            return False
+
+        # Faux findings to steer the swarm
+        findings = [
+            "awwwards: Force GPU compositing (will-change: transform) for all animations.",
+            "awwwards: Purge inline styles and move them to utility classes/styled components.",
+            "awwwards: Ensure smooth scroll integration or prevent layout thrashing.",
+            "awwwards: Refactor to Sovereign 200 standard (Industrial Noir / flawless 60fps).",
+        ]
+
+        logger.info("Executing Awwwards Fixer on %s", abs_path.name)
+        swarm = MejoraloSwarm(level=2)
+        
+        try:
+            new_code = asyncio.run(
+                swarm.refactor_file(
+                    abs_path, findings, iteration=1, engine=self, project=project
+                )
+            )
+        except RuntimeError:
+            new_code = None
+
+        if not new_code:
+            return False
+
+        from cortex.cli import console
+        console.print(f"  [cyan]Applying Sovereign Aesthetics to {abs_path.name}...[/]")
+        abs_path.write_text(new_code)
+        
+        # Format the result
+        if abs_path.suffix in (".py",):
+            _apply_aesthetic_formatting(abs_path, console)
+            
+        console.print(f"  [bold green]✅ {abs_path.name} is now Awwwards-grade.[/]")
+        return True
+
     # ── Fase 6: Ouroboros — Record Session ────────────────────────────
 
     def record_session(

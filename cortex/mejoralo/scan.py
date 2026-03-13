@@ -12,11 +12,20 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cortex.mejoralo.constants import (
+    INDENT_NESTING_THRESHOLD,
+    MAX_FINDINGS_ARCH,
+    MAX_FINDINGS_COMPLEXITY,
     MAX_LOC,
+    MCCABE_THRESHOLD,
+    NESTING_DEPTH_LIMIT,
     PSI_PATTERNS,
+    PSI_PENALTY_BRUTAL,
+    PSI_PENALTY_NORMAL,
     SCAN_EXTENSIONS,
     SECURITY_PATTERNS,
+    SECURITY_PENALTY_PER_FINDING,
     SKIP_DIRS,
+    SOVEREIGN_BONUS_FACTOR,
 )
 from cortex.mejoralo.models import DimensionResult, ScanResult
 from cortex.mejoralo.utils import detect_stack
@@ -93,7 +102,7 @@ class McCabeVisitor(ast.NodeVisitor):
             if isinstance(child, _COMPLEXITY_NODES):
                 comp += 1
 
-        if comp > 10:  # Sovereign threshold: 10
+        if comp > MCCABE_THRESHOLD:
             self.findings.append(
                 f"{self.rel}:{node.lineno} -> High Complexity ({comp}) in '{node.name}'"
             )
@@ -109,7 +118,7 @@ class NestingVisitor(ast.NodeVisitor):
         inc = isinstance(node, _NESTING_NODES)
         if inc:
             self.depth += 1
-            if self.depth >= 6:  # Strict sovereign depth: 6
+            if self.depth >= NESTING_DEPTH_LIMIT:
                 line_no = getattr(node, "lineno", "?")
                 self.findings.append(
                     f"{self.rel}:{line_no} -> Severe structural nesting (depth {self.depth})"
@@ -139,7 +148,7 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
         if not stripped or stripped.startswith(("#", "//", "/*", "*", '"""', "'''", "]", "}", ")")):
             continue
         indent = len(line) - len(stripped)
-        if indent >= 24 and any(
+        if indent >= INDENT_NESTING_THRESHOLD and any(
             stripped.startswith(kw)
             for kw in (
                 "if ",
@@ -259,7 +268,7 @@ def _score_dimensions(
             name="Arquitectura",
             score=arch_score,
             weight="critical",
-            findings=large_files[:10],
+            findings=large_files[:MAX_FINDINGS_ARCH],
         )
     )
 
@@ -267,7 +276,9 @@ def _score_dimensions(
     if not has_files:
         sec_score = 0
     else:
-        sec_score = max(0, 100 - min(100, len(security_findings) * 15))
+        sec_score = max(
+            0, 100 - min(100, len(security_findings) * SECURITY_PENALTY_PER_FINDING)
+        )
     dimensions.append(
         DimensionResult(
             name="Seguridad",
@@ -289,7 +300,7 @@ def _score_dimensions(
             name="Complejidad",
             score=complexity_score,
             weight="high",
-            findings=complexity_findings[:15],
+            findings=complexity_findings[:MAX_FINDINGS_COMPLEXITY],
         )
     )
 
@@ -297,7 +308,7 @@ def _score_dimensions(
     if not has_files:
         psi_score = 0
     else:
-        psi_penalty_base = 5 if not brutal else 10
+        psi_penalty_base = PSI_PENALTY_BRUTAL if brutal else PSI_PENALTY_NORMAL
         psi_score = max(0, 100 - min(100, len(psi_findings) * psi_penalty_base))
 
     dimensions.append(
@@ -305,7 +316,7 @@ def _score_dimensions(
             name="Psi",
             score=psi_score,
             weight="high",
-            findings=psi_findings[:15],
+            findings=psi_findings[:MAX_FINDINGS_COMPLEXITY],
         )
     )
 
@@ -350,7 +361,7 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
 
     for d in dimensions:
         if d.weight == "sovereign":
-            bonus_points = int(d.score * 0.3)  # Max +30
+            bonus_points = int(d.score * SOVEREIGN_BONUS_FACTOR)
             continue
 
         w = _LOCAL_WEIGHT_MAP.get(d.weight, 10)
