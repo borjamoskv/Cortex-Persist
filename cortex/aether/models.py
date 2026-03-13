@@ -71,7 +71,7 @@ class AgentTask:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "AgentTask":
+    def from_dict(cls, d: dict) -> AgentTask:
         return cls(
             id=d["id"],
             title=d["title"],

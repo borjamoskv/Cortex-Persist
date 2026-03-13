@@ -5,16 +5,16 @@ Integración CORTEX con Coinbase Developer Platform.
 Singleton: una única instancia por proceso.
 """
 
+import asyncio
+import logging
 import os
 import stat
-import logging
-import asyncio
 from decimal import Decimal
-from typing import Optional, List, Any
+from typing import Any, Optional
 
 try:
-    from cdp_langchain.utils import CdpAgentkitWrapper
     from cdp_langchain.agent_toolkits import CdpToolkit
+    from cdp_langchain.utils import CdpAgentkitWrapper
     CDP_AVAILABLE = True
 except ImportError:
     CDP_AVAILABLE = False
@@ -59,8 +59,8 @@ class CDPSovereignWallet:
         self.private_key = os.getenv(
             "CDP_API_KEY_PRIVATE_KEY", ""
         ).replace("\\n", "\n")
-        self.agentkit: Optional[CdpAgentkitWrapper] = None
-        self.tools: List[Any] = []
+        self.agentkit: CdpAgentkitWrapper | None = None
+        self.tools: list[Any] = []
 
         if not CDP_AVAILABLE:
             logger.warning(

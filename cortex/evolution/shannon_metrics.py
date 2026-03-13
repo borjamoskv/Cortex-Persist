@@ -160,7 +160,7 @@ class CortexMetrics:
                 self._query_batch(conn, result)
             finally:
                 conn.close()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — fallback to snapshot on sqlite sync failure
             logger.debug("Sync metrics refresh failed: %s", e)
             for domain in AgentDomain:
                 if domain not in result:

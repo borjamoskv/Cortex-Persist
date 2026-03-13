@@ -7,11 +7,12 @@ tests to ensure zero functional drift (Immunitas-Omega D4 Siege).
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
-import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from cortex.thinking.orchestra import ThoughtOrchestra
 

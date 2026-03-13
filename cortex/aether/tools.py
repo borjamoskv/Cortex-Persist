@@ -196,7 +196,7 @@ class AgentToolkit:
             return output or "(no output)"
         except subprocess.TimeoutExpired:
             return f"[ERROR] Command timed out after {timeout}s"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"[ERROR] bash failed: {e}"
 
     # ── Git tools ─────────────────────────────────────────────────────
@@ -243,7 +243,7 @@ class AgentToolkit:
             related = [r.get("Text", "") for r in data.get("RelatedTopics", [])[:3]]
             result = abstract or " | ".join(related) or "(no result)"
             return result[:2000]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"[ERROR] web_search failed: {e}"
 
     def autodidact_ingest(self, target_url: str, intent: str = "Aprender") -> str:
@@ -251,8 +251,9 @@ class AgentToolkit:
         logger.info("🧠 autodidact_ingest: %s (Intent: %s)", target_url, intent)
         # Inline import to avoid circular dependencies and unnecessary overhead
         try:
-            from cortex.skills.autodidact.actuator import autodidact_pipeline
             import asyncio
+
+            from cortex.skills.autodidact.actuator import autodidact_pipeline
 
             # Helper to run async in sync context
             def _run_async():
@@ -269,7 +270,7 @@ class AgentToolkit:
 
             result = _run_async()
             return f"AUTODIDACT-Ω Result: {result}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return f"[ERROR] Autodidact failed: {e}"
 
     # ── Dispatch ──────────────────────────────────────────────────────
@@ -300,6 +301,6 @@ class AgentToolkit:
             return f"[ERROR] Unknown tool: {tool_name}"
         try:
             return fn(args)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.exception("Tool dispatch error [%s]", tool_name)
             return f"[ERROR] {tool_name} raised: {e}"

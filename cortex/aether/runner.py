@@ -35,8 +35,8 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.llm.provider import LLMProvider
         from cortex.agents.registry import AgentRegistry
+        from cortex.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
@@ -78,7 +78,7 @@ class AetherAgent:
             plan = await self._planner.plan(task.description, toolkit)
             queue.update(task.id, plan=plan.to_prompt_str())
             logger.info("📋 Plan: %s — %d steps", plan.summary, len(plan.steps))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — LLM failure boundary
             return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
@@ -115,7 +115,7 @@ class AetherAgent:
                 execute_result = await self._executor.execute(
                     plan, instruction, toolkit
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — LLM execution failure boundary
                 return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────
@@ -123,7 +123,7 @@ class AetherAgent:
             logger.info("🔍 Critiquing...")
             try:
                 critique = await self._critic.critique(task.description, toolkit)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — LLM critique failure boundary
                 logger.warning("Critic failed (%s) — skipping", e)
                 break
 
@@ -155,7 +155,7 @@ class AetherAgent:
                 None, self._tester.run, toolkit
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — Testing framework boundary isolation
             logger.warning("Tester failed (%s) — ignoring", e)
             test_result = None
 
@@ -233,7 +233,7 @@ class AetherAgent:
             )
             # Fire and forget / bounded wait
             await asyncio.wait_for(proc.communicate(), timeout=10.0)
-        except Exception as e:
+        except (asyncio.TimeoutError, OSError) as e:
             logger.debug("CORTEX persist failed: %s", e)
 
     @staticmethod
@@ -257,7 +257,7 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=10.0)
-        except Exception as e:
+        except (asyncio.TimeoutError, OSError) as e:
             logger.debug("CORTEX error persist failed: %s", e)
 
     @staticmethod
@@ -276,5 +276,5 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except Exception:
+        except (asyncio.TimeoutError, OSError):
             pass
