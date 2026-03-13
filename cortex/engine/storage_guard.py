@@ -10,7 +10,7 @@ Enforces:
 4. Fact type whitelist — only allowed types pass
 5. Project validation — non-empty, reasonable length
 
-Copyright 2026 Borja Moskv — Apache-2.0
+Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations
@@ -71,7 +71,7 @@ _ALLOWED_CONFIDENCE: frozenset[str] = frozenset(
 )
 
 _MAX_PROJECT_LENGTH = 256
-_MAX_CONTENT_LENGTH = 100_000
+_MAX_CONTENT_LENGTH = 500_000
 _MAX_TAGS = 50
 _MAX_TAG_LENGTH = 128
 _MIN_CONTENT_LENGTH = 10

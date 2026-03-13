@@ -61,7 +61,7 @@ class AgentMixin(EngineMixinBase):
                 logger.info("MOLTBOOK: Triggering automatic registration for agent '%s'", name)
                 await client.register(name, description=description)
                 await client.close()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — external MOLTBOOK sync is best-effort
                 # Fail-safe: Moltbook registration should not break local agent creation
                 logger.warning("MOLTBOOK: Automated registration failed for '%s': %s", name, e)
 

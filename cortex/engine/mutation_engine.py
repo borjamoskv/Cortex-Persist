@@ -22,11 +22,12 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from cortex.axioms.topological_id import flake_gen
 from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
+
+from cortex.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 

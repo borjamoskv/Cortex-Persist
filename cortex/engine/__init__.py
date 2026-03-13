@@ -21,6 +21,7 @@ from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.health.health_mixin import HealthMixin
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -29,11 +30,14 @@ logger = logging.getLogger("cortex")
 
 from cortex.consensus.manager import ConsensusManager  # noqa: E402
 from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
+from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker  # noqa: E402
 from cortex.engine.lock import SovereignLock  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 
-class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
+class CortexEngine(
+    StoreMixin, QueryMixin, MemoryMixin, TransactionMixin, HealthMixin,
+):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
@@ -193,7 +197,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
             nonlocal result, exception
             try:
                 result = asyncio.run(coro)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — sync wrapper must catch all async errors to propagate
                 exception = e
 
         t = threading.Thread(target=_worker)
@@ -266,6 +270,12 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
 
     def close_sync(self):
         return self._run_sync(self.close())
+
+    def health_check_sync(self, *args, **kwargs):
+        return self._run_sync(self.health_check(*args, **kwargs))
+
+    def health_report_sync(self, *args, **kwargs):
+        return self._run_sync(self.health_report(*args, **kwargs))
 
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
@@ -395,7 +405,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
                     self._memory_manager.wait_for_background(),  # type: ignore
                     timeout=5.0,
                 )
-            except (asyncio.TimeoutError, Exception):
+            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
                 logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
         if self._persistence:

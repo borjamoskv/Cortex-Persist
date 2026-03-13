@@ -107,9 +107,11 @@ class PathogenEngine:
         """
         import asyncio
         from datetime import datetime, timezone
+
         import dateutil.parser
-        from cortex.moltbook.client import MoltbookClient
+
         from cortex.cli.common import console
+        from cortex.moltbook.client import MoltbookClient
 
         post_id = url.rstrip("/").split("/")[-1]
         logger.info("Injecting monitoring hook into RADAR-Ω for: %s", url)
@@ -156,7 +158,7 @@ class PathogenEngine:
                 # Sleep 5 minutes before checking again
                 await asyncio.sleep(300)
                 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — background monitor must not crash host process
             logger.exception("Monitor hook failed: %s", e)
         finally:
             await client.close()

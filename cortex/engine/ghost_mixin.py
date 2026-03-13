@@ -40,6 +40,7 @@ class GhostMixin:
         project: str,
         target_file: str | Path | None = None,
         conn: aiosqlite.Connection | None = None,
+        root_dir: Path | None = None,
     ) -> str:
         """Embed a ghost trace on a file.
 
@@ -48,23 +49,22 @@ class GhostMixin:
             context: Semantic context (intent).
             project: Project id.
             target_file: The file to attach the ghost to. If None, uses current working context.
+            root_dir: Bounded root for thermal economy field scan.
         """
         import asyncio
 
-        root = Path.cwd()
-
         def _do_register() -> str:
-            # 1. Enforce Thermal Economy
-            self._economy.validate_emission(root)
-
-            # 2. Determine target file (default to some manifest if not provided)
             nonlocal target_file
             if not target_file:
-                target_file = root / ".cortex_field"
+                target_file = (root_dir or Path.cwd()) / ".cortex_field"
                 if not target_file.exists():
                     target_file.touch()
             else:
                 target_file = Path(target_file)
+
+            # 1. Enforce Thermal Economy. Bound to local scope to prevent O(N) scanning hang.
+            eval_root = root_dir or target_file.parent
+            self._economy.validate_emission(eval_root)
 
             # 3. Embed the resonance
             content_for_id = f"{reference}: {context}"

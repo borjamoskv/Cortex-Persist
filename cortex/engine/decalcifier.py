@@ -59,7 +59,8 @@ class SovereignDecalcifier:
             # In aiosqlite, accessing conn.isolation_level triggers cross-thread errors.
             # So we create an ephemeral connection with isolation_level=None to execute VACUUM.
             import sqlite3
-            from cortex.daemon.models import CORTEX_DB
+
+            from cortex.core.paths import CORTEX_DB
             
             def _run_vacuum():
                 with sqlite3.connect(CORTEX_DB, isolation_level=None) as vconn:
@@ -74,7 +75,7 @@ class SovereignDecalcifier:
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05, reason="Memory Compression")
             metrics["serotonin_boost"] = 0.1
             
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — background task resilience
             logger.error("❌ [DECALCIFIER] REM Cycle interrupted by nightmare (Error): %s", e)
             ENDOCRINE.pulse(HormoneType.CORTISOL, 0.2, reason="REM Interruption")
             await conn.rollback()

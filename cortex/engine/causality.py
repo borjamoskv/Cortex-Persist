@@ -98,8 +98,8 @@ class AsyncCausalGraph:
         """Record a causal edge asynchronously."""
         await self.ensure_table()
         cursor = await self._conn.execute(
-            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, "
+            "project, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
         )
         await self._conn.commit()
@@ -139,7 +139,7 @@ class AsyncCausalOracle:
 
     @staticmethod
     async def find_parent_signal(
-        conn: aiosqlite.Connection, project: str | None = None
+        conn: aiosqlite.Connection, project: str | None = None, tenant_id: str = "default"
     ) -> int | None:
         """Finds the most recent unconsumed causal signal asynchronously."""
         bus = AsyncSignalBus(conn)
@@ -153,7 +153,7 @@ class AsyncCausalOracle:
 # ── Data Model ──────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class CausalEdge:
     """A single edge in the causal DAG."""
 
@@ -221,8 +221,8 @@ class CausalGraph:
         """
         self.ensure_table()
         cursor = self._conn.execute(
-            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, "
+            "project, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
         )
         self._conn.commit()
@@ -237,7 +237,9 @@ class CausalGraph:
         )
         return edge_id
 
-    def trace_ancestors(self, fact_id: int, max_depth: int = 50) -> list[CausalEdge]:
+    def trace_ancestors(
+        self, fact_id: int, tenant_id: str = "default", max_depth: int = 50
+    ) -> list[CausalEdge]:
         """Walk the DAG upward from a fact to its root causes.
 
         Returns edges in order from immediate parent to oldest ancestor.
@@ -254,9 +256,10 @@ class CausalGraph:
             visited.add(current)
 
             cursor = self._conn.execute(
-                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, tenant_id, created_at "
-                "FROM causal_edges WHERE fact_id = ? ORDER BY id DESC LIMIT 1",
-                (current,),
+                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, "
+                "tenant_id, created_at FROM causal_edges WHERE fact_id = ? "
+                "AND tenant_id = ? ORDER BY id DESC LIMIT 1",
+                (current, tenant_id),
             )
             row = cursor.fetchone()
             if not row:
@@ -272,7 +275,9 @@ class CausalGraph:
 
         return result
 
-    def trace_descendants(self, fact_id: int, max_depth: int = 50) -> list[CausalEdge]:
+    def trace_descendants(
+        self, fact_id: int, tenant_id: str = "default", max_depth: int = 50
+    ) -> list[CausalEdge]:
         """Walk the DAG downward from a fact to its consequences.
 
         Returns edges in BFS order.
@@ -291,9 +296,10 @@ class CausalGraph:
             visited.add(current)
 
             cursor = self._conn.execute(
-                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, tenant_id, created_at "
-                "FROM causal_edges WHERE parent_id = ? ORDER BY id ASC",
-                (current,),
+                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, "
+                "tenant_id, created_at FROM causal_edges WHERE parent_id = ? "
+                "AND tenant_id = ? ORDER BY id ASC",
+                (current, tenant_id),
             )
             for row in cursor.fetchall():
                 edge = _edge_from_row(row)
@@ -302,13 +308,13 @@ class CausalGraph:
 
         return result
 
-    def lineage_report(self, fact_id: int) -> dict[str, Any]:
+    def lineage_report(self, fact_id: int, tenant_id: str = "default") -> dict[str, Any]:
         """Generate a compliance-ready lineage report for a fact.
 
         Returns a dict suitable for EU AI Act Article 12 reporting.
         """
-        ancestors = self.trace_ancestors(fact_id)
-        descendants = self.trace_descendants(fact_id)
+        ancestors = self.trace_ancestors(fact_id, tenant_id=tenant_id)
+        descendants = self.trace_descendants(fact_id, tenant_id=tenant_id)
 
         # Collect all signal IDs in the chain for cross-referencing
         all_edges = ancestors + descendants
@@ -316,6 +322,7 @@ class CausalGraph:
 
         return {
             "fact_id": fact_id,
+            "tenant_id": tenant_id,
             "ancestor_count": len(ancestors),
             "descendant_count": len(descendants),
             "depth": len(ancestors),
@@ -372,7 +379,9 @@ class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact."""
 
     @staticmethod
-    def find_parent_signal(db_path: str, project: str | None = None) -> int | None:
+    def find_parent_signal(
+        db_path: str, project: str | None = None, tenant_id: str = "default"
+    ) -> int | None:
         """Finds the most recent unconsumed causal signal.
 
         Looks for 'plan:done', 'task:start', or 'apotheosis:heal'
@@ -381,7 +390,7 @@ class CausalOracle:
         try:
             with db_connect(db_path) as conn:
                 bus = SignalBus(conn)
-                recent = bus.history(project=project, limit=5)
+                recent = bus.history(project=project, tenant_id=tenant_id, limit=5)
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                         return sig.id

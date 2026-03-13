@@ -16,6 +16,7 @@ from cortex.engine.evolution_types import (
     SovereignAgent,
     SubAgent,
 )
+from cortex.engine.zero_prompting import ZeroPromptingEvolutionStrategy
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES
@@ -361,6 +362,7 @@ class CortexEvolutionEngine:
             EntropyReductionStrategy(),
             CrossoverRecombinationStrategy(),
             StagnationBreakerStrategy(),
+            ZeroPromptingEvolutionStrategy(),  # Axiom Ω₇
         ]
         self._evaluation_count = 0
         self._prev_avg_fitness: dict[str, float] = {}
@@ -412,7 +414,7 @@ class CortexEvolutionEngine:
                     results.append(
                         {"agent_id": subagent.agent_id, "timestamp": time.time(), **result}
                     )
-            except Exception as exc:
+            except (ValueError, TypeError, AttributeError, RuntimeError) as exc:
                 results.append({"agent_id": subagent.agent_id, "strategy": name, "error": str(exc)})
         return results
 

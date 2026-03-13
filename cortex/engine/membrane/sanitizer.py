@@ -68,7 +68,7 @@ class SovereignSanitizer:
         try:
             # We construct the PureEngram. The Config(extra='forbid') will reject invalid fields.
             pure_engram = PureEngram(original_raw_hash=raw_hash, **raw_engram)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — byzantine input quarantine boundary
             # If the dict is severely malformed, we create an error engram instead of crashing
             # Axiom Ω5 (Antifragility): System requires stress as fuel.
             pure_engram = PureEngram(

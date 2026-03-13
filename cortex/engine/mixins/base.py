@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.engine")
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.confidence, "
     "f.valid_from, f.valid_until, f.source, f.meta, f.consensus_score, "
-    "f.created_at, f.updated_at, f.tx_id, t.hash"
+    "f.created_at, f.updated_at, f.tx_id, f.parent_decision_id, t.hash"
 )
 FACT_JOIN = "FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id"
 
@@ -59,5 +59,19 @@ class EngineMixinBase:
             "created_at": fact.created_at,
             "updated_at": fact.updated_at,
             "tx_id": fact.tx_id,
+            "parent_decision_id": fact.parent_decision_id,
             "hash": fact.hash,
         }
+
+    def _resolve_tenant(self, tenant_id: str) -> str:
+        """Resolve and validate the tenant ID from context if 'default' is provided."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+
+            tenant_id = get_tenant_id()
+
+        # Strict Multi-Tenancy (RLS): Never allow empty tenant
+        if not tenant_id:
+            tenant_id = "default"
+
+        return tenant_id

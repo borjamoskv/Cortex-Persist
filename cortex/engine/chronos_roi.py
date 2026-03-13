@@ -28,7 +28,7 @@ __all__ = ["ChronosROI", "ChronosReport", "CHRONOS"]
 # ── Data Model ──────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ChronosReport:
     """Immutable snapshot of a CHRONOS audit result."""
 

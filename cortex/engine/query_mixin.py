@@ -23,6 +23,8 @@ class QueryMixin(EngineMixinBase):
         fact_types: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Retrieve all active facts, optionally filtered by project or types."""
+        tenant_id = self._resolve_tenant(tenant_id)
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
@@ -43,7 +45,9 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.project, f.fact_type, f.id"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [
+                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
+            ]  # type: ignore[reportAttributeAccessIssue]
 
     async def search(
         self,
@@ -62,6 +66,8 @@ class QueryMixin(EngineMixinBase):
         Speed Optimization (Kairos-Ω):
         - If query is simple (keywords) or fast_mode=True, skip model load and use FTS5.
         """
+        tenant_id = self._resolve_tenant(tenant_id)
+
         if not query or not query.strip():
             raise ValueError("query cannot be empty")
 
@@ -115,7 +121,9 @@ class QueryMixin(EngineMixinBase):
                 entities = extract_entities(query)
                 seeds = [e["name"] for e in entities]
                 if seeds:
-                    subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth)
+                    subgraph = await get_context_subgraph(
+                        conn, seeds, depth=graph_depth, tenant_id=tenant_id
+                    )
                     results[0].graph_context = {"graph": subgraph, "seeds": seeds}
 
             return results
@@ -126,11 +134,16 @@ class QueryMixin(EngineMixinBase):
 
     async def get_fact(self, fact_id: int, tenant_id: str = "default") -> dict[str, Any] | None:
         """Retrieve a specific fact by ID and tenant."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ? AND f.tenant_id = ?"
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
-                return self._row_to_fact(row, tenant_id=tenant_id) if row else None  # type: ignore[reportAttributeAccessIssue]
+                return (
+                    self._row_to_fact(row, tenant_id=tenant_id) if row else None
+                )  # type: ignore[reportAttributeAccessIssue]
 
     async def recall(
         self,
@@ -141,6 +154,9 @@ class QueryMixin(EngineMixinBase):
         offset: int = 0,
     ) -> list[dict[str, Any]]:
         """High-level recall with scoring and temporal relevance."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             query = f"""
                 SELECT {FACT_COLUMNS}
@@ -171,7 +187,9 @@ class QueryMixin(EngineMixinBase):
 
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [
+                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
+            ]  # type: ignore[reportAttributeAccessIssue]
 
     async def history(
         self,
@@ -180,6 +198,10 @@ class QueryMixin(EngineMixinBase):
         as_of: str | None = None,
     ) -> list[dict[str, Any]]:
         """Visualización histórica: hechos activos, borrados o actualizados."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             if as_of:
                 clause, params = build_temporal_filter_params(as_of, table_alias="f")
@@ -197,7 +219,9 @@ class QueryMixin(EngineMixinBase):
                 )
                 cursor = await conn.execute(query, (tenant_id, project))
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [
+                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
+            ]  # type: ignore[reportAttributeAccessIssue]
 
     async def reconstruct_state(
         self,
@@ -206,6 +230,10 @@ class QueryMixin(EngineMixinBase):
         tx_id: int | None = None,
     ) -> list[dict[str, Any]]:
         """Reconstruct the state of a project at a specific transaction ID."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             if not tx_id:
                 return await self.recall(project, tenant_id=tenant_id)
@@ -232,7 +260,9 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [
+                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
+            ]  # type: ignore[reportAttributeAccessIssue]
 
     async def time_travel(
         self,
@@ -240,6 +270,10 @@ class QueryMixin(EngineMixinBase):
         tx_id: int | None = None,
     ) -> list[dict[str, Any]]:
         """Retrieve the whole world state at a specific transaction."""
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
+
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             clause, params = time_travel_filter(tx_id, table_alias="f")
             query = (
@@ -251,7 +285,9 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.id ASC"
             cursor = await conn.execute(query, [tenant_id, *params])
             rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]  # type: ignore[reportAttributeAccessIssue]
+            return [
+                self._row_to_fact(row, tenant_id=tenant_id) for row in rows
+            ]  # type: ignore[reportAttributeAccessIssue]
 
     async def stats(self) -> dict:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
@@ -316,47 +352,56 @@ class QueryMixin(EngineMixinBase):
                 "db_path": str(getattr(self, "_db_path", "unknown")),
             }
 
-    async def graph(self, project: str | None = None):
+    async def graph(self, project: str | None = None, tenant_id: str = "default"):
         """Get entity graph for a project."""
+        tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import get_graph
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await get_graph(conn, project)
+            return await get_graph(conn, project, tenant_id=tenant_id)
 
     async def query_entity(
         self,
         name: str,
         project: str | None = None,
+        tenant_id: str = "default",
     ) -> list[dict]:
         """Query a specific entity by name."""
+        tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import query_entity
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await query_entity(conn, name, project)  # type: ignore[reportReturnType]
+            return await query_entity(
+                conn, name, project, tenant_id=tenant_id
+            )  # type: ignore[reportReturnType]
 
     async def find_path(
         self,
         source: str,
         target: str,
         max_depth: int = 3,
+        tenant_id: str = "default",
     ) -> list[dict]:
         """Find paths between two entities."""
+        tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import find_path
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await find_path(conn, source, target, max_depth)
+            return await find_path(conn, source, target, max_depth, tenant_id=tenant_id)
 
     async def get_context_subgraph(
         self,
         seeds: list[str],
         depth: int = 2,
         max_nodes: int = 50,
+        tenant_id: str = "default",
     ) -> dict:
         """Retrieve a subgraph context for RAG."""
+        tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import get_context_subgraph
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            return await get_context_subgraph(conn, seeds, depth, max_nodes)
+            return await get_context_subgraph(conn, seeds, depth, max_nodes, tenant_id=tenant_id)
 
     async def get_causal_chain(
         self,
@@ -376,6 +421,10 @@ class QueryMixin(EngineMixinBase):
         Returns:
             List of fact dicts ordered by depth (0 = starting fact).
         """
+        if tenant_id == "default":
+            from cortex.security.tenant import get_tenant_id
+            tenant_id = get_tenant_id()
+
         if direction == "up":
             # Follow parent_decision_id upward toward root
             sql = """
@@ -423,14 +472,14 @@ class QueryMixin(EngineMixinBase):
             placeholders = ", ".join("?" for _ in id_list)
             cursor = await conn.execute(
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
-                f"WHERE f.id IN ({placeholders})",
-                id_list,
+                f"WHERE f.id IN ({placeholders}) AND f.tenant_id = ?",
+                [*id_list, tenant_id],
             )
             rows = await cursor.fetchall()
             facts = [
-                self._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
+                self._row_to_fact(row, tenant_id=tenant_id)
                 for row in rows
-            ]
+            ]  # type: ignore[reportAttributeAccessIssue]
 
             # Annotate with depth and sort
             for f in facts:

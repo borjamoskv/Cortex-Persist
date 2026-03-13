@@ -38,7 +38,7 @@ class MemoryMixin:
             sync_conn = self._get_sync_conn()  # type: ignore[reportAttributeAccessIssue]
             bus = SignalBus(sync_conn)
             bus.ensure_table()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — L1 memory fallback ignores SignalBus failure
             logger.warning("SignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.

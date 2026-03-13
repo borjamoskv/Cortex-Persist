@@ -28,6 +28,7 @@ async def insert_fact_record(
     source: str | None,
     meta: dict[str, Any] | None,
     tx_id: int | None,
+    parent_decision_id: int | None = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
@@ -51,11 +52,40 @@ async def insert_fact_record(
     except (ImportError, ValueError, OSError) as e:
         logger.debug("Fact signing skipped: %s", e)
 
+    # ── Causal Infrastructure: Validate & Auto-Resolve parent_decision_id ──
+    if parent_decision_id is not None:
+        # FK validation — ensure parent exists
+        cursor = await conn.execute(
+            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
+        )
+        if await cursor.fetchone() is None:
+            logger.warning(
+                "parent_decision_id=%d references non-existent fact — cleared",
+                parent_decision_id,
+            )
+            parent_decision_id = None
+    elif fact_type in ("decision", "error"):
+        # Auto-resolve: link to the most recent decision in the same project
+        # Decisions chain to previous decisions; errors link to their cause.
+        cursor = await conn.execute(
+            "SELECT id FROM facts WHERE project = ? AND tenant_id = ? "
+            "AND fact_type = 'decision' AND is_tombstoned = 0 "
+            "ORDER BY id DESC LIMIT 1",
+            (project, tenant_id),
+        )
+        row = await cursor.fetchone()
+        if row:
+            parent_decision_id = row[0]
+            logger.debug(
+                "Auto-resolved parent_decision_id=%d for %s in project=%s",
+                parent_decision_id, fact_type, project,
+            )
+
     cursor = await conn.execute(
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "
         "valid_from, source, meta, hash, signature, signer_pubkey, "
-        "created_at, updated_at, tx_id) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "created_at, updated_at, tx_id, parent_decision_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -72,6 +102,7 @@ async def insert_fact_record(
             ts,
             ts,
             tx_id,
+            parent_decision_id,
         ),
     )
     fact_id = cursor.lastrowid
@@ -115,7 +146,7 @@ async def insert_fact_record(
                     tenant_id,
                 ),
             )
-    except (ImportError, Exception) as e:
+    except (ImportError, Exception) as e:  # noqa: BLE001
         logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
 
     # Graph Extraction
@@ -123,9 +154,9 @@ async def insert_fact_record(
 
     try:
         # type: ignore[reportArgumentType]
-        await process_fact_graph(conn, fact_id, content, project, ts)
+        await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
     except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
-        logger.warning("Graph extraction failed for fact %d: %s", fact_id, e)
+        logger.warning("Graph extraction failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e)
 
     return fact_id  # type: ignore[reportReturnType]
 

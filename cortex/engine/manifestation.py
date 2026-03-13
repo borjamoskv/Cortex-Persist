@@ -62,7 +62,7 @@ async def manifest_singularity(signal_bus: "SignalBus | None" = None) -> None:
 
         ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.5)
         logger.info("🌌 [SINGULARITY] Manifestation successful. 150/100 state reached.")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — singularity collapse must handle all internal failures
         logger.error("🌌 [SINGULARITY] Manifestation collapse failed: %s", e)
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.5)
 
@@ -144,6 +144,6 @@ async def transfigure_ui(html_file: Path, signal_bus: "SignalBus | None" = None)
                     project="frontend",
                 )
             return True
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — frontend UI transfiguration isolation boundary
         logger.error("[MANIFESTATION] Transfiguration failed for %s: %s", html_file, e)
     return False

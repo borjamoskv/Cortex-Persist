@@ -117,7 +117,7 @@ class AnalysisEngine(BaseEngine):
                     atoms.update(file_atoms)
                 except SyntaxError as e:
                     logger.error("SyntaxError inside %s: %s", path, e)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 — parser boundary isolates file failures
                     logger.error("Failed to read %s: %s", path, e)
 
         # O(1) Graph linking
@@ -380,7 +380,7 @@ class PhoenixOrchestrator:
         for engine, args in stages:
             state = await engine.execute(state, *args)
             if state.status != PhaseStatus.COMPLETED:
-                logger.error(f"❌ PHOENIX HALTED at {engine.__class__.__name__}")
+                logger.error("❌ PHOENIX HALTED at %s", engine.__class__.__name__)
                 break
 
         return state
