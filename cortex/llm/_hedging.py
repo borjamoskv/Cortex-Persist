@@ -118,5 +118,5 @@ class HedgedRequestStrategy:
                 if not t.done():
                     try:
                         await t
-                    except (asyncio.CancelledError, Exception):
+                    except (asyncio.CancelledError, Exception):  # noqa: BLE001
                         pass

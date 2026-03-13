@@ -10,6 +10,7 @@ Extraído de router.py (Ω₂ Landauer split — 1371 → 5 módulos cohesivos).
 """
 
 from __future__ import annotations
+from typing import Any, Optional
 
 import time
 from abc import ABC, abstractmethod
@@ -63,7 +64,7 @@ class CascadeTier(str, Enum):
     NONE = "none"  # all providers failed
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class CascadeEvent:
     """Structured trace for a single execute_resilient call.
 
@@ -73,16 +74,16 @@ class CascadeEvent:
     """
 
     intent: IntentProfile
-    resolved_by: str | None
+    resolved_by: Optional[str]
     tier: CascadeTier
-    project: str | None = None
+    project: Optional[str] = None
     depth: int = 1  # how many providers attempted before success
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class HedgedResult:
     """Observability payload for hedged request races.
 
@@ -119,13 +120,13 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
-    episodic_context: list[dict[str, str]] | None = Field(
+    episodic_context: list[dict[str, Optional[str]]] = Field(
         default=None,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
-    project: str | None = Field(
+    project: Optional[str] = Field(
         default=None,
         description="Project to which this prompt belongs. Used for telemetry and billing.",
     )
@@ -188,13 +189,21 @@ class BaseProvider(ABC):
     def intent_affinity(self) -> frozenset[IntentProfile]:
         """Intenciones para las que este provider es adecuado.
 
-        Override en subclases especializadas. Por defecto, GENERAL (sin restricción).
-        Esto preserva la compatibilidad con providers existentes: un provider
-        sin override se comporta exactamente igual que antes.
+        Override en subclases especializadas. Por defecto, GENERAL.
         """
         return frozenset({IntentProfile.GENERAL})
 
+    @property
+    def tier(self) -> str:
+        """Provider tier: 'frontier', 'high', or 'local'."""
+        return "high"
+
+    @property
+    def cost_class(self) -> str:
+        """Cost classification: 'free', 'low', 'medium', 'high', 'variable'."""
+        return "medium"
+
     @abstractmethod
     async def invoke(self, prompt: CortexPrompt) -> str:
-        """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
+        """Traduce el CortexPrompt y ejecuta la inferencia."""
         ...

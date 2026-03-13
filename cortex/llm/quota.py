@@ -35,14 +35,14 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except Exception:
+    except Exception:  # noqa: BLE001 — rollback transaction before raising
         conn.rollback()
         raise
     finally:
         conn.close()
 
 
-@dataclasses.dataclass(frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class QuotaStatus:
     """Typed snapshot of the quota bucket state."""
 

@@ -134,12 +134,12 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     @staticmethod
     def _detect_available_providers() -> list[str]:
-        """Detecta providers con API key configurada."""
+        """Detecta providers disponibles (API key configurada o local sin key)."""
         presets = load_presets()
         return [
             name
             for name, preset in presets.items()
-            if preset.get("env_key") and os.environ.get(preset["env_key"])
+            if not preset.get("env_key") or os.environ.get(preset["env_key"])
         ]
 
     def _find_judge(self, available: list[str]) -> LLMProvider | None:
@@ -173,9 +173,12 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             preset = presets.get(provider_name)
             if not preset:
                 continue
+
             env_key = preset.get("env_key", "")
-            if env_key and os.environ.get(env_key):
+            # Fix: Support local providers without API keys
+            if not env_key or os.environ.get(env_key):
                 resolved.append((provider_name, model))
+
             if len(resolved) >= self.config.max_models:
                 break
 

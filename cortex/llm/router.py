@@ -67,8 +67,26 @@ class CortexLLMRouter:
     def fallbacks(self) -> list[BaseProvider]:
         return self._fallbacks
 
-    def _ordered_fallbacks(self, intent: IntentProfile) -> list[BaseProvider]:
-        """Ordena los fallbacks por afinidad de intención."""
+    # Cost class ordering for tiebreaking (cheaper first)
+    _COST_ORDER: dict[str, int] = {
+        "free": 0, "low": 1, "medium": 2,
+        "high": 3, "variable": 4,
+    }
+
+    # Tier ordering (higher quality first)
+    _TIER_ORDER: dict[str, int] = {
+        "frontier": 0, "high": 1, "local": 2,
+    }
+
+    def _ordered_fallbacks(
+        self, intent: IntentProfile,
+    ) -> list[BaseProvider]:
+        """Ordena fallbacks: intent affinity → A-record → cost → tier.
+
+        Within each tier, promotes known-good (A-record) by latency,
+        then sorts unknowns by cost_class (cheaper first), then by
+        tier (frontier > high > local) for same-cost tiebreaking.
+        """
         typed_matches: list[BaseProvider] = []
         safety_net: list[BaseProvider] = []
 
@@ -78,11 +96,39 @@ class CortexLLMRouter:
             else:
                 safety_net.append(p)
 
-        # Apply A-record promotion (fastest first)
-        promoted_typed = self._cascade.promote_known_good(typed_matches, intent)
-        promoted_safety = self._cascade.promote_known_good(safety_net, intent)
+        # Apply A-record promotion + cost/tier tiebreaking
+        promoted_typed = self._promote_by_latency_then_cost(
+            typed_matches, intent,
+        )
+        promoted_safety = self._promote_by_latency_then_cost(
+            safety_net, intent,
+        )
 
         return promoted_typed + promoted_safety
+
+    def _promote_by_latency_then_cost(
+        self,
+        providers: list[BaseProvider],
+        intent: IntentProfile,
+    ) -> list[BaseProvider]:
+        """A-record first (by latency), unknowns by (cost, tier)."""
+        promoted = self._cascade.promote_known_good(
+            providers, intent,
+        )
+        # promote_known_good: [known_good by latency] + [unknown]
+        known_count = sum(
+            1 for p in promoted
+            if self._cascade.get_a_record(p.provider_name)
+        )
+        known = promoted[:known_count]
+        unknown = promoted[known_count:]
+        unknown.sort(
+            key=lambda p: (
+                self._COST_ORDER.get(p.cost_class, 4),
+                self._TIER_ORDER.get(p.tier, 2),
+            )
+        )
+        return known + unknown
 
     async def execute_hedged(self, prompt: CortexPrompt) -> Result[str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
@@ -152,7 +198,7 @@ class CortexLLMRouter:
             result = await self._execute_resilient_impl(prompt)
             future.set_result(result)
             return result
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             if not future.done():
                 future.set_exception(exc)
             raise
@@ -238,9 +284,60 @@ class CortexLLMRouter:
         """Try a single provider, returning Result."""
         try:
             return Ok(await provider.invoke(prompt))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             return Err(str(exc))
 
     def cascade_stats(self) -> dict[str, Any]:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
+
+    def select_model_for_intent(self, intent: str) -> str | None:
+        """Resolve the optimal model for the primary provider's intent.
+
+        Uses the preset routing functions to find the best model
+        based on the intent_model_map in llm_presets.json.
+        """
+        try:
+            from cortex.llm._presets import resolve_model
+
+            return resolve_model(self._primary.provider_name, intent)
+        except ImportError:
+            return None
+
+    @staticmethod
+    def optimal_provider_order(
+        intent: str,
+        *,
+        min_tier: str = "local",
+        max_cost: str = "high",
+    ) -> list[tuple[str, str]]:
+        """Return (provider_name, model) pairs for an intent, cost-optimized.
+
+        This is the bridge between preset metadata and runtime routing.
+        Returns providers ordered by cost (cheapest first) filtered by tier.
+
+        Usage:
+            order = CortexLLMRouter.optimal_provider_order("code", max_cost="medium")
+            # → [("groq", "llama-3.3-70b-versatile"), ("deepseek", "deepseek-chat"), ...]
+        """
+        try:
+            from cortex.llm._presets import providers_for_intent
+
+            return providers_for_intent(
+                intent, min_tier=min_tier, max_cost=max_cost, sort_by="cost",
+            )
+        except ImportError:
+            return []
+
+    @staticmethod
+    def frontier_order(intent: str) -> list[tuple[str, str]]:
+        """Return frontier-tier providers for an intent, cheapest first.
+
+        Convenience for high-stakes tasks where only frontier models are acceptable.
+        """
+        try:
+            from cortex.llm._presets import frontier_providers
+
+            return frontier_providers(intent)
+        except ImportError:
+            return []

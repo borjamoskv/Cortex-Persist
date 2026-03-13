@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from cortex.memory.metamemory import MemoryCard, MetaJudgment, Verdict
@@ -55,7 +55,7 @@ _RESPOND_CONFIDENCE_FLOOR: float = 0.5
 # ─── Calibration Signal ───────────────────────────────────────────────
 
 
-class EpistemicSignal(StrEnum):
+class EpistemicSignal(str, Enum):
     """Human-readable epistemic state passed to the LLM."""
 
     CONFIDENT = "confident"  # FOK high, Verdict=RESPOND
@@ -67,7 +67,7 @@ class EpistemicSignal(StrEnum):
 # ─── Metacognitive Context ────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class MetacognitiveContext:
     """Epistemic snapshot passed from memory layer to LLM layer.
 

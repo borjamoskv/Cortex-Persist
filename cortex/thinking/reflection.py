@@ -39,7 +39,7 @@ LEARNABLE_TYPES = ("reflection", "error", "meta_learning")
 AUTO_TAGS = ["post-mortem", "auto-generated"]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Reflection:
     """A structured post-mortem reflection."""
 
@@ -60,7 +60,7 @@ class Reflection:
         return "\n".join(parts)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class InjectedLearning:
     """A retrieved learning ready for system_prompt injection."""
 

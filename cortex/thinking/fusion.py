@@ -1,18 +1,6 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
-# Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Thought Fusion Engine.
 
-Fusiona N respuestas de diferentes modelos en una respuesta
-superior. Cuatro estrategias disponibles:
-
-1. MAJORITY: La respuesta más similar al centro del cluster gana.
-2. SYNTHESIS: Un modelo-juez fusiona todas las perspectivas.
-3. BEST_OF_N: Puntúa cada respuesta en paralelo y elige la mejor.
-4. WEIGHTED_SYNTHESIS: Síntesis ponderada por latencia y reputación.
-"""
+"""Thought Fusion Engine — N model responses → 1 superior fused response."""
 
 from __future__ import annotations
 
@@ -33,6 +21,8 @@ from cortex.thinking.fusion_models import (
 )
 
 __all__ = ["ThoughtFusion", "ContextFusion"]
+
+logger = logging.getLogger("cortex.thinking.fusion")
 
 
 class ContextFusion:
@@ -112,7 +102,7 @@ class ContextFusion:
             return "\n".join(f.get("content", "") for f in retrieved_facts)
         return synthesized
 
-logger = logging.getLogger("cortex.thinking.fusion")
+
 
 
 class ThoughtFusion:
