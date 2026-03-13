@@ -73,7 +73,7 @@ class HeartbeatDaemon:
                 async with aiosqlite.connect(CORTEX_DB, timeout=5.0) as conn:
                     await decalcifier.decalcify_cycle(conn)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("🧬 [Ω₃-E+] Decalcifier hourly loop error: %s", e)
 
     async def start(self) -> None:
@@ -132,7 +132,7 @@ class HeartbeatDaemon:
 
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Heartbeat loop error: %s", e)
                 await asyncio.sleep(10.0)
 

@@ -225,9 +225,7 @@ class AlertHandlerMixin:
         """Handler for AetherAlert — autonomous coding task completions."""
         for a in alerts:
             emoji = "✅" if a.status == "done" else "❌"
-            logger.info(
-                "%s Aether task [%s] %s: %s", emoji, a.task_id, a.status, a.title
-            )
+            logger.info("%s Aether task [%s] %s: %s", emoji, a.task_id, a.status, a.title)
             if self._should_alert(f"aether:{a.task_id}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 sound = "Glass" if a.status == "done" else "Basso"
                 Notifier.notify(
@@ -239,7 +237,11 @@ class AlertHandlerMixin:
     def _alert_evaluation(self, alerts: list) -> None:
         """Handler for EvaluationAlert from EvaluationMonitor."""
         for a in alerts:
-            logger.info("📡 Evaluation Metrics: Stale_Ratio=%.2f, Contradictions=%d", a.stale_ratio, a.contradictions_found)
+            logger.info(
+                "📡 Evaluation Metrics: Stale_Ratio=%.2f, Contradictions=%d",
+                a.stale_ratio,
+                a.contradictions_found,
+            )
             if a.stale_ratio >= 0.5 or a.contradictions_found > 0:
                 if self._should_alert("evaluation:stale_cont"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                     msg = f"{a.message} | Contradictions: {a.contradictions_found}"
@@ -252,8 +254,26 @@ class AlertHandlerMixin:
             if self._should_alert(f"auto_immune:{task_id}"):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
                 logger.info("🛡️ Auto-Immune System dispatched ghost resolution task: %s", task_id)
 
-    def _flush_timer(self) -> None:
+    def _alert_workflows(self, alerts: list) -> None:
+        """Handler for WorkflowAlert — proactive workflow recommendations."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"workflow:{a.workflow}"
+            logger.info(
+                "🔮 Workflow Recommendation: %s (%s) — %s",
+                a.workflow,
+                a.confidence,
+                a.reason,
+            )
+            if self._should_alert(key):  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
+                Notifier.notify(
+                    f"🔮 Deploy {a.workflow}",
+                    a.reason[:120],
+                    sound="Glass",
+                )
 
+    def _flush_timer(self) -> None:
         """Flush accumulated time tracker heartbeats."""
         if not getattr(self, "tracker", None):
             return
@@ -261,5 +281,5 @@ class AlertHandlerMixin:
             entries = self.tracker.flush()  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
             if entries > 0:
                 logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("TimeTracker flush error: %s", e)

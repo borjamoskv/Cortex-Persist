@@ -64,7 +64,7 @@ class CloudSyncMonitor:
             res = asyncio.run(self._turso.execute("SELECT MAX(id) as max_id FROM transactions"))  # type: ignore[reportOptionalMemberAccess]
             if res and res[0].get("max_id") is not None:
                 return res[0]["max_id"]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("CloudSync: Failed to get remote sync state: %s", e)
         return 0
 

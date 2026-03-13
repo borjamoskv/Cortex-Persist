@@ -124,7 +124,7 @@ def _collect_snapshot() -> MemorySnapshot:
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except Exception:  # noqa: BLE001 — boundary; caller handles alerts
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001 — boundary; caller handles alerts
             pass
 
     if _IS_LINUX:
@@ -136,7 +136,7 @@ def _collect_snapshot() -> MemorySnapshot:
 
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
-        except Exception:  # noqa: BLE001
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001
             pass
 
     return MemorySnapshot(
@@ -264,7 +264,7 @@ class MemoryPressureMonitor:
                     await self._tick()
                 except asyncio.CancelledError:
                     raise
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Sample loop crashed: %s", e)
             except asyncio.CancelledError:
                 self._running = False

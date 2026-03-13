@@ -13,7 +13,7 @@ logger = logging.getLogger("moskv-daemon")
 
 class EvaluationMonitor:
     """Evaluates memory staleness and contradictions in the background.
-    
+
     Part of CORTEX v8 Axis 1: Evaluation Layer.
     """
 
@@ -39,24 +39,25 @@ class EvaluationMonitor:
 
         try:
             from cortex.database.core import connect as db_connect
-            
+
             alerts = []
             with db_connect(self.db_path) as conn:
                 cur = conn.cursor()
                 import sqlite3
+
                 try:
                     # Total facts
                     cur.execute("SELECT COUNT(*) FROM facts_meta")
                     total_row = cur.fetchone()
                     total = total_row[0] if total_row else 0
-                    
+
                     # Stale facts (> 180 days without subjective hit)
                     cur.execute(
                         "SELECT COUNT(*) FROM facts_meta WHERE last_accessed < datetime('now', '-180 days')"
                     )
                     stale_row = cur.fetchone()
                     stale_count = stale_row[0] if stale_row else 0
-                    
+
                     stale_ratio = (stale_count / total) if total > 0 else 0.0
                 except sqlite3.OperationalError as e:
                     if "no such table: facts_meta" in str(e):
@@ -69,20 +70,17 @@ class EvaluationMonitor:
 
             # Heuristics Contradiction flag (0 for now, logic deferred to asynchronous batch LLM evaluation)
             contradictions = 0
-            
+
             alerts.append(
                 EvaluationAlert(
                     stale_ratio=stale_ratio,
                     stale_count=stale_count,
                     contradictions_found=contradictions,
-                    message=(
-                        f"V8 Evaluation complete. "
-                        f"Stale memory ratio: {stale_ratio:.2%}"
-                    ),
+                    message=(f"V8 Evaluation complete. Stale memory ratio: {stale_ratio:.2%}"),
                 )
             )
             return alerts
-            
-        except Exception as e:
+
+        except Exception as e:  # noqa: BLE001
             logger.error("EvaluationMonitor error: %s", e)
             return []

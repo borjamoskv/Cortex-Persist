@@ -71,7 +71,7 @@ class AutoAuditMonitor(BaseMonitor[AutoAuditAlert]):
                             issue_type="high_ghosts",
                             severity=severity,
                             message=f"System is bleeding: {ghost_count} active ghosts detected.",
-                            metrics={"ghost_count": ghost_count, "error_count": error_count}
+                            metrics={"ghost_count": ghost_count, "error_count": error_count},
                         )
                     )
                 elif error_count > self.error_threshold:
@@ -80,7 +80,7 @@ class AutoAuditMonitor(BaseMonitor[AutoAuditAlert]):
                             issue_type="high_errors",
                             severity="medium",
                             message=f"System entropy rising: {error_count} active errors tracked.",
-                            metrics={"ghost_count": ghost_count, "error_count": error_count}
+                            metrics={"ghost_count": ghost_count, "error_count": error_count},
                         )
                     )
                 elif activity_24h == 0:
@@ -89,14 +89,14 @@ class AutoAuditMonitor(BaseMonitor[AutoAuditAlert]):
                             issue_type="stagnation",
                             severity="low",
                             message="Zero activity detected in 24h. System is entering stasis.",
-                            metrics={"activity_24h": activity_24h}
+                            metrics={"activity_24h": activity_24h},
                         )
                     )
 
             self._last_run = now
         except sqlite3.OperationalError as e:
             logger.debug("AutoAuditMonitor DB check skipped (table missing or locked): %s", e)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("AutoAuditMonitor failed: %s", e)
 
         return alerts

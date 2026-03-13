@@ -16,6 +16,7 @@ from cortex.daemon.monitors.base import BaseMonitor
 try:
     from cortex.aether.models import AgentTask, TaskSource
     from cortex.aether.queue import TaskQueue
+
     _AETHER_AVAILABLE = True
 except ImportError:
     _AETHER_AVAILABLE = False
@@ -28,8 +29,8 @@ class AutoImmuneMonitor(BaseMonitor):
 
     def __init__(
         self,
-        queue: 'TaskQueue | None' = None,
-        ghosts_path: 'Path' = AGENT_DIR / "memory" / "ghosts.json",
+        queue: TaskQueue | None = None,
+        ghosts_path: Path = AGENT_DIR / "memory" / "ghosts.json",
         stale_hours: float = DEFAULT_STALE_HOURS,
     ):
         self.queue = queue

@@ -16,10 +16,11 @@ logger = logging.getLogger("cortex.daemon.metabolism")
 @dataclass
 class Vitals:
     """The OS's vital signs."""
-    heart_rate: float = 1.0      # Execution frequency multiplier
-    entropy: float = 0.0         # Accumulated noise/boredom
-    signal: float = 1.0          # Useful state changes (alerts)
-    age: int = 0                 # Total daemon loops
+
+    heart_rate: float = 1.0  # Execution frequency multiplier
+    entropy: float = 0.0  # Accumulated noise/boredom
+    signal: float = 1.0  # Useful state changes (alerts)
+    age: int = 0  # Total daemon loops
 
 
 class MetabolismEngine:
@@ -77,6 +78,10 @@ class MetabolismEngine:
 
         logger.info(
             "PULSE-Ω: %s [HR: %.2f | Sig: %.2f | Ent: %.2f] -> Next beat in %.0fs",
-            self.bpm, self.vitals.heart_rate, self.vitals.signal, self.vitals.entropy, final_wait
+            self.bpm,
+            self.vitals.heart_rate,
+            self.vitals.signal,
+            self.vitals.entropy,
+            final_wait,
         )
         return final_wait

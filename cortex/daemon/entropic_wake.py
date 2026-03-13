@@ -3,9 +3,10 @@ Entropic Wake Daemon (VOID DAEMON)
 The proactive heartbeat that crosses the Rubicon: from determinism to autonomous mutation.
 """
 
+import asyncio
 import logging
+import sqlite3
 import subprocess
-import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -47,11 +48,11 @@ class EntropicWakeDaemon:
             # Default to scanning the CORTEX directory
             scan_path = Path.home() / "cortex"
             ghosts = sensor.scan_field(scan_path)
-            
+
             # Each ghost's strength contributes to the total resonance
             physical_resonance = sum(g.get("strength", 0.0) for g in ghosts)
             # Normalize physical resonance impact (e.g., 0.1 per full point of resonance)
-            entropy_score += (physical_resonance * 0.1)
+            entropy_score += physical_resonance * 0.1
 
             # 2. Epistemic Entropy (Banda E) - Low confidence facts in the database
             conn = self.engine.pool.get_connection()
@@ -62,16 +63,16 @@ class EntropicWakeDaemon:
             )
             epistemic_ghosts = cursor.fetchone()[0]
             # Normalize epistemic weight (e.g., 0.05 per low confidence fact)
-            entropy_score += (epistemic_ghosts * 0.05)
-            
+            entropy_score += epistemic_ghosts * 0.05
+
             # 3. DB Type Ghosts
             cursor.execute(
                 "SELECT COUNT(*) FROM facts WHERE type = 'ghost' AND status != 'resolved'"
             )
             db_ghosts = cursor.fetchone()[0]
-            entropy_score += (db_ghosts * 0.15)
+            entropy_score += db_ghosts * 0.15
 
-        except Exception as e:
+        except (sqlite3.Error, OSError, ValueError) as e:
             logger.error("RADAR-Ω Entropic query failed: %s", e)
 
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
@@ -84,11 +85,7 @@ class EntropicWakeDaemon:
         """
         logger.warning("THRESHOLD EXCEEDED. Imploding execution context for %s.", target)
         intent = "Aniquilación y extracción O(1) vía OUROBOROS-Ω y Berreraiki."
-        command = [
-            "cortex", "spawn",
-            f"--target={target}",
-            f"--intent={intent}"
-        ]
+        command = ["cortex", "spawn", f"--target={target}", f"--intent={intent}"]
 
         try:
             # Singularidad Headless: Detached background process
@@ -97,18 +94,18 @@ class EntropicWakeDaemon:
                 command,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                start_new_session=True
+                start_new_session=True,
             )
             # Log the action in memory
             self._log_action_to_cortex(target)
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.error("Failed to ignite purification agent: %s", e)
 
     def _log_action_to_cortex(self, target: str):
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
-        now_str = datetime.now().strftime('%H:%M %p')
+        now_str = datetime.now().strftime("%H:%M %p")
         msg = (
             f"Anoche a las {now_str} disolví secciones entrópicas estancadas en {target}. "
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
@@ -118,14 +115,14 @@ class EntropicWakeDaemon:
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, time.time())
+                (msg, datetime.now().timestamp()),
             )
             conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("Failed to log to cortex DB: %s", e)
 
-    def run_loop(self):
+    async def run_loop(self):
         """The main continuous loop for the Void Daemon."""
         logger.info("Initializing Entropic Wake Loop (VOID DAEMON)...")
         while not self._shutdown:
@@ -135,11 +132,11 @@ class EntropicWakeDaemon:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
                     self.ignite_purification_agent(highest_entropy_target)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — Main daemon loop must survive unexpected errors
                 logger.error("Entropic Wake encountered an error: %s", e)
 
             # Sleep until next pulse
-            time.sleep(self.interval_seconds)
+            await asyncio.sleep(self.interval_seconds)
 
     def stop(self):
         logger.info("Stopping Entropic Wake Daemon.")

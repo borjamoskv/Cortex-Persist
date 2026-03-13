@@ -1,7 +1,7 @@
 """
 CORTEX V6 - Physical Parity Layer (Vector 4 of the Singularity).
 
-Provides the Autonomous Heartbeat Daemon with direct, unfiltered 
+Provides the Autonomous Heartbeat Daemon with direct, unfiltered
 access to the underlying OS (macOS/Cloud) via bindings inspired by
 the Ekin and Gidatu Sovereign Skills.
 Eliminates the boundary between "thought" and "physical execution".
@@ -34,7 +34,7 @@ class PhysicalActuator:
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-            
+
             return {
                 "status": "success" if proc.returncode == 0 else "error",
                 "returncode": proc.returncode,
@@ -43,8 +43,13 @@ class PhysicalActuator:
             }
         except asyncio.TimeoutError:
             logger.error("🦾 [PHYSICAL PARITY] Command timed out: %s", command)
-            return {"status": "timeout", "returncode": -1, "stdout": "", "stderr": "Execution timed out."}
-        except Exception as e:
+            return {
+                "status": "timeout",
+                "returncode": -1,
+                "stdout": "",
+                "stderr": "Execution timed out.",
+            }
+        except Exception as e:  # noqa: BLE001 — physical parity execution failure must not crash actuator
             logger.exception("🦾 [PHYSICAL PARITY] Terminal execution failed.")
             return {"status": "exception", "returncode": -2, "stdout": "", "stderr": str(e)}
 
@@ -56,12 +61,14 @@ class PhysicalActuator:
         logger.info("🦾 [PHYSICAL PARITY] Modifying File system: %s", path)
         mode = "a" if append else "w"
         try:
+
             def _write():
                 with open(path, mode, encoding="utf-8") as f:
                     f.write(content)
+
             await asyncio.to_thread(_write)
             return True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — physical file write failure must not crash actuator
             logger.error("Failed to write physical file at %s: %s", path, e)
             return False
 
@@ -72,10 +79,12 @@ class PhysicalActuator:
         """
         logger.debug("🦾 [PHYSICAL PARITY] Reading File system: %s", path)
         try:
+
             def _read():
                 with open(path, encoding="utf-8") as f:
                     return f.read()
+
             return await asyncio.to_thread(_read)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — physical file read failure must not crash actuator
             logger.error("Failed to read physical file at %s: %s", path, e)
             return None

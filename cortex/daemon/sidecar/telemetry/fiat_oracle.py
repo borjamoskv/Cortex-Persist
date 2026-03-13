@@ -93,7 +93,8 @@ class FiatOracle:
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
                     logger.critical(
-                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s", tx_file.name
+                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s",
+                        tx_file.name,
                     )
                     await asyncio.to_thread(tx_file.unlink)  # Delete malicious file immediately
                     continue
@@ -132,7 +133,8 @@ class FiatOracle:
                 signature = data.get("signature")
                 if not self._verify_signature(data, signature):
                     logger.critical(
-                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s", tx_file.name
+                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s",
+                        tx_file.name,
                     )
                     tx_file.unlink()
                     continue
@@ -164,7 +166,9 @@ class FiatOracle:
         source = payload.get("source", "BUNQ_REDIRECT")
         tx_id = payload.get("tx_id", "UNKNOWN")
 
-        logger.info("💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id)
+        logger.info(
+            "💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id
+        )
 
         meta = {
             "oracle": "fiat_oracle_v1.3.0",
@@ -192,12 +196,18 @@ class FiatOracle:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + rng.uniform(0.1, 1.618 ** (attempt + 1))
                 logger.error(
-                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs", e, attempt + 1, MAX_RETRIES, delay
+                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs",
+                    e,
+                    attempt + 1,
+                    MAX_RETRIES,
+                    delay,
                 )
                 await asyncio.sleep(delay)
 
         logger.critical(
-            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.", tx_id, MAX_RETRIES
+            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",
+            tx_id,
+            MAX_RETRIES,
         )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 
@@ -208,7 +218,9 @@ class FiatOracle:
         source = payload.get("source", "BUNQ_REDIRECT")
         tx_id = payload.get("tx_id", "UNKNOWN")
 
-        logger.info("💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id)
+        logger.info(
+            "💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id
+        )
 
         meta = {
             "oracle": "fiat_oracle_v1.3.0",
@@ -233,12 +245,18 @@ class FiatOracle:
                 last_error = e
                 delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
                 logger.error(
-                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs", e, attempt + 1, MAX_RETRIES, delay
+                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs",
+                    e,
+                    attempt + 1,
+                    MAX_RETRIES,
+                    delay,
                 )
                 time.sleep(delay)
 
         logger.critical(
-            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.", tx_id, MAX_RETRIES
+            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",
+            tx_id,
+            MAX_RETRIES,
         )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 
