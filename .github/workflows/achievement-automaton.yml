@@ -1,113 +1,119 @@
 # ─────────────────────────────────────────────────────────────────────
-# CORTEX Achievement Automaton v2
+# CORTEX Achievement Automaton v3 — Maximum Farming
 # ─────────────────────────────────────────────────────────────────────
-# Two modes:
-#   1. PASSIVE: Any push to a non-main branch → auto-creates PR → merges
-#   2. ACTIVE:  Scheduled daily — generates synthetic commits → PRs → merges
+# Farms ALL farmable achievements:
+#   🦈 Pull Shark    — auto PR create + merge (5x/day scheduled)
+#   📦 Pair Extra    — Co-authored-by on every merge commit
+#   🎯 YOLO          — first merge without review (one-time)
+#   🖼️ Quickdraw     — open + close issue in <5 min
+#   ❤️ Heart         — react to own PRs
 #
-# Farms: 🦈 Pull Shark · 📦 Pair Extraordinaire · 🎯 YOLO
+# Contribution graph boost: every merge = green square
 # ─────────────────────────────────────────────────────────────────────
 
 name: "⚡ Achievement Automaton"
 
 on:
-  # Mode 1: Passive — triggers on real work
   push:
     branches-ignore:
       - main
       - master
 
-  # Mode 2: Active — daily scheduled farming (3 PRs/day)
   schedule:
-    - cron: "0 8 * * *"   # 08:00 UTC
-    - cron: "0 14 * * *"  # 14:00 UTC
-    - cron: "0 20 * * *"  # 20:00 UTC
+    # 5 runs/day = ~150 PRs/month = Pull Shark Gold in ~4 weeks
+    - cron: "0 6 * * *"
+    - cron: "0 10 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 18 * * *"
+    - cron: "0 22 * * *"
 
-  # Manual trigger for instant farming
   workflow_dispatch:
     inputs:
       count:
-        description: "Number of PRs to farm"
-        default: "1"
+        description: "PRs to farm (max 10)"
+        default: "5"
         type: string
 
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
-  # ─── Mode 1: Real branch push → auto PR + merge ───
-  passive-farm:
-    name: "🦈 Passive Farm"
+  # ─── Real branch push → auto PR + merge ───
+  passive:
+    name: "🦈 Passive"
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.actor == 'borjamoskv'
-
     steps:
-      - name: Create and merge PR
+      - name: Auto-PR and merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH="${GITHUB_REF_NAME}"
-          echo "🦈 Creating PR for branch: ${BRANCH}"
 
-          # Create PR via gh CLI
+          # Create PR
           PR_URL=$(gh pr create \
             --repo "${{ github.repository }}" \
             --head "${BRANCH}" \
             --base "main" \
-            --title "⚡ ${BRANCH} → main" \
-            --body "### Achievement Automaton
-          **Branch**: \`${BRANCH}\`
-          **Commit**: \`${{ github.sha }}\`
-          _🦈 Pull Shark +1_" \
+            --title "⚡ ${BRANCH}" \
+            --body "🦈 _Achievement Automaton_ · \`${{ github.sha }}\`" \
             2>&1) || true
 
-          echo "PR: ${PR_URL}"
-
-          # Merge it
+          # Merge
           if echo "${PR_URL}" | grep -q "github.com"; then
-            gh pr merge "${PR_URL}" \
-              --squash \
-              --delete-branch \
-              --admin \
-              || gh pr merge "${PR_URL}" --squash --delete-branch || true
+            sleep 3
+            gh pr merge "${PR_URL}" --squash --delete-branch --admin 2>/dev/null \
+              || gh pr merge "${PR_URL}" --squash --delete-branch 2>/dev/null || true
+            # React for Heart achievement
+            PR_NUM=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
+            gh api "repos/${{ github.repository }}/issues/${PR_NUM}/reactions" \
+              -f content=heart 2>/dev/null || true
           fi
 
-          echo "✅ 🦈 +1"
-
-  # ─── Mode 2: Scheduled synthetic farming ───
-  active-farm:
+  # ─── Scheduled + Manual burst farming ───
+  active:
     name: "🦈 Active Farm"
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
 
       - name: Configure git
         run: |
           git config user.name "borjamoskv"
           git config user.email "borjamoskv@users.noreply.github.com"
 
-      - name: Farm PRs
+      - name: Farm Pull Shark + Pair Extraordinaire
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           COUNT="${{ github.event.inputs.count || '1' }}"
-          echo "🦈 Farming ${COUNT} PR(s)..."
+          FARMED=0
 
           for i in $(seq 1 ${COUNT}); do
-            BRANCH="farm/shark-$(date +%Y%m%d-%H%M%S)-${i}"
-            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            TS=$(date +%s)
+            BRANCH="farm/shark-${TS}-${i}"
 
-            # Create branch with a real change
+            git checkout main
+            git pull origin main --rebase 2>/dev/null || true
             git checkout -b "${BRANCH}"
-            echo "# 🦈 ${TIMESTAMP}" >> .github/.achievement-log
-            git add .github/.achievement-log
-            git commit -m "chore: achievement ${TIMESTAMP}
+
+            # Real file change — also lights up the contribution graph
+            mkdir -p .github/achievements
+            cat >> .github/achievements/log.md << EOF
+
+          ## 🦈 #${TS}-${i}
+          - **Time**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          - **Run**: ${{ github.run_number }}
+          EOF
+
+            git add .github/achievements/
+            git commit -m "chore(achievement): shark ${TS}
 
           Co-authored-by: CORTEX <cortex@moskv.dev>"
 
@@ -117,27 +123,52 @@ jobs:
             PR_URL=$(gh pr create \
               --head "${BRANCH}" \
               --base "main" \
-              --title "⚡ shark ${TIMESTAMP}" \
-              --body "_🦈 Automated by CORTEX Achievement Automaton_")
+              --title "⚡ shark #${TS}" \
+              --body "🦈 _Pull Shark +1 · Pair Extraordinaire +1_")
 
-            # Merge immediately
-            gh pr merge "${PR_URL}" \
-              --squash \
-              --delete-branch \
-              --admin \
-              || gh pr merge "${PR_URL}" --squash --delete-branch || true
+            # Heart reaction
+            PR_NUM=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
+            gh api "repos/${{ github.repository }}/issues/${PR_NUM}/reactions" \
+              -f content=heart 2>/dev/null || true
 
-            echo "✅ PR #${i} merged"
-
-            # Reset to main for next iteration
-            git checkout main
-            git pull origin main
-
+            # Merge
             sleep 2
+            gh pr merge "${PR_URL}" --squash --delete-branch --admin 2>/dev/null \
+              || gh pr merge "${PR_URL}" --squash --delete-branch 2>/dev/null || true
+
+            FARMED=$((FARMED + 1))
+            echo "✅ #${i} done"
+            sleep 1
           done
 
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "⚡ FARMED ${COUNT} PR(s)"
-          echo "🦈 Pull Shark: +${COUNT}"
-          echo "📦 Pair Extraordinaire: +${COUNT}"
+          echo "⚡ FARMED: ${FARMED} PRs"
+          echo "🦈 Pull Shark: +${FARMED}"
+          echo "📦 Pair Extra: +${FARMED}"
+          echo "❤️ Heart:      +${FARMED}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # ─── Quickdraw farming (open + close issue fast) ───
+  quickdraw:
+    name: "🖼️ Quickdraw"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Farm Quickdraw
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create and immediately close an issue = Quickdraw achievement
+          ISSUE_URL=$(gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "🖼️ quickdraw $(date +%s)" \
+            --body "Auto-resolved by Achievement Automaton" \
+            --label "automation")
+
+          sleep 2
+
+          gh issue close "${ISSUE_URL}" \
+            --repo "${{ github.repository }}" \
+            --reason "completed" || true
+
+          echo "🖼️ Quickdraw: +1"
