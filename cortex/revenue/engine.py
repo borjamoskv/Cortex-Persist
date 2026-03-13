@@ -99,7 +99,7 @@ class RevenueEngine:
         scan_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         all_opportunities: list[Opportunity] = []
-        for vector, result in zip(active, scan_results):
+        for vector, result in zip(active, scan_results, strict=False):
             if isinstance(result, BaseException):
                 logger.error(
                     "☠️ [DINERO] Vector %s scan failed: %s",

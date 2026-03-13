@@ -51,7 +51,7 @@ def register_music_tools(mcp: FastMCP):
                 f"Stems: {list(result.stems.keys())}"
             )
         except Exception as e:
-            logger.error(f"Failed to generate track: {e}")
+            logger.error("Failed to generate track: %s", e)
             return f"Error generating track: {str(e)}"
 
     @mcp.tool()
