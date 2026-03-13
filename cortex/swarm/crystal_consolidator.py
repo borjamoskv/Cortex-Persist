@@ -17,6 +17,7 @@ Axiom Derivations:
 from __future__ import annotations
 
 import logging
+import sqlite3
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -127,7 +128,7 @@ async def _execute_cold_purge(
                 v.age_days,
                 " (DRY)" if dry_run else "",
             )
-        except Exception as e:
+        except (sqlite3.Error, ValueError, TypeError) as e:
             logger.error("🗑️ [PURGE] Error on %s: %s", v.fact_id, e)
             result.errors += 1
 
@@ -173,7 +174,7 @@ async def _execute_semantic_merge(
                     "content": row[0],
                     "embedding": np.frombuffer(row[1], dtype=np.float32)
                 }
-    except Exception as e:
+    except (sqlite3.Error, ValueError, TypeError) as e:
         logger.error("🔗 [MERGE] Failed to load data: %s", e)
         return
 
@@ -232,7 +233,7 @@ async def _execute_semantic_merge(
                         "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
                         id_a, id_b, " (DRY)" if dry_run else "",
                     )
-                except Exception as e:
+                except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
                     logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, e)
                     result.errors += 1
                     continue
@@ -278,7 +279,7 @@ async def _execute_diamond_promotion(
                 v.resonance,
                 " (DRY)" if dry_run else "",
             )
-        except Exception as e:
+        except (sqlite3.Error, ValueError, TypeError) as e:
             logger.error("💎 [PROMOTE] Error on %s: %s", v.fact_id, e)
             result.errors += 1
 

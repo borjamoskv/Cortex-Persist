@@ -81,7 +81,7 @@ class SwarmBudgetManager:
                         last_update = excluded.last_update
                 """, (mission_id, input_tokens, output_tokens, cost, now))
                 logger.debug("Budget: %d tokens ($%.4f) reported for mission %s", input_tokens + output_tokens, cost, mission_id)
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("Budget: Failed to report usage: %s", e)
 
     def get_mission_budget(self, mission_id: str) -> MissionBudget | None:
@@ -96,7 +96,7 @@ class SwarmBudgetManager:
                 ).fetchone()
                 if row:
                     return MissionBudget(*row)
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("Budget: Failed to fetch: %s", e)
         return None
 
@@ -106,7 +106,7 @@ class SwarmBudgetManager:
             with sqlite3.connect(self.db_path) as conn:
                 rows = conn.execute("SELECT * FROM mission_budget ORDER BY last_update DESC").fetchall()
                 return [MissionBudget(*row) for row in rows]
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("Budget: Failed to list: %s", e)
             return []
 

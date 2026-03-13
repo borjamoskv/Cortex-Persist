@@ -1,10 +1,10 @@
+import asyncio
+import logging
 import os
 import shutil
-import logging
-import asyncio
-from pathlib import Path
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from pathlib import Path
 
 logger = logging.getLogger("cortex.swarm.worktree")
 
@@ -55,7 +55,7 @@ async def isolated_worktree(branch_name: str, base_path: str | Path | None = Non
         if proc_add.returncode != 0 and b"already exists" not in stderr_add:
             raise WorktreeIsolationError(f"Colapso al instanciar Git Worktree: {stderr_add.decode().strip()}")
             
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("☠️ [WORKTREE ISOLATION] Fallo catastrófico de instanciación: %s", e)
         raise WorktreeIsolationError(f"Fallo de instanciación: {e}") from e
 
@@ -99,5 +99,5 @@ async def isolated_worktree(branch_name: str, base_path: str | Path | None = Non
                 
             logger.info("✅ [WORKTREE ISOLATION] Purgatorio aniquilado. RAM recuperada.")
             
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("⚠️ [WORKTREE ISOLATION] Residuo termodinámico detectado al purgar %s: %s", worktree_path, e)

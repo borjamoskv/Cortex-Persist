@@ -9,14 +9,14 @@ import logging
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from cortex.swarm.budget import get_budget_manager
 
 logger = logging.getLogger("cortex.swarm.manager")
 
-class TaskStatus(StrEnum):
+class TaskStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -73,7 +73,7 @@ class CapatazOrchestrator:
             task.status = TaskStatus.COMPLETED
             task.result = result
             return result
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             task.status = TaskStatus.FAILED
             task.error = str(e)
             logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name, e)

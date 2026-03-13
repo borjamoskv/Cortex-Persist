@@ -1,45 +1,17 @@
 """CORTEX v8.0 — The Code Smith (Safe Self-Evolution).
 
-The Swarm that builds itself. A specialized agent role capable of safely
-modifying the swarm's own source code, skills, and configuration at runtime.
-
-Replaces "blind code generation" with a rigorous Agentic Software Engineering
-(ASE) pipeline:
-
-    1. REQUEST:  Agent identifies a bug or missing feature.
-    2. DESIGN:   Architect Agent proposes a change plan.
-    3. EDIT:     Code Smith generates code in an isolated sandbox.
-    4. VALIDATE: Static Analysis Gate (AST whitelist, complexity guard, import audit).
-    5. TEST:     Unit tests generated and executed in sandbox.
-    6. COMMIT:   Only if tests pass + AST is valid → code promoted to live repo.
-
-Safety Protocols:
-    - Kill Switch:          Immediate revocation via OrchestratorLedger.
-    - 4-Layer Rollback:     Git revert to last Known Good Version (KGV).
-    - AST Node Whitelist:   No eval, exec, os.system, subprocess, __import__.
-    - Complexity Guard:     Loop depth limits, recursion ceiling, LOC caps.
-    - Immune Integration:   All changes pass through ImmuneArbiter before promotion.
-
-Self-Healing Repository:
-    Monitor → Diagnose → Patch → Hot-swap (with ByzantineConsensus validation).
-
-Axiom Derivations:
-    Ω₀ (Self-Reference):     The swarm writes itself — this code IS the code it modifies.
-    Ω₂ (Entropic Asymmetry): Every modification must reduce net entropy or be rejected.
-    Ω₃ (Byzantine Default):  Generated code is untrusted until AST-validated.
-    Ω₅ (Antifragile):        Runtime errors feed back as training signal.
-    Ω₆ (Zenón's Razor):      If validation takes longer than the fix, ship with guardrails.
+ASE pipeline: REQUEST → DESIGN → EDIT → VALIDATE → TEST → COMMIT.
+Kill switch, 4-layer rollback, AST whitelist, complexity guard, immune integration.
+Axioms: Ω₀ (Self-Reference), Ω₂ (Entropic Asymmetry), Ω₃ (Byzantine Default).
 """
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import logging
-
 import time
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -48,79 +20,16 @@ logger = logging.getLogger("cortex.swarm.code_smith")
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
-# AST nodes that are NEVER allowed in generated code (Ω₃: Zero Trust)
-FORBIDDEN_AST_NODES: frozenset[type] = frozenset({
-    ast.Global,         # No global state mutation
-})
-
-# Function calls that are categorically banned
-FORBIDDEN_CALLS: frozenset[str] = frozenset({
-    "eval",
-    "exec",
-    "compile",
-    "__import__",
-    "globals",
-    "locals",
-    "breakpoint",
-    "exit",
-    "quit",
-})
-
-# Module imports that require explicit whitelisting
-FORBIDDEN_IMPORTS: frozenset[str] = frozenset({
-    "os",
-    "subprocess",
-    "shutil",
-    "sys",
-    "ctypes",
-    "importlib",
-    "signal",
-    "socket",
-    "http",
-    "urllib",
-    "requests",
-    "httpx",
-    "aiohttp",
-    "pickle",
-    "shelve",
-    "marshal",
-    "code",
-    "codeop",
-    "compileall",
-})
-
-# Whitelisted imports (safe standard library + cortex internals)
-ALLOWED_IMPORT_PREFIXES: frozenset[str] = frozenset({
-    "typing",
-    "collections",
-    "dataclasses",
-    "enum",
-    "functools",
-    "itertools",
-    "math",
-    "hashlib",
-    "json",
-    "re",
-    "abc",
-    "logging",
-    "time",
-    "datetime",
-    "pathlib",
-    "cortex.",
-    "pydantic",
-})
-
-# Complexity ceilings
-MAX_LOOP_DEPTH: int = 4
-MAX_FUNCTION_LINES: int = 80
-MAX_TOTAL_LINES: int = 500
-MAX_CYCLOMATIC_COMPLEXITY: int = 15
-
+# Re-exported from ast_validator for backward compatibility
+from cortex.swarm.ast_validator import (  # noqa: E402
+    ASTValidationResult,
+    ASTValidator,
+)
 
 # ── Enums ──────────────────────────────────────────────────────────────────
 
 
-class SmithPhase(StrEnum):
+class SmithPhase(str, Enum):
     """Pipeline phases for the Code Smith."""
 
     REQUEST = "request"
@@ -132,18 +41,6 @@ class SmithPhase(StrEnum):
     ROLLBACK = "rollback"
 
 
-class ValidationVerdict(StrEnum):
-    """Result of AST validation gate."""
-
-    PASS = "pass"
-    FAIL_FORBIDDEN_NODE = "fail_forbidden_node"
-    FAIL_FORBIDDEN_CALL = "fail_forbidden_call"
-    FAIL_FORBIDDEN_IMPORT = "fail_forbidden_import"
-    FAIL_COMPLEXITY = "fail_complexity"
-    FAIL_SYNTAX = "fail_syntax"
-    FAIL_PARSE = "fail_parse"
-
-
 # ── Protocols ──────────────────────────────────────────────────────────────
 
 
@@ -151,7 +48,10 @@ class SandboxExecutor(Protocol):
     """Protocol for sandbox environments (E2B, Wasm, Docker, etc.)."""
 
     async def write_file(self, path: str, content: str) -> None: ...
-    async def run_command(self, command: str, timeout_s: float = 30.0) -> SandboxResult: ...
+
+    async def run_command(
+        self, command: str, timeout_s: float = 30.0,
+    ) -> SandboxResult: ...
     async def cleanup(self) -> None: ...
 
 
@@ -165,7 +65,7 @@ class CodeGenerator(Protocol):
 # ── Data Models ────────────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SandboxResult:
     """Result from sandbox execution."""
 
@@ -176,38 +76,20 @@ class SandboxResult:
     duration_ms: float = 0.0
 
 
-@dataclass(slots=True)
+@dataclass()
 class ChangeRequest:
     """A request for code modification."""
 
     skill_id: str
     description: str
     target_file: str
-    context: str = ""                    # Surrounding code for context
+    context: str = ""
     requester_agent_id: str = "system"
-    priority: int = 5                    # 1 (low) to 10 (critical)
+    priority: int = 5
     timestamp: float = field(default_factory=time.time)
 
 
-@dataclass(slots=True)
-class ASTValidationResult:
-    """Detailed result of the Static Analysis Gate."""
-
-    verdict: ValidationVerdict
-    violations: list[str] = field(default_factory=list)
-    stats: dict[str, Any] = field(default_factory=dict)
-
-    @property
-    def passed(self) -> bool:
-        return self.verdict == ValidationVerdict.PASS
-
-    def summary(self) -> str:
-        if self.passed:
-            return f"✅ AST validation passed. Stats: {self.stats}"
-        return f"❌ {self.verdict.value}: {'; '.join(self.violations)}"
-
-
-@dataclass(slots=True)
+@dataclass()
 class SmithResult:
     """Complete result of a Code Smith operation."""
 
@@ -220,7 +102,7 @@ class SmithResult:
     commit_hash: str = ""
     error: str = ""
     duration_ms: float = 0.0
-    rollback_target: str = ""            # Previous commit hash for rollback
+    rollback_target: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -235,249 +117,7 @@ class SmithResult:
         }
 
 
-# ── AST Validator (Static Analysis Gate) ──────────────────────────────────
-
-
-class ASTValidator:
-    """The Static Analysis Gate (SAG).
-
-    Parses code into an AST and enforces:
-        1. Node whitelist:     No forbidden AST node types.
-        2. Call blacklist:     No eval, exec, os.system, etc.
-        3. Import audit:       Only whitelisted module prefixes.
-        4. Complexity guard:   Loop depth, function size, cyclomatic complexity.
-
-    DECISION: Ω₃ + Ω₂ → AST-level analysis is the only trustworthy gate
-    for LLM-generated code. String-matching is trivially bypassable.
-    """
-
-    __slots__ = ("_allowed_import_prefixes", "_forbidden_calls", "_forbidden_imports")
-
-    def __init__(
-        self,
-        *,
-        allowed_import_prefixes: frozenset[str] | None = None,
-        forbidden_calls: frozenset[str] | None = None,
-        forbidden_imports: frozenset[str] | None = None,
-    ) -> None:
-        self._allowed_import_prefixes = allowed_import_prefixes or ALLOWED_IMPORT_PREFIXES
-        self._forbidden_calls = forbidden_calls or FORBIDDEN_CALLS
-        self._forbidden_imports = forbidden_imports or FORBIDDEN_IMPORTS
-
-    def validate(self, code: str) -> ASTValidationResult:
-        """Run the full Static Analysis Gate on Python source code.
-
-        Returns:
-            ASTValidationResult with detailed diagnostics.
-        """
-        violations: list[str] = []
-
-        # Phase 1: Parse
-        try:
-            tree = ast.parse(code)
-        except SyntaxError as e:
-            return ASTValidationResult(
-                verdict=ValidationVerdict.FAIL_SYNTAX,
-                violations=[f"SyntaxError at line {e.lineno}: {e.msg}"],
-            )
-
-        # Phase 2: Forbidden AST nodes
-        for node in ast.walk(tree):
-            if type(node) in FORBIDDEN_AST_NODES:
-                violations.append(
-                    "Forbidden AST node: "
-                    f"{type(node).__name__} at line "
-                    f"{getattr(node, 'lineno', '?')}"
-                )
-
-        if violations:
-            return ASTValidationResult(
-                verdict=ValidationVerdict.FAIL_FORBIDDEN_NODE,
-                violations=violations,
-            )
-
-        # Phase 3: Forbidden function calls
-        call_violations = self._check_calls(tree)
-        if call_violations:
-            return ASTValidationResult(
-                verdict=ValidationVerdict.FAIL_FORBIDDEN_CALL,
-                violations=call_violations,
-            )
-
-        # Phase 4: Import audit
-        import_violations = self._check_imports(tree)
-        if import_violations:
-            return ASTValidationResult(
-                verdict=ValidationVerdict.FAIL_FORBIDDEN_IMPORT,
-                violations=import_violations,
-            )
-
-        # Phase 5: Complexity guard
-        complexity_violations, stats = self._check_complexity(tree, code)
-        if complexity_violations:
-            return ASTValidationResult(
-                verdict=ValidationVerdict.FAIL_COMPLEXITY,
-                violations=complexity_violations,
-                stats=stats,
-            )
-
-        return ASTValidationResult(
-            verdict=ValidationVerdict.PASS,
-            stats=stats,
-        )
-
-    def _check_calls(self, tree: ast.AST) -> list[str]:
-        """Detect banned function calls in the AST."""
-        violations: list[str] = []
-
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Call):
-                continue
-
-            call_name: str | None = None
-
-            if isinstance(node.func, ast.Name):
-                call_name = node.func.id
-            elif isinstance(node.func, ast.Attribute):
-                call_name = node.func.attr
-
-            if call_name and call_name in self._forbidden_calls:
-                violations.append(
-                    f"Forbidden call: {call_name}() at line {getattr(node, 'lineno', '?')}"
-                )
-
-        return violations
-
-    def _check_imports(self, tree: ast.AST) -> list[str]:
-        """Audit all imports against whitelist."""
-        violations: list[str] = []
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if not self._is_import_allowed(
-                        alias.name,
-                    ):
-                        violations.append(
-                            f"Forbidden import: '{alias.name}' at line {node.lineno}"
-                        )
-            elif isinstance(node, ast.ImportFrom):
-                module = node.module or ""
-                if not self._is_import_allowed(module):
-                    violations.append(
-                        f"Forbidden import: 'from {module}' at line {node.lineno}"
-                    )
-
-        return violations
-
-    def _is_import_allowed(self, module_name: str) -> bool:
-        """Check if a module import is whitelisted."""
-        # Exact match against forbidden list
-        base_module = module_name.split(".")[0]
-        if base_module in self._forbidden_imports:
-            return False
-
-        # Must match at least one allowed prefix
-        return any(
-            module_name == prefix or module_name.startswith(prefix)
-            for prefix in self._allowed_import_prefixes
-        )
-
-    def _check_complexity(self, tree: ast.AST, code: str) -> tuple[list[str], dict[str, Any]]:
-        """Enforce complexity ceilings."""
-        violations: list[str] = []
-        lines = code.strip().split("\n")
-        total_lines = len(lines)
-
-        stats: dict[str, Any] = {
-            "total_lines": total_lines,
-            "functions": 0,
-            "classes": 0,
-            "max_loop_depth": 0,
-            "max_function_lines": 0,
-        }
-
-        # Total LOC check
-        if total_lines > MAX_TOTAL_LINES:
-            violations.append(
-                f"Total lines ({total_lines}) exceeds maximum ({MAX_TOTAL_LINES})"
-            )
-
-        # Function-level analysis
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                stats["functions"] += 1
-                func_lines = (node.end_lineno or node.lineno) - node.lineno + 1
-                stats["max_function_lines"] = max(stats["max_function_lines"], func_lines)
-
-                if func_lines > MAX_FUNCTION_LINES:
-                    violations.append(
-                        f"Function '{node.name}' has {func_lines} lines (max {MAX_FUNCTION_LINES})"
-                    )
-
-                # Cyclomatic complexity proxy: count branches
-                complexity = self._cyclomatic_complexity(node)
-                if complexity > MAX_CYCLOMATIC_COMPLEXITY:
-                    violations.append(
-                        f"Function '{node.name}' cyclomatic "
-                        f"complexity {complexity} > "
-                        f"{MAX_CYCLOMATIC_COMPLEXITY}"
-                    )
-
-            elif isinstance(node, ast.ClassDef):
-                stats["classes"] += 1
-
-        # Loop depth
-        max_depth = self._max_loop_depth(tree)
-        stats["max_loop_depth"] = max_depth
-        if max_depth > MAX_LOOP_DEPTH:
-            violations.append(
-                f"Maximum loop nesting depth ({max_depth}) exceeds limit ({MAX_LOOP_DEPTH})"
-            )
-
-        return violations, stats
-
-    @staticmethod
-    def _cyclomatic_complexity(func_node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
-        """Approximate McCabe cyclomatic complexity."""
-        complexity = 1  # Base path
-        branch_nodes = (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.With, ast.Assert)
-
-        for node in ast.walk(func_node):
-            if isinstance(node, branch_nodes):
-                complexity += 1
-            elif isinstance(node, ast.BoolOp):
-                # Each 'and'/'or' adds a path
-                complexity += len(node.values) - 1
-
-        return complexity
-
-    @staticmethod
-    def _max_loop_depth(tree: ast.AST) -> int:
-        """Calculate maximum loop nesting depth via DFS."""
-        max_depth = 0
-
-        def _walk_depth(node: ast.AST, current_depth: int) -> None:
-            nonlocal max_depth
-            loop_types = (ast.For, ast.While, ast.AsyncFor)
-
-            for child in ast.iter_child_nodes(node):
-                if isinstance(child, loop_types):
-                    new_depth = current_depth + 1
-                    if new_depth > max_depth:
-                        max_depth = new_depth
-                    _walk_depth(child, new_depth)
-                else:
-                    _walk_depth(child, current_depth)
-
-        _walk_depth(tree, 0)
-        return max_depth
-
-
-# ── Known Good Version (KGV) Tracker ──────────────────────────────────────
-
-
-@dataclass(slots=True)
+@dataclass()
 class KnownGoodVersion:
     """Tracks the last verified-good state of a file."""
 
@@ -748,7 +388,7 @@ class CodeSmith:
                 change_request.skill_id, commit_hash,
             )
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             result.error = f"Unhandled exception in phase {result.phase_reached.value}: {exc}"
             logger.error("💥 CodeSmith: %s", result.error)
 
@@ -759,7 +399,7 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception:
+            except Exception:  # noqa: BLE001 — best-effort cleanup
                 pass
 
         return result

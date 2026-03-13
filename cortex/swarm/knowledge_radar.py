@@ -12,14 +12,13 @@ Axiom Derivations:
 
 from __future__ import annotations
 
+import json
 import logging
-import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import re
-import json
 import yaml
 
 logger = logging.getLogger("cortex.swarm.knowledge_radar")
@@ -89,7 +88,7 @@ def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarg
         logger.info("📡 [RADAR] Found %d curated targets", len(targets))
         return targets
 
-    except Exception as e:
+    except (yaml.YAMLError, OSError, ValueError, TypeError) as e:
         logger.error("📡 [RADAR] Error reading queue %s: %s", path, e)
         return []
 
@@ -163,7 +162,7 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
 
         logger.info("📡 [RADAR] Found %d ghost knowledge gaps", len(targets))
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError, AttributeError) as e:
         logger.error("📡 [RADAR] Ghost scan failed: %s", e)
 
     return targets
@@ -202,7 +201,7 @@ async def scan_semantic_gaps(cortex_db: Any, min_facts: int = 5) -> list[Crystal
 
         logger.info("📡 [RADAR] Found %d semantic gaps", len(targets))
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError, AttributeError) as e:
         logger.error("📡 [RADAR] Semantic gap scan failed: %s", e)
 
     return targets

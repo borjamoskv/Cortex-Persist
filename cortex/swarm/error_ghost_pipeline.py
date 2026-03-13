@@ -242,7 +242,7 @@ class ErrorGhostPipeline:
                 meta=meta,
             )
             return fact_id
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("AUTO-GHOST DB persist failed, falling back to FS: %s", e)
             self._fallback_fs_persist(project, content, source, meta)
             return None
@@ -263,7 +263,7 @@ class ErrorGhostPipeline:
                 self._persist_async(project, content, source, meta)
             )
             self._record_emission(content_hash, source, fact_id)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Last resort — never let ghost persistence crash the daemon
             logger.error("AUTO-GHOST sync persist failed: %s", e)
             self._record_emission(content_hash, source, None)
@@ -276,8 +276,8 @@ class ErrorGhostPipeline:
         meta: dict[str, Any],
     ) -> None:
         """Filesystem fallback when DB is unreachable."""
-        from pathlib import Path
         import json
+        from pathlib import Path
 
         fallback_dir = Path.home() / ".cortex" / _FALLBACK_DIR_NAME
         fallback_dir.mkdir(parents=True, exist_ok=True)

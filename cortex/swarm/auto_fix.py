@@ -1,31 +1,4 @@
-"""CORTEX v6 — AutoFixPipeline (Ω₅ Antifragile Self-Repair).
-
-Closed loop: Ghost → Classify → AgentTask → Aether Execution → Validate.
-Every error that reaches the ghost pipeline becomes a candidate for
-autonomous repair. Failed repairs escalate to harder ghosts with context.
-
-Architecture::
-
-    ErrorBoundary (Phase 1)         AutoFixPipeline (Phase 2)
-    ────────────────────            ─────────────────────────
-    @error_boundary(src)  ───→ ErrorGhostPipeline ───→ cortex.db
-                                                          │
-    JosuDaemon._query_pending_targets() ←────────────────┘
-         │
-         └──→ AutoFixPipeline.process_ghost(target)
-                  │
-                  ├──→ classify(ghost)     → GhostClass
-                  ├──→ ghost_to_task(ghost) → AgentTask
-                  ├──→ aether.run_task()   → FixAttempt
-                  └──→ validate(result)    → FixResult
-                        ├───→ OK: mark ghost resolved
-                        └───→ FAIL: escalate as harder ghost (Ω₅)
-
-Axioms:
-    Ω₀: The system fixes its own errors.
-    Ω₅: Failed fixes forge stronger antibodies (escalated ghosts).
-    Ω₃: Every fix is validated (tests + diff review) before delivery.
-"""
+"""AutoFixPipeline — Ghost → Classify → AgentTask → Aether → Validate (Ω₅)."""
 
 from __future__ import annotations
 
@@ -46,48 +19,41 @@ logger = logging.getLogger("cortex.swarm.auto_fix")
 class GhostClass(str, Enum):
     """Ghost classification for routing to the correct fix strategy."""
 
-    CODE_BUG = "code_bug"          # Traceback, assertion, type error
-    CONFIG_ERROR = "config_error"  # Missing env, bad path, invalid JSON
-    IMPORT_ERROR = "import_error"  # Missing module, circular import
-    TEST_FAILURE = "test_failure"  # Failing test assertion
-    DOC_GAP = "doc_gap"            # Missing docstring, TODO, stale comment
-    UNKNOWN = "unknown"            # Cannot classify → requires human
+    CODE_BUG = "code_bug"
+    CONFIG_ERROR = "config_error"
+    IMPORT_ERROR = "import_error"
+    TEST_FAILURE = "test_failure"
+    DOC_GAP = "doc_gap"
+    UNKNOWN = "unknown"
 
 
-# Pre-lowered classification patterns for O(1) matching
 _CLASS_PATTERNS: dict[GhostClass, list[str]] = {
     GhostClass.CODE_BUG: [
-        p.lower() for p in [
-            "TypeError", "ValueError", "AttributeError", "KeyError",
-            "IndexError", "RuntimeError", "ZeroDivisionError",
-        ]
+        "TypeError",
+        "ValueError",
+        "AttributeError",
+        "KeyError",
+        "IndexError",
+        "RuntimeError",
+        "ZeroDivisionError",
     ],
     GhostClass.CONFIG_ERROR: [
-        p.lower() for p in [
-            "FileNotFoundError", "env var", "config", "path",
-            "PermissionError", "OSError",
-        ]
+        "FileNotFoundError",
+        "env var",
+        "config",
+        "path",
+        "PermissionError",
+        "OSError",
     ],
-    GhostClass.IMPORT_ERROR: [
-        p.lower() for p in [
-            "ImportError", "ModuleNotFoundError", "circular",
-        ]
-    ],
-    GhostClass.TEST_FAILURE: [
-        p.lower() for p in [
-            "AssertionError", "FAILED", "pytest", "test_",
-        ]
-    ],
-    GhostClass.DOC_GAP: [
-        p.lower() for p in [
-            "TODO", "FIXME", "HACK", "docstring", "undocumented",
-        ]
-    ],
+    GhostClass.IMPORT_ERROR: ["ImportError", "ModuleNotFoundError", "circular"],
+    GhostClass.TEST_FAILURE: ["AssertionError", "FAILED", "pytest", "test_"],
+    GhostClass.DOC_GAP: ["TODO", "FIXME", "HACK", "docstring", "undocumented"],
 }
 
 
 class GhostProtocol(Protocol):
     """Structural typing for incoming ghosts to avoid circular imports."""
+
     id: str
     description: str
     project: str
@@ -109,47 +75,27 @@ class FixAttempt:
 
 
 class AutoFixPipeline:
-    """Ghost → Classify → Fix → Validate (zero human intervention).
-
-    This is the Ω₀ loop: the system fixes its own errors. Each ghost
-    from the ErrorBoundary/ErrorGhostPipeline is classified, converted
-    to an AgentTask, and sent to Aether for autonomous execution.
-
-    Usage::
-
-        pipeline = AutoFixPipeline(repo_path="/path/to/repo")
-        result = await pipeline.process_ghost(ghost_target)
-    """
+    """Ghost → Classify → Fix → Validate (zero human intervention)."""
 
     __slots__ = ("_repo_path",)
 
     def __init__(self, repo_path: str | Path = ".") -> None:
         self._repo_path = Path(repo_path)
 
-    # ── Public API ────────────────────────────────────────────────────
-
     async def process_ghost(self, ghost: GhostProtocol) -> FixAttempt:
-        """Full pipeline: classify → task → execute → validate.
-
-        Args:
-            ghost: A GhostTarget (matching GhostProtocol) from Josu.
-
-        Returns:
-            FixAttempt with success/failure and branch info.
-        """
+        """Full pipeline: classify → task → execute → validate."""
         t0 = time.monotonic()
-        ghost_id = getattr(ghost, "id", str(id(ghost)))  # Fallback just in case
+        ghost_id = getattr(ghost, "id", str(id(ghost)))
         description = getattr(ghost, "description", str(ghost))
         project = getattr(ghost, "project", "CORTEX")
 
-        # 1. Classify
         classification = self.classify(description)
         logger.info(
             "🔬 [AUTOFIX] Ghost [%s] classified as %s",
-            ghost_id, classification.value,
+            ghost_id,
+            classification.value,
         )
 
-        # 2. Skip unclassifiable ghosts (Ω₂: wrong scale, not wrong place)
         if classification == GhostClass.UNKNOWN:
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -159,7 +105,6 @@ class AutoFixPipeline:
                 duration_ms=(time.monotonic() - t0) * 1000,
             )
 
-        # 3. Generate AgentTask
         task = self.ghost_to_task(
             ghost_id=ghost_id,
             description=description,
@@ -167,18 +112,17 @@ class AutoFixPipeline:
             project=project,
         )
 
-        # 4. Execute via Aether in isolated worktree
         try:
             result = await self._execute(task)
         except asyncio.CancelledError:
-            raise  # Async integrity
-        except Exception as e:
+            raise
+        except Exception as e:  # noqa: BLE001
             elapsed = (time.monotonic() - t0) * 1000
             logger.error(
                 "☠️ [AUTOFIX] Execution failed for ghost [%s]: %s",
-                ghost_id, e,
+                ghost_id,
+                e,
             )
-            # Ω₅: Failed fix forges a harder ghost
             await self._escalate(ghost_id, classification, str(e), project)
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -188,20 +132,22 @@ class AutoFixPipeline:
                 duration_ms=elapsed,
             )
 
-        # 5. Validate
         elapsed = (time.monotonic() - t0) * 1000
         if result.get("tests_passed", False) and result.get("status") == "done":
             branch = result.get("branch", "")
-            
-            # Ω₂: Autonomous Ouroboros Merge
             merge_result = ""
             if branch:
                 merged = await self._autonomous_merge(branch)
-                merge_result = " (Merged to main)" if merged else " (Merge failed, branch preserved)"
+                merge_result = (
+                    " (Merged to main)" if merged else " (Merge failed, branch preserved)"
+                )
 
             logger.info(
                 "✅ [AUTOFIX] Ghost [%s] resolved → branch=%s%s (%.0fms)",
-                ghost_id, branch, merge_result, elapsed,
+                ghost_id,
+                branch,
+                merge_result,
+                elapsed,
             )
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -214,8 +160,6 @@ class AutoFixPipeline:
             )
         else:
             error_msg = result.get("error", "validation failed")
-            
-            # Check for Ω₆ early aborts
             if "Ω₆ Siege-Verification aborted" in error_msg:
                 logger.info("🛡️  [AUTOFIX] Ω₆ prevented hallucination for ghost [%s].", ghost_id)
                 return FixAttempt(
@@ -229,10 +173,11 @@ class AutoFixPipeline:
                     tests_passed=result.get("tests_passed", False),
                 )
 
-            # Ω₅: Escalate failed fix
             await self._escalate(
-                ghost_id, classification,
-                error_msg, project,
+                ghost_id,
+                classification,
+                error_msg,
+                project,
             )
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -245,30 +190,15 @@ class AutoFixPipeline:
                 tests_passed=result.get("tests_passed", False),
             )
 
-    # ── Classification ────────────────────────────────────────────────
-
     @staticmethod
     def classify(description: str) -> GhostClass:
-        """Classify a ghost description into a GhostClass.
-
-        Uses O(1) pattern matching — no LLM required for triage.
-        """
+        """Classify a ghost description into a GhostClass."""
         desc_lower = description.lower()
-
-        # Score each class by pattern matches
-        scores: dict[GhostClass, int] = {}
-        for cls, patterns in _CLASS_PATTERNS.items():
-            score = sum(1 for p in patterns if p in desc_lower)
-            if score > 0:
-                scores[cls] = score
-
-        if not scores:
-            return GhostClass.UNKNOWN
-
-        # Return highest-scoring class
-        return max(scores, key=scores.__getitem__)
-
-    # ── Task Generation ───────────────────────────────────────────────
+        scores = {
+            cls: sum(1 for p in patterns if p in desc_lower)
+            for cls, patterns in _CLASS_PATTERNS.items()
+        }
+        return max(scores, key=scores.get, default=GhostClass.UNKNOWN)
 
     def ghost_to_task(
         self,
@@ -277,10 +207,7 @@ class AutoFixPipeline:
         classification: GhostClass,
         project: str = "CORTEX",
     ) -> dict[str, Any]:
-        """Convert a classified ghost into an AgentTask-compatible dict.
-
-        Returns a dict that can be passed to AgentTask.from_dict().
-        """
+        """Convert a classified ghost into an AgentTask-compatible dict."""
         strategy = _FIX_STRATEGIES.get(classification, _DEFAULT_STRATEGY)
         task_description = strategy.format(
             description=description,
@@ -296,14 +223,8 @@ class AutoFixPipeline:
             "source": "ghost",
         }
 
-    # ── Execution ─────────────────────────────────────────────────────
-
     async def _execute(self, task_dict: dict[str, Any]) -> dict[str, Any]:
-        """Execute the fix task via Aether in an isolated worktree.
-
-        Returns a result dict with keys: status, branch, summary, error,
-        tests_passed.
-        """
+        """Execute the fix task via Aether in an isolated worktree."""
         from cortex.aether.models import AgentTask, TaskStatus
         from cortex.aether.queue import TaskQueue
         from cortex.aether.runner import AetherAgent
@@ -320,7 +241,6 @@ class AutoFixPipeline:
                 branch_name=branch_name,
                 base_path=str(self._repo_path),
             ) as wt_path:
-                # Override repo path to worktree
                 task.repo_path = str(wt_path)
                 agent = AetherAgent()
                 result_task = await agent.run_task(task, queue)
@@ -334,8 +254,8 @@ class AutoFixPipeline:
                     and "TESTS FAILED" not in (result_task.result or ""),
                 }
         except asyncio.CancelledError:
-            raise  # Async integrity
-        except Exception as e:
+            raise
+        except Exception as e:  # noqa: BLE001
             return {
                 "status": "failed",
                 "branch": branch_name,
@@ -344,19 +264,12 @@ class AutoFixPipeline:
                 "tests_passed": False,
             }
 
-    # ── Absorption (Ω₂) ───────────────────────────────────────────────
-
     async def _autonomous_merge(self, branch_name: str) -> bool:
-        """Attempt to merge the fixed branch back into the main line via --ff-only.
-
-        Ω₂: Reduce entropy by absorbing the fix natively.
-        Returns True if successful, False if it requires human resolution.
-        """
+        """Attempt to merge the fixed branch back into the main line via --ff-only."""
         import subprocess
 
         cwd = str(self._repo_path)
         try:
-            # Detect primary branch
             proc_branch = await asyncio.to_thread(
                 subprocess.run,
                 ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
@@ -365,10 +278,13 @@ class AutoFixPipeline:
                 cwd=cwd,
                 timeout=5,
             )
-            main_branch = proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "master"
+            main_branch = (
+                proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "master"
+            )
 
-            # Merge with --ff-only to guarantee no conflict resolution is needed
-            logger.info("🧬 [AUTOFIX] Attempting Ouroboros merge: %s into %s", branch_name, main_branch)
+            logger.info(
+                "🧬 [AUTOFIX] Attempting Ouroboros merge: %s into %s", branch_name, main_branch
+            )
             proc_merge = await asyncio.to_thread(
                 subprocess.run,
                 ["git", "merge", "--ff-only", branch_name],
@@ -380,7 +296,6 @@ class AutoFixPipeline:
 
             if proc_merge.returncode == 0:
                 logger.info("🧬 [AUTOFIX] Merged successfully.")
-                # Clean up the branch
                 await asyncio.to_thread(
                     subprocess.run,
                     ["git", "branch", "-d", branch_name],
@@ -393,11 +308,9 @@ class AutoFixPipeline:
                 logger.error("🛑 [AUTOFIX] Merge failed (requires human): %s", proc_merge.stderr)
                 return False
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.error("☠️ [AUTOFIX] Merge exception: %s", e)
             return False
-
-    # ── Escalation (Ω₅) ──────────────────────────────────────────────
 
     async def _escalate(
         self,
@@ -406,19 +319,13 @@ class AutoFixPipeline:
         error: str,
         project: str,
     ) -> None:
-        """Persist failed fix as a harder ghost with full context.
-
-        Ω₅: "What antibody does this failure forge?"
-        The escalated ghost carries the fix attempt context, making
-        the next attempt (human or agent) better informed.
-        """
+        """Persist failed fix as a harder ghost with full context."""
         try:
             from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
             pipeline = ErrorGhostPipeline()
             escalation = RuntimeError(
-                f"AutoFix ESCALATION for ghost #{ghost_id} "
-                f"[{classification.value}]: {error}"
+                f"AutoFix ESCALATION for ghost #{ghost_id} [{classification.value}]: {error}"
             )
             await pipeline.capture(
                 escalation,
@@ -433,16 +340,16 @@ class AutoFixPipeline:
             )
             logger.warning(
                 "🔄 [AUTOFIX] Ghost [%s] escalated — fix failed: %s",
-                ghost_id, error[:100],
+                ghost_id,
+                error[:100],
             )
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError) as e:
             logger.error(
                 "☠️ [AUTOFIX] Escalation failed for ghost [%s]: %s",
-                ghost_id, e,
+                ghost_id,
+                e,
             )
 
-
-# ── Fix Strategy Templates ────────────────────────────────────────────
 
 _DEFAULT_STRATEGY = (
     "Fix the following error in the CORTEX codebase:\n\n"

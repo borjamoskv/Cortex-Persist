@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 import time
 from pathlib import Path
 from typing import Any
@@ -80,8 +81,19 @@ class NightShiftCrystalDaemon:
                 max_targets=self._max_crystals,
                 queue_path=self._queue_path,
             )
-        except Exception as e:
-            logger.error("🌙 [NIGHTSHIFT] Radar scan failed: %s", e)
+        except sqlite3.Error as e:
+            logger.error("🌙 [NIGHTSHIFT] Radar scan failed (Database error): %s", e)
+            report = {
+                "cycle_id": cycle_id,
+                "status": "radar_failed",
+                "error": str(e),
+                "crystals": 0,
+                "duration_s": time.time() - cycle_start,
+            }
+            self._cycle_history.append(report)
+            return report
+        except (ValueError, TypeError) as e:
+            logger.error("🌙 [NIGHTSHIFT] Radar scan failed (Validation error): %s", e)
             report = {
                 "cycle_id": cycle_id,
                 "status": "radar_failed",
@@ -106,8 +118,20 @@ class NightShiftCrystalDaemon:
         # 2. Pipeline execution
         try:
             pipeline_result = await self._pipeline.run(targets=targets)
-        except Exception as e:
-            logger.error("🌙 [NIGHTSHIFT] Pipeline failed: %s", e)
+        except sqlite3.Error as e:
+            logger.error("🌙 [NIGHTSHIFT] Pipeline failed (Database error): %s", e)
+            report = {
+                "cycle_id": cycle_id,
+                "status": "pipeline_failed",
+                "error": str(e),
+                "targets_found": len(targets),
+                "crystals": 0,
+                "duration_s": time.time() - cycle_start,
+            }
+            self._cycle_history.append(report)
+            return report
+        except (ValueError, TypeError, RuntimeError) as e:
+            logger.error("🌙 [NIGHTSHIFT] Pipeline failed (Execution error): %s", e)
             report = {
                 "cycle_id": cycle_id,
                 "status": "pipeline_failed",
@@ -180,7 +204,10 @@ class NightShiftCrystalDaemon:
         while not self._stop_event.is_set():
             try:
                 await self.run_cycle()
-            except Exception as e:
+            except asyncio.CancelledError:
+                logger.info("🌙 [NIGHTSHIFT] Daemon loop cancelled.")
+                raise
+            except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
                 logger.error("🌙 [NIGHTSHIFT] Unhandled cycle error: %s", e)
 
             # Cooldown
@@ -226,7 +253,7 @@ class NightShiftCrystalDaemon:
                     ),
                     metadata={"nightshift_cycle": report},
                 )
-        except Exception as e:
+        except (sqlite3.Error, AttributeError, ValueError, TypeError) as e:
             logger.warning("🌙 [NIGHTSHIFT] Failed to persist cycle report: %s", e)
 
     # ── Consolidation Phase ────────────────────────────────────────────
@@ -237,8 +264,8 @@ class NightShiftCrystalDaemon:
             return None
 
         try:
-            from cortex.swarm.crystal_thermometer import scan_all_crystals
             from cortex.swarm.crystal_consolidator import consolidate
+            from cortex.swarm.crystal_thermometer import scan_all_crystals
 
             logger.info("🌙 [NIGHTSHIFT] Phase 2: Consolidation (REM) for %s", cycle_id)
 
@@ -259,7 +286,7 @@ class NightShiftCrystalDaemon:
 
             return result.to_dict()
 
-        except Exception as e:
+        except (sqlite3.Error, ImportError, ValueError, TypeError) as e:
             logger.error("🌙 [NIGHTSHIFT] Consolidation failed: %s", e)
             return {"error": str(e)}
 
