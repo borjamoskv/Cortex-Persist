@@ -121,6 +121,7 @@ class DistributedSovereignCache:
         self.chaos_gate = ChaosGate(name="redis_l1_cache")
 
         self._hydra_advance_script = self._r.register_script(_LUA_HYDRA_ADVANCE)
+        self._last_ping_time = 0.0
 
     # ─── Factory ─────────────────────────────────────────────────────────────
 
@@ -161,6 +162,18 @@ class DistributedSovereignCache:
 
     async def get(self, key: str) -> dict[str, Any] | None:
         if not self._is_available:
+            # Quick Circuit Breaker Ping (Max once per 10 secs to avoid Event Loop spam)
+            now = time.time()
+            if now - self._last_ping_time > 10.0:
+                self._last_ping_time = now
+                try:
+                    # Non-blocking ping
+                    await asyncio.wait_for(self._r.ping(), timeout=1.0)
+                    self._is_available = True
+                    logger.info("🐉 [HYDRA-LOG] Circuit Breaker reset. Cache is back online.")
+                except Exception:
+                    # Still dead, fail fast without waiting
+                    pass
             return None
         try:
             shadow_key = f"{_SHADOW_KEY_PREFIX}{key}"
@@ -264,13 +277,12 @@ class DistributedSovereignCache:
         logger.info("🐲 [HYDRA-LOG] Reliable stream consumer group active.")
 
     async def _stop_background_tasks(self) -> None:
+        import contextlib
         for t in [self._notification_task, self._consumer_task]:
             if t and not t.done():
                 t.cancel()
-                try:
+                with contextlib.suppress(asyncio.CancelledError):
                     await t
-                except asyncio.CancelledError:
-                    pass
 
     # ─── Loop 1: Handoff (The Spark) ─────────────────────────────────────────
 
@@ -342,39 +354,7 @@ class DistributedSovereignCache:
                 if not items:
                     continue
 
-                for _stream, messages in items:
-                    for msg_id, data in messages:
-                        agent_key = data.get("agent_key", "unknown")
-
-                        # 2. Persist to DB (The Callback)
-                        if self._audit_callback:
-                            try:
-                                # Data in stream already has the proofs calculated by Lua
-                                await self._audit_callback(agent_key, {}, data)
-                                # 3. Acknowledge (Safe now)
-                                await async_interceptor(
-                                    self.chaos_gate,
-                                    self._r.xack,
-                                    _AUDIT_STREAM_KEY,
-                                    _AUDIT_GROUP_NAME,
-                                    msg_id,
-                                )
-                                logger.info(
-                                    "✅ [HYDRA AUDIT] ACKed %s proof=%s",
-                                    agent_key,
-                                    data["current_proof"][:8],
-                                )
-                            except (ValueError, TypeError, ConnectionError, OSError) as e:
-                                logger.error("🚨 [CALLBACK FAIL] %s", e)
-                                await asyncio.sleep(1)  # Backoff
-                            except Exception as e:  # noqa: BLE001
-                                logger.error("🚨 [CALLBACK UNEXPECTED] %s", e)
-                                ErrorGhostPipeline().capture_sync(
-                                    e,
-                                    source="distributed_cache:callback",
-                                    project="CORTEX_SYSTEM",
-                                )
-                                await asyncio.sleep(1)
+                await self._process_stream_items(items)
 
             except asyncio.CancelledError:
                 raise
@@ -389,6 +369,42 @@ class DistributedSovereignCache:
                     project="CORTEX_SYSTEM",
                 )
                 await asyncio.sleep(5)
+
+    async def _process_stream_items(self, items: list) -> None:
+        """Processes and acknowledges stream items."""
+        for _stream, messages in items:
+            for msg_id, data in messages:
+                agent_key = data.get("agent_key", "unknown")
+
+                # 2. Persist to DB (The Callback)
+                if self._audit_callback:
+                    try:
+                        # Data in stream already has the proofs calculated by Lua
+                        await self._audit_callback(agent_key, {}, data)
+                        # 3. Acknowledge (Safe now)
+                        await async_interceptor(
+                            self.chaos_gate,
+                            self._r.xack,
+                            _AUDIT_STREAM_KEY,
+                            _AUDIT_GROUP_NAME,
+                            msg_id,
+                        )
+                        logger.info(
+                            "✅ [HYDRA AUDIT] ACKed %s proof=%s",
+                            agent_key,
+                            data["current_proof"][:8],
+                        )
+                    except (ValueError, TypeError, OSError) as e:
+                        logger.error("🚨 [CALLBACK FAIL] %s", e)
+                        await asyncio.sleep(1)  # Backoff
+                    except Exception as e:  # noqa: BLE001
+                        logger.error("🚨 [CALLBACK UNEXPECTED] %s", e)
+                        ErrorGhostPipeline().capture_sync(
+                            e,
+                            source="distributed_cache:callback",
+                            project="CORTEX_SYSTEM",
+                        )
+                        await asyncio.sleep(1)
 
     async def prove_forgetting(self) -> dict[str, Any]:
         try:

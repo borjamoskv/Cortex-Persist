@@ -71,7 +71,8 @@ class CortexMemoryManager:
         "_hdc",
         "_hdc_encoder",
         "_router",
-        "_background_tasks",
+        "_bg_queue",
+        "_bg_workers",
         "_max_bg_tasks",
         "_fusion",
         "_dynamic_space",
@@ -106,8 +107,11 @@ class CortexMemoryManager:
         self._hdc_encoder = hdc_encoder
         self._router = router
         self._bus = bus
-        self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
+        self._bg_queue: asyncio.Queue[tuple[list, str, str, str]] = asyncio.Queue(
+            maxsize=max_bg_tasks
+        )
+        self._bg_workers: list[asyncio.Task[Any]] = []
         self.thalamus = ThalamusGate(self)
         self._dynamic_space = (
             DynamicSemanticSpace(self._l2, manager=self)  # type: ignore[reportOptionalCall]
@@ -145,6 +149,32 @@ class CortexMemoryManager:
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router)
+        self._start_bg_workers()
+
+    def _start_bg_workers(self) -> None:
+        """Initialize persistent background workers for L2 compression."""
+        # 3 workers default, bounding the active compression coroutines to 3.
+        num_workers = min(3, max(1, self._max_bg_tasks // 10))
+        for i in range(num_workers):
+            task = asyncio.create_task(self._compression_worker_loop(i))
+            self._bg_workers.append(task)
+
+    async def _compression_worker_loop(self, worker_id: int) -> None:
+        """Persistent worker loop consuming from the background queue."""
+        while True:
+            try:
+                overflowed, session_id, tenant_id, project_id = await self._bg_queue.get()
+                try:
+                    await compress_and_store(self, overflowed, session_id, tenant_id, project_id)
+                except Exception as e:
+                    logger.error("MemoryManager: Worker %d failed compression: %s", worker_id, e)
+                finally:
+                    self._bg_queue.task_done()
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                logger.error("MemoryManager: Worker %d encountered fatal error: %s", worker_id, e)
+                await asyncio.sleep(1)
 
     # ─── Primary API ──────────────────────────────────────────────
 
@@ -186,17 +216,14 @@ class CortexMemoryManager:
         overflowed = self._l1.add_event(event)
 
         if overflowed:
-            if len(self._background_tasks) >= self._max_bg_tasks:
-                logger.warning(
-                    "MemoryManager: Background task queue full (%d). Dropping overflow task.",
+            try:
+                self._bg_queue.put_nowait((overflowed, session_id, tenant_id, project_id))
+            except asyncio.QueueFull:
+                logger.critical(
+                    "MemoryManager: Background task queue full (max=%d). "
+                    "Dropping overflow to protect Event Loop P99 latency.",
                     self._max_bg_tasks,
                 )
-            else:
-                task = asyncio.create_task(
-                    compress_and_store(self, overflowed, session_id, tenant_id, project_id)
-                )
-                self._background_tasks.add(task)
-                task.add_done_callback(self._background_tasks.discard)
 
         return event
 
@@ -476,25 +503,33 @@ class CortexMemoryManager:
 
     async def wait_for_background(self, timeout: float = 30.0) -> None:
         """Wait for background tasks to complete with a hard timeout."""
-        if not self._background_tasks:
+        if self._bg_queue.empty():
             return
         import os
 
         _testing = os.environ.get("CORTEX_TESTING")
         try:
             async with asyncio.timeout(timeout):
-                await asyncio.gather(*self._background_tasks, return_exceptions=True)
+                await self._bg_queue.join()
         except asyncio.TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
             if _testing:
                 self._cancel_background_tasks()
 
     def _cancel_background_tasks(self) -> None:
-        """Cancel pending tasks aggressively to prevent event loop leaks (testing mode)."""
-        for task in list(self._background_tasks):
-            if not task.done():
-                task.cancel()
-        self._background_tasks.clear()
+        """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
+        for worker in self._bg_workers:
+            if not worker.done():
+                worker.cancel()
+        self._bg_workers.clear()
+
+        # Flush the queue
+        while not self._bg_queue.empty():
+            try:
+                self._bg_queue.get_nowait()
+                self._bg_queue.task_done()
+            except asyncio.QueueEmpty:
+                break
 
     def __repr__(self) -> str:
-        return f"CortexMemoryManager(l1={self._l1!r}, bg_tasks={len(self._background_tasks)})"
+        return f"CortexMemoryManager(l1={self._l1!r}, bg_queue_size={self._bg_queue.qsize()})"
