@@ -213,3 +213,53 @@ class Lyria3Adapter(AudioAdapter):
          
     async def close(self) -> None:
         await self.client.aclose()
+
+
+class LocalMIDIAdapter(AudioAdapter):
+    """Local MIDI → WAV adapter. No API keys needed."""
+
+    def __init__(self):
+        from cortex.music_engine.midi_engine import (
+            generate_euclidean_groove,
+            generate_harmonic_sequence,
+            generate_texture_layer,
+            render_sequence_to_wav,
+        )
+        self._groove = generate_euclidean_groove
+        self._harmony = generate_harmonic_sequence
+        self._texture = generate_texture_layer
+        self._render = render_sequence_to_wav
+
+    async def generate(self, params: dict) -> str:
+        import os
+        import uuid
+
+        bpm = params.get("bpm", 128)
+        bars = params.get("bars", 8)
+
+        # Generate layers
+        groove = self._groove(bpm=bpm, bars=bars)
+        harmony = self._harmony(bpm=bpm, bars=bars)
+        texture = self._texture(bpm=bpm, bars=bars)
+
+        # Merge all tracks
+        groove.tracks.extend(harmony.tracks)
+        groove.tracks.extend(texture.tracks)
+
+        # Render WAV
+        out_dir = os.path.expanduser(
+            "~/.cortex/grammy/renders"
+        )
+        os.makedirs(out_dir, exist_ok=True)
+        fname = f"grammy_{uuid.uuid4().hex[:8]}.wav"
+        wav_path = os.path.join(out_dir, fname)
+        self._render(groove, wav_path)
+
+        logger.info("Local generation complete: %s", wav_path)
+        return wav_path
+
+    async def get_stems(self, job_id: str) -> dict[str, str]:
+        return {"master": job_id}
+
+    async def close(self) -> None:
+        pass

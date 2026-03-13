@@ -13,8 +13,12 @@ from pydantic import BaseModel, Field
 from cortex.llm.manager import LLMManager
 from cortex.llm.router import IntentProfile
 
-# Interfaces CORTEX Music Engine
-from cortex.music_engine.adapters import Lyria3Adapter, SunoV5Adapter, UdioV4Adapter
+from cortex.music_engine.adapters import (
+    LocalMIDIAdapter,
+    Lyria3Adapter,
+    SunoV5Adapter,
+    UdioV4Adapter,
+)
 from cortex.music_engine.dsp_apotheosis import DSPApotheosis
 
 logger = logging.getLogger(__name__)
@@ -77,11 +81,12 @@ class GRAMMYOrchestrator:
         self.current_album: AlbumContext | None = None
         self.llm_manager = LLMManager()
 
-        # Audio Backends (Frontier Models)
+        # Audio Backends (Frontier Models + Local)
         self.adapters = {
             "suno_v5": SunoV5Adapter(),
             "udio_v4": UdioV4Adapter(),
             "lyria_3": Lyria3Adapter(),
+            "local": LocalMIDIAdapter(),
         }
 
         # O(1) Deterministic DSP
@@ -159,19 +164,26 @@ class GRAMMYOrchestrator:
             return matrix
         except (json.JSONDecodeError, ValueError) as e:
             logger.error("Error parseando matriz acústica: %s", e)
-            # Fallback protector (Termodinámica defensiva)
-            return {
-                "target_model": "suno_v5",
-                "prompt_injection": (
-                    "Fallback IDM deep techno, sub-bass 40Hz, solid 4/4 groove, analog warmth."
-                ),
-                "expected_entropy": "medium",
-                "sonic_vectors": {
-                    "groove": "4/4 locked",
-                    "timbre": "analog warm",
-                    "spatial": "wide",
-                },
-            }
+            return self._fallback_matrix(track)
+
+    def _fallback_matrix(self, track: TrackContext) -> dict[str, Any]:
+        """Fallback protector (Termodinámica defensiva)."""
+        return {
+            "target_model": "local",
+            "bpm": track.bpm,
+            "key": track.key,
+            "bars": 8,
+            "prompt_injection": (
+                "IDM deep techno, sub-bass 40Hz, solid groove, "
+                "analog warmth."
+            ),
+            "expected_entropy": "medium",
+            "sonic_vectors": {
+                "groove": "4/4 locked",
+                "timbre": "analog warm",
+                "spatial": "wide",
+            },
+        }
 
     async def evaluate_track_gri(self, track: TrackContext) -> float:
         """
@@ -254,47 +266,196 @@ class GRAMMYOrchestrator:
             return NEUTRAL_GRI_SCORE
 
     async def run_pipeline(self, track: TrackContext) -> TrackContext:
-        """
-        El pipeline maestro. Genera la receta paramétrica sintética, inyecta prompts hacia
-        los modelos de frontera seleccionados, y estabiliza espectralmente el audio final.
-        """
-        logger.info("--- Iniciando Pipeline de Síntesis para %s ---", track.title)
+        """Pipeline maestro con LLM + API adapters."""
+        logger.info(
+            "--- Iniciando Pipeline de Síntesis para %s ---",
+            track.title,
+        )
         track.state = TrackState.PRE_PRODUCTION
 
-        # 1. Gemini Cognition: Matriz Paramétrica
         matrix = await self.generate_prompt_matrix(track)
+        track.metadata["sonic_vectors"] = matrix.get(
+            "sonic_vectors", {}
+        )
+        track.metadata["expected_entropy"] = matrix.get(
+            "expected_entropy", "medium"
+        )
 
-        # Persist vectors in metadata for evaluation context
-        track.metadata["sonic_vectors"] = matrix.get("sonic_vectors", {})
-        track.metadata["expected_entropy"] = matrix.get("expected_entropy", "medium")
-
-        target_model_key = matrix.get("target_model", "suno_v5").lower()
-
+        target_model_key = matrix.get(
+            "target_model", "suno_v5"
+        ).lower()
         if target_model_key not in self.adapters:
-            logger.warning("Fallback. Modelo '%s' desconocido. Usando 'suno_v5'.", target_model_key)
-            target_model_key = "suno_v5"
+            logger.warning(
+                "Fallback. Modelo '%s' desconocido. Using 'local'.",
+                target_model_key,
+            )
+            target_model_key = "local"
 
         adapter = self.adapters[target_model_key]
 
-        # 2. Inyección y Generación Estocástica
-        logger.info("Asaltando the base model %s...", target_model_key)
         track.state = TrackState.TRACKING
         job_uri = await adapter.generate(matrix)
         track.metadata["raw_audio_uri"] = job_uri
 
-        # 3. Separación de Stems (Simulada si la API lo permite)
         stems = await adapter.get_stems(job_uri)
         track.stems = stems
 
-        # 4. DSP Apotheosis (Corrección Termodinámica Semántica)
         track.state = TrackState.POST_PRODUCTION
-        logger.info("Interviniendo audio renderizado con DSP Deterministico...")
-        # (En producción aquí cargaríamos numpy arrays desde los URIs y pasaríamos al master_track)
-        # self.dsp_engine.master_track(mock_audio_data, sample_rate=48000)
-
-        # 5. Evaluación Final (GRI)
         track.gri_score = await self.evaluate_track_gri(track)
         track.state = TrackState.MASTERED
-        logger.info("Pipeline completado. GRI Score: %s", track.gri_score)
-
+        logger.info(
+            "Pipeline completado. GRI: %s", track.gri_score
+        )
         return track
+
+    async def run_pipeline_local(
+        self, track: TrackContext
+    ) -> TrackContext:
+        """
+        Offline pipeline — MIDI + DSP synthesis.
+        No LLM, no external APIs.
+        """
+        logger.info(
+            "--- Local Pipeline para %s ---", track.title
+        )
+        track.state = TrackState.PRE_PRODUCTION
+
+        matrix = self._fallback_matrix(track)
+        track.metadata["sonic_vectors"] = matrix.get(
+            "sonic_vectors", {}
+        )
+        track.metadata["expected_entropy"] = matrix.get(
+            "expected_entropy", "medium"
+        )
+
+        adapter = self.adapters["local"]
+
+        track.state = TrackState.TRACKING
+        wav_path = await adapter.generate(matrix)
+        track.metadata["raw_audio_uri"] = wav_path
+        track.stems = {"master": wav_path}
+
+        # Apply DSPApotheosis mastering
+        track.state = TrackState.POST_PRODUCTION
+        try:
+            import numpy as np
+            import scipy.io.wavfile as wavfile
+
+            sr, audio_data = wavfile.read(wav_path)
+            audio_float = audio_data.astype(np.float64) / 32767.0
+
+            mastered = self.dsp_engine.master_track(
+                audio_float, sr
+            )
+
+            mastered_path = wav_path.replace(
+                ".wav", "_mastered.wav"
+            )
+            mastered_int16 = (mastered * 32767).astype(np.int16)
+            wavfile.write(mastered_path, sr, mastered_int16)
+            track.stems["mastered"] = mastered_path
+
+            lufs_in = (
+                mastered.reshape(-1, 1)
+                if mastered.ndim == 1
+                else mastered
+            )
+            lufs = self.dsp_engine.calculate_lufs(lufs_in, sr)
+            track.metadata["lufs_integrated"] = lufs
+            logger.info(
+                "DSP mastering complete. LUFS: %.2f", lufs
+            )
+        except Exception as e:
+            logger.error("DSP mastering failed: %s", e)
+
+        track.gri_score = 0.45
+        track.state = TrackState.MASTERED
+        logger.info(
+            "Local pipeline complete. Output: %s", wav_path
+        )
+        return track
+
+    async def compose_album_tracks(
+        self,
+        title: str,
+        concept: str,
+        num_tracks: int = 3,
+        bpm_range: tuple[int, int] = (120, 140),
+        keys: list[str] | None = None,
+        mode: str = "local",
+    ) -> AlbumContext:
+        """Batch-compose an album with N tracks."""
+        import random as rng
+
+        album = await self.initialize_album(title, concept)
+
+        if keys is None:
+            keys = [
+                "C minor", "A minor", "D minor",
+                "F minor", "G minor", "E minor",
+            ]
+
+        for i in range(num_tracks):
+            bpm = rng.randint(bpm_range[0], bpm_range[1])
+            key = keys[i % len(keys)]
+            track_title = f"{title} - Track {i + 1:02d}"
+
+            track = TrackContext(
+                id=f"trk_{i + 1:02d}",
+                title=track_title,
+                bpm=bpm,
+                key=key,
+                state=TrackState.CONCEPT,
+            )
+
+            if mode == "local":
+                track = await self.run_pipeline_local(track)
+            else:
+                track = await self.run_pipeline(track)
+
+            album.tracks.append(track)
+
+        if album.tracks:
+            album.global_gri = sum(
+                t.gri_score for t in album.tracks
+            ) / len(album.tracks)
+
+        self.current_album = album
+        logger.info(
+            "Album '%s' composed. %d tracks. GRI: %.2f",
+            title,
+            len(album.tracks),
+            album.global_gri,
+        )
+        return album
+
+    def get_album_status(self) -> dict[str, Any]:
+        """Return current album state and per-track GRI."""
+        if not self.current_album:
+            return {"status": "No album loaded."}
+
+        album = self.current_album
+        tracks = []
+        for t in album.tracks:
+            tracks.append({
+                "id": t.id,
+                "title": t.title,
+                "bpm": t.bpm,
+                "key": t.key,
+                "state": t.state.value,
+                "gri_score": t.gri_score,
+                "stems": list(t.stems.keys()),
+                "lufs": t.metadata.get(
+                    "lufs_integrated", "N/A"
+                ),
+            })
+
+        return {
+            "album_id": album.id,
+            "title": album.title,
+            "concept": album.concept,
+            "global_gri": album.global_gri,
+            "total_tracks": len(album.tracks),
+            "tracks": tracks,
+        }
+
