@@ -218,11 +218,51 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
     def hybrid_search_sync(self, *args, **kwargs):
         return self._run_sync(self.search(*args, **kwargs))
 
+    # ─── Causal Episode Tracing (Epoch 8) ─────────────────────────
+
+    async def recall_episode(
+        self,
+        query: str,
+        project: str = "",
+        limit: int = 3,
+    ) -> list:
+        """Recall causal episodes matching a query.
+
+        Returns full causal DAGs, not isolated facts.
+        Enables the LLM to understand *why* something happened.
+        """
+        from cortex.memory.episodic import CausalTracer
+
+        conn = await self.get_conn()
+        tracer = CausalTracer(conn)
+        return await tracer.recall_episode(query, project, limit)
+
+    async def trace_episode(
+        self,
+        fact_id: int,
+        max_depth: int | None = None,
+    ):
+        """Trace the full causal DAG from a given fact ID."""
+        from cortex.memory.episodic import CausalTracer
+
+        conn = await self.get_conn()
+        tracer = CausalTracer(conn)
+        return await tracer.trace_episode(fact_id, max_depth)
+
+    def recall_episode_sync(self, *args, **kwargs):
+        return self._run_sync(self.recall_episode(*args, **kwargs))
+
+    def trace_episode_sync(self, *args, **kwargs):
+        return self._run_sync(self.trace_episode(*args, **kwargs))
+
     def graph_sync(self, *args, **kwargs):
         return self._run_sync(self.graph(*args, **kwargs))
 
     def query_entity_sync(self, *args, **kwargs):
         return self._run_sync(self.query_entity(*args, **kwargs))
+
+    def get_causal_chain_sync(self, *args, **kwargs):
+        return self._run_sync(self.get_causal_chain(*args, **kwargs))
 
     def close_sync(self):
         return self._run_sync(self.close())
@@ -238,7 +278,7 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         return await self.facts.store(*args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
-        return await self.facts.store_many(*args, **kwargs)
+        return await super().store_many(*args, **kwargs)
 
     async def recall(self, *args, **kwargs):
         self._audit_log(
@@ -342,7 +382,9 @@ class CortexEngine(StoreMixin, QueryMixin, MemoryMixin, TransactionMixin):
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
-        return super()._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
+        return super()._row_to_fact(  # type: ignore[reportAttributeAccessIssue]
+            row, tenant_id=tenant_id,
+        )
 
     # ─── Lifecycle ────────────────────────────────────────────────
 

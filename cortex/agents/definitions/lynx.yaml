@@ -29,6 +29,7 @@ memory:
   tier: "hot"
   sparse_encoding: true
   silent_engrams: true
+  causal_memory: true
 
 guardrails:
   max_session_tokens: 200000
@@ -39,6 +40,7 @@ tools:
   - filesystem
   - mcp
   - cortex_search
+  - cortex_trace_episode
   - cortex_shannon_report
   - analyze_entropy
   - toolbox_membrane

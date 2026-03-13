@@ -1,8 +1,3 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
-# Change Date: 2030-01-01 (Transitions to Apache 2.0)
-
 """CORTEX v5.3 — Cognitive Memory Orchestrator.
 
 Wires the Tripartite Memory Architecture:
@@ -113,14 +108,16 @@ class CortexMemoryManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
         self._max_bg_tasks = max_bg_tasks
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
+        self._dynamic_space = (
+            DynamicSemanticSpace(self._l2, manager=self)  # type: ignore[reportOptionalCall]
+            if self._l2 else None
+        )
 
         try:
             from cortex.memory.hologram import HolographicMemory
-            self._hologram = HolographicMemory(self._l2) if self._l2 else None
-            if self._hologram:
-                # We do not await it here, we let it lazy-load or load in background upon first recall
-                pass
+            self._hologram = (
+                HolographicMemory(self._l2) if self._l2 else None
+            )
         except ImportError:
             self._hologram = None
 
@@ -280,7 +277,11 @@ class CortexMemoryManager:
         decisions, and formal proof counterexamples.
         """
         should_process, action, _ = await self.thalamus.filter(
-            content=content, project_id=project_id, tenant_id=tenant_id, fact_type=fact_type
+            content=content,
+            project_id=project_id,
+            tenant_id=tenant_id,
+            fact_type=fact_type,
+            parent_decision_id=int(parent_decision_id) if parent_decision_id else None,
         )
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
@@ -318,7 +319,7 @@ class CortexMemoryManager:
             timestamp=time.time(),
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
-            parent_decision_id=str(parent_decision_id) if parent_decision_id else None,
+            parent_decision_id=parent_decision_id if parent_decision_id else None,
         )
 
         # 3. Process through Adaptive Resonance Gate (ART-v2)

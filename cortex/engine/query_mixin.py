@@ -279,6 +279,17 @@ class QueryMixin(EngineMixinBase):
             ) as cursor:
                 types = dict(await cursor.fetchall())
 
+            # Causal chain coverage (zero-cost: indexed column)
+            try:
+                async with conn.execute(
+                    "SELECT COUNT(*) FROM facts "
+                    "WHERE parent_decision_id IS NOT NULL "
+                    "AND valid_until IS NULL"
+                ) as cursor:
+                    causal_facts = (await cursor.fetchone())[0]
+            except (sqlite3.Error, OSError):
+                causal_facts = 0
+
             # Database size via PRAGMA (zero-overhead, no filesystem stat needed)
             try:
                 async with conn.execute(
@@ -294,6 +305,8 @@ class QueryMixin(EngineMixinBase):
                 "total_facts": total,
                 "active_facts": active,
                 "deprecated_facts": total - active,
+                "causal_facts": causal_facts,
+                "orphan_facts": active - causal_facts,
                 "projects": projects,
                 "project_count": len(projects),
                 "types": types,
@@ -344,3 +357,84 @@ class QueryMixin(EngineMixinBase):
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             return await get_context_subgraph(conn, seeds, depth, max_nodes)
+
+    async def get_causal_chain(
+        self,
+        fact_id: int,
+        direction: str = "down",
+        max_depth: int = 10,
+        tenant_id: str = "default",
+    ) -> list[dict[str, Any]]:
+        """Traverse the parent_decision_id causal DAG.
+
+        Args:
+            fact_id: Starting fact ID.
+            direction: 'up' (toward root) or 'down' (toward leaves).
+            max_depth: Maximum recursion depth (default: 10).
+            tenant_id: Tenant scope.
+
+        Returns:
+            List of fact dicts ordered by depth (0 = starting fact).
+        """
+        if direction == "up":
+            # Follow parent_decision_id upward toward root
+            sql = """
+                WITH RECURSIVE chain(id, depth) AS (
+                    SELECT id, 0 FROM facts
+                    WHERE id = ? AND tenant_id = ?
+                    UNION ALL
+                    SELECT f.parent_decision_id, c.depth + 1
+                    FROM facts f JOIN chain c ON f.id = c.id
+                    WHERE f.parent_decision_id IS NOT NULL
+                        AND c.depth < ?
+                )
+                SELECT id, depth FROM chain ORDER BY depth
+            """
+        else:
+            sql = """
+                WITH RECURSIVE chain(id, depth) AS (
+                    SELECT id, 0 FROM facts
+                    WHERE id = ? AND tenant_id = ?
+                    UNION ALL
+                    SELECT f.id, c.depth + 1
+                    FROM facts f JOIN chain c
+                        ON f.parent_decision_id = c.id
+                    WHERE c.depth < ?
+                )
+                SELECT id, depth FROM chain ORDER BY depth
+            """
+
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            cursor = await conn.execute(sql, (fact_id, tenant_id, max_depth))
+            chain_ids = await cursor.fetchall()
+
+            if not chain_ids:
+                return []
+
+            # Fetch full fact data for each ID in the chain
+            id_list = [row[0] for row in chain_ids if row[0] is not None]
+            depth_map = {
+                row[0]: row[1] for row in chain_ids if row[0] is not None
+            }
+
+            if not id_list:
+                return []
+
+            placeholders = ", ".join("?" for _ in id_list)
+            cursor = await conn.execute(
+                f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
+                f"WHERE f.id IN ({placeholders})",
+                id_list,
+            )
+            rows = await cursor.fetchall()
+            facts = [
+                self._row_to_fact(row, tenant_id=tenant_id)  # type: ignore[reportAttributeAccessIssue]
+                for row in rows
+            ]
+
+            # Annotate with depth and sort
+            for f in facts:
+                f["causal_depth"] = depth_map.get(f["id"], 0)
+            facts.sort(key=lambda f: f["causal_depth"])
+
+            return facts

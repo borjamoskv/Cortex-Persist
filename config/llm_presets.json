@@ -8,7 +8,7 @@
   },
   "openai": {
     "base_url": "https://api.openai.com/v1",
-    "default_model": "gpt-4o-mini",
+    "default_model": "gpt-4o",
     "env_key": "OPENAI_API_KEY",
     "context_window": 128000,
     "specialization": ["reasoning", "code", "creative", "general"]
@@ -25,10 +25,17 @@
   },
   "gemini": {
     "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
-    "default_model": "gemini-2.0-flash",
+    "default_model": "gemini-2.5-pro",
     "env_key": "GEMINI_API_KEY",
     "context_window": 1000000,
-    "specialization": ["reasoning", "creative", "general"]
+    "specialization": ["reasoning", "creative", "code", "architect", "general"],
+    "intent_model_map": {
+      "reasoning": "gemini-2.5-pro",
+      "creative": "gemini-2.5-pro",
+      "code": "gemini-3.1-pro",
+      "architect": "gemini-3.1-pro",
+      "general": "gemini-2.5-pro"
+    }
   },
   "kimi": {
     "base_url": "https://api.moonshot.cn/v1",
@@ -56,11 +63,12 @@
     "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
     "context_window": 131072,
-    "specialization": ["code", "reasoning", "creative", "general"],
+    "specialization": ["code", "reasoning", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "grok-4.1-fast",
       "reasoning": "grok-4.1",
       "creative":  "grok-4.1",
+      "architect": "grok-4.1",
       "general":   "grok-4.1-fast"
     }
   },
@@ -83,12 +91,13 @@
     "default_model": "qwen/qwen-2.5-72b-instruct",
     "env_key": "OPENROUTER_API_KEY",
     "context_window": 131072,
-    "specialization": ["reasoning", "code", "creative", "general"],
+    "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "anthropic/claude-sonnet-4-20250514",
       "reasoning": "deepseek/deepseek-r1",
       "creative":  "anthropic/claude-sonnet-4-20250514",
-      "general":   "google/gemini-2.5-flash-preview"
+      "architect": "anthropic/claude-sonnet-4-20250514",
+      "general":   "google/gemini-2.5-pro"
     }
   },
   "groq": {
