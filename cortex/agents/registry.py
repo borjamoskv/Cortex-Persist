@@ -30,9 +30,10 @@ class MemoryConfig:
     tier: str = "hot"
     sparse_encoding: bool = True
     silent_engrams: bool = True
+    causal_memory: bool = False  # Epoch 8: Enable causal DAG tracing
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "MemoryConfig":
+    def from_dict(cls, d: dict[str, Any]) -> MemoryConfig:
         """Parse from YAML dict safely."""
         return cls(
             art_rho=float(d.get("art_rho", 0.95)),
@@ -41,6 +42,7 @@ class MemoryConfig:
             tier=str(d.get("tier", "hot")),
             sparse_encoding=bool(d.get("sparse_encoding", True)),
             silent_engrams=bool(d.get("silent_engrams", True)),
+            causal_memory=bool(d.get("causal_memory", False)),
         )
 
 
@@ -52,7 +54,7 @@ class GuardrailsConfig:
     max_turns: int = 50
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "GuardrailsConfig":
+    def from_dict(cls, d: dict[str, Any]) -> GuardrailsConfig:
         """Parse from YAML dict safely."""
         return cls(
             max_session_tokens=int(d.get("max_session_tokens", 100000)),
@@ -75,7 +77,7 @@ class AgentDefinition:
     tools: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_yaml_file(cls, filepath: Path) -> "AgentDefinition":
+    def from_yaml_file(cls, filepath: Path) -> AgentDefinition:
         """Load an AgentDefinition from a YAML file."""
         import yaml
 
@@ -110,11 +112,11 @@ class AgentRegistry:
     Loads definitions lazily upon first access.
     """
 
-    _instance: "AgentRegistry | None" = None
+    _instance: AgentRegistry | None = None
     _agents: dict[str, AgentDefinition] = {}
     _loaded: bool = False
 
-    def __new__(cls) -> "AgentRegistry":
+    def __new__(cls) -> AgentRegistry:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance

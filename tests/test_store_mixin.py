@@ -66,7 +66,9 @@ class TestStore:
         assert id1 != id2
 
     async def test_store_rejects_empty_content(self, engine):
-        with pytest.raises((ValueError, TypeError)):
+        from cortex.engine.storage_guard import GuardViolation
+
+        with pytest.raises((ValueError, TypeError, GuardViolation)):
             await engine.store(
                 project="test", content="",
                 fact_type="knowledge", source="agent:test_suite",

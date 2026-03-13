@@ -51,6 +51,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         commit: bool = True,
         tx_id: int | None = None,
         conn: aiosqlite.Connection | None = None,
+        parent_decision_id: int | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
         kwargs = {
@@ -65,6 +66,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             "valid_from": valid_from,
             "commit": commit,
             "tx_id": tx_id,
+            "parent_decision_id": parent_decision_id,
         }
         if conn:
             return await self._store_impl(conn, **kwargs)
@@ -193,6 +195,7 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
         valid_from: str | None,
         commit: bool,
         tx_id: int | None,
+        parent_decision_id: int | None = None,
     ) -> int:
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -217,7 +220,40 @@ class StoreMixin(EngineMixinBase, PrivacyMixin, GhostMixin, QuarantineMixin):
             source,
             meta,
             tx_id,
+            parent_decision_id=parent_decision_id,
         )
+
+        # ─── Dual-Write Bridge: sync parent_decision_id to facts_meta ───
+        # The L2 vector store (hologram, memory_archaeology) reads
+        # parent_decision_id from facts_meta.  insert_fact_record only
+        # writes to `facts`.  Bridge the gap by propagating to facts_meta
+        # when auto-resolve or explicit parent is set.
+        try:
+            cursor = await conn.execute(
+                "SELECT parent_decision_id FROM facts WHERE id = ?",
+                (fact_id,),
+            )
+            row = await cursor.fetchone()
+            resolved_parent = row[0] if row else None
+            if resolved_parent is not None:
+                await conn.execute(
+                    "UPDATE facts_meta SET parent_decision_id = ? "
+                    "WHERE id = ?",
+                    (str(resolved_parent), fact_id),
+                )
+        except Exception:  # noqa: BLE001
+            # facts_meta may not exist yet (pre-embed) — fire and forget
+            pass
+
+        # Ω₈: Epistemic Circuit Breaker - Evaluate Entropy Density
+        # Defensive import: the daemon package eagerly imports heavyweight
+        # optional deps (watchdog via ast_oracle). Store must never fail
+        # because an optional daemon dep is missing. (Ghost #4731)
+        try:
+            from cortex.daemon.epistemic_breaker import EpistemicCircuitBreaker
+            await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)
+        except (ImportError, ModuleNotFoundError) as _ecb_err:
+            logger.debug("[STORE] EpistemicCircuitBreaker skipped (missing dep): %s", _ecb_err)
 
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
             await embed_fact_async(

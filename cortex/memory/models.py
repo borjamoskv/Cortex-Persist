@@ -10,12 +10,14 @@ Tripartite Memory Architecture (KETER-∞ Frontera 2):
 
 from __future__ import annotations
 
-from cortex.axioms.topological_id import flake_gen
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from cortex.axioms.topological_id import flake_gen
 
 
 def now_iso() -> str:
@@ -25,7 +27,37 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-__all__ = ["CortexFactModel", "EpisodicSnapshot", "MemoryEntry", "MemoryEvent"]
+@dataclass(slots=True)
+class CausalEpisode:
+    """A DAG of causally-linked facts forming a coherent temporal episode.
+
+    Built by traversing `parent_decision_id` chains in the facts table.
+    Enables the LLM to understand *why* something happened, not just *what*.
+    """
+
+    episode_id: str = field(default_factory=lambda: flake_gen.next_lexicographic_id())
+    root_fact_id: int = 0
+    fact_chain: list[dict] = field(default_factory=list)
+    project: str = ""
+    summary: str = ""
+    depth: int = 0
+    ghost_count: int = 0
+    decision_count: int = 0
+    created_at: float = field(default_factory=time.time)
+
+    @property
+    def entropy_density(self) -> float:
+        """Ghost ratio within this episode (0.0 = clean, 1.0 = all ghosts)."""
+        total = self.ghost_count + self.decision_count
+        if total == 0:
+            return 0.0
+        return self.ghost_count / total
+
+
+__all__ = [
+    "CausalEpisode", "CortexFactModel", "EpisodicSnapshot",
+    "MemoryEntry", "MemoryEvent",
+]
 
 
 # ─── Cognitive Stratification Configuration ──────────────────────────
@@ -182,7 +214,7 @@ class CortexFactModel(BaseModel):
     cognitive_layer: COGNITIVE_LAYER = Field(
         default="semantic", description="Target cognitive layer for this fact."
     )
-    parent_decision_id: str | None = Field(
+    parent_decision_id: int | None = Field(
         default=None, description="Causal anchor to the parent decision."
     )
 

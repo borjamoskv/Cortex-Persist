@@ -12,6 +12,7 @@ from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 from cortex.immune.filters.base import Verdict
 from cortex.immune.membrane import ImmuneMembrane
+from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.trust_tools import register_trust_tools
@@ -638,6 +639,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
     # Mega Poderosas (Aether, Void, Chronos paradigms)
     register_mega_tools(mcp, ctx)
+
+    # Genesis Engine — create systems from specs
+    register_genesis_tools(mcp, ctx)
 
     return mcp
 
