@@ -46,8 +46,8 @@ import os
 import time
 from dataclasses import dataclass, field
 
-from cortex.llm.provider import LLMProvider
 from cortex.llm._presets import load_presets
+from cortex.llm.provider import LLMProvider
 from cortex.llm.router import IntentProfile
 
 __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
@@ -56,7 +56,7 @@ logger = logging.getLogger("cortex.llm.sovereign")
 
 # Default signature for template fallback — override via constructor
 _DEFAULT_SIGNATURE = (
-    "---\nBorja Moskv | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
+    "---\nby borjamoskv.com | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
 )
 
 

@@ -11,8 +11,9 @@ tabla de routing por modo, y configuración por defecto.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import StrEnum
+import os
+from dataclasses import dataclass, field
+from enum import Enum
 
 from cortex.thinking.fusion import FusionStrategy
 
@@ -28,7 +29,7 @@ __all__ = [
 # ─── Thinking Modes ──────────────────────────────────────────────────
 
 
-class ThinkingMode(StrEnum):
+class ThinkingMode(str, Enum):
     """Modos de pensamiento que determinan qué modelos participan."""
 
     DEEP_REASONING = "deep_reasoning"
@@ -97,16 +98,19 @@ ERNIE_5_0 = "baidu/ernie-5-0-thinking-latest"
 # Solo se usarán los que tengan API key configurada.
 DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.DEEP_REASONING: [
+        ("ollama", "qwen2.5-coder:32b"),
+        ("gemini", "gemini-3.1-pro-preview"),
         ("openai", "gpt-4o"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-reasoner"),
         ("ernie", ERNIE_5_0),
         ("zhipu", "glm-5"),
         ("kimi", "moonshot-v1-128k"),
-        ("gemini", "gemini-2.0-flash"),
         ("qwen", "qwen-max"),
     ],
     ThinkingMode.CODE: [
+        ("ollama", "qwen2.5-coder:32b"),
+        ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-chat"),
         ("zhipu", "glm-5"),
@@ -116,14 +120,16 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("fireworks", "accounts/fireworks/models/deepseek-coder-v2"),
     ],
     ThinkingMode.CREATIVE: [
+        ("gemini", "gemini-3.1-pro-preview"),
         ("openai", "gpt-4o"),
         ("xai", "grok-2-latest"),
         ("kimi", "moonshot-v1-128k"),
-        ("gemini", "gemini-2.0-flash"),
         ("cohere", "command-r-plus"),
         ("qwen", "qwen-plus"),
     ],
     ThinkingMode.SPEED: [
+        ("ollama", "qwen2.5-coder:32b"),
+        ("gemini", "gemini-3.1-pro-preview"),
         ("groq", "llama-3.3-70b-versatile"),
         ("cerebras", "llama-3.3-70b"),
         ("sambanova", "Meta-Llama-3.3-70B-Instruct"),
@@ -131,13 +137,13 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("together", "meta-llama/Llama-3.3-70B-Instruct-Turbo"),
     ],
     ThinkingMode.CONSENSUS: [
+        ("gemini", "gemini-3.1-pro-preview"),
         ("zhipu", "glm-5"),
         ("openai", "gpt-4o"),
         ("kimi", "moonshot-v1-128k"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", "deepseek-chat"),
         ("ernie", ERNIE_5_0),
-        ("gemini", "gemini-2.0-flash"),
         ("qwen", "qwen-plus"),
         ("groq", "llama-3.3-70b-versatile"),
         ("xai", "grok-2-latest"),
@@ -145,19 +151,19 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     # Sprint 1: Metacognitive mode uses the best reasoning models —
     # these need to follow complex epistemic instructions reliably.
     ThinkingMode.METACOGNITIVE: [
+        ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("openai", "gpt-4o"),
         ("deepseek", "deepseek-reasoner"),
-        ("gemini", "gemini-2.0-flash"),
         ("kimi", "moonshot-v1-128k"),
     ],
     ThinkingMode.OMEGA: [
+        ("gemini", "gemini-3.1-pro-preview"),
         ("deepseek", "deepseek-reasoner"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("ernie", ERNIE_5_0),
         ("openai", "o1-preview"),
         ("openai", "gpt-4o"),
-        ("gemini", "gemini-2.0-flash"),
     ],
 }
 
@@ -165,7 +171,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
 # ─── Configuration ───────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class OrchestraConfig:
     """Configuración del orchestra."""
 
@@ -174,7 +180,9 @@ class OrchestraConfig:
     timeout_seconds: float = 120.0
     default_strategy: FusionStrategy = FusionStrategy.SYNTHESIS
     temperature: float = 0.3
-    max_tokens: int = 4096
+    max_tokens: int = field(
+        default_factory=lambda: int(os.environ.get("CORTEX_LLM_MAX_TOKENS", "4096"))
+    )
 
     # ── Thermal Variance (Prevents Swarm Mode Collapse) ──
     dynamic_temperature: bool = True

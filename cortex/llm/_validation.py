@@ -25,7 +25,7 @@ __all__ = ["DriftSignal", "IntentValidator"]
 # ─── DNSSEC (Intent Validation) ────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class DriftSignal:
     """DNSSEC validation result for a single response.
 

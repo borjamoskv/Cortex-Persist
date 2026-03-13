@@ -1,27 +1,6 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
-# Change Date: 2030-01-01 (Transitions to Apache 2.0)
+# This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
-"""CORTEX v5.2 — Universal LLM Provider (OpenAI-compatible).
-
-Sovereign-grade async client for ANY OpenAI-compatible LLM endpoint.
-Modularized architecture with externalized presets, high-precision logging,
-and intent-aware model routing via ``intent_model_map``.
-
-Intent Model Map
-~~~~~~~~~~~~~~~~
-Providers that serve multiple models (OpenRouter, Groq, Together, Fireworks,
-DeepInfra) declare an ``intent_model_map`` in their preset (llm_presets.json).
-This maps each ``IntentProfile`` to the optimal model available on that
-provider, enabling deterministic per-intent routing without code changes.
-
-Environment:
-    CORTEX_LLM_PROVIDER=qwen       (preset name, or 'custom')
-    CORTEX_LLM_MODEL=override      (optional model override)
-    CORTEX_LLM_BASE_URL=https://.. (required if provider='custom')
-    CORTEX_LLM_API_KEY=your-key    (required if provider='custom')
-"""
+"""Universal LLM Provider — OpenAI-compatible async client with intent routing."""
 
 from __future__ import annotations
 
@@ -103,6 +82,8 @@ class LLMProvider(BaseProvider):
         self._extra_headers = {}
         self._intent_affinity: frozenset[IntentProfile] = frozenset({IntentProfile.GENERAL})
         self._intent_model_map: dict[IntentProfile, str] = {}  # no map for custom
+        self._tier = "high"
+        self._cost_class = "medium"
 
         if not self._base_url:
             raise ValueError("Custom LLM provider requires CORTEX_LLM_BASE_URL")
@@ -122,6 +103,8 @@ class LLMProvider(BaseProvider):
         self._context_window = preset["context_window"]
         self._extra_headers = preset.get("extra_headers", {})
         self._api_key = api_key
+        self._tier = preset.get("tier", "high")
+        self._cost_class = preset.get("cost_class", "medium")
 
         # Resolve intent affinity from preset specialization tags
         _TAG_MAP: dict[str, IntentProfile] = {
@@ -289,11 +272,26 @@ class LLMProvider(BaseProvider):
         payload: dict[str, Any],
         original_error: httpx.HTTPStatusError,
     ) -> str:
-        """Maneja el backoff exponencial y reintentos para errores 429."""
+        """Maneja el backoff rápido o el fallback hipersónico para errores 429.
+
+        Aplica Path B (Ejecución Hipersónica):
+        1. Para OpenAI: Breve backoff (max 3 intentos) dada su resiliencia.
+        2. Otros (ej. Gemini): Fallback INSTANTÁNEO sin dormir (O(1)).
+        """
+        if self._provider != "openai":
+            logger.warning(
+                "LLM API [429 Quota Exceeded Final] on %s. Fallback inmediato al meta-router...",
+                self._model,
+            )
+            # En vez de ahogar la máquina, propaga instantáneamente hacia el Router (Orchestra)
+            # para que haga el fallback hipersónico al siguiente modelo disponible en la cascada.
+            raise original_error
+
+        # Solo si es OpenAI le damos un respiro muy breve
         last_error = original_error
         for attempt in range(1, 4):
-            delay = self._extract_retry_delay(last_error.response.text)
-            safe_delay = max(delay or 2.0, 2.0) * attempt + 1.0
+            # Reducimos los tiempos drásticamente para agilizar el YOLO
+            safe_delay = (attempt * 1.5) + (1.0 * attempt)
 
             logger.warning(
                 "LLM API [429 Quota Exceeded] on %s. Auto-sleeping for %.2fs (attempt %d/3)...",
@@ -442,7 +440,7 @@ class LLMProvider(BaseProvider):
 
     @property
     def model_name(self) -> str:
-        """Active model name."""
+        """Active model name (alias for ``model``)."""
         return self._model
 
     @property
@@ -457,8 +455,18 @@ class LLMProvider(BaseProvider):
 
     @property
     def intent_affinity(self) -> frozenset[IntentProfile]:
-        """Intenciones para las que este provider es óptimo (leído del preset)."""
+        """Intenciones para las que este provider es óptimo."""
         return self._intent_affinity
+
+    @property
+    def tier(self) -> str:
+        """Provider tier from preset (frontier/high/local)."""
+        return self._tier
+
+    @property
+    def cost_class(self) -> str:
+        """Cost class from preset (free/low/medium/high/variable)."""
+        return self._cost_class
 
     @property
     def context_window(self) -> int:

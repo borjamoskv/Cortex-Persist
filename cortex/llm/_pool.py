@@ -23,7 +23,7 @@ __all__ = ["ProviderMetrics", "WeightedProviderPool"]
 logger = logging.getLogger("cortex.llm.pool")
 
 
-@dataclass(slots=True)
+@dataclass()
 class ProviderMetrics:
     """EWMA-based latency and success tracking per provider.
 
