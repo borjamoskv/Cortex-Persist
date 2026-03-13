@@ -18,7 +18,6 @@ from typing import Any
 
 from cortex.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
-    HARD_ITERATION_CAP,
     STAGNATION_LIMIT,
 )
 from cortex.mejoralo.models import ScanResult

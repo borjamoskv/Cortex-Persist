@@ -10,9 +10,9 @@ import uuid
 
 from cortex.market_maker.detector import TrendDetector
 from cortex.market_maker.models import (
-    Experiment, 
-    ExperimentStatus, 
-    Opportunity, 
+    Experiment,
+    ExperimentStatus,
+    Opportunity,
     Verdict,
 )
 from cortex.market_maker.mvp_generator import MVPGenerator

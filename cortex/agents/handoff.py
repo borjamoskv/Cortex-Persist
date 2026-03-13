@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.handoff")
 
-HANDOFF_VERSION = "1.2"
+HANDOFF_VERSION = "1.3"
 DEFAULT_HANDOFF_PATH = CORTEX_DIR / "handoff.json"
 
 # Limits
@@ -213,10 +213,21 @@ async def generate_handoff(
     if session_meta:
         session.update(session_meta)
 
+    # ── Cognitive Fingerprint (v1.3) — Behavioral prior for receiving agent ─
+    cognitive_fingerprint: dict = {}
+    try:
+        from cortex.fingerprint.extractor import FingerprintExtractor
+
+        fp = await FingerprintExtractor.extract(engine, project=None, top_domains=10)
+        cognitive_fingerprint = fp.to_dict()
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Cognitive fingerprint skipped: %s", e)
+
     handoff = {
         "version": HANDOFF_VERSION,
         "generated_at": now_iso(),
         "session": session,
+        "cognitive_fingerprint": cognitive_fingerprint,
         "hot_decisions": hot_decisions,
         "causal_episodes": causal_episodes_data,
         "causal_chains": causal_chains,
@@ -232,12 +243,13 @@ async def generate_handoff(
 
     logger.info(
         "Handoff generated: %d decisions, %d episodes, %d ghosts, "
-        "%d errors, %d active projects",
+        "%d errors, %d active projects, fingerprint=%s",
         len(hot_decisions),
         len(causal_episodes_data),
         len(active_ghosts),
         len(recent_errors),
         len(active_projects),
+        cognitive_fingerprint.get("archetype", "none"),
     )
 
     return handoff

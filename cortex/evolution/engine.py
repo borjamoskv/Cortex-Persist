@@ -6,29 +6,24 @@ from pathlib import Path
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from cortex.evolution.action import SymbolicActionEngine, SymbolicActionState
+from cortex.evolution.action import SymbolicActionEngine
 from cortex.evolution.agents import (
     AgentDomain,
-    Mutation,
-    MutationType,
     SovereignAgent,
     SubAgent,
 )
-from cortex.evolution.cortex_metrics import DomainMetrics, fetch_all_domain_metrics
+from cortex.evolution.cortex_metrics import fetch_all_domain_metrics
 from cortex.evolution.ledger_db import EvolutionLedgerDB
 from cortex.evolution.lnn import LagrangianController
 from cortex.evolution.models import (
     CycleReport,
     EngineParameters,
-    EvolutionMetric,
-    EvolutionMutation,
 )
+from cortex.evolution.operations_mixin import EvolutionOpsMixin
 from cortex.evolution.persistence import load_swarm, save_swarm
-from cortex.evolution.strategies import DEFAULT_STRATEGIES
 from cortex.gate.ouroboros import OuroborosGate
 from cortex.ledger import SovereignLedger
 from cortex.sovereign.endocrine import DigitalEndocrine
-from cortex.evolution.operations_mixin import EvolutionOpsMixin
 
 random = secrets.SystemRandom()
 

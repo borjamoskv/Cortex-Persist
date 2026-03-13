@@ -1,11 +1,12 @@
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.ui_control.applescript import is_app_running, run_applescript
 from cortex.ui_control.accessibility import AccessibilityEngine
+from cortex.ui_control.applescript import is_app_running, run_applescript
+from cortex.ui_control.models import AppTarget, InteractionResult
 from cortex.ui_control.mouse import MouseEngine
 from cortex.ui_control.vision import VisionEngine
-from cortex.ui_control.models import AppTarget, InteractionResult
+
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 else:

@@ -13,6 +13,7 @@ from cortex.immune.filters.adversarial import AdversarialFilter
 from cortex.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 from cortex.immune.filters.causal import CausalFilter
 from cortex.immune.filters.confidence import ConfidenceFilter
+from cortex.immune.filters.entropic_quarantine import EntropicQuarantineFilter
 from cortex.immune.filters.entropy import EntropyFilter
 from cortex.immune.filters.reversibility import ReversibilityFilter
 
@@ -42,6 +43,7 @@ class ImmuneMembrane:
             CausalFilter(),
             EntropyFilter(),
             ConfidenceFilter(),
+            EntropicQuarantineFilter(),  # F6 — entropic quarantine gate
         ]
 
     async def intercept(self, intent: Any, context: dict[str, Any]) -> TriageReport:
@@ -87,8 +89,8 @@ class ImmuneMembrane:
             final_verdict = Verdict.PASS
 
         # Triage Score (Weighted average)
-        # F1: 30%, F2: 25%, F3: 20%, F4: 15%, F5: 10%
-        weights = {"F1": 0.30, "F2": 0.25, "F3": 0.20, "F4": 0.15, "F5": 0.10}
+        # F1: 25%, F2: 20%, F3: 20%, F4: 15%, F5: 10%, F6: 10%
+        weights = {"F1": 0.25, "F2": 0.20, "F3": 0.20, "F4": 0.15, "F5": 0.10, "F6": 0.10}
         total_score = 0.0
         for res in results:
             total_score += res.score * weights.get(res.filter_id, 0.05)

@@ -8,7 +8,15 @@ import logging
 import numpy as np
 import pyloudnorm as pyln
 import scipy.signal
-from numba import njit
+
+try:
+    from numba import njit
+    _NUMBA_AVAILABLE = True
+except ImportError:
+    _NUMBA_AVAILABLE = False
+    def njit(func):  # type: ignore[misc]  # noqa: E302
+        """No-op decorator when numba is not available."""
+        return func
 
 logger = logging.getLogger(__name__)
 

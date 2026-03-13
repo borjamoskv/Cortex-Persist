@@ -1,10 +1,8 @@
 import logging
-from typing import Optional, Any
+
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel
 
 from cortex.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
-from cortex.mcp.utils import get_engine
 
 logger = logging.getLogger("cortex.mcp.music")
 

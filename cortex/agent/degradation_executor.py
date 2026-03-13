@@ -11,7 +11,7 @@ import functools
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any, TypeVar, Optional, Union
+from typing import Any, TypeVar
 
 try:
     from typing import ParamSpec
@@ -47,7 +47,7 @@ _RECOVERY_DOCTOR = "Run `cortex doctor` to scan subsystem health"
 
 def sovereign_execute(
     fallback_mode: str = "text_only",
-    cortex_engine: Optional[Any] = None,
+    cortex_engine: Any | None = None,
     project: str = "default",
 ) -> Callable[[Callable[_P, Awaitable[_R]]], Callable[_P, Awaitable[_R]]]:
     """Decorator that wraps any agent execute() method with Sovereign Degradation.
@@ -65,7 +65,7 @@ def sovereign_execute(
         @functools.wraps(fn)
         async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             t0 = time.perf_counter()
-            action: Optional[AgentAction] = next((a for a in args if isinstance(a, AgentAction)), None)
+            action: AgentAction | None = next((a for a in args if isinstance(a, AgentAction)), None)
 
             try:
                 result = await fn(*args, **kwargs)
