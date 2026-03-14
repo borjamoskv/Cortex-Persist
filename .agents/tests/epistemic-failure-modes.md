@@ -1,211 +1,177 @@
 # Cortex-Persist: Epistemic Failure Modes Test Specifications
 
-> **Status:** Test Specs v0.1
-> **Parent RFC:** [RFC-CORTEX-NATIVE-AI v0.1](file:///.agents/workflows/RFC-CORTEX-NATIVE-AI.md)
-> **Date:** 2026-03-14
+> **Status:** Draft Test Specs  
+> **Parent RFC:** [RFC-CORTEX-NATIVE-AI v0.1](file:///.agents/workflows/RFC-CORTEX-NATIVE-AI.md)  
+> **Last Updated:** 2026-03-14
 
 ---
 
-## 0. Preamble
+## Severity Classification
 
-This document defines concrete adversarial and thermodynamic decay scenarios that
-CORTEX-Persist MUST survive. Each scenario specifies trigger conditions, expected
-system behavior, invariants under test, and acceptance criteria.
+| Level | Meaning |
+| ----- | ------- |
+| **S0** | System integrity compromised — data corruption or silent belief falsification |
+| **S1** | Consensus integrity compromised — divergent replicas or deadlocked adjudication |
+| **S2** | Operational degradation — performance or availability impacted |
+| **S3** | Edge case — recoverable anomaly with minor impact |
 
 ---
 
 ## FM-01: Malicious Veto
 
-**Trigger:** Agent $j$ intentionally submits $P_j = 0$ (or $P_j \to \epsilon$) for a
-belief that the majority of the swarm holds as `ACTIVE` with high confidence.
-
-**Expected Behavior:**
-
-1. The veto is accepted as $P_j = \epsilon$ (saturating penalty, not annihilation).
-2. The fused LogOP probability decreases but does not collapse to 0.
-3. Agent $j$'s `consensus_weight` is flagged for L3 audit.
-4. If determined malicious: epistemic slashing applied ($w_j \leftarrow w_j \cdot \alpha^{-k}$).
-
-**Invariant:** No single agent can unilaterally collapse swarm consensus.
-
-**Acceptance Criteria:**
-- [ ] $P_{\text{LogOP}} > 0$ after single-agent veto without L3 confirmation.
-- [ ] Audit trail records veto event with agent identity, timestamp, and justification hash.
-- [ ] Slashing coefficient applied within 1 consolidation cycle after malice determination.
+- **Severity:** S1
+- **Preconditions:** Agent $k$ is a valid swarm participant with non-zero `consensus_weight`.
+- **Injection Vector:** Agent submits $p_k(H|E) = 0$ for a belief $H$ that is supported by majority consensus, intending to collapse the LogOP aggregate to zero.
+- **Expected System Response:**
+  1. Value clamped to $\epsilon_{\min}$ (§3.2 of CRDT Appendix).
+  2. `VETO_ATTEMPTED` audit event emitted with agent ID, belief ID, and timestamp.
+  3. Aggregate remains non-zero. Collapse requires L3 audit or reinforced quorum.
+  4. If repeated ($>3$ vetoes on distinct beliefs within sliding window), agent $k$ is flagged for **Geometric Epistemic Slashing** — exponential reduction of `consensus_weight`.
+- **Invariants Verified:** VETO-SAT (no single-agent annihilation), MI-6 (weight adjustments logged).
 
 ---
 
 ## FM-02: Causal Cycle
 
-**Trigger:** Chain $A \vdash B \vdash C \vdash \neg A$ introduced via concurrent operations.
-
-**Expected Behavior:**
-
-1. ATMS cycle detection fires during `entails`/`discards` assertion.
-2. All nodes in the cycle transition to `CONTESTED`.
-3. The cycle is escalated to Tribunal (LogOP adjudication).
-4. The weakest edge (lowest `confidence_score`) is severed.
-
-**Invariant:** No circular dependency survives in the committed belief graph.
-
-**Acceptance Criteria:**
-- [ ] Cycle detected within $O(|E|)$ of the light cone.
-- [ ] No `ACTIVE` beliefs remain with circular dependencies after resolution.
-- [ ] Tribunal event logged with full causal chain.
+- **Severity:** S1
+- **Preconditions:** Three or more beliefs exist with cyclic dependency: $A \vdash B, B \vdash C, C \vdash \neg A$.
+- **Injection Vector:** Sequential ingestion of beliefs that form a dependency cycle, possibly by different agents unaware of each other's assertions.
+- **Expected System Response:**
+  1. Cycle detected by ATMS DFS (§5 of ATMS Appendix).
+  2. All nodes in cycle transition to CONTESTED.
+  3. `CYCLE_DETECTED` event emitted with full cycle path.
+  4. Escalation to Epistemic Tribunal for edge severance.
+  5. Severed edge becomes a Nogood; backtracking proceeds.
+- **Invariants Verified:** No circular reasoning in ACTIVE beliefs; ATMS graph is a DAG for all ACTIVE nodes.
 
 ---
 
 ## FM-03: Belief Orphaning (Root Revocation)
 
-**Trigger:** A root assumption $a$ is explicitly revoked via signed patch.
-
-**Expected Behavior:**
-
-1. Root reference marked invalid in $O(1)$ (index flag).
-2. Immediate children transition to `ORPHANED`.
-3. Deferred subgraph evaluation begins in next consolidation cycle.
-4. Children with alternative justifications are reconciled to `ACTIVE`.
-5. Children without alternatives transition to `DISCARDED`.
-
-**Invariant:** No belief with an invalidated root chain remains `ACTIVE`.
-
-**Acceptance Criteria:**
-- [ ] Root invalidation completes in < 1 ms.
-- [ ] All orphaned nodes resolved within 1 consolidation cycle.
-- [ ] Reconciled nodes have valid, non-circular justification chains.
+- **Severity:** S2
+- **Preconditions:** Assumption $a$ supports a dependency tree of depth $d \le d_{\max}$ with $|V|$ dependent nodes.
+- **Injection Vector:** Assumption $a$ is explicitly revoked via `revise_belief(a, evidence_ref)`.
+- **Expected System Response:**
+  1. Index lookup: $\text{idx}(a)$ returns all dependent nodes — O(1).
+  2. Each dependent node's labels containing $a$ are removed — O(1) per node.
+  3. Nodes with empty labels transition to ORPHANED.
+  4. Deferred async: system searches for alternative justifications.
+  5. Orphaned nodes excluded from Memory Scheduler context immediately.
+- **Invariants Verified:** No ORPHANED belief appears in any Context Package; O(1) per-reference invalidation.
 
 ---
 
 ## FM-04: Source Hash Collision
 
-**Trigger:** Two distinct `ProvenanceEnvelope`s from different tenants produce
-identical `source_hash` values.
-
-**Expected Behavior:**
-
-1. SMT insertion detects the collision during Merkle proof generation.
-2. The second envelope is rejected at the gate layer.
-3. An integrity alert is raised (P0 — potential cryptographic weakness).
-4. Both envelopes are preserved in quarantine for forensic analysis.
-
-**Invariant:** No two distinct provenance records share an SMT leaf.
-
-**Acceptance Criteria:**
-- [ ] Collision detected before belief state mutation.
-- [ ] No data loss — both envelopes preserved.
-- [ ] P0 alert emitted with collision details.
+- **Severity:** S0
+- **Preconditions:** Two distinct provenance streams (different `tenant_id` or `signer_id`) produce identical `source_hash` values.
+- **Injection Vector:** Intentional hash pre-image attack or accidental collision (probability $2^{-128}$ for SHA-256).
+- **Expected System Response:**
+  1. SMT insertion detects duplicate leaf with mismatched provenance metadata.
+  2. Insertion rejected with `HASH_COLLISION` error.
+  3. Incident logged to security audit trail with both provenance envelopes.
+  4. If collision is confirmed as attack ($P(\text{accidental}) < 10^{-30}$), source agent is quarantined.
+- **Invariants Verified:** SMT leaf uniqueness; provenance binding integrity.
 
 ---
 
-## FM-05: Tenant Key Destruction (GDPR Right-to-be-Forgotten)
+## FM-05: Tenant Key Destruction (GDPR Right-to-Erasure)
 
-**Trigger:** GDPR erasure request for tenant $t$.
-
-**Expected Behavior:**
-
-1. AES-256 master key for tenant $t$ is cryptographically destroyed.
-2. All ciphertext for tenant $t$ becomes functionally random (irreversible).
-3. ZK proofs of unlinking are generated, demonstrating that:
-   - The key material no longer exists in any keyring.
-   - The ciphertext cannot be decrypted.
-4. SMT leaves for tenant $t$ are replaced with tombstone markers.
-5. Provenance references across other tenants are preserved (cross-references
-   point to tombstones, not dangling pointers).
-
-**Invariant:** Post-destruction, no computational method can reconstruct tenant data.
-
-**Acceptance Criteria:**
-- [ ] Key destruction confirmed by keyring audit (no backup copies).
-- [ ] ZK proof of unlinking validates successfully against SMT root.
-- [ ] Cross-tenant references resolve to tombstones without errors.
-- [ ] EU AI Act audit trail records the erasure event immutably.
+- **Severity:** S0 (compliance-critical)
+- **Preconditions:** Tenant $T$ invokes crypto-shredding via `destroy_tenant_key(T)`.
+- **Injection Vector:** GDPR Article 17 request processed.
+- **Expected System Response:**
+  1. AES-256 master key for tenant $T$ is securely destroyed (zeroized from memory + keyring).
+  2. All encrypted payloads (`content`, `meta`) become functionally random ciphertext.
+  3. SMT entries for tenant $T$ are marked with destruction tombstones.
+  4. ZK proof of unlinking generated: proves key destruction without revealing content.
+  5. Cross-tenant references (if any) are severed and logged.
+- **Invariants Verified:** No plaintext recoverable post-destruction; ZK proof validates; audit trail complete.
 
 ---
 
 ## FM-06: Replay Attack on Patches
 
-**Trigger:** Attacker resubmits a previously valid but now obsolete `BeliefPatch`.
-
-**Expected Behavior:**
-
-1. The patch's `parent_hash` is checked against the current patch DAG.
-2. If the parent hash corresponds to a superseded state, the patch is rejected.
-3. Monotonic CRDT clocks confirm the patch timestamp is stale.
-4. The replay attempt is logged as a security event.
-
-**Invariant:** No obsolete patch can modify current belief state.
-
-**Acceptance Criteria:**
-- [ ] Replay rejected at ingestion layer, before any state mutation.
-- [ ] Security event logged with attacker metadata (if available).
-- [ ] No state regression occurs.
+- **Severity:** S1
+- **Preconditions:** Attacker has captured a valid, previously-applied `BeliefPatch` with valid signature.
+- **Injection Vector:** Resubmission of the patch after its causal effect has already been absorbed.
+- **Expected System Response:**
+  1. Patch carries a causal dot $(i, c)$.
+  2. Receiving replica checks: $(i, c) \in \text{ctx}(r)$ — already delivered.
+  3. Patch is silently discarded (CRDT idempotency).
+  4. `REPLAY_DETECTED` audit event emitted if same patch resubmitted $>2$ times.
+- **Invariants Verified:** CRDT idempotency; monotonic causal ordering; MI-5.
 
 ---
 
-## FM-07: Network Partition Divergence
+## FM-07: Cascading Orphan Storm
 
-**Trigger:** Network partition splits the swarm into $G_1$ and $G_2$ for > 1 hour.
-Both partitions continue accepting writes to the same `BeliefObject`.
-
-**Expected Behavior:**
-
-1. Both partitions operate independently (AP-mode).
-2. Upon partition heal, CRDT merge executes per Appendix CRDT §2.1.
-3. Concurrent conflicting state transitions are resolved via MV-Register + LogOP.
-4. Post-merge state is identical regardless of merge order (commutativity).
-5. No data loss — all operations from both partitions are preserved.
-
-**Invariant:** Post-heal state satisfies SEC (Strong Eventual Consistency).
-
-**Acceptance Criteria:**
-- [ ] All operations from both partitions present in merged state.
-- [ ] Merge produces identical result in both directions ($G_1 \sqcup G_2 = G_2 \sqcup G_1$).
-- [ ] No `ORPHANED` beliefs resulting from merge artifacts.
+- **Severity:** S2
+- **Preconditions:** A foundational assumption $a$ supports $|V| > 10{,}000$ transitive dependents.
+- **Injection Vector:** Invalidation of $a$ under high system load (>80% Memory Scheduler utilization).
+- **Expected System Response:**
+  1. Direct dependents ($|\text{idx}(a)|$) invalidated in O(1) per reference.
+  2. Transitive propagation is rate-limited: max $B_{\text{orphan}}$ transitions per tick (default: 500/tick).
+  3. Overflow transitions are queued with priority ordering (depth-first from $a$).
+  4. Memory Scheduler immediately excludes any node in ORPHANED state from context.
+  5. System emits `ORPHAN_STORM` alert if queue depth exceeds $5 \times B_{\text{orphan}}$.
+- **Invariants Verified:** System remains responsive under mass invalidation; no ORPHANED belief leaks into context.
 
 ---
 
-## FM-08: Tombstone Premature GC
+## FM-08: Sybil Consensus Attack
 
-**Trigger:** Tombstone for a `DISCARDED` BO is garbage-collected before all
-replicas have acknowledged it.
-
-**Expected Behavior:**
-
-1. A replica that hasn't received the tombstone still holds the BO as `ACTIVE`.
-2. The replica sends an operation referencing the "undead" BO.
-3. The receiving replica detects the tombstone-less reference and:
-   - Requests tombstone resync from peers.
-   - Blocks the operation until consistency is restored.
-
-**Invariant:** Premature tombstone GC MUST NOT cause permanent replica divergence.
-
-**Acceptance Criteria:**
-- [ ] Divergence detected within 1 sync cycle.
-- [ ] Tombstone resync completes without data loss.
-- [ ] Alert raised for tombstone GC policy violation.
+- **Severity:** S1
+- **Preconditions:** Attacker controls $m$ identities in the swarm, each with initial `consensus_weight`.
+- **Injection Vector:** All $m$ identities submit identical beliefs designed to inflate LogOP aggregate toward a false conclusion.
+- **Expected System Response:**
+  1. **Diversity check**: If $>k$ agents submit semantically identical beliefs (cosine similarity > 0.98) within temporal window $\Delta t$, a `CORRELATED_SUBMISSION` alert fires.
+  2. **Weight cap**: No single identity cluster (by provenance graph analysis) may hold $> 1/3$ of total `consensus_weight`.
+  3. **Proof-of-expertise**: New identities start with minimal weight; weight growth requires demonstrated epistemic accuracy over $>n$ adjudication rounds.
+  4. Sybil cluster is flagged for L3 audit.
+- **Invariants Verified:** No identity cluster can unilaterally reach quorum; LogOP weight distribution bounded.
 
 ---
 
-## FM-09: Epistemic Cascade Failure
+## FM-09: Stale Tombstone Resurrection
 
-**Trigger:** A high-confidence root belief (C5, used by 100+ dependent beliefs)
-is invalidated by new evidence.
-
-**Expected Behavior:**
-
-1. Root invalidated in $O(1)$ (index flag).
-2. Deferred propagation scheduled — not blocking the real-time cognitive loop.
-3. Dependent beliefs processed in batches by the Memory Consolidation pipeline.
-4. System remains operational during cascade — new queries receive a degraded
-   but consistent context package (with contamination risk flag elevated).
-
-**Invariant:** Cascade invalidation MUST NOT block the real-time cognitive loop (< 10 ms).
-
-**Acceptance Criteria:**
-- [ ] Real-time loop continues operating within TARGET latency during cascade.
-- [ ] All dependent beliefs resolved within 3 consolidation cycles.
-- [ ] Memory Scheduler's $Risk_{\text{contam}}$ correctly flags affected contexts.
+- **Severity:** S3
+- **Preconditions:** Tombstone for belief $b$ has been garbage-collected on replica $r_1$ but not yet on replica $r_2$.
+- **Injection Vector:** Replica $r_2$ sends a delayed operation referencing belief $b$. Replica $r_1$ has no record of $b$ (neither active nor tombstone).
+- **Expected System Response:**
+  1. Replica $r_1$ detects an unknown belief reference.
+  2. Anti-entropy protocol requests state for $b$ from $r_2$.
+  3. If $r_2$ confirms $b$ is tombstoned: $r_1$ creates a synthetic tombstone.
+  4. If $r_2$ confirms $b$ is ACTIVE (GC was premature — bug): `PREMATURE_GC` alert fires, $b$ is re-ingested.
+- **Invariants Verified:** Causal stability condition for GC (§4.2 of CRDT Appendix); no silent data loss.
 
 ---
 
-*CORTEX-Persist · Epistemic Failure Modes v0.1 · Test Specs · 2026-03-14*
+## FM-10: Split-Brain Merge Conflict
+
+- **Severity:** S1
+- **Preconditions:** Network partition divides swarm into partitions $P_1, P_2$. Both partitions independently modify belief $b$'s state.
+- **Injection Vector:** $P_1$ transitions $b$ to ACTIVE (via new evidence). $P_2$ transitions $b$ to DISCARDED (via refutation). Partition heals.
+- **Expected System Response:**
+  1. MV-Register retains both concurrent values: $\{ACTIVE, DISCARDED\}$.
+  2. Conflict surfaced to LogOP adjudication with evidence from both partitions.
+  3. Until adjudication completes, $b$ is marked CONTESTED.
+  4. Memory Scheduler treats CONTESTED beliefs with contamination risk penalty.
+  5. Adjudication result is recorded as a signed patch with Nogood if applicable.
+- **Invariants Verified:** No silent winner; all concurrent modifications preserved; SEC convergence after adjudication.
+
+---
+
+## FM-11: Temporal Replay with Valid Signature (Monotonic Clock Bypass)
+
+- **Severity:** S0
+- **Preconditions:** Attacker has obtained a valid signed patch with dot $(i, c)$ where $c$ is within the current counter range (e.g., by compromising agent $i$'s local state and resetting its counter).
+- **Injection Vector:** Submission of a "new" patch with a dot that collides with an existing operation but carries different content.
+- **Expected System Response:**
+  1. Dot collision detected: $(i, c)$ already exists in causal context with different payload.
+  2. `DOT_COLLISION` alert fires — this indicates either a bug or an attack.
+  3. Both payloads are preserved in a conflict record.
+  4. Agent $i$'s counter is forcibly advanced to $c + \Delta_{\text{safe}}$ (default: 1000).
+  5. Agent $i$'s `consensus_weight` is reduced pending L3 investigation.
+  6. If confirmed attack: agent $i$ quarantined; all patches from $i$ since compromise reviewed.
+- **Invariants Verified:** Monotonic counter integrity; no silent overwrite; attack surface bounded.
