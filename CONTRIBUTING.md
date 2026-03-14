@@ -1,10 +1,11 @@
-# Contributing to CORTEX
+# CONTRIBUTING.md — CORTEX Persist
 
-Thank you for your interest in CORTEX. We welcome contributions of all kinds.
+Package: cortex-persist v0.3.0b1
+Engine: v8
+License: Apache-2.0
+Python: >=3.10
 
-Before making changes, read [AGENTS.md](./AGENTS.md) — the operational contract for contributors and coding agents working inside this repository.
-
-## Contribution Guide
+## Purpose
 
 This file covers local setup, quality checks, and the basic pull request flow.
 
@@ -16,78 +17,35 @@ Before touching critical trust surfaces, also read:
 
 ## Development Setup
 
+Clone the repository and install in editable mode with development dependencies:
+
 ```bash
-# Clone the repo
-git clone https://github.com/borjamoskv/cortex.git
-cd cortex
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+pip install -e ".[dev]"
+```
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# .venv\Scripts\activate   # Windows
+If you are working on API, cloud, ADK, or full-surface integration paths, install the relevant extras:
 
-# Install with all optional deps
+```bash
+pip install -e ".[api]"
+pip install -e ".[cloud]"
+pip install -e ".[adk]"
 pip install -e ".[all]"
-
-# Verify setup
-pytest tests/ -v --tb=short -x
 ```
 
-## Running the Test Suite
+## Quality Checks
+
+Run the required checks before opening a pull request:
 
 ```bash
-# Full suite (1,000+ tests)
-pytest tests/ -v --tb=short
-
-# Single file
-pytest tests/test_engine.py -v
-
-# With coverage
-pytest tests/ --cov=cortex --cov-report=term-missing
-
-# Fast smoke test
-pytest tests/ -x --timeout=30
-```
-
-## Code Quality
-
-We use **Ruff** for linting and formatting:
-
-```bash
-# Check
-ruff check cortex/ tests/
-ruff format --check cortex/ tests/
-
-# Auto-fix
-ruff check --fix cortex/ tests/
-ruff format cortex/ tests/
-
-# Type check
+pytest tests/ -v --cov=cortex
+ruff check cortex/
 pyright cortex/
 ```
 
-## Making Changes
-
-1. **Fork** the repository
-2. **Create a branch**: `git checkout -b feature/my-change`
-3. **Make your changes** — keep commits focused and atomic
-4. **Add tests** for new functionality
-5. **Run the full test suite** to confirm nothing is broken
-6. **Submit a Pull Request** against `master`
-
-### Commit Message Convention
-
-```text
-<type>: <short description>
-
-Types: feat, fix, docs, test, refactor, ci, chore
-```
-
-Examples:
-
-- `feat: add graph-based memory traversal`
-- `fix: correct Merkle checkpoint hash calculation`
-- `docs: expand privacy shield documentation`
+If your change touches API surfaces, also run the relevant API tests.
+If your change touches CLI behavior, test the CLI path explicitly.
 
 ## Pull Requests
 
@@ -101,24 +59,33 @@ Before opening a PR:
 - confirm CI passes
 - update docs if public behavior changed
 
-For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in
-[`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
+For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
-## Creating a Plugin
+## Basic Contribution Rules
 
-Use the scaffold generator:
+- Preserve tenant-aware behavior in public data paths.
+- Keep CLI modules thin; do not move business logic into command wrappers.
+- Prefer explicit failure over permissive fallback behavior.
+- Add or update tests for every behavior change.
+- Use type hints on public functions.
+- Catch specific exceptions rather than broad ones.
+- Keep dependency additions justified and reflected in project metadata.
 
-```bash
-python scripts/create_plugin.py my-plugin --description "Does something cool"
-```
+## Documentation Expectations
 
-This generates a complete working plugin with manifest, API spec, Dockerfile, tests, and docs.
+Update documentation when you change:
 
-## Questions?
+- public APIs
+- CLI behavior
+- trust boundaries
+- validation behavior
+- storage or migration semantics
+- operational procedures
 
-- Open a [GitHub Discussion](https://github.com/borjamoskv/cortex/discussions)
-- Email: [borja@moskv.com](mailto:borja@moskv.com)
+## Related Documents
 
-## License
-
-By contributing, you agree that your contributions will be licensed under Apache License 2.0.
+- [`AGENTS.md`](./AGENTS.md)
+- [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
+- [`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md)
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`SECURITY.md`](./SECURITY.md)
