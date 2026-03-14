@@ -126,6 +126,25 @@ Full treatment: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 
 ---
 
+## AX-035: Ontología de la Capacidad (Ingeniería de Interfaz vs. Prompting)
+
+> Una capacidad nueva no es una respuesta mejor. Es una nueva forma estable de transformar estado.
+
+Las capacidades de un sistema soberano no nacen de inyectar más *tokens* o diseñar *prompts* más largos ("maquillaje con esteroides"). Se materializan cuando una fricción recurrente se formaliza en un protocolo compuesto, verificable y transferible.
+
+Una verdadera **Capacidad (Skill/Agent)** surge de acoplar invariablemente cinco capas:
+
+1. **Modelo**: Razonamiento, contexto, *tool-use*.
+2. **Memoria/Estado**: Acumulación de contexto útil frente a "respuesta suelta".
+3. **Herramientas**: Mutación de estado real (APIs, filesystem, web).
+4. **Contratos/Evaluación**: Schemas, validadores, *guardrails*, criterios de éxito.
+5. **Orquestación**: Control de flujo (observar, decidir, abortar).
+
+**El Criterio de Falsabilidad de una Capacidad:**
+Si un comportamiento no define qué entrada recibe, qué salida válida produce, qué herramientas orquesta y bajo qué condiciones exactas debe **abortar**, no es una capacidad: es un **ritual narrativo**. La novedad no reside en hacer más cosas; reside en aislar una transformación de estado y volverla estable, invocable y verificable (Nivel 1+).
+
+---
+
 ## Axiom Registry Reference
 
 For the full operational axiom registry (AX-001 through AX-028), including Constitutional, Operational, and Aspirational layers with CI enforcement gates, see [`operating-axioms.md`](operating-axioms.md).
