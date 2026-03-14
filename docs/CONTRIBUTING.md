@@ -1,40 +1,16 @@
-# Contributing — CORTEX Persist
+# CONTRIBUTING.md — Deep Change Protocols
 
-> How to contribute without breaking trust surfaces.
->
-> Related: [`AGENTS.md`](../AGENTS.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`SECURITY_TRUST_MODEL.md`](SECURITY_TRUST_MODEL.md)
+Package: cortex-persist v0.3.0b1 · Engine: v8
+License: Apache-2.0 · Python: >=3.10
 
----
+## Scope
 
-## Branch Workflow
+This document defines deep change protocols for critical trust surfaces.
 
-1. Create a feature branch from `main`.
-2. Keep branches short-lived — merge or close within days, not weeks.
-3. Rebase on `main` before opening a PR.
+For local setup, test commands, and the basic pull request flow, see
+[`../CONTRIBUTING.md`](../CONTRIBUTING.md).
 
----
-
-## Commit Style
-
-- Use imperative mood: "Add guard for X", not "Added guard for X".
-- One logical change per commit.
-- Reference issue numbers where applicable.
-
----
-
-## Required Tests
-
-Every PR must include tests for modified behavior. Tests mirror `cortex/` structure in `tests/`.
-
-```bash
-# Run full suite
-pytest tests/ -v --cov=cortex
-
-# Run fast subset (no torch/embedding imports)
-pytest tests/ -v -m "not slow"
-```
-
----
+For repository-wide invariants, see [`../AGENTS.md`](../AGENTS.md).
 
 ## Schema Changes
 
@@ -86,7 +62,7 @@ REST API endpoints are external contracts. Before modifying:
 
 Any change to the store/write path must validate:
 
-- Guard behavior (injection, contradiction, dependency)
+- Guard behavior (contradiction, dependency, and injection-detection surfaces)
 - Encryption/decryption flow
 - Ledger continuity
 - Audit trail emission
@@ -94,33 +70,8 @@ Any change to the store/write path must validate:
 
 ---
 
-## PR Acceptance Gate
+## Merge Rule
 
-A change is incomplete if it lacks any of:
-
-- Tests for modified behavior
-- Type coverage for public surfaces
-- Migration impact review (if schema touched)
-- Ledger/audit impact review (if trust surface touched)
-- Async correctness review (if concurrency-sensitive path touched)
-
----
-
-## Quality Gates
-
-```bash
-# Lint
-ruff check cortex/
-
-# Type check
-pyright cortex/
-
-# Tests with coverage
-pytest tests/ -v --cov=cortex
-```
-
-All three must pass before merge. CI enforces this via `.github/workflows/quality_gates.yml`.
-
----
-
-*CORTEX Persist · `cortex-persist` v0.3.0b1*
+Changes affecting schema, ledger continuity, tenant isolation, policy, guards,
+or async transactional correctness are not routine edits. They are trust events
+and must be reviewed as such.

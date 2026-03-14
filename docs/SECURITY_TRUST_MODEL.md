@@ -107,7 +107,7 @@ A cryptographically logged lie is still a lie. It is merely an auditable lie.
 
 ---
 
-## Threat Model
+## Trust-Surface Threat Model
 
 Representative threats include:
 
@@ -156,7 +156,7 @@ Examples include:
 
 - contradiction guard
 - dependency guard
-- injection guard
+- injection-detection surfaces
 
 These operate before persistence and are intended to reject invalid or dangerous proposals.
 
@@ -335,6 +335,7 @@ It reduces their freedom to contaminate persistent state.
 
 ## Related Documents
 
+- [`../SECURITY.md`](../SECURITY.md)
 - [`../AGENTS.md`](../AGENTS.md)
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - [`AXIOMS.md`](AXIOMS.md)

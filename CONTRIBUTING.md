@@ -1,6 +1,18 @@
 # Contributing to CORTEX
 
-Thank you for your interest in CORTEX! We welcome contributions of all kinds.
+Thank you for your interest in CORTEX. We welcome contributions of all kinds.
+
+Before making changes, read [AGENTS.md](./AGENTS.md) — the operational contract for contributors and coding agents working inside this repository.
+
+## Contribution Guide
+
+This file covers local setup, quality checks, and the basic pull request flow.
+
+Before touching critical trust surfaces, also read:
+
+- [AGENTS.md](./AGENTS.md) — operational contract and invariants
+- [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) — deep change protocols
+- [docs/SECURITY_TRUST_MODEL.md](./docs/SECURITY_TRUST_MODEL.md) — trust boundaries and verification model
 
 ## Development Setup
 
@@ -14,7 +26,7 @@ python -m venv .venv
 source .venv/bin/activate  # macOS/Linux
 # .venv\Scripts\activate   # Windows
 
-# Install with dev dependencies
+# Install with all optional deps
 pip install -e ".[all]"
 
 # Verify setup
@@ -24,7 +36,7 @@ pytest tests/ -v --tb=short -x
 ## Running the Test Suite
 
 ```bash
-# Full suite (1,276+ tests)
+# Full suite (1,000+ tests)
 pytest tests/ -v --tb=short
 
 # Single file
@@ -49,6 +61,9 @@ ruff format --check cortex/ tests/
 # Auto-fix
 ruff check --fix cortex/ tests/
 ruff format cortex/ tests/
+
+# Type check
+pyright cortex/
 ```
 
 ## Making Changes
@@ -62,41 +77,32 @@ ruff format cortex/ tests/
 
 ### Commit Message Convention
 
-```
+```text
 <type>: <short description>
 
 Types: feat, fix, docs, test, refactor, ci, chore
 ```
 
 Examples:
+
 - `feat: add graph-based memory traversal`
 - `fix: correct Merkle checkpoint hash calculation`
 - `docs: expand privacy shield documentation`
 
-## Pull Request Guidelines
+## Pull Requests
 
-- PRs should target `master`
-- Ensure CI passes (lint + tests + security audit)
-- Include a description of **what** changed and **why**
-- Link related issues with `Closes #123`
+Keep pull requests small, test-backed, and scoped to one change surface when possible.
 
-## Architecture Overview
+Before opening a PR:
 
-```
-cortex/
-├── api.py              # FastAPI REST endpoints
-├── cli/                # Click-based CLI (38 commands)
-├── engine.py           # Core CortexEngine
-├── audit/              # Immutable ledger & Merkle trees
-├── consensus/          # WBFT multi-agent consensus
-├── gate/               # Trust Gateway (RBAC, Privacy Shield)
-├── search/             # Vector + semantic search
-├── sovereign/          # Self-healing daemon & observability
-├── storage/            # SQLite, AlloyDB, Turso backends
-└── mcp/                # Model Context Protocol server
-```
+- run tests
+- run Ruff
+- run Pyright
+- confirm CI passes
+- update docs if public behavior changed
 
-For detailed architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in
+[`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
 ## Creating a Plugin
 
@@ -111,7 +117,7 @@ This generates a complete working plugin with manifest, API spec, Dockerfile, te
 ## Questions?
 
 - Open a [GitHub Discussion](https://github.com/borjamoskv/cortex/discussions)
-- Email: borja@moskv.com
+- Email: [borja@moskv.com](mailto:borja@moskv.com)
 
 ## License
 

@@ -5,6 +5,9 @@
 > **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
 > *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and traceability for regulated environments.*
 
+Package: cortex-persist v0.3.0b1 · Engine: v8
+License: Apache-2.0 · Python: >=3.10
+
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v7.0%20alpha-orange.svg)
@@ -47,7 +50,7 @@ $ cortex verify 8f4a2b9e
 | | |
 |:---|:---|
 | **<20ms** retrieval | In-process SQLite. No HTTP. No network. |
-| **1,993+** tests | Production-grade from day one |
+| **1,000+** tests | Production-grade from day one |
 | **Zero** attack surface | No HTTP endpoints required. No cloud dependency. |
 
 ---
@@ -191,7 +194,7 @@ block-beta
 
 | Metric | Value |
 |:---|:---|
-| Test functions | **1,993+** |
+| Test functions | **1,000+** |
 | Production LOC | **~45,500** |
 | Python Modules | **444** |
 | Python version | **3.10+** |
