@@ -11,7 +11,7 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Email: **security@cortexpersist.com**
+Email: **<security@cortexpersist.com>**
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
@@ -72,7 +72,7 @@ CORTEX assumes:
 ### Attack Vectors & Mitigations
 
 | Vector | Mitigation |
-|:---|:---|
+| :--- | :--- |
 | Tampered package on PyPI | Sigstore signature verification |
 | Vulnerable dependency | pip-audit in CI, Dependabot alerts |
 | Compromised container image | Trivy scan (CRITICAL/HIGH block) |
@@ -84,3 +84,7 @@ CORTEX assumes:
 | Cross-tenant data access | Tenant ID scoping on all queries |
 
 > **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.
+
+---
+
+For trust boundaries, verification flow, and cognitive trust surfaces, see [docs/SECURITY_TRUST_MODEL.md](./docs/SECURITY_TRUST_MODEL.md).
