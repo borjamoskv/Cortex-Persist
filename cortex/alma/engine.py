@@ -4,10 +4,15 @@ Core Engine for mapping real-world system telemetry and memory events into
 biological psychological states for the ALMA ecosystem.
 """
 
+from __future__ import annotations
+
 import logging
 import time
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from cortex.alma.taste import TasteVerdict
 
 import aiosqlite
 
@@ -26,6 +31,7 @@ class SoulState:
     wisdom: float  # 0.0 - 1.0 (Bridge/Decision fact depth)
     synergy: float  # 0.0 - 1.0 (System health, response time)
     vibe: str  # Categorical label: "zen", "chaotic", "focused", "dormant", "overloaded"
+    last_taste: TasteVerdict | None = None  # Last taste evaluation
     timestamp: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -38,6 +44,8 @@ class AlmaEngine:
     def __init__(self, memory_manager: Any):
         self._memory = memory_manager
         self._last_state: SoulState | None = None
+        self._last_taste: TasteVerdict | None = None
+        self._taste_engine: Any | None = None  # Lazy-loaded
         self._smoothing_factor = 0.8  # EMA for state transitions
 
     async def pulse(self, mock_wisdom: float | None = None) -> SoulState:
@@ -131,5 +139,29 @@ class AlmaEngine:
             wisdom=round(res_w, 4),
             synergy=round(res_s, 4),
             vibe=vibe,
+            last_taste=self._last_taste,
             timestamp=time.time(),
         )
+
+    def evaluate_taste(
+        self, content: str, context: dict[str, Any] | None = None,
+    ) -> TasteVerdict:
+        """Evaluate content quality using the Taste Engine.
+
+        Lazy-loads the TasteEngine on first call to avoid circular imports.
+        Caches the last verdict for inclusion in SoulState.
+        """
+        if self._taste_engine is None:
+            from cortex.alma.taste import TasteEngine
+            self._taste_engine = TasteEngine()
+
+        verdict = self._taste_engine.evaluate(content, context)
+        self._last_taste = verdict
+
+        logger.debug(
+            "ALMA Taste: %s (%.4f) — %s",
+            verdict.grade,
+            verdict.composite_score,
+            verdict.verdict,
+        )
+        return verdict

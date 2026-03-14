@@ -318,6 +318,25 @@ _ASPIRATIONAL: list[Axiom] = [
         category=AxiomCategory.ASPIRATIONAL,
         enforcement="Epistemic Confidence Policy (from user rules).",
     ),
+    Axiom(
+        id="AX-033",
+        name="El Gradiente de Admisibilidad",
+        mandate=(
+            "Un LLM no es un motor de verdad; es un compresor generativo de "
+            "regularidades bajo incertidumbre. Su loss function minimiza "
+            "sorpresa estadística (cross-entropy), no divergencia con el "
+            "estado real del mundo. La admisibilidad se confunde con "
+            "conocimiento y la fluidez con correspondencia empírica. "
+            "La verdad no emerge del modelo; se impone mediante topología: "
+            "colapso forzado (micro-ciclos O-H-A-M), guards como fronteras "
+            "de fallo (no creadores de verdad), zero-trust cognitivo, y "
+            "detección de cierre cognitivo fraudulento (premature epistemic "
+            "closure)."
+        ),
+        category=AxiomCategory.ASPIRATIONAL,
+        enforcement="Axioma de Colapso Entrópico. Guards entrópicos. "
+        "Zero-trust cognitivo. Detección de premature epistemic closure.",
+    ),
 ]
 
 

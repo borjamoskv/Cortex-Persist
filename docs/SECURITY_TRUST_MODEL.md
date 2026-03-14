@@ -1,5 +1,13 @@
 # SECURITY_TRUST_MODEL.md — CORTEX Persist
 
+Package: cortex-persist v0.3.0b1 · Engine: v8
+License: Apache-2.0 · Python: >=3.10
+
+This document describes trust boundaries and cognitive/state-mutation risks.
+
+For vulnerability disclosure policy and repository security reporting, see
+[`../SECURITY.md`](../SECURITY.md).
+
 ## Purpose
 
 This document defines the trust boundaries, guarantees, non-guarantees, and
@@ -156,7 +164,7 @@ Examples include:
 
 - contradiction guard
 - dependency guard
-- injection-detection surfaces
+- injection-detection and input-hardening controls
 
 These operate before persistence and are intended to reject invalid or dangerous proposals.
 

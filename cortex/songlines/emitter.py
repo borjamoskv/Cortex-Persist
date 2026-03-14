@@ -3,6 +3,8 @@ ResonanceEmitter — The Ocre Painter.
 Embeds hyperdimensional ghost traces into the file system.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging

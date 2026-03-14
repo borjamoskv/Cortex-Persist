@@ -1,3 +1,12 @@
+"""
+CLI de Mac Maestro — Automatización soberana de escritorio macOS.
+
+Comandos para control de teclado, mouse, ventanas y accesibilidad
+desde la terminal.
+"""
+
+from __future__ import annotations
+
 import asyncio
 
 import click
@@ -9,194 +18,313 @@ from cortex.ui_control.models import AppTarget
 
 @click.group(name="maestro")
 def maestro():
-    """MAC-Ω: Sovereign Desktop UI Automation (AppleScript/Native)."""
+    """MAC-Ω: Automatización soberana de escritorio (AppleScript/Native)."""
     pass
 
 
-@maestro.command("activate")
+# ─── Inspección ─────────────────────────────────────────────────
+
+
+@maestro.command("inspect")
 @click.argument("app_name")
-def activate_cmd(app_name: str):
-    """Activate and focus a macOS application."""
+@click.option("--depth", default=5, help="Profundidad máxima del árbol AX")
+def inspect_cmd(app_name: str, depth: int):
+    """Inspecciona el árbol de accesibilidad de una app."""
+    engine = get_engine()
+    m = MaestroUI(engine=engine)
+
+    if not m.check_permissions():
+        console.print(
+            "[red]✘ Sin permisos de Accesibilidad."
+            " Revisar Preferencias del Sistema.[/red]"
+        )
+        return
+
+    tree = m.dump_tree(app_name, max_depth=depth)
+    if not tree:
+        console.print(f"[yellow]⚠ No se encontraron elementos para '{app_name}'[/yellow]")
+        return
+
+    console.print(f"[bold]Árbol AX de {app_name}[/bold] ({len(tree)} elementos):\n")
+    for el in tree:
+        indent = "  " * (el.depth or 0)
+        role = el.role or "?"
+        title = f' "{el.title}"' if el.title else ""
+        ident = f" [{el.identifier}]" if el.identifier else ""
+        val = f" = {el.value}" if el.value else ""
+        console.print(f"{indent}{role}{title}{ident}{val}")
+
+
+@maestro.command("find")
+@click.argument("app_name")
+@click.argument("query")
+@click.option("--by", default="title", type=click.Choice(["title", "role", "id"]))
+def find_cmd(app_name: str, query: str, by: str):
+    """Buscar elementos AX por título, rol o identificador."""
+    engine = get_engine()
+    m = MaestroUI(engine=engine)
+
+    if by == "title":
+        el = m.find_element_by_title(app_name, query)
+        results = [el] if el else []
+    elif by == "role":
+        results = m.find_elements_by_role(app_name, query)
+    else:
+        el = m.find_element(app_name, query)
+        results = [el] if el else []
+
+    if not results:
+        console.print(f"[yellow]⚠ Sin resultados para '{query}' ({by})[/yellow]")
+        return
+
+    console.print(f"[green]✔ {len(results)} elemento(s) encontrado(s):[/green]")
+    for el in results:
+        console.print(f"  {el.role}: {el.title or el.identifier or '(sin nombre)'}")
+
+
+# ─── Teclado ────────────────────────────────────────────────────
+
+
+@maestro.command("hotkey")
+@click.argument("key")
+@click.argument("modifiers", nargs=-1)
+@click.option("--app", default=None, help="App objetivo")
+def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
+    """
+    Envía un atajo de teclado.
+
+    Ejemplo: cortex maestro hotkey c command       → Cmd+C
+    Ejemplo: cortex maestro hotkey s command shift  → Cmd+Shift+S
+    """
 
     async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        res = await m.activate_app(AppTarget(name=app_name))
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app) if app else None
+        res = await m.hotkey(key, *modifiers, target=target)
         if res.success:
-            console.print(f"[green]✔ Successfully activated {app_name}[/green]")
+            mod_str = "+".join(list(modifiers) + [key])
+            console.print(f"[green]✔ Enviado: {mod_str}[/green]")
         else:
-            console.print(f"[red]✘ Failed to activate {app_name}: {res.error}[/red]")
-        await engine.close()
+            console.print(f"[red]✘ Error: {res.error}[/red]")
 
     asyncio.run(_run())
 
 
 @maestro.command("type")
-@click.argument("app_name")
 @click.argument("text")
-def type_cmd(app_name: str, text: str):
-    """Type text into the active window of the target application."""
+@click.option("--app", default=None, help="App objetivo")
+def type_cmd(text: str, app: str | None):
+    """Escribe texto en la app activa (clipboard para cadenas largas)."""
 
     async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        target = AppTarget(name=app_name)
-
-        # Ensure focus first
-        res = await m.activate_app(target)
-        if not res.success:
-            console.print(f"[red]✘ Failed to focus {app_name}: {res.error}[/red]")
-            return
-
-        await asyncio.sleep(0.5)
-
-        console.print(f"Injecting {len(text)} characters into {app_name}...")
-        for char in text:
-            res = await m.inject_keystroke(target, char)
-            if not res.success:
-                msg = f"[red]✘ Failed at character '{char}': {res.error}[/red]"
-                console.print(msg)
-                return
-            await asyncio.sleep(0.02)
-
-        console.print("[green]✔ Done.[/green]")
-        await engine.close()
-
-    asyncio.run(_run())
-
-
-@maestro.command("click-menu")
-@click.argument("app_name")
-@click.argument("menu_path", nargs=-1)
-def click_menu_cmd(app_name: str, menu_path: tuple[str, ...]):
-    """
-    Click a menu item.
-
-    Example: cortex maestro click-menu Safari File "Export as PDF…"
-    """
-
-    async def _run():
-        if len(menu_path) < 2:
-            console.print("[red]✘ Menu path must have at least top-level menu and item.[/red]")
-            return
-
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        target = AppTarget(name=app_name)
-        res = await m.click_menu_item(target, list(menu_path))
-
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app) if app else None
+        console.print(f"Escribiendo {len(text)} caracteres...")
+        res = await m.type_text(text, target=target)
         if res.success:
-            path_str = " > ".join(menu_path)
-            msg = f"[green]✔ Successfully clicked menu {path_str} in {app_name}[/green]"
-            console.print(msg)
+            console.print("[green]✔ Texto inyectado.[/green]")
         else:
-            console.print(f"[red]✘ Failed to click menu: {res.error}[/red]")
-        await engine.close()
+            console.print(f"[red]✘ Error: {res.error}[/red]")
 
     asyncio.run(_run())
 
 
-@maestro.command("click-id")
-@click.argument("app_name")
-@click.argument("identifier")
-def click_id_cmd(app_name: str, identifier: str):
-    """Click an element by its Accessibility Identifier."""
-
-    async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        res = await m.click_element(app_name, identifier)
-
-        if res.success:
-            console.print(f"[green]✔ Successfully clicked {identifier} in {app_name}[/green]")
-        else:
-            console.print(f"[red]✘ Failed: {res.error}[/red]")
-        await engine.close()
-
-    asyncio.run(_run())
+# ─── Ratón ──────────────────────────────────────────────────────
 
 
 @maestro.command("click-at")
 @click.argument("x", type=int)
 @click.argument("y", type=int)
-@click.option("--button", default="left", help="left or right click")
+@click.option("--button", default="left", help="left / right")
 def click_at_cmd(x: int, y: int, button: str):
-    """Click at specific screen coordinates."""
+    """Click en coordenadas de pantalla."""
+    m = MaestroUI(engine=get_engine())
+    res = m.click(x, y, button)
+    if res.success:
+        console.print(f"[green]✔ Click en ({x}, {y})[/green]")
+    else:
+        console.print(f"[red]✘ Error: {res.error}[/red]")
 
-    async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        res = await m.click_at(x, y, button)
 
-        if res.success:
-            console.print(f"[green]✔ Clicked at ({x}, {y})[/green]")
-        else:
-            console.print(f"[red]✘ Failed: {res.error}[/red]")
-        await engine.close()
+@maestro.command("double-click")
+@click.argument("x", type=int)
+@click.argument("y", type=int)
+def double_click_cmd(x: int, y: int):
+    """Doble click en coordenadas de pantalla."""
+    m = MaestroUI(engine=get_engine())
+    res = m.double_click(x, y)
+    if res.success:
+        console.print(f"[green]✔ Doble click en ({x}, {y})[/green]")
+    else:
+        console.print(f"[red]✘ Error: {res.error}[/red]")
 
-    asyncio.run(_run())
+
+@maestro.command("drag")
+@click.argument("from_x", type=int)
+@click.argument("from_y", type=int)
+@click.argument("to_x", type=int)
+@click.argument("to_y", type=int)
+@click.option("--duration", default=0.5, help="Duración del arrastre en segundos")
+def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
+    """Drag-and-drop de un punto a otro."""
+    m = MaestroUI(engine=get_engine())
+    res = m.drag(from_x, from_y, to_x, to_y, duration=duration)
+    if res.success:
+        console.print(f"[green]✔ Drag ({from_x},{from_y}) → ({to_x},{to_y})[/green]")
+    else:
+        console.print(f"[red]✘ Error: {res.error}[/red]")
 
 
 @maestro.command("scroll")
 @click.argument("clicks", type=int)
 def scroll_cmd(clicks: int):
-    """Scroll the mouse wheel. Positive for up, negative for down."""
+    """Scroll de rueda. Positivo=arriba, negativo=abajo."""
+    m = MaestroUI(engine=get_engine())
+    res = m.scroll(clicks)
+    if res.success:
+        console.print(f"[green]✔ Scroll {clicks} líneas[/green]")
+    else:
+        console.print(f"[red]✘ Error: {res.error}[/red]")
+
+
+# ─── Ventanas ───────────────────────────────────────────────────
+
+
+@maestro.command("list-windows")
+@click.argument("app_name")
+def list_windows_cmd(app_name: str):
+    """Lista todas las ventanas de una aplicación."""
 
     async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        res = await m.scroll(clicks)
-
-        if res.success:
-            console.print(f"[green]✔ Scrolled {clicks} lines[/green]")
-        else:
-            console.print(f"[red]✘ Failed: {res.error}[/red]")
-        await engine.close()
+        m = MaestroUI(engine=get_engine())
+        windows = await m.list_windows(app_name)
+        if not windows:
+            console.print(f"[yellow]⚠ Sin ventanas para '{app_name}'[/yellow]")
+            return
+        console.print(f"[bold]{app_name}[/bold] — {len(windows)} ventana(s):")
+        for w in windows:
+            state = ""
+            if w.minimized:
+                state = " [minimizada]"
+            elif w.fullscreen:
+                state = " [pantalla completa]"
+            console.print(f"  • '{w.title}' — {w.width}×{w.height} @ ({w.x},{w.y}){state}")
 
     asyncio.run(_run())
+
+
+@maestro.command("move")
+@click.argument("app_name")
+@click.argument("x", type=int)
+@click.argument("y", type=int)
+def move_cmd(app_name: str, x: int, y: int):
+    """Mueve la ventana principal de una app."""
+
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app_name)
+        res = await m.move_window(target, x, y)
+        if res.success:
+            console.print(f"[green]✔ Ventana movida a ({x}, {y})[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
+@maestro.command("resize")
+@click.argument("app_name")
+@click.argument("width", type=int)
+@click.argument("height", type=int)
+def resize_cmd(app_name: str, width: int, height: int):
+    """Redimensiona la ventana principal de una app."""
+
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app_name)
+        res = await m.resize_window(target, width, height)
+        if res.success:
+            console.print(f"[green]✔ Ventana redimensionada a {width}×{height}[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
+@maestro.command("minimize")
+@click.argument("app_name")
+def minimize_cmd(app_name: str):
+    """Minimiza la ventana principal de una app."""
+
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        res = await m.minimize_window(AppTarget(name=app_name))
+        if res.success:
+            console.print(f"[green]✔ {app_name} minimizado[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
+@maestro.command("fullscreen")
+@click.argument("app_name")
+def fullscreen_cmd(app_name: str):
+    """Alterna pantalla completa para una app."""
+
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        res = await m.fullscreen_window(AppTarget(name=app_name))
+        if res.success:
+            console.print(f"[green]✔ {app_name} pantalla completa alternada[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
+# ─── Captura ────────────────────────────────────────────────────
 
 
 @maestro.command("capture")
-@click.option("--x", type=int, help="Region start x")
-@click.option("--y", type=int, help="Region start y")
-@click.option("--w", type=int, help="Region width")
-@click.option("--h", type=int, help="Region height")
-def capture_cmd(x: int | None, y: int | None, w: int | None, h: int | None):
-    """Capture a screenshot of the main display or a specific region."""
+@click.option("--output", "-o", default=None, help="Ruta de salida para la captura")
+def capture_cmd(output: str | None):
+    """Captura de pantalla del display principal."""
 
     async def _run():
-        engine = get_engine()
-        m = MaestroUI(engine=engine)
-        region = (x, y, w, h) if all(v is not None for v in [x, y, w, h]) else None
-        res = await m.capture(region)
-
-        if res.success:
-            console.print(f"[green]✔ Screenshot saved to: {res.output}[/green]")
+        m = MaestroUI(engine=get_engine())
+        path = await m.screenshot(output)
+        if path:
+            console.print(f"[green]✔ Captura guardada en: {path}[/green]")
         else:
-            console.print(f"[red]✘ Failed: {res.error}[/red]")
-        await engine.close()
+            console.print("[red]✘ Fallo al capturar pantalla[/red]")
 
     asyncio.run(_run())
+
+
+# ─── AppleScript ────────────────────────────────────────────────
 
 
 @maestro.command("run")
 @click.argument("instruction", nargs=-1)
 def run_cmd(instruction: tuple[str, ...]):
-    """Execute a natural language instruction using Mac Maestro (AppleScript)."""
+    """Ejecuta instrucción de lenguaje natural con Mac Maestro."""
     text = " ".join(instruction)
 
     async def _run():
         from cortex.agents.mac_maestro import MacMaestroAgent
 
         agent = MacMaestroAgent()
-        console.print(f"Maestro Ω processing: '{text}'...")
+        console.print(f"Maestro Ω procesando: '{text}'...")
         res = await agent.execute(text)
 
         if res.get("success"):
-            console.print(f"[green]✔ Success: {res.get('explanation')}[/green]")
+            console.print(f"[green]✔ Éxito: {res.get('explanation')}[/green]")
             if res.get("stdout"):
                 console.print(res["stdout"])
         else:
-            console.print(f"[red]✘ Failed: {res.get('error') or res.get('stderr')}[/red]")
+            console.print(
+                f"[red]✘ Error: {res.get('error') or res.get('stderr')}[/red]"
+            )
 
     asyncio.run(_run())

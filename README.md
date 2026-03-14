@@ -5,8 +5,7 @@
 > **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
 > *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and traceability for regulated environments.*
 
-Package: cortex-persist v0.3.0b1 · Engine: v8
-License: Apache-2.0 · Python: >=3.10
+Package: `cortex-persist v0.3.0b1` · Current engine generation: `v8`
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)

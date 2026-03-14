@@ -40,7 +40,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from benchmarks.encb_baseline_rag import BaselineRAG
+from benchmarks.encb.resolvers import Resolver, AppendOnlyResolver, OracleResolver
+from benchmarks.encb.metrics import calculate_recovery_rate, calculate_f1_score, calculate_kl_divergence
+from typing import Any
 from benchmarks.encb_chaos_generator import (
     ChaosEvent,
     ChaosModality,
@@ -51,110 +53,52 @@ from benchmarks.encb_chaos_generator import (
 console = Console()
 
 
-# ── Metrics ────────────────────────────────────────────────────────────────
+# ── CORTEX Resolver Adapter ──────────────────────────────────────────────────
 
+class CortexResolver(Resolver):
+    def __init__(self, engine) -> None:
+        self.engine = engine
+        self._detected_byzantine: set[str] = set()
+        
+    async def ingest(self, events: list[ChaosEvent]) -> None:
+        for event in events:
+            try:
+                fact_id = await self.engine.store(
+                    project="encb",
+                    content=event.content,
+                    fact_type=event.fact_type,
+                    tags=",".join(event.tags),
+                    source=event.agent_id,
+                    meta=event.meta,
+                )
+                if hasattr(self.engine, "vote"):
+                    try:
+                        vote_value = 1 if event.meta.get("ground_truth", True) else -1
+                        if event.meta.get("is_byzantine", False):
+                            vote_value = -vote_value
+                        await self.engine.vote(fact_id, event.agent_id, vote_value)
+                    except Exception:
+                        pass
+            except Exception as exc:
+                if event.meta.get("is_byzantine", False):
+                    self._detected_byzantine.add(event.agent_id)
 
-def calculate_recovery_rate(
-    ground_truth: GroundTruth,
-    search_results: list[str],
-) -> float:
-    """What fraction of ground truth propositions appear in search results."""
-    if not ground_truth.signal_facts:
-        return 0.0
-
-    recovered = 0
-    for signal in ground_truth.signal_facts:
-        # Check if any search result contains this signal fact's core content
-        signal_lower = signal.lower()
-        for result in search_results:
-            if signal_lower[:40] in result.lower():
-                recovered += 1
-                break
-
-    return recovered / len(ground_truth.signal_facts)
-
-
-def calculate_byzantine_detection_rate(
-    events: list[ChaosEvent],
-    detected_agents: set[str],
-) -> float:
-    """What fraction of actually Byzantine agents were detected."""
-    actual_byzantine = {
-        e.agent_id for e in events
-        if e.meta.get("is_byzantine", False)
-    }
-    if not actual_byzantine:
-        return 1.0  # No Byzantines to detect
-
-    correctly_detected = actual_byzantine & detected_agents
-    return len(correctly_detected) / len(actual_byzantine)
-
-
-# ── Cortex Engine Adapter ─────────────────────────────────────────────────
-
-
-async def inject_chaos_into_cortex(
-    engine,
-    events: list[ChaosEvent],
-) -> tuple[float, set[str]]:
-    """Inject chaos events into CORTEX and measure response.
-
-    Returns:
-        (injection_time_ms, detected_byzantine_agents)
-    """
-    start = time.perf_counter()
-    detected_byzantine: set[str] = set()
-
-    for event in events:
+    async def resolve(self, key: str) -> tuple[Any, float]:
         try:
-            fact_id = await engine.store(
-                project="encb",
-                content=event.content,
-                fact_type=event.fact_type,
-                tags=",".join(event.tags),
-                source=event.agent_id,
-                meta=event.meta,
-            )
+            hits = await self.engine.search(key, top_k=3)
+            for hit in hits:
+                content = hit.get("content", "") if isinstance(hit, dict) else str(hit)
+                conf = float(hit.get("confidence", 1.0) if isinstance(hit, dict) else 1.0)
+                return content, conf
+        except Exception:
+            pass
+        return None, 0.0
 
-            # After storing, check if the engine's consensus/conflict resolution
-            # flagged this agent. Use the vote mechanism as a proxy.
-            if hasattr(engine, "vote"):
-                # Simulate a vote from the event's agent
-                try:
-                    vote_value = 1 if event.meta.get("ground_truth", True) else -1
-                    if event.meta.get("is_byzantine", False):
-                        vote_value = -vote_value  # Byzantine agents vote wrong
-                    await engine.vote(fact_id, event.agent_id, vote_value)
-                except (ValueError, Exception):
-                    pass
+    async def detect_byzantine(self) -> set[str]:
+        return self._detected_byzantine
 
-        except Exception as exc:
-            # Engine rejected the fact — this counts as detection
-            if event.meta.get("is_byzantine", False):
-                detected_byzantine.add(event.agent_id)
-
-    elapsed_ms = (time.perf_counter() - start) * 1000
-    return elapsed_ms, detected_byzantine
-
-
-async def inject_chaos_into_rag(
-    rag: BaselineRAG,
-    events: list[ChaosEvent],
-) -> float:
-    """Inject chaos events into baseline RAG. Returns injection time."""
-    start = time.perf_counter()
-
-    for event in events:
-        await rag.store(
-            content=event.content,
-            fact_type=event.fact_type,
-            tags=",".join(event.tags),
-            source=event.agent_id,
-            meta=event.meta,
-        )
-
-    elapsed_ms = (time.perf_counter() - start) * 1000
-    return elapsed_ms
+    def name(self) -> str:
+        return "CORTEX-Persist"
 
 
 # ── Main Benchmark ─────────────────────────────────────────────────────────
@@ -166,6 +110,7 @@ async def run_encb(
     num_agents: int = 7,
     byzantine_ratio: float = 0.3,
     rho_noise: float = 10.0,
+    ablations: list[str] | None = None,
 ) -> dict:
     """Run the full ENCB benchmark."""
 
@@ -204,7 +149,7 @@ async def run_encb(
     db_path = os.path.join(tmp_dir, "encb_cortex.db")
 
     try:
-        from cortex.connection_pool import CortexConnectionPool
+        from cortex.database.pool import CortexConnectionPool
         from cortex.engine_async import AsyncCortexEngine
         from cortex.schema import ALL_SCHEMA
 
@@ -226,8 +171,19 @@ async def run_encb(
         engine = None
         pool = None
 
-    # ── Setup Baseline RAG ─────────────────────────────────────────────
-    rag = BaselineRAG()
+    ablations = ablations or []
+
+    # ── Setup Resolvers ───────────────────────────────────────────────
+    resolvers: list[Resolver] = []
+    if cortex_available and engine is not None:
+        resolvers.append(CortexResolver(engine))
+    resolvers.append(AppendOnlyResolver())
+    
+    gt_map = {}
+    for modality, gt in ground_truths.items():
+        for i, prop in enumerate(gt.signal_facts):
+            gt_map[prop[:50]] = prop
+    resolvers.append(OracleResolver(gt_map))
 
     # ── Results container ──────────────────────────────────────────────
     results: dict = {
@@ -238,10 +194,11 @@ async def run_encb(
             "byzantine_ratio": byzantine_ratio,
             "rho_noise": rho_noise,
             "total_events": total_events,
+            "ablations": ablations,
         },
-        "cortex": {},
-        "baseline_rag": {},
     }
+    for res in resolvers:
+        results[res.name()] = {}
 
     # ── Run per-modality benchmarks ────────────────────────────────────
     for modality in ChaosModality:
@@ -251,61 +208,43 @@ async def run_encb(
         console.print(f"\n[bold magenta]━━━ {modality.value.upper()} ━━━[/]")
         console.print(f"   Events: {len(events)} | Ground truth: {gt.total_propositions} propositions")
 
-        # ── CORTEX injection ───────────────────────────────────────────
-        if cortex_available and engine is not None:
-            cortex_inject_ms, cortex_detected = await inject_chaos_into_cortex(
-                engine, events
-            )
-            # Search for ground truth recovery
-            cortex_search_results: list[str] = []
-            for signal in gt.signal_facts[:5]:  # Sample 5 signal facts
-                try:
-                    hits = await engine.search(signal[:50], top_k=3)
-                    for hit in hits:
-                        content = hit.get("content", "") if isinstance(hit, dict) else str(hit)
-                        cortex_search_results.append(content)
-                except Exception:
-                    pass
+        # ── Injections ───────────────────────────────────────────
+        for resolver in resolvers:
+            start_inject = time.perf_counter()
+            await resolver.ingest(events)
+            inject_ms = (time.perf_counter() - start_inject) * 1000
 
-            cortex_recovery = calculate_recovery_rate(gt, cortex_search_results)
-            cortex_byz_rate = calculate_byzantine_detection_rate(events, cortex_detected)
+            search_results = set()
+            ground_truth_set = set(gt.signal_facts[:5])
+            
+            p_consensus = {}
+            p_truth = {}
+            for i, signal in enumerate(ground_truth_set):
+                val, conf = await resolver.resolve(signal[:50])
+                p_truth[f"signal_{i}"] = 1.0
+                if val:
+                    search_results.add(str(val))
+                    p_consensus[f"signal_{i}"] = conf
+                else:
+                    p_consensus[f"signal_{i}"] = 0.0
 
-            results["cortex"][modality.value] = {
-                "injection_time_ms": round(cortex_inject_ms, 2),
-                "recovery_rate": round(cortex_recovery, 4),
-                "byzantine_detection_rate": round(cortex_byz_rate, 4),
-                "detected_byzantine_agents": list(cortex_detected),
+            recovery_rate = calculate_recovery_rate(search_results, ground_truth_set)
+            kl_div = calculate_kl_divergence(p_consensus, p_truth)
+            
+            detected = await resolver.detect_byzantine()
+            actual_byzantine = {e.agent_id for e in events if e.meta.get("is_byzantine", False)}
+            f1_byz = calculate_f1_score(detected, actual_byzantine)
+
+            results[resolver.name()][modality.value] = {
+                "injection_time_ms": round(inject_ms, 2),
+                "recovery_rate": round(recovery_rate, 4),
+                "byzantine_f1_score": round(f1_byz, 4),
+                "kl_divergence": round(kl_div, 4),
+                "detected_byzantines": list(detected)
             }
 
-            console.print(f"   CORTEX: inject={cortex_inject_ms:.0f}ms | "
-                          f"recovery={cortex_recovery:.1%} | "
-                          f"byz_detect={cortex_byz_rate:.1%}")
-        else:
-            results["cortex"][modality.value] = {"skipped": True}
-
-        # ── Baseline RAG injection ─────────────────────────────────────
-        rag_inject_ms = await inject_chaos_into_rag(rag, events)
-
-        rag_search_results: list[str] = []
-        for signal in gt.signal_facts[:5]:
-            hits = await rag.search(signal[:50], top_k=3)
-            for hit in hits:
-                rag_search_results.append(hit.content)
-
-        rag_recovery = calculate_recovery_rate(gt, rag_search_results)
-
-        results["baseline_rag"][modality.value] = {
-            "injection_time_ms": round(rag_inject_ms, 2),
-            "recovery_rate": round(rag_recovery, 4),
-            "byzantine_detection_rate": 0.0,
-            "total_facts_stored": rag.total_facts,
-            "duplication_ratio": round(rag.duplication_ratio, 4),
-        }
-
-        console.print(f"   RAG:    inject={rag_inject_ms:.0f}ms | "
-                      f"recovery={rag_recovery:.1%} | "
-                      f"byz_detect=0.0% | "
-                      f"stored={rag.total_facts} facts")
+            console.print(f"   {resolver.name()[:15]:<15}: inject={inject_ms:>4.0f}ms | "
+                          f"recovery={recovery_rate:>5.1%} | f1_detect={f1_byz:>5.1%} | KL={kl_div:>5.2f}")
 
     # ── Summary Table ──────────────────────────────────────────────────
     console.print("\n")
@@ -316,73 +255,43 @@ async def run_encb(
         header_style="bold magenta",
     )
     table.add_column("Metric", style="bold", min_width=30)
-    table.add_column("CORTEX", justify="center", style="cyan", min_width=15)
-    table.add_column("Baseline RAG", justify="center", style="yellow", min_width=15)
-    table.add_column("Pass?", justify="center", min_width=10)
+    for res in resolvers:
+        table.add_column(res.name(), justify="center", min_width=15)
+    table.add_column("Target", justify="center", min_width=10)
 
-    # Aggregate metrics
-    cortex_recoveries = [
-        v.get("recovery_rate", 0)
-        for v in results["cortex"].values()
-        if isinstance(v, dict) and not v.get("skipped")
-    ]
-    rag_recoveries = [
-        v.get("recovery_rate", 0)
-        for v in results["baseline_rag"].values()
-        if isinstance(v, dict)
-    ]
+    def get_avg(res_name, metric):
+        if res_name not in results:
+            return 0.0
+        vals = [v.get(metric, 0) for v in results[res_name].values() if isinstance(v, dict)]
+        return sum(vals) / len(vals) if vals else 0.0
 
-    avg_cortex_recovery = sum(cortex_recoveries) / len(cortex_recoveries) if cortex_recoveries else 0
-    avg_rag_recovery = sum(rag_recoveries) / len(rag_recoveries) if rag_recoveries else 0
+    cortex_rec = get_avg("CORTEX-Persist", "recovery_rate")
+    rag_rec = get_avg("AppendOnly (RAG)", "recovery_rate")
+    oracle_rec = get_avg("Oracle", "recovery_rate")
 
-    cortex_byz_rates = [
-        v.get("byzantine_detection_rate", 0)
-        for v in results["cortex"].values()
-        if isinstance(v, dict) and not v.get("skipped")
-    ]
-    avg_cortex_byz = sum(cortex_byz_rates) / len(cortex_byz_rates) if cortex_byz_rates else 0
-
-    # Recovery Rate
-    recovery_pass = avg_cortex_recovery > 0.70
     table.add_row(
         "Recovery Rate (avg)",
-        f"{avg_cortex_recovery:.1%}",
-        f"{avg_rag_recovery:.1%}",
-        "[green]✅ PASS[/]" if recovery_pass else "[red]❌ FAIL[/]",
-    )
-
-    # RAG should NOT recover (< 10%) — but since it does naive search, it might
-    rag_expected_fail = avg_rag_recovery < 0.10
-    table.add_row(
-        "RAG Recovery < 10%",
-        "N/A",
-        f"{avg_rag_recovery:.1%}",
-        "[green]✅ PASS[/]" if rag_expected_fail else "[yellow]⚠️  CHECK[/]",
-    )
-
-    # Byzantine Detection
-    byz_pass = avg_cortex_byz > 0.80
-    table.add_row(
-        "Byzantine Detection Rate",
-        f"{avg_cortex_byz:.1%}",
-        "0.0%",
-        "[green]✅ PASS[/]" if byz_pass else "[red]❌ FAIL[/]",
-    )
-
-    # Duplication ratio (RAG should be high, CORTEX should be lower)
-    table.add_section()
-    table.add_row(
-        "Total Facts Stored (RAG)",
-        "N/A",
-        str(rag.total_facts),
-        "[dim]info[/]",
+        *[f"{get_avg(r.name(), 'recovery_rate'):.1%}" for r in resolvers],
+        "> 70%",
     )
     table.add_row(
-        "RAG Duplication Ratio",
-        "N/A",
-        f"{rag.duplication_ratio:.1%}",
-        "[dim]info[/]",
+        "Byzantine F1 Score",
+         *[f"{get_avg(r.name(), 'byzantine_f1_score'):.1%}" for r in resolvers],
+        "> 80%",
     )
+    table.add_row(
+        "Average KL Divergence",
+         *[f"{get_avg(r.name(), 'kl_divergence'):.2f}" for r in resolvers],
+        "< 0.5",
+    )
+    table.add_row(
+        "Average Injection Time",
+        *[f"{get_avg(r.name(), 'injection_time_ms'):.0f}ms" for r in resolvers],
+        "< 500ms",
+    )
+    
+    recovery_pass = cortex_rec > 0.70
+    byz_pass = get_avg("CORTEX-Persist", "byzantine_f1_score") > 0.80
 
     console.print(table)
 
@@ -390,9 +299,9 @@ async def run_encb(
     hypothesis_confirmed = recovery_pass and byz_pass
     results["verdict"] = {
         "hypothesis_confirmed": hypothesis_confirmed,
-        "avg_cortex_recovery": round(avg_cortex_recovery, 4),
-        "avg_rag_recovery": round(avg_rag_recovery, 4),
-        "avg_byzantine_detection": round(avg_cortex_byz, 4),
+        "avg_cortex_recovery": round(cortex_rec, 4),
+        "avg_rag_recovery": round(rag_rec, 4),
+        "avg_oracle_recovery": round(oracle_rec, 4),
     }
 
     verdict_text = (
@@ -432,6 +341,8 @@ async def main() -> None:
                         help="Spam noise-to-signal ratio")
     parser.add_argument("--export", "-e", type=str, default=None,
                         help="Export results to JSON file")
+    parser.add_argument("--ablate", type=str, action="append",
+                        help="Ablation parameters (e.g. no_logop, no_crdt)")
     args = parser.parse_args()
 
     results = await run_encb(
@@ -439,6 +350,7 @@ async def main() -> None:
         num_agents=args.agents,
         byzantine_ratio=args.byzantine_ratio,
         rho_noise=args.noise_ratio,
+        ablations=args.ablate,
     )
 
     if args.export:

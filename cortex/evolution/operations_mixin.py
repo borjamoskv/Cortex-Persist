@@ -1,4 +1,5 @@
 """Evolution Operations Mixin — genetic operators and adversarial processes."""
+# pyright: reportAttributeAccessIssue=false
 
 import asyncio
 import logging

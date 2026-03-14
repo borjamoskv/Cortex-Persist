@@ -87,4 +87,8 @@ CORTEX assumes:
 
 ---
 
-For trust boundaries, verification flow, and cognitive trust surfaces, see [docs/SECURITY_TRUST_MODEL.md](./docs/SECURITY_TRUST_MODEL.md).
+## Related Security Documentation
+
+For trust boundaries, verification flow, ledger continuity, and cognitive/state-mutation
+security surfaces, see
+[`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md).

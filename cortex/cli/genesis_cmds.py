@@ -17,6 +17,7 @@ from cortex.cli.common import console
 @click.group("genesis")
 def genesis_group() -> None:
     """Genesis Engine — create systems from declarative specs."""
+# pyright: reportCallIssue=false
 
 
 @genesis_group.command("create")

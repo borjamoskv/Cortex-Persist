@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 """Background loop methods for MoskvDaemon (Seal 8 LOC extraction)."""
 
 from __future__ import annotations

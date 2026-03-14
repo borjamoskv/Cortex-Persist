@@ -3,6 +3,8 @@ Fact Store Core - Low-level storage operations (SQL, FTS, Graph, Causality).
 Ω₁: Immutable audit trail and causal linking.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import sqlite3

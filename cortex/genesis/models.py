@@ -48,7 +48,12 @@ class ComponentSpec:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> ComponentSpec:
-        """Deserialize from dict."""
+        """Deserialize from dict with strict schema validation."""
+        allowed_keys = {"name", "component_type", "imports", "interfaces", "dependencies", "template", "docstring"}
+        unknown_keys = set(d.keys()) - allowed_keys
+        if unknown_keys:
+            raise ValueError(f"Unknown keys in ComponentSpec: {unknown_keys}")
+
         return cls(
             name=str(d["name"]),
             component_type=str(d.get("component_type", "module")),
@@ -101,7 +106,12 @@ class SystemSpec:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> SystemSpec:
-        """Deserialize from dict."""
+        """Deserialize from dict with strict schema validation."""
+        allowed_keys = {"name", "description", "target_dir", "components", "system_type", "auto_cli", "auto_tests", "tags"}
+        unknown_keys = set(d.keys()) - allowed_keys
+        if unknown_keys:
+            raise ValueError(f"Unknown keys in SystemSpec: {unknown_keys}")
+
         components = [ComponentSpec.from_dict(c) for c in d.get("components", [])]
         return cls(
             name=str(d["name"]),

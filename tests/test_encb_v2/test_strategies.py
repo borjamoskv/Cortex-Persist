@@ -148,12 +148,15 @@ class TestCortex:
     def test_reliability_update_happens(self):
         n1 = _honest_node("n0", 0.5)
         n2 = _liar_node("n1", 0.5)
+        n3 = _honest_node("n2", 0.5)
         s = PropState("k", BeliefType.BOOLEAN, True)
         obs = [
-            (n1, True, 0.8),
-            (n2, False, 0.9),
+            (n1, True, 0.9),
+            (n3, True, 0.85),
+            (n2, False, 0.7),
         ]
-        resolve_cortex(s, obs, 0)
+        # Run at round 5 (past warm-up) so full LogOP applies
+        resolve_cortex(s, obs, 5)
         # After resolution, honest node reliability should increase
         # and liar node reliability should decrease
         assert n1.reliability > 0.5  # was correct

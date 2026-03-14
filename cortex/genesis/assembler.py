@@ -81,7 +81,14 @@ class SystemAssembler:
 
             rendered = template.render(spec.name, component)
 
-            for rel_path, content in rendered.items():
+            for rel_path_str, content in rendered.items():
+                rel_path = Path(rel_path_str)
+                # Guard against path traversal
+                if ".." in rel_path.parts or rel_path.is_absolute():
+                    logger.error("Path traversal blocked: %s", rel_path)
+                    failed.append(f"{component.name}: Path traversal blocked {rel_path_str}")
+                    continue
+
                 # Determine output location
                 if component.component_type == "test":
                     # Tests go to a sibling test directory

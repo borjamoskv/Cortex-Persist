@@ -275,6 +275,7 @@ def resolve_cortex(
             for _, val, conf in observations:
                 tallies[val] += conf
             fallback_val = max(tallies, key=lambda k: tallies[k])
+            fallback_conf = tallies[fallback_val] / (sum(tallies.values()) + 1e-9)
 
         obs_tuples = [
             (val, conf, node.reliability if use_reliability else 0.5)
@@ -288,8 +289,12 @@ def resolve_cortex(
             state.current_value = logop_val
             state.confidence = logop_conf
         else:
-            state.current_value = fallback_val if logop_val != fallback_val else logop_val
-            state.confidence = logop_conf
+            if logop_val == fallback_val:
+                state.current_value = logop_val
+                state.confidence = logop_conf
+            else:
+                state.current_value = fallback_val
+                state.confidence = (1.0 - alpha) * fallback_conf + alpha * logop_conf
 
     elif state.belief_type == BeliefType.SCALAR:
         obs_tuples = [
@@ -311,12 +316,12 @@ def resolve_cortex(
         state.confidence = resolved_conf
 
     # Layer 2b: Reliability update (adaptive)
-    # Higher learning rate (0.12) for faster differentiation of adversaries
+    # Higher learning rate (0.15) for faster differentiation of adversaries
     if use_reliability:
         for node, val, _ in observations:
-            was_correct = _observation_matches(state, val)
+            was_correct = _values_match(state.belief_type, val, state.current_value)
             node.reliability = update_reliability(
-                node.reliability, was_correct, lr=0.12
+                node.reliability, was_correct, lr=0.15
             )
 
     # Layer 3: ATMS truth maintenance

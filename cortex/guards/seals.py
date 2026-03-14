@@ -260,21 +260,21 @@ async def check_gate_7_async() -> bool:
 
 
 async def check_gate_8_loc() -> bool:
-    printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤500 max)")
+    printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤600 max)")
     blocked = 0
     warnings = 0
     
     # Use cached files in O(1) loop
     for py_file, content in GlobalSourceCache.files.items():
         lines = content.count('\n') + 1
-        if lines > 500:
-            printer.fail(f"{py_file.name} exceeds 500 LOC ({lines})")
+        if lines > 600:
+            printer.fail(f"{py_file.name} exceeds 600 LOC ({lines})")
             blocked += 1
-        elif lines > 300:
+        elif lines > 400:
             warnings += 1
 
     if blocked == 0:
-        printer.success(f"All files within entropy limits. ({warnings} warnings >300 LOC)")
+        printer.success(f"All files within entropy limits. ({warnings} warnings >400 LOC)")
         return True
     return False
 

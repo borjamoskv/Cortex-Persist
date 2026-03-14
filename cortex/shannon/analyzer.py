@@ -23,6 +23,9 @@ import math
 __all__ = [
     "conditional_entropy",
     "cross_entropy",
+    "dead_weight",
+    "exergy_ratio",
+    "exergy_score",
     "information_value",
     "jensen_shannon_divergence",
     "kl_divergence",
@@ -300,3 +303,89 @@ def information_value(freq: int, total: int) -> float:
         return 0.0
     p = freq / total
     return -math.log2(p)
+
+
+# ── Exergy — Ω₁₃ §15.9: Useful Work Measurement ──────────────────────
+
+
+def exergy_score(
+    distribution: dict[str, int],
+    usage_weights: dict[str, float],
+) -> float:
+    """Compute exergy score — the fraction of information that is actionable.
+
+    Ω₁₃ §15.9: exergy_score_required_for_useful_work_claims = true
+
+    Exergy = Σ p(x) · w(x) · log₂(1/p(x))
+
+    Where w(x) is the usage weight (how often type x leads to a decision).
+    Normalized by max possible exergy (all categories equally weighted at 1.0).
+
+    Args:
+        distribution: Mapping of category → count.
+        usage_weights: Mapping of category → actionability weight ∈ [0.0, 1.0].
+
+    Returns:
+        Exergy score ∈ [0.0, 1.0]. 0.0 = no useful work. 1.0 = all useful.
+    """
+    total = sum(distribution.values())
+    if total <= 0:
+        return 0.0
+
+    # Compute weighted entropy (exergy)
+    ex = 0.0
+    for cat, count in distribution.items():
+        if count > 0:
+            p = count / total
+            w = usage_weights.get(cat, 0.0)
+            ex += p * w * (-math.log2(p))
+
+    # Normalize: max exergy = H(X) when all weights = 1.0
+    h_max = shannon_entropy(distribution)
+    if h_max < 1e-15:
+        return 0.0
+
+    return min(ex / h_max, 1.0)
+
+
+def exergy_ratio(
+    distribution: dict[str, int],
+    usage_weights: dict[str, float],
+) -> float:
+    """Ratio of useful work to total information: exergy / entropy.
+
+    Ω₁₃ enforcement: >0.5 = healthy, <0.2 = mostly noise.
+
+    Args:
+        distribution: Mapping of category → count.
+        usage_weights: Mapping of category → actionability weight.
+
+    Returns:
+        Ratio ∈ [0.0, 1.0]. 0.0 if entropy is zero.
+    """
+    h = shannon_entropy(distribution)
+    if h < 1e-15:
+        return 0.0
+    ex = exergy_score(distribution, usage_weights) * h
+    return min(ex / h, 1.0)
+
+
+def dead_weight(
+    distribution: dict[str, int],
+    usage_weights: dict[str, float],
+) -> float:
+    """Dead weight = entropy - exergy in bits. Pure dissipation.
+
+    Information present in the system that cannot be extracted as
+    useful work. Higher dead_weight = more noise, less signal.
+
+    Args:
+        distribution: Mapping of category → count.
+        usage_weights: Mapping of category → actionability weight.
+
+    Returns:
+        Dead weight in bits. Always ≥ 0.
+    """
+    h = shannon_entropy(distribution)
+    ex = exergy_score(distribution, usage_weights) * h
+    return max(h - ex, 0.0)

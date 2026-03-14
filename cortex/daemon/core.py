@@ -226,6 +226,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def _init_background_agents(self, file_config: dict) -> None:
         """Initialize autonomous background agents like Aether."""
+# pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false
         self._aether_daemon: AetherDaemon | None = None
         self.aether_monitor: AetherMonitor | None = None
         if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):

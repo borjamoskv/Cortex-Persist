@@ -305,18 +305,17 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> bool:
         """Dispatch a single message. Returns True if loop should exit."""
-        match msg:
-            case _Shutdown(future=fut):
-                await self._handle_shutdown(conn, loop, fut)
-                return True
-            case _WriteOp() as op:
-                await self._process_write(conn, op, loop)
-            case _TxBegin(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "BEGIN IMMEDIATE")
-            case _TxCommit(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "COMMIT")
-            case _TxRollback(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "ROLLBACK")
+        if isinstance(msg, _Shutdown):
+            await self._handle_shutdown(conn, loop, msg.future)
+            return True
+        elif isinstance(msg, _WriteOp):
+            await self._process_write(conn, msg, loop)
+        elif isinstance(msg, _TxBegin):
+            await self._handle_tx_sql(conn, loop, msg.future, "BEGIN IMMEDIATE")
+        elif isinstance(msg, _TxCommit):
+            await self._handle_tx_sql(conn, loop, msg.future, "COMMIT")
+        elif isinstance(msg, _TxRollback):
+            await self._handle_tx_sql(conn, loop, msg.future, "ROLLBACK")
         return False
 
     async def _handle_shutdown(

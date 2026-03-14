@@ -27,7 +27,7 @@ _ADK_INSTALL_MSG = "Google ADK not installed. Install with: pip install google-a
 
 _ADK_AVAILABLE = False
 try:
-    from google.adk.agents.llm_agent import Agent
+    from google.adk.agents.llm_agent import Agent  # pyright: ignore[reportMissingImports]
 
     _ADK_AVAILABLE = True
 except ImportError:

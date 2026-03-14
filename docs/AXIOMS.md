@@ -1,5 +1,8 @@
 # Axioms — CORTEX Persist
 
+Package: cortex-persist v0.3.0b1 · Engine: v8
+License: Apache-2.0 · Python: >=3.10
+
 > Epistemic and design doctrine.
 >
 > Related: [`AGENTS.md`](../AGENTS.md) · [`operating-axioms.md`](operating-axioms.md) (AX-001–AX-028)
@@ -130,6 +133,3 @@ For the full operational axiom registry (AX-001 through AX-028), including Const
 Canonical source of truth: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 
 ---
-
-*Package: cortex-persist v0.3.0b1 · Engine: v8*
-*License: Apache-2.0 · Python: >=3.10*

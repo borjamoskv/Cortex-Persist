@@ -153,7 +153,14 @@ class GenesisEngine:
                 continue
 
             rendered = template.render(system_name, comp)
-            for rel_path, content in rendered.items():
+            for rel_path_str, content in rendered.items():
+                rel_path = Path(rel_path_str)
+                # Guard against path traversal
+                if ".." in rel_path.parts or rel_path.is_absolute():
+                    logger.error("Path traversal blocked in extend: %s", rel_path)
+                    failed.append(f"{comp.name}: Path traversal blocked {rel_path_str}")
+                    continue
+
                 file_path = existing_dir / rel_path
                 if file_path.exists():
                     logger.info("SKIP (exists): %s", file_path)
@@ -383,37 +390,33 @@ class GenesisEngine:
     def _persist_to_cortex(self, result: GenesisResult) -> None:
         """Record a genesis event as a bridge in the CORTEX ledger (#2).
 
-        Best-effort: does not fail the genesis if persistence is unavailable.
+        Atomic: Genesis fails if persistence is unavailable.
         """
-        try:
-            from cortex.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
-            engine = CortexEngine()
-            engine.store_sync(
-                content=(
-                    f"Genesis bridge: created system '{result.spec.name}' "
-                    f"({result.spec.system_type}) — "
-                    f"{len(result.files_created)} files, "
-                    f"CHRONOS-1: {result.hours_saved:.2f}h saved"
-                ),
-                fact_type="bridge",
-                project="cortex",
-                source="genesis-engine",
-                tags=["genesis", "system_bridge", result.spec.system_type],
-                confidence="C5",
-                meta={
-                    "system_name": result.spec.name,
-                    "system_type": result.spec.system_type,
-                    "files_created": len(result.files_created),
-                    "hours_saved": result.hours_saved,
-                    "validation_passed": result.validation_passed,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                },
-            )
-            logger.info(
-                "📦 Genesis persisted to CORTEX ledger: %s",
-                result.spec.name,
-            )
-        except Exception as e:  # noqa: BLE001 — best-effort persistence boundary
-            # Best-effort — don't fail genesis if CORTEX is unavailable
-            logger.debug("CORTEX persistence skipped (non-critical): %s", e)
+        engine = CortexEngine()
+        engine.store_sync(
+            content=(
+                f"Genesis bridge: created system '{result.spec.name}' "
+                f"({result.spec.system_type}) — "
+                f"{len(result.files_created)} files, "
+                f"CHRONOS-1: {result.hours_saved:.2f}h saved"
+            ),
+            fact_type="bridge",
+            project="cortex",
+            source="genesis-engine",
+            tags=["genesis", "system_bridge", result.spec.system_type],
+            confidence="C5",
+            meta={
+                "system_name": result.spec.name,
+                "system_type": result.spec.system_type,
+                "files_created": len(result.files_created),
+                "hours_saved": result.hours_saved,
+                "validation_passed": result.validation_passed,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+        logger.info(
+            "📦 Genesis persisted to CORTEX ledger: %s",
+            result.spec.name,
+        )

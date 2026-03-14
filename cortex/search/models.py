@@ -28,6 +28,7 @@ class SearchResult:
     created_at: str
     updated_at: str
     score: float = 0.0
+    causal_gap_score: float = 0.0
     source: str | None = None
     meta: dict = field(default_factory=dict)
     tx_id: int | None = None

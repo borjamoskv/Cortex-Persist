@@ -3,6 +3,8 @@
 Implements L3 Application-Level Encryption using AES-GCM.
 """
 
+from __future__ import annotations
+
 import base64
 import os
 

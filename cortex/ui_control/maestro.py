@@ -1,177 +1,257 @@
+"""
+MaestroUI — Orquestador soberano de control de escritorio macOS.
+
+Integra todos los motores (Accessibility, Keyboard, Mouse, Window, Vision)
+en una interfaz unificada con lógica de reintento.
+"""
+
+from __future__ import annotations
+
+import asyncio
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Optional
 
 from cortex.ui_control.accessibility import AccessibilityEngine
-from cortex.ui_control.applescript import is_app_running, run_applescript
-from cortex.ui_control.models import AppTarget, InteractionResult
+from cortex.ui_control.applescript import (
+    get_clipboard,
+    get_frontmost_app,
+    is_app_running,
+    run_applescript,
+    set_clipboard,
+)
+from cortex.ui_control.keyboard import KeyboardEngine
+from cortex.ui_control.models import (
+    AXElement,
+    AppTarget,
+    InteractionResult,
+    KeyCombo,
+    WindowInfo,
+)
 from cortex.ui_control.mouse import MouseEngine
 from cortex.ui_control.vision import VisionEngine
+from cortex.ui_control.window import WindowEngine
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-else:
-    CortexEngine = Any
 
 logger = logging.getLogger("cortex.ui_control.maestro")
+
+# Constantes de reintentos
+MAX_RETRIES = 3
+RETRY_DELAY = 0.5  # segundos
 
 
 class MaestroUI:
     """
-    Sovereign Desktop UI Automation Coordinator.
-    Provides predictable, AppleScript-backed automation.
-    Integrates with CORTEX Master Ledger for audit trails.
+    Orquestador de automatización de escritorio macOS.
+
+    Combina todos los sub-motores (accessibility, keyboard, mouse, window, vision)
+    bajo una API unificada con reintentos automáticos.
     """
 
-    def __init__(self, engine: CortexEngine | None = None) -> None:
+    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
         self.engine = engine
-        self.acc = AccessibilityEngine(engine=engine)
-        self.mouse = MouseEngine(engine=engine)
-        self.vision = VisionEngine(engine=engine)
+        self.accessibility = AccessibilityEngine(engine)
+        self.keyboard = KeyboardEngine(engine)
+        self.mouse = MouseEngine(engine)
+        self.window = WindowEngine(engine)
+        self.vision = VisionEngine(engine)
 
-    async def _persist_interaction(
-        self, action: str, target: AppTarget, result: InteractionResult
-    ) -> None:
-        """Stores the UI interaction in the CORTEX Ledger."""
-        if not self.engine:
-            return
+    # ─── Utilidades ─────────────────────────────────────────────
 
-        content = f"MAC-Ω UI Interaction: {action} on {target.name}. Success: {result.success}"
-        if not result.success:
-            content += f" | Error: {result.error}"
-
-        await self.engine.store(
-            project="MAESTRO-Ω",
-            content=content,
-            fact_type="decision" if result.success else "error",
-            tags=["ui_control", "macos", target.name.lower()],
-            meta={
-                "action": action,
-                "app": target.name,
-                "bundle_id": target.bundle_id,
-                "success": result.success,
-                "output": result.output,
-                "error": result.error,
-            },
+    async def _retry(
+        self,
+        coro_fn,  # noqa: ANN001
+        *args,
+        retries: int = MAX_RETRIES,
+        **kwargs,  # noqa: ANN003
+    ) -> InteractionResult:
+        """Ejecuta una coroutine con reintentos automáticos."""
+        last_error = ""
+        for attempt in range(retries):
+            result = await coro_fn(*args, **kwargs)
+            if result.success:
+                return result
+            last_error = result.error or ""
+            logger.warning(
+                "Intento %d/%d falló: %s", attempt + 1, retries, last_error
+            )
+            if attempt < retries - 1:
+                await asyncio.sleep(RETRY_DELAY)
+        return InteractionResult(
+            success=False,
+            error=f"Fallido tras {retries} intentos: {last_error}",
         )
 
-    async def activate_app(self, target: AppTarget) -> InteractionResult:
-        """Activates and brings the target application to the front."""
-        script = f'tell application "{target.name}" to activate'
-        try:
-            await run_applescript(script)
-            res = InteractionResult(success=True)
-        except Exception as e:
-            res = InteractionResult(success=False, error=str(e))
+    # ─── Accesibilidad ──────────────────────────────────────────
 
-        await self._persist_interaction("activate_app", target, res)
-        return res
+    def check_permissions(self) -> bool:
+        """Verifica permisos de Accesibilidad del sistema."""
+        return self.accessibility.check_permissions()
 
-    async def verify_app_state(self, target: AppTarget) -> bool:
-        """Verifies if the application is running."""
-        return await is_app_running(target.name)
+    def find_element(self, app_name: str, identifier: str) -> AXElement | None:
+        """Busca un elemento AX por identificador."""
+        return self.accessibility.find_element(app_name, identifier)
 
-    async def inject_keystroke(
-        self, target: AppTarget, keystroke: str, modifiers: list[str] | None = None
+    def find_element_by_title(
+        self, app_name: str, title: str, max_depth: int = 8
+    ) -> AXElement | None:
+        """Busca un elemento AX por título."""
+        return self.accessibility.find_element_by_title(app_name, title, max_depth)
+
+    def find_elements_by_role(
+        self, app_name: str, role: str, max_depth: int = 8
+    ) -> list[AXElement]:
+        """Devuelve todos los elementos que coinciden con un rol AX."""
+        return self.accessibility.find_elements_by_role(app_name, role, max_depth)
+
+    def dump_tree(self, app_name: str, max_depth: int = 5) -> list[AXElement]:
+        """Vuelca el árbol completo de accesibilidad de una app."""
+        return self.accessibility.dump_tree(app_name, max_depth)
+
+    async def wait_for_element(
+        self,
+        app_name: str,
+        identifier: str,
+        timeout: float = 5.0,
+    ) -> AXElement | None:
+        """Espera a que un elemento aparezca (polling)."""
+        return await self.accessibility.wait_for_element(
+            app_name, identifier, timeout
+        )
+
+    async def click_element(self, element: AXElement) -> InteractionResult:
+        """Click en un elemento AX con reintentos."""
+        return await self._retry(self.accessibility.perform_click, element)
+
+    def get_value(self, element: AXElement) -> str | None:
+        """Lee el valor AX de un elemento."""
+        return self.accessibility.get_value(element)
+
+    def set_value(self, element: AXElement, value: str) -> InteractionResult:
+        """Establece el valor AX de un elemento."""
+        return self.accessibility.set_value(element, value)
+
+    # ─── Teclado ────────────────────────────────────────────────
+
+    async def hotkey(
+        self, key: str, *modifiers: str, target: AppTarget = None
     ) -> InteractionResult:
-        """
-        Injects a keystroke into the target application.
+        """Atajo de teclado (ej: hotkey('c', 'command'))."""
+        return await self.keyboard.hotkey(key, *modifiers, target=target)
 
-        Args:
-            target: The app to focus before sending keys.
-            keystroke: The key to press (e.g., "v", "return").
-            modifiers: List of modifiers (e.g., ["command down", "shift down"]).
-        """
-        # Ensure focus first (Axiom 2: Absolute Intent)
-        running = await self.verify_app_state(target)
-        if not running:
-            return InteractionResult(
-                success=False, error=f"Cannot inject keystroke: {target.name} is not running."
-            )
+    async def type_text(
+        self, text: str, target: AppTarget = None, delay: float = 0.05
+    ) -> InteractionResult:
+        """Escribe texto (clipboard para cadenas largas, keystroke para cortas)."""
+        return await self.keyboard.type_text(text, target=target, delay=delay)
 
-        mods_str = ""
-        if modifiers:
-            mods_str = f" using {{{', '.join(modifiers)}}}"
+    async def press_special(
+        self, key_name: str, target: AppTarget = None
+    ) -> InteractionResult:
+        """Pulsa una tecla especial (return, tab, escape, flechas)."""
+        return await self.keyboard.press_special(key_name, target=target)
 
-        # If keystroke is more than one character and uses "return", "tab", etc.
-        # AppleScript uses bare words for special keys but strings for literals.
-        # We need to format the script accordingly.
-        script = f"""
-        tell application "{target.name}" to activate
-        delay 0.5
-        tell application "System Events"
-            keystroke "{keystroke}"{mods_str}
-        end tell
-        """
-        # Note: delay 0.5 is added to ensure app activation completes before keystroke.
+    async def press(
+        self, combo: KeyCombo, target: AppTarget = None
+    ) -> InteractionResult:
+        """Pulsa una combinación de teclas."""
+        return await self.keyboard.press(combo, target=target)
 
-        try:
-            await run_applescript(script)
-            res = InteractionResult(success=True)
-        except Exception as e:
-            res = InteractionResult(success=False, error=str(e))
+    # ─── Ratón ──────────────────────────────────────────────────
 
-        await self._persist_interaction("inject_keystroke", target, res)
-        return res
+    def click(self, x: int, y: int, button: str = "left") -> InteractionResult:
+        """Click simple en coordenadas."""
+        return self.mouse.click(x, y, button)
 
-    async def click_menu_item(self, target: AppTarget, menu_path: list[str]) -> InteractionResult:
-        """
-        Clicks a specific menu item.
+    def double_click(self, x: int, y: int) -> InteractionResult:
+        """Doble click nativo."""
+        return self.mouse.double_click(x, y)
 
-        Args:
-            target: The application target.
-            menu_path: E.g., ["File", "Export as PDF..."]
-        """
-        if len(menu_path) < 2:
-            return InteractionResult(
-                success=False, error="Menu path must have at least top-level menu and item"
-            )
+    def right_click(self, x: int, y: int) -> InteractionResult:
+        """Click derecho (menú contextual)."""
+        return self.mouse.right_click(x, y)
 
-        script = f"""
-        tell application "{target.name}" to activate
-        tell application "System Events"
-            tell process "{target.name}"
-                click menu item "{menu_path[1]}" of menu "{menu_path[0]}" \
-                    of menu bar item "{menu_path[0]}" of menu bar 1
-            end tell
-        end tell
-        """
+    def drag(
+        self, from_x: int, from_y: int, to_x: int, to_y: int,
+        duration: float = 0.5,
+    ) -> InteractionResult:
+        """Drag-and-drop interpolado."""
+        return self.mouse.drag(from_x, from_y, to_x, to_y, duration=duration)
 
-        try:
-            await run_applescript(script)
-            res = InteractionResult(success=True)
-        except Exception as e:
-            res = InteractionResult(success=False, error=str(e))
+    def move_cursor(self, x: int, y: int) -> InteractionResult:
+        """Mueve el cursor a coordenadas."""
+        return self.mouse.move(x, y)
 
-        await self._persist_interaction("click_menu_item", target, res)
-        return res
+    def scroll(self, clicks: int) -> InteractionResult:
+        """Scroll de rueda. Positivo=arriba, negativo=abajo."""
+        return self.mouse.scroll(clicks)
 
-    async def click_element(self, app_name: str, identifier: str) -> InteractionResult:
-        """Clicks an element by its Accessibility Identifier."""
-        element = self.acc.find_element(app_name, identifier)
-        if not element:
-            res = InteractionResult(
-                success=False, error=f"Element with ID {identifier} not found in {app_name}"
-            )
-        else:
-            res = await self.acc.perform_click(element)
+    # ─── Ventanas ───────────────────────────────────────────────
 
-        await self._persist_interaction("click_element", AppTarget(name=app_name), res)
-        return res
+    async def list_windows(self, app_name: str) -> list[WindowInfo]:
+        """Lista todas las ventanas de una aplicación."""
+        return await self.window.list_windows(app_name)
 
-    async def click_at(self, x: int, y: int, button: str = "left") -> InteractionResult:
-        """Clicks at specific screen coordinates."""
-        res = self.mouse.click(x, y, button)
-        await self._persist_interaction("click_at", AppTarget(name="System"), res)
-        return res
+    async def get_frontmost_window(self) -> WindowInfo | None:
+        """Devuelve información de la ventana en primer plano."""
+        return await self.window.get_frontmost()
 
-    async def scroll(self, clicks: int) -> InteractionResult:
-        """Scrolls the mouse wheel."""
-        res = self.mouse.scroll(clicks)
-        await self._persist_interaction("scroll", AppTarget(name="System"), res)
-        return res
+    async def move_window(
+        self, target: AppTarget, x: int, y: int
+    ) -> InteractionResult:
+        """Mueve la ventana principal de una app."""
+        return await self.window.move(target, x, y)
 
-    async def capture(self, region: tuple[int, int, int, int] | None = None) -> InteractionResult:
-        """Captures a screenshot for visual verification."""
-        res = self.vision.capture_screen(region)
-        await self._persist_interaction("capture", AppTarget(name="System"), res)
-        return res
+    async def resize_window(
+        self, target: AppTarget, width: int, height: int
+    ) -> InteractionResult:
+        """Redimensiona la ventana principal de una app."""
+        return await self.window.resize(target, width, height)
+
+    async def minimize_window(self, target: AppTarget) -> InteractionResult:
+        """Minimiza la ventana principal de una app."""
+        return await self.window.minimize(target)
+
+    async def restore_window(self, target: AppTarget) -> InteractionResult:
+        """Restaura la ventana minimizada de una app."""
+        return await self.window.restore(target)
+
+    async def fullscreen_window(self, target: AppTarget) -> InteractionResult:
+        """Alterna pantalla completa de una app."""
+        return await self.window.fullscreen(target)
+
+    async def close_window(self, target: AppTarget) -> InteractionResult:
+        """Cierra la ventana principal de una app (Cmd+W)."""
+        return await self.window.close_window(target)
+
+    # ─── AppleScript Directos ───────────────────────────────────
+
+    async def run_script(self, script: str) -> str | None:
+        """Ejecuta un AppleScript arbitrario."""
+        return await run_applescript(script, require_success=False)
+
+    async def is_app_running(self, app_name: str) -> bool:
+        """Verifica si una app está en ejecución."""
+        return await is_app_running(app_name)
+
+    async def get_frontmost_app(self) -> str | None:
+        """Devuelve el nombre de la app en primer plano."""
+        return await get_frontmost_app()
+
+    async def clipboard_set(self, text: str) -> None:
+        """Escribe texto al clipboard."""
+        await set_clipboard(text)
+
+    async def clipboard_get(self) -> str | None:
+        """Lee el clipboard."""
+        return await get_clipboard()
+
+    # ─── Visión ─────────────────────────────────────────────────
+
+    async def screenshot(self, output_path: str | None = None) -> str | None:
+        """Captura pantalla y devuelve la ruta al archivo."""
+        result = self.vision.capture_screen()
+        if result.success:
+            return result.output
+        return None

@@ -5,6 +5,10 @@ Links facts to the signals that triggered them, creating
 a directed acyclic graph (DAG) of consequence. Every decision
 must be traceable to an axiom or business need.
 
+Taint Propagation (Ω₁₃ §15.9 — causality/):
+When a fact is invalidated, suspicion propagates to all descendants.
+Derived confidence must be recomputed on taint.
+
 EU AI Act Article 12 compliance: full decision traceability.
 """
 
@@ -28,6 +32,7 @@ __all__ = [
     "CausalEdge",
     "CausalGraph",
     "AsyncCausalGraph",
+    "TaintReport",
     "link_causality",
 ]
 
@@ -60,6 +65,20 @@ EDGE_TRIGGERED_BY = "triggered_by"  # fact was triggered by signal
 EDGE_UPDATED_FROM = "updated_from"  # fact is an update of another fact
 EDGE_DEPRECATED_BY = "deprecated_by"  # fact was deprecated by another
 EDGE_DERIVED_FROM = "derived_from"  # fact was derived from analysis
+EDGE_TAINTED_BY = "tainted_by"  # fact was tainted by invalidation of ancestor
+
+# Confidence degradation ladder (C5 → C1)
+CONFIDENCE_LEVELS = ["C5", "C4", "C3", "C2", "C1"]
+
+
+def _downgrade_confidence(current: str, hops: int = 1) -> str:
+    """Downgrade confidence by N levels. C5→C4→C3→C2→C1."""
+    try:
+        idx = CONFIDENCE_LEVELS.index(current)
+    except ValueError:
+        return "C1"  # Unknown confidence → floor
+    new_idx = min(idx + hops, len(CONFIDENCE_LEVELS) - 1)
+    return CONFIDENCE_LEVELS[new_idx]
 
 
 # ── Async Causal Graph ────────────────────────────────────────────────
@@ -124,11 +143,117 @@ class AsyncCausalGraph:
             row = await cursor.fetchone()
             orphans = row[0] if row else 0
 
+        async with self._conn.execute(
+            "SELECT COUNT(DISTINCT fact_id) FROM causal_edges WHERE edge_type = ?",
+            (EDGE_TAINTED_BY,),
+        ) as cursor:
+            row = await cursor.fetchone()
+            tainted = row[0] if row else 0
+
         return {
             "total_edges": total,
             "by_edge_type": by_type,
+            "tainted_facts": tainted,
             "orphan_edges": orphans,
         }
+
+
+    async def propagate_taint(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        max_depth: int = 50,
+    ) -> "TaintReport":
+        """Propagate taint from an invalidated fact to all descendants.
+
+        Ω₁₃ §15.9: taint_propagation_required_for_invalidated_facts = true
+        derived_confidence_must_be_recomputed_on_taint = true
+
+        Each hop downgrades confidence by one level (C5→C4→C3→C2→C1).
+        Records taint edges and marks affected facts.
+        """
+        await self.ensure_table()
+        import json
+        from cortex.memory.temporal import now_iso
+
+        ts = now_iso()
+        changes: list[dict[str, Any]] = []
+        visited: set[int] = set()
+        # BFS with depth tracking: (fact_id, depth)
+        queue: list[tuple[int, int]] = [(fact_id, 0)]
+
+        while queue:
+            current_id, depth = queue.pop(0)
+            if current_id in visited or depth > max_depth:
+                continue
+            visited.add(current_id)
+
+            # Find children of current fact
+            async with self._conn.execute(
+                "SELECT DISTINCT fact_id FROM causal_edges "
+                "WHERE parent_id = ? AND tenant_id = ? AND edge_type != ?",
+                (current_id, tenant_id, EDGE_TAINTED_BY),
+            ) as cursor:
+                children = await cursor.fetchall()
+
+            for (child_id,) in children:
+                if child_id in visited:
+                    continue
+
+                # Read current confidence
+                async with self._conn.execute(
+                    "SELECT confidence, meta FROM facts WHERE id = ? AND valid_until IS NULL",
+                    (child_id,),
+                ) as cursor:
+                    row = await cursor.fetchone()
+                if not row:
+                    continue
+
+                old_conf = row[0] or "C3"
+                hops = depth + 1
+                new_conf = _downgrade_confidence(old_conf, hops)
+
+                # Update confidence and meta
+                try:
+                    meta = json.loads(row[1]) if row[1] else {}
+                except (json.JSONDecodeError, TypeError):
+                    meta = {}
+                meta["tainted_by"] = fact_id
+                meta["taint_timestamp"] = ts
+                meta["taint_hops"] = hops
+                meta["pre_taint_confidence"] = old_conf
+
+                await self._conn.execute(
+                    "UPDATE facts SET confidence = ?, meta = ? WHERE id = ?",
+                    (new_conf, json.dumps(meta), child_id),
+                )
+
+                # Record taint edge
+                await self._conn.execute(
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type, "
+                    "project, tenant_id) VALUES (?, ?, ?, ?, ?)",
+                    (child_id, fact_id, EDGE_TAINTED_BY, None, tenant_id),
+                )
+
+                changes.append({
+                    "fact_id": child_id,
+                    "old_confidence": old_conf,
+                    "new_confidence": new_conf,
+                    "hops": hops,
+                })
+                logger.info(
+                    "Taint propagated: fact %d (%s→%s) from source %d (%d hops)",
+                    child_id, old_conf, new_conf, fact_id, hops,
+                )
+
+                queue.append((child_id, hops))
+
+        await self._conn.commit()
+        return TaintReport(
+            source_fact_id=fact_id,
+            affected_count=len(changes),
+            confidence_changes=changes,
+        )
 
 
 # ── Async Oracle ──────────────────────────────────────────────────────
@@ -165,6 +290,18 @@ class CausalEdge:
     project: str | None
     tenant_id: str
     created_at: str
+
+
+@dataclass(frozen=True)
+class TaintReport:
+    """Result of taint propagation through the causal DAG.
+
+    Ω₁₃ enforcement: measurable taint_propagation_result.
+    """
+
+    source_fact_id: int
+    affected_count: int
+    confidence_changes: list[dict[str, Any]]
 
 
 def _edge_from_row(row: tuple) -> CausalEdge:
@@ -365,10 +502,16 @@ class CausalGraph:
             "SELECT COUNT(*) FROM causal_edges WHERE parent_id IS NULL AND signal_id IS NULL"
         ).fetchone()
 
+        tainted = self._conn.execute(
+            "SELECT COUNT(DISTINCT fact_id) FROM causal_edges WHERE edge_type = ?",
+            (EDGE_TAINTED_BY,),
+        ).fetchone()
+
         return {
             "total_edges": total[0] if total else 0,
             "by_edge_type": {r[0]: r[1] for r in by_type},
             "orphan_edges": orphans[0] if orphans else 0,
+            "tainted_facts": tainted[0] if tainted else 0,
         }
 
 

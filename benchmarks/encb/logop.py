@@ -16,11 +16,11 @@ from typing import Any
 
 @dataclass(frozen=True)
 class LogOPConfig:
-    w_self: float = 0.20
-    w_node: float = 0.45
-    w_ext: float = 0.10
-    w_cons: float = 0.15
-    w_fresh: float = 0.10
+    w_self: float = 0.30
+    w_node: float = 0.50
+    w_ext: float = 0.05
+    w_cons: float = 0.10
+    w_fresh: float = 0.05
 
 DEFAULT_LOGOP_CONFIG = LogOPConfig()
 
@@ -43,7 +43,7 @@ def sigmoid(x: float) -> float:
 def effective_confidence(
     c_self: float,
     r_node: float,
-    e_external: float = 0.5,
+    e_external: float = 1.0,
     a_consistency: float = 1.0,
     t_freshness: float = 1.0,
     config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
@@ -53,22 +53,24 @@ def effective_confidence(
     Args:
         c_self: Self-reported confidence by the agent [0, 1].
         r_node: Historical reliability of the node [0, 1].
-        e_external: External verification support [0, 1].
-        a_consistency: Consistency with known constraints [0, 1].
-        t_freshness: Temporal freshness weight [0, 1].
+        e_external: External verification support [0, 1]. Defaults to 1.0 if unused.
+        a_consistency: Consistency with known constraints [0, 1]. Defaults to 1.0 if unused.
+        t_freshness: Temporal freshness weight [0, 1]. Defaults to 1.0 if unused.
         config: Tunable weights for the formula.
 
     Returns:
         Effective confidence [0, 1].
     """
-    # Weighted geometric mean — each component contributes multiplicatively
+    # Weighted arithmetic mean to prevent massive suppression of highly reliable nodes
+    # from unused factors like external verification.
+    weight_sum = config.w_self + config.w_node + config.w_ext + config.w_cons + config.w_fresh
     raw = (
-        c_self ** config.w_self
-        * r_node ** config.w_node
-        * e_external ** config.w_ext
-        * a_consistency ** config.w_cons
-        * t_freshness ** config.w_fresh
-    )
+        (c_self * config.w_self)
+        + (r_node * config.w_node)
+        + (e_external * config.w_ext)
+        + (a_consistency * config.w_cons)
+        + (t_freshness * config.w_fresh)
+    ) / max(1e-9, weight_sum)
     return max(0.01, min(0.99, raw))
 
 

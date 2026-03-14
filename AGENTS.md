@@ -3,8 +3,10 @@
 Trust infrastructure for autonomous AI:
 cryptographic verification, audit trails, epistemic containment, and agent memory.
 
-Package: cortex-persist v0.3.0b1 · Engine: v8
-License: Apache-2.0 · Python: >=3.10
+Package: cortex-persist v0.3.0b1
+Engine: v8
+License: Apache-2.0
+Python: >=3.10
 
 ## Scope
 
@@ -108,6 +110,7 @@ DATABASE_URL
 - Do not bypass guards on write paths.
 - Do not silently downgrade validation errors into permissive writes.
 - Do not treat LLM output as trusted state.
+- Do not document a capability as a named module unless that module exists or the implementation surface is explicitly identified.
 
 ## Change Protocol
 

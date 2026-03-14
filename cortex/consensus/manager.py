@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 
 from cortex.telemetry.metrics import metrics
@@ -11,6 +12,19 @@ from cortex.telemetry.pulse import PULSE
 __all__ = ["ConsensusManager"]
 
 logger = logging.getLogger("cortex.consensus")
+
+
+def _logit(p: float) -> float:
+    p = min(max(p, 1e-6), 1.0 - 1e-6)
+    return math.log(p / (1.0 - p))
+
+
+def _sigmoid(x: float) -> float:
+    if x > 500:
+        return 1.0
+    if x < -500:
+        return 0.0
+    return 1.0 / (1.0 + math.exp(-x))
 
 
 class ConsensusManager:
@@ -167,9 +181,24 @@ class ConsensusManager:
         if not votes:
             return await self._recalculate_consensus(fact_id, conn)
 
-        weighted_sum = sum(v[0] * max(v[1], v[2]) for v in votes)
-        total_weight = sum(max(v[1], v[2]) for v in votes)
-        score = 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
+        # Logarithmic Opinion Pool (LogOP) consensus calculation
+        score_sum = 0.0
+        for v in votes:
+            vote_val = v[0]
+            if vote_val == 0:
+                continue
+            
+            p = 0.99 if vote_val > 0 else 0.01
+            # Quadratic weight aggressively suppresses unreliable nodes
+            rel = max(v[1], v[2])
+            w = rel ** 2
+            
+            score_sum += w * _logit(p)
+
+        prob_true = _sigmoid(score_sum)
+        # Scale back to [0.0, 2.0] so >=1.5 is verified
+        score = prob_true * 2.0
+
         await self._update_fact_score(fact_id, score, conn)
 
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
@@ -179,12 +208,26 @@ class ConsensusManager:
 
     async def _recalculate_consensus(self, fact_id: int, conn) -> float:
         cursor = await conn.execute(
-            "SELECT SUM(vote) FROM consensus_votes WHERE fact_id = ?",
+            "SELECT vote FROM consensus_votes WHERE fact_id = ?",
             (fact_id,),
         )
-        row = await cursor.fetchone()
-        vote_sum = row[0] or 0
-        score = max(0.0, 1.0 + (vote_sum * 0.1))
+        votes = await cursor.fetchall()
+        if not votes:
+            score = 1.0
+            await self._update_fact_score(fact_id, score, conn)
+            return score
+            
+        score_sum = 0.0
+        for (vote_val,) in votes:
+            if vote_val == 0:
+                continue
+            p = 0.99 if vote_val > 0 else 0.01
+            w = 1.0  # Legacy votes have equal weight
+            score_sum += w * _logit(p)
+            
+        prob_true = _sigmoid(score_sum)
+        score = prob_true * 2.0
+        
         await self._update_fact_score(fact_id, score, conn)
         return score
 

@@ -21,7 +21,7 @@ logger = logging.getLogger("moskv-daemon")
 
 class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
     """Monitors the mathematical decay of epistemic certainty.
-    """
+
     Acts as the knowledge immune system. Instead of waiting for time-based
     heuristics, this monitor analyzes the actual confidence derived from the
     Metacognitive Judge and triggers atomic workflows when certainty drops.

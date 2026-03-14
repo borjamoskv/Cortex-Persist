@@ -13,15 +13,30 @@ from decimal import Decimal
 from typing import Any, Optional
 
 try:
-    from cdp_langchain.agent_toolkits import CdpToolkit
-    from cdp_langchain.utils import CdpAgentkitWrapper
+    from cdp_langchain.agent_toolkits import CdpToolkit  # pyright: ignore[reportMissingImports]
+    from cdp_langchain.utils import CdpAgentkitWrapper  # pyright: ignore[reportMissingImports]
 
     CDP_AVAILABLE = True
 except ImportError:
     CDP_AVAILABLE = False
-    CdpAgentkitWrapper = Any
-    CdpToolkit = Any
 
+    class CdpAgentkitWrapper:
+        wallet: Any
+
+        def __init__(self, **kwargs: Any) -> None:
+            pass
+
+        def export_wallet(self) -> str:
+            return ""
+
+    class _MockCdpToolkit:
+        def get_tools(self) -> list[Any]:
+            return []
+
+    class CdpToolkit:
+        @classmethod
+        def from_cdp_agentkit_wrapper(cls, wrapper: Any) -> _MockCdpToolkit:
+            return _MockCdpToolkit()
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +111,7 @@ class CDPSovereignWallet:
                 network_id=self.network_id,
                 cdp_wallet_data=wallet_data,
             )
+            assert self.agentkit is not None
 
             # Persist seed with restrictive permissions (0600)
             new_wallet_data = self.agentkit.export_wallet()
@@ -139,6 +155,7 @@ class CDPSovereignWallet:
         if not self.agentkit:
             return "0.0"
         try:
+            assert self.agentkit is not None
             wallet = self.agentkit.wallet
             loop = asyncio.get_running_loop()
             balance = await loop.run_in_executor(
@@ -202,15 +219,15 @@ class CDPSovereignWallet:
             target_address,
         )
 
-        def _transfer():
+        def _transfer() -> Any:
+            assert self.agentkit is not None
             wallet = self.agentkit.wallet
             t = wallet.transfer(amount, asset, target_address)
             t.wait()
             return t
 
         try:
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, _transfer)
+            await asyncio.to_thread(_transfer)
             _tx_count_this_session += 1
             logger.info(
                 "[CDP TX CONFIRMED] %d/%d this session",

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 ThermalEconomy — The Entropy Gatekeeper.
 Enforces 'Proof-of-Skin' and field density limits.
@@ -5,9 +7,9 @@ Enforces 'Proof-of-Skin' and field density limits.
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
-from cortex.songlines.sensor import TopographicSensor
+from cortex.songlines.sensor import GhostTrace, TopographicSensor
 
 logger = logging.getLogger("cortex.songlines.economy")
 
