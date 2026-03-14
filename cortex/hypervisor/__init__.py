@@ -14,6 +14,8 @@ Usage::
     health = await handle.reflect()
 """
 
+from cortex.hypervisor.belief_engine import BeliefEngine
+from cortex.hypervisor.belief_object import BeliefObject, BeliefVerdict
 from cortex.hypervisor.core import AgencyHypervisor
 from cortex.hypervisor.handle import AgentHandle
 from cortex.hypervisor.models import HealthReport, Memory, Receipt
@@ -21,6 +23,9 @@ from cortex.hypervisor.models import HealthReport, Memory, Receipt
 __all__ = [
     "AgencyHypervisor",
     "AgentHandle",
+    "BeliefEngine",
+    "BeliefObject",
+    "BeliefVerdict",
     "HealthReport",
     "Memory",
     "Receipt",
