@@ -268,6 +268,29 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
 );
 """
 
+CREATE_FACTS_FTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
+AFTER INSERT ON facts
+BEGIN
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
+AFTER UPDATE OF content, project, tags, fact_type ON facts
+BEGIN
+  DELETE FROM facts_fts WHERE rowid = OLD.id;
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
+BEFORE DELETE ON facts
+BEGIN
+  DELETE FROM facts_fts WHERE rowid = OLD.id;
+END;
+"""
+
 # ─── Immutable Ledger (Merkle) ──────────────────────────────────────
 CREATE_MERKLE_ROOTS = """
 CREATE TABLE IF NOT EXISTS merkle_roots (
@@ -340,5 +363,6 @@ EXTENSION_SCHEMA = [
     CREATE_LLM_TELEMETRY_INDEX,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
+    CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
 ]

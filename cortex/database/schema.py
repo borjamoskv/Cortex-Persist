@@ -19,6 +19,7 @@ from cortex.database.schema_extensions import (
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
     CREATE_FACTS_FTS,
+    CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
     CREATE_OUTCOMES,
     CREATE_PROCEDURAL_ENGRAMS,
@@ -105,6 +106,8 @@ CREATE INDEX IF NOT EXISTS idx_facts_project ON facts(project);
 CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
+CREATE INDEX IF NOT EXISTS idx_facts_tenant_valid ON facts(tenant_id, valid_until);
+CREATE INDEX IF NOT EXISTS idx_facts_proj_valid ON facts(project, valid_until);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────

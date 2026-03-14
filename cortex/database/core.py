@@ -73,6 +73,10 @@ PAGE_SIZE: Final[int] = 8192
 _CACHE_MB: Final[int] = int(os.environ.get("CORTEX_SQLITE_CACHE_MB", "128"))
 CACHE_SIZE_KB: Final[int] = -(_CACHE_MB * 1024)
 
+# WAL auto-checkpoint threshold (pages). At 8KB page_size, 1000 pages ≈ 8MB.
+# Prevents unbounded WAL growth under sustained writes.
+WAL_AUTOCHECKPOINT: Final[int] = 1000
+
 # Strings used to detect lock errors in OperationalError messages.
 _LOCK_MARKERS: Final[tuple[str, ...]] = ("database is locked", "busy")
 
@@ -106,6 +110,10 @@ def _apply_pragmas_sync(
     if writer_mode:
         # Disable automatic WAL checkpoints — writer controls flush timing
         conn.execute("PRAGMA wal_autocheckpoint=0")
+    else:
+        conn.execute(
+            f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}"
+        )
 
 
 # ─── Sync Factory ─────────────────────────────────────────────────────
@@ -239,6 +247,9 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     await conn.execute(f"PRAGMA page_size={PAGE_SIZE};")
     await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
     await conn.execute("PRAGMA temp_store=MEMORY;")
+    await conn.execute(
+        f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};"
+    )
     await conn.commit()
 
 

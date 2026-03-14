@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -37,14 +38,16 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
-        min_connections: int = 2,
-        max_connections: int = 10,
+        min_connections: int | None = None,
+        max_connections: int | None = None,
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):
+        _env_min = int(os.environ.get("CORTEX_POOL_MIN", "4"))
+        _env_max = int(os.environ.get("CORTEX_POOL_MAX", "32"))
         self.db_path = db_path
-        self.min_connections = min_connections
-        self.max_connections = max_connections
+        self.min_connections = min_connections or _env_min
+        self.max_connections = max_connections or _env_max
         self.max_idle_time = max_idle_time
         self.read_only = read_only
 
