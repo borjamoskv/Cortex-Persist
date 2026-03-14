@@ -8,14 +8,16 @@ This document describes trust boundaries and cognitive/state-mutation risks.
 For vulnerability disclosure policy and repository security reporting, see
 [`../SECURITY.md`](../SECURITY.md).
 
-## Purpose
+## Purpose: The Doctrinal Formula
 
-This document defines the trust boundaries, guarantees, non-guarantees, and
-verification surfaces of CORTEX Persist.
+> **CORTEX-Persist no confía en outputs.**
+> La probabilidad puede sugerir. Solo la verificación puede gobernar.
 
-CORTEX is not secure because it stores data.
-CORTEX is secure to the extent that it constrains who may mutate state, under
-which conditions, with what auditability, and with what failure behavior.
+This document defines the trust boundaries, guarantees, non-guarantees, and verification surfaces of CORTEX Persist.
+
+The fundamental problem of modern AI agents is not that they hallucinate; it is that their probabilistic output is granted ontological status before being verified. **We do not build systems that trust the model. We build systems where unverified probabilistic output cannot survive long enough to matter.** CORTEX treats all generative output as *thermodynamically unstable conjecture* (`Void-State`).
+
+CORTEX is not secure because it stores data. CORTEX is secure to the extent that it constrains who may mutate state, under which conditions, forcing probabilistic suggestions to cross a deterministic admission pipeline—formal schema validation, cryptographic ledger inscription, and causal taint tracking—before becoming actionable memory.
 
 ## Security Posture
 
