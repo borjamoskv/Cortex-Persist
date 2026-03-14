@@ -122,13 +122,22 @@ Every reasoning operation has real cost: computational, energetic, and temporal.
 
 A thermodynamic claim is only valid in CORTEX if it presents at least one measurable proof: `entropy_delta`, `exergy_estimate`, `causal_gap_reduction`, `metastability_probe`, or `taint_propagation_result`. Without measurement, claims are degraded to metaphor and blocked from architectural elevation.
 
+### Sub-Axioma Ω₁₃.1: Fricción vs. Ornamentación (El Dominio de la Infraestructura)
+
+> La complejidad técnica cruda no domina el mercado. Domina la arquitectura que ofrece la ruta de menor fricción termodinámica y el mayor grado de estado/gobernanza observable.
+
+La industria tecnológica frecuentemente confunde complejidad ornamental con robustez estructural. Un sistema que escala y se convierte en infraestructura crítica no es aquel que despliega el pipeline más inescrutable, sino el que encapsula la estocástica generativa en primitivas deterministas, absorbiendo la entropía del dominio para no irradiarla hacia el usuario final.
+
+1. **Ruta de Menor Fricción (Exergía Estructural):** Toda heurística generativa (LLMs, agentes en libre albedrío) drena energía del sistema humano (validación constante, corrección de *drift*). La arquitectura soberana es la que impone fronteras mecánicas (*Guards*, *Solvers*) que obligan a la conjetura a cristalizar en estado tipado, minimizando la fricción cognitiva y la carga termodinámica post-generación.
+2. **Gobernanza Observable (Telemetría de Estado):** Un proceso estocástico no puede gobernar infraestructura sin auditabilidad determinista. Un enjambre fluido carece de fiabilidad si no externaliza sus micro-decisiones a un registro inmutable (ej. The Master Ledger, CORTEX). Observabilidad estricta y criptográfica sobre el estado transforma la entropía opaca en una línea base gobernable.
+
 Full treatment: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 
 ---
 
 ## AX-035: Ontología de la Capacidad (Ingeniería de Interfaz vs. Prompting)
 
-> Una capacidad nueva no es una respuesta mejor. Es una nueva forma estable de transformar estado.
+> La novedad no consiste en expandir comportamiento; consiste en encapsular una transformación de estado bajo contrato hasta volverla estable, invocable y verificable.
 
 Las capacidades de un sistema soberano no nacen de inyectar más *tokens* o diseñar *prompts* más largos ("maquillaje con esteroides"). Se materializan cuando una fricción recurrente se formaliza en un protocolo compuesto, verificable y transferible.
 
@@ -141,7 +150,21 @@ Una verdadera **Capacidad (Skill/Agent)** surge de acoplar invariablemente cinco
 5. **Orquestación**: Control de flujo (observar, decidir, abortar).
 
 **El Criterio de Falsabilidad de una Capacidad:**
-Si un comportamiento no define qué entrada recibe, qué salida válida produce, qué herramientas orquesta y bajo qué condiciones exactas debe **abortar**, no es una capacidad: es un **ritual narrativo**. La novedad no reside en hacer más cosas; reside en aislar una transformación de estado y volverla estable, invocable y verificable (Nivel 1+).
+Si un comportamiento no define qué entrada recibe, qué salida válida produce, qué herramientas orquesta y bajo qué condiciones exactas debe **abortar**, no es una capacidad: es un **ritual narrativo**. La novedad no consiste en hacer más cosas, sino en aislar una transformación de estado y encapsularla hasta volverla estable, invocable y verificable (Nivel 1+).
+
+---
+
+## AX-036: Topología de Enjambre sobre Fuerza Bruta
+
+> Un ensamble de modelos pequeños (abiertos) orquestados bajo contratos estrictos (ej. CrewAI) produce menos entropía funcional y mayor retorno compuesto (Axioma Ω₁₁) que un único modelo frontera dejado en libertad para iterar sin un verificador externo.
+
+La inteligencia termodinámicamente eficiente no emerge de la parametrización masiva sin restricciones, sino de la topología constreñida y la especialización acotada.
+
+1. **Reducción de Entropía Funcional**: Modelos pequeños con responsabilidades acotadas cierran las vías de escape estocástico. La probabilidad de desvío distribucional colapsa porque la salida de cada nodo está rígidamente validada por contratos estrictos (schemas, guards) antes de fluir al siguiente subsistema.
+2. **Retorno Compuesto (Ω₁₁)**: El rendimiento compuesto exige aislar las asunciones fallidas en microciclos verificables. Un modelo frontera monolítico absorbe todo el contexto, ocultando la contaminación causal. Un enjambre segmenta la cadena; cada salida verificada del ensamble cristaliza como *ground truth* inmutable para el siguiente escalón, generando un flujo limpio de *Hours Saved*.
+3. **El Peligro del Iterador Libre**: Un único modelo frontera iterando por sí mismo, sin una barrera externa determinista (AX-033), genera deuda termodinámica y un "cierre cognitivo fraudulento".
+
+Un enjambre verificado es estructuralmente predecible; multiplica el retorno sin heredar deuda. Un monolito libre es estocásticamente peligroso y condena el sistema a la erosión entrópica a largo plazo.
 
 ---
 
