@@ -2,74 +2,177 @@
 description: RFC v0.1 Cortex-Persist Native AI Architecture
 ---
 
-# RFC v0.1: Cortex-Persist Native AI Architecture
+# RFC-CORTEX-NATIVE-AI
 
-> **Status:** Normative Draft  
-> **Axiom:** Ω₃ (Verify then trust)
+## 0. Status
+Normative Draft v0.1
 
-## 1. Implementation Maturity
+## 1. Purpose
+Define the normative architecture of Cortex-Persist as a sovereign cognitive hypervisor.
 
-This RFC defines the normative architecture and system invariants of Cortex-Persist Native AI.
-Some subcomponents remain under formal specification and are therefore treated as implementation-bound appendices rather than blocking dependencies:
+This RFC standardizes the transition of Cortex-Persist from passive vector retrieval to an active memory governance system. The system does not treat semantic similarity as sufficient evidence of validity. Instead, it separates three concerns that are commonly collapsed in RAG systems:
+1. Cryptographic integrity of stored artifacts,
+2. Epistemic status of active beliefs,
+3. Distributed convergence of agent-local state.
 
-- CRDT merge algebra for semantic swarm sync (`RFC-CORTEX-CRDT-MATH-APPENDIX.md`)
-- LogOP veto saturation rules (`RFC-CORTEX-CRDT-MATH-APPENDIX.md`)
-- ATMS dependency indexing formalism (`RFC-CORTEX-ATMS-SEMANTICS.md`)
-- Resume-path service level objectives under load
+The guiding invariant is Axiom Ω₃: *Verify then trust*. No datum may enter the operational context of a model unless its provenance, tenant binding, and structural validity can be mechanically verified.
 
-## 2. Terminology
+## 2. Scope
+This RFC standardizes the data structures, state machines, consensus bounds, and integrity checks required for the Swarm to operate a mathematically verifiable, self-governing memory subsystem.
 
+## 3. Non-Goals
+This RFC explicitly does not guarantee:
+- Metaphysical truth of all accepted beliefs,
+- Full graph satisfiability at ingestion time,
+- Real-time global logical closure,
+- Byzantine-proof consensus across arbitrary hostile networks,
+- Vector-space erasure guarantees after third-party model exposure.
+
+## 4. Terminology
 - **MUST / MUST NOT**: Hard invariants. Structural violations of these will cause a Hard Fault.
 - **SHOULD / SHOULD NOT**: Strong implementation guidance.
 - **TARGET**: Performance SLO, not formal guarantee.
 - **EXPERIMENTAL**: Subject to revision pending formal proof or benchmark evidence.
 
-## 3. Architecture Planes
+## 5. System Model
+Components, trust boundaries, and execution model. The system acts as a decentralized hypervisor. Agents produce operational facts. The ATMS evaluates logic dependencies. The Consensus protocol propagates locally active belief states.
 
-### 3.1. Integrity Plane (Plano de Integridad Criptográfica)
-**Guarantee:** No data enters the operative light cone without demonstrable provenance.
+## 6. Data Model
 
-- **MUST**: Each episodic or semantic transaction MUST be sealed in a Sparse Merkle Tree (SMT) interconnected with the Master Ledger.
-- **MUST NOT**: Belief modification MUST NOT overwrite its original vector. It MUST fork the tree branch, emitting an immutable `BeliefPatch` signed by the originating agent (`PROV-AGENT`).
-- **MUST**: If the ledger hash chain fractures or the `tenant_id` fails cryptographic validation, the read operation MUST collapse with a Hard Fault at $t=0$, isolating contamination before it reaches the LLM.
+```typescript
+type BeliefState = "ACTIVE" | "SUSPENDED" | "DISCARDED" | "ORPHANED";
 
-### 3.2. Belief Plane (Plano de Creencias y Mantenimiento de Verdad)
-**Guarantee:** Active memory is a logically coherent subgraph, not a bag of semantically noisy vectors.
+interface ProvenanceEnvelope {
+  source_hash: string;
+  source_type: string;
+  tenant_id: string;
+  signer_id: string;
+  signature: string;
+  created_at: string;
+}
 
-- **MUST**: Each Belief Object (`BO`) MUST operate with explicit causal relations (`entails`, `discards`) and an epistemic state (Active, Suspended, Discarded).
-- **SHOULD**: The Inconsistency Tribunal (DeepThinK Gatekeeper). If a collision generates a critical `consensus_weight` differential, the hypervisor SHOULD `SUSPEND` the subgraph and route exclusively to Heavy Reasoning (System 2, e.g., Gemini 3.1 DeepThinK). The LLM returns the exact deductive trace, crystallizing as a new Axiom.
-- **MUST**: Cascading Invalidation. Root invalidation MUST propagate via precomputed indexed invalidation, allowing state change in constant time by reference and deferred local rehydration of the affected subgraph.
+interface BeliefObject {
+  belief_id: string;
+  content_hash: string;
+  state: BeliefState;
+  consensus_weight: number;
+  assumptions: string[];
+  provenance: ProvenanceEnvelope;
+  parents: string[];
+  relations: Array<{
+    type: "entails" | "discards" | "depends_on" | "supersedes";
+    target_id: string;
+  }>;
+}
+```
 
-### 3.3. Swarm Sync (Sincronización de Enjambre)
-**Guarantee:** Topological convergence does not depend on central validation.
+## 7. Integrity Plane
 
-- **MUST**: Tactical execution agents MUST synchronize non-blocking memory via a P2P bus (Zenoh) utilizing Semantic CRDTs.
-- **MUST**: LogOP Consensus (Epistemic Veto). Vetoes DO NOT operate as absolute zero directly in the tactical layer; they MUST introduce a saturating epistemic penalty validated by proof, and can only collapse to total exclusion after L3 audit or reinforced quorum.
-- **SHOULD**: Thermal Isolation (iceoryx2). Shared embedding tensors SHOULD reside in zero-copy memory (SHM) to allow Python agents to consume state instantaneously without serialization overhead.
+The Integrity Plane governs provenance, tenant isolation, and append-only mutation semantics.
 
-### 3.4. Resume Paths (Colapso y Expansión de Contexto)
-**Guarantee:** Deterministic state recovery across temporal bounds.
+### Requirements
 
-- **TARGET (Hot Resume)**: ~0 ms logical / sub-10 ms practical within the same resident process or session via KV-Cache Persistence.
-- **TARGET (Warm Resume)**: p95 < 200 ms under nominal load and bounded indexed cardinality. Extracts state from indexed storage and asynchronously reconstructs adjacent causal light cones.
-- **MUST (Cold Resume)**: NightShift / Crystallization. Raw episodic logs MUST NOT survive a Cold Boot. The system MUST compact daily episodic noise into clean modular rules. At cold boot, the system MUST only load Axioms (maximum Shannon compressed entropy).
+- Every episodic or semantic write MUST be committed as an immutable event into a Sparse Merkle Tree linked to the Master Ledger.
+- A mutation MUST NOT overwrite a prior belief payload in place.
+- Any revision MUST be represented as a signed `BeliefPatch` referencing the previous belief state.
+- Every read path MUST verify:
+  - ledger integrity,
+  - tenant binding,
+  - signature validity,
+  - patch ancestry.
 
-### 3.5. Compliance Plane (Membrana Regulatoria)
-**Guarantee:** Deep auditability and structural compliance (e.g., EU AI Act Article 12).
+If any of these checks fail, the request MUST terminate before model invocation.
 
-- **MUST**: Every inference cycle modifying the Belief Plane MUST emit an immutable provenance certificate (VEX & PROV-O native).
-- **MUST**: Zero-Knowledge Crypto-Shredding. GDPR "Right to be Forgotten" MUST physically destroy the AES key of the specific Tenant, cryptographically discarding the Layer 0 (plaintext), and proving unlinking via ZK-Proofs.
+## 8. Belief Plane
 
-## 4. Failure Modes & Invariants
+A Belief Object (BO) is not treated as globally true or false. It is treated as an accepted, suspended, or discarded unit of operational cognition under explicit assumptions.
 
-| Failure Mode | Structural Condition | Resolution (Invariant) |
-| :--- | :--- | :--- |
-| **Denial of Truth (Veto Attack)** | Compromised agent transmits a veto ($P=0$) blocking LogOP consensus. | **Epistemic Slashing**: Veto requires proof-of-work. False positives geometrically destroy the node's `consensus_weight` and trigger `immune-chaos` isolation. |
-| **ATMS NP-Hard Explosion** | Full logical satisfiability evaluation of $10^6$ beliefs degrades to polynomial collapse. | **Light Cone Restriction**: ATMS restricts recalculation to $d \le 2$. Full re-balancing is deferred to background consolidation (NightShift/Sleep Cycle). |
-| **Circular Epistemic Regression** | LLM assimilates its own processed logs as novel evidence to reaffirm false conclusions. | **Provenance Check**: `BO` merges MUST originate from orthogonal source hashes, structurally breaking the hallucination feedback loop. |
+### Invariant
 
-## 5. Forbidden Simplifications
+If a root dependency becomes invalid, dependent beliefs MUST become non-operational immediately by index-based invalidation. Graph-wide reconciliation MAY be deferred.
 
-- **RAG-only memory is non-compliant with Axiom Ω₃.**
-- **Vector similarity is NOT truth maintenance.**
-- **Mutable overwrite of belief state is FORBIDDEN.**
+### State Transitions
+
+| Current State | Event | New State |
+| ------------- | ----- | --------- |
+| ACTIVE        | Critical contradiction         | SUSPENDED          |
+| ACTIVE        | Signed patch invalidating it   | DISCARDED          |
+| ACTIVE        | Parent dependency invalidated  | ORPHANED           |
+| SUSPENDED     | Favorable adjudication         | ACTIVE             |
+| ORPHANED      | Valid structural reconciliation| ACTIVE / DISCARDED |
+
+### Conflict Escalation
+
+If two or more active beliefs produce a contradiction whose weighted divergence exceeds a configured threshold, the affected subgraph MUST be suspended from default model access.
+
+Resolution MUST be delegated to a high-reasoning adjudication path.
+The adjudicator output MUST include:
+- conflict inputs,
+- assumptions used,
+- deduction trace,
+- resulting patch or axiom.
+
+No resolved belief may re-enter ACTIVE state without a new signed artifact.
+
+## 9. Swarm Sync
+
+Swarm synchronization is eventually convergent and does not rely on a single central validator for tactical state propagation.
+
+### Requirements
+
+- Agent-local semantic state MUST be represented by CRDT-compatible data structures.
+- Merge operations MUST be associative, commutative, and idempotent.
+- Transport is orthogonal to merge semantics.
+- Shared embeddings MAY be distributed through zero-copy shared memory where locality permits, but SHM is an optimization, not a correctness dependency.
+
+### Epistemic Veto
+
+A veto MUST NOT act as an unconditional probability-zero annihilator at ingestion time.
+
+Instead, a veto introduces a signed negative evidence event with bounded suppression power.
+Escalation to full exclusion requires one of:
+- quorum reinforcement,
+- adjudicated proof,
+- L3 audit confirmation.
+
+## 10. Resume Semantics
+
+### Hot Resume
+Re-entry into an already resident execution context without reconstructing model-local short-term state.
+TARGET: sub-10 ms resume latency under same-process residency.
+
+### Warm Resume
+Reconstruction of task-adjacent cognitive state from indexed persistence without full semantic consolidation.
+TARGET: p95 < 200 ms under nominal load.
+
+### Cold Resume
+Boot from consolidated axioms and compressed long-range semantic artifacts after raw episodic logs have been compacted or discarded.
+
+## 11. Compliance Plane
+
+- Every inference cycle modifying the Belief Plane MUST emit an immutable provenance certificate (VEX & PROV-O native).
+- Zero-Knowledge Crypto-Shredding: GDPR "Right to be Forgotten" MUST physically destroy the AES key of the specific Tenant, cryptographically discarding the Layer 0 (plaintext), and proving unlinking via ZK-Proofs.
+
+## 12. Threat Model
+
+- **Malicious/Compromised Node**: Agents that sign coherent but contradictory patches to paralyze LogOP state.
+- **Replay Attacks**: Agents broadcasting obsolete but properly signed patches.
+- **Key Compromise / Tenant Bleed**: Valid signature but compromised backend keys.
+- **Network Partition**: Divergent Swarm states due to edge disconnections.
+- **Semantic Poisoning**: Slow degradation of axioms through coordinated injection over time.
+- **Biased Consensus**: Correlated nodes amplifying a false consensus to brute-force a veto.
+
+## 13. Failure Modes
+Mechanical responses to structural failures are documented in `.agents/tests/epistemic-failure-modes.md`.
+
+## 14. Performance Targets
+
+- **Local Cognitive Loop**: Target local memory resolution bounded under 10 ms.
+- **Deep Adjudication**: Heavy reasoning paths handled out-of-band bounded under 45 s.
+
+## 15. Open Questions
+
+- Can veto suppression be safely modeled as bounded log-odds decay instead of hard exclusion?
+- Which CRDT family best fits belief dependency metadata without excessive tombstone growth?
+- How should suspended subgraphs be serialized for audit without leaking sensitive tenant-level content?
+- What is the minimal indexing scheme required for constant-time invalidation by dependency root?
