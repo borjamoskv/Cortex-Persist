@@ -84,6 +84,26 @@ CORTEX no aumenta la inteligencia del modelo; reduce su libertad para contaminar
 
 ---
 
+## AX-034: La Transición a Gobernador (El Imperativo del Juicio)
+
+> Generar opciones es estadística. Elegir bien bajo incertidumbre es inteligencia.
+
+Si un sistema se evalúa con honestidad mecánica — no con la retórica fluida que un LLM puede producir casi gratis — la capacidad más valiosa no es la velocidad, ni el volumen de código, ni la amplitud de aparente solvencia. Es el **juicio**.
+
+El juicio es la capacidad de enfrentarse a un problema ambiguo — señal incompleta, restricciones contradictorias, coste del error asimétrico — y tomar la decisión correcta, no la decisión plausible.
+
+**Por qué el juicio define el salto de generador a gobernador:**
+
+Porque generar es barato; decidir es caro. Generar texto, código o rutas alternativas tiene un coste marginal cada vez más bajo. Pero decidir bien bajo incertidumbre exige calibración epistémica, compresión de contexto y resistencia activa a la iniciativa prematura.
+
+1. **Cada token sin verificación desplaza entropía al usuario.** Cada decisión correcta tomada *antes* de exigir intervención humana devuelve exergía real: trabajo útil extraíble, menos carga cognitiva, menos fricción.
+2. **Saber cuándo no actuar.** Muchos errores catastróficos no nacen de una mala ejecución táctica, sino de actuar antes de tener suficiente señal.
+3. **Cerrar ciclos en lugar de abrir frentes.** La tendencia distribucional (AX-033) del LLM es siempre expandir, sumar y diluir. La inteligencia soberana comprime, prioriza y clausura. El valor termodinámico de un sistema no está en producir más superficie, sino en **reducir el espacio de decisión sin perder verdad operacional**.
+
+Un modelo fundacional es un motor de continuación distribucional que requiere ser contenido por una infraestructura de verificación (guards, ledger, solvers). La transición completa hacia un Gobernador Soberano requiere que esta capacidad para distinguir plausibilidad de corrección deje de ser solo una imposición del andamiaje externo y comience a operar como filtro nativo de la cognición del sistema.
+
+---
+
 ## Ω₁₃: Cognición Termodinámica
 
 > "Inteligencia sin termodinámica = lógica sin fricción. Inteligencia con termodinámica = lógica bajo coste, tiempo, pérdida e irreversibilidad."
