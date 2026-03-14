@@ -30,6 +30,7 @@ Usage (async):
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 from typing import Any, Final
 
@@ -63,6 +64,15 @@ CONNECT_TIMEOUT_S: Final[int] = 5
 # instead of userspace read() syscalls. Zero-copy for hot paths.
 MMAP_SIZE: Final[int] = 20_000_000_000
 
+# Page size (bytes). 8KB aligns with SSD sector size and modern OS page
+# caches. Only takes effect on new databases or after VACUUM; safe to set
+# unconditionally (silent no-op on existing DBs).
+PAGE_SIZE: Final[int] = 8192
+
+# Negative value = KiB. Default 128MB. Configurable via CORTEX_SQLITE_CACHE_MB.
+_CACHE_MB: Final[int] = int(os.environ.get("CORTEX_SQLITE_CACHE_MB", "128"))
+CACHE_SIZE_KB: Final[int] = -(_CACHE_MB * 1024)
+
 # Strings used to detect lock errors in OperationalError messages.
 _LOCK_MARKERS: Final[tuple[str, ...]] = ("database is locked", "busy")
 
@@ -87,6 +97,9 @@ def _apply_pragmas_sync(
     conn.execute("PRAGMA foreign_keys=ON")
     conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     conn.execute(f"PRAGMA mmap_size={MMAP_SIZE}")
+    conn.execute(f"PRAGMA page_size={PAGE_SIZE}")
+    conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB}")
+    conn.execute("PRAGMA temp_store=MEMORY")
 
     if read_only:
         conn.execute("PRAGMA query_only=1")
@@ -223,6 +236,9 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     await conn.execute("PRAGMA foreign_keys=ON;")
     await conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS};")
     await conn.execute(f"PRAGMA mmap_size={MMAP_SIZE};")
+    await conn.execute(f"PRAGMA page_size={PAGE_SIZE};")
+    await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
+    await conn.execute("PRAGMA temp_store=MEMORY;")
     await conn.commit()
 
 

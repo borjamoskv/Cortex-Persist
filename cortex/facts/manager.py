@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 from typing import Any
 
@@ -8,6 +9,8 @@ from pydantic import ValidationError
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.store_validators import validate_content
 from cortex.utils.canonical import now_iso
+
+_FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 
 __all__ = ["FactManager"]
 
@@ -138,7 +141,7 @@ class FactManager:
         results = await self.engine.get_all_active_facts(
             tenant_id=tenant_id, project=project, fact_types=fact_types
         )
-        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
+        return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
@@ -147,7 +150,7 @@ class FactManager:
         results = await self.engine.recall(
             project=project, tenant_id=tenant_id, limit=limit, offset=offset
         )
-        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
+        return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
 
     async def history(
         self, project: str, tenant_id: str = "default", as_of: str | None = None

@@ -26,6 +26,26 @@ EMBEDDING_DIM = 384
 # Configurable LRU cache size via env var (default 1024)
 _CACHE_SIZE = int(os.environ.get("CORTEX_CACHE_SIZE", "1024"))
 
+# Device selection: auto-detect GPU, override via CORTEX_DEVICE
+# Valid: "cpu", "cuda", "mps" (Apple Silicon), "auto" (default)
+_DEVICE = os.environ.get("CORTEX_DEVICE", "auto")
+
+
+def _resolve_device() -> str:
+    """Resolve embedding device. GPU if available, CPU fallback."""
+    if _DEVICE != "auto":
+        return _DEVICE
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            return "mps"
+    except ImportError:
+        pass
+    return "cpu"
+
 
 class LocalEmbedder:
     """Local embedding engine using sentence-transformers.
@@ -38,11 +58,13 @@ class LocalEmbedder:
         self,
         model_name: str = DEFAULT_MODEL,
         cache_dir: Path | None = None,
+        device: str | None = None,
     ):
         self._model_name = model_name
         self._cache_dir = cache_dir or DEFAULT_CACHE_DIR
         self._model = None
         self._identity_hash: str | None = None
+        self._device = device or _resolve_device()
 
     def _ensure_model(self):
         """Lazy-load model on first use."""
@@ -56,12 +78,21 @@ class LocalEmbedder:
 
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning, message=".*position_ids.*")
-                logger.info("Loading embedding model: %s", self._model_name)
+                logger.info(
+                    "Loading embedding model: %s (device=%s)",
+                    self._model_name,
+                    self._device,
+                )
                 self._model = SentenceTransformer(
                     self._model_name,
                     cache_folder=str(self._cache_dir),
+                    device=self._device,
                 )
-            logger.info("Model loaded. Dimension: %d", EMBEDDING_DIM)
+            logger.info(
+                "Model loaded. Dimension: %d, Device: %s",
+                EMBEDDING_DIM,
+                self._device,
+            )
         except ImportError as exc:
             raise RuntimeError(
                 "sentence-transformers not installed. "

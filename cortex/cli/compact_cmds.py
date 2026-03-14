@@ -83,6 +83,8 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
     Deduplicates, consolidates errors, and prunes stale facts.
     Original facts are deprecated (never deleted) — full audit trail preserved.
     """
+    from cortex.cli.common import _run_async
+
     engine = get_engine(db)
     try:
         # Parse strategies
@@ -128,14 +130,14 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
             )
             return
 
-        result = compact(
+        result = _run_async(compact(
             engine,
             project=project,
             strategies=strategies,
             dry_run=dry_run,
             similarity_threshold=threshold,
             max_age_days=max_age,
-        )
+        ))
 
         # Display results
         _display_compaction_result(project, result, dry_run)

@@ -45,7 +45,8 @@ class QueryMixin(EngineMixinBase):
             query = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND "
-                "(json_extract(f.meta, '$.is_quarantined') IS NULL OR "
+                "(f.meta LIKE 'v6_aesgcm:%' OR "
+                "json_extract(f.meta, '$.is_quarantined') IS NULL OR "
                 "json_extract(f.meta, '$.is_quarantined') = 0) "
                 "AND f.is_tombstoned = 0"
             )
@@ -124,7 +125,8 @@ class QueryMixin(EngineMixinBase):
                 f"SELECT {FACT_COLUMNS} "
                 f"{FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND f.project = ? "
-                "AND (json_extract(f.meta, '$.is_quarantined') IS NULL OR "
+                "AND (f.meta LIKE 'v6_aesgcm:%' OR "
+                "json_extract(f.meta, '$.is_quarantined') IS NULL OR "
                 "json_extract(f.meta, '$.is_quarantined') = 0) "
                 "AND f.is_tombstoned = 0"
             )
@@ -135,9 +137,12 @@ class QueryMixin(EngineMixinBase):
                 params.append(fact_type)
 
             # Unified Scoring: Bayesian reputation + Temporal decay
+            # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """
                 ORDER BY (
-                    coalesce(json_extract(f.meta, '$.consensus_score'), 1.0) * 0.8
+                    CASE WHEN f.meta LIKE 'v6_aesgcm:%' THEN 1.0
+                         ELSE coalesce(json_extract(f.meta, '$.consensus_score'), 1.0)
+                    END * 0.8
                     + (1.0 / (1.0 + (
                         julianday('now') - julianday(f.created_at)
                     ))) * 0.2
