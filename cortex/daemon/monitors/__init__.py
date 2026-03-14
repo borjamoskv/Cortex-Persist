@@ -31,6 +31,7 @@ __all__ = [
     "TrendsMonitor",
     "UnifiedMejoraloMonitor",
     "WorkflowMonitor",
+    "EpistemicMonitor",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
@@ -52,6 +53,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TrendsMonitor": ("cortex.daemon.monitors.trends", "TrendsMonitor"),
     "UnifiedMejoraloMonitor": ("cortex.daemon.monitors.mejoralo", "UnifiedMejoraloMonitor"),
     "WorkflowMonitor": ("cortex.daemon.monitors.workflow", "WorkflowMonitor"),
+    "EpistemicMonitor": ("cortex.daemon.monitors.epistemic", "EpistemicMonitor"),
 }
 
 

@@ -48,6 +48,7 @@ from cortex.daemon.monitors import (
     TombstoneMonitor,
     UnifiedMejoraloMonitor,
     WorkflowMonitor,
+    EpistemicMonitor,
 )
 from cortex.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
@@ -163,6 +164,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             ghosts_path=self.config_dir / "ghosts.json",
             memory_path=self.config_dir / "system.json",
             db_path=Path(file_config.get("db_path", str(CORTEX_DB))),
+        )
+        self.epistemic_monitor = EpistemicMonitor(
+            engine=self._shared_engine,
+            eval_interval_seconds=file_config.get("epistemic_eval_interval", 600),
+            critical_repair_threshold=file_config.get("epistemic_repair_threshold", 5),
+            decay_velocity_threshold=file_config.get("epistemic_decay_threshold", -0.05),
+            stale_ratio_threshold=file_config.get("epistemic_stale_ratio", 0.20),
         )
 
     def _init_external_oracles(self, file_config: dict, resolved_sites: list[str]) -> None:
@@ -376,6 +384,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         )
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
         self._run_monitor(status, "workflow_alerts", self.workflow_monitor, self._alert_workflows)
+        self._run_monitor(status, "epistemic_alerts", self.epistemic_monitor, self._alert_workflows)
         if self.aether_monitor is not None:
             self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
             if hasattr(self, "auto_immune_monitor"):

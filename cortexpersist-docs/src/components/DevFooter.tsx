@@ -20,9 +20,7 @@ export function DevFooter() {
               <Shield className="w-3.5 h-3.5" />
               .com
             </a>
-            <a href="https://cortexpersist.org" target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1 bg-white/[0.03] border border-white/5">
-              .org
-            </a>
+
             <a href="https://github.com/borjamoskv/cortex" target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1 bg-white/[0.03] border border-white/5">
               <Github className="w-3.5 h-3.5" /> GitHub
             </a>

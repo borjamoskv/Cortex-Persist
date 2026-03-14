@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 import aiosqlite
 
@@ -43,6 +43,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     """
 
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
+    _thermal_decay_cache: ClassVar[dict[int, int]] = {}
 
     async def store(
         self,
@@ -143,11 +144,32 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                             )
                             try:
                                 fact_id_int = int(top_match.id)
-                                await conn.execute(
-                                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP "
-                                    "WHERE id = ?",
-                                    (fact_id_int,),
-                                )
+                                
+                                # Axiom Ω7: Defensive Mutation (Thermal Decay Quarantine)
+                                hits = self.__class__._thermal_decay_cache.get(fact_id_int, 0) + 1
+                                self.__class__._thermal_decay_cache[fact_id_int] = hits
+                                
+                                if hits > 4:
+                                    logger.warning(
+                                        "☣️ [THERMAL DECAY] Fact %d reached critical entropy "
+                                        "(%d hits). Quarantining.",
+                                        fact_id_int,
+                                        hits,
+                                    )
+                                    # Archive the decaying abstraction before it processes further
+                                    await self.deprecate(
+                                        fact_id=fact_id_int,
+                                        reason=f"Thermal decay quarantine (Semantic loop {hits}x)",
+                                        conn=conn,
+                                        tenant_id=tenant_id
+                                    )
+                                    self.__class__._thermal_decay_cache[fact_id_int] = 0
+                                else:
+                                    await conn.execute(
+                                        "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP "
+                                        "WHERE id = ?",
+                                        (fact_id_int,),
+                                    )
                                 return fact_id_int, meta, content, fact_type
                             except (ValueError, TypeError):
                                 logger.warning(

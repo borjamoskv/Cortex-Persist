@@ -157,6 +157,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
 
 _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("agent", "cortex.cli.agent_cmds", "agent_cmds", "Agent management commands."),
+    ("architect", "cortex.cli.architect_cmds", "architect", "Design Sovereign Prompts from raw requirements."),
     ("apotheosis", "cortex.cli.apotheosis_cmds", "apotheosis_cmds", "Apotheosis autonomy engine."),
     ("autorouter", "cortex.cli.autorouter_cmds", "autorouter_cmds", "AI model router daemon."),
     (

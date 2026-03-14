@@ -410,4 +410,15 @@ Axioma de comunicación estructural: Evita simplificaciones basadas en opinión 
 
 ---
 
+## Axioma de Colapso Entrópico (Ejecución en Ciclos)
+
+Axioma de ejecución estructural (Relacionado con Axioma Ω₁₁): Forzar ciclos cerrados de iteración [Observar → Hipotetizar → Actuar → Medir] en lugar de ejecución monolítica continua para tareas complejas.
+
+- **Fricción como Filtro (Colapso Entrópico)**: Un LLM es estocástico. Forzar paradas rompe la acumulación de error probabilístico (alucinación compuesta) y purifica la señal para el siguiente bloque.
+- **Rendimiento Compuesto**: La salida verificada y ejecutada del Ciclo $N$ se consolida como la base axiomática (*ground truth*) inmutable del Ciclo $N+1$.
+- **Aislamiento del Fallo**: Una asunción fallida en el paso 2 se detecta y corrige en su ciclo, impidiendo que el sistema construya los pasos 3 al 10 sobre *código fantasma*.
+- **Transición a Determinista**: Atrapa la regresión infinita del LLM en un bucle cerrado validado mecánicamente, forzando a que el resultado final sea estructuralmente predecible.
+
+---
+
 *CORTEX Persist · `cortex-persist` v0.3.0b1 · Updated 2026-03-02*

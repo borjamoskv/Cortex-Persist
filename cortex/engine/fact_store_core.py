@@ -99,8 +99,9 @@ async def insert_fact_record(
     encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
 
     cursor = await conn.execute(
-        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, hash, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, "
+        "hash, created_at, updated_at, valid_from) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -109,6 +110,7 @@ async def insert_fact_record(
             tags_json,
             encrypted_meta,
             f_hash,
+            ts,
             ts,
             ts,
         ),

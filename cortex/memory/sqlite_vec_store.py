@@ -61,6 +61,8 @@ class SovereignVectorStoreL2:
         "_sanitizer",
     )
 
+    MAX_DOMAIN_ENTROPY = 5000  # Axiom Ω8: Critical mass for Universe Splitting
+
     def __init__(
         self,
         encoder: AsyncEncoder,
@@ -169,6 +171,93 @@ class SovereignVectorStoreL2:
                 pass
         return self._sanitizer
 
+    def _get_domain_tables(self, conn: sqlite3.Connection, tenant_id: str, project_id: str) -> tuple[str, str]:
+        """Axiom Ω8: Vertical Domain Cut. 
+        If a corpus weighs too much, we split the universe and migrate only distilled axioms.
+        """
+        safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
+        safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
+        if not safe_tenant or not safe_proj:
+            return "facts_meta", "vec_facts"
+
+        meta_tb = f"facts_meta_{safe_tenant}_{safe_proj}"
+        vec_tb = f"vec_facts_{safe_tenant}_{safe_proj}"
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (meta_tb,))
+        if cursor.fetchone():
+            return meta_tb, vec_tb
+
+        cursor.execute(
+            "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
+            (tenant_id, project_id)
+        )
+        count = cursor.fetchone()[0]
+
+        if count >= self.MAX_DOMAIN_ENTROPY:
+            logger.warning(
+                "🌌 [UNIVERSE SPLIT] Domain %s/%s reached mass %d. Sharding vector space.", 
+                tenant_id, project_id, count
+            )
+            # Create sharded schema
+            conn.execute(f"""
+                CREATE TABLE {meta_tb} (
+                    id TEXT PRIMARY KEY,
+                    tenant_id TEXT NOT NULL,
+                    project_id TEXT NOT NULL,
+                    content TEXT,
+                    timestamp REAL,
+                    is_diamond INTEGER,
+                    is_bridge INTEGER,
+                    confidence TEXT,
+                    success_rate REAL,
+                    cognitive_layer TEXT,
+                    parent_decision_id TEXT,
+                    metadata TEXT
+                )
+            """)
+            conn.execute(
+                f"CREATE VIRTUAL TABLE {vec_tb} USING "
+                f"vec0(embedding float[{self._encoder.dimension}])"
+            )
+
+            # Migrate only distilled axioms (is_diamond = 1)
+            conn.execute(f"""
+                INSERT INTO {meta_tb} (
+                    rowid, id, tenant_id, project_id, content, timestamp,
+                    is_diamond, is_bridge, confidence, success_rate,
+                    cognitive_layer, parent_decision_id, metadata
+                )
+                SELECT
+                    rowid, id, tenant_id, project_id, content, timestamp,
+                    is_diamond, is_bridge, confidence, success_rate,
+                    cognitive_layer, parent_decision_id, metadata
+                FROM facts_meta
+                WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
+            """, (tenant_id, project_id))
+
+            conn.execute(f"""
+                INSERT INTO {vec_tb}(rowid, embedding)
+                SELECT v.rowid, v.embedding
+                FROM vec_facts v
+                JOIN facts_meta m ON v.rowid = m.rowid
+                WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1
+            """, (tenant_id, project_id))
+
+            conn.execute(
+                f"CREATE INDEX idx_tenant_proj_{safe_tenant}_{safe_proj} "
+                f"ON {meta_tb}(tenant_id, project_id)"
+            )
+            conn.execute(
+                f"CREATE INDEX idx_bridge_{safe_tenant}_{safe_proj} "
+                f"ON {meta_tb}(is_bridge)"
+            )
+            
+            conn.commit()
+            return meta_tb, vec_tb
+
+        return "facts_meta", "vec_facts"
+
     async def memorize(self, fact: CortexFactModel) -> None:
         """Encode and store a multi-tenant CortexFactModel.
 
@@ -206,9 +295,10 @@ class SovereignVectorStoreL2:
 
             cursor = conn.cursor()
             try:
+                meta_tb, vec_tb = self._get_domain_tables(conn, fact.tenant_id, fact.project_id)
                 cursor.execute(
-                    """
-                    INSERT INTO facts_meta (
+                    f"""
+                    INSERT INTO {meta_tb} (
                         id, tenant_id, project_id, content, timestamp,
                         is_diamond, is_bridge, confidence, success_rate,
                         cognitive_layer, parent_decision_id, metadata
@@ -232,7 +322,7 @@ class SovereignVectorStoreL2:
                 rowid = cursor.lastrowid
 
                 cursor.execute(
-                    "INSERT INTO vec_facts(rowid, embedding) VALUES (?, ?)",
+                    f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
                     (rowid, embedding_bytes),
                 )
                 conn.commit()
@@ -262,8 +352,9 @@ class SovereignVectorStoreL2:
 
         # Vector search + Reranking in SQL
         cursor = conn.cursor()
+        meta_tb, vec_tb = self._get_domain_tables(conn, tenant_id, project_id)
 
-        sql = """
+        sql = f"""
             SELECT
                 m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
                 m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
@@ -272,8 +363,8 @@ class SovereignVectorStoreL2:
                 ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
                  cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                  m.success_rate) as final_score
-            FROM facts_meta m
-            JOIN vec_facts v ON m.rowid = v.rowid
+            FROM {meta_tb} m
+            JOIN {vec_tb} v ON m.rowid = v.rowid
             WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
         """
         params = [embedding_bytes, now, self._half_life, tenant_id, project_id]
