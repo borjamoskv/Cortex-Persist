@@ -3,9 +3,8 @@
 Trust infrastructure for autonomous AI:
 cryptographic verification, audit trails, epistemic containment, and agent memory.
 
-Version: `cortex-persist` v0.3.0b1
-License: Apache-2.0
-Python: >=3.10
+Package: cortex-persist v0.3.0b1 · Engine: v8
+License: Apache-2.0 · Python: >=3.10
 
 ## Scope
 
@@ -37,7 +36,7 @@ agents working inside the repository.
 | `memory/` | Critical | Large public API surface |
 | `ledger.py` | Critical | Hash-chain integrity and trust continuity |
 | `migrations/` | Critical | Irreversible production impact |
-| `guards/` | High | Admission, contradiction, and injection boundaries |
+| `guards/` | High | Admission, contradiction, dependency, and injection-detection surfaces |
 | `verification/` | High | Formal or deterministic validation surfaces |
 | `routes/` | High | External API contract |
 | `cli/` | Medium | Thin wrappers only |
@@ -174,6 +173,6 @@ logging, and external verification when required.
 - [`README.md`](README.md) — project overview and install surface
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system topology and module map
 - [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, ledger, verification
-- [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms
+- [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
