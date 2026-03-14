@@ -56,7 +56,7 @@ class CortexConnectionPool:
         self._active_count = 0
         self._lock = asyncio.Lock()
         # Semaphore limits concurrent acquisitions
-        self._semaphore = asyncio.Semaphore(max_connections)
+        self._semaphore = asyncio.Semaphore(self.max_connections)
         self._initialized = False
 
     async def initialize(self) -> None:

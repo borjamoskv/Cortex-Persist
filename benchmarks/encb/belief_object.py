@@ -34,6 +34,7 @@ class Evidence:
     confidence: float  # 0..1
     assumption_ids: FrozenSet[str]
     payload_hash: str
+    value: Any = None
 
     @staticmethod
     def make(
@@ -51,6 +52,7 @@ class Evidence:
             confidence=max(0.0, min(1.0, conf)),
             assumption_ids=assumptions or frozenset(),
             payload_hash=f"{key}:{value}:{t}:{node}",
+            value=value,
         )
 
 

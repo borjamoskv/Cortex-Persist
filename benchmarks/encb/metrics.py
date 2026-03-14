@@ -218,3 +218,80 @@ def compute_report(
         ),
         error_rate_by_type=error_by_type,
     )
+
+
+# ── Strict Statistical Metrics ───────────────────────────────────────────
+
+
+import math
+
+def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> float:
+    """
+    Calculates the Recovery Rate R = |recovered ∩ GT| / |GT|.
+    Uses exact string matching for now (set intersection), but could be extended to
+    Jaccard or cosine similarity for softer recovery.
+    """
+    if not ground_truth:
+        return 1.0 if not recovered else 0.0
+    
+    intersection = recovered.intersection(ground_truth)
+    return len(intersection) / len(ground_truth)
+
+
+def calculate_f1_score(predicted: set[str], actual: set[str]) -> float:
+    """
+    Calculates the F1 score for detection tasks (e.g., Byzantine node detection).
+    Replaces simple recall to penalize false positives.
+    """
+    # True Positives: predicted AND actual
+    tp = len(predicted.intersection(actual))
+    # False Positives: predicted BUT NOT actual
+    fp = len(predicted - actual)
+    # False Negatives: actual BUT NOT predicted
+    fn = len(actual - predicted)
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+
+    if precision + recall == 0:
+         return 0.0
+         
+    return 2 * (precision * recall) / (precision + recall)
+
+
+def calculate_kl_divergence(p_consensus: dict[str, float], p_truth: dict[str, float]) -> float:
+    """
+    Calculates the Kullback-Leibler Divergence KL(P_truth || P_consensus).
+    Expects probability distributions where values sum to 1.0 (or represent distinct parallel probs).
+    If a probability in P_consensus is 0, we add a small epsilon to avoid math error.
+    
+    Lower is better (0.0 means perfect alignment).
+    """
+    epsilon = 1e-9
+    kl_div = 0.0
+    for key, truth_prob in p_truth.items():
+        if truth_prob > 0:
+            cons_prob = p_consensus.get(key, 0.0)
+            # Smooth consensus probability to avoid log(0)
+            cons_prob = max(cons_prob, epsilon)
+            # Both probabilities must be bounded [epsilon, 1.0] for safe log
+            kl_div += truth_prob * math.log(truth_prob / cons_prob)
+    return kl_div
+
+
+def calculate_entropy_delta(pre_state_probs: list[float], post_state_probs: list[float]) -> float:
+    """
+    Calculates the difference in Shannon Entropy: ΔH = H(post) - H(pre).
+    A negative delta indicates the system reduced uncertainty (entropy went down).
+    """
+    def shannon_h(probs: list[float]) -> float:
+        h = 0.0
+        for p in probs:
+            if p > 0:
+                h -= p * math.log(p)
+        return h
+
+    h_pre = shannon_h(pre_state_probs)
+    h_post = shannon_h(post_state_probs)
+    return h_post - h_pre
+

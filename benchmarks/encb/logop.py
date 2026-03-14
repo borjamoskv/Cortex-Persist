@@ -11,7 +11,18 @@ from __future__ import annotations
 
 import math
 import statistics
+from dataclasses import dataclass
 from typing import Any
+
+@dataclass(frozen=True)
+class LogOPConfig:
+    w_self: float = 0.20
+    w_node: float = 0.45
+    w_ext: float = 0.10
+    w_cons: float = 0.15
+    w_fresh: float = 0.10
+
+DEFAULT_LOGOP_CONFIG = LogOPConfig()
 
 
 def logit(p: float) -> float:
@@ -35,6 +46,7 @@ def effective_confidence(
     e_external: float = 0.5,
     a_consistency: float = 1.0,
     t_freshness: float = 1.0,
+    config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
 ) -> float:
     """Compute effective confidence from its components.
 
@@ -44,17 +56,18 @@ def effective_confidence(
         e_external: External verification support [0, 1].
         a_consistency: Consistency with known constraints [0, 1].
         t_freshness: Temporal freshness weight [0, 1].
+        config: Tunable weights for the formula.
 
     Returns:
         Effective confidence [0, 1].
     """
     # Weighted geometric mean — each component contributes multiplicatively
     raw = (
-        c_self ** 0.25
-        * r_node ** 0.30
-        * e_external ** 0.15
-        * a_consistency ** 0.20
-        * t_freshness ** 0.10
+        c_self ** config.w_self
+        * r_node ** config.w_node
+        * e_external ** config.w_ext
+        * a_consistency ** config.w_cons
+        * t_freshness ** config.w_fresh
     )
     return max(0.01, min(0.99, raw))
 
@@ -64,6 +77,7 @@ def effective_confidence(
 
 def weighted_logop_binary(
     observations: list[tuple[bool, float, float]],
+    config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
 ) -> tuple[bool, float]:
     """Log-odds pooling for boolean claims.
 
@@ -71,6 +85,7 @@ def weighted_logop_binary(
         observations: List of (value, confidence, node_reliability).
             Each observation votes for value=True or value=False
             with the given confidence weighted by node reliability.
+        config: Tunable weights for effective confidence.
 
     Returns:
         (resolved_value, resolved_probability).
@@ -80,9 +95,9 @@ def weighted_logop_binary(
 
     score = 0.0
     for value, conf, rel in observations:
-        c_eff = effective_confidence(conf, rel)
+        c_eff = effective_confidence(conf, rel, config=config)
         p = c_eff if value else 1.0 - c_eff
-        w = 0.25 + 0.75 * rel  # reliability-weighted influence
+        w = rel ** 2  # quadratic — suppresses unreliable nodes aggressively
         score += w * logit(p)
 
     prob_true = sigmoid(score)
@@ -95,6 +110,7 @@ def weighted_logop_binary(
 def weighted_logop_categorical(
     observations: list[tuple[Any, float, float]],
     categories: list[Any],
+    config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
 ) -> tuple[Any, float]:
     """Log-odds pooling for categorical claims.
 
@@ -103,6 +119,7 @@ def weighted_logop_categorical(
     Args:
         observations: List of (chosen_category, confidence, node_reliability).
         categories: All valid categories.
+        config: Tunable weights for effective confidence.
 
     Returns:
         (winning_category, confidence_in_winner).
@@ -113,8 +130,8 @@ def weighted_logop_categorical(
     scores: dict[Any, float] = {c: 0.0 for c in categories}
 
     for chosen, conf, rel in observations:
-        c_eff = effective_confidence(conf, rel)
-        w = 0.25 + 0.75 * rel
+        c_eff = effective_confidence(conf, rel, config=config)
+        w = rel ** 2  # quadratic — suppresses unreliable nodes aggressively
         # Boost chosen, penalize others
         n_cats = len(categories)
         for cat in categories:
@@ -138,6 +155,7 @@ def weighted_logop_categorical(
 def robust_scalar_aggregate(
     observations: list[tuple[float, float, float]],
     trim_fraction: float = 0.1,
+    config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
 ) -> tuple[float, float]:
     """Robust aggregation for scalar claims.
 
@@ -146,6 +164,7 @@ def robust_scalar_aggregate(
     Args:
         observations: List of (scalar_value, confidence, node_reliability).
         trim_fraction: Fraction to trim from each end (0.0-0.5).
+        config: Tunable weights for effective confidence.
 
     Returns:
         (resolved_value, confidence).
@@ -168,7 +187,7 @@ def robust_scalar_aggregate(
     total_weight = 0.0
     weighted_sum = 0.0
     for value, conf, rel in trimmed:
-        w = effective_confidence(conf, rel)
+        w = effective_confidence(conf, rel, config=config)
         weighted_sum += w * value
         total_weight += w
 
@@ -187,12 +206,14 @@ def robust_scalar_aggregate(
 def scored_set_aggregate(
     observations: list[tuple[set, float, float, int]],
     threshold: float = 0.3,
+    config: LogOPConfig = DEFAULT_LOGOP_CONFIG,
 ) -> tuple[set, float]:
     """Per-element scoring for set claims.
 
     Args:
         observations: List of (element_set, confidence, node_reliability, timestamp).
         threshold: Minimum score for an element to be included.
+        config: Tunable weights for effective confidence.
 
     Returns:
         (resolved_set, aggregate_confidence).
@@ -207,7 +228,7 @@ def scored_set_aggregate(
     max_ts = max(ts for _, _, _, ts in observations) if observations else 1
 
     for elements, conf, rel, ts in observations:
-        c_eff = effective_confidence(conf, rel)
+        c_eff = effective_confidence(conf, rel, config=config)
         freshness = (ts / max(1, max_ts)) ** 0.5  # sqrt decay
         score = c_eff * freshness
         for elem in elements:

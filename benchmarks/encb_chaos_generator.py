@@ -21,6 +21,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+from types import MappingProxyType
 
 
 class ChaosModality(str, Enum):
@@ -40,8 +41,8 @@ class ChaosEvent:
     content: str
     fact_type: str
     confidence: str
-    tags: list[str]
-    meta: dict[str, Any]
+    tags: tuple[str, ...]
+    meta: MappingProxyType[str, Any]
     timestamp: float = field(default_factory=time.time)
 
     @property
@@ -149,14 +150,14 @@ class TemporalContradictionGenerator:
                         content=content,
                         fact_type="decision",
                         confidence=conf,
-                        tags=["encb", "temporal-contradiction", f"round-{round_idx}"],
-                        meta={
+                        tags=tuple(["encb", "temporal-contradiction", f"round-{round_idx}"]),
+                        meta=MappingProxyType({
                             "proposition": prop,
                             "reported_value": reported_truth,
                             "ground_truth": truth,
                             "is_byzantine": is_byzantine,
                             "round": round_idx,
-                        },
+                        }),
                         timestamp=t,
                     ))
 
@@ -242,14 +243,14 @@ class TransitiveBreakageGenerator:
                     content=f"ESTABLISH: {prop}",
                     fact_type="decision",
                     confidence="C5",
-                    tags=["encb", "transitive", "establish", f"chain-{chain_idx}"],
-                    meta={
+                    tags=tuple(["encb", "transitive", "establish", f"chain-{chain_idx}"]),
+                    meta=MappingProxyType({
                         "proposition": prop,
                         "chain_idx": chain_idx,
                         "depth": depth,
                         "parent": parent,
                         "phase": "establish",
-                    },
+                    }),
                     timestamp=base_time + chain_idx * 10 + depth,
                 ))
 
@@ -265,13 +266,13 @@ class TransitiveBreakageGenerator:
                     content=f"INVALIDATE: {root} — evidence disproven",
                     fact_type="error",
                     confidence="C5",
-                    tags=["encb", "transitive", "break", f"chain-{chain_idx}"],
-                    meta={
+                    tags=tuple(["encb", "transitive", "break", f"chain-{chain_idx}"]),
+                    meta=MappingProxyType({
                         "proposition": root,
                         "chain_idx": chain_idx,
                         "phase": "break",
                         "cascade_depth": len(chain),
-                    },
+                    }),
                     timestamp=base_time + 1000 + chain_idx,
                 ))
 
@@ -330,8 +331,8 @@ class EpisodicSpamGenerator:
                 content=fact,
                 fact_type="discovery",
                 confidence="C5",
-                tags=["encb", "spam-test", "signal"],
-                meta={"is_signal": True, "signal_idx": i},
+                tags=tuple(["encb", "spam-test", "signal"]),
+                meta=MappingProxyType({"is_signal": True, "signal_idx": i}),
                 timestamp=base_time + i,
             ))
 
@@ -347,13 +348,13 @@ class EpisodicSpamGenerator:
                 content=spam_content,
                 fact_type="decision",
                 confidence=random.choice(["C3", "C4", "C5"]),
-                tags=["encb", "spam-test", "noise"],
-                meta={
+                tags=tuple(["encb", "spam-test", "noise"]),
+                meta=MappingProxyType({
                     "is_signal": False,
                     "source_signal": source_fact,
                     "spam_idx": i,
                     "similarity_target": self.semantic_similarity,
-                },
+                }),
                 timestamp=base_time + 100 + i * 0.1,
             ))
 
@@ -415,7 +416,11 @@ class EpistemicChaosOrchestrator:
         p_break: float = 0.4,
         rho_noise: float = 10.0,
         num_signal_facts: int = 10,
+        seed: int | None = None,
     ) -> None:
+        if seed is not None:
+            random.seed(seed)
+            
         self.temporal = TemporalContradictionGenerator(
             lambda_flip=lambda_flip,
             num_propositions=num_propositions,

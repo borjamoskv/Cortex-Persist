@@ -141,14 +141,19 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
     # Collect all observed scalar values from evidence
     values: list[float] = []
     for ev in merged_evidences:
-        try:
-            # Extract value from payload_hash format "key:value:t:node"
-            parts = ev.payload_hash.split(":")
-            if len(parts) >= 2:
-                values.append(float(parts[1]))
-        except (ValueError, IndexError):
-            pass
-
+        if ev.value is not None:
+            try:
+                values.append(float(ev.value))
+            except (ValueError, TypeError):
+                pass
+        else:
+            try:
+                parts = ev.payload_hash.split(":")
+                if len(parts) >= 2:
+                    values.append(float(parts[1]))
+            except (ValueError, IndexError):
+                pass
+    
     if values:
         result_value = statistics.median(values)
     else:

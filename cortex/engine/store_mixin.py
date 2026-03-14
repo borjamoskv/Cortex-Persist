@@ -334,7 +334,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     source=source or "engine:store",
                     tenant_id=tenant_id,
                 )
-        except Exception as _sig_err:  # noqa: BLE001
+        except (ImportError, RuntimeError, ValueError, TypeError, OSError) as _sig_err:
             # Signal emission is best-effort — must not block the store operation
             logger.debug("[STORE] Signal emit skipped: %s", _sig_err)
 

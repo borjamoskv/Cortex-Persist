@@ -162,13 +162,13 @@ class CortexMemoryManager:
                 overflowed, session_id, tenant_id, project_id = await self._bg_queue.get()
                 try:
                     await compress_and_store(self, overflowed, session_id, tenant_id, project_id)
-                except Exception as e:
+                except (ValueError, TypeError, RuntimeError, OSError) as e:
                     logger.error("MemoryManager: Worker %d failed compression: %s", worker_id, e)
                 finally:
                     self._bg_queue.task_done()
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except (ValueError, TypeError, RuntimeError, OSError) as e:
                 logger.error("MemoryManager: Worker %d encountered fatal error: %s", worker_id, e)
                 await asyncio.sleep(1)
 
@@ -306,7 +306,7 @@ class CortexMemoryManager:
         if hasattr(self._l2, "_get_conn"):
             try:
                 conn = self._l2._get_conn()
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 logger.warning("CortexMemoryManager: Could not get L2 conn for thalamus: %s", e)
 
         should_process, action, _ = await self.thalamus.filter(

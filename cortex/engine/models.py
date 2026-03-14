@@ -63,7 +63,7 @@ def row_to_fact(row: tuple) -> Fact:
     tenant_id = r[1] or "default"
     try:
         content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
-    except Exception:  # noqa: BLE001 — Corrupted or key-mismatched facts shouldn't crash
+    except ValueError:
         content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
 
     # Safely handle JSON parsing
@@ -74,7 +74,7 @@ def row_to_fact(row: tuple) -> Fact:
 
     try:
         meta = enc.decrypt_json(r[6], tenant_id=tenant_id) if r[6] else {}
-    except Exception:  # noqa: BLE001
+    except ValueError:
         meta = {"error": "decryption_failed", "fact_id": r[0]}
 
     return Fact(

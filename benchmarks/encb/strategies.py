@@ -9,8 +9,7 @@ Four strategies implementing a common interface:
 
 from __future__ import annotations
 
-import math
-import random
+
 import statistics
 from collections import defaultdict
 from enum import Enum
@@ -20,7 +19,6 @@ from benchmarks.encb.agents import NodeProfile, update_reliability
 from benchmarks.encb.atms import ATMSLite
 from benchmarks.encb.belief_object import BeliefType
 from benchmarks.encb.logop import (
-    effective_confidence,
     robust_scalar_aggregate,
     scored_set_aggregate,
     weighted_logop_binary,
@@ -223,6 +221,7 @@ def resolve_cortex(
     use_reliability: bool = True,
     use_atms: bool = True,
     use_freshness: bool = True,
+    warmup_rounds: int = 5,
 ) -> None:
     """S3 — CRDT merge + LogOP + ATMS-lite + reliability adaptation.
 
@@ -230,30 +229,67 @@ def resolve_cortex(
       Layer 1: CRDT merge (in observations, already pre-merged)
       Layer 2: LogOP belief arbitration (this function)
       Layer 3: ATMS truth maintenance (invalidation)
+
+    During warm-up (first `warmup_rounds` rounds), blends LogOP with
+    confidence-weighted majority to avoid noise from uninformative
+    reliability scores. After warm-up, full LogOP resolution applies.
     """
     if not observations:
         return
 
-    # Layer 2: LogOP resolution
+    # Warm-up blending factor: 0.0 at round 0 → 1.0 at warmup_rounds
+    alpha = min(1.0, round_idx / max(1, warmup_rounds)) if use_reliability else 1.0
+
+    # Layer 2: LogOP resolution (weighted by alpha during warm-up)
     if state.belief_type == BeliefType.BOOLEAN:
+        if alpha < 1.0:
+            # Blend: fallback = confidence-weighted majority (like S2)
+            votes: dict[bool, float] = defaultdict(float)
+            for _, val, conf in observations:
+                votes[val] += conf
+            fallback_val = max(votes, key=lambda k: votes[k])
+            fallback_conf = votes[fallback_val] / (sum(votes.values()) + 1e-9)
+
         obs_tuples = [
             (val, conf, node.reliability if use_reliability else 0.5)
             for node, val, conf in observations
         ]
-        resolved_val, resolved_prob = weighted_logop_binary(obs_tuples)
-        state.current_value = resolved_val
-        state.confidence = resolved_prob
+        logop_val, logop_prob = weighted_logop_binary(obs_tuples)
+
+        if alpha >= 1.0:
+            state.current_value = logop_val
+            state.confidence = logop_prob
+        else:
+            # During warm-up: if fallback and logop agree, use logop.
+            # If they disagree, blend confidence toward fallback.
+            if logop_val == fallback_val:
+                state.current_value = logop_val
+                state.confidence = logop_prob
+            else:
+                state.current_value = fallback_val
+                state.confidence = (1.0 - alpha) * fallback_conf + alpha * logop_prob
 
     elif state.belief_type == BeliefType.CATEGORICAL:
+        if alpha < 1.0:
+            tallies: dict[Any, float] = defaultdict(float)
+            for _, val, conf in observations:
+                tallies[val] += conf
+            fallback_val = max(tallies, key=lambda k: tallies[k])
+
         obs_tuples = [
             (val, conf, node.reliability if use_reliability else 0.5)
             for node, val, conf in observations
         ]
-        resolved_val, resolved_conf = weighted_logop_categorical(
+        logop_val, logop_conf = weighted_logop_categorical(
             obs_tuples, state.categories
         )
-        state.current_value = resolved_val
-        state.confidence = resolved_conf
+
+        if alpha >= 1.0:
+            state.current_value = logop_val
+            state.confidence = logop_conf
+        else:
+            state.current_value = fallback_val if logop_val != fallback_val else logop_val
+            state.confidence = logop_conf
 
     elif state.belief_type == BeliefType.SCALAR:
         obs_tuples = [
@@ -275,10 +311,13 @@ def resolve_cortex(
         state.confidence = resolved_conf
 
     # Layer 2b: Reliability update (adaptive)
+    # Higher learning rate (0.12) for faster differentiation of adversaries
     if use_reliability:
         for node, val, _ in observations:
             was_correct = _observation_matches(state, val)
-            node.reliability = update_reliability(node.reliability, was_correct)
+            node.reliability = update_reliability(
+                node.reliability, was_correct, lr=0.12
+            )
 
     # Layer 3: ATMS truth maintenance
     if use_atms and atms is not None:
