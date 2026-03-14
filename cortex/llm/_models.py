@@ -53,6 +53,14 @@ class IntentProfile(str, Enum):
     GENERAL = "general"
     """Intención genérica o no clasificada — sin restricción de fallback."""
 
+    BELIEF_AUDIT = "belief_audit"
+    """Cognitive Handoff: contradiction detection, invariant verification.
+    Routes to Auditor Economic (Deep Think) or Premium (Opus)."""
+
+    EPISODIC_PROCESSING = "episodic_processing"
+    """Cognitive Handoff: massive context reads, multimodal ingestion.
+    Routes to Infrastructure (Gemini 3.1 Pro) for cost-gated prescreen."""
+
 
 class CascadeTier(str, Enum):
     """Classification of which cascade tier resolved the call."""

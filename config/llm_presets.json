@@ -26,7 +26,9 @@
       "reasoning": "o3",
       "creative":  "gpt-4o",
       "architect": "o3",
-      "general":   "gpt-4o"
+      "general":   "gpt-4o",
+      "belief_audit": "gpt-5.4",
+      "episodic_processing": "gpt-4o"
     }
   },
   "anthropic": {
@@ -45,7 +47,9 @@
       "reasoning": "claude-sonnet-4-20250514",
       "creative":  "claude-sonnet-4-20250514",
       "architect": "claude-sonnet-4-20250514",
-      "general":   "claude-sonnet-4-20250514"
+      "general":   "claude-sonnet-4-20250514",
+      "belief_audit": "claude-opus-4-20260301",
+      "episodic_processing": "claude-sonnet-4-20250514"
     }
   },
   "gemini": {
@@ -61,7 +65,9 @@
       "creative":  "gemini-3.1-pro-preview",
       "code":      "gemini-3.1-pro-preview",
       "architect": "gemini-3.1-pro-preview",
-      "general":   "gemini-3.1-pro-preview"
+      "general":   "gemini-3.1-pro-preview",
+      "belief_audit": "gemini-2.5-pro-deep-think",
+      "episodic_processing": "gemini-3.1-pro-preview"
     }
   },
   "kimi": {
