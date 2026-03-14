@@ -14,8 +14,15 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
-from watchdog.observers import Observer
+try:
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler
+    from watchdog.observers import Observer
+except ImportError:
+    # Sovereign fallback: If watchdog isn't installed (e.g. running just API/CLI),
+    # the module loads but Oracle start() will fail or be no-op.
+    FileSystemEvent = object  # type: ignore
+    FileSystemEventHandler = object  # type: ignore
+    Observer = object  # type: ignore
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine
