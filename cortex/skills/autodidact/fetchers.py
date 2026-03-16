@@ -144,8 +144,14 @@ def _unwrap(res: Any) -> Any:
 async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
     """Extrae, asimila y retorna el Cristal Cognitivo (Markdown)."""
     try:
-        if intent_type == "quick_read":
+        is_youtube = "youtube.com" in target or "youtu.be" in target
+        if intent_type == "quick_read" and not is_youtube:
             return _unwrap(await fetch_jina_markdown(target))
+        elif is_youtube and intent_type in ("quick_read", "deep_learn"):
+            res = _unwrap(await fetch_firecrawl_deep(target))
+            if isinstance(res, dict) and "data" in res and res["data"]:
+                return res["data"][0].get("markdown", str(res))
+            return str(res)
         if intent_type == "deep_learn":
             res = _unwrap(await fetch_firecrawl_deep(target))
             if isinstance(res, dict) and "data" in res and res["data"]:

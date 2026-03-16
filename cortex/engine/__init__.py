@@ -68,6 +68,67 @@ class CortexEngine(
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
 
+        # Decoupled guard pipeline (Ω₃: minimal coupling)
+        self._guard_pipeline = self._register_default_guards()
+
+    # ─── Guard Pipeline Registration ──────────────────────────────
+
+    def _register_default_guards(self):
+        """Build the GuardPipeline with all available guard adapters.
+
+        Each adapter is imported defensively — if the underlying module
+        is not installed, the adapter is silently skipped. This ensures
+        the engine always starts, regardless of optional dependencies.
+        """
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        pipeline = GuardPipeline()
+        db_path = str(self._db_path)
+
+        # Pre-store guards (AX-033 Hooks 1-3)
+        try:
+            from cortex.engine.guard_adapters import HealthGuardAdapter
+            pipeline.add_guard(HealthGuardAdapter(db_path))
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        try:
+            from cortex.engine.guard_adapters import ContradictionGuardAdapter
+            pipeline.add_guard(ContradictionGuardAdapter(db_path))
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        try:
+            from cortex.engine.guard_adapters import VerifierGuardAdapter
+            pipeline.add_guard(VerifierGuardAdapter())
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
+        try:
+            from cortex.engine.guard_adapters import LedgerCheckpointHook
+            pipeline.add_post_hook(LedgerCheckpointHook(self))
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        try:
+            from cortex.engine.guard_adapters import SignalEmitHook
+            pipeline.add_post_hook(SignalEmitHook())
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        try:
+            from cortex.engine.guard_adapters import EpistemicBreakerHook
+            pipeline.add_post_hook(EpistemicBreakerHook())
+        except (ImportError, Exception):  # noqa: BLE001
+            pass
+
+        logger.debug(
+            "GuardPipeline: %d guards, %d hooks registered",
+            pipeline.guard_count, pipeline.hook_count,
+        )
+        return pipeline
+
     # ─── Security: Filesystem Permission Enforcement ──────────────
 
     def _enforce_fs_permissions(self) -> None:

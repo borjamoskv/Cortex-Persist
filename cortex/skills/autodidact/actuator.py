@@ -75,7 +75,7 @@ async def daemon_ingesta_soberana(
     # 2. Barrera Babestu (Seguridad Estática T-Cell)
     if BabestuTCell:
         logger.info("🛡️ [BABESTU] Escaneando payload con T-Cell (O(1))...")
-        audit = BabestuTCell.scan_payload(texto_raw)
+        audit = BabestuTCell.scan_payload(texto_raw, source_url=target_url)
         if audit.get("estado") == "CONTAMINADO":
             msg = f"Veneno detectado: {audit.get('firma_ataque')}. Razón: {audit.get('razon')}"
             logger.critical("🛑 [BABESTU] %s", msg)

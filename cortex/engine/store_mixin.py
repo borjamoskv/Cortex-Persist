@@ -248,64 +248,23 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
-        # ═══ AX-033 Hook 1: HealthGuard (pre-validation circuit breaker) ═══
-        try:
-            from cortex.guards.health_guard import HealthGuard
-
-            db_path = getattr(self, "_db_path", None) or getattr(self, "db_path", None)
-            if db_path:
-                guard = HealthGuard(db_path=str(db_path))
-                await guard.check_write_safety()
-        except ImportError:
-            pass  # HealthGuard not available
-        except Exception as _hg_err:  # noqa: BLE001 — AX-033 defensive boundary
-            logger.debug("[AX-033] HealthGuard skipped: %s", _hg_err)
+        # ═══ AX-033: Pre-store guards via GuardPipeline ═══
+        pipeline = getattr(self, "_guard_pipeline", None)
+        if pipeline is not None:
+            try:
+                await pipeline.run_guards(
+                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+                )
+            except ValueError:
+                raise  # Guard rejections must propagate
+            except Exception as _gp_err:  # noqa: BLE001
+                logger.debug("[AX-033] GuardPipeline pre-store skipped: %s", _gp_err)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
         if dedupe_id is not None:
             return dedupe_id
-
-        # ═══ AX-033 Hook 2: Contradiction Guard (decision/rule/error types) ═══
-        if fact_type in ("decision", "rule", "error"):
-            try:
-                from cortex.guards.contradiction_guard import detect_contradictions
-
-                db_path = getattr(self, "_db_path", None) or getattr(self, "db_path", None)
-                if db_path:
-                    report = await detect_contradictions(
-                        new_content=content, new_project=project, db_path=str(db_path)
-                    )
-                    if report.has_conflicts and report.severity == "high":
-                        logger.warning(
-                            "[AX-033] Contradiction detected (severity=%s):\n%s",
-                            report.severity,
-                            report.format(),
-                        )
-            except ImportError:
-                pass
-            except Exception as _cg_err:  # noqa: BLE001 — AX-033 defensive boundary
-                logger.debug("[AX-033] ContradictionGuard skipped: %s", _cg_err)
-
-        # ═══ AX-033 Hook 3: SovereignVerifier (code-type formal verification) ═══
-        if fact_type == "code":
-            try:
-                from cortex.verification.verifier import SovereignVerifier
-
-                result = SovereignVerifier().check(content, context={"project": project})
-                if not result.is_valid:
-                    violation_names = [v.get("name", "unknown") for v in result.violations]
-                    raise ValueError(
-                        f"[AX-033] Formal verification failed: {violation_names}. "
-                        f"Counterexample: {result.counterexample}"
-                    )
-            except ImportError:
-                pass
-            except ValueError:
-                raise  # Re-raise verification failures — must not be swallowed
-            except Exception as _sv_err:  # noqa: BLE001 — AX-033 defensive boundary
-                logger.debug("[AX-033] SovereignVerifier skipped: %s", _sv_err)
 
         tx_id = (
             tx_id
@@ -328,10 +287,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         )
 
         # ─── Dual-Write Bridge: sync parent_decision_id to facts_meta ───
-        # The L2 vector store (hologram, memory_archaeology) reads
-        # parent_decision_id from facts_meta.  insert_fact_record only
-        # writes to `facts`.  Bridge the gap by propagating to facts_meta
-        # when auto-resolve or explicit parent is set.
         try:
             cursor = await conn.execute(
                 "SELECT parent_decision_id FROM facts WHERE id = ?",
@@ -345,20 +300,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     (str(resolved_parent), fact_id),
                 )
         except (aiosqlite.Error, OSError):
-            # facts_meta may not exist yet (pre-embed) — fire and forget
             pass
-
-        # Ω₈: Epistemic Circuit Breaker - Evaluate Entropy Density
-        # Defensive import: the daemon package eagerly imports heavyweight
-        # optional deps (watchdog via ast_oracle). Store must never fail
-        # because an optional daemon dep is missing. (Ghost #4731)
-        try:
-            from cortex.daemon.epistemic_breaker import EpistemicBreakerDaemon
-
-            EpistemicCircuitBreaker = EpistemicBreakerDaemon
-            await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)  # type: ignore[reportAttributeAccessIssue]
-        except (ImportError, ModuleNotFoundError, AttributeError) as _ecb_err:
-            logger.debug("[STORE] EpistemicCircuitBreaker skipped (missing dep): %s", _ecb_err)
 
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
             await embed_fact_async(
@@ -374,31 +316,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if commit:
             await conn.commit()
 
-        # ═══ AX-033 Hook 4: Ledger write tracking + auto-checkpoint ═══
-        try:
-            ledger = getattr(self, "_ledger", None)
-            if ledger is not None and hasattr(ledger, "record_write"):
-                ledger.record_write()
-                # Auto-checkpoint when adaptive batch is full
-                await ledger.create_checkpoint_async()
-        except Exception as _ld_err:  # noqa: BLE001 — AX-033 defensive boundary
-            logger.debug("[AX-033] Ledger checkpoint skipped: %s", _ld_err)
-
-        try:
-            from cortex.signals.fact_hook import emit_fact_stored
-
-            if db_p := (getattr(self, "db_path", None) or getattr(self, "_db_path", None)):
-                emit_fact_stored(
-                    db_path=str(db_p),
-                    fact_id=fact_id,
-                    project=project,
-                    fact_type=fact_type,
-                    source=source or "engine:store",
-                    tenant_id=tenant_id,
+        # ═══ AX-033: Post-store hooks via GuardPipeline ═══
+        if pipeline is not None:
+            db_path = str(getattr(self, "_db_path", "") or "")
+            try:
+                await pipeline.run_post_hooks(
+                    fact_id, project, fact_type, conn,
+                    tenant_id=tenant_id, source=source, db_path=db_path,
                 )
-        except (ImportError, RuntimeError, ValueError, TypeError, OSError) as _sig_err:
-            # Signal emission is best-effort — must not block the store operation
-            logger.debug("[STORE] Signal emit skipped: %s", _sig_err)
+            except Exception as _ph_err:  # noqa: BLE001
+                logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
 
         return fact_id
 

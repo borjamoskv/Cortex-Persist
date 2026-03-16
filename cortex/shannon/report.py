@@ -11,6 +11,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from cortex.shannon.analyzer import (
+from cortex.shannon.analyzer import (
+    exergy_score,
     max_entropy,
     mutual_information,
     normalized_entropy,
@@ -230,6 +232,20 @@ class EntropyReport:
             content_norm=content_block["normalized"],
         )
 
+        # Baseline weights for exergy (higher means the type drives more actions)
+        usage_weights = {
+            "decision": 1.0,
+            "error": 0.9,
+            "bridge": 0.8,
+            "architecture": 0.9,
+            "ghost": 0.5,
+            "learning": 0.7,
+            "concept": 0.4,
+            "log": 0.1,
+            "system": 0.3,
+        }
+        type_exergy = exergy_score(type_dist, usage_weights)
+
         # Diagnose with enriched inputs
         diagnosis, recommendations = _diagnose(
             type_block["normalized"],
@@ -241,6 +257,7 @@ class EntropyReport:
         return {
             "total_facts": total,
             "health_score": health,
+            "exergy_score": round(type_exergy, 4),
             "project_filter": project,
             "temporal_trend": trend,
             "velocity_per_day": velocity,

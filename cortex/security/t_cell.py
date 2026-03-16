@@ -60,14 +60,16 @@ class BabestuTCell:
         return True, ""
 
     @classmethod
-    def scan_payload(cls, raw_text: str) -> dict[str, Any]:
+    def scan_payload(cls, raw_text: str, source_url: str = "") -> dict[str, Any]:
         """
         Punto de entrada O(1).
         1. Busca ofuscaciones superficiales (Base64, Hex).
         2. Extrae bloques de código (Python).
         3. Realiza la autopsia del AST.
         """
-        if cls.B64_HEURISTIC.search(raw_text):
+        is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
+
+        if not is_youtube and cls.B64_HEURISTIC.search(raw_text):
             return cls._veredicto(
                 "CONTAMINADO",
                 90,

@@ -82,8 +82,9 @@ def _get_synthesis_router() -> CortexLLMRouter:
             logger.debug("Synthesis provider '%s' skipped: %s", name, e)
 
     if primary is None:
+        logger.critical("🛑 [CORTEX] API KEY MISSING. Cannot synthesize without LLM.")
         raise RuntimeError(
-            "No LLM providers available for synthesis. Configure at least one API key in .env"
+            "No LLM providers available for synthesis. Configure at least one API key (e.g., GEMINI_API_KEY) in .env"
         )
 
     _synthesis_router = CortexLLMRouter(primary, fallbacks)
