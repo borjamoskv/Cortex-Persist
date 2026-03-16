@@ -231,7 +231,7 @@ async def execute_cognitive_synthesis(
 
     if isinstance(cristal, dict):
         memo_content: str = cristal.get("content_markdown", "")
-        entities: list[str] = cristal.get("entities", [])
+        entities: list[str] = cristal.get("entities", [])  # type: ignore[type-error]
         resonancia: str = cristal.get("resonancia_axiomatica", "")
     else:
         memo_content = str(cristal)

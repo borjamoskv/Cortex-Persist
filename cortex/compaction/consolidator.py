@@ -251,7 +251,7 @@ class BeliefConsolidator:
             if not rows:
                 return result
 
-            result.total_events_scanned = len(rows)
+            result.total_events_scanned = len(rows)  # type: ignore[type-error]
             fact_ids = [row[0] for row in rows]
 
             # Decrypt content

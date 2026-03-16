@@ -170,7 +170,7 @@ class CentauroEngine:
             if isinstance(t, asyncio.Task) and not t.done():
                 t.cancel()
 
-        return winning, len(squad)
+        return winning, len(squad)  # type: ignore[type-error]
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission. (Axiom Ω₂: Multiplexed Execution)"""

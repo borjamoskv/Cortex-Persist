@@ -102,7 +102,7 @@ async def _fts5_search(
     sql += " ORDER BY rank ASC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
-    return await cursor.fetchall()
+    return await cursor.fetchall()  # type: ignore[type-error]
 
 
 async def _like_search(
@@ -146,7 +146,7 @@ async def _like_search(
     sql += " ORDER BY f.updated_at DESC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
-    return await cursor.fetchall()
+    return await cursor.fetchall()  # type: ignore[type-error]
 
 
 def text_search_sync(

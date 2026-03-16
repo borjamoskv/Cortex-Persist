@@ -102,7 +102,7 @@ class IoTOracle:
                     },
                 )
             else:
-                self.engine.store_sync(
+                self.engine.store_sync(  # type: ignore[type-error]
                     project="earthship_mmx",
                     content=content,
                     fact_type="physical_telemetry",

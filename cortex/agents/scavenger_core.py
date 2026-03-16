@@ -115,7 +115,7 @@ class ScavengerAgent:
 
     async def _emit_event(self, role: str, content: str, metadata: dict[str, Any]) -> None:
         """Internal ledger commitment via L3."""
-        evt = MemoryEvent(
+        evt = MemoryEvent(  # type: ignore[reportCallIssue]
             event_id=uuid.uuid4().hex,
             timestamp=datetime.now(timezone.utc),
             role=role,

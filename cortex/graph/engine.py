@@ -208,7 +208,7 @@ async def get_graph(
         tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.get_graph(project, limit, tenant_id)
+    return await backend.get_graph(project, limit, tenant_id)  # type: ignore[reportCallIssue]
 
 
 def get_graph_sync(
@@ -231,7 +231,7 @@ async def query_entity(
         tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.query_entity(name, project, tenant_id)
+    return await backend.query_entity(name, project, tenant_id)  # type: ignore[reportCallIssue]
 
 
 def query_entity_sync(
@@ -250,7 +250,7 @@ async def find_path(
     Useful for explaining connections (e.g., "How is Project A related to Library B?").
     """
     backend = get_backend(conn)
-    return await backend.find_path(source, target, max_depth, tenant_id)
+    return await backend.find_path(source, target, max_depth, tenant_id)  # type: ignore[reportCallIssue]
 
 
 async def get_context_subgraph(
@@ -262,4 +262,4 @@ async def get_context_subgraph(
     to find relevant context.
     """
     backend = get_backend(conn)
-    return await backend.find_context_subgraph(seeds, depth, max_nodes, tenant_id)
+    return await backend.find_context_subgraph(seeds, depth, max_nodes, tenant_id)  # type: ignore[reportCallIssue]

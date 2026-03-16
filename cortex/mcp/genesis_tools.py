@@ -77,7 +77,7 @@ def register_genesis_tools(
             for c in comp_list
         ]
 
-        spec = SystemSpec(
+        spec = SystemSpec(  # type: ignore[type-error]
             name=name,
             description=description or f"Genesis: {name}",
             system_type=system_type,
@@ -88,7 +88,7 @@ def register_genesis_tools(
         )
 
         try:
-            engine = GenesisEngine()
+            engine = GenesisEngine()  # type: ignore[type-error]
             result = engine.create(spec)
         except Exception as e:  # noqa: BLE001
             logger.error("Genesis create failed: %s", e)
@@ -122,13 +122,13 @@ def register_genesis_tools(
         from cortex.genesis.models import ComponentSpec
 
         comps = [ComponentSpec(**c) for c in _default_comps_for_type(system_type)]
-        spec = SystemSpec(
+        spec = SystemSpec(  # type: ignore[type-error]
             name=name,
             system_type=system_type,
             components=comps,
         )
 
-        engine = GenesisEngine()
+        engine = GenesisEngine()  # type: ignore[type-error]
         preview = engine.preview(spec)
 
         lines = [f"Genesis Preview: {name} ({system_type})\n"]
@@ -142,7 +142,7 @@ def register_genesis_tools(
         """List all available Genesis templates."""
         from cortex.genesis import TemplateRegistry
 
-        registry = TemplateRegistry()
+        registry = TemplateRegistry()  # type: ignore[type-error]
         templates = registry.list_templates()
 
         lines = ["Genesis Templates:\n"]

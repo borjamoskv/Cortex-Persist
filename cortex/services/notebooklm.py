@@ -170,7 +170,7 @@ class NotebookLMService:
             f"- **ID**: {fact.id}",
             f"- **Source**: {fact.source}",
             f"- **Confidence**: {fact.confidence:.2f}",
-            f"- **Timestamp**: {time.ctime(fact.timestamp)}",
+            f"- **Timestamp**: {time.ctime(fact.timestamp)}",  # type: ignore[type-error]
             "",
             fact.content,
             "",

@@ -465,7 +465,7 @@ class LangCompressor:
         except (ImportError, ValueError, TypeError):
             content = raw_content or ""
             meta = json.loads(meta_json) if meta_json else {}
-        return fact_id, content, meta if isinstance(meta, dict) else {}
+        return fact_id, content, meta if isinstance(meta, dict) else {}  # type: ignore[type-error]
 
     async def _apply_compression(
         self,

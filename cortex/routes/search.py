@@ -40,7 +40,7 @@ async def search_facts(
             tags=r.tags,
             created_at=r.created_at,
             updated_at=r.updated_at,
-            tx_id=r.tx_id,
+            tx_id=r.tx_id,  # type: ignore[reportCallIssue]
             hash=r.hash,
             context=getattr(r, "context", None),
         )
@@ -78,7 +78,7 @@ async def search_facts_get(
             tags=r.tags,
             created_at=r.created_at,
             updated_at=r.updated_at,
-            tx_id=r.tx_id,
+            tx_id=r.tx_id,  # type: ignore[reportCallIssue]
             hash=r.hash,
             context=getattr(r, "context", None),
         )

@@ -157,8 +157,8 @@ class OrchestraIntrospectionMixin:
         return {
             "initialized": self._initialized,  # type: ignore[reportAttributeAccessIssue]
             "judge": (
-                f"{self._judge.provider_name}:{self._judge.model}" 
-                if self._judge else None
+                f"{self._judge.provider_name}:{self._judge.model}"  # type: ignore[type-error]
+                if self._judge else None  # type: ignore[type-error]
             ),  # type: ignore[reportAttributeAccessIssue]
             "pool_size": self._pool.size,  # type: ignore[reportAttributeAccessIssue]
             "history_count": len(self._history),  # type: ignore[reportAttributeAccessIssue]

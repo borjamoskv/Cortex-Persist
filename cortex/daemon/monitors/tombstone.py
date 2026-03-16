@@ -58,7 +58,7 @@ class TombstoneMonitor:
             # Fix HIGH-005 lock contention: use auto-commit mode (isolation_level=None)
             # to avoid taking a write-lock on the first SELECT. We'll manage transactions manually.
             with db_connect(
-                self.db_path,
+                self.db_path,  # type: ignore[type-error]
                 timeout=5,
                 isolation_level=None,  # Manual transaction control
             ) as conn:
@@ -75,11 +75,13 @@ class TombstoneMonitor:
 
                 initial_size = self.db_path.stat().st_size
 
-                # 1. Main Delete (Cascade handling handles vector indexes depending on schema triggers)
+                # 1. Main Delete — cascade handles vector indexes
+                # depending on schema triggers.
                 # But to be safe, we explicitly clear related vectors if cascade is off.
                 cursor.execute("SELECT id FROM facts WHERE is_tombstoned = 1")
 
-                # We batch deletes to avoid mammoth transactions, pulling directly from C-layer limits
+                # Batch deletes to avoid mammoth transactions,
+                # pulling directly from C-layer limits.
                 total_deleted = 0
                 while True:
                     batch_rows = cursor.fetchmany(1000)
@@ -115,7 +117,10 @@ class TombstoneMonitor:
                     TombstoneAlert(
                         deleted_facts=total_deleted,
                         freed_mb=freed_mb,
-                        message=f"Barrido Nocturno completado: {total_deleted} facts purgados permanentemente.",
+                        message=(
+                            f"Barrido Nocturno completado: "
+                            f"{total_deleted} facts purgados."
+                        ),
                     )
                 ]
 

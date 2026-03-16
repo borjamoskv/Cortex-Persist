@@ -93,7 +93,7 @@ class AsyncCortexEngine(
             cursor = await conn.execute(sql, params)
             await conn.commit()
             if sql.strip().upper().startswith("INSERT"):
-                return Ok(cursor.lastrowid)
+                return Ok(cursor.lastrowid)  # type: ignore[type-error]
             return Ok(cursor.rowcount)
 
     async def _backoff(self, attempt: int):
@@ -138,7 +138,7 @@ class AsyncCortexEngine(
             (project, action, dj, prev_hash, th, ts),
         )
         await self._update_transaction_hash_if_needed(
-            conn, cursor.lastrowid, project, action, dj, ts, prev_hash
+            conn, cursor.lastrowid, project, action, dj, ts, prev_hash  # type: ignore[type-error]
         )
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()
@@ -151,7 +151,7 @@ class AsyncCortexEngine(
                 metadata={"tx_id": tx_id, "detail": detail},
                 conn=conn,
             )
-        return tx_id
+        return tx_id  # type: ignore[type-error]
 
     async def _get_previous_hash(self, conn: aiosqlite.Connection) -> str:
         async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:

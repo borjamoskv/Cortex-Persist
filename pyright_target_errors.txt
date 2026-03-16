@@ -1,0 +1,11 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-sdk/cortex_persist/async_client.py
+  /Users/borjafernandezangulo/30_CORTEX/cortex-sdk/cortex_persist/async_client.py:24:8 - warning: No se ha podido resolver la importación "httpx". (reportMissingImports)
+/Users/borjafernandezangulo/30_CORTEX/cortex-sdk/cortex_persist/client.py
+  /Users/borjafernandezangulo/30_CORTEX/cortex-sdk/cortex_persist/client.py:25:8 - warning: No se ha podido resolver la importación "httpx". (reportMissingImports)
+/Users/borjafernandezangulo/30_CORTEX/cortex/aether/github_ingestor.py
+  /Users/borjafernandezangulo/30_CORTEX/cortex/aether/github_ingestor.py:11:8 - warning: No se ha podido resolver la importación "httpx". (reportMissingImports)
+/Users/borjafernandezangulo/30_CORTEX/cortex/aether/sovereign_apis.py
+  /Users/borjafernandezangulo/30_CORTEX/cortex/aether/sovereign_apis.py:6:8 - warning: No se ha podido resolver la importación "httpx". (reportMissingImports)
+/Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py
+  /Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py:15:8 - warning: No se ha podido resolver la importación "httpx". (reportMissingImports)
+0 errors, 5 warnings, 0 informations

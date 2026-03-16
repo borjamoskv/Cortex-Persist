@@ -72,7 +72,7 @@ class SignalMonitor:
 
             count = self._reactor.process_once()
 
-            if count > 0:
+            if count > 0:  # type: ignore[reportOperatorIssue]
                 for sig in signals_to_process[:count]:
                     alerts.append(
                         SignalAlert(

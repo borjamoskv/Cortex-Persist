@@ -25,7 +25,9 @@ logger = logging.getLogger("cortex.vex")
 class PlannerBackend(Protocol):
     """Protocol for pluggable LLM planner backends."""
 
-    async def decompose(self, intent: str, context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    async def decompose(
+        self, intent: str, context: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         ...
 
 

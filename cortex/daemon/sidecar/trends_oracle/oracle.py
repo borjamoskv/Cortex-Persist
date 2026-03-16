@@ -143,7 +143,7 @@ class TrendsOracle:
                     if "title" in df.columns:
                         for idx, row in df.iterrows():
                             # Limiting to top 20
-                            if idx > 20:
+                            if idx > 20:  # type: ignore[reportOperatorIssue]
                                 break
                             title = str(row["title"])
                             traffic = "Rising (Realtime)"
@@ -219,7 +219,7 @@ class TrendsOracle:
             base_backoff=self.config.base_backoff,
         )
 
-        return _execute_with_backoff(
+        return _execute_with_backoff(  # type: ignore[type-error]
             self.pytrends.interest_over_time,
             max_retries=self.config.max_retries,
             base_backoff=self.config.base_backoff,

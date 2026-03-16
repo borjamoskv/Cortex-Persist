@@ -52,7 +52,7 @@ async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:
             _encode_engine = AsyncEncoder()
             _vector_db = SovereignVectorStoreL2(encoder=_encode_engine)
 
-        nearest = await _vector_db.recall(
+        nearest = await _vector_db.recall(  # type: ignore[reportOptionalMemberAccess]
             query=text[:1000], limit=1, project="julen_proxy", tenant_id="sovereign"
         )
         if nearest:

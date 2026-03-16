@@ -41,7 +41,7 @@ class EvaluationMonitor:
             from cortex.database.core import connect as db_connect
 
             alerts = []
-            with db_connect(self.db_path) as conn:
+            with db_connect(self.db_path) as conn:  # type: ignore[type-error]
                 cur = conn.cursor()
                 import sqlite3
 

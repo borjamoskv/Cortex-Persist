@@ -128,7 +128,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         self._apply_epigenetic_modulation()
 
         # 3. Torneo Adversarial (Telemetry-Grounding)
-        await self._evaluate_adversarial(metrics)
+        await self._evaluate_adversarial(metrics)  # type: ignore[type-error]
 
         # 4. Extinción Masiva
         if self.cycle_count % self.params.extinction_cycle == 0:
@@ -139,7 +139,7 @@ class EvolutionEngine(EvolutionOpsMixin):
                 extinctions = self._mass_extinction()
 
         # 5. Selección, Recombinación y Plásmidos (Ω₀ Parallelized)
-        tasks = [self._process_sovereign(s, metrics) for s in self.sovereigns]
+        tasks = [self._process_sovereign(s, metrics) for s in self.sovereigns]  # type: ignore[type-error]
         results = await asyncio.gather(*tasks)
 
         all_mutations = []

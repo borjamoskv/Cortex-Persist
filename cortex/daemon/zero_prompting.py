@@ -105,7 +105,7 @@ class ZeroPromptingDaemon:
         """Persists the successful mutation as a C5 Truth in the CORTEX Ledger."""
         logger.info("[ZERO-PROMPT] [CRYSTALLIZE] Evolution accepted: %s", improvement)
         try:
-            conn = self.engine.pool.get_connection()
+            conn = self.engine.pool.get_connection()  # type: ignore[type-error]
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'ZeroPrompt', ?, ?, 'C5')",

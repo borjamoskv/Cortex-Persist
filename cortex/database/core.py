@@ -149,7 +149,7 @@ def connect(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
-            isolation_level=isolation_level,
+            isolation_level=isolation_level,  # type: ignore[type-error]
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):

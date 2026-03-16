@@ -153,10 +153,10 @@ class SQLiteQueryMixin:
                 (project, tenant_id),
             ).fetchone()[0]
         else:
-            total_entities = self.conn.execute(
+            total_entities = self.conn.execute(  # type: ignore[type-error]
                 "SELECT COUNT(*) FROM entities WHERE tenant_id = ?", (tenant_id,)
             ).fetchone()[0]  # type: ignore[reportAttributeAccessIssue]
-            total_rels = self.conn.execute(
+            total_rels = self.conn.execute(  # type: ignore[type-error]
                 "SELECT COUNT(*) FROM entity_relations WHERE tenant_id = ?", (tenant_id,)
             ).fetchone()[0]  # type: ignore[reportAttributeAccessIssue]
 

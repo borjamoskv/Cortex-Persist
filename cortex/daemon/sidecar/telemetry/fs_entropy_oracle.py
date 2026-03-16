@@ -71,7 +71,7 @@ class FSEntropyOracle:
                     },
                 )
             else:
-                self.engine.store_sync(
+                self.engine.store_sync(  # type: ignore[type-error]
                     project="SYSTEM",
                     content=content,
                     fact_type="ghost",

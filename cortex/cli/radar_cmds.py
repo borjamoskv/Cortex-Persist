@@ -34,7 +34,7 @@ def scan(path: str, entropy: bool):
     if entropy:
         async def _get_entropy():
             conn = await engine._get_conn()
-            db_path = engine.db_path # Assuming engine has a db_path attribute
+            db_path = engine.db_path # Assuming engine has a db_path attribute  # type: ignore[type-error]
             try:
                 from cortex.engine.user_memory import UserConfigManager
 
@@ -48,7 +48,7 @@ def scan(path: str, entropy: bool):
             cursor = await conn.execute(
                 "SELECT count(*) FROM facts WHERE confidence IN ('stated', 'C3', 'C2', 'C1') AND is_tombstoned = 0"
             )
-            return (await cursor.fetchone())[0]
+            return (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
         entropy_count = _run_async(_get_entropy())
 

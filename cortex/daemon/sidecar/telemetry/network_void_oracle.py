@@ -57,7 +57,7 @@ class NetworkVoidOracle:
                     meta={"oracle": "network_void_v1", "state": "isolated"},
                 )
             else:
-                self.engine.store_sync(
+                self.engine.store_sync(  # type: ignore[type-error]
                     project="SYSTEM",
                     content=content,
                     fact_type="rule",
@@ -81,7 +81,7 @@ class NetworkVoidOracle:
                     },
                 )
             else:
-                self.engine.store_sync(
+                self.engine.store_sync(  # type: ignore[type-error]
                     project="SYSTEM",
                     content=content,
                     fact_type="bridge",

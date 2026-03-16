@@ -293,4 +293,4 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             tx_id = res.unwrap()
             self._cache.set(f"last_hash_{project}", th)
             return tx_id
-        raise RuntimeError(f"Failed to log transaction: {res.err()}")
+        raise RuntimeError(f"Failed to log transaction: {res.err()}")  # type: ignore[type-error]

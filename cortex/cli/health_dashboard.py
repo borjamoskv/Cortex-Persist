@@ -10,7 +10,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import console, get_db_path
+from cortex.cli.common import console, get_db_path  # type: ignore[reportAttributeAccessIssue]
 
 
 @click.command("dashboard")

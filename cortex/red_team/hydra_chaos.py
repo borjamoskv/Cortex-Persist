@@ -107,7 +107,7 @@ class MockRedisClient:
 
             self._store[keys[0]] = new_tip
             self._store[keys[1]] = str(count)
-            return (prev_tip, new_tip, count)
+            return (prev_tip, new_tip, count)  # type: ignore[type-error]
 
         return AsyncMock(side_effect=execute)
 

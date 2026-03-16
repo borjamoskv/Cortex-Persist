@@ -37,7 +37,7 @@ class SecurityMonitor:
         self._encoder = AsyncEncoder()
         # LocalEmbedder handles lazy loading of the model
 
-        self._vector_store = VectorStoreL2(
+        self._vector_store = VectorStoreL2(  # type: ignore[type-error]
             encoder=self._encoder, db_path=Path("~/.cortex/security_vectors.db").expanduser()
         )
         return self._vector_store

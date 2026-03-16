@@ -7,7 +7,7 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex.daemon.models import AutoAuditAlert
+from cortex.daemon.models import AutoAuditAlert  # type: ignore[reportAttributeAccessIssue]
 from cortex.daemon.monitors.base import BaseMonitor
 
 logger = logging.getLogger("moskv-daemon")

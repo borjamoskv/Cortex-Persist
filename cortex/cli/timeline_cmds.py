@@ -74,7 +74,7 @@ def timeline_checkout(tx_id, project, db):
         engine = get_engine(db)
         try:
             with console.status(f"[bold blue]Reconstructing state at TX #{tx_id}...[/]"):
-                facts = await engine.reconstruct_state(tx_id, project=project)
+                facts = await engine.reconstruct_state(tx_id, project=project)  # type: ignore[reportCallIssue]
             if not facts:
                 err_empty_results(f"active facts at TX #{tx_id}")
                 return
@@ -156,7 +156,6 @@ def snapshot_list(db):
     async def _snapshot_list_async():
         import sqlite3
 
-        from cortex.cli.common import err_empty_results, handle_cli_error
         from cortex.engine.snapshots import SnapshotManager
 
         try:

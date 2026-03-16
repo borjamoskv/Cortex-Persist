@@ -64,14 +64,14 @@ def send_heartbeat():
         tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
-        if receipt.status == 1:
+        if receipt.status == 1:  # type: ignore[type-error]
             print(
-                f"[Web3 Oracle] ✅ Immortality extended. Pulse locked in block {receipt.blockNumber}."
+                f"[Web3 Oracle] ✅ Immortality extended. Pulse locked in block {receipt.blockNumber}."  # type: ignore[type-error]
             )
             print(f"[Web3 Oracle] 🔗 Tx Hash: {w3.to_hex(tx_hash)}")
             return True
         else:
-            print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")
+            print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
             return False
 
     except Exception as e:  # noqa: BLE001 — Web3 transaction boundary

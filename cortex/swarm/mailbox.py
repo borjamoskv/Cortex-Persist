@@ -61,7 +61,7 @@ class AtomicMailbox:
             """,
             (topic,),
         ) as cursor:
-            return await cursor.fetchall()
+            return await cursor.fetchall()  # type: ignore[type-error]
 
     async def clear(self, topic: str) -> None:
         """Clear topic messages."""

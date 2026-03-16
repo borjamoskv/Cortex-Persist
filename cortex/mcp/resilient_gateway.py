@@ -100,6 +100,8 @@ async def _fetch_httpx(url: str, timeout: float) -> tuple[str, int]:
 
 async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
     """Fallback 1: aiohttp — different connection pool and HTTP stack."""
+    if aiohttp is None:
+        raise ImportError("aiohttp not available")
     client_timeout = aiohttp.ClientTimeout(total=timeout)
     async with aiohttp.ClientSession(
         timeout=client_timeout,
@@ -255,6 +257,7 @@ def _html_to_markdown(html: str) -> str:
         text = re.sub(r"<[^>]+>", " ", text)
         return re.sub(r"\s+", " ", text).strip()
 
+    assert BeautifulSoup is not None  # guarded by _HAS_BS4 above
     soup = BeautifulSoup(html, "html.parser")
 
     # Strip noise elements (Ω₂: reduce entropy)
@@ -265,6 +268,7 @@ def _html_to_markdown(html: str) -> str:
     main = soup.find("main") or soup.find("article")
     target = main if main else soup
 
+    assert markdownify is not None  # guarded by _HAS_MARKDOWNIFY above
     return markdownify.markdownify(
         str(target),
         heading_style="ATX",
@@ -277,6 +281,8 @@ def _extract_with_selector(html: str, css_selector: str) -> str:
     if not _HAS_BS4 or not _HAS_MARKDOWNIFY:
         return _html_to_markdown(html)
 
+    assert BeautifulSoup is not None  # guarded by _HAS_BS4 above
+    assert markdownify is not None  # guarded by _HAS_MARKDOWNIFY above
     soup = BeautifulSoup(html, "html.parser")
     elements = soup.select(css_selector)
     if not elements:
@@ -304,7 +310,7 @@ def _get_fetcher() -> ResilientFetcher:
 def create_resilient_gateway(
     host: str = "127.0.0.1",
     port: int = 5002,
-) -> FastMCP:
+) -> Any:
     """Create the Resilient Gateway FastMCP server."""
     if FastMCP is None:
         raise ImportError("FastMCP not available. Install with: pip install mcp")

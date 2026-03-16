@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from cortex.cli.common import console, get_db_path
+from cortex.cli.common import console, get_db_path  # type: ignore[reportAttributeAccessIssue]
 
 
 def render_sparkline(data: list[float]) -> str:

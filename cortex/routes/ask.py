@@ -123,7 +123,7 @@ async def ask_cortex(
             content={
                 "detail": "No LLM provider configured. "
                 "Set CORTEX_LLM_PROVIDER env variable. "
-                f"Supported: {LLMProvider.list_providers()}",
+                f"Supported: {LLMProvider.list_providers()}",  # type: ignore[type-error]
             },
         )
 
@@ -282,5 +282,5 @@ async def llm_status(
         available=_llm_manager.available,
         provider=_llm_manager.provider_name or "none",
         model=provider.model if provider else None,
-        supported_providers=LLMProvider.list_providers(),
+        supported_providers=LLMProvider.list_providers(),  # type: ignore[type-error]
     )

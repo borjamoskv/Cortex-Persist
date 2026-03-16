@@ -45,7 +45,7 @@ class TopologyManager:
             except Exception as e:  # noqa: BLE001 — websocket send boundary
                 logger.error("Failed to send to websocket: %s", e)
 
-    async def notify_new_memory(self, node_data: dict, neighbors: list[dict] = None):
+    async def notify_new_memory(self, node_data: dict, neighbors: list[dict] = None):  # type: ignore[type-error]
         """
         Entry point for the consolidation engine to notify the dashboard.
         Evaluates the node through the Doubt Circuit before broadcast.

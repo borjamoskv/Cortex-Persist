@@ -103,7 +103,7 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_multimodal"):
             raise RuntimeError("Current embedder does not support multimodal")
 
-        return await embedder.embed_multimodal(parts, task_type=task_type)
+        return await embedder.embed_multimodal(parts, task_type=task_type)  # type: ignore[type-error]
 
     async def embed_image(
         self,
@@ -122,7 +122,7 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_image"):
             raise RuntimeError("Current embedder does not support image embedding")
 
-        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)
+        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)  # type: ignore[type-error]
 
     @property
     def dimension(self) -> int:

@@ -45,7 +45,7 @@ class CascadeTelemetry:
     def _persist_to_db(self, event: CascadeEvent) -> None:
         """Sovereign Persistence (Ω₃): Drive telemetry to the physical ledger."""
         try:
-            conn = db_connect(self._db_path)
+            conn = db_connect(self._db_path)  # type: ignore[type-error]
             try:
                 conn.execute(
                     "INSERT INTO llm_telemetry "

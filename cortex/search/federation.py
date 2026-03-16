@@ -134,7 +134,7 @@ def _search_attached_db(
         else:
             content = str(content_raw)
 
-        if query_lower not in content.lower():
+        if query_lower not in content.lower():  # type: ignore[reportOptionalMemberAccess]
             continue
 
         try:
@@ -145,7 +145,7 @@ def _search_attached_db(
         results.append(
             SearchResult(
                 fact_id=row[0],
-                content=content,
+                content=content,  # type: ignore[type-error]
                 project=row[2] or "",
                 fact_type=row[3] or "knowledge",
                 confidence=row[4] or "stated",

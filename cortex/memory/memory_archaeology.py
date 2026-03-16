@@ -147,7 +147,7 @@ class MemoryArchaeologist:
             ) + "\n".join(content_list)
 
             logger.info("Synthesizing cluster of size %s...", len(cluster_facts))
-            res = await self.llm.agenerate(prompt)
+            res = await self.llm.agenerate(prompt)  # type: ignore[type-error]
             condensed_content = res.text.strip()
 
             parent_ids = [f["parent_decision_id"] for f in cluster_facts if f["parent_decision_id"]]

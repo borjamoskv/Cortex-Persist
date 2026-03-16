@@ -197,7 +197,7 @@ def error_boundary(
 
         else:
 
-            @functools.wraps(func)
+            @functools.wraps(func)  # type: ignore[type-error]
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 boundary = ErrorBoundary(
                     source,
@@ -206,7 +206,7 @@ def error_boundary(
                     extra_meta=extra_meta,
                 )
                 with boundary:
-                    return func(*args, **kwargs)
+                    return func(*args, **kwargs)  # type: ignore[type-error]
 
             return sync_wrapper  # type: ignore[return-value]
 

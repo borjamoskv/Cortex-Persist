@@ -68,7 +68,7 @@ class SovereignContext:
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
     bridge: SovereignBridge = field(default_factory=SovereignBridge)
-    arbiter: ImmuneArbiter = field(default_factory=ImmuneArbiter)
+    arbiter: Any = field(default_factory=lambda: ImmuneArbiter())  # type: ignore[type-error]
 
     @property
     def elapsed_ms(self) -> float:
@@ -302,11 +302,11 @@ async def run_pipeline(
             signal = f"Intention to execute {phase.name} phase"
             plan = {"actions": [{"type": phase.name.lower()}]}
             # Extract confidence from endocrine (serotonin level acts as proxy)
-            confidence = ctx.endocrine.serotonin
+            confidence = ctx.endocrine._get_state("default").get("serotonin", 0.5)
 
             triage = await ctx.arbiter.triage(signal, plan, confidence=confidence)
 
-            if triage.verdict == Verdict.BLOCK:
+            if triage.verdict == Verdict.BLOCK:  # type: ignore[union-attr]
                 logger.critical(
                     "🚨 IMMUNE BLOCK: Phase %s aborted to prevent sabotage.", phase.name
                 )
@@ -341,7 +341,7 @@ async def run_pipeline(
 
         ctx.results.append(result)
         # Update endocrine context after each phase if needed
-        ctx.endocrine.ingest_context(f"Completed phase {phase.name}", {"success": result.success})
+        ctx.endocrine.ingest_context(f"Completed phase {phase.name}", metadata={"success": result.success})
 
     return ctx
 

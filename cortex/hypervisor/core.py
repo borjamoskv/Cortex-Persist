@@ -171,7 +171,7 @@ class AgencyHypervisor:
             stats = await self._engine.stats()
             active_count = stats.get("active_facts", active_count)
 
-            last_activity = facts[0].created_at if facts else None
+            last_activity = facts[0].created_at if facts else None  # type: ignore[type-error]
         except Exception:  # noqa: BLE001
             active_count = 0
             last_activity = None

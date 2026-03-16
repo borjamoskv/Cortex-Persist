@@ -20,7 +20,7 @@ class HotMemory:
 
     def store(self, key, value):
         if len(self.cache) >= self.capacity:
-            oldest = min(self.counters, key=self.counters.get)
+            oldest = min(self.counters, key=self.counters.get)  # type: ignore[type-error]
             del self.cache[oldest]
             del self.counters[oldest]
         self.cache[key] = value

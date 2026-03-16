@@ -90,7 +90,7 @@ class TopographicSensor:
         if hasattr(os, "listxattr"):
             try:
                 # type: ignore[reportAttributeAccessIssue]
-                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
+                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]  # type: ignore[reportAttributeAccessIssue]
             except OSError:
                 pass
 
@@ -168,7 +168,7 @@ class TopographicSensor:
 
             ghost["strength"] = strength
             ghost["source_file"] = str(file_path)
-            return ghost
+            return ghost  # type: ignore[type-error]
         except (json.JSONDecodeError, KeyError):
             return None
 
@@ -177,7 +177,7 @@ class TopographicSensor:
         if hasattr(os, "removexattr"):
             try:
                 # type: ignore[reportAttributeAccessIssue]
-                os.removexattr(str(file_path), attr_name)
+                os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
                 return
             except OSError:
                 pass

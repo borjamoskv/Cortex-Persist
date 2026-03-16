@@ -319,7 +319,7 @@ async def _get_semantic_recalls(
             return None
 
         encoder = AsyncEncoder()
-        store = VectorStoreL2(encoder=encoder, db_path=VECTOR_STORE_PATH)
+        store = VectorStoreL2(encoder=encoder, db_path=VECTOR_STORE_PATH)  # type: ignore[type-error]
 
         query = project_hint or "recent work"
         results = await store.recall(query=query, limit=top_k, project=project_hint)

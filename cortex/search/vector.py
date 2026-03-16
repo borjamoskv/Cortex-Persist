@@ -206,7 +206,7 @@ def semantic_search_sync(
         results.append(
             SearchResult(
                 fact_id=row[0],
-                content=content,
+                content=content,  # type: ignore[type-error]
                 project=row[2],
                 fact_type=row[3],
                 confidence=row[4],

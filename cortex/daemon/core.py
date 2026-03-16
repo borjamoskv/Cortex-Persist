@@ -226,7 +226,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def _init_background_agents(self, file_config: dict) -> None:
         """Initialize autonomous background agents like Aether."""
-        # pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false
+        # pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false  # type: ignore[type-error]
         self._aether_daemon: AetherDaemon | None = None
         self.aether_monitor: AetherMonitor | None = None
         if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
@@ -496,9 +496,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             if self.frontier_daemon:
                 self.frontier_daemon.stop()
             if getattr(self, "zero_prompting_daemon", None):
-                self.zero_prompting_daemon.stop()
+                self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
             if getattr(self, "epistemic_breaker_daemon", None):
-                self.epistemic_breaker_daemon.stop()
+                self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
 
     def _save_status(self, status: DaemonStatus) -> None:
         """Persist status to disk."""

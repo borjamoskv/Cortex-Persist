@@ -52,7 +52,7 @@ class MejoraloDaemon:
         from cortex.config import DEFAULT_DB_PATH
 
         self.cortex_engine = get_engine(
-            db_path or DEFAULT_DB_PATH,
+            db_path or DEFAULT_DB_PATH,  # type: ignore[type-error]
         )  # type: ignore[reportArgumentType]
         self.engine = MejoraloEngine(engine=self.cortex_engine)
         self.canary = CanaryMonitor(self.base_path)  # type: ignore[reportCallIssue]
@@ -126,7 +126,7 @@ class MejoraloDaemon:
 
         # 2. Memory/KI Context Fusion + Causal Analysis
         fused_context = await self.fusion.fuse_context(  # type: ignore[reportCallIssue]
-            query=" ".join(
+            query=" ".join(  # type: ignore[reportCallIssue]
                 d.name for d in result.dimensions if d.score < DAEMON_DIM_SCORE_THRESHOLD
             )
             if any(d.score < DAEMON_DIM_SCORE_THRESHOLD for d in result.dimensions)

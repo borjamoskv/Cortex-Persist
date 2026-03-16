@@ -64,7 +64,7 @@ class CortexLangGraphSupervisor:
 
         self.name = name
         self.nodes: dict[str, SupervisorNode] = {}
-        self.graph_builder = StateGraph(NightShiftState)
+        self.graph_builder = StateGraph(NightShiftState)  # type: ignore[reportOptionalCall]
         self.compiled_app = None
 
     def add_node(self, node: SupervisorNode):
@@ -103,7 +103,7 @@ class CortexLangGraphSupervisor:
         # Pero mockearemos este flujo para compatibilidad.
         try:
             # LangGraph astream returns chunks of updates
-            async for state_update in self.compiled_app.astream(initial_state):
+            async for state_update in self.compiled_app.astream(initial_state):  # type: ignore[reportOptionalMemberAccess]
                 yield state_update
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error("☠️ [SUPERVISOR] Fallo de Ejecución Duradera: %s", e)

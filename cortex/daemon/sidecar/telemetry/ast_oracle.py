@@ -12,17 +12,30 @@ import ast
 import asyncio
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 try:
-    from watchdog.events import FileSystemEvent, FileSystemEventHandler
-    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler  # type: ignore[type-error]
+    from watchdog.observers import Observer  # type: ignore[type-error]
+
+    _HAS_WATCHDOG = True
 except ImportError:
-    # Sovereign fallback: If watchdog isn't installed (e.g. running just API/CLI),
-    # the module loads but Oracle start() will fail or be no-op.
-    FileSystemEvent = object  # type: ignore
-    FileSystemEventHandler = object  # type: ignore
-    Observer = object  # type: ignore
+    _HAS_WATCHDOG = False
+
+    class FileSystemEvent:  # type: ignore[no-redef]
+        """Stub for missing watchdog."""
+        is_directory: bool = False
+        src_path: str = ""
+
+    class FileSystemEventHandler:  # type: ignore[no-redef]
+        """Stub for missing watchdog."""
+
+    class Observer:  # type: ignore[no-redef]
+        """Stub for missing watchdog."""
+        def schedule(self, *a: Any, **kw: Any) -> None: ...
+        def start(self) -> None: ...
+        def stop(self) -> None: ...
+        def join(self) -> None: ...
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine

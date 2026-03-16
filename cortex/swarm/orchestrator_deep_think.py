@@ -147,7 +147,7 @@ class DeepThinkOrchestrator:
         hv_signature = hashlib.sha256(collapsed_hv.tobytes()).hexdigest()[:16]
 
         # Resonancia Bizantina (Consensus Calculation)
-        from cortex.memory.hdc.algebra import similarity
+        from cortex.memory.hdc.algebra import similarity  # type: ignore[reportAttributeAccessIssue]
 
         sims = []
         for i in range(len(hvs)):

@@ -36,7 +36,7 @@ class ComplexityCompressor:
         """Compress a Fact into a Memory, stripping all internal fields."""
         return Memory(
             content=fact.content,
-            relevance=_normalize_score(fact.consensus_score),
+            relevance=_normalize_score(fact.consensus_score),  # type: ignore[type-error]
             created=_parse_iso(fact.created_at),
             source=fact.source or "system",
         )

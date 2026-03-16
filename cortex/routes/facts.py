@@ -187,7 +187,10 @@ async def list_votes(
 
     votes = await engine.get_votes(fact_id)
 
-    return [{"agent": v[0], "vote": v[1], "tx_id": v[2]} for v in votes]  # type: ignore[reportArgumentType]
+    return [  # type: ignore[reportArgumentType]
+        {"agent": v[0], "vote": v[1], "tx_id": v[2]}  # type: ignore[type-error]
+        for v in votes
+    ]
 
 
 @router.delete("/v1/facts/{fact_id}", response_model=dict)

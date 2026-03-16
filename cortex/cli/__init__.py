@@ -61,7 +61,7 @@ class _LazyCommand(click.Command):
         if self._resolved is None:
             mod = importlib.import_module(self._module_path)
             self._resolved = getattr(mod, self._attr_name)
-        return self._resolved
+        return self._resolved  # type: ignore[type-error]
 
     def get_short_help_str(self, limit: int = 150) -> str:
         # Return static help to avoid importing the module for --help listing

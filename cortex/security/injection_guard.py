@@ -320,7 +320,9 @@ class InjectionGuard:
             try:
                 # Lazy import to avoid circular dependencies with cortex.llm.router
                 from cortex.llm.models import Message
-                from cortex.llm.router import CortexRouter
+                from cortex.llm.router import (
+                    CortexRouter,  # type: ignore[reportAttributeAccessIssue]
+                )
 
                 router = CortexRouter()
                 prompt = (

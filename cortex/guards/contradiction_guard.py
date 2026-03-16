@@ -344,7 +344,7 @@ async def _fetch_decision_rows(
             """,
             (fts_terms,),
         )
-    return await cursor.fetchall()
+    return await cursor.fetchall()  # type: ignore[type-error]
 
 
 # ── Main detector ───────────────────────────────────────────────────
@@ -436,7 +436,7 @@ async def scan_all_contradictions(
                 """
             )
             rows = await cursor.fetchall()
-            decisions = _prepare_decisions(rows, decrypt_fn)
+            decisions = _prepare_decisions(rows, decrypt_fn)  # type: ignore[type-error]
 
             by_project: dict[str, list[dict]] = defaultdict(list)
             for d in decisions:

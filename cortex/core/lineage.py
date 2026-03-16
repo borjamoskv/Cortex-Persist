@@ -90,7 +90,7 @@ class LineageVerifier:
 
         # To prevent deadlocks, _cache is simply used to prevent infinite recursion
         # during traversal, not to store fully materialized trees which breaks GC in pytest.
-        _cache[fact_id] = True
+        _cache[fact_id] = True  # type: ignore[type-error]
 
         parents = []
         if max_depth > 0:

@@ -122,7 +122,7 @@ class JosuProactiveDaemon:
                 name="toolbox-watchdog",
             )
             # prevent GC of the background task
-            self._toolbox_watcher_task = watcher
+            self._toolbox_watcher_task = watcher  # type: ignore[reportGeneralTypeIssues]
             logger.info(
                 "🔭 [JOSU] Toolbox watchdog co-launched.",
             )

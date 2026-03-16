@@ -119,7 +119,7 @@ class HeartbeatDaemon:
 
                 # 6. Handle Result
                 if result.get("status") in ["success", "aleph_breakthrough"]:
-                    self._deposit_to_iturria(task, result)
+                    self._deposit_to_iturria(task, result)  # type: ignore[type-error]
                     self.queue.mark_completed(task["id"])
                     logger.info("Task %s completed successfully via %s.", task["id"], formation)
                 else:
@@ -166,12 +166,16 @@ class HeartbeatDaemon:
         result = await PhysicalActuator.ekin_execute_shell(command)
 
         if result["status"] == "success":
+            stdout = result.get('stdout', '')
             self._deposit_to_iturria(
                 task,
                 {
                     "formation": "EKIN-BINDING",
                     "agents_used": 1,
-                    "solution": f"Command Executed Successfully.\n\nSTDOUT:\n```\n{result.get('stdout', '')}\n```",
+                    "solution": (
+                        f"Command Executed Successfully."
+                        f"\n\nSTDOUT:\n```\n{stdout}\n```"
+                    ),
                 },
             )
             self.queue.mark_completed(task["id"])

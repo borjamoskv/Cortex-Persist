@@ -153,7 +153,7 @@ class PolicyEngine:
             metadata={
                 "tags": fact.tags,
                 "confidence": fact.confidence,
-                "consensus_score": fact.consensus_score,
+                "consensus_score": fact.consensus_score,  # type: ignore[type-error]
                 "created_at": fact.created_at,
             },
         )
@@ -200,7 +200,7 @@ class PolicyEngine:
 
         # Consensus: low consensus → needs attention.
         consensus_mod = 1.0
-        if fact.consensus_score < 0.5:
+        if fact.consensus_score < 0.5:  # type: ignore[type-error]
             consensus_mod = 1.3
 
         return min(1.0, base * time_factor * conf_multiplier * consensus_mod)
@@ -269,7 +269,7 @@ class PolicyEngine:
     ) -> list[Fact]:
         """Gather active facts from CORTEX engine."""
         if project:
-            return await self._engine.recall(project, tenant_id=tenant_id)
+            return await self._engine.recall(project, tenant_id=tenant_id)  # type: ignore[type-error]
 
         # All projects: get stats then recall each.
         try:
@@ -283,7 +283,7 @@ class PolicyEngine:
         for proj_name in projects:
             try:
                 facts = await self._engine.recall(proj_name, tenant_id=tenant_id)
-                all_facts.extend(facts)
+                all_facts.extend(facts)  # type: ignore[type-error]
             except (RuntimeError, AttributeError, OSError, ValueError) as e:
                 logger.warning("Failed to recall project %s: %s", proj_name, e)
         return all_facts

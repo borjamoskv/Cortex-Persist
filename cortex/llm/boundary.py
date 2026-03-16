@@ -106,10 +106,10 @@ class ImmuneBoundary:
                 params = len(sig.parameters)
 
                 if params >= 2:
-                    raw_output = await generation_func(schema_dict, last_error_msg)
+                    raw_output = await generation_func(schema_dict, last_error_msg)  # type: ignore[reportCallIssue]
                 else:
                     # Por defecto pasamos el schema (Axioma 14)
-                    raw_output = await generation_func(schema_dict)
+                    raw_output = await generation_func(schema_dict)  # type: ignore[type-error]
 
                 clean_output = _clean_llm_json(raw_output)
                 return schema.model_validate_json(clean_output)

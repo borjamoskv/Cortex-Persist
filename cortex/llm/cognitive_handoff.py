@@ -247,7 +247,10 @@ class CognitiveHandoff:
             system_instruction="You are an Infrastructure prescreen agent. Evaluate if this "
             "belief statement is worth detailed audit. Respond with JSON: "
             '{"action": "audit" | "compact_and_forget", "relevance_score": 0.0-1.0}',
-            working_memory=[{"role": "user", "content": self._format_belief_for_prompt(belief, context)}],
+            working_memory=[{
+                "role": "user",
+                "content": self._format_belief_for_prompt(belief, context),
+            }],
             intent=IntentProfile.EPISODIC_PROCESSING,
         )
 
@@ -284,7 +287,10 @@ class CognitiveHandoff:
             '"contradicting_belief_ids": [...], '
             '"needs_schema_revision": bool, '
             '"reason": "..."}',
-            working_memory=[{"role": "user", "content": self._format_belief_for_prompt(belief, context)}],
+            working_memory=[{
+                "role": "user",
+                "content": self._format_belief_for_prompt(belief, context),
+            }],
             intent=IntentProfile.BELIEF_AUDIT,
         )
 
@@ -329,7 +335,10 @@ class CognitiveHandoff:
             '{"has_contradiction": bool, '
             '"contradicting_belief_ids": [...], '
             '"reason": "..."}',
-            working_memory=[{"role": "user", "content": self._format_belief_for_prompt(belief, context)}],
+            working_memory=[{
+                "role": "user",
+                "content": self._format_belief_for_prompt(belief, context),
+            }],
             intent=IntentProfile.BELIEF_AUDIT,
         )
 
@@ -366,7 +375,13 @@ class CognitiveHandoff:
             "Analyze the belief and propose structural changes. "
             "Respond with the revised belief content and any schema "
             "modifications needed.",
-            working_memory=[{"role": "user", "content": f"Belief: {belief.content}\nAudit reason: {audit.reason}"}],
+            working_memory=[{
+                "role": "user",
+                "content": (
+                    f"Belief: {belief.content}\n"
+                    f"Audit reason: {audit.reason}"
+                ),
+            }],
             intent=IntentProfile.ARCHITECT,
         )
 

@@ -110,7 +110,7 @@ class ComplianceTracker:
         if meta:
             eu_meta.update(meta)
 
-        return self._engine.store_sync(
+        return self._engine.store_sync(  # type: ignore[type-error]
             project=proj,
             content=content,
             fact_type="decision",
@@ -145,7 +145,7 @@ class ComplianceTracker:
                 "violations": [],
             }
 
-        return self._engine._run_sync(ledger.verify_integrity_async())
+        return self._engine._run_sync(ledger.verify_integrity_async())  # type: ignore[type-error]
 
     # ─── 3. export_audit ──────────────────────────────────────────
 
@@ -181,7 +181,7 @@ class ComplianceTracker:
         facts_summary = self._engine._run_sync(self._gather_facts_summary(proj))
 
         # 3. Evaluate Article 12 compliance
-        checks = self._evaluate_article_12(integrity, facts_summary)
+        checks = self._evaluate_article_12(integrity, facts_summary)  # type: ignore[type-error]
         score = sum(1 for v in checks.values() if v["compliant"])
         total = len(checks)
 

@@ -23,7 +23,7 @@ class GitWatcherHandler(FileSystemEventHandler):
         self.loop = loop
 
     def on_modified(self, event):
-        if "HEAD" in event.src_path:
+        if "HEAD" in event.src_path:  # type: ignore[type-error]
             self.state.daemons["git_watcher"]["last_event"] = time.strftime("%H:%M:%S")
             self.osc_client.send_message("/cortex/git_pulse", 1.0)
 
@@ -32,7 +32,7 @@ class GitWatcherHandler(FileSystemEventHandler):
                     from cortex.engine import CortexEngine
 
                     engine = CortexEngine()
-                    modified_path = Path(event.src_path)
+                    modified_path = Path(event.src_path)  # type: ignore[type-error]
                     if modified_path.name == "HEAD":
                         ghosts = await engine.list_active_ghosts(root_dir=self.cortex_root)
                     else:

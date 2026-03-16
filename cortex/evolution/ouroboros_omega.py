@@ -88,7 +88,7 @@ class _AstAnalyzer(ast.NodeVisitor):
         self._current_function = prev_func
 
     def visit_AsyncFunctionDef(self, node):
-        self.visit_FunctionDef(node)  # Similar handling
+        self.visit_FunctionDef(node)  # Similar handling  # type: ignore[type-error]
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name):
@@ -176,7 +176,7 @@ class _DocstringInjector(ast.NodeTransformer):
         return node
 
     def visit_AsyncFunctionDef(self, node):
-        return self.visit_FunctionDef(node)
+        return self.visit_FunctionDef(node)  # type: ignore[type-error]
 
 
 class _BlockingPatternDetector(ast.NodeVisitor):

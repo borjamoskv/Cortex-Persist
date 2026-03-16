@@ -133,7 +133,7 @@ class DistributedSovereignCache:
         audit_callback: AuditCallback | None = None,
     ) -> AsyncIterator[DistributedSovereignCache]:
         redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-        client = aioredis.from_url(redis_url, decode_responses=True)
+        client = aioredis.from_url(redis_url, decode_responses=True)  # type: ignore[reportOptionalMemberAccess]
 
         # Baseline initialization
         await client.setnx(_CHAIN_TIP_KEY, _GENESIS_HASH)
@@ -143,7 +143,7 @@ class DistributedSovereignCache:
         try:
             await client.xgroup_create(_AUDIT_STREAM_KEY, _AUDIT_GROUP_NAME, id="0", mkstream=True)
             logger.info("🐉 [HYDRA-LOG] Created new audit stream consumer group.")
-        except aioredis.exceptions.ResponseError as e:
+        except aioredis.exceptions.ResponseError as e:  # type: ignore[reportOptionalMemberAccess]
             if "BUSYGROUP" not in str(e):
                 raise
 
