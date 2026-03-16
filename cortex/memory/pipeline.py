@@ -1,3 +1,16 @@
+"""
+CORTEX v8 — Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
+
+Orchestrates the cognitive assessment layer that wraps every memory operation:
+
+  Query path:  SchemaEngine → EpistemicVoidDetector → MetamemoryMonitor → QueryResult
+  Store path:  SchemaEngine → ValenceClassifier → STDPEngine → StoreResult
+
+The pipeline is the single entry-point for all memory I/O that requires
+epistemic evaluation, emotional tagging, or synaptic reinforcement.
+
+Derivation: Ω₃ (Byzantine Default) + Ω₂ (Entropic Asymmetry)
+"""
 from __future__ import annotations
 
 import logging

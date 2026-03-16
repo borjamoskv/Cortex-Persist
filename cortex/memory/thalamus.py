@@ -1,3 +1,19 @@
+"""
+CORTEX v7 — Thalamus Gate (Pre-Persistence Admission Filter).
+
+Implements Active Forgetting (selective encoding) BEFORE persistence.
+Three deterministic filters run in sequence:
+
+  1. Density Check   — discard facts below minimum character threshold.
+  2. Redundancy Check — semantic dedup against existing L2 facts.
+  3. Causal Saturation — cap children per parent decision to contain entropy.
+
+Biological analogue: the thalamic relay nuclei gate sensory input,
+preventing cortical overload by filtering noise before it reaches
+the hippocampus (L2 vector store).
+
+Derivation: Ω₂ (Entropic Asymmetry) + Ω₃ (Byzantine Default)
+"""
 import logging
 from typing import Any
 
