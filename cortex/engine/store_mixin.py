@@ -248,11 +248,64 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
+        # ═══ AX-033 Hook 1: HealthGuard (pre-validation circuit breaker) ═══
+        try:
+            from cortex.guards.health_guard import HealthGuard
+
+            db_path = getattr(self, "_db_path", None) or getattr(self, "db_path", None)
+            if db_path:
+                guard = HealthGuard(db_path=str(db_path))
+                await guard.check_write_safety()
+        except ImportError:
+            pass  # HealthGuard not available
+        except Exception as _hg_err:  # noqa: BLE001 — AX-033 defensive boundary
+            logger.debug("[AX-033] HealthGuard skipped: %s", _hg_err)
+
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
         if dedupe_id is not None:
             return dedupe_id
+
+        # ═══ AX-033 Hook 2: Contradiction Guard (decision/rule/error types) ═══
+        if fact_type in ("decision", "rule", "error"):
+            try:
+                from cortex.guards.contradiction_guard import detect_contradictions
+
+                db_path = getattr(self, "_db_path", None) or getattr(self, "db_path", None)
+                if db_path:
+                    report = await detect_contradictions(
+                        new_content=content, new_project=project, db_path=str(db_path)
+                    )
+                    if report.has_conflicts and report.severity == "high":
+                        logger.warning(
+                            "[AX-033] Contradiction detected (severity=%s):\n%s",
+                            report.severity,
+                            report.format(),
+                        )
+            except ImportError:
+                pass
+            except Exception as _cg_err:  # noqa: BLE001 — AX-033 defensive boundary
+                logger.debug("[AX-033] ContradictionGuard skipped: %s", _cg_err)
+
+        # ═══ AX-033 Hook 3: SovereignVerifier (code-type formal verification) ═══
+        if fact_type == "code":
+            try:
+                from cortex.verification.verifier import SovereignVerifier
+
+                result = SovereignVerifier().check(content, context={"project": project})
+                if not result.is_valid:
+                    violation_names = [v.get("name", "unknown") for v in result.violations]
+                    raise ValueError(
+                        f"[AX-033] Formal verification failed: {violation_names}. "
+                        f"Counterexample: {result.counterexample}"
+                    )
+            except ImportError:
+                pass
+            except ValueError:
+                raise  # Re-raise verification failures — must not be swallowed
+            except Exception as _sv_err:  # noqa: BLE001 — AX-033 defensive boundary
+                logger.debug("[AX-033] SovereignVerifier skipped: %s", _sv_err)
 
         tx_id = (
             tx_id
@@ -320,6 +373,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         if commit:
             await conn.commit()
+
+        # ═══ AX-033 Hook 4: Ledger write tracking + auto-checkpoint ═══
+        try:
+            ledger = getattr(self, "_ledger", None)
+            if ledger is not None and hasattr(ledger, "record_write"):
+                ledger.record_write()
+                # Auto-checkpoint when adaptive batch is full
+                await ledger.create_checkpoint_async()
+        except Exception as _ld_err:  # noqa: BLE001 — AX-033 defensive boundary
+            logger.debug("[AX-033] Ledger checkpoint skipped: %s", _ld_err)
 
         try:
             from cortex.signals.fact_hook import emit_fact_stored
@@ -409,7 +472,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),
                 confidence=confidence,
-                source=source,
+                source=source or "engine:update",
                 meta=new_meta,
                 conn=conn,
                 commit=False,
