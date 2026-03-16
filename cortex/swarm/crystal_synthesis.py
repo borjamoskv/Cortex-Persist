@@ -106,11 +106,13 @@ async def synthesize_crystals(
     )
 
     result = await router.execute_resilient(prompt)
+
     if result.is_err():
-        logger.error("❌ [SYNTHESIS] Failed to fuse crystals: %s", result.error)
+        err_val = result.unwrap_err()
+        logger.error("❌ [SYNTHESIS] Failed to fuse crystals: %s", err_val)
         return {
             "fused_content": primary_content + "\n\n" + secondary_content,
-            "error": result.error,
+            "error": str(err_val),
         }
 
     text_content = result.unwrap()

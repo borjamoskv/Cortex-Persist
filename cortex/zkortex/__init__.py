@@ -17,6 +17,15 @@ Exports:
 from __future__ import annotations
 
 import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.zkortex.commitment import KnowledgeCommitment
+    from cortex.zkortex.merkle import MerkleTree, ZKMembershipProof
+    from cortex.zkortex.opacity_layer import SovereignOpacityLayer
+    from cortex.zkortex.prover import ZKOrtexProver
+    from cortex.zkortex.range_proof import ZKRangeProof
+    from cortex.zkortex.verifier import ZKOrtexVerifier
 
 __all__ = [
     "KnowledgeCommitment",

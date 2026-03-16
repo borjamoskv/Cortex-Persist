@@ -12,13 +12,10 @@ import pytest
 from cortex.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
-    BeliefStatus,
-    BeliefVerdict,
     VerdictAction,
 )
 from cortex.llm._models import IntentProfile
 from cortex.llm.cognitive_handoff import CognitiveHandoff
-
 
 # ─── IntentProfile Extensions ───────────────────────────────────────────────
 

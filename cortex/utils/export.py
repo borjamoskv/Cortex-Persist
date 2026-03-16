@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 __all__ = ["export_facts"]
 
 if TYPE_CHECKING:
-    from cortex.engine import Fact
+    from cortex.engine.models import Fact
 
 
 def export_facts(facts: list[Fact], fmt: str = "json") -> str:

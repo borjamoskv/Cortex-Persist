@@ -46,7 +46,7 @@ async def message_stream(request: Request):
                 except (json.JSONDecodeError, ValueError):
                     continue
 
-    return EventSourceResponse(event_generator())
+    return EventSourceResponse(event_generator())  # type: ignore[reportArgumentType]
 
 
 @app.get("/status")

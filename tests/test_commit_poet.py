@@ -8,7 +8,6 @@ import pytest
 
 from cortex.git.poet import CommitPoet, generate_candidates, generate_commit_message
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 

@@ -136,6 +136,7 @@ class StoreRequest(BaseModel):
         "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
+    source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     meta: dict | None = Field(None, description="Optional JSON metadata")
 
     @field_validator("project", "content")
@@ -206,6 +207,7 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
+    confidence: str | float | None = None
     status: str = "recorded"
 
 
@@ -238,9 +240,15 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
+    confidence: str | float | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    source: str | None = None
     meta: dict | None = None
     is_tombstoned: bool = False
     hash: str | None = None
+    tx_id: str | None = None
+    consensus_score: float | None = None
 
 
 class StatusResponse(BaseModel):

@@ -1,18 +1,16 @@
 from cortex.scraper.engine import ScraperEngine
 from cortex.scraper.models import ExtractionStrategy, ScrapeRequest, ScrapeResult
 
+from .models import MarketReport, NicheTarget
+
 # Depending on existing LLM integrations, we will try to use Instructor or directly the LLM gateway.
 # Assuming standard CORTEX gateway interaction here for Pydantic structuring.
 # If CORTEX has a different structured output method, this should be adapted.
 try:
     import instructor
     from openai import AsyncOpenAI
-
-    from cortex.gateway.adapters.openai_spoof import OpenAISpoofAdapter  # Example
 except ImportError:
     instructor = None
-
-from .models import NicheTarget, TrendSignal, MarketReport
 
 
 class NicheArbitrageEngine:

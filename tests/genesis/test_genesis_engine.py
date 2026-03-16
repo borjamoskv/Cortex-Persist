@@ -6,7 +6,6 @@ and assembles it in /tmp to verify recursive integrity.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import pytest
@@ -15,6 +14,7 @@ from cortex.genesis.assembler import SystemAssembler
 from cortex.genesis.engine import GenesisEngine
 from cortex.genesis.models import ComponentSpec, SystemSpec
 from cortex.genesis.validator import GenesisValidator
+
 
 @pytest.fixture
 def test_root(tmp_path: Path) -> Path:

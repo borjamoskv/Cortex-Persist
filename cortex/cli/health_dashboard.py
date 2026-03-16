@@ -10,17 +10,18 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import console, resolve_db_path
+from cortex.cli.common import console, get_db_path
 
 
 @click.command("dashboard")
 @click.option("--db", "db_path", default=None, help="DB path override.")
-def dashboard(db_path: str | None) -> None:
-    """Rich terminal health dashboard."""
-    from cortex.health import HealthCollector, HealthScorer
+def dashboard(db_path: str | None, samples: int, interval: float) -> None:
+    """Rich interactive live dashboard for CORTEX Health."""
+    from cortex.health.collector import HealthCollector
     from cortex.health.models import Grade
+    from cortex.health.scorer import HealthScorer
 
-    path = resolve_db_path(db_path)
+    path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)

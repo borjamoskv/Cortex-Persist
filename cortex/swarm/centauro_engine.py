@@ -3,6 +3,7 @@ CORTEX V5 - Centauro Engine (LEGION-Ω)
 Orchestration engine for the Sovereign Swarm. Implements Byzantine Consensus
 and adaptive agent formations for Zero-Trust problem solving.
 """
+from __future__ import annotations
 
 import asyncio
 import logging
@@ -106,7 +107,7 @@ class CentauroEngine:
     def __init__(self, tolerance: float = 0.67):
         self.consensus = ByzantineConsensus(tolerance_threshold=tolerance)
         self.agents: dict[str, VirtualAgent] = {}
-        self._active_missions: dict[str, asyncio.Future] = {}
+        self._active_missions: dict[str, asyncio.Future[CentauroMissionResult]] = {}
         self._aleph = AxiomaticLeapEngine()
 
     def spawn_squad(self, size: int, formation: str = Formation.BLITZ) -> dict[str, VirtualAgent]:
@@ -150,11 +151,15 @@ class CentauroEngine:
         agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
 
         winning = None
+        from typing import cast
+
         for future in asyncio.as_completed(agent_tasks):
             agent_id, result = await future
             if isinstance(result, Exception):
                 continue
-            proposals[agent_id] = result
+            
+            str_result = cast(str, result)
+            proposals[agent_id] = str_result
             winning = self.consensus.execute_consensus(proposals)
             if winning:
                 logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
@@ -174,11 +179,13 @@ class CentauroEngine:
         mission_hash = hashlib.sha256(f"{mission}:{formation}".encode()).hexdigest()
 
         # --- Thermal Heat-Sink (Multiplexing) ---
-        if mission_hash in self._active_missions:
+        mission_hash_str = str(mission_hash)
+        if mission_hash_str in self._active_missions:
             logger.info(
-                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash[:8]
+                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", 
+                mission_hash_str
             )
-            return await self._active_missions[mission_hash]  # type: ignore
+            return await self._active_missions[mission_hash_str]
 
         loop = asyncio.get_running_loop()
         mission_future: asyncio.Future[CentauroMissionResult] = loop.create_future()
@@ -234,7 +241,10 @@ class CentauroEngine:
                     logger.error("ALEPH-Ω Leap failed: %s", leap_e)
                     result = {
                         "status": "failure",
-                        "reason": "Byzantine Consensus Threshold Not Reached, tracking leap failure.",
+                        "reason": (
+                            "Byzantine Consensus Threshold Not Reached, "
+                            "tracking leap failure."
+                        ),
                         "agents_used": agents_used,
                         "formation": formation,
                     }
@@ -247,4 +257,6 @@ class CentauroEngine:
                 mission_future.set_exception(e)
             raise
         finally:
-            self._active_missions.pop(mission_hash, None)
+            self._active_missions.pop(str(mission_hash), None)
+            
+        raise RuntimeError("Unreachable")

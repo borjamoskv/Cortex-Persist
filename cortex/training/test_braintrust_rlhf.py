@@ -17,7 +17,7 @@ class MockEpisodicMemory:
 
         def ep(evt, content, intent="", meta=None):
             return Episode(
-                id=uuid.uuid4().hex,
+                id=int(uuid.uuid4().hex[:8], 16),
                 session_id=session_id,
                 project="test_rlhf",
                 event_type=evt,
@@ -56,15 +56,15 @@ async def run_triad_rlhf_sandbox():
     print("[SOVEREIGN SANDBOX] Iniciando Pruebas RLHF con Braintrust...")
 
     mock_memory = MockEpisodicMemory()
-    triad = SovereignTriad()
+    _triad = SovereignTriad()
 
     # Force mock API KEY if not present for log tracking attempt without hard failing.
-    # triad.braintrust_key = "fake_key_para_evitar_warnings"
+    # _triad.braintrust_key = "fake_key_para_evitar_warnings"
 
     session_id = f"sandbox_{uuid.uuid4().hex[:8]}"
 
-    collector = TrajectoryCollector(episodic_memory=mock_memory, triad=triad)
-    engine = RewardEngine(use_tests=True, triad=triad)
+    collector = TrajectoryCollector(episodic_memory=mock_memory)
+    engine = RewardEngine(use_tests=True)
 
     print(f"1. Extrayendo trayectoria virtual (ID: {session_id})")
     trajectory = await collector.collect_session_trajectory(session_id)
@@ -79,7 +79,7 @@ async def run_triad_rlhf_sandbox():
     print(f"   - Outcome Inferido: {trajectory.outcome}")
 
     print("3. Calculando Sovereign V2 Reward (Sincronizado a Braintrust)")
-    reward = await engine.calculate_reward(trajectory)
+    reward = engine.calculate_reward(trajectory)
 
     print(f"   => SCORE FINAL (Escala [-1.0, 1.0]): {reward:.3f}")
     print("4. Braintrust trace execution triggers in background via SovereignTriad O(1).")

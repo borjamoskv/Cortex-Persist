@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
-
 from benchmarks.encb.belief_object import (
     BeliefObject,
     BeliefType,
-    Evidence,
 )
 from benchmarks.encb.merge import (
     merge_boolean,

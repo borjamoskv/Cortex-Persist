@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from benchmarks.encb.agents import AdversaryType, NodeProfile
 from benchmarks.encb.belief_object import BeliefType
 from benchmarks.encb.strategies import (

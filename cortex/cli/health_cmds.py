@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from cortex.cli.common import console, resolve_db_path
+from cortex.cli.common import console, get_db_path
 
 
 def render_sparkline(data: list[float]) -> str:
@@ -34,7 +34,7 @@ def check(db_path: str | None) -> None:
     """Quick boolean health check (healthy/degraded)."""
     from cortex.health import HealthCollector, HealthScorer
 
-    path = resolve_db_path(db_path)
+    path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
@@ -60,7 +60,7 @@ def report(db_path: str | None, as_json: bool) -> None:
     from cortex.health import HealthMixin
 
     class _Engine(HealthMixin):
-        _db_path = resolve_db_path(db_path)
+        _db_path = get_db_path(db_path)
 
     engine = _Engine()
     rep = asyncio.run(engine.health_report())
@@ -96,7 +96,7 @@ def score(db_path: str | None) -> None:
     """Print only the numeric health score (0-100)."""
     from cortex.health import HealthCollector, HealthScorer
 
-    path = resolve_db_path(db_path)
+    path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
@@ -116,7 +116,7 @@ def trend(db_path: str | None, samples: int, interval: float) -> None:
     from cortex.health import HealthCollector, HealthScorer
     from cortex.health.trend import TrendDetector
 
-    path = resolve_db_path(db_path)
+    path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
     detector = TrendDetector(window_size=samples)
     scores: list[float] = []

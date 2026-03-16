@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from benchmarks.encb.belief_object import (
     BeliefObject,
     BeliefType,

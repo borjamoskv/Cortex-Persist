@@ -7,6 +7,23 @@ and scales or kills experiments.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.market_maker.detector import TrendDetector
+    from cortex.market_maker.models import (
+        Experiment,
+        ExperimentStatus,
+        MVPArtifact,
+        Opportunity,
+        TrendSignal,
+        Verdict,
+    )
+    from cortex.market_maker.mvp_generator import MVPGenerator
+    from cortex.market_maker.orchestrator import MarketMakerOrchestrator
+    from cortex.market_maker.scorer import OpportunityScorer
+    from cortex.market_maker.validator import DemandValidator
+
 __all__ = [
     "DemandValidator",
     "Experiment",

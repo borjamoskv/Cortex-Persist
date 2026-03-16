@@ -11,20 +11,7 @@ import functools
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any, TypeVar
-
-try:
-    from typing import ParamSpec
-except ImportError:
-    try:
-        from typing_extensions import ParamSpec
-    except ImportError:
-        # Fallback for Python 3.9 environments without typing_extensions
-        class ParamSpec:
-            def __init__(self, *args, **kwargs):
-                self.args = []
-                self.kwargs = {}
-
+from typing import Any, ParamSpec, TypeVar
 
 from cortex.agent.degradation import (
     AgentAction,

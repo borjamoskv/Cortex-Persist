@@ -57,7 +57,7 @@ class CortexLLMRouter:
         self._cascade = CascadeManager(negative_ttl, positive_ttl)
         self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
         # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
-        self._inflight: dict[str, asyncio.Future[Result[str]]] = {}
+        self._inflight: dict[str, asyncio.Future[Result[str, str]]] = {}
 
     @property
     def primary(self) -> BaseProvider:
@@ -144,7 +144,7 @@ class CortexLLMRouter:
         )
         return known + unknown
 
-    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str] | None:
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -188,7 +188,7 @@ class CortexLLMRouter:
         """Clear NXDOMAIN records."""
         self._cascade._nxdomain_cache.clear()
 
-    async def execute_resilient(self, prompt: CortexPrompt) -> Result[str]:
+    async def execute_resilient(self, prompt: CortexPrompt) -> Result[str, str]:
         """Ejecuta inferencia con cascade determinista por intención.
 
         Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
@@ -205,7 +205,7 @@ class CortexLLMRouter:
             return await self._inflight[prompt_key]
 
         loop = asyncio.get_running_loop()
-        future: asyncio.Future[Result[str]] = loop.create_future()
+        future: asyncio.Future[Result[str, str]] = loop.create_future()
         self._inflight[prompt_key] = future
 
         try:
@@ -219,11 +219,11 @@ class CortexLLMRouter:
         finally:
             self._inflight.pop(prompt_key, None)
 
-    async def invoke(self, prompt: CortexPrompt) -> Result[str]:
+    async def invoke(self, prompt: CortexPrompt) -> Result[str, str]:
         """Alias for backward compatibility."""
         return await self.execute_resilient(prompt)
 
-    async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str]:
+    async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str, str]:
         """Core cascade logic (extracted for Heat-Sink wrapping)."""
         # Phase 0: Hedging (Parallel race-to-first)
         hedged_res = await self.execute_hedged(prompt)
@@ -250,7 +250,7 @@ class CortexLLMRouter:
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt.intent)
-        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]
+        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # type: ignore[union-attr]
 
         for i, provider in enumerate(fallbacks, start=2):
             if self._cascade.is_nxdomain_cached(provider.provider_name):
@@ -277,7 +277,7 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
-            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore[union-attr]
             self._cascade.set_nx_record(provider.provider_name)
 
         # Final defeat: record terminal event
@@ -294,7 +294,7 @@ class CortexLLMRouter:
         )
         return Err(f"All providers failed. Cascade exhausted. Errors: {'; '.join(errors)}")
 
-    async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str]:
+    async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
         """Try a single provider, returning Result."""
         try:
             return Ok(await provider.invoke(prompt))

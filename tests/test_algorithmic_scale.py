@@ -4,10 +4,6 @@ from __future__ import annotations
 
 import os
 import sqlite3
-import tempfile
-
-import pytest
-
 
 # ─── Index Tests ──────────────────────────────────────────────────────
 
@@ -17,7 +13,7 @@ class TestCoveringIndices:
 
     def test_tenant_valid_index_exists(self, tmp_path):
         """idx_facts_tenant_valid covers (tenant_id, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS_TABLE, CREATE_FACTS_INDEXES
+        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
@@ -40,7 +36,7 @@ class TestCoveringIndices:
 
     def test_proj_valid_index_exists(self, tmp_path):
         """idx_facts_proj_valid covers (project, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS_TABLE, CREATE_FACTS_INDEXES
+        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
@@ -70,7 +66,7 @@ class TestFTS5Triggers:
 
     def _setup_db(self, db_path: str) -> sqlite3.Connection:
         """Create facts table + FTS5 + triggers."""
-        from cortex.database.schema import CREATE_FACTS_TABLE, CREATE_FACTS_INDEXES
+        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
         from cortex.database.schema_extensions import (
             CREATE_FACTS_FTS,
             CREATE_FACTS_FTS_TRIGGERS,

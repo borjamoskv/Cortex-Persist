@@ -21,7 +21,6 @@ from cortex.hypervisor.belief_object import (
     VerdictAction,
 )
 
-
 # ─── BeliefConfidence ───────────────────────────────────────────────────────
 
 

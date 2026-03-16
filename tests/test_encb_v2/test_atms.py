@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
-from benchmarks.encb.atms import ATMSLite, AssumptionLabel
+from benchmarks.encb.atms import AssumptionLabel, ATMSLite
 
 
 class TestAssumptionLabel:

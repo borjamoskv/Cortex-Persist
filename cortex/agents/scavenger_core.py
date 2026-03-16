@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
@@ -17,7 +17,6 @@ from cortex.events.bus import DistributedEventBus
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
 from cortex.skills.cadastral.models import (
-    OwnershipType,
     ZoneClassification,
 )
 

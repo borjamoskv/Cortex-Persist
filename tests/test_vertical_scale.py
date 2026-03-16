@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import inspect
 import os
-import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -23,7 +22,6 @@ from cortex.database.core import (
     PAGE_SIZE,
     connect,
 )
-
 
 # ─── SQLite Pragma Tests ──────────────────────────────────────────────
 

@@ -43,19 +43,27 @@ class OrchestraIntrospectionMixin:
 
     async def deep_think(self, prompt: str) -> FusedThought:
         """Razonamiento profundo con síntesis."""
-        return await self.think(prompt, mode="deep_reasoning", strategy="synthesis")  # type: ignore[reportAttributeAccessIssue]
+        return await self.think( # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="deep_reasoning", strategy="synthesis"  
+        )
 
     async def code_think(self, prompt: str) -> FusedThought:
         """Análisis de código con best-of-n."""
-        return await self.think(prompt, mode="code_analysis", strategy="best_of_n")  # type: ignore[reportAttributeAccessIssue]
+        return await self.think( # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="code_analysis", strategy="best_of_n"  
+        )
 
     async def creative_think(self, prompt: str) -> FusedThought:
         """Pensamiento creativo con weighted synthesis."""
-        return await self.think(prompt, mode="creative", strategy="weighted")  # type: ignore[reportAttributeAccessIssue]
+        return await self.think( # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="creative", strategy="weighted"  
+        )
 
     async def consensus_think(self, prompt: str) -> FusedThought:
         """Máximo consenso — todos los modelos con síntesis."""
-        return await self.think(prompt, mode="consensus", strategy="synthesis")  # type: ignore[reportAttributeAccessIssue]
+        return await self.think( # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="consensus", strategy="synthesis"  
+        )
 
     async def omega_think(self, prompt: str) -> FusedThought:
         """Omega Reasoning Protocol (ORP) — Adversarial Truth Collapse.
@@ -67,7 +75,9 @@ class OrchestraIntrospectionMixin:
         from cortex.llm.sovereign import Inquisitor
 
         # Phase 1: Hypothesis Synthesis
-        hypothesis = await self.think(prompt, mode="omega", strategy="synthesis")  # type: ignore[reportAttributeAccessIssue]
+        hypothesis = await self.think( # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="omega", strategy="synthesis"  
+        )
 
         # Phase 2: Inquisitorial Siege (Asymmetry Ω₅)
         inquisitor = Inquisitor()
@@ -84,9 +94,9 @@ class OrchestraIntrospectionMixin:
             f"the original intent with zero-defect architecture."
         )
 
-        final_thought = await self.think(
+        final_thought = await self.think(  # type: ignore[reportAttributeAccessIssue]
             refinement_prompt, mode="deep_reasoning", strategy="synthesis"
-        )  # type: ignore[reportAttributeAccessIssue]
+        )
 
         # Logic for Multi-round Refinement (Ω₅)
         if final_thought.confidence < 0.8:
@@ -101,9 +111,9 @@ class OrchestraIntrospectionMixin:
                 f"SECOND CRITIQUE: {siege_2.content}\n\n"
                 f"MISSION: Absolute perfection. Resolve remaining blind spots."
             )
-            final_thought = await self.think(
+            final_thought = await self.think(  # type: ignore[reportAttributeAccessIssue]
                 refinement_prompt_2, mode="deep_reasoning", strategy="synthesis"
-            )  # type: ignore[reportAttributeAccessIssue]
+            )
 
         # Merge metadata
         final_thought.meta.update(
@@ -146,7 +156,10 @@ class OrchestraIntrospectionMixin:
 
         return {
             "initialized": self._initialized,  # type: ignore[reportAttributeAccessIssue]
-            "judge": (f"{self._judge.provider_name}:{self._judge.model}" if self._judge else None),  # type: ignore[reportAttributeAccessIssue]
+            "judge": (
+                f"{self._judge.provider_name}:{self._judge.model}" 
+                if self._judge else None
+            ),  # type: ignore[reportAttributeAccessIssue]
             "pool_size": self._pool.size,  # type: ignore[reportAttributeAccessIssue]
             "history_count": len(self._history),  # type: ignore[reportAttributeAccessIssue]
             "modes": mode_status,
@@ -166,14 +179,14 @@ class OrchestraIntrospectionMixin:
             return {"total_thoughts": 0}
 
         total = len(self._history)  # type: ignore[reportAttributeAccessIssue]
-        avg_confidence = sum(r.confidence for r in self._history) / total  # type: ignore[reportAttributeAccessIssue]
-        avg_agreement = sum(r.agreement for r in self._history) / total  # type: ignore[reportAttributeAccessIssue]
-        avg_latency = sum(r.total_latency_ms for r in self._history) / total  # type: ignore[reportAttributeAccessIssue]
-        success_rate = (
+        avg_confidence = float(sum(r.confidence for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
+        avg_agreement = float(sum(r.agreement for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
+        avg_latency = float(sum(r.total_latency_ms for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
+        success_rate = float(
             sum(
                 r.models_succeeded / r.models_queried
-                for r in self._history
-                if r.models_queried > 0  # type: ignore[reportAttributeAccessIssue]
+                for r in self._history  # type: ignore[reportAttributeAccessIssue]
+                if r.models_queried > 0 
             )
             / total
         )

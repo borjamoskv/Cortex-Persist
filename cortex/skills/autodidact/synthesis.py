@@ -192,8 +192,8 @@ async def distill_sovereign_memo(
     result = await router.execute_resilient(prompt)
 
     if result.is_err():
-        logger.error("❌ [SYNTHESIS] Cascade exhausted: %s", result.error)
-        return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": result.error}
+        logger.error("❌ [SYNTHESIS] Cascade exhausted: %s", result.error)  # type: ignore[union-attr]
+        return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": result.error}  # type: ignore[union-attr]
 
     text_content = result.unwrap()
 
@@ -221,7 +221,7 @@ async def execute_cognitive_synthesis(
     is_redundant, existing_id = await check_semantic_redundancy(raw_data)
     if is_redundant and not force:
         logger.info("❄️ Isoterma detectada: %s", existing_id)
-        return existing_id
+        return existing_id or ""
 
     cristal_raw = await distill_sovereign_memo(raw_data, source, intent)
     if isinstance(cristal_raw, dict) and "status" in cristal_raw:
@@ -229,9 +229,14 @@ async def execute_cognitive_synthesis(
     else:
         cristal = cristal_raw
 
-    memo_content = cristal.get("content_markdown", "")
-    entities = cristal.get("entities", [])
-    resonancia = cristal.get("resonancia_axiomatica", "")
+    if isinstance(cristal, dict):
+        memo_content: str = cristal.get("content_markdown", "")
+        entities: list[str] = cristal.get("entities", [])
+        resonancia: str = cristal.get("resonancia_axiomatica", "")
+    else:
+        memo_content = str(cristal)
+        entities = []
+        resonancia = ""
 
     bytes_in, bytes_out = len(raw_data), len(memo_content)
     rendimiento = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0

@@ -102,7 +102,7 @@ class AsyncSignalBus:
             )
             await self._conn.commit()
             self.session_emitted += 1
-            return cursor.lastrowid
+            return cursor.lastrowid or 0
         except Exception:  # noqa: BLE001
             self.session_errors += 1
             raise
@@ -129,7 +129,7 @@ class AsyncSignalBus:
             params.insert(-1, since.isoformat())
         cursor = await self._conn.execute(query, params)
         rows = await cursor.fetchall()
-        return [signal_from_row(row) for row in rows]
+        return [signal_from_row(tuple(row)) for row in rows]
 
     async def _query(
         self,
@@ -149,7 +149,7 @@ class AsyncSignalBus:
         )
         cursor = await self._conn.execute(query, params)
         rows = await cursor.fetchall()
-        return [signal_from_row(row) for row in rows]
+        return [signal_from_row(tuple(row)) for row in rows]
 
     async def poll(
         self,
@@ -290,7 +290,7 @@ class SignalBus:
                 source,
             )
             self.session_emitted += 1
-            return signal_id
+            return signal_id or 0
         except Exception:  # noqa: BLE001
             self.session_errors += 1
             raise
@@ -368,7 +368,7 @@ class SignalBus:
             query = query.replace(" ORDER BY", " AND created_at >= ? ORDER BY", 1)
             params.insert(-1, since.isoformat())
         cursor = self._conn.execute(query, params)
-        return [signal_from_row(row) for row in cursor.fetchall()]
+        return [signal_from_row(tuple(row)) for row in cursor.fetchall()]
 
     def stats(self) -> dict:
         self.ensure_table()
@@ -427,4 +427,4 @@ class SignalBus:
             limit=limit,
         )
         cursor = self._conn.execute(query, params)
-        return [signal_from_row(row) for row in cursor.fetchall()]
+        return [signal_from_row(tuple(row)) for row in cursor.fetchall()]

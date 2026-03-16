@@ -3,7 +3,7 @@ import time
 from typing import TYPE_CHECKING, Optional
 
 try:
-    import Quartz.CoreGraphics as CG
+    import Quartz.CoreGraphics as CG  # type: ignore[reportMissingImports]
 except ImportError:
     CG = None
 

@@ -18,6 +18,39 @@ import importlib
 import socket  # noqa: F401
 import ssl  # noqa: F401 — re-export for backward compat (tests patch via cortex.daemon.ssl)
 import time  # noqa: F401
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.daemon.core import MoskvDaemon
+    from cortex.daemon.models import (
+        BUNDLE_ID,
+        DEFAULT_COOLDOWN,
+        DEFAULT_INTERVAL,
+        DEFAULT_MEMORY_STALE_HOURS,
+        DEFAULT_STALE_HOURS,
+        STATUS_FILE,
+        CertAlert,
+        DaemonStatus,
+        DiskAlert,
+        EngineHealthAlert,
+        EntropyAlert,
+        GhostAlert,
+        MejoraloAlert,
+        MemoryAlert,
+        PerceptionAlert,
+        SiteStatus,
+    )
+    from cortex.daemon.monitors import (
+        CertMonitor,
+        DiskMonitor,
+        EngineHealthCheck,
+        EntropyMonitor,
+        GhostWatcher,
+        MemorySyncer,
+        PerceptionMonitor,
+        SiteMonitor,
+    )
+    from cortex.daemon.notifier import Notifier
 
 __all__ = [
     # core

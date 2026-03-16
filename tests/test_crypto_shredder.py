@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from cortex.crypto.shredder import CryptoShredder, ShredResult
+from cortex.crypto.shredder import CryptoShredder
 
 
 @pytest.fixture

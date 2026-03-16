@@ -1,8 +1,8 @@
 import json
 import os
 
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3 import Web3  # type: ignore[reportAttributeAccessIssue,reportMissingImports]
+from web3.middleware import geth_poa_middleware  # type: ignore[reportMissingImports]
 
 # The Ouroboros Swarm Oracle (Phase 3 Energy Independence)
 # Derivation: Axiom Ω₆ -> Execute.

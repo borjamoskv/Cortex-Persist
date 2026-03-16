@@ -10,8 +10,6 @@ Validates:
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from benchmarks.encb_baseline_rag import BaselineRAG
@@ -22,7 +20,6 @@ from benchmarks.encb_chaos_generator import (
     TemporalContradictionGenerator,
     TransitiveBreakageGenerator,
 )
-
 
 # ── Temporal Contradiction Tests ───────────────────────────────────────────
 

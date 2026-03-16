@@ -7,7 +7,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-import psutil
+import psutil  # type: ignore[reportMissingModuleSource]
 
 
 @dataclass

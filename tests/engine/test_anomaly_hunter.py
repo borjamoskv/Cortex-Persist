@@ -1,7 +1,9 @@
-import pytest
 from datetime import datetime, timedelta, timezone
-from cortex.engine.anomaly_hunter import AnomalyHunterEngine, Anomaly
-from cortex.engine.models import Fact
+
+import pytest
+
+from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+
 
 @pytest.fixture
 def mock_cortex_engine():

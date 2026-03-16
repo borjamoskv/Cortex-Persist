@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import math
-import pytest
-
 from benchmarks.encb.logop import (
     effective_confidence,
     logit,

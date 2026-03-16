@@ -34,8 +34,8 @@ class TTTEngine:
     """
 
     def __init__(self, episodic_memory: Any, triad: Any = None):
-        self.collector = TrajectoryCollector(episodic_memory, triad)
-        self.rewarder = RewardEngine(use_tests=True, triad=triad)
+        self.collector = TrajectoryCollector(episodic_memory)
+        self.rewarder = RewardEngine(use_tests=True)
 
         self.dataset_dir = Path.home() / ".cortex" / "training" / "datasets"
         self.dataset_dir.mkdir(parents=True, exist_ok=True)
@@ -65,7 +65,7 @@ class TTTEngine:
                 if not traj:
                     continue
 
-                reward = await self.rewarder.calculate_reward(traj)
+                reward = self.rewarder.calculate_reward(traj)
 
                 # Axiom Ω4: Aesthetic Integrity - Only learn from excellence
                 if reward > 0.4:

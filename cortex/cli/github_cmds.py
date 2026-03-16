@@ -90,7 +90,8 @@ def status(db: str) -> None:
                 "WHERE fact_type = 'bridge' AND source = 'bridge:github' "
                 "AND valid_until IS NULL"
             )
-            bridge_count = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            bridge_count = row[0] if row else 0
 
             # Count crystallized decisions
             cursor = await conn.execute(
@@ -98,7 +99,8 @@ def status(db: str) -> None:
                 "WHERE fact_type = 'decision' AND source = 'bridge:github' "
                 "AND valid_until IS NULL"
             )
-            decision_count = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            decision_count = row[0] if row else 0
 
             # Last sync time
             cursor = await conn.execute(

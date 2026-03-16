@@ -1,9 +1,14 @@
 from dataclasses import dataclass
 from typing import Any
 
-import structlog
+try:
+    import structlog
 
-logger = structlog.get_logger(__name__)
+    logger = structlog.get_logger(__name__)
+except ModuleNotFoundError:  # pragma: no cover
+    import logging
+
+    logger = logging.getLogger(__name__)
 
 
 @dataclass

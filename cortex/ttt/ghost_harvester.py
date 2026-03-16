@@ -50,6 +50,7 @@ def format_for_lora(rows):
     dataset = []
 
     from cortex.crypto.aes import CortexEncrypter
+    from cortex.crypto.keyring import get_master_key
 
     # Try to load existing key via standard environment variable or default logic.
     if "CORTEX_MASTER_KEY" not in os.environ:
@@ -59,7 +60,7 @@ def format_for_lora(rows):
             with open(key_path) as f:
                 os.environ["CORTEX_MASTER_KEY"] = f.read().strip()
 
-    master_key = os.environ.get("CORTEX_MASTER_KEY")
+    master_key = get_master_key()
     if not master_key:
         logger.warning("No CORTEX_MASTER_KEY found! Only unencrypted facts will be exported.")
         crypto = None
@@ -74,7 +75,10 @@ def format_for_lora(rows):
         # Action only if encrypted
         if content.startswith("v6_aesgcm:"):
             try:
-                content = crypto.decrypt(content)
+                if crypto:
+                    content = crypto.decrypt_str(content)
+                else:
+                    continue # Cannot decrypt without crypto
             except Exception:  # noqa: BLE001 — decryption failure on corrupted memory item skip
                 continue  # If we can't decrypt, skip this fact to not poison the model
 

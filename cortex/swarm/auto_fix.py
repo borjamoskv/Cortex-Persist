@@ -201,7 +201,7 @@ class AutoFixPipeline:
         max_score = max(scores.values(), default=0)
         if max_score == 0:
             return GhostClass.UNKNOWN
-        return max(scores, key=scores.get)
+        return max(scores, key=scores.__getitem__)
 
     def ghost_to_task(
         self,
@@ -235,7 +235,7 @@ class AutoFixPipeline:
 
         task = AgentTask.from_dict(task_dict)
         queue = TaskQueue()
-        queue.add(task)
+        queue.enqueue(task)
 
         branch_name = f"autofix/{task.id}"
 
@@ -266,6 +266,13 @@ class AutoFixPipeline:
                 "error": str(e),
                 "tests_passed": False,
             }
+        return {
+            "status": "failed",
+            "branch": branch_name,
+            "summary": "Fallthrough execution",
+            "error": "Pipeline failed to execute worktree block",
+            "tests_passed": False,
+        }
 
     async def _autonomous_merge(self, branch_name: str) -> bool:
         """Attempt to merge the fixed branch back into the main line via --ff-only."""
@@ -274,12 +281,13 @@ class AutoFixPipeline:
         cwd = str(self._repo_path)
         try:
             proc_branch = await asyncio.to_thread(
-                subprocess.run,
-                ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
-                capture_output=True,
-                text=True,
-                cwd=cwd,
-                timeout=5,
+                lambda *args, **kwargs: subprocess.run(
+                    ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
+                    capture_output=True,
+                    text=True,
+                    cwd=cwd,
+                    timeout=5,
+                )
             )
             main_branch = (
                 proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "master"
@@ -289,22 +297,24 @@ class AutoFixPipeline:
                 "🧬 [AUTOFIX] Attempting Ouroboros merge: %s into %s", branch_name, main_branch
             )
             proc_merge = await asyncio.to_thread(
-                subprocess.run,
-                ["git", "merge", "--ff-only", branch_name],
-                capture_output=True,
-                text=True,
-                cwd=cwd,
-                timeout=10,
+                lambda *args, **kwargs: subprocess.run(
+                    ["git", "merge", "--ff-only", branch_name],
+                    capture_output=True,
+                    text=True,
+                    cwd=cwd,
+                    timeout=10,
+                )
             )
 
             if proc_merge.returncode == 0:
                 logger.info("🧬 [AUTOFIX] Merged successfully.")
                 await asyncio.to_thread(
-                    subprocess.run,
-                    ["git", "branch", "-d", branch_name],
-                    capture_output=True,
-                    cwd=cwd,
-                    timeout=5,
+                    lambda *args, **kwargs: subprocess.run(
+                        ["git", "branch", "-d", branch_name],
+                        capture_output=True,
+                        cwd=cwd,
+                        timeout=5,
+                    )
                 )
                 return True
             else:
@@ -330,6 +340,9 @@ class AutoFixPipeline:
             escalation = RuntimeError(
                 f"AutoFix ESCALATION for ghost #{ghost_id} [{classification.value}]: {error}"
             )
+            error_trunk = error[0:500] if len(error) > 500 else error
+            error_short = error[0:100] if len(error) > 100 else error
+
             await pipeline.capture(
                 escalation,
                 source=f"autofix:{classification.value}",
@@ -338,13 +351,13 @@ class AutoFixPipeline:
                     "original_ghost_id": ghost_id,
                     "classification": classification.value,
                     "escalated": True,
-                    "fix_error": error[:500],
+                    "fix_error": error_trunk,
                 },
             )
             logger.warning(
                 "🔄 [AUTOFIX] Ghost [%s] escalated — fix failed: %s",
                 ghost_id,
-                error[:100],
+                error_short,
             )
         except (ImportError, RuntimeError, OSError) as e:
             logger.error(

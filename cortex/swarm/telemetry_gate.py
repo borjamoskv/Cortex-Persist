@@ -26,7 +26,7 @@ import os
 import time
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any, TypeAlias, TypeVar
 
 from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
 from cortex.utils.result import Err, Result
@@ -51,7 +51,7 @@ _SAFE_KWARG_PREFIXES = frozenset(
 
 
 # Evaluator signature: (inputs: dict, output: Any) -> float [0.0 – 1.0]
-EvaluatorFn = Callable[[dict[str, Any], Any], float]
+EvaluatorFn: TypeAlias = Callable[[dict[str, Any], Any], float]
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -99,8 +99,7 @@ def init_sovereign_tracing(project_name: str = "cortex-master-swarm") -> None:
 #  Core: Evaluator Protocol & Combinators
 # ═════════════════════════════════════════════════════════════════════════
 
-# Evaluator signature: (inputs: dict, output: Any) -> float [0.0 – 1.0]
-EvaluatorFn = Callable[[dict[str, Any], Any], float]
+# NOTE: EvaluatorFn type alias defined above (line 54)
 
 
 def exact_match_evaluator(expected_keys: list[str]) -> EvaluatorFn:
@@ -303,7 +302,7 @@ def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) 
     if not _HAS_LANGSMITH or not os.getenv("LANGCHAIN_API_KEY"):
         return None
     try:
-        rt = RunTree(
+        rt = RunTree(  # type: ignore[misc]
             name=f"sovereign_gate:{tool_name}",
             run_type="chain",
             inputs={"args": repr(args)[:500], "kwargs": _sanitize_kwargs(kwargs)},

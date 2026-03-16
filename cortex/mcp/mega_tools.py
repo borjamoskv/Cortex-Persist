@@ -91,7 +91,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project, cutoff_30d),
             )
-            decisions = await cursor.fetchall()
+            decisions = list(await cursor.fetchall())
 
             # Active ghosts (unfinished work)
             cursor = await conn.execute(
@@ -103,7 +103,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project,),
             )
-            ghosts = await cursor.fetchall()
+            ghosts = list(await cursor.fetchall())
 
             # Bridges (cross-project patterns)
             cursor = await conn.execute(
@@ -115,7 +115,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project,),
             )
-            bridges = await cursor.fetchall()
+            bridges = list(await cursor.fetchall())
 
         # 2. Build report from real data
         if type_rows:
@@ -341,7 +341,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project, project),
             )
-            ghost_count = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            ghost_count = row[0] if row else 0
 
             # 3. Total active facts
             cursor = await conn.execute(
@@ -352,7 +353,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project, project),
             )
-            total_facts = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            total_facts = row[0] if row else 0
 
             # 4. Temporal drift: recent vs previous 7-day window
             cursor = await conn.execute(
@@ -365,7 +367,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (cutoff_7d, project, project),
             )
-            recent_decisions = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            recent_decisions = row[0] if row else 0
 
             cursor = await conn.execute(
                 """
@@ -377,7 +380,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (cutoff_14d, cutoff_7d, project, project),
             )
-            prev_decisions = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            prev_decisions = row[0] if row else 0
 
             # 5. Bridge count (cross-project patterns)
             cursor = await conn.execute(
@@ -389,7 +393,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (project, project),
             )
-            bridge_count = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            bridge_count = row[0] if row else 0
 
             # 6. Error rate (recent errors)
             cursor = await conn.execute(
@@ -402,7 +407,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                 """,
                 (cutoff_7d, project, project),
             )
-            recent_errors = (await cursor.fetchone())[0]
+            error_row = await cursor.fetchone()
+            recent_errors = error_row[0] if error_row else 0
 
         # Calculate real metrics
         tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")

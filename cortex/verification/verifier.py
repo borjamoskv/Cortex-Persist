@@ -35,7 +35,7 @@ class SovereignVerifier:
         self._solver = None
         # Lazy z3 init: z3-solver is an optional [dev] dependency
         try:
-            import z3 as _z3
+            import z3 as _z3  # type: ignore[reportMissingImports]
 
             self._solver = _z3.Solver()
             # Set a hard timeout for Z3 to prevent blocking the RSI loop
