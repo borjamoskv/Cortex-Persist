@@ -60,30 +60,22 @@ class MouseEngine:
         btn = CG.kCGMouseButtonLeft
 
         # Primer click
-        down1 = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseDown, (p.x, p.y), btn
-        )
+        down1 = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, (p.x, p.y), btn)
         CG.CGEventSetIntegerValueField(down1, CG.kCGMouseEventClickState, 1)
         CG.CGEventPost(CG.kCGHIDEventTap, down1)
 
-        up1 = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseUp, (p.x, p.y), btn
-        )
+        up1 = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseUp, (p.x, p.y), btn)
         CG.CGEventSetIntegerValueField(up1, CG.kCGMouseEventClickState, 1)
         CG.CGEventPost(CG.kCGHIDEventTap, up1)
 
         time.sleep(0.05)
 
         # Segundo click con clickCount=2
-        down2 = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseDown, (p.x, p.y), btn
-        )
+        down2 = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, (p.x, p.y), btn)
         CG.CGEventSetIntegerValueField(down2, CG.kCGMouseEventClickState, 2)
         CG.CGEventPost(CG.kCGHIDEventTap, down2)
 
-        up2 = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseUp, (p.x, p.y), btn
-        )
+        up2 = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseUp, (p.x, p.y), btn)
         CG.CGEventSetIntegerValueField(up2, CG.kCGMouseEventClickState, 2)
         CG.CGEventPost(CG.kCGHIDEventTap, up2)
 
@@ -113,9 +105,7 @@ class MouseEngine:
         step_delay = duration / steps
 
         # Mouse down en origen
-        down = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseDown, (from_x, from_y), btn
-        )
+        down = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, (from_x, from_y), btn)
         CG.CGEventPost(CG.kCGHIDEventTap, down)
         time.sleep(0.05)
 
@@ -124,16 +114,12 @@ class MouseEngine:
             t = i / steps
             cx = from_x + int((to_x - from_x) * t)
             cy = from_y + int((to_y - from_y) * t)
-            drag_ev = CG.CGEventCreateMouseEvent(
-                None, CG.kCGEventLeftMouseDragged, (cx, cy), btn
-            )
+            drag_ev = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDragged, (cx, cy), btn)
             CG.CGEventPost(CG.kCGHIDEventTap, drag_ev)
             time.sleep(step_delay)
 
         # Mouse up en destino
-        up = CG.CGEventCreateMouseEvent(
-            None, CG.kCGEventLeftMouseUp, (to_x, to_y), btn
-        )
+        up = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseUp, (to_x, to_y), btn)
         CG.CGEventPost(CG.kCGHIDEventTap, up)
 
         return InteractionResult(success=True)
@@ -151,8 +137,6 @@ class MouseEngine:
         if not CG:
             return InteractionResult(success=False, error="CoreGraphics no disponible")
 
-        event = CG.CGEventCreateScrollWheelEvent(
-            None, CG.kCGScrollEventUnitLine, 1, clicks
-        )
+        event = CG.CGEventCreateScrollWheelEvent(None, CG.kCGScrollEventUnitLine, 1, clicks)
         CG.CGEventPost(CG.kCGHIDEventTap, event)
         return InteractionResult(success=True)

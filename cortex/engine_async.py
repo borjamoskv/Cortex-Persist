@@ -46,6 +46,7 @@ class AsyncCortexEngine(
         self._writer = writer
         self._embedder: LocalEmbedder | None = None
         self._ledger: ImmutableLedger | None = None
+        self.vault: Any | None = None
 
         from cortex.cuatrida.orchestrator import CuatridaOrchestrator
 

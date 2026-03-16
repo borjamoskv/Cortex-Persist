@@ -157,7 +157,12 @@ _SELF_REGISTERING_MODULES: list[str] = [
 
 _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("agent", "cortex.cli.agent_cmds", "agent_cmds", "Agent management commands."),
-    ("architect", "cortex.cli.architect_cmds", "architect", "Design Sovereign Prompts from raw requirements."),
+    (
+        "architect",
+        "cortex.cli.architect_cmds",
+        "architect",
+        "Design Sovereign Prompts from raw requirements.",
+    ),
     ("apotheosis", "cortex.cli.apotheosis_cmds", "apotheosis_cmds", "Apotheosis autonomy engine."),
     ("autorouter", "cortex.cli.autorouter_cmds", "autorouter_cmds", "AI model router daemon."),
     (
@@ -202,6 +207,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ),
     ("github", "cortex.cli.github_cmds", "github_cmds", "GitHub ↔ CORTEX bridge sync."),
     ("scraper", "cortex.cli.scraper_cmds", "scraper", "🕷️ SCRAPER-Ω: Sovereign web extraction."),
+    ("niche", "cortex.cli.niche_cmds", "niche_cmds", "Domain intelligence and market anomaly arbitrage."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

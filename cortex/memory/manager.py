@@ -1,14 +1,4 @@
-"""CORTEX v5.3 — Cognitive Memory Orchestrator.
-
-Wires the Tripartite Memory Architecture:
-    L1 (Working Memory)  → Token-budgeted sliding window
-    L2 (Vector Store)    → sqlite-vec semantic recall
-    L3 (Event Ledger)    → SQLite WAL immutable log
-
-Delegates:
-    Retrieval  → cortex.memory.memory_retrieval
-    Compression → cortex.memory.memory_compression
-"""
+"""CORTEX v5.3 — Cognitive Memory Orchestrator."""
 
 from __future__ import annotations
 
@@ -18,6 +8,8 @@ import time
 import uuid
 from typing import Any
 
+# Memory OS (RFC-CORTEX-MEMORY-OS)
+from cortex.compaction.mem0_pipeline import Mem0Pipeline
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
@@ -29,6 +21,7 @@ from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
+from cortex.policy.memory_os import MemoryOS
 from cortex.routes.notch_ws import notify_notch_pruning
 from cortex.security.tenant import get_tenant_id
 from cortex.sovereign.endocrine import DigitalEndocrine
@@ -83,6 +76,8 @@ class CortexMemoryManager:
         "_endocrine",
         "_schema_engine",
         "metamemory",
+        "_mem0_pipeline",
+        "_memory_os",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -90,8 +85,8 @@ class CortexMemoryManager:
     def __init__(
         self,
         l1: WorkingMemoryL1,
-        l2: VectorStoreL2,
-        l3: EventLedgerL3,  # type: ignore[reportInvalidTypeForm]
+        l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
+        l3: EventLedgerL3,
         encoder: AsyncEncoder,
         hdc_l2: HDCVectorStoreL2 | None = None,
         hdc_encoder: HDCEncoder | None = None,
@@ -128,6 +123,10 @@ class CortexMemoryManager:
         from cortex.memory.metamemory import MetamemoryMonitor
 
         self.metamemory = MetamemoryMonitor()
+
+        # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
+        self._mem0_pipeline = Mem0Pipeline()
+        self._memory_os = MemoryOS()
 
         # ART-v2 Resonance Engine [v6.2]
         _sensor = None
@@ -300,14 +299,22 @@ class CortexMemoryManager:
 
         Bypasses the L1 working memory buffer. Useful for errors,
         decisions, and formal proof counterexamples.
+
+        Pipeline: Mem0 exergy gate → Thalamus → dedup → encode → resonance → L2
         """
         tenant_id = tenant_id or get_tenant_id()
-        conn = None
-        if hasattr(self._l2, "_get_conn"):
-            try:
-                conn = self._l2._get_conn()
-            except (RuntimeError, ValueError, OSError) as e:
-                logger.warning("CortexMemoryManager: Could not get L2 conn for thalamus: %s", e)
+        conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
+
+        # ── Mem0 Exergy Pre-Filter (RFC-CORTEX-MEMORY-OS) ──────────
+        exergy = await self._mem0_pipeline.evaluate_exergy(
+            {"content": content, "fact_type": fact_type, "metadata": metadata}
+        )
+        if exergy.score < self._mem0_pipeline.exergy_threshold:
+            logger.info(
+                "CortexMemoryManager: Fact rejected by Mem0 exergy gate: %s",
+                exergy.score,
+            )
+            return f"filtered:low_exergy:{exergy.score}"
 
         should_process, action, _ = await self.thalamus.filter(
             content=content,
@@ -332,18 +339,13 @@ class CortexMemoryManager:
 
         adjusted_layer = self._determine_layer(project_id, layer)
 
-        # 0. Apply Top-Down Cognitive Schema (Bartlett) before semantic encoding
-        matched_schema = self._schema_engine.match_schema(content)
-        if matched_schema:
+        if matched_schema := self._schema_engine.match_schema(content):
             content = self._schema_engine.apply_encoding_schema(matched_schema, content)
-            _meta["active_schema"] = matched_schema.name
-            logger.debug("Applied Schema '%s' to Fact Encoding", matched_schema.name)
+            _meta.update({"active_schema": matched_schema.name})
 
-        # 1. Encode Content for Resonance Verification
         vector = await self._encoder.encode(content)
         fact_id = str(uuid.uuid4())
 
-        # 2. Build Candidate Engram (CORTEX v6+ Thermodynamic Engine)
         candidate = CortexSemanticEngram(
             id=fact_id,
             tenant_id=tenant_id,
@@ -353,32 +355,22 @@ class CortexMemoryManager:
             timestamp=time.time(),
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
-            parent_decision_id=parent_decision_id if parent_decision_id else None,
+            parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
         )
 
-        # 3. Process through Adaptive Resonance Gate (ART-v2)
-        # Replacing simple exact deduplication with semantic resonance.
-        # This eliminates semantic overlap, not just string duplication.
         status, engram = await self._resonance_gate.gate(
             candidate=candidate, precision_mode=(fact_type in ("decision", "rule"))
         )
 
         if status == "resonance":
-            # Resonance found! The gate already reinforced the existing engram.
-            # We return the existing ID to the caller.
             logger.info("CortexMemoryManager: Fact assimilated via resonance with #%s", engram.id)
             return f"deduplicated:{engram.id}"
 
-        # 4. If we reached here, it's a 'reset' (new engram category)
-        # Emit to Experience Bus if required
         if use_bus and self._bus:
             return await self._emit_to_bus(
                 fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
             )
 
-        # 5. Parallel storage (L2 + HDC)
-        # Note: L2 store is handled by the gate itself on 'reset' if upsert exists,
-        # but we double-check for HDC and persistence.
         if self._hdc:
             await self._hdc.memorize(engram, fact_type=fact_type)
 
@@ -442,7 +434,7 @@ class CortexMemoryManager:
         events = self._l1.get_context(tenant_id=tenant_id)
         if not events:
             return None
-        hvs = [self._hdc_encoder.encode_text(e.content) for e in events]
+        hvs = [self._hdc_encoder.encode_text(e["content"]) for e in events]
         from cortex.memory.hdc.algebra import bundle
 
         try:
@@ -454,11 +446,7 @@ class CortexMemoryManager:
     # ─── NREM Consolidation ─────────────────────────────────────────
 
     async def nrem_consolidation(self, tenant_id: str, project_id: str | None = None) -> dict:
-        """Run a full NREM consolidation cycle.
-
-        Orchestrates maturation, pruning, STDP decay, and
-        homeostatic scaling in a single sweep.
-        """
+        """Run a full NREM consolidation cycle."""
         from cortex.memory.consolidation import SystemsConsolidator
         from cortex.memory.homeostasis import EntropyPruner, HomeostaticScaler
         from cortex.memory.nrem_cycle import NREMConsolidationCycle
@@ -467,23 +455,16 @@ class CortexMemoryManager:
         pruner = EntropyPruner(self._l2) if self._l2 else None
         scaler = HomeostaticScaler(self._l2) if self._l2 else None
 
-        stdp = getattr(self, "_stdp_engine", None)
-
         cycle = NREMConsolidationCycle(
-            consolidator=consolidator, pruner=pruner, stdp_engine=stdp, homeostatic_scaler=scaler
+            consolidator=consolidator,
+            pruner=pruner,
+            stdp_engine=getattr(self, "_stdp_engine", None),
+            homeostatic_scaler=scaler,
         )
         report = await cycle.run(tenant_id=tenant_id, project_id=project_id)
-        logger.info("NREM consolidation complete: %s", report)
-        return {
-            "matured": report.matured,
-            "deceased": report.deceased,
-            "pruned": report.pruned,
-            "edges_pruned": report.edges_pruned,
-            "engrams_scaled": report.engrams_scaled,
-            "scaling_factor": report.scaling_factor,
-            "duration_ms": report.duration_ms,
-            "errors": report.errors,
-        }
+        import dataclasses
+
+        return dataclasses.asdict(report)
 
     # ─── Introspection ────────────────────────────────────────────
 
@@ -503,8 +484,7 @@ class CortexMemoryManager:
 
         _testing = os.environ.get("CORTEX_TESTING")
         try:
-            async with asyncio.timeout(timeout):
-                await self._bg_queue.join()
+            await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
         except asyncio.TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
             if _testing:

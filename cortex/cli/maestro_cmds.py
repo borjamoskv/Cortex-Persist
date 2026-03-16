@@ -35,8 +35,7 @@ def inspect_cmd(app_name: str, depth: int):
 
     if not m.check_permissions():
         console.print(
-            "[red]✘ Sin permisos de Accesibilidad."
-            " Revisar Preferencias del Sistema.[/red]"
+            "[red]✘ Sin permisos de Accesibilidad. Revisar Preferencias del Sistema.[/red]"
         )
         return
 
@@ -323,8 +322,6 @@ def run_cmd(instruction: tuple[str, ...]):
             if res.get("stdout"):
                 console.print(res["stdout"])
         else:
-            console.print(
-                f"[red]✘ Error: {res.get('error') or res.get('stderr')}[/red]"
-            )
+            console.print(f"[red]✘ Error: {res.get('error') or res.get('stderr')}[/red]")
 
     asyncio.run(_run())

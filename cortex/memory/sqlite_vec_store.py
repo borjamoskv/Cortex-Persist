@@ -171,8 +171,10 @@ class SovereignVectorStoreL2:
                 pass
         return self._sanitizer
 
-    def _get_domain_tables(self, conn: sqlite3.Connection, tenant_id: str, project_id: str) -> tuple[str, str]:
-        """Axiom Ω8: Vertical Domain Cut. 
+    def _get_domain_tables(
+        self, conn: sqlite3.Connection, tenant_id: str, project_id: str
+    ) -> tuple[str, str]:
+        """Axiom Ω8: Vertical Domain Cut.
         If a corpus weighs too much, we split the universe and migrate only distilled axioms.
         """
         safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
@@ -190,14 +192,16 @@ class SovereignVectorStoreL2:
 
         cursor.execute(
             "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
-            (tenant_id, project_id)
+            (tenant_id, project_id),
         )
         count = cursor.fetchone()[0]
 
         if count >= self.MAX_DOMAIN_ENTROPY:
             logger.warning(
-                "🌌 [UNIVERSE SPLIT] Domain %s/%s reached mass %d. Sharding vector space.", 
-                tenant_id, project_id, count
+                "🌌 [UNIVERSE SPLIT] Domain %s/%s reached mass %d. Sharding vector space.",
+                tenant_id,
+                project_id,
+                count,
             )
             # Create sharded schema
             conn.execute(f"""
@@ -222,7 +226,8 @@ class SovereignVectorStoreL2:
             )
 
             # Migrate only distilled axioms (is_diamond = 1)
-            conn.execute(f"""
+            conn.execute(
+                f"""
                 INSERT INTO {meta_tb} (
                     rowid, id, tenant_id, project_id, content, timestamp,
                     is_diamond, is_bridge, confidence, success_rate,
@@ -234,25 +239,29 @@ class SovereignVectorStoreL2:
                     cognitive_layer, parent_decision_id, metadata
                 FROM facts_meta
                 WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
-            """, (tenant_id, project_id))
+            """,
+                (tenant_id, project_id),
+            )
 
-            conn.execute(f"""
+            conn.execute(
+                f"""
                 INSERT INTO {vec_tb}(rowid, embedding)
                 SELECT v.rowid, v.embedding
                 FROM vec_facts v
                 JOIN facts_meta m ON v.rowid = m.rowid
                 WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1
-            """, (tenant_id, project_id))
+            """,
+                (tenant_id, project_id),
+            )
 
             conn.execute(
                 f"CREATE INDEX idx_tenant_proj_{safe_tenant}_{safe_proj} "
                 f"ON {meta_tb}(tenant_id, project_id)"
             )
             conn.execute(
-                f"CREATE INDEX idx_bridge_{safe_tenant}_{safe_proj} "
-                f"ON {meta_tb}(is_bridge)"
+                f"CREATE INDEX idx_bridge_{safe_tenant}_{safe_proj} ON {meta_tb}(is_bridge)"
             )
-            
+
             conn.commit()
             return meta_tb, vec_tb
 

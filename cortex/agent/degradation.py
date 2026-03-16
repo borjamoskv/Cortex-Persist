@@ -113,7 +113,7 @@ class SovereignAgentError(Exception):
         recovery_steps: list[str],
         suggested_alt: str | None = None,
         cause: BaseException | None = None,
-        context: dict[str, Any | None] = None,
+        context: dict[str, Any | None] | None = None,
     ) -> None:
         super().__init__(message)
         self.component = component

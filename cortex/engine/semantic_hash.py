@@ -95,9 +95,7 @@ class SemanticFingerprint:
         return struct.pack(f"<{len(self.embedding)}f", *self.embedding)
 
     @classmethod
-    def from_bytes(
-        cls, data: bytes, hash_value: str, dimension: int = 384
-    ) -> SemanticFingerprint:
+    def from_bytes(cls, data: bytes, hash_value: str, dimension: int = 384) -> SemanticFingerprint:
         """Deserialize from binary representation."""
         embedding = list(struct.unpack(f"<{dimension}f", data))
         return cls(hash=hash_value, embedding=embedding, dimension=dimension)
@@ -140,6 +138,7 @@ def semantic_fingerprint(
 
     if embedder is None:
         from cortex.embeddings import LocalEmbedder
+
         embedder = LocalEmbedder()
 
     embedding = embedder.embed(text)
@@ -167,9 +166,7 @@ def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
     this simplifies to the dot product.
     """
     if len(vec_a) != len(vec_b):
-        raise ValueError(
-            f"Vector dimension mismatch: {len(vec_a)} vs {len(vec_b)}"
-        )
+        raise ValueError(f"Vector dimension mismatch: {len(vec_a)} vs {len(vec_b)}")
 
     dot = sum(a * b for a, b in zip(vec_a, vec_b, strict=True))
     norm_a = sum(a * a for a in vec_a) ** 0.5
@@ -226,6 +223,7 @@ def batch_fingerprint(
 
     if embedder is None:
         from cortex.embeddings import LocalEmbedder
+
         embedder = LocalEmbedder()
 
     embeddings = embedder.embed_batch(texts)

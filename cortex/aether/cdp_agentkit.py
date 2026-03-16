@@ -38,6 +38,7 @@ except ImportError:
         def from_cdp_agentkit_wrapper(cls, wrapper: Any) -> _MockCdpToolkit:
             return _MockCdpToolkit()
 
+
 logger = logging.getLogger(__name__)
 
 # ── Spending Guardrails (Axiom Ω₃: Verify, then trust) ──────────

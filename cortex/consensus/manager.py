@@ -41,6 +41,15 @@ class ConsensusManager:
         value: int,
         agent_id: str | None = None,
     ) -> float:
+        """Legacy v1 vote path. DEPRECATED. Use vote_v2 instead."""
+        import warnings
+
+        warnings.warn(
+            "ConsensusManager.vote() is deprecated and will be removed. Use vote_v2().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if agent_id:
             return await self.vote_v2(fact_id, agent_id, value)
 
@@ -187,12 +196,12 @@ class ConsensusManager:
             vote_val = v[0]
             if vote_val == 0:
                 continue
-            
+
             p = 0.99 if vote_val > 0 else 0.01
             # Quadratic weight aggressively suppresses unreliable nodes
             rel = max(v[1], v[2])
-            w = rel ** 2
-            
+            w = rel**2
+
             score_sum += w * _logit(p)
 
         prob_true = _sigmoid(score_sum)
@@ -216,7 +225,7 @@ class ConsensusManager:
             score = 1.0
             await self._update_fact_score(fact_id, score, conn)
             return score
-            
+
         score_sum = 0.0
         for (vote_val,) in votes:
             if vote_val == 0:
@@ -224,10 +233,10 @@ class ConsensusManager:
             p = 0.99 if vote_val > 0 else 0.01
             w = 1.0  # Legacy votes have equal weight
             score_sum += w * _logit(p)
-            
+
         prob_true = _sigmoid(score_sum)
         score = prob_true * 2.0
-        
+
         await self._update_fact_score(fact_id, score, conn)
         return score
 

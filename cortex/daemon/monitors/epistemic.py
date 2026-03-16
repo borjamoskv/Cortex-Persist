@@ -42,7 +42,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
         # Negative velocity = confidence is dropping
         self._decay_velocity_threshold = decay_velocity_threshold
         self._stale_ratio_threshold = stale_ratio_threshold
-        
+
         self._last_eval: float = 0.0
         self._last_mean_confidence: float | None = None
         self._last_suggestions: list[WorkflowAlert] = []
@@ -98,13 +98,13 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
             stale_ratio = 0.0
             if stats.total_memories > 0:
                 stale_ratio = stats.stale_memories / stats.total_memories
-            
+
             if stale_ratio >= self._stale_ratio_threshold:
                 suggestions.append(
                     WorkflowAlert(
                         workflow="/nightshift",
                         reason=(
-                            f"Entropía térmica: {stale_ratio*100:.1f}% de la memoria está obsoleta.\n"
+                            f"Entropía térmica: {stale_ratio * 100:.1f}% de la memoria está obsoleta.\n"
                             "Se requiere cristalización nocturna."
                         ),
                         confidence="C4🔵",
@@ -115,7 +115,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
 
             # Update state
             self._last_mean_confidence = stats.mean_retrieval_confidence
-            
+
         except Exception as e:
             logger.error("Failed to evaluate epistemic certainty: %s", e)
 

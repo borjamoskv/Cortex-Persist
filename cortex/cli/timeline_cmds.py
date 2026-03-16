@@ -88,12 +88,13 @@ def timeline_checkout(tx_id, project, db):
             table.add_column("Content", width=50)
             table.add_column("Score", style="green", width=6)
             for f in facts:
+                content = f.get("content", "")
                 table.add_row(
-                    str(f.id),
-                    f.project,
-                    f.fact_type,
-                    f.content[:50] + "..." if len(f.content) > 50 else f.content,
-                    f"{f.consensus_score:.2f}",
+                    str(f.get("id", "")),
+                    f.get("project", ""),
+                    f.get("fact_type", "unknown"),
+                    content[:50] + "..." if len(content) > 50 else content,
+                    f"{f.get('consensus_score', 0.0):.2f}",
                 )
             console.print(table)
         except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:

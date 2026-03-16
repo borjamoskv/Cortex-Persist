@@ -45,9 +45,9 @@ __all__ = [
 class EvictionPolicy(str, Enum):
     """Cache eviction strategy."""
 
-    LRU = "lru"         # Least Recently Used
-    TTL = "ttl"         # Time-To-Live expiry
-    FIFO = "fifo"       # First In, First Out
+    LRU = "lru"  # Least Recently Used
+    TTL = "ttl"  # Time-To-Live expiry
+    FIFO = "fifo"  # First In, First Out
     PROJECT = "project"  # Evict by project scope
 
 
@@ -61,14 +61,14 @@ class CacheEntry:
 
     cache_id: str
     project: str
-    provider: str           # "gemini" | "openai" | "vllm" | "tgi"
-    model: str              # e.g., "gemini-2.0-flash"
-    token_count: int        # Number of tokens in the cached prefix
-    created_at: float       # Unix timestamp
-    last_accessed: float    # For LRU eviction
+    provider: str  # "gemini" | "openai" | "vllm" | "tgi"
+    model: str  # e.g., "gemini-2.0-flash"
+    token_count: int  # Number of tokens in the cached prefix
+    created_at: float  # Unix timestamp
+    last_accessed: float  # For LRU eviction
     ttl_seconds: int = 3600  # Default 1 hour
     provider_handle: str = ""  # Provider-specific cache ID/reference
-    agent_id: str = ""      # Which agent created this cache
+    agent_id: str = ""  # Which agent created this cache
     tags: list[str] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
 
@@ -172,7 +172,10 @@ class ContextCacheManager:
         self._cache[cache_id] = entry
         logger.info(
             "Cache created: %s (project=%s, provider=%s, tokens=%d)",
-            cache_id, project, provider, token_count,
+            cache_id,
+            project,
+            provider,
+            token_count,
         )
         return entry
 
@@ -194,17 +197,11 @@ class ContextCacheManager:
 
     def get_by_project(self, project: str) -> list[CacheEntry]:
         """Get all active cache entries for a project."""
-        return [
-            e for e in self._cache.values()
-            if e.project == project and not e.is_expired
-        ]
+        return [e for e in self._cache.values() if e.project == project and not e.is_expired]
 
     def get_by_agent(self, agent_id: str) -> list[CacheEntry]:
         """Get all active cache entries created by a specific agent."""
-        return [
-            e for e in self._cache.values()
-            if e.agent_id == agent_id and not e.is_expired
-        ]
+        return [e for e in self._cache.values() if e.agent_id == agent_id and not e.is_expired]
 
     def invalidate(self, cache_id: str) -> bool:
         """Invalidate a specific cache entry.
@@ -220,34 +217,27 @@ class ContextCacheManager:
 
     def invalidate_project(self, project: str) -> int:
         """Invalidate all cache entries for a project."""
-        to_remove = [
-            cid for cid, e in self._cache.items()
-            if e.project == project
-        ]
+        to_remove = [cid for cid, e in self._cache.items() if e.project == project]
         for cid in to_remove:
             del self._cache[cid]
         if to_remove:
             logger.info(
                 "Cache invalidated %d entries for project %s",
-                len(to_remove), project,
+                len(to_remove),
+                project,
             )
         return len(to_remove)
 
     def invalidate_agent(self, agent_id: str) -> int:
         """Invalidate all cache entries for an agent."""
-        to_remove = [
-            cid for cid, e in self._cache.items()
-            if e.agent_id == agent_id
-        ]
+        to_remove = [cid for cid, e in self._cache.items() if e.agent_id == agent_id]
         for cid in to_remove:
             del self._cache[cid]
         return len(to_remove)
 
     def cleanup_expired(self) -> int:
         """Remove all expired entries. Run periodically."""
-        expired = [
-            cid for cid, e in self._cache.items() if e.is_expired
-        ]
+        expired = [cid for cid, e in self._cache.items() if e.is_expired]
         for cid in expired:
             del self._cache[cid]
         if expired:
@@ -296,9 +286,7 @@ class ContextCacheManager:
 
         elif self._eviction_policy == EvictionPolicy.TTL:
             # Remove expired first, then LRU if still over capacity
-            expired = [
-                cid for cid, e in self._cache.items() if e.is_expired
-            ]
+            expired = [cid for cid, e in self._cache.items() if e.is_expired]
             if expired:
                 del self._cache[expired[0]]
             else:

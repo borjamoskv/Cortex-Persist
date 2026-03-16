@@ -8,7 +8,7 @@ from dataclasses import dataclass
 __all__ = ["Fact", "row_to_fact"]
 
 
-@dataclass
+@dataclass(slots=True)
 class Fact:
     id: int
     tenant_id: str
@@ -28,8 +28,8 @@ class Fact:
     confidence: str = "C3"
 
     def is_active(self) -> bool:
-        # Relies on tombstone instead of valid_until
-        return not self.is_tombstoned
+        """Evaluate logical validity using valid_until and physical state."""
+        return not self.is_tombstoned and self.valid_until is None
 
     def to_dict(self) -> dict:
         return {

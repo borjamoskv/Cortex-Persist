@@ -3,11 +3,12 @@ CORTEX v5.0 — API Models.
 Centralized Pydantic models for request/response validation.
 """
 
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
 __all__ = [
+    "AcceptanceResult",
     "AgentRegisterRequest",
     "AgentResponse",
     "ApiKeyListItem",
@@ -16,13 +17,14 @@ __all__ = [
     "ContextSignalModel",
     "ContextSnapshotResponse",
     "DeepHealthResponse",
-    "DimensionResultModel",
+    "EventEnvelope",
     "ExportResponse",
     "FactResponse",
     "GateActionResponse",
     "GateApprovalRequest",
     "GateStatusResponse",
     "HealthCheckDetail",
+    "HealthReport",
     "HeartbeatRequest",
     "LedgerReportResponse",
     "MejoraloScanRequest",
@@ -33,7 +35,12 @@ __all__ = [
     "MejoraloShipResponse",
     "MissionLaunchRequest",
     "MissionResponse",
+    "OperationResult",
     "ProjectScoreModel",
+    "QueryEvidenceLevel",
+    "QueryInput",
+    "QueryResultData",
+    "RejectionResult",
     "SearchRequest",
     "SearchResult",
     "ShipSealModel",
@@ -41,10 +48,85 @@ __all__ = [
     "StoreRequest",
     "StoreResponse",
     "TimeSummaryResponse",
+    "TraceInput",
     "VoteRequest",
     "VoteResponse",
     "VoteV2Request",
 ]
+
+
+# ─── SDK Surface v0.2 Protocol Types ─────────────────────────────────
+
+QueryIntent = Literal["lookup", "explore", "audit"]
+QueryStrategy = Literal["auto", "text", "vector", "hybrid", "temporal", "graph"]
+
+class QueryInput(TypedDict, total=False):
+    tenant_id: str
+    project: str
+    query: str
+    strategy: Literal[
+        "auto",
+        "bayesian",
+        "hybrid",
+        "text",
+        "vector",
+        "temporal",
+        "graph"
+    ]
+    as_of: str
+    top_k: int
+    min_confidence: float
+    include_graph: bool
+    include_history: bool
+    include_taint: bool
+
+class QueryEvidenceLevel(BaseModel):
+    level: Literal["none", "basic", "traceable", "verified"]
+    reason: str
+
+class QueryResultData(BaseModel):
+    answer: str | None = None
+    evidence_level: QueryEvidenceLevel | None = None
+    degraded: bool = False
+    degraded_reason: str | None = None
+    trace: dict | None = None
+    facts: list[dict] | None = None
+
+class RejectionResult(TypedDict):
+    accepted: Literal[False]
+    code: str
+    message: str
+    layer: Literal["guard", "membrane", "policy", "verification"]
+    rule_id: str
+    severity: Literal["low", "medium", "high", "critical"]
+    evidence: list[dict]
+    remediation: list[str]
+
+class AcceptanceResult(TypedDict):
+    accepted: Literal[True]
+    operation_id: str
+    warnings: list[str]
+
+OperationResult = AcceptanceResult | RejectionResult
+
+class TraceInput(BaseModel):
+    tx_id: str | None = None
+    fact_id: str | None = None
+    decision_id: str | None = None
+    query_result_id: str | None = None
+    depth: int = Field(5, ge=1, le=20)
+
+class EventEnvelope(BaseModel):
+    schema_version: str = "1.0"
+    event_id: str
+    event_type: str
+    ts: str
+    tenant_id: str
+    project: str
+    source: str
+    sequence: int
+    idempotency_key: str
+    payload: dict
 
 
 class StoreRequest(BaseModel):
@@ -179,6 +261,22 @@ class ExportResponse(BaseModel):
     project: str
     artifact: str
     message: str
+
+
+class HealthReport(TypedDict):
+    status: Literal["ok", "degraded", "blocked"]
+    components: dict[str, str]
+    degraded_features: list[str]
+    warnings: list[str]
+
+
+class RecoveryReport(BaseModel):
+    """Report of the agent's memory recovery status during boot."""
+    status: Literal["clean", "recovered", "failed"]
+    recovered_items: int
+    failed_items: int
+    last_checkpoint_id: str | None = None
+    warnings: list[str] = Field(default_factory=list)
 
 
 class HealthCheckDetail(BaseModel):

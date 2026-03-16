@@ -92,5 +92,4 @@ class ImprovementStrategy(Protocol):
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: Any,
-    ) -> dict[str, Any] | None:
-        ...
+    ) -> dict[str, Any] | None: ...

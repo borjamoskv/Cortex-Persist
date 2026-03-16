@@ -71,7 +71,8 @@ class MejoraloOmegaAgent:
         from cortex.config import DEFAULT_DB_PATH
         from cortex.mejoralo.engine import MejoraloEngine
 
-        self._engine = get_engine(self._db_path or DEFAULT_DB_PATH)
+        db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
+        self._engine = get_engine(db_val)
         self._mejoralo = MejoraloEngine(engine=self._engine)
 
     def _load_agent_definition(self) -> None:

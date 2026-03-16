@@ -72,8 +72,8 @@ def sovereign_status_cmd() -> None:
     power = compute_power(scores, multiplier=1.3)
 
     console.print(Panel("[bold cyan]CORTEX SOVEREIGN STATUS[/]", border_style="cyan"))
-    console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.temperature:.2f}[/]")
-    console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.response_style}[/]")
+    console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.get_temperature():.2f}[/]")
+    console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.get_response_style()}[/]")
     console.print(f"⚡  [bold]Power:[/][cyan] {power.power}/1000[/]")
 
     hormones = endocrine.to_dict()["hormones"]

@@ -68,20 +68,12 @@ class SovereignSanitizer:
         try:
             # We construct the PureEngram. The Config(extra='forbid') will reject invalid fields.
             pure_engram = PureEngram(original_raw_hash=raw_hash, log=log, **raw_engram)
-        except Exception as e:  # noqa: BLE001 — byzantine input quarantine boundary
-            # If the dict is severely malformed, we create an error engram instead of crashing
-            # Axiom Ω5 (Antifragility): System requires stress as fuel.
-            pure_engram = PureEngram(
-                type="error",
-                source="membrane",
-                topic=raw_engram.get("topic", "system"),
-                content=f"Engram digestion failed due to Byzantine input: {str(e)}",
-                metadata={"raw_length": original_size},
-                original_raw_hash=raw_hash,
-                log=log,
-            )
+        except Exception as e:
+            # INV-01 (Type Supremacy): Any incoming payload failing validation will be automatically rejected.
+            # We no longer convert this to an "error" engram; we block the write entirely.
             log.level = MembraneLogLevel.CRITICAL
-            log.details = "Byzantine input rejected and quarantined."
+            log.details = f"Byzantine input rejected (INV-01 Type Supremacy violation): {str(e)}"
+            raise ValueError(log.details) from e
 
         # Finalize log
         pure_str = pure_engram.model_dump_json()

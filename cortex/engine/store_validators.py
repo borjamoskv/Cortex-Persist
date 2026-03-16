@@ -12,25 +12,21 @@ if TYPE_CHECKING:
     import aiosqlite
 
 __all__ = [
-    "MIN_CONTENT_LENGTH",
     "validate_content",
     "check_dedup",
+    "MIN_CONTENT_LENGTH",
 ]
 
 MIN_CONTENT_LENGTH = 10
 
 
 def validate_content(project: str, content: str, fact_type: str) -> str:
-    """Sovereign Content Gatekeeper — validates and normalizes content before storage."""
-    if not project or not project.strip():
-        raise ValueError("project cannot be empty")
-    if not content or not content.strip():
-        raise ValueError("content cannot be empty")
-
-    content = content.strip()
-    if len(content) < MIN_CONTENT_LENGTH:
-        raise ValueError(f"content too short ({len(content)} chars, min {MIN_CONTENT_LENGTH})")
-
+    """Sovereign Content Gatekeeper — normalizes content before storage.
+    
+    Note: Structural requirements (minimum length, poisoning checks, non-empty)
+    are now enforced deterministically by StorageGuard via Pydantic upstream.
+    This function handles business-logic specific normalizations only.
+    """
     if fact_type == "decision" and content.startswith("DECISION: DECISION:"):
         content = content.replace("DECISION: DECISION:", "DECISION:", 1)
 
@@ -54,7 +50,7 @@ async def check_dedup(
 
     cursor = await conn.execute(
         "SELECT id FROM facts WHERE tenant_id = ? AND project = ? AND hash = ? "
-        "AND valid_until IS NULL AND is_quarantined = 0 LIMIT 1",
+        "AND is_tombstoned = 0 AND is_quarantined = 0 AND valid_until IS NULL LIMIT 1",
         (tenant_id, project, f_hash),
     )
     existing = await cursor.fetchone()

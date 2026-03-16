@@ -45,9 +45,7 @@ class QueryMixin(EngineMixinBase):
             query = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND "
-                "(f.meta LIKE 'v6_aesgcm:%' OR "
-                "json_extract(f.meta, '$.is_quarantined') IS NULL OR "
-                "json_extract(f.meta, '$.is_quarantined') = 0) "
+                "f.is_quarantined = 0 "
                 "AND f.is_tombstoned = 0"
             )
             params: list = [tenant_id]
@@ -125,9 +123,7 @@ class QueryMixin(EngineMixinBase):
                 f"SELECT {FACT_COLUMNS} "
                 f"{FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND f.project = ? "
-                "AND (f.meta LIKE 'v6_aesgcm:%' OR "
-                "json_extract(f.meta, '$.is_quarantined') IS NULL OR "
-                "json_extract(f.meta, '$.is_quarantined') = 0) "
+                "AND f.is_quarantined = 0 "
                 "AND f.is_tombstoned = 0"
             )
             params: list = [tenant_id, project]

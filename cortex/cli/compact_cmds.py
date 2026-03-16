@@ -130,14 +130,16 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
             )
             return
 
-        result = _run_async(compact(
-            engine,
-            project=project,
-            strategies=strategies,
-            dry_run=dry_run,
-            similarity_threshold=threshold,
-            max_age_days=max_age,
-        ))
+        result = _run_async(
+            compact(
+                engine,
+                project=project,
+                strategies=strategies,
+                dry_run=dry_run,
+                similarity_threshold=threshold,
+                max_age_days=max_age,
+            )
+        )
 
         # Display results
         _display_compaction_result(project, result, dry_run)

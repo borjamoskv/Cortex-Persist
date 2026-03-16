@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import httpx
@@ -270,7 +271,7 @@ class AgentToolkit:
                     asyncio.set_event_loop(loop)
 
                 if loop.is_running():
-                    import nest_asyncio
+                    import nest_asyncio  # pyright: ignore[reportMissingImports]
 
                     nest_asyncio.apply(loop)
                 return asyncio.run(autodidact_pipeline(target_url, intent, force=False))
@@ -289,7 +290,7 @@ class AgentToolkit:
             return (
                 f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
             )
-        handlers: dict[str, callable] = {
+        handlers: dict[str, Callable[[dict[str, str]], str]] = {
             "read_file": lambda a: self.read_file(a.get("path", "")),
             "write_file": lambda a: self.write_file(a.get("path", ""), a.get("content", "")),
             "list_dir": lambda a: self.list_dir(a.get("path", ".")),

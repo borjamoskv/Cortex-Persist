@@ -178,10 +178,11 @@ class CortexCRDT:
                 result.conflicts.append(conflict)
                 result.conflicts_detected += 1
                 logger.warning(
-                    "MV-Register conflict: fact #%d (%s) "
-                    "local@node%d vs remote@node%d",
-                    remote.fact_id, remote.fact_type,
-                    local.node_id, remote.node_id,
+                    "MV-Register conflict: fact #%d (%s) local@node%d vs remote@node%d",
+                    remote.fact_id,
+                    remote.fact_type,
+                    local.node_id,
+                    remote.node_id,
                 )
             else:
                 # LWW-Register: highest HLC wins

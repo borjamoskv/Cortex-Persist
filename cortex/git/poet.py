@@ -17,7 +17,6 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 # ── Commit type detection heuristics ──────────────────────────────────────────
 
 _TYPE_SIGNALS: dict[str, list[str]] = {
@@ -489,9 +488,18 @@ class CommitPoet:
         name = fn_match.group(1) if fn_match else "unknown"
 
         verbs = [
-            "Execute", "Perform", "Orchestrate", "Deploy",
-            "Catalyze", "Forge", "Transmit", "Resolve",
-            "Calculate", "Transform", "Extract", "Validate",
+            "Execute",
+            "Perform",
+            "Orchestrate",
+            "Deploy",
+            "Catalyze",
+            "Forge",
+            "Transmit",
+            "Resolve",
+            "Calculate",
+            "Transform",
+            "Extract",
+            "Validate",
         ]
         objects = [
             "sovereign operation",

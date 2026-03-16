@@ -170,10 +170,7 @@ class CognitiveHandoff:
             )
 
         # ── Step 3: Escalate to Opus (premium) if needed ─────────────
-        needs_premium = (
-            audit.verdict == "UNCERTAIN"
-            or self._involves_axiomatics(belief, ctx)
-        )
+        needs_premium = audit.verdict == "UNCERTAIN" or self._involves_axiomatics(belief, ctx)
 
         if needs_premium:
             self._escalation_count += 1
@@ -291,9 +288,7 @@ class CognitiveHandoff:
             intent=IntentProfile.BELIEF_AUDIT,
         )
 
-        result = await self._router.route(
-            prompt, provider_hint=self._auditor_economic
-        )
+        result = await self._router.route(prompt, provider_hint=self._auditor_economic)
         tokens = getattr(result, "tokens_used", 0)
         return _AuditResult(
             verdict="CERTAIN",
@@ -338,9 +333,7 @@ class CognitiveHandoff:
             intent=IntentProfile.BELIEF_AUDIT,
         )
 
-        result = await self._router.route(
-            prompt, provider_hint=self._auditor_premium
-        )
+        result = await self._router.route(prompt, provider_hint=self._auditor_premium)
         tokens = getattr(result, "tokens_used", 0)
         return _AuditResult(
             verdict="CERTAIN",
@@ -377,9 +370,7 @@ class CognitiveHandoff:
             intent=IntentProfile.ARCHITECT,
         )
 
-        result = await self._router.route(
-            prompt, provider_hint=self._architect
-        )
+        result = await self._router.route(prompt, provider_hint=self._architect)
         tokens = getattr(result, "tokens_used", 0)
         return BeliefVerdict(
             action=VerdictAction.REVISE,
@@ -417,8 +408,6 @@ class CognitiveHandoff:
         if context:
             parts.append("\n## Existing Beliefs (Context)\n")
             for b in context[:20]:  # Cap context to prevent token explosion
-                parts.append(
-                    f"- [{b.id}] ({b.confidence.value}) {b.content}\n"
-                )
+                parts.append(f"- [{b.id}] ({b.confidence.value}) {b.content}\n")
 
         return "".join(parts)

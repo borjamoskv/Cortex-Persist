@@ -219,9 +219,7 @@ class BeliefEngine:
                         beliefs.append(BeliefObject.from_dict(belief_data))
                     else:
                         conf_val = str(fact.confidence)
-                        valid_confs = {
-                            c.value for c in BeliefConfidence
-                        }
+                        valid_confs = {c.value for c in BeliefConfidence}
                         beliefs.append(
                             BeliefObject(
                                 content=fact.content,

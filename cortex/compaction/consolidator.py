@@ -39,9 +39,15 @@ __all__ = [
 ]
 
 # Fact types eligible for consolidation
-_CONSOLIDATABLE_TYPES = frozenset({
-    "event", "observation", "intent", "note", "log",
-})
+_CONSOLIDATABLE_TYPES = frozenset(
+    {
+        "event",
+        "observation",
+        "intent",
+        "note",
+        "log",
+    }
+)
 
 # Minimum cluster size to trigger consolidation
 _MIN_CLUSTER_SIZE = 2
@@ -98,6 +104,7 @@ class BeliefConsolidator:
         if self._client is None:
             try:
                 from google import genai
+
                 self._client = genai.Client()
             except (ImportError, ValueError, OSError, RuntimeError) as e:
                 raise RuntimeError(
@@ -194,8 +201,7 @@ class BeliefConsolidator:
 
             if len(cluster.event_ids) >= _MIN_CLUSTER_SIZE:
                 cluster.avg_similarity = (
-                    sum(similarities) / len(similarities)
-                    if similarities else 1.0
+                    sum(similarities) / len(similarities) if similarities else 1.0
                 )
                 clusters.append(cluster)
 
@@ -251,6 +257,7 @@ class BeliefConsolidator:
             # Decrypt content
             try:
                 from cortex.crypto import get_default_encrypter
+
                 enc = get_default_encrypter()
                 contents = []
                 for row in rows:
@@ -307,7 +314,8 @@ class BeliefConsolidator:
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(
                         "Cluster #%d compression failed: %s",
-                        cluster.cluster_id, e,
+                        cluster.cluster_id,
+                        e,
                     )
                     result.error = str(e)
 

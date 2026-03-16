@@ -47,6 +47,9 @@ from cortex.routes import (
     dashboard as dashboard_router,
 )
 from cortex.routes import (
+    events as events_router,
+)
+from cortex.routes import (
     facts as facts_router,
 )
 from cortex.routes import (
@@ -71,6 +74,7 @@ from cortex.routes import (
 )
 from cortex.routes import onboarding as onboarding_router
 from cortex.routes import oracle as oracle_router
+from cortex.routes import runtime as runtime_router
 from cortex.routes import (
     search as search_router,
 )
@@ -321,6 +325,7 @@ async def get_metrics():
 # ─── Router Inclusion ────────────────────────────────────────────────
 
 
+app.include_router(events_router.events_router)
 app.include_router(facts_router.router)
 app.include_router(search_router.router)
 app.include_router(ask_router.router)
@@ -344,6 +349,7 @@ app.include_router(notch_ws_router.router)
 app.include_router(topology_ws_router.router)
 app.include_router(memories_router.router)
 app.include_router(usage_router.router)
+app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)
 app.include_router(health_index_router.router)
 

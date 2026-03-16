@@ -75,15 +75,20 @@ def architect() -> None:
 @click.argument("filepath", type=click.Path(exists=True, dir_okay=False))
 def architect_instruct(filepath: str) -> None:
     """Rewrite a raw requirement file into a Sovereign Prompt.
-    
+
     Reads the content of FILEPATH (which contains raw ideas or unstructured requirements)
     and uses SovereignLLM to restructure it using the 5-phase MOSKV topology.
     """
     path = Path(filepath)
     raw_content = path.read_text(encoding="utf-8")
-    
-    console.print(Panel(f"Reads: [bold cyan]{path.name}[/]\nExtracting logic...", title="[bold #CCFF00]Sovereign Prompt Architect[/]"))
-    
+
+    console.print(
+        Panel(
+            f"Reads: [bold cyan]{path.name}[/]\nExtracting logic...",
+            title="[bold #CCFF00]Sovereign Prompt Architect[/]",
+        )
+    )
+
     async def _run() -> None:
         async with SovereignLLM(temperature=0.2) as llm:
             with console.status("[bold cyan]Applying MOSKV Rule topology...[/]"):
@@ -91,7 +96,7 @@ def architect_instruct(filepath: str) -> None:
                     prompt=raw_content,
                     system=_INSTRUCT_SYSTEM_PROMPT,
                 )
-                
+
             console.print(
                 Panel(
                     Syntax(result.content, "markdown", theme="monokai", word_wrap=True),
@@ -100,7 +105,11 @@ def architect_instruct(filepath: str) -> None:
                 )
             )
             # Damos la opción de guardar
-            save = Prompt.ask("\n¿Deseas guardar el resultado sobrescribiendo el archivo?", choices=["y", "n"], default="n")
+            save = Prompt.ask(
+                "\n¿Deseas guardar el resultado sobrescribiendo el archivo?",
+                choices=["y", "n"],
+                default="n",
+            )
             if save == "y":
                 path.write_text(result.content, encoding="utf-8")
                 console.print(f"[bold green]✓ Guardado en {path.name}[/]")
@@ -112,23 +121,23 @@ def architect_instruct(filepath: str) -> None:
 @click.argument("text", required=False)
 def architect_reverse(text: str | None) -> None:
     """Reverse engineer style and structural rules.
-    
+
     Extracts the underlying vector rules (tone, signal/noise ratio, sentence length)
     from a reference text to generate reusable "Context Walls".
     """
     if not text:
         text = Prompt.ask("Pega el texto de referencia a ingeniar (Golden Master)")
-        
+
     console.print(Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]"))
-    
+
     async def _run() -> None:
         async with SovereignLLM(temperature=0.1) as llm:
             with console.status("[bold cyan]Extracting stylistic vectors...[/]"):
                 result = await llm.generate(
-                    prompt=text, # type: ignore
+                    prompt=text,  # type: ignore
                     system=_REVERSE_SYSTEM_PROMPT,
                 )
-                
+
             console.print(
                 Panel(
                     Syntax(result.content, "markdown", theme="monokai", word_wrap=True),
@@ -143,16 +152,22 @@ def architect_reverse(text: str | None) -> None:
 @architect.command("base")
 def architect_base() -> None:
     """Interactive requirement gathering for a Sovereign Prompt.
-    
+
     Asks the user to define the target, success criteria, and anti-patterns
     interactively, then builds a base Sovereign Prompt template.
     """
     console.print("[bold #CCFF00]⚡ Inicializando Fase 1: Colapso del Estado de Éxito[/]")
-    
-    target = Prompt.ask("\n[bold cyan]1. Target (Qué lograr)[/]\nDescribe el artefacto literal que debe existir al finalizar")
-    success = Prompt.ask("\n[bold cyan]2. Métrica de Éxito[/]\n¿Cuáles son las propiedades estructurales que dictan una ejecución impecable?")
-    anti_patterns = Prompt.ask("\n[bold cyan]3. Anti-Patrones[/]\n¿Qué NO debe suceder o sonar? (ej. genérico, disclaimers, etc.)")
-    
+
+    target = Prompt.ask(
+        "\n[bold cyan]1. Target (Qué lograr)[/]\nDescribe el artefacto literal que debe existir al finalizar"
+    )
+    success = Prompt.ask(
+        "\n[bold cyan]2. Métrica de Éxito[/]\n¿Cuáles son las propiedades estructurales que dictan una ejecución impecable?"
+    )
+    anti_patterns = Prompt.ask(
+        "\n[bold cyan]3. Anti-Patrones[/]\n¿Qué NO debe suceder o sonar? (ej. genérico, disclaimers, etc.)"
+    )
+
     template = f"""# 1. OBJETIVO (GOAL)
 **Target**: {target}
 **Métrica de Éxito**: {success}
@@ -174,7 +189,7 @@ El Plan Final: Devuelve tu ruta en 3-5 balas concisas.
 Pause State: Espera confirmación del operador antes de ejecutar producción.
 Crítica In-Vivo: Audita tu propio output contra los Anti-Patrones y regenera si es necesario.
 """
-    
+
     console.print("\n")
     console.print(
         Panel(

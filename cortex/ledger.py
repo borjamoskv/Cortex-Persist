@@ -152,8 +152,13 @@ class SemanticMerkleTree:
         )
 
         if not self._fingerprints or not (0 <= index < len(self._fingerprints)):
-            return {"valid": False, "similarity": 0.0, "exact_match": False,
-                    "threshold": self.threshold, "error": "index_out_of_range"}
+            return {
+                "valid": False,
+                "similarity": 0.0,
+                "exact_match": False,
+                "threshold": self.threshold,
+                "error": "index_out_of_range",
+            }
 
         stored_fp = self._fingerprints[index]
         current_fp = semantic_fingerprint(content, embedder)
@@ -168,9 +173,7 @@ class SemanticMerkleTree:
             "threshold": self.threshold,
         }
 
-    def verify_batch(
-        self, contents: list[str], embedder: Any = None
-    ) -> list[dict]:
+    def verify_batch(self, contents: list[str], embedder: Any = None) -> list[dict]:
         """Verify multiple content entries. GPU-accelerated via batch embedding."""
         from cortex.engine.semantic_hash import batch_fingerprint, cosine_similarity
 
@@ -185,13 +188,15 @@ class SemanticMerkleTree:
         ):
             sim = cosine_similarity(stored_fp.embedding, current_fp.embedding)
             exact = stored_fp.hash == current_fp.hash
-            results.append({
-                "index": i,
-                "valid": sim >= self.threshold,
-                "similarity": round(sim, 6),
-                "exact_match": exact,
-                "threshold": self.threshold,
-            })
+            results.append(
+                {
+                    "index": i,
+                    "valid": sim >= self.threshold,
+                    "similarity": round(sim, 6),
+                    "exact_match": exact,
+                    "threshold": self.threshold,
+                }
+            )
 
         return results
 

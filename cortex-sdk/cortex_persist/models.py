@@ -1,57 +1,177 @@
-"""cortex-persist — Data Models."""
+"""
+SORTU-Ω Core Types & Models
 
-from __future__ import annotations
+This module defines the canonical types for the SORTU-Ω public SDK.
+It includes trust semantics, query models, operational results, health reports,
+and event envelopes, strictly adhering to the v0.2 RFC specifications.
+"""
 
 from dataclasses import dataclass, field
-from typing import Any
+from enum import Enum
+from typing import Any, Literal, TypedDict
 
-__all__ = ["Memory"]
+# ─── Trust Semantics Enums ─────────────────────────────────────────────
 
+class EvidenceLevel(str, Enum):
+    NONE = "none"
+    BASIC = "basic"
+    TRACEABLE = "traceable"
+    VERIFIED = "verified"
+
+class TrustGrade(str, Enum):
+    A = "A" # Verified, strict policy, high integrity
+    B = "B" # Traceable, standard policy
+    C = "C" # Basic provenance, some warnings
+    D = "D" # Degraded constraints
+    F = "F" # Untrusted or tainted
+
+class IntegrityState(str, Enum):
+    UNKNOWN = "unknown"
+    PARTIAL = "partial"
+    VERIFIED = "verified"
+    FAILED = "failed"
+    STALE = "stale"
+
+class TaintState(str, Enum):
+    NONE = "none"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    UNKNOWN = "unknown"
+
+# ─── Core Types ────────────────────────────────────────────────────────
 
 @dataclass
-class Memory:
-    """A single memory from the CORTEX API."""
-
-    id: int
+class EvidenceItem:
+    """A single piece of evidence from the memory layer."""
+    id: str
     project: str
     content: str
-    type: str
-    tags: list[str] = field(default_factory=list)
-    confidence: str = "C3"
-    source: str | None = None
+    fact_type: str
+    tags: list[str]
+    created_at: str
+    valid_from: str
+    valid_until: str | None
+    source_uri: str
+    confidence: float
+    evidence_level: EvidenceLevel
+    integrity: IntegrityState
+    taint: TaintState
+    is_tombstoned: bool = False
     metadata: dict[str, Any] = field(default_factory=dict)
-    parent_decision_id: int | None = None
-    tenant_id: str = "default"
-    consensus_score: float = 1.0
-    valid_from: str | None = None
-    valid_until: str | None = None
-    tx_id: int | None = None
-    created_at: str = ""
-    updated_at: str = ""
-    hash: str | None = None
-    score: float | None = None
 
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Memory:
-        """Create a Memory from an API response dict."""
-        return cls(
-            id=data.get("id", 0),
-            project=data.get("project", ""),
-            content=data.get("content", ""),
-            type=data.get("type", "knowledge"),
-            tags=data.get("tags", []),
-            confidence=data.get("confidence", "C3"),
-            source=data.get("source"),
-            metadata=data.get("metadata", {}),
-            parent_decision_id=data.get("parent_decision_id"),
-            tenant_id=data.get("tenant_id", "default"),
-            consensus_score=data.get("consensus_score", 1.0),
-            valid_from=data.get("valid_from"),
-            valid_until=data.get("valid_until"),
-            tx_id=data.get("tx_id"),
-            created_at=data.get("created_at", ""),
-            updated_at=data.get("updated_at", ""),
-            hash=data.get("hash"),
-            score=data.get("score"),
-        )
+# ─── Query Semantics ───────────────────────────────────────────────────
 
+class QueryInput(TypedDict, total=False):
+    """Input parameters for a memory query."""
+    tenant_id: str
+    project: str
+    query: str
+    strategy: Literal["auto", "bayesian", "hybrid", "text", "vector", "temporal", "graph"]
+    as_of: str
+    top_k: int
+    min_confidence: float
+    include_graph: bool
+    include_history: bool
+    include_taint: bool
+
+@dataclass
+class QueryEvidenceLevel:
+    """The aggregate evidence level for a query result."""
+    level: EvidenceLevel
+    grade: TrustGrade
+    verification_proof: str | None = None
+
+@dataclass
+class QueryPlan:
+    """The execution plan and warnings for a query."""
+    routing_strategy: str
+    execution_time_ms: float
+    degraded: bool
+    warnings: list[str] = field(default_factory=list)
+
+@dataclass
+class QueryResult:
+    """The result of a memory query operation."""
+    items: list[EvidenceItem]
+    evidence: QueryEvidenceLevel
+    plan: QueryPlan
+
+# ─── Operational Results ───────────────────────────────────────────────
+
+class AcceptanceResult(TypedDict):
+    """Successful operation result."""
+    accepted: Literal[True]
+    operation_id: str
+    warnings: list[str]
+
+class RejectionResult(TypedDict):
+    """
+    Governance rejection.
+    The system understood the request, but policy or safety rules denied it.
+    """
+    accepted: Literal[False]
+    code: str
+    message: str
+    layer: Literal["guard", "membrane", "policy", "verification"]
+    rule_id: str
+    severity: Literal["low", "medium", "high", "critical"]
+    evidence: list[dict[str, Any]]
+    remediation: list[str]
+
+class FailureResult(TypedDict):
+    """
+    Operational failure.
+    The system attempted to execute but failed due to external or internal limits.
+    """
+    status: Literal["failed"]
+    reason: str
+    code: str  # Must be from ERROR-CODE-REGISTRY
+    category: Literal["dependency", "storage", "runtime", "capability"]
+    is_retryable: bool
+    failed_at: str
+    retry_after_ms: int | None
+
+OperationResult = AcceptanceResult | RejectionResult | FailureResult
+
+# ─── Runtime & Identity ────────────────────────────────────────────────
+
+@dataclass
+class CapabilityReport:
+    """Report of a specific agent capability."""
+    name: str
+    status: Literal["active", "degraded", "offline"]
+    latency_ms: float
+    error_rate: float
+    last_verified: str
+
+class HealthReport(TypedDict):
+    """Overall system health and capability report."""
+    status: Literal["ok", "degraded", "blocked"]
+    components: dict[str, str]
+    degraded_features: list[str]
+    warnings: list[str]
+
+@dataclass
+class RecoveryReport:
+    """Report of the agent's memory recovery status during boot."""
+    status: Literal["clean", "recovered", "failed"]
+    recovered_items: int
+    failed_items: int
+    last_checkpoint_id: str | None = None
+    warnings: list[str] = field(default_factory=list)
+
+# ─── Coordination (Events) ─────────────────────────────────────────────
+
+@dataclass
+class EventEnvelope:
+    """Canonical event envelope for SORTU-Ω coordination."""
+    event_id: str
+    event_type: str
+    api_version: str
+    timestamp: str
+    issuer: str
+    tenant_id: str
+    payload: dict[str, Any]
+    causality_id: str | None = None
+    signature: str | None = None

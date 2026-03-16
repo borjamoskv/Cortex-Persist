@@ -24,8 +24,8 @@ from cortex.ui_control.applescript import (
 from cortex.ui_control.keyboard import KeyboardEngine
 from cortex.ui_control.maestro import MaestroUI
 from cortex.ui_control.models import (
-    AXElement,
     AppTarget,
+    AXElement,
     InteractionResult,
     KeyCombo,
     Point,

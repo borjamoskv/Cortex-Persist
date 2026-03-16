@@ -111,9 +111,7 @@ def _apply_pragmas_sync(
         # Disable automatic WAL checkpoints — writer controls flush timing
         conn.execute("PRAGMA wal_autocheckpoint=0")
     else:
-        conn.execute(
-            f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}"
-        )
+        conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}")
 
 
 # ─── Sync Factory ─────────────────────────────────────────────────────
@@ -247,9 +245,7 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     await conn.execute(f"PRAGMA page_size={PAGE_SIZE};")
     await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
     await conn.execute("PRAGMA temp_store=MEMORY;")
-    await conn.execute(
-        f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};"
-    )
+    await conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};")
     await conn.commit()
 
 

@@ -43,24 +43,17 @@ class HLCTimestamp:
     node_id: int = 0
 
     def __repr__(self) -> str:
-        return (
-            f"HLC({self.physical_ms}:{self.logical:04x}"
-            f"@node{self.node_id})"
-        )
+        return f"HLC({self.physical_ms}:{self.logical:04x}@node{self.node_id})"
 
     def to_bytes(self) -> bytes:
         """Pack into 16 bytes: 8 (physical) + 4 (logical) + 4 (node)."""
-        return struct.pack(
-            "<QII", self.physical_ms, self.logical, self.node_id
-        )
+        return struct.pack("<QII", self.physical_ms, self.logical, self.node_id)
 
     @classmethod
     def from_bytes(cls, data: bytes) -> HLCTimestamp:
         """Unpack from 16-byte binary."""
         physical_ms, logical, node_id = struct.unpack("<QII", data)
-        return cls(
-            physical_ms=physical_ms, logical=logical, node_id=node_id
-        )
+        return cls(physical_ms=physical_ms, logical=logical, node_id=node_id)
 
     def to_str(self) -> str:
         """Human-readable serialization for SQLite TEXT storage."""

@@ -78,6 +78,7 @@ async def arun_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
 
 class GlobalSourceCache:
     """O(1) Memory Cache for Python Source Files to Annihilate Repeated O(N) Disk I/O."""
+
     _instance = None
     _loaded = False
     files: dict[Path, str] = {}
@@ -92,18 +93,17 @@ class GlobalSourceCache:
         """Loads all Python files into memory concurrently. Called exactly once."""
         if cls._loaded:
             return
-        
+
         cortex_dir = ROOT_DIR / "cortex"
-        
+
         def _get_files() -> list[Path]:
             # synchronous scan is unavoidable, but we do it only once
             return [
-                f for f in cortex_dir.rglob("*.py")
-                if "test" not in str(f) and ".pyc" not in str(f)
+                f for f in cortex_dir.rglob("*.py") if "test" not in str(f) and ".pyc" not in str(f)
             ]
-        
+
         target_files = await asyncio.to_thread(_get_files)
-        
+
         async def _read_file(p: Path) -> tuple[Path, str | None]:
             try:
                 # Use to_thread to prevent blocking event loop on disk I/O
@@ -116,7 +116,7 @@ class GlobalSourceCache:
         for p, content in results:
             if content is not None:
                 cls.files[p] = content
-                
+
         cls._loaded = True
 
 
@@ -141,7 +141,9 @@ async def check_gate_2_type() -> bool:
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
     if code == 127:
         # pyright not available, try mypy
-        code, out = await arun_cmd(["mypy", "cortex/", "--ignore-missing-imports", "--no-error-summary"])
+        code, out = await arun_cmd(
+            ["mypy", "cortex/", "--ignore-missing-imports", "--no-error-summary"]
+        )
         if code == 127:
             printer.warn("No type checker found (pyright/mypy) — skipping")
             return True
@@ -242,7 +244,7 @@ async def check_gate_7_async() -> bool:
         ]
     )
     violations = []
-    
+
     # Use cached files in O(1) loop
     for py_file, content in GlobalSourceCache.files.items():
         if py_file.name in _ASYNC_EXCLUDE_FILES:
@@ -263,10 +265,10 @@ async def check_gate_8_loc() -> bool:
     printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤600 max)")
     blocked = 0
     warnings = 0
-    
+
     # Use cached files in O(1) loop
     for py_file, content in GlobalSourceCache.files.items():
-        lines = content.count('\n') + 1
+        lines = content.count("\n") + 1
         if lines > 600:
             printer.fail(f"{py_file.name} exceeds 600 LOC ({lines})")
             blocked += 1
@@ -319,7 +321,7 @@ async def check_gate_10_prompt_size() -> bool:
             printer.success(f"System prompt within targets ({tokens} words).")
     except OSError:
         printer.warn("Could not read SYSTEM_PROMPT.md")
-        
+
     return True
 
 
@@ -353,7 +355,8 @@ async def check_gate_11_cobbler() -> bool:
     # Filter Global Cache for Engine files
     engine_parts = ("cortex", "engine")
     engine_files = {
-        p: content for p, content in GlobalSourceCache.files.items()
+        p: content
+        for p, content in GlobalSourceCache.files.items()
         if all(part in p.parts for part in engine_parts) and p.name not in _EXCLUDE
     }
 
@@ -374,7 +377,7 @@ async def check_gate_11_cobbler() -> bool:
 
     # Launch audit concurrently
     await asyncio.gather(*(_audit(p, c) for p, c in engine_files.items()))
-    
+
     passed = True
 
     if demon_violations:
@@ -383,7 +386,9 @@ async def check_gate_11_cobbler() -> bool:
             print(f"      ↳ {v}")
         passed = False
     else:
-        printer.success(f"EntropyDemon: engine source is clean ({len(engine_files)} files scanned).")
+        printer.success(
+            f"EntropyDemon: engine source is clean ({len(engine_files)} files scanned)."
+        )
 
     if intruder_violations:
         printer.fail(
@@ -418,7 +423,7 @@ async def check_gate_12_determinism() -> bool:
             content = await asyncio.to_thread(path.read_text, encoding="utf-8")
         else:
             continue
-            
+
         if (
             "temperature" in content
             and "temperature=0" not in content
@@ -491,7 +496,7 @@ async def check_gate_14_aesthetic() -> bool:
 
 async def main() -> int:
     printer.head("21 SEALS — CORTEX QUALITY GATES")
-    
+
     # Pre-cache all Python files into memory concurrently. O(1) file traversals moving forward.
     await GlobalSourceCache.load()
 

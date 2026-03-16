@@ -15,10 +15,11 @@ __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure
+# Canonical Fact query structure — all 16 columns matching row_to_fact contract
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.meta, "
-    "f.hash, f.created_at, f.updated_at, f.is_tombstoned"
+    "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
+    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
 )
 FACT_JOIN = "FROM facts f"
 
@@ -59,31 +60,57 @@ class EngineMixinBase:
     def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
         """Convert a database row to a decrypted fact dictionary.
 
-        aiosqlite returns tuple-like rows (not sqlite3.Row with named keys),
-        so we delegate to row_to_fact() which handles positional indexing correctly.
+        Builds the dict directly from the row tuple — no intermediate Fact
+        allocation. Columns must match FACT_COLUMNS order (16 columns).
         """
-        from cortex.engine.models import row_to_fact
+        import json
 
-        fact = row_to_fact(row)  # type: ignore[reportArgumentType]
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        r = list(row)
+        while len(r) < 16:
+            r.append(None)
+
+        db_tenant_id = r[1] or "default"
+
+        # Decrypt content
+        try:
+            content = enc.decrypt_str(r[3], tenant_id=db_tenant_id) if r[3] else ""
+        except ValueError:
+            content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
+
+        # Parse tags
+        try:
+            tags = json.loads(r[5]) if r[5] else []
+        except (json.JSONDecodeError, TypeError):
+            tags = []
+
+        # Decrypt meta
+        try:
+            meta = enc.decrypt_json(r[6], tenant_id=db_tenant_id) if r[6] else {}
+        except ValueError:
+            meta = {"error": "decryption_failed", "fact_id": r[0]}
+
         return {
-            "id": fact.id,
-            "tenant_id": fact.tenant_id,
-            "project": fact.project,
-            "content": fact.content,
-            "fact_type": fact.fact_type,
-            "type": fact.fact_type,  # API compat alias
-            "tags": fact.tags,
-            "confidence": fact.meta.get("confidence", "C5") if fact.meta else "C5",
-            "valid_from": fact.meta.get("valid_from") if fact.meta else fact.created_at,
-            "valid_until": "9999-12-31T23:59:59Z" if fact.is_tombstoned else None,
-            "source": fact.meta.get("source", "system") if fact.meta else "system",
-            "meta": fact.meta,
-            "consensus_score": fact.meta.get("consensus_score", 1.0) if fact.meta else 1.0,
-            "created_at": fact.created_at,
-            "updated_at": fact.updated_at,
-            "tx_id": fact.meta.get("tx_id") if fact.meta else None,
-            "parent_decision_id": fact.meta.get("parent_decision_id") if fact.meta else None,
-            "hash": fact.hash,
+            "id": r[0],
+            "tenant_id": db_tenant_id,
+            "project": r[2],
+            "content": content,
+            "fact_type": r[4],
+            "type": r[4],  # API compat alias
+            "tags": tags,
+            "confidence": r[11] or (meta.get("confidence", "C5") if meta else "C5"),
+            "valid_from": r[8] or (meta.get("valid_from") if meta else r[12]),
+            "valid_until": "9999-12-31T23:59:59Z" if bool(r[14]) else r[9],
+            "source": r[10] or (meta.get("source", "system") if meta else "system"),
+            "meta": meta,
+            "consensus_score": meta.get("consensus_score", 1.0) if meta else 1.0,
+            "created_at": r[12],
+            "updated_at": r[13],
+            "tx_id": meta.get("tx_id") if meta else None,
+            "parent_decision_id": meta.get("parent_decision_id") if meta else None,
+            "hash": r[7],
         }
 
     def _resolve_tenant(self, tenant_id: str) -> str:

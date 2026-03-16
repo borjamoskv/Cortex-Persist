@@ -144,7 +144,9 @@ class AlmaEngine:
         )
 
     def evaluate_taste(
-        self, content: str, context: dict[str, Any] | None = None,
+        self,
+        content: str,
+        context: dict[str, Any] | None = None,
     ) -> TasteVerdict:
         """Evaluate content quality using the Taste Engine.
 
@@ -153,6 +155,7 @@ class AlmaEngine:
         """
         if self._taste_engine is None:
             from cortex.alma.taste import TasteEngine
+
             self._taste_engine = TasteEngine()
 
         verdict = self._taste_engine.evaluate(content, context)

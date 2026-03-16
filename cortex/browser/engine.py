@@ -32,6 +32,8 @@ class BrowserEngine:
                 "--mute-audio",
             ],
         )
+        if not self._browser:
+            raise RuntimeError("Browser failed to launch.")
         self._context = await self._browser.new_context(
             viewport={"width": 1280, "height": 800},
             user_agent=(
@@ -40,6 +42,8 @@ class BrowserEngine:
                 "Chrome/120.0.0.0 Safari/537.36"
             ),
         )
+        if not self._context:
+            raise RuntimeError("Context failed to create.")
         self._page = await self._context.new_page()
 
         # Override navigator.webdriver

@@ -23,6 +23,8 @@ def anomaly_cmds():
     pass
 
 
+
+
 @anomaly_cmds.command("anomaly-hunt")
 @click.option("--hours", default=24, help="Número de horas hacia atrás a escanear (default: 24).")
 @click.option("--project", default=None, help="Limitar el escaneo a un proyecto específico.")

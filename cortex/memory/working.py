@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import time
 from collections import deque
-from typing import Final
+from typing import Any, Final
 
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
@@ -67,7 +67,7 @@ class WorkingMemoryL1:
         score = 1.0
         # 1. Recency (base priority)
         age_seconds = time.time() - event.timestamp.timestamp()
-        score += max(0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
+        score += max(0.0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
 
         # 2. Emotion/Valence
         meta_valence = event.metadata.get("valence", 0.0)
@@ -126,7 +126,7 @@ class WorkingMemoryL1:
                     evict_idx = i
 
             evicted = buffer[evict_idx]
-            del buffer[evict_idx]
+            buffer.remove(evicted)
             self._tenant_tokens[tenant_id] -= evicted.token_count
             overflow.append(evicted)
 
@@ -193,6 +193,42 @@ class WorkingMemoryL1:
             self._buffers.clear()
             self._tenant_tokens.clear()
         return flushed
+
+    # ─── Snapshot & Export ────────────────────────────────────────
+
+    def snapshot(self, tenant_id: str | None = None) -> dict[str, Any]:
+        """Export current working memory state as a portable dictionary."""
+        resolved_tenant_id = tenant_id or get_tenant_id()
+        if resolved_tenant_id not in self._buffers:
+            return {"tenant_id": resolved_tenant_id, "tokens": 0, "events": []}
+
+        return {
+            "tenant_id": resolved_tenant_id,
+            "tokens": self._tenant_tokens[resolved_tenant_id],
+            "events": [
+                e.model_dump() if hasattr(e, "model_dump") else e.dict()
+                for e in self._buffers[resolved_tenant_id]
+            ],
+        }
+
+    def restore(self, snapshot_data: dict[str, Any], tenant_id: str | None = None) -> None:
+        """Import working memory state from a snapshot dictionary."""
+        resolved_tenant_id = tenant_id or snapshot_data.get("tenant_id") or get_tenant_id()
+        if not resolved_tenant_id:
+            raise ValueError("Cannot restore: resolved tenant_id is None or empty.")
+
+        events_data = snapshot_data.get("events", [])
+        events = []
+        for e_data in events_data:
+            if isinstance(e_data, dict):
+                events.append(MemoryEvent(**e_data))
+            else:
+                events.append(e_data)
+
+        self._buffers[resolved_tenant_id] = deque(events)
+        self._tenant_tokens[resolved_tenant_id] = snapshot_data.get(
+            "tokens", sum(e.token_count for e in events)
+        )
 
     # ─── Introspection ────────────────────────────────────────────
 

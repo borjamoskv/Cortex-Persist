@@ -37,7 +37,9 @@ async def run_applescript(
     logger.debug("Ejecutando AppleScript:\n%s", script)
 
     process = await asyncio.create_subprocess_exec(
-        "osascript", "-e", script,
+        "osascript",
+        "-e",
+        script,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -50,32 +52,26 @@ async def run_applescript(
         if not require_success:
             logger.warning("AppleScript timeout tras %.1fs", timeout)
             return None
-        raise TimeoutError(f"AppleScript excedió timeout de {timeout}s")
+        raise TimeoutError(f"AppleScript excedió timeout de {timeout}s") from None
 
     decoded_out = stdout.decode("utf-8").strip() if stdout else ""
     decoded_err = stderr.decode("utf-8").strip() if stderr else ""
 
     if process.returncode != 0:
         if not require_success:
-            logger.warning(
-                "AppleScript falló (Exit %s): %s", process.returncode, decoded_err
-            )
+            logger.warning("AppleScript falló (Exit %s): %s", process.returncode, decoded_err)
             return None
 
         error_lower = decoded_err.lower()
         if "is not running" in error_lower or "application isn't running" in error_lower:
-            raise AppNotRunningError(
-                f"App objetivo no está en ejecución: {decoded_err}"
-            )
+            raise AppNotRunningError(f"App objetivo no está en ejecución: {decoded_err}")
 
         if (
             "can't get window" in error_lower
             or "can't get menu" in error_lower
             or "can't get UI element" in error_lower
         ):
-            raise UIElementNotFoundError(
-                f"No se encontró el elemento UI: {decoded_err}"
-            )
+            raise UIElementNotFoundError(f"No se encontró el elemento UI: {decoded_err}")
 
         raise AppleScriptExecutionError(
             "Fallo al ejecutar AppleScript",

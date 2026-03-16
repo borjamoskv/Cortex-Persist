@@ -420,7 +420,7 @@ def ingest_cmd(drive_path: str | None):
                     continue
 
                 res = await llm.generate(
-                    content, system=system_prompt, intent=IntentProfile.SYNTHESIS
+                    content, system=system_prompt, intent=IntentProfile.EPISODIC_PROCESSING
                 )
 
                 if res.ok:

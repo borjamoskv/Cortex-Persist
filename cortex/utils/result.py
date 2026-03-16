@@ -32,7 +32,7 @@ from __future__ import annotations
 import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 __all__ = ["Ok", "Err", "Result", "safe", "safe_async"]
 
@@ -112,7 +112,7 @@ class Err(Generic[E]):
 
 
 # Union type for pattern matching and type narrowing
-Result = Union[Ok[T], Err[E]]
+Result = Ok[T] | Err[E]
 
 
 def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:

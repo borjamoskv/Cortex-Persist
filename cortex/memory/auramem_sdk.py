@@ -34,6 +34,32 @@ class AuraMemClient:
             "Content-Type": "application/json",
         }
 
+    async def _request(self, method: str, endpoint: str, **kwargs: Any) -> dict[str, Any]:
+        if not self.api_key:
+            raise ValueError("AURAMEM_API_KEY is required to invoke AuraMem")
+
+        try:
+            return await self._execute_request(method, endpoint, **kwargs)
+        except aiohttp.ClientError as e:
+            logger.error("AURA-MEM ❌: Edge request failed - %s", e)
+            raise
+        except Exception as e:
+            logger.error("AURA-MEM ❌: Edge request unexpected error - %s", e)
+            from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
+            ErrorGhostPipeline().capture_sync(
+                e, source=f"auramem:{endpoint.strip('/')}", project="CORTEX_SYSTEM"
+            )
+            raise
+
+    async def _execute_request(self, method: str, endpoint: str, **kwargs: Any) -> dict[str, Any]:
+        async with aiohttp.ClientSession(headers=self.headers) as session:
+            async with session.request(method, f"{self.base_url}{endpoint}", **kwargs) as response:
+                if response.status == 401:
+                    logger.error("AURA-MEM ❌: Unauthorized. Invalid API Key.")
+                response.raise_for_status()
+                return await response.json()
+
     async def store(
         self, agent_id: str, fact: str, metadata: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -45,71 +71,31 @@ class AuraMemClient:
         - message: Contextual message
         - memory_count: Total memories for agent
         """
-        if not self.api_key:
-            raise ValueError("AURAMEM_API_KEY is required to invoke AuraMem")
-
         payload = {"agent_id": agent_id, "fact": fact, "metadata": metadata or {}}
+        data = await self._request("POST", "/memory", json=payload)
 
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            try:
-                async with session.post(f"{self.base_url}/memory", json=payload) as response:
-                    if response.status == 401:
-                        logger.error("AURA-MEM: Unauthorized. Invalid API Key.")
-                        response.raise_for_status()
+        if data.get("status") == "deduplicated":
+            logger.info(
+                "AURA-MEM ⚡: Semantic deduplication triggered for agent %s. Fact ignored.",
+                agent_id,
+            )
+        else:
+            logger.info("AURA-MEM ✓: New fact stored for agent %s.", agent_id)
 
-                    data = await response.json()
-
-                    if data.get("status") == "deduplicated":
-                        logger.info(
-                            "AURA-MEM ⚡: Semantic deduplication triggered for agent %s. Fact ignored.",
-                            agent_id,
-                        )
-                    else:
-                        logger.info("AURA-MEM ✓: New fact stored for agent %s.", agent_id)
-
-                    return data
-            except aiohttp.ClientError as e:
-                logger.error("AURA-MEM ❌: Edge submission failed - %s", e)
-                raise
-            except Exception as e:  # noqa: BLE001
-                logger.error("AURA-MEM ❌: Edge submission unexpected error - %s", e)
-                from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
-
-                ErrorGhostPipeline().capture_sync(
-                    e, source="auramem:store", project="CORTEX_SYSTEM"
-                )
-                raise
+        return data
 
     async def recall(self, agent_id: str, query: str) -> dict[str, Any]:
         """
         Retrieves context from AuraMem.
         """
-        if not self.api_key:
-            raise ValueError("AURAMEM_API_KEY is required to invoke AuraMem")
-
         params = {"agent_id": agent_id, "query": query}
+        data = await self._request("GET", "/memory", params=params)
 
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            try:
-                async with session.get(f"{self.base_url}/memory", params=params) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    # Mock metric logging
-                    saved = data.get("context_tokens_saved", 0)
-                    if saved > 0:
-                        logger.info("AURA-MEM: Edge retrieval saved %s tokens of noise.", saved)
-                    return data
-            except aiohttp.ClientError as e:
-                logger.error("AURA-MEM ❌: Edge recall failed - %s", e)
-                raise
-            except Exception as e:  # noqa: BLE001
-                logger.error("AURA-MEM ❌: Edge recall unexpected error - %s", e)
-                from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+        saved = data.get("context_tokens_saved", 0)
+        if saved > 0:
+            logger.info("AURA-MEM: Edge retrieval saved %s tokens of noise.", saved)
 
-                ErrorGhostPipeline().capture_sync(
-                    e, source="auramem:recall", project="CORTEX_SYSTEM"
-                )
-                raise
+        return data
 
 
 # Global singleton for CORTEX use

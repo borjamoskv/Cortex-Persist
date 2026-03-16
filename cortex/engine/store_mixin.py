@@ -13,14 +13,18 @@ from typing import Any, ClassVar
 
 import aiosqlite
 
+# Hoisted from _run_store_validation hot path
+from cortex.engine.bridge_guard import BridgeGuard
 from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import (
     insert_fact_record,
     resolve_causality_async,
 )
 from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.membrane.sanitizer import SovereignSanitizer
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.privacy_mixin import PrivacyMixin
+from cortex.engine.storage_guard import StorageGuard
 from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
@@ -101,9 +105,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def _run_store_validation(
         self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
     ) -> tuple[int | None, dict | None, str, str]:
-        from cortex.engine.bridge_guard import BridgeGuard
-        from cortex.engine.storage_guard import StorageGuard
-
         StorageGuard.validate(
             project=project,
             content=content,
@@ -144,11 +145,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                             )
                             try:
                                 fact_id_int = int(top_match.id)
-                                
+
                                 # Axiom Ω7: Defensive Mutation (Thermal Decay Quarantine)
                                 hits = self.__class__._thermal_decay_cache.get(fact_id_int, 0) + 1
                                 self.__class__._thermal_decay_cache[fact_id_int] = hits
-                                
+
                                 if hits > 4:
                                     logger.warning(
                                         "☣️ [THERMAL DECAY] Fact %d reached critical entropy "
@@ -161,7 +162,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                                         fact_id=fact_id_int,
                                         reason=f"Thermal decay quarantine (Semantic loop {hits}x)",
                                         conn=conn,
-                                        tenant_id=tenant_id
+                                        tenant_id=tenant_id,
                                     )
                                     self.__class__._thermal_decay_cache[fact_id_int] = 0
                                 else:
@@ -181,7 +182,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         meta = run_security_guards(content, project, source, meta)
 
         # Omega-3: Byzantine Default - Pass through SovereignSanitizer
-        from cortex.engine.membrane.sanitizer import SovereignSanitizer
 
         raw_engram = {
             "type": fact_type,
@@ -221,9 +221,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     fact_type = "bridge"
                     # Prescriptive pattern adoption: ensure bridge content follows BridgeGuard format
                     if "→" not in content and "->" not in content:
-                        content = (
-                            f"Pattern from {source_proj} → {project}. Adaptation: {content}"
-                        )
+                        content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
 
         if fact_type == "bridge":
             bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
@@ -303,6 +301,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         # because an optional daemon dep is missing. (Ghost #4731)
         try:
             from cortex.daemon.epistemic_breaker import EpistemicBreakerDaemon
+
             EpistemicCircuitBreaker = EpistemicBreakerDaemon
             await EpistemicCircuitBreaker.evaluate(conn, tenant_id, project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, ModuleNotFoundError, AttributeError) as _ecb_err:
@@ -405,7 +404,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
             new_id = await self.store(
                 project=project,
-                content=content if content is not None else str(old_content or ""),  
+                content=content if content is not None else str(old_content or ""),
                 tenant_id=db_tenant_id,
                 fact_type=fact_type,
                 tags=tags if tags is not None else json.loads(old_tags_json),

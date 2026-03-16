@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger("cortex.ui_control")
 
@@ -57,11 +56,11 @@ class AXElement:
     """Represents a macOS UI element from the Accessibility tree."""
 
     role: str
-    subrole: Optional[str] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-    identifier: Optional[str] = None
-    value: Optional[str] = None
+    subrole: str | None = None
+    title: str | None = None
+    description: str | None = None
+    identifier: str | None = None
+    value: str | None = None
     native_ref: object = None
     depth: int = 0
     children: list["AXElement"] = field(default_factory=list)
@@ -72,7 +71,7 @@ class AppTarget:
     """Represents an application to target."""
 
     name: str
-    bundle_id: Optional[str] = None
+    bundle_id: str | None = None
 
 
 @dataclass
@@ -80,8 +79,8 @@ class InteractionResult:
     """Result of a UI interaction."""
 
     success: bool
-    output: Optional[str] = None
-    error: Optional[str] = None
+    output: str | None = None
+    error: str | None = None
 
 
 @dataclass

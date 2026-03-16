@@ -157,13 +157,12 @@ class AsyncCausalGraph:
             "orphan_edges": orphans,
         }
 
-
     async def propagate_taint(
         self,
         fact_id: int,
         tenant_id: str = "default",
         max_depth: int = 50,
-    ) -> "TaintReport":
+    ) -> TaintReport:
         """Propagate taint from an invalidated fact to all descendants.
 
         Ω₁₃ §15.9: taint_propagation_required_for_invalidated_facts = true
@@ -174,6 +173,7 @@ class AsyncCausalGraph:
         """
         await self.ensure_table()
         import json
+
         from cortex.memory.temporal import now_iso
 
         ts = now_iso()
@@ -235,15 +235,21 @@ class AsyncCausalGraph:
                     (child_id, fact_id, EDGE_TAINTED_BY, None, tenant_id),
                 )
 
-                changes.append({
-                    "fact_id": child_id,
-                    "old_confidence": old_conf,
-                    "new_confidence": new_conf,
-                    "hops": hops,
-                })
+                changes.append(
+                    {
+                        "fact_id": child_id,
+                        "old_confidence": old_conf,
+                        "new_confidence": new_conf,
+                        "hops": hops,
+                    }
+                )
                 logger.info(
                     "Taint propagated: fact %d (%s→%s) from source %d (%d hops)",
-                    child_id, old_conf, new_conf, fact_id, hops,
+                    child_id,
+                    old_conf,
+                    new_conf,
+                    fact_id,
+                    hops,
                 )
 
                 queue.append((child_id, hops))

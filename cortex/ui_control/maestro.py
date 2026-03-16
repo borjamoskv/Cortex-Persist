@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.ui_control.accessibility import AccessibilityEngine
 from cortex.ui_control.applescript import (
@@ -21,8 +21,8 @@ from cortex.ui_control.applescript import (
 )
 from cortex.ui_control.keyboard import KeyboardEngine
 from cortex.ui_control.models import (
-    AXElement,
     AppTarget,
+    AXElement,
     InteractionResult,
     KeyCombo,
     WindowInfo,
@@ -49,7 +49,7 @@ class MaestroUI:
     bajo una API unificada con reintentos automáticos.
     """
 
-    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
+    def __init__(self, engine: CortexEngine | None = None) -> None:
         self.engine = engine
         self.accessibility = AccessibilityEngine(engine)
         self.keyboard = KeyboardEngine(engine)
@@ -73,9 +73,7 @@ class MaestroUI:
             if result.success:
                 return result
             last_error = result.error or ""
-            logger.warning(
-                "Intento %d/%d falló: %s", attempt + 1, retries, last_error
-            )
+            logger.warning("Intento %d/%d falló: %s", attempt + 1, retries, last_error)
             if attempt < retries - 1:
                 await asyncio.sleep(RETRY_DELAY)
         return InteractionResult(
@@ -116,9 +114,7 @@ class MaestroUI:
         timeout: float = 5.0,
     ) -> AXElement | None:
         """Espera a que un elemento aparezca (polling)."""
-        return await self.accessibility.wait_for_element(
-            app_name, identifier, timeout
-        )
+        return await self.accessibility.wait_for_element(app_name, identifier, timeout)
 
     async def click_element(self, element: AXElement) -> InteractionResult:
         """Click en un elemento AX con reintentos."""
@@ -135,26 +131,22 @@ class MaestroUI:
     # ─── Teclado ────────────────────────────────────────────────
 
     async def hotkey(
-        self, key: str, *modifiers: str, target: AppTarget = None
+        self, key: str, *modifiers: str, target: AppTarget | None = None
     ) -> InteractionResult:
         """Atajo de teclado (ej: hotkey('c', 'command'))."""
         return await self.keyboard.hotkey(key, *modifiers, target=target)
 
     async def type_text(
-        self, text: str, target: AppTarget = None, delay: float = 0.05
+        self, text: str, target: AppTarget | None = None, delay: float = 0.05
     ) -> InteractionResult:
         """Escribe texto (clipboard para cadenas largas, keystroke para cortas)."""
         return await self.keyboard.type_text(text, target=target, delay=delay)
 
-    async def press_special(
-        self, key_name: str, target: AppTarget = None
-    ) -> InteractionResult:
+    async def press_special(self, key_name: str, target: AppTarget | None = None) -> InteractionResult:
         """Pulsa una tecla especial (return, tab, escape, flechas)."""
         return await self.keyboard.press_special(key_name, target=target)
 
-    async def press(
-        self, combo: KeyCombo, target: AppTarget = None
-    ) -> InteractionResult:
+    async def press(self, combo: KeyCombo, target: AppTarget | None = None) -> InteractionResult:
         """Pulsa una combinación de teclas."""
         return await self.keyboard.press(combo, target=target)
 
@@ -173,7 +165,11 @@ class MaestroUI:
         return self.mouse.right_click(x, y)
 
     def drag(
-        self, from_x: int, from_y: int, to_x: int, to_y: int,
+        self,
+        from_x: int,
+        from_y: int,
+        to_x: int,
+        to_y: int,
         duration: float = 0.5,
     ) -> InteractionResult:
         """Drag-and-drop interpolado."""
@@ -197,15 +193,11 @@ class MaestroUI:
         """Devuelve información de la ventana en primer plano."""
         return await self.window.get_frontmost()
 
-    async def move_window(
-        self, target: AppTarget, x: int, y: int
-    ) -> InteractionResult:
+    async def move_window(self, target: AppTarget, x: int, y: int) -> InteractionResult:
         """Mueve la ventana principal de una app."""
         return await self.window.move(target, x, y)
 
-    async def resize_window(
-        self, target: AppTarget, width: int, height: int
-    ) -> InteractionResult:
+    async def resize_window(self, target: AppTarget, width: int, height: int) -> InteractionResult:
         """Redimensiona la ventana principal de una app."""
         return await self.window.resize(target, width, height)
 

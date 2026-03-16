@@ -121,9 +121,7 @@ class CryptoShredder:
         )
         return cursor.fetchone() is not None
 
-    async def is_shredded_async(
-        self, fact_id: int, tenant_id: str = "default"
-    ) -> bool:
+    async def is_shredded_async(self, fact_id: int, tenant_id: str = "default") -> bool:
         """Check if a fact's key has been shredded (async)."""
         cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
             "SELECT 1 FROM shredded_keys WHERE fact_id = ? AND tenant_id = ?",
@@ -131,9 +129,7 @@ class CryptoShredder:
         )
         return (await cursor.fetchone()) is not None
 
-    def get_shredded_fact_ids(
-        self, tenant_id: str = "default"
-    ) -> set[int]:
+    def get_shredded_fact_ids(self, tenant_id: str = "default") -> set[int]:
         """Return all shredded fact IDs for a tenant (sync)."""
         if not isinstance(self._conn, sqlite3.Connection):
             raise TypeError("Use get_shredded_fact_ids_async for async")
@@ -143,9 +139,7 @@ class CryptoShredder:
         )
         return {row[0] for row in cursor.fetchall()}
 
-    async def get_shredded_fact_ids_async(
-        self, tenant_id: str = "default"
-    ) -> set[int]:
+    async def get_shredded_fact_ids_async(self, tenant_id: str = "default") -> set[int]:
         """Return all shredded fact IDs for a tenant (async)."""
         cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
             "SELECT fact_id FROM shredded_keys WHERE tenant_id = ?",
@@ -197,7 +191,9 @@ class CryptoShredder:
             self._conn.commit()
             logger.info(
                 "Crypto-shredded fact #%d (tenant=%s, reason=%s)",
-                fact_id, tenant_id, reason,
+                fact_id,
+                tenant_id,
+                reason,
             )
             return ShredResult(
                 fact_id=fact_id,
@@ -254,7 +250,9 @@ class CryptoShredder:
             await self._conn.commit()  # type: ignore[reportAttributeAccessIssue]
             logger.info(
                 "Crypto-shredded fact #%d (tenant=%s, reason=%s)",
-                fact_id, tenant_id, reason,
+                fact_id,
+                tenant_id,
+                reason,
             )
             return ShredResult(
                 fact_id=fact_id,
@@ -298,9 +296,7 @@ class CryptoShredder:
         rows = await cursor.fetchall()
         fact_ids = [row[0] for row in rows]
 
-        return await self._shred_batch(
-            fact_ids, tenant_id, reason, shredded_by
-        )
+        return await self._shred_batch(fact_ids, tenant_id, reason, shredded_by)
 
     async def shred_by_project(
         self,
@@ -317,9 +313,7 @@ class CryptoShredder:
         rows = await cursor.fetchall()
         fact_ids = [row[0] for row in rows]
 
-        return await self._shred_batch(
-            fact_ids, tenant_id, reason, shredded_by
-        )
+        return await self._shred_batch(fact_ids, tenant_id, reason, shredded_by)
 
     async def _shred_batch(
         self,
@@ -332,9 +326,7 @@ class CryptoShredder:
         batch = ShredBatchResult(total_requested=len(fact_ids))
 
         for fact_id in fact_ids:
-            result = await self.shred_fact_async(
-                fact_id, tenant_id, reason, shredded_by
-            )
+            result = await self.shred_fact_async(fact_id, tenant_id, reason, shredded_by)
             batch.results.append(result)
 
             if result.was_already_shredded:
@@ -346,9 +338,7 @@ class CryptoShredder:
 
         return batch
 
-    def _invalidate_fact_key(
-        self, fact_id: int, tenant_id: str
-    ) -> None:
+    def _invalidate_fact_key(self, fact_id: int, tenant_id: str) -> None:
         """Invalidate the HKDF-derived key for a fact from in-memory cache.
 
         After shredding, even if the encrypter has the master key,

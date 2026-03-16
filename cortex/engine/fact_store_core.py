@@ -12,6 +12,8 @@ from typing import Any
 
 import aiosqlite
 
+# Hoisted from insert_fact_record hot path (was lazy import per-call)
+from cortex.graph import process_fact_graph
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
 
@@ -42,7 +44,6 @@ async def insert_fact_record(
 
     enc = get_default_encrypter()
     encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
-    encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
 
     sig_b64: str | None = None
     pub_b64: str | None = None
@@ -163,7 +164,6 @@ async def insert_fact_record(
         logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
 
     # Graph Extraction
-    from cortex.graph import process_fact_graph
 
     try:
         # type: ignore[reportArgumentType]
