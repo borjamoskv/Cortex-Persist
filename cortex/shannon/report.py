@@ -11,7 +11,6 @@ import logging
 from typing import TYPE_CHECKING
 
 from cortex.shannon.analyzer import (
-from cortex.shannon.analyzer import (
     exergy_score,
     max_entropy,
     mutual_information,
