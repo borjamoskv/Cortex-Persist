@@ -2,6 +2,7 @@
 
 Configuration, Metrics, Caching, and Connection Pooling.
 """
+from __future__ import annotations
 
 import asyncio
 import logging

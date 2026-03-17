@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+:root {
+  --bg-primary: #0A0A0A;
+  --bg-secondary: #111111;
+  --bg-elevated: #1A1A1A;
+
+  --text-primary: #F5F5F5;
+  --text-secondary: #999999;
+  --text-muted: #666666;
+
+  --accent: #CCFF00;
+
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+
+  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --text-2xl: clamp(2rem, 1rem + 4vw, 4rem);
+  --text-hero: clamp(3rem, 1rem + 8vw, 8rem);
+  
+  --tracking-tight: -0.04em;
+  --tracking-hero: -0.06em;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#webgl-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.app-container {
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10vw;
+  position: relative;
+}
+
+.hero {
+  align-items: center;
+  text-align: center;
+}
+
+.content.left { margin-right: auto; max-width: 500px; }
+.content.right { margin-left: auto; max-width: 500px; text-align: right; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: 1rem;
+}
+
+.hero-text {
+  font-size: var(--text-hero);
+  letter-spacing: var(--tracking-hero);
+  line-height: 0.9;
+  font-weight: 300;
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  line-height: 1;
+}
+
+p {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Custom Cursor */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}

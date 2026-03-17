@@ -22,6 +22,7 @@ logger = logging.getLogger("cortex.extensions.evolution.engine.ops")
 
 class EvolutionOpsMixin:
     """Mixin for genetic operations, extinctions, and adversarial grounding."""
+from __future__ import annotations
 
     def _apply_epigenetic_modulation(self) -> None:
         """Modulate mutation rate and selection pressure via DigitalEndocrine."""

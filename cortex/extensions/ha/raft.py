@@ -3,6 +3,7 @@ CORTEX v5.0 — Raft Consensus Implementation.
 
 Handles leader election and log replication state.
 """
+from __future__ import annotations
 
 import asyncio
 import logging

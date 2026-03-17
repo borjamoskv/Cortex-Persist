@@ -2,6 +2,7 @@
 CORTEX v5.0 — API Models.
 Centralized Pydantic models for request/response validation.
 """
+from __future__ import annotations
 
 from typing import Any, Literal, TypedDict
 

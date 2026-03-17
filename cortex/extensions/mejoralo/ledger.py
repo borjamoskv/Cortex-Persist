@@ -1,4 +1,5 @@
 """MEJORAlo Ledger — session recording and history retrieval."""
+from __future__ import annotations
 
 import json
 import logging

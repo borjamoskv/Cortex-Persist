@@ -3,6 +3,7 @@ KETER Engine (Singularity Cascade).
 Metasistema de Invocacion Fractal. KETER auto-determina skills,
 secuencia, modelos. Invoca, ejecuta, entrega.
 """
+from __future__ import annotations
 
 import asyncio
 import logging

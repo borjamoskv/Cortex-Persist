@@ -1,6 +1,7 @@
 """Gidatu UI/Desktop Orchestration Handler.
 Ω₃ (Byzantine Default): Enforces SafeZones and strict app-scoping.
 """
+from __future__ import annotations
 
 import logging
 import sys

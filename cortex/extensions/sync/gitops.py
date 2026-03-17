@@ -12,6 +12,7 @@ logger = logging.getLogger("cortex.extensions.sync.gitops")
 
 def _locate_repo_root(project_name: str) -> Path | None:
     """Intenta localizar la carpeta del proyecto en rutas estándar."""
+from __future__ import annotations
     game_dir = Path.home() / "game" / project_name
     if game_dir.exists() and game_dir.is_dir():
         return game_dir

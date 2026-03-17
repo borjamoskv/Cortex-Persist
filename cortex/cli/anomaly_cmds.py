@@ -2,6 +2,7 @@
 
 Integrates the NightShift anomaly hunter into the Sovereign CLI.
 """
+from __future__ import annotations
 
 import click
 from rich.panel import Panel

@@ -19,6 +19,7 @@ logger = logging.getLogger("moskv-daemon")
 
 class TrendsOracle:
     """Permanent connection sidecar for Google Trends."""
+from __future__ import annotations
 
     def __init__(self, engine: Any, config: TrendsConfig):
         self.engine = engine

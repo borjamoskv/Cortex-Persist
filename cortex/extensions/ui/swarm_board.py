@@ -3,6 +3,7 @@
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.
 Listens to the CORTEX SignalBus for state changes.
 """
+from __future__ import annotations
 
 import sqlite3
 import threading

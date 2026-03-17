@@ -2,6 +2,7 @@
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Protocolo CORTEX: Analysis -> Extraction -> Reconstruction -> Scaling -> Verification
 """
+from __future__ import annotations
 
 import ast
 import asyncio

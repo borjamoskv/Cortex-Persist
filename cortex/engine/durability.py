@@ -4,6 +4,7 @@ Implements the two-layer persistence strategy:
 1. C5 Supervisor: Interval-based background flushing.
 2. C4 atexit: Fallback for clean process termination.
 """
+from __future__ import annotations
 
 import asyncio
 import atexit

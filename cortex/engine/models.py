@@ -8,7 +8,7 @@ from dataclasses import dataclass
 __all__ = ["Fact", "row_to_fact"]
 
 
-@dataclass(slots=True)
+@dataclass
 class Fact:
     id: int
     tenant_id: str

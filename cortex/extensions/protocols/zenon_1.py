@@ -6,6 +6,7 @@ en enjambres multi-modelo y ciclos meta-cognitivos (OUROBOROS-∞ / SINGULARIS-0
 Axioma 15: La Inteligencia no es pensar infinitamente;
 es saber matemáticamente cuándo dejar de pensar y actuar.
 """
+from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

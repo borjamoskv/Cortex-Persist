@@ -1,4 +1,5 @@
 """MEJORAlo Engine implementation."""
+from __future__ import annotations
 
 import logging
 from pathlib import Path
@@ -31,6 +32,14 @@ class MejoraloEngine:
     def detect_stack(path: str | Path) -> str:
         """Detect project stack from marker files."""
         return detect_stack(path)
+
+    # ── Fase 1.1: Live System ────────────────────────────────────────
+
+    def mac_inspect(self) -> Any:
+        """Live macOS system snapshot via mac-maestro-omega semantic ladder."""
+        from .mac_control import mac_system_snapshot
+
+        return mac_system_snapshot()
 
     # ── Fase 2: X-Ray 13D Scan ───────────────────────────────────────
 

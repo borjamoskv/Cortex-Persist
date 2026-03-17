@@ -7,6 +7,7 @@ Transitions CORTEX from a Local Daemon to a Mesh Network.
 With the L1 Signal Bus bridge, every published event can optionally
 persist to SQLite for cross-process reactive signaling.
 """
+from __future__ import annotations
 
 import asyncio
 import logging

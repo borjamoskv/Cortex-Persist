@@ -1,4 +1,5 @@
 """Advanced stack detection with tool intelligence for MEJORAlo."""
+from __future__ import annotations
 
 import logging
 import shlex

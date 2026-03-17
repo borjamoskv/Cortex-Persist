@@ -110,4 +110,4 @@ python -m cortex.mcp
 
 ### How do I report a security issue?
 
-See [SECURITY.md](https://github.com/borjamoskv/cortex/blob/master/SECURITY.md) for responsible disclosure instructions. Do not open public GitHub issues for security vulnerabilities.
+See [SECURITY.md](https://github.com/borjamoskv/cortex/blob/main/SECURITY.md) for responsible disclosure instructions. Do not open public GitHub issues for security vulnerabilities.

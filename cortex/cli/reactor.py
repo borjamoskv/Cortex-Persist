@@ -3,6 +3,7 @@ CORTEX REACTOR (SYNAPSE-X) v1.0
 The 'Killer Feature' for Marketing.
 Visualizes Synaptic Resonance and Entropy Eradication.
 """
+from __future__ import annotations
 
 import random
 import time

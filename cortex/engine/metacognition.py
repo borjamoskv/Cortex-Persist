@@ -3,6 +3,7 @@ CORTEX V7 - Metacognition & The Doubt Circuit (DOUBT-Ω)
 Evaluates Semantic Divergence and Epistemic Uncertainty to prevent Coherence Traps.
 Axiom Ω₃: Byzantine Default — Nothing is trusted by default, including consensus.
 """
+from __future__ import annotations
 
 import math
 from typing import Any

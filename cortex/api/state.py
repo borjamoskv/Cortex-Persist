@@ -2,6 +2,7 @@
 CORTEX v5.0 — API State.
 Global instances and shared state for the API layer.
 """
+from __future__ import annotations
 
 from typing import Any
 

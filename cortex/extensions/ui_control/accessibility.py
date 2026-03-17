@@ -1,3 +1,4 @@
+from __future__ import annotations
 # pyright: reportMissingImports=false, reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 import asyncio
 import logging

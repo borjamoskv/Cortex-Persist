@@ -4,8 +4,8 @@ Extracted from antipatterns.py to satisfy the Landauer LOC barrier (≤500).
 Provides Scanner 4: Circular Deps + Fan-Out analysis.
 These functions are project-wide (not per-file) — they build a full dep graph.
 """
-
 from __future__ import annotations
+
 
 import ast
 import os

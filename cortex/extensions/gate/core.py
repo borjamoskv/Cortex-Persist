@@ -1,6 +1,7 @@
 """
 CORTEX v5.0 — SovereignGate Core Logic.
 """
+from __future__ import annotations
 
 import collections
 import hashlib

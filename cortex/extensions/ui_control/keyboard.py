@@ -4,6 +4,7 @@ CORTEX — Sovereign Keyboard Engine for macOS.
 Dedicated keyboard automation: hotkeys, text input, special keys.
 Uses AppleScript (System Events) for reliable keystroke injection.
 """
+from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Optional

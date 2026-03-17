@@ -1,4 +1,5 @@
 """Constants for MEJORAlo engine."""
+from __future__ import annotations
 
 import re
 
@@ -14,6 +15,11 @@ __all__ = [
     "HEAL_TEMPERATURES",
     "INDENT_NESTING_THRESHOLD",
     "INMEJORABLE_SCORE",
+    "MAC_AX_PENALTY",
+    "MAC_MEMORY_PRESSURE_WARN",
+    "MAC_PROCESS_ENTROPY_LIMIT",
+    "MAC_PROCESS_PENALTY_PER_10",
+    "MAC_THERMAL_OK",
     "MAX_FAN_OUT",
     "MAX_FINDINGS_ARCH",
     "MAX_FINDINGS_COMPLEXITY",
@@ -127,6 +133,13 @@ TOTAL_SCANNER_COUNT = 6  # Number of antipattern scanners
 DAEMON_DEFAULT_SCAN_INTERVAL = 1800  # 30 minutes between scans
 DAEMON_DEFAULT_TARGET_SCORE = 100  # 100 = Sovereign standard
 DAEMON_DIM_SCORE_THRESHOLD = 7  # Dimension score below this triggers query
+
+# ─── Mac Control Constants ────────────────────────────────────────
+MAC_PROCESS_ENTROPY_LIMIT = 250      # Max process count before entropy penalty
+MAC_MEMORY_PRESSURE_WARN = "warn"    # macOS pressure level that triggers penalty
+MAC_THERMAL_OK = "Nominal"           # Expected thermal state (no penalty)
+MAC_AX_PENALTY = 25                  # Score penalty if Accessibility not trusted
+MAC_PROCESS_PENALTY_PER_10 = 5       # Penalty per 10 procs over entropy limit
 
 
 # File extensions to scan per stack

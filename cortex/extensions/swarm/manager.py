@@ -3,6 +3,7 @@
 Orchestrates multi-agent dialectics. The Foreman manages parallel
 workstreams for Research, Implementation, and Verification.
 """
+from __future__ import annotations
 
 import asyncio
 import logging

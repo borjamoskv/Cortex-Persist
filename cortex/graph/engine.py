@@ -2,6 +2,7 @@
 
 Extraction, relationship detection, and backend orchestration.
 """
+from __future__ import annotations
 
 import logging
 import sqlite3

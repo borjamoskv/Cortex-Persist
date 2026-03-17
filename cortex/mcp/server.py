@@ -3,6 +3,7 @@
 Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
+from __future__ import annotations
 
 import json
 import logging

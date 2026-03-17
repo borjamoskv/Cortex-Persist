@@ -1,6 +1,6 @@
 """Data types for MEJORAlo engine."""
-
 from __future__ import annotations
+
 
 from dataclasses import dataclass, field
 
@@ -11,6 +11,7 @@ __all__ = [
     "ShipSeal",
     "AntipatternFinding",
     "AntipatternReport",
+    "MacSnapshot",
 ]
 
 
@@ -100,3 +101,17 @@ class AntipatternReport:
         """Calculate penalty points for MEJORAlo score integration."""
         penalties = {"critical": 15, "high": 8, "medium": 3, "low": 1}
         return sum(penalties.get(f.severity, 1) for f in self.findings)
+
+
+@dataclass
+class MacSnapshot:
+    """Live macOS system telemetry snapshot."""
+
+    platform: str          # "darwin" or "unsupported"
+    cpu_percent: float     # 0.0-100.0
+    memory_pressure: str   # "ok" | "warn" | "critical"
+    thermal_state: str     # "Nominal" | "Fair" | "Serious" | "Critical"
+    process_count: int     # Number of running processes
+    ax_trusted: bool       # Accessibility permissions granted
+    gpu_active: bool       # Discrete GPU active
+    timestamp: str         # ISO8601 UTC timestamp

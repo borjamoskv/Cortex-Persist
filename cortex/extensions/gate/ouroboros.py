@@ -2,6 +2,7 @@
 CORTEX — Ouroboros-Ω Gate.
 The thermodynamic enforcer for architectural scaling.
 """
+from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone

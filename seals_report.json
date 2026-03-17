@@ -1,0 +1,154 @@
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 21 SEALS — CORTEX QUALITY GATES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────
+🔍 Gate 1: Lint (Ruff) (AX-011 Entropy Death)
+
+────────────────────────────────────────
+🔍 Gate 2: Type Check (Pyright) (AX-012 Type Safety)
+
+────────────────────────────────────────
+🔍 Gate 3: Security Scan (Bandit) (AX-010 Zero Trust)
+   [🟡 WARN] Bandit not found — skipping (install with: pip install bandit)
+
+────────────────────────────────────────
+🔍 Gate 4: Tests & Coverage (AX-017 Ledger Integrity)
+
+────────────────────────────────────────
+🔍 Gate 5: Schema Initialization (AX-017 Ledger Integrity)
+
+────────────────────────────────────────
+🔍 Gate 6: Connection Guard (AX-017 Ledger Integrity)
+
+────────────────────────────────────────
+🔍 Gate 7: Async Guard (No time.sleep) (AX-013 Async Native)
+   [🟢 PASSED] No blocking time.sleep() found.
+
+────────────────────────────────────────
+🔍 Gate 8: LOC Guard (≤600 max) (AX-011 Entropy Death)
+   [🔴 FAILED] store_mixin.py exceeds 600 LOC (661)
+
+────────────────────────────────────────
+🔍 Gate 9: Axiom Registry Sync (Registry Integrity)
+   [🟢 PASSED] Registry load OK: 27 axioms, 9 CI-enforced.
+
+────────────────────────────────────────
+🔍 Gate 11: Cobbler's Compliance (Swarm Self-Audit) (Ω₃ Byzantine Default)
+   [🟢 PASSED] Seal 12: Temperature Determinism Gate intact.
+   [🟢 PASSED] Seal 13: A-Record Latency Gate intact (<200ms).
+   [🟢 PASSED] Seal 15: Dependency Ghost Check intact.
+   [🟢 PASSED] Seal 16: Byzantine Consensus (Weights) intact.
+   [🟢 PASSED] Seal 17: Shannon Entropy Budget intact.
+   [🟢 PASSED] Seal 18: Zero-Prompting Evolution intact.
+   [🟢 PASSED] Seal 19: EU AI Act Audit intact (Ledger C5).
+   [🟢 PASSED] Seal 20: Industrial Noir Contrast (#CCFF00) intact.
+   [🟢 PASSED] Seal 21: Sovereign Self-Preservation intact.
+   [🟢 PASSED] Seal 14: Sovereign Aesthetic Gate intact.
+   [🔴 FAILED] Ruff linting failed.
+cortex/engine/__init__.py:98:13: I001 [*] Import block is un-sorted or un-formatted
+cortex/engine/guard_adapters.py:143:9: I001 [*] Import block is un-sorted or un-formatted
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.
+
+   [🟢 PASSED] Connection guard passed.
+   [🟢 PASSED] Ledger schema initialized successfully.
+   [🔴 FAILED] Tests failed.
+
+==================================== ERRORS ====================================
+________________ ERROR collecting tests/test_causality_taint.py ________________
+ImportError while importing test module '/Users/borjafernandezangulo/30_CORTEX/tests/test_causality_taint.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_causality_taint.py:10: in <module>
+    from cortex.engine.causality import (
+E   ImportError: cannot import name 'CONFIDENCE_LEVELS' from 'cortex.engine.causality' (/Users/borjafernandezangulo/30_CORTEX/cortex/engine/causality.py)
+=============================== warnings summary ===============================
+cortex/extensions/aether/models.py:128
+  /Users/borjafernandezangulo/30_CORTEX/cortex/extensions/aether/models.py:128: PytestCollectionWarning: cannot collect test class 'TesterOutput' because it has a __init__ constructor (from: tests/test_aether_models.py)
+    @dataclass
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_causality_taint.py
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 warning, 1 error in 0.70s
+
+   [🟢 PASSED] EntropyDemon: engine source is clean (81 files scanned).
+   [🟢 PASSED] Intruder: no eval/exec/os.system in engine source.
+   [🔴 FAILED] Type checking failed.
+{
+    "version": "1.1.408",
+    "time": "1773745352461",
+    "generalDiagnostics": [
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/auth/backends.py",
+            "severity": "warning",
+            "message": "No se ha podido resolver la importación \"asyncpg\".",
+            "range": {
+                "start": {
+                    "line": 176,
+                    "character": 15
+                },
+                "end": {
+                    "line": 176,
+                    "character": 22
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/cli/heal_cmds.py",
+            "severity": "warning",
+            "message": "No se ha podido resolver la importación \"dotenv\".",
+            "range": {
+                "start": {
+                    "line": 17,
+                    "character": 7
+                },
+                "end": {
+                    "line": 17,
+                    "character": 13
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/cli/relay_daemon.py",
+            "severity": "warning",
+            "message": "La importación \"aiofiles\" no se ha podido resolver desde el origen",
+            "range": {
+                "start": {
+                    "line": 3,
+                    "character": 7
+                },
+                "end": {
+                    "line": 3,
+                    "character": 15
+                }
+            },
+            "rule": "reportMissingModuleSource"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/compaction/mem0_pipeline.py",
+            "severity": "warning",
+            "message": "No se ha podido resolver la importación \"structlog\".",
+            "range": {
+                "start": {
+                    "line": 4,
+             
+
+────────────────────────────────────────
+🔍 Gate 10: Prompt Size Check (Heuristic)
+   [🟡 WARN] No SYSTEM_PROMPT.md found.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEALS SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   [🔴 FAILED] SEALS BROKEN: [1, 2, 4, 8]
+
+Fix violations before pushing.

@@ -12,6 +12,7 @@ from cortex.cli.common import cli, console
 @cli.group()
 def swarm():
     """SOVEREIGN SWARM — Orchestration of specialized agents (130/100)."""
+from __future__ import annotations
     pass
 
 
