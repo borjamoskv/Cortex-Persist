@@ -41,6 +41,7 @@ class SovereignLock:
         this at the cost of a small open/close overhead (acceptable for lock paths).
         """
         import aiosqlite
+
         db_path = str(self._db_path or getattr(self._engine, "_db_path", None))
         async with aiosqlite.connect(db_path) as conn:
             # WAL mode so concurrent readers don't block writers
