@@ -335,6 +335,20 @@ BEGIN
 END;
 """
 
+CREATE_CAUSAL_EDGES = """
+CREATE TABLE IF NOT EXISTS causal_edges (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL,
+    parent_id       INTEGER,
+    signal_id       INTEGER,
+    edge_type       TEXT NOT NULL DEFAULT 'triggered_by',
+    project         TEXT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (fact_id) REFERENCES facts(id)
+);
+"""
+
 
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
@@ -361,6 +375,7 @@ EXTENSION_SCHEMA = [
     CREATE_LOCK_TTL_TRIGGER,
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
+    CREATE_CAUSAL_EDGES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,

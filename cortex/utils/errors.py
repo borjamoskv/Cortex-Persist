@@ -27,6 +27,7 @@ __all__ = [
     "WriteWorkerError",
     "AuthError",
     "PermissionDeniedError",
+    "SovereignViolation",
 ]
 
 
@@ -112,5 +113,11 @@ class AuthError(CortexError):
 
 class PermissionDeniedError(AuthError):
     """Raised when an operation is rejected by RBAC."""
+
+    pass
+
+
+class SovereignViolation(CortexError):
+    """Raised when a sovereign policy is violated (e.g., Rule 1.3 model tier)."""
 
     pass
