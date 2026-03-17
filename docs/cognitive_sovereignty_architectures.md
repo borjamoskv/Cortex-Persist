@@ -3,7 +3,7 @@
 **Optimización, Persistencia y Verificabilidad en Agentes de IA de Próxima Generación**
 
 > [!NOTE]
-> Este documento establece el marco teórico-práctico que sustenta la arquitectura de [CORTEX](file:///Users/borjafernandezangulo/cortex) y el [Enjambre Centauro](file:///Users/borjafernandezangulo/game/moskv-swarm). Cada sección mapea directamente a componentes implementados o en roadmap.
+> Este documento establece el marco teórico-práctico que sustenta la arquitectura de [CORTEX](file://.) y el [Enjambre Centauro](file://~/game/moskv-swarm). Cada sección mapea directamente a componentes implementados o en roadmap.
 
 ---
 

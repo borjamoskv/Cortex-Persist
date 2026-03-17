@@ -1,7 +1,7 @@
 # API-SURFACE.md — ORTU-Ω Phase 2
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  
-> **Input**: [PILLAR-MAP.md](file:///Users/borjafernandezangulo/30_CORTEX/docs/ortu-omega/PILLAR-MAP.md) · [REPOSITORY-CENSUS.md](file:///Users/borjafernandezangulo/30_CORTEX/docs/ortu-omega/REPOSITORY-CENSUS.md)  
+> **Input**: [PILLAR-MAP.md](file://./docs/ortu-omega/PILLAR-MAP.md) · [REPOSITORY-CENSUS.md](file://./docs/ortu-omega/REPOSITORY-CENSUS.md)  
 > **Generated**: 2026-03-14
 
 ---

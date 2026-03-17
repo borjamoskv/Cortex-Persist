@@ -165,5 +165,5 @@ class SwarmBoard:
 
 
 if __name__ == "__main__":
-    board = SwarmBoard("/Users/borjafernandezangulo/.cortex/cortex.db")
+    board = SwarmBoard("~/.cortex/cortex.db")
     board.start()

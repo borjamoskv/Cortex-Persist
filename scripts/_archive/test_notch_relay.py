@@ -2,7 +2,7 @@ import sys
 import time
 
 # Add cortex to path
-sys.path.append("/Users/borjafernandezangulo/cortex")
+sys.path.append(".")
 from cortex.cli.bicameral import bicameral
 
 

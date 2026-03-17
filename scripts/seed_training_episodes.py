@@ -30,7 +30,7 @@ async def seed():
             project=project,
             meta={
                 "tool": "list_dir",
-                "input": {"DirectoryPath": "/Users/borjafernandezangulo/cortex/cortex"},
+                "input": {"DirectoryPath": "./cortex"},
             },
         )
 

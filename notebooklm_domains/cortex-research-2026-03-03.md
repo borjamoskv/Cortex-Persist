@@ -359,33 +359,33 @@
 
 ### Meta_learning
 
-> **[CTX-546]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:56:58 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo /Users/borjafernandezangulo/live-notch/ <!-- /CTX-546 -->
+> **[CTX-546]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:56:58 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo ~/live-notch/ <!-- /CTX-546 -->
 
-> **[CTX-548]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:58:46 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/frontend/ <!-- /CTX-548 -->
+> **[CTX-548]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:58:46 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo ~/nexus-tracker/frontend/ <!-- /CTX-548 -->
 
-> **[CTX-549]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:59:01 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/backend/ <!-- /CTX-549 -->
+> **[CTX-549]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 04:59:01 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo ~/nexus-tracker/backend/ <!-- /CTX-549 -->
 
-> **[CTX-550]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:02:02 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo /Users/borjafernandezangulo/projects/conspiracy-calculator/ <!-- /CTX-550 -->
+> **[CTX-550]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:02:02 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo ~/projects/conspiracy-calculator/ <!-- /CTX-550 -->
 
-> **[CTX-551]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:03:55 CET 2026 en modo ENTROPY_CRUSH_3 sobre objetivo /Users/borjafernandezangulo/game/moskv-swarm/ <!-- /CTX-551 -->
+> **[CTX-551]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:03:55 CET 2026 en modo ENTROPY_CRUSH_3 sobre objetivo ~/game/moskv-swarm/ <!-- /CTX-551 -->
 
-> **[CTX-552]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:07:38 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/backend/ <!-- /CTX-552 -->
+> **[CTX-552]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:07:38 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo ~/nexus-tracker/backend/ <!-- /CTX-552 -->
 
-> **[CTX-553]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:09:41 CET 2026 en modo ENTROPY_CRUSH_4 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/backend/ <!-- /CTX-553 -->
+> **[CTX-553]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:09:41 CET 2026 en modo ENTROPY_CRUSH_4 sobre objetivo ~/nexus-tracker/backend/ <!-- /CTX-553 -->
 
-> **[CTX-555]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:11:52 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo /Users/borjafernandezangulo/game/naroa-web/ <!-- /CTX-555 -->
+> **[CTX-555]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:11:52 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo ~/game/naroa-web/ <!-- /CTX-555 -->
 
-> **[CTX-556]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:13:48 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/backend/ <!-- /CTX-556 -->
+> **[CTX-556]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:13:48 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo ~/nexus-tracker/backend/ <!-- /CTX-556 -->
 
-> **[CTX-557]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:15:44 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo /Users/borjafernandezangulo/antigravity/ <!-- /CTX-557 -->
+> **[CTX-557]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:15:44 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo ~/antigravity/ <!-- /CTX-557 -->
 
-> **[CTX-558]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:17:34 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo /Users/borjafernandezangulo/projects/conspiracy-calculator/ <!-- /CTX-558 -->
+> **[CTX-558]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:17:34 CET 2026 en modo ENTROPY_CRUSH_0 sobre objetivo ~/projects/conspiracy-calculator/ <!-- /CTX-558 -->
 
-> **[CTX-560]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:19:28 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo /Users/borjafernandezangulo/nexus-tracker/frontend/ <!-- /CTX-560 -->
+> **[CTX-560]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:19:28 CET 2026 en modo ENTROPY_CRUSH_1 sobre objetivo ~/nexus-tracker/frontend/ <!-- /CTX-560 -->
 
-> **[CTX-562]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:21:45 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo /Users/borjafernandezangulo/cortex/ <!-- /CTX-562 -->
+> **[CTX-562]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:21:45 CET 2026 en modo ENTROPY_CRUSH_2 sobre objetivo ./ <!-- /CTX-562 -->
 
-> **[CTX-565]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:25:12 CET 2026 en modo ENTROPY_CRUSH_4 sobre objetivo /Users/borjafernandezangulo/live-notch-swift/ <!-- /CTX-565 -->
+> **[CTX-565]** Ciclo infinito SOVEREIGN completado a las Fri Feb 20 05:25:12 CET 2026 en modo ENTROPY_CRUSH_4 sobre objetivo ~/live-notch-swift/ <!-- /CTX-565 -->
 
 ---
 

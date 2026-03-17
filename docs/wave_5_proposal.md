@@ -15,7 +15,7 @@ ToolCall(
     function=FunctionBody(
         name='ReadFile',
         arguments='{"path": 
-"/Users/borjafernandezangulo/cortex/CORTEX_V4_ARCHITECTURAL_SUMMARY.md"}'
+"./CORTEX_V4_ARCHITECTURAL_SUMMARY.md"}'
     ),
     extras=None
 )
@@ -259,7 +259,7 @@ reached.',
 )
 ToolCallPart(
     arguments_part='{"path": 
-"/Users/borjafernandezangulo/cortex/WAVE5_PERSISTENCE_DEPLOYMENT.md"}'
+"./WAVE5_PERSISTENCE_DEPLOYMENT.md"}'
 )
 ToolCall(
     type='function',
@@ -854,7 +854,7 @@ self.pool.acquire() as conn:\n  1000\t                conn.execute("SELECT
 )
 ToolCallPart(
     arguments_part=' 
-"/Users/borjafernandezangulo/cortex/CORTEX_WAVE4_ROADMAP.md"}'
+"./CORTEX_WAVE4_ROADMAP.md"}'
 )
 ToolCall(
     type='function',
@@ -1236,7 +1236,7 @@ ToolCall(
     function=FunctionBody(
         name='ReadFile',
         arguments='{"path": 
-"/Users/borjafernandezangulo/cortex/WAVE5_PERSISTENCE_DEPLOYMENT.md", 
+"./WAVE5_PERSISTENCE_DEPLOYMENT.md", 
 "line_offset": 1000}'
     ),
     extras=None
@@ -2258,7 +2258,7 @@ ToolCall(
     function=FunctionBody(
         name='ReadFile',
         arguments='{"path": 
-"/Users/borjafernandezangulo/cortex/cortex/migrations.py"}'
+"./cortex/migrations.py"}'
     ),
     extras=None
 )
@@ -2267,7 +2267,7 @@ ToolCall(
     id='tool_9MNCXl4YSIhSqfmGldbPfzvW',
     function=FunctionBody(
         name='ReadFile',
-        arguments='{"path": "/Users/borjafer'
+        arguments='{"path": "~fer'
     ),
     extras=None
 )
@@ -2726,7 +2726,7 @@ ToolCall(
     function=FunctionBody(
         name='WriteFile',
         arguments='{"path": 
-"/Users/borjafernandezangulo/cortex/WAVE5_PROPOSAL_PERSISTENCE_DEPLOYMENT.md", 
+"./WAVE5_PROPOSAL_PERSISTENCE_DEPLOYMENT.md", 
 "content": "# CORTEX V4.0 — Wave 5: Persistence & Deployment\\n## 
 Production-Ready Consensus Infrastructure\\n\\n**Date:** 2026-02-16  
 \\n**Version:** 5.0.0-proposal  \\n**Status:** Technical Design Document  
@@ -3765,7 +3765,7 @@ ToolResult(
         display=[
             DiffDisplayBlock(
                 type='diff',
-                path='/Users/borjafernandezangulo/cortex/WAVE5_PROPOSAL_PERSISTE
+                path='./WAVE5_PROPOSAL_PERSISTE
 NCE_DEPLOYMENT.md',
                 old_text='',
                 new_text='# CORTEX V4.0 — Wave 5: Persistence & Deployment\n## 
@@ -4819,7 +4819,7 @@ ToolCall(
     function=FunctionBody(
         name='WriteFile',
         arguments='{"path": 
-"/Users/borjafernandezangulo/cortex/WAVE5_ARCHITECTURE_ANALYSIS.md", "content": 
+"./WAVE5_ARCHITECTURE_ANALYSIS.md", "content": 
 "# CORTEX V4.0 — Wave 5 Architecture Analysis\\n## Executive Summary: 
 Persistence & Deployment\\n\\n**Date:** 2026-02-16  \\n**Status:** Technical 
 Design Complete  \\n**Classification:** Strategic Architecture Document  
@@ -5241,7 +5241,7 @@ ToolResult(
         display=[
             DiffDisplayBlock(
                 type='diff',
-                path='/Users/borjafernandezangulo/cortex/WAVE5_ARCHITECTURE_ANAL
+                path='./WAVE5_ARCHITECTURE_ANAL
 YSIS.md',
                 old_text='',
                 new_text="# CORTEX V4.0 — Wave 5 Architecture Analysis\n## 

@@ -98,7 +98,7 @@ def main():
     parser.add_argument(
         "--db-path",
         type=str,
-        default="/Users/borjafernandezangulo/.cortex/cortex.db",
+        default="~/.cortex/cortex.db",
         help="Path to the cortex.db file",
     )
     args = parser.parse_args()

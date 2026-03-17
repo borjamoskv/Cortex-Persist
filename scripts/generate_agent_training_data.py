@@ -23,7 +23,7 @@ from cortex.extensions.training.reward_engine import RewardEngine
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.training.data_gen")
 
-OUTPUT_DIR = Path("/Users/borjafernandezangulo/cortex/data/training")
+OUTPUT_DIR = Path("./data/training")
 OUTPUT_FILE = OUTPUT_DIR / "agent_trajectories.jsonl"
 
 

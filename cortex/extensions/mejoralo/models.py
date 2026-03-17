@@ -69,6 +69,10 @@ class AntipatternFinding:
     message: str  # Human-readable description
     fix_hint: str  # Suggested fix
 
+    def __str__(self) -> str:
+        """Format matching surgical AST extraction: `file:line -> message`."""
+        return f"{self.file}:{self.line} -> {self.message}"
+
 
 @dataclass
 class AntipatternReport:

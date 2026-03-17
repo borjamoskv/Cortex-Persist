@@ -97,7 +97,7 @@ def swarm_refactor(file, level, issue, dry_run):
 @swarm.command("deploy")
 @click.option("--mode", "-m", default="infinite", help="Scaling mode (infinite, legion, squadron)")
 @click.option("--target", "-t", required=True, help="Mission target or goal")
-@click.option("--db", default="/Users/borjafernandezangulo/.cortex/cortex.db", help="Database path")
+@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_deploy(mode, target, db):
     """Deploy a Sovereign Swarm for fractal scaling (SCALING-Ω)."""
 
@@ -148,10 +148,92 @@ def swarm_deploy(mode, target, db):
 
 
 @swarm.command("board")
-@click.option("--db", default="/Users/borjafernandezangulo/.cortex/cortex.db", help="Database path")
+@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
     from cortex.extensions.ui.swarm_board import SwarmBoard
 
     board = SwarmBoard(db)
     board.start()
+
+
+@swarm.command("up")
+@click.option("--db", default="~/.cortex/swarm.db", help="Swarm Bus Database Path")
+def swarm_up(db):
+    """Launch the Sovereign Swarm with Omega Prime as orchestrator."""
+    import asyncio
+    from uuid import uuid4
+
+    from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
+    from cortex.agents.bus import SqliteMessageBus
+    from cortex.agents.manifest import AgentManifest
+    from cortex.agents.message_schema import AgentMessage, MessageKind
+    from cortex.agents.supervisor import Supervisor
+
+    class CliToolExecutor:
+        async def execute(self, tool_name: str, arguments: dict) -> dict:
+            console.print(f"[dim]Executing tool: {tool_name} with {arguments}...[/dim]")
+            await asyncio.sleep(0.5)
+            return {"status": "ok", "result": f"Mock output from {tool_name}"}
+
+    async def _run_swarm():
+        bus = SqliteMessageBus(db)
+
+        supervisor = Supervisor()
+
+        omega_manifest = AgentManifest(
+            agent_id="omega-prime",
+            purpose="Orchestrator and main LLM planner",
+            tools_allowed=["*"],
+        )
+
+        omega_prime = OmegaPrimeAgent(
+            manifest=omega_manifest,
+            bus=bus,
+            tool_executor=CliToolExecutor(),
+            verification_agent_id="verification-agent",
+            handoff_agent_id="handoff-agent",
+        )
+
+        supervisor.register(omega_prime)
+
+        await supervisor.start_agent("omega-prime")
+
+        console.print("\n[bold green]🐝 SWARM UP: Omega Prime and Supervisor are online.[/bold green]")
+        console.print("[dim]Type your objective, or 'exit' to quit.[/dim]\n")
+
+        try:
+            while True:
+                user_input = await asyncio.to_thread(console.input, "[bold cyan]Objective > [/bold cyan]")
+                if user_input.strip().lower() in ("exit", "quit", "q"):
+                    break
+
+                correlation_id = str(uuid4())
+                task_msg = AgentMessage(
+                    correlation_id=correlation_id,
+                    sender="cli-user",
+                    recipient="omega-prime",
+                    kind=MessageKind.TASK_REQUEST,
+                    payload={
+                        "task_id": str(uuid4()),
+                        "objective": user_input,
+                        "input": {},
+                    },
+                )
+
+                await bus.send(task_msg)
+                console.print(f"[dim]dispatched TASK_REQUEST ({correlation_id})[/dim]")
+
+                # Simple wait loop to allow background tasks to run.
+                # A robust REPL would use a dedicated listener on the bus for TASK_COMPLETED.
+                await asyncio.sleep(1.0)
+                
+        except (KeyboardInterrupt, EOFError):
+            console.print("\n[dim]Shutting down swarm...[/dim]")
+        
+        finally:
+            await supervisor.stop_agent("omega-prime")
+            await asyncio.sleep(0.5)
+            await bus.close()
+
+    asyncio.run(_run_swarm())

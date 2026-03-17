@@ -3,20 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORTEX Persist | Cryptographic memory for AI agents</title>
-    <meta name="description" content="Persistent memory is not a vector dump. It is identity, provenance, temporal truth and controlled forgetting.">
-    <!-- Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Open Graph Metadata -->
-    <meta property="og:title" content="CORTEX Persist | Cryptographic memory for AI agents">
-    <meta property="og:description" content="CORTEX Persist stores facts, events and trust scores so agents stop roleplaying amnesia.">
+    <title>CORTEX Persist | Trust infrastructure for AI agent state</title>
+    <meta name="description" content="Turn stochastic agent output into auditable state. Governed writes, SHA-256 audit trail, local-first memory, zero cloud dependency.">
+    <meta name="author" content="CORTEX Persist">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://cortexpersist.com/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="CORTEX Persist | Trust infrastructure for AI agent state">
+    <meta property="og:description" content="Turn stochastic agent output into auditable state. Governed writes, SHA-256 audit trail, local-first.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cortexpersist.com/">
-    
+    <meta property="og:site_name" content="CORTEX Persist">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CORTEX Persist | Trust infrastructure for AI agent state">
+    <meta name="twitter:description" content="Turn stochastic agent output into auditable state. Governed writes, SHA-256 audit trail, local-first.">
+
+    <meta name="theme-color" content="#0A0A0A">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
@@ -24,86 +37,282 @@
       "@type": "SoftwareApplication",
       "name": "CORTEX Persist",
       "applicationCategory": "DeveloperApplication",
-      "description": "Cryptographic memory for AI agents.",
-      "url": "https://cortexpersist.com/"
+      "description": "Trust infrastructure for AI agent state. Governed writes, cryptographic audit trail, local-first memory.",
+      "url": "https://cortexpersist.com/",
+      "operatingSystem": "Cross-platform",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     }
     </script>
 </head>
 <body>
-    <div class="noise-overlay"></div>
-    <div class="grid-overlay"></div>
+    <!-- Pre-loader -->
+    <div class="loader-overlay" aria-hidden="true">
+        <div class="loader-brand">CORTEX<span class="accent">.</span></div>
+        <div class="loader-track"><div class="loader-bar"></div></div>
+        <div class="loader-counter">0%</div>
+    </div>
 
-    <header class="site-header fade-in">
+    <!-- Texture overlays -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <!-- Sovereign Cursor -->
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
+    <!-- Skip link -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <!-- Header -->
+    <header class="site-header">
         <div class="logo">CORTEX<span class="accent">.</span></div>
+        <nav class="header-nav" aria-label="Main navigation">
+            <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://pypi.org/project/cortex-persist/" target="_blank" rel="noopener">PyPI</a>
+            <a href="mailto:contact@cortexpersist.com">Contact</a>
+        </nav>
     </header>
 
-    <main>
-        <section class="hero content-section fade-in">
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                <span>SYSTEM V0.3 ACTIVE</span>
-            </div>
-            
-            <h1 class="hero-title">Cryptographic memory<br><span class="accent">for AI agents.</span></h1>
-            <h2 class="hero-subtitle">Stateful identity, verified memory, temporal truth.</h2>
-            
-            <p class="hero-description">
-                Persistent memory is not a vector dump.<br>
-                It is identity, provenance, temporal truth and controlled forgetting.
-            </p>
+    <main id="main-content">
 
-            <p class="hero-context">
-                CORTEX Persist stores facts, events and trust scores so agents stop roleplaying amnesia.
-            </p>
-
-            <div class="cta-group">
-                <a href="https://github.com/borjamoskv/cortex-persist" class="btn btn-primary" target="_blank" rel="noopener">Read Architecture Spec</a>
-                <a href="mailto:contact@cortexpersist.com" class="btn btn-secondary">Request Access</a>
-            </div>
-        </section>
-
-        <section class="features" id="architecture">
-            <h3 class="section-label fade-in">// CORE MECHANICS</h3>
-            
-            <div class="feature-grid">
-                <div class="feature-card fade-in" style="--delay: 1">
-                    <div class="feature-icon">[ 01 ]</div>
-                    <h4>Memory Layers</h4>
-                    <p>Episodic traces, semantic facts, and working context for sovereign systems.</p>
+        <!-- ===== 1. HERO ===== -->
+        <section class="hero">
+            <div class="section-inner">
+                <div class="status-badge reveal" data-delay="0">
+                    <span class="status-dot"></span>
+                    <span>v0.3 — Open Source</span>
                 </div>
-                
-                <div class="feature-card fade-in" style="--delay: 2">
-                    <div class="feature-icon">[ 02 ]</div>
-                    <h4>Trust Model</h4>
-                    <p>Trust-scored memory writes, cryptographic signatures, provenance tracking, and revocation.</p>
+
+                <h1 class="hero-title reveal" data-delay="1">
+                    Turn stochastic agent output<br>
+                    into <span class="accent">auditable state.</span>
+                </h1>
+
+                <div class="hero-tags reveal" data-delay="2">
+                    <span class="hero-tag">Article 12 logging</span>
+                    <span class="hero-tag">Tamper-evident audit trail</span>
+                    <span class="hero-tag">Local-first memory</span>
+                    <span class="hero-tag">Guardrails before write</span>
+                    <span class="hero-tag">Exportable evidence</span>
                 </div>
-                
-                <div class="feature-card fade-in" style="--delay: 3">
-                    <div class="feature-icon">[ 03 ]</div>
-                    <h4>Temporal Truth</h4>
-                    <p>Facts change, history remains. Temporal versioning and revocation-aware recall.</p>
+
+                <div class="cta-group reveal" data-delay="3">
+                    <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-primary" data-magnetic target="_blank" rel="noopener">View on GitHub</a>
+                    <button class="pip-install" id="pip-copy" data-magnetic aria-label="Copy pip install command">
+                        <span>pip install cortex-persist</span>
+                        <span class="copy-icon">⎘</span>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <section class="manifesto content-section fade-in">
-             <blockquote>
-                "For sovereign systems that need memory with consequences."
-             </blockquote>
+        <!-- ===== 2. WRITE-PATH PIPELINE ===== -->
+        <section class="pipeline-section" id="architecture">
+            <div class="section-inner">
+                <div class="section-label reveal">// The Governed Write Path</div>
+                <p class="section-desc reveal">Every write to memory passes through a deterministic validation pipeline.<br>Nothing reaches storage without earning it.</p>
+
+                <div class="pipeline-track" id="pipeline-track">
+                    <div class="pipeline-node" data-step="0">
+                        <span class="pipeline-node-icon">📝</span>
+                        <span class="pipeline-node-label">Proposal</span>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-node" data-step="1">
+                        <span class="pipeline-node-icon">🛡</span>
+                        <span class="pipeline-node-label">Guards</span>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-node" data-step="2">
+                        <span class="pipeline-node-icon">⬡</span>
+                        <span class="pipeline-node-label">Schema</span>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-node" data-step="3">
+                        <span class="pipeline-node-icon">🔐</span>
+                        <span class="pipeline-node-label">Encryption</span>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-node" data-step="4">
+                        <span class="pipeline-node-icon">📒</span>
+                        <span class="pipeline-node-label">Ledger</span>
+                    </div>
+                    <span class="pipeline-arrow">→</span>
+                    <div class="pipeline-node" data-step="5">
+                        <span class="pipeline-node-icon">💾</span>
+                        <span class="pipeline-node-label">Persist</span>
+                    </div>
+                </div>
+            </div>
         </section>
+
+        <!-- ===== 3. THREE PROOFS ===== -->
+        <section class="proofs-section" id="proofs">
+            <div class="section-inner">
+                <div class="section-label reveal">// Proof, not promises</div>
+                <h2 class="section-title reveal">3 things you can verify in 5 minutes.</h2>
+
+                <div class="proofs-grid">
+                    <div class="proof-card reveal" data-delay="1">
+                        <div class="proof-metric">&lt; 5ms</div>
+                        <div class="proof-title">Governed write latency</div>
+                        <p class="proof-desc">Full pipeline — guards, schema validation, encryption, ledger entry, persist — in under 5 milliseconds. SQLite, local, zero network.</p>
+                    </div>
+
+                    <div class="proof-card reveal" data-delay="2">
+                        <div class="proof-title">Tamper-evident hash chain</div>
+                        <p class="proof-desc">Every ledger entry is SHA-256 chained to its predecessor. Any modification to any entry breaks the chain — detectable, auditable, exportable.</p>
+                        <div class="proof-snippet">sha256:9f86d081...  ← entry #42
+sha256:3c7e29a1...  ← entry #41
+sha256:a4f2b8c3...  ← entry #40</div>
+                    </div>
+
+                    <div class="proof-card reveal" data-delay="3">
+                        <div class="proof-title">Replay & export</div>
+                        <p class="proof-desc">The full ledger exports as JSON. Feed it to your compliance team, your auditor, or your own verification scripts. Every fact, every guard result, every timestamp.</p>
+                        <div class="proof-snippet">cortex export --format json --output audit.json</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 4. COMPARISON ===== -->
+        <section class="comparison-section" id="compare">
+            <div class="section-inner">
+                <div class="section-label reveal">// Why this matters</div>
+                <h2 class="section-title reveal">What you get that others don't.</h2>
+
+                <div class="comparison-table-wrapper reveal">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Capability</th>
+                                <th>Plain Logs</th>
+                                <th>Vector Memory</th>
+                                <th>CORTEX Persist</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Write validation (guards)</td>
+                                <td class="cross">✗</td>
+                                <td class="cross">✗</td>
+                                <td class="check">✓ Guards</td>
+                            </tr>
+                            <tr>
+                                <td>Tamper detection</td>
+                                <td class="cross">✗</td>
+                                <td class="cross">✗</td>
+                                <td class="check">✓ SHA-256 chain</td>
+                            </tr>
+                            <tr>
+                                <td>Temporal versioning</td>
+                                <td class="cross">✗</td>
+                                <td class="cross">✗</td>
+                                <td class="check">✓ Built-in</td>
+                            </tr>
+                            <tr>
+                                <td>Audit export</td>
+                                <td class="cross">✗</td>
+                                <td class="cross">✗</td>
+                                <td class="check">✓ JSON</td>
+                            </tr>
+                            <tr>
+                                <td>Local-first / zero telemetry</td>
+                                <td class="partial">~</td>
+                                <td class="partial">~</td>
+                                <td class="check">✓ SQLite</td>
+                            </tr>
+                            <tr>
+                                <td>Contradiction detection</td>
+                                <td class="cross">✗</td>
+                                <td class="cross">✗</td>
+                                <td class="check">✓ Guards</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 5. CORE MECHANICS ===== -->
+        <section class="features-section" id="mechanics">
+            <div class="section-inner">
+                <div class="section-label reveal">// Core Mechanics</div>
+
+                <div class="features-grid">
+                    <div class="feature-card reveal" data-delay="1">
+                        <div class="feature-number">[ 01 ]</div>
+                        <h3>Governed Write Path</h3>
+                        <p>Every write passes guards, schema validation, and encryption before touching storage. If a proposal fails validation, the write aborts. No silent corruption.</p>
+                    </div>
+
+                    <div class="feature-card reveal" data-delay="2">
+                        <div class="feature-number">[ 02 ]</div>
+                        <h3>Cryptographic Audit Trail</h3>
+                        <p>SHA-256 hash-chain ledger. Every action logged, chained, and tamper-evident. Export the full chain for external audit at any time.</p>
+                    </div>
+
+                    <div class="feature-card reveal" data-delay="3">
+                        <div class="feature-number">[ 03 ]</div>
+                        <h3>Temporal Truth</h3>
+                        <p>Facts change, history remains. Temporal versioning with revocation-aware recall. Know what was true, when, and why it changed.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 6. AUDIT ARTIFACT ===== -->
+        <section class="artifact-section" id="artifact">
+            <div class="section-inner">
+                <div class="section-label reveal">// See the evidence</div>
+                <h2 class="section-title reveal">What an audit artifact looks like.</h2>
+                <p class="section-desc reveal">Every governed write produces a ledger entry like this. Exportable, verifiable, ready for compliance review.</p>
+
+                <div class="artifact-block reveal">
+                    <div class="artifact-header">
+                        <div class="artifact-dots">
+                            <span class="artifact-dot"></span>
+                            <span class="artifact-dot"></span>
+                            <span class="artifact-dot"></span>
+                        </div>
+                        <span class="artifact-filename">ledger_entry.json</span>
+                    </div>
+                    <pre class="artifact-code"><span class="key">{</span>
+  <span class="key">"entry_id"</span>:          <span class="string">"ldg_2026-03-17_00042"</span>,
+  <span class="key">"fact_id"</span>:           <span class="string">"f_a7c3e901"</span>,
+  <span class="key">"action"</span>:            <span class="string">"CREATE"</span>,
+  <span class="key">"timestamp"</span>:         <span class="string">"2026-03-17T09:15:22.841Z"</span>,
+  <span class="key">"hash"</span>:              <span class="string">"sha256:9f86d081884c7d659a2feaa0c55ad015..."</span>,
+  <span class="key">"prev_hash"</span>:         <span class="string">"sha256:3c7e29a1d8b045f6a2e981c4d0762b38..."</span>,
+  <span class="key">"tenant"</span>:            <span class="string">"agent-alpha"</span>,
+  <span class="key">"guard_result"</span>:      <span class="string">"PASS"</span>,
+  <span class="key">"payload_encrypted"</span>: <span class="bool">true</span>
+<span class="key">}</span></pre>
+                    <div class="artifact-cta">
+                        <button class="download-btn" id="download-artifact" data-magnetic>
+                            ↓ Download sample audit artifact
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="site-footer fade-in">
+    <!-- Footer -->
+    <footer class="site-footer">
         <div class="footer-content">
-            <div class="footer-brand">CORTEXPERSIST</div>
-            <div class="footer-links">
-                <a href="https://github.com/borjamoskv/cortex-persist" target="_blank" rel="noopener">GitHub</a>
+            <div class="footer-brand">CORTEX<span class="accent">.</span>PERSIST</div>
+            <nav class="footer-links" aria-label="Footer navigation">
+                <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://pypi.org/project/cortex-persist/" target="_blank" rel="noopener">PyPI</a>
                 <a href="mailto:contact@cortexpersist.com">Contact</a>
-            </div>
+            </nav>
         </div>
         <div class="footer-bottom">
             <span>© 2026 Sovereign Architecture</span>
-            <span>Axiom Ω</span>
+            <span>Trust topology for governed agent state</span>
         </div>
     </footer>
 

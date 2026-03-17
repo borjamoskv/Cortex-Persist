@@ -20,12 +20,16 @@ if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
 
 from cortex.extensions.mejoralo.constants import (
+    CHRONOS_COMPLEXITY_DIVISOR,
+    CHRONOS_HOURS_PER_CODEPATH,
+    CHRONOS_HOURS_PER_FILE,
     ESCALATION_ITER_L2,
     ESCALATION_ITER_L3,
     HARD_ITERATION_CAP,
     MIN_PROGRESS,
     PYTEST_TIMEOUT_SECONDS,
     STAGNATION_LIMIT,
+    TAINT_TAG,
 )
 from cortex.extensions.mejoralo.deps import sort_by_topological_order
 from cortex.extensions.mejoralo.heal_prompts import (
@@ -65,6 +69,78 @@ def _extract_path_from_finding(finding: str) -> str | None:
     return None
 
 
+# ── CHRONOS-1 Yield Helpers ──────────────────────────────────────────
+
+
+def _calculate_chronos_yield(
+    files_touched: int,
+    codepaths_affected: int,
+    runtime_ms: int,
+    cyclomatic_complexity_delta: int,
+) -> float:
+    """Calculate linear hours saved per the CHRONOS-1 formula (Axiom Ω₁₁).
+
+    Hours_Saved = ((files_touched * 6) + (codepaths_affected * 12)
+                  + (runtime_ms * 10)) * (complexity_delta / 3) / 60
+    """
+    complexity_factor = abs(cyclomatic_complexity_delta) / max(1, CHRONOS_COMPLEXITY_DIVISOR)
+    raw = (
+        (files_touched * CHRONOS_HOURS_PER_FILE)
+        + (codepaths_affected * CHRONOS_HOURS_PER_CODEPATH)
+        + (runtime_ms * 10)
+    ) * complexity_factor
+    return round(raw / 60, 2)
+
+
+# ── Taint Circuit Breaker Helpers ────────────────────────────────────
+
+
+def _mark_file_tainted(
+    file_path: str,
+    project: str,
+    engine: MejoraloEngine | None,
+) -> None:
+    """Persist a permanent Taint mark on a file that failed L3 healing.
+
+    The file will appear in CORTEX with tag 'mejoralo-tainted' and must
+    be manually remediated via ariadne-arch-omega before MEJORAlo can
+    attempt healing again.
+    """
+    if not engine or not project:
+        return
+    logger.warning("[TAINT] Marking %s as permanently tainted in CORTEX.", file_path)
+    try:
+        engine.engine.store_sync(
+            project=project,
+            content=(
+                f"[MEJORAlo TAINT] {file_path} failed L3 healing. "
+                "Requires ariadne-arch-omega intervention before retry."
+            ),
+            fact_type="error",
+            tags=["mejoralo", TAINT_TAG, "circuit-breaker"],
+            confidence="verified",
+            source="cortex-mejoralo",
+            meta={"file_path": file_path, "tainted": True},
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to persist taint for %s", file_path)
+
+
+def _is_file_tainted(
+    file_path: str,
+    project: str,
+    engine: MejoraloEngine | None,
+) -> bool:
+    """Check if a file has been permanently tainted in CORTEX."""
+    if not engine or not project:
+        return False
+    try:
+        scars = engine.scars(project, file_path, limit=10)
+        return any(TAINT_TAG in (s.get("content", "")) for s in scars)
+    except Exception:  # noqa: BLE001
+        return False
+
+
 async def _heal_file_async(
     file_path: Path,
     findings: list[str],
@@ -83,6 +159,23 @@ async def _heal_file_async(
     return await swarm.refactor_file(
         file_path, findings, iteration=iteration, engine=engine, project=project
     )
+
+
+def _calculate_total_complexity(source_code: str) -> int:
+    try:
+        tree = ast.parse(source_code)
+    except SyntaxError:
+        return 0
+
+    from cortex.extensions.mejoralo.scan import _COMPLEXITY_NODES
+
+    comp = 0
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            comp += 1
+        if isinstance(node, _COMPLEXITY_NODES):
+            comp += 1
+    return comp
 
 
 def _apply_and_verify(
@@ -106,6 +199,12 @@ def _apply_and_verify(
         logger.exception("Failed to read original code for %s", top_file_rel)
         return False
 
+    complexity_delta = 0
+    if abs_path.suffix == ".py":
+        old_comp = _calculate_total_complexity(original_code)
+        new_comp = _calculate_total_complexity(new_code)
+        complexity_delta = old_comp - new_comp
+
     if not _run_functional_inquisitor(
         new_code, original_code, top_file_rel, console, engine, project, abs_path
     ):
@@ -115,12 +214,13 @@ def _apply_and_verify(
     _apply_aesthetic_formatting(abs_path, console)
 
     if not _run_delta_testing(
-        top_file_rel, path, original_code, abs_path, console, engine, project
+        top_file_rel, path, original_code, abs_path, console, engine, project, level
     ):
         return False
 
     return _commit_healed_file(
-        abs_path, path, top_file_rel, level, iteration, current_score, console
+        abs_path, path, top_file_rel, level, iteration, current_score, console,
+        complexity_delta=complexity_delta, engine=engine, project=project,
     )
 
 
@@ -177,6 +277,7 @@ def _run_delta_testing(
     console: Any,
     engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
+    level: int = 1,
 ) -> bool:
     pytest_cmd = [sys.executable, "-m", "pytest"]
     rel_parts = Path(top_file_rel).parts
@@ -202,12 +303,20 @@ def _run_delta_testing(
             if engine and project:
                 error_trace = (res.stdout + "\n" + res.stderr).strip()
                 engine.record_scar(project, top_file_rel, error_trace)
+                # ⛔ Taint Circuit Breaker: if L3 and still failing, mark as tainted
+                if level >= 3:
+                    console.print(
+                        f"  [bold red]☠️ L3 CIRCUIT BREAKER: {top_file_rel} "
+                        "marcado como TAINTED. Requiere ariadne-arch-omega.[/]"
+                    )
+                    _mark_file_tainted(top_file_rel, project, engine)
             abs_path.write_text(original_code)
             return False
         return True
     except subprocess.TimeoutExpired as e:
         console.print(
-            f"  [bold red]⏳ Timeout en {top_file_rel} tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
+            f"  [bold red]⏳ Timeout en {top_file_rel} "
+            f"tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
         )
         if engine and project:
             err_trace = (
@@ -227,6 +336,9 @@ def _commit_healed_file(
     iteration: int,
     current_score: int,
     console: Any,
+    complexity_delta: int = 0,
+    engine: MejoraloEngine | None = None,
+    project: str | None = None,
 ) -> bool:
     try:
         commit_msg = (
@@ -248,6 +360,27 @@ def _commit_healed_file(
             cwd=path,
             capture_output=True,
         )
+        # Ω₁₁ CHRONOS-1: Emit compound yield for this healed file
+        if engine and project:
+            hours = _calculate_chronos_yield(
+                files_touched=1,
+                codepaths_affected=max(1, complexity_delta),
+                runtime_ms=0,
+                cyclomatic_complexity_delta=complexity_delta,
+            )
+            try:
+                engine.record_session(
+                    project=project,
+                    score_before=current_score,
+                    score_after=current_score,  # Will be updated by caller on re-scan
+                    actions=[
+                        f"Healed {top_file_rel} (L{level}, iter {iteration})",
+                        f"CHRONOS-1 yield: {hours}h saved",
+                    ],
+                )
+                console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
+            except Exception:  # noqa: BLE001
+                logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
     except (OSError, subprocess.SubprocessError):
         logger.exception("Error aplicando commit a %s", top_file_rel)
@@ -376,6 +509,13 @@ def _run_healing_iteration(
 
     iteration_success = False
     for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
+        # ⛔ Skip permanently tainted files before attempting to apply
+        if _is_file_tainted(top_file_rel, project, engine):
+            console.print(
+                f"  [bold red]☠️ {top_file_rel} está TAINTED. "
+                "Requiere ariadne-arch-omega. Saltando.[/]"
+            )
+            continue
         if new_code and _apply_and_verify(
             top_file_rel,
             new_code,

@@ -13,7 +13,7 @@ Usage::
         id="abc123",
         title="Add docstrings",
         description="Add module-level docstrings to cortex/llm/quota.py",
-        repo_path="/Users/borjamoskv/cortex",
+        repo_path="~/cortex",
         source="cli",
     ))
 

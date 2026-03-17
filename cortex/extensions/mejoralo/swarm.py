@@ -9,6 +9,7 @@ from __future__ import annotations
 import ast
 import logging
 import re
+import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -99,24 +100,212 @@ class MejoraloSwarm:
         engine: MejoraloEngine | None = None,
         project: str | None = None,
     ) -> str | None:
-        """Refactor code using a parallel swarm of specialists. (Complexity Crushed)"""
+        """Refactor code using surgical AST mode when possible, full-file fallback.
+
+        Surgical mode:
+          - Extracts the exact infected AST node (function/class) at the reported line.
+          - Sends ONLY that node to the swarm (~30 lines vs ~800 lines).
+          - Reduces hallucination window by ~96%.
+          - Reintegrates the patched node back into the original file.
+
+        Falls back to full-file mode when:
+          - No line number is present in findings.
+          - AST node can't be extracted.
+          - Swarm produces invalid syntax.
+        """
         content = self._read_source(file_path)
         if not content:
             return None
 
         findings_str = "- " + "\n- ".join(findings)
-        base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
+        scars_str = self._get_scars_prompt(engine, project, file_path.name)
         swarm_system = self._build_swarm_system(self._select_specialists(findings_str), iteration)
-
-        # 🧠 Telemetría de Consciencia
         console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
 
-        result_content = await self._run_orchestra(base_prompt, swarm_system)
+        # ✂️ Attempt surgical AST mode first (Python only)
+        if file_path.suffix == ".py":
+            result = await self._surgical_refactor(
+                file_path, content, findings, findings_str, scars_str, swarm_system
+            )
+            if result is not None:
+                console.print(f"  [green]✨ Cirujía AST completada [{file_path.name}][/]")
+                return result
+            console.print(
+                "  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]"
+            )
 
+        # 📦 Full-file fallback
+        base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
+        result_content = await self._run_orchestra(base_prompt, swarm_system)
         if result_content:
             console.print(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
-
         return self._extract_code(result_content) if result_content else None
+
+    # ── Surgical AST Mode ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _extract_infected_line(findings: list[str]) -> int | None:
+        """Parse the first line number from MEJORAlo finding strings.
+
+        Findings look like: 'path/to/file.py:42 -> High Complexity (15)'
+        Returns the integer line number, or None if not parseable.
+        """
+        for finding in findings:
+            # Matches ':42 ->' or ':42 →'
+            m = re.search(r":(\d+)\s*(?:->|→)", finding)
+            if m:
+                return int(m.group(1))
+        return None
+
+    @staticmethod
+    def _extract_infected_node(
+        source: str, target_line: int
+    ) -> tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str] | None:
+        """Find the innermost function/class definition that contains target_line.
+
+        Returns (node, dedented_source_of_node) or None.
+        """
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            return None
+
+        lines = source.splitlines(keepends=True)
+        best: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None = None
+
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            start = node.lineno
+            end = getattr(node, "end_lineno", None)
+            if end is None:
+                continue
+            if start <= target_line <= end:
+                # Pick the innermost (smallest) enclosing node
+                if best is None:
+                    best = node
+                else:
+                    best_start = best.lineno
+                    best_end = getattr(best, "end_lineno", best_start)
+                    if (end - start) < (best_end - best_start):
+                        best = node
+
+        if best is None:
+            return None
+
+        # Extract raw source lines (1-indexed)
+        start_idx = best.lineno - 1
+        end_idx = getattr(best, "end_lineno", best.lineno)
+        node_lines = lines[start_idx:end_idx]
+        node_source = textwrap.dedent("".join(node_lines))
+        return best, node_source
+
+    @staticmethod
+    def _surgical_patch_file(
+        original_source: str,
+        node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+        patched_node_source: str,
+    ) -> str | None:
+        """Replace the original node in the source with the patched version.
+
+        Preserves original indentation by detecting the leading whitespace
+        of the node's first line and re-applying it to every line of the patch.
+        """
+        lines = original_source.splitlines(keepends=True)
+        start_idx = node.lineno - 1
+        end_idx = getattr(node, "end_lineno", node.lineno)
+
+        # Detect original indentation from first line of the node
+        original_first_line = lines[start_idx] if start_idx < len(lines) else ""
+        indent = len(original_first_line) - len(original_first_line.lstrip())
+        indent_str = " " * indent
+
+        # Re-indent the patched node
+        patch_lines = patched_node_source.splitlines(keepends=True)
+        re_indented = [
+            (indent_str + line if line.strip() else line)
+            for line in patch_lines
+        ]
+
+        # Splice
+        new_lines = lines[:start_idx] + re_indented + lines[end_idx:]
+        result = "".join(new_lines)
+
+        # Validate the resulting file is still parseable
+        try:
+            ast.parse(result)
+            return result
+        except SyntaxError:
+            return None
+
+    async def _surgical_refactor(
+        self,
+        file_path: Path,
+        content: str,
+        findings: list[str],
+        findings_str: str,
+        scars_str: str,
+        swarm_system: str,
+    ) -> str | None:
+        """Execute surgical AST refactor: extract node, patch, reintegrate."""
+        # 1. Determine the infected line number
+        target_line = self._extract_infected_line(findings)
+        if target_line is None:
+            return None
+
+        # 2. Extract the infected node
+        extraction = self._extract_infected_node(content, target_line)
+        if extraction is None:
+            return None
+        node, node_source = extraction
+
+        node_type = type(node).__name__.replace("Def", "").replace("Async", "async ")
+        console.print(
+            f"  [cyan]✂️ Modo Quirúrgico: {node_type} `{node.name}` "
+            f"(L{node.lineno}–{getattr(node, 'end_lineno', '?')})[/]"
+        )
+
+        # 3. Build a micro-prompt focused ONLY on the infected node
+        micro_prompt = (
+            f"SURGICAL-REFAC: Fix ONLY this {node_type} from {file_path.name}.\n"
+            f"Do NOT change the signature or remove any public API.\n"
+            f"Findings targeting this node:\n{findings_str}{scars_str}\n\n"
+            f"Infected node:\n```python\n{node_source}\n```\n\n"
+            "Return ONLY the corrected function/class inside ```python blocks. "
+            "No wrapper, no imports, no module-level code."
+        )
+
+        # 4. Run orchestra on micro-prompt
+        result_content = await self._run_orchestra(micro_prompt, swarm_system)
+        if not result_content:
+            return None
+
+        # 5. Extract just the code block
+        patched_node = self._extract_code(result_content)
+        if not patched_node:
+            return None
+
+        # 6. Validate extracted node is syntactically a single definition
+        try:
+            patched_tree = ast.parse(patched_node)
+            top_level = [
+                n for n in ast.iter_child_nodes(patched_tree)
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            ]
+            if len(top_level) != 1:
+                logger.warning(
+                    "Surgical patch returned %d top-level nodes, expected 1.",
+                    len(top_level),
+                )
+                return None
+        except SyntaxError as e:
+            logger.warning("Surgical patch invalid syntax: %s", e)
+            return None
+
+        # 7. Splice the patch back into the original file
+        return self._surgical_patch_file(content, node, patched_node)
+
+    # ── Full-File Prompt Builder ───────────────────────────────────────────────
 
     def _read_source(self, file_path: Path) -> str | None:
         try:

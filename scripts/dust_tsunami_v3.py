@@ -40,9 +40,9 @@ def get_keys():
     # Escanea el sistema del usuario por la key fondeada
     keys = []
     paths = [
-        "/Users/borjafernandezangulo/cortex/.env",
-        "/Users/borjafernandezangulo/game/prophecy-nft/.env",
-        "/Users/borjafernandezangulo/hardhat-project/.env",
+        "./.env",
+        "~/game/prophecy-nft/.env",
+        "~/hardhat-project/.env",
     ]
     for p in paths:
         if os.path.exists(p):
