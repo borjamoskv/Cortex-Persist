@@ -74,7 +74,13 @@ class HDCVectorStoreL2:
                 err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
                 raise RuntimeError(err)
 
-            self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
+            self._conn = sqlite3.connect(
+                self._db_path,
+                check_same_thread=False,
+                timeout=5.0,  # opening-policy: O(1) fail-fast
+            )
+            # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
+            self._conn.execute("PRAGMA busy_timeout=5000")
             self._conn.enable_load_extension(True)
             sqlite_vec.load(self._conn)
             self._conn.row_factory = sqlite3.Row
@@ -253,7 +259,7 @@ class HDCVectorStoreL2:
             cursor = conn.cursor()
             placeholders = ",".join(["?"] * len(inhibit_ids))
             cursor.execute(
-                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "
+                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "  # nosec B608 — parameterized query
                 f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
                 inhibit_ids,
             )
@@ -348,12 +354,11 @@ class HDCVectorStoreL2:
             SELECT id FROM hdc_facts_meta
             WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)
             AND fact_type = 'error' AND metadata LIKE '%"is_toxic": true%'
-            ORDER BY timestamp DESC LIMIT ?
+            ORDER BY rowid DESC LIMIT ?
             """,
             (tenant_id, project_id, limit),
         )
         ids = [row["id"] for row in cursor.fetchall()]
-        # print(f"DEBUG: Found {len(ids)} toxic IDs for {tenant_id}/{project_id}")
         return ids
 
     def extract_traces(self, fact: CortexFactModel) -> dict[str, Any]:

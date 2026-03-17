@@ -7,7 +7,7 @@ CORTEX exposes a versioned FastAPI-based REST API.
 ## Start the Server
 
 ```bash
-pip install cortex-memory[api]
+pip install cortex-persist[api]
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 

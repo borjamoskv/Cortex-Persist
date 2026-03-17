@@ -7,6 +7,7 @@ using Weighted Byzantine Fault-Tolerant (WBFT) consensus.
 Usage:
     python examples/quickstart/multi_agent_consensus.py
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -41,13 +42,11 @@ async def main() -> None:
             source=source,
         )
         facts.append(fact)
-        print(f"   📝 {source}: \"{content[:50]}...\"")
+        print(f'   📝 {source}: "{content[:50]}..."')
 
     # --- Step 2: Show consensus ---
     print("\n2️⃣  Checking consensus across agents...")
-    all_facts = await engine.search_facts(
-        "market conditions", project="consensus-demo"
-    )
+    all_facts = await engine.search_facts("market conditions", project="consensus-demo")
 
     # Count agreement
     votes: dict[str, int] = {}
@@ -59,7 +58,7 @@ async def main() -> None:
     for content, count in sorted(votes.items(), key=lambda x: -x[1]):
         pct = count / len(all_facts) * 100
         bar = "█" * int(pct / 5)
-        print(f"      {bar} {pct:.0f}% — \"{content[:50]}\"")
+        print(f'      {bar} {pct:.0f}% — "{content[:50]}"')
 
     # BFT threshold: need > 2/3 agreement
     max_votes = max(votes.values())

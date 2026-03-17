@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package cortex.bci;
+
+// The Bytecode Intent Protocol (BCI) - Ouroboros-Ω Schema
+// Eliminates semantic parsing entropy by transmitting pure intent buffers.
+
+message SovereignIntent {
+  // Required: Derivation explicitly declaring the axiom/intent used natively (e.g. Ω₂ -> 0x01)
+  string derivation = 1;
+  
+  // High-level categorical intent of the binary buffer.
+  enum ActionType {
+    UNKNOWN = 0;
+    EDIT_FILE = 1;       // Modifies filesystem
+    RUN_COMMAND = 2;     // Spawns shell command
+    STORE_MEMORY = 3;    // Writes to DB
+    VALIDATE_STATE = 4;  // Red Team verification trigger
+  }
+  
+  ActionType action = 2;
+  
+  // Specific instruction code (equivalent to a tool call)
+  string instruction = 3;
+  
+  // The raw binary payload. This will be either raw bytes (like a diff),
+  // or a serialized JSON string of arguments, avoiding conversational proxy.
+  bytes payload = 4;
+  
+  // Validation hash (e.g. SHA256 of payload) to ensure integrity over socket
+  string integrity_hash = 5;
+  
+  // The timestamp generated at the origin
+  int64 timestamp = 6;
+}

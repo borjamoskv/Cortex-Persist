@@ -70,11 +70,13 @@ def build_temporal_filter_params(
         prefix = ""
 
     if as_of is None:
-        return f"{prefix}valid_until IS NULL", []
+        return f"{prefix}is_tombstoned = 0", []
     else:
         return (
-            f"{prefix}valid_from <= ? AND ({prefix}valid_until IS NULL OR {prefix}valid_until > ?)",
-            [as_of, as_of],
+            f"coalesce(json_extract({prefix}meta, '$.valid_from'), {prefix}created_at) <= ? AND "
+            f"({prefix}is_tombstoned = 0 OR json_extract({prefix}meta, '$.valid_until') > ? OR "
+            f"json_extract({prefix}meta, '$.tombstoned_at') > ?)",
+            [as_of, as_of, as_of],
         )
 
 
@@ -108,8 +110,11 @@ def time_travel_filter(
         prefix = ""
 
     return (
-        f"{prefix}tx_id <= ? AND ("
-        f"{prefix}valid_until IS NULL OR "
-        f"{prefix}valid_until > (SELECT timestamp FROM transactions WHERE id = ?))",
-        [tx_id, tx_id],
+        f"json_extract({prefix}meta, '$.tx_id') <= ? AND ("  # nosec B608
+        f"{prefix}is_tombstoned = 0 OR "
+        f"json_extract({prefix}meta, '$.valid_until') > "
+        "(SELECT timestamp FROM transactions WHERE id = ?) OR "
+        f"json_extract({prefix}meta, '$.tombstoned_at') > "
+        "(SELECT timestamp FROM transactions WHERE id = ?))",
+        [tx_id, tx_id, tx_id],
     )

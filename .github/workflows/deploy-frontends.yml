@@ -1,0 +1,123 @@
+# ─────────────────────────────────────────────────────────────
+# CORTEX Persist — Frontend Deploy (.com + .org)
+# Deploys Vite React apps to Vercel on push to master/main
+# ─────────────────────────────────────────────────────────────
+name: Deploy Frontends
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "web/**"
+      - "web-org/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # ── Detect what changed ──────────────────────────────────────
+  changes:
+    name: "🔍 Detect Changes"
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      web-org: ${{ steps.filter.outputs.web-org }}
+      dev: ${{ steps.filter.outputs.dev }}
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'web/**'
+            web-org:
+              - 'web-org/**'
+            dev:
+              - 'cortexpersist-dev/**'
+
+  # ── Build & Deploy cortexpersist.com ──────────────────────────
+  deploy-com:
+    name: "🚀 cortexpersist.com"
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install & Build
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_COM }}
+          working-directory: web/dist
+          vercel-args: "--prod"
+
+  # ── Build & Deploy cortexpersist.org ──────────────────────────
+  deploy-org:
+    name: "🚀 cortexpersist.org"
+    needs: changes
+    if: needs.changes.outputs.web-org == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: web-org/package-lock.json
+
+      - name: Install & Build
+        working-directory: web-org
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ORG }}
+          working-directory: web-org/dist
+          vercel-args: "--prod"
+
+  # ── Deploy cortexpersist.dev (O(1) Static) ────────────────────
+  deploy-dev:
+    name: "🚀 cortexpersist.dev"
+    needs: changes
+    if: needs.changes.outputs.dev == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_DEV }}
+          working-directory: cortexpersist-dev
+          vercel-args: "--prod"

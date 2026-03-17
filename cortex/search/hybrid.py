@@ -14,6 +14,11 @@ from typing import Final
 
 import aiosqlite
 
+from cortex.search.causal_gap import (
+    CausalGap,
+    SearchCandidate,
+    compute_candidate_score,
+)
 from cortex.search.models import SearchResult
 from cortex.search.text import text_search, text_search_sync
 from cortex.search.vector import semantic_search, semantic_search_sync
@@ -38,6 +43,8 @@ async def hybrid_search(
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
     confidence: str | None = None,
+    causal_gap: CausalGap | None = None,
+    **kwargs,
 ) -> list[SearchResult]:
     """
     Sovereign Hybrid Search: Semantic + Text via RRF.
@@ -106,6 +113,10 @@ async def hybrid_search(
         r.score = round(rrf_scores[fid], 6)
         merged.append(r)
 
+    # Ω₁₃: Causal gap re-ranking — similarity alone is insufficient
+    if causal_gap is not None and merged:
+        merged = _rerank_by_causal_gap(merged, causal_gap)
+
     logger.debug(
         "Hybrid search executed. query='%s' results=%d top_score=%.4f",
         query[:30],
@@ -121,14 +132,20 @@ def hybrid_search_sync(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
+    tenant_id: str = "default",
     project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
+    causal_gap: CausalGap | None = None,
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2
-    sem_results = semantic_search_sync(conn, query_embedding, fetch_limit, project)
-    txt_results = text_search_sync(conn, query, project, limit=fetch_limit)
+    sem_results = semantic_search_sync(
+        conn, query_embedding, fetch_limit, tenant_id=tenant_id, project=project
+    )
+    txt_results = text_search_sync(
+        conn, query, tenant_id=tenant_id, project=project, limit=fetch_limit
+    )
 
     total_w = vector_weight + text_weight
     w_vec = vector_weight / total_w
@@ -155,4 +172,42 @@ def hybrid_search_sync(
         r.score = round(rrf_scores[fid], 6)
         merged.append(r)
 
+    # Ω₁₃: Causal gap re-ranking
+    if causal_gap is not None and merged:
+        merged = _rerank_by_causal_gap(merged, causal_gap)
+
     return merged
+
+
+def _rerank_by_causal_gap(
+    results: list[SearchResult],
+    gap: CausalGap,
+) -> list[SearchResult]:
+    """Re-rank results by causal gap reduction, not mere similarity.
+
+    Ω₁₃: causal_gap_reduction_required_for_search_success = true
+    """
+    missing = gap.missing_evidence.lower()
+    candidates: list[tuple[SearchResult, float]] = []
+
+    for rank, r in enumerate(results):
+        content_lower = r.content.lower()
+        # Evidence match: word overlap with missing_evidence
+        missing_words = set(missing.split())
+        content_words = set(content_lower.split())
+        overlap = len(missing_words & content_words)
+        evidence_score = min(overlap / max(len(missing_words), 1), 1.0)
+
+        sc = SearchCandidate(
+            doc_id=str(r.fact_id),
+            semantic_score=r.score,
+            evidence_match_score=evidence_score,
+            confidence_gain_score=gap.expected_confidence_gain,
+            novelty_score=1.0 / (rank + 1),  # Higher rank = lower novelty
+        )
+        final = compute_candidate_score(sc)
+        r.causal_gap_score = round(final, 6)
+        candidates.append((r, final))
+
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    return [c[0] for c in candidates]

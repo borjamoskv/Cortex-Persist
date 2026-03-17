@@ -3,7 +3,7 @@
 Entities, Relationships, and Graph Processing.
 """
 
-from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
+from cortex.graph.backends import GraphBackend, SQLiteBackend
 from cortex.graph.engine import (
     detect_relationships,
     extract_entities,
@@ -25,7 +25,6 @@ __all__ = [
     "Ghost",
     "GraphBackend",
     "SQLiteBackend",
-    "Neo4jBackend",
     "extract_entities",
     "detect_relationships",
     "process_fact_graph",

@@ -5,7 +5,7 @@ import re
 import shutil
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import aiosqlite
@@ -106,7 +106,7 @@ class SnapshotManager:
         # Sanitize name to prevent path traversal or malicious filenames
         # Allow only alphanumeric, underscores, and dashes
         safe_name = re.sub(r"[^a-zA-Z0-9_\-]", "_", name)
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"cortex_snap_{ts}_{safe_name}.db"
         dest_path = self.snapshot_dir / filename
 
@@ -131,7 +131,7 @@ class SnapshotManager:
             "name": safe_name,
             "tx_id": tx_id,
             "merkle_root": merkle_root,
-            "created_at": datetime.now().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "size_mb": size_mb,
             "path": str(dest_path),
         }

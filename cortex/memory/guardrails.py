@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 logger = logging.getLogger("cortex.memory.guardrails")
 
 
-@dataclass(slots=True)
+@dataclass()
 class SessionGuardrail:
     """Hard cap on total tokens consumed per agent session.
 

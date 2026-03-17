@@ -1,6 +1,6 @@
 # El código que se cura solo
 
-*Por Borja Moskv*
+*by [borjamoskv.com](https://borjamoskv.com)*
 
 ---
 
@@ -102,4 +102,4 @@ Yo estoy aprendiendo a hacer lo mismo con el silicio.
 
 ---
 
-*Borja Moskv construye sistemas de memoria artificial y persigue ladrones de Ethereum desde algún lugar del Cantábrico.*
+*[borjamoskv.com](https://borjamoskv.com) construye sistemas de memoria artificial y persigue ladrones de Ethereum desde algún lugar del Cantábrico.*

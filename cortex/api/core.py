@@ -18,13 +18,17 @@ import cortex.api.state as api_state
 from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
+    ImmuneMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
     SecurityHeadersMiddleware,
+    TracingMiddleware,
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.hive.main import router as hive_router
+from cortex.extensions.hive.main import router as hive_router
+from cortex.extensions.metering.middleware import MeteringMiddleware
+from cortex.extensions.timing import TimingTracker
 from cortex.routes import (
     admin as admin_router,
 )
@@ -44,6 +48,9 @@ from cortex.routes import (
     dashboard as dashboard_router,
 )
 from cortex.routes import (
+    events as events_router,
+)
+from cortex.routes import (
     facts as facts_router,
 )
 from cortex.routes import (
@@ -52,18 +59,23 @@ from cortex.routes import (
 from cortex.routes import (
     graph as graph_router,
 )
+from cortex.routes import health as health_index_router
 from cortex.routes import (
     ledger as ledger_router,
 )
 from cortex.routes import (
     mejoralo as mejoralo_router,
 )
+from cortex.routes import memories as memories_router
 from cortex.routes import (
     missions as missions_router,
 )
 from cortex.routes import (
     notch_ws as notch_ws_router,
 )
+from cortex.routes import onboarding as onboarding_router
+from cortex.routes import oracle as oracle_router
+from cortex.routes import runtime as runtime_router
 from cortex.routes import (
     search as search_router,
 )
@@ -77,10 +89,13 @@ from cortex.routes import (
     tips as tips_router,
 )
 from cortex.routes import (
+    topology_ws as topology_ws_router,
+)
+from cortex.routes import (
     translate as translate_router,
 )
+from cortex.routes import usage as usage_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
-from cortex.timing import TimingTracker
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 __all__ = [
@@ -127,7 +142,7 @@ async def lifespan(app: FastAPI):
     # 3. Global Auth Registration
     import cortex.auth
 
-    cortex.auth.manager._auth_manager = auth_manager
+    cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 
     # 4. Temporal Tracking
     from cortex.database.core import connect as db_connect
@@ -148,10 +163,10 @@ async def lifespan(app: FastAPI):
     api_state.tracker = tracker
 
     # 6. Notification Bus — wire adapters from config
-    from cortex.notifications.setup import setup_notifications
+    from cortex.extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
-    api_state.notification_bus = notification_bus
+    api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
     try:
         yield
@@ -161,11 +176,11 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth.manager._auth_manager = None
+        cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
-        api_state.notification_bus = None
+        api_state.notification_bus = None  # type: ignore[reportAttributeAccessIssue]
 
 
 app = FastAPI(
@@ -195,10 +210,13 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(SecurityFraudMiddleware)
+app.add_middleware(TracingMiddleware)
+app.add_middleware(ImmuneMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
+app.add_middleware(MeteringMiddleware)
 
 
 # ─── Exception Handlers ──────────────────────────────────────────────
@@ -213,6 +231,15 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     logger.error("Sovereign DB Error: %s", exc)
+
+    # PULMONES: Map WAL locks to graceful 503 (Triangulación Antifrágil)
+    if "database is locked" in str(exc).lower():
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "CORTEX_BUSY: Database is under heavy load. Retry in 2s."},
+            headers={"Retry-After": "2"},
+        )
+
     return JSONResponse(status_code=500, content={"detail": get_trans("error_internal_db", lang)})
 
 
@@ -246,10 +273,45 @@ async def root_node(request: Request) -> dict:
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    cortisol = 0.0
+    growth = 0.0
+    try:
+        engine = getattr(request.app.state, "engine", None)
+        if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
+            cortisol = engine.manager._endocrine.cortisol_level
+            growth = engine.manager._endocrine.neural_growth
+    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — health check must never crash
+        pass
+
+    # Health Index integration
+    health_score = 0.0
+    health_grade = "F"
+    try:
+        from cortex.extensions.health import HealthCollector, HealthScorer
+
+        db_path = ""
+        engine = getattr(request.app.state, "engine", None)
+        if engine:
+            db_path = str(getattr(engine, "_db_path", ""))
+        collector = HealthCollector(db_path=db_path)
+        metrics_snap = collector.collect_all()
+        hs = HealthScorer.score(metrics_snap)
+        health_score = round(hs.score, 2)
+        health_grade = hs.grade
+    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001
+        pass
+
     return {
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
         "version": __version__,
+        "cortisol": round(cortisol, 3),
+        "neuroplasticity": round(growth, 3),
+        "health_index": {
+            "score": health_score,
+            "grade": health_grade,
+            "healthy": health_score >= 40.0,
+        },
     }
 
 
@@ -263,12 +325,14 @@ async def get_metrics():
 # ─── Router Inclusion ────────────────────────────────────────────────
 
 
+app.include_router(events_router.events_router)
 app.include_router(facts_router.router)
 app.include_router(search_router.router)
 app.include_router(ask_router.router)
 app.include_router(admin_router.router)
 app.include_router(timing_router.router)
 app.include_router(translate_router.router)
+app.include_router(oracle_router.router)
 app.include_router(daemon_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(agents_router.router)
@@ -282,6 +346,12 @@ app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
 app.include_router(hive_router)
 app.include_router(notch_ws_router.router)
+app.include_router(topology_ws_router.router)
+app.include_router(memories_router.router)
+app.include_router(usage_router.router)
+app.include_router(runtime_router.router)
+app.include_router(onboarding_router.router)
+app.include_router(health_index_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

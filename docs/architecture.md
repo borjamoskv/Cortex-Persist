@@ -1,12 +1,15 @@
 # Architecture
 
 > **CORTEX Trust Engine v8 — Sovereign Cloud**
+> *La probabilidad puede sugerir. Solo la verificación puede gobernar.*
 
 ---
 
 ## System Overview
 
-CORTEX is a **trust infrastructure engine** that provides cryptographic verification, immutable audit trails, and regulatory compliance for AI agent memory. It combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
+CORTEX is a **trust infrastructure engine** that provides cryptographic verification, immutable audit trails, and regulatory compliance for AI agent memory. It is built under the strict premise that generative AI output is fundamentally *thermodynamically unstable conjecture* (`Void-State`). It only becomes durable state after surviving a predefined path of deterministic filters.
+
+To enforce this, it combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
 ```mermaid
 graph TB
@@ -138,6 +141,19 @@ CORTEX implements **Weighted Byzantine Fault Tolerance**:
 4. Updates `consensus_score` on each fact
 5. Elder Council verdict for edge cases without quorum
 6. Immutable vote ledger for audit
+
+---
+
+## Engine Evolution: The Omega Manifold (Ω)
+
+En la transición hacia las **v7 y v8**, CORTEX introduce el **Manifold Omega**, una capa de orquestación 4D que unifica percepción, decisión y acción.
+
+Los pilares fundamentales:
+- **KETER-Ω**: Meta-orquestación soberana. (`engine/keter.py`)
+- **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
+- **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
+
+Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOLD.md).
 
 ---
 

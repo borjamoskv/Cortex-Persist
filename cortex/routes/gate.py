@@ -7,7 +7,7 @@ REST endpoints for remote operator approval of L3 actions.
 from fastapi import APIRouter, Depends, HTTPException
 
 from cortex.auth import require_permission
-from cortex.gate import (
+from cortex.extensions.gate import (
     GateError,
     GateExpired,
     GateInvalidSignature,

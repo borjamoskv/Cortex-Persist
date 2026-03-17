@@ -5,7 +5,7 @@ Thin, zero-dependency client for the [CORTEX Memory API](https://github.com/borj
 ## Install
 
 ```bash
-pip install cortex-memory-sdk
+pip install cortex-persist
 ```
 
 ## Usage

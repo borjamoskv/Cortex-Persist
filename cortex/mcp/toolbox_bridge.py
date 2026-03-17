@@ -4,6 +4,9 @@ Provides a bridge between CORTEX and Google's MCP Toolbox for Databases,
 enabling agents to query external databases (PostgreSQL, AlloyDB, MySQL,
 Spanner) through a secure, centralized control plane.
 
+Also exposes CORTEX's own knowledge base via the Toolbox membrane
+(read-only, port 5050) with antifragile fallback to direct ORM.
+
 Integrated via the `toolbox-core` Python SDK.
 """
 
@@ -18,12 +21,14 @@ __all__ = [
     "DEFAULT_SERVER_URL",
     "ToolboxBridge",
     "ToolboxConfig",
+    "cortex_self_bridge",
     "create_toolbox_bridge",
+    "toolbox_health_check",
 ]
 
 logger = logging.getLogger("cortex.mcp.toolbox_bridge")
 
-DEFAULT_SERVER_URL = "http://127.0.0.1:5000"
+DEFAULT_SERVER_URL = "http://127.0.0.1:5050"
 
 _TOOLBOX_AVAILABLE = False
 try:
@@ -46,7 +51,7 @@ class ToolboxConfig:
     toolset: str = ""
     timeout_seconds: float = 30.0
     allowed_server_urls: list[str] = field(
-        default_factory=lambda: [DEFAULT_SERVER_URL, "http://localhost:5000"]
+        default_factory=lambda: [DEFAULT_SERVER_URL, "http://localhost:5050"]
     )
 
     @classmethod
@@ -56,7 +61,7 @@ class ToolboxConfig:
         allowed = (
             [url.strip() for url in allowed_raw.split(",")]
             if allowed_raw
-            else [DEFAULT_SERVER_URL, "http://localhost:5000"]
+            else [DEFAULT_SERVER_URL, "http://localhost:5050"]
         )
 
         return cls(
@@ -92,9 +97,13 @@ class ToolboxBridge:
         allowed = [u.rstrip("/") for u in self.config.allowed_server_urls]
 
         if url not in allowed:
-            logger.critical("Sovereign Security Breach: Rejected unallowed Toolbox URL: %s", url)
+            logger.critical(
+                "Sovereign Security Breach: Rejected unallowed Toolbox URL: %s",
+                url,
+            )
             raise ValueError(
-                f"External URL '{url}' not in the allowlist. For security, update TOOLBOX_ALLOWED_URLS."
+                f"External URL '{url}' not in the allowlist. "
+                f"For security, update TOOLBOX_ALLOWED_URLS."
             )
 
     async def connect(self) -> bool:
@@ -106,13 +115,15 @@ class ToolboxBridge:
         self._validate_server_url()
 
         try:
-            self._client = ToolboxClient(self.config.server_url)
+            self._client = ToolboxClient(self.config.server_url)  # type: ignore[reportOptionalCall]
 
             # Load tools (all or specific set)
             load_coro = (
-                self._client.load_toolset(self.config.toolset)
+                self._client.load_toolset(  # type: ignore[reportOptionalMemberAccess]
+                    self.config.toolset,
+                )
                 if self.config.toolset
-                else self._client.load_toolset()
+                else self._client.load_toolset()  # type: ignore[reportOptionalMemberAccess]
             )
             self._tools = await load_coro
 
@@ -150,7 +161,8 @@ class ToolboxBridge:
 
     def __repr__(self) -> str:
         status = "connected" if self._client else "disconnected"
-        return f"ToolboxBridge(status={status}, tools={len(self._tools)}, url={self.config.server_url})"
+        n = len(self._tools)
+        return f"ToolboxBridge({status}, tools={n}, url={self.config.server_url})"
 
 
 # ─── Factory ──────────────────────────────────────────────────────────
@@ -174,3 +186,49 @@ async def create_toolbox_bridge(
     bridge = ToolboxBridge(config)
     await bridge.connect()
     return bridge
+
+
+async def cortex_self_bridge(
+    toolset: str = "cortex-readonly",
+) -> ToolboxBridge | None:
+    """Connect to the local CORTEX Toolbox membrane.
+
+    Returns a bridge pre-configured for reading CORTEX's own
+    knowledge base, or None if the server is unreachable
+    (antifragile fallback — callers degrade to direct ORM).
+
+    Tools via cortex-readonly:
+      query-facts, query-ghosts, query-decisions,
+      query-signals, cortex-stats
+    """
+    if not toolbox_health_check():
+        logger.warning(
+            "Toolbox membrane unreachable at %s — fallback to direct ORM.",
+            DEFAULT_SERVER_URL,
+        )
+        return None
+    return await create_toolbox_bridge(
+        server_url=DEFAULT_SERVER_URL,
+        toolset=toolset,
+    )
+
+
+def toolbox_health_check(
+    url: str = DEFAULT_SERVER_URL,
+    timeout: float = 2.0,
+) -> bool:
+    """Probe whether the Toolbox server is alive.
+
+    Uses stdlib urllib — zero external deps. Hits GET /api/toolset/
+    and expects a 200 response within `timeout` seconds.
+    """
+    import urllib.error
+    import urllib.request
+
+    probe = f"{url.rstrip('/')}/api/toolset/"
+    try:
+        req = urllib.request.Request(probe, method="GET")
+        with urllib.request.urlopen(req, timeout=timeout):
+            return True
+    except (urllib.error.URLError, OSError, TimeoutError):
+        return False
