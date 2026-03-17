@@ -10,8 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
-from cortex.immune.filters.base import Verdict
-from cortex.immune.membrane import ImmuneMembrane
+from cortex.extensions.immune.filters.base import Verdict
+from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.mcp.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,

@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from cortex.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, TrackState
+from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, TrackState
 
 console = Console()
 

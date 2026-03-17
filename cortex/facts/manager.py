@@ -11,7 +11,7 @@ from cortex.engine.store_validators import validate_content
 from cortex.utils.canonical import now_iso
 
 if TYPE_CHECKING:
-    from cortex.interfaces.engine import EngineProtocol
+    from cortex.extensions.interfaces.engine import EngineProtocol
 
 _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 

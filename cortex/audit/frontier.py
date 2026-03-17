@@ -10,8 +10,8 @@ import logging
 from typing import Any
 
 from cortex.engine import CortexEngine
-from cortex.llm.router import IntentProfile
-from cortex.llm.sovereign import SovereignLLM
+from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.llm.sovereign import SovereignLLM
 
 logger = logging.getLogger("cortex.audit.frontier")
 

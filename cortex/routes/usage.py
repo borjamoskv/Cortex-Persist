@@ -11,8 +11,8 @@ import logging
 from fastapi import APIRouter, Depends, Request
 
 from cortex.auth import AuthResult, require_permission
-from cortex.metering.quotas import QuotaEnforcer
-from cortex.metering.tracker import UsageTracker
+from cortex.extensions.metering.quotas import QuotaEnforcer
+from cortex.extensions.metering.tracker import UsageTracker
 
 __all__ = ["get_tracker", "get_usage", "get_usage_breakdown", "get_usage_history"]
 

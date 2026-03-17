@@ -11,7 +11,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
-from cortex.sync import export_to_json
+from cortex.extensions.sync import export_to_json
 from cortex.utils.errors import FactNotFound
 
 __all__ = ["delete", "list_facts", "edit"]

@@ -5,8 +5,8 @@ import tempfile
 
 import pytest
 
-from cortex.metering.quotas import PLAN_QUOTAS, QuotaEnforcer
-from cortex.metering.tracker import UsageRecord, UsageTracker
+from cortex.extensions.metering.quotas import PLAN_QUOTAS, QuotaEnforcer
+from cortex.extensions.metering.tracker import UsageRecord, UsageTracker
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 

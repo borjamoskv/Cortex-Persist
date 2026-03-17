@@ -16,8 +16,8 @@ from cortex.engine.zero_prompting import (
     ResolutionReport,
     ZeroPromptingEvolutionStrategy,
 )
-from cortex.skills.cadastral.engine import CadastralEngine
-from cortex.skills.cadastral.models import (
+from cortex.extensions.skills.cadastral.engine import CadastralEngine
+from cortex.extensions.skills.cadastral.models import (
     CadastralReport,
     Coordinate,
     ExpropiationStatus,
@@ -341,7 +341,7 @@ class TestZeroPromptingEvolution:
 
 class TestAxiomRegistry:
     def test_ax029_registered(self) -> None:
-        from cortex.axioms.registry import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
         ax = AXIOM_REGISTRY.get("AX-029")
         assert ax is not None
@@ -349,7 +349,7 @@ class TestAxiomRegistry:
         assert "Ω₇" in ax.name
 
     def test_total_axiom_count(self) -> None:
-        from cortex.axioms.registry import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
         assert len(AXIOM_REGISTRY) == 23  # 3 + 10 + 10 (was 22, now 23)
 

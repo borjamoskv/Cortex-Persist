@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.wealth.growth import GrowthEngine, GrowthSignal
+from cortex.extensions.wealth.growth import GrowthEngine, GrowthSignal
 
 # ── Sorting ──────────────────────────────────────────────────────────
 

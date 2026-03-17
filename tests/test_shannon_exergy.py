@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.shannon.analyzer import dead_weight, exergy_ratio, exergy_score
+from cortex.extensions.shannon.analyzer import dead_weight, exergy_ratio, exergy_score
 
 # Default usage weights per fact type
 DEFAULT_WEIGHTS: dict[str, float] = {

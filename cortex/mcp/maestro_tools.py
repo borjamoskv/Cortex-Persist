@@ -2,9 +2,9 @@ import logging
 
 from mcp.server.fastmcp import FastMCP
 
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 from cortex.mcp.utils import get_engine  # type: ignore[reportAttributeAccessIssue]
-from cortex.ui_control.maestro import MaestroUI
-from cortex.ui_control.models import AppTarget
 
 logger = logging.getLogger("cortex.mcp.maestro")
 

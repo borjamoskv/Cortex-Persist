@@ -13,7 +13,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.interfaces.store_pipeline import ContentMutator, PostStoreHook, StoreGuard
+from cortex.extensions.interfaces.store_pipeline import ContentMutator, PostStoreHook, StoreGuard
 
 __all__ = ["GuardPipeline"]
 

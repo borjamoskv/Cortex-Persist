@@ -1,6 +1,6 @@
 import time
 
-from cortex.axioms.topological_id import SovereignFlake
+from cortex.extensions.axioms.topological_id import SovereignFlake
 
 
 def test_flake_sequence_increment():

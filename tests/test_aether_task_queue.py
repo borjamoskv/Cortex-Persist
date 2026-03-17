@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.aether.models import AgentTask, TaskStatus
-from cortex.aether.queue import TaskQueue
+from cortex.extensions.aether.models import AgentTask, TaskStatus
+from cortex.extensions.aether.queue import TaskQueue
 
 
 @pytest.fixture

@@ -201,11 +201,12 @@ def compliance_report(db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def audit_cognitive(tenant: str, db: str) -> None:
     """Run a deep cryptographic audit of the Cognitive Event Ledger (L3)."""
-    from cortex.db import connect_async
+    from cortex.database.core import connect_async
     from cortex.memory.ledger import EventLedgerL3
 
     async def _run_audit():
-        async with connect_async(db) as conn:
+        conn = await connect_async(db)
+        try:
             ledger = EventLedgerL3(conn)
             report = await ledger.verify_chain(tenant)
 
@@ -228,7 +229,8 @@ def audit_cognitive(tenant: str, db: str) -> None:
                 for finding in report["findings"]:
                     findings_table.add_row(finding)
                 console.print(findings_table)
-
+        finally:
+            await conn.close()
     try:
         _run_async(_run_audit())
     except Exception as e:  # noqa: BLE001 — CLI boundary catch

@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.swarm.langgraph_supervisor import (
+from cortex.extensions.swarm.langgraph_supervisor import (
     LANGGRAPH_AVAILABLE,
     CortexLangGraphSupervisor,
     LangGraphSupervisorError,
@@ -73,7 +73,7 @@ async def test_langgraph_supervisor_routing():
 def test_missing_langgraph_throws_error():
     # If LANGGRAPH_AVAILABLE is False, it should throw error.
     # We can mock it if it is true.
-    import cortex.swarm.langgraph_supervisor as module
+    import cortex.extensions.swarm.langgraph_supervisor as module
 
     original = module.LANGGRAPH_AVAILABLE
     module.LANGGRAPH_AVAILABLE = False

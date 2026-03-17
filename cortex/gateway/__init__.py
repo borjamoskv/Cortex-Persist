@@ -202,7 +202,7 @@ class GatewayRouter:
             )
             # Ω₅: Auto-persist error as ghost for Josu/Aether processing
             try:
-                from cortex.immune.error_boundary import ErrorBoundary
+                from cortex.extensions.immune.error_boundary import ErrorBoundary
 
                 boundary = ErrorBoundary(
                     f"gateway.{intent_str}",
@@ -292,7 +292,7 @@ class GatewayRouter:
         if not self._bus:
             return {"delivered": False, "reason": "no notification bus configured"}
 
-        from cortex.notifications.events import CortexEvent, EventSeverity
+        from cortex.extensions.notifications.events import CortexEvent, EventSeverity
 
         severity_str = req.payload.get("severity", "info")
         try:

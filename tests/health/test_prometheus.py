@@ -1,7 +1,7 @@
 """Tests for the Prometheus exposition module."""
 
-from cortex.health.models import Grade, HealthScore, MetricSnapshot
-from cortex.health.prometheus import export_prometheus
+from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot
+from cortex.extensions.health.prometheus import export_prometheus
 
 
 def test_export_prometheus_formats_correctly() -> None:

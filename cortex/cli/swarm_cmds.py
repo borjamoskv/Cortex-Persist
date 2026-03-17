@@ -20,7 +20,7 @@ def swarm():
 @click.option("--level", "-l", type=int, default=1, help="Escalation level (1-3)")
 def swarm_audit(path, level):
     """Deep semantic audit of a file or directory using the swarm."""
-    from cortex.mejoralo.swarm import MejoraloSwarm
+    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(path)
     files = [p] if p.is_file() else list(p.glob("**/*.py"))
@@ -59,7 +59,7 @@ def swarm_audit(path, level):
 @click.option("--dry-run", is_flag=True, help="Show refactored code without overwriting")
 def swarm_refactor(file, level, issue, dry_run):
     """Refactor a specific file using the full specialist squad."""
-    from cortex.mejoralo.swarm import MejoraloSwarm
+    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(file)
     swarm_engine = MejoraloSwarm(level=level)
@@ -151,7 +151,7 @@ def swarm_deploy(mode, target, db):
 @click.option("--db", default="/Users/borjafernandezangulo/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
-    from cortex.ui.swarm_board import SwarmBoard
+    from cortex.extensions.ui.swarm_board import SwarmBoard
 
     board = SwarmBoard(db)
     board.start()

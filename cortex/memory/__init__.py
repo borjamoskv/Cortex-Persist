@@ -196,14 +196,8 @@ def __getattr__(name: str) -> object:
 
             val = SovereignVectorStoreL2
         except ImportError:
-            try:
-                from cortex.memory.vector_store import (
-                    VectorStoreL2 as _VL2,  # type: ignore[import-not-found]
-                )
-
-                val = _VL2
-            except ImportError:
-                val = None  # type: ignore[assignment]
+            # cortex.memory.vector_store was removed; no further fallback
+            val = None  # type: ignore[assignment]
         globals()["VectorStoreL2"] = val
         return val
 

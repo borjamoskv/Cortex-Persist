@@ -1,7 +1,7 @@
 import asyncio
 
 from cortex.engine import CortexEngine
-from cortex.episodic.main import EpisodicMemory
+from cortex.extensions.episodic.main import EpisodicMemory
 
 
 async def seed():

@@ -24,13 +24,13 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
         "httpx",
         "socket",
         "http.client",
-        "cortex.moltbook",  # Añadir red
+        "cortex.extensions.moltbook",  # Añadir red
     }
 
     def find_spec(self, fullname: str, path, target=None):
         base_module = fullname.partition(".")[0]
         # or other pathological module names that python might allow internally.
-        if "cortex.moltbook" in fullname or base_module in self._POISONED_MODULES:
+        if "cortex.extensions.moltbook" in fullname or base_module in self._POISONED_MODULES:
             print("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
             print(f"FATAL: Attempted to import '{fullname}' within Cold Mode.")
             print("Activating Cyanide Protocol. Self-destructing.")

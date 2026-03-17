@@ -9,7 +9,6 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.cuatrida.models import Dimension
 from cortex.database.pool import CortexConnectionPool
 from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
@@ -20,6 +19,7 @@ from cortex.engine.ledger import ImmutableLedger
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
+from cortex.extensions.cuatrida.models import Dimension
 from cortex.graph import get_graph as _get_graph
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import canonical_json, compute_tx_hash
@@ -48,7 +48,7 @@ class AsyncCortexEngine(
         self._ledger: ImmutableLedger | None = None
         self.vault: Any | None = None
 
-        from cortex.cuatrida.orchestrator import CuatridaOrchestrator
+        from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
 

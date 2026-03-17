@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from cortex.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, TrackState
+from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, TrackState
 
 logging.basicConfig(level=logging.INFO)
 

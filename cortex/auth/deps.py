@@ -53,7 +53,7 @@ async def require_auth(
         raise HTTPException(status_code=401, detail=error_msg)
 
     # SECURE LINK: Bind the dynamic tenant context to the authenticated identity
-    from cortex.security.tenant import tenant_id_var
+    from cortex.extensions.security.tenant import tenant_id_var
 
     tenant_id_var.set(result.tenant_id)
 

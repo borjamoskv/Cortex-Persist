@@ -18,8 +18,8 @@ class HistoryMixin(EngineMixinBase):
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
         """Reconstruct state as of transaction ID."""
+        from cortex.extensions.security.tenant import get_tenant_id
         from cortex.memory.temporal import time_travel_filter
-        from cortex.security.tenant import get_tenant_id
 
         current_tenant = get_tenant_id()
 

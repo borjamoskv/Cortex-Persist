@@ -35,9 +35,9 @@ class MemoryMixin(EngineMixinBase):
         When auto_embed=False (e.g. tests), L2 initialization is skipped entirely
         to avoid loading the ML model (~30s penalty per test).
         """
+        from cortex.extensions.signals.bus import SignalBus
         from cortex.memory.ledger import EventLedgerL3
         from cortex.memory.working import WorkingMemoryL1
-        from cortex.signals.bus import SignalBus
 
         l1 = WorkingMemoryL1()
         l3 = EventLedgerL3(conn)

@@ -146,7 +146,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             db_path = str(getattr(self._engine, "_db_path", ""))
             if not db_path:
                 return
-            from cortex.signals.bus import SignalBus
+            from cortex.extensions.signals.bus import SignalBus
 
             conn = sqlite3.connect(db_path)
             try:

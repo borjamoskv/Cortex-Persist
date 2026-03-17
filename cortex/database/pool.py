@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 
 import aiosqlite
 
-from cortex.immune.chaos import ChaosGate, async_interceptor
+from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 

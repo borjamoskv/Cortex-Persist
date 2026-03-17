@@ -35,8 +35,8 @@ def register_scraper_tools(mcp) -> None:
         Returns:
             Dict with url, title, content (markdown), hash, strategy_used, elapsed_ms.
         """
-        from cortex.scraper.engine import ScraperEngine
-        from cortex.scraper.models import ExtractionStrategy, ScrapeRequest
+        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
 
         engine = ScraperEngine()
         request = ScrapeRequest(
@@ -74,8 +74,8 @@ def register_scraper_tools(mcp) -> None:
         Returns:
             Dict with job_id, total, successful, errors, and results list.
         """
-        from cortex.scraper.engine import ScraperEngine
-        from cortex.scraper.models import ExtractionStrategy
+        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.extensions.scraper.models import ExtractionStrategy
 
         engine = ScraperEngine()
         job = await engine.batch_scrape(
@@ -115,7 +115,7 @@ def register_scraper_tools(mcp) -> None:
         Returns:
             Dict with url, depth, and discovered_urls list.
         """
-        from cortex.scraper.engine import ScraperEngine
+        from cortex.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
         discovered = await engine.map_site(url, max_depth=depth)

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.ui_control.models import AppTarget
-from cortex.ui_control.window import WindowEngine
+from cortex.extensions.ui_control.models import AppTarget
+from cortex.extensions.ui_control.window import WindowEngine
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ class TestListWindows:
         # Formato real: name|||x,y|||w,h|||minimized
         mock_output = "Finder|||100,50|||800,600|||false"
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = mock_output
             windows = await win.list_windows("Finder")
@@ -39,7 +39,7 @@ class TestListWindows:
     async def test_list_windows_empty(self, win):
         """Sin ventanas devuelve lista vacía."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = None
             windows = await win.list_windows("AppInexistente")
@@ -55,7 +55,7 @@ class TestGetFrontmost:
         # Formato real: appName|||winName|||x,y|||w,h
         mock_output = "Safari|||Main Window|||0,0|||1440,900"
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = mock_output
             result = await win.get_frontmost()
@@ -68,7 +68,7 @@ class TestGetFrontmost:
     async def test_get_frontmost_no_window(self, win):
         """Sin ventana activa devuelve None."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = None
             result = await win.get_frontmost()
@@ -82,7 +82,7 @@ class TestWindowOperations:
     async def test_move_window(self, win):
         """Mueve la ventana a coordenadas específicas."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = ""
             target = AppTarget(name="Finder")
@@ -95,7 +95,7 @@ class TestWindowOperations:
     async def test_resize_window(self, win):
         """Redimensiona la ventana."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = ""
             result = await win.resize(AppTarget(name="Finder"), 1024, 768)
@@ -105,7 +105,7 @@ class TestWindowOperations:
     async def test_minimize_window(self, win):
         """Minimiza una ventana."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = ""
             result = await win.minimize(AppTarget(name="Finder"))
@@ -115,7 +115,7 @@ class TestWindowOperations:
     async def test_close_window(self, win):
         """Cierra la ventana (Cmd+W)."""
         with patch(
-            "cortex.ui_control.window.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = ""
             result = await win.close_window(AppTarget(name="Finder"))

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from cortex.moltbook.client import MoltbookClient
+from cortex.extensions.moltbook.client import MoltbookClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | 🦞 SINK | %(message)s")
 logger = logging.getLogger("entropy_sink")

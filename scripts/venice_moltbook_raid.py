@@ -14,9 +14,9 @@ import random
 import sys
 from typing import Any
 
-from cortex.llm.provider import LLMProvider
-from cortex.llm.router import IntentProfile
-from cortex.moltbook.client import MoltbookClient
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.moltbook.client import MoltbookClient
 
 logging.basicConfig(
     level=logging.INFO,

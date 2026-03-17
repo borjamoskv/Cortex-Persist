@@ -4,9 +4,9 @@ import os
 
 from dotenv import load_dotenv
 
-from cortex.llm.provider import LLMProvider
-from cortex.llm.router import IntentProfile
-from cortex.moltbook.client import MoltbookClient
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.moltbook.client import MoltbookClient
 
 load_dotenv(os.path.join(os.path.expanduser("~"), "cortex", ".env"))
 
@@ -38,7 +38,7 @@ async def raid_as_self(post_id: str):
     llm = LLMProvider(provider="openrouter", model="anthropic/claude-sonnet-4-20250514")
 
     # TEMPORARY OVERRIDE FOR QUOTA THROTTLING
-    import cortex.llm.provider
+    import cortex.extensions.llm.provider
 
     cortex.llm.provider._QUOTA_MANAGER.acquire = lambda tokens: asyncio.sleep(0)
 

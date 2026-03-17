@@ -166,7 +166,7 @@ def _validate_with_glm5(suspicious_content, hits):
     try:
         import asyncio
 
-        from cortex.llm.orchestra import ThoughtOrchestra
+        from cortex.extensions.llm.orchestra import ThoughtOrchestra
 
         orchestra = ThoughtOrchestra()
         loop = asyncio.get_event_loop()

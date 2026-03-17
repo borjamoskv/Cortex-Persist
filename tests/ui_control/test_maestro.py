@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.ui_control.maestro import MaestroUI
-from cortex.ui_control.models import AppTarget
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def maestro():
 
 @pytest.mark.asyncio
 async def test_activate_app_success(maestro):
-    with patch("cortex.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
+    with patch("cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
         mock_run.return_value = ""
         target = AppTarget(name="Safari")
 
@@ -28,7 +28,7 @@ async def test_activate_app_success(maestro):
 
 @pytest.mark.asyncio
 async def test_activate_app_failure(maestro):
-    with patch("cortex.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
+    with patch("cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
         mock_run.side_effect = Exception("osascript failed")
         target = AppTarget(name="Safari")
 
@@ -41,7 +41,7 @@ async def test_activate_app_failure(maestro):
 @pytest.mark.asyncio
 async def test_inject_keystroke_app_not_running(maestro):
     with patch(
-        "cortex.ui_control.maestro.is_app_running", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
     ) as mock_is_running:
         mock_is_running.return_value = False
         target = AppTarget(name="NonExistentApp")
@@ -55,11 +55,11 @@ async def test_inject_keystroke_app_not_running(maestro):
 @pytest.mark.asyncio
 async def test_inject_keystroke_success(maestro):
     with patch(
-        "cortex.ui_control.maestro.is_app_running", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
     ) as mock_is_running:
         mock_is_running.return_value = True
 
-        with patch("cortex.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
+        with patch("cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
             target = AppTarget(name="Safari")
 
             result = await maestro.inject_keystroke(target, "t", ["command down"])
@@ -82,7 +82,7 @@ async def test_click_menu_invalid_path(maestro):
 
 @pytest.mark.asyncio
 async def test_click_menu_success(maestro):
-    with patch("cortex.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
+    with patch("cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock) as mock_run:
         target = AppTarget(name="Safari")
         result = await maestro.click_menu_item(target, ["File", "Export as PDF..."])
 

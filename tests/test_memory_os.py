@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 
 from cortex.compaction.mem0_pipeline import ExergyScore, Mem0Pipeline
-from cortex.context.hiagent import HiAgentTraceManager
-from cortex.policy.memory_os import MemoryOS, MemoryTier
+from cortex.extensions.context.hiagent import HiAgentTraceManager
+from cortex.extensions.policy.memory_os import MemoryOS, MemoryTier
 
 # ─── Mem0Pipeline ────────────────────────────────────────────────────
 

@@ -22,9 +22,9 @@ from typing import Any
 import aiosqlite
 
 from cortex.database.core import connect as db_connect
-from cortex.signals.bus import AsyncSignalBus, SignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
-logger = logging.getLogger("cortex.causality")
+logger = logging.getLogger("cortex.extensions.causality")
 
 __all__ = [
     "CausalOracle",

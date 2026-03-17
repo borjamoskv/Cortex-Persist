@@ -41,10 +41,10 @@ from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.manifestation import transfigure_ui
 from cortex.engine.reflex import trigger_autonomic_reflex
 from cortex.engine.rem_cycle import REMCoordinator
-from cortex.immune.membrane import ImmuneMembrane, Verdict
+from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
+from cortex.extensions.signals.bus import SignalBus
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
-from cortex.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +186,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         if not self._cortex:
             return
         try:
-            from cortex.policy import PolicyConfig, PolicyEngine
+            from cortex.extensions.policy import PolicyConfig, PolicyEngine
 
             config = PolicyConfig(max_actions=5)
             policy = PolicyEngine(self._cortex, config)

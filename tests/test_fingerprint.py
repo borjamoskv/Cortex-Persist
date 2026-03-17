@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.fingerprint.extractor import FingerprintExtractor
-from cortex.fingerprint.models import CognitiveFingerprint
+from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+from cortex.extensions.fingerprint.models import CognitiveFingerprint
 
 
 def _make_engine() -> MagicMock:
@@ -19,7 +19,7 @@ def _make_engine() -> MagicMock:
 
 def _patch_scanner(mock_data: dict):
     """Patch FingerprintScanner with controlled return values."""
-    scanner_patch = patch("cortex.fingerprint.extractor.FingerprintScanner", autospec=True)
+    scanner_patch = patch("cortex.extensions.fingerprint.extractor.FingerprintScanner", autospec=True)
     return scanner_patch, mock_data
 
 
@@ -87,7 +87,7 @@ class TestFingerprintEmpty:
     @pytest.mark.asyncio
     async def test_empty_db_returns_null_state(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             m = AsyncMock()
             m.total_facts.return_value = 0
             MockScanner.return_value = m
@@ -104,7 +104,7 @@ class TestPatternVector:
     async def test_risk_tolerance_computed_correctly(self):
         """C3+C4+C5 = 40 of 50 → risk_tolerance = 0.8."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(
                 total=50,
                 conf_dist={"C5": 20, "C4": 10, "C3": 10, "C2": 5, "C1": 5},
@@ -117,7 +117,7 @@ class TestPatternVector:
     async def test_synthesis_drive_from_bridges(self):
         """bridge=10 + discovery=5 of 50 total → synthesis_drive = 0.30."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(
                 total=50,
                 type_dist={"decision": 35, "bridge": 10, "discovery": 5},
@@ -131,7 +131,7 @@ class TestPatternVector:
         """20 facts/day over 10 days → density = 20/10 = 2.0 facts/day.
         Normalized: 2.0/10.0 = 0.20 (cap is 10 facts/day)."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(total=20, active_days=10)
             fp = await _run(engine)
 
@@ -141,7 +141,7 @@ class TestPatternVector:
     async def test_recency_bias_calculation(self):
         """40 of 50 facts in last 30 days → recency_bias = 0.8."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(total=50, recent=40, total_count=50)
             fp = await _run(engine)
 
@@ -152,7 +152,7 @@ class TestArchetype:
     @pytest.mark.asyncio
     async def test_archetype_field_populated(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner()
             fp = await _run(engine)
 
@@ -164,7 +164,7 @@ class TestArchetype:
     async def test_bold_experimenter_high_risk(self):
         """Pure C5 facts, no errors → should lean bold_experimenter or sovereign."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(
                 total=100,
                 conf_dist={"C5": 100},
@@ -181,7 +181,7 @@ class TestDomainPreferences:
     @pytest.mark.asyncio
     async def test_domain_preferences_populated(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner()
             fp = await _run(engine)
 
@@ -194,7 +194,7 @@ class TestDomainPreferences:
     @pytest.mark.asyncio
     async def test_domain_confidence_weight_passed_through(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner()
             fp = await _run(engine)
 
@@ -205,7 +205,7 @@ class TestSerialization:
     @pytest.mark.asyncio
     async def test_to_dict_keys_present(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner()
             fp = await _run(engine)
 
@@ -227,7 +227,7 @@ class TestSerialization:
     @pytest.mark.asyncio
     async def test_to_agent_prompt_contains_archetype(self):
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner()
             fp = await _run(engine)
 
@@ -240,11 +240,11 @@ class TestSerialization:
     async def test_completeness_grows_with_data(self):
         """More facts → higher completeness."""
         engine = _make_engine()
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(total=10)
             fp_small = await _run(engine)
 
-        with patch("cortex.fingerprint.extractor.FingerprintScanner") as MockScanner:
+        with patch("cortex.extensions.fingerprint.extractor.FingerprintScanner") as MockScanner:
             MockScanner.return_value = _mock_scanner(total=100)
             fp_large = await _run(engine)
 

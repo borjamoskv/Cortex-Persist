@@ -9,7 +9,7 @@ import click
 from rich.table import Table
 
 from cortex.cli.common import console
-from cortex.llm.quota import SovereignQuotaManager
+from cortex.extensions.llm.quota import SovereignQuotaManager
 
 
 @click.group()

@@ -22,13 +22,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.red_team.hydra_chaos import (
+from cortex.extensions.red_team.hydra_chaos import (
     ChaosResult,
     ChaosScenario,
     HydraChaosEngine,
     MockRedisClient,
 )
-from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ class TestRedisKillScenario:
     ):
         """When Redis dies mid-operation, the error MUST become a Ghost."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=1,
         ):
@@ -115,7 +115,7 @@ class TestRedisKillScenario:
     ):
         """Ghost capture on Redis kill MUST complete in O(1) time (< 100ms)."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=1,
         ):
@@ -139,7 +139,7 @@ class TestStreamCorruptionScenario:
     ):
         """Corrupted stream data MUST be intercepted as a Ghost."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=2,
         ):
@@ -171,7 +171,7 @@ class TestStreamCorruptionScenario:
 
         # get() should handle bad JSON gracefully
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline.capture_sync",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline.capture_sync",
         ):
             await cache.get("agent:test")
 
@@ -187,7 +187,7 @@ class TestPartialWriteScenario:
     ):
         """Partial write MUST be captured as Ghost with data-in-limbo metadata."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=3,
         ):
@@ -229,7 +229,7 @@ class TestConsumerStallScenario:
     ):
         """Consumer stall MUST be captured as Ghost without blocking."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=4,
         ):
@@ -255,7 +255,7 @@ class TestCascadeFailureScenario:
     ):
         """ALL concurrent failures MUST be captured — zero leaks."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=5,
         ):
@@ -278,7 +278,7 @@ class TestCascadeFailureScenario:
     ):
         """Cascade failure recovery MUST be O(1) — bounded latency."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=6,
         ):
@@ -304,7 +304,7 @@ class TestFullSiege:
     ):
         """Every chaos scenario MUST pass sovereignty check."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=99,
         ):
@@ -335,7 +335,7 @@ class TestFullSiege:
     ):
         """Report must contain structured data for all scenarios."""
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=100,
         ):
@@ -364,7 +364,7 @@ class TestGhostPipelineIntegration:
         pipeline = ErrorGhostPipeline()
 
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=42,
         ) as mock_persist:
@@ -388,7 +388,7 @@ class TestGhostPipelineIntegration:
         pipeline = ErrorGhostPipeline()
 
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=43,
         ):
@@ -410,7 +410,7 @@ class TestGhostPipelineIntegration:
         pipeline = ErrorGhostPipeline()
 
         with patch(
-            "cortex.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=44,
         ):

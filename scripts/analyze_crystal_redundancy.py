@@ -14,7 +14,7 @@ from typing import NamedTuple
 
 import numpy as np
 
-from cortex.swarm.crystal_thermometer import calculate_resonance
+from cortex.extensions.swarm.crystal_thermometer import calculate_resonance
 
 logger = logging.getLogger("analyze_redundancy")
 

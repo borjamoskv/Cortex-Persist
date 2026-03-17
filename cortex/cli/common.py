@@ -15,7 +15,7 @@ from rich.theme import Theme
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-    from cortex.timing import TimingTracker
+    from cortex.extensions.timing import TimingTracker
 
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH
@@ -50,7 +50,7 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine (lazy import)."""
-    from cortex.timing import TimingTracker
+    from cortex.extensions.timing import TimingTracker
 
     return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 

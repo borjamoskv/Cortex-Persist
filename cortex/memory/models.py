@@ -17,7 +17,16 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cortex.axioms.topological_id import flake_gen
+try:
+    from cortex.extensions.axioms.topological_id import flake_gen
+
+    def next_id() -> str:
+        return flake_gen.next_lexicographic_id()
+except ImportError:
+    import uuid
+
+    def next_id() -> str:
+        return uuid.uuid4().hex
 
 
 def now_iso() -> str:
@@ -33,7 +42,7 @@ class CausalEpisode:
     Enables the LLM to understand *why* something happened, not just *what*.
     """
 
-    episode_id: str = field(default_factory=lambda: flake_gen.next_lexicographic_id())
+    episode_id: str = field(default_factory=next_id)
     root_fact_id: int = 0
     fact_chain: list[dict] = field(default_factory=list)
     project: str = ""
@@ -84,7 +93,7 @@ class MemoryEntry:
     """
 
     content: str
-    id: str = field(default_factory=flake_gen.next_lexicographic_id)
+    id: str = field(default_factory=next_id)
     project: str | None = None
     source: str = "episodic"  # episodic | fact | reflection | ghost
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -144,7 +153,7 @@ class MemoryEvent(BaseModel):
     """
 
     event_id: str = Field(
-        default_factory=flake_gen.next_lexicographic_id,
+        default_factory=next_id,
         description="Unique identifier for this event.",
     )
     timestamp: datetime = Field(
@@ -172,7 +181,7 @@ class EpisodicSnapshot(BaseModel):
     """
 
     snapshot_id: str = Field(
-        default_factory=flake_gen.next_lexicographic_id,
+        default_factory=next_id,
         description="Unique identifier for this episode.",
     )
     summary: str = Field(description="Compressed textual summary of the events.")
@@ -199,7 +208,7 @@ class CortexFactModel(BaseModel):
     """
 
     id: str = Field(
-        default_factory=flake_gen.next_lexicographic_id,
+        default_factory=next_id,
         description="Unique identifier for the fact.",
     )
     tenant_id: str = Field(..., description="Absolute Zero-Trust Isolation.")

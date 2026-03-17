@@ -8,7 +8,7 @@ import sqlite3
 from cortex.database.core import connect as db_connect
 from cortex.engine.evolution_types import DomainMetrics, Mutation
 
-logger = logging.getLogger("cortex.evolution.metrics")
+logger = logging.getLogger("cortex.extensions.evolution.metrics")
 
 
 class CortexMetrics:

@@ -20,7 +20,7 @@ from typing import Any
 import httpx
 
 from cortex.api.client import CortexError, Fact
-from cortex.immune.chaos import ChaosGate, async_interceptor
+from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["AsyncCortexClient"]
 

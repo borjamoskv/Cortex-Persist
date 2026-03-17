@@ -36,6 +36,7 @@ class TransactionMixin(EngineMixinBase):
         ts = now_iso()
         cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
         prev = await cursor.fetchone()
+        await cursor.close()
         ph = prev[0] if prev else "GENESIS"
         th = compute_tx_hash(ph, project, action, dj, ts)
 

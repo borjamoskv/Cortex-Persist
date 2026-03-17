@@ -19,9 +19,9 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
-from cortex.llm.manager import LLMManager
-from cortex.llm.provider import LLMProvider
-from cortex.llm.router import IntentProfile
+from cortex.extensions.llm.manager import LLMManager
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import IntentProfile
 
 __all__ = [
     "AskRequest",

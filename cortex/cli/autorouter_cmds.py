@@ -257,7 +257,7 @@ def logs():
         console.print(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
         sys.exit(1)
 
-    from cortex.platform.sys import tail_file_command
+    from cortex.extensions.platform.sys import tail_file_command
 
     console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:

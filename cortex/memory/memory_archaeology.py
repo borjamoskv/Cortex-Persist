@@ -14,7 +14,10 @@ from typing import Any
 
 import numpy as np
 
-from cortex.llm.sovereign import SovereignLLM
+try:
+    from cortex.extensions.llm.sovereign import SovereignLLM
+except ImportError:
+    SovereignLLM = None  # type: ignore[assignment, misc]
 
 logger = logging.getLogger("cortex.memory.archaeology")
 
@@ -24,7 +27,7 @@ class MemoryArchaeologist:
 
     def __init__(self, engine: Any) -> None:
         self.engine = engine
-        self.llm = SovereignLLM()
+        self.llm = SovereignLLM() if SovereignLLM else None
 
     async def run_archaeology(
         self, project: str, similarity_threshold: float = 0.88, simulate: bool = False
@@ -138,6 +141,10 @@ class MemoryArchaeologist:
         l2_conn = self.engine.memory._l2._get_conn()
 
         for cluster_indices in clusters:
+            if not self.llm:
+                logger.warning("Archaeology bypassed: SovereignLLM is not installed.")
+                continue
+
             cluster_facts = [facts[idx] for idx in cluster_indices]
             content_list = [f"- {f['content']}" for f in cluster_facts]
             prompt = (

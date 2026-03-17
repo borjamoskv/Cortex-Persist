@@ -36,7 +36,7 @@ async def insert_fact_record(
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
-    from cortex.security.signatures import get_default_signer
+    from cortex.extensions.security.signatures import get_default_signer
 
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
@@ -58,23 +58,25 @@ async def insert_fact_record(
     # ── Causal Infrastructure: Validate & Auto-Resolve parent_decision_id ──
     if parent_decision_id is not None:
         # FK validation — ensure parent exists
-        cursor = await conn.execute("SELECT id FROM facts WHERE id = ?", (parent_decision_id,))
-        if await cursor.fetchone() is None:
-            logger.warning(
-                "parent_decision_id=%d references non-existent fact — cleared",
-                parent_decision_id,
-            )
-            parent_decision_id = None
+        async with conn.execute(
+            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
+        ) as cursor:
+            if await cursor.fetchone() is None:
+                logger.warning(
+                    "parent_decision_id=%d references non-existent fact — cleared",
+                    parent_decision_id,
+                )
+                parent_decision_id = None
     elif fact_type in ("decision", "error"):
         # Auto-resolve: link to the most recent decision in the same project
         # Decisions chain to previous decisions; errors link to their cause.
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT id FROM facts WHERE project = ? AND tenant_id = ? "
             "AND fact_type = 'decision' AND is_tombstoned = 0 "
             "ORDER BY id DESC LIMIT 1",
             (project, tenant_id),
-        )
-        row = await cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         if row:
             parent_decision_id = row[0]
             logger.debug(
@@ -103,8 +105,8 @@ async def insert_fact_record(
 
     cursor = await conn.execute(
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, "
-        "hash, created_at, updated_at, valid_from) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "hash, created_at, updated_at, valid_from, confidence, source) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -116,6 +118,8 @@ async def insert_fact_record(
             ts,
             ts,
             ts,
+            confidence,
+            source,
         ),
     )
     fact_id = cursor.lastrowid

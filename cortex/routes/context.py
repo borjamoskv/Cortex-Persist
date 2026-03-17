@@ -13,9 +13,9 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.context.collector import ContextCollector
-from cortex.context.inference import ContextInference
 from cortex.engine_async import AsyncCortexEngine
+from cortex.extensions.context.collector import ContextCollector
+from cortex.extensions.context.inference import ContextInference
 from cortex.types.models import (
     ContextSignalModel,
     ContextSnapshotResponse,

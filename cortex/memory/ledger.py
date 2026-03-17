@@ -22,7 +22,12 @@ from typing import Any
 import aiosqlite
 
 from cortex.memory.models import MemoryEvent
-from cortex.security.tenant import get_tenant_id
+
+try:
+    from cortex.extensions.security.tenant import get_tenant_id
+except ImportError:
+    def get_tenant_id() -> str:
+        return "default"
 
 __all__ = ["EventLedgerL3"]
 

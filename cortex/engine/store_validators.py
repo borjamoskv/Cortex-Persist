@@ -22,7 +22,7 @@ MIN_CONTENT_LENGTH = 10
 
 def validate_content(project: str, content: str, fact_type: str) -> str:
     """Sovereign Content Gatekeeper — normalizes content before storage.
-    
+
     Note: Structural requirements (minimum length, poisoning checks, non-empty)
     are now enforced deterministically by StorageGuard via Pydantic upstream.
     This function handles business-logic specific normalizations only.
@@ -38,6 +38,7 @@ async def check_dedup(
     tenant_id: str,
     project: str,
     content: str,
+    exclude_id: int | None = None,
 ) -> int | None:
     """Verify if fact already exists with Zero-G entropy penalty.
 
@@ -48,12 +49,20 @@ async def check_dedup(
 
     f_hash = compute_fact_hash(content)
 
-    cursor = await conn.execute(
+    query = (
         "SELECT id FROM facts WHERE tenant_id = ? AND project = ? AND hash = ? "
-        "AND is_tombstoned = 0 AND is_quarantined = 0 AND valid_until IS NULL LIMIT 1",
-        (tenant_id, project, f_hash),
+        "AND is_tombstoned = 0 AND is_quarantined = 0 AND valid_until IS NULL"
     )
-    existing = await cursor.fetchone()
+    params: list[str | int] = [tenant_id, project, f_hash]
+
+    if exclude_id is not None:
+        query += " AND id != ?"
+        params.append(exclude_id)
+
+    query += " LIMIT 1"
+
+    async with conn.execute(query, tuple(params)) as cursor:
+        existing = await cursor.fetchone()
     if existing:
         return existing[0]
     return None

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.immune.error_boundary import ErrorBoundary, error_boundary
+from cortex.extensions.immune.error_boundary import ErrorBoundary, error_boundary
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
@@ -17,12 +17,12 @@ def _reset_pipeline():
     """Reset singleton pipeline between tests."""
     with (
         patch(
-            "cortex.immune.error_boundary.ErrorBoundary._persist",
+            "cortex.extensions.immune.error_boundary.ErrorBoundary._persist",
             new_callable=AsyncMock,
             return_value=42,
         ) as mock_persist,
         patch(
-            "cortex.immune.error_boundary.ErrorBoundary._persist_sync",
+            "cortex.extensions.immune.error_boundary.ErrorBoundary._persist_sync",
             new_callable=MagicMock,
         ) as mock_persist_sync,
     ):

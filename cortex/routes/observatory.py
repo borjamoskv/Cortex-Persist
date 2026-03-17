@@ -52,7 +52,7 @@ def observatory_status(
 def _get_daemon_status() -> dict[str, Any]:
     """Load last daemon check results."""
     try:
-        from cortex.daemon import MoskvDaemon
+        from cortex.extensions.daemon import MoskvDaemon
 
         status = MoskvDaemon.load_status()
         return status if status else {"status": "no_data"}
@@ -63,7 +63,7 @@ def _get_daemon_status() -> dict[str, Any]:
 def _get_dependency_health() -> dict[str, Any]:
     """Run dependency health checks."""
     try:
-        from cortex.daemon.monitors.dependency_health import (
+        from cortex.extensions.daemon.monitors.dependency_health import (
             DependencyHealthMonitor,
         )
 
@@ -78,7 +78,7 @@ def _get_effectiveness() -> dict[str, Any]:
     try:
         from cortex.cli.common import get_engine
         from cortex.config import DEFAULT_DB_PATH
-        from cortex.mejoralo.effectiveness import EffectivenessTracker
+        from cortex.extensions.mejoralo.effectiveness import EffectivenessTracker
 
         engine = get_engine(str(DEFAULT_DB_PATH))
         try:
@@ -95,7 +95,7 @@ def _get_effectiveness() -> dict[str, Any]:
 def _get_evolution_status() -> dict[str, Any]:
     """Get evolution engine swarm status if running."""
     try:
-        from cortex.evolution.engine import EvolutionEngine
+        from cortex.extensions.evolution.engine import EvolutionEngine
 
         engine = EvolutionEngine(resume=True, persist=False)  # type: ignore[reportCallIssue]
         return engine.swarm_status()  # type: ignore[reportAttributeAccessIssue]

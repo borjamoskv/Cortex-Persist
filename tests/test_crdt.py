@@ -1,7 +1,7 @@
 """Tests for CRDT Merge Engine — Phase 4."""
 
-from cortex.sync.crdt import ConflictRecord, CortexCRDT, FactReplica
-from cortex.sync.hlc import HLCTimestamp
+from cortex.extensions.sync.crdt import ConflictRecord, CortexCRDT, FactReplica
+from cortex.extensions.sync.hlc import HLCTimestamp
 
 
 def _make_replica(

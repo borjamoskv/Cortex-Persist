@@ -4,7 +4,7 @@ CORTEX Nexus v8.1 — The Einstein-Rosen Bridge (Production Grade).
 Legacy shim for backward compatibility. Use `cortex.nexus` directly.
 """
 
-from cortex.nexus import (
+from cortex.extensions.nexus import (
     DomainOrigin,
     IntentType,
     NexusWorldModel,

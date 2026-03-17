@@ -22,7 +22,16 @@ from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
-from cortex.health.health_mixin import HealthMixin
+
+try:
+    from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
+except ImportError:
+    class HealthMixin:  # type: ignore
+        async def health_check(self, *args, **kwargs):
+            return {"status": "unhealthy", "reason": "No Health extension"}
+
+        async def health_report(self, *args, **kwargs):
+            return {"status": "unhealthy", "reason": "No Health extension"}
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -36,7 +45,7 @@ from cortex.engine.lock import SovereignLock  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 if TYPE_CHECKING:
-    from cortex.interfaces.engine import EngineProtocol
+    from cortex.extensions.interfaces.engine import EngineProtocol
 
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
@@ -380,15 +389,17 @@ class CortexEngine(
             return None
         from cortex.engine.models import Fact
 
-        return Fact(**{k: v for k, v in res.items() if k != "type"})
+        return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.utils.errors import FactNotFound
 
         conn = await self.get_conn()
-        cursor = await conn.execute(f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,))
-        row = await cursor.fetchone()
+        async with conn.execute(
+            f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
         fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
         if not fact or fact.valid_until:
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
@@ -406,7 +417,7 @@ class CortexEngine(
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
-        from cortex.shannon.report import EntropyReport
+        from cortex.extensions.shannon.report import EntropyReport
 
         return await EntropyReport.analyze(self, project)
 
@@ -427,7 +438,7 @@ class CortexEngine(
             project: Optional project filter.
             top_domains: Max domain preferences to extract.
         """
-        from cortex.fingerprint.extractor import FingerprintExtractor
+        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
 
         return await FingerprintExtractor.extract(self, project, top_domains)
 
@@ -436,7 +447,7 @@ class CortexEngine(
 
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
-        from cortex.shannon.immortality import ImmortalityIndex
+        from cortex.extensions.shannon.immortality import ImmortalityIndex
 
         return await ImmortalityIndex.compute(self, project)
 
@@ -453,7 +464,7 @@ class CortexEngine(
         Returns a list of ActionItems scored by value function V(s) = R(s,a) + γ·V(s').
         Higher value = more urgent/impactful action.
         """
-        from cortex.policy import PolicyEngine
+        from cortex.extensions.policy import PolicyEngine
 
         policy = PolicyEngine(self)
         return await policy.evaluate(project=project, tenant_id=tenant_id)
@@ -492,7 +503,7 @@ class CortexEngine(
 
     def export_snapshot(self, out_path: str | Path) -> str:
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
-        from cortex.sync.snapshot import export_snapshot
+        from cortex.extensions.sync.snapshot import export_snapshot
 
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 

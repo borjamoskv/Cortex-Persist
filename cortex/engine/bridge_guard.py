@@ -129,15 +129,15 @@ class BridgeGuard:
 
         Returns fraction of active facts that are quarantined (0.0 to 1.0).
         """
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT "
             "  SUM(CASE WHEN is_quarantined = 1 THEN 1 ELSE 0 END) as quarantined, "
             "  COUNT(*) as total "
             "FROM facts "
             "WHERE tenant_id = ? AND project = ? AND valid_until IS NULL",
             (tenant_id, project),
-        )
-        row = await cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         if not row or not row[1]:
             return 0.0
         return row[0] / row[1]
@@ -160,14 +160,14 @@ class BridgeGuard:
         f_hash = compute_fact_hash(content)
 
         # Search for the same hash in OTHER projects
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT project FROM facts "
             "WHERE tenant_id = ? AND project != ? AND hash = ? "
             "AND valid_until IS NULL AND is_quarantined = 0 "
             "LIMIT 1",
             (tenant_id, current_project, f_hash),
-        )
-        row = await cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         if row:
             return row[0]
         return None
@@ -181,12 +181,12 @@ class BridgeGuard:
 
         Returns list of bridge audit results.
         """
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT id, project, content FROM facts "
             "WHERE fact_type = 'bridge' AND valid_until IS NULL "
             "AND is_quarantined = 0",
-        )
-        rows = await cursor.fetchall()
+        ) as cursor:
+            rows = await cursor.fetchall()
 
         results = []
         for row in rows:

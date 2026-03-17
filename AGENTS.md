@@ -56,7 +56,7 @@ agents working inside the repository.
 | **API** | FastAPI + Uvicorn (optional: `[api]`) |
 | **CLI** | Click + Rich |
 | **Cloud** | `asyncpg` (AlloyDB), `redis` (L1 cache), `qdrant-client` (vector cloud) — optional: `[cloud]` |
-| **Linting** | Ruff (`E`, `F`, `W`, `I`, `UP`, `B` — line length 100) |
+| **Linting** | Ruff (`E`, `F`, `W`, `I`, `UP`, `B`, `ASYNC` — line length 100). Enforces non-blocking limits structurally |
 | **Type check** | Pyright (basic mode) |
 | **Testing** | pytest + pytest-asyncio + pytest-cov |
 
@@ -126,7 +126,7 @@ Before changing critical trust surfaces:
    - embedding/index side effects
    - tenant isolation
 4. For schema changes:
-   - review prior migrations
+   - **EXECUTE REQUIRED**: `alembic history --verbose`. Print exact downgrade target of the previous migration.
    - assess backward compatibility
    - document rollback constraints
    - check production irreversibility

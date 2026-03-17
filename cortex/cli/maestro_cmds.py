@@ -12,8 +12,8 @@ import asyncio
 import click
 
 from cortex.cli.common import console, get_engine
-from cortex.ui_control.maestro import MaestroUI
-from cortex.ui_control.models import AppTarget
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 @click.group(name="maestro")
@@ -311,7 +311,7 @@ def run_cmd(instruction: tuple[str, ...]):
     text = " ".join(instruction)
 
     async def _run():
-        from cortex.agents.mac_maestro import MacMaestroAgent
+        from cortex.extensions.agents.mac_maestro import MacMaestroAgent
 
         agent = MacMaestroAgent()
         console.print(f"Maestro Ω procesando: '{text}'...")

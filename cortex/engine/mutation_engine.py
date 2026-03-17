@@ -27,7 +27,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.axioms.topological_id import flake_gen
+from cortex.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 
@@ -139,11 +139,11 @@ class FactMutationEngine:
         entity_id: int,
     ) -> str:
         """Fetch the signature of the most recent event for this entity."""
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT signature FROM entity_events WHERE entity_id = ? ORDER BY id DESC LIMIT 1",
             (entity_id,),
-        )
-        row = await cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         return row[0] if row else "GENESIS"
 
     # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
@@ -196,12 +196,13 @@ class FactMutationEngine:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
 
         # 1. Fetch current scores
-        cursor = await conn.execute(
-            "SELECT consensus_score, confidence FROM facts WHERE id = ?", (fact_id,)
-        )
-        row = await cursor.fetchone()
-        if not row:
-            return
+        async with conn.execute(
+            "SELECT json_extract(meta, '$.consensus_score'), confidence FROM facts WHERE id = ?",
+            (fact_id,),
+        ) as cursor:
+            row = await cursor.fetchone()
+            if not row:
+                return
 
         current_score, confidence = row
         new_score = round((current_score or 1.0) * decay_factor, 3)
@@ -214,8 +215,13 @@ class FactMutationEngine:
             new_confidence = "disputed"
 
         await conn.execute(
-            "UPDATE facts SET consensus_score = ?, confidence = ?, updated_at = ? WHERE id = ?",
-            (new_score, new_confidence, ts, fact_id),
+            "UPDATE facts SET confidence = ?, updated_at = ?, "
+            "meta = CASE "
+            "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
+            "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+            "END "
+            "WHERE id = ?",
+            (new_confidence, ts, new_score, fact_id),
         )
 
     async def _proj_deprecate(
@@ -245,11 +251,18 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        reason = payload.get("reason", "tombstoned")
+        ts = payload.get(
+            "timestamp", datetime.now(timezone.utc).isoformat()
+        )
         await conn.execute(
-            "UPDATE facts SET valid_until = ?, is_tombstoned = 1, "
-            "tombstoned_at = ?, updated_at = ? WHERE id = ?",
-            (ts, ts, ts, fact_id),
+            "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
+            "meta = CASE "
+            "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
+            "  ELSE json_set(COALESCE(meta, '{}'), '$.tombstoned_at', ?, '$.tombstone_reason', ?) "
+            "END "
+            "WHERE id = ?",
+            (ts, ts, ts, reason, fact_id),
         )
 
     async def _proj_quarantine(
@@ -288,15 +301,31 @@ class FactMutationEngine:
     ) -> None:
         score = payload.get("consensus_score")
         confidence = payload.get("confidence")
-        if score is not None and confidence:
+
+        if score is not None and confidence is not None:
             await conn.execute(
-                "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
-                (score, confidence, fact_id),
+                "UPDATE facts SET confidence = ?, "
+                "meta = CASE "
+                "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
+                "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+                "END "
+                "WHERE id = ?",
+                (confidence, score, fact_id),
             )
         elif score is not None:
             await conn.execute(
-                "UPDATE facts SET consensus_score = ? WHERE id = ?",
+                "UPDATE facts SET "
+                "meta = CASE "
+                "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
+                "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+                "END "
+                "WHERE id = ?",
                 (score, fact_id),
+            )
+        elif confidence is not None:
+            await conn.execute(
+                "UPDATE facts SET confidence = ? WHERE id = ?",
+                (confidence, fact_id),
             )
 
     async def _proj_restore(
@@ -325,39 +354,38 @@ class FactMutationEngine:
         Recalculates every signature and verifies back-pointers.
         Returns a structured audit result.
         """
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT id, entity_id, tenant_id, event_type, payload, "
             "prev_hash, signature "
             "FROM entity_events "
             "WHERE entity_id = ? "
             "ORDER BY id ASC",
             (entity_id,),
-        )
+        ) as cursor:
+            findings: list[str] = []
+            last_sig = "GENESIS"
+            count = 0
 
-        findings: list[str] = []
-        last_sig = "GENESIS"
-        count = 0
+            async for row in cursor:
+                count += 1
+                eid, ent_id, tid, etype, payload_str, prev_hash, sig = row
 
-        async for row in cursor:
-            count += 1
-            eid, ent_id, tid, etype, payload_str, prev_hash, sig = row
+                # 1. Hash continuity
+                if prev_hash != last_sig:
+                    findings.append(
+                        f"DISCONTINUITY: Event {eid} prev_hash={prev_hash} "
+                        f"but last signature was {last_sig}"
+                    )
 
-            # 1. Hash continuity
-            if prev_hash != last_sig:
-                findings.append(
-                    f"DISCONTINUITY: Event {eid} prev_hash={prev_hash} "
-                    f"but last signature was {last_sig}"
-                )
+                # 2. Signature integrity
+                chain_input = f"{eid}:{ent_id}:{tid}:{etype}:{payload_str}:{prev_hash}"
+                expected = hashlib.sha3_256(chain_input.encode()).hexdigest()
+                if sig != expected:
+                    findings.append(
+                        f"TAMPER_DETECTED: Event {eid} sig={sig[:16]}… expected={expected[:16]}…"
+                    )
 
-            # 2. Signature integrity
-            chain_input = f"{eid}:{ent_id}:{tid}:{etype}:{payload_str}:{prev_hash}"
-            expected = hashlib.sha3_256(chain_input.encode()).hexdigest()
-            if sig != expected:
-                findings.append(
-                    f"TAMPER_DETECTED: Event {eid} sig={sig[:16]}… expected={expected[:16]}…"
-                )
-
-            last_sig = sig
+                last_sig = sig
 
         return {
             "entity_id": entity_id,
@@ -385,17 +413,16 @@ class FactMutationEngine:
             query += "AND timestamp <= ? "
         query += "ORDER BY id ASC"
 
-        cursor = await conn.execute(query, params)
-
         state: dict[str, Any] = {}
-        async for row in cursor:
-            event_type, payload_str = row
-            try:
-                payload = json.loads(payload_str)
-            except (json.JSONDecodeError, TypeError):
-                payload = {}
-            state["_last_event_type"] = event_type
-            state.update(payload)
+        async with conn.execute(query, params) as cursor:
+            async for row in cursor:
+                event_type, payload_str = row
+                try:
+                    payload = json.loads(payload_str)
+                except (json.JSONDecodeError, TypeError):
+                    payload = {}
+                state["_last_event_type"] = event_type
+                state.update(payload)
 
         return state
 

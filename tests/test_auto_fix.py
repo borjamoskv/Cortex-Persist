@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from cortex.swarm.auto_fix import (
+from cortex.extensions.swarm.auto_fix import (
     AutoFixPipeline,
     GhostClass,
     GhostProtocol,
@@ -88,7 +88,7 @@ def test_ghost_to_task():
 
 
 @pytest.mark.asyncio
-@patch("cortex.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
 async def test_process_ghost_success(mock_execute):
     """Test standard successful autofix flow."""
     mock_execute.return_value = {
@@ -118,8 +118,8 @@ async def test_process_ghost_success(mock_execute):
 
 
 @pytest.mark.asyncio
-@patch("cortex.swarm.auto_fix.AutoFixPipeline._execute")
-@patch("cortex.swarm.auto_fix.AutoFixPipeline._escalate")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._escalate")
 async def test_process_ghost_execution_failure(mock_escalate, mock_execute):
     """Test failure during Aether execution escalates the ghost (Ω₅)."""
     mock_execute.side_effect = RuntimeError("Aether crash: OOM")
@@ -151,7 +151,7 @@ async def test_process_ghost_unknown_classification():
     )
 
     # _execute shouldn't even be called for UNKNOWN
-    with patch("cortex.swarm.auto_fix.AutoFixPipeline._execute") as mock_exe:
+    with patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute") as mock_exe:
         result = await pipeline.process_ghost(ghost)
 
         assert result.success is False

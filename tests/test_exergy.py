@@ -14,7 +14,7 @@ os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
 
-from cortex.shannon.exergy import ExergyReport, compute_exergy_report
+from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
 
 
 class TestComputeExergyReport:

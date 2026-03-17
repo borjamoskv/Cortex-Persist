@@ -23,6 +23,13 @@ async def engine(tmp_path: Path):
     db = str(tmp_path / "test_store.db")
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
+
+    # Ensure causal_edges is created since engine.init_db() doesn't auto-create it now
+    from cortex.engine.causality import AsyncCausalGraph
+    async with e.session() as conn:
+        cg = AsyncCausalGraph(conn)
+        await cg.ensure_table()
+
     yield e
     await e.close()
 
@@ -152,3 +159,112 @@ class TestUpdate:
     async def test_update_nonexistent_raises(self, engine):
         with pytest.raises(ValueError, match="not found"):
             await engine.update(999999, content="ghost update")
+
+# ─── Taint Integration ──────────────────────────────────────────────────
+
+class TestTaintIntegration:
+    async def test_deprecate_triggers_taint_propagation(self, engine):
+        # 1. Create parent fact (C5)
+        parent_id = await engine.store(
+            project="test",
+            content="Parent fact that will be deprecated.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            confidence="C5"
+        )
+        
+        # 2. Create child fact depending on parent (C5)
+        # We need to manually add the causal edge if `store` doesn't do it automatically,
+        # but store takes parent_decision_id. Wait, does `store` create EDGE_DERIVED_FROM?
+        child_id = await engine.store(
+            project="test",
+            content="Child fact that depends on parent.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            confidence="C5",
+            parent_decision_id=parent_id
+        )
+
+        # Let's make sure edge is created. The current store() might not map parent_decision_id to an edge.
+        # Let's manually create EDGE_DERIVED_FROM just in case.
+        from cortex.engine.causality import EDGE_DERIVED_FROM
+        async with engine.session() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                    (child_id, parent_id, EDGE_DERIVED_FROM)
+                )
+                await conn.commit()
+            
+        # 3. Deprecate the parent fact. This should trigger propagate_taint.
+        await engine.deprecate(parent_id, reason="testing taint propagation")
+        
+        # 4. Check the child's confidence. Invalidation triggers propagate_taint,
+        # which downgrades the confidence. If parent goes C5 -> None, child goes C5 -> C4 (or lower based on logic).
+        child_fact = await engine.get_fact(child_id)
+        assert child_fact is not None, "Child fact should exist"
+        assert child_fact.confidence != "C5", "Child confidence should be downgraded upon parent invalidation"      
+        # Check that it's marked as tainted in causal_edges
+        from cortex.engine.causality import EDGE_TAINTED_BY
+        async with engine.session() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
+                    (parent_id, EDGE_TAINTED_BY)
+                )
+                taint_edges = await cur.fetchall()
+                taint_sources = [row[0] for row in taint_edges]
+                assert child_id in taint_sources, "Child should be linked by EDGE_TAINTED_BY to the deprecated parent"
+
+    async def test_invalidate_triggers_taint_propagation(self, engine):
+        # 1. Create parent fact
+        parent_id = await engine.store(
+            project="test",
+            content="Evil parent fact.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            confidence="C5"
+        )
+        
+        # 2. Create child fact
+        child_id = await engine.store(
+            project="test",
+            content="Innocent child fact.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            confidence="C5"
+        )
+
+        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TAINTED_BY
+        async with engine.session() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                    (child_id, parent_id, EDGE_DERIVED_FROM)
+                )
+                await conn.commit()
+
+        # 3. Invalidate the parent
+        await engine.invalidate(parent_id, reason="testing invalidation taint")
+
+        # 4. Check the parent fact (should be C1 and tombstoned -- tombstone might remove it from get_fact if it filters status, let's see)
+        async with engine.session() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("SELECT confidence, is_tombstoned FROM facts WHERE id = ?", (parent_id,))
+                p_row = await cur.fetchone()
+                assert p_row is not None
+                assert p_row[0] == "C1", "Parent confidence should be C1 after invalidate"
+                assert p_row[1] == 1, "Parent should be tombstoned"
+                
+                await cur.execute("SELECT confidence FROM facts WHERE id = ?", (child_id,))
+                c_row = await cur.fetchone()
+                assert c_row is not None
+                assert c_row[0] == "C4", "Child confidence should be downgraded to C4"
+
+                await cur.execute(
+                    "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
+                    (parent_id, EDGE_TAINTED_BY)
+                )
+                taint_edges = await cur.fetchall()
+                taint_sources = [row[0] for row in taint_edges]
+                assert child_id in taint_sources, "Child should have TAINTED_BY edge"

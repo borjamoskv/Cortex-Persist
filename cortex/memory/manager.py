@@ -21,12 +21,31 @@ from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
-from cortex.policy.memory_os import MemoryOS
+
+try:
+    from cortex.extensions.policy.memory_os import MemoryOS
+except ImportError:
+    MemoryOS = None  # type: ignore
+
 from cortex.routes.notch_ws import notify_notch_pruning
-from cortex.security.tenant import get_tenant_id
-from cortex.sovereign.endocrine import DigitalEndocrine
+
+try:
+    from cortex.extensions.security.tenant import get_tenant_id
+except ImportError:
+    def get_tenant_id() -> str:
+        return "default"
+
+try:
+    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+except ImportError:
+    DigitalEndocrine = None  # type: ignore
+
 from cortex.telemetry.metrics import metrics
-from cortex.thinking.fusion import ContextFusion
+
+try:
+    from cortex.extensions.thinking.fusion import ContextFusion
+except ImportError:
+    ContextFusion = None  # type: ignore
 
 try:
     from cortex.memory.semantic_ram import DynamicSemanticSpace
@@ -117,7 +136,7 @@ class CortexMemoryManager:
         except ImportError:
             self._hologram = None
 
-        self._endocrine = DigitalEndocrine()
+        self._endocrine = DigitalEndocrine() if DigitalEndocrine else None
         self._schema_engine = SchemaEngine()
 
         from cortex.memory.metamemory import MetamemoryMonitor
@@ -126,12 +145,12 @@ class CortexMemoryManager:
 
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
-        self._memory_os = MemoryOS()
+        self._memory_os = MemoryOS() if MemoryOS else None
 
         # ART-v2 Resonance Engine [v6.2]
         _sensor = None
         try:
-            from cortex.songlines.sensor import TopographicSensor
+            from cortex.extensions.songlines.sensor import TopographicSensor
 
             _sensor = TopographicSensor()
         except ImportError:
@@ -143,7 +162,7 @@ class CortexMemoryManager:
 
         if self._dynamic_space:
             self._dynamic_space.start()
-        self._fusion = ContextFusion(judge_provider=router)
+        self._fusion = ContextFusion(judge_provider=router) if ContextFusion else None
         self._start_bg_workers()
 
     def _start_bg_workers(self) -> None:
@@ -206,7 +225,8 @@ class CortexMemoryManager:
         await self._l3.append_event(event)
 
         # Ingest into Digital Endocrine system [v6.2]
-        self._endocrine.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
+        if self._endocrine:
+            self._endocrine.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
 
         overflowed = self._l1.add_event(event)
 
@@ -419,7 +439,7 @@ class CortexMemoryManager:
             "episodic_context": episodic_facts,
         }
 
-        if fuse_context and episodic_facts:
+        if fuse_context and episodic_facts and self._fusion:
             context["episodic_context"] = await self._fusion.fuse_context(
                 user_prompt=query or "", retrieved_facts=episodic_facts
             )

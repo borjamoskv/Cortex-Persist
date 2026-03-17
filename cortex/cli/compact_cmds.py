@@ -153,9 +153,11 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
 @click.option("--db", default=DEFAULT_DB, help="Database path.")
 def compact_status(project, db) -> None:
     """Show compaction history and statistics."""
+    from cortex.cli.common import _run_async
+
     engine = get_engine(db)
     try:
-        stats = get_compaction_stats(engine, project)
+        stats = _run_async(get_compaction_stats(engine, project))
 
         if stats["total_compactions"] == 0:  # type: ignore[reportIndexIssue]
             console.print("[dim]No compaction history found.[/]")
@@ -203,9 +205,11 @@ def compact_session_cmd(project, max_facts, db) -> None:
     grouped by type and sorted by importance. Ideal for pasting into
     a new conversation to avoid context rot.
     """
+    from cortex.cli.common import _run_async
+
     engine = get_engine(db)
     try:
-        output = compact_session(engine, project, max_facts=max_facts)
+        output = _run_async(compact_session(engine, project, max_facts=max_facts))
         console.print(output)
     finally:
         close_engine_sync(engine)

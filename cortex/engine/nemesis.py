@@ -8,7 +8,7 @@ import aiosqlite
 
 from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.signals.bus import AsyncSignalBus, SignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.nemesis")
 

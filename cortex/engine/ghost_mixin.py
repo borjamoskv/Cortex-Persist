@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.songlines.sensor import GhostTrace
+    from cortex.extensions.songlines.sensor import GhostTrace
 
 import aiosqlite
 
 from cortex.engine.mixins.base import EngineMixinBase
-from cortex.songlines.economy import ThermalEconomy
-from cortex.songlines.emitter import ResonanceEmitter
-from cortex.songlines.sensor import TopographicSensor
+from cortex.extensions.songlines.economy import ThermalEconomy
+from cortex.extensions.songlines.emitter import ResonanceEmitter
+from cortex.extensions.songlines.sensor import TopographicSensor
 
 __all__ = ["GhostMixin"]
 

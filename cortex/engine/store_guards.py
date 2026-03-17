@@ -26,7 +26,7 @@ def _guard_injection(
     Passes ``source`` to the guard so trusted agents bypass L1/L5.
     """
     try:
-        from cortex.security.injection_guard import GUARD
+        from cortex.extensions.security.injection_guard import GUARD
 
         report = GUARD.scan(content, source=source)
         if not report.is_safe:
@@ -57,7 +57,7 @@ def _guard_anomaly(
 ) -> dict[str, Any] | None:
     """Check for statistical anomalies in store patterns."""
     try:
-        from cortex.security.anomaly_detector import DETECTOR, SecurityEvent
+        from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
 
         anomaly = DETECTOR.record_event(
             SecurityEvent(
@@ -82,12 +82,12 @@ def _guard_anomaly(
                 "anomaly_severity": anomaly.severity,
             }
             if anomaly.severity == "critical":
-                from cortex.security.security_sync import SIGNAL
+                from cortex.extensions.security.security_sync import SIGNAL
 
                 SIGNAL.emit_sync("threat", {"type": "anomaly", "severity": "critical"})
                 raise ValueError(f"ANOMALY BLOCKED: {anomaly.description}")
             if anomaly.severity == "high":
-                from cortex.security.security_sync import SIGNAL
+                from cortex.extensions.security.security_sync import SIGNAL
 
                 SIGNAL.emit_sync("anomaly", {"type": "anomaly", "severity": "high"})
     except ImportError:
@@ -101,8 +101,8 @@ def _guard_honeypot(
 ) -> dict[str, Any] | None:
     """Check if content attempts to access a honeypot resource."""
     try:
-        from cortex.security.honeypot import HONEY_POT
-        from cortex.security.security_sync import SIGNAL
+        from cortex.extensions.security.honeypot import HONEY_POT
+        from cortex.extensions.security.security_sync import SIGNAL
 
         decoy = HONEY_POT.check_exploitation(content)
         if decoy:

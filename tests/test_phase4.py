@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.aether.tools import AgentToolkit
-from cortex.swarm.auto_fix import AutoFixPipeline
+from cortex.extensions.aether.tools import AgentToolkit
+from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 
 
 @pytest.fixture
@@ -132,8 +132,8 @@ async def test_autonomous_merge_failure_conflict(temp_repo):
 
 
 @pytest.mark.asyncio
-@patch("cortex.swarm.auto_fix.AutoFixPipeline._execute")
-@patch("cortex.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
 async def test_process_ghost_triggers_merge(mock_merge, mock_execute):
     """Verify that process_ghost calls _autonomous_merge on success."""
     mock_execute.return_value = {

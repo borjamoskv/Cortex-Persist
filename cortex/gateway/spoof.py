@@ -13,8 +13,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from cortex.extensions.llm.router import CortexPrompt, IntentProfile
 from cortex.gateway.shield import APIShield
-from cortex.llm.router import CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.gateway.spoof")
 
@@ -34,7 +34,7 @@ class SpoofManager:
             logger.error("Failed to load spoof rules: %s", e)
             # Ω₅: Persist config failure as ghost
             try:
-                from cortex.immune.error_boundary import ErrorBoundary
+                from cortex.extensions.immune.error_boundary import ErrorBoundary
 
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
             except Exception:  # noqa: BLE001 — boundary persistence must never crash config load

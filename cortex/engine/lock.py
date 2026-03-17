@@ -64,11 +64,11 @@ class SovereignLock:
             # 3. Wait for state collapse (polling projection)
             start_time = datetime.now(timezone.utc)
             while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
-                cursor = await conn.execute(
+                async with conn.execute(
                     "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
                     (resource,),
-                )
-                row = await cursor.fetchone()
+                ) as cursor:
+                    row = await cursor.fetchone()
                 if row:
                     holder, expiry = row
                     # Clean up if expired
@@ -102,10 +102,10 @@ class SovereignLock:
     async def is_locked(self, resource: str) -> bool:
         """Check current state without waiting."""
         async with self._engine.session() as conn:
-            cursor = await conn.execute(
+            async with conn.execute(
                 "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?", (resource,)
-            )
-            row = await cursor.fetchone()
+            ) as cursor:
+                row = await cursor.fetchone()
             if not row:
                 return False
             holder, expiry = row
@@ -124,20 +124,21 @@ class SovereignLock:
         )
 
         # 2. Get unhandled intents for this resource
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
-        )
-        state_row = await cursor.fetchone()
+        ) as cursor:
+            state_row = await cursor.fetchone()
         current_holder = state_row[0] if state_row else None
 
         # Check for release intent for current holder
         if current_holder:
-            cursor = await conn.execute(
+            async with conn.execute(
                 "SELECT id FROM lock_intents WHERE resource = ? AND agent_id = ? "
                 "AND action = 'release' ORDER BY id DESC LIMIT 1",
                 (resource, current_holder),
-            )
-            if await cursor.fetchone():
+            ) as cursor:
+                has_release = await cursor.fetchone() is not None
+            if has_release:
                 # Holder released. Delete related intents and clear state.
                 await conn.execute(
                     "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
@@ -148,13 +149,13 @@ class SovereignLock:
 
         # Pick the next candidate (FIFO + Priority)
         if not current_holder:
-            cursor = await conn.execute(
+            async with conn.execute(
                 "SELECT agent_id, expires_at FROM lock_intents "
                 "WHERE resource = ? AND action = 'request' "
                 "ORDER BY priority DESC, id ASC LIMIT 1",
                 (resource,),
-            )
-            row = await cursor.fetchone()
+            ) as cursor:
+                row = await cursor.fetchone()
             if row:
                 new_holder, new_expiry = row
                 await conn.execute(
@@ -163,11 +164,11 @@ class SovereignLock:
                     (resource, new_holder, datetime.now(timezone.utc).isoformat(), new_expiry),
                 )
                 # Cleanup depth info
-                cursor = await conn.execute(
+                async with conn.execute(
                     "SELECT COUNT(*) FROM lock_intents WHERE resource = ? AND action = 'request'",
                     (resource,),
-                )
-                count_row = await cursor.fetchone()
+                ) as cursor:
+                    count_row = await cursor.fetchone()
                 depth = count_row[0] if count_row else 0
                 await conn.execute(
                     "UPDATE lock_state SET queue_depth = ? WHERE resource = ?", (depth, resource)

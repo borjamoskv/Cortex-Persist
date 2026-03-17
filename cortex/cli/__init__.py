@@ -29,7 +29,7 @@ from cortex.cli.common import (
 if TYPE_CHECKING:
     from cortex.config import DEFAULT_DB_PATH
     from cortex.engine import CortexEngine
-    from cortex.timing import TimingTracker
+    from cortex.extensions.timing import TimingTracker
 
 __all__ = [
     "cli",
@@ -59,9 +59,22 @@ class _LazyCommand(click.Command):
 
     def _resolve(self) -> click.Command:
         if self._resolved is None:
-            mod = importlib.import_module(self._module_path)
-            self._resolved = getattr(mod, self._attr_name)
-        return self._resolved  # type: ignore[type-error]
+            try:
+                mod = importlib.import_module(self._module_path)
+                self._resolved = getattr(mod, self._attr_name)
+            except ImportError as e:
+                import sys
+
+                import click
+
+                click.secho(
+                    f"\n[CORTEX] ❌ Missing Extension for command '{self.name}'.\n"
+                    f"Command module '{self._module_path}' failed to load due to missing dependencies:\n  {e}\n",
+                    fg="red",
+                    err=True,
+                )
+                sys.exit(1)
+        return self._resolved  # type: ignore[type-error, return-value]
 
     def get_short_help_str(self, limit: int = 150) -> str:
         # Return static help to avoid importing the module for --help listing

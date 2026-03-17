@@ -8,7 +8,7 @@ import asyncio
 import click
 
 from cortex.cli.common import console, get_engine
-from cortex.daemon.frontier import FrontierDaemon
+from cortex.extensions.daemon.frontier import FrontierDaemon
 
 
 @click.group("frontier")

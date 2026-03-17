@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.health.collector import (
+from cortex.extensions.health.collector import (
     CollectorRegistry,
     DbCollector,
     EntropyCollector,
@@ -20,18 +20,18 @@ from cortex.health.collector import (
     WalCollector,
     create_default_registry,
 )
-from cortex.health.health_mixin import HealthMixin
-from cortex.health.health_protocol import MetricCollectorProtocol
-from cortex.health.invariants import verify_health_system
-from cortex.health.models import (
+from cortex.extensions.health.health_mixin import HealthMixin
+from cortex.extensions.health.health_protocol import MetricCollectorProtocol
+from cortex.extensions.health.invariants import verify_health_system
+from cortex.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex.health.scorer import HealthScorer
-from cortex.health.trend import TrendDetector
+from cortex.extensions.health.scorer import HealthScorer
+from cortex.extensions.health.trend import TrendDetector
 
 # ═══════════════════════════════════════════════════════════════
 # D1: SEALED GRADE ENUM
@@ -254,7 +254,7 @@ class TestCollectorRegistry:
 
 class TestProtocolEnforcement:
     def test_builtin_collectors_conform(self):
-        from cortex.health.collector import SystemLoadCollector
+        from cortex.extensions.health.collector import SystemLoadCollector
 
         for cls in [
             DbCollector,

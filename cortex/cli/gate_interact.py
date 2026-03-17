@@ -7,14 +7,14 @@ import sqlite3
 import time
 from typing import TYPE_CHECKING, Any
 
-from cortex.gate import ActionStatus, GateNotApproved, GatePolicy
+from cortex.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
 
 __all__ = ["approve_interactive"]
 
 if TYPE_CHECKING:
-    from cortex.gate import SovereignGate
+    from cortex.extensions.gate import SovereignGate
 
-logger = logging.getLogger("cortex.gate.interact")
+logger = logging.getLogger("cortex.extensions.gate.interact")
 
 
 def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:

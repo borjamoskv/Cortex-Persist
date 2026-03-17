@@ -18,8 +18,8 @@ import click
 import dotenv
 from rich.console import Console
 
-from cortex.llm.provider import LLMProvider
-from cortex.llm.router import CortexPrompt
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import CortexPrompt
 
 dotenv.load_dotenv()
 

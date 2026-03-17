@@ -1,5 +1,5 @@
 import asyncio
-from cortex.llm.router import Router, HedgedRequests
+from cortex.extensions.llm.router import Router, HedgedRequests
 
 async def main():
     router = Router()

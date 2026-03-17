@@ -1,8 +1,8 @@
 import asyncio
 
 from cortex.cli.common import console, get_engine
-from cortex.ui_control.maestro import MaestroUI
-from cortex.ui_control.models import AppTarget
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 async def demo_phase2():

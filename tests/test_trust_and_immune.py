@@ -10,12 +10,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.immune.filters.entropic_quarantine import (
+from cortex.extensions.immune.filters.entropic_quarantine import (
     EntropicQuarantineFilter,
     _extract_text,
     _shannon_entropy,
 )
-from cortex.trust.bayesian import (
+from cortex.extensions.trust.bayesian import (
     BayesianTrustUpdater,
     Signal,
     _map_to_confidence,
@@ -71,7 +71,7 @@ class TestEntropicQuarantineFilter:
     async def test_rich_text_passes(self, f):
         signal = "The quick brown fox jumps over the lazy dog, revealing secrets of the universe."
         result = await f.evaluate(signal, {})
-        from cortex.immune.filters.base import Verdict
+        from cortex.extensions.immune.filters.base import Verdict
 
         assert result.verdict == Verdict.PASS
         assert result.score == 100.0
@@ -80,7 +80,7 @@ class TestEntropicQuarantineFilter:
     async def test_repeated_chars_blocked(self, f):
         signal = "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         result = await f.evaluate(signal, {})
-        from cortex.immune.filters.base import Verdict
+        from cortex.extensions.immune.filters.base import Verdict
 
         assert result.verdict == Verdict.BLOCK
         assert result.score == 0.0
@@ -92,7 +92,7 @@ class TestEntropicQuarantineFilter:
         # Instead use balanced 5+ char mix: 20 each of 5 different chars → H=≈2.32
         # Better: use a balanced 8-char signal: H = log2(8) = 3.0 bits exactly.
         signal = "abcdefgh" * 40  # uniform 8-char dist → H=3.0 bits (2.5<3.0<3.5 → HOLD)
-        from cortex.immune.filters.base import Verdict
+        from cortex.extensions.immune.filters.base import Verdict
 
         result = await f.evaluate(signal, {})
         assert result.verdict == Verdict.HOLD
@@ -101,7 +101,7 @@ class TestEntropicQuarantineFilter:
     async def test_dict_content_evaluated(self, f):
         signal = {"content": "The quick brown fox jumps over the lazy dog."}
         result = await f.evaluate(signal, {})
-        from cortex.immune.filters.base import Verdict
+        from cortex.extensions.immune.filters.base import Verdict
 
         assert result.verdict == Verdict.PASS
 
@@ -112,7 +112,7 @@ class TestEntropicQuarantineFilter:
         result = await f.evaluate(
             signal, {"entropy_high_threshold": 99.0, "entropy_mid_threshold": 98.0}
         )
-        from cortex.immune.filters.base import Verdict
+        from cortex.extensions.immune.filters.base import Verdict
 
         assert result.verdict == Verdict.BLOCK
 

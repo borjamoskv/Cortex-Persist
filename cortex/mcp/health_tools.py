@@ -27,7 +27,7 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
         No arguments required. Checks DB, ledger, and entropy.
         Returns: {"healthy": bool, "score": float, "grade": str}
         """
-        from cortex.health import HealthCollector, HealthScorer
+        from cortex.extensions.health import HealthCollector, HealthScorer
 
         db_path = getattr(ctx, "db_path", "")
         collector = HealthCollector(db_path=db_path)
@@ -56,8 +56,8 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
         No arguments required.
         Returns: {"score": {...}, "recommendations": [...], "warnings": [...]}
         """
-        from cortex.health import HealthCollector, HealthScorer
-        from cortex.health.models import HealthReport
+        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex.extensions.health.models import HealthReport
 
         db_path = getattr(ctx, "db_path", "")
         collector = HealthCollector(db_path=db_path)

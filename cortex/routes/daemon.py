@@ -15,7 +15,7 @@ router = APIRouter(tags=["daemon"])
 @router.get("/v1/daemon/status")
 def daemon_status(request: Request, auth: AuthResult = Depends(require_permission("read"))) -> dict:
     """Get last daemon watchdog check results."""
-    from cortex.daemon import MoskvDaemon
+    from cortex.extensions.daemon import MoskvDaemon
 
     lang = request.headers.get("Accept-Language", "en")
 

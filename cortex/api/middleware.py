@@ -312,7 +312,7 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        from cortex.security.tenant import tenant_id_var
+        from cortex.extensions.security.tenant import tenant_id_var
 
         # 1. Establish Tenant Context for Database RLS
         # In full production, this is validated by AuthManager from the JWT.

@@ -185,11 +185,11 @@ async def compact(
         strategies = CompactionStrategy.all()
 
     conn = await engine.get_conn()
-    cursor = await conn.execute(
+    async with conn.execute(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
-    )
-    count_before = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+    ) as cursor:
+        count_before = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     result = CompactionResult(project=project, original_count=count_before, dry_run=dry_run)
 
@@ -205,11 +205,11 @@ async def compact(
     )
 
     # Final count
-    cursor = await conn.execute(
+    async with conn.execute(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
-    )
-    count_after = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+    ) as cursor:
+        count_after = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
     result.compacted_count = count_after
 
     # Log compaction
@@ -285,7 +285,7 @@ async def compact_session(
     now = time.time()
     half_life = 7 * 24 * 3600  # 7 days in seconds
 
-    cursor = await conn.execute(
+    async with conn.execute(
         "SELECT fact_type, content, consensus_score, created_at "
         "FROM facts "
         "WHERE project = ? AND valid_until IS NULL "
@@ -293,8 +293,8 @@ async def compact_session(
         "cortex_decay(0, CAST(strftime('%s', created_at) AS REAL), ?, ?) * 0.3) DESC "
         "LIMIT ?",
         (project, now, half_life, max_facts),
-    )
-    rows = await cursor.fetchall()
+    ) as cursor:
+        rows = await cursor.fetchall()
 
     if not rows:
         return f"No active facts for project '{project}'."
@@ -339,10 +339,10 @@ async def get_compaction_stats(
     """Get compaction history and statistics."""
     conn = await engine.get_conn()
 
-    cursor = await conn.execute(
+    async with conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name='compaction_log'"
-    )
-    table_exists = await cursor.fetchone()
+    ) as cursor:
+        table_exists = await cursor.fetchone()
 
     if not table_exists:
         return {"total_compactions": 0, "total_deprecated": 0, "history": []}
@@ -354,8 +354,8 @@ async def get_compaction_stats(
         params.append(project)
     query += " ORDER BY id DESC LIMIT 20"
 
-    cursor = await conn.execute(query, params)
-    rows = await cursor.fetchall()
+    async with conn.execute(query, params) as cursor:
+        rows = await cursor.fetchall()
     history = []
     total_deprecated = 0
 

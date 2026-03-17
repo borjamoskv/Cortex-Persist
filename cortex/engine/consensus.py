@@ -95,8 +95,10 @@ class ConsensusMixin(EngineMixinBase):
 
                 from cortex.engine.mutation_engine import MUTATION_ENGINE
 
-                cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
-                row = await cursor.fetchone()
+                async with conn.execute(
+                    "SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)
+                ) as cursor:
+                    row = await cursor.fetchone()
                 tenant_id = row[0] if row else "default"
 
                 await MUTATION_ENGINE.apply(

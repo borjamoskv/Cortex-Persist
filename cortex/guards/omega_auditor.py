@@ -11,8 +11,13 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from cortex.llm.provider import LLMProvider
-from cortex.llm.router import CortexPrompt, IntentProfile
+try:
+    from cortex.extensions.llm.provider import LLMProvider
+    from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+except ImportError:
+    LLMProvider = None  # type: ignore
+    CortexPrompt = None  # type: ignore
+    IntentProfile = None  # type: ignore
 
 logger = logging.getLogger("cortex.guards.omega")
 
@@ -31,10 +36,17 @@ class OmegaAuditor:
     """Sovereign Auditor for deep semantic health."""
 
     def __init__(self, provider: str = "gemini"):
-        self._llm = LLMProvider(provider=provider)
+        if LLMProvider is not None:
+            self._llm = LLMProvider(provider=provider)
+        else:
+            self._llm = None
 
     async def audit_decision(self, content: str, project: str) -> list[OmegaConflict]:
         """Audit a candidate decision against the massive context of the snapshot."""
+        if self._llm is None or CortexPrompt is None or IntentProfile is None:
+            logger.warning("OmegaAuditor: LLM extension missing. Skipping deep audit.")
+            return []
+
         if not SNAPSHOT_PATH.exists():
             logger.warning(
                 "OmegaAuditor: Snapshot missing at %s. Skipping deep audit.", SNAPSHOT_PATH

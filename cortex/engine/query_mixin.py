@@ -60,8 +60,8 @@ class QueryMixin(EngineMixinBase):
                 params.extend(fact_types)
 
             query += " ORDER BY f.project, f.fact_type, f.id"
-            cursor = await conn.execute(query, params)
-            rows = await cursor.fetchall()
+            async with conn.execute(query, params) as cursor:
+                rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
     # NOTE: search() is provided by SearchMixin, not QueryMixin.
@@ -152,8 +152,8 @@ class QueryMixin(EngineMixinBase):
                 q += " OFFSET ?"
                 params.append(offset)
 
-            cursor = await conn.execute(q, params)
-            rows = await cursor.fetchall()
+            async with conn.execute(q, params) as cursor:
+                rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
     async def history(
@@ -184,17 +184,18 @@ class QueryMixin(EngineMixinBase):
                     f"{base} AND {clause} ORDER BY "
                     "coalesce(json_extract(f.meta, '$.valid_from'), f.created_at) DESC"
                 )
-                cursor = await conn.execute(
+                async with conn.execute(
                     q,
                     (tenant_id, project, *tparams),
-                )
+                ) as cursor:
+                    rows = await cursor.fetchall()
             else:
                 q = (
                     f"{base} ORDER BY "
                     "coalesce(json_extract(f.meta, '$.valid_from'), f.created_at) DESC"
                 )
-                cursor = await conn.execute(q, (tenant_id, project))
-            rows = await cursor.fetchall()
+                async with conn.execute(q, (tenant_id, project)) as cursor:
+                    rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
     async def reconstruct_state(
@@ -235,11 +236,11 @@ class QueryMixin(EngineMixinBase):
                 "json_extract(f.meta, '$.valid_until') > ?) "
                 "ORDER BY f.id ASC"
             )
-            cursor = await conn.execute(
+            async with conn.execute(
                 q,
                 [tenant_id, project, tx_time, tx_time, tx_time],
-            )
-            rows = await cursor.fetchall()
+            ) as cursor:
+                rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
     async def time_travel(
@@ -262,7 +263,8 @@ class QueryMixin(EngineMixinBase):
                     f"AND f.is_tombstoned = 0 "
                     "ORDER BY f.id ASC"
                 )
-                cursor = await conn.execute(q, [tenant_id])
+                async with conn.execute(q, [tenant_id]) as cursor:
+                    rows = await cursor.fetchall()
             else:
                 clause, tparams = time_travel_filter(
                     tx_id,
@@ -274,8 +276,8 @@ class QueryMixin(EngineMixinBase):
                     f"AND f.is_tombstoned = 0 AND {clause} "
                     "ORDER BY f.id ASC"
                 )  # nosec B608 — parameterized via temporal builder
-                cursor = await conn.execute(q, [tenant_id, *tparams])
-            rows = await cursor.fetchall()
+                async with conn.execute(q, [tenant_id, *tparams]) as cursor:
+                    rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
     async def stats(self) -> dict:
@@ -446,11 +448,11 @@ class QueryMixin(EngineMixinBase):
             """
 
         async with self.session() as conn:
-            cursor = await conn.execute(
+            async with conn.execute(
                 sql,
                 (fact_id, tenant_id, max_depth),
-            )
-            chain_ids = await cursor.fetchall()
+            ) as cursor:
+                chain_ids = await cursor.fetchall()
 
             if not chain_ids:
                 return []
@@ -462,13 +464,13 @@ class QueryMixin(EngineMixinBase):
                 return []
 
             placeholders = ", ".join("?" for _ in id_list)
-            cursor = await conn.execute(
+            async with conn.execute(
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 f"WHERE f.id IN ({placeholders}) "
                 "AND f.tenant_id = ?",
                 [*id_list, tenant_id],
-            )
-            rows = await cursor.fetchall()
+            ) as cursor:
+                rows = await cursor.fetchall()
             facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
             for f in facts:

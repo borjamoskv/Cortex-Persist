@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.aether.models import AgentTask, PlanOutput
-from cortex.aether.runner import AetherAgent
+from cortex.extensions.aether.models import AgentTask, PlanOutput
+from cortex.extensions.aether.runner import AetherAgent
 
 
 @pytest.fixture
@@ -34,10 +34,10 @@ async def test_siege_verification_instruction_injection(mock_queue):
     executor_mock.execute.return_value = "Done"
 
     with (
-        patch("cortex.aether.runner.PlannerAgent", return_value=planner_mock),
-        patch("cortex.aether.runner.ExecutorAgent", return_value=executor_mock),
-        patch("cortex.llm.provider.LLMProvider") as mock_llm_cls,
-        patch("cortex.aether.runner.AgentToolkit") as mock_toolkit,
+        patch("cortex.extensions.aether.runner.PlannerAgent", return_value=planner_mock),
+        patch("cortex.extensions.aether.runner.ExecutorAgent", return_value=executor_mock),
+        patch("cortex.extensions.llm.provider.LLMProvider") as mock_llm_cls,
+        patch("cortex.extensions.aether.runner.AgentToolkit") as mock_toolkit,
     ):
         mock_toolkit.return_value.git_create_branch.return_value = "OK"
         mock_toolkit.return_value.bash.return_value = "[FAIL] (exit code: 1) error"
@@ -59,7 +59,7 @@ async def test_siege_verification_instruction_injection(mock_queue):
 async def test_bash_fail_format():
     """Verify that AgentToolkit.bash returns [FAIL] on non-zero exit."""
 
-    from cortex.aether.tools import AgentToolkit
+    from cortex.extensions.aether.tools import AgentToolkit
 
     # Create a temp dir for the repo
     repo = Path("/tmp/cortex_test_repro")

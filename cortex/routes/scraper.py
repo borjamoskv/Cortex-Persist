@@ -66,8 +66,8 @@ class ScrapeResponseItem(BaseModel):
 @router.post("/scrape", response_model=ScrapeResponseItem)
 async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
     """Extract content from a single URL."""
-    from cortex.scraper.engine import ScraperEngine
-    from cortex.scraper.models import ExtractionStrategy, ScrapeRequest
+    from cortex.extensions.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
 
     try:
         strategy = ExtractionStrategy(body.strategy)
@@ -105,8 +105,8 @@ async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
 @router.post("/batch")
 async def batch_scrape(body: BatchScrapeRequestBody) -> dict[str, Any]:
     """Batch extract content from multiple URLs."""
-    from cortex.scraper.engine import ScraperEngine
-    from cortex.scraper.models import ExtractionStrategy
+    from cortex.extensions.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.models import ExtractionStrategy
 
     try:
         strategy = ExtractionStrategy(body.strategy)
@@ -151,7 +151,7 @@ async def batch_scrape(body: BatchScrapeRequestBody) -> dict[str, Any]:
 @router.post("/map")
 async def map_site(body: MapRequestBody) -> dict[str, Any]:
     """Discover URLs from a website."""
-    from cortex.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.engine import ScraperEngine
 
     engine = ScraperEngine()
     urls = await engine.map_site(body.url, max_depth=body.max_depth)

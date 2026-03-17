@@ -2,7 +2,7 @@
 
 import pytest
 
-from cortex.swarm.worktree_isolation import isolated_worktree
+from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 
 @pytest.mark.asyncio

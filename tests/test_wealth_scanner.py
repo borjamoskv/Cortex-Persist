@@ -9,7 +9,7 @@ from decimal import Decimal
 
 import pytest
 
-from cortex.wealth.scanner import FundingRateScanner
+from cortex.extensions.wealth.scanner import FundingRateScanner
 
 SEED = 42
 
@@ -74,7 +74,7 @@ class TestRiskAssessment:
 
 class TestFundingArbitrage:
     def test_not_viable_low_liquidity(self):
-        from cortex.wealth.scanner import FundingArbitrage
+        from cortex.extensions.wealth.scanner import FundingArbitrage
 
         opp = FundingArbitrage(
             asset="TEST",
@@ -90,7 +90,7 @@ class TestFundingArbitrage:
         assert opp.is_viable is False
 
     def test_not_viable_low_spread(self):
-        from cortex.wealth.scanner import FundingArbitrage
+        from cortex.extensions.wealth.scanner import FundingArbitrage
 
         opp = FundingArbitrage(
             asset="TEST",

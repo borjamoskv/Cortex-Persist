@@ -58,7 +58,7 @@ def get_staged_files() -> list[str]:
 
 def run_hook(commit_msg_file: str | None = None) -> int:
     """Main hook logic — generate and inject commit message."""
-    from cortex.git.poet import CommitPoet
+    from cortex.extensions.git.poet import CommitPoet
 
     diff_stat = get_staged_diff_stat()
     files = get_staged_files()

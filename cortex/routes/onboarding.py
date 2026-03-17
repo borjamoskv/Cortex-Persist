@@ -71,8 +71,8 @@ async def signup(req: SignupRequest) -> SignupResponse:
     logger.info("New signup: %s → tenant=%s plan=free", req.name, req.email)
 
     # Get plan limits from quota system (single source of truth)
-    from cortex.metering.quotas import QuotaEnforcer
-    from cortex.metering.tracker import UsageTracker
+    from cortex.extensions.metering.quotas import QuotaEnforcer
+    from cortex.extensions.metering.tracker import UsageTracker
 
     plan_info = QuotaEnforcer(UsageTracker()).get_plan_info("free")
 

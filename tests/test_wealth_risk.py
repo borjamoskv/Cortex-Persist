@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from decimal import Decimal
 
-from cortex.wealth.risk import Portfolio, Position, RiskManager
+from cortex.extensions.wealth.risk import Portfolio, Position, RiskManager
 
 # ── Helpers ──────────────────────────────────────────────────────────
 

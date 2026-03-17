@@ -10,7 +10,7 @@ import pytest
 @pytest.fixture()
 def mock_scanner():
     """Patch MemoryScanner to return controlled data."""
-    with patch("cortex.shannon.immortality.MemoryScanner") as mock_cls:
+    with patch("cortex.extensions.shannon.immortality.MemoryScanner") as mock_cls:
         scanner = AsyncMock()
         mock_cls.return_value = scanner
         yield scanner
@@ -25,7 +25,7 @@ async def test_immortality_empty_db(mock_scanner):
     mock_scanner.confidence_weight_sum.return_value = (0.0, 1)
     mock_scanner.domain_coverage.return_value = (0, 1)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)
@@ -57,7 +57,7 @@ async def test_immortality_perfect_score(mock_scanner):
     # Full domain coverage
     mock_scanner.domain_coverage.return_value = (25, 25)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)
@@ -77,7 +77,7 @@ async def test_immortality_single_weak_dimension(mock_scanner):
     mock_scanner.confidence_weight_sum.return_value = (200.0, 200)
     mock_scanner.domain_coverage.return_value = (10, 10)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)
@@ -102,7 +102,7 @@ async def test_continuity_large_gap(mock_scanner):
     mock_scanner.confidence_weight_sum.return_value = (80.0, 100)
     mock_scanner.domain_coverage.return_value = (5, 10)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)
@@ -124,7 +124,7 @@ async def test_confidence_weighting(mock_scanner):
     mock_scanner.confidence_weight_sum.return_value = (60.0, 100)
     mock_scanner.domain_coverage.return_value = (5, 10)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)
@@ -142,7 +142,7 @@ async def test_json_output_structure(mock_scanner):
     mock_scanner.confidence_weight_sum.return_value = (8.0, 10)
     mock_scanner.domain_coverage.return_value = (1, 1)
 
-    from cortex.shannon.immortality import ImmortalityIndex
+    from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = AsyncMock()
     result = await ImmortalityIndex.compute(engine)

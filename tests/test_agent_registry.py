@@ -3,7 +3,7 @@
 
 import pytest
 
-from cortex.agents.registry import (
+from cortex.extensions.agents.registry import (
     AgentDefinition,
     AgentRegistry,
     GuardrailsConfig,

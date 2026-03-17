@@ -9,13 +9,13 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.hypervisor.belief_object import (
+from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     VerdictAction,
 )
-from cortex.llm._models import IntentProfile
-from cortex.llm.cognitive_handoff import CognitiveHandoff
+from cortex.extensions.llm._models import IntentProfile
+from cortex.extensions.llm.cognitive_handoff import CognitiveHandoff
 
 # ─── IntentProfile Extensions ───────────────────────────────────────────────
 

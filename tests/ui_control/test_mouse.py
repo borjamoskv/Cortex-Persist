@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.ui_control.mouse import MouseEngine
+from cortex.extensions.ui_control.mouse import MouseEngine
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ class TestMouseClick:
 
     def test_click_left(self, mouse):
         """Click izquierdo en coordenadas."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
             mock_cg.kCGEventLeftMouseDown = 1
             mock_cg.kCGEventLeftMouseUp = 2
@@ -28,7 +28,7 @@ class TestMouseClick:
 
     def test_click_right(self, mouse):
         """Click derecho en coordenadas."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonRight = 1
             mock_cg.kCGEventRightMouseDown = 3
             mock_cg.kCGEventRightMouseUp = 4
@@ -39,7 +39,7 @@ class TestMouseClick:
 
     def test_click_without_cg(self, mouse):
         """Sin CoreGraphics devuelve error."""
-        with patch("cortex.ui_control.mouse.CG", None):
+        with patch("cortex.extensions.ui_control.mouse.CG", None):
             result = mouse.click(0, 0)
             assert not result.success
 
@@ -49,7 +49,7 @@ class TestMouseDoubleClick:
 
     def test_double_click(self, mouse):
         """Doble click nativo con clickCount."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
             mock_cg.kCGEventLeftMouseDown = 1
             mock_cg.kCGEventLeftMouseUp = 2
@@ -67,7 +67,7 @@ class TestMouseDrag:
 
     def test_drag(self, mouse):
         """Drag-and-drop con interpolación."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
             mock_cg.kCGEventLeftMouseDown = 1
             mock_cg.kCGEventLeftMouseUp = 2
@@ -85,7 +85,7 @@ class TestMouseScroll:
 
     def test_scroll_up(self, mouse):
         """Scroll hacia arriba."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGScrollEventUnitLine = 0
             mock_cg.kCGHIDEventTap = 0
             mock_cg.CGEventCreateScrollWheelEvent.return_value = MagicMock()
@@ -94,7 +94,7 @@ class TestMouseScroll:
 
     def test_scroll_down(self, mouse):
         """Scroll hacia abajo."""
-        with patch("cortex.ui_control.mouse.CG") as mock_cg:
+        with patch("cortex.extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGScrollEventUnitLine = 0
             mock_cg.kCGHIDEventTap = 0
             mock_cg.CGEventCreateScrollWheelEvent.return_value = MagicMock()
@@ -108,7 +108,7 @@ class TestMouseRightClick:
     def test_right_click_delegates(self, mouse):
         """right_click delega a click(button='right')."""
         with patch.object(mouse, "click") as mock_click:
-            from cortex.ui_control.models import InteractionResult
+            from cortex.extensions.ui_control.models import InteractionResult
 
             mock_click.return_value = InteractionResult(success=True)
             result = mouse.right_click(50, 60)

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.ui_control.keyboard import KeyboardEngine
-from cortex.ui_control.models import AppTarget, KeyCombo
+from cortex.extensions.ui_control.keyboard import KeyboardEngine
+from cortex.extensions.ui_control.models import AppTarget, KeyCombo
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ class TestKeyboardPress:
     async def test_press_simple_key(self, kb):
         """Pulsa una tecla simple sin modificadores."""
         combo = KeyCombo(key="a")
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.press(combo)
             assert result.success
@@ -32,7 +32,7 @@ class TestKeyboardPress:
     async def test_press_with_modifiers(self, kb):
         """Pulsa Cmd+Shift+S."""
         combo = KeyCombo(key="s", modifiers=["command", "shift"])
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.press(combo)
             assert result.success
@@ -45,7 +45,7 @@ class TestKeyboardPress:
         """Activa una app antes de pulsar."""
         combo = KeyCombo(key="c", modifiers=["command"])
         target = AppTarget(name="Safari")
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.press(combo, target=target)
             assert result.success
@@ -59,7 +59,7 @@ class TestKeyboardHotkey:
     @pytest.mark.asyncio
     async def test_hotkey_cmd_c(self, kb):
         """Atajo Cmd+C."""
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.hotkey("c", "command")
             assert result.success
@@ -67,7 +67,7 @@ class TestKeyboardHotkey:
     @pytest.mark.asyncio
     async def test_hotkey_no_modifiers(self, kb):
         """Tecla sola sin modificadores."""
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.hotkey("a")
             assert result.success
@@ -79,7 +79,7 @@ class TestKeyboardTypeText:
     @pytest.mark.asyncio
     async def test_type_short_text(self, kb):
         """Texto corto usa un único script AppleScript con todos los keystrokes."""
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.type_text("abc")
             assert result.success
@@ -93,7 +93,7 @@ class TestKeyboardTypeText:
     async def test_type_long_text_uses_clipboard(self, kb):
         """Texto largo usa clipboard paste en un solo script."""
         long_text = "x" * 200
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.type_text(long_text)
             assert result.success
@@ -110,7 +110,7 @@ class TestKeyboardPressSpecial:
     @pytest.mark.asyncio
     async def test_press_return(self, kb):
         """Pulsa tecla Return."""
-        with patch("cortex.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
+        with patch("cortex.extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock) as mock:
             mock.return_value = ""
             result = await kb.press_special("return")
             assert result.success

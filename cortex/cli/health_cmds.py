@@ -32,7 +32,7 @@ def health_group() -> None:
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def check(db_path: str | None) -> None:
     """Quick boolean health check (healthy/degraded)."""
-    from cortex.health import HealthCollector, HealthScorer
+    from cortex.extensions.health import HealthCollector, HealthScorer
 
     path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
@@ -57,7 +57,7 @@ def report(db_path: str | None, as_json: bool) -> None:
     import asyncio
     import json
 
-    from cortex.health import HealthMixin
+    from cortex.extensions.health import HealthMixin
 
     class _Engine(HealthMixin):
         _db_path = get_db_path(db_path)
@@ -94,7 +94,7 @@ def report(db_path: str | None, as_json: bool) -> None:
 @click.option("--db", "db_path", default=None)
 def score(db_path: str | None) -> None:
     """Print only the numeric health score (0-100)."""
-    from cortex.health import HealthCollector, HealthScorer
+    from cortex.extensions.health import HealthCollector, HealthScorer
 
     path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)
@@ -113,8 +113,8 @@ def trend(db_path: str | None, samples: int, interval: float) -> None:
 
     from rich.progress import track
 
-    from cortex.health import HealthCollector, HealthScorer
-    from cortex.health.trend import TrendDetector
+    from cortex.extensions.health import HealthCollector, HealthScorer
+    from cortex.extensions.health.trend import TrendDetector
 
     path = get_db_path(db_path)
     collector = HealthCollector(db_path=path)

@@ -30,8 +30,21 @@ from collections.abc import AsyncIterator, Callable, Coroutine
 from contextlib import asynccontextmanager
 from typing import Any
 
-from cortex.immune.chaos import ChaosGate, async_interceptor
-from cortex.swarm.error_ghost_pipeline import ErrorGhostPipeline
+try:
+    from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+except ImportError:
+    ChaosGate = None  # type: ignore[assignment, misc]
+
+    async def async_interceptor(gate: Any, func: Any, *args: Any, **kwargs: Any) -> Any:
+        return await func(*args, **kwargs)
+
+try:
+    from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+except ImportError:
+    class DummyErrorGhostPipeline:
+        def capture_sync(self, *args: Any, **kwargs: Any) -> None:
+            pass
+    ErrorGhostPipeline = DummyErrorGhostPipeline  # type: ignore[assignment, misc]
 
 try:
     import redis.asyncio as aioredis
@@ -119,7 +132,7 @@ class DistributedSovereignCache:
         self._consumer_task: asyncio.Task[None] | None = None
         self._notification_task: asyncio.Task[None] | None = None
         self._is_available = True
-        self.chaos_gate = ChaosGate(name="redis_l1_cache")
+        self.chaos_gate = ChaosGate(name="redis_l1_cache") if ChaosGate else None
 
         self._hydra_advance_script = self._r.register_script(_LUA_HYDRA_ADVANCE)
         self._last_ping_time = 0.0

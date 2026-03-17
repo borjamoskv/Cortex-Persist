@@ -3,8 +3,8 @@ import os
 import asyncio
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from cortex.llm.router import CortexRouter
-from cortex.llm.models import Message
+from cortex.extensions.llm.router import CortexRouter
+from cortex.extensions.llm.models import Message
 
 async def main():
     try:

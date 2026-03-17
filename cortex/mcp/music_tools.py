@@ -2,7 +2,7 @@ import logging
 
 from mcp.server.fastmcp import FastMCP
 
-from cortex.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
+from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 
 logger = logging.getLogger("cortex.mcp.music")
 

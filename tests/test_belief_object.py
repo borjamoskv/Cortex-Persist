@@ -11,7 +11,7 @@ from dataclasses import FrozenInstanceError, replace
 
 import pytest
 
-from cortex.hypervisor.belief_object import (
+from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     BeliefStatus,

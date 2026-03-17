@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.daemon.health_loop import HealthLoop
+from cortex.extensions.daemon.health_loop import HealthLoop
 
 
 class TestHealthLoop:

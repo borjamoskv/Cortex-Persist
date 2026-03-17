@@ -55,8 +55,8 @@ def register_genesis_tools(
 
         Returns summary of created files and CHRONOS-1 yield.
         """
-        from cortex.genesis import GenesisEngine, SystemSpec
-        from cortex.genesis.models import ComponentSpec
+        from cortex.extensions.genesis import GenesisEngine, SystemSpec
+        from cortex.extensions.genesis.models import ComponentSpec
 
         try:
             comp_list = json.loads(components) if components else []
@@ -118,8 +118,8 @@ def register_genesis_tools(
             name: System name.
             system_type: module | skill | agent | workflow.
         """
-        from cortex.genesis import GenesisEngine, SystemSpec
-        from cortex.genesis.models import ComponentSpec
+        from cortex.extensions.genesis import GenesisEngine, SystemSpec
+        from cortex.extensions.genesis.models import ComponentSpec
 
         comps = [ComponentSpec(**c) for c in _default_comps_for_type(system_type)]
         spec = SystemSpec(  # type: ignore[type-error]
@@ -140,7 +140,7 @@ def register_genesis_tools(
     @mcp.tool()
     async def cortex_genesis_templates() -> str:
         """List all available Genesis templates."""
-        from cortex.genesis import TemplateRegistry
+        from cortex.extensions.genesis import TemplateRegistry
 
         registry = TemplateRegistry()  # type: ignore[type-error]
         templates = registry.list_templates()

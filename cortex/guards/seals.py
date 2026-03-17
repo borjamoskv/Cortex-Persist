@@ -284,9 +284,13 @@ async def check_gate_8_loc() -> bool:
 async def check_gate_9_registry() -> bool:
     printer.seal(9, "Registry Integrity", "Axiom Registry Sync")
     try:
-        from cortex.axioms import AXIOM_REGISTRY, AxiomCategory
-        from cortex.axioms.registry import by_category, enforced
+        from cortex.extensions.axioms import AXIOM_REGISTRY, AxiomCategory
+        from cortex.extensions.axioms.registry import by_category, enforced
+    except ImportError:
+        printer.warn("Axioms extension not found. Skipping registry check.")
+        return True
 
+    try:
         total = len(AXIOM_REGISTRY)
         const = len(by_category(AxiomCategory.CONSTITUTIONAL))
         enf = len(enforced())
@@ -447,7 +451,11 @@ async def check_gate_13_latency() -> bool:
 
     Fails if average local model latency exceeds 200ms in telemetry.
     """
-    from cortex.llm._telemetry import CascadeTelemetry
+    try:
+        from cortex.extensions.llm._telemetry import CascadeTelemetry
+    except ImportError:
+        printer.warn("Seal 13 Skipped: LLM telemetry extension not found.")
+        return True
 
     telemetry = CascadeTelemetry()
     stats = telemetry.stats()

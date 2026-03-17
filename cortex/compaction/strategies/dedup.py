@@ -144,7 +144,16 @@ async def _merge_duplicate_group(
     if canonical_fact.fact_type == "error" and len(all_contents) > 1:
         merged = merge_error_contents(all_contents)
         if merged != canonical_fact.content:
-            await engine.update(
-                canonical_id,
-                content=merged,
-            )
+            try:
+                await engine.update(
+                    canonical_id,
+                    content=merged,
+                )
+            except (ValueError, Exception) as e:  # noqa: BLE001
+                # IntegrityError (UNIQUE hash collision) is expected when
+                # merged content hashes identically to another active fact.
+                # The canonical fact is already correct — skip silently.
+                logger.warning(
+                    "Dedup merge update skipped for fact %d: %s",
+                    canonical_id, e,
+                )

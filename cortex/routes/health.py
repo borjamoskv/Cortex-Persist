@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
-from cortex.health import HealthCollector, HealthScorer
-from cortex.health.models import HealthReport
+from cortex.extensions.health import HealthCollector, HealthScorer
+from cortex.extensions.health.models import HealthReport
 
 router = APIRouter(prefix="/v1/health", tags=["health-index"])
 

@@ -41,7 +41,7 @@ async def summarize_events(
         return raw_text
 
     try:
-        from cortex.llm.router import CortexPrompt
+        from cortex.extensions.llm.router import CortexPrompt
         from cortex.utils.result import Ok
 
         prompt = CortexPrompt(
@@ -60,7 +60,7 @@ async def summarize_events(
             return result.value
 
         logger.warning("LLM compression failed: %s — falling back to raw", result.error)
-    except (ValueError, TypeError, RuntimeError, OSError) as e:
+    except (ValueError, TypeError, RuntimeError, OSError, ImportError) as e:
         logger.warning("LLM compression error: %s — falling back to raw", e)
 
     return raw_text

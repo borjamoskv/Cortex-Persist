@@ -141,7 +141,7 @@ def guard_cmd() -> None:
         # Real: Check daemon status
         daemon_status = "desconocido"
         try:
-            from cortex.daemon.core import MoskvDaemon
+            from cortex.extensions.daemon.core import MoskvDaemon
 
             status = MoskvDaemon.load_status()
             if status:

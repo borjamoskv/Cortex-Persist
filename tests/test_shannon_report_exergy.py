@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.shannon.report import EntropyReport
+from cortex.extensions.shannon.report import EntropyReport
 
 
 def _make_scanner_mock() -> MagicMock:
@@ -63,7 +63,7 @@ async def test_analyze_includes_exergy_report():
     engine_mock = MagicMock()
 
     with patch(
-        "cortex.shannon.report.MemoryScanner", return_value=scanner
+        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
     ):
         result = await report.analyze(engine_mock)
 
@@ -94,7 +94,7 @@ async def test_analyze_includes_dead_weight_bits():
     engine_mock = MagicMock()
 
     with patch(
-        "cortex.shannon.report.MemoryScanner", return_value=scanner
+        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
     ):
         result = await report.analyze(engine_mock)
 
@@ -111,7 +111,7 @@ async def test_exergy_report_nonzero_for_real_distributions():
     engine_mock = MagicMock()
 
     with patch(
-        "cortex.shannon.report.MemoryScanner", return_value=scanner
+        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
     ):
         result = await report.analyze(engine_mock)
 

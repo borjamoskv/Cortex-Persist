@@ -16,6 +16,7 @@ __all__ = [
     "HealthGuardAdapter",
     "ContradictionGuardAdapter",
     "VerifierGuardAdapter",
+    "ExergyGuardAdapter",
     "LedgerCheckpointHook",
     "SignalEmitHook",
     "EpistemicBreakerHook",
@@ -106,6 +107,25 @@ class VerifierGuardAdapter:
             )
 
 
+class ExergyGuardAdapter:
+    """AX-033 Hook -> StoreGuard protocol (thermodynamic filter)."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.exergy_guard import ExergyGuard
+        
+        guard = ExergyGuard()
+        guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
+
+
 # ─── Post-Store Hooks ─────────────────────────────────────────────
 
 
@@ -146,7 +166,7 @@ class SignalEmitHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.signals.fact_hook import emit_fact_stored
+        from cortex.extensions.signals.fact_hook import emit_fact_stored
 
         if db_path:
             emit_fact_stored(
@@ -173,7 +193,7 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.daemon.epistemic_breaker import EpistemicBreakerDaemon
+        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 
         await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
             conn, tenant_id, project,
