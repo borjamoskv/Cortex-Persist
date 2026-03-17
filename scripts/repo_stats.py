@@ -8,6 +8,7 @@ Usage:
     python scripts/repo_stats.py
     python scripts/repo_stats.py --out artifacts/stats.json
 """
+
 from __future__ import annotations
 
 import ast
@@ -51,7 +52,10 @@ def count_python_modules(paths: list[Path]) -> int:
                 continue
             try:
                 tree = ast.parse(f.read_text(encoding="utf-8", errors="ignore"))
-                if any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) for n in ast.walk(tree)):
+                if any(
+                    isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+                    for n in ast.walk(tree)
+                ):
                     count += 1
             except SyntaxError:
                 pass
@@ -65,7 +69,15 @@ def count_tests() -> dict[str, int]:
         return {"collected": 0}
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pytest", str(tests_path), "--collect-only", "-q", "--no-header"],
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                str(tests_path),
+                "--collect-only",
+                "-q",
+                "--no-header",
+            ],
             capture_output=True,
             text=True,
             cwd=ROOT,
@@ -112,7 +124,10 @@ def run_benchmark_sample() -> dict[str, float]:
     latencies.sort()
     p50 = statistics.median(latencies)
     p95 = latencies[int(len(latencies) * 0.95)]
-    return {"benchmark_sqlite_rw_p50_ms": round(p50, 2), "benchmark_sqlite_rw_p95_ms": round(p95, 2)}
+    return {
+        "benchmark_sqlite_rw_p50_ms": round(p50, 2),
+        "benchmark_sqlite_rw_p95_ms": round(p95, 2),
+    }
 
 
 def main(out_path: Path | None = None) -> None:
