@@ -24,6 +24,16 @@ You will receive an acknowledgment within 48 hours and a detailed response withi
 | **Medium** | Siguiente release menor | Information disclosure (low risk), DoS (complex) |
 | **Low** | Backlog / Tooling debt | Best practices, outdated deps (non-exploitable) |
 
+### Service Level Agreement (SLA)
+
+| Severity | Resolution Target |
+| :--- | :--- |
+| **Critical** | Immediate resolution (Out-of-band hotfix) |
+| **High** | 72h resolution |
+| **Medium/Low** | Next minor release |
+
+*Note: Code scanning alerts are treated as actionable execution vectors. False positives will be triaged and explicitly dismissed; they will not be left open as cosmetic decorations.*
+
 ## Security Features
 
 CORTEX is built security-first:
