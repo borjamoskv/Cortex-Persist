@@ -1,6 +1,7 @@
 """Consensus Sovereign Layer — ConsensusManager for CORTEX."""
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import math
@@ -39,7 +40,7 @@ class ConsensusManager:
         fact_id: int,
         agent: str,
         value: int,
-        agent_id: str | None = None,
+        agent_id: Optional[str] = None,
     ) -> float:
         """Legacy v1 vote path. DEPRECATED. Use vote_v2 instead."""
         import warnings
@@ -112,7 +113,7 @@ class ConsensusManager:
         fact_id: int,
         agent_id: str,
         value: int,
-        reason: str | None = None,
+        reason: Optional[str] = None,
     ) -> float:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")

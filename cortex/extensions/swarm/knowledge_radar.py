@@ -17,7 +17,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 import yaml
 
@@ -53,7 +53,7 @@ class CrystalTarget:
 # ── Source 1: Curated YAML Queue ──────────────────────────────────────────
 
 
-def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarget]:
+def scan_curated_queue(queue_path: Optional[Union[Path, str]] = None) -> list[CrystalTarget]:
     """Read targets from the curated YAML queue file.
 
     Expected format:
@@ -256,9 +256,9 @@ def merge_and_prioritize(
 
 
 async def discover(
-    cortex_db: Any | None = None,
+    cortex_db: Optional[Any] = None,
     max_targets: int = 5,
-    queue_path: Path | str | None = None,
+    queue_path: Optional[Union[Path, str]] = None,
 ) -> list[CrystalTarget]:
     """Full radar scan: curated + ghosts + semantic gaps → merged targets.
 

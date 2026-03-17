@@ -12,6 +12,7 @@ No framework has this for agent memory. This is the killer feature.
 """
 
 from __future__ import annotations
+from typing import Union
 
 import logging
 import time
@@ -36,7 +37,7 @@ class GCounter:
     def merge(self, other: GCounter) -> GCounter:
         """Merge two counters by taking max per agent."""
         merged = GCounter()
-        all_agents = set(self._counts.keys()) | set(other._counts.keys())
+        all_agents = Union[set(self._counts.keys()), set(other._counts.keys())]
         for agent in all_agents:
             merged._counts[agent] = max(
                 self._counts.get(agent, 0),
@@ -94,7 +95,7 @@ class ORSet:
     def merge(self, other: ORSet) -> ORSet:
         """Merge two sets — union of all elements."""
         merged = ORSet()
-        all_keys = set(self._elements.keys()) | set(other._elements.keys())
+        all_keys = Union[set(self._elements.keys()), set(other._elements.keys())]
         for key in all_keys:
             ts_self = self._elements.get(key, 0.0)
             ts_other = other._elements.get(key, 0.0)

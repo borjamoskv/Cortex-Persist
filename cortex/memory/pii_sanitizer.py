@@ -24,6 +24,7 @@ Usage:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import re
@@ -257,7 +258,7 @@ class PIISanitizer:
 
         return report
 
-    def _try_encrypt(self, value: str, tenant_id: str) -> str | None:
+    def _try_encrypt(self, value: str, tenant_id: str) -> Optional[str]:
         """Attempt field-level encryption using CortexEncrypter."""
         try:
             from cortex.crypto import get_default_encrypter
@@ -275,7 +276,7 @@ class PIISanitizer:
 
 # ─── Module-level singleton ────────────────────────────────────────────────────
 
-_default_sanitizer: PIISanitizer | None = None
+_default_sanitizer: Optional[PIISanitizer] = None
 
 
 def get_pii_sanitizer(encrypt: bool = True) -> PIISanitizer:

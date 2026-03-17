@@ -252,6 +252,7 @@ described in frameworks such as the EU AI Act (Article 12), among others.
 
 - [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
 - [Architecture](docs/architecture.md) — topology, module map, and data flow
+- [Capabilities](docs/architecture/CORTEX-CAPABILITIES.md) — structural properties enabled by CORTEX topology
 - [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) — trust boundaries and threat model
 - [Axioms](docs/AXIOMS.md) — epistemic and design axioms
 - [Contributing](./CONTRIBUTING.md) — contribution workflow

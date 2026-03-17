@@ -10,6 +10,7 @@ pool de providers LLM y registro de historial.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import time
@@ -74,5 +75,5 @@ class ThinkingRecord:
     total_latency_ms: float
     confidence: float
     agreement: float
-    winner: str | None = None
+    winner: Optional[str] = None
     timestamp: float = field(default_factory=time.time)

@@ -6,6 +6,7 @@ Each signal represents a contextual cue from a specific source.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from dataclasses import dataclass, field
 
@@ -28,7 +29,7 @@ class Signal:
     source: str
     signal_type: str
     content: str
-    project: str | None
+    project: Optional[str]
     timestamp: str
     weight: float = 0.5
 
@@ -56,7 +57,7 @@ class InferenceResult:
         projects_ranked: List of (project, score) tuples, descending.
     """
 
-    active_project: str | None
+    active_project: Optional[str]
     confidence: str
     signals_used: int
     summary: str

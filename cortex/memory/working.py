@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import time
 from collections import deque
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
@@ -50,7 +50,7 @@ class WorkingMemoryL1:
     def __init__(
         self,
         max_tokens: int = DEFAULT_MAX_TOKENS,
-        guardrail: SessionGuardrail | None = None,
+        guardrail: Optional[SessionGuardrail] = None,
     ) -> None:
         if max_tokens <= 0:
             raise ValueError(f"max_tokens must be positive, got {max_tokens}")
@@ -145,7 +145,7 @@ class WorkingMemoryL1:
 
         return overflow
 
-    def get_context(self, tenant_id: str | None = None) -> list[dict[str, str]]:
+    def get_context(self, tenant_id: Optional[str] = None) -> list[dict[str, str]]:
         """Return current buffer for a tenant as prompt-ready message dicts."""
         tenant_id = tenant_id or get_tenant_id()
         if tenant_id not in self._buffers:
@@ -183,7 +183,7 @@ class WorkingMemoryL1:
         # Normalise: 100+ accesses in window → 1.0  (Ω₁: right scale matters)
         return min(1.0, count / 100.0)
 
-    def clear(self, tenant_id: str | None = None) -> list[MemoryEvent]:
+    def clear(self, tenant_id: Optional[str] = None) -> list[MemoryEvent]:
         """Flush events. If tenant_id provided, clears ONLY that tenant."""
         flushed: list[MemoryEvent] = []
         if tenant_id:
@@ -201,7 +201,7 @@ class WorkingMemoryL1:
 
     # ─── Snapshot & Export ────────────────────────────────────────
 
-    def snapshot(self, tenant_id: str | None = None) -> dict[str, Any]:
+    def snapshot(self, tenant_id: Optional[str] = None) -> dict[str, Any]:
         """Export current working memory state as a portable dictionary."""
         resolved_tenant_id = tenant_id or get_tenant_id()
         if resolved_tenant_id not in self._buffers:
@@ -216,7 +216,7 @@ class WorkingMemoryL1:
             ],
         }
 
-    def restore(self, snapshot_data: dict[str, Any], tenant_id: str | None = None) -> None:
+    def restore(self, snapshot_data: dict[str, Any], tenant_id: Optional[str] = None) -> None:
         """Import working memory state from a snapshot dictionary."""
         resolved_tenant_id = tenant_id or snapshot_data.get("tenant_id") or get_tenant_id()
         if not resolved_tenant_id:
@@ -248,14 +248,14 @@ class WorkingMemoryL1:
         """Maximum token budget per tenant."""
         return self._max_tokens
 
-    def utilization(self, tenant_id: str | None = None) -> float:
+    def utilization(self, tenant_id: Optional[str] = None) -> float:
         """Token utilization ratio for a tenant."""
         tenant_id = tenant_id or get_tenant_id()
         if self._max_tokens == 0:
             return 0.0
         return self._tenant_tokens.get(tenant_id, 0) / self._max_tokens
 
-    def event_count(self, tenant_id: str | None = None) -> int:
+    def event_count(self, tenant_id: Optional[str] = None) -> int:
         """Number of events in the buffer for a tenant."""
         tenant_id = tenant_id or get_tenant_id()
         return len(self._buffers.get(tenant_id, []))

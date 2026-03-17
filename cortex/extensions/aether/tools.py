@@ -5,6 +5,7 @@ All file/shell operations are confined to task.repo_path.
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import logging
 import os
@@ -73,9 +74,9 @@ class AgentToolkit:
 
     def __init__(
         self,
-        repo_path: str | Path,
-        allowed_tools: list[str] | None = None,
-        capability_guard: CapabilityGuard | None = None,
+        repo_path: Union[str, Path],
+        allowed_tools: Optional[list[str]] = None,
+        capability_guard: Optional[CapabilityGuard] = None,
     ) -> None:
         self.repo_path = Path(repo_path).resolve()
         if not self.repo_path.exists():
@@ -119,7 +120,7 @@ class AgentToolkit:
         return p
 
     @staticmethod
-    def _sovereign_bash_guard(cmd: str) -> str | None:
+    def _sovereign_bash_guard(cmd: str) -> Optional[str]:
         """Validate a shell command against the Sovereign Command Guard.
 
         Returns None if the command is safe, or an error string if blocked.

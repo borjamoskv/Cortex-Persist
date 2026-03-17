@@ -11,7 +11,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.extensions.swarm.conflict_resolution")
 
@@ -129,7 +129,7 @@ _W_CONFIDENCE: float = 0.20
 _W_RECENCY: float = 0.10
 
 
-def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> WeightedVote | None:
+def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> Optional[WeightedVote]:
     """Compute reputation-weighted vote score for an agent."""
     domain_match = 1.0 if agent.specialty.lower() == conflict_domain.lower() else 0.3
 
@@ -217,7 +217,7 @@ class ConflictResolver:
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],  # agent_id → (profile, chosen_option_id)
         conflict_domain: str = "general",
-        architect_judge: Any | None = None,
+        architect_judge: Optional[Any] = None,
     ) -> ConflictResolution:
         """Execute the full escalation ladder."""
         self._conflict_counter += 1
@@ -368,7 +368,7 @@ class ConflictResolver:
         self,
         options: list[ConflictOption],
         judge: Any,
-    ) -> ResolutionResult | None:
+    ) -> Optional[ResolutionResult]:
         """Invoke LLM-as-judge for complex strategic decisions."""
         try:
             options_desc = "\n".join(

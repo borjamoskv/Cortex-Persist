@@ -8,7 +8,7 @@ ValueError → propagates for critical security blocks.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 __all__ = ["run_security_guards"]
 
@@ -18,9 +18,9 @@ logger = logging.getLogger("cortex")
 def _guard_injection(
     content: str,
     project: str,
-    source: str | None,
-    meta: dict[str, Any] | None,
-) -> dict[str, Any] | None:
+    source: Optional[str],
+    meta: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
     """Scan content for injection attacks.
 
     Passes ``source`` to the guard so trusted agents bypass L1/L5.
@@ -52,9 +52,9 @@ def _guard_injection(
 def _guard_anomaly(
     content: str,
     project: str,
-    source: str | None,
-    meta: dict[str, Any] | None,
-) -> dict[str, Any] | None:
+    source: Optional[str],
+    meta: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
     """Check for statistical anomalies in store patterns."""
     try:
         from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
@@ -97,8 +97,8 @@ def _guard_anomaly(
 
 def _guard_honeypot(
     content: str,
-    meta: dict[str, Any] | None,
-) -> dict[str, Any] | None:
+    meta: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
     """Check if content attempts to access a honeypot resource."""
     try:
         from cortex.extensions.security.honeypot import HONEY_POT
@@ -122,9 +122,9 @@ def _guard_honeypot(
 def run_security_guards(
     content: str,
     project: str,
-    source: str | None,
-    meta: dict[str, Any] | None,
-) -> dict[str, Any] | None:
+    source: Optional[str],
+    meta: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
     """Run all Anti-Hacker Shield guards (injection, anomaly, honeypot).
 
     Each guard is optional (ImportError → degrade gracefully).

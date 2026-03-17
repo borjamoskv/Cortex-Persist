@@ -12,6 +12,7 @@ Commands:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import subprocess
 from pathlib import Path
@@ -199,7 +200,7 @@ def prompt_show(variant: str) -> None:
     default=None,
     help="Write generated prompt to file instead of stdout.",
 )
-def prompt_generate(variant: str, out: str | None) -> None:
+def prompt_generate(variant: str, out: Optional[str]) -> None:
     """Regenerate the system prompt with live codebase statistics.
 
     Stats injected: LOC, test count, module count, REST endpoints,

@@ -1,3 +1,4 @@
+from typing import Optional
 """
 ZENÓN-1: Formalización Algorítmica del Detector de Rendimiento Decreciente.
 Protocolo Soberano para prevenir la recursividad infinita (Parálisis de Análisis)
@@ -72,7 +73,7 @@ class ZenonDetector:
 
         self.history: list[CognitiveIteration] = []
 
-    def absorb_iteration(self, iteration: CognitiveIteration) -> ZenoExhaustionException | None:
+    def absorb_iteration(self, iteration: CognitiveIteration) -> Optional[ZenoExhaustionException]:
         """
         Absorbe la iteración de cálculo algorítmico y comprueba si hemos topado
         con el Muro Asintótico de Kleene-Zenon.

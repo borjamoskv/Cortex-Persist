@@ -3,7 +3,7 @@ import sqlite3
 from cortex.crypto.aes import get_default_encrypter
 
 enc = get_default_encrypter()
-conn = sqlite3.connect('/Users/borjafernandezangulo/.cortex/cortex.db')
+conn = sqlite3.connect('~/.cortex/cortex.db')
 c = conn.cursor()
 c.execute("SELECT id, project, fact_type, meta FROM facts WHERE meta LIKE 'v6_aesgcm:%'")
 rows = c.fetchall()

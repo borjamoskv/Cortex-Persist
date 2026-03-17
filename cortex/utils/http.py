@@ -31,7 +31,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any
+from typing import Any, Optional, Union
 
 logger = logging.getLogger("cortex.http")
 
@@ -99,9 +99,9 @@ class HttpRetryMixin:
         method: str,
         url: str,
         headers: dict[str, str],
-        payload: dict[str, Any] | None,
+        payload: Optional[dict[str, Any]],
         label: str,
-    ) -> dict[str, Any] | Exception:
+    ) -> Union[dict[str, Any], Exception]:
         """Execute HTTP request and parse JSON. Returns Exception on 429 instead of raising."""
         import httpx
 
@@ -127,7 +127,7 @@ class HttpRetryMixin:
         method: str,
         url: str,
         headers: dict[str, str],
-        payload: dict[str, Any] | None = None,
+        payload: Optional[dict[str, Any]] = None,
         label: str = "",
     ) -> dict[str, Any]:
         """Core retry engine — exponential backoff on HTTP 429.
@@ -137,7 +137,7 @@ class HttpRetryMixin:
         """
         import httpx
 
-        last_exc: Exception | None = None
+        last_exc: Optional[Exception] = None
 
         for attempt in range(self._max_retries):
             result = await self._do_http_call(method, url, headers, payload, label)
@@ -182,7 +182,7 @@ async def _do_standalone_post(
     payload: dict[str, Any],
     provider: str,
     label: str,
-) -> dict[str, Any] | Exception:
+) -> Union[dict[str, Any], Exception]:
     import httpx
 
     response = await client.post(url, headers=headers, json=payload)
@@ -222,7 +222,7 @@ async def post_with_retry(
     """
     import httpx
 
-    last_exc: Exception | None = None
+    last_exc: Optional[Exception] = None
 
     for attempt in range(max_retries):
         result = await _do_standalone_post(client, url, headers, payload, provider, label)

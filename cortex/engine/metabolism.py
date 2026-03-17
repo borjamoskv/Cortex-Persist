@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -126,7 +126,7 @@ class Metabolism:
         self.history.append(diagnostic)
         return diagnostic
 
-    def render_vitals(self, diag: dict[str, Any] | None = None) -> str:
+    def render_vitals(self, diag: Optional[dict[str, Any]] = None) -> str:
         """Render a visual representation of current vitals."""
         v = self.vitals
         d = diag or {}

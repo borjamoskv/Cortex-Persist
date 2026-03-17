@@ -1,3 +1,4 @@
+from typing import Optional
 """
 CORTEX v5.0 — Mission Orchestration Router.
 """
@@ -34,7 +35,7 @@ async def launch_mission(
 
 @router.get("/", response_model=list[dict])
 async def list_missions(
-    project: str | None = Query(None),
+    project: Optional[str] = Query(None),
     engine: CortexEngine = Depends(get_engine),
     _=Depends(require_permission("read")),
 ):

@@ -11,6 +11,7 @@ Usage:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import argparse
 import asyncio
@@ -66,7 +67,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 async def _connect_toolbox(
-    server_url: str | None = None,
+    server_url: Optional[str] = None,
     toolset: str = "",
 ) -> list:
     """Attempt to connect to an MCP Toolbox server and return its tools.
@@ -114,8 +115,8 @@ async def _connect_toolbox(
 
 def run_cli(
     agent_name: str = "sovereign",
-    model: str | None = None,
-    toolbox_url: str | None = None,
+    model: Optional[str] = None,
+    toolbox_url: Optional[str] = None,
     toolbox_toolset: str = "",
 ) -> None:
     """Run a CORTEX agent in interactive CLI mode."""

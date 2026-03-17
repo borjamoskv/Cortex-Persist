@@ -10,7 +10,7 @@ import logging
 import os
 import sqlite3
 from collections import OrderedDict
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 from cortex.storage import StorageMode, get_storage_mode
 
@@ -34,7 +34,7 @@ class TenantRouter:
         self._auth_token = os.environ.get("TURSO_AUTH_TOKEN", "")
         self._postgres_dsn = os.environ.get("POSTGRES_DSN", "")
 
-    async def get_backend(self, tenant_id: str = "default", content: str | None = None):
+    async def get_backend(self, tenant_id: str = "default", content: Optional[str] = None):
         """Get the storage backend for a specific tenant.
 
         If sensitive content is detected, it FORCES local storage to prevent
@@ -172,7 +172,7 @@ class TenantRouter:
 
 # ─── Singleton ────────────────────────────────────────────────────────
 
-_router: TenantRouter | None = None
+_router: Optional[TenantRouter] = None
 
 
 def get_router() -> TenantRouter:

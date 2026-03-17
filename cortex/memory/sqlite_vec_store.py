@@ -7,6 +7,7 @@ and temporal decay directly in the embedding retrieval.
 """
 
 from __future__ import annotations
+from typing import Any, ClassVar, Optional, Union
 
 import asyncio
 import json
@@ -30,7 +31,7 @@ __all__ = ["SovereignVectorStoreL2"]
 
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
-_L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
+_L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
@@ -60,6 +61,7 @@ class SovereignVectorStoreL2:
         "_half_life",
         "_hybrid",
         "_sanitizer",
+        "_vector_enabled",
     )
 
     MAX_DOMAIN_ENTROPY = 5000  # Axiom Ω8: Critical mass for Universe Splitting
@@ -67,16 +69,17 @@ class SovereignVectorStoreL2:
     def __init__(
         self,
         encoder: AsyncEncoder,
-        db_path: str | Path = "~/.cortex/vectors.db",
+        db_path: Union[str, Path] = "~/.cortex/vectors.db",
         half_life_days: int = 7,
     ) -> None:
         self._encoder = encoder
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: sqlite3.Connection | None = None
+        self._conn: Optional[sqlite3.Connection] = None
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
+        self._vector_enabled = False
         # Lazy-initialized subsystems
         self._hybrid = None  # L2HybridSearch — created after conn is ready
         self._sanitizer = None  # PIISanitizer singleton
@@ -94,8 +97,20 @@ class SovereignVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+            
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vector_enabled = True
+                logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
+            except (AttributeError, sqlite3.OperationalError, Exception) as e:
+                logger.warning(
+                    "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
+                    "Semantic search will be disabled but metadata storage is preserved.",
+                    e
+                )
+                self._vector_enabled = False
+
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -119,11 +134,12 @@ class SovereignVectorStoreL2:
                     metadata TEXT
                 )
             """)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
-                    embedding float[{self._encoder.dimension}]
-                )
-            """)
+            if self._vector_enabled:
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
+                        embedding float[{self._encoder.dimension}]
+                    )
+                """)
 
             # Indexes for Zero-Trust and Speed
             self._conn.execute(
@@ -332,10 +348,11 @@ class SovereignVectorStoreL2:
                 )
                 rowid = cursor.lastrowid
 
-                cursor.execute(
-                    f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
-                    (rowid, embedding_bytes),
-                )
+                if self._vector_enabled:
+                    cursor.execute(
+                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
+                        (rowid, embedding_bytes),
+                    )
                 conn.commit()
             except (sqlite3.Error, RuntimeError) as e:
                 # LEGION-OMEGA (Chronos Sniper): Prevent DB from entering corrupt
@@ -353,7 +370,7 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
-        layer: str | None = None,
+        layer: Optional[str] = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -364,6 +381,38 @@ class SovereignVectorStoreL2:
         # Vector search + Reranking in SQL
         cursor = conn.cursor()
         meta_tb, vec_tb = self._get_domain_tables(conn, tenant_id, project_id)
+
+        if not self._vector_enabled:
+            # Fallback to pure metadata/content search (no similarity scoring)
+            sql = f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
+            params: list[Any] = [tenant_id, project_id]
+            if layer:
+                sql += " AND cognitive_layer = ?"
+                params.append(layer)
+            sql += " ORDER BY timestamp DESC LIMIT ?"
+            params.append(limit)
+            
+            cursor.execute(sql, tuple(params))
+            rows = cursor.fetchall()
+            final_facts = []
+            for row in rows:
+                fact = CortexFactModel(
+                    id=row["id"],
+                    tenant_id=row["tenant_id"],
+                    project_id=row["project_id"],
+                    content=row["content"],
+                    embedding=[],  # No embedding available
+                    timestamp=row["timestamp"],
+                    is_diamond=bool(row["is_diamond"]),
+                    is_bridge=bool(row["is_bridge"]),
+                    confidence=row["confidence"],
+                    cognitive_layer=row["cognitive_layer"] or "semantic",
+                    parent_decision_id=row["parent_decision_id"],
+                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                )
+                object.__setattr__(fact, "_recall_score", 0.0)
+                final_facts.append(fact)
+            return final_facts
 
         sql = f"""
             SELECT * FROM (
@@ -427,7 +476,7 @@ class SovereignVectorStoreL2:
         self,
         query: str,
         limit: int = 5,
-        project: str | None = None,
+        project: Optional[str] = None,
         tenant_id: str = "default",
     ) -> list[CortexFactModel]:
         """Backward-compatible recall for legacy callers. Maps to recall_secure."""

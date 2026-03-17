@@ -3,7 +3,7 @@ from cortex.cli.common import get_engine, DEFAULT_DB
 
 def main():
     engine = get_engine(DEFAULT_DB)
-    with open("/Users/borjafernandezangulo/.cortex/ai_agents_handbook.pdf.txt", "r", encoding="utf-8") as f:
+    with open("~/.cortex/ai_agents_handbook.pdf.txt", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Using the store_sync method from CortexEngine

@@ -9,6 +9,7 @@ for hybrid retrieval using Reciprocal Rank Fusion (RRF).
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -41,7 +42,7 @@ class SyncSearchResult:
     project: str
     fact_type: str
     score: float = 0.0
-    source: str | None = None
+    source: Optional[str] = None
     confidence: str = "stated"
     tags: list[str] = field(default_factory=list)
 
@@ -60,7 +61,7 @@ def semantic_search_sync(
     conn: sqlite3.Connection,
     query_embedding: list[float],
     top_k: int = 5,
-    project: str | None = None,
+    project: Optional[str] = None,
 ) -> list[SyncSearchResult]:
     """Vector KNN search using sqlite-vec (sync)."""
     embedding_json = json.dumps(query_embedding)
@@ -149,7 +150,7 @@ def _sanitize_fts_query(query: str) -> str:
 
 def _build_fts_query(
     query: str,
-    project: str | None,
+    project: Optional[str],
     limit: int,
 ) -> tuple[str, list]:
     """Build FTS5 MATCH query."""
@@ -173,7 +174,7 @@ def _build_fts_query(
 
 def _build_like_query(
     query: str,
-    project: str | None,
+    project: Optional[str],
     limit: int,
 ) -> tuple[str, list]:
     """Build LIKE fallback query."""
@@ -231,7 +232,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
-    project: str | None = None,
+    project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SyncSearchResult]:
     """Full-text search with FTS5 (fast) and LIKE fallback (sync)."""
@@ -257,7 +258,7 @@ def hybrid_search_sync(
     query: str,
     query_embedding: list[float],
     top_k: int = 10,
-    project: str | None = None,
+    project: Optional[str] = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
 ) -> list[SyncSearchResult]:

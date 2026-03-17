@@ -12,7 +12,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 from uuid import uuid4
 
 logger = logging.getLogger("moskv-daemon.centaur.queue")
@@ -21,7 +21,7 @@ logger = logging.getLogger("moskv-daemon.centaur.queue")
 class EntropicQueue:
     """Persistent, thread-safe, SQLite WAL-backed task queue."""
 
-    def __init__(self, db_path: Path | str):
+    def __init__(self, db_path: Union[Path, str]):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
@@ -69,7 +69,7 @@ class EntropicQueue:
         task_type: str,
         payload: dict[str, Any],
         priority: int = 50,
-        task_id: str | None = None,
+        task_id: Optional[str] = None,
     ) -> str:
         """Push a new task to the queue."""
         uid = task_id or str(uuid4())
@@ -86,7 +86,7 @@ class EntropicQueue:
         logger.debug("Pushed task %s (%s) to Entropic Queue.", uid, task_type)
         return uid
 
-    def pop(self, max_retries: int = 3) -> dict[str, Any] | None:
+    def pop(self, max_retries: int = 3) -> Optional[dict[str, Any]]:
         """Atomically get the highest priority pending task and mark it as 'processing'."""
         now = datetime.now(timezone.utc).isoformat()
         with self._get_conn() as conn:

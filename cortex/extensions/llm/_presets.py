@@ -4,7 +4,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 logger = logging.getLogger("cortex.extensions.llm.presets")
 
@@ -124,7 +124,7 @@ def load_presets() -> dict[str, dict[str, Any]]:
         return {}
 
 
-def get_preset_info(provider: str) -> dict[str, Any] | None:
+def get_preset_info(provider: str) -> Optional[dict[str, Any]]:
     """Return preset config for a provider, or None if not found."""
     return load_presets().get(provider)
 
@@ -154,7 +154,7 @@ _TIER_RANK: dict[str, int] = {
 }
 
 
-def resolve_model(provider: str, intent: str) -> str | None:
+def resolve_model(provider: str, intent: str) -> Optional[str]:
     """Resolve the best model for a provider and intent.
 
     Returns the intent-specific model if mapped, otherwise the default model.
@@ -172,7 +172,7 @@ def providers_for_intent(
     intent: str,
     *,
     min_tier: str = "high",
-    max_cost: str | None = None,
+    max_cost: Optional[str] = None,
     sort_by: str = "cost",
 ) -> list[tuple[str, str]]:
     """Return providers that support an intent, sorted by cost or tier.

@@ -6,6 +6,7 @@ delegates rendering to the TemplateRegistry.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from pathlib import Path
@@ -28,7 +29,7 @@ class SystemAssembler:
     4. Writes files atomically (write to temp, then rename).
     """
 
-    def __init__(self, registry: TemplateRegistry | None = None) -> None:
+    def __init__(self, registry: Optional[TemplateRegistry] = None) -> None:
         self.registry = registry or TemplateRegistry()
 
     def assemble(self, spec: SystemSpec, base_dir: Path) -> tuple[list[str], list[str]]:

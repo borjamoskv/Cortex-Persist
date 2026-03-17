@@ -12,7 +12,7 @@ The pipe receives relevant facts as context for grounded answers.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 __all__ = ["CORTEX_CONTEXT_TEMPLATE", "run_with_cortex_context", "create_cortex_pipe"]
 
@@ -62,10 +62,10 @@ async def run_with_cortex_context(
     pipe_name: str,
     query: str,
     *,
-    project: str | None = None,
+    project: Optional[str] = None,
     top_k: int = 10,
-    thread_id: str | None = None,
-    variables: list[dict[str, str]] | None = None,
+    thread_id: Optional[str] = None,
+    variables: Optional[list[dict[str, str]]] = None,
 ) -> dict[str, Any]:
     """Run a Langbase Pipe with CORTEX memory as context.
 
@@ -142,8 +142,8 @@ async def create_cortex_pipe(
     name: str,
     *,
     description: str = "CORTEX-powered AI agent",
-    model: str | None = None,
-    memory_names: list[str] | None = None,
+    model: Optional[str] = None,
+    memory_names: Optional[list[str]] = None,
 ) -> dict:
     """Create a Langbase Pipe pre-configured for CORTEX integration.
 

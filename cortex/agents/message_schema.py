@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -44,14 +44,14 @@ class MessageKind(str, Enum):
 class AgentMessage(BaseModel):
     message_id: str = Field(default_factory=lambda: str(uuid4()))
     correlation_id: str
-    causation_id: str | None = None
+    causation_id: Optional[str] = None
     sender: str
     recipient: str
     kind: MessageKind
     payload: dict[str, Any] = Field(default_factory=dict)
     state: MessageState = MessageState.PENDING
     priority: int = 0
-    ttl_seconds: int | None = None
+    ttl_seconds: Optional[int] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     trace_context: dict[str, Any] = Field(default_factory=dict)
 
@@ -69,10 +69,10 @@ def new_message(
     payload: dict[str, Any],
     *,
     correlation_id: str = "auto",
-    causation_id: str | None = None,
+    causation_id: Optional[str] = None,
     ttl_seconds: int = 3600,
     priority: int = 0,
-    trace_context: dict[str, Any] | None = None,
+    trace_context: Optional[dict[str, Any]] = None,
 ) -> AgentMessage:
     if correlation_id == "auto":
         correlation_id = str(uuid4())

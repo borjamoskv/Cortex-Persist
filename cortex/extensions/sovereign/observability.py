@@ -10,7 +10,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 # ---------------------------------------------------------------------------
 # Power-level scoring (target: 1300/1000)
@@ -160,7 +160,7 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
         logger.warning("OpenTelemetry packages not installed — running without telemetry")
 
 
-_latest_power: PowerLevel | None = None
+_latest_power: Optional[PowerLevel] = None
 
 
 def record_power(power: PowerLevel) -> None:

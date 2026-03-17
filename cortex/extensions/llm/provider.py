@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import re
-from typing import Any, Final
+from typing import Any, Callable, Dict, Final, List, Optional, Tuple, Union
 
 import httpx
 
@@ -44,9 +44,9 @@ class LLMProvider(BaseProvider):
     def __init__(
         self,
         provider: str = "qwen",
-        api_key: str | None = None,
-        model: str | None = None,
-        base_url: str | None = None,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        base_url: Optional[str] = None,
     ):
         presets = load_presets()
 
@@ -70,9 +70,9 @@ class LLMProvider(BaseProvider):
 
     def _init_custom(
         self,
-        api_key: str | None,
-        model: str | None,
-        base_url: str | None,
+        api_key: Optional[str],
+        model: Optional[str],
+        base_url: Optional[str],
     ) -> None:
         """Initialize a custom provider configuration."""
         self._provider = "custom"
@@ -93,9 +93,9 @@ class LLMProvider(BaseProvider):
         self,
         provider: str,
         preset: dict[str, Any],
-        api_key: str | None,
-        model: str | None,
-        base_url: str | None,
+        api_key: Optional[str],
+        model: Optional[str],
+        base_url: Optional[str],
     ) -> None:
         """Initialize from a known provider preset."""
         self._provider = provider
@@ -246,7 +246,7 @@ class LLMProvider(BaseProvider):
                 actual,
             )
 
-    def _extract_retry_delay(self, text: str) -> float | None:
+    def _extract_retry_delay(self, text: str) -> Optional[float]:
         """Extrae el delay de reintento desde el JSON o via regex."""
         try:
             data = json.loads(text)

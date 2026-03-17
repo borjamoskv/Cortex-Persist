@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from cortex.extensions.swarm.knowledge_radar import discover
 from cortex.extensions.swarm.nightshift_pipeline import NightShiftPipeline
@@ -40,11 +40,11 @@ class NightShiftCrystalDaemon:
 
     def __init__(
         self,
-        cortex_db: Any | None = None,
+        cortex_db: Optional[Any] = None,
         cooldown_hours: float = 6.0,
         max_crystals: int = 5,
-        queue_path: Path | str | None = None,
-        encoder: Any | None = None,
+        queue_path: Optional[Union[Path, str]] = None,
+        encoder: Optional[Any] = None,
         consolidation_dry_run: bool = False,
     ) -> None:
         self._db = cortex_db
@@ -258,7 +258,7 @@ class NightShiftCrystalDaemon:
 
     # ── Consolidation Phase ────────────────────────────────────────────
 
-    async def _run_consolidation(self, cycle_id: str) -> dict[str, Any] | None:
+    async def _run_consolidation(self, cycle_id: str) -> Optional[dict[str, Any]]:
         """Execute Phase 2: Crystal consolidation (REM sleep)."""
         if self._db is None:
             return None
@@ -298,7 +298,7 @@ class NightShiftCrystalDaemon:
         return list(self._cycle_history)
 
     @property
-    def last_cycle(self) -> dict[str, Any] | None:
+    def last_cycle(self) -> Optional[dict[str, Any]]:
         """Most recent cycle report."""
         return self._cycle_history[-1] if self._cycle_history else None
 

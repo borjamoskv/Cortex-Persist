@@ -6,6 +6,7 @@ to avoid a circular dependency.
 """
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import ast
 
@@ -45,13 +46,16 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                         "Bare `except:` catches all exceptions"
                         " including SystemExit/KeyboardInterrupt"
                     ),
-                    fix_hint="Use a specific exception type: except ValueError, except OSError, etc.",
+                    fix_hint=(
+                        "Use a specific exception type: "
+                        "except ValueError, except OSError, etc."
+                    ),
                 )
             )
         elif isinstance(node.type, ast.Name) and node.type.id in ("Exception", "BaseException"):
             body_is_silent = (
                 len(node.body) == 1
-                and isinstance(node.body[0], ast.Pass | ast.Expr)
+                and isinstance(node.body[0], (ast.Pass, ast.Expr))
                 and (
                     isinstance(node.body[0], ast.Pass)
                     or (
@@ -75,7 +79,10 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                     file=self.rel,
                     line=node.lineno,
                     message=msg,
-                    fix_hint="Catch specific exceptions: except (ValueError, KeyError, OSError) as e:",
+                    fix_hint=(
+                        "Catch specific exceptions: "
+                        "except (ValueError, KeyError, OSError) as e:"
+                    ),
                 )
             )
         self.generic_visit(node)

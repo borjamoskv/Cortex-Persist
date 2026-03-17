@@ -44,6 +44,7 @@ Usage::
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import ast
 import logging
@@ -221,7 +222,7 @@ class ExecResult:
     success: bool
     output: dict[str, object] = field(default_factory=dict)
     stdout: str = ""
-    error: str | None = None
+    error: Optional[str] = None
     duration_ms: float = 0.0
 
 

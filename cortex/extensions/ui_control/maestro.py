@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine
 from cortex.extensions.ui_control.applescript import (
@@ -49,7 +49,7 @@ class MaestroUI:
     bajo una API unificada con reintentos automáticos.
     """
 
-    def __init__(self, engine: CortexEngine | None = None) -> None:
+    def __init__(self, engine: Optional[CortexEngine] = None) -> None:
         self.engine = engine
         self.accessibility = AccessibilityEngine(engine)
         self.keyboard = KeyboardEngine(engine)
@@ -87,13 +87,13 @@ class MaestroUI:
         """Verifica permisos de Accesibilidad del sistema."""
         return self.accessibility.check_permissions()
 
-    def find_element(self, app_name: str, identifier: str) -> AXElement | None:
+    def find_element(self, app_name: str, identifier: str) -> Optional[AXElement]:
         """Busca un elemento AX por identificador."""
         return self.accessibility.find_element(app_name, identifier)
 
     def find_element_by_title(
         self, app_name: str, title: str, max_depth: int = 8
-    ) -> AXElement | None:
+    ) -> Optional[AXElement]:
         """Busca un elemento AX por título."""
         return self.accessibility.find_element_by_title(app_name, title, max_depth)
 
@@ -112,7 +112,7 @@ class MaestroUI:
         app_name: str,
         identifier: str,
         timeout: float = 5.0,
-    ) -> AXElement | None:
+    ) -> Optional[AXElement]:
         """Espera a que un elemento aparezca (polling)."""
         return await self.accessibility.wait_for_element(app_name, identifier, timeout)
 
@@ -120,7 +120,7 @@ class MaestroUI:
         """Click en un elemento AX con reintentos."""
         return await self._retry(self.accessibility.perform_click, element)
 
-    def get_value(self, element: AXElement) -> str | None:
+    def get_value(self, element: AXElement) -> Optional[str]:
         """Lee el valor AX de un elemento."""
         return self.accessibility.get_value(element)
 
@@ -131,22 +131,22 @@ class MaestroUI:
     # ─── Teclado ────────────────────────────────────────────────
 
     async def hotkey(
-        self, key: str, *modifiers: str, target: AppTarget | None = None
+        self, key: str, *modifiers: str, target: Optional[AppTarget] = None
     ) -> InteractionResult:
         """Atajo de teclado (ej: hotkey('c', 'command'))."""
         return await self.keyboard.hotkey(key, *modifiers, target=target)
 
     async def type_text(
-        self, text: str, target: AppTarget | None = None, delay: float = 0.05
+        self, text: str, target: Optional[AppTarget] = None, delay: float = 0.05
     ) -> InteractionResult:
         """Escribe texto (clipboard para cadenas largas, keystroke para cortas)."""
         return await self.keyboard.type_text(text, target=target, delay=delay)
 
-    async def press_special(self, key_name: str, target: AppTarget | None = None) -> InteractionResult:
+    async def press_special(self, key_name: str, target: Optional[AppTarget] = None) -> InteractionResult:
         """Pulsa una tecla especial (return, tab, escape, flechas)."""
         return await self.keyboard.press_special(key_name, target=target)
 
-    async def press(self, combo: KeyCombo, target: AppTarget | None = None) -> InteractionResult:
+    async def press(self, combo: KeyCombo, target: Optional[AppTarget] = None) -> InteractionResult:
         """Pulsa una combinación de teclas."""
         return await self.keyboard.press(combo, target=target)
 
@@ -189,7 +189,7 @@ class MaestroUI:
         """Lista todas las ventanas de una aplicación."""
         return await self.window.list_windows(app_name)
 
-    async def get_frontmost_window(self) -> WindowInfo | None:
+    async def get_frontmost_window(self) -> Optional[WindowInfo]:
         """Devuelve información de la ventana en primer plano."""
         return await self.window.get_frontmost()
 
@@ -219,7 +219,7 @@ class MaestroUI:
 
     # ─── AppleScript Directos ───────────────────────────────────
 
-    async def run_script(self, script: str) -> str | None:
+    async def run_script(self, script: str) -> Optional[str]:
         """Ejecuta un AppleScript arbitrario."""
         return await run_applescript(script, require_success=False)
 
@@ -227,7 +227,7 @@ class MaestroUI:
         """Verifica si una app está en ejecución."""
         return await is_app_running(app_name)
 
-    async def get_frontmost_app(self) -> str | None:
+    async def get_frontmost_app(self) -> Optional[str]:
         """Devuelve el nombre de la app en primer plano."""
         return await get_frontmost_app()
 
@@ -235,13 +235,13 @@ class MaestroUI:
         """Escribe texto al clipboard."""
         await set_clipboard(text)
 
-    async def clipboard_get(self) -> str | None:
+    async def clipboard_get(self) -> Optional[str]:
         """Lee el clipboard."""
         return await get_clipboard()
 
     # ─── Visión ─────────────────────────────────────────────────
 
-    async def screenshot(self, output_path: str | None = None) -> str | None:
+    async def screenshot(self, output_path: Optional[str] = None) -> Optional[str]:
         """Captura pantalla y devuelve la ruta al archivo."""
         result = self.vision.capture_screen()
         if result.success:

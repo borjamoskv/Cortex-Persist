@@ -4,7 +4,7 @@ Extracted from heal.py to maintain thermodynamic LOC limits.
 """
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from cortex.extensions.mejoralo.constants import TAINT_TAG
 
@@ -16,7 +16,7 @@ logger = logging.getLogger("cortex.extensions.mejoralo.taint")
 def mark_file_tainted(
     file_path: str,
     project: str,
-    engine: "MejoraloEngine" | None,
+    engine: Optional['MejoraloEngine'],
 ) -> None:
     """Persist a permanent Taint mark on a file that failed L3 healing."""
     if not engine or not project:
@@ -41,7 +41,7 @@ def mark_file_tainted(
 def is_file_tainted(
     file_path: str,
     project: str,
-    engine: "MejoraloEngine" | None,
+    engine: Optional['MejoraloEngine'],
 ) -> bool:
     """Check if a file has been permanently tainted in CORTEX."""
     if not engine or not project:

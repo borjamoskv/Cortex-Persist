@@ -19,7 +19,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
 
@@ -76,7 +76,7 @@ class ThreatFeedReport:
         }
 
 
-def _keywords_to_pattern(text: str, max_keywords: int = 5) -> str | None:
+def _keywords_to_pattern(text: str, max_keywords: int = 5) -> Optional[str]:
     """Extract keywords from text and build a case-insensitive regex pattern."""
     keywords = [w for w in text.lower().split() if len(w) > 4 and w.isalpha()][:max_keywords]
     if not keywords:
@@ -99,7 +99,7 @@ class ThreatFeedEngine:
     def __init__(
         self,
         data_dir: str = "~/.cortex",
-        hmac_key: str | None = None,
+        hmac_key: Optional[str] = None,
     ) -> None:
         self._data_dir = Path(data_dir).expanduser()
         self._feed_path = self._data_dir / "threat_intel.json"
@@ -334,7 +334,7 @@ class ThreatFeedEngine:
 
         return matches
 
-    def get_last_update(self) -> datetime | None:
+    def get_last_update(self) -> Optional[datetime]:
         """Get timestamp of last successful feed update."""
         if not self._feed_path.exists():
             return None

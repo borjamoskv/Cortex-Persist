@@ -4,6 +4,7 @@ Reviews the git diff produced by the Executor and approves or rejects.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -36,7 +37,7 @@ Be strict but fair. Approve only if:
 class CriticAgent:
     """Reviews the git diff and approves or requests fixes."""
 
-    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
+    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
         self._llm = llm
         self._base_system = base_system_prompt
 

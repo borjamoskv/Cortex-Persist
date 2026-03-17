@@ -1,3 +1,4 @@
+from typing import Optional
 """
 CORTEX v6 — Audit Commands
 Commands for system security and architectural auditing.
@@ -22,7 +23,7 @@ def audit_cmds():
 @click.option(
     "--model", "-m", help="Override default SovereignLLM with a specific preferred provider."
 )
-def frontier_cmd(project: str, model: str | None):
+def frontier_cmd(project: str, model: Optional[str]):
     """Execute a lethal cognitive audit using the TOM, OLIVER & BENJI triad."""
     console.print(
         f"[bold magenta]🐺 Awakening Frontier Auditor for project: {project}...[/bold magenta]"

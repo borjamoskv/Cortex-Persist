@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from cortex.extensions.vex.models import ExecutionReceipt, VEXStatus, _sha256
 
@@ -86,7 +86,7 @@ def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:
 
 def export_receipt(
     receipt: ExecutionReceipt,
-    output_path: str | Path,
+    output_path: Union[str, Path],
 ) -> dict[str, Any]:
     """Export a receipt to a portable JSON file.
 
@@ -120,7 +120,7 @@ def export_receipt(
     }
 
 
-def load_receipt(path: str | Path) -> ExecutionReceipt:
+def load_receipt(path: Union[str, Path]) -> ExecutionReceipt:
     """Load a receipt from a JSON file for verification.
 
     Raises:

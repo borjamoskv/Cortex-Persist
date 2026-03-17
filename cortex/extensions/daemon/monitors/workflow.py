@@ -5,6 +5,7 @@ and generates `WorkflowAlert`s recommending the most relevant workflow to run.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -50,9 +51,9 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
 
     def __init__(
         self,
-        ghosts_path: Path | None = None,
-        memory_path: Path | None = None,
-        db_path: Path | None = None,
+        ghosts_path: Optional[Path] = None,
+        memory_path: Optional[Path] = None,
+        db_path: Optional[Path] = None,
         *,
         ghost_stale_hours: float = 24.0,
         memory_stale_hours: float = 12.0,
@@ -197,7 +198,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
                 continue
         return count
 
-    def _memory_staleness_hours(self) -> float | None:
+    def _memory_staleness_hours(self) -> Optional[float]:
         """Return hours since system.json was last modified, or None."""
         if not self._memory_path.exists():
             return None
@@ -208,7 +209,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
         except OSError:
             return None
 
-    def _db_size_mb(self) -> float | None:
+    def _db_size_mb(self) -> Optional[float]:
         """Return CORTEX DB size in MB, or None."""
         db = Path(self._db_path)
         if not db.exists():

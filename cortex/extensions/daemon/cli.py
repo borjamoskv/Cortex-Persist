@@ -13,6 +13,7 @@ Commands:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import sys
@@ -108,7 +109,7 @@ def setup_logging(verbose: bool = False) -> None:
 def cli(
     ctx: click.Context,
     verbose: bool,
-    sites: str | None,
+    sites: Optional[str],
     stale_hours: float,
     memory_stale_hours: float,
     interval: int,

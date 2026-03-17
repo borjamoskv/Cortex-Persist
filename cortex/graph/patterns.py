@@ -2,6 +2,8 @@
 
 Regex patterns and signal words for graph analysis.
 """
+from __future__ import annotations
+
 
 import re
 

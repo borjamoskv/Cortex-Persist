@@ -6,7 +6,7 @@ Uses z3-solver as the SMT core.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 from cortex.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
 
@@ -19,8 +19,8 @@ class VerificationResult:
 
     is_valid: bool
     violations: list[dict[str, Any]] = field(default_factory=list)
-    proof_certificate: str | None = None
-    counterexample: dict[str, Any] | None = None
+    proof_certificate: Optional[str] = None
+    counterexample: Optional[dict[str, Any]] = None
 
 
 class SovereignVerifier:
@@ -30,7 +30,7 @@ class SovereignVerifier:
     against the 7 Sovereign Safety Invariants.
     """
 
-    def __init__(self, invariants: list[SafetyInvariant] | None = None) -> None:
+    def __init__(self, invariants: Optional[list[SafetyInvariant]] = None) -> None:
         self.invariants = invariants or SOVEREIGN_INVARIANTS
         self._solver = None
         # Lazy z3 init: z3-solver is an optional [dev] dependency
@@ -43,7 +43,7 @@ class SovereignVerifier:
         except ImportError:
             logger.debug("z3-solver not installed; SovereignVerifier in passthrough mode")
 
-    def check(self, code: str, context: dict[str, Any] | None = None) -> VerificationResult:
+    def check(self, code: str, context: Optional[dict[str, Any]] = None) -> VerificationResult:
         """Verify the given code against all active invariants using AST and SMT logic."""
         if self._solver is not None:
             self._solver.reset()

@@ -6,36 +6,28 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 """
 
 from __future__ import annotations
-
 import json
 import logging
-from typing import Any, ClassVar
+from typing import Any, Optional, ClassVar
 
 import aiosqlite
 
-# Hoisted from _run_store_validation hot path
-from cortex.engine.bridge_guard import BridgeGuard
+from cortex.crypto import get_default_encrypter
 from cortex.engine.embedding_engine import embed_fact_async
-from cortex.engine.fact_store_core import (
-    insert_fact_record,
-    resolve_causality_async,
-)
+from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
-from cortex.engine.membrane.sanitizer import SovereignSanitizer
-from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.privacy_mixin import PrivacyMixin
-from cortex.engine.storage_guard import StorageGuard
-from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
-from cortex.guards.thermodynamic import (
-    AgentMode,
-    ThermodynamicCounters,
-    should_enter_decorative_mode,
+from cortex.engine.store_guards import run_security_guards
+from cortex.engine.store_mutation import (
+    deprecate_impl_logic,
+    invalidate_impl_logic,
+    purge_logic,
 )
-from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
-from cortex.memory.temporal import now_iso
-from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
+from cortex.engine.store_validation import run_store_validation_logic
+from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+# now_iso removed (internal use relocated)
 
 __all__ = ["StoreMixin"]
 
@@ -64,15 +56,15 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str = "default",
         fact_type: str = "knowledge",
-        tags: list[str] | None = None,
+        tags: Optional[list[str]] = None,
         confidence: str = "stated",
-        source: str | None = None,
-        meta: dict[str, Any] | None = None,
-        valid_from: str | None = None,
+        source: Optional[str] = None,
+        meta: Optional[dict[str, Any]] = None,
+        valid_from: Optional[str] = None,
         commit: bool = True,
-        tx_id: int | None = None,
-        conn: aiosqlite.Connection | None = None,
-        parent_decision_id: int | None = None,
+        tx_id: Optional[int] = None,
+        parent_decision_id: Optional[int] = None,
+        conn: Optional[aiosqlite.Connection] = None,
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
@@ -112,162 +104,21 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             )
 
     async def _run_store_validation(
-        self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
-    ) -> tuple[int | None, dict | None, str, str]:
-        # ═══ Axiom Ω₁₃: Thermodynamic Enforcement ═══
-        if self.__class__._agent_mode == AgentMode.DECORATIVE and fact_type not in (
-            "error", "ghost"
-        ):
-            logger.warning("🚫 [DECORATIVE MODE] Write blocked for type: %s", fact_type)
-            raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
-
-        # Calculate Exergy for the proposal
-        # We estimate uncertainty reduction. If it's a new fact, prior=1.0, posterior=0.2 (arbitrary for skeleton)
-        # In a real integration, these would come from the LLM's logprobs or the engine's information gain metric.
-        ex_input = ExergyInput(
-            prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
-            posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
-            tokens_consumed=meta.get("_tokens", 100) if meta else 100,
-            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
-            had_backup=True,
-            touched_persistent_state=True
-        )
-        ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
-        enforce_exergy(ex_res)
-
-        # Update counters and check for mode transition
-        if should_enter_decorative_mode(self.__class__._thermo_counters):
-            self.__class__._agent_mode = AgentMode.DECORATIVE
-            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
-
-        StorageGuard.validate(
+        self, conn: aiosqlite.Connection, project: str, content: str, tenant_id: str, fact_type: str, tags: Optional[list[str]], confidence: str, source: Optional[str], meta: Optional[dict[str, Any]]
+    ) -> tuple[Optional[int], Optional[dict[str, Any]], str, str]:
+        """Delegated validation logic (Ω₁₃, Semantic Dedup, Bridge)."""
+        return await run_store_validation_logic(
+            mixin_instance=self,
+            conn=conn,
             project=project,
             content=content,
+            tenant_id=tenant_id,
             fact_type=fact_type,
-            source=source,
-            confidence=confidence,
             tags=tags,
-            meta=meta,
+            confidence=confidence,
+            source=source,
+            meta=meta
         )
-        content = validate_content(project, content, fact_type)
-
-        if not (meta and meta.get("previous_fact_id")):
-            # 1. Exact Structural Hash Dedup (O(1))
-            if (existing_id := await check_dedup(conn, tenant_id, project, content)) is not None:
-                return existing_id, meta, content, fact_type
-
-            # 2. Semantic Deduplication (O(N) Vector Search) - V8 Data Governance
-            manager = getattr(self, "_memory_manager", None)
-            if manager is not None and getattr(manager, "_l2", None) is not None:
-                try:
-                    # L2 recall handles decay, success_rate and cosine similarity natively
-                    similar_facts = await manager._l2.recall(
-                        query=content,
-                        limit=1,
-                        project=project,
-                        tenant_id=tenant_id,
-                    )
-                    if similar_facts:
-                        top_match = similar_facts[0]
-                        score = getattr(top_match, "_recall_score", 0.0)
-                        # Threshold > 0.92 means extreme similarity (almost identical meaning)
-                        if score > 0.92:
-                            logger.info(
-                                "🛡️ [V8 Governance] Semantic deduplication blocked insert "
-                                "(Score: %.3f). ID: %s",
-                                score,
-                                top_match.id,
-                            )
-                            try:
-                                fact_id_int = int(top_match.id)
-
-                                # Axiom Ω7: Defensive Mutation (Thermal Decay Quarantine)
-                                hits = self.__class__._thermal_decay_cache.get(fact_id_int, 0) + 1
-                                self.__class__._thermal_decay_cache[fact_id_int] = hits
-
-                                if hits > 4:
-                                    logger.warning(
-                                        "☣️ [THERMAL DECAY] Fact %d reached critical entropy "
-                                        "(%d hits). Quarantining.",
-                                        fact_id_int,
-                                        hits,
-                                    )
-                                    # Archive the decaying abstraction before it processes further
-                                    await self.deprecate(
-                                        fact_id=fact_id_int,
-                                        reason=f"Thermal decay quarantine (Semantic loop {hits}x)",
-                                        conn=conn,
-                                        tenant_id=tenant_id,
-                                    )
-                                    self.__class__._thermal_decay_cache[fact_id_int] = 0
-                                else:
-                                    await conn.execute(
-                                        "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP "
-                                        "WHERE id = ?",
-                                        (fact_id_int,),
-                                    )
-                                return fact_id_int, meta, content, fact_type
-                            except (ValueError, TypeError):
-                                logger.warning(
-                                    "Non-integer ID returned from vector store. Skipping dedup."
-                                )
-                except (RuntimeError, ValueError, TypeError, OSError) as e:
-                    logger.debug("Semantic deduplication skipped due to internal error: %s", e)
-        meta = self._apply_privacy_shield(content, project, meta)
-        meta = run_security_guards(content, project, source, meta)
-
-        # Omega-3: Byzantine Default - Pass through SovereignSanitizer
-
-        raw_engram = {
-            "type": fact_type,
-            "source": source or "engine:store",
-            "topic": project,
-            "content": content,
-            "metadata": meta or {},
-        }
-        pure_engram, membrane_log = SovereignSanitizer.digest(raw_engram)
-        content = pure_engram.content
-        meta = pure_engram.metadata
-        if hasattr(membrane_log, "model_dump"):
-            meta["_membrane_log"] = membrane_log.model_dump()
-        else:
-            meta["_membrane_log"] = membrane_log.dict()
-
-        meta = await resolve_causality_async(conn, project, meta)
-
-        # Ω₆: Nemesis Analysis must be async to prevent loop starvation
-        # Skip nemesis for errors and ghosts as stack traces/records might contain anti-patterns
-        if fact_type not in ("error", "ghost"):
-            if rej := await NemesisProtocol.analyze_async(content, conn=conn):
-                logger.warning("NEMESIS REJECTION: %s", rej)
-                raise ValueError(rej)
-
-        # Ω₁: Bridge Elevation — Prescriptive pattern elevation for cross-project duplicates
-        if fact_type in ("knowledge", "decision", "rule", "ghost"):
-            # Don't bridge if it's an update (has previous_fact_id)
-            if not (meta and meta.get("previous_fact_id")):
-                source_proj = await BridgeGuard.detect_bridge_candidate(
-                    conn, content, project, tenant_id
-                )
-                if source_proj:
-                    logger.info(
-                        "🌉 [Ω₁] Elevating pattern to BRIDGE: %s → %s", source_proj, project
-                    )
-                    fact_type = "bridge"
-                    # Prescriptive pattern adoption: ensure bridge content follows BridgeGuard format
-                    if "→" not in content and "->" not in content:
-                        content = (
-                            f"Pattern from {source_proj} → {project}. Adaptation: {content}"
-                        )
-
-        if fact_type == "bridge":
-            bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
-            if not bridge_res["allowed"]:
-                raise ValueError(f"BRIDGE BLOCKED: {bridge_res['reason']}")
-            if bridge_res["meta_flags"]:
-                meta = {**(meta or {}), **bridge_res["meta_flags"]}
-
-        return None, meta, content, fact_type
 
     async def _store_impl(
         self,
@@ -276,14 +127,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str,
         fact_type: str,
-        tags: list[str] | None,
+        tags: Optional[list[str]],
         confidence: str,
-        source: str | None,
-        meta: dict[str, Any] | None,
-        valid_from: str | None,
+        source: Optional[str],
+        meta: Optional[dict[str, Any]],
+        valid_from: Optional[str],
         commit: bool,
-        tx_id: int | None,
-        parent_decision_id: int | None = None,
+        tx_id: Optional[int],
+        parent_decision_id: Optional[int] = None,
     ) -> int:
         # ═══ AX-033: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
@@ -384,9 +235,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def update(
         self,
         fact_id: int,
-        content: str | None = None,
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
+        content: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        meta: Optional[dict[str, Any]] = None,
         tenant_id: str = "default",
     ) -> int:
         tenant_id = self._resolve_tenant(tenant_id)
@@ -412,19 +263,15 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 source,
                 raw_old_meta_json,
             ) = row
-            from cortex.crypto import get_default_encrypter
-
             enc = get_default_encrypter()
             old_content = (
                 enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id) if raw_old_content else ""
             )
-            new_meta = (
+            new_meta: dict[str, Any] = (
                 enc.decrypt_json(raw_old_meta_json, tenant_id=db_tenant_id)
                 if raw_old_meta_json
                 else {}
-            )
-            if new_meta is None:
-                new_meta = {}
+            ) or {}
             if meta:
                 new_meta.update(meta)
             new_meta["previous_fact_id"] = fact_id
@@ -453,8 +300,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def deprecate(
         self,
         fact_id: int,
-        reason: str | None = None,
-        conn: aiosqlite.Connection | None = None,
+        reason: Optional[str] = None,
+        conn: Optional[aiosqlite.Connection] = None,
         tenant_id: str = "default",
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
@@ -474,48 +321,18 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _deprecate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
-    ) -> bool:  # type: ignore[reportReturnType]
-        from cortex.engine.mutation_engine import MUTATION_ENGINE
-
-        ts = now_iso()
-        async with conn.execute(
-            "SELECT tenant_id, project FROM facts "
-            "WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
-            (fact_id, tenant_id),
-        ) as cursor:
-            row = await cursor.fetchone()
-        if not row:
-            return False
-        db_tenant_id, project = row[0], row[1]
-        await MUTATION_ENGINE.apply(
-            conn,
-            fact_id=fact_id,
-            tenant_id=db_tenant_id,
-            event_type="deprecate",
-            payload={"reason": reason or "deprecated", "timestamp": ts},
-            signer="store_mixin:deprecate",
-            commit=False,
+        self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+    ) -> bool:
+        """Delegated deprecation logic."""
+        return await deprecate_impl_logic(
+            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
         )
-
-        from cortex.engine.causality import AsyncCausalGraph
-        graph = AsyncCausalGraph(conn)
-        await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
-
-        try:
-            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-        except aiosqlite.Error as _fts_err:  # FTS table may not exist in all deployments
-            logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
-        await self._log_transaction(
-            conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
-        )
-        return True
 
     async def invalidate(
         self,
         fact_id: int,
-        reason: str | None = None,
-        conn: aiosqlite.Connection | None = None,
+        reason: Optional[str] = None,
+        conn: Optional[aiosqlite.Connection] = None,
         tenant_id: str = "default",
     ) -> bool:
         """Explicit severe invalidation (tombstone) + taint propagation."""
@@ -533,60 +350,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _invalidate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
+        self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
     ) -> bool:
-        from cortex.engine.mutation_engine import MUTATION_ENGINE
-
-        ts = now_iso()
-        async with conn.execute(
-            "SELECT tenant_id, project FROM facts "
-            "WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
-            (fact_id, tenant_id),
-        ) as cursor:
-            row = await cursor.fetchone()
-        if not row:
-            return False
-            
-        db_tenant_id, project = row[0], row[1]
-        
-        # 1. Mutate as tombstone (most severe invalidation)
-        await MUTATION_ENGINE.apply(
-            conn,
-            fact_id=fact_id,
-            tenant_id=db_tenant_id,
-            event_type="tombstone",
-            payload={"reason": reason or "invalidated", "timestamp": ts},
-            signer="store_mixin:invalidate",
-            commit=False,
+        """Delegated invalidation logic (tombstone + taint)."""
+        return await invalidate_impl_logic(
+            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
         )
-        
-        # 2. Hard set confidence to C1 for the source fact explicitly via MutationEngine
-        # Actually it's cleaner to just update it here for immediacy of the projection,
-        # but in CORTEX a score_update mutation is best so it's recorded on the ledger.
-        await MUTATION_ENGINE.apply(
-            conn,
-            fact_id=fact_id,
-            tenant_id=db_tenant_id,
-            event_type="score_update",
-            payload={"confidence": "C1", "consensus_score": 0.0},
-            signer="store_mixin:invalidate:force",
-            commit=False,
-        )
-
-        # 3. Propagate taint downward
-        from cortex.engine.causality import AsyncCausalGraph
-        graph = AsyncCausalGraph(conn)
-        await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
-
-        try:
-            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-        except aiosqlite.Error as _fts_err:
-            logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
-
-        await self._log_transaction(
-            conn, project, "invalidate", {"fact_id": fact_id, "reason": reason}
-        )
-        return True
 
     async def purge(
         self,
@@ -594,66 +363,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tenant_id: str = "default",
         force: bool = False,
     ) -> bool:
-        """Axiom Ω₄: Bounded Demolition (Hard Delete with Blast Radius check)."""
+        """Delegated purge logic (Ω₄: Bounded Demolition)."""
         tenant_id = self._resolve_tenant(tenant_id)
-
-        async with self.session() as conn:
-            # 1. Fetch metadata for blast radius evaluation
-            from cortex.engine.causality import AsyncCausalGraph
-            graph = AsyncCausalGraph(conn)
-            
-            # Check if fact exists
-            async with conn.execute(
-                "SELECT project, fact_type FROM facts WHERE id = ? AND tenant_id = ?",
-                (fact_id, tenant_id)
-            ) as cursor:
-                row = await cursor.fetchone()
-            if not row:
-                return False
-            
-            project, fact_type = row
-            
-            # 2. Calculate Blast Radius
-            dep_count = await graph.calculate_blast_radius(fact_id, tenant_id)
-            
-            # Score criticality (example heuristic)
-            criticality = 0.0
-            if fact_type == "rule":
-                criticality += 0.5
-            criticality += min(0.4, dep_count * 0.1)
-            
-            report = BlastRadiusReport(
-                reverse_import_count=0, # Placeholder for more complex analytics
-                test_reference_count=0,
-                runtime_entrypoint_count=0,
-                causal_dependency_count=dep_count,
-                criticality_score=criticality
-            )
-            
-            # 3. Evaluate Demolition
-            # Check for snapshot existence (example check)
-            has_snapshot = True # Placeholder: in a real system, check snapshot registry
-            modifies_schema = (fact_type == "rule")
-            
-            decision = evaluate_demolition(report, has_snapshot, modifies_schema)
-            
-            if not decision.allowed and not force:
-                logger.warning("🚫 DEMOLITION DENIED: %s (Fact #%d)", decision.reason, fact_id)
-                if decision.requires_quarantine:
-                    # Move to quarantine instead of deleting
-                    await self.invalidate(fact_id, reason=f"Quarantined: {decision.reason}", conn=conn, tenant_id=tenant_id)
-                raise RuntimeError(f"Bounded Demolition Denied: {decision.reason}")
-
-            # 4. Perform Demolition
-            await conn.execute("DELETE FROM facts WHERE id = ?", (fact_id,))
-            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-            await conn.execute("DELETE FROM causal_edges WHERE fact_id = ? OR parent_id = ?", (fact_id, fact_id))
-            
-            await self._log_transaction(
-                conn, project, "purge", {"fact_id": fact_id, "blast_radius": dep_count}
-            )
-            await conn.commit()
-            return True
+        return await purge_logic(
+            mixin_instance=self, fact_id=fact_id, tenant_id=tenant_id, force=force
+        )
 
     _validate_content = staticmethod(validate_content)
     _check_dedup = staticmethod(check_dedup)

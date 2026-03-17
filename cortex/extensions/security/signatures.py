@@ -12,7 +12,7 @@ import base64
 import hashlib
 import logging
 import os
-from typing import Any
+from typing import Any, Optional
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
@@ -76,11 +76,11 @@ class Ed25519Signer:
 
     def __init__(
         self,
-        private_key_bytes: bytes | None = None,
-        public_key_bytes: bytes | None = None,
+        private_key_bytes: Optional[bytes] = None,
+        public_key_bytes: Optional[bytes] = None,
     ) -> None:
-        self._private_key: Ed25519PrivateKey | None = None
-        self._public_key: Ed25519PublicKey | None = None
+        self._private_key: Optional[Ed25519PrivateKey] = None
+        self._public_key: Optional[Ed25519PublicKey] = None
 
         if private_key_bytes:
             self._private_key = Ed25519PrivateKey.from_private_bytes(private_key_bytes)
@@ -99,7 +99,7 @@ class Ed25519Signer:
         return self._public_key is not None
 
     @property
-    def public_key_b64(self) -> str | None:
+    def public_key_b64(self) -> Optional[str]:
         """Base64-encoded public key, or None if no key loaded."""
         if self._public_key is None:
             return None
@@ -131,7 +131,7 @@ class Ed25519Signer:
         content: str,
         fact_hash: str,
         signature_b64: str,
-        public_key_b64: str | None = None,
+        public_key_b64: Optional[str] = None,
     ) -> bool:
         """Verify a fact's signature.
 
@@ -157,7 +157,7 @@ class Ed25519Signer:
         except InvalidSignature as exc:
             raise SignatureVerificationError("Ed25519 signature verification failed") from exc
 
-    def _resolve_public_key(self, public_key_b64: str | None) -> Ed25519PublicKey:
+    def _resolve_public_key(self, public_key_b64: Optional[str]) -> Ed25519PublicKey:
         """Resolve which public key to use for verification."""
         if public_key_b64:
             raw = base64.b64decode(public_key_b64)
@@ -176,10 +176,10 @@ class Ed25519Signer:
 
 
 # Module-level singleton
-_default_signer: Ed25519Signer | None = None
+_default_signer: Optional[Ed25519Signer] = None
 
 
-def get_default_signer() -> Ed25519Signer | None:
+def get_default_signer() -> Optional[Ed25519Signer]:
     """Get the default signer, loading from keyring if available.
 
     Returns None if no signing key is configured — signing is optional.
@@ -189,7 +189,7 @@ def get_default_signer() -> Ed25519Signer | None:
     if _default_signer is not None:
         return _default_signer
 
-    priv_b64: str | None = None
+    priv_b64: Optional[str] = None
 
     # Try OS keyring first (skip in testing)
     if not os.environ.get("CORTEX_TESTING"):

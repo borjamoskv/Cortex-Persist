@@ -1,6 +1,8 @@
 """
 Shared utilities for compaction strategies.
 """
+from __future__ import annotations
+
 
 import hashlib
 from difflib import SequenceMatcher

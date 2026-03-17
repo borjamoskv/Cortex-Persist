@@ -5,6 +5,8 @@ FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization, security middleware, and routing.
 Optimized for high-concurrency memory lookups and secure agentic access.
 """
+from __future__ import annotations
+
 
 import logging
 import sqlite3

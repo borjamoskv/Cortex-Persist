@@ -10,6 +10,7 @@ Zero dependencies beyond stdlib. Works with any LLM backend.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import hashlib
 import json
@@ -32,7 +33,7 @@ MAX_SESSION_BOOT_ENTRIES = 50
 # ── Encryption (optional) ─────────────────────────────────────
 
 
-def _get_cipher_key() -> bytes | None:
+def _get_cipher_key() -> Optional[bytes]:
     """Return encryption key if CORTEX_MEMORY_KEY is set."""
     raw = os.environ.get("CORTEX_MEMORY_KEY")
     if not raw:
@@ -153,10 +154,10 @@ def session_boot() -> dict[str, str]:
 
 
 def session_close(
-    decisions: list[str] | None = None,
-    errors: list[str] | None = None,
-    patterns: list[str] | None = None,
-    relationships: dict[str, str] | None = None,
+    decisions: Optional[list[str]] = None,
+    errors: Optional[list[str]] = None,
+    patterns: Optional[list[str]] = None,
+    relationships: Optional[dict[str, str]] = None,
 ) -> str:
     """Persist session data. Returns path to session file."""
     init()
@@ -200,7 +201,7 @@ def session_close(
 def store(
     content: str,
     category: str = "decisions",
-    tags: list[str] | None = None,
+    tags: Optional[list[str]] = None,
     encrypt: bool = False,
 ) -> dict[str, str]:
     """Store a fact in curated knowledge. Returns fact metadata."""
@@ -229,7 +230,7 @@ def store(
 
 def recall(
     query: str,
-    categories: list[str] | None = None,
+    categories: Optional[list[str]] = None,
     limit: int = MAX_RECALL_RESULTS,
 ) -> list[dict[str, str]]:
     """Search all memory tiers for relevant content. Simple keyword match."""

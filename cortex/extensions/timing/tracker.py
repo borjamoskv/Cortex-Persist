@@ -1,6 +1,7 @@
 """TimingTracker — heartbeat-based time tracking."""
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -41,11 +42,11 @@ class TimingTracker:
         self,
         project: str,
         entity: str = "",
-        category: str | None = None,
-        branch: str | None = None,
-        language: str | None = None,
-        timestamp: str | None = None,
-        meta: dict | None = None,
+        category: Optional[str] = None,
+        branch: Optional[str] = None,
+        language: Optional[str] = None,
+        timestamp: Optional[str] = None,
+        meta: Optional[dict] = None,
     ) -> int:
         """Record a single activity heartbeat. Returns Heartbeat ID."""
         ts = timestamp or now_iso()
@@ -62,7 +63,7 @@ class TimingTracker:
         logger.debug("Heartbeat: %s/%s [%s]", project, entity, cat)
         return cursor.lastrowid  # type: ignore[reportReturnType]
 
-    def flush(self, gap_seconds: int | None = None) -> int:
+    def flush(self, gap_seconds: Optional[int] = None) -> int:
         """Group unflushed heartbeats into continuous time entries.
 
         Returns:
@@ -130,12 +131,12 @@ class TimingTracker:
         self._conn.commit()
         return 1
 
-    def today(self, project: str | None = None) -> TimeSummary:
+    def today(self, project: Optional[str] = None) -> TimeSummary:
         """Get time summary for today."""
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         return self._summarize(f"{today_str}%", project)
 
-    def report(self, project: str | None = None, days: int = 7) -> TimeSummary:
+    def report(self, project: Optional[str] = None, days: int = 7) -> TimeSummary:
         """Get time report for the last N days."""
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         where = ["start_time >= ?"]
@@ -145,7 +146,7 @@ class TimingTracker:
             params.append(project)
         return self._build_summary(" AND ".join(where), params)
 
-    def timeline(self, project: str | None = None, date: str | None = None) -> list[TimeEntry]:
+    def timeline(self, project: Optional[str] = None, date: Optional[str] = None) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
         date_str = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         where = ["start_time LIKE ?"]
@@ -195,7 +196,7 @@ class TimingTracker:
 
     # ─── Internal Helpers ─────────────────────────────────────────
 
-    def _summarize(self, date_pattern: str, project: str | None) -> TimeSummary:
+    def _summarize(self, date_pattern: str, project: Optional[str]) -> TimeSummary:
         """Build summary for entries matching a date pattern."""
         where = ["start_time LIKE ?"]
         params: list = [date_pattern]

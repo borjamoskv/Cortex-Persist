@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional, Union
 
 import aiosqlite
 
@@ -30,7 +30,7 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
         """Retrieve an active API key by its hash."""
         pass
 
@@ -49,17 +49,17 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
         """List API keys, optionally filtered by tenant."""
         pass
 
     @abstractmethod
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: Union[int, str]) -> bool:
         """Revoke (deactivate) an API key."""
         pass
 
     @abstractmethod
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: Union[int, str]) -> None:
         """Update the last_used timestamp for a key."""
         pass
 
@@ -88,7 +88,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
         return await connect_async(self.db_path)
 
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -122,7 +122,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -138,7 +138,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: Union[int, str]) -> bool:
         conn = await self._get_conn_async()
         try:
             cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
@@ -147,7 +147,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: Union[int, str]) -> None:
         from datetime import datetime, timezone
 
         conn = await self._get_conn_async()
@@ -192,7 +192,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             await conn.execute(pg_schema)
 
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
@@ -230,7 +230,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             )
             return key_id
 
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             if tenant_id:
@@ -242,14 +242,14 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 rows = await conn.fetch("SELECT * FROM api_keys ORDER BY id DESC")
             return [dict(r) for r in rows]
 
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: Union[int, str]) -> bool:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             res = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = $1", key_id)
             # res is something like "UPDATE 1"
             return res.endswith("1")
 
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: Union[int, str]) -> None:
         from datetime import datetime, timezone
 
         pool = await self._get_pool()

@@ -13,7 +13,7 @@ Usage:
 
 import os
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -31,7 +31,7 @@ class Fact:
     tags: list[str]
     created_at: str
     valid_from: str
-    valid_until: str | None = None
+    valid_until: Optional[str] = None
     score: float = 0.0
 
 
@@ -56,7 +56,7 @@ class CortexClient:
     def __init__(
         self,
         base_url: str = "http://localhost:8484",
-        api_key: str | None = None,
+        api_key: Optional[str] = None,
         timeout: float = 30.0,
     ):
         self.base_url = base_url.rstrip("/")
@@ -91,8 +91,8 @@ class CortexClient:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: list[str] | None = None,
-        metadata: dict | None = None,
+        tags: Optional[list[str]] = None,
+        metadata: Optional[dict] = None,
     ) -> int:
         """Store a fact. Returns fact ID."""
         data = {
@@ -110,7 +110,7 @@ class CortexClient:
         self,
         query: str,
         k: int = 5,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> list[Fact]:
         """Semantic search. Returns ranked facts."""
         data: dict[str, Any] = {"query": query, "k": k}

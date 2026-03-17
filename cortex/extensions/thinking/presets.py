@@ -10,6 +10,7 @@ tabla de routing por modo, y configuración por defecto.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import os
 from dataclasses import dataclass, field
@@ -185,8 +186,8 @@ class OrchestraConfig:
     dynamic_temperature: bool = True
     temperature_variance: float = 0.5  # Modifica la temp de cada subagente
 
-    judge_provider: str | None = None
-    judge_model: str | None = None
+    judge_provider: Optional[str] = None
+    judge_model: Optional[str] = None
     # Retry en caso de fallo individual
     retry_on_failure: bool = True
     retry_delay_seconds: float = 1.0

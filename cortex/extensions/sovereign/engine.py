@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.immune import ImmuneArbiter, Verdict
 from cortex.extensions.sovereign.bridge import SovereignBridge
@@ -63,7 +63,7 @@ class SovereignContext:
 
     project_root: Path = Path.cwd()
     environment: str = "production"
-    power: PowerLevel | None = None
+    power: Optional[PowerLevel] = None
     results: list[PipelineResult] = field(default_factory=list)
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
@@ -284,7 +284,7 @@ PHASE_EXECUTORS: dict[Phase, Callable] = {
 
 
 async def run_pipeline(
-    project_root: Path | None = None,
+    project_root: Optional[Path] = None,
     environment: str = "production",
 ) -> SovereignContext:
     """Execute the full sovereign pipeline, returning the enriched context."""

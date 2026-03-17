@@ -1,3 +1,4 @@
+from typing import Optional, Union
 """Graph Data Models.
 
 Entities, Relationships, and Ghost definitions.
@@ -12,7 +13,7 @@ __all__ = ["Entity", "Relationship", "Ghost"]
 class Entity:
     """A named entity extracted from facts."""
 
-    id: int | str = 0
+    id: Union[int, str] = 0
     name: str = ""
     entity_type: str = "unknown"
     project: str = ""
@@ -37,9 +38,9 @@ class Entity:
 class Relationship:
     """A relationship between two entities."""
 
-    id: int | str = 0
-    source_entity_id: int | str = 0
-    target_entity_id: int | str = 0
+    id: Union[int, str] = 0
+    source_entity_id: Union[int, str] = 0
+    target_entity_id: Union[int, str] = 0
     relation_type: str = "related_to"
     weight: float = 1.0
     first_seen: str = ""
@@ -59,14 +60,14 @@ class Relationship:
 class Ghost:
     """A dangling reference that needs resolution."""
 
-    id: int | str = 0
+    id: Union[int, str] = 0
     reference: str = ""
     context: str = ""
     project: str = ""
     status: str = "open"  # open, resolved, pending_review
     detected_at: str = ""
-    resolved_at: str | None = None
-    target_id: int | str | None = None
+    resolved_at: Optional[str] = None
+    target_id: Optional[Union[int, str]] = None
     confidence: float = 0.0
 
     def to_dict(self) -> dict:

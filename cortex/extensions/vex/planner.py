@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Any, Protocol
+from typing import Any, Optional, Protocol
 
 from cortex.extensions.vex.models import PlannedStep, TaskPlan
 
@@ -26,7 +26,7 @@ class PlannerBackend(Protocol):
     """Protocol for pluggable LLM planner backends."""
 
     async def decompose(
-        self, intent: str, context: dict[str, Any] | None = None,
+        self, intent: str, context: Optional[dict[str, Any]] = None,
     ) -> list[dict[str, Any]]:
         ...
 
@@ -56,7 +56,7 @@ class Planner:
 
     def __init__(
         self,
-        backend: PlannerBackend | None = None,
+        backend: Optional[PlannerBackend] = None,
         model: str = "",
         source: str = "agent:vex",
     ) -> None:
@@ -67,7 +67,7 @@ class Planner:
     async def plan(
         self,
         intent: str,
-        context: dict[str, Any] | None = None,
+        context: Optional[dict[str, Any]] = None,
     ) -> TaskPlan:
         """Create a TaskPlan from a natural-language intent.
 

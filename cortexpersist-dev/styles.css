@@ -1,14 +1,15 @@
 /* Base Variables: Industrial Noir 2026 */
 :root {
-    --bg-base: #060608;
-    --bg-surface: #0A0A0C;
-    --bg-surface-hover: #111116;
-    --accent: #CCFF00;
+    --bg-base: #050816;
+    --bg-surface: #0A0E20;
+    --bg-surface-hover: #121830;
+    --accent: #00D1FF;
+    --accent-secondary: #DFFF00;
     --text-primary: #FFFFFF;
-    --text-secondary: #888899;
-    --text-tertiary: #555566;
-    --border-color: rgba(255, 255, 255, 0.05);
-    --border-highlight: rgba(204, 255, 0, 0.2);
+    --text-secondary: #A0B0D0;
+    --text-tertiary: #7080A0;
+    --border-color: rgba(0, 209, 255, 0.1);
+    --border-highlight: rgba(223, 255, 0, 0.3);
     --font-sans: 'Inter', -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -192,7 +193,7 @@ main {
     align-items: center;
     gap: 0.75rem;
     padding: 0.4rem 1rem;
-    background: rgba(204, 255, 0, 0.03);
+    background: rgba(204, 255, 0, 0.08);
     border: 1px solid var(--border-highlight);
     color: var(--accent);
     font-family: var(--font-mono);

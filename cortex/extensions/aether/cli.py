@@ -4,6 +4,7 @@ Registered as `cortex aether` subcommand group.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import argparse
 import sys
@@ -109,7 +110,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0 if result.status == "done" else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cortex aether",
         description="MOSKV-Aether — Autonomous background AI coding agent",

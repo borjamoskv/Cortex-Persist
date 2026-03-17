@@ -7,7 +7,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 import aiosqlite
 import sqlite_vec
@@ -64,7 +64,7 @@ class CortexEngine(
 
     def __init__(
         self,
-        db_path: str | Path = DEFAULT_DB_PATH,
+        db_path: Union[str, Path] = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
         super().__init__()
@@ -72,11 +72,11 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
-        self._conn: aiosqlite.Connection | None = None
+        self._conn: Optional[aiosqlite.Connection] = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: LocalEmbedder | None = None
+        self._embedder: Optional[LocalEmbedder] = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
 
@@ -330,7 +330,7 @@ class CortexEngine(
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: int | None = None,
+        max_depth: Optional[int] = None,
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
@@ -415,7 +415,7 @@ class CortexEngine(
 
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
-    async def shannon_report(self, project: str | None = None) -> dict:
+    async def shannon_report(self, project: Optional[str] = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
 
@@ -423,7 +423,7 @@ class CortexEngine(
 
     async def fingerprint(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
@@ -445,7 +445,7 @@ class CortexEngine(
     def fingerprint_sync(self, *args, **kwargs):
         return self._run_sync(self.fingerprint(*args, **kwargs))
 
-    async def immortality_index(self, project: str | None = None) -> dict:
+    async def immortality_index(self, project: Optional[str] = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
@@ -456,7 +456,7 @@ class CortexEngine(
 
     async def prioritize(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine — prioritized action queue.
@@ -501,7 +501,7 @@ class CortexEngine(
 
     # ─── Helpers ──────────────────────────────────────────────────
 
-    def export_snapshot(self, out_path: str | Path) -> str:
+    def export_snapshot(self, out_path: Union[str, Path]) -> str:
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.extensions.sync.snapshot import export_snapshot
 
@@ -509,7 +509,7 @@ class CortexEngine(
 
     def _row_to_fact(  # type: ignore[override]
         self,
-        row: aiosqlite.Row | dict,
+        row: Union[aiosqlite.Row, dict],
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""

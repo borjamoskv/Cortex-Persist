@@ -4,7 +4,7 @@ import datetime
 import hashlib
 import json
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Optional
 
 from cortex.immunity.types import (
     ImmuneArtifact,
@@ -36,7 +36,7 @@ def can_transition(current: ImmunityState, target: ImmunityState) -> bool:
 
 
 def transition_artifact(
-    artifact: ImmuneArtifact, target: ImmunityState, reason: str | None = None
+    artifact: ImmuneArtifact, target: ImmunityState, reason: Optional[str] = None
 ) -> None:
     """Transiciona un artefacto de estado si es válido."""
     if not can_transition(artifact.state, target):

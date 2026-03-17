@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
@@ -101,8 +101,8 @@ class StoreProposal(BaseModel):
     fact_type: str = Field(default="knowledge")
     source: str = Field(min_length=1)
     confidence: str = Field(default="stated")
-    tags: list[str] | None = Field(default=None, max_length=_MAX_TAGS)
-    meta: dict[str, Any] | None = Field(default=None)
+    tags: Optional[list[str]] = Field(default=None, max_length=_MAX_TAGS)
+    meta: Optional[dict[str, Any]] = Field(default=None)
 
     @field_validator("project")
     @classmethod
@@ -156,7 +156,7 @@ class StoreProposal(BaseModel):
 
     @field_validator("tags")
     @classmethod
-    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
+    def validate_tags(cls, v: Optional[list[str]]) -> Optional[list[str]]:
         if v is None:
             return v
         for tag in v:
@@ -179,10 +179,10 @@ class StorageGuard:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        source: str | None = None,
+        source: Optional[str] = None,
         confidence: str = "stated",
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
+        tags: Optional[list[str]] = None,
+        meta: Optional[dict[str, Any]] = None,
     ) -> None:
         """Run ALL mandatory pre-store checks via Pydantic state collapse.
 

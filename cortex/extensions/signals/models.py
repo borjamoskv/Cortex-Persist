@@ -10,6 +10,7 @@ Zero external dependencies beyond stdlib.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 from dataclasses import dataclass
@@ -24,7 +25,7 @@ class Signal:
     event_type: str
     payload: dict
     source: str
-    project: str | None
+    project: Optional[str]
     created_at: datetime
     consumed_by: list[str]
 
@@ -42,11 +43,11 @@ class Signal:
 class SignalFilter:
     """Query filter for signal retrieval."""
 
-    event_type: str | None = None
-    source: str | None = None
-    project: str | None = None
-    since: datetime | None = None
-    consumer: str | None = None
+    event_type: Optional[str] = None
+    source: Optional[str] = None
+    project: Optional[str] = None
+    since: Optional[datetime] = None
+    consumer: Optional[str] = None
     unconsumed_only: bool = False
 
 

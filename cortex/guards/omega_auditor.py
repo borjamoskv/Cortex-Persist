@@ -6,6 +6,7 @@ This guard audits new decisions against the ENTIRE system snapshot.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from dataclasses import dataclass
@@ -26,7 +27,7 @@ SNAPSHOT_PATH = Path.home() / ".cortex" / "context-snapshot.md"
 
 @dataclass(frozen=True)
 class OmegaConflict:
-    fact_id: str | None
+    fact_id: Optional[str]
     summary: str
     reasoning: str
     severity: str  # 'low' | 'medium' | 'high'

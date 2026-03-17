@@ -44,8 +44,8 @@ class SovereignGate:
 
     def __init__(
         self,
-        policy: GatePolicy | None = None,
-        secret: str | None = None,
+        policy: Optional[GatePolicy] = None,
+        secret: Optional[str] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         # Resolve policy from env if not provided
@@ -88,9 +88,9 @@ class SovereignGate:
         self,
         level: ActionLevel,
         description: str,
-        command: list[str] | None = None,
-        project: str | None = None,
-        context: dict[str, Any] | None = None,
+        command: Optional[list[str]] = None,
+        project: Optional[str] = None,
+        context: Optional[dict[str, Any]] = None,
     ) -> PendingAction:
         """
         Register an L3/L4 action and generate an HMAC challenge.
@@ -334,8 +334,8 @@ class SovereignGate:
 
 
 def get_gate(
-    policy: GatePolicy | None = None,
-    secret: str | None = None,
+    policy: Optional[GatePolicy] = None,
+    secret: Optional[str] = None,
     timeout: float = SovereignGate.DEFAULT_TIMEOUT,
 ) -> SovereignGate:
     """Get or create the global SovereignGate singleton (thread-safe)."""

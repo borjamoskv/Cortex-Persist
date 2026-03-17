@@ -6,6 +6,7 @@ paths and platform-specific assumptions scattered across the codebase.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import sys
 from pathlib import Path
@@ -76,7 +77,7 @@ def get_python_executable() -> str:
     return sys.executable
 
 
-def get_service_dir() -> Path | None:
+def get_service_dir() -> Optional[Path]:
     """Return the platform-specific user service directory.
 
     - macOS: ``~/Library/LaunchAgents``

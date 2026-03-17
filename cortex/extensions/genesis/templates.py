@@ -1,6 +1,7 @@
 """Genesis Template Registry — deterministic ComponentSpec → Python source renderers."""
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from collections.abc import Callable
@@ -168,7 +169,7 @@ class TemplateRegistry:
         self._templates[template.name] = template
         logger.debug("Registered template: %s", template.name)
 
-    def get(self, name: str) -> SystemTemplate | None:
+    def get(self, name: str) -> Optional[SystemTemplate]:
         """Get a template by name."""
         return self._templates.get(name)
 

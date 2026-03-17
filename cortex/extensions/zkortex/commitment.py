@@ -20,7 +20,7 @@ import hmac
 import os
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from py_ecc.bls12_381 import G1, add, multiply  # type: ignore[reportMissingImports]
 
@@ -89,7 +89,7 @@ class KnowledgeCommitment:
         )
 
 
-def commit(secret: str, blinding_factor: bytes | None = None) -> tuple[KnowledgeCommitment, bytes]:
+def commit(secret: str, blinding_factor: Optional[bytes] = None) -> tuple[KnowledgeCommitment, bytes]:
     """
     Crea un nuevo Pedersen commitment a `secret`.
 
@@ -107,7 +107,7 @@ def commit(secret: str, blinding_factor: bytes | None = None) -> tuple[Knowledge
     return c, blinding_factor
 
 
-def _point_to_hex(point: tuple | None) -> str:
+def _point_to_hex(point: Optional[tuple]) -> str:
     """Serializa un punto en coordenadas afines (x,y) sobre FQ."""
     if point is None:
         return "00" * 96

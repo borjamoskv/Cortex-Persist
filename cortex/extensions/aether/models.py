@@ -1,6 +1,7 @@
 """MOSKV-Aether — Data models."""
 
 from __future__ import annotations
+from typing import Optional
 
 import uuid
 from dataclasses import dataclass, field
@@ -37,14 +38,14 @@ class AgentTask:
     status: str = TaskStatus.PENDING
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    agent_id: str | None = None
+    agent_id: Optional[str] = None
     plan: str = ""
     result: str = ""
     branch: str = ""
     pr_url: str = ""
     error: str = ""
-    github_issue_number: int | None = None
-    github_repo: str | None = None
+    github_issue_number: Optional[int] = None
+    github_repo: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {

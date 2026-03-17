@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.extensions.sync")
 
 
-def _decrypt_json(val: str | None) -> dict:
+def _decrypt_json(val: Optional[str]) -> dict:
     if not val or not str(val).strip():
         return {}
     if str(val).startswith("v6_aesgcm:"):
@@ -45,7 +45,7 @@ def _decrypt_json(val: str | None) -> dict:
         return {}
 
 
-def _decrypt_json_list(val: str | None) -> list:
+def _decrypt_json_list(val: Optional[str]) -> list:
     if not val or not str(val).strip():
         return []
     if str(val).startswith("v6_aesgcm:"):
@@ -71,8 +71,8 @@ async def _writeback_if_changed(
     wb_fn,
     result: WritebackResult,
     wb_hashes: dict,
-    hash_key: str | None = None,
-    hash_value: str | None = None,
+    hash_key: Optional[str] = None,
+    hash_value: Optional[str] = None,
 ) -> None:
     """Hash-check and writeback a single fact type."""
     key = hash_key or fact_type

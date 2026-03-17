@@ -1,3 +1,4 @@
+from typing import Optional
 """
 CORTEX v5.0 - Facts Router.
 """
@@ -56,7 +57,7 @@ async def store_fact(
 async def recall_facts(
     project: str,
     request: Request,
-    limit: int | None = Query(None, ge=1, le=1000),
+    limit: Optional[int] = Query(None, ge=1, le=1000),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:

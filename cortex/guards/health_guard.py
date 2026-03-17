@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional, Union
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -42,10 +42,10 @@ class HealthGuard(HealthMixin):
     # By default, operations are blocked if health falls below DEGRADED (i.e., FAILED)
     DEFAULT_SLA: ClassVar[HealthSLA] = HealthSLA(target_grade=Grade.DEGRADED)
 
-    def __init__(self, db_path: str | Path) -> None:
+    def __init__(self, db_path: Union[str, Path]) -> None:
         self._db_path = str(db_path)
 
-    async def check_write_safety(self, custom_sla: HealthSLA | None = None) -> None:
+    async def check_write_safety(self, custom_sla: Optional[HealthSLA] = None) -> None:
         """Verify the database is healthy enough to receive writes.
 
         Args:

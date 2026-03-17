@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING, Union, cast
 
 from pydantic import ValidationError
 
@@ -35,14 +35,14 @@ class FactManager:
         content: str,
         tenant_id: str = "default",
         fact_type: str = "knowledge",
-        tags: list[str] | None = None,
+        tags: Optional[list[str]] = None,
         confidence: str = "stated",
-        source: str | None = None,
-        meta: dict[str, Any] | None = None,
-        valid_from: str | None = None,
+        source: Optional[str] = None,
+        meta: Optional[dict[str, Any]] = None,
+        valid_from: Optional[str] = None,
         commit: bool = True,
-        tx_id: int | None = None,
-        conn: Any | None = None,
+        tx_id: Optional[int] = None,
+        conn: Optional[Any] = None,
         **kwargs,
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
@@ -97,8 +97,6 @@ class FactManager:
                 raise ValueError(f"Ingestion Validation Failed: {e}") from e
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from typing import cast
-
         from cortex.engine.store_mixin import StoreMixin
         return await StoreMixin._store_impl(
             cast("StoreMixin", self.engine),
@@ -121,7 +119,7 @@ class FactManager:
             raise ValueError("Facts list cannot be empty")
         return await self.engine.store_many(facts)
 
-    async def get_fact(self, fact_id: int) -> Fact | None:
+    async def get_fact(self, fact_id: int) -> Optional[Fact]:
         """Retrieve any fact by ID, including deprecated ones."""
         raw = await self.engine.get_fact(fact_id)
         if not raw:
@@ -129,7 +127,7 @@ class FactManager:
         # Convert dict to Fact model
         return Fact(**raw)
 
-    async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
+    async def _fetch(self, query: str, params: Union[list, tuple] = ()) -> list[Fact]:
         """Lower-level fetch from engine database."""
         conn = await self.engine.get_conn()
         cursor = await conn.execute(query, params)
@@ -138,8 +136,8 @@ class FactManager:
     async def get_all_active_facts(
         self,
         tenant_id: str = "default",
-        project: str | None = None,
-        fact_types: list[str] | None = None,
+        project: Optional[str] = None,
+        fact_types: Optional[list[str]] = None,
     ) -> list[Fact]:
         """Retrieve all active facts, delegated to QueryMixin and wrapped in models."""
         results = await self.engine.get_all_active_facts(
@@ -148,7 +146,7 @@ class FactManager:
         return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
 
     async def recall(
-        self, project: str, tenant_id: str = "default", limit: int | None = None, offset: int = 0
+        self, project: str, tenant_id: str = "default", limit: Optional[int] = None, offset: int = 0
     ) -> list[Fact]:
         """Scored recall delegated to QueryMixin and wrapped in models."""
         results = await self.engine.recall(
@@ -157,14 +155,14 @@ class FactManager:
         return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
 
     async def history(
-        self, project: str, tenant_id: str = "default", as_of: str | None = None
+        self, project: str, tenant_id: str = "default", as_of: Optional[str] = None
     ) -> list[Fact]:
         """Temporal history delegated to QueryMixin."""
         results = await self.engine.history(project=project, tenant_id=tenant_id, as_of=as_of)
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def time_travel(
-        self, tx_id: int, tenant_id: str = "default", project: str | None = None
+        self, tx_id: int, tenant_id: str = "default", project: Optional[str] = None
     ) -> list[Fact]:
         """Project state reconstruction delegated to QueryMixin."""
         results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id)

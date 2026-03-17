@@ -6,8 +6,9 @@ and adaptive agent formations for Zero-Trust problem solving.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
-from typing import TypedDict
+from typing import Optional, TypedDict, Union, cast
 
 from pydantic import BaseModel, Field
 
@@ -134,7 +135,7 @@ class CentauroEngine:
         self,
         squad: dict[str, VirtualAgent],
         mission: str,
-    ) -> tuple[str | None, int]:
+    ) -> tuple[Optional[str], int]:
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
         Returns:
@@ -142,7 +143,7 @@ class CentauroEngine:
         """
         proposals: dict[str, str] = {}
 
-        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
+        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, Union[str, Exception]]:
             try:
                 return (a_id, await a.execute("M-01", mission))
             except Exception as exc:  # noqa: BLE001
@@ -151,8 +152,6 @@ class CentauroEngine:
         agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
 
         winning = None
-        from typing import cast
-
         for future in asyncio.as_completed(agent_tasks):
             agent_id, result = await future
             if isinstance(result, Exception):
@@ -174,8 +173,6 @@ class CentauroEngine:
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission. (Axiom Ω₂: Multiplexed Execution)"""
-        import hashlib
-
         mission_hash = hashlib.sha256(f"{mission}:{formation}".encode()).hexdigest()
 
         # --- Thermal Heat-Sink (Multiplexing) ---

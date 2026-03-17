@@ -44,7 +44,7 @@ def calculate_module_overlap(f1_path, f2_path):
 
 
 def main():
-    base_dir = Path("/Users/borjafernandezangulo/cortex")
+    base_dir = Path(".")
     target_dir = base_dir / "cortex"
     files = list(target_dir.rglob("*.py"))
 

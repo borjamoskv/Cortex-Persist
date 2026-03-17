@@ -13,7 +13,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 from cortex.memory.temporal import now_iso
 
@@ -64,7 +64,7 @@ def _render_frontmatter(data: dict) -> str:
                 lines.append(f"{key}: [{items}]")
             else:
                 lines.append(f"{key}: []")
-        elif isinstance(value, int | float):
+        elif isinstance(value, (int, float)):
             lines.append(f"{key}: {value}")
         elif value is None:
             lines.append(f"{key}: null")

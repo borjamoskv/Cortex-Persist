@@ -1,6 +1,7 @@
 """Autonomous Tombstone Monitor (El Barrendero)."""
 
 from __future__ import annotations
+from typing import Union
 
 import logging
 import sqlite3
@@ -22,7 +23,7 @@ class TombstoneMonitor:
 
     def __init__(
         self,
-        db_path: Path | str,
+        db_path: Union[Path, str],
         interval_seconds: int = 3600,  # check every hour
         start_hour: int = 3,  # 03:00 UTC
         end_hour: int = 5,  # 05:00 UTC

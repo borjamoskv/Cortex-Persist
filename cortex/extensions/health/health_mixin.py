@@ -6,7 +6,7 @@ Cached collector, TrendDetector, configurable thresholds.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import (
@@ -31,9 +31,9 @@ class HealthMixin:
     """
 
     _db_path: Any
-    _health_collector: HealthCollector | None = None
-    _health_trend: TrendDetector | None = None
-    _health_thresholds: HealthThresholds | None = None
+    _health_collector: Optional[HealthCollector] = None
+    _health_trend: Optional[TrendDetector] = None
+    _health_thresholds: Optional[HealthThresholds] = None
 
     def _get_health_collector(self) -> HealthCollector:
         """Lazily create and cache the HealthCollector."""

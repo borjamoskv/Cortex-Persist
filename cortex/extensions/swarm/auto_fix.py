@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, Union
 
 logger = logging.getLogger("cortex.extensions.swarm.auto_fix")
 
@@ -79,7 +79,7 @@ class AutoFixPipeline:
 
     __slots__ = ("_repo_path",)
 
-    def __init__(self, repo_path: str | Path = ".") -> None:
+    def __init__(self, repo_path: Union[str, Path] = ".") -> None:
         self._repo_path = Path(repo_path)
 
     async def process_ghost(self, ghost: GhostProtocol) -> FixAttempt:

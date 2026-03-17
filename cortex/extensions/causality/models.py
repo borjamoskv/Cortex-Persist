@@ -5,6 +5,7 @@ a boolean taint would rupture half the DAG on a mild suspicion.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -75,4 +76,4 @@ class FactNode:
     taint_status: TaintStatus = TaintStatus.CLEAN
     parents: list[str] = field(default_factory=list)
     children: list[str] = field(default_factory=list)
-    source: str | None = None
+    source: Optional[str] = None

@@ -6,6 +6,7 @@ Supports API Key spoofing and Telemetry stripping.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import time
@@ -30,15 +31,15 @@ _spoof_manager = SpoofManager()
 class OpenAIMessage(BaseModel):
     role: str
     content: str
-    name: str | None = None
+    name: Optional[str] = None
 
 
 class OpenAICompletionRequest(BaseModel):
     model: str
     messages: list[OpenAIMessage]
-    temperature: float | None = 0.3
-    max_tokens: int | None = 4096
-    stream: bool | None = False
+    temperature: Optional[float] = 0.3
+    max_tokens: Optional[int] = 4096
+    stream: Optional[bool] = False
 
 
 # --- Routes ---
@@ -48,7 +49,7 @@ class OpenAICompletionRequest(BaseModel):
 async def openai_chat_completions(
     request: Request,
     body: OpenAICompletionRequest,
-    authorization: str | None = Header(None),
+    authorization: Optional[str] = Header(None),
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
 

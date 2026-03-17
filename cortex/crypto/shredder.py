@@ -28,7 +28,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -46,7 +46,7 @@ class ShredResult:
     tenant_id: str
     success: bool
     reason: str = "gdpr_erasure"
-    error: str | None = None
+    error: Optional[str] = None
     was_already_shredded: bool = False
 
 
@@ -68,7 +68,7 @@ class CryptoShredder:
     The immutable ledger hash chain remains intact for EU AI Act compliance.
     """
 
-    def __init__(self, conn: aiosqlite.Connection | sqlite3.Connection):
+    def __init__(self, conn: Union[aiosqlite.Connection, sqlite3.Connection]):
         self._conn = conn
         self._ensure_schema()
 
@@ -153,7 +153,7 @@ class CryptoShredder:
         fact_id: int,
         tenant_id: str = "default",
         reason: str = "gdpr_erasure",
-        shredded_by: str | None = None,
+        shredded_by: Optional[str] = None,
     ) -> ShredResult:
         """Destroy the encryption key for a single fact (sync).
 
@@ -224,7 +224,7 @@ class CryptoShredder:
         fact_id: int,
         tenant_id: str = "default",
         reason: str = "gdpr_erasure",
-        shredded_by: str | None = None,
+        shredded_by: Optional[str] = None,
     ) -> ShredResult:
         """Destroy the encryption key for a single fact (async)."""
         if await self.is_shredded_async(fact_id, tenant_id):
@@ -283,7 +283,7 @@ class CryptoShredder:
         source: str,
         tenant_id: str = "default",
         reason: str = "gdpr_erasure",
-        shredded_by: str | None = None,
+        shredded_by: Optional[str] = None,
     ) -> ShredBatchResult:
         """Shred all facts from a specific source (e.g., a user agent).
 
@@ -303,7 +303,7 @@ class CryptoShredder:
         project: str,
         tenant_id: str = "default",
         reason: str = "project_erasure",
-        shredded_by: str | None = None,
+        shredded_by: Optional[str] = None,
     ) -> ShredBatchResult:
         """Shred all facts in a project."""
         cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
@@ -320,7 +320,7 @@ class CryptoShredder:
         fact_ids: list[int],
         tenant_id: str,
         reason: str,
-        shredded_by: str | None,
+        shredded_by: Optional[str],
     ) -> ShredBatchResult:
         """Internal batch shred implementation."""
         batch = ShredBatchResult(total_requested=len(fact_ids))

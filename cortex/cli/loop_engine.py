@@ -14,7 +14,7 @@ import threading
 import time
 import traceback
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
 from cortex.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
@@ -97,7 +97,7 @@ class ExecutionLoop:
         self,
         project: str,
         db: str = DEFAULT_DB,
-        source: str | None = None,
+        source: Optional[str] = None,
         auto_persist: bool = True,
         persist_interval: int = PERSIST_INTERVAL,
     ) -> None:
@@ -271,7 +271,7 @@ class ExecutionLoop:
         )
         return []
 
-    def _persist_ghost(self, description: str) -> int | None:
+    def _persist_ghost(self, description: str) -> Optional[int]:
         """Enqueue ghost for supervisor to persist."""
         self._enqueue_fact(
             content=f"[LOOP:GHOST] {description}",

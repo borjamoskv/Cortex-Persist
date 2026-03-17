@@ -4,6 +4,7 @@ Implements L3 Application-Level Encryption using AES-GCM.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import base64
 import os
@@ -19,7 +20,7 @@ except ImportError:
 class Vault:
     """Secure Vault for storing sensitive facts."""
 
-    def __init__(self, key: bytes | None = None):
+    def __init__(self, key: Optional[bytes] = None):
         if not AESGCM:
             self._key = None
             return

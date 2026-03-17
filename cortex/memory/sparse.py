@@ -14,6 +14,7 @@ Computational translation:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import math
@@ -37,7 +38,7 @@ class MushroomBodyEncoder:
         self._expansion = expansion_factor
         self._sparsity = sparsity
         self._seed = seed
-        self._projection: list[list[float]] | None = None
+        self._projection: Optional[list[list[float]]] = None
 
     def _init_projection(self, input_dim: int) -> list[list[float]]:
         """Initialize random projection matrix (PN → KC mapping).

@@ -14,7 +14,7 @@ import os
 import random
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.utils.canonical import compute_fact_hash
 
@@ -32,8 +32,8 @@ class DecoyFact:
         content: str,
         project: str = "security_honey",
         severity: str = "critical",
-        created_at: str | None = None,
-        h_hash: str | None = None,
+        created_at: Optional[str] = None,
+        h_hash: Optional[str] = None,
     ) -> None:
         self.id = id
         self.content = content
@@ -76,7 +76,7 @@ class HoneypotManager:
         "STAGING_JWT_TOKEN_{RAND}",
     ]
 
-    def __init__(self, storage_path: str | None = None) -> None:
+    def __init__(self, storage_path: Optional[str] = None) -> None:
         if storage_path is None:
             home = os.environ.get("CORTEX_HOME", os.path.expanduser("~/.cortex"))
             storage_path = os.path.join(home, "security_honeypots.json")
@@ -119,7 +119,7 @@ class HoneypotManager:
         self._save()
         return decoy
 
-    def check_exploitation(self, content: str) -> DecoyFact | None:
+    def check_exploitation(self, content: str) -> Optional[DecoyFact]:
         """Check if content contains any active honeypot secrets."""
         for decoy in self._active_honeypots.values():
             if decoy.content in content:

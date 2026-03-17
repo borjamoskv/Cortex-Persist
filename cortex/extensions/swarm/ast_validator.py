@@ -17,7 +17,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional, Union
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
@@ -152,9 +152,9 @@ class ASTValidator:
     def __init__(
         self,
         *,
-        allowed_import_prefixes: frozenset[str] | None = None,
-        forbidden_calls: frozenset[str] | None = None,
-        forbidden_imports: frozenset[str] | None = None,
+        allowed_import_prefixes: Optional[frozenset[str]] = None,
+        forbidden_calls: Optional[frozenset[str]] = None,
+        forbidden_imports: Optional[frozenset[str]] = None,
     ) -> None:
         self._allowed_import_prefixes = allowed_import_prefixes or ALLOWED_IMPORT_PREFIXES
         self._forbidden_calls = forbidden_calls or FORBIDDEN_CALLS
@@ -247,7 +247,7 @@ class ASTValidator:
 # ── Extracted pure functions ───────────────────────────────────────────────
 
 
-def _extract_call_name(node: ast.Call) -> str | None:
+def _extract_call_name(node: ast.Call) -> Optional[str]:
     """Extract the function name from a Call node."""
     if isinstance(node.func, ast.Name):
         return node.func.id
@@ -320,7 +320,7 @@ def _check_complexity(
 
 
 def cyclomatic_complexity(
-    func_node: ast.FunctionDef | ast.AsyncFunctionDef,
+    func_node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
 ) -> int:
     """Approximate McCabe cyclomatic complexity."""
     complexity = 1  # Base path

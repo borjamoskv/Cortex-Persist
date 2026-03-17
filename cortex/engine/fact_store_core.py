@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -26,13 +26,13 @@ async def insert_fact_record(
     project: str,
     content: str,
     fact_type: str,
-    tags: list[str] | None,
+    tags: Optional[list[str]],
     confidence: str,
-    ts: str | None,
-    source: str | None,
-    meta: dict[str, Any] | None,
-    tx_id: int | None,
-    parent_decision_id: int | None = None,
+    ts: Optional[str],
+    source: Optional[str],
+    meta: Optional[dict[str, Any]],
+    tx_id: Optional[int],
+    parent_decision_id: Optional[int] = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
@@ -45,8 +45,8 @@ async def insert_fact_record(
     enc = get_default_encrypter()
     encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
 
-    sig_b64: str | None = None
-    pub_b64: str | None = None
+    sig_b64: Optional[str] = None
+    pub_b64: Optional[str] = None
     try:
         signer = get_default_signer()
         if signer and signer.can_sign:
@@ -182,7 +182,7 @@ async def insert_fact_record(
 
 
 async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
+    conn: aiosqlite.Connection, project: str, meta: Optional[dict[str, Any]]
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact asynchronously.
 
@@ -197,7 +197,7 @@ async def resolve_causality_async(
 
 
 def resolve_causality(
-    db_path: str | None, project: str, meta: dict[str, Any] | None
+    db_path: Optional[str], project: str, meta: Optional[dict[str, Any]]
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact (sync)."""
     from cortex.engine.causality import CausalOracle, link_causality

@@ -9,6 +9,7 @@ Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import os
@@ -104,7 +105,7 @@ class GlobalSourceCache:
 
         target_files = await asyncio.to_thread(_get_files)
 
-        async def _read_file(p: Path) -> tuple[Path, str | None]:
+        async def _read_file(p: Path) -> tuple[Path, Optional[str]]:
             try:
                 # Use to_thread to prevent blocking event loop on disk I/O
                 content = await asyncio.to_thread(p.read_text, encoding="utf-8")

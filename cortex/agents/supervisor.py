@@ -15,7 +15,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.state import AgentStatus
@@ -26,12 +26,12 @@ DEFAULT_HEARTBEAT_TIMEOUT_S = 30.0
 DEFAULT_MAX_RESTARTS = 3
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentEntry:
     """Supervisor's internal record for a managed agent."""
 
     agent: BaseAgent
-    task: asyncio.Task[None] | None = None
+    task: Optional[asyncio.Task[None]] = None
     restart_count: int = 0
     max_restarts: int = DEFAULT_MAX_RESTARTS
     registered_at: float = field(default_factory=time.time)
@@ -51,7 +51,7 @@ class Supervisor:
     ) -> None:
         self._agents: dict[str, AgentEntry] = {}
         self._heartbeat_timeout_s = heartbeat_timeout_s
-        self._monitor_task: asyncio.Task[None] | None = None
+        self._monitor_task: Optional[asyncio.Task[None]] = None
         self._running = False
 
     # ── Registration ─────────────────────────────────────────────

@@ -8,6 +8,7 @@ Produces 384-dimensional vectors using all-MiniLM-L6-v2.
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import hashlib
 import logging
@@ -57,13 +58,13 @@ class LocalEmbedder:
     def __init__(
         self,
         model_name: str = DEFAULT_MODEL,
-        cache_dir: Path | None = None,
-        device: str | None = None,
+        cache_dir: Optional[Path] = None,
+        device: Optional[str] = None,
     ):
         self._model_name = model_name
         self._cache_dir = cache_dir or DEFAULT_CACHE_DIR
         self._model = None
-        self._identity_hash: str | None = None
+        self._identity_hash: Optional[str] = None
         self._device = device or _resolve_device()
 
     def _ensure_model(self):
@@ -106,7 +107,7 @@ class LocalEmbedder:
         embedding = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportOptionalMemberAccess]
         return embedding.tolist()
 
-    def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+    def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
         """Generate embedding for a single text or delegate list to batch."""
         if isinstance(text, list):
             return self.embed_batch(text)

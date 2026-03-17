@@ -13,7 +13,7 @@ Bidirectional synchronization between CORTEX facts and Langbase Memory.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 __all__ = ["sync_to_langbase", "enrich_from_langbase"]
 
@@ -69,7 +69,7 @@ async def sync_to_langbase(
     client: LangbaseClient,
     engine: AsyncCortexEngine,
     project: str,
-    memory_name: str | None = None,
+    memory_name: Optional[str] = None,
     *,
     limit: int = 500,
 ) -> dict:

@@ -1,6 +1,7 @@
 """MOSKV-Aether — Background daemon and MoskvDaemon monitor."""
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import threading
@@ -25,12 +26,12 @@ class AetherDaemon:
 
     def __init__(
         self,
-        queue: TaskQueue | None = None,
+        queue: Optional[TaskQueue] = None,
         poll_interval: int = _DEFAULT_POLL,
         max_concurrent: int = _DEFAULT_MAX_CONCURRENT,
         llm_provider: str = "qwen",
-        github_token: str | None = None,
-        github_repos: list[str] | None = None,
+        github_token: Optional[str] = None,
+        github_repos: Optional[list[str]] = None,
     ) -> None:
         self._queue = queue or TaskQueue()
         self._poll_interval = poll_interval

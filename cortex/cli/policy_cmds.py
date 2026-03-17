@@ -4,6 +4,7 @@
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import click
 from rich.table import Table
@@ -28,7 +29,7 @@ def policy_cmds() -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--limit", "-n", default=20, help="Max actions to show")
 @click.option("--gamma", "-g", default=0.9, type=float, help="Discount factor (0-1)")
-def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None:
+def evaluate_cmd(project: Optional[str], db: str, limit: int, gamma: float) -> None:
     """Evaluate memory and output prioritized action queue."""
     from cortex.extensions.policy import PolicyConfig, PolicyEngine
 

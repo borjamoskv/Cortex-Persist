@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -65,7 +65,7 @@ class PhoenixState:
     atoms: dict[str, StructuralAtom]
     artifacts: dict[str, Any]
     metrics: dict[str, float]
-    rollback_snapshot: dict | None = None
+    rollback_snapshot: Optional[dict] = None
 
     def transition_to(self, new_phase: AtomicPhase) -> "PhoenixState":
         return PhoenixState(
@@ -226,8 +226,7 @@ class AnalysisEngine(BaseEngine):
             while queue:
                 current = queue.pop(0)
                 neighbors = (
-                    graph.get(current, {}).get("in", set())
-                    | graph.get(current, {}).get("out", set())
+                    Union[graph.get(current, {}).get('in', set()), graph.get(current, {}).get('out', set())]
                 ) - visited
                 visited.update(neighbors)
                 queue.extend(neighbors)

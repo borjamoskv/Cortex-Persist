@@ -14,7 +14,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -24,8 +24,8 @@ class MerkleNode:
     """A node within the Merkle Tree (V8 Immutable)."""
 
     hash: str
-    left: MerkleNode | None = None
-    right: MerkleNode | None = None
+    left: Optional[MerkleNode] = None
+    right: Optional[MerkleNode] = None
     is_leaf: bool = False
 
 
@@ -61,7 +61,7 @@ class MerkleTree:
         return self._build_recursive(next_layer)
 
     @property
-    def root_hash(self) -> str | None:
+    def root_hash(self) -> Optional[str]:
         return self.root.hash if self.root else None
 
     def get_proof(self, index: int) -> list[tuple[str, str]]:
@@ -134,7 +134,7 @@ class SemanticMerkleTree:
         self.root = self._classic_tree.root
 
     @property
-    def root_hash(self) -> str | None:
+    def root_hash(self) -> Optional[str]:
         return self._classic_tree.root_hash if self._classic_tree else None
 
     def verify_content(self, index: int, content: str, embedder: Any = None) -> dict:
@@ -268,7 +268,7 @@ class SovereignLedger:
             logger.error("Ledger OS/IO Failure: %s", e)
             raise
 
-    def create_checkpoint(self, batch_size: int = 100) -> str | None:
+    def create_checkpoint(self, batch_size: int = 100) -> Optional[str]:
         cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
         last_covered = cursor.fetchone()[0] or 0
         cursor = self.conn.execute(

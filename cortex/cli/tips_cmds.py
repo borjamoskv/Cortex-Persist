@@ -5,6 +5,7 @@ Designed to display during agent thinking pauses.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import sqlite3
@@ -67,10 +68,10 @@ def _get_tips_engine(db: str, lang: str = "en") -> TipsEngine:
 def tips(
     ctx: click.Context,
     db: str,
-    category: str | None,
-    project: str | None,
+    category: Optional[str],
+    project: Optional[str],
     count: int,
-    lang: str | None,
+    lang: Optional[str],
 ) -> None:
     """💡 TIPS — Contextual tips and insights from CORTEX."""
     try:
@@ -90,7 +91,7 @@ def tips(
 
 
 def _fetch_and_render_tips(
-    tips_engine: TipsEngine, category: str | None, project: str | None, count: int
+    tips_engine: TipsEngine, category: Optional[str], project: Optional[str], count: int
 ) -> None:
     if category:
         results = _run_async(tips_engine.for_category(category, limit=count))
@@ -152,7 +153,7 @@ def tips_list(ctx: click.Context) -> None:
     help="Filter by category.",
 )
 @click.pass_context
-def tips_all(ctx: click.Context, category: str | None) -> None:
+def tips_all(ctx: click.Context, category: Optional[str]) -> None:
     """Show all available tips."""
     db = ctx.obj["db"]
     lang = ctx.obj["lang"]

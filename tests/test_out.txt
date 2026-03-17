@@ -1,107 +1,184 @@
 ============================= test session starts ==============================
-platform darwin -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- ./.venv/bin/python
+platform darwin -- Python 3.14.0, pytest-8.4.2, pluggy-1.6.0 -- /usr/local/bin/python3.14
 cachedir: .pytest_cache
-rootdir: .
+rootdir: /Users/borjafernandezangulo/30_CORTEX
 configfile: pyproject.toml
-plugins: anyio-4.12.1, asyncio-1.3.0
+plugins: langsmith-0.7.14, anyio-4.12.0, asyncio-1.3.0, typeguard-4.4.4, cov-7.0.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-collecting ... collected 2 items
+collecting ... collected 3 items
 
-tests/test_tenant_isolation.py::test_tenant_isolation_store_and_recall FAILED [ 50%]
-tests/test_tenant_isolation.py::test_tenant_isolation_update_and_deprecate FAILED [100%]
+tests/test_purge_bounded.py::TestPurgeBounded::test_purge_simple_fact_allowed ERROR [ 33%]
+tests/test_purge_bounded.py::TestPurgeBounded::test_purge_rule_with_dependencies_denied ERROR [ 66%]
+tests/test_purge_bounded.py::TestPurgeBounded::test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic ERROR [100%]
 
-=================================== FAILURES ===================================
-____________________ test_tenant_isolation_store_and_recall ____________________
+==================================== ERRORS ====================================
+______ ERROR at setup of TestPurgeBounded.test_purge_simple_fact_allowed _______
 
-engine = <cortex.engine.CortexEngine object at 0x10825fa40>
+tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/pytest-of-borjafernandezangulo/pytest-69/test_purge_simple_fact_allowed0')
 
-    @pytest.mark.asyncio
-    async def test_tenant_isolation_store_and_recall(engine):
-        """Verify that facts stored under one tenant cannot be recalled by another."""
+    @pytest.fixture
+    async def engine(tmp_path: Path):
+        db = str(tmp_path / "test_purge.db")
+>       e = CortexEngine(db_path=db, auto_embed=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_purge_bounded.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+cortex/engine/__init__.py:93: in __init__
+    self._enforce_frontier_policy()
+cortex/engine/__init__.py:100: in _enforce_frontier_policy
+    FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a720440>
+provider = '', model = ''
+
+    def validate_config(self, provider: str, model: str | None = None) -> None:
+        """
+        Validates the current LLM configuration against Rule 1.3.
     
-        # Store fact for Alice
-        token_alice = tenant_id_var.set("tenant-alice")
-        fact_id_alice = await engine.store(
-            content="Alice's secret strategy",
-            fact_type="decision",
-            project="alpha",
-            source="api",
-        )
-        tenant_id_var.reset(token_alice)
+        Args:
+            provider: The LLM provider (e.g., 'openai', 'ollama').
+            model: Optional specific model name. If None, checks provider default.
     
-        # Store fact for Bob
-        token_bob = tenant_id_var.set("tenant-bob")
-        fact_id_bob = await engine.store(
-            content="Bob's secret strategy",
-            fact_type="decision",
-            project="alpha",
-            source="api",
-        )
-        tenant_id_var.reset(token_bob)
+        Raises:
+            SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
+        """
+        if not self.presets_path.exists():
+            logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
+            return
     
-        # Alice queries -> should only see her fact
-        token_alice = tenant_id_var.set("tenant-alice")
-        facts_alice = await engine.recall(project="alpha")
->       assert len(facts_alice) == 1
-E       assert 0 == 1
-E        +  where 0 = len([])
-
-tests/test_tenant_isolation.py:57: AssertionError
-__________________ test_tenant_isolation_update_and_deprecate __________________
-
-engine = <cortex.engine.CortexEngine object at 0x10f00adb0>
-
-    @pytest.mark.asyncio
-    async def test_tenant_isolation_update_and_deprecate(engine):
-        """Verify that updating or deprecating cross-tenant facts fails."""
-    
-        # Alice stores a fact
-        token_alice = tenant_id_var.set("tenant-alice")
-        fact_id_alice = await engine.store(
-            content="Alice's initial draft",
-            fact_type="knowledge",
-            project="beta",
-            source="api"
-        )
-        tenant_id_var.reset(token_alice)
-    
-        # Bob tries to update Alice's fact
-        token_bob = tenant_id_var.set("tenant-bob")
         try:
-            updated_id = await engine.update(
-                fact_id=fact_id_alice,
-                new_content="Bob hacked this",
-                project="beta"
-            )
-            assert not updated_id, "Bob should not be able to update Alice's fact"
-        except Exception:
-            pass # Depending on implementation it might raise or return None
+            with open(self.presets_path) as f:
+                presets = json.load(f)
+        except Exception as e:
+            logger.error("FrontierModelGuard: Failed to load presets: %s", e)
+            return
     
-        # Verify Alice's fact is unchanged
-        tenant_id_var.reset(token_bob)
-    
-        token_alice = tenant_id_var.set("tenant-alice")
-        alice_fact = await engine.get_fact(fact_id_alice)
->       assert alice_fact["content"] == "Alice's initial draft"
-               ^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: 'NoneType' object is not subscriptable
+        if provider not in presets:
+            msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
+            logger.error(msg)
+>           raise SovereignViolation(msg)
+E           cortex.utils.errors.SovereignViolation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
 
-tests/test_tenant_isolation.py:101: TypeError
+cortex/guards/frontier_guard.py:49: SovereignViolation
+------------------------------ Captured log setup ------------------------------
+ERROR    cortex.guards.frontier:frontier_guard.py:48 FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+CRITICAL cortex:__init__.py:102 [RULE 1.3] Sovereign Violation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+_ ERROR at setup of TestPurgeBounded.test_purge_rule_with_dependencies_denied __
+
+tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/pytest-of-borjafernandezangulo/pytest-69/test_purge_rule_with_dependenc0')
+
+    @pytest.fixture
+    async def engine(tmp_path: Path):
+        db = str(tmp_path / "test_purge.db")
+>       e = CortexEngine(db_path=db, auto_embed=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_purge_bounded.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+cortex/engine/__init__.py:93: in __init__
+    self._enforce_frontier_policy()
+cortex/engine/__init__.py:100: in _enforce_frontier_policy
+    FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a742c10>
+provider = '', model = ''
+
+    def validate_config(self, provider: str, model: str | None = None) -> None:
+        """
+        Validates the current LLM configuration against Rule 1.3.
+    
+        Args:
+            provider: The LLM provider (e.g., 'openai', 'ollama').
+            model: Optional specific model name. If None, checks provider default.
+    
+        Raises:
+            SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
+        """
+        if not self.presets_path.exists():
+            logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
+            return
+    
+        try:
+            with open(self.presets_path) as f:
+                presets = json.load(f)
+        except Exception as e:
+            logger.error("FrontierModelGuard: Failed to load presets: %s", e)
+            return
+    
+        if provider not in presets:
+            msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
+            logger.error(msg)
+>           raise SovereignViolation(msg)
+E           cortex.utils.errors.SovereignViolation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+
+cortex/guards/frontier_guard.py:49: SovereignViolation
+------------------------------ Captured log setup ------------------------------
+ERROR    cortex.guards.frontier:frontier_guard.py:48 FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+CRITICAL cortex:__init__.py:102 [RULE 1.3] Sovereign Violation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+_ ERROR at setup of TestPurgeBounded.test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic _
+
+tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/pytest-of-borjafernandezangulo/pytest-69/test_purge_knowledge_with_depe0')
+
+    @pytest.fixture
+    async def engine(tmp_path: Path):
+        db = str(tmp_path / "test_purge.db")
+>       e = CortexEngine(db_path=db, auto_embed=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_purge_bounded.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+cortex/engine/__init__.py:93: in __init__
+    self._enforce_frontier_policy()
+cortex/engine/__init__.py:100: in _enforce_frontier_policy
+    FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a775950>
+provider = '', model = ''
+
+    def validate_config(self, provider: str, model: str | None = None) -> None:
+        """
+        Validates the current LLM configuration against Rule 1.3.
+    
+        Args:
+            provider: The LLM provider (e.g., 'openai', 'ollama').
+            model: Optional specific model name. If None, checks provider default.
+    
+        Raises:
+            SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
+        """
+        if not self.presets_path.exists():
+            logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
+            return
+    
+        try:
+            with open(self.presets_path) as f:
+                presets = json.load(f)
+        except Exception as e:
+            logger.error("FrontierModelGuard: Failed to load presets: %s", e)
+            return
+    
+        if provider not in presets:
+            msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
+            logger.error(msg)
+>           raise SovereignViolation(msg)
+E           cortex.utils.errors.SovereignViolation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+
+cortex/guards/frontier_guard.py:49: SovereignViolation
+------------------------------ Captured log setup ------------------------------
+ERROR    cortex.guards.frontier:frontier_guard.py:48 FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
+CRITICAL cortex:__init__.py:102 [RULE 1.3] Sovereign Violation: FrontierModelGuard: Unknown provider ''. Rejecting for safety (Rule 1.3).
 =============================== warnings summary ===============================
-.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1428
-  ./.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1428: PytestConfigWarning: Unknown config option: timeout
-  
-    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
-
-tests/test_tenant_isolation.py::test_tenant_isolation_store_and_recall
-tests/test_tenant_isolation.py::test_tenant_isolation_update_and_deprecate
-  ./.venv/lib/python3.12/site-packages/aiosqlite/core.py:63: RuntimeWarning: coroutine '_migration_022_cognitive_layer' was never awaited
-    result = function()
-  Enable tracemalloc to get traceback where the object was allocated.
-  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+tests/test_purge_bounded.py::TestPurgeBounded::test_purge_simple_fact_allowed
+  /Users/borjafernandezangulo/30_CORTEX/tests/conftest.py:22: DeprecationWarning: 'asyncio.DefaultEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    return asyncio.DefaultEventLoopPolicy()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
-FAILED tests/test_tenant_isolation.py::test_tenant_isolation_store_and_recall
-FAILED tests/test_tenant_isolation.py::test_tenant_isolation_update_and_deprecate
-================== 2 failed, 3 warnings in 120.39s (0:02:00) ===================
+ERROR tests/test_purge_bounded.py::TestPurgeBounded::test_purge_simple_fact_allowed
+ERROR tests/test_purge_bounded.py::TestPurgeBounded::test_purge_rule_with_dependencies_denied
+ERROR tests/test_purge_bounded.py::TestPurgeBounded::test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic
+========================= 1 warning, 3 errors in 0.47s =========================

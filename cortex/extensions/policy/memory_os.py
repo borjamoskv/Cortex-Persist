@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 try:
     import structlog
@@ -49,7 +49,7 @@ class MemoryOS:
 
         return False
 
-    async def read(self, tier: MemoryTier, query: str) -> Any | None:
+    async def read(self, tier: MemoryTier, query: str) -> Optional[Any]:
         """
         Routes the retrieval request to the appropriate subsystem,
         bypassing expensive global searches.

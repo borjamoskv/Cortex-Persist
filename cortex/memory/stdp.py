@@ -26,7 +26,7 @@ import logging
 import math
 import time
 from dataclasses import dataclass, field
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 logger = logging.getLogger("cortex.memory.stdp")
 
@@ -177,7 +177,7 @@ class STDPEngine:
 
     def _apply_ltp(
         self, source_id: str, target_id: str, delta_t: float
-    ) -> tuple[str, str, float] | None:
+    ) -> Optional[tuple[str, str, float]]:
         """Apply Long-Term Potentiation (strengthen causal edge).
 
         Weight increase follows: lr * exp(-delta_t / tau)
@@ -215,7 +215,7 @@ class STDPEngine:
 
     def _apply_ltd(
         self, source_id: str, target_id: str, delta_t: float
-    ) -> tuple[str, str, float] | None:
+    ) -> Optional[tuple[str, str, float]]:
         """Apply Long-Term Depression (weaken anti-causal edge).
 
         Weight decrease follows: lr * exp(-delta_t / tau_ltd)
@@ -249,7 +249,7 @@ class STDPEngine:
         edge = self._edges.get((source_id, target_id))
         return edge.weight if edge else 0.0
 
-    def get_edge(self, source_id: str, target_id: str) -> SynapticEdge | None:
+    def get_edge(self, source_id: str, target_id: str) -> Optional[SynapticEdge]:
         """Get full edge metadata."""
         return self._edges.get((source_id, target_id))
 

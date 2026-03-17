@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 import httpx
 
@@ -78,7 +78,7 @@ class GitHubCortexBridge:
 
     # ─── Public API ──────────────────────────────────────────────────
 
-    async def sync_all(self, repo_filter: str | None = None) -> SyncResult:
+    async def sync_all(self, repo_filter: Optional[str] = None) -> SyncResult:
         """Discover repos and sync all issues/PRs into CORTEX.
 
         Parameters
@@ -114,7 +114,7 @@ class GitHubCortexBridge:
 
     # ─── Repo Discovery ──────────────────────────────────────────────
 
-    async def _discover_repos(self, repo_filter: str | None) -> list[str]:
+    async def _discover_repos(self, repo_filter: Optional[str]) -> list[str]:
         """List public repos for the owner. Returns full names (owner/repo)."""
         if repo_filter:
             return [f"{self._owner}/{repo_filter}"]

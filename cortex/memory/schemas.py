@@ -12,6 +12,7 @@ relevance during fetch.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from dataclasses import dataclass
@@ -61,7 +62,7 @@ class SchemaEngine:
     __slots__ = ("_schemas", "_config")
 
     def __init__(
-        self, schemas: list[MemorySchema] | None = None, config: SchemaEngineConfig | None = None
+        self, schemas: Optional[list[MemorySchema]] = None, config: Optional[SchemaEngineConfig] = None
     ) -> None:
         self._config = config or SchemaEngineConfig()
         self._schemas: dict[str, MemorySchema] = {}
@@ -119,7 +120,7 @@ class SchemaEngine:
         for s in (debug_schema, ml_schema, front_schema):
             self._schemas[s.name] = s
 
-    def match_schema(self, text: str) -> MemorySchema | None:
+    def match_schema(self, text: str) -> Optional[MemorySchema]:
         """
         Identify the most relevant schema for the given context text using fast triggers.
         Returns first match or None. O(S*T) purely in memory.

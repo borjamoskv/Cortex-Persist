@@ -1,6 +1,7 @@
 """CORTEX Policy Engine — Data Models."""
 
 from __future__ import annotations
+from typing import Optional
 
 from dataclasses import dataclass, field
 
@@ -22,7 +23,7 @@ class ActionItem:
         metadata: Extra context (cross-project deps, tags, etc.).
     """
 
-    fact_id: int | None
+    fact_id: Optional[int]
     project: str
     action_type: str
     description: str

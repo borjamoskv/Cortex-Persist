@@ -1,3 +1,4 @@
+from typing import Optional
 import ast
 import os
 from pathlib import Path
@@ -100,7 +101,7 @@ class LandauerAnalyzer(ast.NodeVisitor):
         self._visit_node(node)
 
 
-def calculate_calcification(file_path: Path) -> dict | None:
+def calculate_calcification(file_path: Path) -> Optional[dict]:
     """
     Calculate the Calcification Score (Ω₂-C) for a file.
     Formula: Calcification = (Complexity * LOC) / 100

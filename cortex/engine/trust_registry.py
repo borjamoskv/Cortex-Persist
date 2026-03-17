@@ -6,6 +6,7 @@ Defines who has the mathematical right to mutate the persistent state.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import dataclasses
 import datetime
@@ -14,7 +15,7 @@ from collections.abc import Sequence
 
 logger = logging.getLogger("cortex.engine.trust")
 
-@dataclasses.dataclass(slots=True)
+@dataclasses.dataclass()
 class AgentTrustProfile:
     """Historical and dynamic trust profile for an executing agent."""
 
@@ -24,15 +25,15 @@ class AgentTrustProfile:
     failures: int = 0
     taint_events: int = 0
     taint_severity_sum: float = 0.0
-    last_incident_ts: datetime.datetime | None = None
-    last_success_ts: datetime.datetime | None = None
+    last_incident_ts: Optional[datetime.datetime] = None
+    last_success_ts: Optional[datetime.datetime] = None
 
     @property
     def total_events(self) -> int:
         return self.successes + self.failures
 
 
-@dataclasses.dataclass(slots=True)
+@dataclasses.dataclass()
 class WeightedProposal:
     """A single deterministic proposal awaiting Thalamus collapse."""
 
@@ -44,7 +45,7 @@ class WeightedProposal:
     trust_score: float = 0.0
     influence_weight: float = 0.0
     final_score: float = 0.0
-    reasoning_ref: str | None = None
+    reasoning_ref: Optional[str] = None
 
 
 class TrustRegistry:
@@ -73,7 +74,7 @@ class TrustRegistry:
         success: bool,
         is_taint: bool = False,
         taint_severity: float = 0.0,
-        now: datetime.datetime | None = None,
+        now: Optional[datetime.datetime] = None,
     ) -> None:
         """Record operational evidence for an agent."""
         if now is None:
@@ -94,7 +95,7 @@ class TrustRegistry:
         self, 
         profile: AgentTrustProfile, 
         domain_risk_modifier: float = 1.0, 
-        now: datetime.datetime | None = None
+        now: Optional[datetime.datetime] = None
     ) -> float:
         """
         trust(agent, domain) = base_prior + reliability_posterior - taint_penalty - drift_penalty
@@ -152,7 +153,7 @@ class TrustRegistry:
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: datetime.datetime | None = None
+        now: Optional[datetime.datetime] = None
     ) -> list[WeightedProposal]:
         """
         Hydrate proposals with trust math and rank them.
@@ -179,8 +180,8 @@ class TrustRegistry:
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: datetime.datetime | None = None
-    ) -> tuple[WeightedProposal | None, dict[str, str]]:
+        now: Optional[datetime.datetime] = None
+    ) -> tuple[Optional[WeightedProposal], dict[str, str]]:
         """
         Takes N proposals and returns the Single Winning Proposal (or None) + Diagnostic Reason Code.
         """

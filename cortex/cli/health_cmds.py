@@ -5,6 +5,7 @@ Thin CLI wrapper; all logic lives in cortex.health.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import click
 
@@ -30,7 +31,7 @@ def health_group() -> None:
 
 @health_group.command("check")
 @click.option("--db", "db_path", default=None, help="DB path override.")
-def check(db_path: str | None) -> None:
+def check(db_path: Optional[str]) -> None:
     """Quick boolean health check (healthy/degraded)."""
     from cortex.extensions.health import HealthCollector, HealthScorer
 
@@ -52,7 +53,7 @@ def check(db_path: str | None) -> None:
 @health_group.command("report")
 @click.option("--db", "db_path", default=None)
 @click.option("--json", "as_json", is_flag=True, default=False)
-def report(db_path: str | None, as_json: bool) -> None:
+def report(db_path: Optional[str], as_json: bool) -> None:
     """Full health report with recommendations."""
     import asyncio
     import json
@@ -92,7 +93,7 @@ def report(db_path: str | None, as_json: bool) -> None:
 
 @health_group.command("score")
 @click.option("--db", "db_path", default=None)
-def score(db_path: str | None) -> None:
+def score(db_path: Optional[str]) -> None:
     """Print only the numeric health score (0-100)."""
     from cortex.extensions.health import HealthCollector, HealthScorer
 
@@ -107,7 +108,7 @@ def score(db_path: str | None) -> None:
 @click.option("--db", "db_path", default=None)
 @click.option("--samples", default=10, help="Number of samples to collect.")
 @click.option("--interval", default=1.0, help="Seconds between samples.")
-def trend(db_path: str | None, samples: int, interval: float) -> None:
+def trend(db_path: Optional[str], samples: int, interval: float) -> None:
     """Live health trend monitoring with sparklines."""
     import time
 

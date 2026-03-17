@@ -13,6 +13,7 @@ Extraído de router.py (Ω₂ Landauer split).
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -41,7 +42,7 @@ class HedgedRequestStrategy:
         cls,
         providers: list[BaseProvider],
         prompt: CortexPrompt,
-    ) -> tuple[HedgedResult | None, list[str]]:
+    ) -> tuple[Optional[HedgedResult], list[str]]:
         """Race N providers simultaneously. Returns (winner | None, errors).
 
         DNS-over-HTTPS pattern: query sent to all providers concurrently,

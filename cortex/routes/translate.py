@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -30,7 +30,7 @@ class TranslateRequest(BaseModel):
     target_languages: list[str] = Field(
         ..., description="List of target language codes (e.g., ['es', 'fr', 'zh'])."
     )
-    context: str | None = Field(None, description="Optional context about the application or tone.")
+    context: Optional[str] = Field(None, description="Optional context about the application or tone.")
 
 
 class TranslateResponse(BaseModel):
@@ -52,7 +52,7 @@ def _get_genai_client() -> Any:
         raise HTTPException(status_code=500, detail="LLM configuration error.") from e
 
 
-def _build_system_instruction(context: str | None) -> str:
+def _build_system_instruction(context: Optional[str]) -> str:
     """Constructs the sovereign B2B translation instruction set."""
     base_instruction = (
         "You are OMNI-TRANSLATE, a sovereign localization AI for B2B applications. "
@@ -65,7 +65,7 @@ def _build_system_instruction(context: str | None) -> str:
 
 
 def _parse_llm_response(
-    text_output: str | None, target_languages: list[str]
+    text_output: Optional[str], target_languages: list[str]
 ) -> dict[str, dict[str, str]]:
     """Strictly parses the LLM output ensuring all target languages are present."""
     if not text_output:

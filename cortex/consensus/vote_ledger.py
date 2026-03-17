@@ -4,13 +4,15 @@ CORTEX v5.0 — Registro Inmutable de Votos.
 Almacenamiento de votos a prueba de manipulaciones criptográficas mediante encadenamiento de hashes y árboles de Merkle.
 Parte de la Arquitectura de Soberanía Wave 5.
 """
+from __future__ import annotations
+
 
 import hashlib
 import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -31,7 +33,7 @@ class VoteEntry:
     prev_hash: str
     hash: str
     timestamp: str
-    signature: str | None = None
+    signature: Optional[str] = None
 
 
 class ImmutableVoteLedger:
@@ -74,7 +76,7 @@ class ImmutableVoteLedger:
         agent_id: str,
         vote: int,
         vote_weight: float = 1.0,
-        signature: str | None = None,
+        signature: Optional[str] = None,
     ) -> VoteEntry:
         """
         Añade un voto de forma segura y sellada.
@@ -195,7 +197,7 @@ class ImmutableVoteLedger:
         if count >= self.MERKLE_BATCH_SIZE:
             await self._create_checkpoint_internal(conn)
 
-    async def create_checkpoint(self) -> str | None:
+    async def create_checkpoint(self) -> Optional[str]:
         """Dispara manualmente un punto de control."""
         conn = await self._get_conn()
         try:
@@ -215,7 +217,7 @@ class ImmutableVoteLedger:
         finally:
             await self._release_conn(conn)
 
-    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> str | None:
+    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> Optional[str]:
         """Lógica interna de creación de punto de control."""
         async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
             row = await cursor.fetchone()

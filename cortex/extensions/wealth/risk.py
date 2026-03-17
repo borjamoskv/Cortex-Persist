@@ -5,6 +5,7 @@ Decimal-precision. Zero tolerance for float drift.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import threading
@@ -94,7 +95,7 @@ class RiskManager:
         self.circuit_breaker_triggered = False
         self.consecutive_rejections = 0
         self.MAX_CONSECUTIVE_REJECTIONS = 3
-        self._cb_timer: threading.Timer | None = None
+        self._cb_timer: Optional[threading.Timer] = None
 
     def approve_trade(self, position: Position, portfolio: Portfolio) -> bool:
         """Cada trade DEBE pasar por aquí. Sin excepciones."""

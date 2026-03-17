@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import asyncio
 import logging
 import os
@@ -17,7 +18,7 @@ class WorktreeIsolationError(Exception):
 
 @asynccontextmanager
 async def isolated_worktree(
-    branch_name: str, base_path: str | Path | None = None
+    branch_name: str, base_path: Optional[Union[str, Path]] = None
 ) -> AsyncGenerator[Path, None]:
     """
     Gestor O(1) de Workspaces aislados usando `git worktree`.

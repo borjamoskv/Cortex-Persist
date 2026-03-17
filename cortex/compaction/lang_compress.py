@@ -23,7 +23,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.lang_compress")
 
@@ -284,7 +284,7 @@ class CompressionResult:
     token_savings_est: int
     savings_pct: float
     was_compressed: bool = True
-    error: str | None = None
+    error: Optional[str] = None
 
 
 @dataclass
@@ -373,7 +373,7 @@ class LangCompressor:
         self,
         fact_id: int,
         content: str,
-        meta: dict[str, Any] | None = None,
+        meta: Optional[dict[str, Any]] = None,
         dry_run: bool = False,
     ) -> CompressionResult:
         """Compress a single fact by translating to English.
@@ -472,7 +472,7 @@ class LangCompressor:
         engine: Any,
         result: CompressionResult,
         meta: dict[str, Any],
-    ) -> str | None:
+    ) -> Optional[str]:
         """Apply compressed content to the engine. Returns error string or None."""
         new_meta = dict(meta)
         new_meta["_orig_lang"] = result.original_lang

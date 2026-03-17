@@ -11,7 +11,7 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from cortex.events.bus import DistributedEventBus
 from cortex.extensions.skills.cadastral.models import (
@@ -83,7 +83,7 @@ def valve_cadastral_radar(lat: float, lon: float) -> dict[str, Any]:
     return {"clear": False, "reason": "Unknown zone classification"}
 
 
-def valve_scrap_negotiator(item: str, owner: str | None, ask_price: float) -> float:
+def valve_scrap_negotiator(item: str, owner: Optional[str], ask_price: float) -> float:
     """Válvula 3: Scrap Negotiator."""
     return 0.0
 

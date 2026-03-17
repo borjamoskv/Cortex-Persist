@@ -37,7 +37,7 @@ def analyze_dir(directory: str) -> tuple[int, int, int]:
 
 
 def main():
-    base_path = "/Users/borjafernandezangulo/30_CORTEX"
+    base_path = "."
     directories = ["cortex/engine", "cortex/memory", "cortex/swarm"]
     for d in directories:
         bare, bound, total = analyze_dir(os.path.join(base_path, d))

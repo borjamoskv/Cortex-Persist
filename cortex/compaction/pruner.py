@@ -6,6 +6,7 @@ Manages embedding lifecycle: archives stale embeddings to cold storage
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import hashlib
 import json
@@ -20,7 +21,7 @@ __all__ = ["EmbeddingPrunerMixin"]
 logger = logging.getLogger("cortex.pruner")
 
 
-def _to_bytes(data: str | bytes | object) -> bytes:
+def _to_bytes(data: Union[str, bytes, object]) -> bytes:
     """Convierte datos de embedding a bytes para hashing."""
     if isinstance(data, str):
         return data.encode("utf-8")
@@ -91,7 +92,7 @@ class EmbeddingPrunerMixin:
         return stats
 
     async def _prune_single_embedding(
-        self, conn: aiosqlite.Connection, fact_id: int, embedding_data: str | bytes, stats: dict
+        self, conn: aiosqlite.Connection, fact_id: int, embedding_data: Union[str, bytes], stats: dict
     ) -> None:
         """Prunes a single embedding and updates stats."""
         try:
@@ -113,7 +114,7 @@ class EmbeddingPrunerMixin:
             logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
             stats["errors"].append({"fact_id": fact_id, "error": str(e)})
 
-    async def verify_embedding_hash(self, fact_id: int) -> dict | None:
+    async def verify_embedding_hash(self, fact_id: int) -> Optional[dict]:
         """Check if a pruned embedding's hash exists and return metadata.
 
         Returns:

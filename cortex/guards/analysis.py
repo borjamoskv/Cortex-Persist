@@ -1,3 +1,4 @@
+from typing import Optional
 import ast
 from pathlib import Path
 
@@ -14,7 +15,7 @@ def has_sovereign_fallback(source: str) -> bool:
     return any(m in source for m in SOVEREIGN_MARKERS)
 
 
-def get_call_name(node: ast.Call) -> str | None:
+def get_call_name(node: ast.Call) -> Optional[str]:
     """Extract dotted name from a function call node."""
     func = node.func
     if isinstance(func, ast.Attribute):
@@ -28,7 +29,7 @@ def get_call_name(node: ast.Call) -> str | None:
     return None
 
 
-def oracle_in_str(value: str) -> str | None:
+def oracle_in_str(value: str) -> Optional[str]:
     """Return oracle name if found in string, else None."""
     lower = value.lower()
     for oracle in ORACLE_BINARIES:
@@ -147,7 +148,7 @@ def scan_exec_args(node: ast.Call) -> list[str]:
 
 def check_getattr_evasion(
     node: ast.Call,
-) -> tuple[int, str, str] | None:
+) -> Optional[tuple[int, str, str]]:
     """Detect getattr(subprocess, "run")([oracle]) pattern."""
     if len(node.args) < 2:
         return None

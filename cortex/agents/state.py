@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 
 class AgentStatus(str, Enum):
@@ -22,14 +22,14 @@ class AgentStatus(str, Enum):
     QUARANTINED = "quarantined"
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentState:
     """Mutable runtime state for an agent instance."""
 
     status: AgentStatus = AgentStatus.IDLE
-    current_goal: str | None = None
-    memory_ref: str | None = None
-    last_heartbeat_ts: float | None = None
+    current_goal: Optional[str] = None
+    memory_ref: Optional[str] = None
+    last_heartbeat_ts: Optional[float] = None
     error_count: int = 0
     consecutive_errors: int = 0
     total_messages_processed: int = 0
@@ -50,7 +50,7 @@ class AgentState:
         self.total_messages_processed += 1
 
 
-@dataclass(slots=True)
+@dataclass()
 class WorkingMemory:
     """Isolated per-agent working memory.
 

@@ -1,6 +1,7 @@
 """Timing data classes, constants, and classification."""
 
 from __future__ import annotations
+from typing import Optional
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -111,8 +112,8 @@ class Heartbeat:
     project: str
     entity: str
     category: str
-    branch: str | None
-    language: str | None
+    branch: Optional[str]
+    language: Optional[str]
     timestamp: str
     meta: dict
 

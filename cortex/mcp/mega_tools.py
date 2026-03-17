@@ -14,7 +14,7 @@ import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -190,7 +190,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
 # ─── Entropy Cracker ─────────────────────────────────────────────────
 
 
-def _resolve_safe_path(path: str) -> str | None:
+def _resolve_safe_path(path: str) -> Optional[str]:
     """Resolve path safely, rejecting traversal outside safe bases."""
     resolved = str(Path(path).expanduser().resolve())
     if any(resolved.startswith(base) for base in _SAFE_BASES):

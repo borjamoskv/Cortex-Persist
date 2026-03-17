@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -79,7 +79,7 @@ class SimpleAsyncCache:
         self.ttl = ttl_seconds
         self._cache: dict[str, tuple[float, Any]] = {}
 
-    def get(self, key: str) -> Any | None:
+    def get(self, key: str) -> Optional[Any]:
         if key not in self._cache:
             return None
         timestamp, value = self._cache[key]
@@ -144,7 +144,7 @@ class AsyncConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[aiosqlite.Connection]:
         """Acquire a connection with timeout."""
-        conn: aiosqlite.Connection | None = None
+        conn: Optional[aiosqlite.Connection] = None
         try:
             conn = await asyncio.wait_for(self._pool.get(), timeout=self.acquire_timeout)
         except asyncio.TimeoutError:

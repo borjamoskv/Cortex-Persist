@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -44,12 +44,12 @@ class CortexLLMRouter:
     def __init__(
         self,
         primary: BaseProvider,
-        fallbacks: Sequence[BaseProvider] | None = None,
+        fallbacks: Optional[Sequence[BaseProvider]] = None,
         *,
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
-        hedging_providers: Sequence[BaseProvider] | None = None,
-        db_path: str | Path | None = None,
+        hedging_providers: Optional[Sequence[BaseProvider]] = None,
+        db_path: Optional[Union[str, Path]] = None,
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])
@@ -144,7 +144,7 @@ class CortexLLMRouter:
         )
         return known + unknown
 
-    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
+    async def execute_hedged(self, prompt: CortexPrompt) -> Optional[Result[str, str]]:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -358,7 +358,7 @@ class CortexLLMRouter:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
 
-    def select_model_for_intent(self, intent: str) -> str | None:
+    def select_model_for_intent(self, intent: str) -> Optional[str]:
         """Resolve the optimal model for the primary provider's intent.
 
         Uses the preset routing functions to find the best model

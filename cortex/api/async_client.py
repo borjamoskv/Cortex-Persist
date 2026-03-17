@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -37,7 +37,7 @@ class AsyncCortexClient:
     def __init__(
         self,
         base_url: str = "http://localhost:8484",
-        api_key: str | None = None,
+        api_key: Optional[str] = None,
         timeout: float = 30.0,
     ):
         self.base_url = base_url.rstrip("/")
@@ -107,8 +107,8 @@ class AsyncCortexClient:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: list[str] | None = None,
-        metadata: dict[str, Any] | None = None,
+        tags: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> int:
         """Store a fact. Returns fact ID."""
         data = {
@@ -134,9 +134,9 @@ class AsyncCortexClient:
         self,
         query: str,
         k: int = 5,
-        project: str | None = None,
-        tags: list[str] | None = None,
-        fact_type: str | None = None,
+        project: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        fact_type: Optional[str] = None,
     ) -> list[Fact]:
         """Semantic search. Returns ranked facts."""
         data: dict[str, Any] = {"query": query, "k": k}
@@ -165,7 +165,7 @@ class AsyncCortexClient:
         self,
         project: str,
         include_deprecated: bool = False,
-        limit: int | None = None,
+        limit: Optional[int] = None,
         offset: int = 0,
     ) -> list[Fact]:
         """Get facts for a project with optional pagination."""
@@ -202,9 +202,9 @@ class AsyncCortexClient:
     async def update(
         self,
         fact_id: int,
-        content: str | None = None,
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
+        content: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        meta: Optional[dict[str, Any]] = None,
     ) -> int:
         """Update a fact. Returns new fact ID."""
         data: dict[str, Any] = {}

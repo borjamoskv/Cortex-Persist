@@ -13,7 +13,7 @@ import asyncio
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.config import FEDERATION_MODE, SHARD_DIR
 
@@ -75,7 +75,7 @@ class FederatedEngine:
     async def search(
         self,
         query: str,
-        tenant_id: str | None = None,
+        tenant_id: Optional[str] = None,
         top_k: int = 5,
         **kwargs,
     ) -> list:

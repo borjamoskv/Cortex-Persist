@@ -5,6 +5,7 @@ deduplication, rate limiting, and batch processing with checkpoints.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -220,7 +221,7 @@ class ScraperEngine:
         LOG.info("🗺️ [MAP] Discovered %d URLs from %s", len(discovered), url)
         return sorted(discovered)
 
-    def get_job(self, job_id: str) -> ScrapeJob | None:
+    def get_job(self, job_id: str) -> Optional[ScrapeJob]:
         """Get a batch job by ID."""
         return self._jobs.get(job_id)
 

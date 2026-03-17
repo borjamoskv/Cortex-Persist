@@ -5,7 +5,7 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -39,14 +39,14 @@ class AsyncCortexEngine(
         self,
         pool: CortexConnectionPool,
         db_path: str,
-        writer: SqliteWriteWorker | None = None,
+        writer: Optional[SqliteWriteWorker] = None,
     ):
         self._pool = pool
         self._db_path = Path(db_path)
         self._writer = writer
-        self._embedder: LocalEmbedder | None = None
-        self._ledger: ImmutableLedger | None = None
-        self.vault: Any | None = None
+        self._embedder: Optional[LocalEmbedder] = None
+        self._ledger: Optional[ImmutableLedger] = None
+        self.vault: Optional[Any] = None
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
@@ -57,7 +57,7 @@ class AsyncCortexEngine(
         return self._cuatrida
 
     @property
-    def writer(self) -> SqliteWriteWorker | None:
+    def writer(self) -> Optional[SqliteWriteWorker]:
         return self._writer
 
     async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
@@ -77,7 +77,7 @@ class AsyncCortexEngine(
 
     async def _try_execute_write(
         self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
-    ) -> Result[int, str] | None:
+    ) -> Optional[Result[int, str]]:
         try:
             result = await self._execute_write(sql, params)
             if result:
@@ -88,7 +88,7 @@ class AsyncCortexEngine(
             await self._backoff(attempt)
         return None
 
-    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str] | None:
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Optional[Result[int, str]]:
         async with self.session() as conn:
             cursor = await conn.execute(sql, params)
             await conn.commit()
@@ -178,13 +178,13 @@ class AsyncCortexEngine(
     async def verify_ledger(self) -> dict[str, Any]:
         return await self._get_ledger().verify_integrity_async()
 
-    async def create_checkpoint(self) -> int | None:
+    async def create_checkpoint(self) -> Optional[int]:
         return await self._get_ledger().create_checkpoint_async()
 
     async def verify_vote_ledger(self) -> dict[str, Any]:
         return await super().verify_vote_ledger()
 
-    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict[str, Any]:
+    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict[str, Any]:
         async with self.session() as conn:
             return await _get_graph(conn, project, limit)
 

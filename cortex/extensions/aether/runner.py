@@ -5,6 +5,7 @@ Orchestrates the 4-agent loop:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -34,14 +35,14 @@ class AetherAgent:
         agent.run_task_sync(task, queue)
     """
 
-    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: Optional[str] = None) -> None:
         from cortex.extensions.agents.registry import AgentRegistry
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
         system_prompt = None
-        self._allowed_tools: list[str] | None = None
+        self._allowed_tools: Optional[list[str]] = None
         if agent_id:
             registry = AgentRegistry()
             # Ensure registries are loaded (safe to call multiple times)

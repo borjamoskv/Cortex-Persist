@@ -10,6 +10,7 @@ Extraído de router.py (Ω₂ Landauer split — 1371 → 5 módulos cohesivos).
 """
 
 from __future__ import annotations
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import time
 from abc import ABC, abstractmethod
@@ -81,9 +82,9 @@ class CascadeEvent:
     """
 
     intent: IntentProfile
-    resolved_by: str | None
+    resolved_by: Optional[str]
     tier: CascadeTier
-    project: str | None = None
+    project: Optional[str] = None
     depth: int = 1  # how many providers attempted before success
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
@@ -127,13 +128,13 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
-    episodic_context: list[dict[str, str | None]] = Field(
+    episodic_context: list[dict[str, Optional[str]]] = Field(
         default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
-    project: str | None = Field(
+    project: Optional[str] = Field(
         default=None,
         description="Project to which this prompt belongs. Used for telemetry and billing.",
     )

@@ -20,6 +20,7 @@ Invariants enforced:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from dataclasses import dataclass
@@ -115,7 +116,7 @@ class CognitiveHandoff:
     async def process_belief(
         self,
         belief: BeliefObject,
-        context: list[BeliefObject] | None = None,
+        context: Optional[list[BeliefObject]] = None,
     ) -> BeliefVerdict:
         """Cost-aware belief processing pipeline.
 

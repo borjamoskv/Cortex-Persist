@@ -16,7 +16,7 @@ import os
 import sqlite3
 import subprocess
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from cortex.database.core import connect as db_connect
 
@@ -173,7 +173,7 @@ class ChronosROI:
         report: ChronosReport,
         db_path: str,
         project: str = "system",
-    ) -> int | None:
+    ) -> Optional[int]:
         """Persist a CHRONOS report as a CORTEX fact + emit signal.
 
         This closes the observability loop — CHRONOS metrics are now

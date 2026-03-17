@@ -12,7 +12,7 @@ Handles Pipes, Memory, and Tools endpoints.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -97,8 +97,8 @@ class LangbaseClient:
         method: str,
         path: str,
         *,
-        json_body: dict | None = None,
-        timeout: float | None = None,
+        json_body: Optional[dict] = None,
+        timeout: Optional[float] = None,
     ) -> dict:
         """Make an authenticated request to Langbase API."""
         try:
@@ -132,8 +132,8 @@ class LangbaseClient:
         name: str,
         messages: list[dict[str, str]],
         *,
-        thread_id: str | None = None,
-        variables: list[dict[str, str]] | None = None,
+        thread_id: Optional[str] = None,
+        variables: Optional[list[dict[str, str]]] = None,
     ) -> dict:
         """Run a Langbase Pipe (AI agent).
 
@@ -169,9 +169,9 @@ class LangbaseClient:
         name: str,
         *,
         description: str = "",
-        model: str | None = None,
+        model: Optional[str] = None,
         system_prompt: str = "",
-        memory: list[dict] | None = None,
+        memory: Optional[list[dict]] = None,
     ) -> dict:
         """Create a new Pipe (AI agent).
 
@@ -255,7 +255,7 @@ class LangbaseClient:
         content: str,
         filename: str,
         *,
-        meta: dict | None = None,
+        meta: Optional[dict] = None,
     ) -> dict:
         """Upload a document to a Memory set.
 

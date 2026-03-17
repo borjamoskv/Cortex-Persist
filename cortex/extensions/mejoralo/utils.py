@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from .constants import STACK_MARKERS
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def detect_stack(path: str | Path) -> str:
+def detect_stack(path: Union[str, Path]) -> str:
     """Detect project stack from marker files."""
     p = Path(path)
     for stack, marker in STACK_MARKERS.items():
@@ -24,7 +24,7 @@ def detect_stack(path: str | Path) -> str:
     return "unknown"
 
 
-def get_build_cmd(stack: str) -> list[str] | None:
+def get_build_cmd(stack: str) -> Optional[list[str]]:
     cmds = {
         "node": ["npm", "run", "build"],
         "python": ["python", "-m", "py_compile", "."],
@@ -33,7 +33,7 @@ def get_build_cmd(stack: str) -> list[str] | None:
     return cmds.get(stack)
 
 
-def get_test_cmd(stack: str) -> list[str] | None:
+def get_test_cmd(stack: str) -> Optional[list[str]]:
     cmds = {
         "node": ["npm", "test"],
         "python": ["python", "-m", "pytest", "--tb=no", "-q"],
@@ -42,7 +42,7 @@ def get_test_cmd(stack: str) -> list[str] | None:
     return cmds.get(stack)
 
 
-def get_lint_cmd(stack: str) -> list[str] | None:
+def get_lint_cmd(stack: str) -> Optional[list[str]]:
     cmds = {
         "node": ["npx", "eslint", "."],
         "python": ["python", "-m", "ruff", "check", "."],

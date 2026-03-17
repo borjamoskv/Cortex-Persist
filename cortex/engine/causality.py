@@ -1,3 +1,4 @@
+from typing import Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -24,7 +25,7 @@ class LedgerEvent:
     status: EpistemicStatus
     trust_score: float
     created_at: str
-    last_revalidated_at: str | None = None
+    last_revalidated_at: Optional[str] = None
     tainted: bool = False
 
 
@@ -74,6 +75,10 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
         else:
             event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
             event.tainted = True
+
+        for child_id in graph.get_descendants(node_id):
+            if child_id not in visited:
+                queue.append((child_id, depth + 1))
 
 class AsyncCausalGraph:
     def __init__(self, conn: aiosqlite.Connection):

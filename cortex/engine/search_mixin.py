@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph
@@ -27,12 +27,12 @@ class SearchMixin(EngineMixinBase):
         query: str,
         tenant_id: str = "default",
         top_k: int = 5,
-        project: str | None = None,
-        as_of: str | None = None,
+        project: Optional[str] = None,
+        as_of: Optional[str] = None,
         graph_depth: int = 0,
         include_graph: bool = False,
-        confidence: str | None = None,
-        causal_gap: CausalGap | None = None,
+        confidence: Optional[str] = None,
+        causal_gap: Optional[CausalGap] = None,
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -31,7 +31,7 @@ class NotchHub:
     ``await notch_hub.broadcast("thinking")`` to push state to the notch.
     """
 
-    _instance: ClassVar[NotchHub | None] = None
+    _instance: ClassVar[Optional[NotchHub]] = None
     _lock: ClassVar[asyncio.Lock] = asyncio.Lock()
 
     def __new__(cls) -> NotchHub:

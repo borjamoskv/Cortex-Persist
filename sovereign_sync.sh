@@ -9,7 +9,7 @@ if [ -z "$GCP_IP" ]; then
 fi
 
 DEST="borja@$GCP_IP:/home/borja/30_CORTEX"
-LOCAL_HANDOFF="/Users/borjafernandezangulo/30_CORTEX/handoff.json"
+LOCAL_HANDOFF="./handoff.json"
 
 echo "🔄 Iniciando puente de sincronía con $GCP_IP (Shadowing)..."
 

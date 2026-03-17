@@ -4,6 +4,7 @@ Never stores the CORTEX_MASTER_KEY in plain text .env unless forced (e.g., CI/CD
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import base64
 import logging
@@ -19,7 +20,7 @@ SERVICE_NAME = "cortex_v6"
 KEY_NAME = "master_key"
 
 
-def get_master_key() -> bytes | None:
+def get_master_key() -> Optional[bytes]:
     """Read the master key from the OS keychain or fallback to env var."""
     key_b64 = None
     if not os.environ.get("CORTEX_TESTING"):
