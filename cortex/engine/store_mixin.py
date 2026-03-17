@@ -360,8 +360,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 "confidence, source, meta "
                 "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
-            cursor = await conn.execute(query, (fact_id, tenant_id))
-            row = await cursor.fetchone()
+            async with conn.execute(query, (fact_id, tenant_id)) as cursor:
+                row = await cursor.fetchone()
             if not row:
                 raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
 
@@ -392,6 +392,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 new_meta.update(meta)
             new_meta["previous_fact_id"] = fact_id
 
+            # Deprecate first to avoid unique constraint violations on identical hashes
+            await self.deprecate(
+                fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id
+            )
+
             new_id = await self.store(
                 project=project,
                 content=content if content is not None else str(old_content or ""),
@@ -404,9 +409,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn=conn,
                 commit=False,
             )
-            await self.deprecate(
-                fact_id, reason=f"updated_by_{new_id}", conn=conn, tenant_id=db_tenant_id
-            )
+            
             await conn.commit()
             return new_id
 
@@ -439,12 +442,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         ts = now_iso()
-        cursor = await conn.execute(
+        async with conn.execute(
             "SELECT tenant_id, project FROM facts "
             "WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
             (fact_id, tenant_id),
-        )
-        row = await cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         if not row:
             return False
         db_tenant_id, project = row[0], row[1]
@@ -457,12 +460,94 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             signer="store_mixin:deprecate",
             commit=False,
         )
+
+        from cortex.engine.causality import AsyncCausalGraph
+        graph = AsyncCausalGraph(conn)
+        await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
+
         try:
             await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
         except aiosqlite.Error as _fts_err:  # FTS table may not exist in all deployments
             logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
         await self._log_transaction(
             conn, project, "deprecate", {"fact_id": fact_id, "reason": reason}
+        )
+        return True
+
+    async def invalidate(
+        self,
+        fact_id: int,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
+        tenant_id: str = "default",
+    ) -> bool:
+        """Explicit severe invalidation (tombstone) + taint propagation."""
+        tenant_id = self._resolve_tenant(tenant_id)
+
+        if conn:
+            return await self._invalidate_impl(conn, fact_id, reason, tenant_id)
+
+        import typing
+
+        async with self.session() as _raw_conn:
+            _conn = typing.cast(aiosqlite.Connection, _raw_conn)
+            res = await self._invalidate_impl(_conn, fact_id, reason, tenant_id)
+            await _conn.commit()
+            return res
+
+    async def _invalidate_impl(
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
+    ) -> bool:
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
+        ts = now_iso()
+        async with conn.execute(
+            "SELECT tenant_id, project FROM facts "
+            "WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
+            (fact_id, tenant_id),
+        ) as cursor:
+            row = await cursor.fetchone()
+        if not row:
+            return False
+            
+        db_tenant_id, project = row[0], row[1]
+        
+        # 1. Mutate as tombstone (most severe invalidation)
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=db_tenant_id,
+            event_type="tombstone",
+            payload={"reason": reason or "invalidated", "timestamp": ts},
+            signer="store_mixin:invalidate",
+            commit=False,
+        )
+        
+        # 2. Hard set confidence to C1 for the source fact explicitly via MutationEngine
+        # Actually it's cleaner to just update it here for immediacy of the projection,
+        # but in CORTEX a score_update mutation is best so it's recorded on the ledger.
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=db_tenant_id,
+            event_type="score_update",
+            payload={"confidence": "C1", "consensus_score": 0.0},
+            signer="store_mixin:invalidate:force",
+            commit=False,
+        )
+
+        # 3. Propagate taint downward
+        from cortex.engine.causality import AsyncCausalGraph
+        graph = AsyncCausalGraph(conn)
+        await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
+
+        try:
+            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
+        except aiosqlite.Error as _fts_err:
+            logger.debug("[STORE] FTS cleanup skipped for fact %d: %s", fact_id, _fts_err)
+
+        await self._log_transaction(
+            conn, project, "invalidate", {"fact_id": fact_id, "reason": reason}
         )
         return True
 
