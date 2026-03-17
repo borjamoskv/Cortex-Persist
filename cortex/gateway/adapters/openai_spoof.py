@@ -11,7 +11,7 @@ import logging
 import time
 
 from fastapi import APIRouter, Header, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from cortex.gateway.spoof import SpoofManager
@@ -90,7 +90,8 @@ async def openai_chat_completions(
                             {"index": 0, "delta": {"content": chunk}, "finish_reason": None}
                         ],
                     }
-                    yield f"data: {JSONResponse(data).body.decode()}\n\n"
+                    import json
+                    yield f"data: {json.dumps(data)}\n\n"
             except Exception as e:  # noqa: BLE001 — streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)
                 yield 'data: {"error": "Internal streaming error"}\n\n'
