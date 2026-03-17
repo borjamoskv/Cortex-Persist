@@ -1,6 +1,6 @@
 # CORTEX Roadmap
 
-> **Sovereign Memory Engine for Enterprise AI Swarms**
+> **Tamper-Evident Decision Lineage for AI Systems**
 > *Updated: 2026-02-23 · Status: v6 Alpha in active development*
 > **Metrics:** 444 modules · 38 CLI commands · 787 lines of Arch documentation
 
