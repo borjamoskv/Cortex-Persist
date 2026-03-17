@@ -40,14 +40,15 @@ dependencies = [
     "cryptography>=46.0.5",
     "watchdog>=6.0.0",
     "pydantic>=2.0",
+    "filelock>=3.16.0",  # Pin floor: CVE-2024-53908 (TOCTOU/SoftFileLock)
 ]
 
 [project.urls]
 Homepage = "https://cortexpersist.com"
 Documentation = "https://cortexpersist.dev"
-Repository = "https://github.com/borjamoskv/cortex"
-Issues = "https://github.com/borjamoskv/cortex/issues"
-Changelog = "https://github.com/borjamoskv/cortex/releases"
+Repository = "https://github.com/borjamoskv/Cortex-Persist"
+Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
+Changelog = "https://github.com/borjamoskv/Cortex-Persist/blob/main/CHANGELOG.md"
 [project.optional-dependencies]
 api = [
     "fastapi>=0.110",

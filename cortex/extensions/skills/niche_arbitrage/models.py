@@ -13,13 +13,10 @@ class NicheTarget(BaseModel):
 
 class TrendSignal(BaseModel):
     """An extracted signal of a trend or market inefficiency."""
+
     title: str = Field(..., description="Headline of the trend or signal")
-    evidence: str = Field(
-        ..., description="Direct quote or extracted evidence from the text"
-    )
-    exergy_score: int = Field(
-        ..., ge=1, le=10, description="Thermodynamic usefulness score (1-10)"
-    )
+    evidence: str = Field(..., description="Direct quote or extracted evidence from the text")
+    exergy_score: int = Field(..., ge=1, le=10, description="Thermodynamic usefulness score (1-10)")
     sentiment: str = Field(
         ..., description="General sentiment (positive, neutral, negative, urgent)"
     )
@@ -47,16 +44,18 @@ class MarketReport(BaseModel):
             "",
             "## Extracted Signals",
         ]
-        
+
         for sig in sorted(self.signals, key=lambda x: x.exergy_score, reverse=True):
-            md_lines.extend([
-                f"### {sig.title} [Exergy: {sig.exergy_score}/10]",
-                f"**Sentiment:** {sig.sentiment}",
-                "",
-                f"> {sig.evidence}",
-                "",
-                f"**Arbitrage Vector:** {sig.proposed_arbitrage}",
-                "---"
-            ])
-            
+            md_lines.extend(
+                [
+                    f"### {sig.title} [Exergy: {sig.exergy_score}/10]",
+                    f"**Sentiment:** {sig.sentiment}",
+                    "",
+                    f"> {sig.evidence}",
+                    "",
+                    f"**Arbitrage Vector:** {sig.proposed_arbitrage}",
+                    "---",
+                ]
+            )
+
         return "\n".join(md_lines)

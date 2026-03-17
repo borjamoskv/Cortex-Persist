@@ -14,7 +14,9 @@ the hippocampus (L2 vector store).
 
 Derivation: Ω₂ (Entropic Asymmetry) + Ω₃ (Byzantine Default)
 """
+
 from __future__ import annotations
+
 import logging
 from typing import Any
 

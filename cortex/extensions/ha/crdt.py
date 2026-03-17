@@ -3,6 +3,7 @@ CORTEX v5.0 — Conflict-Free Replicated Data Types (CRDTs).
 
 Provides data structures for eventual consistency in HA clusters.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,13 +28,13 @@ class VectorClock:
     node_id: str
     counters: dict[str, int] = field(default_factory=dict)
 
-    def increment(self) -> "VectorClock":
+    def increment(self) -> VectorClock:
         """Increment this node's counter."""
         new_counters = self.counters.copy()
         new_counters[self.node_id] = new_counters.get(self.node_id, 0) + 1
         return VectorClock(self.node_id, new_counters)
 
-    def merge(self, other: "VectorClock") -> "VectorClock":
+    def merge(self, other: VectorClock) -> VectorClock:
         """Merge with another vector clock (taking max of each counter)."""
         all_nodes = set(self.counters.keys()) | set(other.counters.keys())
         new_counters = {}
@@ -41,7 +42,7 @@ class VectorClock:
             new_counters[node] = max(self.counters.get(node, 0), other.counters.get(node, 0))
         return VectorClock(self.node_id, new_counters)
 
-    def compare(self, other: "VectorClock") -> str:
+    def compare(self, other: VectorClock) -> str:
         """
         Compare two vector clocks.
 
@@ -82,7 +83,7 @@ class LWWRegister(Generic[T]):
     value: T
     timestamp: float
 
-    def merge(self, other: "LWWRegister[T]") -> "LWWRegister[T]":
+    def merge(self, other: LWWRegister[T]) -> LWWRegister[T]:
         if other.timestamp > self.timestamp:
             return other
         elif other.timestamp < self.timestamp:
@@ -113,7 +114,7 @@ class ORSet(Generic[T]):
         to_remove = {item for item in self._state if item[0] == element}
         self._state -= to_remove
 
-    def merge(self, other: "ORSet[T]") -> "ORSet[T]":
+    def merge(self, other: ORSet[T]) -> ORSet[T]:
         """Merge two OR-Sets using state-based Add-Wins semantics.
 
         Union of (element, uuid) pairs.  A concurrent Add always wins

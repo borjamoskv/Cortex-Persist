@@ -13,6 +13,7 @@ Scanners:
   5. ImplicitAssumptionScanner → missing type guards, Optional misuse
   6. DeadCodeScanner         → unreachable code after return/raise
 """
+
 from __future__ import annotations
 
 import ast

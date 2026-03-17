@@ -33,10 +33,7 @@ SECRET_PATTERNS: Final[dict[str, str]] = {
     "ssh_key": r"ssh-(rsa|ed25519|ecdsa|dss) AAAA[0-9A-Za-z+/]",
     # ── Tier 2 — PII (score=0.9) ────────────────────────────────────
     "email_address": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-    "phone_number": (
-        r"(?<!\d)(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?"
-        r"\d{3}[-.\s]?\d{4}(?!\d)"
-    ),
+    "phone_number": (r"(?<!\d)(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?" r"\d{3}[-.\s]?\d{4}(?!\d)"),
     "ssn": r"(?<!\d)\d{3}-\d{2}-\d{4}(?!\d)",
     "credit_card": r"(?<!\d)(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6011)[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}(?!\d)",
     "passport_number": r"(?i)passport[\s:#]*[A-Z0-9]{6,12}",

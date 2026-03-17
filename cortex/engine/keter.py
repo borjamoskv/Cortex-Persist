@@ -3,6 +3,7 @@ KETER Engine (Singularity Cascade).
 Metasistema de Invocacion Fractal. KETER auto-determina skills,
 secuencia, modelos. Invoca, ejecuta, entrega.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -190,7 +191,6 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
-
         from cortex.database.core import connect
 
         self.db_path = db_path

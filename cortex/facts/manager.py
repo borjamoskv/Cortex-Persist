@@ -100,6 +100,7 @@ class FactManager:
         from typing import cast
 
         from cortex.engine.store_mixin import StoreMixin
+
         return await StoreMixin._store_impl(
             cast("StoreMixin", self.engine),
             conn,  # type: ignore[reportArgumentType]

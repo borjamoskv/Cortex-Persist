@@ -188,8 +188,7 @@ _NEGATION_MARKERS = frozenset(
 )
 
 _SUPERSESSION_MARKERS = re.compile(
-    r"supersed|replac|obsolet|invalidat|deprecat|"
-    r"eliminad|reemplaz|upgrade|migrat|refactor",
+    r"supersed|replac|obsolet|invalidat|deprecat|" r"eliminad|reemplaz|upgrade|migrat|refactor",
     re.IGNORECASE,
 )
 

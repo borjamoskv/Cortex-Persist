@@ -103,9 +103,9 @@ def test_tool_param_types(tools: list[dict]) -> None:
     """All parameter types must be valid."""
     for tool in tools:
         for param in tool.get("parameters", []):
-            assert param["type"] in VALID_TOOL_PARAM_TYPES, (
-                f"Tool '{tool['name']}' param '{param['name']}' has invalid type '{param['type']}'"
-            )
+            assert (
+                param["type"] in VALID_TOOL_PARAM_TYPES
+            ), f"Tool '{tool['name']}' param '{param['name']}' has invalid type '{param['type']}'"
 
 
 def test_toolset_references(tools: list[dict], toolsets: list[dict]) -> None:

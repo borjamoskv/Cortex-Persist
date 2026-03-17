@@ -2,18 +2,75 @@ import os
 import re
 
 EXTENSIONS = [
-    "adk", "aether", "agent", "agents", "alma", "axioms", "bci", "browser", "causality",
-    "context", "cuatrida", "daemon", "episodic", "evolution", "federation", "fingerprint",
-    "gate", "genesis", "git", "ha", "health", "hive", "hypervisor", "immune", "interfaces",
-    "langbase", "launchpad", "llm", "manifold", "market_maker", "mejoralo", "metering",
-    "moltbook", "music_engine", "nexus", "notifications", "perception", "platform", "policy",
-    "protocols", "red_team", "revenue", "sap", "scraper", "security", "shannon", "signals",
-    "skills", "songlines", "sovereign", "substrate", "swarm", "sync", "thinking", "timing",
-    "training", "trust", "ttt", "ui", "ui_control", "vex", "wealth", "web3", "zkortex"
+    "adk",
+    "aether",
+    "agent",
+    "agents",
+    "alma",
+    "axioms",
+    "bci",
+    "browser",
+    "causality",
+    "context",
+    "cuatrida",
+    "daemon",
+    "episodic",
+    "evolution",
+    "federation",
+    "fingerprint",
+    "gate",
+    "genesis",
+    "git",
+    "ha",
+    "health",
+    "hive",
+    "hypervisor",
+    "immune",
+    "interfaces",
+    "langbase",
+    "launchpad",
+    "llm",
+    "manifold",
+    "market_maker",
+    "mejoralo",
+    "metering",
+    "moltbook",
+    "music_engine",
+    "nexus",
+    "notifications",
+    "perception",
+    "platform",
+    "policy",
+    "protocols",
+    "red_team",
+    "revenue",
+    "sap",
+    "scraper",
+    "security",
+    "shannon",
+    "signals",
+    "skills",
+    "songlines",
+    "sovereign",
+    "substrate",
+    "swarm",
+    "sync",
+    "thinking",
+    "timing",
+    "training",
+    "trust",
+    "ttt",
+    "ui",
+    "ui_control",
+    "vex",
+    "wealth",
+    "web3",
+    "zkortex",
 ]
 
+
 def process_file(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     original = content
@@ -24,12 +81,13 @@ def process_file(filepath):
         content = re.sub(rf"import cortex\.{ext}\b", rf"import cortex.extensions.{ext}", content)
         # Also handle multiline imports or deeper imports
         # Actually \b takes care of `from cortex.extensions.skills.xxx import ...`
-        
+
     if content != original:
         with open(filepath, "w") as f:
             f.write(content)
         return True
     return False
+
 
 root_dirs = ["cortex", "tests", "scripts"]
 modified = 0

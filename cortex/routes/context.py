@@ -3,6 +3,7 @@ CORTEX v5.0 — Context Engine API Route.
 
 Endpoints for ambient context inference, raw signals, and snapshot history.
 """
+
 from __future__ import annotations
 
 import logging

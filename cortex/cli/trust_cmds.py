@@ -231,6 +231,7 @@ def audit_cognitive(tenant: str, db: str) -> None:
                 console.print(findings_table)
         finally:
             await conn.close()
+
     try:
         _run_async(_run_audit())
     except Exception as e:  # noqa: BLE001 — CLI boundary catch

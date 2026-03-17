@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-03-17T17:56:08.081295+00:00",
+  "python_files_core": 1071,
+  "python_modules_core": 951,
+  "loc_python_core": 180174,
+  "tests_collected": 1191,
+  "benchmark_sqlite_rw_p50_ms": 0.03,
+  "benchmark_sqlite_rw_p95_ms": 0.64
+}

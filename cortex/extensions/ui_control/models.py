@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 
@@ -64,7 +65,7 @@ class AXElement:
     value: str | None = None
     native_ref: object = None
     depth: int = 0
-    children: list["AXElement"] = field(default_factory=list)
+    children: list[AXElement] = field(default_factory=list)
 
 
 @dataclass

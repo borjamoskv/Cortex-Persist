@@ -12,13 +12,13 @@ Exposes:
   mac_system_snapshot() -> MacSnapshot
   score_mac_control(snapshot) -> tuple[int, list[str]]
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import logging
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from cortex.extensions.mejoralo.constants import (
@@ -67,7 +67,7 @@ def _parse_vm_stat() -> str:
 
     # Fallback: inspect vm_stat page-out count
     vm_stat_out = _run(["vm_stat"])
-    po_line = next((l for l in vm_stat_out.splitlines() if "pageouts" in l.lower()), "")
+    po_line = next((line for line in vm_stat_out.splitlines() if "pageouts" in line.lower()), "")
     if po_line:
         try:
             count = int(po_line.split(":")[-1].strip().rstrip("."))
@@ -128,7 +128,7 @@ def _parse_thermal_state() -> str:
 def _parse_process_count() -> int:
     """Return total running process count via ps."""
     raw = _run(["ps", "-A", "-o", "pid"])
-    lines = [l for l in raw.splitlines() if l.strip() and l.strip() != "PID"]
+    lines = [line for line in raw.splitlines() if line.strip() and line.strip() != "PID"]
     return len(lines)
 
 
@@ -170,7 +170,7 @@ def mac_system_snapshot() -> MacSnapshot:
             process_count=0,
             ax_trusted=False,
             gpu_active=False,
-            timestamp=datetime.now(UTC).isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
     cpu = _parse_cpu_percent()
@@ -188,7 +188,7 @@ def mac_system_snapshot() -> MacSnapshot:
         process_count=proc_count,
         ax_trusted=ax,
         gpu_active=gpu,
-        timestamp=datetime.now(UTC).isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
     logger.debug("MacSnapshot: %s", snapshot)
     return snapshot

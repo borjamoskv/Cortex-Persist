@@ -167,8 +167,7 @@ async def insert_fact_record(
                 "INSERT INTO causal_edges "
                 "(fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
                 "VALUES (?, ?, NULL, ?, ?, ?)",
-                (fact_id, parent_decision_id, EDGE_DERIVED_FROM,
-                 project, tenant_id),
+                (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
 
     except (ImportError, Exception) as e:  # noqa: BLE001

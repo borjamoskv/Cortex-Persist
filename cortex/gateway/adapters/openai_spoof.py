@@ -91,6 +91,7 @@ async def openai_chat_completions(
                         ],
                     }
                     import json
+
                     yield f"data: {json.dumps(data)}\n\n"
             except Exception as e:  # noqa: BLE001 — streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)

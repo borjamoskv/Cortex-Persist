@@ -127,9 +127,7 @@ class TestHiAgentTraceManager:
         assert trace_mgr.current_trace[0]["action"] == "action1"
 
     @pytest.mark.asyncio
-    async def test_compress_subgoal_returns_crystal(
-        self, trace_mgr: HiAgentTraceManager
-    ):
+    async def test_compress_subgoal_returns_crystal(self, trace_mgr: HiAgentTraceManager):
         trace_mgr.record_step("a1", "o1")
         trace_mgr.record_step("a2", "o2")
         crystal = await trace_mgr.compress_subgoal("test_goal")
@@ -137,18 +135,14 @@ class TestHiAgentTraceManager:
         assert "crystal" in crystal
 
     @pytest.mark.asyncio
-    async def test_compress_flushes_trace(
-        self, trace_mgr: HiAgentTraceManager
-    ):
+    async def test_compress_flushes_trace(self, trace_mgr: HiAgentTraceManager):
         """Amnesia Local: trace must be empty after compression."""
         trace_mgr.record_step("a1", "o1")
         await trace_mgr.compress_subgoal("test_goal")
         assert len(trace_mgr.current_trace) == 0
 
     @pytest.mark.asyncio
-    async def test_compress_empty_trace(
-        self, trace_mgr: HiAgentTraceManager
-    ):
+    async def test_compress_empty_trace(self, trace_mgr: HiAgentTraceManager):
         crystal = await trace_mgr.compress_subgoal("empty_goal")
         assert crystal["goal"] == "empty_goal"
 

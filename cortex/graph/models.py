@@ -2,6 +2,7 @@
 
 Entities, Relationships, and Ghost definitions.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

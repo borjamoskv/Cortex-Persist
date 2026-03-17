@@ -11,7 +11,7 @@ def mock_cortex_engine():
         async def history(self, project):
             fact_1_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
             fact_2_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
-            
+
             return [
                 {
                     "id": 1,
@@ -48,18 +48,18 @@ def mock_cortex_engine():
                     "created_at": fact_2_time,
                     "updated_at": fact_2_time,
                     "is_tombstoned": False,
-                }
+                },
             ]
-            
+
         async def get_fact(self, fact_id):
             return None
-            
+
         async def get_causal_chain(self, fact_id):
             return []
-            
+
         async def store(self, **kwargs):
             pass
-            
+
     return MockEngine()
 
 
@@ -67,7 +67,7 @@ def mock_cortex_engine():
 async def test_anomaly_hunter_spatial_contradiction(mock_cortex_engine):
     hunter = AnomalyHunterEngine(mock_cortex_engine)
     report = await hunter.run_full_scan()
-    
+
     assert report["total_anomalies"] == 1
     assert "SPATIAL_CONTRADICTION" in report["by_type"]
     assert report["high_severity"] == 1

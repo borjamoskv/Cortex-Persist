@@ -247,6 +247,7 @@ def aix_cmd() -> None:
 def _scan_entropy(target: Path) -> dict:
     """Scan a directory for cyclomatic complexity using radon."""
     from typing import Any
+
     result: dict[str, Any] = {"total": 0, "critical": 0, "max_cc": 0, "worst_file": ""}
     try:
         from radon.complexity import cc_visit  # pyright: ignore[reportMissingImports]

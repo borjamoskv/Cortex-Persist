@@ -4,6 +4,7 @@ CORTEX - Mac Maestro Autonomous Agent.
 Executes natural language UI automation requests by dynamically generating
 and executing AppleScript via the LLM.
 """
+
 from __future__ import annotations
 
 import json

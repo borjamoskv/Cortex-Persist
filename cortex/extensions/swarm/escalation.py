@@ -4,6 +4,7 @@ Provides the escalation mechanism when an agent enters
 an unrecoverable state or requires human intervention
 (e.g., repeating the same error, missing API key).
 """
+
 from __future__ import annotations
 
 from typing import Any

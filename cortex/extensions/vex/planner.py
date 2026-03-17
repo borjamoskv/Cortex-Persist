@@ -26,9 +26,10 @@ class PlannerBackend(Protocol):
     """Protocol for pluggable LLM planner backends."""
 
     async def decompose(
-        self, intent: str, context: dict[str, Any] | None = None,
-    ) -> list[dict[str, Any]]:
-        ...
+        self,
+        intent: str,
+        context: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]: ...
 
 
 class Planner:

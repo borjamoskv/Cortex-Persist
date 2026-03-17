@@ -54,7 +54,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
         f"Do you authorize this?"
     )
 
-    script = f'''
+    script = f"""
     try
         set theDialogText to "{prompt}"
         display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with title "CORTEX Axiom 3 — Byzantine Verify" with icon caution
@@ -66,7 +66,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     on error
         return "false"
     end try
-    '''
+    """
 
     try:
         res = subprocess.run(

@@ -1,4 +1,5 @@
 """Constants for MEJORAlo engine."""
+
 from __future__ import annotations
 
 import re
@@ -135,11 +136,11 @@ DAEMON_DEFAULT_TARGET_SCORE = 100  # 100 = Sovereign standard
 DAEMON_DIM_SCORE_THRESHOLD = 7  # Dimension score below this triggers query
 
 # ─── Mac Control Constants ────────────────────────────────────────
-MAC_PROCESS_ENTROPY_LIMIT = 250      # Max process count before entropy penalty
-MAC_MEMORY_PRESSURE_WARN = "warn"    # macOS pressure level that triggers penalty
-MAC_THERMAL_OK = "Nominal"           # Expected thermal state (no penalty)
-MAC_AX_PENALTY = 25                  # Score penalty if Accessibility not trusted
-MAC_PROCESS_PENALTY_PER_10 = 5       # Penalty per 10 procs over entropy limit
+MAC_PROCESS_ENTROPY_LIMIT = 250  # Max process count before entropy penalty
+MAC_MEMORY_PRESSURE_WARN = "warn"  # macOS pressure level that triggers penalty
+MAC_THERMAL_OK = "Nominal"  # Expected thermal state (no penalty)
+MAC_AX_PENALTY = 25  # Score penalty if Accessibility not trusted
+MAC_PROCESS_PENALTY_PER_10 = 5  # Penalty per 10 procs over entropy limit
 
 
 # File extensions to scan per stack

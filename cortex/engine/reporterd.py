@@ -4,6 +4,7 @@ Empuja telemetría hacia el dashboard en verdadero tiempo real usando
 Server-Sent Events (SSE) cada vez que el Manifold emite una señal.
 Latencia cero.
 """
+
 from __future__ import annotations
 
 import asyncio

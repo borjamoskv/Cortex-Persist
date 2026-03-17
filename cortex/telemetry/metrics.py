@@ -9,6 +9,7 @@ Critical metrics (ledger errors, consensus failures) are also persisted
 to CORTEX as ``system_health`` facts so they survive process restarts
 and remain queryable during forensic analysis.
 """
+
 from __future__ import annotations
 
 import asyncio

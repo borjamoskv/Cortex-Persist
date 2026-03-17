@@ -2,6 +2,7 @@
 CORTEX v5.0 — API Models.
 Centralized Pydantic models for request/response validation.
 """
+
 from __future__ import annotations
 
 from typing import Any, Literal, TypedDict
@@ -61,19 +62,12 @@ __all__ = [
 QueryIntent = Literal["lookup", "explore", "audit"]
 QueryStrategy = Literal["auto", "text", "vector", "hybrid", "temporal", "graph"]
 
+
 class QueryInput(TypedDict, total=False):
     tenant_id: str
     project: str
     query: str
-    strategy: Literal[
-        "auto",
-        "bayesian",
-        "hybrid",
-        "text",
-        "vector",
-        "temporal",
-        "graph"
-    ]
+    strategy: Literal["auto", "bayesian", "hybrid", "text", "vector", "temporal", "graph"]
     as_of: str
     top_k: int
     min_confidence: float
@@ -81,9 +75,11 @@ class QueryInput(TypedDict, total=False):
     include_history: bool
     include_taint: bool
 
+
 class QueryEvidenceLevel(BaseModel):
     level: Literal["none", "basic", "traceable", "verified"]
     reason: str
+
 
 class QueryResultData(BaseModel):
     answer: str | None = None
@@ -92,6 +88,7 @@ class QueryResultData(BaseModel):
     degraded_reason: str | None = None
     trace: dict | None = None
     facts: list[dict] | None = None
+
 
 class RejectionResult(TypedDict):
     accepted: Literal[False]
@@ -103,12 +100,15 @@ class RejectionResult(TypedDict):
     evidence: list[dict]
     remediation: list[str]
 
+
 class AcceptanceResult(TypedDict):
     accepted: Literal[True]
     operation_id: str
     warnings: list[str]
 
+
 OperationResult = AcceptanceResult | RejectionResult
+
 
 class TraceInput(BaseModel):
     tx_id: str | None = None
@@ -116,6 +116,7 @@ class TraceInput(BaseModel):
     decision_id: str | None = None
     query_result_id: str | None = None
     depth: int = Field(5, ge=1, le=20)
+
 
 class EventEnvelope(BaseModel):
     schema_version: str = "1.0"
@@ -281,6 +282,7 @@ class HealthReport(TypedDict):
 
 class RecoveryReport(BaseModel):
     """Report of the agent's memory recovery status during boot."""
+
     status: Literal["clean", "recovered", "failed"]
     recovered_items: int
     failed_items: int

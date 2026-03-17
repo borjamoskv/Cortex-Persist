@@ -4,6 +4,7 @@ Entropic Task Queue.
 SQLite WAL-backed queue for storing background tasks intended for the CentauroEngine.
 Supports concurrent access, priority levels, and retry logic.
 """
+
 from __future__ import annotations
 
 import json

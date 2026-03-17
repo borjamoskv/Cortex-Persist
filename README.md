@@ -1,253 +1,137 @@
-# CORTEX — Trust Infrastructure for Autonomous AI
+# Cortex-Persist
+
+**A trust layer for stateful agent systems: persistent memory, auditable trace, guarded execution, and concurrency-safe coordination primitives for regulated and high-integrity environments.**
 
 🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
 
-> **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
-> *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and traceability for regulated environments.*
+`cortex-persist v0.3.0b2` · Engine `v8` · Python `3.10+`
 
-Package: `cortex-persist v0.3.0b1` · Current engine generation: `v8`
-
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v7.0%20alpha-orange.svg)
-![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
-[![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
-![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
-![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-cortexpersist.dev-brightgreen)](https://cortexpersist.dev)
-[![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
-[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
-
-## Documentation
-
-CORTEX separates operational contribution rules, architecture, trust model, and epistemic doctrine.
-
-- [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
-- [Architecture](docs/architecture.md) — topology, module map, and data flow
-- [Axioms](docs/AXIOMS.md) — epistemic and design axioms
-- [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, guarantees, and threat model
-- [Contributing](./CONTRIBUTING.md) — contribution workflow
-- [Security Policy](./SECURITY.md) — vulnerability disclosure policy
-- [Roadmap](./ROADMAP.md) — development timeline and versioning
 
 ---
 
-### ⚡ The "Aha" Moment
+## 1. What is it
 
-AI agents hallucinate past actions. CORTEX stops this mathematically.
+Cortex-Persist is a **local-first cryptographic trust substrate** for autonomous AI systems. It transforms stochastic generative output into a deterministic, auditable ledger — persisting every decision, enforcing validation boundaries, and maintaining cryptographic chain-of-custody from inference to storage.
 
-```bash
-$ cortex store --type decision --project fin-agent "Approved loan #4292"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
+It does not replace memory backends (Mem0, Zep, custom stores). It **certifies** them.
 
-$ cortex verify 8f4a2b9e
-[✔] VERIFIED: Hash chain intact. Merkle root sealed.
-```
+## 2. What problem it solves
 
-### ⚡ The Numbers
+| Problem | Consequence |
+| ------- | ----------- |
+| Agents hallucinate their own history | Entropy compounds silently — past decisions are invented, not retrieved |
+| No causal opacity audit trail | Impossible to answer "why did the agent reach that conclusion?" |
+| EU AI Act Article 12 requirements | Regulated deployments need immutable operational logs and crypto-verifiable traces |
+| Multi-agent consensus gaps | Swarms lack standardized coordination, breaking global state across async tasks |
 
-| | |
-|:---|:---|
-| **<20ms** retrieval | In-process SQLite. No HTTP. No network. |
-| **1,000+** tests | Production-grade from day one |
-| **Zero** attack surface | No HTTP endpoints required. No cloud dependency. |
-
----
-
-## The Problem
-
-AI agents make decisions at scale. Those decisions are invisible, untraceable, and unreproducible.
-
-- Memories are stored without cryptographic proof of integrity.
-- Decision chains cannot be audited or verified after the fact.
-- Multi-agent systems build divergent realities with no consensus mechanism.
-- Regulatory frameworks (EU AI Act Article 12, enforcement August 2026) require automatic logging, tamper-proof storage, and full traceability of AI system decisions.
-
-A system that cannot prove what it decided — and when — is a system that cannot be trusted in production.
-
-## The Solution
-
-CORTEX doesn't replace your memory layer — it **certifies** it.
-
-```text
-Your Memory Layer (Mem0 / Zep / Letta / Custom)
-        ↓
-   CORTEX Trust Engine
-        ├── 🔗 SHA-256 hash-chained ledger
-        ├── 🌳 Merkle tree checkpoints
-        ├── 🛡️ Zero-Trust Guards
-        ├── 🤝 Reputation-weighted WBFT consensus
-        ├── 🔐 Privacy Shield (11-pattern secret detection)
-        ├── 🧬 Biological Core (Autopoiesis/Endocrine)
-        └── 📋 Audit trail generation
-```
-
-### Core Capabilities
-
-| Capability | What It Does |
-|:---|:---|
-| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
-| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
-| 📋 **Audit Trail** | Timestamped, hash-verified log of all decisions |
-| 🔍 **Decision Lineage** | Trace how an agent arrived at any conclusion |
-| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant verification |
-| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger |
-| 🧬 **Biological Core** | Autopoiesis + Endocrine + Circadian Cycles |
-| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret patterns |
-| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. |
-| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis |
-
----
-
-## Quick Start
-
-### Install
+## 3. Quickstart
 
 ```bash
 pip install cortex-persist
 ```
 
-### Store a Decision & Verify It
-
 ```bash
-# Store a fact (auto-detects AI agent source)
-cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
+# Store a decision fact
+cortex store --type decision --project fin-agent "Approved credit #4292 (Score: 88)"
 
-# Verify its cryptographic integrity
-cortex verify 42
-# → ✅ VERIFIED — Hash chain intact, Merkle sealed
+# Verify cryptographic integrity
+cortex verify "8f4a2b9e"
+# → [✔] VERIFIED: Hash chain intact. Merkle root sealed.
 
-# Generate audit report
+# Generate compliance report
 cortex compliance-report
 ```
 
-### Multi-Tenant
-
 ```python
-from cortex import CortexEngine
+from cortex.engine import CortexEngine
 
 engine = CortexEngine()
-
-# All operations are tenant-scoped
-await engine.store_fact(
-    content="Approved loan application #443",
-    fact_type="decision",
-    project="fintech-agent",
-    tenant_id="enterprise-customer-a"
+await engine.store(
+    type="decision",
+    project="fin-agent",
+    content="Approved credit #4292",
+    confidence="C4"
 )
+report = await engine.verify_ledger()
 ```
 
-### Run as MCP Server (Universal IDE Plugin)
+## 4. Core architecture
 
-```bash
-# Works with: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity
-python -m cortex.mcp
+```text
+cortex/
+├── engine/       # Core CRUD, causal graph orchestration, mixin composition
+├── memory/       # Vector store integration (sqlite-vec) and local persistence
+├── guards/       # Admission, contradiction, dependency, injection-detection
+├── verification/ # Cryptographic integrity, Merkle sealing
+├── consensus/    # Byzantine multi-agent arbitration (WBFT)
+├── trace/        # Causal DAGs, lineage, taint propagation (Ω₁₃)
+├── compliance/   # EU AI Act Article 12 audit surface
+├── runtime/      # Event hooks, lifecycle abstractions
+├── api/          # FastAPI REST interface (optional: [api])
+├── cli/          # Click + Rich CLI
+└── mcp/          # Model Context Protocol adapter
 ```
 
-### Run as REST API
+Full repository topology and decision rationale: [docs/architecture/repo-map.md](docs/architecture/repo-map.md).
 
-```bash
-uvicorn cortex.api:app --port 8484
-```
+## 5. Use cases
 
----
+- **Regulated AI systems** — Fintech, GovTech, HealthTech pipelines requiring cryptographically auditable AI decision logs (EU AI Act Article 12 compliance surface)
+- **Agent swarms** — Shared knowledge synchronization via `cortex.consensus` + `SovereignLock` for high-contention async coordination
+- **Autonomous agents** — Long-term semantic memory with `sqlite-vec` vector indexing natively integrated with causal lineage
 
-## Architecture
+## 6. Project status
 
-```mermaid
-block-beta
-  columns 1
+| Dimension | Status |
+| --------- | ------ |
+| Version | `v0.3.0b2` |
+| Core engine stability | Beta — cryptographic chain validated under crash scenarios |
+| Public API surface | Converging toward `v1.0.0` |
+| Concurrency testing | File-backed, `:memory:`, shared-cache, lock contention, cancellation |
+| Compliance surface | EU AI Act Article 12 primitives operational |
 
-  block:INTERFACES["🖥️ INTERFACES"]
-    CLI["CLI (38 cmds)"]
-    API["REST API (55+ endpoints)"]
-    MCP["MCP Server"]
-  end
+## 7. Repository Evidence
 
-  block:GATEWAY["🔐 TRUST GATEWAY"]
-    RBAC["RBAC (4 roles)"]
-    Privacy["Privacy Shield"]
-    Auth["API Keys + JWT"]
-  end
+Generated automatically on every push to `main` via CI.
 
-  block:MEMORY["🧠 COGNITIVE MEMORY"]
-    L1["L1: Redis / Working Memory"]
-    L2["L2: Qdrant / sqlite-vec (384-dim)"]
-    L3["L3: AlloyDB / SQLite (hash-chained)"]
-  end
+- Inventory: [`artifacts/inventory.md`](artifacts/inventory.md)
+- File tree snapshot: [`artifacts/tree.txt`](artifacts/tree.txt)
+- Repository stats: [`artifacts/stats.json`](artifacts/stats.json)
 
-  block:TRUST["⛓️ TRUST LAYER"]
-    Ledger["SHA-256 Ledger"]
-    Merkle["Merkle Trees"]
-    WBFT["WBFT Consensus"]
-  end
+This repository intentionally contains only the trust-layer surface.
+Satellite surfaces (apps, dashboards, marketing, experiments) live outside by design:
 
-  INTERFACES --> GATEWAY --> MEMORY --> TRUST
-```
+| Boundary | In Repo | Out of Repo |
+|----------|---------|-------------|
+| Runtime / Persistence / Verification | ✅ | |
+| Coordination / Consensus / Trace | ✅ | |
+| Dashboards / Apps / Marketing / Experiments | | ✅ |
 
-> 📐 Full architecture details in [architecture.md](docs/architecture.md).
+Boundary contract: [`docs/architecture/repo-map.md`](docs/architecture/repo-map.md)
+CI enforcement: [`.github/workflows/core-boundary.yml`](.github/workflows/core-boundary.yml)
 
----
+## 8. Docs, API, security
 
-## Stats (2026-03-14)
+| Resource | Link |
+| -------- | ---- |
+| Architecture | [docs/architecture/repo-map.md](docs/architecture/repo-map.md) |
+| Compliance | [docs/compliance/](docs/compliance/) |
+| Security policy | [SECURITY.md](SECURITY.md) |
+| Contributor contract | [CONTRIBUTING.md](CONTRIBUTING.md) + [AGENTS.md](AGENTS.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Full docs site | [cortexpersist.dev](https://cortexpersist.dev) |
 
-| Metric | Value |
-|:---|:---|
-| Test functions | **1,000+** |
-| Production LOC | **~45,500** |
-| Python Modules | **444** |
-| Python version | **3.10+** |
+## 9. Contributing
 
----
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before opening an issue or PR.
 
-## Integrations
+The core rejects any PR that:
 
-CORTEX plugs into your existing stack:
-
-- **IDEs**: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity (via MCP)
-- **Agent Frameworks**: LangChain, CrewAI, AutoGen, Google ADK
-- **Memory Layers**: Sits on top of Mem0, Zep, Letta as verification layer
-- **Databases**: SQLite (local), AlloyDB, PostgreSQL, Turso (edge)
-- **Vector Stores**: sqlite-vec (local), Qdrant (self-hosted or cloud)
-- **Deployment**: Docker, Kubernetes (Helm coming Q2 2026), bare metal, `pip install`
-
----
-
-## Cross-Platform
-
-CORTEX runs natively on any environment without Docker:
-
-- **macOS** (launchd & osascript notifications)
-- **Linux** (systemd & notify-send)
-- **Windows** (Task Scheduler & PowerShell)
-
-See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
-
----
-
-## Regulatory Positioning
-
-CORTEX provides the traceability, integrity verification, and audit infrastructure
-that regulated environments require. It does not by itself make a system "compliant"
-— compliance depends on the role, use case, and risk category of the deploying system.
-
-What CORTEX provides:
-
-- **Tamper-evident storage** of all agent decisions (hash-chained ledger)
-- **Automatic audit trail** generation with timestamped, verifiable records
-- **Integrity verification** via Merkle tree checkpoints
-- **Full decision lineage** — trace any conclusion back to its origin
-
-These capabilities support the traceability and logging requirements
-described in EU AI Act Article 12, among other regulatory frameworks.
-
----
-
-## License
-
-**Apache License 2.0** — Free for any use, commercial or non-commercial.
-See [LICENSE](LICENSE) for details.
-
----
-
-*Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
+- Bifurcates `ledger.py` integrity without test coverage
+- Bypasses guards on memory write paths
+- Introduces blocking calls (`time.sleep`) in async contexts
+- Injects third-party dependencies without an asymptotic performance justification

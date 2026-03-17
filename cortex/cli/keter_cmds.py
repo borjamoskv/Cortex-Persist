@@ -2,6 +2,7 @@
 KETER-∞ Daemon CLI commands.
 Sovereign Orchestration and Reality Weaver.
 """
+
 from __future__ import annotations
 
 import click

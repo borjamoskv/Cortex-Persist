@@ -3,6 +3,7 @@ Commands for CHRONOS-1 The Senior Benchmark.
 
 Exposes the native API to calculate Human vs AI asymmetry.
 """
+
 from __future__ import annotations
 
 import click

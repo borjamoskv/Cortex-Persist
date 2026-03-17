@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
 
@@ -113,9 +112,7 @@ class TestProcessStore:
 
     def test_stdp_recorded_with_fact_id(self):
         pipe = _build_pipeline()
-        result = pipe.process_store(
-            content="test", fact_type="knowledge", fact_id="fact_1"
-        )
+        result = pipe.process_store(content="test", fact_type="knowledge", fact_id="fact_1")
         assert result.stdp_edges_updated >= 1
 
     def test_stdp_recorded_with_related_ids(self):

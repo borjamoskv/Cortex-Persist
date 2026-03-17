@@ -26,12 +26,15 @@ from cortex.engine.transaction_mixin import TransactionMixin
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
 except ImportError:
+
     class HealthMixin:  # type: ignore
         async def health_check(self, *args, **kwargs):
             return {"status": "unhealthy", "reason": "No Health extension"}
 
         async def health_report(self, *args, **kwargs):
             return {"status": "unhealthy", "reason": "No Health extension"}
+
+
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -106,18 +109,21 @@ class CortexEngine(
         # Pre-store guards (AX-033 Hooks 1-3)
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
+
             pipeline.add_guard(HealthGuardAdapter(db_path))
         except (ImportError, Exception):  # noqa: BLE001
             pass
 
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
+
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
         except (ImportError, Exception):  # noqa: BLE001
             pass
 
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
+
             pipeline.add_guard(VerifierGuardAdapter())
         except (ImportError, Exception):  # noqa: BLE001
             pass
@@ -125,25 +131,29 @@ class CortexEngine(
         # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
+
             pipeline.add_post_hook(LedgerCheckpointHook(self))
         except (ImportError, Exception):  # noqa: BLE001
             pass
 
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
+
             pipeline.add_post_hook(SignalEmitHook())
         except (ImportError, Exception):  # noqa: BLE001
             pass
 
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
+
             pipeline.add_post_hook(EpistemicBreakerHook())
         except (ImportError, Exception):  # noqa: BLE001
             pass
 
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
-            pipeline.guard_count, pipeline.hook_count,
+            pipeline.guard_count,
+            pipeline.hook_count,
         )
         return pipeline
 

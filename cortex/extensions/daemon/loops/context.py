@@ -65,7 +65,7 @@ async def restore_context(state, project_name: str, speak_func):
                 width = x2 - x
                 height = y2 - y
 
-                script = f'''
+                script = f"""
                 tell application "{app_name}" to activate
                 delay 0.5
                 tell application "System Events"
@@ -79,7 +79,7 @@ async def restore_context(state, project_name: str, speak_func):
                         end try
                     end tell
                 end tell
-                '''
+                """
                 await run_osascript(script)
             else:
                 script = f'tell application "{app_name}" to activate'

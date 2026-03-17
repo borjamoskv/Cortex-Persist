@@ -2,6 +2,7 @@
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Protocolo CORTEX: Analysis -> Extraction -> Reconstruction -> Scaling -> Verification
 """
+
 from __future__ import annotations
 
 import ast
@@ -68,7 +69,7 @@ class PhoenixState:
     metrics: dict[str, float]
     rollback_snapshot: dict | None = None
 
-    def transition_to(self, new_phase: AtomicPhase) -> "PhoenixState":
+    def transition_to(self, new_phase: AtomicPhase) -> PhoenixState:
         return PhoenixState(
             phase=new_phase,
             status=PhaseStatus.PENDING,

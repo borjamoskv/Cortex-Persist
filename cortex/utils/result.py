@@ -112,7 +112,8 @@ class Err(Generic[E]):
 
 
 # Union type for pattern matching and type narrowing
-Result = Ok[T] | Err[E]
+from typing import Union
+Result = Union[Ok[T], Err[E]]
 
 
 def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:

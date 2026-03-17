@@ -1,6 +1,7 @@
 """Gidatu UI/Desktop Orchestration Handler.
 Ω₃ (Byzantine Default): Enforces SafeZones and strict app-scoping.
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,7 +27,7 @@ class GidatuHandler:
         if str(self._skill_path) not in sys.path:
             sys.path.insert(0, str(self._skill_path))
 
-    async def handle(self, req: "GatewayRequest") -> dict[str, Any]:
+    async def handle(self, req: GatewayRequest) -> dict[str, Any]:
         """Process a Gidatu action request."""
         try:
             # Ghost checking

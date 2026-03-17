@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import asyncio
 import logging
 import random
@@ -139,7 +140,13 @@ class AsyncCortexEngine(
             (project, action, dj, prev_hash, th, ts),
         )
         await self._update_transaction_hash_if_needed(
-            conn, cursor.lastrowid, project, action, dj, ts, prev_hash  # type: ignore[type-error]
+            conn,
+            cursor.lastrowid,
+            project,
+            action,
+            dj,
+            ts,
+            prev_hash,  # type: ignore[type-error]
         )
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()

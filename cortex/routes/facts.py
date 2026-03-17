@@ -1,6 +1,7 @@
 """
 CORTEX v5.0 - Facts Router.
 """
+
 from __future__ import annotations
 
 import logging

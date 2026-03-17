@@ -4,6 +4,7 @@ Implements the Byzantine Default: I verify, then trust.
 Any code mutation from the LLM Engine must pass structural checks before
 touching the physical disk.
 """
+
 from __future__ import annotations
 
 import ast

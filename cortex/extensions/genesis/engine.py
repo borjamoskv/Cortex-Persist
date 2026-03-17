@@ -394,29 +394,33 @@ class GenesisEngine:
         """
         from cortex.engine import CortexEngine
 
-        engine = CortexEngine()
-        engine.store_sync(
-            content=(
-                f"Genesis bridge: created system '{result.spec.name}' "
-                f"({result.spec.system_type}) — "
-                f"{len(result.files_created)} files, "
-                f"CHRONOS-1: {result.hours_saved:.2f}h saved"
-            ),
-            fact_type="bridge",
-            project="cortex",
-            source="genesis-engine",
-            tags=["genesis", "system_bridge", result.spec.system_type],
-            confidence="C5",
-            meta={
-                "system_name": result.spec.name,
-                "system_type": result.spec.system_type,
-                "files_created": len(result.files_created),
-                "hours_saved": result.hours_saved,
-                "validation_passed": result.validation_passed,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            },
-        )
-        logger.info(
-            "📦 Genesis persisted to CORTEX ledger: %s",
-            result.spec.name,
-        )
+        engine = CortexEngine(db_path=self.root / "cortex.db")
+        try:
+            engine.init_db_sync()
+            engine.store_sync(
+                content=(
+                    f"Genesis bridge: created system '{result.spec.name}' "
+                    f"({result.spec.system_type}) — "
+                    f"{len(result.files_created)} files, "
+                    f"CHRONOS-1: {result.hours_saved:.2f}h saved"
+                ),
+                fact_type="bridge",
+                project="cortex",
+                source="genesis-engine",
+                tags=["genesis", "system_bridge", result.spec.system_type],
+                confidence="C5",
+                meta={
+                    "system_name": result.spec.name,
+                    "system_type": result.spec.system_type,
+                    "files_created": len(result.files_created),
+                    "hours_saved": result.hours_saved,
+                    "validation_passed": result.validation_passed,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+            logger.info(
+                "📦 Genesis persisted to CORTEX ledger: %s",
+                result.spec.name,
+            )
+        finally:
+            engine.close_sync()

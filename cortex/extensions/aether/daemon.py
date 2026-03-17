@@ -114,7 +114,7 @@ class AetherDaemon:
         """Polls GitHub for issues labeled 'aether' and enqueues them."""
         if not self._github_token:
             return
-            
+
         from cortex.extensions.aether.github_ingestor import GitHubIngestor
 
         ingestor = GitHubIngestor(

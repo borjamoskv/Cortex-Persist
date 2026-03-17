@@ -134,9 +134,9 @@ async def run_tests():
     # Create a second NexusWorldModel pointing to the same DB
     nexus2 = NexusWorldModel(db_path=TEST_DB)
     cross_process_query = await nexus2.query(limit=100)
-    assert len(cross_process_query) == len(all_mutations), (
-        "Second process should see same mutations"
-    )
+    assert len(cross_process_query) == len(
+        all_mutations
+    ), "Second process should see same mutations"
     logger.info(
         "✓ TEST 5: Cross-process persistence (%d mutations visible)", len(cross_process_query)
     )

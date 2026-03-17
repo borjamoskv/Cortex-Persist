@@ -4,8 +4,8 @@ Answers the question: "Is this project getting better over time, or are we just 
 Uses historical session data from the mejoralo ledger to compute trends,
 decay risk, and stagnation alerts.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import logging
 import statistics

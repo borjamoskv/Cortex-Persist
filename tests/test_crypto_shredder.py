@@ -63,9 +63,7 @@ class TestCryptoShredder:
 
     def test_shred_with_reason(self, db):
         shredder = CryptoShredder(db)
-        result = shredder.shred_fact(
-            1, reason="user_request", shredded_by="admin"
-        )
+        result = shredder.shred_fact(1, reason="user_request", shredded_by="admin")
         assert result.success
         assert result.reason == "user_request"
 

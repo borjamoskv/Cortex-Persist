@@ -10,6 +10,7 @@ Usage:
     client.store("my-project", "Important fact about the system")
     results = client.search("what is important?")
 """
+
 from __future__ import annotations
 
 import os

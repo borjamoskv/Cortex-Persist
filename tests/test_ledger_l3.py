@@ -12,7 +12,6 @@ import pytest
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────────
 
 
@@ -208,9 +207,7 @@ class TestVerifyChain:
         await ledger.append_event(_make_event(content="original"))
 
         # Tamper the content directly in DB
-        await ledger._conn.execute(
-            "UPDATE memory_events SET content = 'tampered' WHERE 1=1"
-        )
+        await ledger._conn.execute("UPDATE memory_events SET content = 'tampered' WHERE 1=1")
         await ledger._conn.commit()
 
         result = await ledger.verify_chain("test_tenant")

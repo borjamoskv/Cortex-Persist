@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 # pyright: reportMissingImports=false, reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 import asyncio
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 try:
     import ApplicationServices
@@ -29,7 +30,7 @@ class AccessibilityEngine:
     Handles element inspection, search, and interactions at the OS level.
     """
 
-    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
+    def __init__(self, engine: CortexEngine | None = None) -> None:
         self.engine = engine
 
     def check_permissions(self) -> bool:

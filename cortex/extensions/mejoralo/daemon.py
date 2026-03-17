@@ -4,8 +4,8 @@ CORTEX v8.0 — Sovereign MEJORAlo Ouroboros Daemon.
 Replaces loop_mejoralo.sh with a sovereign, cross-platform Python implementation.
 Ensures continuous code quality evolution with graceful handling.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import asyncio
 import logging

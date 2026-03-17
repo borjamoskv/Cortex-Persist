@@ -269,20 +269,24 @@ async def fetch_domain_metrics(
 
             # ── Open ghosts ──
             placeholders = ",".join("?" for _ in projects)
-            async with conn.execute(
-                f"SELECT COUNT(*) FROM ghosts "  # nosec B608 — parameterized query
-                f"WHERE status = 'open' AND project IN ({placeholders})",
-                projects,
-            ) as cur:
+            async with (
+                conn.execute(
+                    f"SELECT COUNT(*) FROM ghosts "  # nosec B608 — parameterized query
+                    f"WHERE status = 'open' AND project IN ({placeholders})",
+                    projects,
+                ) as cur
+            ):
                 row = await cur.fetchone()
                 m.ghost_count = row[0] if row else 0
 
             # ── Last decision recency (phasic salience) ──
-            async with conn.execute(
-                f"SELECT MAX(created_at) FROM facts "  # nosec B608 — parameterized query
-                f"WHERE fact_type = 'decision' AND project IN ({placeholders})",
-                projects,
-            ) as cur:
+            async with (
+                conn.execute(
+                    f"SELECT MAX(created_at) FROM facts "  # nosec B608 — parameterized query
+                    f"WHERE fact_type = 'decision' AND project IN ({placeholders})",
+                    projects,
+                ) as cur
+            ):
                 row = await cur.fetchone()
                 if row and row[0]:
                     try:

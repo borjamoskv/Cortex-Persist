@@ -4,10 +4,11 @@ CORTEX — Sovereign Keyboard Engine for macOS.
 Dedicated keyboard automation: hotkeys, text input, special keys.
 Uses AppleScript (System Events) for reliable keystroke injection.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.ui_control.applescript import run_applescript
 from cortex.extensions.ui_control.models import (
@@ -32,7 +33,7 @@ class KeyboardEngine:
     Handles hotkeys, text input, and special key sequences.
     """
 
-    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
+    def __init__(self, engine: CortexEngine | None = None) -> None:
         self.engine = engine
 
     async def press(

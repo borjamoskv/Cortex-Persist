@@ -139,12 +139,18 @@ class TestScrapeResult:
         """Same content produces same hash for dedup detection."""
         content = "# Title\n\nThis is the page content."
         r1 = ScrapeResult.from_extraction(
-            url="https://a.com", title="A", content=content,
-            strategy=ExtractionStrategy.AUTO, elapsed_ms=100,
+            url="https://a.com",
+            title="A",
+            content=content,
+            strategy=ExtractionStrategy.AUTO,
+            elapsed_ms=100,
         )
         r2 = ScrapeResult.from_extraction(
-            url="https://b.com", title="B", content=content,
-            strategy=ExtractionStrategy.AUTO, elapsed_ms=200,
+            url="https://b.com",
+            title="B",
+            content=content,
+            strategy=ExtractionStrategy.AUTO,
+            elapsed_ms=200,
         )
         assert r1.content_hash == r2.content_hash
 
@@ -195,12 +201,17 @@ class TestScrapeJob:
         job = ScrapeJob(job_id="test", urls=["a", "b"])
         job.results = [
             ScrapeResult.from_extraction(
-                url="a", title="A", content="content",
-                strategy=ExtractionStrategy.AUTO, elapsed_ms=100,
+                url="a",
+                title="A",
+                content="content",
+                strategy=ExtractionStrategy.AUTO,
+                elapsed_ms=100,
             ),
             ScrapeResult.from_error(
-                url="b", error="fail",
-                strategy=ExtractionStrategy.AUTO, elapsed_ms=50,
+                url="b",
+                error="fail",
+                strategy=ExtractionStrategy.AUTO,
+                elapsed_ms=50,
             ),
         ]
         assert job.successful_count == 1
@@ -239,7 +250,9 @@ class TestHttpExtractor:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+        ):
             extractor = HttpExtractor()
             title, content = await extractor.extract("https://example.com")
 
@@ -260,7 +273,9 @@ class TestHttpExtractor:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+        ):
             extractor = HttpExtractor()
             with pytest.raises(ExtractionError, match="Non-HTML"):
                 await extractor.extract("https://api.example.com/data")
@@ -290,7 +305,9 @@ class TestRobotsTxt:
 
         from cortex.extensions.scraper.extractors import check_robots_txt
 
-        with patch("cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+        ):
             result = await check_robots_txt("https://example.com/public/page")
 
         assert result is True
@@ -311,7 +328,9 @@ class TestRobotsTxt:
 
         from cortex.extensions.scraper.extractors import check_robots_txt
 
-        with patch("cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+        ):
             result = await check_robots_txt("https://example.com/admin/secret")
 
         assert result is False
@@ -329,7 +348,9 @@ class TestRobotsTxt:
 
         from cortex.extensions.scraper.extractors import check_robots_txt
 
-        with patch("cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+        ):
             result = await check_robots_txt("https://example.com/anything")
 
         assert result is True
@@ -355,7 +376,9 @@ class TestScraperEngine:
             return_value=("Test Title", "# Test Content\n\nEnough content to pass checks.")
         )
 
-        with patch.dict("cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}):
+        with patch.dict(
+            "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
+        ):
             with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
                 result = await engine._cascade_extract("https://example.com", 15.0)
 
@@ -436,7 +459,9 @@ class TestScraperEngine:
 
         with (
             patch.dict(
-                "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
+                "cortex.extensions.scraper.extractors.EXTRACTORS",
+                {"http_fast": mock_ext},
+                clear=True,
             ),
             patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
             patch("cortex.extensions.scraper.extractors.check_robots_txt", return_value=True),
@@ -469,7 +494,9 @@ class TestBatchScraping:
 
         with (
             patch.dict(
-                "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
+                "cortex.extensions.scraper.extractors.EXTRACTORS",
+                {"http_fast": mock_ext},
+                clear=True,
             ),
             patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
             patch("cortex.extensions.scraper.extractors.check_robots_txt", return_value=True),
