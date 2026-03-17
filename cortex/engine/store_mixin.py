@@ -332,6 +332,23 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             except Exception as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
 
+        # ═══ DOUBT-Ω: Post-store metacognitive evaluation (non-blocking) ═══
+        try:
+            from cortex.engine.metacognition import DoubtCircuit
+
+            doubt = DoubtCircuit(conn)
+            alerts = await doubt.scan_coherence_traps(project=project, tenant_id=tenant_id, limit=5)
+            for alert in alerts:
+                if alert.alert_type == "COHERENCE_TRAP":
+                    logger.warning(
+                        "🧠 [DOUBT-Ω] Coherence trap detected in project '%s': %s",
+                        project,
+                        alert.description,
+                    )
+        except Exception as _doubt_err:  # noqa: BLE001
+            # Non-blocking: DoubtCircuit failure must never gate storage
+            logger.debug("[DOUBT-Ω] Metacognition skipped: %s", _doubt_err)
+
         return fact_id
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:

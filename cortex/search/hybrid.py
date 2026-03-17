@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import sqlite3
+from datetime import datetime, timezone
 from typing import Final
 
 import aiosqlite
@@ -31,6 +33,39 @@ logger = logging.getLogger("cortex.search.hybrid")
 # Industry standard (Corpus-Scale) is 60.
 RRF_K: Final[int] = 60
 
+# Temporal decay constant: λ=0.01 gives half-life ≈ 70 days
+_DECAY_LAMBDA: Final[float] = 0.01
+
+
+def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) -> list[SearchResult]:
+    """Apply exponential time decay to search results.
+
+    Ω₁₃: A 2-year-old fact should not rank identically to today's.
+    Uses exp(-λ * age_days) with configurable recency_weight blend.
+
+    Final score = rrf_score * (1 - w) + recency_factor * w
+    """
+    now = datetime.now(timezone.utc)
+    for r in results:
+        try:
+            # Parse created_at (ISO format from SQLite)
+            created = datetime.fromisoformat(r.created_at.replace("Z", "+00:00"))
+            if created.tzinfo is None:
+                created = created.replace(tzinfo=timezone.utc)
+            age_days = (now - created).total_seconds() / 86400.0
+        except (ValueError, TypeError, AttributeError):
+            age_days = 0.0  # Unknown age = no penalty
+
+        recency_factor = math.exp(-_DECAY_LAMBDA * max(age_days, 0.0))
+        r.score = round(
+            r.score * (1.0 - recency_weight) + recency_factor * recency_weight,
+            6,
+        )
+
+    # Re-sort by updated scores
+    results.sort(key=lambda r: r.score, reverse=True)
+    return results
+
 
 async def hybrid_search(
     conn: aiosqlite.Connection,
@@ -44,6 +79,7 @@ async def hybrid_search(
     text_weight: float = 0.4,
     confidence: str | None = None,
     causal_gap: CausalGap | None = None,
+    recency_weight: float = 0.1,
     **kwargs,
 ) -> list[SearchResult]:
     """
@@ -113,6 +149,10 @@ async def hybrid_search(
         r.score = round(rrf_scores[fid], 6)
         merged.append(r)
 
+    # Ω₁₃: Temporal decay — older facts naturally discounted
+    if recency_weight > 0 and merged:
+        merged = _apply_temporal_decay(merged, recency_weight)
+
     # Ω₁₃: Causal gap re-ranking — similarity alone is insufficient
     if causal_gap is not None and merged:
         merged = _rerank_by_causal_gap(merged, causal_gap)
@@ -137,6 +177,7 @@ def hybrid_search_sync(
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
     causal_gap: CausalGap | None = None,
+    recency_weight: float = 0.1,
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2
@@ -171,6 +212,10 @@ def hybrid_search_sync(
         r = result_map[fid]
         r.score = round(rrf_scores[fid], 6)
         merged.append(r)
+
+    # Ω₁₃: Temporal decay
+    if recency_weight > 0 and merged:
+        merged = _apply_temporal_decay(merged, recency_weight)
 
     # Ω₁₃: Causal gap re-ranking
     if causal_gap is not None and merged:
