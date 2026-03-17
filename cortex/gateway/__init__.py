@@ -57,7 +57,7 @@ class GatewayIntent(str, Enum):
     MISSION = "mission"  # Launch a swarm mission
     ASK = "ask"  # Ask the AI (LLM pass-through with memory context)
     MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
-    GIDATU = "gidatu"  # UI/Desktop orchestration (Gidatu skill)
+    MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
 
 
 @dataclass
@@ -154,7 +154,6 @@ class GatewayRouter:
             GatewayIntent.RECALL: self._handle_recall,
             GatewayIntent.STATUS: self._handle_status,
             GatewayIntent.EMIT: self._handle_emit,
-            GatewayIntent.GIDATU: self._handle_gidatu,
         }
 
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
@@ -310,10 +309,3 @@ class GatewayRouter:
         )
         await self._bus.emit(event)
         return {"delivered": True, "adapters": self._bus.adapter_names}
-
-    async def _handle_gidatu(self, req: GatewayRequest) -> dict[str, Any]:
-        """Orchestrate UI/Desktop actions via Gidatu skill."""
-        from cortex.gateway.handlers.gidatu import GidatuHandler
-
-        handler = GidatuHandler()
-        return await handler.handle(req)

@@ -9,7 +9,7 @@ try:
     from ApplicationServices import (
         AXUIElementCopyAttributeValue,
         AXUIElementCreateApplication,
-        AXUIElementCreateSystemWide,
+        AXUIElementCreateSystemWide,  # noqa: F401
         kAXChildrenAttribute,
         kAXDescriptionAttribute,
         kAXEnabledAttribute,
@@ -22,6 +22,7 @@ try:
         kAXTitleAttribute,
         kAXValueAttribute,
     )
+
     AX_AVAILABLE = True
 except ImportError:
     AX_AVAILABLE = False
@@ -37,9 +38,7 @@ class AXInspectorError(Exception):
 
 def check_ax_availability() -> None:
     if not AX_AVAILABLE:
-        raise AXInspectorError(
-            "pyobjc-framework-ApplicationServices not available."
-        )
+        raise AXInspectorError("pyobjc-framework-ApplicationServices not available.")
 
 
 def get_ax_attribute(element: Any, attribute: str) -> Any:
@@ -77,10 +76,18 @@ def build_snapshot(
 
     if depth > max_depth:
         return AXNodeSnapshot(
-            role="MAX_DEPTH_REACHED", subrole=None, title=None,
-            value=None, identifier=None, description=None,
-            enabled=None, focused=None, position=None, size=None,
-            path=path, children=[],
+            role="MAX_DEPTH_REACHED",
+            subrole=None,
+            title=None,
+            value=None,
+            identifier=None,
+            description=None,
+            enabled=None,
+            focused=None,
+            position=None,
+            size=None,
+            path=path,
+            children=[],
         )
 
     role = get_ax_attribute(element, kAXRoleAttribute)
@@ -95,14 +102,18 @@ def build_snapshot(
     raw_size = get_ax_attribute(element, kAXSizeAttribute)
 
     snapshot = AXNodeSnapshot(
-        role=role, subrole=subrole, title=title,
+        role=role,
+        subrole=subrole,
+        title=title,
         value=str(value) if value is not None else None,
-        identifier=identifier, description=description,
+        identifier=identifier,
+        description=description,
         enabled=bool(enabled) if enabled is not None else None,
         focused=bool(focused) if focused is not None else None,
         position=_extract_point(raw_pos),
         size=_extract_size(raw_size),
-        path=path, children=[],
+        path=path,
+        children=[],
     )
 
     children_val = get_ax_attribute(element, kAXChildrenAttribute)
@@ -110,7 +121,10 @@ def build_snapshot(
         for i, child_elem in enumerate(children_val):
             snapshot.children.append(
                 build_snapshot(
-                    child_elem, path + (i,), depth + 1, max_depth,
+                    child_elem,
+                    path + (i,),
+                    depth + 1,
+                    max_depth,
                 )
             )
     return snapshot

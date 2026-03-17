@@ -21,8 +21,9 @@ def _get_ledger():
         return _ledger
     _ledger_attempted = True
     try:
-        from cortex.ledger import SovereignLedger
         from cortex.config import DEFAULT_DB_PATH
+        from cortex.ledger import SovereignLedger
+
         _ledger = SovereignLedger(DEFAULT_DB_PATH)
         logger.info("CORTEX Ledger connected for Mac-Maestro tracing.")
     except Exception:
@@ -48,6 +49,7 @@ def emit_trace(
     resolution_method: str | None = None,
     resolution_confidence: float | None = None,
     candidates_count: int = 0,
+    click_target: tuple[float, float] | None = None,
 ) -> dict[str, Any]:
     """Emit a structured RunTrace for auditing and debugging.
 
@@ -78,11 +80,15 @@ def emit_trace(
         "resolution_method": resolution_method,
         "resolution_confidence": resolution_confidence,
         "candidates_count": candidates_count,
+        "click_target": click_target,
     }
 
     logger.info(
         "TRACE %s | %s | v=%s | %s%s",
-        run_id, outcome, selected_vector, bundle_id,
+        run_id,
+        outcome,
+        selected_vector,
+        bundle_id,
         " [DEGRADED]" if degraded else "",
     )
 

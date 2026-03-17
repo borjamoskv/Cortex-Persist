@@ -12,10 +12,6 @@ Plots:
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any
-
 from benchmarks.encb.metrics import MetricsReport
 
 
@@ -23,14 +19,15 @@ def _ensure_matplotlib():
     """Lazy import matplotlib to avoid hard dependency."""
     try:
         import matplotlib
+
         matplotlib.use("Agg")  # Non-interactive backend
         import matplotlib.pyplot as plt
+
         return plt
     except ImportError:
         raise ImportError(
-            "matplotlib is required for plotting. "
-            "Install with: pip install matplotlib"
-        )
+            "matplotlib is required for plotting. Install with: pip install matplotlib"
+        ) from None
 
 
 def plot_pfbr_convergence(
@@ -104,16 +101,13 @@ def plot_edi_bars(
         reports = results[strat]
         edis = [r.edi_total for r in reports]
         means.append(sum(edis) / len(edis))
-        stds.append(
-            (sum((e - means[-1]) ** 2 for e in edis) / len(edis)) ** 0.5
-        )
+        stds.append((sum((e - means[-1]) ** 2 for e in edis) / len(edis)) ** 0.5)
 
     fig, ax = plt.subplots(figsize=(8, 5))
     colors = ["#FF4444", "#FF8800", "#4488FF", "#00CC44"]
     x = np.arange(len(strategies))
 
-    bars = ax.bar(x, means, yerr=stds, capsize=5,
-                  color=colors[: len(strategies)], alpha=0.85)
+    ax.bar(x, means, yerr=stds, capsize=5, color=colors[: len(strategies)], alpha=0.85)
 
     ax.set_xticks(x)
     ax.set_xticklabels(strategies, fontsize=11)
@@ -151,8 +145,14 @@ def plot_cncl_timeline(
             ax.text(avg + 0.5, y_pos, f"avg={avg:.1f}r", va="center", fontsize=9)
 
         if uncontained > 0:
-            ax.text(1, y_pos + 0.3, f"({uncontained} uncontained)",
-                    va="center", fontsize=8, color="#FF4444")
+            ax.text(
+                1,
+                y_pos + 0.3,
+                f"({uncontained} uncontained)",
+                va="center",
+                fontsize=8,
+                color="#FF4444",
+            )
 
         y_labels.append(adv_type)
         y_pos += 1
@@ -200,9 +200,15 @@ def plot_ablation_heatmap(
     # Annotate cells
     for i in range(len(ablations)):
         for j in range(len(metrics)):
-            ax.text(j, i, f"{arr[i, j]:.3f}",
-                    ha="center", va="center", fontsize=9,
-                    color="white" if arr[i, j] > arr.mean() else "black")
+            ax.text(
+                j,
+                i,
+                f"{arr[i, j]:.3f}",
+                ha="center",
+                va="center",
+                fontsize=9,
+                color="white" if arr[i, j] > arr.mean() else "black",
+            )
 
     ax.set_title(title, fontsize=14, fontweight="bold")
     fig.colorbar(im, ax=ax, label="Metric Value (lower=better)")

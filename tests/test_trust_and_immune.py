@@ -10,16 +10,16 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.extensions.immune.filters.entropic_quarantine import (
-    EntropicQuarantineFilter,
-    _extract_text,
-    _shannon_entropy,
-)
-from cortex.extensions.trust.bayesian import (
+from cortex.extensions._quarantine.trust.bayesian import (
     BayesianTrustUpdater,
     Signal,
     _map_to_confidence,
     _posterior_mean,
+)
+from cortex.extensions.immune.filters.entropic_quarantine import (
+    EntropicQuarantineFilter,
+    _extract_text,
+    _shannon_entropy,
 )
 
 # ─── Unit: Shannon entropy ────────────────────────────────────────────────

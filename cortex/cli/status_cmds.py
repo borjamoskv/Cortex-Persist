@@ -15,8 +15,8 @@ from cortex.utils import hygiene
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-@click.option("--json-output", is_flag=True, help="Output as JSON")
-def status(db, json_output) -> None:
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def status(db, as_json) -> None:
     """Show CORTEX health and statistics."""
     engine = get_engine(db)
     try:
@@ -31,7 +31,7 @@ def status(db, json_output) -> None:
 
         h = hygiene.check_system_health()
 
-        if json_output:
+        if as_json:
             out = {"stats": s, "hygiene": h}
             click.echo(json.dumps(out, indent=2))
             return

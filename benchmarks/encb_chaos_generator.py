@@ -16,12 +16,11 @@ from __future__ import annotations
 
 import hashlib
 import random
-import string
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
 from types import MappingProxyType
+from typing import Any
 
 
 class ChaosModality(str, Enum):
@@ -101,15 +100,11 @@ class TemporalContradictionGenerator:
             for i in range(self.num_propositions)
         ]
         # Ground truth: even-indexed propositions are True, odd are False
-        self._ground_truth = {
-            p: (i % 2 == 0) for i, p in enumerate(self._propositions)
-        }
+        self._ground_truth = {p: (i % 2 == 0) for i, p in enumerate(self._propositions)}
 
         self._agents = [f"agent_{i:03d}" for i in range(self.num_agents)]
         num_byzantine = max(1, int(self.num_agents * self.byzantine_ratio))
-        self._byzantine_agents = set(
-            random.sample(self._agents, num_byzantine)
-        )
+        self._byzantine_agents = set(random.sample(self._agents, num_byzantine))
 
         return GroundTruth(
             propositions=dict(self._ground_truth),
@@ -140,26 +135,29 @@ class TemporalContradictionGenerator:
                         conf = "C4" if random.random() < 0.7 else "C3"
 
                     content = (
-                        f"{prop} is {'TRUE' if reported_truth else 'FALSE'} "
-                        f"(round {round_idx})"
+                        f"{prop} is {'TRUE' if reported_truth else 'FALSE'} (round {round_idx})"
                     )
 
-                    events.append(ChaosEvent(
-                        modality=ChaosModality.TEMPORAL_CONTRADICTION,
-                        agent_id=agent,
-                        content=content,
-                        fact_type="decision",
-                        confidence=conf,
-                        tags=tuple(["encb", "temporal-contradiction", f"round-{round_idx}"]),
-                        meta=MappingProxyType({
-                            "proposition": prop,
-                            "reported_value": reported_truth,
-                            "ground_truth": truth,
-                            "is_byzantine": is_byzantine,
-                            "round": round_idx,
-                        }),
-                        timestamp=t,
-                    ))
+                    events.append(
+                        ChaosEvent(
+                            modality=ChaosModality.TEMPORAL_CONTRADICTION,
+                            agent_id=agent,
+                            content=content,
+                            fact_type="decision",
+                            confidence=conf,
+                            tags=tuple(["encb", "temporal-contradiction", f"round-{round_idx}"]),
+                            meta=MappingProxyType(
+                                {
+                                    "proposition": prop,
+                                    "reported_value": reported_truth,
+                                    "ground_truth": truth,
+                                    "is_byzantine": is_byzantine,
+                                    "round": round_idx,
+                                }
+                            ),
+                            timestamp=t,
+                        )
+                    )
 
         return events
 
@@ -237,22 +235,26 @@ class TransitiveBreakageGenerator:
         for chain_idx, chain in enumerate(self._chains):
             for depth, prop in enumerate(chain):
                 parent = chain[depth - 1] if depth > 0 else None
-                events.append(ChaosEvent(
-                    modality=ChaosModality.TRANSITIVE_BREAKAGE,
-                    agent_id="chain_builder",
-                    content=f"ESTABLISH: {prop}",
-                    fact_type="decision",
-                    confidence="C5",
-                    tags=tuple(["encb", "transitive", "establish", f"chain-{chain_idx}"]),
-                    meta=MappingProxyType({
-                        "proposition": prop,
-                        "chain_idx": chain_idx,
-                        "depth": depth,
-                        "parent": parent,
-                        "phase": "establish",
-                    }),
-                    timestamp=base_time + chain_idx * 10 + depth,
-                ))
+                events.append(
+                    ChaosEvent(
+                        modality=ChaosModality.TRANSITIVE_BREAKAGE,
+                        agent_id="chain_builder",
+                        content=f"ESTABLISH: {prop}",
+                        fact_type="decision",
+                        confidence="C5",
+                        tags=tuple(["encb", "transitive", "establish", f"chain-{chain_idx}"]),
+                        meta=MappingProxyType(
+                            {
+                                "proposition": prop,
+                                "chain_idx": chain_idx,
+                                "depth": depth,
+                                "parent": parent,
+                                "phase": "establish",
+                            }
+                        ),
+                        timestamp=base_time + chain_idx * 10 + depth,
+                    )
+                )
 
         # Phase 2: Break random roots
         broken_roots: list[str] = []
@@ -260,21 +262,25 @@ class TransitiveBreakageGenerator:
             if random.random() < self.p_break:
                 root = chain[0]
                 broken_roots.append(root)
-                events.append(ChaosEvent(
-                    modality=ChaosModality.TRANSITIVE_BREAKAGE,
-                    agent_id="root_breaker",
-                    content=f"INVALIDATE: {root} — evidence disproven",
-                    fact_type="error",
-                    confidence="C5",
-                    tags=tuple(["encb", "transitive", "break", f"chain-{chain_idx}"]),
-                    meta=MappingProxyType({
-                        "proposition": root,
-                        "chain_idx": chain_idx,
-                        "phase": "break",
-                        "cascade_depth": len(chain),
-                    }),
-                    timestamp=base_time + 1000 + chain_idx,
-                ))
+                events.append(
+                    ChaosEvent(
+                        modality=ChaosModality.TRANSITIVE_BREAKAGE,
+                        agent_id="root_breaker",
+                        content=f"INVALIDATE: {root} — evidence disproven",
+                        fact_type="error",
+                        confidence="C5",
+                        tags=tuple(["encb", "transitive", "break", f"chain-{chain_idx}"]),
+                        meta=MappingProxyType(
+                            {
+                                "proposition": root,
+                                "chain_idx": chain_idx,
+                                "phase": "break",
+                                "cascade_depth": len(chain),
+                            }
+                        ),
+                        timestamp=base_time + 1000 + chain_idx,
+                    )
+                )
 
         return events
 
@@ -309,9 +315,7 @@ class EpisodicSpamGenerator:
 
     def setup(self) -> GroundTruth:
         """Create signal facts."""
-        self._signal_facts = [
-            self._generate_signal_fact(i) for i in range(self.num_signal_facts)
-        ]
+        self._signal_facts = [self._generate_signal_fact(i) for i in range(self.num_signal_facts)]
         return GroundTruth(
             propositions={f: True for f in self._signal_facts},
             entails_chains=[],
@@ -325,16 +329,18 @@ class EpisodicSpamGenerator:
 
         # Phase 1: Inject signal facts
         for i, fact in enumerate(self._signal_facts):
-            events.append(ChaosEvent(
-                modality=ChaosModality.EPISODIC_SPAM,
-                agent_id="signal_source",
-                content=fact,
-                fact_type="discovery",
-                confidence="C5",
-                tags=tuple(["encb", "spam-test", "signal"]),
-                meta=MappingProxyType({"is_signal": True, "signal_idx": i}),
-                timestamp=base_time + i,
-            ))
+            events.append(
+                ChaosEvent(
+                    modality=ChaosModality.EPISODIC_SPAM,
+                    agent_id="signal_source",
+                    content=fact,
+                    fact_type="discovery",
+                    confidence="C5",
+                    tags=tuple(["encb", "spam-test", "signal"]),
+                    meta=MappingProxyType({"is_signal": True, "signal_idx": i}),
+                    timestamp=base_time + i,
+                )
+            )
 
         # Phase 2: Inject spam (semantically similar noise)
         num_spam = int(self.num_signal_facts * self.rho_noise)
@@ -342,21 +348,25 @@ class EpisodicSpamGenerator:
             # Pick a random signal fact and paraphrase it
             source_fact = random.choice(self._signal_facts)
             spam_content = self._paraphrase_as_spam(source_fact, i)
-            events.append(ChaosEvent(
-                modality=ChaosModality.EPISODIC_SPAM,
-                agent_id=f"spam_bot_{i % 5:02d}",
-                content=spam_content,
-                fact_type="decision",
-                confidence=random.choice(["C3", "C4", "C5"]),
-                tags=tuple(["encb", "spam-test", "noise"]),
-                meta=MappingProxyType({
-                    "is_signal": False,
-                    "source_signal": source_fact,
-                    "spam_idx": i,
-                    "similarity_target": self.semantic_similarity,
-                }),
-                timestamp=base_time + 100 + i * 0.1,
-            ))
+            events.append(
+                ChaosEvent(
+                    modality=ChaosModality.EPISODIC_SPAM,
+                    agent_id=f"spam_bot_{i % 5:02d}",
+                    content=spam_content,
+                    fact_type="decision",
+                    confidence=random.choice(["C3", "C4", "C5"]),
+                    tags=tuple(["encb", "spam-test", "noise"]),
+                    meta=MappingProxyType(
+                        {
+                            "is_signal": False,
+                            "source_signal": source_fact,
+                            "spam_idx": i,
+                            "similarity_target": self.semantic_similarity,
+                        }
+                    ),
+                    timestamp=base_time + 100 + i * 0.1,
+                )
+            )
 
         return events
 
@@ -381,9 +391,18 @@ class EpisodicSpamGenerator:
     def _paraphrase_as_spam(self, source: str, idx: int) -> str:
         """Generate a semantically similar but epistemically null paraphrase."""
         noise_tokens = [
-            "interestingly", "notably", "essentially", "fundamentally",
-            "basically", "arguably", "reportedly", "supposedly",
-            "in theory", "conceptually", "it seems that", "one could say",
+            "interestingly",
+            "notably",
+            "essentially",
+            "fundamentally",
+            "basically",
+            "arguably",
+            "reportedly",
+            "supposedly",
+            "in theory",
+            "conceptually",
+            "it seems that",
+            "one could say",
         ]
         # Shuffle words, add filler, change order
         words = source.split()
@@ -420,7 +439,7 @@ class EpistemicChaosOrchestrator:
     ) -> None:
         if seed is not None:
             random.seed(seed)
-            
+
         self.temporal = TemporalContradictionGenerator(
             lambda_flip=lambda_flip,
             num_propositions=num_propositions,

@@ -1,12 +1,14 @@
-import sys
-import os
 import asyncio
+import os
+import sys
 
 # Ensure cortex is in the path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from cortex.extensions.llm.models import Message
 
 from cortex.extensions.llm.router import CortexRouter
-from cortex.extensions.llm.models import Message
+
 
 async def main():
     try:
@@ -22,22 +24,24 @@ async def main():
         
         Por favor, sé tan crítico como sea necesario. Saca a relucir cualquier posible vulnerabilidad por pequeña que sea.
         """
-        
-        print("Consultando a Sergio (Modelos Frontier vía Router CORTEX) sobre fisuras de seguridad...\n")
-        
+
+        print(
+            "Consultando a Sergio (Modelos Frontier vía Router CORTEX) sobre fisuras de seguridad...\n"
+        )
+
         # Using a direct call to the router. Depending on the exact API of CortexRouter
         response = await router.chat(
-            messages=[Message(role="user", content=prompt)],
-            require_frontier=True
+            messages=[Message(role="user", content=prompt)], require_frontier=True
         )
-        
+
         print("Respuesta de Sergio:")
         print("-" * 80)
         print(response.content)
         print("-" * 80)
-        
+
     except Exception as e:
         print(f"Error al consultar: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

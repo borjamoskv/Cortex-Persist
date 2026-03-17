@@ -11,6 +11,7 @@ logger = logging.getLogger("mac_maestro.app_discovery")
 
 try:
     from AppKit import NSRunningApplication, NSWorkspace
+
     APPKIT_AVAILABLE = True
 except ImportError:
     APPKIT_AVAILABLE = False
@@ -18,9 +19,7 @@ except ImportError:
 
 def _check_appkit() -> None:
     if not APPKIT_AVAILABLE:
-        raise ActionFailed(
-            "AppKit not available. Install pyobjc-framework-Cocoa."
-        )
+        raise ActionFailed("AppKit not available. Install pyobjc-framework-Cocoa.")
 
 
 def get_running_apps(bundle_id: str) -> list:
@@ -95,6 +94,4 @@ def wait_for_app(bundle_id: str, timeout: float = 10.0) -> int:
         if apps:
             return apps[0].processIdentifier()
         time.sleep(0.25)
-    raise ActionFailed(
-        f"App '{bundle_id}' did not start within {timeout}s."
-    )
+    raise ActionFailed(f"App '{bundle_id}' did not start within {timeout}s.")

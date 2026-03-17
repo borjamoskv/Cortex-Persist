@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import unittest
-from unittest.mock import patch
+from unittest import mock
 
 _SDK_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _SDK_ROOT not in sys.path:
@@ -29,12 +29,22 @@ from mac_maestro.workflow import MacMaestroWorkflow, _backoff_sleep  # noqa: E40
 # Helpers
 # ═══════════════════════════════════════════════════════════════════
 
+
 def _make_snapshot(**kwargs) -> AXNodeSnapshot:
     """Build an AXNodeSnapshot with sensible defaults."""
     defaults = dict(
-        role=None, subrole=None, title=None, value=None,
-        identifier=None, description=None, enabled=True, focused=False,
-        position=None, size=None, path=(), children=[],
+        role=None,
+        subrole=None,
+        title=None,
+        value=None,
+        identifier=None,
+        description=None,
+        enabled=True,
+        focused=False,
+        position=None,
+        size=None,
+        path=(),
+        children=[],
     )
     defaults.update(kwargs)
     return AXNodeSnapshot(**defaults)
@@ -43,40 +53,56 @@ def _make_snapshot(**kwargs) -> AXNodeSnapshot:
 def _make_tree() -> AXNodeSnapshot:
     """Build a realistic AX tree for testing."""
     return _make_snapshot(
-        role="AXApplication", title="TestApp", path=(0,),
+        role="AXApplication",
+        title="TestApp",
+        path=(0,),
         children=[
             _make_snapshot(
-                role="AXWindow", title="Main Window", path=(0, 0),
-                position=(0.0, 0.0), size=(800.0, 600.0),
+                role="AXWindow",
+                title="Main Window",
+                path=(0, 0),
+                position=(0.0, 0.0),
+                size=(800.0, 600.0),
                 children=[
                     _make_snapshot(
-                        role="AXButton", title="Save",
+                        role="AXButton",
+                        title="Save",
                         identifier="save-btn",
-                        position=(100.0, 50.0), size=(80.0, 30.0),
+                        position=(100.0, 50.0),
+                        size=(80.0, 30.0),
                         path=(0, 0, 0),
                     ),
                     _make_snapshot(
-                        role="AXButton", title="Cancel",
-                        position=(200.0, 50.0), size=(80.0, 30.0),
+                        role="AXButton",
+                        title="Cancel",
+                        position=(200.0, 50.0),
+                        size=(80.0, 30.0),
                         path=(0, 0, 1),
                     ),
                     _make_snapshot(
-                        role="AXTextField", title="Search",
+                        role="AXTextField",
+                        title="Search",
                         description="Search field",
                         value="",
-                        position=(300.0, 100.0), size=(200.0, 24.0),
+                        position=(300.0, 100.0),
+                        size=(200.0, 24.0),
                         path=(0, 0, 2),
                     ),
                     _make_snapshot(
-                        role="AXCheckBox", title="Remember me",
-                        value="0", enabled=False,
-                        position=(100.0, 150.0), size=(120.0, 20.0),
+                        role="AXCheckBox",
+                        title="Remember me",
+                        value="0",
+                        enabled=False,
+                        position=(100.0, 150.0),
+                        size=(120.0, 20.0),
                         path=(0, 0, 3),
                     ),
                     _make_snapshot(
-                        role="AXMenuItem", title="Export as PDF",
+                        role="AXMenuItem",
+                        title="Export as PDF",
                         description="Export the document",
-                        position=(50.0, 200.0), size=(150.0, 22.0),
+                        position=(50.0, 200.0),
+                        size=(150.0, 22.0),
                         path=(0, 0, 4),
                     ),
                 ],
@@ -88,6 +114,7 @@ def _make_tree() -> AXNodeSnapshot:
 # ═══════════════════════════════════════════════════════════════════
 # Sanitizer Tests (V3)
 # ═══════════════════════════════════════════════════════════════════
+
 
 class TestSanitizer(unittest.TestCase):
     def test_basic_passthrough(self):
@@ -116,6 +143,7 @@ class TestSanitizer(unittest.TestCase):
 # Action Ladder Tests (V2-V4)
 # ═══════════════════════════════════════════════════════════════════
 
+
 class TestActionLadder(unittest.TestCase):
     """Test with Target Lock mocked out (no AppKit in CI)."""
 
@@ -123,19 +151,20 @@ class TestActionLadder(unittest.TestCase):
         wf = MacMaestroWorkflow("com.test")
         return wf
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_primary_success(self, mock_tl):
         wf = self._make_workflow()
         executed = []
         action = UIAction(
-            name="click", vector="B",
+            name="click",
+            vector="B",
             executor=lambda: executed.append("primary"),
         )
         result = wf.execute_action(action, apply_safety_gate=False)
         self.assertTrue(result)
         self.assertEqual(executed, ["primary"])
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_fallback_on_failure(self, mock_tl):
         wf = self._make_workflow()
         executed = []
@@ -145,15 +174,18 @@ class TestActionLadder(unittest.TestCase):
             raise RuntimeError("AX unavailable")
 
         action = UIAction(
-            name="click", vector="B", executor=fail,
-            fallbacks=[UIAction(name="click_cg", vector="D",
-                                executor=lambda: executed.append("fallback"))],
+            name="click",
+            vector="B",
+            executor=fail,
+            fallbacks=[
+                UIAction(name="click_cg", vector="D", executor=lambda: executed.append("fallback"))
+            ],
         )
         result = wf.execute_action(action, apply_safety_gate=False)
         self.assertTrue(result)
         self.assertEqual(executed, ["fail", "fallback"])
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_all_fallbacks_exhausted(self, mock_tl):
         wf = self._make_workflow()
 
@@ -161,7 +193,9 @@ class TestActionLadder(unittest.TestCase):
             raise RuntimeError("always fails")
 
         action = UIAction(
-            name="click", vector="B", executor=fail,
+            name="click",
+            vector="B",
+            executor=fail,
             fallbacks=[
                 UIAction(name="click_cg", vector="D", executor=fail),
             ],
@@ -169,11 +203,12 @@ class TestActionLadder(unittest.TestCase):
         with self.assertRaises(ActionFailed):
             wf.execute_action(action, apply_safety_gate=False)
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_postcondition_failure_not_swallowed(self, mock_tl):
         wf = self._make_workflow()
         action = UIAction(
-            name="type_text", vector="C",
+            name="type_text",
+            vector="C",
             executor=lambda: None,
             postconditions=[lambda: False],
             idempotent=False,
@@ -182,21 +217,24 @@ class TestActionLadder(unittest.TestCase):
             wf.execute_action(action, apply_safety_gate=False)
         self.assertIn("Postconditions failed", str(ctx.exception))
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_safety_gate_blocks_unsafe(self, mock_tl):
         wf = self._make_workflow()
         action = UIAction(
-            name="delete", vector="A",
-            executor=lambda: None, unsafe=False,
+            name="delete",
+            vector="A",
+            executor=lambda: None,
+            unsafe=False,
         )
         with self.assertRaises(PermissionError):
             wf.execute_action(action, apply_safety_gate=True)
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_precondition_failure(self, mock_tl):
         wf = self._make_workflow()
         action = UIAction(
-            name="click", vector="B",
+            name="click",
+            vector="B",
             preconditions=[lambda: False],
         )
         with self.assertRaises(ActionFailed) as ctx:
@@ -208,10 +246,12 @@ class TestActionLadder(unittest.TestCase):
 # V4: Resolver Tests
 # ═══════════════════════════════════════════════════════════════════
 
+
 class TestResolver(unittest.TestCase):
     def test_resolve_applescript_script(self):
         action = UIAction(
-            name="run_as", vector="A",
+            name="run_as",
+            vector="A",
             target_query={"script": 'tell app "Finder" to activate'},
         )
         executor = resolve(action)
@@ -219,7 +259,8 @@ class TestResolver(unittest.TestCase):
 
     def test_resolve_applescript_app_name(self):
         action = UIAction(
-            name="open_app", vector="A",
+            name="open_app",
+            vector="A",
             target_query={"app_name": "TextEdit"},
         )
         executor = resolve(action)
@@ -234,10 +275,14 @@ class TestResolver(unittest.TestCase):
     def test_resolve_with_resolved_target_coords(self):
         """Vector D should auto-extract coordinates from ResolvedTarget."""
         resolved = ResolvedTarget(
-            pid=1234, app_name="Test", bundle_id="com.test",
-            window_title="Main", element=None,
+            pid=1234,
+            app_name="Test",
+            bundle_id="com.test",
+            window_title="Main",
+            element=None,
             position=(140.0, 65.0),
-            resolution_method="ax_semantic", degraded=False,
+            resolution_method="ax_semantic",
+            degraded=False,
         )
         action = UIAction(name="click", vector="D", target_query={})
         executor = resolve(action, resolved_target=resolved)
@@ -247,6 +292,7 @@ class TestResolver(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════
 # V4: Backoff + Sequence Tests
 # ═══════════════════════════════════════════════════════════════════
+
 
 class TestBackoff(unittest.TestCase):
     def test_backoff_increases(self):
@@ -259,7 +305,7 @@ class TestBackoff(unittest.TestCase):
 
 
 class TestRunSequence(unittest.TestCase):
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_sequence_all_succeed(self, mock_tl):
         wf = MacMaestroWorkflow("com.test")
         log = []
@@ -271,7 +317,7 @@ class TestRunSequence(unittest.TestCase):
         self.assertEqual(results, [True, True])
         self.assertEqual(log, [1, 2])
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_sequence_abort_on_failure(self, mock_tl):
         wf = MacMaestroWorkflow("com.test")
 
@@ -285,7 +331,7 @@ class TestRunSequence(unittest.TestCase):
         with self.assertRaises(ActionFailed):
             wf.run_sequence(actions, apply_safety_gate=False, abort_on_failure=True)
 
-    @patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
+    @mock.patch("mac_maestro.workflow.MacMaestroWorkflow._target_lock")
     def test_sequence_continue_on_failure(self, mock_tl):
         wf = MacMaestroWorkflow("com.test")
 
@@ -298,7 +344,9 @@ class TestRunSequence(unittest.TestCase):
             UIAction(name="ok2", vector="A", executor=lambda: None),
         ]
         results = wf.run_sequence(
-            actions, apply_safety_gate=False, abort_on_failure=False,
+            actions,
+            apply_safety_gate=False,
+            abort_on_failure=False,
         )
         self.assertEqual(results, [True, False, True])
 
@@ -306,6 +354,7 @@ class TestRunSequence(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════
 # V5: Matcher Tests — Acceptance Test 2
 # ═══════════════════════════════════════════════════════════════════
+
 
 class TestMatcher(unittest.TestCase):
     """Semantic matcher over mock AX tree — Acceptance Test 2."""
@@ -329,14 +378,18 @@ class TestMatcher(unittest.TestCase):
 
     def test_find_by_description(self):
         results = find_elements(
-            self.tree, role="AXTextField", description="Search field",
+            self.tree,
+            role="AXTextField",
+            description="Search field",
         )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].role, "AXTextField")
 
     def test_find_by_identifier(self):
         results = find_elements(
-            self.tree, role="AXButton", identifier="save-btn",
+            self.tree,
+            role="AXButton",
+            identifier="save-btn",
         )
         self.assertGreaterEqual(len(results), 1)
         self.assertEqual(results[0].title, "Save")
@@ -344,14 +397,18 @@ class TestMatcher(unittest.TestCase):
 
     def test_fuzzy_substring_match(self):
         results = find_elements(
-            self.tree, role="AXMenuItem", title="Export",
+            self.tree,
+            role="AXMenuItem",
+            title="Export",
         )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].role, "AXMenuItem")
 
     def test_fuzzy_case_insensitive(self):
         results = find_elements(
-            self.tree, role="AXButton", title="save",
+            self.tree,
+            role="AXButton",
+            title="save",
         )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].title, "Save")
@@ -405,23 +462,32 @@ class TestMatcher(unittest.TestCase):
 # V5: Trace Degradation — Acceptance Test 3
 # ═══════════════════════════════════════════════════════════════════
 
+
 class TestTraceDegradation(unittest.TestCase):
     """Verify trace emits degraded=True when context is missing."""
 
     def test_trace_degraded_when_pid_is_none(self):
         trace = emit_trace(
-            run_id="test-run", bundle_id="com.test",
-            pid=None, frontmost=False, window_title=None,
-            selected_vector="A", outcome="success",
+            run_id="test-run",
+            bundle_id="com.test",
+            pid=None,
+            frontmost=False,
+            window_title=None,
+            selected_vector="A",
+            outcome="success",
             target_query={},
         )
         self.assertTrue(trace["degraded"])
 
     def test_trace_not_degraded_with_pid(self):
         trace = emit_trace(
-            run_id="test-run", bundle_id="com.test",
-            pid=12345, frontmost=True, window_title="Main",
-            selected_vector="B", outcome="success",
+            run_id="test-run",
+            bundle_id="com.test",
+            pid=12345,
+            frontmost=True,
+            window_title="Main",
+            selected_vector="B",
+            outcome="success",
             target_query={},
             resolution_method="ax_semantic",
             resolution_confidence=0.85,
@@ -434,10 +500,15 @@ class TestTraceDegradation(unittest.TestCase):
 
     def test_trace_has_resolution_fields(self):
         trace = emit_trace(
-            run_id="test-run", bundle_id="com.test",
-            pid=1, frontmost=True, window_title="Win",
-            selected_vector="B", outcome="success",
-            target_query={}, resolution_method=None,
+            run_id="test-run",
+            bundle_id="com.test",
+            pid=1,
+            frontmost=True,
+            window_title="Win",
+            selected_vector="B",
+            outcome="success",
+            target_query={},
+            resolution_method=None,
         )
         self.assertIn("resolution_method", trace)
         self.assertIn("resolution_confidence", trace)
@@ -448,20 +519,31 @@ class TestTraceDegradation(unittest.TestCase):
 # V5: ResolvedTarget / ElementMatch unit tests
 # ═══════════════════════════════════════════════════════════════════
 
+
 class TestResolvedTarget(unittest.TestCase):
     def test_degraded_flag(self):
         rt = ResolvedTarget(
-            pid=1, app_name="A", bundle_id="com.a",
-            window_title=None, element=None, position=None,
-            resolution_method="manual", degraded=True,
+            pid=1,
+            app_name="A",
+            bundle_id="com.a",
+            window_title=None,
+            element=None,
+            position=None,
+            resolution_method="manual",
+            degraded=True,
         )
         self.assertTrue(rt.degraded)
 
     def test_not_degraded(self):
         rt = ResolvedTarget(
-            pid=1, app_name="A", bundle_id="com.a",
-            window_title="Win", element=None, position=(100, 50),
-            resolution_method="ax_semantic", degraded=False,
+            pid=1,
+            app_name="A",
+            bundle_id="com.a",
+            window_title="Win",
+            element=None,
+            position=(100, 50),
+            resolution_method="ax_semantic",
+            degraded=False,
             confidence=0.9,
         )
         self.assertFalse(rt.degraded)
@@ -471,21 +553,167 @@ class TestResolvedTarget(unittest.TestCase):
 class TestElementMatchCenter(unittest.TestCase):
     def test_center_calculation(self):
         em = ElementMatch(
-            ref=None, role="AXButton", subrole=None,
-            title="OK", value=None, identifier=None, description=None,
-            position=(100.0, 200.0), size=(60.0, 30.0),
-            score=0.8, reasons=["role=AXButton"],
+            ref=None,
+            role="AXButton",
+            subrole=None,
+            title="OK",
+            value=None,
+            identifier=None,
+            description=None,
+            position=(100.0, 200.0),
+            size=(60.0, 30.0),
+            score=0.8,
+            reasons=["role=AXButton"],
         )
         self.assertEqual(em.center, (130.0, 215.0))
 
     def test_center_none_without_position(self):
         em = ElementMatch(
-            ref=None, role="AXButton", subrole=None,
-            title="OK", value=None, identifier=None, description=None,
-            position=None, size=None,
-            score=0.5, reasons=[],
+            ref=None,
+            role="AXButton",
+            subrole=None,
+            title="OK",
+            value=None,
+            identifier=None,
+            description=None,
+            position=None,
+            size=None,
+            score=0.5,
+            reasons=[],
         )
         self.assertIsNone(em.center)
+
+
+class TestG1DegradedTargetLock(unittest.TestCase):
+    """G1: _target_lock must not silently swallow exceptions."""
+
+    @mock.patch("mac_maestro.app_discovery.is_frontmost", side_effect=RuntimeError("AX dead"))
+    @mock.patch("mac_maestro.app_discovery.get_pid", return_value=99)
+    def test_degraded_target_set_on_exception(self, _pid, _fm):
+        wf = MacMaestroWorkflow("com.example.Test")
+        wf._target_lock()
+        self.assertIsNotNone(wf._resolved)
+        self.assertTrue(wf._resolved.degraded)
+
+
+class TestG2RefPropagation(unittest.TestCase):
+    """G2: AXUIElement ref flows from AXNodeSnapshot to ElementMatch."""
+
+    def test_ref_propagated_through_find_elements(self):
+        sentinel = object()
+        node = AXNodeSnapshot(
+            role="AXButton",
+            subrole=None,
+            title="OK",
+            value=None,
+            identifier=None,
+            description=None,
+            enabled=True,
+            focused=None,
+            position=(10, 20),
+            size=(50, 30),
+            path=(0,),
+            children=[],
+            _ref=sentinel,
+        )
+        matches = find_elements(node, role="AXButton")
+        self.assertTrue(len(matches) > 0)
+        self.assertIs(matches[0].ref, sentinel)
+
+    def test_ref_is_none_when_snapshot_has_no_ref(self):
+        node = AXNodeSnapshot(
+            role="AXButton",
+            subrole=None,
+            title="OK",
+            value=None,
+            identifier=None,
+            description=None,
+            enabled=True,
+            focused=None,
+            position=(10, 20),
+            size=(50, 30),
+            path=(0,),
+            children=[],
+        )
+        matches = find_elements(node, role="AXButton")
+        self.assertTrue(len(matches) > 0)
+        self.assertIsNone(matches[0].ref)
+
+
+class TestG3ClickTargetInTrace(unittest.TestCase):
+    """G3: emit_trace must accept and record click_target."""
+
+    def test_click_target_present(self):
+        data = emit_trace(
+            run_id="r",
+            bundle_id="b",
+            pid=1,
+            frontmost=True,
+            window_title="w",
+            selected_vector="B",
+            outcome="success",
+            target_query={},
+            matched_element=None,
+            precondition_results={},
+            postcondition_results={},
+            click_target=(100.5, 200.5),
+        )
+        self.assertEqual(data["click_target"], (100.5, 200.5))
+
+    def test_click_target_default_none(self):
+        data = emit_trace(
+            run_id="r",
+            bundle_id="b",
+            pid=1,
+            frontmost=True,
+            window_title="w",
+            selected_vector="B",
+            outcome="success",
+            target_query={},
+            matched_element=None,
+            precondition_results={},
+            postcondition_results={},
+        )
+        self.assertIsNone(data["click_target"])
+
+
+class TestG5CandidatesCount(unittest.TestCase):
+    """G5: candidates_count must reflect real find_elements count."""
+
+    def test_multiple_candidates_counted(self):
+        children = [
+            AXNodeSnapshot(
+                role="AXButton",
+                subrole=None,
+                title=f"Btn{i}",
+                value=None,
+                identifier=None,
+                description=None,
+                enabled=True,
+                focused=None,
+                position=(10 * i, 20),
+                size=(50, 30),
+                path=(0, i),
+                children=[],
+            )
+            for i in range(5)
+        ]
+        root = AXNodeSnapshot(
+            role="AXGroup",
+            subrole=None,
+            title=None,
+            value=None,
+            identifier=None,
+            description=None,
+            enabled=True,
+            focused=None,
+            position=(0, 0),
+            size=(500, 500),
+            path=(0,),
+            children=children,
+        )
+        matches = find_elements(root, role="AXButton")
+        self.assertEqual(len(matches), 5)
 
 
 if __name__ == "__main__":

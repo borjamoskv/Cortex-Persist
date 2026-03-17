@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.extensions.alma.taste import (
+from cortex.extensions._quarantine.alma.taste import (
     GRADE_DEAD,
     GRADE_FUNCTIONAL,
     GRADE_GOAT,

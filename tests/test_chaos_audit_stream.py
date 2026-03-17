@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.extensions.red_team.hydra_chaos import (
+from cortex.extensions._quarantine.red_team.hydra_chaos import (
     ChaosResult,
     ChaosScenario,
     HydraChaosEngine,

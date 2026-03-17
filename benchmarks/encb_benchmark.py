@@ -35,19 +35,23 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from typing import Any
+
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from benchmarks.encb.resolvers import Resolver, AppendOnlyResolver, OracleResolver
-from benchmarks.encb.metrics import calculate_recovery_rate, calculate_f1_score, calculate_kl_divergence
-from typing import Any
+from benchmarks.encb.metrics import (
+    calculate_f1_score,
+    calculate_kl_divergence,
+    calculate_recovery_rate,
+)
+from benchmarks.encb.resolvers import AppendOnlyResolver, OracleResolver, Resolver
 from benchmarks.encb_chaos_generator import (
     ChaosEvent,
     ChaosModality,
     EpistemicChaosOrchestrator,
-    GroundTruth,
 )
 
 console = Console()
@@ -55,11 +59,12 @@ console = Console()
 
 # ── CORTEX Resolver Adapter ──────────────────────────────────────────────────
 
+
 class CortexResolver(Resolver):
     def __init__(self, engine) -> None:
         self.engine = engine
         self._detected_byzantine: set[str] = set()
-        
+
     async def ingest(self, events: list[ChaosEvent]) -> None:
         for event in events:
             try:
@@ -79,7 +84,7 @@ class CortexResolver(Resolver):
                         await self.engine.vote(fact_id, event.agent_id, vote_value)
                     except Exception:
                         pass
-            except Exception as exc:
+            except Exception:
                 if event.meta.get("is_byzantine", False):
                     self._detected_byzantine.add(event.agent_id)
 
@@ -114,11 +119,13 @@ async def run_encb(
 ) -> dict:
     """Run the full ENCB benchmark."""
 
-    console.print(Panel(
-        "[bold cyan]🧪 ENCB — Epistemic Noise Chaos Benchmark[/]\n"
-        "[dim]Nobel-Ω Vector Ξ₄: Empirical Falsification[/]",
-        box=box.DOUBLE,
-    ))
+    console.print(
+        Panel(
+            "[bold cyan]🧪 ENCB — Epistemic Noise Chaos Benchmark[/]\n"
+            "[dim]Nobel-Ω Vector Ξ₄: Empirical Falsification[/]",
+            box=box.DOUBLE,
+        )
+    )
 
     # ── Setup chaos orchestrator ───────────────────────────────────────
     console.print("\n[yellow]⏳ Setting up chaos orchestrator...[/]")
@@ -149,9 +156,10 @@ async def run_encb(
     db_path = os.path.join(tmp_dir, "encb_cortex.db")
 
     try:
+        from cortex.schema import ALL_SCHEMA
+
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine_async import AsyncCortexEngine
-        from cortex.schema import ALL_SCHEMA
 
         pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
         await pool.initialize()
@@ -178,10 +186,10 @@ async def run_encb(
     if cortex_available and engine is not None:
         resolvers.append(CortexResolver(engine))
     resolvers.append(AppendOnlyResolver())
-    
+
     gt_map = {}
-    for modality, gt in ground_truths.items():
-        for i, prop in enumerate(gt.signal_facts):
+    for _modality, gt in ground_truths.items():
+        for _i, prop in enumerate(gt.signal_facts):
             gt_map[prop[:50]] = prop
     resolvers.append(OracleResolver(gt_map))
 
@@ -206,7 +214,9 @@ async def run_encb(
         gt = ground_truths[modality]
 
         console.print(f"\n[bold magenta]━━━ {modality.value.upper()} ━━━[/]")
-        console.print(f"   Events: {len(events)} | Ground truth: {gt.total_propositions} propositions")
+        console.print(
+            f"   Events: {len(events)} | Ground truth: {gt.total_propositions} propositions"
+        )
 
         # ── Injections ───────────────────────────────────────────
         for resolver in resolvers:
@@ -216,7 +226,7 @@ async def run_encb(
 
             search_results = set()
             ground_truth_set = set(gt.signal_facts[:5])
-            
+
             p_consensus = {}
             p_truth = {}
             for i, signal in enumerate(ground_truth_set):
@@ -230,7 +240,7 @@ async def run_encb(
 
             recovery_rate = calculate_recovery_rate(search_results, ground_truth_set)
             kl_div = calculate_kl_divergence(p_consensus, p_truth)
-            
+
             detected = await resolver.detect_byzantine()
             actual_byzantine = {e.agent_id for e in events if e.meta.get("is_byzantine", False)}
             f1_byz = calculate_f1_score(detected, actual_byzantine)
@@ -240,11 +250,13 @@ async def run_encb(
                 "recovery_rate": round(recovery_rate, 4),
                 "byzantine_f1_score": round(f1_byz, 4),
                 "kl_divergence": round(kl_div, 4),
-                "detected_byzantines": list(detected)
+                "detected_byzantines": list(detected),
             }
 
-            console.print(f"   {resolver.name()[:15]:<15}: inject={inject_ms:>4.0f}ms | "
-                          f"recovery={recovery_rate:>5.1%} | f1_detect={f1_byz:>5.1%} | KL={kl_div:>5.2f}")
+            console.print(
+                f"   {resolver.name()[:15]:<15}: inject={inject_ms:>4.0f}ms | "
+                f"recovery={recovery_rate:>5.1%} | f1_detect={f1_byz:>5.1%} | KL={kl_div:>5.2f}"
+            )
 
     # ── Summary Table ──────────────────────────────────────────────────
     console.print("\n")
@@ -276,12 +288,12 @@ async def run_encb(
     )
     table.add_row(
         "Byzantine F1 Score",
-         *[f"{get_avg(r.name(), 'byzantine_f1_score'):.1%}" for r in resolvers],
+        *[f"{get_avg(r.name(), 'byzantine_f1_score'):.1%}" for r in resolvers],
         "> 80%",
     )
     table.add_row(
         "Average KL Divergence",
-         *[f"{get_avg(r.name(), 'kl_divergence'):.2f}" for r in resolvers],
+        *[f"{get_avg(r.name(), 'kl_divergence'):.2f}" for r in resolvers],
         "< 0.5",
     )
     table.add_row(
@@ -289,7 +301,7 @@ async def run_encb(
         *[f"{get_avg(r.name(), 'injection_time_ms'):.0f}ms" for r in resolvers],
         "< 500ms",
     )
-    
+
     recovery_pass = cortex_rec > 0.70
     byz_pass = get_avg("CORTEX-Persist", "byzantine_f1_score") > 0.80
 
@@ -305,20 +317,26 @@ async def run_encb(
     }
 
     verdict_text = (
-        "[bold green]✅ HYPOTHESIS CONFIRMED[/]\n"
-        "Cortex-Persist demonstrates superior epistemic resilience.\n"
-        "The Cognitive Hypervisor recovers ground truth under structured chaos."
-    ) if hypothesis_confirmed else (
-        "[bold red]❌ HYPOTHESIS FALSIFIED (or needs refinement)[/]\n"
-        "Cortex-Persist did NOT meet the pass criteria under this chaos profile.\n"
-        "Review the consensus and conflict resolution mechanisms."
+        (
+            "[bold green]✅ HYPOTHESIS CONFIRMED[/]\n"
+            "Cortex-Persist demonstrates superior epistemic resilience.\n"
+            "The Cognitive Hypervisor recovers ground truth under structured chaos."
+        )
+        if hypothesis_confirmed
+        else (
+            "[bold red]❌ HYPOTHESIS FALSIFIED (or needs refinement)[/]\n"
+            "Cortex-Persist did NOT meet the pass criteria under this chaos profile.\n"
+            "Review the consensus and conflict resolution mechanisms."
+        )
     )
 
-    console.print(Panel(
-        verdict_text,
-        title="🏆 NOBEL-Ω Verdict",
-        box=box.DOUBLE,
-    ))
+    console.print(
+        Panel(
+            verdict_text,
+            title="🏆 NOBEL-Ω Verdict",
+            box=box.DOUBLE,
+        )
+    )
 
     # ── Cleanup ────────────────────────────────────────────────────────
     if pool is not None:
@@ -331,18 +349,26 @@ async def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="ENCB — Epistemic Noise Chaos Benchmark")
-    parser.add_argument("--iterations", "-n", type=int, default=20,
-                        help="Number of temporal contradiction rounds")
-    parser.add_argument("--agents", "-a", type=int, default=7,
-                        help="Number of simulated agents")
-    parser.add_argument("--byzantine-ratio", "-b", type=float, default=0.3,
-                        help="Fraction of Byzantine agents (0.0-0.5)")
-    parser.add_argument("--noise-ratio", "-r", type=float, default=10.0,
-                        help="Spam noise-to-signal ratio")
-    parser.add_argument("--export", "-e", type=str, default=None,
-                        help="Export results to JSON file")
-    parser.add_argument("--ablate", type=str, action="append",
-                        help="Ablation parameters (e.g. no_logop, no_crdt)")
+    parser.add_argument(
+        "--iterations", "-n", type=int, default=20, help="Number of temporal contradiction rounds"
+    )
+    parser.add_argument("--agents", "-a", type=int, default=7, help="Number of simulated agents")
+    parser.add_argument(
+        "--byzantine-ratio",
+        "-b",
+        type=float,
+        default=0.3,
+        help="Fraction of Byzantine agents (0.0-0.5)",
+    )
+    parser.add_argument(
+        "--noise-ratio", "-r", type=float, default=10.0, help="Spam noise-to-signal ratio"
+    )
+    parser.add_argument(
+        "--export", "-e", type=str, default=None, help="Export results to JSON file"
+    )
+    parser.add_argument(
+        "--ablate", type=str, action="append", help="Ablation parameters (e.g. no_logop, no_crdt)"
+    )
     args = parser.parse_args()
 
     results = await run_encb(

@@ -59,16 +59,24 @@ def _score_node(
         reasons.append(f"role={role}")
 
     delta, reason = _score_field(
-        node.title, title, _W_TITLE_EXACT, _W_TITLE_SUBSTRING,
-        _W_TITLE_CASEFOLD, fuzzy,
+        node.title,
+        title,
+        _W_TITLE_EXACT,
+        _W_TITLE_SUBSTRING,
+        _W_TITLE_CASEFOLD,
+        fuzzy,
     )
     score += delta
     if reason:
         reasons.append(f"title:{reason}")
 
     delta, reason = _score_field(
-        node.description, description, _W_DESCRIPTION,
-        _W_DESCRIPTION * 0.6, _W_DESCRIPTION * 0.5, fuzzy,
+        node.description,
+        description,
+        _W_DESCRIPTION,
+        _W_DESCRIPTION * 0.6,
+        _W_DESCRIPTION * 0.5,
+        fuzzy,
     )
     score += delta
     if reason:
@@ -79,7 +87,12 @@ def _score_node(
         reasons.append(f"id={identifier}")
 
     delta, reason = _score_field(
-        node.value, value, 0.10, 0.05, 0.05, fuzzy,
+        node.value,
+        value,
+        0.10,
+        0.05,
+        0.05,
+        fuzzy,
     )
     score += delta
     if reason:
@@ -104,14 +117,26 @@ def _walk_tree(
 ) -> None:
     """Recursively walk AX tree and score each node."""
     score, reasons = _score_node(
-        node, role, title, description, identifier, value, fuzzy,
+        node,
+        role,
+        title,
+        description,
+        identifier,
+        value,
+        fuzzy,
     )
     if score >= SCORE_THRESHOLD:
         results.append((score, reasons, node))
     for child in node.children:
         _walk_tree(
-            child, role, title, description, identifier, value,
-            fuzzy, results,
+            child,
+            role,
+            title,
+            description,
+            identifier,
+            value,
+            fuzzy,
+            results,
         )
 
 
@@ -133,13 +158,20 @@ def find_elements(
 
     raw: list[tuple[float, list[str], AXNodeSnapshot]] = []
     _walk_tree(
-        snapshot, role, title, description, identifier, value, fuzzy, raw,
+        snapshot,
+        role,
+        title,
+        description,
+        identifier,
+        value,
+        fuzzy,
+        raw,
     )
     raw.sort(key=lambda x: x[0], reverse=True)
 
     return [
         ElementMatch(
-            ref=None,
+            ref=node._ref,
             role=node.role,
             subrole=node.subrole,
             title=node.title,
@@ -166,6 +198,12 @@ def find_best(
 ) -> ElementMatch | None:
     """Find the single best-matching element, or None."""
     results = find_elements(
-        snapshot, role, title, description, identifier, value, fuzzy,
+        snapshot,
+        role,
+        title,
+        description,
+        identifier,
+        value,
+        fuzzy,
     )
     return results[0] if results else None

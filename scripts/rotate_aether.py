@@ -31,7 +31,7 @@ logger = logging.getLogger("aether-rotation")
 def get_active_facts() -> int:
     """Extract the active facts count from the context snapshot."""
     if not SNAPSHOT_FILE.exists():
-        logger.warning(f"Snapshot not found at {SNAPSHOT_FILE}. Defaulting to 0 facts.")
+        logger.warning("Snapshot not found at %s. Defaulting to 0 facts.", SNAPSHOT_FILE)
         return 0
 
     try:
@@ -47,7 +47,7 @@ def get_active_facts() -> int:
             return int(match.group(1))
 
     except Exception as e:
-        logger.error(f"Failed to read snapshot: {e}")
+        logger.error("Failed to read snapshot: %s", e)
 
     logger.warning("Could not parse active facts count. Defaulting to 0.")
     return 0
@@ -76,7 +76,7 @@ def record_decision(msg: str) -> None:
             timeout=10,
         )
     except Exception as e:
-        logger.debug(f"Failed to record decision via CLI: {e}")
+        logger.debug("Failed to record decision via CLI: %s", e)
 
 
 def main():
@@ -87,15 +87,15 @@ def main():
         sys.exit(1)
 
     active_facts = get_active_facts()
-    logger.info(f"Detected Active Facts: {active_facts}")
+    logger.info("Detected Active Facts: %s", active_facts)
 
     if active_facts > HEAVY_THRESHOLD_FACTS:
-        logger.info(f"Context weight is HIGH (> {HEAVY_THRESHOLD_FACTS}). Selecting LIGHT profile.")
+        logger.info("Context weight is HIGH (> %s). Selecting LIGHT profile.", HEAVY_THRESHOLD_FACTS)
         source_profile = LIGHT_PROFILE
         profile_type = "LIGHT"
     else:
         logger.info(
-            f"Context weight is NORMAL (<= {HEAVY_THRESHOLD_FACTS}). Selecting HEAVY profile."
+            "Context weight is NORMAL (<= %s). Selecting HEAVY profile.", HEAVY_THRESHOLD_FACTS
         )
         source_profile = HEAVY_PROFILE
         profile_type = "HEAVY"
@@ -107,7 +107,7 @@ def main():
             current_symlink_target = TARGET_PROFILE.readlink()
             if current_symlink_target == source_profile:
                 logger.info(
-                    f"Aether is already using the {profile_type} profile. No action needed."
+                    "Aether is already using the %s profile. No action needed.", profile_type
                 )
                 return
         else:
@@ -116,7 +116,8 @@ def main():
             try:
                 if TARGET_PROFILE.read_bytes() == source_profile.read_bytes():
                     logger.info(
-                        f"Aether is already using the {profile_type} profile content. No action needed."
+                        "Aether is already using the %s profile content. No action needed.",
+                        profile_type,
                     )
                     return
             except Exception:
@@ -139,7 +140,7 @@ def main():
         print(f"✅ {msg}")
 
     except Exception as e:
-        logger.error(f"Failed to rotate profile: {e}")
+        logger.error("Failed to rotate profile: %s", e)
         sys.exit(1)
 
 

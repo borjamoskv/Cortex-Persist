@@ -146,7 +146,6 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.lineage_cmds",
     "cortex.cli.loop_cmds",
     "cortex.cli.mejoralo_cmds",
-    "cortex.cli.memory_cmds",
     "cortex.cli.prompt_cmds",
     "cortex.cli.purge",
     "cortex.cli.reflect_cmds",
@@ -227,6 +226,9 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Domain intelligence and market anomaly arbitrage.",
     ),
     ("wealth", "cortex.cli.wealth_cmds", "wealth_cmds", "Wealth engine."),
+    ("gateway", "cortex.cli.gateway_cmds", "gateway_cmds", "CORTEX gateway management."),
+    ("memory", "cortex.cli.memory_cmds", "memory_cmds", "CORTEX memory management."),
+    ("doctor", "cortex.cli.doctor_cmds", "doctor", "🩺 CORTEX Doctor — Diagnostic tool."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

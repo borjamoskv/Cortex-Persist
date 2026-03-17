@@ -43,8 +43,7 @@ def classify_imports(filepath: str) -> tuple[set[str], set[str], set[str]]:
                 isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
             ):
                 end_line = max(
-                    getattr(n, "end_lineno", getattr(n, "lineno", 0))
-                    for n in ast.walk(node)
+                    getattr(n, "end_lineno", getattr(n, "lineno", 0)) for n in ast.walk(node)
                 )
                 type_checking_ranges.append((node.lineno, end_line))
 
@@ -171,8 +170,10 @@ def main() -> None:
             print()
 
     total = len(runtime_cycles) + len(type_only_cycles) + len(lazy_cycles)
-    print(f"Total pairs: {total} (runtime: {len(runtime_cycles)}, "
-          f"type-only: {len(type_only_cycles)}, lazy: {len(lazy_cycles)})")
+    print(
+        f"Total pairs: {total} (runtime: {len(runtime_cycles)}, "
+        f"type-only: {len(type_only_cycles)}, lazy: {len(lazy_cycles)})"
+    )
 
     sys.exit(1 if runtime_cycles else 0)
 

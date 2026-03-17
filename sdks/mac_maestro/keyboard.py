@@ -11,11 +11,12 @@ try:
     from Quartz import (
         CGEventCreateKeyboardEvent,
         CGEventPost,
-        CGEventSetFlags,
-        kCGEventKeyDown,
-        kCGEventKeyUp,
+        CGEventSetFlags,  # noqa: F401
+        kCGEventKeyDown,  # noqa: F401
+        kCGEventKeyUp,  # noqa: F401
         kCGHIDEventTap,
     )
+
     QUARTZ_AVAILABLE = True
 except ImportError:
     QUARTZ_AVAILABLE = False
@@ -27,9 +28,7 @@ def type_text(text: str, method: str = "cgevent") -> None:
     """Type text using CGEvent keyboard events."""
     if method == "cgevent":
         if not QUARTZ_AVAILABLE:
-            raise ActionFailed(
-                "Quartz framework not available for keyboard input."
-            )
+            raise ActionFailed("Quartz framework not available for keyboard input.")
         for char in text:
             _press_char_cgevent(char)
             time.sleep(0.02)
@@ -58,6 +57,7 @@ def _press_char_cgevent(char: str) -> None:
     up = CGEventCreateKeyboardEvent(None, 0, False)
 
     from Quartz import CGEventKeyboardSetUnicodeString
+
     CGEventKeyboardSetUnicodeString(down, len(char), char)
     CGEventKeyboardSetUnicodeString(up, len(char), char)
 

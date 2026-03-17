@@ -19,7 +19,12 @@ from cortex.cli.errors import err_empty_results
 from cortex.cli.slow_tip import with_slow_tips
 
 
-@cli.command()
+@click.group("memory")
+def memory_cmds() -> None:
+    """CORTEX memory management commands."""
+
+
+@memory_cmds.command("store")
 @click.argument("project")
 @click.argument("content")
 @click.option(
@@ -118,7 +123,7 @@ def store(
         _run_async(engine.close())
 
 
-@cli.command()
+@memory_cmds.command("search")
 @click.argument("query")
 @click.option("--project", "-p", default=None, help="Scope to project")
 @click.option("--top", "-k", default=5, help="Number of results")
@@ -340,7 +345,7 @@ def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
         _run_async(engine.close())
 
 
-@cli.command("trace-episode")
+@memory_cmds.command("trace-episode")
 @click.argument("query", required=False, default="")
 @click.option("--fact-id", "-f", type=int, default=0, help="Trace from a specific fact ID")
 @click.option("--project", "-p", default="", help="Scope to project")
@@ -400,7 +405,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
         _run_async(engine.close())
 
 
-@cli.command("trace-chain")
+@memory_cmds.command("trace-chain")
 @click.argument("fact_id", type=int)
 @click.option(
     "--direction",
@@ -459,3 +464,56 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         _show_tip(engine)
     finally:
         _run_async(engine.close())
+
+
+@memory_cmds.command("stats")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def stats(db, as_json) -> None:
+    """Show memory statistics."""
+    engine = get_engine(db)
+    try:
+        s = _run_async(engine.stats())
+        if as_json:
+            import json
+
+            click.echo(json.dumps(s, indent=2))
+            return
+
+        table = Table(title="🧠 Memory Statistics")
+        table.add_column("Metric", style="bold cyan")
+        table.add_column("Value", style="noir.cyber")
+        table.add_row("Total Facts", str(s["total_facts"]))
+        table.add_row("Active Facts", str(s["active_facts"]))
+        table.add_row("Deprecated", str(s["deprecated_facts"]))
+        table.add_row("Projects", str(s["project_count"]))
+        table.add_row("Embeddings", str(s["embeddings"]))
+        table.add_row("DB Size", f"{s['db_size_mb']} MB")
+        console.print(table)
+    finally:
+        _run_async(engine.close())
+
+
+# --- Root Aliases (Backward Compatibility) ---
+@cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def store_alias(ctx, args):
+    """[Alias] Store a fact."""
+    ctx.invoke(store, *args)
+
+
+@cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def search_alias(ctx, args):
+    """[Alias] Semantic search."""
+    ctx.invoke(search, *args)
+
+
+@cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def recall_alias(ctx, args):
+    """[Alias] Load full context."""
+    ctx.invoke(recall, *args)

@@ -67,7 +67,7 @@ def memory_db(tmp_path: Path):
             valid_from TEXT,
             valid_until TEXT,
             source TEXT,
-            meta TEXT,
+            metadata TEXT,
             consensus_score REAL,
             created_at TEXT,
             updated_at TEXT,
@@ -92,9 +92,12 @@ def memory_db(tmp_path: Path):
 
 
 def _insert_fact(db_path: str, fact_id: int, project: str, hours: float | None = 0.5):
-    meta = json.dumps({"hours_saved": hours}) if hours is not None else "{}"
+    metadata = json.dumps({"hours_saved": hours}) if hours is not None else "{}"
     conn = sqlite3.connect(db_path)
-    conn.execute("INSERT INTO facts (id, project, meta) VALUES (?, ?, ?)", (fact_id, project, meta))
+    conn.execute(
+        "INSERT INTO facts (id, project, metadata) VALUES (?, ?, ?)",
+        (fact_id, project, metadata),
+    )
     conn.commit()
     conn.close()
 
