@@ -1,7 +1,6 @@
 """MoskvDaemon — Main daemon orchestrator."""
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import json
@@ -13,6 +12,7 @@ import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
 from cortex.extensions.daemon.healing import HealingMixin

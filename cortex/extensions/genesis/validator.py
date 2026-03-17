@@ -8,11 +8,11 @@ Validates that a generated system is structurally sound:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import ast
 import logging
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.genesis.models import SystemSpec
 

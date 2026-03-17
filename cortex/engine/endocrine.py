@@ -5,11 +5,11 @@ Regulates system-wide behavior using hormonal signals (Cortisol, Neural-Growth).
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import time
 from enum import Enum, auto
+from typing import Optional
 
 logger = logging.getLogger("cortex.endocrine")
 

@@ -1,10 +1,10 @@
 """Daemon data classes and constants."""
 
 from __future__ import annotations
-from typing import Optional
 
 import dataclasses
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.core.paths import (
     AGENT_DIR,

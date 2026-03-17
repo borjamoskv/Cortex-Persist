@@ -34,10 +34,10 @@ Usage::
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.extensions.thinking.fusion_models import (
     ModelResponse,

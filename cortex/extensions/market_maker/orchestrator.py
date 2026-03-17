@@ -4,10 +4,10 @@ Ties all 4 phases together: Detect -> Score -> Generate -> Validate.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import uuid
+from typing import Optional
 
 from cortex.extensions.market_maker.detector import TrendDetector
 from cortex.extensions.market_maker.models import (

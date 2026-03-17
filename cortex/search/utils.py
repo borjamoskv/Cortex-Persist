@@ -69,7 +69,7 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
 
     Column order from _fts5_search / _like_search:
       0: f.id, 1: f.content, 2: f.project, 3: f.fact_type, 4: f.confidence,
-      5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.meta,
+      5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.metadata,
       10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: t.hash,
       14: bm25(facts_fts) AS rank  [FTS only]
     """

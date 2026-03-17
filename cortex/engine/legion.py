@@ -9,7 +9,7 @@ import asyncio
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 try:
     from cortex.cli.bicameral import bicameral
@@ -152,7 +152,7 @@ class LegionOmegaEngine:
     def __init__(
         self,
         max_cycles: int = 3,
-        vectors: Optional[Union[list[AttackVector], Mapping[str, AttackVector]]] = None,
+        vectors: Optional[list[AttackVector] | Mapping[str, AttackVector]] = None,
     ):
         self.blue_team = BlueTeamAgent()
         # Normalización de vectores: asegurar que sea una lista de objetos, no un dict

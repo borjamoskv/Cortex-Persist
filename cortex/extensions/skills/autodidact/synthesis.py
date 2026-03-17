@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider

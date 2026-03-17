@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import aiosqlite
 

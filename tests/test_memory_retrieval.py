@@ -8,9 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-import pytest
-
-
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
 
@@ -120,8 +117,9 @@ class TestHebbianBoost:
     """Tests for STDP Hebbian ranking boost."""
 
     def test_no_stdp_engine_passthrough(self):
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
         from unittest.mock import MagicMock
+
+        from cortex.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock(spec=[])
         results = [{"id": "a", "score": 1.0}, {"id": "b", "score": 0.5}]
@@ -129,8 +127,9 @@ class TestHebbianBoost:
         assert boosted == results
 
     def test_single_result_passthrough(self):
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
         from unittest.mock import MagicMock
+
+        from cortex.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock()
         manager._stdp_engine = MagicMock()
@@ -139,8 +138,9 @@ class TestHebbianBoost:
         assert boosted == results
 
     def test_strong_edge_boosts_score(self):
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
         from unittest.mock import MagicMock
+
+        from cortex.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock()
         stdp = MagicMock()

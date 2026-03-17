@@ -4,11 +4,11 @@ Precision first. All monetary/scoring logic explicitly uses Decimal.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
+from typing import Optional
 
 
 class Verdict(Enum):

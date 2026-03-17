@@ -4,11 +4,11 @@ Simulates demand validation via micro-budget ad spend.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import random
 from decimal import Decimal
+from typing import Optional
 
 from cortex.extensions.market_maker.models import Experiment, ValidationResult
 

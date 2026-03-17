@@ -8,11 +8,8 @@ from __future__ import annotations
 
 import sqlite3
 
-import pytest
-
 from cortex.search.causal_gap import CausalGap
 from cortex.search.hybrid import hybrid_search_sync
-from cortex.search.models import SearchResult
 
 
 def _make_in_memory_db() -> sqlite3.Connection:

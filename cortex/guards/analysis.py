@@ -1,6 +1,6 @@
-from typing import Optional
 import ast
 from pathlib import Path
+from typing import Optional
 
 from cortex.guards.models import EXEC_MODULES, ORACLE_BINARIES, SOVEREIGN_MARKERS
 

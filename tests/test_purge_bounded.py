@@ -1,9 +1,12 @@
 """Tests for Bounded Demolition (Axiom Ω₄)."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from cortex.engine import CortexEngine
-from cortex.engine.causality import AsyncCausalGraph, EDGE_DERIVED_FROM
+from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+
 
 @pytest.fixture
 async def engine(tmp_path: Path, monkeypatch):

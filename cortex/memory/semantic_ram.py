@@ -14,7 +14,7 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Final, Optional, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Any, Final, Optional, TypedDict
 
 import numpy as np
 

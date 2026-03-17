@@ -8,10 +8,10 @@ The model is loaded lazily on first use and cached for the process lifetime.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
+from typing import Optional
 
 from cortex.embeddings import EMBEDDING_DIM, LocalEmbedder
 

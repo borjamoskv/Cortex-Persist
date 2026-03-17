@@ -13,7 +13,7 @@ Bidirectional synchronization between CORTEX facts and Langbase Memory.
 from __future__ import annotations
 
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 __all__ = ["sync_to_langbase", "enrich_from_langbase"]
 

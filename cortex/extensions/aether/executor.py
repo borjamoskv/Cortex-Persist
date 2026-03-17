@@ -5,12 +5,12 @@ and dispatches to AgentToolkit. No framework dependency.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.extensions.aether.models import PlanOutput, ToolCall
 from cortex.extensions.aether.tools import AgentToolkit

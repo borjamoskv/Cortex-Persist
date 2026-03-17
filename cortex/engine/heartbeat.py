@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
 from cortex.utils import hygiene

@@ -4,6 +4,7 @@ Uses sealed Grade enum. Supports configurable weight overrides.
 """
 
 from __future__ import annotations
+
 from typing import Optional
 
 from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot

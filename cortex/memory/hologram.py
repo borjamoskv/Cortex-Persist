@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 

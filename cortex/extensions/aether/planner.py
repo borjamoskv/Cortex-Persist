@@ -4,11 +4,11 @@ Reads repo structure and emits a structured implementation plan.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.aether.models import PlanOutput
 from cortex.extensions.aether.tools import AgentToolkit

@@ -1,10 +1,11 @@
-import pytest
 import time
-import numpy as np
 from unittest.mock import AsyncMock
-from pathlib import Path
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
+import pytest
+
 from cortex.memory.models import CortexFactModel
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
 
 @pytest.fixture
 def temp_db_path(tmp_path):

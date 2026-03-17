@@ -6,10 +6,10 @@ delegates rendering to the TemplateRegistry.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
 from cortex.extensions.genesis.templates import TemplateRegistry

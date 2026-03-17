@@ -18,7 +18,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass
-from typing import Literal, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -109,7 +109,7 @@ class TopologicalHealthMonitor:
 
     def compute_anchor(
         self,
-        vectors: Union[list[list[float]], np.ndarray],
+        vectors: list[list[float]] | np.ndarray,
     ) -> TopologicalAnchor:
         """Compute a frozen topological anchor from a sample of vectors.
 
@@ -155,7 +155,7 @@ class TopologicalHealthMonitor:
         return anchor.model_hash != self._model_hash
 
     def _validate_and_prepare_array(
-        self, current_vectors: Union[list[list[float]], np.ndarray]
+        self, current_vectors: list[list[float]] | np.ndarray
     ) -> np.ndarray:
         if isinstance(current_vectors, list):
             arr = np.array(current_vectors, dtype=np.float32)
@@ -206,7 +206,7 @@ class TopologicalHealthMonitor:
 
     def measure_drift(
         self,
-        current_vectors: Union[list[list[float]], np.ndarray],
+        current_vectors: list[list[float]] | np.ndarray,
         anchor: TopologicalAnchor,
     ) -> float:
         """Measure topological drift from the anchor.

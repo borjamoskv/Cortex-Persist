@@ -24,7 +24,7 @@ import asyncio
 import base64
 import logging
 import os
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import httpx
 
@@ -185,7 +185,7 @@ class APIEmbedder:
 
     # ─── Text Embedding (all providers) ───────────────────────────
 
-    async def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
+    async def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         """Generate embedding(s). Accepts single text or list."""
         if isinstance(text, list):
             return await self.embed_batch(text)

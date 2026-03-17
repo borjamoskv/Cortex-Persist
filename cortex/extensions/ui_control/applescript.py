@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
+from typing import Optional
 
 from cortex.extensions.ui_control.models import (
     AppleScriptExecutionError,

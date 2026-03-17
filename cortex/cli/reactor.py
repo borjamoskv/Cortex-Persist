@@ -5,7 +5,6 @@ Visualizes Synaptic Resonance and Entropy Eradication.
 """
 from __future__ import annotations
 
-
 import random
 import time
 

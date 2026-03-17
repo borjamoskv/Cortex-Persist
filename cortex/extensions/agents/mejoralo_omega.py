@@ -14,7 +14,7 @@ import logging
 import math
 import time
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
@@ -42,10 +42,10 @@ class MejoraloOmegaAgent:
     def __init__(
         self,
         project: str,
-        base_path: Union[str, Path],
+        base_path: str | Path,
         target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
         cycle_interval: int = DEFAULT_CYCLE_INTERVAL,
-        db_path: Optional[Union[str, Path]] = None,
+        db_path: Optional[str | Path] = None,
     ):
         self.project = project
         self.base_path = Path(base_path).resolve()

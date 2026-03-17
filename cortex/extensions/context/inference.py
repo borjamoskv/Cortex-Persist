@@ -12,7 +12,7 @@ import json
 import logging
 import sqlite3
 from collections import defaultdict
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.context.signals import InferenceResult, Signal
 

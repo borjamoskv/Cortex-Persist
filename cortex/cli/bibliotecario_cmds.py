@@ -7,11 +7,11 @@ them into structured CORTEX Memos (Markdown).
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import os
 from pathlib import Path
+from typing import Optional
 
 import click
 from rich.console import Console

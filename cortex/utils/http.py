@@ -31,7 +31,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.http")
 
@@ -101,7 +101,7 @@ class HttpRetryMixin:
         headers: dict[str, str],
         payload: Optional[dict[str, Any]],
         label: str,
-    ) -> Union[dict[str, Any], Exception]:
+    ) -> dict[str, Any] | Exception:
         """Execute HTTP request and parse JSON. Returns Exception on 429 instead of raising."""
         import httpx
 
@@ -182,7 +182,7 @@ async def _do_standalone_post(
     payload: dict[str, Any],
     provider: str,
     label: str,
-) -> Union[dict[str, Any], Exception]:
+) -> dict[str, Any] | Exception:
     import httpx
 
     response = await client.post(url, headers=headers, json=payload)

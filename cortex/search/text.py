@@ -6,10 +6,10 @@
 """Full-text search implementation."""
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import sqlite3
+from typing import Optional
 
 import aiosqlite
 
@@ -73,7 +73,7 @@ async def _fts5_search(
     fts_query = _sanitize_fts_query(query)
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
-               f.valid_from, f.valid_until, f.tags, f.source, f.meta,
+               f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
                f.created_at, f.updated_at, f.tx_id, t.hash,
                bm25(facts_fts) AS rank
         FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
@@ -119,7 +119,7 @@ async def _like_search(
 ) -> list:
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
-               f.valid_from, f.valid_until, f.tags, f.source, f.meta,
+               f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
                f.created_at, f.updated_at, f.tx_id, t.hash
         FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id
         WHERE f.tenant_id = ? AND f.content LIKE ?

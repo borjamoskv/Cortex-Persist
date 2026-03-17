@@ -5,9 +5,9 @@ Enables developers to track their usage and plan limits.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
 

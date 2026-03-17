@@ -5,10 +5,10 @@ a boolean taint would rupture half the DAG on a mild suspicion.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 __all__ = [
     "Confidence",

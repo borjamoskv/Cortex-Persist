@@ -7,9 +7,9 @@ Commands:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
+from typing import Optional
 
 import click
 from rich.console import Console

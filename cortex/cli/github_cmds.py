@@ -1,10 +1,10 @@
 """CLI commands: github sync, github status."""
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import os
+from typing import Optional
 
 import click
 from rich.panel import Panel

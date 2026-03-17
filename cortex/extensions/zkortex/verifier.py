@@ -10,11 +10,11 @@ Principio soberano: El Verifier puede CONFIAR en CORTEX
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import time
 from dataclasses import dataclass
+from typing import Optional
 
 from cortex.extensions.zkortex.commitment import KnowledgeCommitment
 from cortex.extensions.zkortex.merkle import ZKMembershipProof

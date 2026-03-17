@@ -9,7 +9,7 @@ import math
 import sqlite3
 import time
 from datetime import datetime, timezone
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.engine.forgetting_models import (
     EvictionVerdict,

@@ -1,9 +1,9 @@
 """CORTEX Auth — Data models."""
 
 from __future__ import annotations
-from typing import Optional, Union
 
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.auth.rbac import Permission
 
@@ -12,7 +12,7 @@ from cortex.auth.rbac import Permission
 class APIKey:
     """Represents an API key with its metadata."""
 
-    id: Union[int, str]
+    id: int | str
     name: str
     key_prefix: str
     tenant_id: str
@@ -31,6 +31,6 @@ class AuthResult:
     authenticated: bool
     tenant_id: str = "default"
     role: str = "user"
-    permissions: list[Union[str, Permission]] = field(default_factory=list)
+    permissions: list[str | Permission] = field(default_factory=list)
     key_name: str = ""
     error: str = ""

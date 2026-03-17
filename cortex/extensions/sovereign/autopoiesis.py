@@ -8,7 +8,6 @@ it architecturally manifests it.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import os
@@ -16,6 +15,7 @@ import subprocess
 import uuid
 from collections.abc import Callable
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class Autopoiesis:
     Promoted from experimental to core sovereign layer.
     """
 
-    def __init__(self, tool_dir: Union[str, os.PathLike] = "~/.cortex/tools") -> None:
+    def __init__(self, tool_dir: str | os.PathLike = "~/.cortex/tools") -> None:
         self.tool_dir = Path(os.path.expanduser(tool_dir))
         self.tool_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Autopoiesis engine activated at %s", self.tool_dir)

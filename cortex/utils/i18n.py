@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Callable, Dict, Final, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Final, NamedTuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ def _load_translations() -> LocaleData:
     return _TRANSLATIONS
 
 
-def register_translation(key: TranslationKey, lang: Union[Lang, str], value: str) -> None:
+def register_translation(key: TranslationKey, lang: Lang | str, value: str) -> None:
     """Sovereign Injection: Register or override a translation at runtime.
 
     This allows plugins/daemons to expand the language model without file I/O.
@@ -120,7 +120,7 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-def _normalize_lang(lang: Optional[Union[str, Lang]]) -> Lang:
+def _normalize_lang(lang: Optional[str | Lang]) -> Lang:
     """Fast normalization of language codes with primary-tag fallback."""
     if isinstance(lang, Lang):
         return lang
@@ -246,7 +246,7 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
         threading.Thread(target=asyncio.run, args=(_repair(),), daemon=True).start()
 
 
-def get_trans(key: TranslationKey, lang: Optional[Union[Lang, str]] = None, **kwargs: Any) -> str:
+def get_trans(key: TranslationKey, lang: Optional[Lang | str] = None, **kwargs: Any) -> str:
     """Retrieve localized string formatted with variables.
 
     O(1) lookup via LRU. Supports dynamic string interpolation.
@@ -281,7 +281,7 @@ def has_translation(key: str) -> bool:
 
 
 @contextmanager
-def override_locale(lang: Union[str, Lang]) -> Generator[None, None, None]:
+def override_locale(lang: str | Lang) -> Generator[None, None, None]:
     """Context manager to scope the translation language for the current thread/task."""
     normalized = _normalize_lang(lang)
     token = _LOCALT_CONTEXT.set(normalized)

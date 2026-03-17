@@ -5,11 +5,11 @@ on every health check cycle. Cache invalidates after 60s by default.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import time
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.daemon.models import CORTEX_DIR, DEFAULT_DISK_WARN_MB, DiskAlert
 

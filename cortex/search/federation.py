@@ -15,11 +15,11 @@ Usage:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import sqlite3
 from pathlib import Path
+from typing import Optional
 
 from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope

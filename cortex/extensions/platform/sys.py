@@ -6,10 +6,10 @@ paths and platform-specific assumptions scattered across the codebase.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import sys
 from pathlib import Path
+from typing import Optional
 
 __all__ = [
     "get_cortex_dir",

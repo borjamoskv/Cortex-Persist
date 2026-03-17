@@ -1,7 +1,6 @@
 """V8 Governance: Evaluation Monitor."""
 
 from __future__ import annotations
-from typing import Union
 
 import logging
 import time
@@ -20,7 +19,7 @@ class EvaluationMonitor:
 
     def __init__(
         self,
-        db_path: Union[Path, str],
+        db_path: Path | str,
         interval_seconds: int = 43200,  # 12 hours
     ):
         self.db_path = Path(db_path)

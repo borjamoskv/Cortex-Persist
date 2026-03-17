@@ -4,12 +4,12 @@ Pydantic-validated schemas for requests, results, and batch jobs.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import enum
 import hashlib
 import time
 from dataclasses import dataclass, field
+from typing import Optional
 
 
 class ExtractionStrategy(enum.Enum):

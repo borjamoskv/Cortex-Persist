@@ -7,7 +7,6 @@ the user's goal before they explicitly articulate it.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import hashlib
 import json
@@ -16,6 +15,7 @@ import math
 import re
 import time
 from dataclasses import dataclass
+from typing import Optional
 
 from cortex.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
 

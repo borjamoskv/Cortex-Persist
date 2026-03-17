@@ -6,11 +6,9 @@ of the full CortexEngine, proving that guards can be tested in isolation.
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
@@ -70,7 +68,6 @@ class TestGuardPipeline:
             g.check = check
             return g
 
-        import asyncio
         g1 = await make_guard("first")
         g2 = await make_guard("second")
         g3 = await make_guard("third")

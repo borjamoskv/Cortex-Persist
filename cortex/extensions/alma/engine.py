@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import asdict, dataclass
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from cortex.extensions.alma.taste import TasteVerdict

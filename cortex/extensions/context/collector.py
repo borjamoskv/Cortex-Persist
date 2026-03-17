@@ -13,7 +13,7 @@ import sqlite3
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.context.signals import Signal
 from cortex.memory.temporal import now_iso
@@ -53,7 +53,7 @@ def _recency_decay(rank: int, total: int) -> float:
     return 1.0 - 0.5 * (rank / (total - 1))
 
 
-def _parse_tx_detail(raw: Optional[Union[str, dict]]) -> str:
+def _parse_tx_detail(raw: Optional[str | dict]) -> str:
     """Extract a short summary from a transaction detail field."""
     if not raw:
         return ""

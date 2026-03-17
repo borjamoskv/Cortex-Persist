@@ -5,11 +5,11 @@ Strict scoring bounds to yield exact `Verdict` directives.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import random
 from decimal import Decimal
+from typing import Optional
 
 from cortex.extensions.market_maker.models import Opportunity, TrendSignal, Verdict
 

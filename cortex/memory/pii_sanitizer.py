@@ -24,12 +24,12 @@ Usage:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 __all__ = ["PIISanitizer", "PIIMatch", "PIICategory", "SanitizationReport"]
 

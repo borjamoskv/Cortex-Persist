@@ -11,12 +11,12 @@ Usage:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import argparse
 import asyncio
 import logging
 import sys
+from typing import Optional
 
 __all__ = ["run_cli", "run_web", "main"]
 

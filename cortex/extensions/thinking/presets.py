@@ -10,11 +10,11 @@ tabla de routing por modo, y configuración por defecto.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import os
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 from cortex.extensions.thinking.fusion import FusionStrategy
 

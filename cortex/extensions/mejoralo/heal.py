@@ -14,7 +14,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
@@ -110,7 +110,7 @@ def _calculate_total_complexity(source_code: str) -> int:
 def _apply_and_verify(
     top_file_rel: str,
     new_code: str,
-    path: Union[str, Path],
+    path: str | Path,
     level: int,
     iteration: int,
     console: Any,
@@ -200,7 +200,7 @@ def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
 
 def _run_delta_testing(
     top_file_rel: str,
-    path: Union[str, Path],
+    path: str | Path,
     original_code: str,
     abs_path: Path,
     console: Any,
@@ -259,7 +259,7 @@ def _run_delta_testing(
 
 def _commit_healed_file(
     abs_path: Path,
-    path: Union[str, Path],
+    path: str | Path,
     top_file_rel: str,
     level: int,
     iteration: int,
@@ -330,7 +330,7 @@ def _detect_escalation_level(
 
 def heal_project(
     project: str,
-    path: Union[str, Path],
+    path: str | Path,
     target_score: int,
     scan_result: ScanResult,
     engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
@@ -379,7 +379,7 @@ def heal_project(
 
 def _run_healing_iteration(
     project: str,
-    path: Union[str, Path],
+    path: str | Path,
     level: int,
     iteration: int,
     console: Any,

@@ -1,10 +1,10 @@
 """CORTEX Engine — Fact Model and helpers."""
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 from dataclasses import dataclass
+from typing import Optional
 
 __all__ = ["Fact", "row_to_fact"]
 

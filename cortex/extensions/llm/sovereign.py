@@ -39,13 +39,13 @@ Usage::
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
 import os
 import time
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider

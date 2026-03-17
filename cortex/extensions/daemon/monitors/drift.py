@@ -5,12 +5,12 @@ against the persisted baseline. Fires DriftAlert if health drops below threshold
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import sqlite3
 import time
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -29,8 +29,8 @@ class DriftMonitorDaemon:
 
     def __init__(
         self,
-        vectors_db_path: Union[Path, str],
-        cortex_dir: Optional[Union[Path, str]] = None,
+        vectors_db_path: Path | str,
+        cortex_dir: Optional[Path | str] = None,
         interval_seconds: int = 6 * 3600,  # 6 hours
         health_threshold: float = 0.5,
         model_name: str = "all-MiniLM-L6-v2",

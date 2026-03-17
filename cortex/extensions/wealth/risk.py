@@ -5,7 +5,6 @@ Decimal-precision. Zero tolerance for float drift.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import threading
@@ -13,6 +12,7 @@ import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum, auto
+from typing import Optional
 
 log = logging.getLogger(__name__)
 

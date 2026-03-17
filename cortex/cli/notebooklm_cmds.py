@@ -9,7 +9,6 @@ Provides native CLI commands for NotebookLM synchronization:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import os
@@ -17,6 +16,7 @@ import shutil
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 import click
 from rich.console import Console

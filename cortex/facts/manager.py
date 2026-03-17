@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import Any, Optional, TYPE_CHECKING, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import ValidationError
 
@@ -127,7 +127,7 @@ class FactManager:
         # Convert dict to Fact model
         return Fact(**raw)
 
-    async def _fetch(self, query: str, params: Union[list, tuple] = ()) -> list[Fact]:
+    async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
         """Lower-level fetch from engine database."""
         conn = await self.engine.get_conn()
         cursor = await conn.execute(query, params)

@@ -15,7 +15,7 @@ import logging
 import re
 from collections import Counter, defaultdict
 from itertools import combinations
-from typing import Any, Final, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Final, Optional
 
 from cortex.extensions.episodic.base import (
     EMOTIONS,

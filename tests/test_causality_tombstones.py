@@ -1,4 +1,5 @@
-from cortex.engine.causality import LedgerEvent, EpistemicStatus, CausalGraph, propagate_refutation
+from cortex.engine.causality import CausalGraph, EpistemicStatus, LedgerEvent, propagate_refutation
+
 
 def test_refuted_propagates_taint():
     graph = CausalGraph()

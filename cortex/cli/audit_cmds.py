@@ -1,4 +1,5 @@
 from typing import Optional
+
 """
 CORTEX v6 — Audit Commands
 Commands for system security and architectural auditing.

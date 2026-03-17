@@ -5,13 +5,13 @@ and generates `WorkflowAlert`s recommending the most relevant workflow to run.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.daemon.models import AGENT_DIR, CORTEX_DB, WorkflowAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor

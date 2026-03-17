@@ -6,12 +6,12 @@ Defines who has the mathematical right to mutate the persistent state.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import dataclasses
 import datetime
 import logging
 from collections.abc import Sequence
+from typing import Optional
 
 logger = logging.getLogger("cortex.engine.trust")
 

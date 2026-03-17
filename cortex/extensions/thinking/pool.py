@@ -10,11 +10,11 @@ pool de providers LLM y registro de historial.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cortex.extensions.llm.provider import LLMProvider
 

@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -49,7 +49,7 @@ class CortexLLMRouter:
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
         hedging_providers: Optional[Sequence[BaseProvider]] = None,
-        db_path: Optional[Union[str, Path]] = None,
+        db_path: Optional[str | Path] = None,
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])

@@ -12,11 +12,11 @@ No framework has this for agent memory. This is the killer feature.
 """
 
 from __future__ import annotations
-from typing import Union
 
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Union
 
 logger = logging.getLogger("cortex.memory.crdt")
 

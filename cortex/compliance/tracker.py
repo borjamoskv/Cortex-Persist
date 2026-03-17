@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.config import DEFAULT_DB_PATH
 
@@ -48,7 +48,7 @@ class ComplianceTracker:
 
     def __init__(
         self,
-        db_path: Union[str, Path] = DEFAULT_DB_PATH,
+        db_path: str | Path = DEFAULT_DB_PATH,
         project: str = "default",
     ) -> None:
         from cortex.engine import CortexEngine

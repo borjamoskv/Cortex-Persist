@@ -1,13 +1,13 @@
 """TimingTracker — heartbeat-based time tracking."""
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 import sqlite3
 import threading
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from cortex.extensions.timing.models import (
     DEFAULT_GAP_SECONDS,

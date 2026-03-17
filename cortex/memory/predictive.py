@@ -16,11 +16,11 @@ self-processes, and self-destructs.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import Optional
 
 logger = logging.getLogger("cortex.memory.predictive")
 

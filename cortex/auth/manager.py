@@ -9,7 +9,7 @@ import logging
 import secrets
 import threading
 from datetime import datetime, timezone
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
@@ -27,7 +27,7 @@ class AuthManager:
 
     KEY_LENGTH = 32  # 256-bit keys
 
-    def __init__(self, backend: Optional[Union[BaseAuthBackend, str]] = None):
+    def __init__(self, backend: Optional[BaseAuthBackend | str] = None):
         """Initialize with an optional backend or db_path.
 
         Args:
@@ -259,7 +259,7 @@ class AuthManager:
             for r in rows
         ]
 
-    async def revoke_key(self, key_id: Union[int, str]) -> bool:
+    async def revoke_key(self, key_id: int | str) -> bool:
         """Revoke an API key."""
         return await self.backend.revoke_key(key_id)
 

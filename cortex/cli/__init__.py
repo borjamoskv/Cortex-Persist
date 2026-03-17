@@ -221,6 +221,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("github", "cortex.cli.github_cmds", "github_cmds", "GitHub ↔ CORTEX bridge sync."),
     ("scraper", "cortex.cli.scraper_cmds", "scraper", "🕷️ SCRAPER-Ω: Sovereign web extraction."),
     ("niche", "cortex.cli.niche_cmds", "niche_cmds", "Domain intelligence and market anomaly arbitrage."),
+    ("wealth", "cortex.cli.wealth_cmds", "wealth_cmds", "Wealth engine."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

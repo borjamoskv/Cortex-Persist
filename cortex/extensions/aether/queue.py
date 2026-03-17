@@ -4,13 +4,13 @@ Thread-safe O(1) pop via atomic UPDATE+SELECT.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.aether.models import AgentTask, TaskStatus
 
@@ -45,7 +45,7 @@ CREATE INDEX IF NOT EXISTS idx_agent_tasks_status
 class TaskQueue:
     """Thread-safe SQLite task queue for Aether agent tasks."""
 
-    def __init__(self, db_path: Optional[Union[Path, str]] = None) -> None:
+    def __init__(self, db_path: Optional[Path | str] = None) -> None:
         if db_path is None:
             db_path = Path.home() / ".cortex" / "aether.db"
             # Auto-migrate legacy jules.db if it exists

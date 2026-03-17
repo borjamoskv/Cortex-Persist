@@ -6,10 +6,10 @@ Supports API Key spoofing and Telemetry stripping.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import time
+from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse

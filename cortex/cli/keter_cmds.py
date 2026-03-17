@@ -4,7 +4,6 @@ Sovereign Orchestration and Reality Weaver.
 """
 from __future__ import annotations
 
-
 import click
 from rich.console import Console
 from rich.panel import Panel

@@ -20,12 +20,12 @@ Migration path: @dataclass_to_proto adapter if cross-language federation arrives
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Optional
 
 __all__ = [
     "BeliefObject",

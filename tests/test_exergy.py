@@ -1,7 +1,13 @@
 import pytest
+
 from cortex.shannon.exergy import (
-    ExergyInput, calculate_exergy, enforce_exergy, ThermodynamicWasteError, ActionRisk
+    ActionRisk,
+    ExergyInput,
+    ThermodynamicWasteError,
+    calculate_exergy,
+    enforce_exergy,
 )
+
 
 def test_exergy_reduces_uncertainty_low_cost():
     inp = ExergyInput(

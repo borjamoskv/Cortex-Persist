@@ -9,12 +9,12 @@ Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 from cortex.guards.sovereign_seals import (
     check_gate_15_dependency,

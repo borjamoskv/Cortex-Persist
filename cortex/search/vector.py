@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import aiosqlite
 
@@ -70,7 +70,7 @@ def _build_semantic_query(
     sql = """
         SELECT
             f.id, f.content, f.project, f.fact_type, f.confidence,
-            f.valid_from, f.valid_until, f.tags, f.source, f.meta,
+            f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
             ve.distance, f.created_at, f.updated_at, f.tx_id, t.hash
         FROM fact_embeddings AS ve
         JOIN facts AS f ON f.id = ve.fact_id

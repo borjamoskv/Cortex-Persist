@@ -18,7 +18,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Final, Optional, Union
+from typing import Final, Optional
 
 import numpy as np
 
@@ -67,7 +67,7 @@ class ItemMemory:
     def __init__(
         self,
         dim: int = DEFAULT_DIM,
-        codebook_path: Optional[Union[str, Path]] = None,
+        codebook_path: Optional[str | Path] = None,
         maxsize: int = 10_000,
     ) -> None:
         self._dim = dim

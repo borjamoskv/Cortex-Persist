@@ -1,5 +1,6 @@
 from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
 
+
 def test_decorative_mode_triggers():
     # 3 failures without new hypothesis -> triggering
     c1 = ThermodynamicCounters(consecutive_tool_fails_without_new_hypothesis=3)

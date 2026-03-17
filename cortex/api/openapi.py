@@ -6,11 +6,11 @@ Useful for SDK generation, documentation portals, and API contracts.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import json
 import logging
 from pathlib import Path
+from typing import Optional
 
 __all__ = ["export_openapi_spec", "get_openapi_spec"]
 
@@ -25,7 +25,7 @@ def get_openapi_spec() -> dict:
 
 
 def export_openapi_spec(
-    output_path: Optional[Union[str, Path]] = None,
+    output_path: Optional[str | Path] = None,
     *,
     indent: int = 2,
 ) -> Path:

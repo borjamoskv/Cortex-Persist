@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import replace
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,

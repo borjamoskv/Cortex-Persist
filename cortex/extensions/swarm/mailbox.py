@@ -7,7 +7,7 @@ asynchronously to an atomic embedded database.
 from __future__ import annotations
 
 import json
-from typing import Any, Union
+from typing import Any
 
 from cortex.database.core import connect_async
 
@@ -39,7 +39,7 @@ class AtomicMailbox:
             await self._conn.commit()
         return self._conn
 
-    async def post(self, topic: str, agent_id: str, payload: Union[dict[str, Any], str]) -> None:
+    async def post(self, topic: str, agent_id: str, payload: dict[str, Any] | str) -> None:
         """Atomic write to the mailbox without waiting for a coordinator."""
         if isinstance(payload, dict):
             payload = json.dumps(payload)

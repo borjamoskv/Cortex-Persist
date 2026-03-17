@@ -6,7 +6,6 @@ and consolidate defensive mechanisms in a single Sovereign module (KETER-∞).
 """
 from __future__ import annotations
 
-
 import asyncio
 import contextvars
 import json

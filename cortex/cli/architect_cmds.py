@@ -12,10 +12,10 @@ Commands:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 from pathlib import Path
+from typing import Optional
 
 import click
 from rich.panel import Panel

@@ -4,7 +4,6 @@ Sovereign Electronic Music Production.
 """
 from __future__ import annotations
 
-
 import asyncio
 
 import click

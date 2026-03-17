@@ -5,14 +5,11 @@ All tests exercise pure/static functions — no DB, no sqlite-vec required.
 
 from __future__ import annotations
 
-import pytest
-
 from cortex.memory.l2_hybrid_search import (
     L2HybridSearch,
     L2SearchResult,
     _sanitize_fts_query,
 )
-
 
 # ─── _sanitize_fts_query ────────────────────────────────────────────────
 

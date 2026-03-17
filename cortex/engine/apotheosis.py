@@ -6,7 +6,7 @@ import asyncio
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from watchdog.events import FileSystemEvent as FileSystemEvent

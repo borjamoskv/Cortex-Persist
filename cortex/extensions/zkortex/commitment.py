@@ -20,7 +20,7 @@ import hmac
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from py_ecc.bls12_381 import G1, add, multiply  # type: ignore[reportMissingImports]
 

@@ -4,7 +4,6 @@ Centralized Pydantic models for request/response validation.
 """
 from __future__ import annotations
 
-
 from typing import Any, Literal, Optional, TypedDict, Union
 
 from pydantic import BaseModel, Field, field_validator
@@ -209,7 +208,7 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
-    confidence: Optional[Union[str, float]] = None
+    confidence: Optional[str | float] = None
     status: str = "recorded"
 
 
@@ -242,7 +241,7 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
-    confidence: Optional[Union[str, float]] = None
+    confidence: Optional[str | float] = None
     valid_from: Optional[str] = None
     valid_until: Optional[str] = None
     source: Optional[str] = None

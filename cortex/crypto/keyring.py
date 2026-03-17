@@ -4,11 +4,11 @@ Never stores the CORTEX_MASTER_KEY in plain text .env unless forced (e.g., CI/CD
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import base64
 import logging
 import os
+from typing import Optional
 
 import keyring
 

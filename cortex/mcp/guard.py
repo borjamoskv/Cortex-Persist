@@ -11,10 +11,10 @@ before it touches the database.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import re
+from typing import Optional
 
 from cortex.config import (
     MCP_MAX_CONTENT_LENGTH,

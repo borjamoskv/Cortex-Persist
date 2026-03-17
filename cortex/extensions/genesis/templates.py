@@ -1,10 +1,10 @@
 """Genesis Template Registry — deterministic ComponentSpec → Python source renderers."""
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from collections.abc import Callable
+from typing import Optional
 
 from cortex.extensions.genesis.models import ComponentSpec
 from cortex.extensions.genesis.renderers import (

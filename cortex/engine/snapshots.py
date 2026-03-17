@@ -1,4 +1,3 @@
-from typing import Optional, Union
 import asyncio
 import json
 import logging
@@ -8,6 +7,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 import aiosqlite
 
@@ -88,7 +88,7 @@ class SnapshotManager:
     Manages physical and logical snapshots of the CORTEX database.
     """
 
-    def __init__(self, db_path: Union[str, Path] = DEFAULT_DB_PATH):
+    def __init__(self, db_path: str | Path = DEFAULT_DB_PATH):
         self.db_path = Path(db_path).expanduser()
         self.snapshot_dir = self.db_path.parent / "snapshots"
         self.snapshot_dir.mkdir(parents=True, exist_ok=True)

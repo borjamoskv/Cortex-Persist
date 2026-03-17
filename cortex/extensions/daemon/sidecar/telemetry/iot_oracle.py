@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -28,7 +28,7 @@ class IoTOracle:
 
     def __init__(
         self,
-        engine: Union[CortexEngine, AsyncCortexEngine],
+        engine: CortexEngine | AsyncCortexEngine,
         poll_interval: float = 10.0,
         enable_simulated_sensors: bool = True,
     ):

@@ -12,7 +12,7 @@ import ast
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 try:
     from watchdog.events import FileSystemEvent, FileSystemEventHandler  # type: ignore[type-error]
@@ -83,7 +83,7 @@ class ASTOracle:
     """
 
     def __init__(
-        self, engine: AsyncCortexEngine, watch_dir: Union[str, Path], poll_interval: float = 2.0
+        self, engine: AsyncCortexEngine, watch_dir: str | Path, poll_interval: float = 2.0
     ):
         self.engine = engine
         self.watch_dir = Path(watch_dir)

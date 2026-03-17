@@ -23,7 +23,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
 from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune

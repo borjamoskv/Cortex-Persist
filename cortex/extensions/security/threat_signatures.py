@@ -1,7 +1,6 @@
 """Built-in Threat Signatures for CORTEX Security."""
 from __future__ import annotations
 
-
 from typing import Any
 
 BUILT_IN_SIGNATURES: list[dict[str, Any]] = [

@@ -5,11 +5,11 @@ Allows sending system alerts directly to your phone without external APIs.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
 import sys
+from typing import Optional
 
 from cortex.extensions.notifications.adapters.base import BaseAdapter
 from cortex.extensions.notifications.events import CortexEvent

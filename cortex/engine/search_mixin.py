@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph

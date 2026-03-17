@@ -4,7 +4,6 @@ Regex patterns and signal words for graph analysis.
 """
 from __future__ import annotations
 
-
 import re
 
 __all__ = ["ENTITY_PATTERNS", "RELATION_SIGNALS", "COMMON_WORDS"]

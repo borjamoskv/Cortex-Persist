@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from cortex.extensions.songlines.sensor import GhostTrace
@@ -45,7 +45,7 @@ class GhostMixin(EngineMixinBase):
         reference: str,
         context: str,
         project: str,
-        target_file: Optional[Union[str, Path]] = None,
+        target_file: Optional[str | Path] = None,
         conn: Optional[aiosqlite.Connection] = None,
         root_dir: Optional[Path] = None,
     ) -> str:
@@ -99,7 +99,7 @@ class GhostMixin(EngineMixinBase):
     async def resolve_ghost(
         self,
         ghost_id: str,
-        target_entity_id: Optional[Union[int, str]] = None,
+        target_entity_id: Optional[int | str] = None,
         root_dir: Optional[Path] = None,
         conn: Optional[aiosqlite.Connection] = None,
     ) -> bool:

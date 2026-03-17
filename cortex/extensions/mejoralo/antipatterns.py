@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
+
 """
 CORTEX v6.0 — Antipattern Scanner.
 
@@ -165,7 +166,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
 
     def _check_return_type_hint(
         self,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
         """Public functions without return type hints hide intent."""
         if node.name.startswith("_"):
@@ -198,7 +199,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
 
     def _check_too_many_params(
         self,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
         """Too many parameters is a code smell (implicit complexity)."""
         args = node.args
@@ -336,7 +337,7 @@ def _gather_python_files(root: Path) -> Optional[tuple[list[Path], Path]]:
 
 
 def scan_antipatterns(
-    path: Union[str, Path],
+    path: str | Path,
     *,
     root_package: str = "cortex",
     include_magic: bool = False,

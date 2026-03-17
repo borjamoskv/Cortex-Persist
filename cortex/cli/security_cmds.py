@@ -6,10 +6,10 @@ integrity audits, and daily reports.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
+from typing import Optional
 
 import click
 from rich.console import Console

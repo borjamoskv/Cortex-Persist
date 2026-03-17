@@ -7,7 +7,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import aiosqlite
 import sqlite_vec
@@ -20,6 +20,7 @@ from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 
@@ -54,6 +55,7 @@ MAX_TAGS_PER_FACT = 20
 
 
 class CortexEngine(
+    SearchMixin,
     StoreMixin,
     QueryMixin,
     MemoryMixin,
@@ -64,7 +66,7 @@ class CortexEngine(
 
     def __init__(
         self,
-        db_path: Union[str, Path] = DEFAULT_DB_PATH,
+        db_path: str | Path = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
         super().__init__()
@@ -254,12 +256,12 @@ class CortexEngine(
         from cortex.database.core import connect
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)
-        conn.enable_load_extension(True)
         try:
+            conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
-        except AttributeError:
-            pass
-        conn.enable_load_extension(False)
+            conn.enable_load_extension(False)
+        except (AttributeError, OSError):
+            pass  # System Python lacks extension loading
         return conn
 
     # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
@@ -501,7 +503,7 @@ class CortexEngine(
 
     # ─── Helpers ──────────────────────────────────────────────────
 
-    def export_snapshot(self, out_path: Union[str, Path]) -> str:
+    def export_snapshot(self, out_path: str | Path) -> str:
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.extensions.sync.snapshot import export_snapshot
 
@@ -509,7 +511,7 @@ class CortexEngine(
 
     def _row_to_fact(  # type: ignore[override]
         self,
-        row: Union[aiosqlite.Row, dict],
+        row: aiosqlite.Row | dict,
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""

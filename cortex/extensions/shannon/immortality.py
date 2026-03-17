@@ -18,7 +18,7 @@ Scale: 0% (total entropic decay) → 100% (functional immortality).
 from __future__ import annotations
 
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.shannon.analyzer import normalized_entropy
 from cortex.extensions.shannon.scanner import MemoryScanner

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine
 from cortex.extensions.ui_control.applescript import (

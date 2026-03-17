@@ -4,12 +4,12 @@ Uses sealed Grade enum for comparisons. TrendDetector for drift.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import Grade
@@ -32,7 +32,7 @@ class HealthLoop:
 
     def __init__(
         self,
-        db_path: Union[str, Path] = "",
+        db_path: str | Path = "",
         interval: float = DEFAULT_INTERVAL,
         notify_fn: Optional[Callable[[str, str], None]] = None,
     ) -> None:

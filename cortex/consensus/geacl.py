@@ -11,10 +11,10 @@ creates a semantic digest of the intended action and propagates it via Gossip.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from dataclasses import dataclass
+from typing import Optional
 
 from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
 from cortex.extensions.ha.gossip import GossipProtocol

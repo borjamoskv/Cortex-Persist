@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+
 """
 CORTEX v5.0 — Raft Consensus Implementation.
 
@@ -57,10 +58,10 @@ class NodeRegistry:
     must share the same view of the cluster topology.
     """
 
-    _nodes: dict[str, "RaftNode"] = {}
+    _nodes: dict[str, RaftNode] = {}
 
     @classmethod
-    def register(cls, node: "RaftNode") -> None:
+    def register(cls, node: RaftNode) -> None:
         cls._nodes[node.node_id] = node
 
     @classmethod
@@ -68,7 +69,7 @@ class NodeRegistry:
         cls._nodes.pop(node_id, None)
 
     @classmethod
-    def get(cls, node_id: str) -> "RaftNode | None":
+    def get(cls, node_id: str) -> RaftNode | None:
         return cls._nodes.get(node_id)
 
     @classmethod

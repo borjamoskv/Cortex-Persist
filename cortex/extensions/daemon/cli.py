@@ -13,11 +13,11 @@ Commands:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
 import click
 from rich.console import Console

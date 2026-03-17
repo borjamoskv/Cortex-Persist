@@ -7,7 +7,7 @@ text-based exposition format for ingestion by metrics scrapers.
 
 from __future__ import annotations
 
-from typing import Union, cast
+from typing import cast
 
 from cortex.extensions.health.models import Grade, HealthReport, HealthScore
 
@@ -25,7 +25,7 @@ def _grade_to_numeric(grade: Grade) -> int:
     return mapping.get(grade, 0)
 
 
-def export_prometheus(score_or_report: Union[HealthScore, HealthReport]) -> str:
+def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
     """
     Format a CORTEX health payload into Prometheus exposition format.
 

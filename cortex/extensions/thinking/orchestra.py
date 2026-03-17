@@ -30,7 +30,7 @@ import logging
 import os
 import random
 import time
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider
@@ -163,7 +163,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     # ── Model Resolution ─────────────────────────────────────────
 
-    def _resolve_models(self, mode: Union[ThinkingMode, str]) -> list[tuple[str, str]]:
+    def _resolve_models(self, mode: ThinkingMode | str) -> list[tuple[str, str]]:
         """Resuelve qué modelos usar para un modo dado."""
         mode_key = ThinkingMode(mode) if isinstance(mode, str) else mode
         candidates = self._routing.get(mode_key, [])
@@ -369,7 +369,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         prompt: str,
         mode: str = "deep_reasoning",
         system: Optional[str] = None,
-        strategy: Optional[Union[FusionStrategy, str]] = None,
+        strategy: Optional[FusionStrategy | str] = None,
     ) -> FusedThought:
         """Pensamiento multi-modelo con fusión.
 

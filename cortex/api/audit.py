@@ -6,7 +6,6 @@ Enterprise Audit Ledger using PoQ-6 Standards (Privacy Shield).
 """
 from __future__ import annotations
 
-
 import logging
 import time
 from collections.abc import Callable

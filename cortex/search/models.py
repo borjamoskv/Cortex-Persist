@@ -6,10 +6,10 @@
 """Search result models."""
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 __all__ = ["SearchResult", "SearchScope"]
 

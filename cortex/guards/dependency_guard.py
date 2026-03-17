@@ -9,7 +9,6 @@ MULTIPLE detection strategies, not just subprocess pattern matching.
 """
 
 from __future__ import annotations
-from typing import Union
 
 import ast
 import logging
@@ -24,7 +23,7 @@ __all__ = ["DependencyViolation", "scan_file", "scan_directory"]
 logger = logging.getLogger("cortex.guards.dependency_guard")
 
 
-def scan_file(filepath: Union[str, Path]) -> list[DependencyViolation]:
+def scan_file(filepath: str | Path) -> list[DependencyViolation]:
     """Scan a single Python file for Axiom 4 violations."""
     filepath = Path(filepath)
     if not filepath.exists() or filepath.suffix != ".py":
@@ -79,7 +78,7 @@ def scan_file(filepath: Union[str, Path]) -> list[DependencyViolation]:
 
 
 def scan_directory(
-    directory: Union[str, Path],
+    directory: str | Path,
     *,
     exclude_venv: bool = True,
     exclude_tests: bool = False,

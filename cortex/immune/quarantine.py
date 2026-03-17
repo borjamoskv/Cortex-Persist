@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class BlastRadiusReport:
     reverse_import_count: int

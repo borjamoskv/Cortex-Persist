@@ -17,7 +17,6 @@ from cortex.memory.compression import CompressionResult, SemanticCompressor
 from cortex.memory.models import MemoryEvent
 from cortex.memory.working import WorkingMemoryL1
 
-
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
 

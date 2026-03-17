@@ -11,7 +11,7 @@ import logging
 import re
 import textwrap
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.cli import console
 from cortex.extensions.mejoralo.constants import (
@@ -160,7 +160,7 @@ class MejoraloSwarm:
     @staticmethod
     def _extract_infected_node(
         source: str, target_line: int
-    ) -> Optional[tuple[Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef], str]]:
+    ) -> Optional[tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str]]:
         """Find the innermost function/class definition that contains target_line.
 
         Returns (node, dedented_source_of_node) or None.
@@ -171,7 +171,7 @@ class MejoraloSwarm:
             return None
 
         lines = source.splitlines(keepends=True)
-        best: Optional[Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]] = None
+        best: Optional[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef] = None
 
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -203,7 +203,7 @@ class MejoraloSwarm:
     @staticmethod
     def _surgical_patch_file(
         original_source: str,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
         patched_node_source: str,
     ) -> Optional[str]:
         """Replace the original node in the source with the patched version.

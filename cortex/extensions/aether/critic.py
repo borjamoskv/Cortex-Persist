@@ -4,10 +4,10 @@ Reviews the git diff produced by the Executor and approves or rejects.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
+from typing import Optional
 
 from cortex.extensions.aether.models import CriticOutput
 from cortex.extensions.aether.tools import AgentToolkit

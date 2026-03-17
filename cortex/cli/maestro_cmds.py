@@ -6,9 +6,9 @@ desde la terminal.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
+from typing import Optional
 
 import click
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
-from typing import Optional, TypedDict, Union, cast
+from typing import Optional, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
@@ -143,7 +143,7 @@ class CentauroEngine:
         """
         proposals: dict[str, str] = {}
 
-        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, Union[str, Exception]]:
+        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
             try:
                 return (a_id, await a.execute("M-01", mission))
             except Exception as exc:  # noqa: BLE001

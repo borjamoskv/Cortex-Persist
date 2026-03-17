@@ -1,4 +1,4 @@
-from typing import Union
+
 """Sovereign Arbiter — The Strict Validation Membrane (Ω₃).
 
 Implements the Byzantine Default: I verify, then trust.
@@ -61,7 +61,7 @@ class SovereignArbiter:
     )
 
     @classmethod
-    def validate_mutation(cls, code_string: str, file_path: Union[str, Path]) -> tuple[bool, str]:
+    def validate_mutation(cls, code_string: str, file_path: str | Path) -> tuple[bool, str]:
         """Validate if the incoming code is safe to write to the given path."""
         path = str(file_path)
 

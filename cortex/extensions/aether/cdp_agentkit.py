@@ -6,7 +6,6 @@ Singleton: una única instancia por proceso.
 """
 from __future__ import annotations
 
-
 import asyncio
 import logging
 import os
@@ -56,7 +55,7 @@ class CDPSovereignWallet:
     Wallet seed persists to ~/.cortex/ with restricted file permissions (0600).
     """
 
-    _instance: Optional["CDPSovereignWallet"] = None
+    _instance: Optional[CDPSovereignWallet] = None
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):

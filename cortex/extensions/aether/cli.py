@@ -4,11 +4,11 @@ Registered as `cortex aether` subcommand group.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.aether.models import AgentTask, TaskSource
 from cortex.extensions.aether.queue import TaskQueue

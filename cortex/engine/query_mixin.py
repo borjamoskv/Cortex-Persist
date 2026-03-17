@@ -136,8 +136,8 @@ class QueryMixin(EngineMixinBase):
             # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """
                 ORDER BY (
-                    CASE WHEN f.meta LIKE 'v6_aesgcm:%' THEN 1.0
-                         ELSE coalesce(json_extract(f.meta, '$.consensus_score'), 1.0)
+                    CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN 1.0
+                         ELSE coalesce(json_extract(f.metadata, '$.consensus_score'), 1.0)
                     END * 0.8
                     + (1.0 / (1.0 + (
                         julianday('now') - julianday(f.created_at)
@@ -182,7 +182,7 @@ class QueryMixin(EngineMixinBase):
                 )
                 q = (
                     f"{base} AND {clause} ORDER BY "
-                    "coalesce(json_extract(f.meta, '$.valid_from'), f.created_at) DESC"
+                    "coalesce(json_extract(f.metadata, '$.valid_from'), f.created_at) DESC"
                 )
                 async with conn.execute(
                     q,
@@ -192,7 +192,7 @@ class QueryMixin(EngineMixinBase):
             else:
                 q = (
                     f"{base} ORDER BY "
-                    "coalesce(json_extract(f.meta, '$.valid_from'), f.created_at) DESC"
+                    "coalesce(json_extract(f.metadata, '$.valid_from'), f.created_at) DESC"
                 )
                 async with conn.execute(q, (tenant_id, project)) as cursor:
                     rows = await cursor.fetchall()
@@ -232,8 +232,8 @@ class QueryMixin(EngineMixinBase):
                 "AND f.is_tombstoned = 0 "
                 "AND f.created_at <= ? "
                 "AND (f.is_tombstoned = 0 OR "
-                "json_extract(f.meta, '$.tombstoned_at') > ? OR "
-                "json_extract(f.meta, '$.valid_until') > ?) "
+                "json_extract(f.metadata, '$.tombstoned_at') > ? OR "
+                "json_extract(f.metadata, '$.valid_until') > ?) "
                 "ORDER BY f.id ASC"
             )
             async with conn.execute(
@@ -426,9 +426,9 @@ class QueryMixin(EngineMixinBase):
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
-                    SELECT json_extract(f.meta, '$.parent_decision_id'), c.depth + 1
+                    SELECT json_extract(f.metadata, '$.parent_decision_id'), c.depth + 1
                     FROM facts f JOIN chain c ON f.id = c.id
-                    WHERE json_extract(f.meta, '$.parent_decision_id') IS NOT NULL
+                    WHERE json_extract(f.metadata, '$.parent_decision_id') IS NOT NULL
                         AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
@@ -441,7 +441,7 @@ class QueryMixin(EngineMixinBase):
                     UNION ALL
                     SELECT f.id, c.depth + 1
                     FROM facts f JOIN chain c
-                        ON json_extract(f.meta, '$.parent_decision_id') = c.id
+                        ON json_extract(f.metadata, '$.parent_decision_id') = c.id
                     WHERE c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth

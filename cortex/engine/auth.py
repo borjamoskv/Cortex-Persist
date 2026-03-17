@@ -8,7 +8,6 @@ reaches a 100% unanimous Zenith Consensus rating.
 """
 from __future__ import annotations
 
-
 import asyncio
 import hashlib
 import json

@@ -17,9 +17,9 @@ Functions:
 """
 
 from __future__ import annotations
-from typing import Union
 
 import math
+from typing import Union
 
 __all__ = [
     "conditional_entropy",

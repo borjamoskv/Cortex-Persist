@@ -6,9 +6,9 @@ Never deletes — only deprecates. Enables time-travel queries.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from datetime import datetime, timezone
+from typing import Optional
 
 __all__ = [
     "build_temporal_filter_params",

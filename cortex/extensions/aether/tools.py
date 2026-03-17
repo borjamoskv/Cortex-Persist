@@ -5,13 +5,13 @@ All file/shell operations are confined to task.repo_path.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import os
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
+from typing import Optional
 
 import httpx
 
@@ -74,7 +74,7 @@ class AgentToolkit:
 
     def __init__(
         self,
-        repo_path: Union[str, Path],
+        repo_path: str | Path,
         allowed_tools: Optional[list[str]] = None,
         capability_guard: Optional[CapabilityGuard] = None,
     ) -> None:

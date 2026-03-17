@@ -6,7 +6,7 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
@@ -312,7 +312,7 @@ class CortexMemoryManager:
         fact_type: str = "general",
         metadata: Optional[dict[str, Any]] = None,
         layer: str = "semantic",
-        parent_decision_id: Optional[Union[str, int]] = None,
+        parent_decision_id: Optional[str | int] = None,
         use_bus: bool = False,
     ) -> str:
         """Directly persist a high-value fact to L2 memory layers.

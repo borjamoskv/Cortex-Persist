@@ -5,11 +5,11 @@ Orchestrates the 4-agent loop:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.aether.critic import CriticAgent
 from cortex.extensions.aether.executor import ExecutorAgent

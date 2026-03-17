@@ -9,10 +9,10 @@ persistir y propagarse entre proyectos."
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import re
+from typing import Optional
 
 import aiosqlite
 

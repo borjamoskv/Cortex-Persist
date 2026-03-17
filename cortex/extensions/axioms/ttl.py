@@ -8,6 +8,7 @@ Referenced by: AX-019 (Persist With Decay)
 """
 
 from __future__ import annotations
+
 from typing import Optional
 
 # TTL in seconds. None = immortal.

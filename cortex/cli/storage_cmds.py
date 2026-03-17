@@ -7,9 +7,9 @@ Commands for managing CORTEX storage backends:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import os
+from typing import Optional
 
 import click
 from rich.panel import Panel

@@ -14,10 +14,10 @@ Computational translation:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import math
+from typing import Optional
 
 logger = logging.getLogger("cortex.memory.sparse")
 

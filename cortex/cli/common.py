@@ -38,7 +38,7 @@ cortex_theme = Theme(
 
 console = Console(theme=cortex_theme)
 DEFAULT_DB = str(DEFAULT_DB_PATH)
-GLOBAL_CLI_TIMEOUT: float = 45.0  # Chronos Sniper: No CLI command hangs indefinitely
+GLOBAL_CLI_TIMEOUT: float = 120.0  # Chronos Sniper: No CLI command hangs indefinitely
 
 
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:

@@ -1,11 +1,11 @@
 """Consensus Sovereign Layer — ConsensusManager for CORTEX."""
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 import math
 import uuid
+from typing import Optional
 
 from cortex.telemetry.metrics import metrics
 from cortex.telemetry.pulse import PULSE

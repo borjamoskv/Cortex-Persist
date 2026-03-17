@@ -1,4 +1,5 @@
 from typing import Optional
+
 """SQLite Graph Query Mixin."""
 
 __all__ = ["SQLiteQueryMixin"]

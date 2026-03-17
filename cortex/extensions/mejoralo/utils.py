@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from .constants import STACK_MARKERS
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def detect_stack(path: Union[str, Path]) -> str:
+def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
     p = Path(path)
     for stack, marker in STACK_MARKERS.items():

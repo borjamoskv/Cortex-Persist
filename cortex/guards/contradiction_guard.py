@@ -14,7 +14,6 @@ Returns a ConflictReport with scored candidates.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import re
@@ -22,6 +21,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional, Union
 
 import aiosqlite
 
@@ -353,7 +353,7 @@ async def detect_contradictions(
     new_content: str,
     new_project: str,
     *,
-    db_path: Union[str, Path] = DEFAULT_DB_PATH,
+    db_path: str | Path = DEFAULT_DB_PATH,
     decrypt_fn: Optional[Callable] = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
@@ -415,7 +415,7 @@ async def detect_contradictions(
 # ── CLI-friendly batch scanner ──────────────────────────────────────
 async def scan_all_contradictions(
     *,
-    db_path: Union[str, Path] = DEFAULT_DB_PATH,
+    db_path: str | Path = DEFAULT_DB_PATH,
     decrypt_fn: Optional[Callable] = None,
     min_score: float = 0.45,
     limit: int = 50,

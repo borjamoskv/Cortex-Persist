@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+
 """
 CORTEX v5.0 — Episodic Memory CLI Commands.
 

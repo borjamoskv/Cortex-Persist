@@ -1,4 +1,5 @@
 from typing import Optional
+
 """
 CORTEX CLI — Niche Arbitrage Commands
 """

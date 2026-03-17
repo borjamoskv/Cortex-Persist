@@ -5,10 +5,10 @@ Designed to display during agent thinking pauses.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import sqlite3
+from typing import Optional
 
 import click
 from rich.panel import Panel

@@ -18,10 +18,10 @@ from EmbeddingManager. Gracefully degrades when no LLM is configured.
 """
 
 from __future__ import annotations
-from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import logging
 import os
+from typing import Optional
 
 from cortex.extensions.llm.router import IntentProfile
 

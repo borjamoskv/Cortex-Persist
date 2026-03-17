@@ -7,7 +7,6 @@ and temporal decay directly in the embedding retrieval.
 """
 
 from __future__ import annotations
-from typing import Any, ClassVar, Optional, Union
 
 import asyncio
 import json
@@ -15,6 +14,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
+from typing import Any, Optional
 
 import numpy as np
 
@@ -69,7 +69,7 @@ class SovereignVectorStoreL2:
     def __init__(
         self,
         encoder: AsyncEncoder,
-        db_path: Union[str, Path] = "~/.cortex/vectors.db",
+        db_path: str | Path = "~/.cortex/vectors.db",
         half_life_days: int = 7,
     ) -> None:
         self._encoder = encoder

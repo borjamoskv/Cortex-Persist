@@ -9,12 +9,12 @@ for hybrid retrieval using Reciprocal Rank Fusion (RRF).
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 import sqlite3
 from dataclasses import dataclass, field
+from typing import Optional
 
 __all__ = [
     "RRF_K",

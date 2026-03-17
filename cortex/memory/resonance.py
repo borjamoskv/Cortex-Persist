@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.memory.engrams import CortexSemanticEngram
 

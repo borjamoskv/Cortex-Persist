@@ -9,7 +9,7 @@ import asyncio
 import logging
 import time
 from pathlib import Path
-from typing import Any, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -27,7 +27,7 @@ class ZeroPromptingDaemon:
     def __init__(
         self,
         engine: CortexEngine,
-        workspace_root: Union[str, Path],
+        workspace_root: str | Path,
         cycle_interval_hours: float = 24.0,
     ):
         self.engine = engine

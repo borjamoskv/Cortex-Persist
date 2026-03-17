@@ -1,4 +1,5 @@
 from typing import Optional
+
 """AUTOROUTER-1 — CLI commands for CORTEX integration.
 
 Commands:

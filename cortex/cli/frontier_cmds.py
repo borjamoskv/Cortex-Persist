@@ -1,4 +1,5 @@
 from typing import Optional
+
 """
 Frontier CLI Commands
 Control the R&D and Metabolism pulse of CORTEX.

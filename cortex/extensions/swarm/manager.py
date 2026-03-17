@@ -5,14 +5,13 @@ workstreams for Research, Implementation, and Verification.
 """
 from __future__ import annotations
 
-
 import asyncio
 import logging
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.extensions.swarm.budget import get_budget_manager
 
@@ -62,7 +61,7 @@ class CapatazOrchestrator:
         name: str,
         agent_name: str,
         coro_func: Callable,
-        args: Union[list, tuple] = (),
+        args: list | tuple = (),
         kwargs: Optional[dict] = None,
         lock_resource: Optional[str] = None,
         lock_manager: Optional[Any] = None,

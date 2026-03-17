@@ -10,13 +10,13 @@ DERIVATION: Axiom Ω₂ (Entropic Asymmetry) — reduce noise in the signal.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import hashlib
 import random
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
 
 # ── Commit type detection heuristics ──────────────────────────────────────────
 

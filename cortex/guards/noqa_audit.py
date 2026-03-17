@@ -14,12 +14,12 @@ Usage (monthly): cortex guards noqa-report --since="30 days ago"
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 # ─── Data Model ───────────────────────────────────────────────────────────────
 

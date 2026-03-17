@@ -12,7 +12,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from uuid import uuid4
 
 logger = logging.getLogger("moskv-daemon.centaur.queue")
@@ -21,7 +21,7 @@ logger = logging.getLogger("moskv-daemon.centaur.queue")
 class EntropicQueue:
     """Persistent, thread-safe, SQLite WAL-backed task queue."""
 
-    def __init__(self, db_path: Union[Path, str]):
+    def __init__(self, db_path: Path | str):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()

@@ -6,7 +6,6 @@ Parte de la Arquitectura de Soberanía Wave 5.
 """
 from __future__ import annotations
 
-
 import hashlib
 import logging
 import sqlite3

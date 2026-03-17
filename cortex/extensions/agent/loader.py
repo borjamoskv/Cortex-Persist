@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.extensions.agent.schema import AgentRole
 from cortex.memory.frequency import BIFTRouter, ContinuousMemorySystem
@@ -86,7 +86,7 @@ class AgentInstance:
         }
 
 
-def load_agent(path: Union[str, Path]) -> AgentInstance:
+def load_agent(path: str | Path) -> AgentInstance:
     """Load and hydrate an agent from a role.yaml file.
 
     This is the main entry point for YAML → Agent compilation.

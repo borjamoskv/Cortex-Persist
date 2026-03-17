@@ -6,12 +6,12 @@ zone classifications, coordinates, risk scores, and blind-spot reports.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import hashlib
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ENUMERATIONS

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.embeddings import LocalEmbedder
 
@@ -42,7 +42,7 @@ class EmbeddingManager:
         """Return True if using a cloud/API provider."""
         return self.mode == "api"
 
-    def _get_embedder(self) -> Union[LocalEmbedder, Any]:
+    def _get_embedder(self) -> LocalEmbedder | Any:
         """Lazy-load the appropriate embedder based on config."""
         if self._embedder is not None:
             return self._embedder
@@ -67,7 +67,7 @@ class EmbeddingManager:
 
         return self._embedder
 
-    def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
+    def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         """Generate embedding for a single text or batch."""
         return self._get_embedder().embed(text)
 

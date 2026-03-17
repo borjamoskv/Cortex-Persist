@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Optional, Protocol
 
 logger = logging.getLogger("cortex.extensions.swarm.code_smith")
 
@@ -179,7 +179,7 @@ class LocalProcessSandbox:
 
     def __init__(
         self,
-        tmp_dir: Optional[Union[str, Path]] = None,
+        tmp_dir: Optional[str | Path] = None,
     ) -> None:
         import tempfile
 

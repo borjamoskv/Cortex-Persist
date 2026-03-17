@@ -7,9 +7,9 @@ contextual cues and system health metrics.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

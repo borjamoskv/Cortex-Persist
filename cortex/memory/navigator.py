@@ -24,7 +24,7 @@ import logging
 import math
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Final, Optional, Union
+from typing import Any, Final, Optional
 
 logger = logging.getLogger("cortex.memory.navigator")
 
@@ -55,7 +55,7 @@ _ISLAND_THRESHOLD: Final[float] = 0.2
 class NavigationState:
     """Snapshot of the navigator's current position in semantic space."""
 
-    center_id: Union[str, int] = ""
+    center_id: str | int = ""
     center_content: str = ""
     center_score: float = 0.0
     neighbors: list[dict[str, Any]] = field(default_factory=list)

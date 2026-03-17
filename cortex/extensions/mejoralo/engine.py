@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.engine import CortexEngine
 
@@ -28,14 +28,14 @@ class MejoraloEngine:
     # ── Fase 0: Stack Detection ──────────────────────────────────────
 
     @staticmethod
-    def detect_stack(path: Union[str, Path]) -> str:
+    def detect_stack(path: str | Path) -> str:
         """Detect project stack from marker files."""
         return detect_stack(path)
 
     # ── Fase 2: X-Ray 13D Scan ───────────────────────────────────────
 
     def scan(
-        self, project: str, path: Union[str, Path], deep: bool = False, brutal: bool = False
+        self, project: str, path: str | Path, deep: bool = False, brutal: bool = False
     ) -> ScanResult:
         """
         Execute X-Ray 13D scan on a project directory.
@@ -43,7 +43,7 @@ class MejoraloEngine:
         return scan(project, path, deep, brutal)
 
     def heal(
-        self, project: str, path: Union[str, Path], target_score: int, scan_result: ScanResult
+        self, project: str, path: str | Path, target_score: int, scan_result: ScanResult
     ) -> bool:
         """
         Trigger the autonomous healing to refactor problematic files, test them and commit.
@@ -53,7 +53,7 @@ class MejoraloEngine:
     def relentless_heal(
         self,
         project: str,
-        path: Union[str, Path],
+        path: str | Path,
         scan_result: ScanResult,
         target_score: Optional[int] = None,
     ) -> bool:
@@ -74,7 +74,7 @@ class MejoraloEngine:
 
     # ── Fase 3: Specialized ──────────────────────────────────────────
 
-    def awwwards_fix(self, project: str, file_path: Union[str, Path]) -> bool:
+    def awwwards_fix(self, project: str, file_path: str | Path) -> bool:
         """
         Active auto-correction targeting Awwwards standard (Sovereign 200).
         Bypasses normal scan to directly rewrite animations/styles in a file.
@@ -158,7 +158,7 @@ class MejoraloEngine:
 
     # ── Fase 7: Ship Gate (7 Seals) ──────────────────────────────────
 
-    def ship_gate(self, project: str, path: Union[str, Path]) -> ShipResult:
+    def ship_gate(self, project: str, path: str | Path) -> ShipResult:
         """
         Validate the 7 Seals for production readiness.
         """

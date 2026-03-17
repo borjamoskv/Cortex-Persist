@@ -12,7 +12,7 @@ The pipe receives relevant facts as context for grounded answers.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 __all__ = ["CORTEX_CONTEXT_TEMPLATE", "run_with_cortex_context", "create_cortex_pipe"]
 

@@ -4,7 +4,7 @@ Extracted from heal.py to maintain thermodynamic LOC limits.
 """
 
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.mejoralo.constants import TAINT_TAG
 

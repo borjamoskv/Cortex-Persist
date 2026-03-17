@@ -1,10 +1,10 @@
 """Timing data classes, constants, and classification."""
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 __all__ = [
     "DEFAULT_GAP_SECONDS",

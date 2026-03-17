@@ -13,7 +13,6 @@ import pytest
 
 from cortex.engine.fact_store_core import insert_fact_record
 
-
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 

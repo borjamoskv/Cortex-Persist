@@ -6,11 +6,11 @@ This guard audits new decisions against the ENTIRE system snapshot.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 try:
     from cortex.extensions.llm.provider import LLMProvider

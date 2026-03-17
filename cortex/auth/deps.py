@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from fastapi import Depends, Header, HTTPException, Request
 
@@ -60,7 +60,7 @@ async def require_auth(
     return result
 
 
-def require_permission(permission: Union[str, Permission]):
+def require_permission(permission: str | Permission):
     """Factory for permission-checking dependencies.
 
     Supports both legacy string permissions and CORTEX v6 Permission enums.

@@ -4,10 +4,10 @@ Implements L3 Application-Level Encryption using AES-GCM.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import base64
 import os
+from typing import Optional
 
 __all__ = ["Vault"]
 

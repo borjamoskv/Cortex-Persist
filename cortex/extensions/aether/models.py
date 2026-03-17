@@ -1,12 +1,12 @@
 """MOSKV-Aether — Data models."""
 
 from __future__ import annotations
-from typing import Optional
 
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Optional
 
 
 class TaskStatus(str, Enum):

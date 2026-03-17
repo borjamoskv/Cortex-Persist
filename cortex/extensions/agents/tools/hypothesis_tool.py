@@ -8,7 +8,6 @@ Axiom: "El Diablo no cree en dogmas. Sólo en lo que se puede falsificar."
 """
 from __future__ import annotations
 
-
 import logging
 from typing import Any
 

@@ -10,12 +10,12 @@ Extraído de router.py (Ω₂ Landauer split — 1371 → 5 módulos cohesivos).
 """
 
 from __future__ import annotations
-from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field
 

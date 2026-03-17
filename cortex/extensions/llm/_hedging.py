@@ -13,11 +13,11 @@ Extraído de router.py (Ω₂ Landauer split).
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
 import time
+from typing import Optional
 
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, HedgedResult
 

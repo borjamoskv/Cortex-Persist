@@ -9,10 +9,10 @@ Each engram carries a causal chain enabling:
 """
 
 from __future__ import annotations
-from typing import Union
 
 import logging
 from dataclasses import dataclass
+from typing import Union
 
 logger = logging.getLogger("cortex.memory.causal")
 

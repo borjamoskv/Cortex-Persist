@@ -28,7 +28,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -68,7 +68,7 @@ class CryptoShredder:
     The immutable ledger hash chain remains intact for EU AI Act compliance.
     """
 
-    def __init__(self, conn: Union[aiosqlite.Connection, sqlite3.Connection]):
+    def __init__(self, conn: aiosqlite.Connection | sqlite3.Connection):
         self._conn = conn
         self._ensure_schema()
 

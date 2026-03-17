@@ -38,9 +38,9 @@ the second is a consequence — the system develops reflexes.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
+from typing import Optional
 
 from cortex.database.core import connect as db_connect
 

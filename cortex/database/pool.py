@@ -6,7 +6,6 @@ Handles connection lifecycle, health checks, and WAL mode optimization.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 import logging
@@ -14,6 +13,7 @@ import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Optional
 
 import aiosqlite
 

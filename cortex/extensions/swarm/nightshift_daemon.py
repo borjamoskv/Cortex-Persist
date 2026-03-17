@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.extensions.swarm.knowledge_radar import discover
 from cortex.extensions.swarm.nightshift_pipeline import NightShiftPipeline
@@ -43,7 +43,7 @@ class NightShiftCrystalDaemon:
         cortex_db: Optional[Any] = None,
         cooldown_hours: float = 6.0,
         max_crystals: int = 5,
-        queue_path: Optional[Union[Path, str]] = None,
+        queue_path: Optional[Path | str] = None,
         encoder: Optional[Any] = None,
         consolidation_dry_run: bool = False,
     ) -> None:

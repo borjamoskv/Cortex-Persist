@@ -7,7 +7,7 @@ Each method runs a focused SQL query and returns structured raw data.
 from __future__ import annotations
 
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

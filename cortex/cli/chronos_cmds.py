@@ -1,4 +1,5 @@
 from typing import Optional
+
 """
 Commands for CHRONOS-1 The Senior Benchmark.
 

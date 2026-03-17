@@ -4,12 +4,12 @@ Reads stale ghosts and dispatches them to the Aether Agent queue for autonomous 
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
 from cortex.extensions.daemon.monitors.base import BaseMonitor

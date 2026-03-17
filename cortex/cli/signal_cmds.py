@@ -9,9 +9,9 @@ The nervous system of MOSKV-1 — exposed through the command line.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import json
+from typing import Optional
 
 import click
 from rich.table import Table

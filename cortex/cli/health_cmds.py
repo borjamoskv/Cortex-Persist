@@ -5,6 +5,7 @@ Thin CLI wrapper; all logic lives in cortex.health.
 """
 
 from __future__ import annotations
+
 from typing import Optional
 
 import click

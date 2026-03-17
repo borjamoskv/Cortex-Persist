@@ -8,7 +8,7 @@ If the tenant needs documentation, the architecture has failed.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
 

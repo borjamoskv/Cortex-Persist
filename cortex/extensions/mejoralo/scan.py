@@ -1,4 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
+
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 
@@ -98,7 +99,7 @@ class McCabeVisitor(ast.NodeVisitor):
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         self._check_complexity(node)
 
-    def _check_complexity(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> None:
+    def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
         # Calculate McCabe for this scope
         comp = 1
         for child in ast.walk(node):
@@ -489,7 +490,7 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
 # ─── Main Entry Point ────────────────────────────────────────────────
 
 
-def scan(project: str, path: Union[str, Path], deep: bool = False, brutal: bool = False) -> ScanResult:
+def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = False) -> ScanResult:
     """Execute X-Ray 13D scan on a project directory.
 
     If brutal is True, deep is implied and penalties are more severe.

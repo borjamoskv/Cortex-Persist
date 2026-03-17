@@ -8,13 +8,13 @@ Produces 384-dimensional vectors using all-MiniLM-L6-v2.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import hashlib
 import logging
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Optional, Union
 
 from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
 
@@ -107,7 +107,7 @@ class LocalEmbedder:
         embedding = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportOptionalMemberAccess]
         return embedding.tolist()
 
-    def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
+    def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         """Generate embedding for a single text or delegate list to batch."""
         if isinstance(text, list):
             return self.embed_batch(text)

@@ -12,7 +12,7 @@ import logging
 import math
 import re
 from datetime import datetime, timezone
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.policy.models import (
     ACTION_TYPE_MAP,

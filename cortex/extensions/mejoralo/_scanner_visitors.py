@@ -6,7 +6,6 @@ to avoid a circular dependency.
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 import ast
 

@@ -1,4 +1,5 @@
 from typing import Optional
+
 """
 CORTEX v5.0 - Search Router.
 """

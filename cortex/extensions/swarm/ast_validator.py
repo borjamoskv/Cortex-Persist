@@ -17,7 +17,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
@@ -320,7 +320,7 @@ def _check_complexity(
 
 
 def cyclomatic_complexity(
-    func_node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+    func_node: ast.FunctionDef | ast.AsyncFunctionDef,
 ) -> int:
     """Approximate McCabe cyclomatic complexity."""
     complexity = 1  # Base path

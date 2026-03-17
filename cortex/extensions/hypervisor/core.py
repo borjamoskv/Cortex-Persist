@@ -12,7 +12,7 @@ Telescope Inversion:
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.extensions.hypervisor.compressor import ComplexityCompressor
 from cortex.extensions.hypervisor.handle import AgentHandle

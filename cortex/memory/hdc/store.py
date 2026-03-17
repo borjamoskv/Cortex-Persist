@@ -13,7 +13,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import numpy as np
 
@@ -56,7 +56,7 @@ class HDCVectorStoreL2:
         self,
         encoder: HDCEncoder,
         item_memory: ItemMemory,
-        db_path: Union[str, Path] = "~/.cortex/hdc_vectors.db",
+        db_path: str | Path = "~/.cortex/hdc_vectors.db",
         half_life_days: int = 7,
     ) -> None:
         self._encoder = encoder

@@ -5,7 +5,6 @@ Implementación directa del Axioma Ω₂ (Asimetría Entrópica) y CORTEX-Sovere
 """
 from __future__ import annotations
 
-
 import asyncio
 import logging
 from dataclasses import dataclass

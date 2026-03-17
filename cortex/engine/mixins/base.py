@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, Union
+from typing import Any
 
 import aiosqlite
 
@@ -17,7 +17,7 @@ logger = logging.getLogger("cortex.engine")
 
 # Canonical Fact query structure — all 16 columns matching row_to_fact contract
 FACT_COLUMNS = (
-    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.meta, "
+    "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
     "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
 )
@@ -57,7 +57,7 @@ class EngineMixinBase:
         """Perform hybrid search."""
         raise NotImplementedError
 
-    def _row_to_fact(self, row: Union[dict, aiosqlite.Row], tenant_id: str) -> dict[str, Any]:
+    def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
         """Convert a database row to a decrypted fact dictionary.
 
         Builds the dict directly from the row tuple — no intermediate Fact

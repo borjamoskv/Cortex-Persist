@@ -7,7 +7,6 @@ Ensures perfect causal order without relying on absolute timestamps.
 """
 from __future__ import annotations
 
-
 import threading
 import time
 

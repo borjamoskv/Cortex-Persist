@@ -5,11 +5,11 @@ Rule-based intent inference from file activity statistics.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.perception.base import (
     MIN_EVENTS_FOR_INFERENCE,

@@ -60,11 +60,11 @@ class Ok(Generic[T]):
     def unwrap_or(self, default: T) -> T:  # type: ignore[override]
         return self.value
 
-    def map(self, fn: Callable[[T], U]) -> "Result[U, Any]":
+    def map(self, fn: Callable[[T], U]) -> Result[U, Any]:
         """Apply fn to the value, stay on success track."""
         return Ok(fn(self.value))
 
-    def flat_map(self, fn: Callable[[T], "Result[U, Any]"]) -> "Result[U, Any]":
+    def flat_map(self, fn: Callable[[T], Result[U, Any]]) -> Result[U, Any]:
         """Monadic bind — apply fn that returns a Result."""
         return fn(self.value)
 

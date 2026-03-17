@@ -12,10 +12,10 @@ Categories:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 
 class AxiomCategory(str, Enum):

@@ -26,7 +26,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Final, NamedTuple, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Final, NamedTuple, Optional
 
 import aiosqlite
 
@@ -219,7 +219,7 @@ class TipsEngine:
 
     async def for_category(
         self,
-        category: Union[str, TipCategory],
+        category: str | TipCategory,
         *,
         lang: Optional[str] = None,
         limit: int = 5,

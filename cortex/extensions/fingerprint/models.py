@@ -6,9 +6,9 @@ from the CORTEX Ledger.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from dataclasses import dataclass, field
+from typing import Optional
 
 __all__ = ["CognitiveFingerprint", "DomainPreference", "PatternVector"]
 

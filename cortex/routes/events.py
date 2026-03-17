@@ -3,10 +3,10 @@ CORTEX v6.0 - Event Bus Adapter (SSE).
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import asyncio
 from collections.abc import AsyncGenerator
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse

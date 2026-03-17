@@ -4,7 +4,6 @@ Embeds hyperdimensional ghost traces into the file system.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import hashlib
 import json
@@ -12,6 +11,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory

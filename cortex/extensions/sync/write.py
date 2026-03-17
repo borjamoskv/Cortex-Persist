@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 import sqlite3
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (

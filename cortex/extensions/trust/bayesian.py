@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -112,7 +112,7 @@ class BayesianTrustUpdater:
     async def update(
         self,
         fact_id: int,
-        signal: Union[Signal, str],
+        signal: Signal | str,
         tenant_id: str = "default",
     ) -> TrustUpdate:
         """Apply a Bayesian update to a fact's confidence.
@@ -188,7 +188,7 @@ class BayesianTrustUpdater:
     async def batch_update(
         self,
         fact_ids: list[int],
-        signal: Union[Signal, str],
+        signal: Signal | str,
         tenant_id: str = "default",
     ) -> list[TrustUpdate]:
         """Update multiple facts with the same signal."""

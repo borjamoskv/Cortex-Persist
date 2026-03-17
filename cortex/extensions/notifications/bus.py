@@ -23,7 +23,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import threading
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.notifications.events import CortexEvent, EventSeverity
 

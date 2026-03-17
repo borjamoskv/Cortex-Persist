@@ -1,4 +1,5 @@
 from typing import Optional
+
 """Helper functions for Trust and Compliance CLI commands."""
 
 import json

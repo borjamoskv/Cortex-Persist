@@ -1,9 +1,9 @@
 """CLI commands: cortex fingerprint — cognitive pattern extraction."""
 
 from __future__ import annotations
-from typing import Optional
 
 import json as json_mod
+from typing import Optional
 
 import click
 

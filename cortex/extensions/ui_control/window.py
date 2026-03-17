@@ -6,7 +6,6 @@ Uses AppleScript + System Events for maximum reliability across apps.
 """
 from __future__ import annotations
 
-
 import logging
 from typing import TYPE_CHECKING, Optional
 
@@ -25,7 +24,7 @@ class WindowEngine:
     Handles listing, moving, resizing, minimizing, and fullscreen toggling.
     """
 
-    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
+    def __init__(self, engine: Optional[CortexEngine] = None) -> None:
         self.engine = engine
 
     async def list_windows(self, app_name: str) -> list[WindowInfo]:

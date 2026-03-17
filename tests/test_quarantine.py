@@ -1,5 +1,6 @@
 from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
 
+
 def test_high_blast_radius_no_direct_purge():
     report = BlastRadiusReport(
         reverse_import_count=10,
