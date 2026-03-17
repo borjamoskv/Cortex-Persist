@@ -59,9 +59,13 @@ class CapabilityGuard:
         logger.debug(
             "Action validated: %s at Tier %s", required_capability_name, requested_tier.name
         )
+
     def add_capability(self, capability: Capability) -> None:
-        """Dynamically grant a new capability, re-evaluating the effective risk tier."""
+        """Dynamically grant a capability, escalating tier if needed."""
         self.active_capabilities.add(capability)
+        # Escalate hard ceiling if the new cap demands it
+        if capability.tier > self.credentials.max_tier:
+            object.__setattr__(self.credentials, "max_tier", capability.tier)
         self._recalculate_effective_tier()
 
     def revoke_capability(self, capability_name: str) -> None:
