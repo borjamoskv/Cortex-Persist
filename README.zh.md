@@ -1,13 +1,18 @@
 🌐 [English](README.md) | [Español](README.es.md) | **中文**
 
-# CORTEX — 自治 AI 的信任基础设施
+# CORTEX — AI 系统的防篡改决策溯源
 
-> **为 AI 代理记忆提供密码学验证、审计追踪和欧盟 AI 法案合规支持。**
-> *证明你的代理决策可信的那一层。*
+> 你的 AI 系统在做决策。
+> CORTEX 让这些决策**可追溯、可验证、可审计**。
+>
+> *哈希链日志、Merkle 完整性证明和可查询的决策溯源，
+> 面向监管和高风险 AI 工作流。*
+
+包：`cortex-persist v0.3.0b1` · 引擎：`v8` · 许可证：`Apache-2.0`
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-beta-orange.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
@@ -18,87 +23,128 @@
 
 ---
 
-## 问题
+## 为什么存在
 
-AI 代理每天做出数百万个决策。但**谁来验证这些决策是正确的？**
+AI 系统在一个关键维度上静默失败：**证据**。
 
-- **Mem0** 存储代理的记忆。但你能证明记忆没有被篡改吗？
-- **Zep** 构建知识图谱。但你能审计完整的推理链吗？
-- **Letta** 管理代理状态。但你能为监管机构生成合规报告吗？
+- 你可以存储记忆，但无法证明它们未被修改。
+- 你可以重放输出，但无法重建决策溯源链。
+- 你可以记录活动，但无法随时间验证完整性。
 
-**欧盟 AI 法案（第 12 条，2026 年 8 月起执行）** 要求：
+CORTEX 不替代你的记忆层 — 它**认证**它。
 
-- ✅ 自动记录所有代理决策
-- ✅ 防篡改的决策记录存储
-- ✅ 完整的可追溯性和可解释性
-- ✅ 定期完整性验证
-
-**罚款：最高 3000 万欧元或全球收入的 6%。**
-
-## 解决方案
-
-CORTEX 不是替代你的记忆层——而是为其提供**认证**。
-
-```
-你的记忆层 (Mem0 / Zep / Letta / 自定义)
-        ↓
-   CORTEX Trust Engine v8
-        ├── SHA-256 哈希链账本
-        ├── Merkle 树检查点
-        ├── 信誉加权 WBFT 共识
-        ├── 隐私护盾（11 种密钥模式检测）
-        ├── AST 沙箱（安全的 LLM 代码执行）
-        └── 欧盟 AI 法案合规报告
-```
-
-### 核心能力
-
-| 能力 | 功能 | EU AI Act |
-|:---|:---|:---:|
-| 🔗 **不可变账本** | 每条事实通过 SHA-256 哈希链接。篡改 = 可检测。 | Art. 12.3 |
-| 🌳 **Merkle 检查点** | 定期批量验证账本完整性 | Art. 12.4 |
-| 📋 **审计追踪** | 带时间戳和哈希验证的所有决策日志 | Art. 12.1 |
-| 🔍 **决策谱系** | 追踪代理如何得出任何结论 | Art. 12.2d |
-| 🤝 **WBFT 共识** | 多代理拜占庭容错验证 | Art. 14 |
-| 📊 **合规报告** | 一条命令生成监管就绪快照 | Art. 12 |
-| 🧠 **三层记忆** | L1 工作记忆 → L2 向量记忆 → L3 情景账本 | — |
-| 🔐 **隐私护盾** | 零泄漏入口守卫 — 11 种密钥模式 | — |
-| 🏠 **本地优先** | SQLite。无需云服务。你的数据，你的机器。 | — |
-| ☁️ **主权云** | 多租户 AlloyDB + Qdrant + Redis (v6) | — |
+*它对于 AI 记忆，就如同 SSL/TLS 对于 Web 通信：
+密码学验证、审计追踪和可验证的证据链。*
 
 ---
 
-## 快速开始
+## 它是什么
 
-### 安装
+在你现有记忆栈之上的三层：
+
+### 1. 证据层
+
+每个代理决策的防篡改记录。
+
+- **SHA-256 哈希链账本** — 修改可被检测
+- **Merkle 树检查点** — 定期批量完整性证明
+- **租户隔离存储** — 决策按客户隔离
+
+### 2. 决策溯源层
+
+从任何结论追溯到源头的可查询链路。
+
+- **完整因果链** — 哪些事实导致了哪些决策
+- **带时间戳的审计追踪** — 何时、什么、由哪个代理
+- **语义搜索** — 按语义查找相关决策（384 维向量）
+
+### 3. 治理层
+
+策略执行和合规支持报告。
+
+- **准入守卫** — 在持久化前验证决策
+- **密钥检测** — 在入口拦截 API 密钥、令牌和 PII
+- **合规导出** — 按需生成可审计报告
+- **完整性验证** — 一条命令验证账本一致性
+
+---
+
+## 快速演示
+
+```bash
+# 存储一个带密码学证明的决策
+$ cortex store --type decision --project fin-agent "Approved loan #4292"
+[+] Fact stored. Ledger hash: 8f4a2b9e...
+
+# 验证记录未被篡改
+$ cortex verify 8f4a2b9e
+[✔] VERIFIED: Hash chain intact. Merkle root sealed.
+
+# 生成审计报告
+$ cortex compliance-report
+```
+
+---
+
+## 在哪里使用
+
+```text
+你的记忆栈 (Mem0 / Zep / Letta / 自定义)
+        ↓
+   CORTEX 证据层
+        ├── 哈希链账本
+        ├── Merkle 检查点
+        ├── 准入守卫
+        └── 审计追踪和溯源查询
+```
+
+CORTEX 不是一个记忆存储。它是位于任何记忆存储之上的
+验证和可追溯性层。
+
+---
+
+## 适合谁
+
+| 使用 CORTEX 如果 | 不要使用 CORTEX 如果 |
+|:---|:---|
+| 你需要可验证的决策记录 | 你只需要语义检索 |
+| 你在监管或高风险工作流中运营 | 你不关心完整性证明 |
+| 多个代理共享记忆并需要一致的溯源 | 简单的向量存储已经解决了你的问题 |
+| 你需要可防御的审计追踪用于合规或法律审查 | 你的代理不做持久化决策 |
+
+**专为以下团队构建：**
+- 构建代理基础设施的 AI 平台团队
+- 受监管的 SaaS 供应商（金融科技、健康科技、保险科技）
+- 有审计要求的企业 Copilot 团队
+- 需要具备事后追溯能力的多代理系统
+
+---
+
+## 使用场景
+
+| 行业 | CORTEX 提供什么 |
+|:---|:---|
+| **金融科技 / 保险科技** | 可追溯的承保决策、可验证的贷款审批 |
+| **医疗健康** | 临床决策支持代理的审计追踪 |
+| **企业 Copilot** | 记住了什么、推荐了什么、修改了什么的证据 |
+| **多代理运维** | 跨代理集群的决策溯源 + 事后验证 |
+| **欧盟监管部署** | 高风险 AI 系统义务的可追溯性支持 |
+
+---
+
+## 安装
 
 ```bash
 pip install cortex-persist
 ```
 
-### 存储决策并验证
-
-```bash
-# 存储一条事实（自动检测 AI 代理来源）
-cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
-
-# 验证其密码学完整性
-cortex verify 42
-# → ✅ VERIFIED — Hash chain intact, Merkle sealed
-
-# 生成合规报告
-cortex compliance-report
-# → Compliance Score: 5/5 — All Article 12 requirements met
-```
-
-### 多租户 (v8)
+### Python API
 
 ```python
 from cortex import CortexEngine
 
 engine = CortexEngine()
 
-# 所有操作现在都按租户隔离
 await engine.store_fact(
     content="Approved loan application #443",
     fact_type="decision",
@@ -107,14 +153,14 @@ await engine.store_fact(
 )
 ```
 
-### 作为 MCP 服务器运行（通用 IDE 插件）
+### MCP 服务器（通用 IDE 插件）
 
 ```bash
 # 支持：Claude Code, Cursor, OpenClaw, Windsurf, Antigravity
 python -m cortex.mcp
 ```
 
-### 作为 REST API 运行
+### REST API
 
 ```bash
 uvicorn cortex.api:app --port 8484
@@ -122,79 +168,40 @@ uvicorn cortex.api:app --port 8484
 
 ---
 
-## 架构 (v8 — 主权云)
+## 架构
 
 ```mermaid
 block-beta
   columns 1
 
-  block:INTERFACES["🖥️ 接口层"]
+  block:INTERFACES["接口层"]
     CLI["CLI (38 命令)"]
     API["REST API (55+ 端点)"]
     MCP["MCP Server"]
-    GraphQL["GraphQL (即将推出)"]
   end
 
-  block:GATEWAY["🔐 信任网关"]
+  block:GATEWAY["信任网关"]
     RBAC["RBAC (4 角色)"]
-    Privacy["隐私护盾"]
+    Guards["准入守卫"]
     Auth["API Keys + JWT"]
-    Security["安全中间件"]
   end
 
-  block:MEMORY["🧠 认知记忆"]
-    L1["L1: Redis / 工作记忆"]
-    L2["L2: Qdrant / sqlite-vec (384维)"]
-    L3["L3: AlloyDB / SQLite (哈希链)"]
+  block:STORAGE["存储层"]
+    L1["工作记忆 (Redis / in-process)"]
+    L2["向量搜索 (Qdrant / sqlite-vec)"]
+    L3["账本 (AlloyDB / SQLite, 哈希链)"]
   end
 
-  block:TRUST["⛓️ 信任层"]
+  block:TRUST["验证层"]
     Ledger["SHA-256 账本"]
     Merkle["Merkle 树"]
-    WBFT["WBFT 共识"]
-    Sandbox["AST 沙箱"]
+    Consensus["多代理验证 (BFT)"]
   end
 
-  block:PLATFORM["⚙️ 平台服务"]
-    Daemon["自修复守护进程"]
-    Notifications["通知总线"]
-    Compaction["压缩 Sidecar"]
-    EdgeSync["EdgeSyncMonitor"]
-  end
-
-  INTERFACES --> GATEWAY --> MEMORY --> TRUST --> PLATFORM
+  INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 📐 完整架构详情见 [ARCHITECTURE.md](ARCHITECTURE.md) 和 [文档](https://cortexpersist.dev/architecture/)。
-
----
-
-## 竞争格局
-
-| | **CORTEX** | Mem0 | Zep | Letta | RecordsKeeper |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **密码学账本** | ✅ | ❌ | ❌ | ❌ | ✅ (区块链) |
-| **Merkle 检查点** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **多代理共识** | ✅ WBFT | ❌ | ❌ | ❌ | ❌ |
-| **隐私护盾** | ✅ 11 种模式 | ❌ | ❌ | ❌ | ❌ |
-| **AST 沙箱** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **本地优先** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **无区块链开销** | ✅ | — | — | — | ❌ |
-| **原生 MCP** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **多租户 (v6)** | ✅ | ❌ | ✅ | ❌ | ❌ |
-| **EU AI Act 就绪** | ✅ | ❌ | ❌ | ❌ | 部分 |
-| **费用** | **免费** | $249/月 | $$$ | 免费 | $$$ |
-
----
-
-## 统计数据 (2026-02-24)
-
-| 指标 | 数值 |
-|:---|:---|
-| 测试函数 | **1,162+** |
-| 生产代码行数 | **~45,500** |
-| Python 模块 | **444** |
-| Python 版本 | **3.10+** |
+> 完整架构详见 [architecture.md](docs/architecture.md)。
 
 ---
 
@@ -202,12 +209,12 @@ block-beta
 
 CORTEX 可接入你现有的技术栈：
 
-- **IDE**: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity（通过 MCP）
-- **代理框架**: LangChain, CrewAI, AutoGen, Google ADK
-- **记忆层**: 作为验证层叠加在 Mem0, Zep, Letta 之上
-- **数据库**: SQLite（本地）, AlloyDB, PostgreSQL, Turso（边缘）
-- **向量存储**: sqlite-vec（本地）, Qdrant（自托管或云端）
-- **部署**: Docker, Kubernetes（Helm 计划 2026 Q2）, 裸机, `pip install`
+- **IDE**：Claude Code, Cursor, OpenClaw, Windsurf, Antigravity（通过 MCP）
+- **代理框架**：LangChain, CrewAI, AutoGen, Google ADK
+- **记忆层**：作为验证层叠加在 Mem0, Zep, Letta 之上
+- **数据库**：SQLite（本地）, AlloyDB, PostgreSQL, Turso（边缘）
+- **向量存储**：sqlite-vec（本地）, Qdrant（自托管或云端）
+- **部署**：Docker, Kubernetes, 裸机, `pip install`
 
 ---
 
@@ -219,14 +226,30 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 - **Linux**（systemd 和 notify-send）
 - **Windows**（任务计划程序和 PowerShell）
 
-详见[跨平台架构指南](docs/cross_platform_guide.md)。
+详见[跨平台指南](docs/cross_platform_guide.md)。
+
+---
+
+## 监管定位
+
+CORTEX 提供受监管环境所需的可追溯性、完整性验证和审计基础设施。
+它本身不使系统"合规" — 合规取决于部署系统的角色、用例和风险类别。
+
+CORTEX 提供：
+
+- **防篡改存储** — 所有代理决策（哈希链账本）
+- **自动审计追踪生成** — 带时间戳和密码学验证的记录
+- **完整性验证** — 通过 Merkle 树检查点
+- **完整决策溯源** — 追踪任何结论到其源头
+
+这些能力支持欧盟 AI 法案（第 12 条）等框架中描述的
+可追溯性和记录保存要求。
 
 ---
 
 ## 许可证
 
-**Apache License 2.0** — 任何用途均免费。
-非生产和开发用途免费。2030 年 1 月 1 日自动转换为 Apache 2.0。
+**Apache License 2.0** — 任何用途均免费，商业或非商业。
 详情见 [LICENSE](LICENSE)。
 
 ---
