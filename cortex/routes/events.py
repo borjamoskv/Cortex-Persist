@@ -33,7 +33,7 @@ async def event_generator(
         return
 
     consumer_id = f"sse_{id(request)}"
-    
+
     try:
         while True:
             if await request.is_disconnected():
@@ -44,13 +44,15 @@ async def event_generator(
                 for sig in signals:
                     if event_types and sig.event_type not in event_types:
                         continue
-                    
+
                     yield {
                         "event": sig.event_type,
                         "id": str(sig.id),
-                        "data": sig.model_dump_json() if hasattr(sig, "model_dump_json") else sig.json()
+                        "data": sig.model_dump_json()
+                        if hasattr(sig, "model_dump_json")
+                        else sig.json(),
                     }
-            except Exception: # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 pass
 
             await asyncio.sleep(1.0)
@@ -67,6 +69,4 @@ async def stream_events(
 ) -> EventSourceResponse:
     """Subscribe to CORTEX coordination events via SSE."""
     event_types = types.split(",") if types else None
-    return EventSourceResponse(
-        event_generator(request, engine, auth.tenant_id, event_types)
-    )
+    return EventSourceResponse(event_generator(request, engine, auth.tenant_id, event_types))

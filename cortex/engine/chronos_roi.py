@@ -190,7 +190,7 @@ class ChronosROI:
 
                 cursor = conn.execute(
                     "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
+                    " valid_from, source, metadata, created_at, updated_at)"
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         "default",

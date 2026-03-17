@@ -11,6 +11,8 @@ except ImportError:
     async def create_agent(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
         """Stub: agents.factory removed during extensions refactor."""
         raise NotImplementedError("cortex.extensions.agents.factory was removed")
+
+
 from cortex.extensions.swarm.infinite_minds import InfiniteMindsManager
 
 try:

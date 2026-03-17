@@ -31,20 +31,19 @@ class TestContextCacheManager:
     def test_invalidate(self):
         mgr = ContextCacheManager()
         entry = mgr.create(
-            project="test", provider="gemini",
-            model="m", token_count=100,
+            project="test",
+            provider="gemini",
+            model="m",
+            token_count=100,
         )
         assert mgr.invalidate(entry.cache_id)
         assert mgr.get(entry.cache_id) is None
 
     def test_invalidate_project(self):
         mgr = ContextCacheManager()
-        mgr.create(project="proj_a", provider="gemini",
-                    model="m", token_count=100)
-        mgr.create(project="proj_a", provider="openai",
-                    model="m", token_count=200)
-        mgr.create(project="proj_b", provider="gemini",
-                    model="m", token_count=300)
+        mgr.create(project="proj_a", provider="gemini", model="m", token_count=100)
+        mgr.create(project="proj_a", provider="openai", model="m", token_count=200)
+        mgr.create(project="proj_b", provider="gemini", model="m", token_count=300)
 
         removed = mgr.invalidate_project("proj_a")
         assert removed == 2
@@ -53,10 +52,8 @@ class TestContextCacheManager:
 
     def test_get_by_project(self):
         mgr = ContextCacheManager()
-        mgr.create(project="alpha", provider="gemini",
-                    model="m", token_count=100)
-        mgr.create(project="beta", provider="gemini",
-                    model="m", token_count=200)
+        mgr.create(project="alpha", provider="gemini", model="m", token_count=100)
+        mgr.create(project="beta", provider="gemini", model="m", token_count=200)
 
         alpha = mgr.get_by_project("alpha")
         assert len(alpha) == 1
@@ -64,10 +61,12 @@ class TestContextCacheManager:
 
     def test_get_by_agent(self):
         mgr = ContextCacheManager()
-        mgr.create(project="test", provider="gemini",
-                    model="m", token_count=100, agent_id="agent_1")
-        mgr.create(project="test", provider="gemini",
-                    model="m", token_count=200, agent_id="agent_2")
+        mgr.create(
+            project="test", provider="gemini", model="m", token_count=100, agent_id="agent_1"
+        )
+        mgr.create(
+            project="test", provider="gemini", model="m", token_count=200, agent_id="agent_2"
+        )
 
         a1 = mgr.get_by_agent("agent_1")
         assert len(a1) == 1
@@ -76,29 +75,30 @@ class TestContextCacheManager:
     def test_ttl_expiry(self):
         mgr = ContextCacheManager()
         entry = mgr.create(
-            project="test", provider="gemini",
-            model="m", token_count=100, ttl_seconds=-1,
+            project="test",
+            provider="gemini",
+            model="m",
+            token_count=100,
+            ttl_seconds=-1,
         )
         # TTL=-1 means already expired
         assert mgr.get(entry.cache_id) is None
 
     def test_lru_eviction(self):
         mgr = ContextCacheManager(
-            max_entries=2, eviction_policy=EvictionPolicy.LRU,
+            max_entries=2,
+            eviction_policy=EvictionPolicy.LRU,
         )
-        e1 = mgr.create(project="t", provider="g",
-                         model="m", token_count=100)
+        e1 = mgr.create(project="t", provider="g", model="m", token_count=100)
         time.sleep(0.01)
-        e2 = mgr.create(project="t", provider="g",
-                         model="m", token_count=200)
+        e2 = mgr.create(project="t", provider="g", model="m", token_count=200)
 
         # Access e1 to make it recently used
         mgr.get(e1.cache_id)
         time.sleep(0.01)
 
         # This should evict e2 (least recently used)
-        e3 = mgr.create(project="t", provider="g",
-                         model="m", token_count=300)
+        e3 = mgr.create(project="t", provider="g", model="m", token_count=300)
 
         assert mgr.get(e1.cache_id) is not None
         assert mgr.get(e2.cache_id) is None
@@ -106,12 +106,9 @@ class TestContextCacheManager:
 
     def test_stats(self):
         mgr = ContextCacheManager()
-        mgr.create(project="alpha", provider="gemini",
-                    model="m", token_count=1000)
-        mgr.create(project="alpha", provider="openai",
-                    model="m", token_count=2000)
-        mgr.create(project="beta", provider="gemini",
-                    model="m", token_count=3000)
+        mgr.create(project="alpha", provider="gemini", model="m", token_count=1000)
+        mgr.create(project="alpha", provider="openai", model="m", token_count=2000)
+        mgr.create(project="beta", provider="gemini", model="m", token_count=3000)
 
         # Generate a miss
         mgr.get("nonexistent")
@@ -125,10 +122,8 @@ class TestContextCacheManager:
 
     def test_cleanup_expired(self):
         mgr = ContextCacheManager()
-        mgr.create(project="t", provider="g", model="m",
-                    token_count=100, ttl_seconds=-1)
-        mgr.create(project="t", provider="g", model="m",
-                    token_count=200, ttl_seconds=3600)
+        mgr.create(project="t", provider="g", model="m", token_count=100, ttl_seconds=-1)
+        mgr.create(project="t", provider="g", model="m", token_count=200, ttl_seconds=3600)
 
         cleaned = mgr.cleanup_expired()
         assert cleaned == 1

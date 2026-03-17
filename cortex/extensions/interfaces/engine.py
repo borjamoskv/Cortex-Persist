@@ -22,16 +22,15 @@ class EngineProtocol(Protocol):
     Provides connection access, session management, and core operations
     without coupling to the full CortexEngine implementation.
     """
+
     _db_path: Path
     _vec_available: bool
 
     @property
-    def memory(self) -> Any:
-        ...
+    def memory(self) -> Any: ...
 
     @property
-    def embeddings(self) -> Any:
-        ...
+    def embeddings(self) -> Any: ...
 
     def _resolve_tenant(self, tenant_id: str) -> str:
         """Resolve tenant namespace."""

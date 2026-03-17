@@ -49,4 +49,3 @@ class AgentCredentials:
         default=RiskTier.TIER_0_ANALYTICAL,
         metadata={"description": "Absolute ceiling for operations executed by this agent."},
     )
-

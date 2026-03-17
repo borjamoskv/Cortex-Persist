@@ -62,7 +62,7 @@ async def test_langgraph_supervisor_routing():
     final_state = events[-1]
     # Depending on langgraph versions, it might yield dicts or state objects
     # But usually it yields dict mapped by node name: {"planner": NightShiftState(...)}
-    for k, v in final_state.items():
+    for _k, v in final_state.items():
         if isinstance(v, NightShiftState):
             assert v.variables.get("planned") is True
             assert v.variables.get("executed") is True

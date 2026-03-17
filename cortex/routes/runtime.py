@@ -22,15 +22,11 @@ async def get_boot_recovery(request: Request) -> RecoveryReport:
     engine = getattr(request.app.state, "engine", None)
     if not engine:
         raise HTTPException(status_code=500, detail="Engine not available")
-    
+
     report = getattr(engine, "recovery_report", None)
     if not report:
         # Default empty report if no recovery happened
         return RecoveryReport(
-            status="clean",
-            recovered_items=0,
-            failed_items=0,
-            last_checkpoint_id=None,
-            warnings=[]
+            status="clean", recovered_items=0, failed_items=0, last_checkpoint_id=None, warnings=[]
         )
     return report

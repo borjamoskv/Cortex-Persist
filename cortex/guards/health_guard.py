@@ -23,6 +23,7 @@ except ImportError:
     class HealthSLA:  # type: ignore
         def __init__(self, target_grade: str = "DEGRADED") -> None:
             self.target_grade = target_grade
+
         def evaluate(self, score: float) -> None:
             pass
 
@@ -32,6 +33,7 @@ except ImportError:
     class HealthMixin:  # type: ignore
         async def health_score(self) -> float:
             return 1.0
+
 
 logger = logging.getLogger("cortex.guards.health")
 

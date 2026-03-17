@@ -311,7 +311,9 @@ class TrustService:
     # Audit trail
     # ------------------------------------------------------------------
 
-    def get_audit_trail(self, project: Optional[str] = None, limit: int = 50) -> list[dict[str, Any]]:
+    def get_audit_trail(
+        self, project: Optional[str] = None, limit: int = 50
+    ) -> list[dict[str, Any]]:
         """Fetch audit trail rows via index-backed ordering."""
         conn = self._get_conn()
         if project:
@@ -401,13 +403,16 @@ class TrustService:
     def __exit__(self, *exc: object) -> None:
         self.close()
 
+
 # ---------------------------------------------------------------------------
 # Bayesian Trust Model
 # ---------------------------------------------------------------------------
 
+
 @dataclasses.dataclass(frozen=True)
 class TrustProfile:
     """Agent trust profile representing an expected score derived from Beta(a, b)."""
+
     score: float
     a: float
     b: float
@@ -415,16 +420,19 @@ class TrustProfile:
 
 class TrustVerifier:
     """Calculates dynamic trust weighting for agents using Bayesian inference.
-    
+
     Rewards successes and penalizes failures asymmetrically (taint).
     """
+
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
         # For simplicity, stored in-memory. In a full production implementation,
-        # these numbers would be derived directly from the Master Ledger or a 
+        # these numbers would be derived directly from the Master Ledger or a
         # persistent trust table (e.g., using TrustService).
         self._profiles: dict[str, dict[str, float]] = {}
-        self.asymmetric_penalty = 5.0  # Failures count 5x against trust to quickly quarantine unreliable agents
+        self.asymmetric_penalty = (
+            5.0  # Failures count 5x against trust to quickly quarantine unreliable agents
+        )
 
     def get_profile(self, actor: str) -> TrustProfile:
         stats = self._profiles.get(actor, {"success": 0.0, "failure": 0.0})
@@ -437,21 +445,22 @@ class TrustVerifier:
     def record_feedback(self, actor: str, success: bool) -> None:
         if actor not in self._profiles:
             self._profiles[actor] = {"success": 0.0, "failure": 0.0}
-        
+
         if success:
             self._profiles[actor]["success"] += 1.0
         else:
             self._profiles[actor]["failure"] += self.asymmetric_penalty
 
-    async def calculate_trust_score(self, source_actor: str, confidence_marker: Optional[str] = None) -> float:
+    async def calculate_trust_score(
+        self, source_actor: str, confidence_marker: Optional[str] = None
+    ) -> float:
         """Admission score for an actor, potentially modified by epistemic markers."""
         profile = self.get_profile(source_actor)
         score = profile.score
-        
+
         # Penalize slightly if no strong verification marker is provided
         # C5 is highest (Static/Dynamic).
         if confidence_marker not in ("C5_VERIFIED", "C5_DYNAMIC", "C5_STATIC"):
             score *= 0.9
-            
-        return score
 
+        return score

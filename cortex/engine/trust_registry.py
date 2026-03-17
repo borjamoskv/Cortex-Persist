@@ -15,6 +15,7 @@ from typing import Optional
 
 logger = logging.getLogger("cortex.engine.trust")
 
+
 @dataclasses.dataclass()
 class AgentTrustProfile:
     """Historical and dynamic trust profile for an executing agent."""
@@ -79,7 +80,7 @@ class TrustRegistry:
         """Record operational evidence for an agent."""
         if now is None:
             now = datetime.datetime.now(datetime.timezone.utc)
-            
+
         profile = self.get_profile(agent_id)
         if success:
             profile.successes += 1
@@ -92,10 +93,10 @@ class TrustRegistry:
                 profile.last_incident_ts = now
 
     def compute_trust_score(
-        self, 
-        profile: AgentTrustProfile, 
-        domain_risk_modifier: float = 1.0, 
-        now: Optional[datetime.datetime] = None
+        self,
+        profile: AgentTrustProfile,
+        domain_risk_modifier: float = 1.0,
+        now: Optional[datetime.datetime] = None,
     ) -> float:
         """
         trust(agent, domain) = base_prior + reliability_posterior - taint_penalty - drift_penalty
@@ -122,7 +123,7 @@ class TrustRegistry:
             # Decay the penalty over time (e.g., halflife of ~48 hours)
             if hours_since < 168:  # Only care about last 7 days
                 drift_penalty = 0.2 * (1.0 - (hours_since / 168.0))
-        
+
         # 4. Success Recovery Bonus
         # If there are successes *after* the last incident, soften the blow slightly
         recovery_bonus = 0.0
@@ -130,8 +131,14 @@ class TrustRegistry:
             if profile.last_success_ts > profile.last_incident_ts:
                 recovery_bonus = 0.05  # Slight mechanical recovery, not instant amnesia
 
-        raw_score = profile.prior + (reliability - profile.prior) - taint_penalty - drift_penalty + recovery_bonus
-        
+        raw_score = (
+            profile.prior
+            + (reliability - profile.prior)
+            - taint_penalty
+            - drift_penalty
+            + recovery_bonus
+        )
+
         # 5. Apply Domain Risk
         # Higher risk domains compress the score down closer to 0 if it's already low, or require higher absolute certainty
         # To keep it simple, we penalize the score if the domain risk is > 1.0
@@ -147,13 +154,13 @@ class TrustRegistry:
         inf_weight = trust_score ^ gamma
         gamma > 1 heavily penalizes mediocre agents and zeroes out tainted ones.
         """
-        return trust_score ** self.gamma
+        return trust_score**self.gamma
 
     def rank_proposals(
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: Optional[datetime.datetime] = None
+        now: Optional[datetime.datetime] = None,
     ) -> list[WeightedProposal]:
         """
         Hydrate proposals with trust math and rank them.
@@ -163,16 +170,16 @@ class TrustRegistry:
             profile = self.get_profile(prop.agent_id)
             score = self.compute_trust_score(profile, domain_risk_modifier, now)
             weight = self.compute_influence_weight(score)
-            
+
             # The final score is a combination of the agent's influence weight and their raw confidence for this specific proposal
             final_score = weight * prop.raw_confidence
-            
+
             # Mutate the dataclass (or create a new one)
             prop.trust_score = score
             prop.influence_weight = weight
             prop.final_score = final_score
             ranked.append(prop)
-            
+
         ranked.sort(key=lambda p: p.final_score, reverse=True)
         return ranked
 
@@ -180,22 +187,22 @@ class TrustRegistry:
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: Optional[datetime.datetime] = None
+        now: Optional[datetime.datetime] = None,
     ) -> tuple[Optional[WeightedProposal], dict[str, str]]:
         """
         Takes N proposals and returns the Single Winning Proposal (or None) + Diagnostic Reason Code.
         """
         if not proposals:
             return None, {"reason_code": "NO_PROPOSALS"}
-            
+
         ranked = self.rank_proposals(proposals, domain_risk_modifier, now)
-        
+
         if len(ranked) == 1:
             return ranked[0], {"reason_code": "SINGLE_CANDIDATE"}
-            
+
         top = ranked[0]
         runner_up = ranked[1]
-        
+
         # Tie break handling (AXIOM: determinism)
         if abs(top.final_score - runner_up.final_score) < 0.001:
             # Deterministic fallback: Highest prior wins
@@ -212,4 +219,3 @@ class TrustRegistry:
             return top, {"reason_code": "TIE_BROKEN_BY_PRIOR_OR_HASH"}
 
         return top, {"reason_code": "HIGHEST_INFLUENCE_WEIGHT"}
-

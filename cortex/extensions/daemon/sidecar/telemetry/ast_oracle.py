@@ -24,6 +24,7 @@ except ImportError:
 
     class FileSystemEvent:  # type: ignore[no-redef]
         """Stub for missing watchdog."""
+
         is_directory: bool = False
         src_path: str = ""
 
@@ -32,10 +33,12 @@ except ImportError:
 
     class Observer:  # type: ignore[no-redef]
         """Stub for missing watchdog."""
+
         def schedule(self, *a: Any, **kw: Any) -> None: ...
         def start(self) -> None: ...
         def stop(self) -> None: ...
         def join(self) -> None: ...
+
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine

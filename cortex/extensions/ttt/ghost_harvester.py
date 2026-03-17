@@ -78,7 +78,7 @@ def format_for_lora(rows):
                 if crypto:
                     content = crypto.decrypt_str(content)
                 else:
-                    continue # Cannot decrypt without crypto
+                    continue  # Cannot decrypt without crypto
             except Exception:  # noqa: BLE001 — decryption failure on corrupted memory item skip
                 continue  # If we can't decrypt, skip this fact to not poison the model
 

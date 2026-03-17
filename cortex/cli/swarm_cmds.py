@@ -1,4 +1,5 @@
 """CLI commands for Sovereign Swarm operations."""
+
 from __future__ import annotations
 
 import asyncio
@@ -200,12 +201,16 @@ def swarm_up(db):
 
         await supervisor.start_agent("omega-prime")
 
-        console.print("\n[bold green]🐝 SWARM UP: Omega Prime and Supervisor are online.[/bold green]")
+        console.print(
+            "\n[bold green]🐝 SWARM UP: Omega Prime and Supervisor are online.[/bold green]"
+        )
         console.print("[dim]Type your objective, or 'exit' to quit.[/dim]\n")
 
         try:
             while True:
-                user_input = await asyncio.to_thread(console.input, "[bold cyan]Objective > [/bold cyan]")
+                user_input = await asyncio.to_thread(
+                    console.input, "[bold cyan]Objective > [/bold cyan]"
+                )
                 if user_input.strip().lower() in ("exit", "quit", "q"):
                     break
 
@@ -228,10 +233,10 @@ def swarm_up(db):
                 # Simple wait loop to allow background tasks to run.
                 # A robust REPL would use a dedicated listener on the bus for TASK_COMPLETED.
                 await asyncio.sleep(1.0)
-                
+
         except (KeyboardInterrupt, EOFError):
             console.print("\n[dim]Shutting down swarm...[/dim]")
-        
+
         finally:
             await supervisor.stop_agent("omega-prime")
             await asyncio.sleep(0.5)

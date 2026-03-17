@@ -343,12 +343,15 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             # Exponential backoff + jitter (Ω₁₃: prevent thermal token burn)
             if attempt < attempts - 1:
                 backoff = min(
-                    60.0,
-                    self.config.retry_delay_seconds * (2 ** attempt)
+                    60.0, self.config.retry_delay_seconds * (2**attempt)
                 ) + random.uniform(0, 1.0)
                 logger.info(
                     "⏳ Backoff %.1fs before retry %d/%d for %s:%s",
-                    backoff, attempt + 2, attempts, provider_name, model,
+                    backoff,
+                    attempt + 2,
+                    attempts,
+                    provider_name,
+                    model,
                 )
                 await asyncio.sleep(backoff)
 

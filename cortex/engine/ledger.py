@@ -73,7 +73,9 @@ class ImmutableLedger:
             return config.CHECKPOINT_MIN
         return config.CHECKPOINT_MAX
 
-    async def compute_merkle_root_async(self, start_id: int, end_id: int, conn=None) -> Optional[str]:
+    async def compute_merkle_root_async(
+        self, start_id: int, end_id: int, conn=None
+    ) -> Optional[str]:
         """Compute Merkle root for a range of transactions (async).
 
         Args:

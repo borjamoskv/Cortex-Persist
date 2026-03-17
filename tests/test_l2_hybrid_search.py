@@ -108,7 +108,7 @@ class TestRRFFuse:
         # Same ID ordering
         assert [x[0] for x in r1] == [x[0] for x in r2]
         # Same scores (within float tolerance)
-        for a, b in zip(r1, r2):
+        for a, b in zip(r1, r2, strict=False):
             assert abs(a[1] - b[1]) < 1e-10
 
 

@@ -11,6 +11,7 @@ epistemic evaluation, emotional tagging, or synaptic reinforcement.
 
 Derivation: Ω₃ (Byzantine Default) + Ω₂ (Entropic Asymmetry)
 """
+
 from __future__ import annotations
 
 import logging

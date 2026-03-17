@@ -19,7 +19,7 @@ def mock_queue():
 @pytest.mark.asyncio
 async def test_siege_verification_instruction_injection(mock_queue):
     """Verify that AetherAgent injects Ω₆ instructions if repro_test is present."""
-    llm = AsyncMock()
+    AsyncMock()
     # Mock Planner to return a plan with a repro_test
     planner_mock = AsyncMock()
     planner_mock.plan.return_value = PlanOutput(

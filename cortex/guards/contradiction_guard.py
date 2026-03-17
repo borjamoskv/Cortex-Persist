@@ -21,7 +21,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 import aiosqlite
 
@@ -208,7 +208,7 @@ def _jaccard(a: set[str], b: set[str]) -> float:
     """Jaccard similarity coefficient."""
     if not a or not b:
         return 0.0
-    union = Union[a, b]
+    union = a | b
     return len(a & b) / len(union) if union else 0.0
 
 

@@ -13,10 +13,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.extensions.mejoralo.taint")
 
+
 def mark_file_tainted(
     file_path: str,
     project: str,
-    engine: Optional['MejoraloEngine'],
+    engine: Optional["MejoraloEngine"],
 ) -> None:
     """Persist a permanent Taint mark on a file that failed L3 healing."""
     if not engine or not project:
@@ -38,10 +39,11 @@ def mark_file_tainted(
     except Exception:  # noqa: BLE001
         logger.exception("Failed to persist taint for %s", file_path)
 
+
 def is_file_tainted(
     file_path: str,
     project: str,
-    engine: Optional['MejoraloEngine'],
+    engine: Optional["MejoraloEngine"],
 ) -> bool:
     """Check if a file has been permanently tainted in CORTEX."""
     if not engine or not project:

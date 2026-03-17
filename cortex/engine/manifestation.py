@@ -2,6 +2,7 @@
 Manifestation Engine - Sovereign UI and Singularity Rituals.
 Ω₇: Atomic collapse of multiple project threads.
 """
+
 from __future__ import annotations
 
 import asyncio

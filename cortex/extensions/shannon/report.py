@@ -251,8 +251,7 @@ class EntropyReport:
         # Full exergy report — Ω₁₃: useful work measurement, not just entropy
         # Map high-confidence facts to decisions_enabled proxy
         conf_decisions = sum(
-            v for k, v in type_dist.items()
-            if k in {"decision", "architecture", "error", "bridge"}
+            v for k, v in type_dist.items() if k in {"decision", "architecture", "error", "bridge"}
         )
         exergy_report = compute_exergy_report(
             entropy_score=type_block["H"],

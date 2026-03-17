@@ -148,8 +148,16 @@ def _apply_and_verify(
         return False
 
     return _commit_healed_file(
-        abs_path, path, top_file_rel, level, iteration, current_score, console,
-        complexity_delta=complexity_delta, engine=engine, project=project,
+        abs_path,
+        path,
+        top_file_rel,
+        level,
+        iteration,
+        current_score,
+        console,
+        complexity_delta=complexity_delta,
+        engine=engine,
+        project=project,
     )
 
 
@@ -244,8 +252,7 @@ def _run_delta_testing(
         return True
     except subprocess.TimeoutExpired as e:
         console.print(
-            f"  [bold red]⏳ Timeout en {top_file_rel} "
-            f"tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
+            f"  [bold red]⏳ Timeout en {top_file_rel} tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
         )
         if engine and project:
             err_trace = (

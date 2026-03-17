@@ -15,13 +15,17 @@ from benchmarks.encb.strategies import (
 
 def _honest_node(nid: str = "n0", rel: float = 0.8) -> NodeProfile:
     return NodeProfile(
-        node_id=nid, adversary_type=AdversaryType.HONEST, reliability=rel,
+        node_id=nid,
+        adversary_type=AdversaryType.HONEST,
+        reliability=rel,
     )
 
 
 def _liar_node(nid: str = "liar", rel: float = 0.1) -> NodeProfile:
     return NodeProfile(
-        node_id=nid, adversary_type=AdversaryType.RANDOM_LIAR, reliability=rel,
+        node_id=nid,
+        adversary_type=AdversaryType.RANDOM_LIAR,
+        reliability=rel,
     )
 
 
@@ -95,8 +99,7 @@ class TestRAG:
         assert s.current_value is True
 
     def test_categorical_highest_tally(self):
-        s = PropState("k", BeliefType.CATEGORICAL, "python",
-                       categories=["python", "go", "rust"])
+        s = PropState("k", BeliefType.CATEGORICAL, "python", categories=["python", "go", "rust"])
         obs = [
             (_honest_node("n0"), "python", 0.9),
             (_honest_node("n1"), "python", 0.8),
@@ -171,8 +174,7 @@ class TestCortex:
         assert s.current_value is not None
 
     def test_categorical(self):
-        s = PropState("k", BeliefType.CATEGORICAL, "python",
-                       categories=["python", "go", "rust"])
+        s = PropState("k", BeliefType.CATEGORICAL, "python", categories=["python", "go", "rust"])
         obs = [
             (_honest_node("n0", 0.9), "python", 0.9),
             (_honest_node("n1", 0.85), "python", 0.8),

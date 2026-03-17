@@ -64,7 +64,7 @@ class TestRunSingle:
             seed=0,
         )
         assert len(report.error_rate_by_type) > 0
-        for bt, rate in report.error_rate_by_type.items():
+        for _bt, rate in report.error_rate_by_type.items():
             assert 0.0 <= rate <= 1.0
 
     def test_deterministic_with_same_seed(self):

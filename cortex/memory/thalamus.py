@@ -14,6 +14,7 @@ the hippocampus (L2 vector store).
 
 Derivation: Ω₂ (Entropic Asymmetry) + Ω₃ (Byzantine Default)
 """
+
 import logging
 from typing import Any, Optional
 
@@ -139,8 +140,8 @@ class ThalamusGate:
     ) -> Optional[dict]:
         """
         Arbitrate conflicting proposals dynamically based on Bayesian Trust.
-        Groups by content, sums trust scores for each content group, 
-        and picks the highest sum. Minority of highly trusted agents can 
+        Groups by content, sums trust scores for each content group,
+        and picks the highest sum. Minority of highly trusted agents can
         outvote a majority of tainted agents.
 
         Args:
@@ -152,53 +153,45 @@ class ThalamusGate:
         """
         if not proposals:
             return None
-            
+
         scores = {}
         content_scores = {}
         content_to_actors = {}
-        
+
         for p in proposals:
             actor_id = p["actor_id"]
             content = p["content"]
             marker = p.get("confidence_marker")
-            
+
             # 1. Fetch historical trust score for this agent
             score = await verifier.calculate_trust_score(actor_id, marker)
             scores[actor_id] = score
-            
+
             if content not in content_scores:
                 content_scores[content] = 0.0
                 content_to_actors[content] = []
-                
+
             # 2. Sum scores across agents proposing the same exact content
             content_scores[content] += score
             content_to_actors[content].append(actor_id)
-            
+
         # 3. Sort descending by sum of scores, deterministic tie-break by content string
-        sorted_contents = sorted(
-            content_scores.items(),
-            key=lambda x: (x[1], x[0]),
-            reverse=True
-        )
-        
+        sorted_contents = sorted(content_scores.items(), key=lambda x: (x[1], x[0]), reverse=True)
+
         winning_content, winning_score = sorted_contents[0]
         winning_actors = content_to_actors[winning_content]
-        
+
         # 4. Tie-break winning actor (credit the most trusted one)
-        winning_actors_sorted = sorted(
-            winning_actors,
-            key=lambda a: (scores[a], a),
-            reverse=True
-        )
+        winning_actors_sorted = sorted(winning_actors, key=lambda a: (scores[a], a), reverse=True)
         primary_winner = winning_actors_sorted[0]
-        
+
         rejected = [p["actor_id"] for p in proposals if p["content"] != winning_content]
-        
+
         reason = (
             f"Bayesian arbitration selected content with score sum {winning_score:.3f} "
             f"agreed by {len(winning_actors)} agent(s)."
         )
-        
+
         # 5. Emit complete Decision Receipt
         receipt = {
             "winning_actor": primary_winner,
@@ -207,12 +200,13 @@ class ThalamusGate:
             "rejected_actors": rejected,
             "weights_applied": scores,
             "content_scores": content_scores,
-            "reason": reason
+            "reason": reason,
         }
-        
+
         logger.info(
-            "Thalamus Arbitration: %s -> primary_winner=%s (Rejected: %s)", 
-            reason, primary_winner, len(rejected)
+            "Thalamus Arbitration: %s -> primary_winner=%s (Rejected: %s)",
+            reason,
+            primary_winner,
+            len(rejected),
         )
         return receipt
-

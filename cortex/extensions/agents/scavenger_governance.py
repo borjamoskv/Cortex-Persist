@@ -14,9 +14,10 @@ from cortex.memory.ledger import EventLedgerL3
 
 logger = logging.getLogger("cortex.extensions.agents.scavenger_governance")
 
+
 class ScavengerGovernance:
     """The Deterministic Layer for the Scavenger Agent.
-    
+
     Acts as the sovereign arbiter for all tactical sourcing operations.
     If a transaction fails the threshold (Tox-Vision, Cadastral-Radar),
     it is strictly rejected.

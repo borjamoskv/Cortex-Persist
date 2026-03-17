@@ -54,7 +54,9 @@ class CapabilityGuard:
             logger.error(msg)
             raise ValueError(msg)
 
-        logger.debug("Action validated: %s at Tier %s", required_capability_name, requested_tier.name)
+        logger.debug(
+            "Action validated: %s at Tier %s", required_capability_name, requested_tier.name
+        )
 
     def revoke_capability(self, capability_name: str) -> None:
         """Revoke a capability by name, scoping down execution rights proactively."""
@@ -66,4 +68,3 @@ class CapabilityGuard:
     def __repr__(self) -> str:
         caps = [cap.name for cap in self.active_capabilities]
         return f"<CapabilityGuard agent={self.credentials.agent_id} max_tier={self.max_allowed_tier.name} caps={caps}>"
-

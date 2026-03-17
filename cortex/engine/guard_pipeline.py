@@ -53,9 +53,7 @@ class GuardPipeline:
     ) -> None:
         """Run all pre-store guards. First rejection raises ValueError."""
         for guard in self._guards:
-            await guard.check(
-                content, project, fact_type, meta, conn, tenant_id=tenant_id
-            )
+            await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
 
     async def run_mutators(
         self,
@@ -71,8 +69,13 @@ class GuardPipeline:
         """Run all content mutators in order. Each receives the previous output."""
         for mutator in self._mutators:
             content, fact_type, meta = await mutator.transform(
-                content, project, fact_type, meta, conn,
-                tenant_id=tenant_id, source=source,
+                content,
+                project,
+                fact_type,
+                meta,
+                conn,
+                tenant_id=tenant_id,
+                source=source,
             )
         return content, fact_type, meta
 
@@ -91,13 +94,19 @@ class GuardPipeline:
         for hook in self._post_hooks:
             try:
                 await hook.on_stored(
-                    fact_id, project, fact_type, conn,
-                    tenant_id=tenant_id, source=source, db_path=db_path,
+                    fact_id,
+                    project,
+                    fact_type,
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
+                    db_path=db_path,
                 )
             except Exception as e:  # noqa: BLE001
                 logger.debug(
                     "[GuardPipeline] Post-hook %s failed: %s",
-                    type(hook).__name__, e,
+                    type(hook).__name__,
+                    e,
                 )
 
     @property

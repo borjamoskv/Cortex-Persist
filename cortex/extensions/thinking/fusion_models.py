@@ -15,7 +15,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 __all__ = [
     "FusedThought",
@@ -251,5 +251,5 @@ def _jaccard(set_a: set[str], set_b: set[str]) -> float:
     if not set_a and not set_b:
         return 0.0
     intersection = set_a & set_b
-    union = Union[set_a, set_b]
+    union = set_a | set_b
     return len(intersection) / len(union)

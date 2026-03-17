@@ -52,7 +52,9 @@ def sovereign_execute(
         @functools.wraps(fn)
         async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             t0 = time.perf_counter()
-            action: Optional[AgentAction] = next((a for a in args if isinstance(a, AgentAction)), None)
+            action: Optional[AgentAction] = next(
+                (a for a in args if isinstance(a, AgentAction)), None
+            )
 
             try:
                 result = await fn(*args, **kwargs)

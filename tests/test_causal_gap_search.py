@@ -54,10 +54,20 @@ class TestComputeCandidateScore:
 
     def test_evidence_dominates_semantic(self) -> None:
         """High semantic + zero evidence loses to low semantic + high evidence."""
-        sim_heavy = SearchCandidate("sim", semantic_score=0.95, evidence_match_score=0.1,
-                                     confidence_gain_score=0.1, novelty_score=0.1)
-        evi_heavy = SearchCandidate("evi", semantic_score=0.3, evidence_match_score=0.9,
-                                     confidence_gain_score=0.8, novelty_score=0.3)
+        sim_heavy = SearchCandidate(
+            "sim",
+            semantic_score=0.95,
+            evidence_match_score=0.1,
+            confidence_gain_score=0.1,
+            novelty_score=0.1,
+        )
+        evi_heavy = SearchCandidate(
+            "evi",
+            semantic_score=0.3,
+            evidence_match_score=0.9,
+            confidence_gain_score=0.8,
+            novelty_score=0.3,
+        )
         compute_candidate_score(sim_heavy)
         compute_candidate_score(evi_heavy)
         assert evi_heavy.final_score > sim_heavy.final_score
@@ -73,8 +83,13 @@ class TestRetrieveForCausalGap:
 
     def test_top_k_truncation(self) -> None:
         corpus = [
-            {"doc_id": f"d{i}", "semantic_score": 0.5, "evidence_match_score": 0.5,
-             "confidence_gain_score": 0.5, "novelty_score": 0.5}
+            {
+                "doc_id": f"d{i}",
+                "semantic_score": 0.5,
+                "evidence_match_score": 0.5,
+                "confidence_gain_score": 0.5,
+                "novelty_score": 0.5,
+            }
             for i in range(20)
         ]
         result = retrieve_for_causal_gap(_gap(), corpus, top_k=5)
@@ -83,12 +98,20 @@ class TestRetrieveForCausalGap:
     def test_ranking_by_causal_utility(self) -> None:
         """Causally useful doc beats semantically similar but useless doc."""
         corpus = [
-            {"doc_id": "linkedin_embed", "semantic_score": 0.95,
-             "evidence_match_score": 0.05, "confidence_gain_score": 0.05,
-             "novelty_score": 0.1},
-            {"doc_id": "real_evidence", "semantic_score": 0.40,
-             "evidence_match_score": 0.90, "confidence_gain_score": 0.85,
-             "novelty_score": 0.5},
+            {
+                "doc_id": "linkedin_embed",
+                "semantic_score": 0.95,
+                "evidence_match_score": 0.05,
+                "confidence_gain_score": 0.05,
+                "novelty_score": 0.1,
+            },
+            {
+                "doc_id": "real_evidence",
+                "semantic_score": 0.40,
+                "evidence_match_score": 0.90,
+                "confidence_gain_score": 0.85,
+                "novelty_score": 0.5,
+            },
         ]
         result = retrieve_for_causal_gap(_gap(), corpus, top_k=2)
         assert result[0].doc_id == "real_evidence"
@@ -96,8 +119,13 @@ class TestRetrieveForCausalGap:
 
     def test_all_candidates_get_scores(self) -> None:
         corpus = [
-            {"doc_id": "a", "semantic_score": 0.3, "evidence_match_score": 0.7,
-             "confidence_gain_score": 0.5, "novelty_score": 0.2},
+            {
+                "doc_id": "a",
+                "semantic_score": 0.3,
+                "evidence_match_score": 0.7,
+                "confidence_gain_score": 0.5,
+                "novelty_score": 0.2,
+            },
         ]
         result = retrieve_for_causal_gap(_gap(), corpus, top_k=10)
         assert len(result) == 1

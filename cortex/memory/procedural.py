@@ -148,7 +148,9 @@ class ProceduralMemory:
             try:
                 from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
-                ErrorGhostPipeline().capture_sync(e, source="procedural:load", project="CORTEX_SYSTEM")
+                ErrorGhostPipeline().capture_sync(
+                    e, source="procedural:load", project="CORTEX_SYSTEM"
+                )
             except ImportError:
                 pass
         finally:

@@ -86,7 +86,7 @@ class TestWeightedLogopBinary:
     def test_low_reliability_liar_discounted(self):
         """Critical: a liar with low reliability should be discounted."""
         obs = [
-            (True, 0.7, 0.9),   # honest high-rel
+            (True, 0.7, 0.9),  # honest high-rel
             (False, 0.95, 0.1),  # liar with degraded reliability
         ]
         val, prob = weighted_logop_binary(obs)

@@ -44,7 +44,7 @@ class SovereignReporter:
     async def _fetch_roi_history(self, conn: aiosqlite.Connection) -> list[dict[str, Any]]:
         """Fetch the latest ROI records from the facts table."""
         cursor = await conn.execute(
-            "SELECT content, meta FROM facts WHERE fact_type='knowledge' "
+            "SELECT content, metadata FROM facts WHERE fact_type='knowledge' "
             "AND source='chronos-roi' ORDER BY id DESC LIMIT 5"
         )
         roi_history = []

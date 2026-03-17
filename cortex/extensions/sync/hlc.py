@@ -30,7 +30,10 @@ __all__ = ["HybridLogicalClock", "HLCTimestamp"]
 _MAX_LOGICAL = 0xFFFF  # 65535
 
 
-@dataclass(frozen=True, order=True, )
+@dataclass(
+    frozen=True,
+    order=True,
+)
 class HLCTimestamp:
     """Compact causal timestamp for CRDT operations.
 

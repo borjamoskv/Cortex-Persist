@@ -166,16 +166,13 @@ class HeartbeatDaemon:
         result = await PhysicalActuator.ekin_execute_shell(command)
 
         if result["status"] == "success":
-            stdout = result.get('stdout', '')
+            stdout = result.get("stdout", "")
             self._deposit_to_iturria(
                 task,
                 {
                     "formation": "EKIN-BINDING",
                     "agents_used": 1,
-                    "solution": (
-                        f"Command Executed Successfully."
-                        f"\n\nSTDOUT:\n```\n{stdout}\n```"
-                    ),
+                    "solution": (f"Command Executed Successfully.\n\nSTDOUT:\n```\n{stdout}\n```"),
                 },
             )
             self.queue.mark_completed(task["id"])

@@ -220,8 +220,10 @@ def _hash_ast_subtree(node: ast.AST) -> int:
         if field_name in ("lineno", "col_offset", "end_lineno", "end_col_offset"):
             continue
         if isinstance(value, list):
-            parts.extend(_hash_ast_subtree(child) if isinstance(child, ast.AST) else field_name
-                         for child in value)  # type: ignore[assignment]
+            parts.extend(
+                _hash_ast_subtree(child) if isinstance(child, ast.AST) else field_name
+                for child in value
+            )  # type: ignore[assignment]
         elif isinstance(value, ast.AST):
             parts.append(str(_hash_ast_subtree(value)))
         else:
@@ -327,8 +329,12 @@ def _analyze_files(
     ghost_findings = _detect_code_ghosts(source_files, root)
 
     return (
-        total_loc, large_files, psi_findings, security_findings,
-        complexity_findings, ghost_findings
+        total_loc,
+        large_files,
+        psi_findings,
+        security_findings,
+        complexity_findings,
+        ghost_findings,
     )
 
 

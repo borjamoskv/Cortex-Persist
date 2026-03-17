@@ -165,6 +165,7 @@ class HydraChaosEngine:
         # Mock db persistence for fast chaos tests
         async def fast_mock_persist(*args, **kwargs):
             return 999
+
         ghost_pipeline._persist_async = fast_mock_persist
 
         start_ts = time.perf_counter_ns()

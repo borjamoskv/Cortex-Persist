@@ -35,13 +35,72 @@ _DECORATIVE_MARKERS = frozenset(
 
 _STOP_WORDS = frozenset(
     {
-        "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
-        "have", "has", "had", "do", "does", "did", "will", "would", "could",
-        "should", "may", "might", "shall", "can", "de", "del", "la", "el",
-        "los", "las", "en", "un", "una", "y", "o", "que", "con", "por",
-        "para", "se", "es", "no", "al", "su", "más", "como", "pero", "sin",
-        "sobre", "to", "of", "in", "for", "on", "with", "at", "by", "from",
-        "and", "or", "not", "but", "this", "that", "it", "its",
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "de",
+        "del",
+        "la",
+        "el",
+        "los",
+        "las",
+        "en",
+        "un",
+        "una",
+        "y",
+        "o",
+        "que",
+        "con",
+        "por",
+        "para",
+        "se",
+        "es",
+        "no",
+        "al",
+        "su",
+        "más",
+        "como",
+        "pero",
+        "sin",
+        "sobre",
+        "to",
+        "of",
+        "in",
+        "for",
+        "on",
+        "with",
+        "at",
+        "by",
+        "from",
+        "and",
+        "or",
+        "not",
+        "but",
+        "this",
+        "that",
+        "it",
+        "its",
     }
 )
 
@@ -53,48 +112,48 @@ MIN_EXERGY_THRESHOLD = 0.40
 def calculate_exergy(content: str) -> float:
     """
     Calculate the thermodynamic exergy (useful work) density of a string.
-    
+
     Formula:
     Base Entropy = (Unique Semantic Tokens) / (Total Words + 1)
     Penalty = Overlap with decorative stochastic markers.
     Exergy = Base Entropy * (1.0 - Penalty)
-    
+
     Returns:
         float: 0.0 (pure noise) to 1.0 (pure crystallized information)
     """
     length = len(content)
     if length == 0:
         return 0.0
-        
+
     lower_content = content.lower()
-    
+
     # Extract structural words, ignoring boilerplate symbols
     words = re.findall(r"\b[a-záéíóúñ]+\b", lower_content)
     total_words = len(words)
-    
+
     if total_words < 5:
-        # Extremely short phrases bypass this filter to allow atomic flags, 
+        # Extremely short phrases bypass this filter to allow atomic flags,
         # unless they are purely decorative.
         return 1.0 if not any(marker in lower_content for marker in _DECORATIVE_MARKERS) else 0.0
-        
+
     semantic_tokens = {w for w in words if w not in _STOP_WORDS and len(w) > 2}
-    
+
     # Base density: how many unique, non-trivial words vs total words
     # If the system repeats itself constantly, this drops.
     base_density = len(semantic_tokens) / float(total_words)
-    
+
     # Calculate penalty based on known LLM low-exergy conversational markers
     penalty = 0.0
     for marker in _DECORATIVE_MARKERS:
         if marker in lower_content:
             # Each decorative phrase drops the exergy by 15%
             penalty += 0.15
-            
+
     # Cap penalty at 0.9 to avoid negative exergy
     penalty = min(penalty, 0.9)
-    
+
     exergy = base_density * (1.0 - penalty)
-    
+
     # Amplify the score non-linearly to reward high density and punish low density.
     # Exergy should drop off a cliff if it starts padding.
     return min(exergy * 1.5, 1.0)
@@ -105,7 +164,7 @@ class ExergyGuard:
     Evaluates semantic exergy of incoming facts to ensure they meet Axiom Ω₁₃.
     Decorative payloads without causal utility are aborted.
     """
-    
+
     def check_thermodynamic_yield(
         self,
         content: str,
@@ -115,7 +174,7 @@ class ExergyGuard:
     ) -> float:
         """
         Calculates exergy score and enforces the cutoff threshold.
-        
+
         Raises:
             ValueError: If the exergy score falls below the minimum viable threshold.
         """
@@ -123,9 +182,9 @@ class ExergyGuard:
         # Strict thermodynamic checks apply mostly to natural language decisions, reasoning, and rules.
         if fact_type not in ("decision", "rule", "note", "analysis", "thought"):
             return 1.0
-            
+
         score = calculate_exergy(content)
-        
+
         if score < MIN_EXERGY_THRESHOLD:
             logger.warning(
                 "Thermodynamic Violation (Axiom Ω₁₃): Rejected decorative content "
@@ -139,5 +198,5 @@ class ExergyGuard:
                 "The text is largely rhetorical, repetitive, or conversational padding. "
                 "Strip all conversational markers ('por supuesto', 'aquí tienes', etc) and submit only crystallized structural facts."
             )
-            
+
         return score

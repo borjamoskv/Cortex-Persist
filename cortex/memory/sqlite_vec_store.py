@@ -97,7 +97,7 @@ class SovereignVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            
+
             try:
                 self._conn.enable_load_extension(True)
                 sqlite_vec.load(self._conn)
@@ -107,7 +107,7 @@ class SovereignVectorStoreL2:
                 logger.warning(
                     "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
                     "Semantic search will be disabled but metadata storage is preserved.",
-                    e
+                    e,
                 )
                 self._vector_enabled = False
 
@@ -384,14 +384,16 @@ class SovereignVectorStoreL2:
 
         if not self._vector_enabled:
             # Fallback to pure metadata/content search (no similarity scoring)
-            sql = f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
+            sql = (
+                f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
+            )
             params: list[Any] = [tenant_id, project_id]
             if layer:
                 sql += " AND cognitive_layer = ?"
                 params.append(layer)
             sql += " ORDER BY timestamp DESC LIMIT ?"
             params.append(limit)
-            
+
             cursor.execute(sql, tuple(params))
             rows = cursor.fetchall()
             final_facts = []

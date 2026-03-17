@@ -19,7 +19,9 @@ def _make_engine() -> MagicMock:
 
 def _patch_scanner(mock_data: dict):
     """Patch FingerprintScanner with controlled return values."""
-    scanner_patch = patch("cortex.extensions.fingerprint.extractor.FingerprintScanner", autospec=True)
+    scanner_patch = patch(
+        "cortex.extensions.fingerprint.extractor.FingerprintScanner", autospec=True
+    )
     return scanner_patch, mock_data
 
 

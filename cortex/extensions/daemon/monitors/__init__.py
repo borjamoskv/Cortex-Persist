@@ -73,7 +73,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "SiteMonitor": ("cortex.extensions.daemon.monitors.network", "SiteMonitor"),
     "TombstoneMonitor": ("cortex.extensions.daemon.monitors.tombstone", "TombstoneMonitor"),
     "TrendsMonitor": ("cortex.extensions.daemon.monitors.trends", "TrendsMonitor"),
-    "UnifiedMejoraloMonitor": ("cortex.extensions.daemon.monitors.mejoralo", "UnifiedMejoraloMonitor"),
+    "UnifiedMejoraloMonitor": (
+        "cortex.extensions.daemon.monitors.mejoralo",
+        "UnifiedMejoraloMonitor",
+    ),
     "WorkflowMonitor": ("cortex.extensions.daemon.monitors.workflow", "WorkflowMonitor"),
     "EpistemicMonitor": ("cortex.extensions.daemon.monitors.epistemic", "EpistemicMonitor"),
 }

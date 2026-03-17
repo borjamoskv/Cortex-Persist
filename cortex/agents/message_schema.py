@@ -16,6 +16,7 @@ class MessageState(str, Enum):
     REJECTED = "rejected"
     DEAD_LETTER = "dead_letter"
 
+
 class MessageKind(str, Enum):
     TASK_REQUEST = "task.request"
     TASK_ACCEPTED = "task.accepted"
@@ -30,7 +31,7 @@ class MessageKind(str, Enum):
     HANDOFF_RESULT = "handoff.result"
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
-    
+
     # Old stuff for built-ins MVP backwards compatibility
     TASK_RESULT = "task.result"
     FACT_PROPOSAL = "fact.proposal"
@@ -62,6 +63,7 @@ class AgentMessage(BaseModel):
     def from_json(cls, raw: str) -> AgentMessage:
         return cls.model_validate_json(raw)
 
+
 def new_message(
     sender: str,
     recipient: str,
@@ -87,5 +89,6 @@ def new_message(
         priority=priority,
         trace_context=trace_context or {},
     )
+
 
 MessageType = MessageKind

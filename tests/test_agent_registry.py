@@ -1,6 +1,5 @@
 """Tests for AgentRegistry (Phase 3)."""
 
-
 import pytest
 
 from cortex.extensions.agents.registry import (

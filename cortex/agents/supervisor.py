@@ -81,9 +81,7 @@ class Supervisor:
         if entry is None:
             raise KeyError(f"Agent '{agent_id}' not registered")
         if entry.task is not None and not entry.task.done():
-            raise RuntimeError(
-                f"Agent '{agent_id}' is still running — stop it first"
-            )
+            raise RuntimeError(f"Agent '{agent_id}' is still running — stop it first")
         del self._agents[agent_id]
         logger.info("Supervisor: Unregistered '%s'", agent_id)
 
@@ -202,9 +200,7 @@ class Supervisor:
             try:
                 await self.stop_agent(agent_id)
             except Exception as exc:  # noqa: BLE001
-                logger.error(
-                    "Supervisor: Error stopping '%s': %s", agent_id, exc
-                )
+                logger.error("Supervisor: Error stopping '%s': %s", agent_id, exc)
 
         logger.info("Supervisor: All agents stopped")
 
@@ -238,9 +234,7 @@ class Supervisor:
                 "consecutive_errors": entry.agent.state.consecutive_errors,
                 "messages_processed": entry.agent.state.total_messages_processed,
                 "restarts": entry.restart_count,
-                "last_heartbeat_age_s": (
-                    round(now - heartbeat, 1) if heartbeat else None
-                ),
+                "last_heartbeat_age_s": (round(now - heartbeat, 1) if heartbeat else None),
             }
 
             # Detect dead agents that should be running
@@ -257,11 +251,7 @@ class Supervisor:
                 agent_report["action"] = "restarted"
 
             # Detect stale heartbeats
-            if (
-                task_alive
-                and heartbeat
-                and (now - heartbeat) > self._heartbeat_timeout_s
-            ):
+            if task_alive and heartbeat and (now - heartbeat) > self._heartbeat_timeout_s:
                 logger.warning(
                     "Supervisor: '%s' heartbeat stale (%.1fs) — restarting",
                     agent_id,
@@ -296,11 +286,7 @@ class Supervisor:
 
     @property
     def running_count(self) -> int:
-        return sum(
-            1
-            for e in self._agents.values()
-            if e.agent.state.status == AgentStatus.RUNNING
-        )
+        return sum(1 for e in self._agents.values() if e.agent.state.status == AgentStatus.RUNNING)
 
     # ── Internal ─────────────────────────────────────────────────
 

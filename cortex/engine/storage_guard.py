@@ -120,15 +120,21 @@ class StoreProposal(BaseModel):
             raise ValueError(f"content too short ({len(v)} chars, min {_MIN_CONTENT_LENGTH})")
         for pattern in _POISON_PATTERNS:
             if pattern.search(v):
-                logger.warning("StoreProposal BLOCKED: poisoning pattern detected: %s", pattern.pattern)
-                raise ValueError("content rejected: suspicious pattern detected (possible data poisoning / prompt injection)")
+                logger.warning(
+                    "StoreProposal BLOCKED: poisoning pattern detected: %s", pattern.pattern
+                )
+                raise ValueError(
+                    "content rejected: suspicious pattern detected (possible data poisoning / prompt injection)"
+                )
         return v
 
     @field_validator("fact_type")
     @classmethod
     def validate_fact_type(cls, v: str) -> str:
         if v not in _ALLOWED_FACT_TYPES:
-            raise ValueError(f"'{v}' not in allowed types: {', '.join(sorted(_ALLOWED_FACT_TYPES))}")
+            raise ValueError(
+                f"'{v}' not in allowed types: {', '.join(sorted(_ALLOWED_FACT_TYPES))}"
+            )
         return v
 
     @field_validator("source")
@@ -136,14 +142,18 @@ class StoreProposal(BaseModel):
     def validate_source(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("source attribution is mandatory. Use 'cli', 'agent:<name>', 'api', or 'human' as source.")
+            raise ValueError(
+                "source attribution is mandatory. Use 'cli', 'agent:<name>', 'api', or 'human' as source."
+            )
         return v
 
     @field_validator("confidence")
     @classmethod
     def validate_confidence(cls, v: str) -> str:
         if v not in _ALLOWED_CONFIDENCE:
-            raise ValueError(f"'{v}' not in allowed confidence levels: {', '.join(sorted(_ALLOWED_CONFIDENCE))}")
+            raise ValueError(
+                f"'{v}' not in allowed confidence levels: {', '.join(sorted(_ALLOWED_CONFIDENCE))}"
+            )
         return v
 
     @field_validator("tags", mode="before")
@@ -151,7 +161,9 @@ class StoreProposal(BaseModel):
     def coerce_tags(cls, v: Any) -> Any:
         # Defensive coercion: string tags → list (prevents corrupt JSON in DB)
         if isinstance(v, str):
-            raise ValueError(f"tags must be list[str], got str: {v!r}. Use --tags with comma-separated values via CLI, or pass a list.")
+            raise ValueError(
+                f"tags must be list[str], got str: {v!r}. Use --tags with comma-separated values via CLI, or pass a list."
+            )
         return v
 
     @field_validator("tags")
@@ -204,7 +216,7 @@ class StorageGuard:
         except ValidationError as e:
             # We map Pydantic validation errors back to GuardViolation semantics
             # to maintain backwards compatibility with the existing error catching
-            # in tests and API endpoints. 
+            # in tests and API endpoints.
             err = e.errors()[0]
             loc = ".".join(str(part) for part in err["loc"])
             msg = err["msg"]
@@ -218,9 +230,13 @@ class StorageGuard:
                 if "empty" in msg or "at least 1" in msg:
                     raise GuardViolation("CONTENT_REQUIRED", "content cannot be empty") from e
                 if "too short" in msg:
-                    raise GuardViolation("CONTENT_TOO_SHORT", msg.replace("Value error, ", "")) from e
+                    raise GuardViolation(
+                        "CONTENT_TOO_SHORT", msg.replace("Value error, ", "")
+                    ) from e
                 if "poisoning" in msg:
-                    raise GuardViolation("POISONING_DETECTED", msg.replace("Value error, ", "")) from e
+                    raise GuardViolation(
+                        "POISONING_DETECTED", msg.replace("Value error, ", "")
+                    ) from e
                 raise GuardViolation("CONTENT_TOO_LONG", msg.replace("Value error, ", "")) from e
             elif "fact_type" in loc:
                 raise GuardViolation("INVALID_FACT_TYPE", msg.replace("Value error, ", "")) from e
@@ -234,7 +250,7 @@ class StorageGuard:
                 if "invalid tag" in msg:
                     raise GuardViolation("INVALID_TAG", msg.replace("Value error, ", "")) from e
                 raise GuardViolation("TOO_MANY_TAGS", msg.replace("Value error, ", "")) from e
-            
+
             # Fallback
             raise GuardViolation("VALIDATION_ERROR", f"{loc}: {msg}") from e
 
@@ -245,4 +261,3 @@ class StorageGuard:
             effective_source,
             len(content),
         )
-

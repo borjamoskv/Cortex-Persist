@@ -89,7 +89,9 @@ class KnowledgeCommitment:
         )
 
 
-def commit(secret: str, blinding_factor: Optional[bytes] = None) -> tuple[KnowledgeCommitment, bytes]:
+def commit(
+    secret: str, blinding_factor: Optional[bytes] = None
+) -> tuple[KnowledgeCommitment, bytes]:
     """
     Crea un nuevo Pedersen commitment a `secret`.
 

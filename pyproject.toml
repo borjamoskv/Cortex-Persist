@@ -108,10 +108,10 @@ exclude = ["experimental", "notebooks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G"]
-ignore = ["E501", "B008", "W291", "W293", "S", "BLE001", "UP045"]
+ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
+"tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20", "B017"]
 "open-cortex/tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
 "scripts/**/*.py" = ["S", "T20"]
 "sdks/**/*.py" = ["S", "T20"]

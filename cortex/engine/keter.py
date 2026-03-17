@@ -9,7 +9,7 @@ import logging
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import Any, Final, Optional, TypedDict, typing
+from typing import Any, Final, Optional, TypedDict
 
 from cortex.utils.errors import CortexError
 

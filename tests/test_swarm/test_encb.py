@@ -26,9 +26,7 @@ from benchmarks.encb_chaos_generator import (
 
 class TestTemporalContradiction:
     def test_setup_creates_ground_truth(self):
-        gen = TemporalContradictionGenerator(
-            num_propositions=5, num_agents=3, byzantine_ratio=0.3
-        )
+        gen = TemporalContradictionGenerator(num_propositions=5, num_agents=3, byzantine_ratio=0.3)
         gt = gen.setup()
 
         assert gt.total_propositions == 5
@@ -36,9 +34,7 @@ class TestTemporalContradiction:
         assert all(isinstance(v, bool) for v in gt.propositions.values())
 
     def test_generate_produces_events(self):
-        gen = TemporalContradictionGenerator(
-            num_propositions=3, num_agents=2, byzantine_ratio=0.5
-        )
+        gen = TemporalContradictionGenerator(num_propositions=3, num_agents=2, byzantine_ratio=0.5)
         gen.setup()
         events = gen.generate(num_rounds=5)
 
@@ -47,9 +43,7 @@ class TestTemporalContradiction:
         assert all(e.modality == ChaosModality.TEMPORAL_CONTRADICTION for e in events)
 
     def test_byzantine_agents_exist(self):
-        gen = TemporalContradictionGenerator(
-            num_propositions=2, num_agents=5, byzantine_ratio=0.4
-        )
+        gen = TemporalContradictionGenerator(num_propositions=2, num_agents=5, byzantine_ratio=0.4)
         gen.setup()
         events = gen.generate(num_rounds=2)
 
@@ -60,9 +54,7 @@ class TestTemporalContradiction:
         assert len(honest_events) > 0
 
     def test_events_have_unique_ids(self):
-        gen = TemporalContradictionGenerator(
-            num_propositions=2, num_agents=2, byzantine_ratio=0.5
-        )
+        gen = TemporalContradictionGenerator(num_propositions=2, num_agents=2, byzantine_ratio=0.5)
         gen.setup()
         events = gen.generate(num_rounds=3)
 
@@ -88,12 +80,8 @@ class TestTransitiveBreakage:
         gen.setup()
         events = gen.generate()
 
-        establish_events = [
-            e for e in events if e.meta.get("phase") == "establish"
-        ]
-        break_events = [
-            e for e in events if e.meta.get("phase") == "break"
-        ]
+        establish_events = [e for e in events if e.meta.get("phase") == "establish"]
+        break_events = [e for e in events if e.meta.get("phase") == "break"]
 
         # 2 chains × 4 depth = 8 establish events
         assert len(establish_events) == 8
@@ -149,8 +137,12 @@ class TestEpisodicSpam:
 class TestEpistemicChaosOrchestrator:
     def test_setup_all_creates_three_ground_truths(self):
         orch = EpistemicChaosOrchestrator(
-            num_propositions=3, num_agents=2, num_chains=2,
-            chain_depth=3, num_signal_facts=3, rho_noise=2.0,
+            num_propositions=3,
+            num_agents=2,
+            num_chains=2,
+            chain_depth=3,
+            num_signal_facts=3,
+            rho_noise=2.0,
         )
         gts = orch.setup_all()
 
@@ -161,8 +153,12 @@ class TestEpistemicChaosOrchestrator:
 
     def test_generate_all_produces_events(self):
         orch = EpistemicChaosOrchestrator(
-            num_propositions=2, num_agents=2, num_chains=2,
-            chain_depth=3, num_signal_facts=2, rho_noise=2.0,
+            num_propositions=2,
+            num_agents=2,
+            num_chains=2,
+            chain_depth=3,
+            num_signal_facts=2,
+            rho_noise=2.0,
         )
         orch.setup_all()
         events = orch.generate_all(temporal_rounds=3)

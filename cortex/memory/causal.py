@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Union
 
 logger = logging.getLogger("cortex.memory.causal")
 
@@ -142,7 +141,7 @@ class CausalGraph:
 
     @property
     def node_count(self) -> int:
-        all_ids = Union[set(self._forward.keys()), set(self._backward.keys())]
+        all_ids = set(self._forward.keys()) | set(self._backward.keys())
         return len(all_ids)
 
     @property

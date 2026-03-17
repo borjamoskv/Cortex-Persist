@@ -379,7 +379,9 @@ class SAPClient:
         headers = await self._build_request_headers(method, json_data)
         return await self._perform_retry_loop(method, url, params, json_data, headers)
 
-    async def _build_request_headers(self, method: str, json_data: Optional[dict]) -> dict[str, str]:
+    async def _build_request_headers(
+        self, method: str, json_data: Optional[dict]
+    ) -> dict[str, str]:
         """Build the complete headers dictionary for the request."""
         auth_headers = await self._build_auth_headers()
         headers = {

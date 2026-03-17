@@ -43,26 +43,26 @@ class OrchestraIntrospectionMixin:
 
     async def deep_think(self, prompt: str) -> FusedThought:
         """Razonamiento profundo con síntesis."""
-        return await self.think( # type: ignore[reportAttributeAccessIssue]
-            prompt, mode="deep_reasoning", strategy="synthesis"  
+        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="deep_reasoning", strategy="synthesis"
         )
 
     async def code_think(self, prompt: str) -> FusedThought:
         """Análisis de código con best-of-n."""
-        return await self.think( # type: ignore[reportAttributeAccessIssue]
-            prompt, mode="code_analysis", strategy="best_of_n"  
+        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="code_analysis", strategy="best_of_n"
         )
 
     async def creative_think(self, prompt: str) -> FusedThought:
         """Pensamiento creativo con weighted synthesis."""
-        return await self.think( # type: ignore[reportAttributeAccessIssue]
-            prompt, mode="creative", strategy="weighted"  
+        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="creative", strategy="weighted"
         )
 
     async def consensus_think(self, prompt: str) -> FusedThought:
         """Máximo consenso — todos los modelos con síntesis."""
-        return await self.think( # type: ignore[reportAttributeAccessIssue]
-            prompt, mode="consensus", strategy="synthesis"  
+        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="consensus", strategy="synthesis"
         )
 
     async def omega_think(self, prompt: str) -> FusedThought:
@@ -75,8 +75,8 @@ class OrchestraIntrospectionMixin:
         from cortex.extensions.llm.sovereign import Inquisitor
 
         # Phase 1: Hypothesis Synthesis
-        hypothesis = await self.think( # type: ignore[reportAttributeAccessIssue]
-            prompt, mode="omega", strategy="synthesis"  
+        hypothesis = await self.think(  # type: ignore[reportAttributeAccessIssue]
+            prompt, mode="omega", strategy="synthesis"
         )
 
         # Phase 2: Inquisitorial Siege (Asymmetry Ω₅)
@@ -158,7 +158,8 @@ class OrchestraIntrospectionMixin:
             "initialized": self._initialized,  # type: ignore[reportAttributeAccessIssue]
             "judge": (
                 f"{self._judge.provider_name}:{self._judge.model}"  # type: ignore[type-error]
-                if self._judge else None  # type: ignore[type-error]
+                if self._judge
+                else None  # type: ignore[type-error]
             ),  # type: ignore[reportAttributeAccessIssue]
             "pool_size": self._pool.size,  # type: ignore[reportAttributeAccessIssue]
             "history_count": len(self._history),  # type: ignore[reportAttributeAccessIssue]
@@ -186,7 +187,7 @@ class OrchestraIntrospectionMixin:
             sum(
                 r.models_succeeded / r.models_queried
                 for r in self._history  # type: ignore[reportAttributeAccessIssue]
-                if r.models_queried > 0 
+                if r.models_queried > 0
             )
             / total
         )

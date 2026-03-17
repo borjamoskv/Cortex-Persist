@@ -53,7 +53,7 @@ def test_dynamic_capability_grant(analytics_guard: CapabilityGuard) -> None:
 
     # Max tier elevates
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_3_LOCAL_MUTATION
-    
+
     # We can now write
     analytics_guard.validate_action("fs:write", RiskTier.TIER_3_LOCAL_MUTATION)
 

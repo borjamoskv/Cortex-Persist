@@ -142,7 +142,9 @@ class MaestroUI:
         """Escribe texto (clipboard para cadenas largas, keystroke para cortas)."""
         return await self.keyboard.type_text(text, target=target, delay=delay)
 
-    async def press_special(self, key_name: str, target: Optional[AppTarget] = None) -> InteractionResult:
+    async def press_special(
+        self, key_name: str, target: Optional[AppTarget] = None
+    ) -> InteractionResult:
         """Pulsa una tecla especial (return, tab, escape, flechas)."""
         return await self.keyboard.press_special(key_name, target=target)
 

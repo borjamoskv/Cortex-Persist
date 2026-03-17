@@ -74,9 +74,7 @@ class _Shutdown:
     )
 
 
-from typing import Union
-
-_Message = Union[_WriteOp, _TxBegin, _TxCommit, _TxRollback, _Shutdown]
+_Message = _WriteOp | _TxBegin | _TxCommit | _TxRollback | _Shutdown
 
 
 class TransactionProxy:

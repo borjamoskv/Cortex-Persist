@@ -121,25 +121,18 @@ class TestMemoryAgent:
     @pytest.mark.asyncio
     async def test_status_op(self, bus, mock_manager):
         agent = self._agent(bus, mock_manager)
-        await bus.send(
-            new_message("caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "status"})
-        )
+        await bus.send(new_message("caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "status"}))
         await bus.send(new_message("caller", "mem-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
         replies = await _drain(bus, "caller")
         task_results = [r for r in replies if r.kind == MessageKind.TASK_RESULT]
-        assert any(
-            r.payload.get("result", {}).get("status") == "ok"
-            for r in task_results
-        )
+        assert any(r.payload.get("result", {}).get("status") == "ok" for r in task_results)
 
     @pytest.mark.asyncio
     async def test_unknown_op(self, bus, mock_manager):
         agent = self._agent(bus, mock_manager)
-        await bus.send(
-            new_message("caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "nuke"})
-        )
+        await bus.send(new_message("caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "nuke"}))
         await bus.send(new_message("caller", "mem-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
@@ -167,9 +160,7 @@ class TestMemoryAgent:
     @pytest.mark.asyncio
     async def test_non_task_request_ignored(self, bus, mock_manager):
         agent = self._agent(bus, mock_manager)
-        await bus.send(
-            new_message("caller", "mem-1", MessageKind.HEARTBEAT, {})
-        )
+        await bus.send(new_message("caller", "mem-1", MessageKind.HEARTBEAT, {}))
         await bus.send(new_message("caller", "mem-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
@@ -239,9 +230,7 @@ class TestVerificationAgent:
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        assert any(
-            not r.payload.get("is_valid", True) for r in replies if "is_valid" in r.payload
-        )
+        assert any(not r.payload.get("is_valid", True) for r in replies if "is_valid" in r.payload)
 
     @pytest.mark.asyncio
     async def test_missing_code(self, bus, mock_verifier):
@@ -521,9 +510,7 @@ class TestSupervisorAgent:
 
     async def _req(self, bus, op: str, extra: dict | None = None) -> None:
         payload = {"op": op, **(extra or {})}
-        await bus.send(
-            new_message("caller", "sup-1", MessageKind.TASK_REQUEST, payload)
-        )
+        await bus.send(new_message("caller", "sup-1", MessageKind.TASK_REQUEST, payload))
         await bus.send(new_message("caller", "sup-1", MessageKind.SHUTDOWN, {}))
 
     @pytest.mark.asyncio
@@ -545,9 +532,7 @@ class TestSupervisorAgent:
 
         mock_supervisor.start_agent.assert_called_once_with("agent-x")
         replies = await _drain(bus, "caller")
-        assert any(
-            r.payload.get("result", {}).get("started") == "agent-x" for r in replies
-        )
+        assert any(r.payload.get("result", {}).get("started") == "agent-x" for r in replies)
 
     @pytest.mark.asyncio
     async def test_stop_op(self, bus, mock_supervisor):
@@ -557,9 +542,7 @@ class TestSupervisorAgent:
 
         mock_supervisor.stop_agent.assert_called_once_with("agent-x")
         replies = await _drain(bus, "caller")
-        assert any(
-            r.payload.get("result", {}).get("stopped") == "agent-x" for r in replies
-        )
+        assert any(r.payload.get("result", {}).get("stopped") == "agent-x" for r in replies)
 
     @pytest.mark.asyncio
     async def test_quarantine_op(self, bus, mock_supervisor):
@@ -569,9 +552,7 @@ class TestSupervisorAgent:
 
         mock_supervisor.quarantine_agent.assert_called_once_with("agent-x")
         replies = await _drain(bus, "caller")
-        assert any(
-            r.payload.get("result", {}).get("quarantined") == "agent-x" for r in replies
-        )
+        assert any(r.payload.get("result", {}).get("quarantined") == "agent-x" for r in replies)
 
     @pytest.mark.asyncio
     async def test_start_missing_agent_id(self, bus, mock_supervisor):

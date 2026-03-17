@@ -121,7 +121,7 @@ class ExergyGuardAdapter:
         tenant_id: str = "default",
     ) -> None:
         from cortex.guards.exergy_guard import ExergyGuard
-        
+
         guard = ExergyGuard()
         guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
 
@@ -196,5 +196,7 @@ class EpistemicBreakerHook:
         from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 
         await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
-            conn, tenant_id, project,
+            conn,
+            tenant_id,
+            project,
         )

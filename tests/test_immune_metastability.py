@@ -105,13 +105,13 @@ def test_metastability_property_monotonic_bad_signals() -> None:
         subsystem="test_monotonic",
         coverage_hot_paths=0.5,
     )
-    
+
     worse_report_1 = assess_metastability(
         subsystem="test_monotonic",
         coverage_hot_paths=0.5,
         single_point_dependencies=2,
     )
-    
+
     worse_report_2 = assess_metastability(
         subsystem="test_monotonic",
         coverage_hot_paths=0.5,
@@ -130,7 +130,7 @@ def test_metastability_property_idempotency() -> None:
         "coverage_hot_paths": 0.5,
         "single_point_dependencies": 2,
     }
-    
+
     report1 = assess_metastability(**kwargs)
     report2 = assess_metastability(**kwargs)
 

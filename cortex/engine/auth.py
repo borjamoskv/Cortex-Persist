@@ -6,6 +6,7 @@ Blocks executing destructive physical actions (OS commands, massive SQL deletion
 without explicit, cryptographically verifiable operator approval, unless the swarm
 reaches a 100% unanimous Zenith Consensus rating.
 """
+
 from __future__ import annotations
 
 import asyncio

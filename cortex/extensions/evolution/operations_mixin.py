@@ -1,4 +1,5 @@
 """Evolution Operations Mixin — genetic operators and adversarial processes."""
+
 from __future__ import annotations
 
 # pyright: reportAttributeAccessIssue=false
@@ -118,8 +119,7 @@ class EvolutionOpsMixin:
         """Perform genetic crossover combining two parent SubAgents into a new offspring."""
         cycle = getattr(self, "cycle_count", 0)
         child = SubAgent(
-            id=f"sub_{parent_a.domain.name.lower()}_gen{cycle}_"
-            f"{random.randint(1000, 9999)}",
+            id=f"sub_{parent_a.domain.name.lower()}_gen{cycle}_{random.randint(1000, 9999)}",
             domain=parent_a.domain,
             name=f"Offspring-{parent_a.id}x{parent_b.id}",
             generation=max(parent_a.generation, parent_b.generation) + 1,
@@ -253,14 +253,9 @@ class EvolutionOpsMixin:
                     logger.info("Ouroboros: Culled weakest subagent %s", worst.id)
 
     async def _process_sovereign(
-        self,
-        sovereign: SovereignAgent,
-        metrics: dict[AgentDomain, DomainMetrics]
+        self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]
     ) -> tuple[
-        list[EvolutionMutation],
-        list[EvolutionMutation],
-        int,
-        Optional[SymbolicActionState]
+        list[EvolutionMutation], list[EvolutionMutation], int, Optional[SymbolicActionState]
     ]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1

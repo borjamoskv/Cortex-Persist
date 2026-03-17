@@ -176,21 +176,15 @@ class TestSqliteMessageBus:
     @pytest.mark.asyncio
     async def test_pending_count(self, bus):
         for i in range(3):
-            await bus.send(
-                new_message("a", "b", MessageKind.TASK_REQUEST, {"i": i})
-            )
+            await bus.send(new_message("a", "b", MessageKind.TASK_REQUEST, {"i": i}))
 
         count = await bus.pending_count("b")
         assert count == 3
 
     @pytest.mark.asyncio
     async def test_routing_isolation(self, bus):
-        await bus.send(
-            new_message("x", "agent-1", MessageKind.TASK_REQUEST, {"for": 1})
-        )
-        await bus.send(
-            new_message("x", "agent-2", MessageKind.TASK_REQUEST, {"for": 2})
-        )
+        await bus.send(new_message("x", "agent-1", MessageKind.TASK_REQUEST, {"for": 1}))
+        await bus.send(new_message("x", "agent-2", MessageKind.TASK_REQUEST, {"for": 2}))
 
         msg1 = await bus.receive("agent-1", timeout=0.1)
         msg2 = await bus.receive("agent-2", timeout=0.1)
@@ -285,12 +279,8 @@ class TestBaseAgent:
         assert agent.state.status == AgentStatus.IDLE
 
         # Send a task then a shutdown
-        await bus.send(
-            new_message("tester", "echo-1", MessageKind.TASK_REQUEST, {"q": 1})
-        )
-        await bus.send(
-            new_message("tester", "echo-1", MessageKind.SHUTDOWN, {})
-        )
+        await bus.send(new_message("tester", "echo-1", MessageKind.TASK_REQUEST, {"q": 1}))
+        await bus.send(new_message("tester", "echo-1", MessageKind.SHUTDOWN, {}))
 
         await agent.run()
 
@@ -305,9 +295,7 @@ class TestBaseAgent:
 
         # Send messages that will cause errors
         for _ in range(3):
-            await bus.send(
-                new_message("tester", "fail-1", MessageKind.TASK_REQUEST, {})
-            )
+            await bus.send(new_message("tester", "fail-1", MessageKind.TASK_REQUEST, {}))
 
         await agent.run()
 
@@ -392,9 +380,7 @@ class TestSupervisor:
     @pytest.mark.asyncio
     async def test_quarantine_agent(self, bus):
         supervisor = Supervisor()
-        agent = CountingDaemon(
-            _make_manifest("q-1", daemon=True), bus, max_ticks=100
-        )
+        agent = CountingDaemon(_make_manifest("q-1", daemon=True), bus, max_ticks=100)
         supervisor.register(agent)
 
         await supervisor.start_agent("q-1")

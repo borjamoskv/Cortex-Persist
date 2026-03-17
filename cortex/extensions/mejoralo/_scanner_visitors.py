@@ -46,8 +46,7 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                         " including SystemExit/KeyboardInterrupt"
                     ),
                     fix_hint=(
-                        "Use a specific exception type: "
-                        "except ValueError, except OSError, etc."
+                        "Use a specific exception type: except ValueError, except OSError, etc."
                     ),
                 )
             )
@@ -79,8 +78,7 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                     line=node.lineno,
                     message=msg,
                     fix_hint=(
-                        "Catch specific exceptions: "
-                        "except (ValueError, KeyError, OSError) as e:"
+                        "Catch specific exceptions: except (ValueError, KeyError, OSError) as e:"
                     ),
                 )
             )

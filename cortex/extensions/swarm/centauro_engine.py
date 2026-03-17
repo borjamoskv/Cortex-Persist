@@ -3,6 +3,7 @@ CORTEX V5 - Centauro Engine (LEGION-Ω)
 Orchestration engine for the Sovereign Swarm. Implements Byzantine Consensus
 and adaptive agent formations for Zero-Trust problem solving.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -156,7 +157,7 @@ class CentauroEngine:
             agent_id, result = await future
             if isinstance(result, Exception):
                 continue
-            
+
             str_result = cast(str, result)
             proposals[agent_id] = str_result
             winning = self.consensus.execute_consensus(proposals)
@@ -179,8 +180,7 @@ class CentauroEngine:
         mission_hash_str = str(mission_hash)
         if mission_hash_str in self._active_missions:
             logger.info(
-                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", 
-                mission_hash_str
+                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash_str
             )
             return await self._active_missions[mission_hash_str]
 
@@ -239,8 +239,7 @@ class CentauroEngine:
                     result = {
                         "status": "failure",
                         "reason": (
-                            "Byzantine Consensus Threshold Not Reached, "
-                            "tracking leap failure."
+                            "Byzantine Consensus Threshold Not Reached, tracking leap failure."
                         ),
                         "agents_used": agents_used,
                         "formation": formation,
@@ -255,5 +254,5 @@ class CentauroEngine:
             raise
         finally:
             self._active_missions.pop(str(mission_hash), None)
-            
+
         raise RuntimeError("Unreachable")

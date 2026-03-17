@@ -25,24 +25,28 @@ def event_loop_policy():
 @pytest.fixture(autouse=True)
 def mock_local_embedder(monkeypatch):
     """Mock the local embedder to prevent 10s ONNX model loads during every test."""
+
     class DummyEmbedder:
         def embed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
                 return [0.0] * 768
             return [[0.0] * 768 for _ in content]
-            
+
         async def aembed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
                 return [0.0] * 768
             return [[0.0] * 768 for _ in content]
 
     from cortex.engine import CortexEngine
+
     monkeypatch.setattr(CortexEngine, "_get_embedder", lambda self: DummyEmbedder())
+
 
 @pytest.fixture(autouse=True)
 def reset_anomaly_detector():
     """Reset the anomaly detector before each test to prevent bulk mutation blocks."""
     from cortex.extensions.security.anomaly_detector import DETECTOR
+
     DETECTOR.reset()
 
 
@@ -52,4 +56,3 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_TESTING", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
-

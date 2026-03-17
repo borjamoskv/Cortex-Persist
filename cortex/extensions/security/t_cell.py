@@ -101,7 +101,11 @@ class BabestuTCell:
 
     @staticmethod
     def _veredicto(
-        estado: str, nivel: int, firma: Optional[str], razon: str, contenido_saneado: Optional[str] = None
+        estado: str,
+        nivel: int,
+        firma: Optional[str],
+        razon: str,
+        contenido_saneado: Optional[str] = None,
     ) -> dict[str, Any]:
         return {
             "estado": estado,

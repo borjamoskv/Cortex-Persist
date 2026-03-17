@@ -2,9 +2,10 @@
 CORTEX v5.0 — API Models.
 Centralized Pydantic models for request/response validation.
 """
+
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, TypedDict, Union
+from typing import Any, Literal, Optional, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -61,19 +62,12 @@ __all__ = [
 QueryIntent = Literal["lookup", "explore", "audit"]
 QueryStrategy = Literal["auto", "text", "vector", "hybrid", "temporal", "graph"]
 
+
 class QueryInput(TypedDict, total=False):
     tenant_id: str
     project: str
     query: str
-    strategy: Literal[
-        "auto",
-        "bayesian",
-        "hybrid",
-        "text",
-        "vector",
-        "temporal",
-        "graph"
-    ]
+    strategy: Literal["auto", "bayesian", "hybrid", "text", "vector", "temporal", "graph"]
     as_of: str
     top_k: int
     min_confidence: float
@@ -81,9 +75,11 @@ class QueryInput(TypedDict, total=False):
     include_history: bool
     include_taint: bool
 
+
 class QueryEvidenceLevel(BaseModel):
     level: Literal["none", "basic", "traceable", "verified"]
     reason: str
+
 
 class QueryResultData(BaseModel):
     answer: Optional[str] = None
@@ -92,6 +88,7 @@ class QueryResultData(BaseModel):
     degraded_reason: Optional[str] = None
     trace: Optional[dict] = None
     facts: Optional[list[dict]] = None
+
 
 class RejectionResult(TypedDict):
     accepted: Literal[False]
@@ -103,12 +100,15 @@ class RejectionResult(TypedDict):
     evidence: list[dict]
     remediation: list[str]
 
+
 class AcceptanceResult(TypedDict):
     accepted: Literal[True]
     operation_id: str
     warnings: list[str]
 
-OperationResult = Union[AcceptanceResult, RejectionResult]
+
+OperationResult = AcceptanceResult | RejectionResult
+
 
 class TraceInput(BaseModel):
     tx_id: Optional[str] = None
@@ -116,6 +116,7 @@ class TraceInput(BaseModel):
     decision_id: Optional[str] = None
     query_result_id: Optional[str] = None
     depth: int = Field(5, ge=1, le=20)
+
 
 class EventEnvelope(BaseModel):
     schema_version: str = "1.0"
@@ -281,6 +282,7 @@ class HealthReport(TypedDict):
 
 class RecoveryReport(BaseModel):
     """Report of the agent's memory recovery status during boot."""
+
     status: Literal["clean", "recovered", "failed"]
     recovered_items: int
     failed_items: int

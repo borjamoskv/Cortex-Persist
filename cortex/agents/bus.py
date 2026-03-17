@@ -67,8 +67,7 @@ class SqliteMessageBus:
         conn = await self._get_conn()
         async with self._lock:
             await conn.execute(
-                "INSERT INTO agent_messages (recipient, payload, created_at) "
-                "VALUES (?, ?, ?)",
+                "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
                 (message.recipient, message.to_json(), message.created_at),
             )
             await conn.commit()
@@ -79,9 +78,7 @@ class SqliteMessageBus:
             message.kind.value,
         )
 
-    async def receive(
-        self, agent_id: str, timeout: float = 1.0
-    ) -> Optional[AgentMessage]:
+    async def receive(self, agent_id: str, timeout: float = 1.0) -> Optional[AgentMessage]:
         """Dequeue the oldest unconsumed message for agent_id.
 
         Polls once. If no message, waits up to timeout then returns None.
@@ -146,8 +143,7 @@ class SqliteMessageBus:
         conn = await self._get_conn()
         async with self._lock:
             await conn.execute(
-                "INSERT INTO agent_messages (recipient, payload, created_at) "
-                "VALUES (?, ?, ?)",
+                "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
                 ("*", broadcast_msg.to_json(), broadcast_msg.created_at),
             )
             await conn.commit()
@@ -156,8 +152,7 @@ class SqliteMessageBus:
         """Count unconsumed messages for an agent."""
         conn = await self._get_conn()
         async with conn.execute(
-            "SELECT COUNT(*) FROM agent_messages "
-            "WHERE recipient = ? AND consumed = 0",
+            "SELECT COUNT(*) FROM agent_messages WHERE recipient = ? AND consumed = 0",
             (agent_id,),
         ) as cursor:
             row = await cursor.fetchone()

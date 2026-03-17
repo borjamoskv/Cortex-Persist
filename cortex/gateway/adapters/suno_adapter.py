@@ -86,7 +86,7 @@ class SunoApiOrgAdapter(SunoAdapterBase):
             if resp.status_code != 200:
                 logger.warning("Suno API failed: %s. Mocking response.", resp.status_code)
                 return ["mock_id_1", "mock_id_2"]
-            
+
             data = resp.json()
             # extract song ids (adapted to fictional generic API)
             return [song.get("id") for song in data.get("data", [])]
@@ -95,9 +95,9 @@ class SunoApiOrgAdapter(SunoAdapterBase):
         if "mock_id_1" in song_ids:
             return [
                 SunoTrack("mock_id_1", "https://mock.url/1.mp3", "Rework A", 180.0, "complete"),
-                SunoTrack("mock_id_2", "https://mock.url/2.mp3", "Rework B", 180.0, "complete")
+                SunoTrack("mock_id_2", "https://mock.url/2.mp3", "Rework B", 180.0, "complete"),
             ]
-            
+
         async with httpx.AsyncClient() as client:
             resp = await client.get(
                 f"{self.base_url}/feed?ids={','.join(song_ids)}", headers=self.headers
@@ -134,8 +134,8 @@ class SunoCookieAdapter(SunoAdapterBase):
     async def poll(self, song_ids: list[str]) -> list[SunoTrack]:
         await asyncio.sleep(2)
         return [
-             SunoTrack(sid, f"https://mock.url/{sid}.mp3", "Cookie Rework", 180.0, "complete")
-             for sid in song_ids
+            SunoTrack(sid, f"https://mock.url/{sid}.mp3", "Cookie Rework", 180.0, "complete")
+            for sid in song_ids
         ]
 
 
@@ -150,7 +150,7 @@ def get_adapter() -> SunoAdapterBase:
         return SunoCookieAdapter(cookie)
 
     # In CORTEX environment verification we raise an error.
-    # To prevent complete blockage during autonomous execution if neither is set, 
+    # To prevent complete blockage during autonomous execution if neither is set,
     # we raise EnvironmentError as instructed by safeguard P0.
     raise OSError("No ṢUNO authentication defined (SUNO_API_KEY or SUNO_COOKIE).")
 
@@ -172,16 +172,16 @@ async def suno_generate(
         custom_mode=custom_mode,
         instrumental=instrumental,
     )
-    
+
     try:
         adapter = get_adapter()
     except OSError as e:
         logger.error(str(e))
         raise
 
-    logger.info("Submitting Suno generation request: %s", title or 'Untitled')
+    logger.info("Submitting Suno generation request: %s", title or "Untitled")
     song_ids = await adapter.generate(req)
-    
+
     # Polling loop (Async Poll 5s interval, 5min max)
     max_retries = 60
     for _ in range(max_retries):
@@ -189,5 +189,5 @@ async def suno_generate(
         if all(t.status == "complete" for t in tracks):
             return tracks
         await asyncio.sleep(5)
-    
+
     raise TimeoutError("Suno generation timed out after 5 minutes.")
