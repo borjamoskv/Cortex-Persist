@@ -195,22 +195,83 @@ class ScraperEngine:
             await self._rate_limit(1.0)
 
             try:
+                import ipaddress
+                import socket
+
                 import httpx as _httpx
 
-                async with _httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
-                    response = await client.get(current_url)
-                    if response.status_code != 200:
+                # ── SSRF guard ──────────────────────────────────
+                def _is_safe_ssrf(target_url: str) -> bool:
+                    """Block private/loopback/metadata IPs."""
+                    parsed_t = urlparse(target_url)
+                    if parsed_t.scheme not in ("http", "https"):
+                        return False
+                    hostname_str = str(parsed_t.hostname) if parsed_t.hostname else ""
+                    if not hostname_str:
+                        return False
+                    try:
+                        ip = socket.gethostbyname(hostname_str)
+                        ip_obj = ipaddress.ip_address(ip)
+                        if (
+                            ip_obj.is_private
+                            or ip_obj.is_loopback
+                            or ip_obj.is_link_local
+                            or ip_obj.is_multicast
+                            or str(ip) in ("169.254.169.254", "169.254.169.253")
+                        ):
+                            return False
+                    except OSError:
+                        return False
+                    return True
+
+                if not _is_safe_ssrf(current_url):
+                    continue
+
+                async with _httpx.AsyncClient(
+                    timeout=10.0, follow_redirects=False
+                ) as client:
+                    response = None
+                    redirect_url = current_url
+                    for _ in range(3):  # Max 3 redirects
+                        if not _is_safe_ssrf(redirect_url):
+                            response = None
+                            break
+                        resp = await client.get(redirect_url)
+
+                        # Size limit (10MB)
+                        content_len = int(resp.headers.get("Content-Length", 0))
+                        if content_len > 10 * 1024 * 1024:
+                            response = None
+                            break
+
+                        if resp.is_redirect:
+                            loc = resp.headers.get("Location")
+                            if not loc:
+                                break
+                            redirect_url = urljoin(redirect_url, loc)
+                        else:
+                            response = resp
+                            break
+
+                    if response is None:
                         continue
+                    if getattr(response, "status_code", 500) != 200:
+                        continue
+
+                    text = getattr(response, "text", "")
 
                     # Simple link extraction via regex
                     import re
 
-                    links = re.findall(r'href=["\']([^"\']+)["\']', response.text)
+                    links = re.findall(r'href=["\']([^"\']+)["\']', text)
                     for link in links:
                         absolute = urljoin(current_url, link)
-                        parsed = urlparse(absolute)
+                        parsed_link = urlparse(absolute)
                         # Same domain only
-                        if parsed.netloc == base_domain and absolute not in visited:
+                        if (
+                            parsed_link.netloc == base_domain
+                            and absolute not in visited
+                        ):
                             to_visit.append((absolute, depth + 1))
                             discovered.add(absolute)
 
