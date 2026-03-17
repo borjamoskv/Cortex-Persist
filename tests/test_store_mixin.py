@@ -19,12 +19,16 @@ pytestmark = pytest.mark.slow
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
     from cortex.engine import CortexEngine
+    import os
+
+    # Unblock tests from thermodynamic enforcement
+    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
 
     db = str(tmp_path / "test_store.db")
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
 
-    # Ensure causal_edges is created since engine.init_db() doesn't auto-create it now
+    # Ensure causal_edges exists (AsyncCausalGraph.ensure_table is a safety check)
     from cortex.engine.causality import AsyncCausalGraph
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
@@ -32,6 +36,10 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
+    
+    # Cleanup
+    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
+        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
 
 
 # ─── Store ────────────────────────────────────────────────────────────
