@@ -105,8 +105,9 @@ async def insert_fact_record(
 
     cursor = await conn.execute(
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "hash, created_at, updated_at, valid_from, confidence, source, "
+        "parent_decision_id, consensus_score) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -120,6 +121,8 @@ async def insert_fact_record(
             ts,
             confidence,
             source,
+            parent_decision_id,
+            meta.get("consensus_score", 1.0) if meta else 1.0,
         ),
     )
     fact_id = cursor.lastrowid

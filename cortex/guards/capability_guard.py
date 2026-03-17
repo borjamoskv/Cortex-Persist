@@ -1,6 +1,7 @@
 import logging
+from typing import Optional
 
-from cortex.guards.capabilities import AgentCredentials, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 
 logger = logging.getLogger("cortex.guards.capability_guard")
 
@@ -10,14 +11,39 @@ class CapabilityGuard:
     Enforces capability and risk tier constraints on execution.
     Acts as the deterministic membrane preventing generative outputs
     from executing un-granted operations.
+
+    Two construction modes:
+        1. CapabilityGuard(credentials=AgentCredentials(...))
+           — legacy path, bound to a full agent profile.
+        2. CapabilityGuard(allowed_capabilities={Capability(...)})
+           — direct capability set, no agent identity required.
     """
 
-    def __init__(self, credentials: AgentCredentials):
-        """Builds a deterministic guard bound to an agent's operational profile."""
-        self.credentials = credentials
-        # A mutable set is kept for scoped degradation (revocation)
-        self.active_capabilities = set(credentials.capabilities)
-        # We cap the active tier by the credentials' hard ceiling
+    def __init__(
+        self,
+        credentials: Optional[AgentCredentials] = None,
+        *,
+        allowed_capabilities: Optional[set[Capability]] = None,
+    ) -> None:
+        """Builds a deterministic guard bound to a capability set."""
+        if credentials is not None and allowed_capabilities is not None:
+            raise ValueError("Provide either 'credentials' or 'allowed_capabilities', not both.")
+
+        if allowed_capabilities is not None:
+            # Direct capability set — no agent identity constraints.
+            self.credentials = None
+            self.active_capabilities: set[Capability] = set(allowed_capabilities)
+            self._ceiling = max(
+                (cap.tier for cap in self.active_capabilities),
+                default=RiskTier.TIER_0_ANALYTICAL,
+            )
+        elif credentials is not None:
+            self.credentials = credentials
+            self.active_capabilities = set(credentials.capabilities)
+            self._ceiling = credentials.max_tier
+        else:
+            raise ValueError("Either 'credentials' or 'allowed_capabilities' must be provided.")
+
         self._recalculate_effective_tier()
 
     def _recalculate_effective_tier(self) -> None:
@@ -25,7 +51,16 @@ class CapabilityGuard:
         highest_active = max(
             (cap.tier for cap in self.active_capabilities), default=RiskTier.TIER_0_ANALYTICAL
         )
-        self.max_allowed_tier = min(highest_active, self.credentials.max_tier)
+        self.max_allowed_tier = min(highest_active, self._ceiling)
+
+    def add_capability(self, capability: Capability) -> None:
+        """Dynamically grant a new capability, elevating max_allowed_tier if needed."""
+        self.active_capabilities.add(capability)
+        # Ceiling stays fixed — only active set changes; tier recomputed.
+        # If ceiling was derived from direct caps, raise it with the new cap's tier.
+        if self.credentials is None:
+            self._ceiling = max(self._ceiling, capability.tier)
+        self._recalculate_effective_tier()
 
     def validate_action(self, required_capability_name: str, requested_tier: RiskTier) -> None:
         """
@@ -65,5 +100,5 @@ class CapabilityGuard:
 
     def __repr__(self) -> str:
         caps = [cap.name for cap in self.active_capabilities]
-        return f"<CapabilityGuard agent={self.credentials.agent_id} max_tier={self.max_allowed_tier.name} caps={caps}>"
-
+        agent = self.credentials.agent_id if self.credentials else "<direct>"
+        return f"<CapabilityGuard agent={agent} max_tier={self.max_allowed_tier.name} caps={caps}>"

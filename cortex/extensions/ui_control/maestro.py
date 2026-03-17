@@ -247,3 +247,72 @@ class MaestroUI:
         if result.success:
             return result.output
         return None
+
+    # ─── High-level App Control ─────────────────────────────────────────
+
+    async def activate_app(self, target: AppTarget) -> InteractionResult:
+        """Bring an application to the foreground."""
+        script = f'tell application "{target.name}" to activate'
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as exc:
+            return InteractionResult(success=False, error=str(exc))
+
+    async def inject_keystroke(
+        self,
+        target: AppTarget,
+        key: str,
+        modifiers: list[str],
+    ) -> InteractionResult:
+        """Inject a keystroke into an application, with modifiers."""
+        if not await is_app_running(target.name):
+            return InteractionResult(
+                success=False,
+                error=f"'{target.name}' is not running",
+            )
+        mods = ", ".join(modifiers)
+        script = (
+            f'tell application "{target.name}" to activate\n'
+            f'tell application "System Events"\n'
+            f'  keystroke "{key}" using {{{mods}}}\n'
+            f'end tell'
+        )
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as exc:
+            return InteractionResult(success=False, error=str(exc))
+
+    async def click_menu_item(
+        self,
+        target: AppTarget,
+        path: list[str],
+    ) -> InteractionResult:
+        """Click a menu item given a path like [\"File\", \"Export as PDF...\"].
+
+        Args:
+            target: The application to control.
+            path: Menu path where path[0] is the top-level menu and path[1]
+                  is the menu item. Must have at least 2 elements.
+        """
+        if len(path) < 2:
+            return InteractionResult(
+                success=False,
+                error=f"Menu path must have at least 2 elements, got {len(path)}",
+            )
+        menu_name = path[0]
+        item_name = path[1]
+        script = (
+            f'tell application "{target.name}" to activate\n'
+            f'tell application "System Events"\n'
+            f'  tell process "{target.name}"\n'
+            f'    click menu item "{item_name}" of menu "{menu_name}" of menu bar 1\n'
+            f'  end tell\n'
+            f'end tell'
+        )
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as exc:
+            return InteractionResult(success=False, error=str(exc))

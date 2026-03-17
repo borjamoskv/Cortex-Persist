@@ -104,12 +104,16 @@ class TestWriterPragmaDedup:
     """Ensure writer.py no longer applies duplicate pragmas."""
 
     def test_writer_no_duplicate_pragmas(self):
-        """_create_connection must NOT contain cache_size or temp_store."""
+        """_create_connection must NOT contain cache_size or temp_store pragma calls."""
         from cortex.database.writer import SqliteWriteWorker
 
         source = inspect.getsource(SqliteWriteWorker._create_connection)
-        assert "cache_size" not in source
-        assert "temp_store" not in source
+        # Check that there are no actual PRAGMA calls — comments are allowed.
+        import re
+        assert not re.search(r'PRAGMA\s+cache_size', source, re.IGNORECASE), \
+            "_create_connection still applies cache_size pragma directly"
+        assert not re.search(r'PRAGMA\s+temp_store', source, re.IGNORECASE), \
+            "_create_connection still applies temp_store pragma directly"
 
 
 # ─── GPU Device Detection Tests ────────────────────────────────────────

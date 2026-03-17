@@ -48,6 +48,7 @@ __all__ = [
     "CREATE_EPISODES_INDEXES",
     "CREATE_FACTS",
     "CREATE_FACTS_INDEXES",
+    "CREATE_FACTS_TABLE",
     "CREATE_GHOSTS",
     "CREATE_GHOSTS_INDEX",
     "CREATE_HEARTBEATS",
@@ -80,24 +81,30 @@ SCHEMA_VERSION = "5.3.0"
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
 CREATE TABLE IF NOT EXISTS facts (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id   TEXT NOT NULL DEFAULT 'default',
-    project     TEXT NOT NULL,
-    content     TEXT NOT NULL,
-    fact_type   TEXT NOT NULL DEFAULT 'knowledge',
-    tags        TEXT NOT NULL DEFAULT '[]',
-    meta        TEXT DEFAULT '{}',
-    hash        TEXT,
-    valid_from  TEXT,
-    valid_until TEXT,
-    source      TEXT,
-    confidence  TEXT DEFAULT 'C3',
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    is_tombstoned INTEGER NOT NULL DEFAULT 0,
-    is_quarantined INTEGER NOT NULL DEFAULT 0
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id           TEXT NOT NULL DEFAULT 'default',
+    project             TEXT NOT NULL,
+    content             TEXT NOT NULL,
+    fact_type           TEXT NOT NULL DEFAULT 'knowledge',
+    tags                TEXT NOT NULL DEFAULT '[]',
+    cognitive_layer     TEXT DEFAULT 'semantic',
+    parent_decision_id  INTEGER REFERENCES facts(id),
+    meta                TEXT DEFAULT '{}',
+    hash                TEXT,
+    valid_from          TEXT,
+    valid_until         TEXT,
+    source              TEXT,
+    confidence          TEXT DEFAULT 'C3',
+    consensus_score     REAL DEFAULT 1.0,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    is_tombstoned       INTEGER NOT NULL DEFAULT 0,
+    is_quarantined      INTEGER NOT NULL DEFAULT 0
 );
 """
+
+# Backward-compat alias — tests import CREATE_FACTS_TABLE
+CREATE_FACTS_TABLE = CREATE_FACTS
 
 CREATE_FACTS_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_facts_tenant ON facts(tenant_id);

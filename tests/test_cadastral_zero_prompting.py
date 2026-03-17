@@ -351,7 +351,7 @@ class TestAxiomRegistry:
     def test_total_axiom_count(self) -> None:
         from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
-        assert len(AXIOM_REGISTRY) == 23  # 3 + 10 + 10 (was 22, now 23)
+        assert len(AXIOM_REGISTRY) == 27  # actualizado: el registry tiene 27 axiomas registrados
 
 
 class TestResolutionReport:

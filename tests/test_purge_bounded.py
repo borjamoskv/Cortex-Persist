@@ -28,7 +28,8 @@ class TestPurgeBounded:
         fact_id = await engine.store(
             project="test",
             content="Simple fact with no dependencies.",
-            fact_type="knowledge"
+            fact_type="knowledge",
+            source="test",
         )
         
         result = await engine.purge(fact_id)
@@ -44,7 +45,8 @@ class TestPurgeBounded:
         rule_id = await engine.store(
             project="test",
             content="IF x THEN y",
-            fact_type="rule"
+            fact_type="rule",
+            source="test",
         )
         
         # 2. Create 5 dependent facts to reach criticality > 0.8
@@ -53,7 +55,8 @@ class TestPurgeBounded:
             child_id = await engine.store(
                 project="test",
                 content=f"Dependent fact {i}",
-                parent_decision_id=rule_id
+                parent_decision_id=rule_id,
+                source="test",
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
@@ -64,7 +67,7 @@ class TestPurgeBounded:
                 await conn.commit()
 
         # 3. Purge should fail
-        with pytest.raises(RuntimeError, match="Bounded Demolition Denied"):
+        with pytest.raises(RuntimeError, match="Demolition Denied"):
             await engine.purge(rule_id)
 
         # 4. Success with force
@@ -86,14 +89,16 @@ class TestPurgeBounded:
         fact_id = await engine.store(
             project="test",
             content="Knowledge fact with dependencies.",
-            fact_type="knowledge"
+            fact_type="knowledge",
+            source="test",
         )
         
         for i in range(5):
             child_id = await engine.store(
                 project="test",
                 content=f"Dependent {i}",
-                parent_decision_id=fact_id
+                parent_decision_id=fact_id,
+                source="test",
             )
             async with engine.session() as conn:
                 await conn.execute(

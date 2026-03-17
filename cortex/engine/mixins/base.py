@@ -15,11 +15,12 @@ __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure — all 16 columns matching row_to_fact contract
+# Canonical Fact query structure — all 19 columns matching row_to_fact contract
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.meta, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
-    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
+    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
+    "f.parent_decision_id, f.cognitive_layer, f.consensus_score"
 )
 FACT_JOIN = "FROM facts f"
 
@@ -69,7 +70,7 @@ class EngineMixinBase:
 
         enc = get_default_encrypter()
         r = list(row)
-        while len(r) < 16:
+        while len(r) < 19:
             r.append(None)
 
         db_tenant_id = r[1] or "default"
@@ -105,11 +106,12 @@ class EngineMixinBase:
             "valid_until": "9999-12-31T23:59:59Z" if bool(r[14]) else r[9],
             "source": r[10] or (meta.get("source", "system") if meta else "system"),
             "meta": meta,
-            "consensus_score": meta.get("consensus_score", 1.0) if meta else 1.0,
+            "consensus_score": r[18] if r[18] is not None else (meta.get("consensus_score", 1.0) if meta else 1.0),
             "created_at": r[12],
             "updated_at": r[13],
             "tx_id": meta.get("tx_id") if meta else None,
-            "parent_decision_id": meta.get("parent_decision_id") if meta else None,
+            "parent_decision_id": r[16] if r[16] is not None else (meta.get("parent_decision_id") if meta else None),
+            "cognitive_layer": r[17] if r[17] is not None else (meta.get("cognitive_layer") if meta else None),
             "hash": r[7],
         }
 

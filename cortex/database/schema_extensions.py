@@ -350,6 +350,48 @@ CREATE TABLE IF NOT EXISTS causal_edges (
 """
 
 
+# ─── Immutable Ledger: Vote Ledger + Merkle + Integrity ──────────────
+CREATE_VOTE_LEDGER = """
+CREATE TABLE IF NOT EXISTS vote_ledger (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    agent_id        TEXT NOT NULL,
+    vote            INTEGER NOT NULL,
+    vote_weight     REAL NOT NULL,
+    prev_hash       TEXT NOT NULL,
+    hash            TEXT NOT NULL,
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+    signature       TEXT,
+    UNIQUE(hash)
+);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
+"""
+
+CREATE_VOTE_MERKLE_ROOTS = """
+CREATE TABLE IF NOT EXISTS vote_merkle_roots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    root_hash       TEXT NOT NULL,
+    vote_start_id   INTEGER NOT NULL,
+    vote_end_id     INTEGER NOT NULL,
+    vote_count      INTEGER NOT NULL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(root_hash)
+);
+"""
+
+CREATE_INTEGRITY_CHECKS = """
+CREATE TABLE IF NOT EXISTS integrity_checks (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    check_type      TEXT NOT NULL,
+    status          TEXT NOT NULL,
+    details         TEXT,
+    started_at      TEXT NOT NULL,
+    completed_at    TEXT NOT NULL
+);
+"""
+
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
     CREATE_VOTES,
@@ -380,4 +422,7 @@ EXTENSION_SCHEMA = [
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
+    CREATE_VOTE_LEDGER,
+    CREATE_VOTE_MERKLE_ROOTS,
+    CREATE_INTEGRITY_CHECKS,
 ]

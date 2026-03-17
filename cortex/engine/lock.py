@@ -137,12 +137,13 @@ class SovereignLock:
                 "AND action = 'release' ORDER BY id DESC LIMIT 1",
                 (resource, current_holder),
             ) as cursor:
-                has_release = await cursor.fetchone() is not None
-            if has_release:
-                # Holder released. Delete related intents and clear state.
+                row = await cursor.fetchone()
+                release_id = row[0] if row else None
+            if release_id is not None:
+                # Holder released. Delete related intents up to the release.
                 await conn.execute(
-                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
-                    (resource, current_holder),
+                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ? AND id <= ?",
+                    (resource, current_holder, release_id),
                 )
                 await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
                 current_holder = None

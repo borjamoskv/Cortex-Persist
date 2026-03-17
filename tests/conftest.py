@@ -52,4 +52,28 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_TESTING", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+    # Skip thermodynamic exergy validation in tests — unit tests don't provide
+    # real prior/posterior entropy metadata and should not be gated by Ω₁₃.
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
 
+
+@pytest.fixture(autouse=True)
+def reset_store_mixin_thermo_state():
+    """Reset StoreMixin class-level thermodynamic state between tests.
+
+    _agent_mode and _thermo_counters are ClassVars — they persist across
+    test instances and can cause DECORATIVE mode to bleed into subsequent
+    tests if a prior test triggers the thermodynamic waste threshold.
+    """
+    from cortex.engine.store_mixin import StoreMixin
+    from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+
+    # Reset before each test
+    StoreMixin._agent_mode = AgentMode.ACTIVE
+    StoreMixin._thermo_counters = ThermodynamicCounters()
+    StoreMixin._thermal_decay_cache = {}
+    yield
+    # Reset after each test to leave a clean slate
+    StoreMixin._agent_mode = AgentMode.ACTIVE
+    StoreMixin._thermo_counters = ThermodynamicCounters()
+    StoreMixin._thermal_decay_cache = {}

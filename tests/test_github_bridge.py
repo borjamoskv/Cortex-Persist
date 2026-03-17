@@ -52,6 +52,12 @@ def _mock_transport(routes: dict[str, list]) -> httpx.MockTransport:
 
     def handler(request: httpx.Request) -> httpx.Response:
         path = request.url.path
+        
+        # Prevent infinite pagination loops
+        page = request.url.params.get("page", "1")
+        if int(page) > 1:
+            return httpx.Response(200, json=[])
+        
         for pattern, data in routes.items():
             if pattern in path:
                 return httpx.Response(200, json=data)

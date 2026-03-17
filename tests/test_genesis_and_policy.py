@@ -174,9 +174,14 @@ class TestGenesisEngine:
         assert "__auto__" in preview
         assert "__init__.py" in preview["__auto__"]
 
-    def test_create_writes_files(self, tmp_path):
+    def test_create_writes_files(self, tmp_path, monkeypatch):
         from cortex.extensions.genesis.engine import GenesisEngine
         from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+
+        # Isolate filesystem creation from CORTEX ledger persistence.
+        # _persist_to_cortex instantiates a live CortexEngine which enforces
+        # exergy thresholds — that logic has its own test suite.
+        monkeypatch.setattr(GenesisEngine, "_persist_to_cortex", lambda self, result: None)
 
         engine = GenesisEngine(cortex_root=tmp_path)
         spec = SystemSpec(

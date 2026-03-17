@@ -27,6 +27,9 @@ class Fact:
     valid_until: Optional[str] = None
     source: Optional[str] = None
     confidence: str = "C3"
+    parent_decision_id: Optional[int] = None
+    cognitive_layer: Optional[str] = None
+    consensus_score: Optional[float] = None
 
     def is_active(self) -> bool:
         """Evaluate logical validity using valid_until and physical state."""
@@ -44,6 +47,9 @@ class Fact:
             "active": self.is_active(),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "parent_decision_id": self.parent_decision_id,
+            "cognitive_layer": self.cognitive_layer,
+            "consensus_score": self.consensus_score,
         }
 
 
