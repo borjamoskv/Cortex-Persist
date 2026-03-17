@@ -21,7 +21,11 @@ import logging
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -61,7 +65,11 @@ class DriftSignature:
 
     centroid: tuple[float, ...]
     spectral_gap: float
+<<<<<<< HEAD
+    intrinsic_dim: float | None  # None if scipy unavailable
+=======
     intrinsic_dim: Optional[float]  # None if scipy unavailable
+>>>>>>> origin/main
     n_vectors: int
     model_hash: str
     timestamp: float = field(default_factory=time.time)
@@ -84,7 +92,11 @@ class DriftSignature:
         logger.debug("Drift signature saved to %s", path)
 
     @classmethod
+<<<<<<< HEAD
+    def load(cls, path: Path) -> DriftSignature | None:
+=======
     def load(cls, path: Path) -> Optional[DriftSignature]:
+>>>>>>> origin/main
         """Load signature from JSON. Returns None if missing/corrupt."""
         if not path.exists():
             return None
@@ -152,7 +164,11 @@ def intrinsic_dimensionality(
     embeddings: np.ndarray,
     k: int = 10,
     projection_dim: int = 64,
+<<<<<<< HEAD
+) -> float | None:
+=======
 ) -> Optional[float]:
+>>>>>>> origin/main
     """MLE intrinsic dimensionality (Levina-Bickel 2004).
 
     Applies JL projection to defeat the curse of dimensionality.
@@ -237,7 +253,11 @@ class DriftMonitor:
     def __init__(
         self,
         model_hash: str,
+<<<<<<< HEAD
+        signature_dir: Path | None = None,
+=======
         signature_dir: Optional[Path] = None,
+>>>>>>> origin/main
     ) -> None:
         self._model_hash = model_hash
         self._page_hinkley = PageHinkley()
@@ -282,7 +302,11 @@ class DriftMonitor:
         self,
         drift: float,
         sg_ratio: float,
+<<<<<<< HEAD
+        idim_ratio: float | None,
+=======
         idim_ratio: Optional[float],
+>>>>>>> origin/main
         ph_alert: bool,
     ) -> float:
         """Calculate composite topological health score."""
@@ -308,7 +332,11 @@ class DriftMonitor:
     def health(
         self,
         embeddings: np.ndarray,
+<<<<<<< HEAD
+        baseline: DriftSignature | None = None,
+=======
         baseline: Optional[DriftSignature] = None,
+>>>>>>> origin/main
     ) -> dict[str, Any]:
         """Compute health metrics against a baseline.
 
@@ -384,7 +412,11 @@ class DriftMonitor:
             "detail": " | ".join(details),
         }
 
+<<<<<<< HEAD
+    def load_baseline(self) -> DriftSignature | None:
+=======
     def load_baseline(self) -> Optional[DriftSignature]:
+>>>>>>> origin/main
         """Load persisted baseline signature."""
         if self._signature_path:
             return DriftSignature.load(self._signature_path)

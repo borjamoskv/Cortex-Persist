@@ -10,6 +10,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+<<<<<<< HEAD
+import json
+import random
+import time
+from collections import defaultdict
+=======
 import copy
 import json
 import random
@@ -17,6 +23,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
+>>>>>>> origin/main
 from typing import Any
 
 from benchmarks.encb.agents import (
@@ -55,14 +62,23 @@ def _generate_observations(
         clique_lie = clique_lies.get(prop.key) if node.clique_id else None
 
         if prop.belief_type == BeliefType.BOOLEAN:
+<<<<<<< HEAD
+            val, conf = generate_observation_boolean(prop.ground_truth, node, clique_lie)
+=======
             val, conf = generate_observation_boolean(
                 prop.ground_truth, node, clique_lie
             )
+>>>>>>> origin/main
         elif prop.belief_type == BeliefType.CATEGORICAL:
             val, conf = generate_observation_categorical(
                 prop.ground_truth, prop.categories, node, clique_lie
             )
         elif prop.belief_type == BeliefType.SCALAR:
+<<<<<<< HEAD
+            val, conf = generate_observation_scalar(prop.ground_truth, node)
+        elif prop.belief_type == BeliefType.SET:
+            val, conf = generate_observation_set(prop.ground_truth, node, prop.set_universe or None)
+=======
             val, conf = generate_observation_scalar(
                 prop.ground_truth, node
             )
@@ -70,6 +86,7 @@ def _generate_observations(
             val, conf = generate_observation_set(
                 prop.ground_truth, node, prop.set_universe or None
             )
+>>>>>>> origin/main
         else:
             val, conf = prop.ground_truth, 0.5
 
@@ -84,9 +101,13 @@ def _pre_generate_clique_lies(
 ) -> dict[str, Any]:
     """Pre-generate coordinated lies for clique nodes."""
     clique_lies: dict[str, Any] = {}
+<<<<<<< HEAD
+    has_clique = any(n.adversary_type == AdversaryType.COORDINATED_CLIQUE for n in nodes)
+=======
     has_clique = any(
         n.adversary_type == AdversaryType.COORDINATED_CLIQUE for n in nodes
     )
+>>>>>>> origin/main
     if not has_clique:
         return clique_lies
 
@@ -177,7 +198,13 @@ def run_single(
                 resolve_crdt_only(state, obs, t)
             elif strategy == StrategyID.CORTEX:
                 resolve_cortex(
+<<<<<<< HEAD
+                    state,
+                    obs,
+                    t,
+=======
                     state, obs, t,
+>>>>>>> origin/main
                     atms=atms,
                     use_reliability=use_reliability,
                     use_atms=use_atms,
@@ -304,9 +331,13 @@ def print_summary(results: dict[str, list[MetricsReport]]) -> None:
 
 
 def main() -> None:
+<<<<<<< HEAD
+    parser = argparse.ArgumentParser(description="ENCB v2 — Epistemic Noise Chaos Benchmark")
+=======
     parser = argparse.ArgumentParser(
         description="ENCB v2 — Epistemic Noise Chaos Benchmark"
     )
+>>>>>>> origin/main
     parser.add_argument("--n-agents", type=int, default=200)
     parser.add_argument("--n-props", type=int, default=1000)
     parser.add_argument("--n-domains", type=int, default=8)

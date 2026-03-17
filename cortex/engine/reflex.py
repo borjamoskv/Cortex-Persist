@@ -6,7 +6,11 @@ Reflex Engine - Autonomic Responses and Immune Defense.
 import asyncio
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -20,7 +24,11 @@ async def trigger_autonomic_reflex(
     workspace: Path,
     cortex_engine: Any,
     active_tasks: set[asyncio.Task],
+<<<<<<< HEAD
+    signal_bus: SignalBus | None = None,
+=======
     signal_bus: Optional[SignalBus] = None,
+>>>>>>> origin/main
 ) -> None:
     """Sovereign Reflex: High adrenaline triggers a diagnostic healing sweep."""
     if not cortex_engine:

@@ -9,7 +9,11 @@ import asyncio
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 try:
     from cortex.cli.bicameral import bicameral
@@ -105,7 +109,11 @@ class BlueTeamAgent:
         return imports, body
 
     async def synthesize(
+<<<<<<< HEAD
+        self, intent: str, context: Mapping[str, Any], feedback: list[str] | None = None
+=======
         self, intent: str, context: Mapping[str, Any], feedback: Optional[list[str]] = None
+>>>>>>> origin/main
     ) -> str:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
@@ -125,7 +133,11 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
+<<<<<<< HEAD
+    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 100):
+=======
     def __init__(self, vectors: Optional[list[AttackVector]] = None, replica_count: int = 100):
+>>>>>>> origin/main
         self.vectors = vectors or list(RED_TEAM_SWARM.values())
         # Enforce the 100 Sovereign Agents Topology
         self.replica_count = replica_count
@@ -152,7 +164,11 @@ class LegionOmegaEngine:
     def __init__(
         self,
         max_cycles: int = 3,
+<<<<<<< HEAD
+        vectors: list[AttackVector] | Mapping[str, AttackVector] | None = None,
+=======
         vectors: Optional[list[AttackVector] | Mapping[str, AttackVector]] = None,
+>>>>>>> origin/main
     ):
         self.blue_team = BlueTeamAgent()
         # Normalización de vectores: asegurar que sea una lista de objetos, no un dict
@@ -165,7 +181,11 @@ class LegionOmegaEngine:
         self.red_team = RedTeamSwarm(vectors=self.vectors_list)
         self.max_cycles = max_cycles
 
+<<<<<<< HEAD
+    async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
+=======
     async def forge(self, intent: str, context: Optional[Mapping[str, Any]] = None) -> SiegeResult:
+>>>>>>> origin/main
         """Forge code through the fire of the siege."""
         ctx = context or {}
         feedback = []

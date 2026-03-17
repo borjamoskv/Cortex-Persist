@@ -61,7 +61,11 @@ class CheckoutRequest(BaseModel):
     """Request to create a Stripe Checkout session."""
 
     plan: str = "pro"
+<<<<<<< HEAD
+    customer_email: str | None = None
+=======
     customer_email: Optional[str] = None
+>>>>>>> origin/main
     success_url: str = "https://cortex.moskv.com/success"
     cancel_url: str = "https://cortex.moskv.com/pricing"
 

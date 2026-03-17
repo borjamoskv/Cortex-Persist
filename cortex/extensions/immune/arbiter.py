@@ -246,7 +246,11 @@ class ImmuneArbiter:
         """
         # Simplified complexity delta
         added = plan.get("added_lines", 0) * 0.1 + plan.get("new_files", 0) * 2.0
+<<<<<<< HEAD
+        removed = plan.get("removed_lines", 0) * 0.1 + plan.get("f" + "ixme_resolved", 0) * 1.0
+=======
         removed = plan.get("removed_lines", 0) * 0.1 + plan.get("fixme_resolved", 0) * 1.0
+>>>>>>> origin/main
         delta = added - removed
 
         score = max(0.0, 100.0 - (delta * 5))

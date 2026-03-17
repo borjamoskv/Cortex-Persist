@@ -9,7 +9,10 @@ contextual cues and system health metrics.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +38,11 @@ class DigitalEndocrine:
         return self._tenant_states[tenant_id]
 
     def ingest_context(
+<<<<<<< HEAD
+        self, message: str, tenant_id: str = "default", metadata: dict | None = None
+=======
         self, message: str, tenant_id: str = "default", metadata: Optional[dict] = None
+>>>>>>> origin/main
     ) -> None:
         """Update hormone levels based on incoming context telemetry with damping."""
         state = self._get_state(tenant_id)

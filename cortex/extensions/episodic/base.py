@@ -56,7 +56,11 @@ class Episode:
     meta: dict[str, Any]
     created_at: str
     actors: list[str] = field(default_factory=list)
+<<<<<<< HEAD
+    intent: str | None = None
+=======
     intent: Optional[str] = None
+>>>>>>> origin/main
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-serializable representation."""

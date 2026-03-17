@@ -20,7 +20,11 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.memory.nrem_cycle")
 
@@ -74,10 +78,17 @@ class NREMConsolidationCycle:
 
     def __init__(
         self,
+<<<<<<< HEAD
+        consolidator: Any | None = None,
+        pruner: Any | None = None,
+        stdp_engine: Any | None = None,
+        homeostatic_scaler: Any | None = None,
+=======
         consolidator: Optional[Any] = None,
         pruner: Optional[Any] = None,
         stdp_engine: Optional[Any] = None,
         homeostatic_scaler: Optional[Any] = None,
+>>>>>>> origin/main
         decay_factor: float = 0.95,
     ) -> None:
         self._consolidator = consolidator
@@ -89,7 +100,11 @@ class NREMConsolidationCycle:
     async def run(
         self,
         tenant_id: str,
+<<<<<<< HEAD
+        project_id: str | None = None,
+=======
         project_id: Optional[str] = None,
+>>>>>>> origin/main
     ) -> NREMReport:
         """Execute the full NREM consolidation cycle.
 

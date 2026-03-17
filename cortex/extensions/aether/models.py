@@ -6,7 +6,10 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 
 class TaskStatus(str, Enum):
@@ -38,14 +41,23 @@ class AgentTask:
     status: str = TaskStatus.PENDING
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+<<<<<<< HEAD
+    agent_id: str | None = None
+=======
     agent_id: Optional[str] = None
+>>>>>>> origin/main
     plan: str = ""
     result: str = ""
     branch: str = ""
     pr_url: str = ""
     error: str = ""
+<<<<<<< HEAD
+    github_issue_number: int | None = None
+    github_repo: str | None = None
+=======
     github_issue_number: Optional[int] = None
     github_repo: Optional[str] = None
+>>>>>>> origin/main
 
     def to_dict(self) -> dict:
         return {

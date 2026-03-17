@@ -14,7 +14,10 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.extensions.thinking.fusion import FusionStrategy
 
@@ -186,8 +189,13 @@ class OrchestraConfig:
     dynamic_temperature: bool = True
     temperature_variance: float = 0.5  # Modifica la temp de cada subagente
 
+<<<<<<< HEAD
+    judge_provider: str | None = None
+    judge_model: str | None = None
+=======
     judge_provider: Optional[str] = None
     judge_model: Optional[str] = None
+>>>>>>> origin/main
     # Retry en caso de fallo individual
     retry_on_failure: bool = True
     retry_delay_seconds: float = 1.0

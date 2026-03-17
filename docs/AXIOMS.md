@@ -183,6 +183,8 @@ For the full operational axiom registry (AX-001 through AX-028), including Const
 Canonical source of truth: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 
 ---
+<<<<<<< HEAD
+=======
 
 ## AX-IMM: Inmunología Computacional Formal (Metabolismo Defensivo)
 
@@ -205,3 +207,4 @@ Ningún estado con capacidad de propagación causal puede ser promovido sin un p
 ### AX-IMM-02: Mutación Post-Sello como Infección
 
 Toda mutación sobre estado sellado se interpreta primero como incidente de seguridad y amenaza de entropía, no como error de aplicación. La anomalía en el tejido cicatrizado es prueba de hostilidad o colapso interno.
+>>>>>>> origin/main

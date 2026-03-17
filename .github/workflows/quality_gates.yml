@@ -33,7 +33,11 @@ jobs:
 
       - name: Install CORTEX + dev deps
         run: |
+<<<<<<< HEAD
+          pip install -e ".[dev]" ruff mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
+=======
           pip install -e ".[dev]" ruff mypy bandit pytest pytest-asyncio pytest-cov --quiet
+>>>>>>> origin/main
 
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
       - name: "🛡️ Execute 10 Seals"

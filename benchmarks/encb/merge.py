@@ -10,7 +10,10 @@ concurrently. The *Hypervisor* (Layer 2) decides what's actually true.
 from __future__ import annotations
 
 import statistics
+<<<<<<< HEAD
+=======
 from typing import Any
+>>>>>>> origin/main
 
 from benchmarks.encb.belief_object import BeliefObject, BeliefType, Evidence
 
@@ -39,9 +42,13 @@ def merge_boolean(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
     assert remote.belief_type == BeliefType.BOOLEAN
     assert local.proposition_key == remote.proposition_key
 
+<<<<<<< HEAD
+    merged_vv = merge_version_vectors(local.version_vector, remote.version_vector)
+=======
     merged_vv = merge_version_vectors(
         local.version_vector, remote.version_vector
     )
+>>>>>>> origin/main
     merged_evidences = _merge_evidence_lists(local.evidences, remote.evidences)
 
     if local.dominates(remote):
@@ -86,9 +93,13 @@ def merge_categorical(local: BeliefObject, remote: BeliefObject) -> BeliefObject
     assert remote.belief_type == BeliefType.CATEGORICAL
     assert local.proposition_key == remote.proposition_key
 
+<<<<<<< HEAD
+    merged_vv = merge_version_vectors(local.version_vector, remote.version_vector)
+=======
     merged_vv = merge_version_vectors(
         local.version_vector, remote.version_vector
     )
+>>>>>>> origin/main
     merged_evidences = _merge_evidence_lists(local.evidences, remote.evidences)
 
     if local.dominates(remote):
@@ -133,9 +144,13 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
     assert remote.belief_type == BeliefType.SCALAR
     assert local.proposition_key == remote.proposition_key
 
+<<<<<<< HEAD
+    merged_vv = merge_version_vectors(local.version_vector, remote.version_vector)
+=======
     merged_vv = merge_version_vectors(
         local.version_vector, remote.version_vector
     )
+>>>>>>> origin/main
     merged_evidences = _merge_evidence_lists(local.evidences, remote.evidences)
 
     # Collect all observed scalar values from evidence
@@ -153,15 +168,23 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
                     values.append(float(parts[1]))
             except (ValueError, IndexError):
                 pass
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> origin/main
     if values:
         result_value = statistics.median(values)
     else:
         # Fallback — take more recent
         result_value = (
+<<<<<<< HEAD
+            local.value if local.latest_timestamp >= remote.latest_timestamp else remote.value
+=======
             local.value
             if local.latest_timestamp >= remote.latest_timestamp
             else remote.value
+>>>>>>> origin/main
         )
 
     result_conf = max(local.confidence, remote.confidence)
@@ -187,9 +210,13 @@ def merge_set(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
     assert remote.belief_type == BeliefType.SET
     assert local.proposition_key == remote.proposition_key
 
+<<<<<<< HEAD
+    merged_vv = merge_version_vectors(local.version_vector, remote.version_vector)
+=======
     merged_vv = merge_version_vectors(
         local.version_vector, remote.version_vector
     )
+>>>>>>> origin/main
     merged_evidences = _merge_evidence_lists(local.evidences, remote.evidences)
 
     local_set = set(local.value) if local.value else set()

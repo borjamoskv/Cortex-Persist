@@ -25,6 +25,8 @@ from typing import Optional
 
 from cortex.extensions.llm.router import IntentProfile
 
+from cortex.extensions.llm.router import IntentProfile
+
 __all__ = ["LLMManager"]
 
 logger = logging.getLogger("cortex.extensions.llm.manager")
@@ -90,7 +92,11 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+<<<<<<< HEAD
+    ) -> str | None:
+=======
     ) -> Optional[str]:
+>>>>>>> origin/main
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
         if p is None:

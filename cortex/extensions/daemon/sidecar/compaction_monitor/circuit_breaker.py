@@ -107,9 +107,15 @@ circuit_breaker = CircuitBreaker()
 
 
 async def call_external_compact(
+<<<<<<< HEAD
+    engine: Any | None = None,
+    project: str = "default",
+    db_path: str | None = None,
+=======
     engine: Optional[Any] = None,
     project: str = "default",
     db_path: Optional[str] = None,
+>>>>>>> origin/main
 ) -> None:
     """Execute compaction through the circuit breaker.
 

@@ -187,7 +187,11 @@ class TipsEngine:
         pool = await self._get_pool(lang=lang or self.lang)
         return self._pick_from_pool(pool, exclude_shown=exclude_shown)
 
+<<<<<<< HEAD
+    def random_sync(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
+=======
     def random_sync(self, *, lang: Optional[str] = None, exclude_shown: bool = True) -> Tip:
+>>>>>>> origin/main
         """Synchronous version of random(). Only works with static tips (no mining)."""
         if self._include_dynamic:
             raise RuntimeError("random_sync() only available when include_dynamic=False")

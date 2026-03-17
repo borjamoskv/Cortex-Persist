@@ -11,7 +11,10 @@ import os
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 import httpx
 
@@ -75,8 +78,13 @@ class AgentToolkit:
     def __init__(
         self,
         repo_path: str | Path,
+<<<<<<< HEAD
+        allowed_tools: list[str] | None = None,
+        capability_guard: CapabilityGuard | None = None,
+=======
         allowed_tools: Optional[list[str]] = None,
         capability_guard: Optional[CapabilityGuard] = None,
+>>>>>>> origin/main
     ) -> None:
         self.repo_path = Path(repo_path).resolve()
         if not self.repo_path.exists():
@@ -120,7 +128,11 @@ class AgentToolkit:
         return p
 
     @staticmethod
+<<<<<<< HEAD
+    def _sovereign_bash_guard(cmd: str) -> str | None:
+=======
     def _sovereign_bash_guard(cmd: str) -> Optional[str]:
+>>>>>>> origin/main
         """Validate a shell command against the Sovereign Command Guard.
 
         Returns None if the command is safe, or an error string if blocked.
@@ -198,7 +210,11 @@ class AgentToolkit:
         try:
             result = subprocess.run(
                 cmd,
+<<<<<<< HEAD
+                shell=True,  # nosec B602: Guarded by _sovereign_bash_guard
+=======
                 shell=True,  # noqa: S602
+>>>>>>> origin/main
                 cwd=str(self.repo_path),
                 capture_output=True,
                 text=True,

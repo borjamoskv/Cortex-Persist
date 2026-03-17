@@ -15,11 +15,18 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, Field
 
 __all__ = [
+<<<<<<< HEAD
+    "ReasoningMode",
+=======
+>>>>>>> origin/main
     "IntentProfile",
     "CascadeTier",
     "CascadeEvent",
@@ -28,6 +35,25 @@ __all__ = [
     "BaseProvider",
 ]
 
+<<<<<<< HEAD
+# ─── Cognitive Reasoning Modes (Axiom Ω₁₆) ──────────────────────────────
+
+
+class ReasoningMode(str, Enum):
+    """Execution modes that dictate provider selection, hedging, and capability requirements."""
+
+    DEEP_THINK = "deep"
+    """Requires mathematical/logical verification. Prioritizes 'reasoner' or 'thinking' models."""
+
+    DEEP_RESEARCH = "deep_research"
+    """Requires active tool use, structured searching, and synthesis across domains."""
+
+    ULTRA_THINK = "ultra"
+    """P0 Singularity Mode. Demands maximum context, strict zero-hallucination guards,
+    and compound problem solving. Overrides all cost gates."""
+
+=======
+>>>>>>> origin/main
 
 # ─── Intent Classification ─────────────────────────────────────────────────
 
@@ -82,9 +108,15 @@ class CascadeEvent:
     """
 
     intent: IntentProfile
+<<<<<<< HEAD
+    resolved_by: str | None
+    tier: CascadeTier
+    project: str | None = None
+=======
     resolved_by: Optional[str]
     tier: CascadeTier
     project: Optional[str] = None
+>>>>>>> origin/main
     depth: int = 1  # how many providers attempted before success
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
@@ -128,13 +160,21 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
+<<<<<<< HEAD
+    episodic_context: list[dict[str, str | None]] = Field(
+=======
     episodic_context: list[dict[str, Optional[str]]] = Field(
+>>>>>>> origin/main
         default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
+<<<<<<< HEAD
+    project: str | None = Field(
+=======
     project: Optional[str] = Field(
+>>>>>>> origin/main
         default=None,
         description="Project to which this prompt belongs. Used for telemetry and billing.",
     )
@@ -145,6 +185,17 @@ class CortexPrompt(BaseModel):
             "elegibles para el cascade determinista. GENERAL usa todos."
         ),
     )
+<<<<<<< HEAD
+    reasoning_mode: ReasoningMode | None = Field(
+        default=None,
+        description="Explicit cognitive mode requiring specific architectural capabilities.",
+    )
+    swarm_mode: bool = Field(
+        default=False,
+        description="Ω₂₁: Parallel Swarm Racing. Race multiple providers for O(1) latency.",
+    )
+=======
+>>>>>>> origin/main
 
     def to_openai_messages(self) -> list[dict[str, str]]:
         """Convierte la estructura soberana al formato de mensajes de OpenAI."""

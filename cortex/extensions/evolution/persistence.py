@@ -175,7 +175,11 @@ def _parse_mutations(raw: list[dict]) -> list[Mutation]:
     return mutations
 
 
+<<<<<<< HEAD
+def _reconstruct_subagent(s_data: dict) -> SubAgent | None:
+=======
 def _reconstruct_subagent(s_data: dict) -> Optional[SubAgent]:
+>>>>>>> origin/main
     """Reconstruct a SubAgent from a serialized dict."""
     try:
         s_domain = AgentDomain[s_data["domain"]]

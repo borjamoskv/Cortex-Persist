@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import logging
 import re
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.guards.exergy")
 
@@ -170,7 +173,11 @@ class ExergyGuard:
         content: str,
         project: str,
         fact_type: str,
+<<<<<<< HEAD
+        source: str | None = None,
+=======
         source: Optional[str] = None,
+>>>>>>> origin/main
     ) -> float:
         """
         Calculates exergy score and enforces the cutoff threshold.

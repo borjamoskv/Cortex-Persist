@@ -8,7 +8,10 @@ desde la terminal.
 from __future__ import annotations
 
 import asyncio
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 import click
 
@@ -89,7 +92,11 @@ def find_cmd(app_name: str, query: str, by: str):
 @click.argument("key")
 @click.argument("modifiers", nargs=-1)
 @click.option("--app", default=None, help="App objetivo")
+<<<<<<< HEAD
+def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
+=======
 def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: Optional[str]):
+>>>>>>> origin/main
     """
     Envía un atajo de teclado.
 
@@ -113,7 +120,11 @@ def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: Optional[str]):
 @maestro.command("type")
 @click.argument("text")
 @click.option("--app", default=None, help="App objetivo")
+<<<<<<< HEAD
+def type_cmd(text: str, app: str | None):
+=======
 def type_cmd(text: str, app: Optional[str]):
+>>>>>>> origin/main
     """Escribe texto en la app activa (clipboard para cadenas largas)."""
 
     async def _run():
@@ -288,7 +299,11 @@ def fullscreen_cmd(app_name: str):
 
 @maestro.command("capture")
 @click.option("--output", "-o", default=None, help="Ruta de salida para la captura")
+<<<<<<< HEAD
+def capture_cmd(output: str | None):
+=======
 def capture_cmd(output: Optional[str]):
+>>>>>>> origin/main
     """Captura de pantalla del display principal."""
 
     async def _run():

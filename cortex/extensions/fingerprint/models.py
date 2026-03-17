@@ -8,7 +8,10 @@ from the CORTEX Ledger.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 __all__ = ["CognitiveFingerprint", "DomainPreference", "PatternVector"]
 
@@ -82,7 +85,11 @@ class CognitiveFingerprint:
 
     # Identity
     tenant_id: str = "default"
+<<<<<<< HEAD
+    project_filter: str | None = None
+=======
     project_filter: Optional[str] = None
+>>>>>>> origin/main
     extracted_at: str = ""  # ISO timestamp
 
     # Core pattern vector

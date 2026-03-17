@@ -12,7 +12,11 @@ import logging
 import os
 import stat
 from decimal import Decimal
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 try:
     from cdp_langchain.agent_toolkits import CdpToolkit  # pyright: ignore[reportMissingImports]
@@ -56,7 +60,11 @@ class CDPSovereignWallet:
     Wallet seed persists to ~/.cortex/ with restricted file permissions (0600).
     """
 
+<<<<<<< HEAD
+    _instance: CDPSovereignWallet | None = None
+=======
     _instance: Optional[CDPSovereignWallet] = None
+>>>>>>> origin/main
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):
@@ -76,7 +84,11 @@ class CDPSovereignWallet:
         self.seed_path = os.path.expanduser(seed_path)
         self.api_key_name = os.getenv("CDP_API_KEY_NAME", "")
         self.private_key = os.getenv("CDP_API_KEY_PRIVATE_KEY", "").replace("\\n", "\n")
+<<<<<<< HEAD
+        self.agentkit: CdpAgentkitWrapper | None = None
+=======
         self.agentkit: Optional[CdpAgentkitWrapper] = None
+>>>>>>> origin/main
         self.tools: list[Any] = []
 
         if not CDP_AVAILABLE:

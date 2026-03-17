@@ -43,14 +43,22 @@ class MemoryScanner:
 
     async def type_distribution(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Frequency of each fact_type among active facts."""
         return await self._grouped_count("fact_type", project)
 
     async def confidence_distribution(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Frequency of each confidence level among active facts."""
         return await self._grouped_count("confidence", project)
@@ -61,14 +69,22 @@ class MemoryScanner:
 
     async def source_distribution(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Frequency of active facts per source."""
         return await self._grouped_count("source", project)
 
     async def age_distribution(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Active facts bucketed by age (today/week/month/quarter/older)."""
         where = _ACTIVE
@@ -148,7 +164,11 @@ class MemoryScanner:
 
     async def content_length_distribution(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Content length bucketed into bands for quality assessment.
 
@@ -183,7 +203,11 @@ class MemoryScanner:
 
     async def total_active_facts(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> int:
         """Count of active (non-deprecated, non-quarantined) facts."""
         where = _ACTIVE
@@ -229,7 +253,11 @@ class MemoryScanner:
 
     async def temporal_gap_days(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> tuple[float, float, int]:
         """Largest gap between consecutive facts and total time span.
 
@@ -267,7 +295,11 @@ class MemoryScanner:
 
     async def confidence_weight_sum(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> tuple[float, int]:
         """Sum of confidence-weighted facts and total count.
 
@@ -305,7 +337,11 @@ class MemoryScanner:
     async def _grouped_count(
         self,
         column: str,
+<<<<<<< HEAD
+        project: str | None,
+=======
         project: Optional[str],
+>>>>>>> origin/main
     ) -> dict[str, int]:
         """Generic GROUP BY count for a single column."""
         where = _ACTIVE

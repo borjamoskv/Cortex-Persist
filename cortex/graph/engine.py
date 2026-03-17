@@ -199,7 +199,11 @@ def process_fact_graph_sync(
 
 
 async def get_graph(
+<<<<<<< HEAD
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+=======
     conn, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+>>>>>>> origin/main
 ) -> dict:
     """Get graph data for a project or all projects.
 
@@ -214,7 +218,11 @@ async def get_graph(
 
 
 def get_graph_sync(
+<<<<<<< HEAD
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+=======
     conn, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+>>>>>>> origin/main
 ) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
@@ -222,8 +230,13 @@ def get_graph_sync(
 
 
 async def query_entity(
+<<<<<<< HEAD
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
+=======
     conn, name: str, project: Optional[str] = None, tenant_id: str = "default"
 ) -> Optional[dict]:
+>>>>>>> origin/main
     """Query a specific entity by name.
 
     Args:
@@ -237,8 +250,13 @@ async def query_entity(
 
 
 def query_entity_sync(
+<<<<<<< HEAD
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
+=======
     conn, name: str, project: Optional[str] = None, tenant_id: str = "default"
 ) -> Optional[dict]:
+>>>>>>> origin/main
     """Query entity synchronously."""
     backend = get_backend(conn)
     return backend.query_entity_sync(name, project, tenant_id)  # type: ignore[reportAttributeAccessIssue]

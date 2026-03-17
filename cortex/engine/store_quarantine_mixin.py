@@ -6,7 +6,10 @@ excluded from recall, search, and dedup.
 """
 
 from __future__ import annotations
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 import logging
 
@@ -32,7 +35,11 @@ class QuarantineMixin(EngineMixinBase):
         self,
         fact_id: int,
         reason: str,
+<<<<<<< HEAD
+        conn: aiosqlite.Connection | None = None,
+=======
         conn: Optional[aiosqlite.Connection] = None,
+>>>>>>> origin/main
     ) -> bool:
         """Quarantine a fact: isolate without deleting.
 
@@ -72,6 +79,10 @@ class QuarantineMixin(EngineMixinBase):
                 "system",
                 "quarantine",
                 {"fact_id": fact_id, "reason": reason},
+<<<<<<< HEAD
+                tenant_id=row[0],
+=======
+>>>>>>> origin/main
             )
             await c.commit()
             return True
@@ -84,7 +95,11 @@ class QuarantineMixin(EngineMixinBase):
     async def unquarantine(
         self,
         fact_id: int,
+<<<<<<< HEAD
+        conn: aiosqlite.Connection | None = None,
+=======
         conn: Optional[aiosqlite.Connection] = None,
+>>>>>>> origin/main
     ) -> bool:
         """Lift quarantine from a fact."""
         if not isinstance(fact_id, int) or fact_id <= 0:
@@ -116,6 +131,10 @@ class QuarantineMixin(EngineMixinBase):
                 "system",
                 "unquarantine",
                 {"fact_id": fact_id},
+<<<<<<< HEAD
+                tenant_id=row[0],
+=======
+>>>>>>> origin/main
             )
             await c.commit()
             return True

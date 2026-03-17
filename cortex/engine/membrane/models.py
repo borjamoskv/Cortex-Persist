@@ -1,6 +1,10 @@
 import time
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -24,7 +28,11 @@ class MembraneLog(BaseModel):
     paths_obfuscated: bool = False
     tracebacks_pruned: bool = False
     level: MembraneLogLevel = MembraneLogLevel.INFO
+<<<<<<< HEAD
+    details: str | None = None
+=======
     details: Optional[str] = None
+>>>>>>> origin/main
 
 
 class PureEngram(BaseModel):
@@ -42,7 +50,14 @@ class PureEngram(BaseModel):
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional verified context"
     )
+<<<<<<< HEAD
+    original_raw_hash: str | None = Field(
+        None, description="SHA-256 hash of the payload before digestion"
+    )
+    log: MembraneLog | None = Field(None, description="Audit trail of the purification process")
+=======
     original_raw_hash: Optional[str] = Field(
         None, description="SHA-256 hash of the payload before digestion"
     )
     log: Optional[MembraneLog] = Field(None, description="Audit trail of the purification process")
+>>>>>>> origin/main

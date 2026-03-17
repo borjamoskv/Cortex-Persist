@@ -10,7 +10,6 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Optional
 
 from cortex.extensions.scraper.extractors import (
     CASCADE_ORDER,
@@ -54,6 +53,18 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
+        from cortex.http import validate_url, SSRFBlockedError
+
+        try:
+            request.url = validate_url(request.url)
+        except SSRFBlockedError as e:
+            return ScrapeResult.from_error(
+                url=request.url,
+                error=f"SSRF Blocked: {e}",
+                strategy=request.strategy,
+                elapsed_ms=0,
+            )
+
         # Robots.txt compliance
         if request.respect_robots:
             allowed = await check_robots_txt(request.url)
@@ -177,6 +188,14 @@ class ScraperEngine:
         """
         LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
 
+        from cortex.http import validate_url, SSRFBlockedError
+
+        try:
+            url = validate_url(url)
+        except SSRFBlockedError as e:
+            LOG.error("🗺️ [MAP] SSRF Blocked: %s", e)
+            return []
+
         discovered: set[str] = set()
         to_visit: list[tuple[str, int]] = [(url, 0)]
         visited: set[str] = set()
@@ -221,7 +240,7 @@ class ScraperEngine:
         LOG.info("🗺️ [MAP] Discovered %d URLs from %s", len(discovered), url)
         return sorted(discovered)
 
-    def get_job(self, job_id: str) -> Optional[ScrapeJob]:
+    def get_job(self, job_id: str) -> ScrapeJob | None:
         """Get a batch job by ID."""
         return self._jobs.get(job_id)
 

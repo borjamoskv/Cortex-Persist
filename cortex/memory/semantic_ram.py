@@ -14,7 +14,11 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any, Final, TypedDict
+=======
 from typing import TYPE_CHECKING, Any, Final, Optional, TypedDict
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -62,8 +66,13 @@ class SemanticMutator:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
+<<<<<<< HEAD
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
+=======
         health_monitor: Optional[TopologicalHealthMonitor] = None,
         anchor: Optional[TopologicalAnchor] = None,
+>>>>>>> origin/main
     ) -> None:
         self._store = store
         self._queue: asyncio.Queue[tuple[list[float], str, float]] = asyncio.Queue(maxsize=10000)
@@ -287,17 +296,28 @@ class DynamicSemanticSpace:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
+<<<<<<< HEAD
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
+        buffer_capacity: int = 100,
+        manager: CortexMemoryManager | None = None,
+=======
         health_monitor: Optional[TopologicalHealthMonitor] = None,
         anchor: Optional[TopologicalAnchor] = None,
         buffer_capacity: int = 100,
         manager: Optional[CortexMemoryManager] = None,
+>>>>>>> origin/main
     ) -> None:
         self._store = store
         self.manager = manager
         self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
         self._active_flushes: set[asyncio.Task[Any]] = set()
+<<<<<<< HEAD
+        self._heartbeat_task: asyncio.Task[None] | None = None
+=======
         self._heartbeat_task: Optional[asyncio.Task[None]] = None
+>>>>>>> origin/main
 
     def start(self) -> None:
         """Starts the semantic mutator and the autonomic heartbeat."""
@@ -361,7 +381,11 @@ class DynamicSemanticSpace:
         query: str,
         limit: int = 5,
         pulse_excitation: float = 20.0,
+<<<<<<< HEAD
+        layer: str | None = None,
+=======
         layer: Optional[str] = None,
+>>>>>>> origin/main
     ) -> list[CortexFactModel]:
         """Recupera los vectores y emite un pulso topológico (Inversión Termodinámica)."""
         # Obtenemos el query vector para calcular la gradiente de topología

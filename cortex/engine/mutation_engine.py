@@ -23,10 +23,18 @@ import hashlib
 import json
 import logging
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any
+
+import aiosqlite
+
+from cortex.engine.causality import AsyncCausalGraph
+=======
 from typing import Any, Optional
 
 import aiosqlite
 
+>>>>>>> origin/main
 from cortex.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
@@ -263,6 +271,18 @@ class FactMutationEngine:
             (ts, ts, ts, reason, fact_id),
         )
 
+<<<<<<< HEAD
+        # Ω₁₃: Propagate TAINTED status to descendants
+        graph = AsyncCausalGraph(conn)
+        report = await graph.propagate_taint(fact_id)
+        logger.info(
+            "Ω₁₃ Taint (Tombstone) propagated from fact %d: %d nodes affected",
+            fact_id,
+            report.affected_count,
+        )
+
+=======
+>>>>>>> origin/main
     async def _proj_quarantine(
         self,
         conn: aiosqlite.Connection,
@@ -278,6 +298,18 @@ class FactMutationEngine:
             (ts, reason, ts, fact_id),
         )
 
+<<<<<<< HEAD
+        # Ω₁₃: Propagate taint status to descendants
+        graph = AsyncCausalGraph(conn)
+        report = await graph.propagate_taint(fact_id)
+        logger.info(
+            "Ω₁₃ Taint (Quarantine) propagated from fact %d: %d nodes affected",
+            fact_id,
+            report.affected_count,
+        )
+
+=======
+>>>>>>> origin/main
     async def _proj_unquarantine(
         self,
         conn: aiosqlite.Connection,
@@ -397,7 +429,11 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         entity_id: int,
+<<<<<<< HEAD
+        as_of: str | None = None,
+=======
         as_of: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, Any]:
         """Reconstruct the projected state of an entity from its event log.
 

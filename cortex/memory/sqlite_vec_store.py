@@ -14,7 +14,11 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -31,7 +35,11 @@ __all__ = ["SovereignVectorStoreL2"]
 
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
+<<<<<<< HEAD
+_L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
+=======
 _L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
@@ -131,6 +139,21 @@ class SovereignVectorStoreL2:
                     success_rate REAL,
                     cognitive_layer TEXT,
                     parent_decision_id TEXT,
+<<<<<<< HEAD
+                    metadata TEXT,
+                    -- Double-Plane Facets (Ω₁₃)
+                    category TEXT DEFAULT 'general',
+                    quadrant TEXT DEFAULT 'ACTIVE',
+                    storage_tier TEXT DEFAULT 'HOT',
+                    facet_version INTEGER DEFAULT 2
+                )
+            """)
+            if self._vector_enabled:
+                self._conn.execute(
+                    "CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(embedding float(?))",
+                    (self._encoder.dimension,),
+                )
+=======
                     metadata TEXT
                 )
             """)
@@ -140,6 +163,7 @@ class SovereignVectorStoreL2:
                         embedding float[{self._encoder.dimension}]
                     )
                 """)
+>>>>>>> origin/main
 
             # Indexes for Zero-Trust and Speed
             self._conn.execute(
@@ -150,6 +174,25 @@ class SovereignVectorStoreL2:
             self._ready = True
 
             # Ω₀: Structural integrity migration
+<<<<<<< HEAD
+            migrations = [
+                ("cognitive_layer", "TEXT"),
+                ("parent_decision_id", "TEXT"),
+                ("category", "TEXT DEFAULT 'general'"),
+                ("quadrant", "TEXT DEFAULT 'ACTIVE'"),
+                ("storage_tier", "TEXT DEFAULT 'HOT'"),
+                ("facet_version", "INTEGER DEFAULT 2"),
+            ]
+            for col, col_type in migrations:
+                # Table/Column names cannot be parameterized in SQLite.
+                # Validating col and col_type against strict allowlist.
+                if not all(c.isalnum() or c == "_" for c in (col, col_type)):
+                    continue
+                try:
+                    self._conn.execute(f"ALTER TABLE facts_meta ADD COLUMN {col} {col_type}")  # nosec B608
+                except sqlite3.OperationalError:
+                    pass  # Column already exists
+=======
             try:
                 self._conn.execute("ALTER TABLE facts_meta ADD COLUMN cognitive_layer TEXT")
             except sqlite3.OperationalError:
@@ -158,6 +201,7 @@ class SovereignVectorStoreL2:
                 self._conn.execute("ALTER TABLE facts_meta ADD COLUMN parent_decision_id TEXT")
             except sqlite3.OperationalError:
                 pass
+>>>>>>> origin/main
             self._conn.commit()
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
@@ -222,6 +266,10 @@ class SovereignVectorStoreL2:
                 count,
             )
             # Create sharded schema
+<<<<<<< HEAD
+            # Validating meta_tb and vec_tb against strict allowlist (set in _get_domain_tables)
+=======
+>>>>>>> origin/main
             conn.execute(f"""
                 CREATE TABLE {meta_tb} (
                     id TEXT PRIMARY KEY,
@@ -237,11 +285,20 @@ class SovereignVectorStoreL2:
                     parent_decision_id TEXT,
                     metadata TEXT
                 )
+<<<<<<< HEAD
+            """)  # nosec B608
+            conn.execute(
+                f"CREATE VIRTUAL TABLE {vec_tb} USING "
+                "vec0(embedding float(?))",
+                (self._encoder.dimension,),
+            )  # nosec B608
+=======
             """)
             conn.execute(
                 f"CREATE VIRTUAL TABLE {vec_tb} USING "
                 f"vec0(embedding float[{self._encoder.dimension}])"
             )
+>>>>>>> origin/main
 
             # Migrate only distilled axioms (is_diamond = 1)
             conn.execute(
@@ -350,7 +407,11 @@ class SovereignVectorStoreL2:
 
                 if self._vector_enabled:
                     cursor.execute(
+<<<<<<< HEAD
+                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",  # nosec B608
+=======
                         f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
+>>>>>>> origin/main
                         (rowid, embedding_bytes),
                     )
                 conn.commit()
@@ -370,7 +431,11 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
+<<<<<<< HEAD
+        layer: str | None = None,
+=======
         layer: Optional[str] = None,
+>>>>>>> origin/main
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -385,7 +450,11 @@ class SovereignVectorStoreL2:
         if not self._vector_enabled:
             # Fallback to pure metadata/content search (no similarity scoring)
             sql = (
+<<<<<<< HEAD
+                f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"  # nosec B608
+=======
                 f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
+>>>>>>> origin/main
             )
             params: list[Any] = [tenant_id, project_id]
             if layer:
@@ -433,7 +502,11 @@ class SovereignVectorStoreL2:
                 WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
             )
             WHERE base_similarity > 0.3
+<<<<<<< HEAD
+        """  # nosec B608
+=======
         """
+>>>>>>> origin/main
         params = [embedding_bytes, embedding_bytes, now, self._half_life, tenant_id, project_id]
 
         if layer:

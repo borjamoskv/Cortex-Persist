@@ -47,8 +47,13 @@ _DEFAULT_MODEL = os.environ.get("CORTEX_ADK_MODEL", "gemini-2.0-flash")
 
 
 def create_memory_agent(
+<<<<<<< HEAD
+    model: str | None = None,
+    extra_tools: list | None = None,
+=======
     model: Optional[str] = None,
     extra_tools: Optional[list] = None,
+>>>>>>> origin/main
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Memory Agent — root agent for sovereign memory ops.
 
@@ -107,8 +112,13 @@ def create_memory_agent(
 
 
 def create_analyst_agent(
+<<<<<<< HEAD
+    model: str | None = None,
+    toolbox_tools: list | None = None,
+=======
     model: Optional[str] = None,
     toolbox_tools: Optional[list] = None,
+>>>>>>> origin/main
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Analyst Agent — cross-source analysis sub-agent.
 
@@ -153,7 +163,11 @@ def create_analyst_agent(
 
 
 def create_guardian_agent(
+<<<<<<< HEAD
+    model: str | None = None,
+=======
     model: Optional[str] = None,
+>>>>>>> origin/main
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Guardian Agent — security and integrity sub-agent.
 
@@ -195,7 +209,11 @@ def create_guardian_agent(
 
 
 def create_google_one_agent(
+<<<<<<< HEAD
+    model: str | None = None,
+=======
     model: Optional[str] = None,
+>>>>>>> origin/main
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the Google One Agent — cloud integration and backup sub-agent.
 
@@ -240,8 +258,13 @@ def create_google_one_agent(
 
 
 def create_cortex_swarm(
+<<<<<<< HEAD
+    model: str | None = None,
+    toolbox_tools: list | None = None,
+=======
     model: Optional[str] = None,
     toolbox_tools: Optional[list] = None,
+>>>>>>> origin/main
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the full CORTEX agent swarm — multi-agent system.
 

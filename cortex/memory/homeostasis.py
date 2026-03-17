@@ -70,9 +70,13 @@ class EntropyPruner:
 
         return False
 
+<<<<<<< HEAD
+    async def _post_prune_drift_check(self, tenant_id: str, project_id: str | None = None) -> None:
+=======
     async def _post_prune_drift_check(
         self, tenant_id: str, project_id: Optional[str] = None
     ) -> None:
+>>>>>>> origin/main
         """Run non-blocking drift health check after pruning."""
         import importlib.util
 
@@ -164,7 +168,11 @@ class HomeostaticScaler:
     async def scale(
         self,
         tenant_id: str,
+<<<<<<< HEAD
+        project_id: str | None = None,
+=======
         project_id: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, Any]:
         """Apply multiplicative homeostatic scaling to all engrams.
 

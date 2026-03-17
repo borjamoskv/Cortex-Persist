@@ -201,7 +201,11 @@ class AutoPersistHook:
         return ids
 
     @staticmethod
+<<<<<<< HEAD
+    def _classify_message(msg_lower: str) -> str | None:
+=======
     def _classify_message(msg_lower: str) -> Optional[str]:
+>>>>>>> origin/main
         """Classify a message by its signal patterns using regex.
 
         Priority: error > decision > ghost (errors are most critical).

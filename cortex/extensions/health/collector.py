@@ -1,11 +1,29 @@
+<<<<<<< HEAD
+# This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
+
+"""Metric collector entry point and registry factory.
+
+The monolithic collector is dead. Plugin-based. O(1) lookup.
+Satisfies Seal 8 (LOC Guard) via modularity.
+=======
 """Metric collector registry and built-in collectors.
 
 Adding a metric = creating a class + calling ``registry.register()``.
 The monolithic collector is dead. Plugin-based. O(1) lookup.
+>>>>>>> origin/main
 """
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+from pathlib import Path
+
+from cortex.extensions.health.collectors import BUILTINS
+from cortex.extensions.health.models import MetricSnapshot
+from cortex.extensions.health.registry import CollectorRegistry
+
+__all__ = ["CollectorRegistry", "HealthCollector", "create_default_registry"]
+=======
 import logging
 import os
 import sqlite3
@@ -436,19 +454,27 @@ _BUILTINS = [
     WalCollector,
     SystemLoadCollector,
 ]
+>>>>>>> origin/main
 
 
 def create_default_registry() -> CollectorRegistry:
     """Create a registry with all built-in collectors."""
     reg = CollectorRegistry()
+<<<<<<< HEAD
+    for cls in BUILTINS:
+=======
     for cls in _BUILTINS:
+>>>>>>> origin/main
         reg.register(cls())
     return reg
 
 
+<<<<<<< HEAD
+=======
 # ─── Backward-compatible wrapper ─────────────────────────────
 
 
+>>>>>>> origin/main
 class HealthCollector:
     """Facade for backward compatibility.
 
@@ -459,7 +485,11 @@ class HealthCollector:
     def __init__(
         self,
         db_path: str | Path = "",
+<<<<<<< HEAD
+        registry: CollectorRegistry | None = None,
+=======
         registry: Optional[CollectorRegistry] = None,
+>>>>>>> origin/main
     ) -> None:
         self._db_path = str(db_path) if db_path else ""
         self._registry = registry or create_default_registry()

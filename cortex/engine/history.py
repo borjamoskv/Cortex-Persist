@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -16,7 +20,11 @@ logger = logging.getLogger("cortex.engine.history")
 class HistoryMixin(EngineMixinBase):
     """Mixin for history and time-travel logic in AsyncCortexEngine."""
 
+<<<<<<< HEAD
+    async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
+=======
     async def time_travel(self, tx_id: int, project: Optional[str] = None) -> list[dict[str, Any]]:
+>>>>>>> origin/main
         """Reconstruct state as of transaction ID."""
         from cortex.extensions.security.tenant import get_tenant_id
         from cortex.memory.temporal import time_travel_filter
@@ -60,7 +68,11 @@ class HistoryMixin(EngineMixinBase):
                 return results
 
     async def reconstruct_state(
+<<<<<<< HEAD
+        self, tx_id: int, project: str | None = None
+=======
         self, tx_id: int, project: Optional[str] = None
+>>>>>>> origin/main
     ) -> list[dict[str, Any]]:
         """Alias for time_travel."""
         return await self.time_travel(tx_id, project)

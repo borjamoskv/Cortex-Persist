@@ -9,8 +9,9 @@ def _migration_010_immutable_ledger(conn: sqlite3.Connection):
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS vote_ledger (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id       TEXT NOT NULL DEFAULT 'default',
             fact_id         INTEGER NOT NULL REFERENCES facts(id),
-            agent_id        TEXT NOT NULL, -- references agents(id) effectively
+            agent_id        TEXT NOT NULL,
             vote            INTEGER NOT NULL,
             vote_weight     REAL NOT NULL,
             prev_hash       TEXT NOT NULL,
@@ -117,6 +118,7 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS vote_ledger (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id       TEXT NOT NULL DEFAULT 'default',
             fact_id         INTEGER NOT NULL REFERENCES facts(id),
             agent_id        TEXT NOT NULL,
             vote            INTEGER NOT NULL,
@@ -139,6 +141,7 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS vote_merkle_roots (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id       TEXT NOT NULL DEFAULT 'default',
             root_hash       TEXT NOT NULL,
             vote_start_id   INTEGER NOT NULL,
             vote_end_id     INTEGER NOT NULL,

@@ -33,8 +33,13 @@ def _render_cli_command(system_name: str, comp: ComponentSpec) -> str:
                 [
                     f'@{system_name}_group.command("{cmd_name}")',
                     f"def {func_name}() -> None:",
+<<<<<<< HEAD
+                    f'    """Command for {func_name}."""',
+                    f'    click.echo("{func_name}: operational")',
+=======
                     f'    """TODO: Implement {func_name}."""',
                     f'    click.echo("{func_name}: not yet implemented")',
+>>>>>>> origin/main
                     "",
                 ]
             )

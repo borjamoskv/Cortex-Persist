@@ -5,7 +5,11 @@ import logging
 import os
 import subprocess
 from pathlib import Path
+<<<<<<< HEAD
+from typing import TypedDict
+=======
 from typing import Optional, TypedDict
+>>>>>>> origin/main
 
 from cortex.extensions.songlines.decay import DecayEngine
 
@@ -119,7 +123,11 @@ class TopographicSensor:
         except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return []
 
+<<<<<<< HEAD
+    def _get_attr_payload(self, file_path: Path, attr: str) -> bytes | None:
+=======
     def _get_attr_payload(self, file_path: Path, attr: str) -> Optional[bytes]:
+>>>>>>> origin/main
         """Fetch attribute content via os or CLI."""
         # 1. Try native os.getxattr
         if hasattr(os, "getxattr"):
@@ -149,7 +157,11 @@ class TopographicSensor:
 
     def _parse_ghost_payload(
         self, file_path: Path, attr: str, payload_bytes: bytes
+<<<<<<< HEAD
+    ) -> GhostTrace | None:
+=======
     ) -> Optional[GhostTrace]:
+>>>>>>> origin/main
         """Decode payload and handle decay/evaporation."""
         try:
             # Entropy Demon Guard: Handle malformed UTF-8 or unexpected JSON

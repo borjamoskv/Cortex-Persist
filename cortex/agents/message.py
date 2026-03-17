@@ -10,7 +10,11 @@ import json
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 from uuid import uuid4
 
 
@@ -50,8 +54,13 @@ class AgentMessage:
     kind: MessageKind
     payload: dict[str, Any]
     created_at: float = field(default_factory=time.time)
+<<<<<<< HEAD
+    correlation_id: str | None = None
+    causation_id: str | None = None
+=======
     correlation_id: Optional[str] = None
     causation_id: Optional[str] = None
+>>>>>>> origin/main
     ttl: int = 3600
     priority: int = 0
     trace_context: dict[str, Any] = field(default_factory=dict)
@@ -100,11 +109,19 @@ def new_message(
     kind: MessageKind,
     payload: dict[str, Any],
     *,
+<<<<<<< HEAD
+    correlation_id: str | None = None,
+    causation_id: str | None = None,
+    ttl: int = 3600,
+    priority: int = 0,
+    trace_context: dict[str, Any] | None = None,
+=======
     correlation_id: Optional[str] = None,
     causation_id: Optional[str] = None,
     ttl: int = 3600,
     priority: int = 0,
     trace_context: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
 ) -> AgentMessage:
     """Factory for creating new messages with auto-generated IDs."""
     return AgentMessage(

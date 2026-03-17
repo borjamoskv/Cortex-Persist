@@ -149,7 +149,11 @@ class BridgeGuard:
         content: str,
         current_project: str,
         tenant_id: str = "default",
+<<<<<<< HEAD
+    ) -> str | None:
+=======
     ) -> Optional[str]:
+>>>>>>> origin/main
         """
         Ω₁: Detect if this content already exists in another project.
 

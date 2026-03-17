@@ -15,7 +15,11 @@ import logging
 import time
 from collections import deque
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool

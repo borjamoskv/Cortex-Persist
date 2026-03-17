@@ -18,7 +18,11 @@ This ensures true vector-level isolation between tenants.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any, Final, Protocol, runtime_checkable
+=======
 from typing import Any, Final, Optional, Protocol, runtime_checkable
+>>>>>>> origin/main
 
 __all__ = ["VectorBackend", "QdrantVectorBackend", "get_vector_backend"]
 
@@ -63,7 +67,11 @@ class QdrantVectorBackend:
     def __init__(
         self,
         url: str = "http://localhost:6333",
+<<<<<<< HEAD
+        api_key: str | None = None,
+=======
         api_key: Optional[str] = None,
+>>>>>>> origin/main
         *,
         dim: int = VECTOR_DIM,
     ):
@@ -133,7 +141,11 @@ class QdrantVectorBackend:
         fact_id: int,
         embedding: list[float],
         tenant_id: str = "default",
+<<<<<<< HEAD
+        payload: dict[str, Any] | None = None,
+=======
         payload: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
     ) -> None:
         """Upsert a vector embedding.
 
@@ -171,7 +183,11 @@ class QdrantVectorBackend:
         query_embedding: list[float],
         top_k: int = 5,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> list[tuple[int, float]]:
         """KNN vector search with optional project filter.
 
@@ -265,18 +281,31 @@ class QdrantVectorBackend:
 
 # ─── Factory ─────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+_vector_backend: VectorBackend | None = None
+
+
+def get_vector_backend() -> VectorBackend | None:
+=======
 _vector_backend: Optional[VectorBackend] = None
 
 
 def get_vector_backend() -> Optional[VectorBackend]:
+>>>>>>> origin/main
     """Get the active vector backend singleton (None if using local sqlite-vec)."""
     return _vector_backend
 
 
 async def init_vector_backend(
+<<<<<<< HEAD
+    url: str | None = None,
+    api_key: str | None = None,
+) -> VectorBackend | None:
+=======
     url: Optional[str] = None,
     api_key: Optional[str] = None,
 ) -> Optional[VectorBackend]:
+>>>>>>> origin/main
     """Initialize the global vector backend from environment or parameters.
 
     Returns None if CORTEX_VECTOR_BACKEND is not set (uses sqlite-vec).

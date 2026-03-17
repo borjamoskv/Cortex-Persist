@@ -19,7 +19,10 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 # ─── Data Model ───────────────────────────────────────────────────────────────
 
@@ -101,8 +104,13 @@ class NoqaAudit:
 
     def scan(
         self,
+<<<<<<< HEAD
+        include_paths: list[str] | None = None,
+        exclude_paths: list[str] | None = None,
+=======
         include_paths: Optional[list[str]] = None,
         exclude_paths: Optional[list[str]] = None,
+>>>>>>> origin/main
     ) -> list[NoqaEntry]:
         """
         Static scan: find all noqa:BLE001 in the codebase.

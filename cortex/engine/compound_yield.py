@@ -8,7 +8,11 @@ from __future__ import annotations
 import logging
 import sqlite3
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.signals.bus import SignalBus
@@ -51,7 +55,11 @@ class CompoundReport:
     total_compound: float
     multiplier: float
     reuse_rate: float
+<<<<<<< HEAD
+    project: str | None = None
+=======
     project: Optional[str] = None
+>>>>>>> origin/main
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -163,7 +171,11 @@ class CompoundYieldTracker:
         # This prevents 0 yield for chained structural facts that lack explicit tracking
         return 0.5
 
+<<<<<<< HEAD
+    def analyze_chains(self, project: str | None = None) -> CompoundReport:
+=======
     def analyze_chains(self, project: Optional[str] = None) -> CompoundReport:
+>>>>>>> origin/main
         """Detect chains in the causal DAG and calculate their compound yield."""
         try:
             with db_connect(self.db_path) as conn:
@@ -263,7 +275,11 @@ class CompoundYieldTracker:
         self,
         report: CompoundReport,
         project: str = "system",
+<<<<<<< HEAD
+    ) -> int | None:
+=======
     ) -> Optional[int]:
+>>>>>>> origin/main
         """Persist a CHRONOS Compound report as a CORTEX fact + emit signal."""
         try:
             import json

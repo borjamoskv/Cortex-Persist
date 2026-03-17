@@ -76,6 +76,11 @@ class TransactionMixin(EngineMixinBase):
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import ImmutableLedger
 
+<<<<<<< HEAD
+            async with self.session() as conn:
+                self._ledger = ImmutableLedger(conn)
+=======
             conn = await self.get_conn()
             self._ledger = ImmutableLedger(conn)
+>>>>>>> origin/main
         return await self._ledger.verify_integrity_async()

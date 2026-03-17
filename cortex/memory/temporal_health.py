@@ -26,7 +26,11 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -106,8 +110,13 @@ class TemporalHealthScheduler:
     def __init__(
         self,
         model_hash: str,
+<<<<<<< HEAD
+        config: SchedulerConfig | None = None,
+        signature_dir: Path | None = None,
+=======
         config: Optional[SchedulerConfig] = None,
         signature_dir: Optional[Path] = None,
+>>>>>>> origin/main
     ) -> None:
         self._model_hash = model_hash
         self._config = config or SchedulerConfig()
@@ -115,9 +124,15 @@ class TemporalHealthScheduler:
         self._write_count = 0
 
         # Running mean state — O(d) memory, updated in O(d) per write
+<<<<<<< HEAD
+        self._running_mean: np.ndarray | None = None
+        self._running_n: int = 0
+        self._baseline_centroid: np.ndarray | None = None
+=======
         self._running_mean: Optional[np.ndarray] = None
         self._running_n: int = 0
         self._baseline_centroid: Optional[np.ndarray] = None
+>>>>>>> origin/main
 
         # Streaming Page-Hinkley — O(1) memory, O(1) per update
         self._page_hinkley = PageHinkley(
@@ -125,15 +140,24 @@ class TemporalHealthScheduler:
         )
 
         # Baseline probe values (set during set_baseline)
+<<<<<<< HEAD
+        self._baseline_spectral_gap: float | None = None
+        self._baseline_intrinsic_dim: float | None = None
+=======
         self._baseline_spectral_gap: Optional[float] = None
         self._baseline_intrinsic_dim: Optional[float] = None
+>>>>>>> origin/main
 
         # Rolling buffer for batch probes — bounded RAM
         self._embedding_buffer: list[np.ndarray] = []
         self._buffer_maxsize = self.BUFFER_MAXSIZE
 
         # Persisted baseline
+<<<<<<< HEAD
+        self._baseline: DriftSignature | None = None
+=======
         self._baseline: Optional[DriftSignature] = None
+>>>>>>> origin/main
         if signature_dir:
             sig_path = Path(signature_dir) / "drift_baseline.json"
             loaded = DriftSignature.load(sig_path)
@@ -386,7 +410,11 @@ class TemporalHealthScheduler:
             delta = embedding.astype(np.float32) - self._running_mean
             self._running_mean += delta / self._running_n
 
+<<<<<<< HEAD
+    def _get_buffer_as_array(self) -> np.ndarray | None:
+=======
     def _get_buffer_as_array(self) -> Optional[np.ndarray]:
+>>>>>>> origin/main
         """Materialize the embedding buffer as a single ndarray.
 
         Returns None if the buffer is empty.

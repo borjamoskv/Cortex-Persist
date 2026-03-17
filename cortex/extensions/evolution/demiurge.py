@@ -8,7 +8,11 @@ from __future__ import annotations
 import ast
 import asyncio
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.engine import CortexEngine
 from cortex.extensions.llm.manager import LLMManager
@@ -19,7 +23,11 @@ logger = logging.getLogger("cortex.extensions.evolution.demiurge")
 class DemiurgeCompiler:
     """Sortu JIT Compiler: Autopoiesis and Ephemeral Skills."""
 
+<<<<<<< HEAD
+    def __init__(self, engine: CortexEngine | None = None):
+=======
     def __init__(self, engine: Optional[CortexEngine] = None):
+>>>>>>> origin/main
         if engine is None:
             from cortex.cli.common import get_engine
 
@@ -49,8 +57,14 @@ class DemiurgeCompiler:
         logger.info("Demiurge Omega forging skill for intent: %s", intent)
         system_prompt = (
             "You are Demiurge Omega, an elite Python CORTEX sovereign JIT compiler. "
+<<<<<<< HEAD
+            "Generate a solitary, dependency-free, asynchronous Python function named "
+            "`execute_skill()` that fulfills the user's intent. Return ONLY valid Python "
+            "code starting with `async def execute_skill():`. "
+=======
             "Generate a solitary, dependency-free, asynchronous Python function named `execute_skill()` "
             "that fulfills the user's intent. Return ONLY valid Python code starting with `async def execute_skill():`. "
+>>>>>>> origin/main
             "Do NOT return markdown blocks, only the raw python code. Keep it under 50 lines. "
             "It must return a string or dict with the result."
         )
@@ -86,12 +100,24 @@ class DemiurgeCompiler:
                 }
 
             # Phase 4-5: Ephemeral Execution (Sandbox)
+<<<<<<< HEAD
+            sandbox_globals: dict[str, Any] = {"__builtins__": {}}
+            try:
+                code_obj = compile(generated_code, "<demiurge_ast>", "exec")
+                # Security Justification: The Demiurge JIT compiler requires exec() for
+                # ephemeral skill generation (autopoiesis) within a controlled sandbox.
+                # All inputs are validated via AST analysis before execution.
+                exec(code_obj, sandbox_globals)  # noqa: S102 # nosec B102
+            except Exception as e:
+                # noqa: BLE001 — Compilation error during JIT forging is expected.
+=======
             namespace: dict[str, Any] = {}
             try:
                 # We compile and exec to catch definition errors early
                 code_obj = compile(generated_code, "<demiurge_ast>", "exec")
                 exec(code_obj, namespace)
             except Exception as e:  # noqa: BLE001 — Compilation error during JIT forging is expected
+>>>>>>> origin/main
                 await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
                 return {
                     "status": "FAILED",
@@ -100,7 +126,11 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
+<<<<<<< HEAD
+            if "execute_skill" not in sandbox_globals:
+=======
             if "execute_skill" not in namespace:
+>>>>>>> origin/main
                 return {
                     "status": "FAILED",
                     "reason": "Missing execute_skill()",
@@ -112,7 +142,11 @@ class DemiurgeCompiler:
             start_time = asyncio.get_event_loop().time()
             try:
                 # We must await the execution as the function is defined as async
+<<<<<<< HEAD
+                result = await sandbox_globals["execute_skill"]()
+=======
                 result = await namespace["execute_skill"]()
+>>>>>>> origin/main
                 execution_time = asyncio.get_event_loop().time() - start_time
 
                 # Assign a base utility score
@@ -141,7 +175,11 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
+<<<<<<< HEAD
+            except Exception as run_err:  # noqa: BLE001
+=======
             except Exception as run_err:  # noqa: BLE001 — Runtime exception during JIT execution is expected
+>>>>>>> origin/main
                 await self._record_ghost(intent, generated_code, str(run_err), 0.2)
                 return {
                     "status": "FAILED",
@@ -150,8 +188,13 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
+<<<<<<< HEAD
+        except Exception as e:  # noqa: BLE001
+            logger.debug("Ghost recorded: %s", intent[:30])
+=======
         except Exception as e:  # noqa: BLE001 — Forge orchestration failure must be reported as ERROR status
             logger.error("Forge failed: %s", e)
+>>>>>>> origin/main
             return {"status": "ERROR", "reason": str(e)}
 
     async def _record_ghost(self, intent: str, code: str, error: str, utility: float):

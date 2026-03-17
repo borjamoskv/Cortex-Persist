@@ -6,7 +6,11 @@ import asyncio
 import logging
 import os
 import time
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 from cortex.database.tlru_cache import TLRUCache
 from cortex.extensions.nexus.db import NexusDB
@@ -120,10 +124,17 @@ class NexusWorldModel:
 
     async def query(
         self,
+<<<<<<< HEAD
+        origin: DomainOrigin | None = None,
+        intent: IntentType | None = None,
+        project: str | None = None,
+        since: float | None = None,
+=======
         origin: Optional[DomainOrigin] = None,
         intent: Optional[IntentType] = None,
         project: Optional[str] = None,
         since: Optional[float] = None,
+>>>>>>> origin/main
         limit: int = 50,
     ) -> list[dict[str, Any]]:
         """Ask the World Model: 'What happened?'

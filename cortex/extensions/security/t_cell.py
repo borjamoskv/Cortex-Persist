@@ -3,7 +3,11 @@ from __future__ import annotations
 import ast
 import logging
 import re
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.security.t_cell")
 
@@ -103,9 +107,15 @@ class BabestuTCell:
     def _veredicto(
         estado: str,
         nivel: int,
+<<<<<<< HEAD
+        firma: str | None,
+        razon: str,
+        contenido_saneado: str | None = None,
+=======
         firma: Optional[str],
         razon: str,
         contenido_saneado: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict[str, Any]:
         return {
             "estado": estado,

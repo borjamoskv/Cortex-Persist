@@ -28,6 +28,9 @@ from typing import TYPE_CHECKING, Any, Optional
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
 from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
 
+from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
+from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
+
 if TYPE_CHECKING:
     import aiosqlite
 

@@ -10,7 +10,11 @@ from __future__ import annotations
 import logging
 import statistics
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.engine import CortexEngine
 from cortex.extensions.mejoralo.ledger import get_history
@@ -29,7 +33,11 @@ class TrendReport:
 
     project: str
     sessions_analyzed: int
+<<<<<<< HEAD
+    latest_score: int | None
+=======
     latest_score: Optional[int]
+>>>>>>> origin/main
     avg_delta: float
     positive_rate: float  # % of heals that actually improved score
     score_trend: str  # "improving", "stable", "declining", "insufficient_data"
@@ -127,7 +135,11 @@ class EffectivenessTracker:
     def decay_risk(
         self,
         project: str,
+<<<<<<< HEAD
+        sessions: list[dict[str, Any]] | None = None,
+=======
         sessions: Optional[list[dict[str, Any]]] = None,
+>>>>>>> origin/main
     ) -> float:
         """Probability of score degradation (0.0 to 1.0).
 
@@ -175,7 +187,11 @@ class EffectivenessTracker:
     def stagnation_alert(
         self,
         project: str,
+<<<<<<< HEAD
+        sessions: list[dict[str, Any]] | None = None,
+=======
         sessions: Optional[list[dict[str, Any]]] = None,
+>>>>>>> origin/main
     ) -> bool:
         """True if last N heals had delta <= 0 (consecutive stagnation)."""
         if sessions is None:

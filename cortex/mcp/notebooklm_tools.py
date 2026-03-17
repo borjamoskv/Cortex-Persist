@@ -8,7 +8,11 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.mcp.notebooklm")
 
@@ -24,7 +28,11 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_digest(
         output: str = "cortex_notebooklm_digest.md",
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict:
         """Generate Master Digest for NotebookLM with Shadow Key anchors.
 
@@ -80,7 +88,11 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
     @mcp.tool()
     async def notebooklm_sync(
+<<<<<<< HEAD
+        drive_path: str | None = None,
+=======
         drive_path: Optional[str] = None,
+>>>>>>> origin/main
         mode: str = "both",
     ) -> dict:
         """Sync exported files to cloud storage for NotebookLM pickup.

@@ -87,7 +87,11 @@ def analyze(ai_time: float, complexity: str) -> None:
     is_flag=True,
     help="Persist report into CORTEX ledger.",
 )
+<<<<<<< HEAD
+def compound(project: str | None, persist: bool) -> None:
+=======
 def compound(project: Optional[str], persist: bool) -> None:
+>>>>>>> origin/main
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
     from rich.table import Table
 

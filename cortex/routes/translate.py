@@ -150,7 +150,9 @@ def translate_texts(
     try:
         return _execute_translation(request, client)
     except ValueError as e:
-        raise HTTPException(status_code=502, detail=str(e)) from e
+        raise HTTPException(
+            status_code=502, detail="Error generating translation or invalid upstream response."
+        ) from e
     except (RuntimeError, OSError) as e:
         logger.error("Translation generation failed critically: %s", e)
         raise HTTPException(status_code=502, detail=f"Translation generation failed: {e}") from e

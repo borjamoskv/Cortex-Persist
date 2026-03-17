@@ -37,9 +37,19 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # Engine low-level
         "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
         "cortex/engine/decalcifier.py",  # Sync schema maintenance
+<<<<<<< HEAD
+        "cortex/engine/entropy_pruner.py",  # Maintenance
+        "cortex/engine/lora_forger.py",  # Low-level model forging
         # Agent/system infra (pre- and post-refactor paths)
         "cortex/agents/system_prompt.py",
         "cortex/extensions/agents/system_prompt.py",
+        "cortex/agents/arc_agi_lib/templates/langgraph_thinking/agent.py",
+        "cortex/routes/terminal.py",  # Sync terminal bus
+=======
+        # Agent/system infra (pre- and post-refactor paths)
+        "cortex/agents/system_prompt.py",
+        "cortex/extensions/agents/system_prompt.py",
+>>>>>>> origin/main
         # Evolution/metrics (sync telemetry)
         "cortex/evolution/cortex_metrics.py",
         "cortex/evolution/shannon_metrics.py",
@@ -72,6 +82,14 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/daemon/monitors/auto_audit.py",
         "cortex/extensions/daemon/centaur/queue.py",
         "cortex/extensions/daemon/monitors/auto_audit.py",
+<<<<<<< HEAD
+        # Legitimate raw connections (ledger, utilities, telemetry)
+        "cortex/ledger/store.py",
+        "cortex/cli/doctor_cmds.py",
+        "cortex/engine/capabilities.py",
+        "cortex/extensions/health/trend.py",
+=======
+>>>>>>> origin/main
     }
 )
 

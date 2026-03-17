@@ -4,12 +4,27 @@ Ring buffer of last N scores. Computes slope to classify:
   - "improving" (positive slope)
   - "stable" (near-zero slope)
   - "degrading" (negative slope)
+<<<<<<< HEAD
+
+Supports optional SQLite persistence via health_history table.
+=======
+>>>>>>> origin/main
 """
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+import logging
+import sqlite3
 from collections import deque
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+
+logger = logging.getLogger("cortex.extensions.health.trend")
+=======
+from collections import deque
+from dataclasses import dataclass, field
+>>>>>>> origin/main
 
 
 @dataclass
@@ -83,6 +98,115 @@ class TrendDetector:
         """Number of samples in the buffer."""
         return len(self._scores)
 
+<<<<<<< HEAD
+    # ─── SQLite Persistence ──────────────────────────────────
+
+    @staticmethod
+    def _ensure_table(conn: sqlite3.Connection) -> None:
+        """Create health_history table if it doesn't exist."""
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS health_history ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  timestamp TEXT NOT NULL,"
+            "  score REAL NOT NULL,"
+            "  grade TEXT NOT NULL DEFAULT ''"
+            ")"
+        )
+
+    def persist_to_db(
+        self,
+        db_path: str,
+        score: float,
+        grade: str = "",
+        timestamp: float | None = None,
+    ) -> None:
+        """Persist a health score snapshot to SQLite."""
+        try:
+            from cortex.database.core import connect
+
+            conn = connect(db_path, timeout=5)
+            try:
+                self._ensure_table(conn)
+                ts_str = (
+                    datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    if timestamp
+                    else datetime.now(timezone.utc)
+                ).isoformat()
+                conn.execute(
+                    "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
+                    (ts_str, score, grade),
+                )
+                conn.commit()
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError, ValueError) as e:
+            logger.debug("Failed to persist health score: %s", e)
+
+    def prune_history(self, db_path: str, keep_days: int = 30) -> None:
+        """Delete historical records older than keep_days."""
+        try:
+            from cortex.database.core import connect
+
+            conn = connect(db_path, timeout=5)
+            try:
+                self._ensure_table(conn)
+                # SQLite isoformat comparison: "2024-..." < "2024-..."
+                from datetime import timedelta
+
+                cutoff = (datetime.now(timezone.utc) - timedelta(days=keep_days)).isoformat()
+                conn.execute(
+                    "DELETE FROM health_history WHERE timestamp < ?",
+                    (cutoff,),
+                )
+                conn.commit()
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError) as e:
+            logger.debug("Failed to prune health history: %s", e)
+
+    def load_from_db(self, db_path: str, limit: int | None = None) -> None:
+        """Seed ring buffer from historical DB records."""
+        n = limit or self.window_size
+        try:
+            from cortex.database.core import connect
+
+            conn = connect(db_path, timeout=5, row_factory=sqlite3.Row)
+            try:
+                self._ensure_table(conn)
+                cur = conn.execute(
+                    "SELECT score FROM health_history ORDER BY id DESC LIMIT ?",
+                    (n,),
+                )
+                rows = cur.fetchall()
+                # Rows are newest-first; reverse for chronological push
+                for row in reversed(rows):
+                    self.push(row["score"])
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError) as e:
+            logger.debug("Failed to load health history: %s", e)
+
+    @staticmethod
+    def query_history(db_path: str, limit: int = 20) -> list[dict[str, object]]:
+        """Query persisted health history for display."""
+        try:
+            from cortex.database.core import connect
+
+            conn = connect(db_path, timeout=5, row_factory=sqlite3.Row, read_only=True)
+            try:
+                TrendDetector._ensure_table(conn)
+                cur = conn.execute(
+                    "SELECT timestamp, score, grade FROM health_history ORDER BY id DESC LIMIT ?",
+                    (limit,),
+                )
+                return [dict(row) for row in cur.fetchall()]
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError):
+            return []
+
+=======
+>>>>>>> origin/main
     def __repr__(self) -> str:
         return (
             f"TrendDetector(samples={self.sample_count}, "

@@ -8,7 +8,11 @@ based on Tenant configuration. Ensures SQLite-vec dimension compatibility.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.embeddings.byok")
 
@@ -28,7 +32,11 @@ class BYOKEmbedder:
     def __init__(
         self,
         fallback_local: Any,
+<<<<<<< HEAD
+        api_key: str | None = None,
+=======
         api_key: Optional[str] = None,
+>>>>>>> origin/main
         model: str = "text-embedding-3-small",
         dimension: int = 384,
     ):

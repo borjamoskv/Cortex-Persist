@@ -9,7 +9,11 @@ import math
 import sqlite3
 import time
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 from cortex.engine.forgetting_models import (
     EvictionVerdict,
@@ -60,14 +64,22 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         self,
         engine: AsyncCortexEngine,
         cache_ref: Any = None,
+<<<<<<< HEAD
+        l1_ref: WorkingMemoryL1 | None = None,
+=======
         l1_ref: Optional[WorkingMemoryL1] = None,
+>>>>>>> origin/main
     ) -> None:
         self._engine = engine
         self._cache = cache_ref
         # Direct reference to L1 Working Memory — enables real access_frequency_score
         # instead of the transactional approximation ghost (Derivation: Ω₁ + Ω₂).
         self._l1 = l1_ref
+<<<<<<< HEAD
+        self._last_report: OracleReport | None = None
+=======
         self._last_report: Optional[OracleReport] = None
+>>>>>>> origin/main
         self._audit_count = 0
 
         # Ω₃/Ω₂: Integrated Services
@@ -185,6 +197,10 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                     "SYSTEM",
                     "ORACLE_AUDIT",
                     report.to_dict(),
+<<<<<<< HEAD
+                    tenant_id="system",
+=======
+>>>>>>> origin/main
                 )
                 await conn.commit()
         except (sqlite3.Error, json.JSONDecodeError, TypeError) as e:
@@ -252,11 +268,19 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                     "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
                     (datetime.now(timezone.utc).isoformat(), fact_id),
                 )
+<<<<<<< HEAD
+                tenant_id = fact.get("tenant_id", "default")
+=======
+>>>>>>> origin/main
                 await self._engine._log_transaction(
                     conn,
                     fact.get("project", "SYSTEM"),
                     "MUTATE_TO_GHOST",
                     {"fact_id": fact_id, "original_type": fact.get("fact_type")},
+<<<<<<< HEAD
+                    tenant_id=tenant_id,
+=======
+>>>>>>> origin/main
                 )
                 await conn.commit()
 
@@ -305,6 +329,10 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         return False
 
     @property
+<<<<<<< HEAD
+    def last_report(self) -> OracleReport | None:
+=======
     def last_report(self) -> Optional[OracleReport]:
+>>>>>>> origin/main
         """Last generated audit report."""
         return self._last_report

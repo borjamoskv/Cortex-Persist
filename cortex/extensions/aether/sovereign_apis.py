@@ -1,7 +1,11 @@
 import asyncio
 import logging
 import os
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import httpx
 
@@ -154,7 +158,11 @@ class SovereignTriad:
         span_name: str,
         input_data: Any,
         output_data: Any,
+<<<<<<< HEAD
+        metadata: dict[str, Any] | None = None,
+=======
         metadata: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
     ) -> bool:
         """
         [Braintrust] Telemetría silenciosa. Axioma 3: Mide la ejecución. Graba inputs/outputs para RLHF futuro.

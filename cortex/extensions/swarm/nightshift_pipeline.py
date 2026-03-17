@@ -26,7 +26,11 @@ import json
 import logging
 import re
 import time
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.swarm.nightshift_pipeline")
 
@@ -327,7 +331,11 @@ class NightShiftPipeline:
 
     async def run(
         self,
+<<<<<<< HEAD
+        targets: list[Any] | None = None,
+=======
         targets: Optional[list[Any]] = None,
+>>>>>>> origin/main
         intent: str = "",
         repo_path: str = ".",
         priority: int = 5,

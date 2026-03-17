@@ -13,7 +13,11 @@ import logging
 import time
 from collections.abc import Awaitable, Callable
 from enum import Enum, auto
+<<<<<<< HEAD
+from typing import Any, TypeVar
+=======
 from typing import Any, Optional, TypeVar
+>>>>>>> origin/main
 
 __all__ = ["CircuitBreaker", "CircuitState"]
 
@@ -68,7 +72,11 @@ class CircuitBreaker:
         self._name = name
         self._state = CircuitState.CLOSED
         self._failures = 0
+<<<<<<< HEAD
+        self._last_failure_time: float | None = None
+=======
         self._last_failure_time: Optional[float] = None
+>>>>>>> origin/main
         self._threshold = failure_threshold
         self._timeout = recovery_timeout
         self._total_trips = 0

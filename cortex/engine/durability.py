@@ -9,7 +9,11 @@ import asyncio
 import atexit
 import logging
 import sys
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.durability")
 
@@ -21,7 +25,11 @@ class PersistenceSupervisor:
         self._engine = engine
         self._interval = interval
         self._stop_event = asyncio.Event()
+<<<<<<< HEAD
+        self._task: asyncio.Task | None = None
+=======
         self._task: Optional[asyncio.Task] = None
+>>>>>>> origin/main
         self._queue: list[dict[str, Any]] = []
         self._lock = asyncio.Lock()
 

@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import logging
 import shutil
+<<<<<<< HEAD
+import sqlite3
+import time
+from pathlib import Path
+from typing import Any
+=======
 import time
 from pathlib import Path
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.database.core import connect as db_connect
 from cortex.engine import CortexEngine
@@ -143,6 +150,18 @@ class NotebookLMService:
         self.db_path = db_path
         self.engine = CortexEngine(db_path)
 
+<<<<<<< HEAD
+    async def get_active_facts(self, project: str | None = None) -> list[Fact]:
+        """Fetch cleartext facts using CortexEngine."""
+        # Use get_all_active_facts which returns models.Fact objects correctly
+        facts = await self.engine.get_all_active_facts(project=project)
+        # Ensure we are returning a list of Fact objects
+        return [f for f in facts if f.fact_type != "signal"]
+
+    def get_entities_and_relations(self, project: str | None = None) -> list[dict[str, Any]]:
+        """Load entity graph for NotebookLM context. Fixes connection guard."""
+        conn = db_connect(self.db_path, row_factory=sqlite3.Row)
+=======
     async def get_active_facts(self, project: Optional[str] = None) -> list[Fact]:
         """Fetch cleartext facts using CortexEngine."""
         facts = await self.engine.search(project=project, limit=5000)
@@ -151,6 +170,7 @@ class NotebookLMService:
     def get_entities_and_relations(self, project: Optional[str] = None) -> list[dict[str, Any]]:
         """Load entity graph for NotebookLM context. Fixes connection guard."""
         conn = db_connect(self.db_path)
+>>>>>>> origin/main
         try:
             query = "SELECT * FROM entities"
             params = []
@@ -169,8 +189,13 @@ class NotebookLMService:
             f"### {fact.fact_type.upper()} ({fact.project}) {shadow_key}",
             f"- **ID**: {fact.id}",
             f"- **Source**: {fact.source}",
+<<<<<<< HEAD
+            f"- **Confidence**: {fact.confidence}",
+            f"- **Timestamp**: {fact.created_at}",
+=======
             f"- **Confidence**: {fact.confidence:.2f}",
             f"- **Timestamp**: {time.ctime(fact.timestamp)}",  # type: ignore[type-error]
+>>>>>>> origin/main
             "",
             fact.content,
             "",
@@ -182,7 +207,11 @@ class NotebookLMService:
         """Apply Byzantine Defense (Ω₃): A tamper-evident signature for the export."""
         return f"\n\n---\n**SOVEREIGN SIGNATURE**: {int(time.time())};mosaic-v8;borjamoskv\n"
 
+<<<<<<< HEAD
+    def detect_cloud_sync(self) -> Path | None:
+=======
     def detect_cloud_sync(self) -> Optional[Path]:
+>>>>>>> origin/main
         """Detect appropriate cloud storage sync folder."""
         for _provider, paths in CLOUD_PROVIDERS.items():
             for p in paths:
@@ -190,7 +219,11 @@ class NotebookLMService:
                     return p
         return None
 
+<<<<<<< HEAD
+    async def generate_digest(self, project: str | None = None) -> str:
+=======
     async def generate_digest(self, project: Optional[str] = None) -> str:
+>>>>>>> origin/main
         """Generate Master Digest string."""
         facts = await self.get_active_facts(project)
         sections = [self.format_fact(f) for f in facts]
@@ -215,7 +248,11 @@ class NotebookLMService:
 
         return counts
 
+<<<<<<< HEAD
+    def sync_to_cloud(self, source_path: Path, cloud_path: Path | None = None) -> Path:
+=======
     def sync_to_cloud(self, source_path: Path, cloud_path: Optional[Path] = None) -> Path:
+>>>>>>> origin/main
         """Copy a file or directory to cloud storage."""
         dest = cloud_path or self.detect_cloud_sync()
         if not dest:

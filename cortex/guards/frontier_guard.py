@@ -1,7 +1,10 @@
 import json
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.guards.models import ALLOWED_TIERS
 from cortex.utils.errors import SovereignViolation
@@ -15,7 +18,11 @@ class FrontierModelGuard:
     Rejects 'low', 'flash', 'haiku', or 'mini' models.
     """
 
+<<<<<<< HEAD
+    def __init__(self, presets_path: str | Path | None = None):
+=======
     def __init__(self, presets_path: str | Optional[Path] = None):
+>>>>>>> origin/main
         if presets_path is None:
             # Default location relative to project root or cortex package
             # Based on previous research: config/llm_presets.json
@@ -23,7 +30,11 @@ class FrontierModelGuard:
         else:
             self.presets_path = Path(presets_path)
 
+<<<<<<< HEAD
+    def validate_config(self, provider: str, model: str | None = None) -> None:
+=======
     def validate_config(self, provider: str, model: Optional[str] = None) -> None:
+>>>>>>> origin/main
         """
         Validates the current LLM configuration against Rule 1.3.
 

@@ -57,7 +57,11 @@ class AccessibilityEngine:
 
     # ─── Find by Identifier ─────────────────────────────────────
 
+<<<<<<< HEAD
+    def find_element(self, app_name: str, identifier: str) -> AXElement | None:
+=======
     def find_element(self, app_name: str, identifier: str) -> Optional[AXElement]:
+>>>>>>> origin/main
         """
         Recursively searches for an element with a specific AXIdentifier.
         This is the preferred method — language-independent.
@@ -74,7 +78,11 @@ class AccessibilityEngine:
         app_name: str,
         title: str,
         max_depth: int = DEFAULT_MAX_DEPTH,
+<<<<<<< HEAD
+    ) -> AXElement | None:
+=======
     ) -> Optional[AXElement]:
+>>>>>>> origin/main
         """
         Searches for an element by AXTitle.
         Falls back to AXDescription for untitled elements.
@@ -169,7 +177,11 @@ class AccessibilityEngine:
 
     # ─── Value Operations ───────────────────────────────────────
 
+<<<<<<< HEAD
+    def get_value(self, element: AXElement) -> str | None:
+=======
     def get_value(self, element: AXElement) -> Optional[str]:
+>>>>>>> origin/main
         """Reads AXValue from an element (text fields, sliders, etc)."""
         if not element.native_ref:
             return None
@@ -196,7 +208,11 @@ class AccessibilityEngine:
         identifier: str,
         timeout: float = 5.0,
         poll_interval: float = 0.25,
+<<<<<<< HEAD
+    ) -> AXElement | None:
+=======
     ) -> Optional[AXElement]:
+>>>>>>> origin/main
         """
         Polls for an element until found or timeout.
         Returns the element if found, None if timed out.
@@ -230,7 +246,11 @@ class AccessibilityEngine:
         target_value: str,
         max_depth: int = DEFAULT_MAX_DEPTH,
         depth: int = 0,
+<<<<<<< HEAD
+    ) -> AXElement | None:
+=======
     ) -> Optional[AXElement]:
+>>>>>>> origin/main
         """Generic recursive search by any AX attribute value."""
         val = self._get_attribute(element, attr_name)
         if val is not None and str(val) == target_value:

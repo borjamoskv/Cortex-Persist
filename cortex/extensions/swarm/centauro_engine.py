@@ -9,7 +9,11 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+<<<<<<< HEAD
+from typing import TypedDict, cast
+=======
 from typing import Optional, TypedDict, cast
+>>>>>>> origin/main
 
 from pydantic import BaseModel, Field
 
@@ -136,7 +140,11 @@ class CentauroEngine:
         self,
         squad: dict[str, VirtualAgent],
         mission: str,
+<<<<<<< HEAD
+    ) -> tuple[str | None, int]:
+=======
     ) -> tuple[Optional[str], int]:
+>>>>>>> origin/main
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
         Returns:

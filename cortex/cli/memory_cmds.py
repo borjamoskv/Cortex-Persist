@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import click
 from rich.panel import Panel
 from rich.table import Table
@@ -19,7 +21,12 @@ from cortex.cli.errors import err_empty_results
 from cortex.cli.slow_tip import with_slow_tips
 
 
-@cli.command()
+@click.group("memory")
+def memory_cmds() -> None:
+    """CORTEX memory management commands."""
+
+
+@memory_cmds.command("store")
 @click.argument("project")
 @click.argument("content")
 @click.option(
@@ -118,7 +125,7 @@ def store(
         _run_async(engine.close())
 
 
-@cli.command()
+@memory_cmds.command("search")
 @click.argument("query")
 @click.option("--project", "-p", default=None, help="Scope to project")
 @click.option("--top", "-k", default=5, help="Number of results")
@@ -269,7 +276,30 @@ def recall(project, db) -> None:
                 else:
                     fid, content, tags = f.id, f.content, f.tags or []
                 tags_str = f" [dim]{', '.join(tags)}[/]" if tags else ""
+<<<<<<< HEAD
+
+                # Ω₁₃: Taint & Confidence visibility
+                if isinstance(f, dict):
+                    status = f.get("metadata", {}).get("taint_status", "clean")
+                    conf = f.get("confidence", "C?")
+                else:
+                    status = f.meta.get("taint_status", "clean") if hasattr(f, "meta") else "clean"
+                    conf = f.confidence if hasattr(f, "confidence") else "C?"
+
+                status_color = (
+                    "red" if status == "tainted" else "yellow" if status == "suspect" else "green"
+                )
+                status_icon = "☢" if status == "tainted" else "⚠" if status == "suspect" else "✓"
+
+                console.print(
+                    f"  [dim]#{fid}[/] "
+                    f"[[noir.cyber]{conf}[/]] "
+                    f"[{status_color}]{status_icon} {status}[/] "
+                    f"{content}{tags_str}"
+                )
+=======
                 console.print(f"  [dim]#{fid}[/] {content}{tags_str}")
+>>>>>>> origin/main
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -305,6 +335,8 @@ def history(project, as_of, db) -> None:
                 content = f.content[:80]
             badge = "[green]●[/]" if is_active else "[dim]○[/]"
             console.print(f"  {badge} [dim]#{fid}[/] [{valid_from}] {content}")
+<<<<<<< HEAD
+=======
     finally:
         _run_async(engine.close())
 
@@ -457,5 +489,227 @@ def trace_chain(fact_id, direction, depth, db) -> None:
 
         console.print(table)
         _show_tip(engine)
+>>>>>>> origin/main
     finally:
         _run_async(engine.close())
+
+
+@cli.command()
+@click.argument("project")
+@click.option("--threshold", default=0.88, help="Cosine similarity threshold (0.0 to 1.0)")
+@click.option("--simulate", is_flag=True, default=False, help="Do not save changes, just list them")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
+    """Run Memory Archaeology to deduplicate and crystallize facts."""
+    from cortex.memory.memory_archaeology import MemoryArchaeologist
+
+    engine = get_engine(db)
+    try:
+        with console.status(f"[noir.violet]Running memory archaeology for {project}...[/]"):
+            archaeologist = MemoryArchaeologist(engine)
+            res = _run_async(archaeologist.run_archaeology(project, threshold, simulate))
+
+        if simulate:
+            console.print(
+                f"[bold yellow]Simulation Complete:[/] "
+                f"Would condense {res['condensed']} clusters "
+                f"and tombstone {res['tombstoned']} facts."
+            )
+        else:
+            console.print(
+                f"[[noir.cyber]✓[/]] [bold green]Archaeology Complete:[/] "
+                f"'{project}' optimized. Condensed {res['condensed']} "
+                f"items, tombstoned {res['tombstoned']}."
+            )
+    finally:
+        _run_async(engine.close())
+
+
+@memory_cmds.command("trace-episode")
+@click.argument("query", required=False, default="")
+@click.option("--fact-id", "-f", type=int, default=0, help="Trace from a specific fact ID")
+@click.option("--project", "-p", default="", help="Scope to project")
+@click.option("--limit", "-n", default=3, help="Max episodes to return")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def trace_episode(query, fact_id, project, limit, db) -> None:
+    """Trace causal episodes — reconstruct WHY something happened.
+
+    Two modes:
+      By query:   cortex trace-episode "migration failed"
+      By fact ID: cortex trace-episode --fact-id 42
+    """
+    if not query and fact_id == 0:
+        console.print("[red]Provide a query or --fact-id[/]")
+        return
+
+    engine = get_engine(db)
+    try:
+        if fact_id > 0:
+            with console.status("[noir.violet]Tracing causal chain...[/]"):
+                episode = _run_async(engine.trace_episode(fact_id))
+            console.print(
+                Panel(
+                    f"Root: #{episode.root_fact_id}  |  "
+                    f"Depth: {episode.depth}  |  "
+                    f"Nodes: {len(episode.fact_chain)}  |  "
+                    f"Entropy: {episode.entropy_density:.2f}",
+                    title=f"🧬 Causal Episode from fact #{fact_id}",
+                    border_style="cyan",
+                )
+            )
+            console.print(episode.summary)
+        else:
+            with console.status("[noir.violet]Searching causal episodes...[/]"):
+                episodes = _run_async(engine.recall_episode(query, project, limit))
+            if not episodes:
+                err_empty_results(
+                    "episodios causales",
+                    suggestion="Prueba con otros términos.",
+                )
+                return
+            for ep in episodes:
+                console.print(
+                    Panel(
+                        f"Root: #{ep.root_fact_id}  |  "
+                        f"Depth: {ep.depth}  |  "
+                        f"Nodes: {len(ep.fact_chain)}  |  "
+                        f"Entropy: {ep.entropy_density:.2f}",
+                        title=f"🧬 Episode [{ep.project}]",
+                        border_style="cyan",
+                    )
+                )
+                console.print(ep.summary)
+                console.print()
+        _show_tip(engine)
+    finally:
+        _run_async(engine.close())
+
+
+@memory_cmds.command("trace-chain")
+@click.argument("fact_id", type=int)
+@click.option(
+    "--direction",
+    "-d",
+    type=click.Choice(["up", "down"]),
+    default="down",
+    help="Traversal direction: up (toward root) or down (toward leaves)",
+)
+@click.option("--depth", default=10, help="Max recursion depth")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def trace_chain(fact_id, direction, depth, db) -> None:
+    """Traverse the causal chain from a fact.
+
+    Examples:
+      cortex trace-chain 42            # All descendants
+      cortex trace-chain 42 -d up      # Ancestry toward root
+    """
+    engine = get_engine(db)
+    try:
+        with console.status("[noir.violet]Tracing causal chain...[/]"):
+            chain = _run_async(
+                engine.get_causal_chain(
+                    fact_id,
+                    direction=direction,
+                    max_depth=depth,
+                )
+            )
+
+        if not chain:
+            console.print(f"[dim]No causal chain found from fact #{fact_id}[/]")
+            return
+
+        arrow = "↑" if direction == "up" else "↓"
+        table = Table(
+            title=(f"🧬 Causal Chain {arrow} from #{fact_id} ({len(chain)} nodes)"),
+        )
+        table.add_column("Depth", style="dim", width=5)
+        table.add_column("ID", style="bold", width=6)
+        table.add_column("Type", style="noir.violet", width=10)
+        table.add_column("Conf", style="noir.cyber", width=5)
+        table.add_column("Taint", width=10)
+        table.add_column("Content", width=40)
+        table.add_column("Parent", style="dim", width=6)
+
+        for f in chain:
+            content = f.get("content", "")[:50]
+            parent_id = f.get("parent_decision_id")
+            parent_str = str(parent_id) if parent_id else "—"
+            meta = f.get("metadata") or {}
+            if isinstance(meta, str):
+                try:
+                    meta = json.loads(meta)
+                except (ValueError, TypeError, json.JSONDecodeError):
+                    meta = {}
+
+            taint = meta.get("taint_status", "clean")
+            taint_color = (
+                "red" if taint == "tainted" else "yellow" if taint == "suspect" else "green"
+            )
+
+            table.add_row(
+                str(f.get("causal_depth", "?")),
+                str(f.get("id", "?")),
+                f.get("fact_type", "?"),
+                f.get("confidence", "C?"),
+                f"[{taint_color}]{taint}[/]",
+                content,
+                parent_str,
+            )
+
+        console.print(table)
+        _show_tip(engine)
+    finally:
+        _run_async(engine.close())
+
+
+@memory_cmds.command("stats")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def stats(db, as_json) -> None:
+    """Show memory statistics."""
+    engine = get_engine(db)
+    try:
+        s = _run_async(engine.stats())
+        if as_json:
+            import json
+
+            click.echo(json.dumps(s, indent=2))
+            return
+
+        table = Table(title="🧠 Memory Statistics")
+        table.add_column("Metric", style="bold cyan")
+        table.add_column("Value", style="noir.cyber")
+        table.add_row("Total Facts", str(s["total_facts"]))
+        table.add_row("Active Facts", str(s["active_facts"]))
+        table.add_row("Deprecated", str(s["deprecated_facts"]))
+        table.add_row("Projects", str(s["project_count"]))
+        table.add_row("Embeddings", str(s["embeddings"]))
+        table.add_row("DB Size", f"{s['db_size_mb']} MB")
+        console.print(table)
+    finally:
+        _run_async(engine.close())
+
+
+# --- Root Aliases (Backward Compatibility) ---
+@cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def store_alias(ctx, args):
+    """[Alias] Store a fact."""
+    ctx.invoke(store, *args)
+
+
+@cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def search_alias(ctx, args):
+    """[Alias] Semantic search."""
+    ctx.invoke(search, *args)
+
+
+@cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def recall_alias(ctx, args):
+    """[Alias] Load full context."""
+    ctx.invoke(recall, *args)

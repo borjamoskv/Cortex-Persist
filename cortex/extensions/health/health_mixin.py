@@ -1,12 +1,20 @@
 """CortexEngine health mixin — engine.health_check() API.
 
 Cached collector, TrendDetector, configurable thresholds.
+<<<<<<< HEAD
+Health scores are persisted to SQLite for cross-invocation trend analysis.
+=======
+>>>>>>> origin/main
 """
 
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import (
@@ -31,9 +39,16 @@ class HealthMixin:
     """
 
     _db_path: Any
+<<<<<<< HEAD
+    _health_collector: HealthCollector | None = None
+    _health_trend: TrendDetector | None = None
+    _health_thresholds: HealthThresholds | None = None
+    _health_trend_seeded: bool = False
+=======
     _health_collector: Optional[HealthCollector] = None
     _health_trend: Optional[TrendDetector] = None
     _health_thresholds: Optional[HealthThresholds] = None
+>>>>>>> origin/main
 
     def _get_health_collector(self) -> HealthCollector:
         """Lazily create and cache the HealthCollector."""
@@ -64,7 +79,11 @@ class HealthMixin:
         }
 
     async def health_score(self, **kwargs: Any) -> HealthScore:
+<<<<<<< HEAD
+        """Compute the full health score, record trend, persist to DB."""
+=======
         """Compute the full health score, record trend."""
+>>>>>>> origin/main
         collector = self._get_health_collector()
         metrics = collector.collect_all()
         weights = kwargs.get("weights")
@@ -72,8 +91,24 @@ class HealthMixin:
 
         # Feed trend detector
         trend = self._get_trend_detector()
+<<<<<<< HEAD
+
+        # Seed from DB on first access
+        db_path = str(getattr(self, "_db_path", ""))
+        if not self._health_trend_seeded and db_path:
+            trend.load_from_db(db_path)
+            self._health_trend_seeded = True
+
         trend.push(hs.score)
 
+        # Persist to DB
+        if db_path:
+            trend.persist_to_db(db_path, hs.score, hs.grade.letter)
+
+=======
+        trend.push(hs.score)
+
+>>>>>>> origin/main
         return hs
 
     async def health_report(self, **kwargs: Any) -> HealthReport:

@@ -17,7 +17,11 @@ import enum
 import logging
 import time
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any, Final, Literal
+=======
 from typing import Any, Final, Literal, Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -168,7 +172,11 @@ class MetamemoryIndex:
 
     # ─── Read ─────────────────────────────────────────────────
 
+<<<<<<< HEAD
+    def introspect(self, memory_id: str) -> MemoryCard | None:
+=======
     def introspect(self, memory_id: str) -> Optional[MemoryCard]:
+>>>>>>> origin/main
         """Retrieve the metamemory card for a single memory. O(1)."""
         return self._cards.get(memory_id)
 
@@ -260,9 +268,15 @@ def build_memory_card(
     *,
     energy_level: float = 1.0,
     success_rate: float = 1.0,
+<<<<<<< HEAD
+    last_accessed_ts: float | None = None,
+    access_count: int = 0,
+    embedding: list[float] | None = None,
+=======
     last_accessed_ts: Optional[float] = None,
     access_count: int = 0,
     embedding: Optional[list[float]] = None,
+>>>>>>> origin/main
     consolidation_status: ConsolidationStatus = "unknown",
     contradiction_count: int = 0,
     valence_multiplier: float = 1.0,

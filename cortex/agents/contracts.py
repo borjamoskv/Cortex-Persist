@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+<<<<<<< HEAD
+from typing import Any, Literal
+=======
 from typing import Any, Literal, Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, Field
 
@@ -21,7 +25,11 @@ class ToolResultPayload(BaseModel):
     tool_name: str
     ok: bool
     result: dict[str, Any] = Field(default_factory=dict)
+<<<<<<< HEAD
+    error: str | None = None
+=======
     error: Optional[str] = None
+>>>>>>> origin/main
 
 
 class VerificationRequestPayload(BaseModel):

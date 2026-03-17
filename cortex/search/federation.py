@@ -19,7 +19,10 @@ from __future__ import annotations
 import logging
 import sqlite3
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope
@@ -38,7 +41,11 @@ _FEDERATION_MAP: dict[str, tuple[Path, str]] = {
 
 def attach_federated_dbs(
     conn: sqlite3.Connection,
+<<<<<<< HEAD
+    scopes: list[str] | None = None,
+=======
     scopes: Optional[list[str]] = None,
+>>>>>>> origin/main
 ) -> list[str]:
     """ATTACH secondary databases to an existing connection.
 
@@ -55,9 +62,20 @@ def attach_federated_dbs(
         if not db_path.exists():
             logger.debug("Skipping %s — %s not found", alias, db_path)
             continue
+<<<<<<< HEAD
+        # Validating alias against strict allowlist (from _FEDERATION_MAP keys)
+        valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+        if alias not in valid_aliases:
+            continue
+
+        try:
+            conn.execute(
+                f"ATTACH DATABASE ? AS {alias}",  # nosec B608
+=======
         try:
             conn.execute(
                 f"ATTACH DATABASE ? AS {alias}",
+>>>>>>> origin/main
                 (str(db_path),),
             )
             attached.append(alias)
@@ -76,9 +94,18 @@ def detach_federated_dbs(
     aliases: list[str],
 ) -> None:
     """DETACH previously attached databases."""
+<<<<<<< HEAD
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+    for alias in aliases:
+        if alias not in valid_aliases:
+            continue
+        try:
+            conn.execute(f"DETACH DATABASE {alias}")  # nosec B608
+=======
     for alias in aliases:
         try:
             conn.execute(f"DETACH DATABASE {alias}")
+>>>>>>> origin/main
         except sqlite3.OperationalError:
             pass
 
@@ -87,7 +114,11 @@ def _search_attached_db(
     conn: sqlite3.Connection,
     alias: str,
     query: str,
+<<<<<<< HEAD
+    project: str | None = None,
+=======
     project: Optional[str] = None,
+>>>>>>> origin/main
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table.
@@ -95,15 +126,31 @@ def _search_attached_db(
     Handles AES-GCM encrypted content by decrypting client-side.
     Falls back to LIKE for unencrypted DBs.
     """
+<<<<<<< HEAD
+    from cortex.utils.paths import is_safe_path
+=======
+>>>>>>> origin/main
     from cortex.crypto import get_default_encrypter
     from cortex.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX
 
+<<<<<<< HEAD
+    # Validating alias against strict allowlist
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+    if alias not in valid_aliases:
+        return []
+
+    # Fetch active facts (capped at 500 to limit memory)
+    # Validated alias at line 118.
+    sql = (
+        f"SELECT f.id, f.content, f.project, f.fact_type, "  # nosec B608
+=======
     # Fetch active facts (capped at 500 to limit memory)
     sql = (
         f"SELECT f.id, f.content, f.project, f.fact_type, "
+>>>>>>> origin/main
         f"f.confidence, f.source, f.tags "
         f"FROM {alias}.facts f "
         f"WHERE f.valid_until IS NULL"
@@ -126,6 +173,18 @@ def _search_attached_db(
     results: list[SearchResult] = []
 
     for row in rows:
+<<<<<<< HEAD
+        if str(row[1]).startswith(v6_prefix):
+            try:
+                content = enc.decrypt_str(row[1], tenant_id="default")
+            except (ValueError, TypeError, OSError):
+                continue
+        else:
+            content = str(row[1])
+
+        # type: ignore[reportOptionalMemberAccess]
+        if query_lower not in content.lower():
+=======
         content_raw = row[1] or ""
         if str(content_raw).startswith(v6_prefix):
             try:
@@ -136,6 +195,7 @@ def _search_attached_db(
             content = str(content_raw)
 
         if query_lower not in content.lower():  # type: ignore[reportOptionalMemberAccess]
+>>>>>>> origin/main
             continue
 
         try:
@@ -171,7 +231,11 @@ def federated_search_sync(
     conn: sqlite3.Connection,
     query: str,
     scope: str = "core",
+<<<<<<< HEAD
+    project: str | None = None,
+=======
     project: Optional[str] = None,
+>>>>>>> origin/main
     limit: int = 20,
 ) -> list[SearchResult]:
     """Federated text search across partitioned databases.

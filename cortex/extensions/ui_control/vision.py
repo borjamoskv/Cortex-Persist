@@ -4,7 +4,11 @@ from __future__ import annotations
 import logging
 import os
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 try:
     import ImageIO
@@ -29,14 +33,22 @@ class VisionEngine:
     Used for feedback loops and human-in-the-loop verification.
     """
 
+<<<<<<< HEAD
+    def __init__(self, engine: CortexEngine | None = None) -> None:
+=======
     def __init__(self, engine: Optional[CortexEngine] = None) -> None:
+>>>>>>> origin/main
         self.engine = engine
         self._screenshots_dir = os.path.expanduser("~/.cortex/screenshots")
         os.makedirs(self._screenshots_dir, exist_ok=True)
 
+<<<<<<< HEAD
+    def capture_screen(self, region: tuple[int, int, int, int] | None = None) -> InteractionResult:
+=======
     def capture_screen(
         self, region: Optional[tuple[int, int, int, int]] = None
     ) -> InteractionResult:
+>>>>>>> origin/main
         """
         Captures the screen or a region and saves it to the CORTEX screenshots dir.
         Returns the path to the saved image.

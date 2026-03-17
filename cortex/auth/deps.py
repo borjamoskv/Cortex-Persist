@@ -23,7 +23,11 @@ logger = logging.getLogger(__name__)
 
 async def require_auth(
     request: Request,
+<<<<<<< HEAD
+    authorization: str | None = Header(
+=======
     authorization: Optional[str] = Header(
+>>>>>>> origin/main
         None,
         description="Bearer <api-key>",
     ),

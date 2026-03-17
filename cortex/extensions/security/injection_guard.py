@@ -248,13 +248,21 @@ class InjectionGuard:
     )
 
     @staticmethod
+<<<<<<< HEAD
+    def _is_trusted(source: str | None) -> bool:
+=======
     def _is_trusted(source: Optional[str]) -> bool:
+>>>>>>> origin/main
         """Check if source is in the trusted set."""
         if not source:
             return False
         return source in InjectionGuard.TRUSTED_SOURCES
 
+<<<<<<< HEAD
+    def scan(self, content: str, source: str | None = None) -> InjectionReport:
+=======
     def scan(self, content: str, source: Optional[str] = None) -> InjectionReport:
+>>>>>>> origin/main
         """Full 5-layer synchronous scan of content (Fast Path).
 
         Returns InjectionReport with all matches and safety verdict.
@@ -375,7 +383,11 @@ class InjectionGuard:
                     )
                 )
 
+<<<<<<< HEAD
+    def is_safe(self, content: str, source: str | None = None) -> bool:
+=======
     def is_safe(self, content: str, source: Optional[str] = None) -> bool:
+>>>>>>> origin/main
         """Fast-path safety check. Returns True only if no threats detected."""
         return self.scan(content, source=source).is_safe
 

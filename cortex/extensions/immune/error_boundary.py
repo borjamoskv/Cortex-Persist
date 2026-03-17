@@ -24,7 +24,11 @@ import asyncio
 import functools
 import inspect
 import logging
+<<<<<<< HEAD
+from typing import Any, TypeVar
+=======
 from typing import Any, Optional, TypeVar
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.immune.error_boundary")
 
@@ -61,7 +65,11 @@ class ErrorBoundary:
         *,
         project: str = "CORTEX",
         reraise: bool = True,
+<<<<<<< HEAD
+        extra_meta: dict[str, Any] | None = None,
+=======
         extra_meta: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
     ) -> None:
         self._source = source
         self._project = project
@@ -75,8 +83,13 @@ class ErrorBoundary:
 
     async def __aexit__(
         self,
+<<<<<<< HEAD
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+=======
         exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
+>>>>>>> origin/main
         exc_tb: Any,
     ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
@@ -94,8 +107,13 @@ class ErrorBoundary:
 
     def __exit__(
         self,
+<<<<<<< HEAD
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+=======
         exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
+>>>>>>> origin/main
         exc_tb: Any,
     ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
@@ -106,7 +124,11 @@ class ErrorBoundary:
 
     # ── Persistence ───────────────────────────────────────────────────
 
+<<<<<<< HEAD
+    async def _persist(self, error: BaseException) -> int | None:
+=======
     async def _persist(self, error: BaseException) -> Optional[int]:
+>>>>>>> origin/main
         """Persist error to ghost pipeline (async path)."""
         try:
             from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
@@ -159,7 +181,11 @@ def error_boundary(
     *,
     project: str = "CORTEX",
     reraise: bool = True,
+<<<<<<< HEAD
+    extra_meta: dict[str, Any] | None = None,
+=======
     extra_meta: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
 ) -> Any:
     """Decorator that wraps a function with an ErrorBoundary.
 

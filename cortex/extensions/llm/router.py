@@ -6,7 +6,11 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -44,12 +48,21 @@ class CortexLLMRouter:
     def __init__(
         self,
         primary: BaseProvider,
+<<<<<<< HEAD
+        fallbacks: Sequence[BaseProvider] | None = None,
+        *,
+        negative_ttl: float = 300.0,
+        positive_ttl: float = 600.0,
+        hedging_providers: Sequence[BaseProvider] | None = None,
+        db_path: str | Path | None = None,
+=======
         fallbacks: Optional[Sequence[BaseProvider]] = None,
         *,
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
         hedging_providers: Optional[Sequence[BaseProvider]] = None,
         db_path: Optional[str | Path] = None,
+>>>>>>> origin/main
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])
@@ -85,7 +98,11 @@ class CortexLLMRouter:
 
     def _ordered_fallbacks(
         self,
+<<<<<<< HEAD
+        prompt: CortexPrompt,
+=======
         intent: IntentProfile,
+>>>>>>> origin/main
     ) -> list[BaseProvider]:
         """Ordena fallbacks: intent affinity → A-record → cost → tier.
 
@@ -93,15 +110,45 @@ class CortexLLMRouter:
         then sorts unknowns by cost_class (cheaper first), then by
         tier (frontier > high > local) for same-cost tiebreaking.
         """
+<<<<<<< HEAD
+        from cortex.extensions.llm._models import ReasoningMode
+
+        effective_intent = prompt.intent
+        # Axiom Ω₁₆: If reasoning mode is DEEP_THINK or ULTRA_THINK,
+        # coerce the fallback intent to REASONING to select the right model map.
+        if prompt.reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
+            effective_intent = IntentProfile.REASONING
+
+=======
+>>>>>>> origin/main
         typed_matches: list[BaseProvider] = []
         safety_net: list[BaseProvider] = []
 
         for p in self._fallbacks:
+<<<<<<< HEAD
+            if classify_tier(p, effective_intent) == CascadeTier.TYPED_MATCH:
+=======
             if classify_tier(p, intent) == CascadeTier.TYPED_MATCH:
+>>>>>>> origin/main
                 typed_matches.append(p)
             else:
                 safety_net.append(p)
 
+<<<<<<< HEAD
+        # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
+        if prompt.reasoning_mode == ReasoningMode.ULTRA_THINK:
+            typed_matches = [p for p in typed_matches if p.tier == "frontier"]
+            safety_net = [p for p in safety_net if p.tier == "frontier"]
+
+        # Apply A-record promotion + cost/tier tiebreaking
+        promoted_typed = self._promote_by_latency_then_cost(
+            typed_matches,
+            effective_intent,
+        )
+        promoted_safety = self._promote_by_latency_then_cost(
+            safety_net,
+            effective_intent,
+=======
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
             typed_matches,
@@ -110,6 +157,7 @@ class CortexLLMRouter:
         promoted_safety = self._promote_by_latency_then_cost(
             safety_net,
             intent,
+>>>>>>> origin/main
         )
 
         return promoted_typed + promoted_safety
@@ -144,7 +192,11 @@ class CortexLLMRouter:
         )
         return known + unknown
 
+<<<<<<< HEAD
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
+=======
     async def execute_hedged(self, prompt: CortexPrompt) -> Optional[Result[str, str]]:
+>>>>>>> origin/main
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -190,9 +242,14 @@ class CortexLLMRouter:
 
     # ── Shannon Compression (Ω₁₃: Entropic Containment) ────────────
 
+<<<<<<< HEAD
+    # Default safety margin: keep prompts under 90% of model window.
+    _CONTEXT_SAFETY_MARGIN: float = 0.90
+=======
     # Maximum word count for working_memory before compression triggers.
     # ~32k words ≈ ~40k tokens — safety margin for most providers.
     _MAX_WORKING_MEMORY_WORDS: int = 32_000
+>>>>>>> origin/main
 
     # After compression, keep the first message (instruction) and last N messages.
     _COMPRESSED_TAIL_MESSAGES: int = 6
@@ -240,9 +297,20 @@ class CortexLLMRouter:
         Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
         """
         # Ω₁₃ Shannon Compression: prevent quadratic token burn
+<<<<<<< HEAD
+        # Dynamic threshold based on provider context window
+        model_window = self._primary.context_window
+        # conversion factor approx 0.75 words/token
+        max_words = int((model_window * self._CONTEXT_SAFETY_MARGIN) * 0.75)
+
+        prompt.working_memory = self._compress_working_memory(
+            prompt.working_memory,
+            max_words,
+=======
         prompt.working_memory = self._compress_working_memory(
             prompt.working_memory,
             self._MAX_WORKING_MEMORY_WORDS,
+>>>>>>> origin/main
             self._COMPRESSED_TAIL_MESSAGES,
         )
 
@@ -276,9 +344,62 @@ class CortexLLMRouter:
         """Alias for backward compatibility."""
         return await self.execute_resilient(prompt)
 
+<<<<<<< HEAD
+    async def execute_swarm(self, prompt: CortexPrompt) -> Result[str, str] | None:
+        """Ω₂₁: Parallel Swarm Racing - Race multiple providers simultaneously.
+
+        DNS-over-HTTPS pattern applied to LLMs. Sends query to N frontier providers,
+        takes the first valid response, cancels the rest.
+        """
+        # Determine swarm group based on intent
+        fallbacks = self._ordered_fallbacks(prompt)
+        # Select top 3 frontier/high models for the race
+        swarm_peers = [self._primary] + fallbacks[:2]
+
+        # Filter active only
+        active_peers = [
+            p for p in swarm_peers if not self._cascade.is_nxdomain_cached(p.provider_name)
+        ]
+
+        if len(active_peers) < 2:
+            return None  # Not enough for a race
+
+        logger.info(
+            "🚀 [Ω₂₁ SWARM RACE] Starting race between: %s", [p.provider_name for p in active_peers]
+        )
+
+        result_race, errors = await HedgedRequestStrategy.race(active_peers, prompt)
+        if result_race:
+            self._cascade.set_a_record(result_race.winner, result_race.latency_ms)
+            self._telemetry.emit(
+                CascadeEvent(
+                    intent=prompt.intent,
+                    resolved_by=result_race.winner,
+                    project=prompt.project,
+                    tier=CascadeTier.PRIMARY,  # Swarm is primary tier efficacy
+                    depth=1,
+                    latency_ms=result_race.latency_ms,
+                    errors=errors,
+                )
+            )
+            return Ok(result_race.response)
+
+        return None
+
+    async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str, str]:
+        """Core cascade logic (extracted for Heat-Sink wrapping)."""
+        # Phase 0.1: Parallel Swarm Racing (Ω₂₁)
+        if prompt.swarm_mode:
+            swarm_res = await self.execute_swarm(prompt)
+            if swarm_res:
+                return swarm_res
+
+        # Phase 0.2: Standard Hedging (Parallel race-to-first)
+=======
     async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str, str]:
         """Core cascade logic (extracted for Heat-Sink wrapping)."""
         # Phase 0: Hedging (Parallel race-to-first)
+>>>>>>> origin/main
         hedged_res = await self.execute_hedged(prompt)
         if hedged_res:
             return hedged_res
@@ -302,8 +423,14 @@ class CortexLLMRouter:
             return res_primary
 
         # Phase 2: Fallback cascade
+<<<<<<< HEAD
+        fallbacks = self._ordered_fallbacks(prompt)
+        # Errors from sequential attempts
+        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]
+=======
         fallbacks = self._ordered_fallbacks(prompt.intent)
         errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # type: ignore[union-attr]
+>>>>>>> origin/main
 
         for i, provider in enumerate(fallbacks, start=2):
             if self._cascade.is_nxdomain_cached(provider.provider_name):
@@ -330,7 +457,12 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
+<<<<<<< HEAD
+            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            # type: ignore[reportOptionalMemberAccess]
+=======
             errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore[union-attr]
+>>>>>>> origin/main
             self._cascade.set_nx_record(provider.provider_name)
 
         # Final defeat: record terminal event
@@ -349,8 +481,22 @@ class CortexLLMRouter:
 
     async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
         """Try a single provider, returning Result."""
+<<<<<<< HEAD
+        import httpx
+
         try:
             return Ok(await provider.invoke(prompt))
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429:
+                logger.warning(
+                    "🚀 [HYPERSONIC JUMP] Provider %s hit 429. Skipping immediately...",
+                    provider.provider_name,
+                )
+            return Err(str(exc))
+=======
+        try:
+            return Ok(await provider.invoke(prompt))
+>>>>>>> origin/main
         except Exception as exc:  # noqa: BLE001
             return Err(str(exc))
 
@@ -358,7 +504,11 @@ class CortexLLMRouter:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
 
+<<<<<<< HEAD
+    def select_model_for_intent(self, intent: str) -> str | None:
+=======
     def select_model_for_intent(self, intent: str) -> Optional[str]:
+>>>>>>> origin/main
         """Resolve the optimal model for the primary provider's intent.
 
         Uses the preset routing functions to find the best model

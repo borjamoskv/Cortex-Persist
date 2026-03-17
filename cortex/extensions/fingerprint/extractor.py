@@ -12,7 +12,11 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -98,7 +102,11 @@ class FingerprintExtractor:
     @staticmethod
     async def extract(
         engine: CortexEngine,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
         top_domains: int = 15,
     ) -> CognitiveFingerprint:
         """Run the full fingerprint extraction pipeline.
@@ -200,7 +208,11 @@ class FingerprintExtractor:
         )
 
 
+<<<<<<< HEAD
+def _empty_fingerprint(project: str | None) -> CognitiveFingerprint:
+=======
 def _empty_fingerprint(project: Optional[str]) -> CognitiveFingerprint:
+>>>>>>> origin/main
     """Return zeroed fingerprint when no facts exist."""
     return CognitiveFingerprint(
         tenant_id="default",

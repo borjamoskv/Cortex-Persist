@@ -16,7 +16,10 @@ import random
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 # ── Commit type detection heuristics ──────────────────────────────────────────
 
@@ -278,7 +281,11 @@ class CommitPoet:
         diff_summary: str,
         files: list[str],
         *,
+<<<<<<< HEAD
+        commit_type: str | None = None,
+=======
         commit_type: Optional[str] = None,
+>>>>>>> origin/main
     ) -> str:
         """Generate an original commit message from staged change metadata.
 
@@ -508,6 +515,10 @@ class CommitPoet:
             "deterministic computation",
             "targeted intervention",
             "precision extraction",
+<<<<<<< HEAD
+            "axiomatic verification",
+=======
+>>>>>>> origin/main
         ]
         verb = self._rng.choice(verbs)
         obj = self._rng.choice(objects)
@@ -540,8 +551,13 @@ def generate_commit_message(
     diff_summary: str,
     files: list[str],
     *,
+<<<<<<< HEAD
+    commit_type: str | None = None,
+    seed: int | None = None,
+=======
     commit_type: Optional[str] = None,
     seed: Optional[int] = None,
+>>>>>>> origin/main
 ) -> str:
     """Convenience function — generate a single commit message.
 
@@ -577,6 +593,10 @@ def generate_candidates(
     """
     poet = CommitPoet()
     # Use a hash of the diff as seed for session-level consistency
+<<<<<<< HEAD
+    seed_val = int(hashlib.sha256(diff_summary.encode()).hexdigest()[:8], 16)
+=======
     seed_val = int(hashlib.md5(diff_summary.encode()).hexdigest()[:8], 16)
+>>>>>>> origin/main
     poet.seed(seed_val)
     return poet.compose_batch(diff_summary, files, count=count)

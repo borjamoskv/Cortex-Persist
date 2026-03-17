@@ -169,7 +169,11 @@ class LangbaseClient:
         name: str,
         *,
         description: str = "",
+<<<<<<< HEAD
+        model: str | None = None,
+=======
         model: Optional[str] = None,
+>>>>>>> origin/main
         system_prompt: str = "",
         memory: Optional[list[dict]] = None,
     ) -> dict:

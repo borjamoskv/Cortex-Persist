@@ -45,7 +45,11 @@ class OOMKiller:
             tree = ast.parse(code)
             # Search for infinite loops or massive allocations
             for node in ast.walk(tree):
+<<<<<<< HEAD
+                if isinstance(node, ast.While | ast.For):
+=======
                 if isinstance(node, (ast.While, ast.For)):
+>>>>>>> origin/main
                     if not any(isinstance(n, ast.Break) for n in ast.walk(node)):
                         findings.append(
                             "Potential infinite loop: loop without break statement detected."

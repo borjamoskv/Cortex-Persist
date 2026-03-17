@@ -5,7 +5,11 @@ import logging
 import secrets
 import time
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.evolution.action import SymbolicActionEngine
@@ -42,9 +46,13 @@ class EvolutionEngine(EvolutionOpsMixin):
     - Adversarial Grounding (Telemetry)
     """
 
+<<<<<<< HEAD
+    def __init__(self, sovereigns: list[SovereignAgent] | None = None, engine: Any | None = None):
+=======
     def __init__(
         self, sovereigns: Optional[list[SovereignAgent]] = None, engine: Optional[Any] = None
     ):
+>>>>>>> origin/main
         self.sovereigns = sovereigns or []
         self.params = EngineParameters()
         self.cycle_count = 0

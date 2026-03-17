@@ -8,7 +8,11 @@ import time
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any, final
+=======
 from typing import Any, Optional, final
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -41,7 +45,11 @@ class SovereignTLRUCache:
         self,
         capacity: int = 1000,
         ttl: int = 300,
+<<<<<<< HEAD
+        on_evict: Any | None = None,
+=======
         on_evict: Optional[Any] = None,
+>>>>>>> origin/main
     ):
         self.cache: dict[str, tuple[Any, float]] = {}
         self.capacity = capacity
@@ -53,7 +61,11 @@ class SovereignTLRUCache:
         self._chain_tip = hashlib.sha256(b"CORTEX_CACHE_GENESIS").hexdigest()
         self._eviction_count = 0
 
+<<<<<<< HEAD
+    def get(self, key: str) -> Any | None:
+=======
     def get(self, key: str) -> Optional[Any]:
+>>>>>>> origin/main
         """Retrieve value with TTL check and lazy eviction."""
         if key in self.cache:
             val, expiry = self.cache[key]
@@ -137,7 +149,11 @@ class OptimizedCortexEngine(AsyncCortexEngine):
         self._write_buffer: asyncio.Queue = asyncio.Queue()
         self._cache = SovereignTLRUCache(capacity=2000, ttl=600, on_evict=self._on_cache_evict)
         self._executor = ProcessPoolExecutor(max_workers=2)
+<<<<<<< HEAD
+        self._buffer_task: asyncio.Task | None = None
+=======
         self._buffer_task: Optional[asyncio.Task] = None
+>>>>>>> origin/main
         self._is_flushing = False
 
     def _on_cache_evict(self, key: str, value: Any, audit: dict[str, Any]):

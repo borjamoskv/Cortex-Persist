@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+<<<<<<< HEAD
+=======
 from typing import Optional
 
+>>>>>>> origin/main
 """Graph Data Models.
 
 Entities, Relationships, and Ghost definitions.

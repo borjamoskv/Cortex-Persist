@@ -11,7 +11,11 @@ import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.evolution.ouroboros")
 
@@ -71,6 +75,15 @@ class _AstAnalyzer(ast.NodeVisitor):
         for child in ast.walk(node):
             if isinstance(
                 child,
+<<<<<<< HEAD
+                ast.If
+                | ast.While
+                | ast.For
+                | ast.AsyncFor
+                | ast.ExceptHandler
+                | ast.With
+                | ast.AsyncWith,
+=======
                 (
                     ast.If,
                     ast.While,
@@ -80,6 +93,7 @@ class _AstAnalyzer(ast.NodeVisitor):
                     ast.With,
                     ast.AsyncWith,
                 ),
+>>>>>>> origin/main
             ):
                 complexity += 1
         self.mccabe[node.name] = complexity
@@ -215,7 +229,11 @@ class OuroborosOmega:
 
         self.original_hash = hashlib.sha256(self.original_source.encode()).hexdigest()
 
+<<<<<<< HEAD
+    async def diagnose(self, source_code: str | None = None) -> DiagnosisMatrix:
+=======
     async def diagnose(self, source_code: Optional[str] = None) -> DiagnosisMatrix:
+>>>>>>> origin/main
         """Phase 1: Analysis (Topological Mapping)"""
         code = source_code if source_code is not None else self.original_source
         tree = ast.parse(code)

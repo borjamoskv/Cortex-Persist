@@ -190,7 +190,11 @@ async def create_toolbox_bridge(
 
 async def cortex_self_bridge(
     toolset: str = "cortex-readonly",
+<<<<<<< HEAD
+) -> ToolboxBridge | None:
+=======
 ) -> Optional[ToolboxBridge]:
+>>>>>>> origin/main
     """Connect to the local CORTEX Toolbox membrane.
 
     Returns a bridge pre-configured for reading CORTEX's own

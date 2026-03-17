@@ -67,7 +67,11 @@ class AgentMixin(EngineMixinBase):
 
         return agent_id
 
+<<<<<<< HEAD
+    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
+=======
     async def get_agent(self, agent_id: str) -> Optional[dict[str, Any]]:
+>>>>>>> origin/main
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(

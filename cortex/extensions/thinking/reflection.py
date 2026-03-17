@@ -221,7 +221,11 @@ def _hybrid_search_learnable(
 
 def _build_type_filter_clause(
     types: tuple[str, ...],
+<<<<<<< HEAD
+    project: str | None,
+=======
     project: Optional[str],
+>>>>>>> origin/main
 ) -> tuple[str, list]:
     """Build a safe SQL fragment for type IN + optional project filter.
 

@@ -17,7 +17,11 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.memory.metamemory import (
     FOKDirective,
@@ -41,7 +45,11 @@ class QueryResult:
     epistemic: EpistemicAnalysis
     judgment: MetaJudgment
     fok_directive: FOKDirective
+<<<<<<< HEAD
+    schema_applied: str | None = None
+=======
     schema_applied: Optional[str] = None
+>>>>>>> origin/main
     augmented_query: str = ""
     pipeline_ms: float = 0.0
 
@@ -59,7 +67,11 @@ class QueryResult:
 @dataclass(frozen=True)
 class StoreResult:
     valence: ValenceRecord
+<<<<<<< HEAD
+    schema_applied: str | None = None
+=======
     schema_applied: Optional[str] = None
+>>>>>>> origin/main
     filtered_content: str = ""
     stdp_edges_updated: int = 0
     pipeline_ms: float = 0.0
@@ -70,10 +82,17 @@ class NeuromorphicPipeline:
 
     def __init__(
         self,
+<<<<<<< HEAD
+        metamemory: MetamemoryMonitor | None = None,
+        void_detector: EpistemicVoidDetector | None = None,
+        schema_engine: SchemaEngine | None = None,
+        stdp: STDPEngine | None = None,
+=======
         metamemory: Optional[MetamemoryMonitor] = None,
         void_detector: Optional[EpistemicVoidDetector] = None,
         schema_engine: Optional[SchemaEngine] = None,
         stdp: Optional[STDPEngine] = None,
+>>>>>>> origin/main
     ) -> None:
         self._metamemory = metamemory or MetamemoryMonitor()
         self._void_detector = void_detector or EpistemicVoidDetector()
@@ -86,7 +105,11 @@ class NeuromorphicPipeline:
         query_embedding: list[float],
         candidates: list[dict[str, Any]],
         *,
+<<<<<<< HEAD
+        engrams: list[Any] | None = None,
+=======
         engrams: Optional[list[Any]] = None,
+>>>>>>> origin/main
     ) -> QueryResult:
         t0 = time.monotonic()
 
@@ -139,7 +162,11 @@ class NeuromorphicPipeline:
         content: str,
         fact_type: str = "",
         fact_id: str = "",
+<<<<<<< HEAD
+        related_fact_ids: list[str] | None = None,
+=======
         related_fact_ids: Optional[list[str]] = None,
+>>>>>>> origin/main
     ) -> StoreResult:
         t0 = time.monotonic()
 

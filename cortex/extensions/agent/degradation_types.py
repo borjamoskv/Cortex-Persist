@@ -11,7 +11,11 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 __all__ = [
     # Exception hierarchy
@@ -79,9 +83,15 @@ class SovereignAgentError(Exception):
         *,
         component: str,
         recovery_steps: list[str],
+<<<<<<< HEAD
+        suggested_alt: str | None = None,
+        cause: BaseException | None = None,
+        context: dict[str, Any | None] | None = None,
+=======
         suggested_alt: Optional[str] = None,
         cause: Optional[BaseException] = None,
         context: Optional[dict[str, Optional[Any]]] = None,
+>>>>>>> origin/main
     ) -> None:
         super().__init__(message)
         self.component = component
@@ -126,8 +136,13 @@ class SchemaIncompatibilityError(SovereignAgentError):
         *,
         model: str,
         required_schema: str,
+<<<<<<< HEAD
+        actual_schema: str | None = None,
+        cause: BaseException | None = None,
+=======
         actual_schema: Optional[str] = None,
         cause: Optional[BaseException] = None,
+>>>>>>> origin/main
     ) -> None:
         self._model = model
         super().__init__(
@@ -153,7 +168,11 @@ class ToolRegistrationError(SovereignAgentError):
 
     level = DegradationLevel.L3_ACTIONABLE
 
+<<<<<<< HEAD
+    def __init__(self, *, tool_name: str, cause: BaseException | None = None) -> None:
+=======
     def __init__(self, *, tool_name: str, cause: Optional[BaseException] = None) -> None:
+>>>>>>> origin/main
         super().__init__(
             f"Tool '{tool_name}' failed to register",
             component="tool_registry",
@@ -179,7 +198,11 @@ class ModelUnavailableError(SovereignAgentError):
         model: str,
         reason: str,
         fallback_model: str = "gemini-2.0-flash",
+<<<<<<< HEAD
+        cause: BaseException | None = None,
+=======
         cause: Optional[BaseException] = None,
+>>>>>>> origin/main
     ) -> None:
         super().__init__(
             f"Model '{model}' unavailable: {reason}",
@@ -209,8 +232,13 @@ class AgentDegradedError(SovereignAgentError):
         *,
         cause: BaseException,
         component: str,
+<<<<<<< HEAD
+        suggested_model: str | None = None,
+        recovery_steps: list[str] | None = None,
+=======
         suggested_model: Optional[str] = None,
         recovery_steps: Optional[list[str]] = None,
+>>>>>>> origin/main
     ) -> None:
         super().__init__(
             f"Agent degraded after failure in {component}: {cause}",
@@ -295,7 +323,11 @@ class AgentResult:
     output: Any = None
     degradation_level: DegradationLevel = DegradationLevel.L4_GRACEFUL
     warnings: list[str] = field(default_factory=list)
+<<<<<<< HEAD
+    cortex_fact_id: int | None = None  # If side-effect persisted to CORTEX
+=======
     cortex_fact_id: Optional[int] = None  # If side-effect persisted to CORTEX
+>>>>>>> origin/main
     latency_ms: float = 0.0
 
     def with_warning(self, message: str) -> AgentResult:
@@ -319,7 +351,11 @@ class DegradationReport:
     component: str
     message: str
     recovery_steps: list[str]
+<<<<<<< HEAD
+    suggested_alt: str | None
+=======
     suggested_alt: Optional[str]
+>>>>>>> origin/main
     context: dict[str, Any]
     timestamp: float
 

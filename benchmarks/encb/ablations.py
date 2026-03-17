@@ -12,8 +12,13 @@ Variants:
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+from benchmarks.encb.metrics import MetricsReport
+from benchmarks.encb.runner import run_single
+=======
 from benchmarks.encb.runner import run_single
 from benchmarks.encb.metrics import MetricsReport
+>>>>>>> origin/main
 from benchmarks.encb.strategies import StrategyID
 
 

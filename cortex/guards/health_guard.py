@@ -10,22 +10,39 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import ClassVar
+
+HEALTH_AVAILABLE = True
+=======
 from typing import ClassVar, Optional
 
+>>>>>>> origin/main
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
     from cortex.extensions.health.models import Grade, HealthSLA, HealthSLAViolation  # type: ignore
 except ImportError:
+<<<<<<< HEAD
+    HEALTH_AVAILABLE = False
+=======
+>>>>>>> origin/main
 
     class Grade:  # type: ignore
         DEGRADED = "DEGRADED"
 
     class HealthSLA:  # type: ignore
         def __init__(self, target_grade: str = "DEGRADED") -> None:
+<<<<<<< HEAD
+            pass
+
+        def evaluate(self, score: float) -> bool:
+            return True
+=======
             self.target_grade = target_grade
 
         def evaluate(self, score: float) -> None:
             pass
+>>>>>>> origin/main
 
     class HealthSLAViolation(Exception):  # type: ignore
         pass
@@ -47,6 +64,30 @@ class HealthGuard(HealthMixin):
     def __init__(self, db_path: str | Path) -> None:
         self._db_path = str(db_path)
 
+<<<<<<< HEAD
+    async def check_write_safety(self, sla: HealthSLA | None = None) -> bool:
+        """Check if it's safe to write based on system health.
+
+        Args:
+            sla: Optional SLA to check against. Defaults to DEFAULT_SLA.
+
+        Returns:
+            True if health is acceptable.
+
+        Raises:
+            HealthSLAViolation: If health is below target.
+        """
+        if not HEALTH_AVAILABLE:
+            return True
+
+        target_sla = sla or self.DEFAULT_SLA
+        score = await self.health_score()
+        if not score:
+            return True
+
+        target_sla.evaluate(score)
+        return True
+=======
     async def check_write_safety(self, custom_sla: Optional[HealthSLA] = None) -> None:
         """Verify the database is healthy enough to receive writes.
 
@@ -66,3 +107,4 @@ class HealthGuard(HealthMixin):
         except HealthSLAViolation as e:
             logger.error("HealthGuard blocked write operation: %s", e)
             raise
+>>>>>>> origin/main

@@ -33,7 +33,11 @@ logger = logging.getLogger("uvicorn.error")
 _context_latencies: deque[float] = deque(maxlen=100)
 
 
+<<<<<<< HEAD
+def get_p95_context_latency() -> float | None:
+=======
 def get_p95_context_latency() -> Optional[float]:
+>>>>>>> origin/main
     """Return the 95th percentile latency of the last 100 context inferences."""
     if not _context_latencies:
         return None

@@ -196,7 +196,7 @@ This is not a framework. This is **Sovereign Artificial Intelligence**.
 | Document | Purpose |
 |:---|:---|
 | [README.md](README.md) | Quickstart, architecture diagram, competitive landscape |
-| [CODEX.md](CODEX.md) | Ontology, axioms, operational protocols |
+| [COGITO.md](COGITO.md) | Ontology, axioms, operational protocols |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full technical architecture |
 | [CHANGELOG.md](CHANGELOG.md) | Version history and roadmap |
 | [sovereign_agent_manifesto.md](docs/sovereign_agent_manifesto.md) | Deep dive: 5 Sovereign Specifications |

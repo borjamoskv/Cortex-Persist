@@ -49,7 +49,11 @@ class ContextFusion:
         """Initializes ContextFusion. `judge_provider` should be a fast model like Flash."""
         self._judge = judge_provider
 
+<<<<<<< HEAD
+    async def _judge_safe(self, prompt: str, system: str, **kwargs) -> str | None:
+=======
     async def _judge_safe(self, prompt: str, system: str, **kwargs) -> Optional[str]:
+>>>>>>> origin/main
         """Llama al juez rápido con retries + timeout."""
         if self._judge is None:
             return None

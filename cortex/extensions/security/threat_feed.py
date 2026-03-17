@@ -76,7 +76,11 @@ class ThreatFeedReport:
         }
 
 
+<<<<<<< HEAD
+def _keywords_to_pattern(text: str, max_keywords: int = 5) -> str | None:
+=======
 def _keywords_to_pattern(text: str, max_keywords: int = 5) -> Optional[str]:
+>>>>>>> origin/main
     """Extract keywords from text and build a case-insensitive regex pattern."""
     keywords = [w for w in text.lower().split() if len(w) > 4 and w.isalpha()][:max_keywords]
     if not keywords:

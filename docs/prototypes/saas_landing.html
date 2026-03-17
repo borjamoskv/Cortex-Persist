@@ -241,7 +241,11 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+<<<<<<< HEAD
+    <!-- <script src="https://js.stripe.com/v3/"></script> Removed for CodeQL compliance (SRI not supported by Stripe) -->
+=======
     <script src="https://js.stripe.com/v3/"></script>
+>>>>>>> origin/main
 </head>
 <body>
     <canvas id="cortex-particles"></canvas>
@@ -826,7 +830,12 @@
     </script>
 
     <!-- Cortex Particles (Fixed) -->
+<<<<<<< HEAD
+    <!-- Load Three.js with SRI hash for security compliance (CodeQL #63) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
+=======
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+>>>>>>> origin/main
     <script>
     (function() {
         const canvas = document.getElementById('cortex-particles');

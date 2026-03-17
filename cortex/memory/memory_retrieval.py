@@ -8,7 +8,11 @@ No state mutations. Always returns serializable dicts.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     from cortex.memory.manager import CortexMemoryManager
@@ -30,7 +34,11 @@ class KnowledgeGapException(Exception):
     pass
 
 
+<<<<<<< HEAD
+def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
+=======
 def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> dict[str, Any]:
+>>>>>>> origin/main
     """Convert a fact model to a context-ready dict."""
     return {
         "id": fact.id,
@@ -72,7 +80,11 @@ async def _fetch_hdc_results(
     project_id: str,
     query: str,
     max_episodes: int,
+<<<<<<< HEAD
+    layer: str | None = None,
+=======
     layer: Optional[str] = None,
+>>>>>>> origin/main
 ) -> list[CortexFactModel]:
     try:
         toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
@@ -95,7 +107,11 @@ async def _fetch_dense_results(
     project_id: str,
     query: str,
     max_episodes: int,
+<<<<<<< HEAD
+    layer: str | None = None,
+=======
     layer: Optional[str] = None,
+>>>>>>> origin/main
 ) -> list[CortexFactModel]:
     try:
         # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
@@ -149,9 +165,15 @@ async def retrieve_episodic_context(
     manager: CortexMemoryManager,
     tenant_id: str,
     project_id: str,
+<<<<<<< HEAD
+    query: str | None,
+    max_episodes: int,
+    layer: str | None = None,
+=======
     query: Optional[str],
     max_episodes: int,
     layer: Optional[str] = None,
+>>>>>>> origin/main
 ) -> list[dict[str, Any]]:
     """Retrieve and fuse facts from all available L2 layers.
 

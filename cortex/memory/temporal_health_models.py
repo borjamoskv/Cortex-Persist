@@ -8,7 +8,11 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Literal
+=======
 from typing import Literal, Optional
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -65,19 +69,33 @@ class HealthReport:
     timestamp: float = field(default_factory=time.time)
 
     # PULSE — always populated after write 1
+<<<<<<< HEAD
+    centroid_drift: float | None = None
+    running_centroid: np.ndarray | None = None  # not serialized
+=======
     centroid_drift: Optional[float] = None
     running_centroid: Optional[np.ndarray] = None  # not serialized
+>>>>>>> origin/main
 
     # HEARTBEAT — populated every `heartbeat_every` writes
     page_hinkley_alert: bool = False
 
     # DIAGNOSTIC — populated every `diagnostic_every` writes
+<<<<<<< HEAD
+    spectral_gap_current: float | None = None
+    spectral_gap_ratio: float | None = None  # vs baseline (1.0 = stable)
+
+    # DEEP_SCAN — populated every `deep_scan_every` writes
+    intrinsic_dim_current: float | None = None
+    intrinsic_dim_ratio: float | None = None  # vs baseline
+=======
     spectral_gap_current: Optional[float] = None
     spectral_gap_ratio: Optional[float] = None  # vs baseline (1.0 = stable)
 
     # DEEP_SCAN — populated every `deep_scan_every` writes
     intrinsic_dim_current: Optional[float] = None
     intrinsic_dim_ratio: Optional[float] = None  # vs baseline
+>>>>>>> origin/main
 
     # Composite
     topological_health: float = 1.0  # 0.0 (dead) → 1.0 (perfect)

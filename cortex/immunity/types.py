@@ -3,7 +3,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 
 class ImmunityState(str, Enum):
@@ -52,9 +56,15 @@ class ImmuneArtifact:
     artifact_type: str
     payload: Mapping[str, Any]
     state: ImmunityState = ImmunityState.OBSERVED
+<<<<<<< HEAD
+    profile: PathogenProfile | None = None
+    reasons: list[str] = field(default_factory=list)
+    sealed_at: str | None = None
+=======
     profile: Optional[PathogenProfile] = None
     reasons: list[str] = field(default_factory=list)
     sealed_at: Optional[str] = None
+>>>>>>> origin/main
     parent_ids: list[str] = field(default_factory=list)
 
 

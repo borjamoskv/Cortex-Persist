@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import logging
 import time
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -31,15 +34,25 @@ _spoof_manager = SpoofManager()
 class OpenAIMessage(BaseModel):
     role: str
     content: str
+<<<<<<< HEAD
+    name: str | None = None
+=======
     name: Optional[str] = None
+>>>>>>> origin/main
 
 
 class OpenAICompletionRequest(BaseModel):
     model: str
     messages: list[OpenAIMessage]
+<<<<<<< HEAD
+    temperature: float | None = 0.3
+    max_tokens: int | None = 4096
+    stream: bool | None = False
+=======
     temperature: Optional[float] = 0.3
     max_tokens: Optional[int] = 4096
     stream: Optional[bool] = False
+>>>>>>> origin/main
 
 
 # --- Routes ---
@@ -49,7 +62,11 @@ class OpenAICompletionRequest(BaseModel):
 async def openai_chat_completions(
     request: Request,
     body: OpenAICompletionRequest,
+<<<<<<< HEAD
+    authorization: str | None = Header(None),
+=======
     authorization: Optional[str] = Header(None),
+>>>>>>> origin/main
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
 

@@ -5,10 +5,18 @@ Every new decision must explicitly invalidate its predecessors or confirm
 compatibility.  This guard runs at store-time and returns potential
 conflicts so the agent can disambiguate before persisting.
 
+<<<<<<< HEAD
+Strategy (4-layer, O(N) bounded):
+  1. FTS5 keyword overlap — fast, coarse.
+  2. Project+topic co-occurrence — medium precision.
+  3. Negation / supersession detection — high precision.
+  4. Embedding cosine similarity — semantic precision (graceful degradation).
+=======
 Strategy (3-layer, O(N) bounded):
   1. FTS5 keyword overlap — fast, coarse.
   2. Project+topic co-occurrence — medium precision.
   3. Negation / supersession detection — high precision.
+>>>>>>> origin/main
 
 Returns a ConflictReport with scored candidates.
 """
@@ -25,7 +33,10 @@ from pathlib import Path
 import aiosqlite
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+<<<<<<< HEAD
+=======
 from cortex.database.core import connect_async_ctx
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
@@ -189,8 +200,12 @@ _NEGATION_MARKERS = frozenset(
 )
 
 _SUPERSESSION_MARKERS = re.compile(
+<<<<<<< HEAD
+    r"supersed|replac|obsolet|invalidat|deprecat|" r"eliminad|reemplaz|upgrade|migrat|refactor",
+=======
     r"supersed|replac|obsolet|invalidat|deprecat|"
     r"eliminad|reemplaz|upgrade|migrat|refactor",
+>>>>>>> origin/main
     re.IGNORECASE,
 )
 
@@ -271,6 +286,28 @@ def _classify_conflict(
     return conflict_type, base_score
 
 
+<<<<<<< HEAD
+def _embedding_cosine_similarity(emb_a: list[float] | None, emb_b: list[float] | None) -> float:
+    """Compute cosine similarity between two embeddings.
+
+    Layer 4: Catches semantic contradictions that use different vocabulary.
+    Returns 0.0 if either embedding is missing (graceful degradation).
+    """
+    if not emb_a or not emb_b or len(emb_a) != len(emb_b):
+        return 0.0
+    dot = sum(a * b for a, b in zip(emb_a, emb_b, strict=False))
+    norm_a = sum(a * a for a in emb_a) ** 0.5
+    norm_b = sum(b * b for b in emb_b) ** 0.5
+    if norm_a < 1e-9 or norm_b < 1e-9:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
+EMBEDDING_BOOST_WEIGHT = 0.3  # Max boost from embedding similarity
+
+
+=======
+>>>>>>> origin/main
 def _score_candidate(
     row: aiosqlite.Row,
     new_tokens: set[str],
@@ -278,6 +315,11 @@ def _score_candidate(
     new_project: str,
     decrypt_fn: Callable | None,
     min_score: float,
+<<<<<<< HEAD
+    new_embedding: list[float] | None = None,
+    existing_embedding: list[float] | None = None,
+=======
+>>>>>>> origin/main
 ) -> ConflictCandidate | None:
     """Score a single row against new content. Returns None if below threshold."""
     content = _decrypt_content(row["content"], decrypt_fn)
@@ -291,6 +333,14 @@ def _score_candidate(
     if row["project"] == new_project:
         score *= 1.3
 
+<<<<<<< HEAD
+    # Layer 4: Embedding cosine similarity boost (Ω₁₃ upgrade)
+    cosine_sim = _embedding_cosine_similarity(new_embedding, existing_embedding)
+    if cosine_sim > 0.5:
+        score += EMBEDDING_BOOST_WEIGHT * cosine_sim
+
+=======
+>>>>>>> origin/main
     if score < min_score:
         return None
 
@@ -302,6 +352,13 @@ def _score_candidate(
         score,
     )
 
+<<<<<<< HEAD
+    # If embedding similarity is very high but Jaccard is low, flag as semantic conflict
+    if cosine_sim > 0.8 and _jaccard(new_tokens, existing_tokens) < 0.2:
+        conflict_type = "semantic_similarity"
+
+=======
+>>>>>>> origin/main
     return ConflictCandidate(
         fact_id=row["id"],
         project=row["project"],
@@ -381,7 +438,11 @@ async def detect_contradictions(
 
     report = ConflictReport(new_content, new_project)
 
+<<<<<<< HEAD
+    async with aiosqlite.connect(str(db_path)) as conn:
+=======
     async with connect_async_ctx(str(db_path)) as conn:
+>>>>>>> origin/main
         conn.row_factory = aiosqlite.Row
         try:
             rows = await _fetch_decision_rows(
@@ -425,7 +486,11 @@ async def scan_all_contradictions(
 
     Returns list of (decision_a, decision_b) pairs ordered by overlap.
     """
+<<<<<<< HEAD
+    async with aiosqlite.connect(str(db_path)) as conn:
+=======
     async with connect_async_ctx(str(db_path)) as conn:
+>>>>>>> origin/main
         conn.row_factory = aiosqlite.Row
         try:
             cursor = await conn.execute(

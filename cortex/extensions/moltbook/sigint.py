@@ -14,7 +14,11 @@ import os
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +241,13 @@ def scan_github_issues(
 
 
 def run_sigint_sweep(
+<<<<<<< HEAD
+    repos: list[str] | None = None,
+    token: str | None = None,
+=======
     repos: Optional[list[str]] = None,
     token: Optional[str] = None,
+>>>>>>> origin/main
     min_score: float = 0.05,
 ) -> list[LeadSignal]:
     """Full SIGINT sweep across all target repositories."""

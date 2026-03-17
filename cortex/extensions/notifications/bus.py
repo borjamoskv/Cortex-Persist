@@ -23,7 +23,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import threading
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.notifications.events import CortexEvent, EventSeverity
 
@@ -117,7 +121,11 @@ class NotificationBus:
 
 # ─── Process-level singleton ─────────────────────────────────────────
 
+<<<<<<< HEAD
+_bus: NotificationBus | None = None
+=======
 _bus: Optional[NotificationBus] = None
+>>>>>>> origin/main
 _bus_lock = threading.Lock()
 
 

@@ -266,7 +266,11 @@ class AuthManager:
 
 # ─── Singleton ────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+_auth_manager: AuthManager | None = None
+=======
 _auth_manager: Optional[AuthManager] = None
+>>>>>>> origin/main
 _auth_lock = threading.Lock()
 
 

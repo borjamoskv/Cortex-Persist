@@ -57,21 +57,39 @@ class ConsensusManager:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
-        conn = await self.engine.get_conn()
+        async with self.engine.session() as conn:
+            if value == 0:
+                await conn.execute(
+                    "DELETE FROM consensus_votes WHERE fact_id = ? AND agent = ?",
+                    (fact_id, agent),
+                )
+                action = "unvote"
+            else:
+                await conn.execute(
+                    "INSERT OR REPLACE INTO consensus_votes (fact_id, agent, vote) VALUES (?, ?, ?)",
+                    (fact_id, agent, value),
+                )
+                action = "vote"
 
-        if value == 0:
-            await conn.execute(
-                "DELETE FROM consensus_votes WHERE fact_id = ? AND agent = ?",
-                (fact_id, agent),
+            await self.engine._log_transaction(
+                conn,
+                "consensus",
+                action,
+                {"fact_id": fact_id, "agent": agent, "vote": value},
             )
-            action = "unvote"
-        else:
-            await conn.execute(
-                "INSERT OR REPLACE INTO consensus_votes (fact_id, agent, vote) VALUES (?, ?, ?)",
-                (fact_id, agent, value),
-            )
-            action = "vote"
+            # 💓 Pulse Signal (Reality Observer)
+            if self._signal_bus:
+                self._signal_bus.emit(
+                    f"consensus:{action}",
+                    payload={"fact_id": fact_id, "agent": agent, "vote": value},
+                    source="consensus_manager",
+                )
 
+<<<<<<< HEAD
+            score = await self._recalculate_consensus(fact_id, conn)
+            await conn.commit()
+            return score
+=======
         await self.engine._log_transaction(
             conn,
             "consensus",
@@ -89,6 +107,7 @@ class ConsensusManager:
         score = await self._recalculate_consensus(fact_id, conn)
         await conn.commit()
         return score
+>>>>>>> origin/main
 
     async def register_agent(
         self,
@@ -98,15 +117,15 @@ class ConsensusManager:
         tenant_id: str = "default",
     ) -> str:
         agent_id = str(uuid.uuid4())
-        conn = await self.engine.get_conn()
-        await conn.execute(
-            "INSERT INTO agents "
-            "(id, name, agent_type, public_key, tenant_id) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (agent_id, name, agent_type, public_key, tenant_id),
-        )
-        await conn.commit()
-        return agent_id
+        async with self.engine.session() as conn:
+            await conn.execute(
+                "INSERT INTO agents "
+                "(id, name, agent_type, public_key, tenant_id) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (agent_id, name, agent_type, public_key, tenant_id),
+            )
+            await conn.commit()
+            return agent_id
 
     async def vote_v2(
         self,
@@ -118,6 +137,22 @@ class ConsensusManager:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
+<<<<<<< HEAD
+        async with self.engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
+                (agent_id,),
+            )
+            agent = await cursor.fetchone()
+            if not agent:
+                # 💓 Pulse Reality Check: agent missing
+                if self._signal_bus:
+                    self._signal_bus.emit(
+                        "error:consensus:agent_not_found",
+                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        source="consensus_manager",
+                    )
+=======
         conn = await self.engine.get_conn()
         cursor = await conn.execute(
             "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
@@ -145,39 +180,53 @@ class ConsensusManager:
             )
 
             raise ValueError(f"Agent {agent_id} not found")
+>>>>>>> origin/main
 
-        rep = agent[0]
+                # Legacy Shadow (Analyzing a corpse)
+                metrics.inc(
+                    "cortex_consensus_failures_total",
+                    labels={"reason": "agent_not_found"},
+                    meta={"agent_id": agent_id, "fact_id": fact_id},
+                )
+                # Notify Pulse Registry of the shadow detection
+                PULSE.inc(
+                    "cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"}
+                )
 
-        if value == 0:
-            await conn.execute(
-                "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                (fact_id, agent_id),
+                raise ValueError(f"Agent {agent_id} not found")
+
+            rep = agent[0]
+
+            if value == 0:
+                await conn.execute(
+                    "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                    (fact_id, agent_id),
+                )
+                action = "unvote_v2"
+            else:
+                await conn.execute(
+                    "INSERT OR REPLACE INTO consensus_votes_v2 "
+                    "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (fact_id, agent_id, value, rep, rep, reason),
+                )
+                action = "vote_v2"
+
+            await self.engine._log_transaction(
+                conn,
+                "consensus",
+                action,
+                {
+                    "fact_id": fact_id,
+                    "agent_id": agent_id,
+                    "vote": value,
+                    "rep": rep,
+                    "reason": reason,
+                },
             )
-            action = "unvote_v2"
-        else:
-            await conn.execute(
-                "INSERT OR REPLACE INTO consensus_votes_v2 "
-                "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (fact_id, agent_id, value, rep, rep, reason),
-            )
-            action = "vote_v2"
-
-        await self.engine._log_transaction(
-            conn,
-            "consensus",
-            action,
-            {
-                "fact_id": fact_id,
-                "agent_id": agent_id,
-                "vote": value,
-                "rep": rep,
-                "reason": reason,
-            },
-        )
-        score = await self._recalculate_consensus_v2(fact_id, conn)
-        await conn.commit()
-        return score
+            score = await self._recalculate_consensus_v2(fact_id, conn)
+            await conn.commit()
+            return score
 
     async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
         cursor = await conn.execute(

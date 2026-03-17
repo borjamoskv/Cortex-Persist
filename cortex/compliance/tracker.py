@@ -14,7 +14,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.config import DEFAULT_DB_PATH
 
@@ -67,14 +71,23 @@ class ComplianceTracker:
 
     def log_decision(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
         content: str = "",
         *,
         agent_id: str = "agent:unknown",
         decision_type: str = "decision",
         confidence: str = "C3",
+<<<<<<< HEAD
+        meta: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+=======
         meta: Optional[dict[str, Any]] = None,
         tags: Optional[list[str]] = None,
+>>>>>>> origin/main
     ) -> int:
         """Log an AI decision with EU AI Act Article 12 metadata.
 
@@ -151,7 +164,11 @@ class ComplianceTracker:
 
     def export_audit(
         self,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
         *,
         include_facts: bool = False,
     ) -> dict[str, Any]:

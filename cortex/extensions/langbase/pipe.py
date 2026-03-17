@@ -142,8 +142,13 @@ async def create_cortex_pipe(
     name: str,
     *,
     description: str = "CORTEX-powered AI agent",
+<<<<<<< HEAD
+    model: str | None = None,
+    memory_names: list[str] | None = None,
+=======
     model: Optional[str] = None,
     memory_names: Optional[list[str]] = None,
+>>>>>>> origin/main
 ) -> dict:
     """Create a Langbase Pipe pre-configured for CORTEX integration.
 

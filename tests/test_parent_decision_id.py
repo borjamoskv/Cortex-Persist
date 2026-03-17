@@ -51,7 +51,11 @@ async def db():
             parent_decision_id INTEGER REFERENCES facts(id),
             confidence TEXT DEFAULT 'stated',
             valid_from TEXT DEFAULT (datetime('now')), valid_until TEXT,
+<<<<<<< HEAD
+            source TEXT, metadata TEXT DEFAULT '{}',
+=======
             source TEXT, meta TEXT DEFAULT '{}',
+>>>>>>> origin/main
             consensus_score REAL DEFAULT 1.0,
             hash TEXT, signature TEXT, signer_pubkey TEXT,
             is_quarantined INTEGER DEFAULT 0, quarantined_at TEXT,
@@ -85,7 +89,11 @@ class TestDataModel:
             valid_from="now",
             valid_until=None,
             source="test",
+<<<<<<< HEAD
+            metadata={},
+=======
             meta={},
+>>>>>>> origin/main
             created_at="now",
             updated_at="now",
             parent_decision_id=42,
@@ -104,7 +112,11 @@ class TestDataModel:
             valid_from="now",
             valid_until=None,
             source="test",
+<<<<<<< HEAD
+            metadata={},
+=======
             meta={},
+>>>>>>> origin/main
             created_at="now",
             updated_at="now",
             parent_decision_id=7,

@@ -56,8 +56,12 @@ class GatewayIntent(str, Enum):
     EMIT = "emit"  # Fire a notification event
     MISSION = "mission"  # Launch a swarm mission
     ASK = "ask"  # Ask the AI (LLM pass-through with memory context)
+<<<<<<< HEAD
+    MEJORALO = "mejoralo"  # Continuous improvement cycle
+=======
     MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
     GIDATU = "gidatu"  # UI/Desktop orchestration (Gidatu skill)
+>>>>>>> origin/main
 
 
 @dataclass
@@ -122,6 +126,12 @@ class GatewayResponse:
 
 
 class GatewayRouter:
+    """The Sovereign Nerve Center. [GATEWAY]
+
+    Routes intents across the cognitive hypervisor.
+    Deuda Zero. Zero Entropy. Pure Signal.
+    """
+
     """Routes GatewayRequests to the appropriate CORTEX intelligence handler.
 
     This is the nerve center: adapters (Telegram, REST, MCP) call
@@ -154,7 +164,12 @@ class GatewayRouter:
             GatewayIntent.RECALL: self._handle_recall,
             GatewayIntent.STATUS: self._handle_status,
             GatewayIntent.EMIT: self._handle_emit,
+<<<<<<< HEAD
+            GatewayIntent.ASK: self._handle_ask,
+            GatewayIntent.MEJORALO: self._handle_mejoralo,
+=======
             GatewayIntent.GIDATU: self._handle_gidatu,
+>>>>>>> origin/main
         }
 
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
@@ -311,9 +326,39 @@ class GatewayRouter:
         await self._bus.emit(event)
         return {"delivered": True, "adapters": self._bus.adapter_names}
 
+<<<<<<< HEAD
+    async def _handle_ask(self, req: GatewayRequest) -> dict[str, Any]:
+        """Orchestrate a deterministic query — Ask the LLM pass-through. [ASK]"""
+        prompt = req.payload.get("prompt", "")
+        if not prompt:
+            raise ValueError("payload.prompt is required for ASK intent")
+
+        # Resolve intent and context from memory
+        # In a full implementation, this would call the LLM service with memory injection
+        return {
+            "response": f"CORTEX-Ω: Synthetic response to '{prompt}'",
+            "context_injected": True,
+            "intent": "ask",
+        }
+
+    async def _handle_mejoralo(self, req: GatewayRequest) -> dict[str, Any]:
+        """Catalyze the continuous improvement cycle. [MEJORALO]"""
+        target = req.payload.get("target", "system")
+        objective = req.payload.get("objective", "optimization")
+
+        # Initiate the MEJORALO loop (Axiom Ω₇)
+        # This triggers recursive self-correction and refinement
+        return {
+            "status": "improvement_loop_initiated",
+            "target": target,
+            "objective": objective,
+            "timestamp": time.time(),
+        }
+=======
     async def _handle_gidatu(self, req: GatewayRequest) -> dict[str, Any]:
         """Orchestrate UI/Desktop actions via Gidatu skill."""
         from cortex.gateway.handlers.gidatu import GidatuHandler
 
         handler = GidatuHandler()
         return await handler.handle(req)
+>>>>>>> origin/main

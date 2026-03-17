@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.core.paths import (
     AGENT_DIR,
@@ -220,7 +223,11 @@ class SignalAlert:
 
     event_type: str
     message: str
+<<<<<<< HEAD
+    project: str | None = None
+=======
     project: Optional[str] = None
+>>>>>>> origin/main
     payload: dict = field(default_factory=dict)
 
 

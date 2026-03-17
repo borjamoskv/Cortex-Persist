@@ -8,7 +8,11 @@ use tools declared in its manifest.tools_allowed.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any, Protocol, runtime_checkable
+=======
 from typing import Any, Optional, Protocol, runtime_checkable
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.agents.tools")
 
@@ -40,7 +44,11 @@ class ToolRegistry:
         self._tools[tool.name] = tool
         logger.debug("Tool registered: %s", tool.name)
 
+<<<<<<< HEAD
+    def get(self, name: str, *, allowed: list[str] | None = None) -> Tool:
+=======
     def get(self, name: str, *, allowed: Optional[list[str]] = None) -> Tool:
+>>>>>>> origin/main
         """Retrieve a tool by name, optionally enforcing policy.
 
         Args:

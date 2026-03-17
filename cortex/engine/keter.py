@@ -9,7 +9,11 @@ import logging
 import os
 import typing
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
+from typing import Any, Final, TypedDict
+=======
 from typing import Any, Final, Optional, TypedDict
+>>>>>>> origin/main
 
 from cortex.utils.errors import CortexError
 
@@ -189,7 +193,10 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
         from cortex.database.core import connect
 
         self.db_path = db_path
@@ -204,7 +211,11 @@ class KeterReservoir:
         """)
         self._conn.commit()
 
+<<<<<<< HEAD
+    def get(self, mission_id: str) -> KeterPayload | None:
+=======
     def get(self, mission_id: str) -> Optional[KeterPayload]:
+>>>>>>> origin/main
         import json
         import sqlite3
 
@@ -255,7 +266,11 @@ class KeterEngine:
         db_path = os.path.join(config_dir, "keter_reservoir.db")
         self._reservoir = KeterReservoir(db_path)
 
+<<<<<<< HEAD
+    def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
+=======
     def _dispatch_skill(self, manifest: Any) -> Optional[SovereignPhase]:
+>>>>>>> origin/main
         slug = getattr(manifest, "slug", "")
         if "evolv" in slug or "intencion" in slug:
             return IntentAlchemist()
@@ -304,7 +319,11 @@ class KeterEngine:
 
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
+<<<<<<< HEAD
+    ) -> tuple[str, KeterPayload | None]:
+=======
     ) -> tuple[str, Optional[KeterPayload]]:
+>>>>>>> origin/main
         import hashlib
 
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
@@ -384,7 +403,11 @@ class KeterEngine:
 
                 # Detection of Static Equilibrium (Redundancy)
                 if (
+<<<<<<< HEAD
+                    isinstance(phase, LegionSwarm | MejoraloCrush)
+=======
                     isinstance(phase, (LegionSwarm, MejoraloCrush))
+>>>>>>> origin/main
                     and payload.get("final_code") == previous_code
                     and payload.get("score_130_100") == previous_score
                 ):

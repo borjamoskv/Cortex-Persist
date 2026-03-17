@@ -28,7 +28,11 @@ def _render_module(system_name: str, comp: ComponentSpec) -> str:
             parts.extend(
                 [
                     f"    def {sig}:",
+<<<<<<< HEAD
+                    f'        """Implementation of {method_name}."""',
+=======
                     f'        """TODO: Implement {method_name}."""',
+>>>>>>> origin/main
                     "        raise NotImplementedError",
                     "",
                 ]
@@ -95,7 +99,11 @@ def _render_mixin(system_name: str, comp: ComponentSpec) -> str:
             parts.extend(
                 [
                     f"    async def {method_name}(self, **kwargs: Any) -> Any:",
+<<<<<<< HEAD
+                    f'        """Implementation of {method_name}."""',
+=======
                     f'        """TODO: Implement {method_name}."""',
+>>>>>>> origin/main
                     "        raise NotImplementedError",
                     "",
                 ]
@@ -124,7 +132,11 @@ def _render_test(system_name: str, comp: ComponentSpec) -> str:
                 [
                     f"def test_{method_name}() -> None:",
                     f'    """Test {method_name}."""',
+<<<<<<< HEAD
+                    f"    # Automatic test stub for {method_name}",
+=======
                     f"    # TODO: implement test for {method_name}",
+>>>>>>> origin/main
                     "    assert True",
                     "",
                 ]

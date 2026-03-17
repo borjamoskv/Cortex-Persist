@@ -23,7 +23,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
@@ -31,11 +34,31 @@ from cortex.extensions.hypervisor.belief_object import (
     BeliefVerdict,
     VerdictAction,
 )
+<<<<<<< HEAD
+from cortex.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
+=======
 from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+>>>>>>> origin/main
 
 logger = logging.getLogger(__name__)
 
 
+<<<<<<< HEAD
+# ─── Cognitive Reasoning Map (Axiom Ω₁₆) ────────────────────────────────────
+
+REASONING_MODE_MAP: dict[str, ReasoningMode | None] = {
+    "architecture": ReasoningMode.DEEP_THINK,
+    "tradeoff": ReasoningMode.DEEP_THINK,
+    "unknown_domain": ReasoningMode.DEEP_RESEARCH,
+    "new_api": ReasoningMode.DEEP_RESEARCH,
+    "p0_singularity": ReasoningMode.ULTRA_THINK,
+    "security_breach": ReasoningMode.ULTRA_THINK,
+    "routine": None,  # standard inference
+}
+
+
+=======
+>>>>>>> origin/main
 # ─── Internal Types ─────────────────────────────────────────────────────────
 
 
@@ -116,7 +139,11 @@ class CognitiveHandoff:
     async def process_belief(
         self,
         belief: BeliefObject,
+<<<<<<< HEAD
+        context: list[BeliefObject] | None = None,
+=======
         context: Optional[list[BeliefObject]] = None,
+>>>>>>> origin/main
     ) -> BeliefVerdict:
         """Cost-aware belief processing pipeline.
 
@@ -297,6 +324,10 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+<<<<<<< HEAD
+            reasoning_mode=ReasoningMode.DEEP_THINK,
+=======
+>>>>>>> origin/main
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_economic)
@@ -347,6 +378,12 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+<<<<<<< HEAD
+            # Opus does not have a native 'thinking' parameter like DeepSeek/Gemini,
+            # but setting DEEP_THINK here allows the router to allocate maximum resources.
+            reasoning_mode=ReasoningMode.DEEP_THINK,
+=======
+>>>>>>> origin/main
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_premium)
@@ -389,6 +426,10 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.ARCHITECT,
+<<<<<<< HEAD
+            reasoning_mode=REASONING_MODE_MAP["architecture"],
+=======
+>>>>>>> origin/main
         )
 
         result = await self._router.route(prompt, provider_hint=self._architect)

@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.llm._models import CascadeEvent, CascadeTier
@@ -18,7 +22,11 @@ class CascadeTelemetry:
            Grounding (tracing failures).
     """
 
+<<<<<<< HEAD
+    def __init__(self, db_path: str | None = None) -> None:
+=======
     def __init__(self, db_path: Optional[str] = None) -> None:
+>>>>>>> origin/main
         self.events: list[CascadeEvent] = []
         self._db_path = db_path
 

@@ -8,7 +8,11 @@ the GuardPipeline without store_mixin.py importing them directly.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -143,8 +147,13 @@ class LedgerCheckpointHook:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        source: str | None = None,
+        db_path: str | None = None,
+=======
         source: Optional[str] = None,
         db_path: Optional[str] = None,
+>>>>>>> origin/main
     ) -> None:
         ledger = getattr(self._engine, "_ledger", None)
         if ledger is not None and hasattr(ledger, "record_write"):
@@ -163,8 +172,13 @@ class SignalEmitHook:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        source: str | None = None,
+        db_path: str | None = None,
+=======
         source: Optional[str] = None,
         db_path: Optional[str] = None,
+>>>>>>> origin/main
     ) -> None:
         from cortex.extensions.signals.fact_hook import emit_fact_stored
 
@@ -190,8 +204,13 @@ class EpistemicBreakerHook:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        source: str | None = None,
+        db_path: str | None = None,
+=======
         source: Optional[str] = None,
         db_path: Optional[str] = None,
+>>>>>>> origin/main
     ) -> None:
         from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 

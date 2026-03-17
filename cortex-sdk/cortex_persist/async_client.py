@@ -11,7 +11,11 @@ Usage:
     async with AsyncCortexClient(api_key="ctx_...") as client:
         # Store a memory
         await client.memory.store("my-project", "The system must not use floats for money")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> origin/main
         # Query with trust semantics
         result = await client.memory.query("How should money be stored?")
         print(f"Confidence: {result.evidence.grade}")
@@ -47,7 +51,11 @@ def _parse_error_response(status_code: int, response_data: dict[str, Any]) -> Co
     """Parses an error response into either a RejectionError or FailureError."""
     detail = response_data.get("detail", "Unknown error")
     code = response_data.get("code", "UNKNOWN_ERROR")
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> origin/main
     if "category" in response_data:
         category = response_data["category"]
         if category in ["policy", "safety", "consistency", "integrity", "compliance"]:
@@ -58,7 +66,11 @@ def _parse_error_response(status_code: int, response_data: dict[str, Any]) -> Co
                 category=category,
                 severity=response_data.get("severity", "medium"),
                 layer=response_data.get("layer", "admission"),
+<<<<<<< HEAD
+                mitigation=response_data.get("mitigation"),
+=======
                 mitigation=response_data.get("mitigation")
+>>>>>>> origin/main
             )
         elif category in ["dependency", "storage", "runtime", "capability"]:
             return FailureError(
@@ -67,9 +79,15 @@ def _parse_error_response(status_code: int, response_data: dict[str, Any]) -> Co
                 code=code,
                 category=category,
                 is_retryable=response_data.get("is_retryable", False),
+<<<<<<< HEAD
+                retry_after_ms=response_data.get("retry_after_ms"),
+            )
+
+=======
                 retry_after_ms=response_data.get("retry_after_ms")
             )
             
+>>>>>>> origin/main
     # Fallback for generic errors
     return CortexError(status_code, detail, code)
 
@@ -83,6 +101,10 @@ class BaseAsyncClientDomain:
 
 # ─── 1. Memory Domain ──────────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 class AsyncMemoryClient(BaseAsyncClientDomain):
     """Canonical Async API for Working Memory Integration."""
 
@@ -116,6 +138,15 @@ class AsyncMemoryClient(BaseAsyncClientDomain):
             )
             for i in data["items"]
         ]
+<<<<<<< HEAD
+
+        evidence = QueryEvidenceLevel(
+            level=EvidenceLevel(data["evidence"]["level"]),
+            grade=TrustGrade(data["evidence"]["grade"]),
+            verification_proof=data["evidence"].get("verification_proof"),
+        )
+
+=======
         
         evidence = QueryEvidenceLevel(
             level=EvidenceLevel(data["evidence"]["level"]),
@@ -123,11 +154,16 @@ class AsyncMemoryClient(BaseAsyncClientDomain):
             verification_proof=data["evidence"].get("verification_proof")
         )
         
+>>>>>>> origin/main
         plan = QueryPlan(
             routing_strategy=data["plan"]["routing_strategy"],
             execution_time_ms=data["plan"]["execution_time_ms"],
             degraded=data["plan"]["degraded"],
+<<<<<<< HEAD
+            warnings=data["plan"].get("warnings", []),
+=======
             warnings=data["plan"].get("warnings", [])
+>>>>>>> origin/main
         )
 
         return QueryResult(items=items, evidence=evidence, plan=plan)
@@ -152,26 +188,52 @@ class AsyncMemoryClient(BaseAsyncClientDomain):
             "metadata": metadata or {},
             "tenant_id": tenant_id,
         }
+<<<<<<< HEAD
+
+        data = await self._request("POST", "/v1/memory/facts", json=payload)
+        return AcceptanceResult(
+            accepted=True, operation_id=data["id"], warnings=data.get("warnings", [])
+=======
         
         data = await self._request("POST", "/v1/memory/facts", json=payload)
         return AcceptanceResult(
             accepted=True,
             operation_id=data["id"],
             warnings=data.get("warnings", [])
+>>>>>>> origin/main
         )
 
     async def delete(self, fact_id: str, tenant_id: str = "default") -> AcceptanceResult:
         """Tombstone a fact asynchronously."""
+<<<<<<< HEAD
+        await self._request(
+            "DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id}
+        )
+        return AcceptanceResult(accepted=True, operation_id=fact_id, warnings=[])
+=======
         data = await self._request("DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id})
         return AcceptanceResult(
             accepted=True,
             operation_id=fact_id,
             warnings=[]
         )
+>>>>>>> origin/main
 
 
 # ─── 2. Trace Domain ───────────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+class AsyncTraceClient(BaseAsyncClientDomain):
+    """Canonical Async API for Audit & Trace Integration."""
+
+    async def get_causal_chain(
+        self, fact_id: str, tenant_id: str = "default"
+    ) -> list[dict[str, Any]]:
+        """Retrieve the upstream dependencies that produced a fact asynchronously."""
+        return await self._request(
+            "GET", f"/v1/trace/chain/{fact_id}", params={"tenant_id": tenant_id}
+=======
 class AsyncTraceClient(BaseAsyncClientDomain):
     """Canonical Async API for Audit & Trace Integration."""
 
@@ -181,51 +243,76 @@ class AsyncTraceClient(BaseAsyncClientDomain):
             "GET", 
             f"/v1/trace/chain/{fact_id}", 
             params={"tenant_id": tenant_id}
+>>>>>>> origin/main
         )
 
     async def get_ledger_proof(self, fact_id: str, tenant_id: str = "default") -> dict[str, Any]:
         """Retrieve cryptographic proof of existence for a fact asynchronously."""
         return await self._request(
+<<<<<<< HEAD
+            "GET", f"/v1/trace/proof/{fact_id}", params={"tenant_id": tenant_id}
+=======
             "GET", 
             f"/v1/trace/proof/{fact_id}", 
             params={"tenant_id": tenant_id}
+>>>>>>> origin/main
         )
 
 
 # ─── 3. Verification Domain ────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 class AsyncVerificationClient(BaseAsyncClientDomain):
     """Canonical Async API for Integrity Verification."""
 
     async def verify_integrity(self, fact_id: str, tenant_id: str = "default") -> IntegrityState:
         """Force a cryptographic and referential integrity check asynchronously."""
         data = await self._request(
+<<<<<<< HEAD
+            "POST", f"/v1/verify/integrity/{fact_id}", params={"tenant_id": tenant_id}
+=======
             "POST", 
             f"/v1/verify/integrity/{fact_id}", 
             params={"tenant_id": tenant_id}
+>>>>>>> origin/main
         )
         return IntegrityState(data["status"])
 
     async def audit_taint(self, target_id: str, tenant_id: str = "default") -> TaintState:
         """Calculate the inherited taint from corrupted upstream dependencies asynchronously."""
         data = await self._request(
+<<<<<<< HEAD
+            "GET", f"/v1/verify/taint/{target_id}", params={"tenant_id": tenant_id}
+=======
             "GET", 
             f"/v1/verify/taint/{target_id}", 
             params={"tenant_id": tenant_id}
+>>>>>>> origin/main
         )
         return TaintState(data["state"])
 
 
 # ─── 4. Coordination Domain ────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 class AsyncCoordinationClient(BaseAsyncClientDomain):
     """Canonical Async API for Swarm Coordination."""
 
     async def register_agent(
+<<<<<<< HEAD
+        self, agent_id: str, capabilities: list[str], tenant_id: str = "default"
+=======
         self, 
         agent_id: str, 
         capabilities: list[str], 
         tenant_id: str = "default"
+>>>>>>> origin/main
     ) -> AcceptanceResult:
         """Announce presence to the coordination tier asynchronously."""
         payload = {
@@ -234,6 +321,16 @@ class AsyncCoordinationClient(BaseAsyncClientDomain):
             "tenant_id": tenant_id,
         }
         data = await self._request("POST", "/v1/coordination/agents", json=payload)
+<<<<<<< HEAD
+        return AcceptanceResult(accepted=True, operation_id=data["session_id"], warnings=[])
+
+    async def emit_event(
+        self,
+        event_type: str,
+        payload: dict[str, Any],
+        causality_id: str | None = None,
+        tenant_id: str = "default",
+=======
         return AcceptanceResult(
             accepted=True,
             operation_id=data["session_id"],
@@ -246,6 +343,7 @@ class AsyncCoordinationClient(BaseAsyncClientDomain):
         payload: dict[str, Any], 
         causality_id: str | None = None,
         tenant_id: str = "default"
+>>>>>>> origin/main
     ) -> AcceptanceResult:
         """Publish a localized, fire-and-forget, non-ordered event asynchronously."""
         data = {
@@ -255,6 +353,11 @@ class AsyncCoordinationClient(BaseAsyncClientDomain):
         }
         if causality_id:
             data["causality_id"] = causality_id
+<<<<<<< HEAD
+
+        res = await self._request("POST", "/v1/coordination/events", json=data)
+        return AcceptanceResult(accepted=True, operation_id=res["event_id"], warnings=[])
+=======
             
         res = await self._request("POST", "/v1/coordination/events", json=data)
         return AcceptanceResult(
@@ -262,31 +365,52 @@ class AsyncCoordinationClient(BaseAsyncClientDomain):
             operation_id=res["event_id"],
             warnings=[]
         )
+>>>>>>> origin/main
 
 
 # ─── 5. Runtime Domain ─────────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 class AsyncRuntimeClient(BaseAsyncClientDomain):
     """Canonical Async API for Engine Lifecycle and Health."""
 
     async def health(self) -> HealthReport:
         """Get authoritative system health asynchronously."""
         data = await self._request("GET", "/v1/runtime/health")
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> origin/main
         return HealthReport(
             status=data["status"],
             components=data.get("components", {}),
             degraded_features=data.get("degraded_features", []),
+<<<<<<< HEAD
+            warnings=data.get("warnings", []),
+=======
             warnings=data.get("warnings", [])
+>>>>>>> origin/main
         )
 
 
 # ─── Main Async Client ─────────────────────────────────────────────────
 
+<<<<<<< HEAD
+
+class AsyncCortexClient:
+    """
+    SORTU-Ω Canonical Persistent Trust Async SDK.
+
+=======
 class AsyncCortexClient:
     """
     SORTU-Ω Canonical Persistent Trust Async SDK.
     
+>>>>>>> origin/main
     Provides async access to the five core domains defined in SDK-SURFACE.md:
     .memory       - Working Memory
     .trace        - Audit & Forensics
@@ -331,7 +455,11 @@ class AsyncCortexClient:
                 detail=f"Network error connecting to {self.base_url}: {str(exc)}",
                 code="ERR_FAIL_DEP_000",
                 category="dependency",
+<<<<<<< HEAD
+                is_retryable=True,
+=======
                 is_retryable=True
+>>>>>>> origin/main
             ) from exc
 
         if resp.status_code >= 400:
@@ -339,7 +467,11 @@ class AsyncCortexClient:
                 err_data = resp.json()
             except ValueError:
                 err_data = {"detail": resp.text, "code": "ERR_FAIL_UNKNOWN"}
+<<<<<<< HEAD
+
+=======
             
+>>>>>>> origin/main
             raise _parse_error_response(resp.status_code, err_data)
 
         return resp.json()

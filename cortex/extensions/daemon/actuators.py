@@ -9,7 +9,11 @@ Eliminates the boundary between "thought" and "physical execution".
 
 import asyncio
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.daemon.actuators")
 
@@ -73,7 +77,11 @@ class PhysicalActuator:
             return False
 
     @staticmethod
+<<<<<<< HEAD
+    async def gidatu_read_file(path: str) -> str | None:
+=======
     async def gidatu_read_file(path: str) -> Optional[str]:
+>>>>>>> origin/main
         """
         GIDATU-Binding: Direct file system perception.
         """

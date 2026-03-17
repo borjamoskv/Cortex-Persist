@@ -12,7 +12,11 @@ import hashlib
 import logging
 import sqlite3
 import time
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.database.core import connect as db_connect
 
@@ -46,10 +50,17 @@ class FactVerification:
 
     fact_id: int
     valid: bool
+<<<<<<< HEAD
+    tx_id: int | None
+    project: str | None
+    timestamp: float | None
+    violation: str | None = None
+=======
     tx_id: Optional[int]
     project: Optional[str]
     timestamp: Optional[float]
     violation: Optional[str] = None
+>>>>>>> origin/main
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +91,11 @@ class TrustService:
 
     def __init__(self, db_path: str) -> None:
         self.db_path = db_path
+<<<<<<< HEAD
+        self._cached_conn: sqlite3.Connection | None = None
+=======
         self._cached_conn: Optional[sqlite3.Connection] = None
+>>>>>>> origin/main
 
     # ------------------------------------------------------------------
     # Connection management
@@ -143,7 +158,11 @@ class TrustService:
         recomputed = hashlib.sha256(content.encode()).hexdigest()
         valid = recomputed == stored_hash
 
+<<<<<<< HEAD
+        violation: str | None = None
+=======
         violation: Optional[str] = None
+>>>>>>> origin/main
         if not valid:
             violation = f"HASH_MISMATCH — stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
             logger.warning(
@@ -160,7 +179,11 @@ class TrustService:
 
     def verify_batch(
         self,
+<<<<<<< HEAD
+        fact_ids: list[int] | None = None,
+=======
         fact_ids: Optional[list[int]] = None,
+>>>>>>> origin/main
         *,
         limit: int = 500,
     ) -> list[FactVerification]:
@@ -180,7 +203,11 @@ class TrustService:
                 FROM facts f
                 LEFT JOIN transactions t ON f.tx_id = t.id
                 WHERE f.id IN ({placeholders})
+<<<<<<< HEAD
+                """,  # nosec B608
+=======
                 """,
+>>>>>>> origin/main
                 fact_ids,
             ).fetchall()
         else:
@@ -311,9 +338,13 @@ class TrustService:
     # Audit trail
     # ------------------------------------------------------------------
 
+<<<<<<< HEAD
+    def get_audit_trail(self, project: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+=======
     def get_audit_trail(
         self, project: Optional[str] = None, limit: int = 50
     ) -> list[dict[str, Any]]:
+>>>>>>> origin/main
         """Fetch audit trail rows via index-backed ordering."""
         conn = self._get_conn()
         if project:
@@ -452,7 +483,11 @@ class TrustVerifier:
             self._profiles[actor]["failure"] += self.asymmetric_penalty
 
     async def calculate_trust_score(
+<<<<<<< HEAD
+        self, source_actor: str, confidence_marker: str | None = None
+=======
         self, source_actor: str, confidence_marker: Optional[str] = None
+>>>>>>> origin/main
     ) -> float:
         """Admission score for an actor, potentially modified by epistemic markers."""
         profile = self.get_profile(source_actor)

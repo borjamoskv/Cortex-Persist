@@ -6,7 +6,11 @@ These are pure functions: no side effects beyond raising ValueError on rejection
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import Optional, TYPE_CHECKING, Union
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -38,8 +42,13 @@ async def check_dedup(
     tenant_id: str,
     project: str,
     content: str,
+<<<<<<< HEAD
+    exclude_id: int | None = None,
+) -> int | None:
+=======
     exclude_id: Optional[int] = None,
 ) -> Optional[int]:
+>>>>>>> origin/main
     """Verify if fact already exists with Zero-G entropy penalty.
 
     Uses content hash (not ciphertext) to safely bypass AES-GCM nonce variance.
@@ -53,7 +62,11 @@ async def check_dedup(
         "SELECT id FROM facts WHERE tenant_id = ? AND project = ? AND hash = ? "
         "AND is_tombstoned = 0 AND is_quarantined = 0 AND valid_until IS NULL"
     )
+<<<<<<< HEAD
+    params: list[str | int] = [tenant_id, project, f_hash]
+=======
     params: list[Union[str, int]] = [tenant_id, project, f_hash]
+>>>>>>> origin/main
 
     if exclude_id is not None:
         query += " AND id != ?"

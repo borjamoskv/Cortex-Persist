@@ -39,8 +39,13 @@ class MejoraloDaemon:
         base_path: str | Path,
         scan_interval: int = DAEMON_DEFAULT_SCAN_INTERVAL,
         target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
+<<<<<<< HEAD
+        metrics: MetricsRegistry | None = None,
+        db_path: str | Path | None = None,
+=======
         metrics: Optional[MetricsRegistry] = None,
         db_path: Optional[str | Path] = None,
+>>>>>>> origin/main
     ):
         self.project = project
         self.base_path = Path(base_path).resolve()
@@ -55,10 +60,17 @@ class MejoraloDaemon:
             db_path or DEFAULT_DB_PATH,  # type: ignore[type-error]
         )  # type: ignore[reportArgumentType]
         self.engine = MejoraloEngine(engine=self.cortex_engine)
+<<<<<<< HEAD
+        self.canary = CanaryMonitor()  # type: ignore[reportCallIssue]
+        self.fusion = ContextFusion(self.cortex_engine)
+        self._running = False
+        self._loop_task: asyncio.Task | None = None
+=======
         self.canary = CanaryMonitor(self.base_path)  # type: ignore[reportCallIssue]
         self.fusion = ContextFusion(self.cortex_engine)
         self._running = False
         self._loop_task: Optional[asyncio.Task] = None
+>>>>>>> origin/main
         self._consecutive_stagnant: int = 0
 
     async def start(self) -> None:
@@ -295,6 +307,11 @@ async def _shutdown(daemon: MejoraloDaemon, stop_event: asyncio.Event) -> None:
     stop_event.set()
 
 
+def main() -> None:
+    """CLI entry point alias."""
+    asyncio.run(run_daemon_cli())
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(run_daemon_cli())
+    main()

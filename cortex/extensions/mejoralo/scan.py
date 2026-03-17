@@ -12,6 +12,7 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.mejoralo.constants import (
     GHOST_MIN_SUBTREE_SIZE,
@@ -33,15 +34,16 @@ from cortex.extensions.mejoralo.constants import (
 )
 from cortex.extensions.mejoralo.models import DimensionResult, ScanResult
 from cortex.extensions.mejoralo.utils import detect_stack
+<<<<<<< HEAD
+from cortex.guards.path_guard import is_safe_path
+=======
+>>>>>>> origin/main
 
 __all__ = ["scan"]
 
 logger = logging.getLogger("cortex.extensions.mejoralo")
 
 _WEIGHT_MAP = {"critical": 40, "high": 35, "medium": 15, "low": 10}
-
-
-# ─── File Collection ─────────────────────────────────────────────────
 
 
 def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
@@ -54,9 +56,6 @@ def _collect_source_files(root: Path, extensions: set[str]) -> list[Path]:
             if fp.suffix in extensions and f not in ("constants.py", "xray_scan.py"):
                 source_files.append(fp)
     return source_files
-
-
-# ─── Per-File Analysis ───────────────────────────────────────────────
 
 
 _COMPLEXITY_NODES = (
@@ -205,9 +204,12 @@ def _analyze_single_file(
     return loc, large_file, psi, sec, comp
 
 
+<<<<<<< HEAD
+=======
 # ─── Ghost Detection (Code Ghosts via AST Subtree Hashing) ───────────
 
 
+>>>>>>> origin/main
 def _hash_ast_subtree(node: ast.AST) -> int:
     """Recursively hash an AST subtree using node type and field names.
 
@@ -221,9 +223,15 @@ def _hash_ast_subtree(node: ast.AST) -> int:
             continue
         if isinstance(value, list):
             parts.extend(
+<<<<<<< HEAD
+                str(_hash_ast_subtree(child)) if isinstance(child, ast.AST) else str(field_name)
+                for child in value
+            )
+=======
                 _hash_ast_subtree(child) if isinstance(child, ast.AST) else field_name
                 for child in value
             )  # type: ignore[assignment]
+>>>>>>> origin/main
         elif isinstance(value, ast.AST):
             parts.append(str(_hash_ast_subtree(value)))
         else:
@@ -327,6 +335,8 @@ def _analyze_files(
 
     # Ghost detection runs after all files are collected (cross-file analysis)
     ghost_findings = _detect_code_ghosts(source_files, root)
+<<<<<<< HEAD
+=======
 
     return (
         total_loc,
@@ -336,9 +346,16 @@ def _analyze_files(
         complexity_findings,
         ghost_findings,
     )
+>>>>>>> origin/main
 
-
-# ─── Dimension Scoring ───────────────────────────────────────────────
+    return (
+        total_loc,
+        large_files,
+        psi_findings,
+        security_findings,
+        complexity_findings,
+        ghost_findings,
+    )
 
 
 def _score_dimensions(
@@ -493,9 +510,6 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
     return base_score + bonus_points
 
 
-# ─── Main Entry Point ────────────────────────────────────────────────
-
-
 def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = False) -> ScanResult:
     """Execute X-Ray 13D scan on a project directory.
 
@@ -505,6 +519,9 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
       CRITICAL (weight 40): Integrity, Architecture, Security
       HIGH (weight 35): Psi (toxic markers), Complexity
     """
+    if not is_safe_path(path):
+        raise ValueError(f"Blocked unsafe path: {path}")
+
     root = Path(path).resolve()
     if root.is_file():
         # Single file scan mode
@@ -546,3 +563,13 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
         dead_code=(len(source_files) == 0),
         brutal=brutal,
     )
+
+
+class MejoraloScanner:
+    """Wrapper class for the scan function to match MejoraloEngine's expectations."""
+
+    def scan_project(
+        self, project: str, path: str | Path, deep: bool = False, brutal: bool = False
+    ) -> ScanResult:
+        """Execute X-Ray 13D scan on a project directory."""
+        return scan(project, path, deep=deep, brutal=brutal)

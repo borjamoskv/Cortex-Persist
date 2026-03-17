@@ -12,7 +12,11 @@ import ast
 import asyncio
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 try:
     from watchdog.events import FileSystemEvent, FileSystemEventHandler  # type: ignore[type-error]
@@ -94,8 +98,13 @@ class ASTOracle:
         self._running = False
         self._cache: dict[str, set[str]] = {}
         self._mtimes: dict[str, float] = {}
+<<<<<<< HEAD
+        self._event_queue: asyncio.Queue[Path] | None = None
+        self._observer: Observer | None = None
+=======
         self._event_queue: Optional[asyncio.Queue[Path]] = None
         self._observer: Optional[Observer] = None
+>>>>>>> origin/main
 
     async def start(self) -> None:
         """Invokes the Oracle's eye with kernel-level filesystem hooks."""

@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 __all__ = ["SearchResult", "SearchScope"]
 
@@ -30,11 +33,19 @@ class SearchResult:
     updated_at: str
     score: float = 0.0
     causal_gap_score: float = 0.0
+<<<<<<< HEAD
+    source: str | None = None
+    meta: dict = field(default_factory=dict)
+    tx_id: int | None = None
+    hash: str | None = None
+    graph_context: dict | None = field(default=None)
+=======
     source: Optional[str] = None
     meta: dict = field(default_factory=dict)
     tx_id: Optional[int] = None
     hash: Optional[str] = None
     graph_context: Optional[dict] = field(default=None)
+>>>>>>> origin/main
     db_origin: str = "core"
 
     def to_dict(self) -> dict:

@@ -14,6 +14,10 @@ CREATE_VOTES = """
 CREATE TABLE IF NOT EXISTS consensus_votes (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id INTEGER NOT NULL REFERENCES facts(id),
+<<<<<<< HEAD
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     agent   TEXT NOT NULL,
     vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
     timestamp TEXT NOT NULL DEFAULT (datetime('now')),
@@ -47,6 +51,10 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     agent_id        TEXT NOT NULL REFERENCES agents(id),
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     vote            INTEGER NOT NULL,
     vote_weight     REAL NOT NULL,
     agent_rep_at_vote   REAL NOT NULL,
@@ -64,6 +72,10 @@ CREATE TABLE IF NOT EXISTS trust_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     source_agent    TEXT NOT NULL REFERENCES agents(id),
     target_agent    TEXT NOT NULL REFERENCES agents(id),
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     trust_weight    REAL NOT NULL,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
@@ -75,6 +87,10 @@ CREATE_OUTCOMES = """
 CREATE TABLE IF NOT EXISTS consensus_outcomes (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     final_state     TEXT NOT NULL,
     final_score     REAL NOT NULL,
     resolved_at     TEXT NOT NULL DEFAULT (datetime('now')),
@@ -144,6 +160,10 @@ CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
     content,
     event_type,
     project,
+<<<<<<< HEAD
+    tenant_id UNINDEXED,
+=======
+>>>>>>> origin/main
     content='episodes',
     content_rowid='id'
 );
@@ -169,6 +189,10 @@ CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+<<<<<<< HEAD
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     event_type  TEXT NOT NULL,
     payload     TEXT NOT NULL DEFAULT '{}',
     source      TEXT NOT NULL,
@@ -212,6 +236,10 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     resource        TEXT NOT NULL,
     agent_id        TEXT NOT NULL,
     action          TEXT NOT NULL, -- 'request', 'release'
@@ -224,6 +252,10 @@ CREATE TABLE IF NOT EXISTS lock_intents (
 CREATE_LOCK_STATE = """
 CREATE TABLE IF NOT EXISTS lock_state (
     resource        TEXT PRIMARY KEY,
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     holder_agent    TEXT,
     acquired_at     TEXT,
     expires_at      TEXT,
@@ -258,13 +290,44 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
 
+<<<<<<< HEAD
+# ─── Enrichment Queue (P0 Decoupling) ───────────────────────────────
+CREATE_ENRICHMENT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'queued',
+    priority        INTEGER DEFAULT 0,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    next_attempt_at TEXT,
+    payload         TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_ENRICHMENT_JOBS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status ON enrichment_jobs(status, priority DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_fact ON enrichment_jobs(fact_id);
+"""
+
+
+=======
+>>>>>>> origin/main
 # ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
 CREATE_FACTS_FTS = """
 CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     content,
     project,
     tags,
+<<<<<<< HEAD
+    fact_type,
+    tenant_id UNINDEXED
+=======
     fact_type
+>>>>>>> origin/main
 );
 """
 
@@ -272,6 +335,18 @@ CREATE_FACTS_FTS_TRIGGERS = """
 CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
 AFTER INSERT ON facts
 BEGIN
+<<<<<<< HEAD
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
+AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts
+BEGIN
+  DELETE FROM facts_fts WHERE rowid = OLD.id;
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
+=======
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
   VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
 END;
@@ -282,6 +357,7 @@ BEGIN
   DELETE FROM facts_fts WHERE rowid = OLD.id;
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
   VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+>>>>>>> origin/main
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
@@ -307,6 +383,10 @@ CREATE TABLE IF NOT EXISTS merkle_roots (
 CREATE_PROCEDURAL_ENGRAMS = """
 CREATE TABLE IF NOT EXISTS procedural_engrams (
     skill_name      TEXT PRIMARY KEY,
+<<<<<<< HEAD
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+=======
+>>>>>>> origin/main
     invocations     INTEGER NOT NULL DEFAULT 0,
     success_rate    REAL NOT NULL DEFAULT 1.0,
     avg_latency_ms  REAL NOT NULL DEFAULT 0.0,
@@ -319,7 +399,11 @@ BEFORE UPDATE OF permanent ON procedural_engrams
 FOR EACH ROW
 WHEN OLD.permanent = 1 AND NEW.permanent = 0
 BEGIN
+<<<<<<< HEAD
+    SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated.');
+=======
     SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated. Cannot revert permanent=1 to permanent=0');
+>>>>>>> origin/main
 END;
 """
 
@@ -376,6 +460,11 @@ EXTENSION_SCHEMA = [
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
     CREATE_CAUSAL_EDGES,
+<<<<<<< HEAD
+    CREATE_ENRICHMENT_JOBS,
+    CREATE_ENRICHMENT_JOBS_INDEXES,
+=======
+>>>>>>> origin/main
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,

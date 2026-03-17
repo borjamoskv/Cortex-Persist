@@ -12,7 +12,11 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 
 @dataclass
@@ -60,7 +64,11 @@ class Metabolism:
         return "🔴 FLATLINE"
 
     def _hash_state(self, state: str) -> str:
+<<<<<<< HEAD
+        return hashlib.sha256(state.encode("utf-8")).hexdigest()[:12]
+=======
         return hashlib.md5(state.encode("utf-8")).hexdigest()[:12]
+>>>>>>> origin/main
 
     def metabolize(self, observation: str, action_type: str = "action") -> dict[str, Any]:
         """The core metabolic cycle. Called after every action.
@@ -126,7 +134,11 @@ class Metabolism:
         self.history.append(diagnostic)
         return diagnostic
 
+<<<<<<< HEAD
+    def render_vitals(self, diag: dict[str, Any] | None = None) -> str:
+=======
     def render_vitals(self, diag: Optional[dict[str, Any]] = None) -> str:
+>>>>>>> origin/main
         """Render a visual representation of current vitals."""
         v = self.vitals
         d = diag or {}

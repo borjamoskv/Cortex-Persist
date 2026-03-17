@@ -1,8 +1,14 @@
 from datetime import datetime, timedelta, timezone
+<<<<<<< HEAD
+import pytest
+from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+from cortex.engine.models import Fact
+=======
 
 import pytest
 
 from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+>>>>>>> origin/main
 
 
 @pytest.fixture
@@ -13,6 +19,16 @@ def mock_cortex_engine():
             fact_2_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
 
             return [
+<<<<<<< HEAD
+                Fact(
+                    id=1,
+                    tenant_id="default",
+                    project="anomaly-hunter",
+                    content="Ruta X bloqueada",
+                    fact_type="event",
+                    tags=["route_x"],
+                    meta={
+=======
                 {
                     "id": 1,
                     "tenant_id": "default",
@@ -21,10 +37,26 @@ def mock_cortex_engine():
                     "fact_type": "event",
                     "tags": ["route_x"],
                     "meta": {
+>>>>>>> origin/main
                         "confidence": "C5",
                         "valid_from": fact_1_time,
                         "valid_until": None,
                         "source": "sensor",
+<<<<<<< HEAD
+                    },
+                    created_at=fact_1_time,
+                    updated_at=fact_1_time,
+                    is_tombstoned=False,
+                ),
+                Fact(
+                    id=2,
+                    tenant_id="default",
+                    project="anomaly-hunter",
+                    content="Pasé por Ruta X",
+                    fact_type="event",
+                    tags=["route_x"],
+                    meta={
+=======
                         "consensus_score": 1.0,
                     },
                     "created_at": fact_1_time,
@@ -39,16 +71,25 @@ def mock_cortex_engine():
                     "fact_type": "event",
                     "tags": ["route_x"],
                     "meta": {
+>>>>>>> origin/main
                         "confidence": "C5",
                         "valid_from": fact_2_time,
                         "valid_until": None,
                         "source": "sensor",
+<<<<<<< HEAD
+                    },
+                    created_at=fact_2_time,
+                    updated_at=fact_2_time,
+                    is_tombstoned=False,
+                ),
+=======
                         "consensus_score": 1.0,
                     },
                     "created_at": fact_2_time,
                     "updated_at": fact_2_time,
                     "is_tombstoned": False,
                 },
+>>>>>>> origin/main
             ]
 
         async def get_fact(self, fact_id):

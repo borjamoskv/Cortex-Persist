@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     from cortex.services.trust import TrustService
@@ -14,7 +18,11 @@ logger = logging.getLogger("cortex.oracle.evidence")
 class EvidenceMixin:
     """Verifies evidence chain internal consistency (Ω₃)."""
 
+<<<<<<< HEAD
+    _trust: TrustService | None
+=======
     _trust: Optional[TrustService]
+>>>>>>> origin/main
 
     def _verify_evidence_chain(self, records: list[dict[str, Any]]) -> tuple[bool, str]:
         """Verify ledger evidence chain internal consistency (Ω₃)."""

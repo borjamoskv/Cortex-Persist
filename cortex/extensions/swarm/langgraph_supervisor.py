@@ -1,7 +1,11 @@
 import logging
 import uuid
 from collections.abc import AsyncGenerator
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, ConfigDict
 
@@ -31,7 +35,11 @@ class NightShiftState(BaseModel):
     is_paused: bool = False
 
     @classmethod
+<<<<<<< HEAD
+    def create(cls, session_id: str | None = None):
+=======
     def create(cls, session_id: Optional[str] = None):
+>>>>>>> origin/main
         return cls(session_id=session_id or str(uuid.uuid4()))
 
 

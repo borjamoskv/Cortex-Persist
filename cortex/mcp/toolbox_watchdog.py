@@ -24,7 +24,11 @@ import shutil
 import signal
 import subprocess
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.mcp.toolbox_watchdog")
 
@@ -65,19 +69,32 @@ class ToolboxWatchdog:
     def __init__(
         self,
         port: int = _DEFAULT_PORT,
+<<<<<<< HEAD
+        tools_yaml: Path | None = None,
+        db_path: Path | None = None,
+=======
         tools_yaml: Optional[Path] = None,
         db_path: Optional[Path] = None,
+>>>>>>> origin/main
     ) -> None:
         self._port = port
         self._tools_yaml = tools_yaml or _TOOLS_YAML
         self._db_path = db_path or Path(
             os.environ.get("CORTEX_DB", str(_DEFAULT_DB)),
         )
+<<<<<<< HEAD
+        self._process: subprocess.Popen[bytes] | None = None
+        self._backoff = _INITIAL_BACKOFF_S
+        self._restart_count = 0
+        self._shutdown = False
+        self._log_fd: Any | None = None
+=======
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._backoff = _INITIAL_BACKOFF_S
         self._restart_count = 0
         self._shutdown = False
         self._log_fd: Optional[Any] = None
+>>>>>>> origin/main
 
     # ── Public API ────────────────────────────────────────────────
 
@@ -152,7 +169,11 @@ class ToolboxWatchdog:
 
     # ── Internals ─────────────────────────────────────────────────
 
+<<<<<<< HEAD
+    def _find_binary(self) -> str | None:
+=======
     def _find_binary(self) -> Optional[str]:
+>>>>>>> origin/main
         """Locate genai-toolbox in PATH or ~/go/bin."""
         found = shutil.which("genai-toolbox")
         if found:

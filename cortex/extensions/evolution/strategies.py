@@ -54,7 +54,11 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 
     Explicitly handles MagicMock and other non-standard types in test environments.
     """
+<<<<<<< HEAD
+    if isinstance(val, int | float):
+=======
     if isinstance(val, (int, float)):
+>>>>>>> origin/main
         return float(val)
     return default
 
@@ -62,8 +66,13 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
+<<<<<<< HEAD
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None: ...
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None: ...
+=======
     def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]: ...
     def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]: ...
+>>>>>>> origin/main
 
 
 class ParameterTuningStrategy:
@@ -271,7 +280,11 @@ class AdversarialStressStrategy:
             delta_fitness=-1.0,
         )
 
+<<<<<<< HEAD
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+=======
     def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+>>>>>>> origin/main
         m = _dm(sub)
         fd = _safe_float(m.fitness_delta)
         p_queen = 0.1 + 0.3 * min(1.0, max(0.0, fd))
@@ -300,7 +313,11 @@ class EntropyReductionStrategy:
 
     _MAX_MUTATIONS_PER_GAIN: float = 20.0
 
+<<<<<<< HEAD
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+=======
     def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+>>>>>>> origin/main
         if agent.generation < 10 or agent.fitness < 80.0:
             return None
         gain = max(0.1, agent.fitness - 50.0)
@@ -321,7 +338,11 @@ class EntropyReductionStrategy:
             )
         return None
 
+<<<<<<< HEAD
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+=======
     def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+>>>>>>> origin/main
         if sub.generation < 15 or sub.fitness < 70.0:
             return None
         gain = max(0.1, sub.fitness - 50.0)

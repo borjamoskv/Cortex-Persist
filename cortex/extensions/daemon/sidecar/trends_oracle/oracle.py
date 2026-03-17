@@ -5,7 +5,11 @@ import logging
 import random
 import time
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import pandas as pd
 from pytrends.request import TrendReq
@@ -231,7 +235,11 @@ class TrendsOracle:
 
     def _store_and_emit(
         self, keyword: str, traffic: str, geo: str, category: int, trend_type: str
+<<<<<<< HEAD
+    ) -> TrendsAlert | None:
+=======
     ) -> Optional[TrendsAlert]:
+>>>>>>> origin/main
         """Stores the trend as a CORTEX fact and creates a Daemon Alert."""
         iso_now = datetime.now(timezone.utc).isoformat()
         geo_str = geo if geo else "Global"

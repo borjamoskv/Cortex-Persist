@@ -4,7 +4,11 @@ import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.episodic.base import Episode
 
@@ -15,7 +19,11 @@ logger = logging.getLogger("cortex.extensions.training")
 class Action:
     tool: str
     input: Any
+<<<<<<< HEAD
+    observation: str | None = None
+=======
     observation: Optional[str] = None
+>>>>>>> origin/main
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -39,7 +47,11 @@ class TrajectoryCollector:
     def __init__(self, episodic_memory: Any):
         self.episodic = episodic_memory
 
+<<<<<<< HEAD
+    async def collect_session_trajectory(self, session_id: str) -> Trajectory | None:
+=======
     async def collect_session_trajectory(self, session_id: str) -> Optional[Trajectory]:
+>>>>>>> origin/main
         """
         Reconstructs a trajectory for a specific session by grouping episodes.
         """
@@ -72,7 +84,11 @@ class TrajectoryCollector:
     def _process_episodes(self, episodes: list[Episode]) -> tuple[list[Action], dict[str, Any]]:
         """Processes episodes to extract actions and aggregate metadata."""
         actions: list[Action] = []
+<<<<<<< HEAD
+        current_action: Action | None = None
+=======
         current_action: Optional[Action] = None
+>>>>>>> origin/main
         metadata: dict[str, Any] = {}
 
         for ep in episodes:

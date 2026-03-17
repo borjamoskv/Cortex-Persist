@@ -19,6 +19,8 @@ from typing import Optional
 
 from .models import CausalEpisode, SourceMetadata
 
+from .models import CausalEpisode, SourceMetadata
+
 logger = logging.getLogger("cortex.memory.episodic")
 
 
@@ -196,7 +198,11 @@ class CausalTracer:
     async def trace_episode(
         self,
         fact_id: int,
+<<<<<<< HEAD
+        max_depth: int | None = None,
+=======
         max_depth: Optional[int] = None,
+>>>>>>> origin/main
     ) -> CausalEpisode:
         """Trace the full causal DAG from a given fact.
 

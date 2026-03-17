@@ -6,7 +6,11 @@ Uses z3-solver as the SMT core.
 
 import logging
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
 
@@ -36,6 +40,15 @@ class SovereignVerifier:
         # Lazy z3 init: z3-solver is an optional [dev] dependency
         try:
             import z3 as _z3  # type: ignore[reportMissingImports]
+<<<<<<< HEAD
+
+            self._solver = _z3.Solver()
+            # Set a hard timeout for Z3 to prevent blocking the RSI loop
+            self._solver.set("timeout", 5000)  # 5 seconds per proof
+        except ImportError:
+            logger.debug("z3-solver not installed; SovereignVerifier in passthrough mode")
+=======
+>>>>>>> origin/main
 
             self._solver = _z3.Solver()
             # Set a hard timeout for Z3 to prevent blocking the RSI loop

@@ -16,7 +16,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
@@ -41,14 +45,22 @@ class BaseAgent:
         self,
         manifest: AgentManifest,
         bus: Any,  # MessageBus protocol
+<<<<<<< HEAD
+        tool_registry: ToolRegistry | None = None,
+=======
         tool_registry: Optional[ToolRegistry] = None,
+>>>>>>> origin/main
     ) -> None:
         self.manifest = manifest
         self.bus = bus
         self.tools = tool_registry or ToolRegistry()
         self.state = AgentState()
         self.memory = WorkingMemory()
+<<<<<<< HEAD
+        self._task: asyncio.Task[None] | None = None
+=======
         self._task: Optional[asyncio.Task[None]] = None
+>>>>>>> origin/main
 
     @property
     def agent_id(self) -> str:
@@ -193,7 +205,11 @@ class BaseAgent:
         recipient: str,
         result: Any,
         *,
+<<<<<<< HEAD
+        correlation_id: str | None = None,
+=======
         correlation_id: Optional[str] = None,
+>>>>>>> origin/main
     ) -> None:
         """Send a task result to another agent."""
         msg = new_message(

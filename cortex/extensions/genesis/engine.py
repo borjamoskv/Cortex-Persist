@@ -15,7 +15,11 @@ import logging
 import math
 from datetime import datetime, timezone
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.genesis.assembler import SystemAssembler
 from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
@@ -51,7 +55,11 @@ class GenesisEngine:
         print(result.summary())
     """
 
+<<<<<<< HEAD
+    def __init__(self, cortex_root: Path | None = None) -> None:
+=======
     def __init__(self, cortex_root: Optional[Path] = None) -> None:
+>>>>>>> origin/main
         self.root = cortex_root or Path(__file__).parent.parent
         self.templates = TemplateRegistry()
         self.assembler = SystemAssembler(self.templates)

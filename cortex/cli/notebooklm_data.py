@@ -8,7 +8,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.config import DEFAULT_DB_PATH
 
@@ -59,7 +63,11 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "cortexpersist",
         "cli",
         "CORE",
+<<<<<<< HEAD
+        "COGITO",
+=======
         "CODEX",
+>>>>>>> origin/main
         "__system__",
     ],
     "cortex-infra": [
@@ -231,7 +239,11 @@ def _run_async(coro: Any) -> Any:
     return sovereign_run(coro)
 
 
+<<<<<<< HEAD
+async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
+=======
 async def _get_engine_active_facts(project: Optional[str] = None) -> list[Any]:
+>>>>>>> origin/main
     """Fetch cleartext facts using CortexEngine."""
     from cortex.cli.common import get_engine
 
@@ -244,7 +256,11 @@ async def _get_engine_active_facts(project: Optional[str] = None) -> list[Any]:
         await engine.close()
 
 
+<<<<<<< HEAD
+def _detect_cloud_sync() -> tuple[Path, str] | None:
+=======
 def _detect_cloud_sync() -> Optional[tuple[Path, str]]:
+>>>>>>> origin/main
     """Detect appropriate cloud storage sync folder."""
     for provider, candidates in CLOUD_PROVIDERS.items():
         for candidate in candidates:
@@ -255,12 +271,20 @@ def _detect_cloud_sync() -> Optional[tuple[Path, str]]:
 
 
 def _get_entities_and_relations(
+<<<<<<< HEAD
+    project: str | None = None,
+=======
     project: Optional[str] = None,
+>>>>>>> origin/main
 ) -> tuple[Any, Any]:
     """Load entity graph for NotebookLM context."""
     import pandas as pd
 
+<<<<<<< HEAD
+    conn = __import__("cortex.database.core", fromlist=["connect"]).connect(_get_db_path())
+=======
     conn = __import__("cortex.database.core", fromlist=["db_connect"]).db_connect(_get_db_path())
+>>>>>>> origin/main
     try:
         if project:
             entities = pd.read_sql_query(  # type: ignore[reportCallIssue]

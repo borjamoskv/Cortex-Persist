@@ -98,6 +98,10 @@ class ImmuneBoundary:
 
         schema_dict = schema.model_json_schema()
 
+        import inspect
+
+        schema_dict = schema.model_json_schema()
+
         for attempt in range(max_retries):
             try:
                 # Determinar cuántos argumentos acepta la función de generación

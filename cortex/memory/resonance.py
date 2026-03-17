@@ -12,7 +12,11 @@ from __future__ import annotations
 
 import logging
 import math
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 from cortex.memory.engrams import CortexSemanticEngram
 
@@ -51,8 +55,13 @@ class AdaptiveResonanceGate:
         vector_store: Any,
         rho: float = 0.85,
         ltp_boost: float = 0.25,
+<<<<<<< HEAD
+        songline_sensor: Any | None = None,
+        endocrine: DigitalEndocrine | None = None,
+=======
         songline_sensor: Optional[Any] = None,
         endocrine: Optional[DigitalEndocrine] = None,
+>>>>>>> origin/main
     ):
         self._vs = vector_store
         self._rho = rho
@@ -112,9 +121,15 @@ class AdaptiveResonanceGate:
         neighbors: list[Any],
         rho: float,
         topo_boost: float,
+<<<<<<< HEAD
+    ) -> tuple[CortexSemanticEngram | None, float]:
+        """Find the best matching engram above vigilance threshold."""
+        best_match: CortexSemanticEngram | None = None
+=======
     ) -> tuple[Optional[CortexSemanticEngram], float]:
         """Find the best matching engram above vigilance threshold."""
         best_match: Optional[CortexSemanticEngram] = None
+>>>>>>> origin/main
         best_sim = 0.0
 
         for neighbor in neighbors:
@@ -140,7 +155,11 @@ class AdaptiveResonanceGate:
         self,
         candidate: CortexSemanticEngram,
         search_limit: int = 15,
+<<<<<<< HEAD
+        vigilance_override: float | None = None,
+=======
         vigilance_override: Optional[float] = None,
+>>>>>>> origin/main
         precision_mode: bool = False,
     ) -> tuple[str, CortexSemanticEngram]:
         """Evaluate a candidate engram against existing memory with adaptive vigilance.

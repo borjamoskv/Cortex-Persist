@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
@@ -17,9 +21,15 @@ class BrowserEngine:
     def __init__(self, headless: bool = True):
         self.headless = headless
         self._playwright = None
+<<<<<<< HEAD
+        self._browser: Browser | None = None
+        self._context: BrowserContext | None = None
+        self._page: Page | None = None
+=======
         self._browser: Optional[Browser] = None
         self._context: Optional[BrowserContext] = None
         self._page: Optional[Page] = None
+>>>>>>> origin/main
         self._element_mapping: dict[int, str] = {}  # Maps CORTEX ID to XPath or CSS selector
 
     async def start(self):

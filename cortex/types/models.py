@@ -5,7 +5,11 @@ Centralized Pydantic models for request/response validation.
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+from typing import Any, Literal, TypedDict
+=======
 from typing import Any, Literal, Optional, TypedDict
+>>>>>>> origin/main
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -82,12 +86,21 @@ class QueryEvidenceLevel(BaseModel):
 
 
 class QueryResultData(BaseModel):
+<<<<<<< HEAD
+    answer: str | None = None
+    evidence_level: QueryEvidenceLevel | None = None
+    degraded: bool = False
+    degraded_reason: str | None = None
+    trace: dict | None = None
+    facts: list[dict] | None = None
+=======
     answer: Optional[str] = None
     evidence_level: Optional[QueryEvidenceLevel] = None
     degraded: bool = False
     degraded_reason: Optional[str] = None
     trace: Optional[dict] = None
     facts: Optional[list[dict]] = None
+>>>>>>> origin/main
 
 
 class RejectionResult(TypedDict):
@@ -111,10 +124,17 @@ OperationResult = AcceptanceResult | RejectionResult
 
 
 class TraceInput(BaseModel):
+<<<<<<< HEAD
+    tx_id: str | None = None
+    fact_id: str | None = None
+    decision_id: str | None = None
+    query_result_id: str | None = None
+=======
     tx_id: Optional[str] = None
     fact_id: Optional[str] = None
     decision_id: Optional[str] = None
     query_result_id: Optional[str] = None
+>>>>>>> origin/main
     depth: int = Field(5, ge=1, le=20)
 
 
@@ -139,7 +159,12 @@ class StoreRequest(BaseModel):
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
+<<<<<<< HEAD
+    confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
+    meta: dict | None = Field(None, description="Optional JSON metadata")
+=======
     meta: Optional[dict] = Field(None, description="Optional JSON metadata")
+>>>>>>> origin/main
 
     @field_validator("project", "content")
     @classmethod
@@ -186,9 +211,15 @@ class SearchResult(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
+<<<<<<< HEAD
+    meta: dict | None = None
+    hash: str | None = None
+    context: dict | None = Field(
+=======
     meta: Optional[dict] = None
     hash: Optional[str] = None
     context: Optional[dict] = Field(
+>>>>>>> origin/main
         None, description="Graph-RAG context (subgraph or related entities)"
     )
 
@@ -209,7 +240,11 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
+<<<<<<< HEAD
+    confidence: str | float | None = None
+=======
     confidence: Optional[str | float] = None
+>>>>>>> origin/main
     status: str = "recorded"
 
 
@@ -242,6 +277,17 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
+<<<<<<< HEAD
+    confidence: str | float | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    source: str | None = None
+    meta: dict | None = None
+    is_tombstoned: bool = False
+    hash: str | None = None
+    tx_id: str | None = None
+    consensus_score: float | None = None
+=======
     confidence: Optional[str | float] = None
     valid_from: Optional[str] = None
     valid_until: Optional[str] = None
@@ -251,6 +297,7 @@ class FactResponse(BaseModel):
     hash: Optional[str] = None
     tx_id: Optional[str] = None
     consensus_score: Optional[float] = None
+>>>>>>> origin/main
 
 
 class StatusResponse(BaseModel):
@@ -286,7 +333,11 @@ class RecoveryReport(BaseModel):
     status: Literal["clean", "recovered", "failed"]
     recovered_items: int
     failed_items: int
+<<<<<<< HEAD
+    last_checkpoint_id: str | None = None
+=======
     last_checkpoint_id: Optional[str] = None
+>>>>>>> origin/main
     warnings: list[str] = Field(default_factory=list)
 
 
@@ -294,6 +345,20 @@ class HealthCheckDetail(BaseModel):
     """Single health probe result."""
 
     status: str
+<<<<<<< HEAD
+    detail: str | None = None
+    version: str | None = None
+    expected: str | None = None
+    actual: str | None = None
+    pending_uncheckpointed: int | None = None
+    last_checkpoint_tx: int | None = None
+    active_connections: int | None = None
+    max_connections: int | None = None
+    utilization: str | None = None
+    useful_facts_ratio: float | None = None
+    duplicates_ratio: float | None = None
+    total_facts: int | None = None
+=======
     detail: Optional[str] = None
     version: Optional[str] = None
     expected: Optional[str] = None
@@ -306,6 +371,7 @@ class HealthCheckDetail(BaseModel):
     useful_facts_ratio: Optional[float] = None
     duplicates_ratio: Optional[float] = None
     total_facts: Optional[int] = None
+>>>>>>> origin/main
 
     model_config = {"extra": "allow"}
 
@@ -313,17 +379,24 @@ class HealthCheckDetail(BaseModel):
 class DeepHealthResponse(BaseModel):
     """Structured deep health check response."""
 
-    status: str  # "healthy" | "degraded"
+    status: str  # "healthy", "degraded"
     version: str
     schema_version: str
     checks: dict[str, HealthCheckDetail]
     latency_ms: float
 
     # V8 Evaluation Metrics
+<<<<<<< HEAD
+    p95_latency_ms: float | None = Field(
+        default=None, description="p95 latency of ambient context boot"
+    )
+    stale_ratio: float | None = Field(
+=======
     p95_latency_ms: Optional[float] = Field(
         default=None, description="p95 latency of ambient context boot"
     )
     stale_ratio: Optional[float] = Field(
+>>>>>>> origin/main
         default=None, description="Ratio of facts older than 180 days with no hits"
     )
 

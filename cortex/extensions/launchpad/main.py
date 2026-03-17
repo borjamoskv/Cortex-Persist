@@ -109,7 +109,7 @@ class MissionOrchestrator:
                 "source": "swarm-engine",
                 "meta": {
                     "return_code": result.returncode,
-                    "stderr": error[-1000:],
+                    "stderr": str(error or "")[-512:],  # Truncated and sanitized
                     "intent_id": fact_id,
                 },
             }
@@ -127,14 +127,26 @@ class MissionOrchestrator:
 
         except (sqlite3.Error, OSError, RuntimeError) as e:
             logger.error("Failed to launch mission: %s", e)
+<<<<<<< HEAD
+            return {
+                "intent_id": fact_id,
+                "status": "error",
+                "error": "Internal mission execution error",
+            }
+=======
             return {"intent_id": fact_id, "status": "error", "error": str(e)}
+>>>>>>> origin/main
 
     def list_missions(self, project: Optional[str] = None) -> list[dict[str, Any]]:
         """Retrieve recent mission attempts from the ledger."""
         # Query facts of type 'intent' or 'report' with 'swarm' tag
         # Use sync connection
         conn = self.engine._get_sync_conn()
-        query = "SELECT id, project, content, created_at, fact_type FROM facts WHERE (fact_type = 'intent' OR fact_type = 'report') AND tags LIKE '%swarm%'"
+        query = (
+            "SELECT id, project, content, created_at, fact_type "
+            "FROM facts WHERE (fact_type = 'intent' OR fact_type = 'report') "
+            "AND tags LIKE '%swarm%'"
+        )
         params = []
         if project:
             query += " AND project = ?"

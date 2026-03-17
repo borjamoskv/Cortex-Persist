@@ -11,7 +11,11 @@ import logging
 import re
 import textwrap
 from pathlib import Path
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 from cortex.cli import console
 from cortex.extensions.mejoralo.constants import (
@@ -97,9 +101,15 @@ class MejoraloSwarm:
         file_path: Path,
         findings: list[str],
         iteration: int = 0,
+<<<<<<< HEAD
+        engine: MejoraloEngine | None = None,
+        project: str | None = None,
+    ) -> str | None:
+=======
         engine: Optional[MejoraloEngine] = None,
         project: Optional[str] = None,
     ) -> Optional[str]:
+>>>>>>> origin/main
         """Refactor code using surgical AST mode when possible, full-file fallback.
 
         Surgical mode:
@@ -142,7 +152,11 @@ class MejoraloSwarm:
     # ── Surgical AST Mode ──────────────────────────────────────────────────
 
     @staticmethod
+<<<<<<< HEAD
+    def _extract_infected_line(findings: list[str]) -> int | None:
+=======
     def _extract_infected_line(findings: list[str]) -> Optional[int]:
+>>>>>>> origin/main
         """Parse the first line number from MEJORAlo finding strings.
 
         Findings look like: 'path/to/file.py:42 -> High Complexity (15)'
@@ -158,7 +172,11 @@ class MejoraloSwarm:
     @staticmethod
     def _extract_infected_node(
         source: str, target_line: int
+<<<<<<< HEAD
+    ) -> tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str] | None:
+=======
     ) -> Optional[tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str]]:
+>>>>>>> origin/main
         """Find the innermost function/class definition that contains target_line.
 
         Returns (node, dedented_source_of_node) or None.
@@ -169,10 +187,17 @@ class MejoraloSwarm:
             return None
 
         lines = source.splitlines(keepends=True)
+<<<<<<< HEAD
+        best: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None = None
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+=======
         best: Optional[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef] = None
 
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+>>>>>>> origin/main
                 continue
             start = node.lineno
             end = getattr(node, "end_lineno", None)
@@ -203,7 +228,11 @@ class MejoraloSwarm:
         original_source: str,
         node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
         patched_node_source: str,
+<<<<<<< HEAD
+    ) -> str | None:
+=======
     ) -> Optional[str]:
+>>>>>>> origin/main
         """Replace the original node in the source with the patched version.
 
         Preserves original indentation by detecting the leading whitespace
@@ -241,7 +270,11 @@ class MejoraloSwarm:
         findings_str: str,
         scars_str: str,
         swarm_system: str,
+<<<<<<< HEAD
+    ) -> str | None:
+=======
     ) -> Optional[str]:
+>>>>>>> origin/main
         """Execute surgical AST refactor: extract node, patch, reintegrate."""
         # 1. Determine the infected line number
         target_line = self._extract_infected_line(findings)
@@ -286,7 +319,11 @@ class MejoraloSwarm:
             top_level = [
                 n
                 for n in ast.iter_child_nodes(patched_tree)
+<<<<<<< HEAD
+                if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+=======
                 if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+>>>>>>> origin/main
             ]
             if len(top_level) != 1:
                 logger.warning(
@@ -303,7 +340,11 @@ class MejoraloSwarm:
 
     # ── Full-File Prompt Builder ───────────────────────────────────────────────
 
+<<<<<<< HEAD
+    def _read_source(self, file_path: Path) -> str | None:
+=======
     def _read_source(self, file_path: Path) -> Optional[str]:
+>>>>>>> origin/main
         try:
             return file_path.read_text(errors="replace")
         except OSError as e:
@@ -311,7 +352,11 @@ class MejoraloSwarm:
             return None
 
     def _build_prompt(
+<<<<<<< HEAD
+        self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
+=======
         self, file_path: Path, content: str, findings_str: str, engine: Any, project: Optional[str]
+>>>>>>> origin/main
     ) -> str:
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         return (
@@ -320,7 +365,11 @@ class MejoraloSwarm:
             f"Current Code:\n```python\n{content}\n```"
         )
 
+<<<<<<< HEAD
+    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> str | None:
+=======
     async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> Optional[str]:
+>>>>>>> origin/main
         console.rule(f"[cyan]SOVEREIGN SWARM L{self.level} ENGAGED")
         with console.status("[bold green]Synthesizing specialists insights...", spinner="point"):
             try:
@@ -336,7 +385,11 @@ class MejoraloSwarm:
                 logger.error("Swarm orchestration failed: %s", e)
                 return None
 
+<<<<<<< HEAD
+    def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
+=======
     def _get_scars_prompt(self, engine: Any, project: Optional[str], filename: str) -> str:
+>>>>>>> origin/main
         """Helper to format previous failure scars without bloating main flow."""
         if not engine or not project:
             return ""
@@ -409,7 +462,11 @@ class MejoraloSwarm:
             "Return ONLY high-density Python code inside ```python blocks. No fluff."
         )
 
+<<<<<<< HEAD
+    def _extract_code(self, content: str) -> str | None:
+=======
     def _extract_code(self, content: str) -> Optional[str]:
+>>>>>>> origin/main
         """Extract and validate python code from LLM string output."""
         clean_code = None
         match = re.search(r"```python\n(.*?)```", content, re.DOTALL)

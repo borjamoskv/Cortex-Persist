@@ -8,7 +8,11 @@ Uses AppleScript + System Events for maximum reliability across apps.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.ui_control.applescript import run_applescript
 from cortex.extensions.ui_control.models import AppTarget, InteractionResult, WindowInfo
@@ -25,7 +29,11 @@ class WindowEngine:
     Handles listing, moving, resizing, minimizing, and fullscreen toggling.
     """
 
+<<<<<<< HEAD
+    def __init__(self, engine: CortexEngine | None = None) -> None:
+=======
     def __init__(self, engine: Optional[CortexEngine] = None) -> None:
+>>>>>>> origin/main
         self.engine = engine
 
     async def list_windows(self, app_name: str) -> list[WindowInfo]:
@@ -95,7 +103,11 @@ class WindowEngine:
                 logger.debug("Skipping malformed window line: %s", line)
         return windows
 
+<<<<<<< HEAD
+    async def get_frontmost(self) -> WindowInfo | None:
+=======
     async def get_frontmost(self) -> Optional[WindowInfo]:
+>>>>>>> origin/main
         """Returns the frontmost window of the frontmost application."""
         script = """
         tell application "System Events"

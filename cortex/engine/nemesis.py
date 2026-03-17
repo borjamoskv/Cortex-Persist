@@ -13,6 +13,14 @@ from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.nemesis")
 
+import aiosqlite
+
+from cortex.database.core import connect as db_connect
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+
+logger = logging.getLogger("cortex.nemesis")
+
 
 class NemesisRejection(Exception):
     """Raised when a fact violates the 130/100 standard and is rejected by Nemesis."""
@@ -71,7 +79,11 @@ class NemesisProtocol:
         return dynamic_rules
 
     @classmethod
+<<<<<<< HEAD
+    def analyze(cls, content: str, db_path: str | None = None) -> str | None:
+=======
     def analyze(cls, content: str, db_path: Optional[str] = None) -> Optional[str]:
+>>>>>>> origin/main
         """Analyze content and return rejection reason if it violates protocols."""
         content_lower = content.lower()
 
@@ -86,8 +98,13 @@ class NemesisProtocol:
 
     @classmethod
     async def analyze_async(
+<<<<<<< HEAD
+        cls, content: str, conn: aiosqlite.Connection | None = None
+    ) -> str | None:
+=======
         cls, content: str, conn: Optional[aiosqlite.Connection] = None
     ) -> Optional[str]:
+>>>>>>> origin/main
         """Analyze content asynchronously. Eliminates I/O wait on event loop (Ω₆)."""
         content_lower = content.lower()
 
@@ -127,7 +144,11 @@ class NemesisProtocol:
         return None
 
     @classmethod
+<<<<<<< HEAD
+    def _check_dynamic_antibodies(cls, content_lower: str, db_path: str | None) -> str | None:
+=======
     def _check_dynamic_antibodies(cls, content_lower: str, db_path: Optional[str]) -> Optional[str]:
+>>>>>>> origin/main
         """Helper to scan for dynamically generated antibodies."""
         for pattern, reason in cls._load_dynamic_antibodies():
             if re.search(pattern, content_lower):
@@ -169,7 +190,11 @@ class NemesisProtocol:
             logger.debug("Failed to emit nemesis signal: %s", e)
 
     @classmethod
+<<<<<<< HEAD
+    def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:
+=======
     def assimilate(cls, vector: str, reason: str, db_path: Optional[str] = None) -> bool:
+>>>>>>> origin/main
         """
         Ω₅: Dynamic Immunity. Converts an attack vector into a permanent antibody.
         'Asimilar el ataque y convertirlo en anticuerpo antes de que llegue al núcleo.'

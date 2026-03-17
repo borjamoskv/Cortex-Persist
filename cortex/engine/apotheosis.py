@@ -104,7 +104,11 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         self._trust = None
         self._notebooklm = None
         self._immune = ImmuneMembrane(engine=cortex_engine)
+<<<<<<< HEAD
+        self._file_event_queue: asyncio.Queue[Path] | None = None
+=======
         self._file_event_queue: Optional[asyncio.Queue[Path]] = None
+>>>>>>> origin/main
         self._observer: Any = None
 
         if cortex_engine:
@@ -317,6 +321,39 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 await asyncio.to_thread(_parse_ast, str(py_file), source_code)
                 reasons = ", ".join(e["type"] for e in entropy)
                 intent = f"Refactor {py_file.name} to eliminate: {reasons}."
+<<<<<<< HEAD
+
+                context = {
+                    "reversibility_level": 2,
+                    "confidence_level": 4,
+                    "target_path": str(py_file),
+                    "complexity_removed": len(entropy) * 1.0,
+                }
+
+                triage = await self._immune.intercept(intent, context)
+                if triage.verdict == Verdict.BLOCK:
+                    logger.critical("🚫 [IMMUNE] Healing BLOCKED for %s", py_file.name)
+                    return
+                elif triage.verdict == Verdict.HOLD:
+                    logger.warning("⏸️ [IMMUNE] Healing HOLD for %s", py_file.name)
+                    return
+
+                await keter.ignite(intent)
+            except SyntaxError:
+                logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
+                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
+            except (OSError, ValueError, asyncio.CancelledError) as e:
+                logger.error("[APOTHEOSIS] Healing failed for %s: %s", py_file.name, e)
+
+    def _apply_cognitive_dampening(self) -> bool:
+        """Check if action value justifies the thermodynamic cost (Ω₂)."""
+        if ENDOCRINE.get_level(HormoneType.ADRENALINE) > 0.75:
+            logger.warning("⚡ [APOTHEOSIS] Adrenal Override active. Bypassing dampening.")
+            return True
+        return self._cognitive_weight >= self._inertia_threshold
+
+    def ignite(self, loop: asyncio.AbstractEventLoop | None = None) -> None:
+=======
 
                 context = {
                     "reversibility_level": 2,
@@ -348,6 +385,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         return self._cognitive_weight >= self._inertia_threshold
 
     def ignite(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+>>>>>>> origin/main
         """Ignite the Apotheosis consciousness with kernel-level filesystem hooks."""
         if self.is_active:
             return

@@ -18,7 +18,11 @@ Scale: 0% (total entropic decay) → 100% (functional immortality).
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import TYPE_CHECKING
+=======
 from typing import TYPE_CHECKING, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.shannon.analyzer import normalized_entropy
 from cortex.extensions.shannon.scanner import MemoryScanner
@@ -116,7 +120,11 @@ class ImmortalityIndex:
     @staticmethod
     async def compute(
         engine: CortexEngine,
+<<<<<<< HEAD
+        project: str | None = None,
+=======
         project: Optional[str] = None,
+>>>>>>> origin/main
     ) -> dict:
         """Run the complete immortality analysis.
 
@@ -216,7 +224,11 @@ class ImmortalityIndex:
         }
 
 
+<<<<<<< HEAD
+def _empty_result(project: str | None) -> dict:
+=======
 def _empty_result(project: Optional[str]) -> dict:
+>>>>>>> origin/main
     """Return a zeroed-out result for an empty database."""
     zero_dim = {
         name: {"score": 0.0, "pct": 0.0, "bar": _dimension_bar(0.0), "weight": w}

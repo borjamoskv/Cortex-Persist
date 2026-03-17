@@ -12,7 +12,10 @@ import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum, auto
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 log = logging.getLogger(__name__)
 
@@ -95,7 +98,11 @@ class RiskManager:
         self.circuit_breaker_triggered = False
         self.consecutive_rejections = 0
         self.MAX_CONSECUTIVE_REJECTIONS = 3
+<<<<<<< HEAD
+        self._cb_timer: threading.Timer | None = None
+=======
         self._cb_timer: Optional[threading.Timer] = None
+>>>>>>> origin/main
 
     def approve_trade(self, position: Position, portfolio: Portfolio) -> bool:
         """Cada trade DEBE pasar por aquí. Sin excepciones."""

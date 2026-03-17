@@ -9,7 +9,11 @@ Axioma Ω₅ — Antifragile by Default.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.engine import CortexEngine
 from cortex.extensions.llm.router import IntentProfile
@@ -46,7 +50,11 @@ Formato: Markdown estricto bajo el encabezado ## 🦅 VEREDICTO & EFECTOS (OLIVE
 class FrontierAuditor:
     """Ejecuta una auditoría letal y exhaustiva de la frontera de CORTEX (Axioma Ω3 & Ω5)."""
 
+<<<<<<< HEAD
+    def __init__(self, engine: CortexEngine, model_override: str | None = None) -> None:
+=======
     def __init__(self, engine: CortexEngine, model_override: Optional[str] = None) -> None:
+>>>>>>> origin/main
         self.engine = engine
         self._custom_model = model_override
         # Preferred models, ideally Google Gemini 1.5 Pro for massive context, or top-tier Qwen/Anthropic.

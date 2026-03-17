@@ -38,8 +38,13 @@ async def text_search(
     fact_type: Optional[str] = None,
     tags: Optional[list[str]] = None,
     limit: int = 20,
+<<<<<<< HEAD
+    as_of: str | None = None,
+    confidence: str | None = None,
+=======
     as_of: Optional[str] = None,
     confidence: Optional[str] = None,
+>>>>>>> origin/main
     **kwargs,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
@@ -63,12 +68,21 @@ async def _fts5_search(
     conn: aiosqlite.Connection,
     query: str,
     tenant_id: str,
+<<<<<<< HEAD
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+=======
     project: Optional[str],
     fact_type: Optional[str],
     tags: Optional[list[str]],
     limit: int,
     as_of: Optional[str],
     confidence: Optional[str],
+>>>>>>> origin/main
 ) -> list:
     fts_query = _sanitize_fts_query(query)
     sql = """
@@ -110,12 +124,21 @@ async def _like_search(
     conn: aiosqlite.Connection,
     query: str,
     tenant_id: str,
+<<<<<<< HEAD
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+=======
     project: Optional[str],
     fact_type: Optional[str],
     tags: Optional[list[str]],
     limit: int,
     as_of: Optional[str],
     confidence: Optional[str],
+>>>>>>> origin/main
 ) -> list:
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
@@ -154,7 +177,11 @@ def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
     tenant_id: str = "default",
+<<<<<<< HEAD
+    project: str | None = None,
+=======
     project: Optional[str] = None,
+>>>>>>> origin/main
     limit: int = 20,
 ) -> list[SearchResult]:
     """Full-text search (sync)."""

@@ -15,7 +15,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 
 class AxiomCategory(str, Enum):
@@ -35,7 +38,11 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
+<<<<<<< HEAD
+    ci_gate: str | None = None
+=======
     ci_gate: Optional[str] = None
+>>>>>>> origin/main
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -345,23 +352,74 @@ _ASPIRATIONAL: list[Axiom] = [
 # THE REGISTRY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+<<<<<<< HEAD
+
+class AxiomRegistry:
+    """Sovereign Axiom Registry.
+
+    Provides a class-based interface for axiom lookup and CI gate verification.
+    Matches the pattern used by CollectorRegistry and other system components.
+    """
+
+    def __init__(self):
+        self._axioms: dict[str, Axiom] = {
+            ax.id: ax for ax in [*_CONSTITUTIONAL, *_OPERATIONAL, *_ASPIRATIONAL]
+        }
+        self._guarded: dict[str, Axiom] = {
+            ax.id: ax for ax in self._axioms.values() if ax.ci_gate is not None
+        }
+
+    async def load(self) -> None:
+        """Mock load for interface compatibility.
+        Axioms are currently static but may transition to persistent storage.
+        """
+        pass
+
+    def get(self, axiom_id: str) -> Axiom | None:
+        """Retrieve an axiom by its canonical ID (e.g., 'AX-010')."""
+        return self._axioms.get(axiom_id)
+
+    def by_category(self, category: AxiomCategory) -> list[Axiom]:
+        """Return all axioms in a given category."""
+        return [ax for ax in self._axioms.values() if ax.category == category]
+
+    def enforced(self) -> list[Axiom]:
+        """Return only axioms with a CI gate that blocks merges."""
+        return list(self._guarded.values())
+
+
+# Legacy exports for backwards compatibility
+=======
+>>>>>>> origin/main
 AXIOM_REGISTRY: dict[str, Axiom] = {
     ax.id: ax for ax in [*_CONSTITUTIONAL, *_OPERATIONAL, *_ASPIRATIONAL]
 }
 
+<<<<<<< HEAD
+
+def by_category(category: AxiomCategory) -> list[Axiom]:
+=======
 # ── Lookup helpers ─────────────────────────────────────────────────────────────
 
 
 def by_category(category: AxiomCategory) -> list[Axiom]:
     """Return all axioms in a given category."""
+>>>>>>> origin/main
     return [ax for ax in AXIOM_REGISTRY.values() if ax.category == category]
 
 
 def enforced() -> list[Axiom]:
+<<<<<<< HEAD
+    return [ax for ax in AXIOM_REGISTRY.values() if ax.ci_gate is not None]
+
+
+def get(axiom_id: str) -> Axiom | None:
+=======
     """Return only axioms with a CI gate that blocks merges."""
     return [ax for ax in AXIOM_REGISTRY.values() if ax.ci_gate is not None]
 
 
 def get(axiom_id: str) -> Optional[Axiom]:
     """Retrieve an axiom by its canonical ID (e.g., 'AX-010')."""
+>>>>>>> origin/main
     return AXIOM_REGISTRY.get(axiom_id)

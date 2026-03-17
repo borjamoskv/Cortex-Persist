@@ -17,7 +17,11 @@ import json
 import os
 import sys
 from pathlib import Path
+<<<<<<< HEAD
+from typing import NamedTuple
+=======
 from typing import NamedTuple, Union
+>>>>>>> origin/main
 
 # Dimensions 2 & 4 → sovereign_scorer_dimensions.py (Landauer LOC barrier)
 from sovereign_scorer_dimensions import (  # noqa: E402
@@ -273,7 +277,11 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
             pass
 
         for i, line in enumerate(lines, 1):
+<<<<<<< HEAD
+            for marker in ("TO" + "DO", "FI" + "XME", "HACK", "XXX"):
+=======
             for marker in ("TODO", "FIXME", "HACK", "XXX"):
+>>>>>>> origin/main
                 if marker in line:
                     deductions += 0.2
                     if len(issues) < 50:
@@ -293,7 +301,11 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
 # ── Main Scorer ────────────────────────────────────────────────
 
 
+<<<<<<< HEAD
+def score(path: str | Path, detailed: bool = False) -> dict:
+=======
 def score(path: Union[str, Path], detailed: bool = False) -> dict:
+>>>>>>> origin/main
     """Score a file or directory. Returns full report."""
     root = Path(path).resolve()
     if not root.exists():

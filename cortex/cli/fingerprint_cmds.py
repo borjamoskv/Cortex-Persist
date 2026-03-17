@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json as json_mod
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 import click
 
@@ -49,7 +52,11 @@ def _arch_badge(name: str, confidence: float) -> str:
 @click.option("--prompt", is_flag=True, help="Output agent prompt injection.")
 @click.option("--top", default=15, help="Max domain preferences shown.", show_default=True)
 def fingerprint_extract(
+<<<<<<< HEAD
+    project: str | None,
+=======
     project: Optional[str],
+>>>>>>> origin/main
     as_json: bool,
     prompt: bool,
     top: int,

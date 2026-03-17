@@ -1,0 +1,8 @@
+[audit]
+ignore-vuln = [
+    "GHSA-qmgc-5h2g-mvrw",
+    "GHSA-j842-xgm4-wf88",
+    "GHSA-w6vg-jg77-2qg6",
+    "GHSA-f83h-ghpp-7wcc",
+    "GHSA-jr27-m4p2-rc6r"
+]

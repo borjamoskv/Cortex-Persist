@@ -20,6 +20,8 @@ from typing import Any, Optional
 
 from cortex.memory.memory_retrieval import _fetch_dense_results
 
+from cortex.memory.memory_retrieval import _fetch_dense_results
+
 logger = logging.getLogger("cortex.memory.thalamus")
 
 
@@ -49,9 +51,15 @@ class ThalamusGate:
         project_id: str,
         tenant_id: str,
         fact_type: str = "general",
+<<<<<<< HEAD
+        parent_decision_id: int | None = None,
+        conn: Any = None,
+    ) -> tuple[bool, str, Any | None]:
+=======
         parent_decision_id: Optional[int] = None,
         conn: Any = None,
     ) -> tuple[bool, str, Optional[Any]]:
+>>>>>>> origin/main
         """
         Determines if a fact should be encoded, merged, or discarded.
 
@@ -137,7 +145,11 @@ class ThalamusGate:
         self,
         proposals: list[dict],
         verifier: Any,
+<<<<<<< HEAD
+    ) -> dict | None:
+=======
     ) -> Optional[dict]:
+>>>>>>> origin/main
         """
         Arbitrate conflicting proposals dynamically based on Bayesian Trust.
         Groups by content, sums trust scores for each content group,

@@ -55,7 +55,11 @@ class _LazyCommand(click.Command):
         self._module_path = module_path
         self._attr_name = attr_name
         self._help_text = help_text
+<<<<<<< HEAD
+        self._resolved: click.Command | None = None
+=======
         self._resolved: Optional[click.Command] = None
+>>>>>>> origin/main
 
     def _resolve(self) -> click.Command:
         if self._resolved is None:
@@ -94,9 +98,15 @@ class _LazyCommand(click.Command):
 
     def make_context(
         self,
+<<<<<<< HEAD
+        info_name: str | None,
+        args: list[str],
+        parent: click.Context | None = None,
+=======
         info_name: Optional[str],
         args: list[str],
         parent: Optional[click.Context] = None,
+>>>>>>> origin/main
         **extra,
     ) -> click.Context:
         return self._resolve().make_context(info_name, args, parent=parent, **extra)
@@ -120,7 +130,11 @@ class _LazyGroup(_LazyCommand, click.Group):
             return resolved.list_commands(ctx)
         return []
 
+<<<<<<< HEAD
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
+=======
     def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+>>>>>>> origin/main
         resolved = self._resolve()
         if isinstance(resolved, click.Group):
             return resolved.get_command(ctx, cmd_name)
@@ -146,7 +160,10 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.lineage_cmds",
     "cortex.cli.loop_cmds",
     "cortex.cli.mejoralo_cmds",
+<<<<<<< HEAD
+=======
     "cortex.cli.memory_cmds",
+>>>>>>> origin/main
     "cortex.cli.prompt_cmds",
     "cortex.cli.purge",
     "cortex.cli.reflect_cmds",
@@ -157,11 +174,19 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.status_cmds",
     "cortex.cli.storage_cmds",
     "cortex.cli.swarm_cmds",
+<<<<<<< HEAD
+    "cortex.cli.swarm_10k_cmds",
+=======
+>>>>>>> origin/main
     "cortex.cli.sync_cmds",
     "cortex.cli.time_cmds",
     "cortex.cli.timeline_cmds",
     "cortex.cli.tips_cmds",
     "cortex.cli.trust_cmds",
+<<<<<<< HEAD
+    "cortex.cli.memory_cmds",
+=======
+>>>>>>> origin/main
     "cortex.cli.vote_ledger",
 ]
 
@@ -204,6 +229,15 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
     ("genesis", "cortex.cli.genesis_cmds", "genesis_group", "Genesis Engine — create systems."),
     ("health", "cortex.cli.health_cmds", "health_group", "Health Index — system monitoring."),
+<<<<<<< HEAD
+    (
+        "immune",
+        "cortex.cli.immune_cmds",
+        "immune_group",
+        "Immune system and epistemic membrane commands.",
+    ),
+=======
+>>>>>>> origin/main
     ("routing", "cortex.cli.routing_cmds", "routing", "LLM routing — tier/cost-aware selection."),
     ("maestro", "cortex.cli.maestro_cmds", "maestro", "Autonomous Mac automation agent."),
     (
@@ -227,6 +261,12 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Domain intelligence and market anomaly arbitrage.",
     ),
     ("wealth", "cortex.cli.wealth_cmds", "wealth_cmds", "Wealth engine."),
+<<<<<<< HEAD
+    ("gateway", "cortex.cli.gateway_cmds", "gateway_cmds", "CORTEX gateway management."),
+    ("memory", "cortex.cli.memory_cmds", "memory_cmds", "CORTEX memory management."),
+    ("doctor", "cortex.cli.doctor_cmds", "doctor", "🩺 CORTEX Doctor — Diagnostic tool."),
+=======
+>>>>>>> origin/main
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────
@@ -262,7 +302,11 @@ def _patched_list_commands(ctx: click.Context) -> list[str]:
     return _original_list_commands(ctx)
 
 
+<<<<<<< HEAD
+def _patched_get_command(ctx: click.Context, cmd_name: str) -> click.Command | None:
+=======
 def _patched_get_command(ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+>>>>>>> origin/main
     """Get a command, loading self-registering modules if not found."""
     # First try without loading (catches lazy groups + already loaded commands)
     cmd = _original_get_command(ctx, cmd_name)

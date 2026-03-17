@@ -28,6 +28,12 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
+<<<<<<< HEAD
+from cortex.extensions.metering.middleware import MeteringMiddleware
+from cortex.extensions.swarm.manager import get_swarm_manager
+from cortex.extensions.timing import TimingTracker
+from cortex.routes import api_router
+=======
 from cortex.extensions.hive.main import router as hive_router
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.timing import TimingTracker
@@ -97,6 +103,7 @@ from cortex.routes import (
     translate as translate_router,
 )
 from cortex.routes import usage as usage_router
+>>>>>>> origin/main
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -140,6 +147,8 @@ async def lifespan(app: FastAPI):
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
+
+    app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
     import cortex.auth
@@ -194,6 +203,7 @@ app = FastAPI(
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
+app.state.swarm_manager = get_swarm_manager()
 
 
 # ─── Internal Middleware ──────────────────────────────────────────────
@@ -272,6 +282,24 @@ async def root_node(request: Request) -> dict:
     }
 
 
+# ─── Backward Compatibility Redirects ───────────────────────────────
+
+
+@app.api_route(
+    "/v1/memories/{path:path}",
+    methods=["GET", "POST", "DELETE", "PUT", "PATCH"],
+    include_in_schema=False,
+)
+async def memory_redirect(path: str, request: Request):
+    """Redirect legacy /v1/memories/* to /v1/facts/* (v5.1 consolidation)."""
+    from fastapi.responses import RedirectResponse
+
+    # Map the URL path
+    new_url = str(request.url).replace("/v1/memories", "/v1/facts")
+    logger.info("Redirecting legacy client: %s -> %s", request.url.path, new_url)
+    return RedirectResponse(url=new_url, status_code=307)
+
+
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
@@ -282,7 +310,17 @@ async def health_check(request: Request) -> dict:
         if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
             cortisol = engine.manager._endocrine.cortisol_level
             growth = engine.manager._endocrine.neural_growth
+<<<<<<< HEAD
+    except (
+        ValueError,
+        KeyError,
+        OSError,
+        RuntimeError,
+        AttributeError,
+    ):  # noqa: BLE001 — health check must never crash
+=======
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — health check must never crash
+>>>>>>> origin/main
         pass
 
     # Health Index integration
@@ -327,6 +365,9 @@ async def get_metrics():
 # ─── Router Inclusion ────────────────────────────────────────────────
 
 
+<<<<<<< HEAD
+app.include_router(api_router)
+=======
 app.include_router(events_router.events_router)
 app.include_router(facts_router.router)
 app.include_router(search_router.router)
@@ -354,17 +395,9 @@ app.include_router(usage_router.router)
 app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)
 app.include_router(health_index_router.router)
+>>>>>>> origin/main
 
-# Gateway — Universal Intelligence Entry Point
-from cortex.gateway.adapters import (  # noqa: E402
-    rest_router as gateway_rest_router,
-)
-from cortex.gateway.adapters import (  # noqa: E402
-    telegram_router as gateway_telegram_router,
-)
-
-app.include_router(gateway_rest_router)
-app.include_router(gateway_telegram_router)
+# Extensions and third-party integrations
 
 # Extension modules (opt-in)
 if config.LANGBASE_API_KEY:

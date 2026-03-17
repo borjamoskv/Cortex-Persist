@@ -6,7 +6,11 @@ at init time instead of being hardcoded into store_mixin.py.
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+from typing import Any, Protocol, runtime_checkable
+=======
 from typing import Any, Optional, Protocol, runtime_checkable
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -55,7 +59,11 @@ class ContentMutator(Protocol):
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        source: str | None = None,
+=======
         source: Optional[str] = None,
+>>>>>>> origin/main
     ) -> tuple[str, str, dict[str, Any]]:
         """Transform content before storage.
 
@@ -81,8 +89,13 @@ class PostStoreHook(Protocol):
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        source: str | None = None,
+        db_path: str | None = None,
+=======
         source: Optional[str] = None,
         db_path: Optional[str] = None,
+>>>>>>> origin/main
     ) -> None:
         """Execute post-store side effect.
 

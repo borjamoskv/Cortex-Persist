@@ -2,12 +2,20 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any, cast
+=======
 from typing import TYPE_CHECKING, Any, Optional, cast
+>>>>>>> origin/main
 
 from pydantic import ValidationError
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.store_validators import validate_content
+<<<<<<< HEAD
+from cortex.immunity.haiku import HaikuGuard
+=======
+>>>>>>> origin/main
 from cortex.utils.canonical import now_iso
 
 if TYPE_CHECKING:
@@ -49,7 +57,11 @@ class FactManager:
         tenant_id = self.engine._resolve_tenant(tenant_id)
         conn = conn or await self.engine.get_conn()
 
+        # Ω₄: Aesthetic Integrity (Inmunidad Haiku)
+        HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
+
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
+
         if (
             hasattr(self.engine, "memory")
             and self.engine.memory
@@ -120,7 +132,11 @@ class FactManager:
             raise ValueError("Facts list cannot be empty")
         return await self.engine.store_many(facts)
 
+<<<<<<< HEAD
+    async def get_fact(self, fact_id: int) -> Fact | None:
+=======
     async def get_fact(self, fact_id: int) -> Optional[Fact]:
+>>>>>>> origin/main
         """Retrieve any fact by ID, including deprecated ones."""
         raw = await self.engine.get_fact(fact_id)
         if not raw:
@@ -137,8 +153,13 @@ class FactManager:
     async def get_all_active_facts(
         self,
         tenant_id: str = "default",
+<<<<<<< HEAD
+        project: str | None = None,
+        fact_types: list[str] | None = None,
+=======
         project: Optional[str] = None,
         fact_types: Optional[list[str]] = None,
+>>>>>>> origin/main
     ) -> list[Fact]:
         """Retrieve all active facts, delegated to QueryMixin and wrapped in models."""
         results = await self.engine.get_all_active_facts(
@@ -156,14 +177,22 @@ class FactManager:
         return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
 
     async def history(
+<<<<<<< HEAD
+        self, project: str, tenant_id: str = "default", as_of: str | None = None
+=======
         self, project: str, tenant_id: str = "default", as_of: Optional[str] = None
+>>>>>>> origin/main
     ) -> list[Fact]:
         """Temporal history delegated to QueryMixin."""
         results = await self.engine.history(project=project, tenant_id=tenant_id, as_of=as_of)
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     async def time_travel(
+<<<<<<< HEAD
+        self, tx_id: int, tenant_id: str = "default", project: str | None = None
+=======
         self, tx_id: int, tenant_id: str = "default", project: Optional[str] = None
+>>>>>>> origin/main
     ) -> list[Fact]:
         """Project state reconstruction delegated to QueryMixin."""
         results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id)

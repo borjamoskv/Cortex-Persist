@@ -8,7 +8,11 @@ with code + context payloads, runs invariant checks, returns TASK_RESULT.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import SqliteMessageBus
@@ -28,7 +32,11 @@ class VerificationAgent(BaseAgent):
         manifest: AgentManifest,
         bus: SqliteMessageBus,
         tool_registry: ToolRegistry,
+<<<<<<< HEAD
+        verifier: SovereignVerifier | None = None,
+=======
         verifier: Optional[SovereignVerifier] = None,
+>>>>>>> origin/main
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
         self._verifier = verifier or SovereignVerifier()

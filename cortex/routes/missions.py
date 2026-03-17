@@ -31,6 +31,13 @@ async def launch_mission(
         formation=request.formation,
         agents=request.agents,
     )
+    # Sanitize: never expose raw error details to the client
+    if result.get("status") == "error" and "error" in result:
+        import logging
+
+        logger = logging.getLogger("cortex.routes.missions")
+        logger.error("Mission launch failed: %s", result.get("error"))
+        result["error"] = "An internal error occurred during mission launch."
     return result
 
 

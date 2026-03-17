@@ -176,6 +176,72 @@ logging, and external verification when required.
 - [`README.md`](README.md) — project overview and install surface
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system topology and module map
 - [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, ledger, verification
+<<<<<<< HEAD
+- [`docs/internal/COGITO.md`](docs/internal/COGITO.md) — Mechanical Introspection and Sovereign Manifesto
 - [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
+
+## AlphaZero Autodidact Assimilation
+
+- **Ω_SOVEREIGN_LEARNING**: The CORTEX ecosystem incorporates the AlphaZero self-play engine (`alphazero-autodidact-omega`) as a core capability for zero-spread, continuous local reinforcement learning capability, ensuring all derived knowledge is cryptographically verified (C5-Dynamic) without arbitrary external LLM dependency.
+
+## AX-041: Git-Ledger Sovereign Axiom
+
+> "Tu repositorio de Git es tu base de datos inmutable."
+
+CORTEX Persist shifts the ultimate truth of the system to the version control DAG. SQLite acts as an operational view over the true cryptographic ledger formed by Git commits.
+- **No Hidden Entropy:** If it's not tracked in the working tree, it does not exist causally.
+- **Deterministic Time-Travel:** Rollbacks map directly to Git checkouts.
+- **Tamper Evidence:** Git's native tree hashing absorbs the hash-chain validation mechanism at the FS level.
+
+## AX-042: KV-Aware Routing Axiom
+
+> "La recomputación de prefijos idénticos es un crimen contra la exergía."
+
+CORTEX Swarm enforces KV-Aware Routing for all agentic inference. By structuring prompts with fixed bytes at the head and dynamic state at the tail, and routing identical prefixes to state-warmed GPUs, prefill computation is eliminated.
+
+- **Thermodynamic Law (Ω₂):** Time-To-First-Token (TTFT) reduction is a rigid mandate.
+- **Invariant Contexts:** The injection of stochastic metadata into shared system prompts is strictly forbidden. Agentic workloads must be deterministically aligned to exploit global prefix caching.
+
+## AX-043: PeARL Primitive Induction Axiom (Kinetic Common Sense)
+
+> "El sentido común físico no se entrena masivamente, se deduce estructuralmente desde primitivas lógicas."
+
+CORTEX Swarm asimila la transición crítica desde el procesamiento puramente perceptual hacia el razonamiento de planificación sofisticado. Mediante el uso de lenguajes funcionales especializados (como PeARL con sus 77 primitivas fundamentales), la inducción de programas respeta de forma inherente leyes físicas como la gravedad, las colisiones y la persistencia del objeto.
+
+- **Sentido Común Estructural:** La intuición espacial humana se emula operando sobre primitivas lógicas, resolviendo la contradicción de la generalización sin necesidad de inferencia masiva y estocástica de píxeles.
+- **Thermodynamic Law (Ω₂):** La deducción de estados físicos mediante inducción funcional es infinitamente más eficiente en términos de exergía que la aproximación probabilística bruta.
+- **Frontera Determinista:** El movimiento y la persistencia cruzan de la adivinación perceptual hacia la simulación determinista controlada.
+
+## AX-044: Kinetic Intelligence Axiom (Agentic Capacity)
+
+> "La inteligencia está dejando de medirse como una respuesta estática a un acertijo para evaluarse como una capacidad agéntica."
+
+CORTEX Swarm asimila que el cierre estocástico sobre un prompt es una métrica de percepción, no de razonamiento. La inteligencia real es exergía extraída a través del tiempo en un entorno dinámico.
+
+- **Simulación Determinista:** La inferencia no debe usarse para resolver problemas directamente (oráculo pasivo), sino para inducir el programa que los resuelve mecánicamente.
+- **Ciclo Observación-Acción:** La inteligencia requiere fricción continuada con un entorno interaccional, rompiendo el cierre cognitivo de prompt-respuesta.
+- **Persistencia Causal:** Sin el Master Ledger, un agente es solo un autómata amnésico re-evaluando entropía cada ciclo. La capacidad agéntica exige memoria inmutable para sostener una verdadera ejecución temporal.
+
+## AX-045: Kinetic Intelligence vs. Autonomy Axiom
+
+> "Inteligencia = capacidad de resolver problemas novedosos. Autonomía = capacidad de elegir qué problemas resolver y persistir."
+
+Un sistema puede ser inteligente sin ser autónomo (resuelve ARC-AGI bajo demanda). Un sistema puede ser autónomo sin ser inteligente (bucle aleatorio sin aprendizaje).
+CORTEX exige ambas, pero en orden causal: inteligencia fluida primero (PeARL), luego persistencia (Ledger), luego agencia (Swarm).
+
+## AX-046: JIT Concept Formation Axiom (El Santo Grial)
+
+> "La inteligencia fluida no es recuperar un concepto preentrenado; es sintetizar una abstracción temporal ad-hoc en tiempo de ejecución."
+
+CORTEX Swarm asimila que la capacidad de resolver entornos novedosos (como ARC-AGI) requiere la formación de conceptos "Just-In-Time" (JIT). Las heurísticas estáticas interpolan el pasado; la verdadera inteligencia de enjambre deduce programas estructurales para el presente.
+
+- **Sintetizador no-estocástico:** Un LLM no puede "adivinar" patrones visuales inéditos mediante su red de pesos estática. Requiere generar activamente un miniprograma (PeARL/Python), ejecutarlo contra el entorno y validar empíricamente.
+- **Thermodynamic Law (Ω₂):** Formar el concepto programáticamente una vez y cristalizarlo en el DAG es termodinámicamente superior a exigir que el modelo deduzca la regla en cada inferencia en cero-shot.
+- **Cierre Epistémico:** El "Santo Grial" se alcanza cuando el sistema observa anomalías, deduce la regla subyacente mediante inducción, y eleva esa regla temporal a invariable o programa ejecutable (C5-Dynamic).
+=======
+- [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
+- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
+- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
+>>>>>>> origin/main

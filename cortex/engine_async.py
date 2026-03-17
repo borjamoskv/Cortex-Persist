@@ -44,20 +44,47 @@ class AsyncCortexEngine(
         self._pool = pool
         self._db_path = Path(db_path)
         self._writer = writer
+<<<<<<< HEAD
+        self._embedder: LocalEmbedder | None = None
+        self._ledger: ImmutableLedger | None = None
+        self.vault: Any | None = None
+=======
         self._embedder: Optional[LocalEmbedder] = None
         self._ledger: Optional[ImmutableLedger] = None
         self.vault: Optional[Any] = None
+>>>>>>> origin/main
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
+        self._trust_registry: Any | None = None
 
     @property
     def cuatrida(self) -> Any:
         return self._cuatrida
 
+    def get_trust_registry(self) -> Any:
+        """Access the Bayesian Trust Registry (Ω₃)."""
+        if self._trust_registry is None:
+            from cortex.engine.trust_registry import TrustRegistry
+
+            self._trust_registry = TrustRegistry()
+        return self._trust_registry
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str = "default") -> Any:
+        """Propagate taint (Ω₁₃) through the causal DAG."""
+        from cortex.engine.causality import AsyncCausalGraph
+
+        async with self.session() as conn:
+            graph = AsyncCausalGraph(conn)
+            return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
+
     @property
+<<<<<<< HEAD
+    def writer(self) -> SqliteWriteWorker | None:
+=======
     def writer(self) -> Optional[SqliteWriteWorker]:
+>>>>>>> origin/main
         return self._writer
 
     async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
@@ -77,7 +104,11 @@ class AsyncCortexEngine(
 
     async def _try_execute_write(
         self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
+<<<<<<< HEAD
+    ) -> Result[int, str] | None:
+=======
     ) -> Optional[Result[int, str]]:
+>>>>>>> origin/main
         try:
             result = await self._execute_write(sql, params)
             if result:
@@ -88,7 +119,11 @@ class AsyncCortexEngine(
             await self._backoff(attempt)
         return None
 
+<<<<<<< HEAD
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str] | None:
+=======
     async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Optional[Result[int, str]]:
+>>>>>>> origin/main
         async with self.session() as conn:
             cursor = await conn.execute(sql, params)
             await conn.commit()
@@ -125,10 +160,24 @@ class AsyncCortexEngine(
         return self._ledger
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        action: str,
+        detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         dj = canonical_json(detail)
         ts = now_iso()
+<<<<<<< HEAD
+        prev_hash = await self._get_previous_hash(conn, tenant_id)
+        th = compute_tx_hash(prev_hash, project, action, dj, ts)
+
+        cursor = await conn.execute(
+            "INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (tenant_id, project, action, dj, prev_hash, th, ts),
+=======
         prev_hash = await self._get_previous_hash(conn)
         th = compute_tx_hash(prev_hash, project, action, dj, ts)
 
@@ -136,6 +185,7 @@ class AsyncCortexEngine(
             "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
             "VALUES (?, ?, ?, ?, ?, ?)",
             (project, action, dj, prev_hash, th, ts),
+>>>>>>> origin/main
         )
         await self._update_transaction_hash_if_needed(
             conn,
@@ -145,6 +195,10 @@ class AsyncCortexEngine(
             dj,
             ts,
             prev_hash,  # type: ignore[type-error]
+<<<<<<< HEAD
+            tenant_id,
+=======
+>>>>>>> origin/main
         )
         tx_id = cursor.lastrowid
         self._get_ledger().record_write()
@@ -154,13 +208,21 @@ class AsyncCortexEngine(
                 project=project,
                 intent=action,
                 dimension=Dimension.TEMPORAL_SOVEREIGNTY,
-                metadata={"tx_id": tx_id, "detail": detail},
+                metadata={"tx_id": tx_id, "detail": detail, "tenant_id": tenant_id},
                 conn=conn,
             )
         return tx_id  # type: ignore[type-error]
 
+<<<<<<< HEAD
+    async def _get_previous_hash(self, conn: aiosqlite.Connection, tenant_id: str) -> str:
+        async with conn.execute(
+            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (tenant_id,),
+        ) as cursor:
+=======
     async def _get_previous_hash(self, conn: aiosqlite.Connection) -> str:
         async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+>>>>>>> origin/main
             prev = await cursor.fetchone()
             return prev[0] if prev else "GENESIS"
 
@@ -173,8 +235,17 @@ class AsyncCortexEngine(
         dj: str,
         ts: str,
         initial_ph: str,
+<<<<<<< HEAD
+        tenant_id: str,
+    ):
+        async with conn.execute(
+            "SELECT prev_hash FROM transactions WHERE id = ? AND tenant_id = ?",
+            (tx_id, tenant_id),
+        ) as c2:
+=======
     ):
         async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as c2:
+>>>>>>> origin/main
             row = await c2.fetchone()
             actual_ph = row[0] if row else initial_ph
             if actual_ph != initial_ph:

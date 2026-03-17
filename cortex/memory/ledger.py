@@ -17,7 +17,11 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import aiosqlite
 
@@ -146,7 +150,11 @@ class EventLedgerL3:
     async def get_session_events(
         self,
         session_id: str,
+<<<<<<< HEAD
+        tenant_id: str | None = None,
+=======
         tenant_id: Optional[str] = None,
+>>>>>>> origin/main
         limit: int = 100,
     ) -> list[MemoryEvent]:
         """Retrieve events for a session in chronological order, scoped by tenant."""
@@ -179,7 +187,11 @@ class EventLedgerL3:
         rows = await cursor.fetchall()
         return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
 
+<<<<<<< HEAD
+    async def count(self, tenant_id: str, session_id: str | None = None) -> int:
+=======
     async def count(self, tenant_id: str, session_id: Optional[str] = None) -> int:
+>>>>>>> origin/main
         """Count events for a tenant, optionally filtered by session."""
         await self.ensure_table()
         if session_id:

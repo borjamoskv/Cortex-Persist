@@ -1,6 +1,10 @@
 import pytest
 
+<<<<<<< HEAD
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
+=======
 from cortex.guards.capabilities import Capability, RiskTier
+>>>>>>> origin/main
 from cortex.guards.capability_guard import CapabilityGuard
 
 
@@ -11,7 +15,16 @@ def analytics_guard() -> CapabilityGuard:
         Capability(name="fs:read", tier=RiskTier.TIER_1_LOCAL_SAFE),
         Capability(name="mem:query", tier=RiskTier.TIER_0_ANALYTICAL),
     }
+<<<<<<< HEAD
+    creds = AgentCredentials(
+        agent_id="test-analyst",
+        capabilities=caps,
+        max_tier=RiskTier.TIER_1_LOCAL_SAFE
+    )
+    return CapabilityGuard(credentials=creds)
+=======
     return CapabilityGuard(allowed_capabilities=caps)
+>>>>>>> origin/main
 
 
 @pytest.fixture
@@ -22,7 +35,16 @@ def execution_guard() -> CapabilityGuard:
         Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION),
         Capability(name="git:commit", tier=RiskTier.TIER_3_LOCAL_MUTATION),
     }
+<<<<<<< HEAD
+    creds = AgentCredentials(
+        agent_id="test-executor",
+        capabilities=caps,
+        max_tier=RiskTier.TIER_3_LOCAL_MUTATION
+    )
+    return CapabilityGuard(credentials=creds)
+=======
     return CapabilityGuard(allowed_capabilities=caps)
+>>>>>>> origin/main
 
 
 def test_capability_guard_success(analytics_guard: CapabilityGuard) -> None:
@@ -44,6 +66,38 @@ def missing_capability_violation(execution_guard: CapabilityGuard) -> None:
         execution_guard.validate_action("network:get", RiskTier.TIER_2_REMOTE_READ)
 
 
+<<<<<<< HEAD
+def test_dynamic_capability_grant_with_high_ceiling() -> None:
+    # Setup agent with high ceiling (Tier 5)
+    caps = {Capability(name="fs:read", tier=RiskTier.TIER_1_LOCAL_SAFE)}
+    creds = AgentCredentials(
+        agent_id="test-elevatable",
+        capabilities=caps,
+        max_tier=RiskTier.TIER_4_REMOTE_MUTATION
+    )
+    guard = CapabilityGuard(credentials=creds)
+
+    # Initially max tier is 1
+    assert guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
+
+    # Add a Tier 3 capability dynamically
+    guard.grant_capability(Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION))
+
+    # Max tier elevates to 3
+    assert guard.max_allowed_tier == RiskTier.TIER_3_LOCAL_MUTATION
+
+    # We can now write
+    guard.validate_action("fs:write", RiskTier.TIER_3_LOCAL_MUTATION)
+
+
+def test_grant_beyond_ceiling_is_capped(analytics_guard: CapabilityGuard) -> None:
+    # analytics_guard has max_tier = TIER_1_LOCAL_SAFE
+    assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
+
+    # Granting TIER_3 should still result in TIER_1 ceiling enforcement
+    analytics_guard.grant_capability(Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION))
+    assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
+=======
 def test_dynamic_capability_grant(analytics_guard: CapabilityGuard) -> None:
     # Initially max tier is 1
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
@@ -56,6 +110,7 @@ def test_dynamic_capability_grant(analytics_guard: CapabilityGuard) -> None:
 
     # We can now write
     analytics_guard.validate_action("fs:write", RiskTier.TIER_3_LOCAL_MUTATION)
+>>>>>>> origin/main
 
 
 def test_capability_revocation(execution_guard: CapabilityGuard) -> None:

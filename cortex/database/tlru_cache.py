@@ -12,7 +12,11 @@ from __future__ import annotations
 
 import time
 from collections import OrderedDict
+<<<<<<< HEAD
+from typing import Final, final
+=======
 from typing import Final, Optional, final
+>>>>>>> origin/main
 
 __all__ = ["TLRUCache"]
 
@@ -80,7 +84,11 @@ class TLRUCache:
         self._cache.move_to_end(key)
         return value
 
+<<<<<<< HEAD
+    def get(self, key: str, default: float | None = None) -> float | None:
+=======
     def get(self, key: str, default: Optional[float] = None) -> Optional[float]:
+>>>>>>> origin/main
         """Get value with default. O(1)."""
         try:
             return self[key]

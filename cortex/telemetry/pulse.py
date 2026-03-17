@@ -16,7 +16,11 @@ import logging
 import threading
 import time
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import TYPE_CHECKING, Any
+=======
 from typing import TYPE_CHECKING, Any, Optional
+>>>>>>> origin/main
 
 if TYPE_CHECKING:
     from cortex.extensions.signals.bus import SignalBus
@@ -41,7 +45,11 @@ class PulseRegistry:
     Redesigns the data flow by preferring direct signals over manual increments.
     """
 
+<<<<<<< HEAD
+    def __init__(self, signal_bus: SignalBus | None = None) -> None:
+=======
     def __init__(self, signal_bus: Optional[SignalBus] = None) -> None:
+>>>>>>> origin/main
         self._signal_bus = signal_bus
         self._metrics: dict[str, PulseMetric] = {}
         self._lock = threading.RLock()
@@ -94,7 +102,11 @@ class PulseRegistry:
         # we flag the manual log as a "ghost".
         self._ghost_metrics.add(event_type)
 
+<<<<<<< HEAD
+    def inc(self, name: str, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
+=======
     def inc(self, name: str, value: float = 1.0, labels: Optional[dict[str, str]] = None) -> None:
+>>>>>>> origin/main
         """Increments a pulse-driven counter."""
         key = self._gen_key(name, labels)
         with self._lock:
@@ -103,7 +115,11 @@ class PulseRegistry:
             self._metrics[key].value += value
             self._metrics[key].last_update = time.time()
 
+<<<<<<< HEAD
+    def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
+=======
     def set_gauge(self, name: str, value: float, labels: Optional[dict[str, str]] = None) -> None:
+>>>>>>> origin/main
         """Sets a pulse-driven gauge."""
         key = self._gen_key(name, labels)
         with self._lock:
@@ -112,7 +128,11 @@ class PulseRegistry:
             self._metrics[key].value = value
             self._metrics[key].last_update = time.time()
 
+<<<<<<< HEAD
+    def _gen_key(self, name: str, labels: dict[str, str] | None) -> str:
+=======
     def _gen_key(self, name: str, labels: Optional[dict[str, str]]) -> str:
+>>>>>>> origin/main
         if not labels:
             return name
         l_str = ",".join(f"{k}={v}" for k, v in sorted(labels.items()))

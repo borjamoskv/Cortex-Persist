@@ -17,7 +17,11 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
@@ -152,9 +156,15 @@ class ASTValidator:
     def __init__(
         self,
         *,
+<<<<<<< HEAD
+        allowed_import_prefixes: frozenset[str] | None = None,
+        forbidden_calls: frozenset[str] | None = None,
+        forbidden_imports: frozenset[str] | None = None,
+=======
         allowed_import_prefixes: Optional[frozenset[str]] = None,
         forbidden_calls: Optional[frozenset[str]] = None,
         forbidden_imports: Optional[frozenset[str]] = None,
+>>>>>>> origin/main
     ) -> None:
         self._allowed_import_prefixes = allowed_import_prefixes or ALLOWED_IMPORT_PREFIXES
         self._forbidden_calls = forbidden_calls or FORBIDDEN_CALLS
@@ -247,7 +257,11 @@ class ASTValidator:
 # ── Extracted pure functions ───────────────────────────────────────────────
 
 
+<<<<<<< HEAD
+def _extract_call_name(node: ast.Call) -> str | None:
+=======
 def _extract_call_name(node: ast.Call) -> Optional[str]:
+>>>>>>> origin/main
     """Extract the function name from a Call node."""
     if isinstance(node.func, ast.Name):
         return node.func.id
@@ -288,7 +302,11 @@ def _check_complexity(
         violations.append(f"Total lines ({total_lines}) exceeds maximum ({MAX_TOTAL_LINES})")
 
     for node in ast.walk(tree):
+<<<<<<< HEAD
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+=======
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+>>>>>>> origin/main
             stats["functions"] += 1
             func_lines = (node.end_lineno or node.lineno) - node.lineno + 1
             stats["max_function_lines"] = max(stats["max_function_lines"], func_lines)

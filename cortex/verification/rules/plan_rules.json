@@ -1,0 +1,12 @@
+{
+  "plan": {
+    "required_fields": ["objective", "steps"],
+    "min_steps": 1,
+    "heuristics": [
+      {
+        "name": "check_objective_clarity",
+        "min_length": 10
+      }
+    ]
+  }
+}

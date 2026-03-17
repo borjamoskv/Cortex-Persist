@@ -20,7 +20,11 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 import numpy as np
 
@@ -51,7 +55,11 @@ class ConsolidationResult:
     errors: int = 0
     total_scanned: int = 0
     dry_run: bool = False
+<<<<<<< HEAD
+    details: list[str] | None = None
+=======
     details: Optional[list[str]] = None
+>>>>>>> origin/main
 
     @property
     def total_actions(self) -> int:

@@ -9,7 +9,11 @@ publishes cycle reports to configured escalation targets.
 from __future__ import annotations
 
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import SqliteMessageBus
@@ -33,7 +37,11 @@ class NightshiftAgent(BaseAgent):
         manifest: AgentManifest,
         bus: SqliteMessageBus,
         tool_registry: ToolRegistry,
+<<<<<<< HEAD
+        daemon: NightShiftCrystalDaemon | None = None,
+=======
         daemon: Optional[NightShiftCrystalDaemon] = None,
+>>>>>>> origin/main
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
         self._daemon = daemon or NightShiftCrystalDaemon()

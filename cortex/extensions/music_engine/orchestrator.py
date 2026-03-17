@@ -8,7 +8,11 @@ from __future__ import annotations
 import json
 import logging
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from pydantic import BaseModel, Field
 
@@ -79,7 +83,11 @@ class GRAMMYOrchestrator:
     def __init__(self, tenant_id: str = "default", project: str = "grammy-electronic-omega"):
         self.tenant_id = tenant_id
         self.project = project
+<<<<<<< HEAD
+        self.current_album: AlbumContext | None = None
+=======
         self.current_album: Optional[AlbumContext] = None
+>>>>>>> origin/main
         self.llm_manager = LLMManager()
 
         # Audio Backends (Frontier Models + Local)
@@ -351,7 +359,11 @@ class GRAMMYOrchestrator:
         concept: str,
         num_tracks: int = 3,
         bpm_range: tuple[int, int] = (120, 140),
+<<<<<<< HEAD
+        keys: list[str] | None = None,
+=======
         keys: Optional[list[str]] = None,
+>>>>>>> origin/main
         mode: str = "local",
     ) -> AlbumContext:
         """Batch-compose an album with N tracks."""

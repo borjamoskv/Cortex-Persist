@@ -9,7 +9,10 @@ Four strategies implementing a common interface:
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 import statistics
 from collections import defaultdict
 from enum import Enum
@@ -123,9 +126,13 @@ def resolve_rag(
         return
 
     if state.belief_type == BeliefType.BOOLEAN:
+<<<<<<< HEAD
+        votes = sum((1.0 if val else -1.0) * conf for _, val, conf in observations)
+=======
         votes = sum(
             (1.0 if val else -1.0) * conf for _, val, conf in observations
         )
+>>>>>>> origin/main
         state.current_value = votes >= 0
         state.confidence = min(0.99, max(0.51, abs(votes) / len(observations)))
 
@@ -281,9 +288,13 @@ def resolve_cortex(
             (val, conf, node.reliability if use_reliability else 0.5)
             for node, val, conf in observations
         ]
+<<<<<<< HEAD
+        logop_val, logop_conf = weighted_logop_categorical(obs_tuples, state.categories)
+=======
         logop_val, logop_conf = weighted_logop_categorical(
             obs_tuples, state.categories
         )
+>>>>>>> origin/main
 
         if alpha >= 1.0:
             state.current_value = logop_val
@@ -307,8 +318,17 @@ def resolve_cortex(
 
     elif state.belief_type == BeliefType.SET:
         obs_tuples = [
+<<<<<<< HEAD
+            (
+                val if isinstance(val, set) else set(),
+                conf,
+                node.reliability if use_reliability else 0.5,
+                round_idx,
+            )
+=======
             (val if isinstance(val, set) else set(), conf,
              node.reliability if use_reliability else 0.5, round_idx)
+>>>>>>> origin/main
             for node, val, conf in observations
         ]
         resolved_val, resolved_conf = scored_set_aggregate(obs_tuples)
@@ -320,16 +340,24 @@ def resolve_cortex(
     if use_reliability:
         for node, val, _ in observations:
             was_correct = _values_match(state.belief_type, val, state.current_value)
+<<<<<<< HEAD
+            node.reliability = update_reliability(node.reliability, was_correct, lr=0.15)
+=======
             node.reliability = update_reliability(
                 node.reliability, was_correct, lr=0.15
             )
+>>>>>>> origin/main
 
     # Layer 3: ATMS truth maintenance
     if use_atms and atms is not None:
         belief_id = f"{state.key}:{round_idx}"
+<<<<<<< HEAD
+        assumption_ids = frozenset(f"{node.node_id}:{round_idx}" for node, _, _ in observations)
+=======
         assumption_ids = frozenset(
             f"{node.node_id}:{round_idx}" for node, _, _ in observations
         )
+>>>>>>> origin/main
         atms.add_justification(belief_id, assumption_ids)
 
         # Check for invalidated nodes — if a node has reliability < 0.15,

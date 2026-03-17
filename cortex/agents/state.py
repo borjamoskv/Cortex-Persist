@@ -9,7 +9,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 
 class AgentStatus(str, Enum):
@@ -27,9 +31,15 @@ class AgentState:
     """Mutable runtime state for an agent instance."""
 
     status: AgentStatus = AgentStatus.IDLE
+<<<<<<< HEAD
+    current_goal: str | None = None
+    memory_ref: str | None = None
+    last_heartbeat_ts: float | None = None
+=======
     current_goal: Optional[str] = None
     memory_ref: Optional[str] = None
     last_heartbeat_ts: Optional[float] = None
+>>>>>>> origin/main
     error_count: int = 0
     consecutive_errors: int = 0
     total_messages_processed: int = 0

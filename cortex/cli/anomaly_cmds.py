@@ -1,5 +1,8 @@
+<<<<<<< HEAD
+=======
 from typing import Optional
 
+>>>>>>> origin/main
 """CORTEX CLI — Anomaly Hunter Daemon Commands.
 
 Integrates the NightShift anomaly hunter into the Sovereign CLI.
@@ -29,7 +32,11 @@ def anomaly_cmds():
 @click.option("--hours", default=24, help="Número de horas hacia atrás a escanear (default: 24).")
 @click.option("--project", default=None, help="Limitar el escaneo a un proyecto específico.")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
+<<<<<<< HEAD
+def anomaly_hunt_cmd(hours: int, project: str | None, db: str) -> None:
+=======
 def anomaly_hunt_cmd(hours: int, project: Optional[str], db: str) -> None:
+>>>>>>> origin/main
     """Escaneo completo: detecta anomalías ontológicas en el Ledger."""
     engine = get_engine(db)
     try:

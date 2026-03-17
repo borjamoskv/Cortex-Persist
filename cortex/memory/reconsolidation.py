@@ -27,7 +27,11 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Final
+=======
 from typing import Final, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.memory.reconsolidation")
 
@@ -84,7 +88,11 @@ class ReconsolidationEvent:
     version_id: str
     """New version of the engram post-transition (UUID4)."""
 
+<<<<<<< HEAD
+    parent_version: str | None
+=======
     parent_version: Optional[str]
+>>>>>>> origin/main
     """Previous version this supersedes (None = first access)."""
 
     outcome: ReconsolidationOutcome
@@ -118,7 +126,11 @@ class LabilizationRecord:
 
     # v2 version tracking (Ω₃: every state change is traceable)
     version_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+<<<<<<< HEAD
+    parent_version: str | None = None
+=======
     parent_version: Optional[str] = None
+>>>>>>> origin/main
 
     @property
     def is_expired(self) -> bool:
@@ -220,9 +232,13 @@ class ReconsolidationTracker:
 
     # ─── Access ───────────────────────────────────────────────────
 
+<<<<<<< HEAD
+    def on_access(self, engram_id: str, previous_version: str | None = None) -> LabilizationRecord:
+=======
     def on_access(
         self, engram_id: str, previous_version: Optional[str] = None
     ) -> LabilizationRecord:
+>>>>>>> origin/main
         """Mark an engram as labile after access.
 
         Args:

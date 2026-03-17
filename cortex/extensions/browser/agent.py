@@ -1,7 +1,11 @@
 import asyncio
 import json
 import logging
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.extensions.browser.engine import BrowserEngine
 from cortex.extensions.llm.provider import LLMProvider
@@ -17,7 +21,11 @@ class SovereignBrowserAgent:
     """
 
     def __init__(
+<<<<<<< HEAD
+        self, objective: str, llm_provider: LLMProvider | None = None, headless: bool = False
+=======
         self, objective: str, llm_provider: Optional[LLMProvider] = None, headless: bool = False
+>>>>>>> origin/main
     ):
         self.objective = objective
         self.engine = BrowserEngine(headless=headless)  # Controlled by initialization

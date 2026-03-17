@@ -8,7 +8,10 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from cortex.extensions.aether.models import AgentTask, TaskSource
 from cortex.extensions.aether.queue import TaskQueue
@@ -110,7 +113,11 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0 if result.status == "done" else 1
 
 
+<<<<<<< HEAD
+def main(argv: list[str] | None = None) -> int:
+=======
 def main(argv: Optional[list[str]] = None) -> int:
+>>>>>>> origin/main
     parser = argparse.ArgumentParser(
         prog="cortex aether",
         description="MOSKV-Aether — Autonomous background AI coding agent",

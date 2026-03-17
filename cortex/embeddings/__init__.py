@@ -58,13 +58,22 @@ class LocalEmbedder:
     def __init__(
         self,
         model_name: str = DEFAULT_MODEL,
+<<<<<<< HEAD
+        cache_dir: Path | None = None,
+        device: str | None = None,
+=======
         cache_dir: Optional[Path] = None,
         device: Optional[str] = None,
+>>>>>>> origin/main
     ):
         self._model_name = model_name
         self._cache_dir = cache_dir or DEFAULT_CACHE_DIR
         self._model = None
+<<<<<<< HEAD
+        self._identity_hash: str | None = None
+=======
         self._identity_hash: Optional[str] = None
+>>>>>>> origin/main
         self._device = device or _resolve_device()
 
     def _ensure_model(self):

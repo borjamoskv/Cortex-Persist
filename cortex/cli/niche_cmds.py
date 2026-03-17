@@ -1,5 +1,8 @@
+<<<<<<< HEAD
+=======
 from typing import Optional
 
+>>>>>>> origin/main
 """
 CORTEX CLI — Niche Arbitrage Commands
 """
@@ -24,7 +27,11 @@ def niche_cmds():
 @click.option("--name", required=True, help="Semantic name of the target")
 @click.option("--tags", default="", help="Comma separated tags")
 @click.option("--output", "-o", default=None, help="Save report to file (Markdown)")
+<<<<<<< HEAD
+def extract_cmd(url: str, name: str, tags: str, output: str | None):
+=======
 def extract_cmd(url: str, name: str, tags: str, output: Optional[str]):
+>>>>>>> origin/main
     """Executes the Niche Arbitrage ETL pipeline."""
     tag_list = [t.strip() for t in tags.split(",") if t.strip()]
     target = NicheTarget(url=url, name=name, tags=tag_list)

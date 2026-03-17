@@ -9,7 +9,11 @@ class SQLiteQueryMixin:
     """Mixin for graph query operations."""
 
     async def get_graph(
+<<<<<<< HEAD
+        self, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+=======
         self, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+>>>>>>> origin/main
     ) -> dict:
         entities, entity_ids = await self._get_graph_entities(project, limit, tenant_id)
 
@@ -30,7 +34,11 @@ class SQLiteQueryMixin:
         }
 
     async def _get_graph_entities(
+<<<<<<< HEAD
+        self, project: str | None, limit: int, tenant_id: str
+=======
         self, project: Optional[str], limit: int, tenant_id: str
+>>>>>>> origin/main
     ) -> tuple[list[dict], list[int]]:
         query_entities = (
             "SELECT id, name, entity_type, project, mention_count FROM entities WHERE tenant_id = ?"
@@ -75,7 +83,11 @@ class SQLiteQueryMixin:
             )
         return relationships
 
+<<<<<<< HEAD
+    async def _get_graph_stats(self, project: str | None, tenant_id: str) -> dict[str, int]:
+=======
     async def _get_graph_stats(self, project: Optional[str], tenant_id: str) -> dict[str, int]:
+>>>>>>> origin/main
         total_entities = 0
         total_rels = 0
         if project:
@@ -94,7 +106,11 @@ class SQLiteQueryMixin:
         return {"total_entities": total_entities, "total_relationships": total_rels}
 
     def get_graph_sync(
+<<<<<<< HEAD
+        self, project: str | None = None, limit: int = 50, tenant_id: str = "default"
+=======
         self, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+>>>>>>> origin/main
     ) -> dict:
         if project:
             entity_rows = self.conn.execute(  # type: ignore[reportAttributeAccessIssue]
@@ -169,8 +185,13 @@ class SQLiteQueryMixin:
         }
 
     async def query_entity(
+<<<<<<< HEAD
+        self, name: str, project: str | None = None, tenant_id: str = "default"
+    ) -> dict | None:
+=======
         self, name: str, project: Optional[str] = None, tenant_id: str = "default"
     ) -> Optional[dict]:
+>>>>>>> origin/main
         if not name or not name.strip():
             return None
 
@@ -213,8 +234,13 @@ class SQLiteQueryMixin:
         return entity
 
     def query_entity_sync(
+<<<<<<< HEAD
+        self, name: str, project: str | None = None, tenant_id: str = "default"
+    ) -> dict | None:
+=======
         self, name: str, project: Optional[str] = None, tenant_id: str = "default"
     ) -> Optional[dict]:
+>>>>>>> origin/main
         if not name or not name.strip():
             return None
         q = "SELECT id, name, entity_type, project, mention_count FROM entities WHERE name = ? AND tenant_id = ?"

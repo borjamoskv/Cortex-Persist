@@ -23,6 +23,10 @@ import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+<<<<<<< HEAD
+from typing import Any
+=======
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.extensions.swarm.heartbeat")
 
@@ -65,11 +69,25 @@ class SwarmHeartbeat:
     immune to wall-clock drift (NTP corrections, DST changes, etc.).
     """
 
+<<<<<<< HEAD
+    def __init__(
+        self,
+        suspect_threshold: int = 2,
+        dead_threshold: int = 4,
+        signal_bus: Any = None,
+    ) -> None:
+        self._lock = threading.Lock()
+        self._registry: dict[str, NodePulse] = {}
+        self._suspect_threshold = suspect_threshold
+        self._dead_threshold = dead_threshold
+        self._signal_bus = signal_bus
+=======
     def __init__(self, suspect_threshold: int = 2, dead_threshold: int = 4) -> None:
         self._lock = threading.Lock()
         self._registry: dict[str, NodePulse] = {}
         self._suspect_threshold = suspect_threshold  # Miss cycles before SUSPECT
         self._dead_threshold = dead_threshold  # Miss cycles before DEAD
+>>>>>>> origin/main
 
     def pulse(self, node_id: str, thread_name: str = "") -> None:
         """Record proof-of-life for a node. O(1)."""
@@ -120,6 +138,15 @@ class SwarmHeartbeat:
                     old_status = node.status
                     node.status = NodeStatus.DEAD
                     alerts.append(node)
+<<<<<<< HEAD
+                    self._emit_health_signal(
+                        "node:dead",
+                        node,
+                        elapsed,
+                        old_status,
+                    )
+=======
+>>>>>>> origin/main
                     logger.error(
                         "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses, was %s)",
                         node.node_id,
@@ -131,6 +158,15 @@ class SwarmHeartbeat:
                 elif node.miss_count >= self._suspect_threshold and node.status == NodeStatus.ALIVE:
                     node.status = NodeStatus.SUSPECT
                     alerts.append(node)
+<<<<<<< HEAD
+                    self._emit_health_signal(
+                        "node:suspect",
+                        node,
+                        elapsed,
+                        NodeStatus.ALIVE,
+                    )
+=======
+>>>>>>> origin/main
                     logger.warning(
                         "⚠️  NODE SUSPECT: %s [%s] — no pulse for %.0fs (%d misses)",
                         node.node_id,
@@ -141,6 +177,39 @@ class SwarmHeartbeat:
 
         return alerts
 
+<<<<<<< HEAD
+    def _emit_health_signal(
+        self,
+        event_type: str,
+        node: NodePulse,
+        elapsed: float,
+        old_status: NodeStatus,
+    ) -> None:
+        """Emit health signal into SignalBus. Fire-and-forget."""
+        if self._signal_bus is None:
+            return
+        try:
+            self._signal_bus.emit(
+                event_type,
+                {
+                    "node_id": node.node_id,
+                    "thread_name": node.thread_name,
+                    "elapsed_s": round(elapsed, 1),
+                    "miss_count": node.miss_count,
+                    "old_status": old_status.value,
+                    "new_status": node.status.value,
+                },
+                source="swarm_heartbeat",
+                project="CORTEX_SWARM",
+            )
+        except Exception:  # noqa: BLE001
+            logger.debug(
+                "Health signal emission failed for %s",
+                event_type,
+            )
+
+=======
+>>>>>>> origin/main
     def get_vitals(self) -> dict[str, NodePulse]:
         """Snapshot of the full registry. Returns a copy."""
         with self._lock:

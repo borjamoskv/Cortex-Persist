@@ -11,7 +11,11 @@ import math
 import time
 from collections import deque
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.memory.metamemory")
 
@@ -123,7 +127,11 @@ class MetamemoryMonitor:
         self,
         query_embedding: list[float],
         candidate_engrams: list[Any],
+<<<<<<< HEAD
+        threshold: float | None = None,
+=======
         threshold: Optional[float] = None,
+>>>>>>> origin/main
     ) -> MetaJudgment:
         """Evaluate Feeling-of-Knowing for a query against candidate engrams.
 
@@ -241,7 +249,11 @@ class MetamemoryMonitor:
             if len(self._query_failures[key]) > 20:
                 self._query_failures[key] = self._query_failures[key][-20:]
 
+<<<<<<< HEAD
+    def calibration_score(self, project_id: str | None = None) -> float:
+=======
     def calibration_score(self, project_id: Optional[str] = None) -> float:
+>>>>>>> origin/main
         """Compute Brier score of confidence predictions vs outcomes.
 
         Lower = better calibrated. Range [0.0, 1.0].

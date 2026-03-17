@@ -14,6 +14,10 @@ import statistics
 from dataclasses import dataclass
 from typing import Any
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 @dataclass(frozen=True)
 class LogOPConfig:
     w_self: float = 0.30
@@ -22,6 +26,10 @@ class LogOPConfig:
     w_cons: float = 0.10
     w_fresh: float = 0.05
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 DEFAULT_LOGOP_CONFIG = LogOPConfig()
 
 
@@ -99,7 +107,11 @@ def weighted_logop_binary(
     for value, conf, rel in observations:
         c_eff = effective_confidence(conf, rel, config=config)
         p = c_eff if value else 1.0 - c_eff
+<<<<<<< HEAD
+        w = rel**2  # quadratic — suppresses unreliable nodes aggressively
+=======
         w = rel ** 2  # quadratic — suppresses unreliable nodes aggressively
+>>>>>>> origin/main
         score += w * logit(p)
 
     prob_true = sigmoid(score)
@@ -133,7 +145,11 @@ def weighted_logop_categorical(
 
     for chosen, conf, rel in observations:
         c_eff = effective_confidence(conf, rel, config=config)
+<<<<<<< HEAD
+        w = rel**2  # quadratic — suppresses unreliable nodes aggressively
+=======
         w = rel ** 2  # quadratic — suppresses unreliable nodes aggressively
+>>>>>>> origin/main
         # Boost chosen, penalize others
         n_cats = len(categories)
         for cat in categories:
@@ -246,8 +262,12 @@ def scored_set_aggregate(
             resolved.add(elem)
 
     avg_conf = (
+<<<<<<< HEAD
+        sum(element_scores.values()) / (len(element_scores) * n_obs) if element_scores else 0.0
+=======
         sum(element_scores.values()) / (len(element_scores) * n_obs)
         if element_scores
         else 0.0
+>>>>>>> origin/main
     )
     return resolved, min(0.99, avg_conf)

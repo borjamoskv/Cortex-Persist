@@ -14,6 +14,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+<<<<<<< HEAD
+from cortex.core.paths import (
+    CORTEX_DB as DEFAULT_DB_PATH,
+)
+
+# ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
+from cortex.core.paths import (
+    CORTEX_DIR,
+)
+=======
 # ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
 from cortex.core.paths import (
     AGENT_DIR,  # noqa: F401 — re-exported for backwards compat
@@ -22,6 +32,7 @@ from cortex.core.paths import (
 from cortex.core.paths import (
     CORTEX_DB as DEFAULT_DB_PATH,
 )
+>>>>>>> origin/main
 
 # ─── Configuration Dataclass ─────────────────────────────────────────
 
@@ -78,11 +89,15 @@ class CortexConfig:
     VECTOR_STORE_MODE: str = "local"  # local exclusively (SQLite-vec)
 
     # LLM Provider
-    LLM_PROVIDER: str = ""
-    LLM_MODEL: str = ""
+    LLM_PROVIDER: str = "deepseek"
+    LLM_MODEL: str = "deepseek-v4"
     LLM_BASE_URL: str = ""
     LLM_API_KEY: str = ""
     LLM_LOCAL_FIRST: bool = False
+<<<<<<< HEAD
+    LLM_STEALTH_MODE: bool = True
+=======
+>>>>>>> origin/main
 
     # Langbase
     LANGBASE_API_KEY: str = ""
@@ -163,11 +178,20 @@ class CortexConfig:
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
             VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
+<<<<<<< HEAD
+            LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", "deepseek"),
+            LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", "deepseek-v4"),
+            LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
+            LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
+            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
+            LLM_STEALTH_MODE=os.environ.get("CORTEX_LLM_STEALTH", "1") == "1",
+=======
             LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", ""),
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
             LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
             LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
+>>>>>>> origin/main
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),

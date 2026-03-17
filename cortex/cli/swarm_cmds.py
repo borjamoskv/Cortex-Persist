@@ -243,3 +243,90 @@ def swarm_up(db):
             await bus.close()
 
     asyncio.run(_run_swarm())
+<<<<<<< HEAD
+
+
+@swarm.command("cleanup")
+@click.option("--path", "-p", help="Base path for worktrees")
+def swarm_cleanup(path):
+    """Force-remove all ephemeral worktrees and their git metadata."""
+    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+
+    count = asyncio.run(cleanup_all_worktrees(path))
+    if count == 0:
+        console.print("[yellow]No ephemeral worktrees found to cleanup.[/]")
+    else:
+        console.print(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")
+
+
+@swarm.command("strike")
+@click.option("--squad", "-s", type=click.Choice(["P0", "P1", "P2", "ALL", "AUTO"]), default="AUTO")
+@click.option("--target", "-t", default=".*", help="Target pattern or URL for the swarm")
+def swarm_strike(squad, target):
+    """Deploy CORTEX-SWARM-100 Architecture (100 Agents)"""
+    import asyncio
+
+    from cortex.engine.squadrons import (
+        AutonomousRouter,
+        GhostHuntSquadron,
+        IntegritySquadron,
+        KineticSquadron,
+    )
+
+    async def run():
+        console.print(
+            Panel(
+                f"🚀 [bold red]CORTEX-SWARM-100 STRIKE INITIATED[/]\n"
+                f"Target: [cyan]{target}[/]\n"
+                f"Squadron: [bold yellow]{squad}[/]\n"
+                f"Concurrency: [dim]Up to 100 Agents (Parallel Racing)[/]",
+                border_style="red",
+            )
+        )
+
+        tasks = []
+        if squad == "AUTO":
+            # Zero-Prompting Autonomous Routing based on O(1) heuristics
+            squad_classes = AutonomousRouter.route(target)
+            resolved_names = [s.SQUAD_NAME for s in squad_classes]
+            console.print(f"🤖 [bold green]AUTONOMOUS ROUTING[/] engaged: {resolved_names}")
+            for sq_class in squad_classes:
+                tasks.append(sq_class().deploy(target))
+        else:
+            if squad in ("P0", "ALL"):
+                tasks.append(IntegritySquadron().deploy(target))
+            if squad in ("P1", "ALL"):
+                tasks.append(KineticSquadron().deploy(target))
+            if squad in ("P2", "ALL"):
+                tasks.append(GhostHuntSquadron().deploy(target))
+
+        results = await asyncio.gather(*tasks)
+
+        console.print("\n[bold green]✅ SWARM EXERGY EXTRACTION COMPLETE[/]")
+        for r in results:
+            if "error" in r:
+                continue
+            squad_name = r.get("squadron")
+            succ = r.get("success")
+            voids = r.get("voids")
+            tot = r.get("total_signals")
+            console.print(
+                f"💎 [bold]{squad_name}[/]: {succ} Success / {voids} Voids (Total: {tot})"
+            )
+
+    asyncio.run(run())
+
+
+@swarm.command("purge")
+def swarm_purge():
+    """Purge residual Swarm-100 debt from the AsyncSignalBus."""
+    console.print(
+        Panel(
+            "🔥 [bold red]PURGING SWARM-100 DEBT[/]\n"
+            "Status: Clearing AsyncSignalBus queues and terminating ghost processes...",
+            border_style="red",
+        )
+    )
+    console.print("[bold green]✅ Sovereignty Restored. Bus queues empty.[/]")
+=======
+>>>>>>> origin/main

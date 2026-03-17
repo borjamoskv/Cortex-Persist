@@ -27,7 +27,11 @@ from __future__ import annotations
 
 import hmac
 import logging
+<<<<<<< HEAD
+from typing import Annotated, Any
+=======
 from typing import Annotated, Any, Optional
+>>>>>>> origin/main
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -50,7 +54,11 @@ _COMMAND_TO_INTENT: dict[str, GatewayIntent] = {
 }
 
 
+<<<<<<< HEAD
+def _parse_telegram_message(text: str) -> GatewayRequest | None:
+=======
 def _parse_telegram_message(text: str) -> Optional[GatewayRequest]:
+>>>>>>> origin/main
     """Parse a Telegram message text into a GatewayRequest."""
     text = (text or "").strip()
     if not text.startswith("/"):
@@ -66,7 +74,11 @@ def _parse_telegram_message(text: str) -> Optional[GatewayRequest]:
     return _dispatch_intent(intent, rest)
 
 
+<<<<<<< HEAD
+def _dispatch_intent(intent: GatewayIntent, rest: str) -> GatewayRequest | None:
+=======
 def _dispatch_intent(intent: GatewayIntent, rest: str) -> Optional[GatewayRequest]:
+>>>>>>> origin/main
     """Dispatch parsing to specific intent handlers."""
     handlers = {
         GatewayIntent.STORE: _handle_store,

@@ -11,6 +11,12 @@ Four metrics that measure epistemic debt, not just accuracy:
 from __future__ import annotations
 
 from dataclasses import dataclass
+<<<<<<< HEAD
+
+from benchmarks.encb.agents import AdversaryType, NodeProfile
+from benchmarks.encb.strategies import PropState
+
+=======
 from typing import Any
 
 from benchmarks.encb.agents import NodeProfile, AdversaryType
@@ -18,6 +24,7 @@ from benchmarks.encb.belief_object import BeliefType
 from benchmarks.encb.strategies import PropState
 
 
+>>>>>>> origin/main
 # ── PFBR — Persistent False Belief Rate ──────────────────────────────────
 
 
@@ -130,6 +137,12 @@ def cncl(
         node_id → round of containment (None if never contained).
     """
     # Only measure for corrupt nodes
+<<<<<<< HEAD
+    corrupt_nodes = {n.node_id: n for n in nodes if n.adversary_type != AdversaryType.HONEST}
+
+    result: dict[str, int | None] = {}
+    for node_id, _profile in corrupt_nodes.items():
+=======
     corrupt_nodes = {
         n.node_id: n
         for n in nodes
@@ -138,6 +151,7 @@ def cncl(
 
     result: dict[str, int | None] = {}
     for node_id, profile in corrupt_nodes.items():
+>>>>>>> origin/main
         history = reliability_history.get(node_id, [])
         contained_at = None
         for t, rel in enumerate(history):
@@ -209,6 +223,11 @@ def compute_report(
         edi_total=edi(round_snapshots),
         cncl_avg=cncl_avg(containment),
         avg_conflict_mass=(
+<<<<<<< HEAD
+            sum(s.conflict_mass for s in final_states) / len(final_states) if final_states else 0.0
+        ),
+        avg_reliability=(sum(n.reliability for n in nodes) / len(nodes) if nodes else 0.0),
+=======
             sum(s.conflict_mass for s in final_states) / len(final_states)
             if final_states else 0.0
         ),
@@ -216,6 +235,7 @@ def compute_report(
             sum(n.reliability for n in nodes) / len(nodes)
             if nodes else 0.0
         ),
+>>>>>>> origin/main
         error_rate_by_type=error_by_type,
     )
 
@@ -225,6 +245,10 @@ def compute_report(
 
 import math
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> float:
     """
     Calculates the Recovery Rate R = |recovered ∩ GT| / |GT|.
@@ -233,7 +257,11 @@ def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> floa
     """
     if not ground_truth:
         return 1.0 if not recovered else 0.0
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> origin/main
     intersection = recovered.intersection(ground_truth)
     return len(intersection) / len(ground_truth)
 
@@ -254,8 +282,13 @@ def calculate_f1_score(predicted: set[str], actual: set[str]) -> float:
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
 
     if precision + recall == 0:
+<<<<<<< HEAD
+        return 0.0
+
+=======
          return 0.0
          
+>>>>>>> origin/main
     return 2 * (precision * recall) / (precision + recall)
 
 
@@ -264,7 +297,11 @@ def calculate_kl_divergence(p_consensus: dict[str, float], p_truth: dict[str, fl
     Calculates the Kullback-Leibler Divergence KL(P_truth || P_consensus).
     Expects probability distributions where values sum to 1.0 (or represent distinct parallel probs).
     If a probability in P_consensus is 0, we add a small epsilon to avoid math error.
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> origin/main
     Lower is better (0.0 means perfect alignment).
     """
     epsilon = 1e-9
@@ -284,6 +321,10 @@ def calculate_entropy_delta(pre_state_probs: list[float], post_state_probs: list
     Calculates the difference in Shannon Entropy: ΔH = H(post) - H(pre).
     A negative delta indicates the system reduced uncertainty (entropy went down).
     """
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
     def shannon_h(probs: list[float]) -> float:
         h = 0.0
         for p in probs:
@@ -294,4 +335,7 @@ def calculate_entropy_delta(pre_state_probs: list[float], post_state_probs: list
     h_pre = shannon_h(pre_state_probs)
     h_post = shannon_h(post_state_probs)
     return h_post - h_pre
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main

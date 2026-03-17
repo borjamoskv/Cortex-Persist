@@ -7,13 +7,20 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 
 from __future__ import annotations
 
-import json
 import logging
+<<<<<<< HEAD
+from typing import Any, ClassVar
+=======
 from typing import Any, ClassVar, Optional
+>>>>>>> origin/main
 
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
+<<<<<<< HEAD
+from cortex.engine.capabilities import CapabilityRegistry
+=======
+>>>>>>> origin/main
 from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
@@ -47,6 +54,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     - ``deprecate()``: Soft-delete with audit trail.
     """
 
+<<<<<<< HEAD
+    store_fact = None  # Placeholder to be assigned after store() definition or just use an alias below
+
+=======
+>>>>>>> origin/main
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
     _thermal_decay_cache: ClassVar[dict[int, int]] = {}
     _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
@@ -64,13 +76,30 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         meta: Optional[dict[str, Any]] = None,
         valid_from: Optional[str] = None,
         commit: bool = True,
+<<<<<<< HEAD
+        tx_id: int | None = None,
+        parent_decision_id: int | None = None,
+        conn: aiosqlite.Connection | None = None,
+=======
         tx_id: Optional[int] = None,
         parent_decision_id: Optional[int] = None,
         conn: Optional[aiosqlite.Connection] = None,
+>>>>>>> origin/main
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
 
+<<<<<<< HEAD
+        # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══
+        if getattr(self, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
+            if source != "daemon:circuit-breaker":
+                raise RuntimeError(
+                    "CORTEX Engine is in LOCKED_EPISTEMIC_HALT state due to cognitive thrashing. "
+                    "Write access denied until Sovereign Lock is lifted by Autodidact-Omega."
+                )
+
+=======
+>>>>>>> origin/main
         if conn:
             return await self._store_impl(
                 conn,
@@ -112,11 +141,19 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str,
         fact_type: str,
+<<<<<<< HEAD
+        tags: list[str] | None,
+        confidence: str,
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> tuple[int | None, dict[str, Any] | None, str, str]:
+=======
         tags: Optional[list[str]],
         confidence: str,
         source: Optional[str],
         meta: Optional[dict[str, Any]],
     ) -> tuple[Optional[int], Optional[dict[str, Any]], str, str]:
+>>>>>>> origin/main
         """Delegated validation logic (Ω₁₃, Semantic Dedup, Bridge)."""
         return await run_store_validation_logic(
             mixin_instance=self,
@@ -128,7 +165,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             tags=tags,
             confidence=confidence,
             source=source,
+<<<<<<< HEAD
+            meta=meta,
+=======
             meta=meta
+>>>>>>> origin/main
         )
 
     async def _store_impl(
@@ -144,8 +185,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         meta: Optional[dict[str, Any]],
         valid_from: Optional[str],
         commit: bool,
+<<<<<<< HEAD
+        tx_id: int | None,
+        parent_decision_id: int | None = None,
+=======
         tx_id: Optional[int],
         parent_decision_id: Optional[int] = None,
+>>>>>>> origin/main
     ) -> int:
         # ═══ AX-033: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
@@ -169,7 +215,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             tx_id
             if tx_id is not None
             else await self._log_transaction(
+<<<<<<< HEAD
+                conn, project, "store", {"fact_type": fact_type}, tenant_id=tenant_id
+=======
                 conn, project, "store", {"fact_type": fact_type}
+>>>>>>> origin/main
             )
         )
         fact_id = await insert_fact_record(
@@ -187,6 +237,21 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             parent_decision_id=parent_decision_id,
         )
 
+<<<<<<< HEAD
+        # Dual-Write Bridge: sync parent_decision_id logic is currently integrated into insert_fact_record
+        pass
+
+        # P0 Decoupling: Blocking embedding is now handled by EnrichmentWorker
+        # We only keep this if explicitly requested or for legacy compatibility,
+        # but by default, insert_fact_record now enqueues an async job.
+
+        caps = CapabilityRegistry.get_instance().capabilities
+        if (
+            getattr(self, "_auto_embed", False)
+            and getattr(self, "_vec_available", False)
+            and caps.embeddings
+        ):
+=======
         # ─── Dual-Write Bridge: sync parent_decision_id to facts_meta ───
         if parent_decision_id is not None:
             try:
@@ -200,6 +265,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 pass
 
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
+>>>>>>> origin/main
             await embed_fact_async(
                 conn,
                 fact_id,
@@ -218,8 +284,18 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
                 await pipeline.run_post_hooks(
+<<<<<<< HEAD
+                    fact_id,
+                    project,
+                    fact_type,
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
+                    db_path=db_path,
+=======
                     fact_id, project, fact_type, conn,
                     tenant_id=tenant_id, source=source, db_path=db_path,
+>>>>>>> origin/main
                 )
             except Exception as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
@@ -244,36 +320,62 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def update(
         self,
         fact_id: int,
+<<<<<<< HEAD
+        content: str | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
+=======
         content: Optional[str] = None,
         tags: Optional[list[str]] = None,
         meta: Optional[dict[str, Any]] = None,
+>>>>>>> origin/main
         tenant_id: str = "default",
     ) -> int:
         tenant_id = self._resolve_tenant(tenant_id)
 
         async with self.session() as conn:
             query = (
+<<<<<<< HEAD
+                "SELECT tenant_id, project, content, fact_type, "
+                "confidence, source, metadata "
+=======
                 "SELECT tenant_id, project, content, fact_type, tags, "
                 "confidence, source, meta "
+>>>>>>> origin/main
                 "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
             if not row:
+<<<<<<< HEAD
+                raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
+=======
                 raise ValueError(
                     f"Fact {fact_id} not found or belongs to another tenant"
                 )
+>>>>>>> origin/main
 
             (
                 db_tenant_id,
                 project,
                 raw_old_content,
                 fact_type,
-                old_tags_json,
                 confidence,
                 source,
                 raw_old_meta_json,
             ) = row
+<<<<<<< HEAD
+
+            # Fetch tags from bridge table
+            async with conn.execute(
+                "SELECT tag FROM fact_tags WHERE fact_id = ? AND tenant_id = ?",
+                (fact_id, db_tenant_id),
+            ) as cursor:
+                tag_rows = await cursor.fetchall()
+                old_tags = [r[0] for r in tag_rows]
+
+=======
+>>>>>>> origin/main
             enc = get_default_encrypter()
             old_content = (
                 enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id) if raw_old_content else ""
@@ -288,16 +390,20 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             new_meta["previous_fact_id"] = fact_id
 
             # Deprecate first to avoid unique constraint violations on identical hashes
+<<<<<<< HEAD
+            await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
+=======
             await self.deprecate(
                 fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id
             )
+>>>>>>> origin/main
 
             new_id = await self.store(
                 project=project,
                 content=content if content is not None else str(old_content or ""),
                 tenant_id=db_tenant_id,
                 fact_type=fact_type,
-                tags=tags if tags is not None else json.loads(old_tags_json),
+                tags=tags if tags is not None else old_tags,
                 confidence=confidence,
                 source=source or "engine:update",
                 meta=new_meta,
@@ -311,8 +417,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def deprecate(
         self,
         fact_id: int,
+<<<<<<< HEAD
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
+=======
         reason: Optional[str] = None,
         conn: Optional[aiosqlite.Connection] = None,
+>>>>>>> origin/main
         tenant_id: str = "default",
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
@@ -332,7 +443,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _deprecate_impl(
+<<<<<<< HEAD
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
+=======
         self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+>>>>>>> origin/main
     ) -> bool:
         """Delegated deprecation logic."""
         return await deprecate_impl_logic(
@@ -342,8 +457,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def invalidate(
         self,
         fact_id: int,
+<<<<<<< HEAD
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
+=======
         reason: Optional[str] = None,
         conn: Optional[aiosqlite.Connection] = None,
+>>>>>>> origin/main
         tenant_id: str = "default",
     ) -> bool:
         """Explicit severe invalidation (tombstone) + taint propagation."""
@@ -361,7 +481,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _invalidate_impl(
+<<<<<<< HEAD
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
+=======
         self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+>>>>>>> origin/main
     ) -> bool:
         """Delegated invalidation logic (tombstone + taint)."""
         return await invalidate_impl_logic(

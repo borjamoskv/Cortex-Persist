@@ -26,7 +26,11 @@ def _render_fastapi_route(system_name: str, comp: ComponentSpec) -> str:
                 [
                     f'@router.get("/{endpoint}")',
                     f"async def {endpoint}() -> dict[str, str]:",
+<<<<<<< HEAD
+                    f'    """Service endpoint for {endpoint}."""',
+=======
                     f'    """TODO: Implement {endpoint}."""',
+>>>>>>> origin/main
                     f'    return {{"status": "{endpoint} ok"}}',
                     "\n",
                 ]

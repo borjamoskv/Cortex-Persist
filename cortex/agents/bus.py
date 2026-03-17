@@ -10,7 +10,11 @@ import asyncio
 import json
 import logging
 import time
+<<<<<<< HEAD
+from typing import Any, Protocol
+=======
 from typing import Any, Optional, Protocol
+>>>>>>> origin/main
 
 from cortex.agents.message_schema import AgentMessage
 
@@ -21,7 +25,11 @@ class MessageBus(Protocol):
     """Protocol for inter-agent message transport."""
 
     async def send(self, message: AgentMessage) -> None: ...
+<<<<<<< HEAD
+    async def receive(self, agent_id: str, timeout: float = 1.0) -> AgentMessage | None: ...
+=======
     async def receive(self, agent_id: str, timeout: float = 1.0) -> Optional[AgentMessage]: ...
+>>>>>>> origin/main
     async def broadcast(self, message: AgentMessage) -> None: ...
     async def close(self) -> None: ...
 
@@ -78,7 +86,11 @@ class SqliteMessageBus:
             message.kind.value,
         )
 
+<<<<<<< HEAD
+    async def receive(self, agent_id: str, timeout: float = 1.0) -> AgentMessage | None:
+=======
     async def receive(self, agent_id: str, timeout: float = 1.0) -> Optional[AgentMessage]:
+>>>>>>> origin/main
         """Dequeue the oldest unconsumed message for agent_id.
 
         Polls once. If no message, waits up to timeout then returns None.
@@ -97,7 +109,11 @@ class SqliteMessageBus:
 
         return None
 
+<<<<<<< HEAD
+    async def _fetch_one(self, conn: Any, agent_id: str) -> AgentMessage | None:
+=======
     async def _fetch_one(self, conn: Any, agent_id: str) -> Optional[AgentMessage]:
+>>>>>>> origin/main
         """Fetch and consume one message atomically."""
         row = None
         async with self._lock:

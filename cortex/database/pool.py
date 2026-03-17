@@ -39,8 +39,13 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
+<<<<<<< HEAD
+        min_connections: int | None = None,
+        max_connections: int | None = None,
+=======
         min_connections: Optional[int] = None,
         max_connections: Optional[int] = None,
+>>>>>>> origin/main
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):

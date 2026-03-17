@@ -9,7 +9,11 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Any, Final
+=======
 from typing import Any, Final, Optional
+>>>>>>> origin/main
 
 logger = logging.getLogger("cortex.embeddings.presets")
 
@@ -50,7 +54,11 @@ def load_embedding_presets() -> dict[str, dict[str, Any]]:
         return {}
 
 
+<<<<<<< HEAD
+def get_embedding_preset(provider: str) -> dict[str, Any] | None:
+=======
 def get_embedding_preset(provider: str) -> Optional[dict[str, Any]]:
+>>>>>>> origin/main
     """Return preset config for an embedding provider, or None if not found."""
     return load_embedding_presets().get(provider)
 

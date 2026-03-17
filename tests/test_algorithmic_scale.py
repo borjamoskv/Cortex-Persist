@@ -13,11 +13,19 @@ class TestCoveringIndices:
 
     def test_tenant_valid_index_exists(self, tmp_path):
         """idx_facts_tenant_valid covers (tenant_id, valid_until)."""
+<<<<<<< HEAD
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
+
+        db = str(tmp_path / "test.db")
+        conn = sqlite3.connect(db)
+        for stmt in CREATE_FACTS.strip().split(";"):
+=======
         from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
         for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+>>>>>>> origin/main
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -35,11 +43,19 @@ class TestCoveringIndices:
 
     def test_proj_valid_index_exists(self, tmp_path):
         """idx_facts_proj_valid covers (project, valid_until)."""
+<<<<<<< HEAD
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
+
+        db = str(tmp_path / "test.db")
+        conn = sqlite3.connect(db)
+        for stmt in CREATE_FACTS.strip().split(";"):
+=======
         from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
         for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+>>>>>>> origin/main
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -64,14 +80,22 @@ class TestFTS5Triggers:
 
     def _setup_db(self, db_path: str) -> sqlite3.Connection:
         """Create facts table + FTS5 + triggers."""
+<<<<<<< HEAD
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
+=======
         from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
+>>>>>>> origin/main
         from cortex.database.schema_extensions import (
             CREATE_FACTS_FTS,
             CREATE_FACTS_FTS_TRIGGERS,
         )
 
         conn = sqlite3.connect(db_path)
+<<<<<<< HEAD
+        for stmt in CREATE_FACTS.strip().split(";"):
+=======
         for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+>>>>>>> origin/main
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -92,7 +116,11 @@ class TestFTS5Triggers:
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
+<<<<<<< HEAD
+            "valid_from, tags, source, metadata, exergy_score, "
+=======
             "valid_from, tags, source, meta, consensus_score, "
+>>>>>>> origin/main
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
@@ -124,7 +152,11 @@ class TestFTS5Triggers:
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
+<<<<<<< HEAD
+            "valid_from, tags, source, metadata, exergy_score, "
+=======
             "valid_from, tags, source, meta, consensus_score, "
+>>>>>>> origin/main
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
@@ -162,7 +194,11 @@ class TestFTS5Triggers:
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
+<<<<<<< HEAD
+            "valid_from, tags, source, metadata, exergy_score, "
+=======
             "valid_from, tags, source, meta, consensus_score, "
+>>>>>>> origin/main
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
@@ -231,9 +267,15 @@ class TestPoolExpansion:
 
         try:
             # Re-import to pick up clean env
+<<<<<<< HEAD
+            from cortex.database.pool import CortexConnectionPool
+
+            pool = CortexConnectionPool(db_path=":memory:")
+=======
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
+>>>>>>> origin/main
             assert pool.min_connections == 4, f"Expected min=4, got {pool.min_connections}"
         finally:
             os.environ.clear()
@@ -246,9 +288,15 @@ class TestPoolExpansion:
         os.environ.pop("CORTEX_POOL_MAX", None)
 
         try:
+<<<<<<< HEAD
+            from cortex.database.pool import CortexConnectionPool
+
+            pool = CortexConnectionPool(db_path=":memory:")
+=======
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
+>>>>>>> origin/main
             assert pool.max_connections == 32, f"Expected max=32, got {pool.max_connections}"
         finally:
             os.environ.clear()
@@ -260,9 +308,15 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MIN"] = "8"
 
         try:
+<<<<<<< HEAD
+            from cortex.database.pool import CortexConnectionPool
+
+            pool = CortexConnectionPool(db_path=":memory:")
+=======
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
+>>>>>>> origin/main
             assert pool.min_connections == 8, f"Expected min=8, got {pool.min_connections}"
         finally:
             os.environ.clear()
@@ -274,9 +328,15 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
+<<<<<<< HEAD
+            from cortex.database.pool import CortexConnectionPool
+
+            pool = CortexConnectionPool(db_path=":memory:")
+=======
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
+>>>>>>> origin/main
             assert pool.max_connections == 64, f"Expected max=64, got {pool.max_connections}"
         finally:
             os.environ.clear()
@@ -289,9 +349,15 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
+<<<<<<< HEAD
+            from cortex.database.pool import CortexConnectionPool
+
+            pool = CortexConnectionPool(
+=======
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(
+>>>>>>> origin/main
                 db_path=":memory:",
                 min_connections=3,
                 max_connections=15,

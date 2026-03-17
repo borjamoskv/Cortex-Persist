@@ -9,6 +9,10 @@ from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["PrivacyMixin"]
 
+from cortex.engine.mixins.base import EngineMixinBase
+
+__all__ = ["PrivacyMixin"]
+
 logger = logging.getLogger("cortex.privacy")
 
 

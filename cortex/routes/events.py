@@ -6,7 +6,10 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncGenerator
+<<<<<<< HEAD
+=======
 from typing import Optional
+>>>>>>> origin/main
 
 from fastapi import APIRouter, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
@@ -24,7 +27,11 @@ async def event_generator(
     request: Request,
     engine: AsyncCortexEngine,
     tenant_id: str,
+<<<<<<< HEAD
+    event_types: list[str] | None = None,
+=======
     event_types: Optional[list[str]] = None,
+>>>>>>> origin/main
 ) -> AsyncGenerator[dict, None]:
     """Generator for Server-Sent Events."""
     bus = getattr(engine, "_signal_bus", None)
@@ -63,7 +70,11 @@ async def event_generator(
 @events_router.get("/v1/events/stream")
 async def stream_events(
     request: Request,
+<<<<<<< HEAD
+    types: str | None = Query(None, description="Comma-separated list of event types"),
+=======
     types: Optional[str] = Query(None, description="Comma-separated list of event types"),
+>>>>>>> origin/main
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> EventSourceResponse:

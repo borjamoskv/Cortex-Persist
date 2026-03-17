@@ -18,7 +18,7 @@ ENTITY_PATTERNS = [
             r"(?:^|[\s`\"\'])([a-zA-Z_][\w]*\.(?:py|js|ts|tsx|jsx|css|html|md|yml|yaml|json|toml|rs|go|sql))\b"
         ),
     ),
-    ("class", re.compile(r"\b([A-Z][a-zA-Z0-9]{2,}(?:[A-Z][a-z]+)+)\b")),
+    ("class", re.compile(r"\b([A-Z][a-zA-Z0-9]*[A-Z][a-z][a-zA-Z0-9]*)\b")),
     (
         "tool",
         re.compile(

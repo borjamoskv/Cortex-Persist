@@ -280,7 +280,11 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
+<<<<<<< HEAD
+def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+=======
 def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+>>>>>>> origin/main
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this

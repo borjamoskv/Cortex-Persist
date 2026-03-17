@@ -43,9 +43,14 @@ class EngineMixinBase:
         """Provide a synchronous database connection."""
         raise NotImplementedError
 
+<<<<<<< HEAD
+    # Deprecated get_conn() — removed in favor of session() (Ω₂: Thermodynamic hygiene)
+    # The session() context manager is now the only valid way to obtain a connection.
+=======
     def get_conn(self) -> Any:
         """Provide an asynchronous database connection."""
         raise NotImplementedError
+>>>>>>> origin/main
 
     async def _log_transaction(
         self, conn: aiosqlite.Connection, project: str, action: str, details: dict[str, Any]

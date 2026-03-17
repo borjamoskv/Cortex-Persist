@@ -21,7 +21,11 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Any
+=======
 from typing import Any, Optional
+>>>>>>> origin/main
 
 from cortex.engine.evolution_metrics import CortexMetrics
 from cortex.engine.evolution_types import (
@@ -122,7 +126,11 @@ class ZeroPromptingEvolutionStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
+<<<<<<< HEAD
+    ) -> dict[str, Any] | None:
+=======
     ) -> Optional[dict[str, Any]]:
+>>>>>>> origin/main
         """ImprovementStrategy protocol implementation."""
         # Gate: only act on fit-enough agents
         if subagent.fitness < _MIN_FITNESS_GATE:
@@ -316,7 +324,11 @@ class ZeroPromptingEvolutionStrategy:
         return len(self._resolution_log)
 
     @property
+<<<<<<< HEAD
+    def last_report(self) -> ResolutionReport | None:
+=======
     def last_report(self) -> Optional[ResolutionReport]:
+>>>>>>> origin/main
         return self._resolution_log[-1] if self._resolution_log else None
 
     def get_resolution_hashes(self) -> list[str]:
