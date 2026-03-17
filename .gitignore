@@ -23,6 +23,7 @@ node_modules/
 .venv/
 venv/
 env/
+.venv_transcript/
 
 # ── Python build artifacts ────────────────────────
 __pycache__/
@@ -46,6 +47,8 @@ build/
 *.db-shm
 *.db-wal
 *.db.bak
+file:*
+file:mem_*
 
 # ── Testing & Linting ────────────────────────────
 .pytest_cache/
@@ -55,6 +58,11 @@ reports/
 .coverage
 htmlcov/
 coverage.xml
+compile_*.txt
+pyright_*.txt
+test_*.txt
+prepush_out*.txt
+seals_report.json
 
 # ── OS ────────────────────────────────────────────
 .DS_Store
@@ -146,4 +154,5 @@ sovereign_agent/
 xokas-elevator/
 yt-notebooklm-ext/
 auramem/
+yt-remotion-video/
 nexus-dashboard/.next/
