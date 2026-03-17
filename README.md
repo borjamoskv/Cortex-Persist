@@ -22,7 +22,7 @@ It does not replace memory backends (Mem0, Zep, custom stores). It **certifies**
 ## 2. What problem it solves
 
 | Problem | Consequence |
-|---------|-------------|
+| ------- | ----------- |
 | Agents hallucinate their own history | Entropy compounds silently — past decisions are invented, not retrieved |
 | No causal opacity audit trail | Impossible to answer "why did the agent reach that conclusion?" |
 | EU AI Act Article 12 requirements | Regulated deployments need immutable operational logs and crypto-verifiable traces |
@@ -87,7 +87,7 @@ Full repository topology and decision rationale: [docs/architecture/repo-map.md]
 ## 6. Project status
 
 | Dimension | Status |
-|-----------|--------|
+| --------- | ------ |
 | Version | `v0.3.0b2` |
 | Core engine stability | Beta — cryptographic chain validated under crash scenarios |
 | Public API surface | Converging toward `v1.0.0` |
@@ -117,7 +117,7 @@ CI enforcement: [`.github/workflows/core-boundary.yml`](.github/workflows/core-b
 ## 8. Docs, API, security
 
 | Resource | Link |
-|----------|------|
+| -------- | ---- |
 | Architecture | [docs/architecture/repo-map.md](docs/architecture/repo-map.md) |
 | Compliance | [docs/compliance/](docs/compliance/) |
 | Security policy | [SECURITY.md](SECURITY.md) |
@@ -130,6 +130,7 @@ CI enforcement: [`.github/workflows/core-boundary.yml`](.github/workflows/core-b
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before opening an issue or PR.
 
 The core rejects any PR that:
+
 - Bifurcates `ledger.py` integrity without test coverage
 - Bypasses guards on memory write paths
 - Introduces blocking calls (`time.sleep`) in async contexts

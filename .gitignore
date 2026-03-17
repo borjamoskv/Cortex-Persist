@@ -21,6 +21,7 @@ service-account*.json
 # ── Dependencies ──────────────────────────────────
 node_modules/
 .venv/
+.venv*/
 venv/
 env/
 
