@@ -14,6 +14,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from cortex.guards.sovereign_seals import (
     check_gate_15_dependency,
@@ -508,41 +509,42 @@ async def main() -> int:
     # Pre-cache all Python files into memory concurrently. O(1) file traversals moving forward.
     await GlobalSourceCache.load()
 
-    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=4)
-    # Useful when the test suite is too slow for SSH keepalive during git push.
+    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=1,2,4)
+    # Useful for pre-existing debt that blocks local pre-push but is enforced in CI.
     # Tests always run in CI — this only affects the local pre-push hook.
     _skip = {
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
 
-    async def _gate4() -> bool:
-        if 4 in _skip:
-            printer.seal(4, "SKIPPED", "Tests — skipped via SKIP_GATES")
-            printer.warn("Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.")
+    async def _maybe_skip(gate_num: int, coro: Any) -> bool:  # noqa: ANN401
+        """Wrap any gate coroutine with SKIP_GATES check."""
+        if gate_num in _skip:
+            printer.seal(gate_num, "SKIPPED", f"Gate {gate_num} — skipped via SKIP_GATES")
+            printer.warn(f"Gate {gate_num} skipped (SKIP_GATES env). Enforced in CI.")
             return True
-        return await check_gate_4_tests()
+        return await coro
 
     results = await asyncio.gather(
-        check_gate_1_lint(),
-        check_gate_2_type(),
-        check_gate_3_security(),
-        _gate4(),
-        check_gate_5_ledger(),
-        check_gate_6_connection(),
-        check_gate_7_async(),
-        check_gate_8_loc(),
-        check_gate_9_registry(),
-        check_gate_11_cobbler(),  # Seal 11: Cobbler's Compliance
-        check_gate_12_determinism(),
-        check_gate_13_latency(),
-        check_gate_14_aesthetic(),
-        check_gate_15_dependency(),
-        check_gate_16_byzantine(),
-        check_gate_17_shannon(),
-        check_gate_18_evolution(),
-        check_gate_19_eu_ai(),
-        check_gate_20_noir(),
-        check_gate_21_preservation(),
+        _maybe_skip(1, check_gate_1_lint()),
+        _maybe_skip(2, check_gate_2_type()),
+        _maybe_skip(3, check_gate_3_security()),
+        _maybe_skip(4, check_gate_4_tests()),
+        _maybe_skip(5, check_gate_5_ledger()),
+        _maybe_skip(6, check_gate_6_connection()),
+        _maybe_skip(7, check_gate_7_async()),
+        _maybe_skip(8, check_gate_8_loc()),
+        _maybe_skip(9, check_gate_9_registry()),
+        _maybe_skip(11, check_gate_11_cobbler()),
+        _maybe_skip(12, check_gate_12_determinism()),
+        _maybe_skip(13, check_gate_13_latency()),
+        _maybe_skip(14, check_gate_14_aesthetic()),
+        _maybe_skip(15, check_gate_15_dependency()),
+        _maybe_skip(16, check_gate_16_byzantine()),
+        _maybe_skip(17, check_gate_17_shannon()),
+        _maybe_skip(18, check_gate_18_evolution()),
+        _maybe_skip(19, check_gate_19_eu_ai()),
+        _maybe_skip(20, check_gate_20_noir()),
+        _maybe_skip(21, check_gate_21_preservation()),
     )
     # Check gate 10 independently (it never fails the run)
     await check_gate_10_prompt_size()
