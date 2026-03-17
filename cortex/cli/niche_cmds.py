@@ -1,6 +1,7 @@
 """
 CORTEX CLI — Niche Arbitrage Commands
 """
+from __future__ import annotations
 
 import asyncio
 

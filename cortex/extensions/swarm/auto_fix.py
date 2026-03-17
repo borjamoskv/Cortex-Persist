@@ -289,7 +289,7 @@ class AutoFixPipeline:
                 timeout=5,
             )
             main_branch = (
-                proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "master"
+                proc_branch.stdout.strip().split("/")[-1] if proc_branch.stdout else "main"
             )
 
             logger.info(

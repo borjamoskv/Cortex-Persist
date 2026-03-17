@@ -4,6 +4,7 @@ CORTEX v6 — Role-Based Access Control (RBAC) Engine.
 Defines roles, permissions, and the evaluation logic for secure
 multi-tenancy and agentic sovereignty.
 """
+from __future__ import annotations
 
 import logging
 from enum import Enum

@@ -4,6 +4,7 @@ CORTEX v5.0 — Registro Inmutable de Votos.
 Almacenamiento de votos a prueba de manipulaciones criptográficas mediante encadenamiento de hashes y árboles de Merkle.
 Parte de la Arquitectura de Soberanía Wave 5.
 """
+from __future__ import annotations
 
 import hashlib
 import logging

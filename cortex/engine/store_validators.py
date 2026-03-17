@@ -12,12 +12,23 @@ if TYPE_CHECKING:
     import aiosqlite
 
 __all__ = [
+    "normalize_project",
     "validate_content",
     "check_dedup",
     "MIN_CONTENT_LENGTH",
 ]
 
 MIN_CONTENT_LENGTH = 10
+
+
+def normalize_project(raw: str) -> str:
+    """Canonicalize project name to UPPER_SNAKE_CASE at write time.
+
+    Enforces a single dedup namespace per logical project, preventing
+    CORTEX/cortex-style splits that bypass the (tenant_id, project, hash)
+    deduplication gate in check_dedup.
+    """
+    return raw.strip().upper().replace("-", "_").replace(" ", "_")
 
 
 def validate_content(project: str, content: str, fact_type: str) -> str:

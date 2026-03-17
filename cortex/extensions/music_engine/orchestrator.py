@@ -2,6 +2,7 @@
 Sovereign Electronic Music Engine (GRAMMY-Ω).
 Master Orchestrator powered by Gemini-3.1-Pro-Preview.
 """
+from __future__ import annotations
 
 import json
 import logging

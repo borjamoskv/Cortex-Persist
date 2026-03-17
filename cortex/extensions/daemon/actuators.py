@@ -6,6 +6,7 @@ access to the underlying OS (macOS/Cloud) via bindings inspired by
 the Ekin and Gidatu Sovereign Skills.
 Eliminates the boundary between "thought" and "physical execution".
 """
+from __future__ import annotations
 
 import asyncio
 import logging

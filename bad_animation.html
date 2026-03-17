@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  position: absolute;
+  top: 50px;
+}
+</style>
+</head>
+<body>
+  <div class="box" id="myBox" style="color: white; border: 1px solid black;">Layout Thrashing!</div>
+  <script>
+    const box = document.getElementById('myBox');
+    let pos = 50;
+    function animate() {
+      pos += 1;
+      // This causes layout thrashing
+      box.style.top = pos + 'px';
+      box.style.left = pos + 'px';
+      if (pos < 500) requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

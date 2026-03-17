@@ -9,7 +9,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v8.0%20beta-brightgreen.svg)
 ![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
-[![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
+[![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
 ![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
 [![Docs](https://img.shields.io/badge/docs-cortexpersist.dev-brightgreen)](https://cortexpersist.dev)

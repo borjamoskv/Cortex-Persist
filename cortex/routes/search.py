@@ -1,6 +1,7 @@
 """
 CORTEX v5.0 - Search Router.
 """
+from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 

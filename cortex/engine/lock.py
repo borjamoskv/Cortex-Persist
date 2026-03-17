@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -29,6 +30,24 @@ class SovereignLock:
         self._engine = engine
         self._db_path = getattr(engine, "db_path", None) or getattr(engine, "_db_path", None)
 
+    @asynccontextmanager
+    async def _dedicated_conn(self):
+        """Open a dedicated aiosqlite connection for lock operations.
+
+        The engine uses a single shared connection (engine.session() returns the
+        same conn every time). Concurrent lock users would serialize on that conn
+        object, producing a deadlock when the polling loop and the release happen
+        from different coroutines. Opening a fresh connection per operation avoids
+        this at the cost of a small open/close overhead (acceptable for lock paths).
+        """
+        import aiosqlite
+        db_path = str(self._db_path or getattr(self._engine, "_db_path", None))
+        async with aiosqlite.connect(db_path) as conn:
+            # WAL mode so concurrent readers don't block writers
+            await conn.execute("PRAGMA journal_mode=WAL")
+            await conn.execute("PRAGMA busy_timeout=5000")
+            yield conn
+
     async def acquire(
         self,
         resource: str,
@@ -37,33 +56,23 @@ class SovereignLock:
         ttl_s: float = 30.0,
         priority: int = 0,
     ) -> bool:
-        """
-        Attempts to acquire a lock by appending a 'request' intent.
-
-        Args:
-            resource: The URI or identifier of the resource.
-            agent_id: The ID of the agent requesting the lock.
-            timeout_s: How long to wait for acquisition before giving up.
-            ttl_s: Time-to-live for the lock if not released.
-            priority: Higher priority intents take precedence in reduction.
-        """
+        """Attempts to acquire a lock via append-only intent ledger."""
         expires_at = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 
-        # 1. Append Intent (Atomic operation in SQLite)
-        async with self._engine.session() as conn:
+        # 1. Append intent + trigger initial reduction
+        async with self._dedicated_conn() as conn:
             await conn.execute(
                 "INSERT INTO lock_intents (resource, agent_id, action, priority, expires_at) "
                 "VALUES (?, ?, ?, ?, ?)",
                 (resource, agent_id, "request", priority, expires_at),
             )
             await conn.commit()
-
-            # 2. Trigger immediate localized reduction
             await self._reduce_resource(conn, resource)
 
-            # 3. Wait for state collapse (polling projection)
-            start_time = datetime.now(timezone.utc)
-            while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
+        # 2. Poll for state collapse — each poll uses a fresh connection
+        start_time = datetime.now(timezone.utc)
+        while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
+            async with self._dedicated_conn() as conn:
                 async with conn.execute(
                     "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
                     (resource,),
@@ -71,26 +80,20 @@ class SovereignLock:
                     row = await cursor.fetchone()
                 if row:
                     holder, expiry = row
-                    # Clean up if expired
                     if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
                         await self._clear_expired(conn, resource)
-                        continue  # Re-read after clear
-
+                        continue
                     if holder == agent_id:
-                        logger.debug(
-                            "SovereignLock: Resource %s acquired by %s", resource, agent_id
-                        )
+                        logger.debug("SovereignLock: %s acquired by %s", resource, agent_id)
                         return True
-
-                # Wait for chance
-                await asyncio.sleep(0.1)
+            await asyncio.sleep(0.05)
 
         logger.warning("SovereignLock: Timeout acquiring %s for %s", resource, agent_id)
         return False
 
     async def release(self, resource: str, agent_id: str):
         """Registers a 'release' intent and flattens the result."""
-        async with self._engine.session() as conn:
+        async with self._dedicated_conn() as conn:
             await conn.execute(
                 "INSERT INTO lock_intents (resource, agent_id, action) VALUES (?, ?, ?)",
                 (resource, agent_id, "release"),

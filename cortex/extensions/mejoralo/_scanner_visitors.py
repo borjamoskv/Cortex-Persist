@@ -4,8 +4,8 @@ Extracted from antipatterns.py to satisfy the Landauer LOC barrier (≤500).
 Visitors accept AntipatternFinding instances but do NOT import antipatterns.py
 to avoid a circular dependency.
 """
-
 from __future__ import annotations
+
 
 import ast
 

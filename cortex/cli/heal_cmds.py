@@ -1,3 +1,4 @@
+from __future__ import annotations
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 

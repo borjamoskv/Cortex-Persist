@@ -13,6 +13,7 @@ from typing import Any
 import aiosqlite
 
 # Hoisted from insert_fact_record hot path (was lazy import per-call)
+from cortex.engine.store_validators import normalize_project
 from cortex.graph import process_fact_graph
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
@@ -37,6 +38,9 @@ async def insert_fact_record(
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
     from cortex.extensions.security.signatures import get_default_signer
+
+    # ── Normalize project at write boundary (Ω-gate: prevents namespace splits) ──
+    project = normalize_project(project)
 
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])

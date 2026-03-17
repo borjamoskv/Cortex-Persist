@@ -2,6 +2,7 @@
 Reflex Engine - Autonomic Responses and Immune Defense.
 Ω₅: High adrenaline triggers diagnostic healing.
 """
+from __future__ import annotations
 
 import asyncio
 import logging
