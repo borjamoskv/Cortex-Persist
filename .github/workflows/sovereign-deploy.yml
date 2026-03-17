@@ -121,7 +121,7 @@ jobs:
         working-directory: infra/terraform
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
-      - uses: hashicorp/setup-terraform@v3  # verified publisher — keep tag
+      - uses: hashicorp/setup-terraform@v4  # verified publisher — keep tag
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
