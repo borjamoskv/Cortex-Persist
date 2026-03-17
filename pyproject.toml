@@ -45,9 +45,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://cortexpersist.com"
 Documentation = "https://cortexpersist.dev"
-Repository = "https://github.com/borjamoskv/cortex"
-Issues = "https://github.com/borjamoskv/cortex/issues"
-Changelog = "https://github.com/borjamoskv/cortex/releases"
+Repository = "https://github.com/borjamoskv/Cortex-Persist"
+Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
+Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
 [project.optional-dependencies]
 api = [
     "fastapi>=0.110",

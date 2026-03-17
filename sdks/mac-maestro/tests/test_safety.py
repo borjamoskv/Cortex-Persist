@@ -1,8 +1,7 @@
 import pytest
-
+from mac_maestro.errors import SafetyViolationError
 from mac_maestro.models import ClickAction
 from mac_maestro.safety import SafetyPolicy
-from mac_maestro.errors import SafetyViolationError
 
 
 def test_blocks_destructive_clicks() -> None:

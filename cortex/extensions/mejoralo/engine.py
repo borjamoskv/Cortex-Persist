@@ -1,4 +1,5 @@
 """MEJORAlo Engine implementation."""
+
 from __future__ import annotations
 
 import logging

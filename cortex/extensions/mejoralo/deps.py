@@ -2,6 +2,7 @@
 
 Calculates topological dependencies for topological sorting.
 """
+
 from __future__ import annotations
 
 import ast

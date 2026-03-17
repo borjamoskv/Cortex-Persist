@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import Enum
-from typing import Literal, Sequence
+from typing import Literal
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class KeyModifier(str, Enum):
@@ -25,7 +26,7 @@ class AXNodeSnapshot(BaseModel):
     enabled: bool = True
     visible: bool = True
     focused: bool = False
-    children: list["AXNodeSnapshot"] = Field(default_factory=list)
+    children: list[AXNodeSnapshot] = Field(default_factory=list)
 
 
 class ElementSelector(BaseModel):

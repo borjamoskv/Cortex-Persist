@@ -1,6 +1,7 @@
 """
 SQLite WAL Backend (Multi-Process Safe)
 """
+
 from __future__ import annotations
 
 import json

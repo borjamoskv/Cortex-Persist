@@ -17,6 +17,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+macos = [
+  "pyobjc-core>=10.3; platform_system == 'Darwin'",
+  "pyobjc-framework-Cocoa>=10.3; platform_system == 'Darwin'",
+  "pyobjc-framework-Quartz>=10.3; platform_system == 'Darwin'",
+  "pyobjc-framework-ApplicationServices>=10.3; platform_system == 'Darwin'",
+]
 dev = [
   "pytest>=8.0.0",
   "pytest-cov>=5.0.0",

@@ -3,6 +3,7 @@
 Orchestrates multi-agent dialectics. The Foreman manages parallel
 workstreams for Research, Implementation, and Verification.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -77,18 +78,25 @@ class CapatazOrchestrator:
         lock_acquired = False
         try:
             kwargs = kwargs or {}
-            
+
             # Acquire lock if specified
             if lock_resource and lock_manager:
-                logger.debug("[%s] Capataz: Agent %s attempting to acquire lock on %s", self.mission_id, agent_name, lock_resource)
+                logger.debug(
+                    "[%s] Capataz: Agent %s attempting to acquire lock on %s",
+                    self.mission_id,
+                    agent_name,
+                    lock_resource,
+                )
                 lock_acquired = await lock_manager.acquire(
                     resource=lock_resource,
                     agent_id=agent_name,
                     timeout_s=lock_timeout_s,
-                    ttl_s=lock_ttl_s
+                    ttl_s=lock_ttl_s,
                 )
                 if not lock_acquired:
-                    raise asyncio.TimeoutError(f"Agent {agent_name} failed to acquire lock on {lock_resource}")
+                    raise asyncio.TimeoutError(
+                        f"Agent {agent_name} failed to acquire lock on {lock_resource}"
+                    )
 
             result = await coro_func(*args, **kwargs)
             task.status = TaskStatus.COMPLETED
@@ -101,7 +109,12 @@ class CapatazOrchestrator:
             raise
         finally:
             if lock_acquired and lock_resource and lock_manager:
-                logger.debug("[%s] Capataz: Agent %s releasing lock on %s", self.mission_id, agent_name, lock_resource)
+                logger.debug(
+                    "[%s] Capataz: Agent %s releasing lock on %s",
+                    self.mission_id,
+                    agent_name,
+                    lock_resource,
+                )
                 await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
 

@@ -252,9 +252,7 @@ class FactMutationEngine:
         payload: dict,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
-        ts = payload.get(
-            "timestamp", datetime.now(timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
         await conn.execute(
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
             "meta = CASE "

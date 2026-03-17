@@ -6,10 +6,11 @@ Tests:
 3. CausalTracer.recall_episode() finds and deduplicates episodes by query.
 4. ThalamusGate causal saturation check rejects facts past threshold.
 """
+
 import asyncio
+import os
 import sqlite3
 import sys
-import os
 
 # Ensure project root is on path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -115,8 +116,10 @@ async def test_trace_episode():
     assert episode.ghost_count == 2  # id=2 and id=4
     assert episode.decision_count == 2  # id=1 and id=3
     assert len(episode.fact_chain) == 4  # All 4 facts in the tree
-    print(f"✅ trace_episode: DAG with {len(episode.fact_chain)} nodes, "
-          f"depth={episode.depth}, entropy={episode.entropy_density:.2f}")
+    print(
+        f"✅ trace_episode: DAG with {len(episode.fact_chain)} nodes, "
+        f"depth={episode.depth}, entropy={episode.entropy_density:.2f}"
+    )
     print(f"   Summary:\n{episode.summary}")
 
 

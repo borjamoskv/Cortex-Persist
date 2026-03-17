@@ -4,6 +4,7 @@ CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 Execute X-Ray 13D scan on a project directory.
 Refactored: scan() orchestrates, helpers do collection + scoring + assembly.
 """
+
 from __future__ import annotations
 
 import ast
@@ -322,8 +323,10 @@ def _score_dimensions(
     # 14. Control macOS (System Telemetry)
     # Injected conditionally on darwin platforms. Exposes host entropy to the scan.
     import sys
+
     if sys.platform == "darwin":
         from cortex.extensions.mejoralo.mac_control import mac_control_dimension_kwargs
+
         dimensions.append(DimensionResult(**mac_control_dimension_kwargs()))
 
     # 14. Sovereign Excellence (Sovereign Pass)

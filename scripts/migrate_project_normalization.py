@@ -9,6 +9,7 @@ FTS5 content synced via `INSERT INTO facts_fts(facts_fts) VALUES('rebuild')`.
 Usage:
     python3 scripts/migrate_project_normalization.py [--dry-run]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -45,9 +46,9 @@ def run(dry_run: bool) -> None:
                 continue
 
             # ── facts ────────────────────────────────────────────────────
-            count = conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE project = ?", (raw,)
-            ).fetchone()[0]
+            count = conn.execute("SELECT COUNT(*) FROM facts WHERE project = ?", (raw,)).fetchone()[
+                0
+            ]
             if count > 0:
                 report.append(f"  facts        : '{raw}' → '{canonical}' ({count} rows)")
                 if not dry_run:

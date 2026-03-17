@@ -4,6 +4,7 @@
 Integración CORTEX con Coinbase Developer Platform.
 Singleton: una única instancia por proceso.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -11,7 +12,7 @@ import logging
 import os
 import stat
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 try:
     from cdp_langchain.agent_toolkits import CdpToolkit  # pyright: ignore[reportMissingImports]
@@ -55,7 +56,7 @@ class CDPSovereignWallet:
     Wallet seed persists to ~/.cortex/ with restricted file permissions (0600).
     """
 
-    _instance: Optional["CDPSovereignWallet"] = None
+    _instance: CDPSovereignWallet | None = None
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):

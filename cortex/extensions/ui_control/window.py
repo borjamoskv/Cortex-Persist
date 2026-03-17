@@ -4,10 +4,11 @@ CORTEX — Sovereign Window Management Engine for macOS.
 Dedicated window operations: list, move, resize, minimize, fullscreen, close.
 Uses AppleScript + System Events for maximum reliability across apps.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.ui_control.applescript import run_applescript
 from cortex.extensions.ui_control.models import AppTarget, InteractionResult, WindowInfo
@@ -24,7 +25,7 @@ class WindowEngine:
     Handles listing, moving, resizing, minimizing, and fullscreen toggling.
     """
 
-    def __init__(self, engine: Optional["CortexEngine"] = None) -> None:
+    def __init__(self, engine: CortexEngine | None = None) -> None:
         self.engine = engine
 
     async def list_windows(self, app_name: str) -> list[WindowInfo]:

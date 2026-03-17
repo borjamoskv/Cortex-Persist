@@ -5,6 +5,7 @@ sidecar to protect calls to the external ``cortex.compactor.compact`` service.
 It follows the classic Closed → Open → Half‑Open state machine with configurable
 error thresholds and cooldown periods.
 """
+
 from __future__ import annotations
 
 import logging

@@ -43,14 +43,14 @@ class IMessageAdapter(BaseAdapter):
         # Escape double quotes for AppleScript
         applescript_msg = message.replace('"', '\\"')
 
-        script = f'''
+        script = f"""
         tell application "Messages"
             set targetBuddy to "{self.target}"
             set targetService to (1st service whose service type is iMessage)
             set theBuddy to buddy targetBuddy of targetService
             send "{applescript_msg}" to theBuddy
         end tell
-        '''
+        """
 
         try:
             proc = await asyncio.create_subprocess_exec(

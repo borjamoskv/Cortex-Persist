@@ -43,5 +43,7 @@ class SafetyPolicy:
             raise SafetyViolationError("Refusing to type absurd payload >10k chars.")
 
     def _validate_press(self, action: PressAction) -> None:
-        if not self.allow_destructive and action.key_code == 53:  # Escape usually safe, just example
+        if (
+            not self.allow_destructive and action.key_code == 53
+        ):  # Escape usually safe, just example
             return

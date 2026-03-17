@@ -11,6 +11,7 @@ Commands:
   cortex autorouter disable-boot→ Desinstala de launchd
   cortex autorouter logs     → Tail al log del daemon
 """
+
 from __future__ import annotations
 
 import subprocess

@@ -321,8 +321,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
                 await pipeline.run_post_hooks(
-                    fact_id, project, fact_type, conn,
-                    tenant_id=tenant_id, source=source, db_path=db_path,
+                    fact_id,
+                    project,
+                    fact_type,
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
+                    db_path=db_path,
                 )
             except Exception as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
@@ -393,9 +398,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             new_meta["previous_fact_id"] = fact_id
 
             # Deprecate first to avoid unique constraint violations on identical hashes
-            await self.deprecate(
-                fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id
-            )
+            await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
 
             new_id = await self.store(
                 project=project,
@@ -409,7 +412,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn=conn,
                 commit=False,
             )
-            
+
             await conn.commit()
             return new_id
 
@@ -462,6 +465,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         )
 
         from cortex.engine.causality import AsyncCausalGraph
+
         graph = AsyncCausalGraph(conn)
         await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
 
@@ -509,9 +513,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             row = await cursor.fetchone()
         if not row:
             return False
-            
+
         db_tenant_id, project = row[0], row[1]
-        
+
         # 1. Mutate as tombstone (most severe invalidation)
         await MUTATION_ENGINE.apply(
             conn,
@@ -522,7 +526,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             signer="store_mixin:invalidate",
             commit=False,
         )
-        
+
         # 2. Hard set confidence to C1 for the source fact explicitly via MutationEngine
         # Actually it's cleaner to just update it here for immediacy of the projection,
         # but in CORTEX a score_update mutation is best so it's recorded on the ledger.
@@ -538,6 +542,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         # 3. Propagate taint downward
         from cortex.engine.causality import AsyncCausalGraph
+
         graph = AsyncCausalGraph(conn)
         await graph.propagate_taint(fact_id=fact_id, tenant_id=db_tenant_id)
 

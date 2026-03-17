@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 # cortex/evolution/shannon_metrics.py
 """Shannon Entropy-modulated metrics for Evolution Engine.
 

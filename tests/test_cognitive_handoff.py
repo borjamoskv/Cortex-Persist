@@ -118,10 +118,7 @@ class TestCognitiveHandoffInvariants:
 
     def test_involves_axiomatics_false(self):
         """No C5 beliefs → no premium escalation."""
-        beliefs = [
-            BeliefObject(content=f"b-{i}", project="test")
-            for i in range(3)
-        ]
+        beliefs = [BeliefObject(content=f"b-{i}", project="test") for i in range(3)]
         candidate = BeliefObject(content="candidate", project="test")
         assert CognitiveHandoff._involves_axiomatics(candidate, beliefs) is False
 

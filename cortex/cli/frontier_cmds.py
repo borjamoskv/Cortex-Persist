@@ -2,6 +2,7 @@
 Frontier CLI Commands
 Control the R&D and Metabolism pulse of CORTEX.
 """
+
 from __future__ import annotations
 
 import asyncio

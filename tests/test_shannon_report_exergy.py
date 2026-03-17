@@ -23,23 +23,25 @@ def _make_scanner_mock() -> MagicMock:
     scanner.confidence_distribution = AsyncMock(
         return_value={"C5": 50, "C4": 30, "C3": 15, "C2": 5}
     )
-    scanner.project_distribution = AsyncMock(
-        return_value={"cortex": 60, "naroa": 40}
-    )
-    scanner.source_distribution = AsyncMock(
-        return_value={"agent": 70, "human": 30}
-    )
+    scanner.project_distribution = AsyncMock(return_value={"cortex": 60, "naroa": 40})
+    scanner.source_distribution = AsyncMock(return_value={"agent": 70, "human": 30})
     scanner.age_distribution = AsyncMock(
         return_value={"<7d": 20, "7-30d": 30, "30-90d": 30, ">90d": 20}
     )
     scanner.content_length_distribution = AsyncMock(
         return_value={"short": 25, "medium": 50, "long": 25}
     )
-    scanner.temporal_velocity = AsyncMock(return_value={
-        "2026-03-10": 5, "2026-03-11": 8, "2026-03-12": 12,
-        "2026-03-13": 10, "2026-03-14": 15, "2026-03-15": 20,
-        "2026-03-16": 18,
-    })
+    scanner.temporal_velocity = AsyncMock(
+        return_value={
+            "2026-03-10": 5,
+            "2026-03-11": 8,
+            "2026-03-12": 12,
+            "2026-03-13": 10,
+            "2026-03-14": 15,
+            "2026-03-15": 20,
+            "2026-03-16": 18,
+        }
+    )
     scanner.type_project_joint = AsyncMock(
         return_value={
             ("decision", "cortex"): 25,
@@ -62,9 +64,7 @@ async def test_analyze_includes_exergy_report():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch(
-        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
-    ):
+    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert "exergy_report" in result
@@ -77,13 +77,9 @@ async def test_analyze_includes_exergy_report():
         "noise_fraction",
         "useful_work_ratio",
     }
-    assert required_keys <= set(er.keys()), (
-        f"Missing keys: {required_keys - set(er.keys())}"
-    )
+    assert required_keys <= set(er.keys()), f"Missing keys: {required_keys - set(er.keys())}"
     for k, v in er.items():
-        assert isinstance(v, (int, float)), (
-            f"{k} should be numeric, got {type(v)}"
-        )
+        assert isinstance(v, (int, float)), f"{k} should be numeric, got {type(v)}"
 
 
 @pytest.mark.asyncio
@@ -93,9 +89,7 @@ async def test_analyze_includes_dead_weight_bits():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch(
-        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
-    ):
+    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert "dead_weight_bits" in result
@@ -110,9 +104,7 @@ async def test_exergy_report_nonzero_for_real_distributions():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch(
-        "cortex.extensions.shannon.report.MemoryScanner", return_value=scanner
-    ):
+    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert result["exergy_score"] > 0.0

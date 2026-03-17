@@ -1,6 +1,7 @@
 """
 CORTEX v5.0 — SovereignGate Core Logic.
 """
+
 from __future__ import annotations
 
 import collections
@@ -15,7 +16,7 @@ import threading
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from .errors import GateError, GateExpired, GateInvalidSignature, GateNotApproved
 from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
@@ -23,7 +24,7 @@ from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
 __all__ = ["SovereignGate", "get_gate", "reset_gate"]
 
 logger = logging.getLogger("cortex.extensions.gate")
-_gate_instance: Optional["SovereignGate"] = None
+_gate_instance: SovereignGate | None = None
 _gate_lock = threading.Lock()
 
 

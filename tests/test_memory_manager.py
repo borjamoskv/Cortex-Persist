@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -51,11 +50,11 @@ def mock_mem0_pipeline():
     # Mem0Pipeline is instantiated internally, we'll patch it below or mock it out
     mem0 = AsyncMock()
     from dataclasses import dataclass
-    
+
     @dataclass
     class MockExergy:
         score: float
-    
+
     mem0.evaluate_exergy = AsyncMock(return_value=MockExergy(score=0.9))
     mem0.exergy_threshold = 0.5
     return mem0
@@ -138,7 +137,7 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
     with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock) as mock_compress:
         # Give worker a tick to pick it up
         await asyncio.sleep(0.01)
-        # However, the task was added *before* this patch. The worker might have already processed it 
+        # However, the task was added *before* this patch. The worker might have already processed it
         # using the real compress_and_store and failed. We should patch it before calling process_interaction.
         pass
 
@@ -153,7 +152,7 @@ async def test_process_interaction_with_overflow_clean():
         encoder=AsyncMock(),
         max_bg_tasks=1,
     )
-    
+
     with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock) as mock_compress:
         await mgr.process_interaction(
             role="user",
@@ -162,10 +161,10 @@ async def test_process_interaction_with_overflow_clean():
             token_count=10,
             tenant_id="t1",
         )
-        
+
         # Worker loop processes the queue
         await mgr.wait_for_background(timeout=1.0)
-        
+
         # verify background task fired
         mock_compress.assert_called_once()
         args = mock_compress.call_args[0]
@@ -173,7 +172,7 @@ async def test_process_interaction_with_overflow_clean():
         assert args[1] == ["overflowed_item"]
         assert args[2] == "sess"
         assert args[3] == "t1"
-        
+
     mgr._cancel_background_tasks()
 
 
@@ -186,18 +185,27 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
     manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
     # Mock Resonance Gate to insert new (reset)
     manager._resonance_gate.gate = AsyncMock(
-        return_value=("reset", CortexSemanticEngram(
-            id="engram_123", tenant_id="t", project_id="p",
-            content="c", embedding=[0.0],
-        ))
+        return_value=(
+            "reset",
+            CortexSemanticEngram(
+                id="engram_123",
+                tenant_id="t",
+                project_id="p",
+                content="c",
+                embedding=[0.0],
+            ),
+        )
     )
 
     with (
         patch.object(
-            type(manager), "_check_deduplication", return_value=None,
+            type(manager),
+            "_check_deduplication",
+            return_value=None,
         ),
         patch.object(
-            type(manager._schema_engine), "match_schema",
+            type(manager._schema_engine),
+            "match_schema",
             return_value=None,
         ),
     ):
@@ -217,7 +225,7 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
 async def test_store_rejection_low_exergy(manager, mock_mem0_pipeline):
     """Test store abortion if Mem0 exergy is too low."""
     manager._mem0_pipeline = mock_mem0_pipeline
-    mock_mem0_pipeline.evaluate_exergy.return_value.score = 0.1 # Below 0.5 threshold
+    mock_mem0_pipeline.evaluate_exergy.return_value.score = 0.1  # Below 0.5 threshold
 
     result = await manager.store(
         tenant_id="t1",
@@ -230,11 +238,11 @@ async def test_store_rejection_low_exergy(manager, mock_mem0_pipeline):
 @pytest.mark.asyncio
 async def test_store_rejection_thalamus(manager, mock_mem0_pipeline):
     """Test store abortion if ThalamusGate rejects."""
-    manager._mem0_pipeline = mock_mem0_pipeline # Pass exergy
-    
+    manager._mem0_pipeline = mock_mem0_pipeline  # Pass exergy
+
     # 2. Thalamus rejects
     manager.thalamus.filter = AsyncMock(return_value=(False, "discard:causal_saturation", None))
-    
+
     # Patch notify_notch_pruning so it doesn't try to use WebSockets
     with patch("cortex.memory.manager.notify_notch_pruning", new_callable=AsyncMock):
         result = await manager.store(
@@ -254,18 +262,24 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
     )
 
     existing_match = CortexSemanticEngram(
-        id="existing_456", tenant_id="t", project_id="p",
-        content="c", embedding=[0.0],
+        id="existing_456",
+        tenant_id="t",
+        project_id="p",
+        content="c",
+        embedding=[0.0],
     )
     manager._resonance_gate.gate = AsyncMock(
         return_value=("resonance", existing_match),
     )
 
     with patch.object(
-        type(manager), "_check_deduplication", return_value=None,
+        type(manager),
+        "_check_deduplication",
+        return_value=None,
     ):
         result_id = await manager.store(
-            tenant_id="t1", content="Similar fact",
+            tenant_id="t1",
+            content="Similar fact",
         )
     assert result_id == "deduplicated:existing_456"
 
@@ -273,18 +287,20 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
 @pytest.mark.asyncio
 async def test_assemble_context(manager, mock_l1):
     """Test assembling final LLM context from L1 and L2."""
-    with patch("cortex.memory.manager.retrieve_episodic_context", new_callable=AsyncMock) as mock_retrieve:
+    with patch(
+        "cortex.memory.manager.retrieve_episodic_context", new_callable=AsyncMock
+    ) as mock_retrieve:
         mock_retrieve.return_value = [{"content": "episodic 1"}]
-        
+
         ctx = await manager.assemble_context(
             tenant_id="tenant_1",
             query="test query",
         )
-        
+
         # Working memory should be the mocked return `[{"role": "user", "content": "hello"}]`
         assert len(ctx["working_memory"]) == 1
         assert ctx["working_memory"][0]["content"] == "hello"
-        
+
         # Episodic context
         assert len(ctx["episodic_context"]) == 1
         assert ctx["episodic_context"][0]["content"] == "episodic 1"
@@ -295,20 +311,20 @@ async def test_wait_for_background_timeout(manager):
     """Test hard timeout enforcement on background tasks."""
     # Put a fake task and never call task_done
     manager._bg_queue.put_nowait((["fake"], "s", "t", "p"))
-    
+
     # Should timeout because the fake task blocks (or we can just mock the worker)
     # Actually, the worker will process it and fail (since args are fake strings not objects),
     # but it WILL call task_done in the `finally` block!
     # So we need to put a task that actually hangs.
     async def hanging_compress(*args, **kwargs):
         await asyncio.sleep(5.0)
-        
-    manager._cancel_background_tasks() # Stop real workers
-    manager._bg_queue.put_nowait((["fake"], "s", "t", "p")) # Unfinished item
-    
+
+    manager._cancel_background_tasks()  # Stop real workers
+    manager._bg_queue.put_nowait((["fake"], "s", "t", "p"))  # Unfinished item
+
     with patch("os.environ.get", return_value="1"):
         # Test the wait_for_background times out after 0.1s
         await manager.wait_for_background(timeout=0.1)
-    
+
     # Queue should have been auto-drained due to timeout logic (since CORTEX_TESTING is set)
     assert manager._bg_queue.empty()

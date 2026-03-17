@@ -1,5 +1,7 @@
 import asyncio
-from cortex.extensions.llm.router import Router, HedgedRequests
+
+from cortex.extensions.llm.router import Router
+
 
 async def main():
     router = Router()
@@ -12,21 +14,20 @@ async def main():
     
     Por favor, sé tan crítico como sea necesario.
     """
-    
+
     # We use HedgedRequests to ask the frontier models (Gemini 3.1 Pro / ChatGPT 5.2 / Claude 4.6)
     # to evaluate the codebase for security fissures, acting as 'Sergio' (or a critical security auditor).
-    print("Consultando a Sergio (Frontend Models via Sovereign Router) sobre fisuras de seguridad...")
-    
-    response = await router.query(
-        prompt=prompt,
-        intent="security_audit",
-        require_frontier=True
+    print(
+        "Consultando a Sergio (Frontend Models via Sovereign Router) sobre fisuras de seguridad..."
     )
-    
+
+    response = await router.query(prompt=prompt, intent="security_audit", require_frontier=True)
+
     print("\nRespuesta de Sergio:")
     print("-" * 80)
     print(response.content)
     print("-" * 80)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

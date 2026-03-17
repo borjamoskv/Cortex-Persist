@@ -296,7 +296,15 @@ class TestSerialization:
     def test_dimension_names_in_dict(self, engine: TasteEngine) -> None:
         verdict = engine.evaluate("Test content.")
         d = verdict.to_dict()
-        expected = {"precision", "utility", "novelty", "depth", "robustness", "reusability", "taste"}
+        expected = {
+            "precision",
+            "utility",
+            "novelty",
+            "depth",
+            "robustness",
+            "reusability",
+            "taste",
+        }
         assert set(d["dimensions"].keys()) == expected
 
 

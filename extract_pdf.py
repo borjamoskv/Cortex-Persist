@@ -1,4 +1,3 @@
-import sys
 from pypdf import PdfReader
 
 pdf_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/2bf92ab9-b546-48e5-9c56-9341c0985306/.tempmediaStorage/64c61ec9ec71d2bd.pdf"

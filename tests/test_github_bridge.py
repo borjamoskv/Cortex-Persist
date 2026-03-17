@@ -96,10 +96,12 @@ class TestSyncCreatesBridgeFacts:
         ]
         repos = [{"full_name": "borjamoskv/testrepo", "fork": False}]
 
-        transport = _mock_transport({
-            "/users/borjamoskv/repos": repos,
-            "/repos/borjamoskv/testrepo/issues": issues,
-        })
+        transport = _mock_transport(
+            {
+                "/users/borjamoskv/repos": repos,
+                "/repos/borjamoskv/testrepo/issues": issues,
+            }
+        )
 
         bridge = GitHubCortexBridge(engine, token="fake-token", owner="borjamoskv")
         bridge._client = httpx.AsyncClient(transport=transport)
@@ -120,10 +122,12 @@ class TestSyncSkipsDuplicates:
         issues = [_make_issue(10, title="Unique issue for dedup test")]
         repos = [{"full_name": "borjamoskv/testrepo", "fork": False}]
 
-        transport = _mock_transport({
-            "/users/borjamoskv/repos": repos,
-            "/repos/borjamoskv/testrepo/issues": issues,
-        })
+        transport = _mock_transport(
+            {
+                "/users/borjamoskv/repos": repos,
+                "/repos/borjamoskv/testrepo/issues": issues,
+            }
+        )
 
         bridge = GitHubCortexBridge(engine, token="fake-token", owner="borjamoskv")
         bridge._client = httpx.AsyncClient(transport=transport)
@@ -148,10 +152,12 @@ class TestClosedIssueCrystallizes:
         open_issues = [_make_issue(20, title="Will close soon")]
         repos = [{"full_name": "borjamoskv/testrepo", "fork": False}]
 
-        transport = _mock_transport({
-            "/users/borjamoskv/repos": repos,
-            "/repos/borjamoskv/testrepo/issues": open_issues,
-        })
+        transport = _mock_transport(
+            {
+                "/users/borjamoskv/repos": repos,
+                "/repos/borjamoskv/testrepo/issues": open_issues,
+            }
+        )
 
         bridge = GitHubCortexBridge(engine, token="fake-token", owner="borjamoskv")
         bridge._client = httpx.AsyncClient(transport=transport)
@@ -160,10 +166,12 @@ class TestClosedIssueCrystallizes:
 
         # Step 2: Sync again with the issue now closed
         closed_issues = [_make_issue(20, title="Will close soon", state="closed")]
-        transport2 = _mock_transport({
-            "/users/borjamoskv/repos": repos,
-            "/repos/borjamoskv/testrepo/issues": closed_issues,
-        })
+        transport2 = _mock_transport(
+            {
+                "/users/borjamoskv/repos": repos,
+                "/repos/borjamoskv/testrepo/issues": closed_issues,
+            }
+        )
         bridge._client = httpx.AsyncClient(transport=transport2)
         r2 = await bridge.sync_all()
         assert r2.crystallized == 1
@@ -178,10 +186,12 @@ class TestPRDetected:
         issues = [_make_issue(30, title="Feature PR", is_pr=True)]
         repos = [{"full_name": "borjamoskv/testrepo", "fork": False}]
 
-        transport = _mock_transport({
-            "/users/borjamoskv/repos": repos,
-            "/repos/borjamoskv/testrepo/issues": issues,
-        })
+        transport = _mock_transport(
+            {
+                "/users/borjamoskv/repos": repos,
+                "/repos/borjamoskv/testrepo/issues": issues,
+            }
+        )
 
         bridge = GitHubCortexBridge(engine, token="fake-token", owner="borjamoskv")
         bridge._client = httpx.AsyncClient(transport=transport)

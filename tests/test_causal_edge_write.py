@@ -13,7 +13,6 @@ import pytest
 
 from cortex.engine.fact_store_core import insert_fact_record
 
-
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
@@ -115,9 +114,7 @@ async def test_parent_decision_id_creates_causal_edge(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr(
-        "cortex.crypto.get_default_encrypter", lambda: FakeEnc()
-    )
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
@@ -155,9 +152,7 @@ async def test_parent_decision_id_creates_causal_edge(
     )
 
     # Verify causal edge was created
-    async with conn.execute(
-        "SELECT fact_id, parent_id, edge_type FROM causal_edges"
-    ) as cursor:
+    async with conn.execute("SELECT fact_id, parent_id, edge_type FROM causal_edges") as cursor:
         edges = await cursor.fetchall()
 
     assert len(edges) >= 1
@@ -186,9 +181,7 @@ async def test_auto_resolved_parent_creates_edge(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr(
-        "cortex.crypto.get_default_encrypter", lambda: FakeEnc()
-    )
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
@@ -226,9 +219,7 @@ async def test_auto_resolved_parent_creates_edge(
         # No parent_decision_id — should auto-resolve to 50
     )
 
-    async with conn.execute(
-        "SELECT fact_id, parent_id, edge_type FROM causal_edges"
-    ) as cursor:
+    async with conn.execute("SELECT fact_id, parent_id, edge_type FROM causal_edges") as cursor:
         edges = await cursor.fetchall()
 
     # Should have auto-created a derived_from edge to fact 50
@@ -258,9 +249,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr(
-        "cortex.crypto.get_default_encrypter", lambda: FakeEnc()
-    )
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
@@ -298,8 +287,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
     )
 
     async with conn.execute(
-        "SELECT fact_id, parent_id, signal_id, edge_type "
-        "FROM causal_edges"
+        "SELECT fact_id, parent_id, signal_id, edge_type " "FROM causal_edges"
     ) as cursor:
         edges = await cursor.fetchall()
 

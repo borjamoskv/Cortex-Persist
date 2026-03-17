@@ -118,8 +118,7 @@ class TombstoneMonitor:
                         deleted_facts=total_deleted,
                         freed_mb=freed_mb,
                         message=(
-                            f"Barrido Nocturno completado: "
-                            f"{total_deleted} facts purgados."
+                            f"Barrido Nocturno completado: " f"{total_deleted} facts purgados."
                         ),
                     )
                 ]

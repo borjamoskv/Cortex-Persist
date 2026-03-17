@@ -58,9 +58,7 @@ def backfill(dry_run: bool = False) -> dict[str, int]:
     conn.commit()
 
     # Get all facts with their meta
-    rows = conn.execute(
-        "SELECT id, meta, project, tenant_id FROM facts"
-    ).fetchall()
+    rows = conn.execute("SELECT id, meta, project, tenant_id FROM facts").fetchall()
 
     stats = {
         "total_facts": len(rows),
@@ -73,17 +71,12 @@ def backfill(dry_run: bool = False) -> dict[str, int]:
 
     # Build set of existing edges for O(1) lookup
     existing = set()
-    edge_rows = conn.execute(
-        "SELECT fact_id, parent_id FROM causal_edges"
-    ).fetchall()
+    edge_rows = conn.execute("SELECT fact_id, parent_id FROM causal_edges").fetchall()
     for er in edge_rows:
         existing.add((er[0], er[1]))
 
     # Build set of valid fact IDs for FK validation
-    valid_ids = {
-        r[0]
-        for r in conn.execute("SELECT id FROM facts").fetchall()
-    }
+    valid_ids = {r[0] for r in conn.execute("SELECT id FROM facts").fetchall()}
 
     batch: list[tuple[int, int, str, str, str]] = []
 
@@ -102,9 +95,7 @@ def backfill(dry_run: bool = False) -> dict[str, int]:
         # Source 2: encrypted meta (fallback)
         if parent_id is None and encrypted_meta:
             try:
-                meta_str = enc.decrypt_str(
-                    encrypted_meta, tenant_id=tid
-                )
+                meta_str = enc.decrypt_str(encrypted_meta, tenant_id=tid)
                 meta = json.loads(meta_str)
                 pdi = meta.get("parent_decision_id")
                 if pdi:
@@ -133,13 +124,15 @@ def backfill(dry_run: bool = False) -> dict[str, int]:
             stats["already_linked"] += 1
             continue
 
-        batch.append((
-            fact_id,
-            parent_id,
-            EDGE_TYPE,
-            project or "unknown",
-            tid,
-        ))
+        batch.append(
+            (
+                fact_id,
+                parent_id,
+                EDGE_TYPE,
+                project or "unknown",
+                tid,
+            )
+        )
         existing.add((fact_id, parent_id))
 
     if batch and not dry_run:
@@ -154,9 +147,7 @@ def backfill(dry_run: bool = False) -> dict[str, int]:
     stats["edges_created"] = len(batch)
 
     # Final count
-    final_count = conn.execute(
-        "SELECT COUNT(*) FROM causal_edges"
-    ).fetchone()[0]
+    final_count = conn.execute("SELECT COUNT(*) FROM causal_edges").fetchone()[0]
     stats["total_edges_after"] = final_count
 
     conn.close()
@@ -181,11 +172,7 @@ def main() -> None:
     logger.info("Decrypt errors:        %d", stats["decrypt_errors"])
     logger.info("Total edges now:       %d", stats["total_edges_after"])
 
-    density = (
-        stats["total_edges_after"] / stats["total_facts"]
-        if stats["total_facts"] > 0
-        else 0
-    )
+    density = stats["total_edges_after"] / stats["total_facts"] if stats["total_facts"] > 0 else 0
     logger.info(
         "Edge density:          %.1f%% (%d/%d)",
         density * 100,

@@ -2,6 +2,7 @@
 CORTEX v6 — Audit Commands
 Commands for system security and architectural auditing.
 """
+
 from __future__ import annotations
 
 import asyncio

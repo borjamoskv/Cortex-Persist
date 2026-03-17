@@ -1,6 +1,6 @@
 import logging
 
-from cortex.guards.capabilities import AgentCredentials, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 
 logger = logging.getLogger("cortex.guards.capability_guard")
 
@@ -22,9 +22,11 @@ class CapabilityGuard:
 
     def _recalculate_effective_tier(self) -> None:
         """Calculates the max permissible tier bounded by hard agent limits."""
-        highest_active = max(
-            (cap.tier for cap in self.active_capabilities), default=RiskTier.TIER_0_ANALYTICAL
-        )
+        if not self.active_capabilities:
+            self.max_allowed_tier = RiskTier.TIER_0_ANALYTICAL
+            return
+
+        highest_active = max(cap.tier for cap in self.active_capabilities)
         self.max_allowed_tier = min(highest_active, self.credentials.max_tier)
 
     def validate_action(self, required_capability_name: str, requested_tier: RiskTier) -> None:
@@ -54,7 +56,13 @@ class CapabilityGuard:
             logger.error(msg)
             raise ValueError(msg)
 
-        logger.debug("Action validated: %s at Tier %s", required_capability_name, requested_tier.name)
+        logger.debug(
+            "Action validated: %s at Tier %s", required_capability_name, requested_tier.name
+        )
+    def add_capability(self, capability: Capability) -> None:
+        """Dynamically grant a new capability, re-evaluating the effective risk tier."""
+        self.active_capabilities.add(capability)
+        self._recalculate_effective_tier()
 
     def revoke_capability(self, capability_name: str) -> None:
         """Revoke a capability by name, scoping down execution rights proactively."""
@@ -66,4 +74,3 @@ class CapabilityGuard:
     def __repr__(self) -> str:
         caps = [cap.name for cap in self.active_capabilities]
         return f"<CapabilityGuard agent={self.credentials.agent_id} max_tier={self.max_allowed_tier.name} caps={caps}>"
-

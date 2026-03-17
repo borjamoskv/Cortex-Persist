@@ -5,6 +5,7 @@ CortexLLMRouter resiliente. Zero single-point-of-failure.
 
 Axiom Ω₅: Antifragile by Default — el aprendizaje nunca se detiene por un 401.
 """
+
 from __future__ import annotations
 
 import json

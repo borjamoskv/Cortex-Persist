@@ -6,11 +6,9 @@ of the full CortexEngine, proving that guards can be tested in isolation.
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
@@ -18,6 +16,7 @@ import pytest
 @pytest.fixture
 def pipeline():
     from cortex.engine.guard_pipeline import GuardPipeline
+
     return GuardPipeline()
 
 
@@ -33,9 +32,7 @@ def mock_conn():
 class TestGuardPipeline:
     async def test_empty_pipeline_passes(self, pipeline, mock_conn):
         """An empty pipeline should not raise."""
-        await pipeline.run_guards(
-            "test content", "project", "knowledge", {}, mock_conn
-        )
+        await pipeline.run_guards("test content", "project", "knowledge", {}, mock_conn)
 
     async def test_passing_guard(self, pipeline, mock_conn):
         """A guard that returns without raising should pass."""
@@ -43,9 +40,7 @@ class TestGuardPipeline:
         guard.check = AsyncMock(return_value=None)
         pipeline.add_guard(guard)
 
-        await pipeline.run_guards(
-            "content", "project", "knowledge", {}, mock_conn
-        )
+        await pipeline.run_guards("content", "project", "knowledge", {}, mock_conn)
         guard.check.assert_awaited_once()
 
     async def test_rejecting_guard_raises(self, pipeline, mock_conn):
@@ -55,9 +50,7 @@ class TestGuardPipeline:
         pipeline.add_guard(guard)
 
         with pytest.raises(ValueError, match="rejected"):
-            await pipeline.run_guards(
-                "content", "project", "knowledge", {}, mock_conn
-            )
+            await pipeline.run_guards("content", "project", "knowledge", {}, mock_conn)
 
     async def test_guard_ordering_preserved(self, pipeline, mock_conn):
         """Guards should execute in registration order."""
@@ -66,11 +59,11 @@ class TestGuardPipeline:
         async def make_guard(name: str):
             async def check(content, project, fact_type, meta, conn, **kw):
                 order.append(name)
+
             g = MagicMock()
             g.check = check
             return g
 
-        import asyncio
         g1 = await make_guard("first")
         g2 = await make_guard("second")
         g3 = await make_guard("third")
@@ -79,9 +72,7 @@ class TestGuardPipeline:
         pipeline.add_guard(g2)
         pipeline.add_guard(g3)
 
-        await pipeline.run_guards(
-            "content", "project", "knowledge", {}, mock_conn
-        )
+        await pipeline.run_guards("content", "project", "knowledge", {}, mock_conn)
         assert order == ["first", "second", "third"]
 
     async def test_first_rejection_stops_chain(self, pipeline, mock_conn):
@@ -95,9 +86,7 @@ class TestGuardPipeline:
         pipeline.add_guard(g2)
 
         with pytest.raises(ValueError, match="blocked"):
-            await pipeline.run_guards(
-                "content", "project", "knowledge", {}, mock_conn
-            )
+            await pipeline.run_guards("content", "project", "knowledge", {}, mock_conn)
         g2.check.assert_not_awaited()
 
 
@@ -107,6 +96,7 @@ class TestGuardPipeline:
 class TestMutators:
     async def test_mutator_transforms_content(self, pipeline, mock_conn):
         """A mutator should be able to modify content, fact_type, and meta."""
+
         async def transform(content, project, fact_type, meta, conn, **kw):
             return content.upper(), "bridge", {**meta, "mutated": True}
 
@@ -114,15 +104,14 @@ class TestMutators:
         mutator.transform = transform
         pipeline.add_mutator(mutator)
 
-        c, ft, m = await pipeline.run_mutators(
-            "hello", "project", "knowledge", {}, mock_conn
-        )
+        c, ft, m = await pipeline.run_mutators("hello", "project", "knowledge", {}, mock_conn)
         assert c == "HELLO"
         assert ft == "bridge"
         assert m["mutated"] is True
 
     async def test_chained_mutators(self, pipeline, mock_conn):
         """Mutators should chain — each receives the previous output."""
+
         async def add_prefix(content, project, fact_type, meta, conn, **kw):
             return f"[PREFIX] {content}", fact_type, meta
 
@@ -134,9 +123,7 @@ class TestMutators:
         pipeline.add_mutator(m1)
         pipeline.add_mutator(m2)
 
-        c, _, _ = await pipeline.run_mutators(
-            "body", "project", "knowledge", {}, mock_conn
-        )
+        c, _, _ = await pipeline.run_mutators("body", "project", "knowledge", {}, mock_conn)
         assert c == "[PREFIX] body [SUFFIX]"
 
 
@@ -149,23 +136,17 @@ class TestPostHooks:
         hook.on_stored = AsyncMock(return_value=None)
         pipeline.add_post_hook(hook)
 
-        await pipeline.run_post_hooks(
-            123, "project", "knowledge", mock_conn
-        )
+        await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
         hook.on_stored.assert_awaited_once()
 
     async def test_failing_hook_does_not_raise(self, pipeline, mock_conn):
         """Post-store hooks must never raise — failures are logged."""
         hook = MagicMock()
-        hook.on_stored = AsyncMock(
-            side_effect=RuntimeError("disk on fire")
-        )
+        hook.on_stored = AsyncMock(side_effect=RuntimeError("disk on fire"))
         pipeline.add_post_hook(hook)
 
         # Should NOT raise
-        await pipeline.run_post_hooks(
-            123, "project", "knowledge", mock_conn
-        )
+        await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
 
     async def test_multiple_hooks_all_run(self, pipeline, mock_conn):
         """All post-store hooks should run, even if one fails."""
@@ -187,9 +168,7 @@ class TestPostHooks:
         pipeline.add_post_hook(h2)
         pipeline.add_post_hook(h3)
 
-        await pipeline.run_post_hooks(
-            123, "project", "knowledge", mock_conn
-        )
+        await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
         assert results == ["ok", "bad", "final"]
 
 

@@ -20,7 +20,9 @@ def _norm(value: str | None) -> str:
     return (value or "").strip().casefold()
 
 
-def _score_text(expected: str | None, actual: str | None, weight: float, label: str) -> tuple[float, str | None]:
+def _score_text(
+    expected: str | None, actual: str | None, weight: float, label: str
+) -> tuple[float, str | None]:
     if expected is None:
         return 0.0, None
     if _norm(expected) == _norm(actual):
@@ -28,7 +30,9 @@ def _score_text(expected: str | None, actual: str | None, weight: float, label: 
     return 0.0, None
 
 
-def _score_contains(needle: str | None, *haystack: str | None, weight: float) -> tuple[float, str | None]:
+def _score_contains(
+    needle: str | None, *haystack: str | None, weight: float
+) -> tuple[float, str | None]:
     if needle is None:
         return 0.0, None
     n = _norm(needle)
@@ -38,7 +42,9 @@ def _score_contains(needle: str | None, *haystack: str | None, weight: float) ->
     return 0.0, None
 
 
-def score_node(node: AXNodeSnapshot, selector: ElementSelector, weights: MatchWeights | None = None) -> ElementMatch | None:
+def score_node(
+    node: AXNodeSnapshot, selector: ElementSelector, weights: MatchWeights | None = None
+) -> ElementMatch | None:
     weights = weights or MatchWeights()
 
     if selector.enabled is not None and node.enabled != selector.enabled:
@@ -98,9 +104,7 @@ def score_node(node: AXNodeSnapshot, selector: ElementSelector, weights: MatchWe
 
 def find_best_match(root: AXNodeSnapshot, selector: ElementSelector) -> ElementMatch:
     candidates = [
-        match
-        for node in walk_nodes(root)
-        if (match := score_node(node, selector)) is not None
+        match for node in walk_nodes(root) if (match := score_node(node, selector)) is not None
     ]
     if not candidates:
         raise ElementNotFoundError(f"No element matched selector: {selector.model_dump()}")

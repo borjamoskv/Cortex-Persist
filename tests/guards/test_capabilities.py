@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.guards.capabilities import Capability, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 from cortex.guards.capability_guard import CapabilityGuard
 
 
@@ -11,7 +11,8 @@ def analytics_guard() -> CapabilityGuard:
         Capability(name="fs:read", tier=RiskTier.TIER_1_LOCAL_SAFE),
         Capability(name="mem:query", tier=RiskTier.TIER_0_ANALYTICAL),
     }
-    return CapabilityGuard(allowed_capabilities=caps)
+    creds = AgentCredentials(agent_id="test_analytics", capabilities=caps, max_tier=RiskTier.TIER_1_LOCAL_SAFE)
+    return CapabilityGuard(credentials=creds)
 
 
 @pytest.fixture
@@ -22,7 +23,8 @@ def execution_guard() -> CapabilityGuard:
         Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION),
         Capability(name="git:commit", tier=RiskTier.TIER_3_LOCAL_MUTATION),
     }
-    return CapabilityGuard(allowed_capabilities=caps)
+    creds = AgentCredentials(agent_id="test_execution", capabilities=caps, max_tier=RiskTier.TIER_3_LOCAL_MUTATION)
+    return CapabilityGuard(credentials=creds)
 
 
 def test_capability_guard_success(analytics_guard: CapabilityGuard) -> None:
@@ -53,7 +55,7 @@ def test_dynamic_capability_grant(analytics_guard: CapabilityGuard) -> None:
 
     # Max tier elevates
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_3_LOCAL_MUTATION
-    
+
     # We can now write
     analytics_guard.validate_action("fs:write", RiskTier.TIER_3_LOCAL_MUTATION)
 

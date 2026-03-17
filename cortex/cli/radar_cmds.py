@@ -32,6 +32,7 @@ def scan(path: str, entropy: bool):
     # 2. Epistemic Entropy (Banda E)
     entropy_count = 0
     if entropy:
+
         async def _get_entropy():
             conn = await engine._get_conn()
             # conn obtained for direct query below

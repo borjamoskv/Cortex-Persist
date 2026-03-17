@@ -66,10 +66,8 @@ class TestCortexCRDT:
     def test_mv_register_conflict_detection(self):
         """Critical fact (decision): both sides preserved."""
         crdt = CortexCRDT(local_node_id=0)
-        local = [_make_replica(1, "decision A", fact_type="decision",
-                               node_id=0, physical_ms=1000)]
-        remote = [_make_replica(1, "decision B", fact_type="decision",
-                                node_id=1, physical_ms=2000)]
+        local = [_make_replica(1, "decision A", fact_type="decision", node_id=0, physical_ms=1000)]
+        remote = [_make_replica(1, "decision B", fact_type="decision", node_id=1, physical_ms=2000)]
 
         result = crdt.merge(local, remote)
         assert result.conflicts_detected == 1
@@ -129,10 +127,8 @@ class TestCortexCRDT:
     def test_tie_break_by_node_id(self):
         """Same HLC: higher node_id wins (deterministic)."""
         crdt = CortexCRDT(local_node_id=0)
-        local = [_make_replica(1, "local ver", node_id=0,
-                               physical_ms=1000, logical=0)]
-        remote = [_make_replica(1, "remote ver", node_id=5,
-                                physical_ms=1000, logical=0)]
+        local = [_make_replica(1, "local ver", node_id=0, physical_ms=1000, logical=0)]
+        remote = [_make_replica(1, "remote ver", node_id=5, physical_ms=1000, logical=0)]
 
         result = crdt.merge(local, remote)
         # Remote node_id (5) > local (0), so remote wins

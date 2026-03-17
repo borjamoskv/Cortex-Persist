@@ -4,6 +4,7 @@ CORTEX v5.0 — MEJORAlo Ship Gate.
 Validates the 7 Seals for production readiness.
 Refactored: each seal is an independent checker function.
 """
+
 from __future__ import annotations
 
 import logging

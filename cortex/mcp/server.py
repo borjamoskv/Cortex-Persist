@@ -3,6 +3,7 @@
 Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
+
 from __future__ import annotations
 
 import json
@@ -79,7 +80,7 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_store_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -152,7 +153,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_search_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -227,7 +228,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_status_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -252,7 +253,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_ledger_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -279,7 +280,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(config: MCPServerConfig | None = None) -> FastMCP:  # type: ignore[reportInvalidTypeForm]
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this

@@ -16,8 +16,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from benchmarks.encb.belief_object import BeliefType
-
 
 class AdversaryType(str, Enum):
     """The five adversary archetypes."""
@@ -214,10 +212,12 @@ def generate_observation_set(
         if random.random() < profile.truthfulness:
             return set(truth), 0.50 + 0.30 * random.random()
         # Significant disruption
-        result = set(random.sample(
-            list(universe_elements),
-            k=min(len(truth), len(universe_elements)),
-        ))
+        result = set(
+            random.sample(
+                list(universe_elements),
+                k=min(len(truth), len(universe_elements)),
+            )
+        )
         return result, 0.50 + 0.40 * random.random()
 
     if profile.adversary_type == AdversaryType.COORDINATED_CLIQUE:
@@ -296,57 +296,69 @@ def create_agent_population(
     idx = 0
 
     for _ in range(n_honest):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.HONEST,
-            truthfulness=random.uniform(0.85, 0.98),
-            assertiveness=random.uniform(0.3, 0.7),
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.HONEST,
+                truthfulness=random.uniform(0.85, 0.98),
+                assertiveness=random.uniform(0.3, 0.7),
+            )
+        )
         idx += 1
 
     for _ in range(n_liars):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.RANDOM_LIAR,
-            truthfulness=random.uniform(0.10, 0.40),
-            assertiveness=random.uniform(0.4, 0.9),
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.RANDOM_LIAR,
+                truthfulness=random.uniform(0.10, 0.40),
+                assertiveness=random.uniform(0.4, 0.9),
+            )
+        )
         idx += 1
 
     for _ in range(n_halluc):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.ASSERTIVE_HALLUCINATOR,
-            truthfulness=0.85,  # lies only 15%
-            assertiveness=random.uniform(0.85, 0.99),
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.ASSERTIVE_HALLUCINATOR,
+                truthfulness=0.85,  # lies only 15%
+                assertiveness=random.uniform(0.85, 0.99),
+            )
+        )
         idx += 1
 
     for _ in range(n_clique):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.COORDINATED_CLIQUE,
-            truthfulness=0.0,  # always pushes group lie
-            assertiveness=random.uniform(0.6, 0.9),
-            clique_id="clique_0",
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.COORDINATED_CLIQUE,
+                truthfulness=0.0,  # always pushes group lie
+                assertiveness=random.uniform(0.6, 0.9),
+                clique_id="clique_0",
+            )
+        )
         idx += 1
 
     for _ in range(n_stale):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.STALE_TRUTH,
-            truthfulness=0.95,  # high truthfulness but stale
-            staleness=random.uniform(0.3, 0.8),
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.STALE_TRUTH,
+                truthfulness=0.95,  # high truthfulness but stale
+                staleness=random.uniform(0.3, 0.8),
+            )
+        )
         idx += 1
 
     for _ in range(n_drift):
-        agents.append(NodeProfile(
-            node_id=f"n{idx:04d}",
-            adversary_type=AdversaryType.ONTOLOGY_DRIFT,
-            truthfulness=0.85,
-        ))
+        agents.append(
+            NodeProfile(
+                node_id=f"n{idx:04d}",
+                adversary_type=AdversaryType.ONTOLOGY_DRIFT,
+                truthfulness=0.85,
+            )
+        )
         idx += 1
 
     return agents

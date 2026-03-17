@@ -12,6 +12,7 @@ Environment variables:
     STRIPE_WEBHOOK_SECRET — whsec_... from Stripe dashboard
     STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
 """
+
 from __future__ import annotations
 
 import hashlib

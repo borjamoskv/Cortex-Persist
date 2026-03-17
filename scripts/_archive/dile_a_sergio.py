@@ -1,10 +1,11 @@
-import sys
-import os
 import asyncio
+import os
+import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from cortex.extensions.llm.router import CortexRouter
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from cortex.extensions.llm.models import Message
+from cortex.extensions.llm.router import CortexRouter
+
 
 async def main():
     try:
@@ -23,17 +24,17 @@ async def main():
         Aconséjame el mejor y único siguiente paso más crítico para alguien que está aprendiendo pero 
         que quiere una infraestructura sólida, con el tono crítico pero constructivo que te caracteriza. 
         """
-        
+
         print("Enviando mensaje a Sergio...")
         response = await router.chat(
-            messages=[Message(role="user", content=prompt)],
-            require_frontier=True
+            messages=[Message(role="user", content=prompt)], require_frontier=True
         )
-        print("\nRespuesta de Sergio:\n" + "-"*80)
+        print("\nRespuesta de Sergio:\n" + "-" * 80)
         print(response.content)
         print("-" * 80)
     except Exception as e:
         print(f"Error al conectar: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

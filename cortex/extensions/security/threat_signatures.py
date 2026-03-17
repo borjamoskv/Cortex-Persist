@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """Built-in Threat Signatures for CORTEX Security."""
 
 from typing import Any

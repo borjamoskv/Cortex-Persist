@@ -1,4 +1,5 @@
 """SQLite Graph Query Mixin."""
+
 from __future__ import annotations
 
 __all__ = ["SQLiteQueryMixin"]

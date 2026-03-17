@@ -2,6 +2,7 @@
 
 Integrates the NightShift anomaly hunter into the Sovereign CLI.
 """
+
 from __future__ import annotations
 
 import click
@@ -22,8 +23,6 @@ from cortex.cli.common import (
 def anomaly_cmds():
     """🔍 ANOMALY-HUNTER-DAEMON (NightShift Memory Refiner)."""
     pass
-
-
 
 
 @anomaly_cmds.command("anomaly-hunt")

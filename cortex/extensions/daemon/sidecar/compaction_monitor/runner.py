@@ -4,6 +4,7 @@ Async entry point for the Compaction Monitor sidecar.
 It sets up uvloop, connects to Redis (ARQ), starts the pressure watcher
 and registers the compaction job handler.
 """
+
 from __future__ import annotations
 
 import asyncio
