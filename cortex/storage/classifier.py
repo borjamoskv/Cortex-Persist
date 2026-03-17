@@ -61,7 +61,7 @@ SECRET_PATTERNS: Final[dict[str, str]] = {
     "npm_token": r"npm_[A-Za-z0-9]{36}",
     "pypi_token": r"pypi-[A-Za-z0-9_-]{50,}",
     "docker_auth": r'"auth"\s*:\s*"[A-Za-z0-9+/=]{20,}"',
-}
+}  # nosec B105
 
 CRITICAL_PATTERNS: Final[frozenset[str]] = frozenset(
     {

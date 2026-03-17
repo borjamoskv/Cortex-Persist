@@ -14,7 +14,9 @@ __all__ = [
     "mejoralo_record",
     "mejoralo_scan",
     "mejoralo_ship",
+    "mejoralo_awwwards_fix",
     "mejoralo_daemon",
+    "mejoralo_trend",
 ]
 
 
@@ -39,8 +41,8 @@ def mejoralo():
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_score, db):
     """X-Ray 13D — Escaneo multidimensional del proyecto."""
-    from cortex.mejoralo import MejoraloEngine
-    from cortex.mejoralo.constants import INMEJORABLE_SCORE
+    from cortex.extensions.mejoralo import MejoraloEngine
+    from cortex.extensions.mejoralo.constants import INMEJORABLE_SCORE
 
     engine = get_engine(db)
     try:
@@ -126,7 +128,7 @@ def _display_scan_result(result):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_record(project, score_before, score_after, actions, db):
     """Ouroboros — Registrar sesión MEJORAlo en el ledger."""
-    from cortex.mejoralo import MejoraloEngine
+    from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -147,10 +149,11 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 
         # Update mejora_loop_state.json if it exists
         import json
-        from datetime import datetime
-        from pathlib import Path
+        from datetime import datetime, timezone
 
-        state_file = Path.home() / ".cortex" / "mejora_loop_state.json"
+        from cortex.core.paths import CORTEX_DIR
+
+        state_file = CORTEX_DIR / "mejora_loop_state.json"
         if state_file.exists():
             try:
                 with open(state_file) as f:
@@ -160,7 +163,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"].append(
                     {
                         "project": project,
-                        "timestamp": datetime.now().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,
                         "delta": delta,
@@ -186,7 +189,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_history(project, limit, db):
     """Historial de sesiones MEJORAlo."""
-    from cortex.mejoralo import MejoraloEngine
+    from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -226,13 +229,67 @@ def mejoralo_history(project, limit, db):
         close_engine_sync(engine)
 
 
+@mejoralo.command("trend")
+@click.argument("project")
+@click.option("--window", "-w", default=30, help="Sessions to analyze")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def mejoralo_trend(project, window, db):
+    """📈 Effectiveness Trend — ¿CORTEX está mejorando tu código de verdad?"""
+    from cortex.extensions.mejoralo.effectiveness import EffectivenessTracker
+
+    engine = get_engine(db)
+    try:
+        tracker = EffectivenessTracker(engine)
+        trend = tracker.project_trend(project, window=window)
+
+        if trend.score_trend == "insufficient_data":
+            console.print(
+                f"[dim]Datos insuficientes para '{project}' "
+                f"({trend.sessions_analyzed} sesiones, mínimo 3).[/]"
+            )
+            return
+
+        # Trend icon and color
+        icons = {"improving": "📈", "stable": "➡️", "declining": "📉"}
+        colors = {"improving": "green", "stable": "yellow", "declining": "red"}
+        icon = icons.get(trend.score_trend, "❓")
+        color = colors.get(trend.score_trend, "white")
+
+        console.print(f"\n  {icon} [bold {color}]{trend.score_trend.upper()}[/]")
+        console.print(f"  Proyecto: [bold]{project}[/]")
+        console.print(f"  Sesiones analizadas: {trend.sessions_analyzed}")
+        console.print(f"  Score actual: [bold]{trend.latest_score}[/]")
+        console.print(f"  Delta promedio: [{color}]Δ{trend.avg_delta:+.1f}[/]")
+        console.print(f"  Tasa de mejora: {trend.positive_rate:.0%}")
+
+        # Decay risk bar
+        risk_pct = trend.decay_risk * 100
+        if risk_pct < 20:
+            risk_color = "green"
+        elif risk_pct < 50:
+            risk_color = "yellow"
+        else:
+            risk_color = "red"
+        bar = "█" * int(risk_pct / 5) + "░" * (20 - int(risk_pct / 5))
+        console.print(f"  Riesgo de decay: [{risk_color}]{bar} {risk_pct:.0f}%[/]")
+
+        if trend.stagnant:
+            console.print(
+                "  [bold red]⚠️  ESTANCAMIENTO DETECTADO — últimas 5 sesiones sin mejora[/]"
+            )
+
+        console.print()
+    finally:
+        close_engine_sync(engine)
+
+
 @mejoralo.command("ship")
 @click.argument("project")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_ship(project, path, db):
     """Ship Gate — Los 7 Sellos de producción."""
-    from cortex.mejoralo import MejoraloEngine
+    from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -255,10 +312,32 @@ def mejoralo_ship(project, path, db):
         close_engine_sync(engine)
 
 
+@mejoralo.command("awwwards-fix")
+@click.argument("project")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def mejoralo_awwwards_fix(project, path, db):
+    """Sovereign 200 — Rewrite animations, CSS, and UI for Awwwards SOTD."""
+    from cortex.extensions.mejoralo import MejoraloEngine
+
+    engine = get_engine(db)
+    try:
+        m = MejoraloEngine(engine)
+        with console.status("[bold blue]Injecting Awwwards Sovereign Agent...[/]"):
+            success = m.awwwards_fix(project, path)
+
+        if success:
+            console.print("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
+        else:
+            console.print("[bold red]❌ Failed to apply Awwwards Fix.[/]")
+    finally:
+        close_engine_sync(engine)
+
+
 @mejoralo.command("daemon")
 def mejoralo_daemon():
     """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
-    from cortex.mejoralo.daemon import main
+    from cortex.extensions.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
 
     main()
 
@@ -269,7 +348,7 @@ def mejoralo_daemon():
 @click.option("--no-hints", is_flag=True, help="Excluir detección de type hints faltantes")
 def mejoralo_antipatterns(path, magic, no_hints):
     """🔍 Antipattern Scanner — Detecta lo implícito que debería ser explícito."""
-    from cortex.mejoralo.antipatterns import scan_antipatterns
+    from cortex.extensions.mejoralo.antipatterns import scan_antipatterns
 
     with console.status("[bold blue]Escaneando antipatrones...[/]"):
         report = scan_antipatterns(

@@ -1,0 +1,51 @@
+name: "🔍 CORTEX SIGINT Monitor"
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: 'Minimum lead score (0.0 - 1.0)'
+        required: false
+        default: '0.05'
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  sigint-sweep:
+    name: "Signal Intelligence Sweep"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: "Install deps"
+        run: pip install httpx --quiet
+
+      - name: "Run SIGINT Sweep"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_SIGINT }}
+        run: |
+          python -m cortex.moltbook.sigint \
+            --mode sweep \
+            --min-score ${{ github.event.inputs.min_score || '0.05' }}
+
+      - name: "Post Summary"
+        run: |
+          echo "## ⚔️ CORTEX SIGINT Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Repos: letta, AutoGPT, langchain, autogen, crewAI, mem0" >> $GITHUB_STEP_SUMMARY
+          echo "Min score: ${{ github.event.inputs.min_score || '0.05' }}" >> $GITHUB_STEP_SUMMARY
+          echo "Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY

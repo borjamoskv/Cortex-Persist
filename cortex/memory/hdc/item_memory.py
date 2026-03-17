@@ -18,11 +18,11 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Any, Final
+from typing import Final
 
 import numpy as np
 
-from cortex.memory.hdc.algebra import DEFAULT_DIM, HVType, cosine_similarity, random_bipolar
+from cortex.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
 
 __all__ = ["ItemMemory"]
 
@@ -53,11 +53,7 @@ CORTEX_ROLES: Final[tuple[str, ...]] = (
 
 
 def _deterministic_seed(symbol: str) -> int:
-    """Derive a deterministic integer seed from a symbol string.
-
-    Uses SHA-256 truncated to 8 bytes → 64-bit integer.
-    Guarantees same symbol always produces same hypervector.
-    """
+    """Derive a deterministic integer seed from a symbol string."""
     digest = hashlib.sha256(symbol.encode("utf-8")).digest()
     return int.from_bytes(digest[:8], byteorder="big")
 
@@ -65,23 +61,18 @@ def _deterministic_seed(symbol: str) -> int:
 class ItemMemory:
     """Codebook mapping symbols to deterministic bipolar hypervectors.
 
-    All vectors are generated lazily and cached. The codebook can be
-    saved to / loaded from disk for sub-100ms cold starts.
-
-    Args:
-        dim: Hypervector dimensionality (default: 10,000).
-        codebook_path: Optional path for persistent codebook JSON.
+    Memory bounds are enforced via random eviction when maxsize is exceeded.
     """
-
-    __slots__ = ("_cache", "_dim", "_codebook_path")
 
     def __init__(
         self,
         dim: int = DEFAULT_DIM,
         codebook_path: str | Path | None = None,
+        maxsize: int = 10_000,
     ) -> None:
         self._dim = dim
         self._cache: dict[str, HVType] = {}
+        self._maxsize = maxsize
         self._codebook_path = Path(codebook_path) if codebook_path else None
 
         if self._codebook_path and self._codebook_path.exists():
@@ -92,52 +83,23 @@ class ItemMemory:
             self._get_or_create(f"role:{role}")
 
     def encode(self, symbol: str) -> HVType:
-        """Get or create the hypervector for a symbol.
-
-        Args:
-            symbol: Any string key (token, role:type, project:name).
-
-        Returns:
-            Deterministic bipolar hypervector for this symbol.
-        """
+        """Get or create the hypervector for a symbol. O(1)."""
         return self._get_or_create(symbol)
 
     def role_vector(self, fact_type: str) -> HVType:
-        """Get the role hypervector for a CORTEX fact type.
-
-        Args:
-            fact_type: One of CORTEX_ROLES (decision, bridge, ghost, ...).
-
-        Returns:
-            Role hypervector.
-        """
+        """Get the role hypervector for a CORTEX fact type."""
         return self._get_or_create(f"role:{fact_type}")
 
     def project_vector(self, project: str) -> HVType:
-        """Get the project hypervector.
-
-        Args:
-            project: Project name (e.g., 'cortex', 'naroa-2026').
-
-        Returns:
-            Project hypervector.
-        """
+        """Get the project hypervector."""
         return self._get_or_create(f"project:{project}")
 
     def nearest(
         self, query_hv: HVType, candidates: list[str] | None = None, top_k: int = 1
     ) -> list[tuple[str, float]]:
-        """Find the nearest symbols to a query hypervector.
+        """Find the nearest symbols to a query hypervector."""
+        from cortex.memory.hdc.algebra import cosine_similarity
 
-        Args:
-            query_hv: The hypervector to search for.
-            candidates: Optional subset of symbols to search.
-                        If None, searches the entire codebook.
-            top_k: Number of results to return.
-
-        Returns:
-            List of (symbol, similarity) tuples sorted by similarity (desc).
-        """
         search_space = candidates or list(self._cache.keys())
         scores: list[tuple[str, float]] = []
 
@@ -151,12 +113,12 @@ class ItemMemory:
         return scores[:top_k]
 
     def save_codebook(self) -> None:
-        """Persist the codebook to disk as JSON (int8 → list[int])."""
+        """Persist the codebook to disk as JSON."""
         if not self._codebook_path:
             return
 
         self._codebook_path.parent.mkdir(parents=True, exist_ok=True)
-        data: dict[str, Any] = {
+        data = {
             "dim": self._dim,
             "vectors": {k: v.tolist() for k, v in self._cache.items()},
         }
@@ -170,25 +132,28 @@ class ItemMemory:
 
     @property
     def dim(self) -> int:
-        """Hypervector dimensionality."""
         return self._dim
 
     @property
     def size(self) -> int:
-        """Number of symbols in the codebook."""
         return len(self._cache)
 
     # ─── Private ──────────────────────────────────────────────────
 
     def _get_or_create(self, symbol: str) -> HVType:
-        """Get from cache or generate deterministically."""
+        """Get from cache or generate deterministically with memory bounds."""
         if symbol not in self._cache:
+            if len(self._cache) >= self._maxsize:
+                # Basic eviction to maintain bounds
+                self._cache.pop(next(iter(self._cache)))
+
             seed = _deterministic_seed(symbol)
             self._cache[symbol] = random_bipolar(self._dim, seed=seed)
+
         return self._cache[symbol]
 
     def _load_codebook(self) -> None:
-        """Load codebook from JSON file."""
+        """Load codebook from disk."""
         if not self._codebook_path or not self._codebook_path.exists():
             return
 
@@ -196,21 +161,13 @@ class ItemMemory:
             raw = json.loads(self._codebook_path.read_text(encoding="utf-8"))
             saved_dim = raw.get("dim", self._dim)
             if saved_dim != self._dim:
-                logger.warning(
-                    "Codebook dim mismatch: saved=%d, current=%d. Regenerating.",
-                    saved_dim,
-                    self._dim,
-                )
-                return
+                logger.warning("Codebook dim mismatch: using saved %d", saved_dim)
+                self._dim = saved_dim
 
             vectors = raw.get("vectors", {})
             for k, v in vectors.items():
                 self._cache[k] = np.array(v, dtype=np.int8)
-
-            logger.info(
-                "HDC codebook loaded: %d symbols from %s",
-                len(self._cache),
-                self._codebook_path,
-            )
-        except (json.JSONDecodeError, KeyError, ValueError) as exc:
-            logger.warning("Failed to load HDC codebook: %s", exc)
+                if len(self._cache) >= self._maxsize:
+                    break
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            logger.warning("Failed to load HDC codebook: %s", e)

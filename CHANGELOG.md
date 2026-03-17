@@ -10,12 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — v0.4.x
 
 ### In Progress
-- GraphQL API (`/graphql`) — cross-language integration layer
-- Distributed Event Bus (NATS/Redis Streams) for swarm orchestration
-- GCP deployment blueprints (AlloyDB + GKE + Qdrant Cloud)
-- Zero-Knowledge encryption for agent memories at rest
-
+- **Stripe Embedded Checkout**: Migrado el flujo de monetización de redirecciones estándar a *Embedded Checkout* nativo para reducción drástica de fricción (O(1) cognitive load). Backend devuelve `client_secret` en `/v1/stripe/checkout` (con `ui_mode="embedded"`).
 ---
+
+## [0.3.1-beta] — 2026-03-02
+
+### Security
+- **Security Audit (2026-03-02)**: Complete autonomous audit across 58,098 LOC with 0 High/Medium findings.
+- **Supply Chain Integrity**: 289 dependencies audited with 0 known vulnerabilities.
+- **Nemesis Protocol RESTORED**: Fixed critical `IndentationError` in `append_antibody` hindering system-wide immunity recording.
+- **Hormonal Pulse Corrected**: Indicated pulse of `ADRENALINE` (0.8+) for auto-detected anti-patterns via Nemesis ledger.
+- **AST Sandbox Verified**: Structural validation against `__subclasses__` and `__globals__` confirmed as tamper-proof.
+
+### Fixed
+- `cortex/engine/nemesis.py`: Removed redundant `import datetime` and corrected indent failing on daemon bootstrap.
+- `cortex/cli/audit.py`: Optimized calcification reporting.
 
 ## [0.3.0-beta] — 2026-02-23
 
@@ -138,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Async API**: High-performance FastAPI backend with connection pooling and async SQLite
 - **Industrial Noir UI**: Dashboard with Cyber Lime (`#CCFF00`) and Abyssal Black (`#0A0A0A`) theme
 - **Internationalization**: Localized error messages (en, es)
-- **Python SDK** (`sdks/python/`): `pip install cortex-memory` public API
+- **Python SDK** (`sdks/python/`): `pip install cortex-persist` public API
 - **OpenAPI spec** (`openapi.yaml` — 70.5 KB): Full machine-readable API contract
 - **CI/CD** (`ci.yml`): GitHub Actions pipeline with pytest + ruff
 

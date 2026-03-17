@@ -3,20 +3,36 @@
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 
 from cortex.telemetry.metrics import metrics
+from cortex.telemetry.pulse import PULSE
 
 __all__ = ["ConsensusManager"]
 
 logger = logging.getLogger("cortex.consensus")
 
 
+def _logit(p: float) -> float:
+    p = min(max(p, 1e-6), 1.0 - 1e-6)
+    return math.log(p / (1.0 - p))
+
+
+def _sigmoid(x: float) -> float:
+    if x > 500:
+        return 1.0
+    if x < -500:
+        return 0.0
+    return 1.0 / (1.0 + math.exp(-x))
+
+
 class ConsensusManager:
     """Manages agent registration and weighted consensus voting."""
 
-    def __init__(self, engine):
+    def __init__(self, engine, signal_bus=None):
         self.engine = engine
+        self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
 
     async def vote(
         self,
@@ -25,6 +41,15 @@ class ConsensusManager:
         value: int,
         agent_id: str | None = None,
     ) -> float:
+        """Legacy v1 vote path. DEPRECATED. Use vote_v2 instead."""
+        import warnings
+
+        warnings.warn(
+            "ConsensusManager.vote() is deprecated and will be removed. Use vote_v2().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if agent_id:
             return await self.vote_v2(fact_id, agent_id, value)
 
@@ -52,6 +77,14 @@ class ConsensusManager:
             action,
             {"fact_id": fact_id, "agent": agent, "vote": value},
         )
+        # 💓 Pulse Signal (Reality Observer)
+        if self._signal_bus:
+            self._signal_bus.emit(
+                f"consensus:{action}",
+                payload={"fact_id": fact_id, "agent": agent, "vote": value},
+                source="consensus_manager",
+            )
+
         score = await self._recalculate_consensus(fact_id, conn)
         await conn.commit()
         return score
@@ -91,11 +124,25 @@ class ConsensusManager:
         )
         agent = await cursor.fetchone()
         if not agent:
+            # 💓 Pulse Reality Check: agent missing
+            if self._signal_bus:
+                self._signal_bus.emit(
+                    "error:consensus:agent_not_found",
+                    payload={"agent_id": agent_id, "fact_id": fact_id},
+                    source="consensus_manager",
+                )
+
+            # Legacy Shadow (Analyzing a corpse)
             metrics.inc(
                 "cortex_consensus_failures_total",
                 labels={"reason": "agent_not_found"},
                 meta={"agent_id": agent_id, "fact_id": fact_id},
             )
+            # Notify Pulse Registry of the shadow detection
+            PULSE.inc(
+                "cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"}
+            )
+
             raise ValueError(f"Agent {agent_id} not found")
 
         rep = agent[0]
@@ -143,24 +190,59 @@ class ConsensusManager:
         if not votes:
             return await self._recalculate_consensus(fact_id, conn)
 
-        weighted_sum = sum(v[0] * max(v[1], v[2]) for v in votes)
-        total_weight = sum(max(v[1], v[2]) for v in votes)
-        score = 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
+        # Logarithmic Opinion Pool (LogOP) consensus calculation
+        score_sum = 0.0
+        for v in votes:
+            vote_val = v[0]
+            if vote_val == 0:
+                continue
+
+            p = 0.99 if vote_val > 0 else 0.01
+            # Quadratic weight aggressively suppresses unreliable nodes
+            rel = max(v[1], v[2])
+            w = rel**2
+
+            score_sum += w * _logit(p)
+
+        prob_true = _sigmoid(score_sum)
+        # Scale back to [0.0, 2.0] so >=1.5 is verified
+        score = prob_true * 2.0
+
         await self._update_fact_score(fact_id, score, conn)
+
+        # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
+        await self._update_agent_entropy(fact_id, score, conn)
+
         return score
 
     async def _recalculate_consensus(self, fact_id: int, conn) -> float:
         cursor = await conn.execute(
-            "SELECT SUM(vote) FROM consensus_votes WHERE fact_id = ?",
+            "SELECT vote FROM consensus_votes WHERE fact_id = ?",
             (fact_id,),
         )
-        row = await cursor.fetchone()
-        vote_sum = row[0] or 0
-        score = max(0.0, 1.0 + (vote_sum * 0.1))
+        votes = await cursor.fetchall()
+        if not votes:
+            score = 1.0
+            await self._update_fact_score(fact_id, score, conn)
+            return score
+
+        score_sum = 0.0
+        for (vote_val,) in votes:
+            if vote_val == 0:
+                continue
+            p = 0.99 if vote_val > 0 else 0.01
+            w = 1.0  # Legacy votes have equal weight
+            score_sum += w * _logit(p)
+
+        prob_true = _sigmoid(score_sum)
+        score = prob_true * 2.0
+
         await self._update_fact_score(fact_id, score, conn)
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
         if score >= 1.5:
             conf = "verified"
         elif score <= 0.5:
@@ -168,12 +250,75 @@ class ConsensusManager:
         else:
             conf = None
 
+        cursor = await conn.execute(
+            "SELECT tenant_id FROM facts WHERE id = ?",
+            (fact_id,),
+        )
+        row = await cursor.fetchone()
+        tenant_id = row[0] if row else "default"
+
+        payload: dict = {"consensus_score": score}
         if conf:
-            await conn.execute(
-                "UPDATE facts SET consensus_score = ?, confidence = ? WHERE id = ?",
-                (score, conf, fact_id),
-            )
+            payload["confidence"] = conf
+
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=tenant_id,
+            event_type="score_update",
+            payload=payload,
+            signer="consensus_manager",
+            commit=False,
+        )
+
+    async def _update_agent_entropy(self, fact_id: int, final_consensus: float, conn) -> None:
+        """
+        Ratifica el consenso final y castiga/premia la entropía de los votantes.
+        Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
+        """
+        # Convertimos score continuo de [0.5, 1.5] a valor discreto
+        if final_consensus >= 1.5:
+            c_val = 1
+        elif final_consensus <= 0.5:
+            c_val = -1
         else:
+            return  # No hay consenso claro aún (Disputed), no hay castigo posible.
+
+        # 1. Recuperar los votos para este Fact
+        cursor = await conn.execute(
+            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ?", (fact_id,)
+        )
+        voters = await cursor.fetchall()
+
+        for agent_id, a_vote in voters:
+            # Calcular Alineación (1 = Acierto, -1 = Divergencia, 0 = Abstención)
+            alignment_score = a_vote * c_val
+
+            # 2. Actualizar el ring_buffer de los últimos N votos (hits vs misses)
             await conn.execute(
-                "UPDATE facts SET consensus_score = ? WHERE id = ?", (score, fact_id)
+                """
+                UPDATE agents 
+                SET 
+                    alignment_hits = alignment_hits + (CASE WHEN ? > 0 THEN 1 ELSE 0 END),
+                    alignment_misses = alignment_misses + (CASE WHEN ? < 0 THEN 1 ELSE 0 END),
+                    reputation_score = CASE 
+                        WHEN (alignment_hits - alignment_misses) < 0 THEN base_reputation * 0.5
+                        ELSE base_reputation 
+                    END
+                WHERE id = ? AND is_active = 1
+            """,
+                (alignment_score, alignment_score, agent_id),
             )
+
+            # Pulse the reality degradation check
+            if alignment_score < 0:
+                logger.warning(
+                    "Entropic drift detected in agent %s (Vote rejected by WBFT Consensus).",
+                    agent_id,
+                )
+                if self._signal_bus:
+                    self._signal_bus.emit(
+                        "agent:alignment:drift",
+                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        source="consensus_manager",
+                    )

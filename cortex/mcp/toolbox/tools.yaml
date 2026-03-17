@@ -1,0 +1,305 @@
+# ─────────────────────────────────────────────────────────────────────
+# CORTEX Knowledge Membrane — MCP Toolbox for Databases Configuration
+#
+# Read-only exposure of cortex.db for any MCP-compatible client.
+# Writes go through the CORTEX MCP server (Python) to avoid
+# SQLite write-lock contention.
+#
+# Usage:
+#   genai-toolbox --tools-file cortex/mcp/toolbox/tools.yaml
+# ─────────────────────────────────────────────────────────────────────
+
+# ── Source ────────────────────────────────────────────────────────────
+
+kind: sources
+name: cortex-db
+type: "sqlite"
+database: "${CORTEX_DB:~/.cortex/cortex.db}"
+
+---
+# ── Tools ─────────────────────────────────────────────────────────────
+
+kind: tools
+name: query-facts
+type: sqlite-sql
+source: cortex-db
+description: >
+  Search CORTEX facts by project, type, and confidence level.
+  Returns knowledge, decisions, errors, bridges, and ghost facts.
+  Use fact_type values: knowledge, decision, error, ghost, bridge.
+  Confidence values: C1 (hypothesis), C2 (speculative), C3 (inferred),
+  C4 (probable), C5 (confirmed), or legacy: stated, derived, inferred.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project name (exact match). Leave empty for all projects."
+  - name: fact_type
+    type: string
+    description: "Filter by fact type: knowledge, decision, error, ghost, bridge."
+  - name: min_confidence
+    type: string
+    description: "Minimum confidence level, e.g. C3. Filters >= this value alphabetically."
+  - name: limit
+    type: integer
+    description: "Maximum number of results to return (default 50)."
+statement: |
+  SELECT id, project, content, fact_type, tags, confidence, source,
+         cognitive_layer, consensus_score, created_at
+  FROM facts
+  WHERE is_tombstoned = 0
+    AND is_quarantined = 0
+    AND (? IS NULL OR ? = '' OR project = ?)
+    AND (? IS NULL OR ? = '' OR fact_type = ?)
+    AND (? IS NULL OR ? = '' OR confidence >= ?)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 50 ELSE ? END;
+
+---
+
+kind: tools
+name: query-ghosts
+type: sqlite-sql
+source: cortex-db
+description: >
+  Get CORTEX ghosts (unresolved knowledge gaps) by status and project.
+  Ghosts represent things the system suspects but cannot confirm.
+  Status values: open, resolved.
+parameters:
+  - name: status
+    type: string
+    description: "Ghost status filter: 'open' or 'resolved'. Defaults to open if empty."
+  - name: project
+    type: string
+    description: "Filter by project name. Leave empty for all projects."
+  - name: limit
+    type: integer
+    description: "Maximum number of results (default 20)."
+statement: |
+  SELECT id, reference, context, project, status, confidence,
+         created_at, resolved_at, expires_at
+  FROM ghosts
+  WHERE ((? IS NULL OR ? = '') AND status = 'open' OR status = ?)
+    AND (? IS NULL OR ? = '' OR project = ?)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 20 ELSE ? END;
+
+---
+
+kind: tools
+name: query-decisions
+type: sqlite-sql
+source: cortex-db
+description: >
+  Retrieve sovereign decisions persisted in CORTEX.
+  Decisions are facts with fact_type = 'decision' — architectural choices,
+  design rationale, and resolved trade-offs.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project name. Leave empty for all."
+  - name: limit
+    type: integer
+    description: "Maximum number of results (default 30)."
+statement: |
+  SELECT id, project, content, confidence, source, tags, created_at
+  FROM facts
+  WHERE fact_type = 'decision'
+    AND is_tombstoned = 0
+    AND is_quarantined = 0
+    AND (? IS NULL OR ? = '' OR project = ?)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 30 ELSE ? END;
+
+---
+
+kind: tools
+name: query-signals
+type: sqlite-sql
+source: cortex-db
+description: >
+  Read recent signal bus events from CORTEX's L1 consciousness layer.
+  Signals are cross-tool reactive events (file changes, test results,
+  deployment triggers, etc.).
+parameters:
+  - name: event_type
+    type: string
+    description: "Filter by signal event type. Leave empty for all."
+  - name: project
+    type: string
+    description: "Filter by project. Leave empty for all."
+  - name: limit
+    type: integer
+    description: "Maximum number of signals (default 30)."
+statement: |
+  SELECT id, event_type, payload, source, project, created_at
+  FROM signals
+  WHERE (? IS NULL OR ? = '' OR event_type = ?)
+    AND (? IS NULL OR ? = '' OR project = ?)
+  ORDER BY created_at DESC
+  LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 30 ELSE ? END;
+
+---
+
+kind: tools
+name: cortex-stats
+type: sqlite-sql
+source: cortex-db
+description: >
+  Get aggregate statistics about CORTEX's knowledge base.
+  Returns counts of facts by type, ghost counts by status,
+  total signals, and latest activity timestamp.
+parameters: []
+statement: |
+  SELECT
+    (SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0) AS total_facts,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'knowledge' AND is_tombstoned = 0) AS knowledge_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND is_tombstoned = 0) AS decision_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'error' AND is_tombstoned = 0) AS error_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0) AS ghost_fact_count,
+    (SELECT COUNT(*) FROM facts WHERE fact_type = 'bridge' AND is_tombstoned = 0) AS bridge_count,
+    (SELECT COUNT(*) FROM ghosts WHERE status = 'open') AS open_ghosts,
+    (SELECT COUNT(*) FROM ghosts WHERE status = 'resolved') AS resolved_ghosts,
+    (SELECT COUNT(*) FROM signals) AS total_signals,
+    (SELECT MAX(created_at) FROM facts) AS latest_fact,
+    (SELECT MAX(created_at) FROM ghosts) AS latest_ghost;
+
+---
+
+kind: tools
+name: trace-impact
+type: sqlite-sql
+source: cortex-db
+description: >
+  Recursive graph analysis to trace the impact of a decision or fact.
+  Explores the parent-child hierarchy (parent_decision_id) to reveal
+  the chain of causality. Supports consensus filtering to prune
+  low-relevance branches in massive architectures.
+parameters:
+  - name: root_id
+    type: integer
+    description: "The ID of the fact/decision to start the trace from."
+  - name: max_depth
+    type: integer
+    description: "Maximum recursion depth (default 5, scale dynamically for large graphs)."
+  - name: min_consensus
+    type: float
+    description: "Minimum consensus score (0.0 to 1.0) to explore a branch. Prunes low-relevance paths."
+  - name: tag
+    type: string
+    description: "Filter branches by a specific tag. If provided, paths without this tag are pruned."
+statement: |
+  WITH RECURSIVE impact_graph(id, project, content, fact_type, consensus_score, tags, parent_id, depth) AS (
+    SELECT id, project, content, fact_type, consensus_score, tags, parent_decision_id, 0
+    FROM facts WHERE id = ?
+    UNION ALL
+    SELECT f.id, f.project, f.content, f.fact_type, f.consensus_score, f.tags, f.parent_decision_id, ig.depth + 1
+    FROM facts f
+    JOIN impact_graph ig ON f.parent_decision_id = ig.id
+    WHERE ig.depth < CASE WHEN ? IS NULL OR ? <= 0 THEN 5 ELSE ? END
+      AND (f.consensus_score IS NULL OR f.consensus_score >= CASE WHEN ? IS NULL THEN 0.0 ELSE ? END)
+      AND (? IS NULL OR ? = '' OR f.tags LIKE '%' || ? || '%')
+  )
+  SELECT id, project, content, fact_type, consensus_score, tags, parent_id, depth
+  FROM impact_graph
+  ORDER BY depth ASC, consensus_score DESC;
+
+---
+
+kind: tools
+name: cluster-signals
+type: sqlite-sql
+source: cortex-db
+description: >
+  Identify temporal signal clusters to detect correlated events.
+  Uses a sliding window (CTE) to find groups of signals firing
+  within a 60-second window.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project. Leave empty for all."
+  - name: limit
+    type: integer
+    description: "Max number of clusters to return (default 10)."
+statement: |
+  WITH signal_times AS (
+    SELECT id, event_type, project, created_at,
+           strftime('%s', created_at) as unix_time
+    FROM signals
+    WHERE (? IS NULL OR ? = '' OR project = ?)
+  ),
+  clusters AS (
+    SELECT s1.id as root_id, s1.event_type as root_type,
+           COUNT(s2.id) as cluster_size,
+           GROUP_CONCAT(s2.event_type) as associated_types
+    FROM signal_times s1
+    JOIN signal_times s2 ON s2.unix_time BETWEEN s1.unix_time - 30 AND s1.unix_time + 30
+    GROUP BY s1.id
+    HAVING cluster_size > 1
+  )
+  SELECT * FROM clusters
+  ORDER BY cluster_size DESC
+  LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 10 ELSE ? END;
+
+---
+
+kind: tools
+name: ghost-mapping
+type: sqlite-sql
+source: cortex-db
+description: >
+  Join ghosts with facts to map knowledge gaps to existing context.
+  Helps visualize which areas of the project are "haunted" by
+  unresolved hypotheses.
+parameters:
+  - name: project
+    type: string
+    description: "Filter by project. Leave empty for all."
+  - name: tag
+    type: string
+    description: "Filter related facts by a specific tag."
+statement: |
+  SELECT g.id as ghost_id, g.reference, g.status,
+         f.id as related_fact_id, f.content as fact_content, 
+         f.fact_type, f.confidence as fact_confidence, f.tags
+  FROM ghosts g
+  LEFT JOIN facts f ON (
+    (g.project = f.project OR (? IS NULL OR ? = '' OR g.project = ?))
+    AND (f.content LIKE '%' || g.reference || '%' OR g.context LIKE '%' || f.content || '%')
+    AND (? IS NULL OR ? = '' OR f.tags LIKE '%' || ? || '%')
+  )
+  WHERE g.status = 'open'
+  LIMIT 50;
+
+---
+# ── Toolsets ──────────────────────────────────────────────────────────
+
+
+---
+
+kind: toolsets
+name: cortex-readonly
+tools:
+  - query-facts
+  - query-ghosts
+  - query-decisions
+  - query-signals
+  - cortex-stats
+  - trace-impact
+  - cluster-signals
+  - ghost-mapping
+
+---
+
+kind: toolsets
+name: graph-analysis
+tools:
+  - trace-impact
+  - cluster-signals
+  - ghost-mapping
+
+---
+
+kind: toolsets
+name: cortex-summary
+tools:
+  - cortex-stats

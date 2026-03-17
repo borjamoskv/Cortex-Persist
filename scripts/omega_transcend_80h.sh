@@ -5,7 +5,15 @@
 
 HOURS=80
 TOTAL_SECONDS=$((HOURS * 3600))
+
+# -- SECURITY GUARD --
+if [[ -z "${CORTEX_ALLOW_HOME_MUTATION}" ]]; then
+    echo -e "\033[38;2;255;0;0m[SECURITY] Script requires CORTEX_ALLOW_HOME_MUTATION=1 to modify \$HOME.\033[0m"
+    exit 1
+fi
+
 START_TIME=$(date +%s)
+
 LOG_FILE="$HOME/cortex/logs/aether_omega.log"
 
 mkdir -p "$HOME/cortex/logs"

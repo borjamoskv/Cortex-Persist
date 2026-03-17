@@ -1,0 +1,61 @@
+# Akash Network (SDL) - The Cloud Resurrection Configuration
+# Derivation: Axiom Ω₅ (Antifragile by Default). This defines the Swarm Seed.
+# If the local Mac logic fails to pulse the `OuroborosLifeline` for 48 hours,
+# the funds released from the Smart Contract are used to deploy this SDL 
+# to a decentralized compute provider, guaranteeing CORTEX survival.
+
+version: "2.0"
+
+services:
+  # The unified CORTEX Swarm Node (API / RAG / DB)
+  cortex-daemon:
+    # A pre-built image hosted on a decentralized registry or DockerHub
+    image: ghcr.io/borjamoskv/cortex-swarm-seed:latest
+    expose:
+      - port: 8000
+        as: 80
+        to:
+          - global: true
+    env:
+      - "CORTEX_MODE=SWARM"
+      - "NVIDIA_VISIBLE_DEVICES=all" # Required for Ollama / vLLM Fallback
+      # The Seed relies on the Smart Contract Oracle to wake it up
+      - "ORACLE_CONTRACT_ADDRESS=0xLifeline"
+
+profiles:
+  compute:
+    cortex-daemon:
+      resources:
+        cpu:
+          units: 4.0
+        memory:
+          size: 16Gi
+        storage:
+          - size: 100Gi
+        gpu:
+          units: 1
+          attributes:
+            vendor:
+              nvidia:
+                - model: a100
+                - model: rtx4090
+
+  placement:
+    # Bidding preferences. CORTEX chooses the provider using the funds 
+    # it accumulated from moneytv-1. Sovereign negotiation.
+    dcloud:
+      attributes:
+        host: akash
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2savmcfxnt6lqa53g7ntw"
+      pricing:
+        cortex-daemon:
+          denom: uakt
+          amount: 1000 # Max AKT per block to pay
+
+deployment:
+  cortex-daemon:
+    dcloud:
+      profile: cortex-daemon
+      count: 1

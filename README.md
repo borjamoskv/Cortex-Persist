@@ -1,9 +1,11 @@
-🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
-
 # CORTEX — Trust Infrastructure for Autonomous AI
 
-> **Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.**
-> *CORTEX is to AI memory what SSL/TLS is to web communications.*
+🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
+
+> **Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with?**
+> *CORTEX is to AI memory what SSL/TLS is to web communications — cryptographic verification, audit trails, and traceability for regulated environments.*
+
+Package: `cortex-persist v0.3.0b1` · Current engine generation: `v8`
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -16,58 +18,84 @@
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
+## Documentation
+
+CORTEX separates operational contribution rules, architecture, trust model, and epistemic doctrine.
+
+- [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
+- [Architecture](docs/architecture.md) — topology, module map, and data flow
+- [Axioms](docs/AXIOMS.md) — epistemic and design axioms
+- [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, guarantees, and threat model
+- [Contributing](./CONTRIBUTING.md) — contribution workflow
+- [Security Policy](./SECURITY.md) — vulnerability disclosure policy
+- [Roadmap](./ROADMAP.md) — development timeline and versioning
+
+---
+
+### ⚡ The "Aha" Moment
+
+AI agents hallucinate past actions. CORTEX stops this mathematically.
+
+```bash
+$ cortex store --type decision --project fin-agent "Approved loan #4292"
+[+] Fact stored. Ledger hash: 8f4a2b9e...
+
+$ cortex verify 8f4a2b9e
+[✔] VERIFIED: Hash chain intact. Merkle root sealed.
+```
+
+### ⚡ The Numbers
+
+| | |
+|:---|:---|
+| **<20ms** retrieval | In-process SQLite. No HTTP. No network. |
+| **1,000+** tests | Production-grade from day one |
+| **Zero** attack surface | No HTTP endpoints required. No cloud dependency. |
+
 ---
 
 ## The Problem
 
-AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
+AI agents make decisions at scale. Those decisions are invisible, untraceable, and unreproducible.
 
-- **Mem0** stores what agents remember. But can you prove the memory wasn't tampered with?
-- **Zep** builds knowledge graphs. But can you audit the full chain of reasoning?
-- **Letta** manages agent state. But can you generate a compliance report for regulators?
+- Memories are stored without cryptographic proof of integrity.
+- Decision chains cannot be audited or verified after the fact.
+- Multi-agent systems build divergent realities with no consensus mechanism.
+- Regulatory frameworks (EU AI Act Article 12, enforcement August 2026) require automatic logging, tamper-proof storage, and full traceability of AI system decisions.
 
-The **EU AI Act (Article 12, enforced August 2026)** requires:
-
-- ✅ Automatic logging of all agent decisions
-- ✅ Tamper-proof storage of decision records
-- ✅ Full traceability and explainability
-- ✅ Periodic integrity verification
-
-**Fines: up to €30M or 6% of global revenue.**
+A system that cannot prove what it decided — and when — is a system that cannot be trusted in production.
 
 ## The Solution
 
 CORTEX doesn't replace your memory layer — it **certifies** it.
 
-```
+```text
 Your Memory Layer (Mem0 / Zep / Letta / Custom)
         ↓
-   CORTEX Trust Engine v7
-        ├── 🧬 Biological Core (Autopoiesis/Endocrine)
-        ├── 🛡️ Zero-Trust Guards (Connection/Storage)
+   CORTEX Trust Engine
         ├── 🔗 SHA-256 hash-chained ledger
-        ├── Merkle tree checkpoints
-        ├── Reputation-weighted WBFT consensus
-        ├── Privacy Shield (11-pattern secret detection)
-        ├── AST Sandbox (safe LLM code execution)
-        └── EU AI Act compliance reports
+        ├── 🌳 Merkle tree checkpoints
+        ├── 🛡️ Zero-Trust Guards
+        ├── 🤝 Reputation-weighted WBFT consensus
+        ├── 🔐 Privacy Shield (11-pattern secret detection)
+        ├── 🧬 Biological Core (Autopoiesis/Endocrine)
+        └── 📋 Audit trail generation
 ```
 
 ### Core Capabilities
 
-| Capability | What It Does | EU AI Act |
-|:---|:---|:---:|
-| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. | Art. 12.3 |
-| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity | Art. 12.4 |
-| 📋 **Audit Trail** | Timestamped, hash-verified log of all decisions | Art. 12.1 |
-| 🔍 **Decision Lineage** | Trace how an agent arrived at any conclusion | Art. 12.2d |
-| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant verification | Art. 14 |
-| 📊 **Compliance Report** | One-command regulatory readiness snapshot | Art. 12 |
-| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger | — |
-| 🧬 **Biological Core** | Autopoiesis + Endocrine + Circadian Cycles | — |
-| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret patterns | — |
-| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. | — |
-| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (v6) | — |
+| Capability | What It Does |
+|:---|:---|
+| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
+| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
+| 📋 **Audit Trail** | Timestamped, hash-verified log of all decisions |
+| 🔍 **Decision Lineage** | Trace how an agent arrived at any conclusion |
+| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant verification |
+| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger |
+| 🧬 **Biological Core** | Autopoiesis + Endocrine + Circadian Cycles |
+| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret patterns |
+| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. |
+| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis |
 
 ---
 
@@ -76,7 +104,7 @@ Your Memory Layer (Mem0 / Zep / Letta / Custom)
 ### Install
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### Store a Decision & Verify It
@@ -89,19 +117,18 @@ cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
 cortex verify 42
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 
-# Generate compliance report
+# Generate audit report
 cortex compliance-report
-# → Compliance Score: 5/5 — All Article 12 requirements met
 ```
 
-### Multi-Tenant (v8)
+### Multi-Tenant
 
 ```python
 from cortex import CortexEngine
 
 engine = CortexEngine()
 
-# All operations are now tenant-scoped
+# All operations are tenant-scoped
 await engine.store_fact(
     content="Approved loan application #443",
     fact_type="decision",
@@ -125,7 +152,7 @@ uvicorn cortex.api:app --port 8484
 
 ---
 
-## Architecture (v8 — Sovereign Cloud)
+## Architecture
 
 ```mermaid
 block-beta
@@ -135,67 +162,38 @@ block-beta
     CLI["CLI (38 cmds)"]
     API["REST API (55+ endpoints)"]
     MCP["MCP Server"]
-    GraphQL["GraphQL (soon)"]
   end
 
   block:GATEWAY["🔐 TRUST GATEWAY"]
     RBAC["RBAC (4 roles)"]
     Privacy["Privacy Shield"]
     Auth["API Keys + JWT"]
-    Security["Security Middleware"]
   end
 
   block:MEMORY["🧠 COGNITIVE MEMORY"]
     L1["L1: Redis / Working Memory"]
     L2["L2: Qdrant / sqlite-vec (384-dim)"]
     L3["L3: AlloyDB / SQLite (hash-chained)"]
-    Bio["🧬 Biological: Autopoietic Core"]
   end
 
   block:TRUST["⛓️ TRUST LAYER"]
     Ledger["SHA-256 Ledger"]
     Merkle["Merkle Trees"]
     WBFT["WBFT Consensus"]
-    Sandbox["AST Sandbox"]
   end
 
-  block:PLATFORM["⚙️ PLATFORM SERVICES"]
-    Daemon["Self-Healing Daemon"]
-    Notifications["Notification Bus"]
-    Compaction["Compaction Sidecar"]
-    EdgeSync["EdgeSyncMonitor"]
-  end
-
-  INTERFACES --> GATEWAY --> MEMORY --> TRUST --> PLATFORM
+  INTERFACES --> GATEWAY --> MEMORY --> TRUST
 ```
 
-> 📐 Full architecture details in [ARCHITECTURE.md](ARCHITECTURE.md) and [docs](https://cortexpersist.dev/architecture/).
+> 📐 Full architecture details in [architecture.md](docs/architecture.md).
 
 ---
 
-## Competitive Landscape
-
-| | **CORTEX** | Mem0 | Zep | Letta | RecordsKeeper |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **Cryptographic Ledger** | ✅ | ❌ | ❌ | ❌ | ✅ (blockchain) |
-| **Merkle Checkpoints** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Multi-Agent Consensus** | ✅ WBFT | ❌ | ❌ | ❌ | ❌ |
-| **Privacy Shield** | ✅ 11 patterns | ❌ | ❌ | ❌ | ❌ |
-| **AST Sandbox** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Local-First** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **No Blockchain Overhead** | ✅ | — | — | — | ❌ |
-| **MCP Native** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Multi-Tenant (v6)** | ✅ | ❌ | ✅ | ❌ | ❌ |
-| **EU AI Act Ready** | ✅ | ❌ | ❌ | ❌ | Partial |
-| **Cost** | **Free** | $249/mo | $$$ | Free | $$$ |
-
----
-
-## Stats (2026-02-24)
+## Stats (2026-03-14)
 
 | Metric | Value |
 |:---|:---|
-| Test functions | **1,162+** |
+| Test functions | **1,000+** |
 | Production LOC | **~45,500** |
 | Python Modules | **444** |
 | Python version | **3.10+** |
@@ -227,6 +225,24 @@ See [Cross-Platform Architecture Guide](docs/cross_platform_guide.md).
 
 ---
 
+## Regulatory Positioning
+
+CORTEX provides the traceability, integrity verification, and audit infrastructure
+that regulated environments require. It does not by itself make a system "compliant"
+— compliance depends on the role, use case, and risk category of the deploying system.
+
+What CORTEX provides:
+
+- **Tamper-evident storage** of all agent decisions (hash-chained ledger)
+- **Automatic audit trail** generation with timestamped, verifiable records
+- **Integrity verification** via Merkle tree checkpoints
+- **Full decision lineage** — trace any conclusion back to its origin
+
+These capabilities support the traceability and logging requirements
+described in EU AI Act Article 12, among other regulatory frameworks.
+
+---
+
 ## License
 
 **Apache License 2.0** — Free for any use, commercial or non-commercial.
@@ -234,4 +250,4 @@ See [LICENSE](LICENSE) for details.
 
 ---
 
-*Built by [Borja Moskv](https://github.com/borjamoskv) · [cortexpersist.com](https://cortexpersist.com)*
+*Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*

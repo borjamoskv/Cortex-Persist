@@ -49,7 +49,7 @@ DEMOTION_ENERGY: dict[MemoryFrequency, float] = {
 }
 
 
-@dataclass(slots=True)
+@dataclass()
 class FrequencyMetadata:
     """Metadata tracking an engram's frequency tier and access count."""
 
@@ -124,7 +124,7 @@ class RetrievalBand(str, enum.Enum):
 
 
 # Band configuration: maps to search parameters
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class BandConfig:
     """Configuration for a retrieval frequency band."""
 

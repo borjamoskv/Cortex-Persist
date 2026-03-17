@@ -9,20 +9,42 @@ Produces 384-dimensional vectors using all-MiniLM-L6-v2.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 from functools import lru_cache
 from pathlib import Path
+
+from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
 
 logger = logging.getLogger("cortex.embeddings")
 
 # Default model — compact, fast, good quality
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
-DEFAULT_CACHE_DIR = Path.home() / ".cortex" / "models"
 
 # Configurable LRU cache size via env var (default 1024)
 _CACHE_SIZE = int(os.environ.get("CORTEX_CACHE_SIZE", "1024"))
+
+# Device selection: auto-detect GPU, override via CORTEX_DEVICE
+# Valid: "cpu", "cuda", "mps" (Apple Silicon), "auto" (default)
+_DEVICE = os.environ.get("CORTEX_DEVICE", "auto")
+
+
+def _resolve_device() -> str:
+    """Resolve embedding device. GPU if available, CPU fallback."""
+    if _DEVICE != "auto":
+        return _DEVICE
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            return "mps"
+    except ImportError:
+        pass
+    return "cpu"
 
 
 class LocalEmbedder:
@@ -36,10 +58,13 @@ class LocalEmbedder:
         self,
         model_name: str = DEFAULT_MODEL,
         cache_dir: Path | None = None,
+        device: str | None = None,
     ):
         self._model_name = model_name
         self._cache_dir = cache_dir or DEFAULT_CACHE_DIR
         self._model = None
+        self._identity_hash: str | None = None
+        self._device = device or _resolve_device()
 
     def _ensure_model(self):
         """Lazy-load model on first use."""
@@ -47,14 +72,27 @@ class LocalEmbedder:
             return
 
         try:
+            import warnings
+
             from sentence_transformers import SentenceTransformer
 
-            logger.info("Loading embedding model: %s", self._model_name)
-            self._model = SentenceTransformer(
-                self._model_name,
-                cache_folder=str(self._cache_dir),
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning, message=".*position_ids.*")
+                logger.info(
+                    "Loading embedding model: %s (device=%s)",
+                    self._model_name,
+                    self._device,
+                )
+                self._model = SentenceTransformer(
+                    self._model_name,
+                    cache_folder=str(self._cache_dir),
+                    device=self._device,
+                )
+            logger.info(
+                "Model loaded. Dimension: %d, Device: %s",
+                EMBEDDING_DIM,
+                self._device,
             )
-            logger.info("Model loaded. Dimension: %d", EMBEDDING_DIM)
         except ImportError as exc:
             raise RuntimeError(
                 "sentence-transformers not installed. "
@@ -65,7 +103,7 @@ class LocalEmbedder:
     def _embed_cached(self, text: str) -> list[float]:
         """Internal cached embedding for single strings."""
         self._ensure_model()
-        embedding = self._model.encode(text, normalize_embeddings=True)
+        embedding = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportOptionalMemberAccess]
         return embedding.tolist()
 
     def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
@@ -88,7 +126,7 @@ class LocalEmbedder:
                 raise ValueError("embedded text cannot be empty")
 
         self._ensure_model()
-        embeddings = self._model.encode(
+        embeddings = self._model.encode(  # type: ignore[reportOptionalMemberAccess]
             texts,
             normalize_embeddings=True,
             batch_size=batch_size,
@@ -140,3 +178,41 @@ class LocalEmbedder:
     def dimension(self) -> int:
         """Embedding dimension (384 for all-MiniLM-L6-v2)."""
         return EMBEDDING_DIM
+
+    def _apply_hf_cache_hash(self, h: hashlib._Hash) -> None:
+        """Fallback: check HuggingFace cache structure."""
+        hf_config = self._cache_dir / ("models--" + self._model_name.replace("/", "--"))
+        if not hf_config.exists():
+            return
+
+        refs_dir = hf_config / "refs"
+        if not refs_dir.exists():
+            return
+
+        for ref_file in sorted(refs_dir.iterdir()):
+            h.update(ref_file.read_bytes())
+
+    @property
+    def model_identity_hash(self) -> str:
+        """Deterministic SHA-256 hash of the embedding model identity.
+
+        Computed from model_name + config file content (if local).
+        Used to version TopologicalAnchors — if this hash changes,
+        all reference signatures must be recalculated in cold mode.
+
+        Cached after first computation (model is immutable during process lifetime).
+        """
+        if self._identity_hash is not None:
+            return self._identity_hash
+
+        h = hashlib.sha256()
+        h.update(self._model_name.encode("utf-8"))
+
+        config_path = self._cache_dir / self._model_name.replace("/", "_") / "config.json"
+        if config_path.exists():
+            h.update(config_path.read_bytes())
+        else:
+            self._apply_hf_cache_hash(h)
+
+        self._identity_hash = h.hexdigest()
+        return self._identity_hash

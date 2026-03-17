@@ -33,7 +33,7 @@ def agent_cmds():
 )
 def agent_init(output: str):
     """Generate a scaffold role.yaml with sensible defaults."""
-    from cortex.agent.schema import AgentRole
+    from cortex.extensions.agent.schema import AgentRole
 
     scaffold = AgentRole.scaffold()
     path = Path(output)
@@ -51,11 +51,11 @@ def agent_init(output: str):
 )
 def agent_validate(config: str):
     """Validate a role.yaml configuration file."""
-    from cortex.agent.schema import AgentRole
+    from cortex.extensions.agent.schema import AgentRole
 
     try:
         role = AgentRole.from_yaml_file(config)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]❌ Validation failed: {e}[/red]")
         sys.exit(1)
 
@@ -133,11 +133,11 @@ def _run_interactive_agent_loop(agent) -> None:
 @click.option("--dry-run", is_flag=True, help="Compile but don't execute.")
 def agent_run(config: str, dry_run: bool):
     """Compile and run an agent from a YAML role definition."""
-    from cortex.agent.loader import load_agent
+    from cortex.extensions.agent.loader import load_agent
 
     try:
         agent = load_agent(config)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]❌ Failed to compile agent: {e}[/red]")
         sys.exit(1)
 

@@ -5,7 +5,7 @@
  *
  * @example
  * ```ts
- * import { Cortex } from '@cortex-memory/sdk'
+ * import { Cortex } from '@cortex-persist/sdk'
  *
  * const ctx = new Cortex({ url: 'http://localhost:8000', apiKey: 'sk-xxx' })
  * await ctx.store('user prefers dark mode', { project: 'myapp' })

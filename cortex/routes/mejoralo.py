@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query
 from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
-from cortex.mejoralo import MejoraloEngine
+from cortex.extensions.mejoralo import MejoraloEngine
 from cortex.types.models import (
     DimensionResultModel,
     MejoraloScanRequest,

@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 import aiosqlite
+
+from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 
@@ -35,22 +38,25 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
-        min_connections: int = 2,
-        max_connections: int = 10,
+        min_connections: int | None = None,
+        max_connections: int | None = None,
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):
+        _env_min = int(os.environ.get("CORTEX_POOL_MIN", "4"))
+        _env_max = int(os.environ.get("CORTEX_POOL_MAX", "32"))
         self.db_path = db_path
-        self.min_connections = min_connections
-        self.max_connections = max_connections
+        self.min_connections = min_connections or _env_min
+        self.max_connections = max_connections or _env_max
         self.max_idle_time = max_idle_time
         self.read_only = read_only
 
+        self.chaos_gate = ChaosGate(name=f"sqlite_pool:{self.db_path}")
         self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue()
         self._active_count = 0
         self._lock = asyncio.Lock()
         # Semaphore limits concurrent acquisitions
-        self._semaphore = asyncio.Semaphore(max_connections)
+        self._semaphore = asyncio.Semaphore(self.max_connections)
         self._initialized = False
 
     async def initialize(self) -> None:
@@ -94,7 +100,7 @@ class CortexConnectionPool:
             await conn.load_extension(sqlite_vec.loadable_path())
             await conn.enable_load_extension(False)
         except (ImportError, OSError, AttributeError) as e:
-            logger.debug(f"sqlite-vec not available for connection: {e}")
+            logger.debug("sqlite-vec not available for connection: %s", e)
 
         return conn
 
@@ -151,12 +157,16 @@ class CortexConnectionPool:
         return new_conn
 
     async def _is_healthy(self, conn: aiosqlite.Connection) -> bool:
-        """Check if connection is alive."""
-        try:
+        """Check if connection is alive. Logic-bombed by chaos_gate."""
+
+        async def _check():
             async with conn.execute("SELECT 1") as cursor:
                 await cursor.fetchone()
             return True
-        except (sqlite3.Error, OSError):
+
+        try:
+            return await async_interceptor(self.chaos_gate, _check)
+        except (sqlite3.Error, OSError, ConnectionError, TimeoutError):
             return False
 
     async def _close_conn(self, conn: aiosqlite.Connection) -> None:

@@ -31,6 +31,8 @@ CRITICAL_METRICS: set[str] = {
     "cortex_ledger_checkpoint_failures_total",
     "cortex_consensus_failures_total",
     "cortex_integrity_checks_total",
+    "cortex_contradictions_total",
+    "cortex_stale_memory_cleaned_total",
 }
 
 

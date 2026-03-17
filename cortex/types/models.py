@@ -3,11 +3,12 @@ CORTEX v5.0 — API Models.
 Centralized Pydantic models for request/response validation.
 """
 
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
 __all__ = [
+    "AcceptanceResult",
     "AgentRegisterRequest",
     "AgentResponse",
     "ApiKeyListItem",
@@ -16,13 +17,14 @@ __all__ = [
     "ContextSignalModel",
     "ContextSnapshotResponse",
     "DeepHealthResponse",
-    "DimensionResultModel",
+    "EventEnvelope",
     "ExportResponse",
     "FactResponse",
     "GateActionResponse",
     "GateApprovalRequest",
     "GateStatusResponse",
     "HealthCheckDetail",
+    "HealthReport",
     "HeartbeatRequest",
     "LedgerReportResponse",
     "MejoraloScanRequest",
@@ -33,7 +35,12 @@ __all__ = [
     "MejoraloShipResponse",
     "MissionLaunchRequest",
     "MissionResponse",
+    "OperationResult",
     "ProjectScoreModel",
+    "QueryEvidenceLevel",
+    "QueryInput",
+    "QueryResultData",
+    "RejectionResult",
     "SearchRequest",
     "SearchResult",
     "ShipSealModel",
@@ -41,10 +48,85 @@ __all__ = [
     "StoreRequest",
     "StoreResponse",
     "TimeSummaryResponse",
+    "TraceInput",
     "VoteRequest",
     "VoteResponse",
     "VoteV2Request",
 ]
+
+
+# ─── SDK Surface v0.2 Protocol Types ─────────────────────────────────
+
+QueryIntent = Literal["lookup", "explore", "audit"]
+QueryStrategy = Literal["auto", "text", "vector", "hybrid", "temporal", "graph"]
+
+class QueryInput(TypedDict, total=False):
+    tenant_id: str
+    project: str
+    query: str
+    strategy: Literal[
+        "auto",
+        "bayesian",
+        "hybrid",
+        "text",
+        "vector",
+        "temporal",
+        "graph"
+    ]
+    as_of: str
+    top_k: int
+    min_confidence: float
+    include_graph: bool
+    include_history: bool
+    include_taint: bool
+
+class QueryEvidenceLevel(BaseModel):
+    level: Literal["none", "basic", "traceable", "verified"]
+    reason: str
+
+class QueryResultData(BaseModel):
+    answer: str | None = None
+    evidence_level: QueryEvidenceLevel | None = None
+    degraded: bool = False
+    degraded_reason: str | None = None
+    trace: dict | None = None
+    facts: list[dict] | None = None
+
+class RejectionResult(TypedDict):
+    accepted: Literal[False]
+    code: str
+    message: str
+    layer: Literal["guard", "membrane", "policy", "verification"]
+    rule_id: str
+    severity: Literal["low", "medium", "high", "critical"]
+    evidence: list[dict]
+    remediation: list[str]
+
+class AcceptanceResult(TypedDict):
+    accepted: Literal[True]
+    operation_id: str
+    warnings: list[str]
+
+OperationResult = AcceptanceResult | RejectionResult
+
+class TraceInput(BaseModel):
+    tx_id: str | None = None
+    fact_id: str | None = None
+    decision_id: str | None = None
+    query_result_id: str | None = None
+    depth: int = Field(5, ge=1, le=20)
+
+class EventEnvelope(BaseModel):
+    schema_version: str = "1.0"
+    event_id: str
+    event_type: str
+    ts: str
+    tenant_id: str
+    project: str
+    source: str
+    sequence: int
+    idempotency_key: str
+    payload: dict
 
 
 class StoreRequest(BaseModel):
@@ -54,9 +136,7 @@ class StoreRequest(BaseModel):
         "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
-    source: str | None = Field(
-        None, max_length=200, description="Source of the fact (e.g. agent name)"
-    )
+    source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     meta: dict | None = Field(None, description="Optional JSON metadata")
 
     @field_validator("project", "content")
@@ -102,12 +182,9 @@ class SearchResult(BaseModel):
     fact_type: str
     score: float
     tags: list[str]
-    consensus_score: float = 1.0
     created_at: str
     updated_at: str
-    valid_from: str | None = None
-    valid_until: str | None = None
-    tx_id: int | None = None
+    meta: dict | None = None
     hash: str | None = None
     context: dict | None = Field(
         None, description="Graph-RAG context (subgraph or related entities)"
@@ -130,7 +207,7 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
-    confidence: str | None = None
+    confidence: str | float | None = None
     status: str = "recorded"
 
 
@@ -163,13 +240,15 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
+    confidence: str | float | None = None
     valid_from: str | None = None
     valid_until: str | None = None
-    metadata: dict | None = None
-    confidence: str = "stated"
-    consensus_score: float = 1.0
-    tx_id: int | None = None
+    source: str | None = None
+    meta: dict | None = None
+    is_tombstoned: bool = False
     hash: str | None = None
+    tx_id: str | None = None
+    consensus_score: float | None = None
 
 
 class StatusResponse(BaseModel):
@@ -192,6 +271,22 @@ class ExportResponse(BaseModel):
     message: str
 
 
+class HealthReport(TypedDict):
+    status: Literal["ok", "degraded", "blocked"]
+    components: dict[str, str]
+    degraded_features: list[str]
+    warnings: list[str]
+
+
+class RecoveryReport(BaseModel):
+    """Report of the agent's memory recovery status during boot."""
+    status: Literal["clean", "recovered", "failed"]
+    recovered_items: int
+    failed_items: int
+    last_checkpoint_id: str | None = None
+    warnings: list[str] = Field(default_factory=list)
+
+
 class HealthCheckDetail(BaseModel):
     """Single health probe result."""
 
@@ -205,6 +300,9 @@ class HealthCheckDetail(BaseModel):
     active_connections: int | None = None
     max_connections: int | None = None
     utilization: str | None = None
+    useful_facts_ratio: float | None = None
+    duplicates_ratio: float | None = None
+    total_facts: int | None = None
 
     model_config = {"extra": "allow"}
 
@@ -217,6 +315,14 @@ class DeepHealthResponse(BaseModel):
     schema_version: str
     checks: dict[str, HealthCheckDetail]
     latency_ms: float
+
+    # V8 Evaluation Metrics
+    p95_latency_ms: float | None = Field(
+        default=None, description="p95 latency of ambient context boot"
+    )
+    stale_ratio: float | None = Field(
+        default=None, description="Ratio of facts older than 180 days with no hits"
+    )
 
 
 class ApiKeyResponse(BaseModel):

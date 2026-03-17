@@ -50,6 +50,7 @@ def run_migrations(conn: sqlite3.Connection) -> int:
 
     if current == 0:
         _apply_base_schema(conn)
+        current = get_current_version(conn)
 
     applied = 0
     for version, description, func in MIGRATIONS:
@@ -76,6 +77,15 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
                 logger.warning("Skipping schema statement: %s", e)
             else:
                 raise
+
+    # Mark the latest migration as applied so we don't try to run historical migrations on a fresh DB
+    if MIGRATIONS:
+        max_version = max(m[0] for m in MIGRATIONS)
+        conn.execute(
+            "INSERT INTO schema_version (version, description) VALUES (?, ?)",
+            (max_version, "Initial fresh schema baseline"),
+        )
+
     conn.commit()
     logger.info("Base schema applied.")
 
@@ -114,6 +124,9 @@ async def run_migrations_async(conn: aiosqlite.Connection) -> int:
 
     if current == 0:
         await _apply_base_schema_async(conn)
+        cursor = await conn.execute("SELECT MAX(version) FROM schema_version")
+        row = await cursor.fetchone()
+        current = row[0] if row and row[0] is not None else 0
 
     applied = 0
     for version, description, func in MIGRATIONS:
@@ -135,6 +148,15 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
                 logger.warning("Skipping schema statement: %s", e)
             else:
                 raise
+
+    # Mark the latest migration as applied so we don't try to run historical migrations on a fresh DB
+    if MIGRATIONS:
+        max_version = max(m[0] for m in MIGRATIONS)
+        await conn.execute(
+            "INSERT INTO schema_version (version, description) VALUES (?, ?)",
+            (max_version, "Initial fresh schema baseline"),
+        )
+
     await conn.commit()
 
 

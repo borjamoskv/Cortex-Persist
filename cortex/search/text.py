@@ -5,6 +5,8 @@
 
 """Full-text search implementation."""
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 
@@ -37,6 +39,7 @@ async def text_search(
     limit: int = 20,
     as_of: str | None = None,
     confidence: str | None = None,
+    **kwargs,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
     use_fts = await _has_fts5(conn)
@@ -55,7 +58,17 @@ async def text_search(
     return _rows_to_results(rows, is_fts=use_fts)
 
 
-async def _fts5_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
+async def _fts5_search(
+    conn: aiosqlite.Connection,
+    query: str,
+    tenant_id: str,
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+) -> list:
     fts_query = _sanitize_fts_query(query)
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
@@ -85,14 +98,24 @@ async def _fts5_search(conn, query, tenant_id, project, fact_type, tags, limit, 
             params.append(f"%{tag}%")
     if confidence:
         sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        params.append(confidence)
     sql += " ORDER BY rank ASC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
-    return await cursor.fetchall()
+    return await cursor.fetchall()  # type: ignore[type-error]
 
 
-async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence):
+async def _like_search(
+    conn: aiosqlite.Connection,
+    query: str,
+    tenant_id: str,
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+) -> list:
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.meta,
@@ -119,16 +142,17 @@ async def _like_search(conn, query, tenant_id, project, fact_type, tags, limit, 
             params.append(f"%{tag}%")
     if confidence:
         sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        params.append(confidence)
     sql += " ORDER BY f.updated_at DESC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
-    return await cursor.fetchall()
+    return await cursor.fetchall()  # type: ignore[type-error]
 
 
 def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
+    tenant_id: str = "default",
     project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -141,9 +165,9 @@ def text_search_sync(
                 SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                        f.source, f.tags, bm25(facts_fts) AS rank
                 FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
-                WHERE fts.content MATCH ? AND f.valid_until IS NULL
+                WHERE f.tenant_id = ? AND fts.content MATCH ? AND f.valid_until IS NULL
             """
-            params: list = [fts_query]
+            params: list = [tenant_id, fts_query]
             if project:
                 sql += _PROJECT_FILTER
                 params.append(project)
@@ -152,9 +176,9 @@ def text_search_sync(
         else:
             sql = (
                 "SELECT id, content, project, fact_type, confidence, source, tags "
-                "FROM facts WHERE content LIKE ? AND valid_until IS NULL"
+                "FROM facts WHERE tenant_id = ? AND content LIKE ? AND valid_until IS NULL"
             )
-            params = [f"%{query}%"]
+            params = [tenant_id, f"%{query}%"]
             if project:
                 sql += " AND project = ?"
                 params.append(project)

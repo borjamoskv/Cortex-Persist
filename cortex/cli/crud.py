@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sqlite3
 
 import click
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
-from cortex.sync import export_to_json
+from cortex.extensions.sync import export_to_json
+from cortex.utils.errors import FactNotFound
 
 __all__ = ["delete", "list_facts", "edit"]
 
@@ -29,7 +31,7 @@ def delete(fact_id, reason, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 
@@ -93,7 +95,7 @@ def list_facts(project, fact_type, limit, db) -> None:
                 suggestion="Prueba sin filtros: cortex list",
             )
             return
-        table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")
+        table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")  # type: ignore[reportArgumentType]
         table.add_column("ID", style="bold", width=5)
         table.add_column("Proyecto", style="cyan", width=18)
         table.add_column("Tipo", width=10)
@@ -101,16 +103,19 @@ def list_facts(project, fact_type, limit, db) -> None:
         table.add_column("Tags", style="dim", width=15)
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
+
+        from cryptography.exceptions import InvalidTag
 
         for row in rows:
             # Decrypt content (may be AES-encrypted in DB)
             raw_content = row[2]
             try:
                 content = enc.decrypt_str(raw_content, tenant_id="default")
-            except (ValueError, TypeError, OSError):
+            except (ValueError, TypeError, OSError, InvalidTag):
                 content = raw_content  # Fallback to raw if decryption fails
-            content_preview = content[:57] + "..." if len(content) > 60 else content
+            content_preview = content[:57] + "..." if len(content) > 60 else content  # type: ignore[reportOptionalSubscript,reportArgumentType]
             tags = json.loads(row[4]) if row[4] else []
             tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
@@ -129,7 +134,7 @@ def edit(fact_id, new_content, db) -> None:
     try:
         try:
             fact = _run_async(engine.retrieve(fact_id))
-        except Exception:
+        except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 

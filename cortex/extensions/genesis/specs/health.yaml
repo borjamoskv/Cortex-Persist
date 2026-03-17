@@ -1,0 +1,35 @@
+name: health
+description: "CORTEX Health Index — system-wide monitoring, scoring, and reporting."
+system_type: module
+auto_cli: false
+auto_tests: true
+tags: [genesis, health, observability, sovereign]
+
+components:
+  - name: models
+    component_type: dataclass
+    docstring: "Health data models — scores, thresholds, snapshots."
+    interfaces: [HealthScore, MetricSnapshot, HealthReport, to_dict]
+
+  - name: collector
+    component_type: module
+    docstring: "Metric collector — DB stats, ledger integrity, entropy."
+    interfaces: [collect_all, collect_db, collect_ledger, collect_entropy]
+    dependencies: [models]
+
+  - name: scorer
+    component_type: module
+    docstring: "Weighted 0-100 health scoring engine."
+    interfaces: [score, classify, get_weights, summarize]
+    dependencies: [models, collector]
+
+  - name: health_protocol
+    component_type: protocol
+    docstring: "Health check protocol — structural typing contract."
+    interfaces: [check, report, score]
+
+  - name: health_mixin
+    component_type: mixin
+    docstring: "CortexEngine health mixin — engine.health_check() API."
+    interfaces: [health_check, health_report, health_score]
+    dependencies: [models, collector, scorer]

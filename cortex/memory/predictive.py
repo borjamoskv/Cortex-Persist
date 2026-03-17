@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 logger = logging.getLogger("cortex.memory.predictive")
 
 
-@dataclass(slots=True)
+@dataclass()
 class PrefetchResult:
     """Result of a predictive prefetch operation."""
 

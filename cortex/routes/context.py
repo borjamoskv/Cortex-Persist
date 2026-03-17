@@ -5,14 +5,17 @@ Endpoints for ambient context inference, raw signals, and snapshot history.
 """
 
 import logging
+import math
+import time
+from collections import deque
 
 from fastapi import APIRouter, Depends, Query, Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.context.collector import ContextCollector
-from cortex.context.inference import ContextInference
 from cortex.engine_async import AsyncCortexEngine
+from cortex.extensions.context.collector import ContextCollector
+from cortex.extensions.context.inference import ContextInference
 from cortex.types.models import (
     ContextSignalModel,
     ContextSnapshotResponse,
@@ -24,6 +27,18 @@ __all__ = ["infer_context", "list_signals", "context_history"]
 router = APIRouter(prefix="/v1/context", tags=["context"])
 logger = logging.getLogger("uvicorn.error")
 
+# Global tracking for CORTEX v8 Axis 1 (Evaluation Layer)
+_context_latencies: deque[float] = deque(maxlen=100)
+
+
+def get_p95_context_latency() -> float | None:
+    """Return the 95th percentile latency of the last 100 context inferences."""
+    if not _context_latencies:
+        return None
+    sorted_latencies = sorted(_context_latencies)
+    idx = int(math.ceil(len(sorted_latencies) * 0.95)) - 1
+    return round(sorted_latencies[max(0, min(idx, len(sorted_latencies) - 1))], 1)
+
 
 @router.get("/infer", response_model=ContextSnapshotResponse)
 async def infer_context(
@@ -34,6 +49,8 @@ async def infer_context(
 ) -> ContextSnapshotResponse:
     """Run ambient context inference and return the current context snapshot."""
     from cortex import config
+
+    start_time = time.monotonic()
 
     async with engine.session() as conn:
         collector = ContextCollector(
@@ -49,6 +66,9 @@ async def infer_context(
             result = await inference.infer_and_persist(signals)
         else:
             result = inference.infer(signals)
+
+    elapsed_ms = (time.monotonic() - start_time) * 1000.0
+    _context_latencies.append(elapsed_ms)
 
     return ContextSnapshotResponse(
         active_project=result.active_project,

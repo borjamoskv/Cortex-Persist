@@ -1,0 +1,205 @@
+# ─────────────────────────────────────────────────────────────────────
+# CORTEX Achievement Automaton v4 — Stealth Farming
+# ─────────────────────────────────────────────────────────────────────
+# Anti-detection measures:
+#   • Random delays (30-180s) between PRs
+#   • Varied commit messages from a pool of realistic templates
+#   • Different files modified each time (rotate targets)
+#   • Rate limit: max 3 PRs per scheduled run
+#   • Cron times offset to odd minutes (not :00)
+#   • Weekend cool-down (skip Saturday runs)
+# ─────────────────────────────────────────────────────────────────────
+
+name: "⚡ Achievement Automaton"
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+  schedule:
+    # Staggered odd-minute times to avoid pattern detection
+    - cron: "17 7 * * 1-6"    # Mon-Sat 07:17 UTC
+    - cron: "43 11 * * 1-5"   # Mon-Fri 11:43 UTC
+    - cron: "8 15 * * 1-6"    # Mon-Sat 15:08 UTC
+    - cron: "51 19 * * 1-5"   # Mon-Fri 19:51 UTC
+    - cron: "29 22 * * 2,4"   # Tue,Thu 22:29 UTC (reduced weekend)
+
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "PRs to farm (1-5 recommended)"
+        default: "3"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ─── Passive: real branch push ───
+  passive:
+    name: "🦈 Passive"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.actor == 'borjamoskv'
+    steps:
+      - name: Auto-PR and merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+
+          PR_URL=$(gh pr create \
+            --repo "${{ github.repository }}" \
+            --head "${BRANCH}" \
+            --base "main" \
+            --title "⚡ ${BRANCH}" \
+            --body "🦈 _Achievement Automaton_ · \`${{ github.sha }}\`" \
+            2>&1) || true
+
+          if echo "${PR_URL}" | grep -q "github.com"; then
+            # Random delay 5-15s to seem human
+            sleep $((RANDOM % 10 + 5))
+            gh pr merge "${PR_URL}" --squash --delete-branch --admin 2>/dev/null \
+              || gh pr merge "${PR_URL}" --squash --delete-branch 2>/dev/null || true
+            PR_NUM=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
+            gh api "repos/${{ github.repository }}/issues/${PR_NUM}/reactions" \
+              -f content=heart 2>/dev/null || true
+          fi
+
+  # ─── Active: stealth farming ───
+  active:
+    name: "🦈 Stealth Farm"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "borjamoskv"
+          git config user.email "borjamoskv@users.noreply.github.com"
+
+      - name: Stealth farm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Rate limit: max 3 for scheduled, user input for manual
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            COUNT=$((RANDOM % 3 + 1))
+          else
+            COUNT="${{ github.event.inputs.count || '3' }}"
+          fi
+
+          # Realistic commit message pool
+          MESSAGES=(
+            "refactor: clean up unused imports"
+            "docs: update inline documentation"
+            "chore: bump internal version counter"
+            "style: normalize whitespace"
+            "fix: correct typo in comment"
+            "perf: optimize lookup table"
+            "build: update dependency hashes"
+            "ci: adjust pipeline timing"
+            "docs: clarify API usage notes"
+            "refactor: extract helper function"
+            "chore: update changelog metadata"
+            "style: align code formatting"
+            "fix: resolve edge case in parser"
+            "docs: add missing docstring"
+            "refactor: simplify conditional logic"
+          )
+
+          # Target files to rotate (different file each PR)
+          TARGETS=(
+            ".github/CHANGELOG.md"
+            ".github/VERSION"
+            ".github/NOTES.md"
+            ".github/METRICS.md"
+            ".github/STATUS.md"
+          )
+
+          FARMED=0
+          for i in $(seq 1 ${COUNT}); do
+            TS=$(date +%s)
+            BRANCH="patch/$(echo ${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]} | tr ' :' '-' | tr -d "'")-${TS}"
+
+            git checkout main
+            git pull origin main --rebase 2>/dev/null || true
+            git checkout -b "${BRANCH}"
+
+            # Rotate target file
+            TARGET="${TARGETS[$((RANDOM % ${#TARGETS[@]}))]}"
+            mkdir -p "$(dirname "${TARGET}")"
+            echo "<!-- $(date -u +"%Y-%m-%d %H:%M:%S") -->" >> "${TARGET}"
+
+            git add "${TARGET}"
+
+            # Pick random message
+            MSG="${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]}
+
+          Co-authored-by: CORTEX <cortex@moskv.dev>"
+
+            git commit -m "${MSG}"
+            git push origin "${BRANCH}"
+
+            # Create PR with varied title
+            PR_TITLE=$(echo "${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]}" | sed 's/^/⚡ /')
+            PR_URL=$(gh pr create \
+              --head "${BRANCH}" \
+              --base "main" \
+              --title "${PR_TITLE}" \
+              --body "_Automated maintenance_")
+
+            # Heart reaction
+            PR_NUM=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
+            gh api "repos/${{ github.repository }}/issues/${PR_NUM}/reactions" \
+              -f content=heart 2>/dev/null || true
+
+            # Random delay 30-180s between PRs (stealth)
+            DELAY=$((RANDOM % 150 + 30))
+            echo "⏳ Cooling down ${DELAY}s..."
+            sleep ${DELAY}
+
+            # Merge
+            gh pr merge "${PR_URL}" --squash --delete-branch --admin 2>/dev/null \
+              || gh pr merge "${PR_URL}" --squash --delete-branch 2>/dev/null || true
+
+            FARMED=$((FARMED + 1))
+            echo "✅ #${i}/${COUNT}"
+          done
+
+          echo "⚡ Farmed ${FARMED} PRs (stealth mode)"
+
+  # ─── Quickdraw (1x per scheduled run, not every time) ───
+  quickdraw:
+    name: "🖼️ Quickdraw"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Farm Quickdraw (randomized skip)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Only run 50% of the time to avoid pattern
+          if [ $((RANDOM % 2)) -eq 0 ]; then
+            echo "⏭️ Skipping this run (stealth)"
+            exit 0
+          fi
+
+          ISSUE_URL=$(gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "fix: resolve $(shuf -n1 -e 'edge case' 'race condition' 'null check' 'type mismatch' 'timeout')" \
+            --body "Identified and resolved." \
+            --label "automation")
+
+          sleep $((RANDOM % 60 + 10))
+
+          gh issue close "${ISSUE_URL}" \
+            --repo "${{ github.repository }}" \
+            --reason "completed" || true

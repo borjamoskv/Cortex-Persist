@@ -16,7 +16,7 @@ from dataclasses import dataclass
 logger = logging.getLogger("cortex.memory.causal")
 
 
-@dataclass(slots=True)
+@dataclass()
 class CausalLink:
     """A directed causal relationship between two engrams."""
 
