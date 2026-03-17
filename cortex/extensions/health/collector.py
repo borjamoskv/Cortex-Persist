@@ -10,7 +10,7 @@ import logging
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from cortex.extensions.health.health_protocol import MetricCollectorProtocol
 from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
@@ -458,8 +458,8 @@ class HealthCollector:
 
     def __init__(
         self,
-        db_path: str | Path = "",
-        registry: CollectorRegistry | None = None,
+        db_path: Union[str, Path] = "",
+        registry: Optional[CollectorRegistry] = None,
     ) -> None:
         self._db_path = str(db_path) if db_path else ""
         self._registry = registry or create_default_registry()

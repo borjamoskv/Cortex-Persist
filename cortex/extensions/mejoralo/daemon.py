@@ -12,7 +12,7 @@ import logging
 import signal
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from cortex.cli import get_engine
 from cortex.extensions.daemon.monitors.canary import CanaryMonitor
@@ -36,11 +36,11 @@ class MejoraloDaemon:
     def __init__(
         self,
         project: str,
-        base_path: str | Path,
+        base_path: Union[str, Path],
         scan_interval: int = DAEMON_DEFAULT_SCAN_INTERVAL,
         target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
-        metrics: MetricsRegistry | None = None,
-        db_path: str | Path | None = None,
+        metrics: Optional[MetricsRegistry] = None,
+        db_path: Optional[Union[str, Path]] = None,
     ):
         self.project = project
         self.base_path = Path(base_path).resolve()
@@ -58,7 +58,7 @@ class MejoraloDaemon:
         self.canary = CanaryMonitor(self.base_path)  # type: ignore[reportCallIssue]
         self.fusion = ContextFusion(self.cortex_engine)
         self._running = False
-        self._loop_task: asyncio.Task | None = None
+        self._loop_task: Optional[asyncio.Task] = None
         self._consecutive_stagnant: int = 0
 
     async def start(self) -> None:

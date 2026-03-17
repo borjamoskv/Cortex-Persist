@@ -10,6 +10,7 @@ Principio soberano: El Verifier puede CONFIAR en CORTEX
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import time
@@ -30,7 +31,7 @@ class VerificationResult:
     proof_type: str
     verified_at: float
     details: str
-    public_root: str | None = None
+    public_root: Optional[str] = None
 
 
 class ZKOrtexVerifier:
@@ -47,7 +48,7 @@ class ZKOrtexVerifier:
     El Verifier puede ser ejecutado por terceros sin ningún acceso a CORTEX.
     """
 
-    def __init__(self, expected_root: str | None = None) -> None:
+    def __init__(self, expected_root: Optional[str] = None) -> None:
         """
         Args:
             expected_root: El Merkle Root publicado por CORTEX.

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from typing import Any
+from typing import Any, Optional
 
 from cortex import config
 from cortex.extensions.daemon.models import CloudSyncAlert
@@ -29,7 +29,7 @@ class CloudSyncMonitor:
         self._last_run: float = 0.0
         self._engine = engine
         self._batch_size = batch_size
-        self._turso: TursoBackend | None = None
+        self._turso: Optional[TursoBackend] = None
 
         if config.TURSO_DATABASE_URL and config.TURSO_AUTH_TOKEN:
             self._turso = TursoBackend(

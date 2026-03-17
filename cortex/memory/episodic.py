@@ -10,6 +10,7 @@ schema-compatible summaries.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import time
@@ -195,7 +196,7 @@ class CausalTracer:
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: int | None = None,
+        max_depth: Optional[int] = None,
     ) -> CausalEpisode:
         """Trace the full causal DAG from a given fact.
 

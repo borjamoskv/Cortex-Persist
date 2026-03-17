@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from typing import Final
+from typing import Final, Optional
 
 __all__ = [
     "sanitize_project_name",
@@ -142,8 +142,8 @@ def validate_fact_type(fact_type: str) -> str:
 
 
 def validate_pagination(
-    limit: int | None = None,
-    offset: int | None = None,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
     max_limit: int = 1000,
 ) -> tuple[int, int]:
     """Validate and clamp pagination parameters.

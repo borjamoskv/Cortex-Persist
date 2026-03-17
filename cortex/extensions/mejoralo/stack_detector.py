@@ -1,3 +1,4 @@
+from typing import Optional
 """Advanced stack detection with tool intelligence for MEJORAlo."""
 
 import logging
@@ -16,13 +17,13 @@ class StackIntelligence:
     """Tool commands available for a detected project stack."""
 
     stack: str
-    linter_cmd: str | None
-    complexity_cmd: str | None
-    security_cmd: str | None
-    build_cmd: str | None
+    linter_cmd: Optional[str]
+    complexity_cmd: Optional[str]
+    security_cmd: Optional[str]
+    build_cmd: Optional[str]
 
 
-_STACK_CONFIGS: dict[str, dict[str, str | None]] = {
+_STACK_CONFIGS: dict[str, dict[str, Optional[str]]] = {
     "node": {
         "linter_cmd": "npx eslint . --format=json",
         "complexity_cmd": "npx eslint . --no-eslintrc --plugin complexity --rule 'complexity: [2, 10]'",
@@ -75,7 +76,7 @@ def get_stack_intelligence(path: Path) -> StackIntelligence:
     )
 
 
-def run_cmd(cmd: str | None, cwd: Path) -> tuple[int, str]:
+def run_cmd(cmd: Optional[str], cwd: Path) -> tuple[int, str]:
     """Execute a shell command safely, returning (returncode, combined_output)."""
     if not cmd:
         return (0, "")

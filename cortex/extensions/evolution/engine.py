@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 import secrets
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.evolution.action import SymbolicActionEngine
@@ -40,7 +42,11 @@ class EvolutionEngine(EvolutionOpsMixin):
     - Adversarial Grounding (Telemetry)
     """
 
-    def __init__(self, sovereigns: list[SovereignAgent] | None = None, engine: Any | None = None):
+    def __init__(
+        self,
+        sovereigns: Optional[list[SovereignAgent]] = None,
+        engine: Optional[Any] = None
+    ):
         self.sovereigns = sovereigns or []
         self.params = EngineParameters()
         self.cycle_count = 0
@@ -52,7 +58,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         self._lnn = LagrangianController()
         self._ledger = self._build_ledger()
         self._evolution_ledger = EvolutionLedgerDB()
-        if self.engine:
+        if self.engine and hasattr(self.engine, "_get_sync_conn"):
             self._ouroboros = OuroborosGate(self.engine._get_sync_conn())
 
     def _build_ledger(self) -> SovereignLedger:
@@ -69,7 +75,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         if loaded:
             agents, cycle = loaded
             self.sovereigns = agents
-            self.cycle_count = cycle
+            self.cycle_count = int(cycle)
             logger.info("Loaded evolutionary swarm at cycle %d", cycle)
         else:
             logger.info("No valid state found. Initializing genesis swarm.")
@@ -91,8 +97,8 @@ class EvolutionEngine(EvolutionOpsMixin):
                     name=f"Genesis-{domain.name}-{i:02d}",
                 )
                 sub.parameters = {
-                    "temperature": round(random.uniform(0.1, 1.0), 2),
-                    "top_p": round(random.uniform(0.8, 1.0), 2),
+                    "temperature": float(f"{random.uniform(0.1, 1.0):.2f}"),
+                    "top_p": float(f"{random.uniform(0.8, 1.0):.2f}"),
                     "system_prompt": f"You are a specialized agent for {domain.name}.",
                     "tools": ["search", "read"] if random.random() > 0.5 else ["write", "execute"],
                 }
@@ -128,7 +134,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         self._apply_epigenetic_modulation()
 
         # 3. Torneo Adversarial (Telemetry-Grounding)
-        await self._evaluate_adversarial(metrics)  # type: ignore[type-error]
+        await self._evaluate_adversarial(metrics)
 
         # 4. Extinción Masiva
         if self.cycle_count % self.params.extinction_cycle == 0:
@@ -139,7 +145,7 @@ class EvolutionEngine(EvolutionOpsMixin):
                 extinctions = self._mass_extinction()
 
         # 5. Selección, Recombinación y Plásmidos (Ω₀ Parallelized)
-        tasks = [self._process_sovereign(s, metrics) for s in self.sovereigns]  # type: ignore[type-error]
+        tasks = [self._process_sovereign(s, metrics) for s in self.sovereigns]
         results = await asyncio.gather(*tasks)
 
         all_mutations = []

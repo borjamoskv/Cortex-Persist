@@ -15,6 +15,7 @@ Usage:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import sqlite3
@@ -37,7 +38,7 @@ _FEDERATION_MAP: dict[str, tuple[Path, str]] = {
 
 def attach_federated_dbs(
     conn: sqlite3.Connection,
-    scopes: list[str] | None = None,
+    scopes: Optional[list[str]] = None,
 ) -> list[str]:
     """ATTACH secondary databases to an existing connection.
 
@@ -86,7 +87,7 @@ def _search_attached_db(
     conn: sqlite3.Connection,
     alias: str,
     query: str,
-    project: str | None = None,
+    project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table.
@@ -170,7 +171,7 @@ def federated_search_sync(
     conn: sqlite3.Connection,
     query: str,
     scope: str = "core",
-    project: str | None = None,
+    project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Federated text search across partitioned databases.

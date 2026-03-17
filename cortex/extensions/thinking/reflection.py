@@ -14,7 +14,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 __all__ = [
     "AUTO_TAGS",
@@ -76,8 +76,8 @@ def generate_reflection(
     engine: CortexEngine,
     project: str,
     summary: str,
-    errors: list[str] | None = None,
-    decisions: list[str] | None = None,
+    errors: Optional[list[str]] = None,
+    decisions: Optional[list[str]] = None,
     source: str = "auto-reflect",
 ) -> int:
     """Store a structured post-mortem reflection.
@@ -117,7 +117,7 @@ def generate_reflection(
 def inject_reflections(
     engine: CortexEngine,
     context_hint: str,
-    project: str | None = None,
+    project: Optional[str] = None,
     top_k: int = 5,
 ) -> list[InjectedLearning]:
     """Retrieve the top-K most relevant past learnings for system_prompt injection.
@@ -206,7 +206,7 @@ def format_injection_json(learnings: list[InjectedLearning]) -> str:
 def _hybrid_search_learnable(
     conn: sqlite3.Connection,
     query: str,
-    project: str | None,
+    project: Optional[str],
     top_k: int,
 ) -> list[dict]:
     """Hybrid search filtered to learnable fact types only.
@@ -221,7 +221,7 @@ def _hybrid_search_learnable(
 
 def _build_type_filter_clause(
     types: tuple[str, ...],
-    project: str | None,
+    project: Optional[str],
 ) -> tuple[str, list]:
     """Build a safe SQL fragment for type IN + optional project filter.
 
@@ -240,7 +240,7 @@ def _build_type_filter_clause(
 def _semantic_arm(  # nosec B608 — parameterized query
     conn: sqlite3.Connection,
     query: str,
-    project: str | None,
+    project: Optional[str],
     top_k: int,
 ) -> list[dict]:
     """Semantic vector search arm."""
@@ -287,7 +287,7 @@ def _semantic_arm(  # nosec B608 — parameterized query
 def _text_arm(
     conn: sqlite3.Connection,
     query: str,
-    project: str | None,
+    project: Optional[str],
     top_k: int,
 ) -> list[dict]:
     """Full-text search arm via FTS5."""

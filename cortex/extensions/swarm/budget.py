@@ -5,6 +5,7 @@ Integrates with LLMProvider to capture actual 'usage' metrics.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import sqlite3
@@ -93,7 +94,7 @@ class SwarmBudgetManager:
         except sqlite3.Error as e:
             logger.error("Budget: Failed to report usage: %s", e)
 
-    def get_mission_budget(self, mission_id: str) -> MissionBudget | None:
+    def get_mission_budget(self, mission_id: str) -> Optional[MissionBudget]:
         """Retrieve current budget state for a mission."""
         try:
             with sqlite3.connect(self.db_path) as conn:

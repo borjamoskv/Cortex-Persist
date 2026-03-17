@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from cortex.engine import CortexEngine
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
@@ -19,7 +19,7 @@ def record_session(
     project: str,
     score_before: int,
     score_after: int,
-    actions: list[str] | None = None,
+    actions: Optional[list[str]] = None,
 ) -> int:
     """Record a MEJORAlo audit session in the CORTEX ledger.
 
@@ -97,7 +97,7 @@ def record_scar(
     project: str,
     file_path: str,
     error_trace: str,
-    diff: str | None = None,
+    diff: Optional[str] = None,
 ) -> int:
     """Record a failure (Scar) in the CORTEX ledger to prevent future regressions.
 
@@ -173,7 +173,7 @@ def _row_to_session(row: tuple[Any, ...]) -> dict[str, Any]:
     }
 
 
-def _parse_meta(raw: str | None) -> dict[str, Any]:
+def _parse_meta(raw: Optional[str]) -> dict[str, Any]:
     """Safely parse JSON metadata from a row."""
     if not raw:
         return {}

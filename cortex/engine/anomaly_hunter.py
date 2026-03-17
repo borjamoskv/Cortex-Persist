@@ -3,12 +3,14 @@
 Detects physical and temporal contradictions in the daily logs.
 Implementación directa del Axioma Ω₂ (Asimetría Entrópica) y CORTEX-Sovereignty.
 """
+from __future__ import annotations
+
 
 import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Optional
 
 from cortex.engine.models import Fact
 
@@ -35,7 +37,7 @@ class AnomalyHunterEngine:
         self.window = timedelta(hours=lookback_hours)
         self.anomalies: list[Anomaly] = []
 
-    def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
+    def _get_fact_timestamp(self, fact_id: int) -> Optional[datetime]:
         """Helper para extraer timestamp de forma síncrona si es necesario
         (En la versión final usaremos el engine async directamente).
         """

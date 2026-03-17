@@ -8,7 +8,7 @@ Extracted to mitigate LOC bloat and enhance maintainability.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 __all__ = ["Episode", "Pattern"]
 
@@ -50,13 +50,13 @@ class Episode:
     session_id: str
     event_type: str
     content: str
-    project: str | None
+    project: Optional[str]
     emotion: str
     tags: list[str]
     meta: dict[str, Any]
     created_at: str
     actors: list[str] = field(default_factory=list)
-    intent: str | None = None
+    intent: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-serializable representation."""

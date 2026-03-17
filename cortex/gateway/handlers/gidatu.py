@@ -6,7 +6,7 @@ import logging
 import sys
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.gateway import GatewayRequest
@@ -44,7 +44,7 @@ class GidatuHandler:
         return await asyncio.to_thread(self._sync_handle, action, params, timeout, app)
 
     def _sync_handle(
-        self, action: str, params: dict, timeout: float, app: str | None
+        self, action: str, params: dict, timeout: float, app: Optional[str]
     ) -> dict[str, Any]:
         from ghost_chain import Ghost
         from ghost_platform import platform_info

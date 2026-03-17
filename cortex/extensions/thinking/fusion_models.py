@@ -15,7 +15,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional, Union
 
 __all__ = [
     "FusedThought",
@@ -123,7 +123,7 @@ class ModelResponse:
     model: str
     content: str
     latency_ms: float = 0.0
-    error: str | None = None
+    error: Optional[str] = None
     token_count: int = 0  # Tokens usados (estimación)
 
     @property
@@ -152,12 +152,12 @@ class FusedThought:
         return sum(1 for s in self.sources if s.ok)
 
     @property
-    def fastest_source(self) -> ModelResponse | None:
+    def fastest_source(self) -> Optional[ModelResponse]:
         ok_sources = [s for s in self.sources if s.ok]
         return min(ok_sources, key=lambda s: s.latency_ms) if ok_sources else None
 
     @property
-    def slowest_source(self) -> ModelResponse | None:
+    def slowest_source(self) -> Optional[ModelResponse]:
         ok_sources = [s for s in self.sources if s.ok]
         return max(ok_sources, key=lambda s: s.latency_ms) if ok_sources else None
 
@@ -251,5 +251,5 @@ def _jaccard(set_a: set[str], set_b: set[str]) -> float:
     if not set_a and not set_b:
         return 0.0
     intersection = set_a & set_b
-    union = set_a | set_b
+    union = Union[set_a, set_b]
     return len(intersection) / len(union)

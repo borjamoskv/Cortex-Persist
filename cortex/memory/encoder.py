@@ -8,6 +8,7 @@ The model is loaded lazily on first use and cached for the process lifetime.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -29,7 +30,7 @@ class AsyncEncoder:
 
     __slots__ = ("_embedder",)
 
-    def __init__(self, embedder: LocalEmbedder | None = None) -> None:
+    def __init__(self, embedder: Optional[LocalEmbedder] = None) -> None:
         self._embedder = embedder or LocalEmbedder()
 
     async def encode(self, text: str) -> list[float]:

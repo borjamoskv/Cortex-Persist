@@ -7,6 +7,7 @@ that consumes memory without reducing the causal gap.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import re
@@ -110,7 +111,7 @@ class ExergyGuard:
         content: str,
         project: str,
         fact_type: str,
-        source: str | None = None,
+        source: Optional[str] = None,
     ) -> float:
         """
         Calculates exergy score and enforces the cutoff threshold.

@@ -4,6 +4,7 @@ Embeds hyperdimensional ghost traces into the file system.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import hashlib
 import json
@@ -25,7 +26,7 @@ class ResonanceEmitter:
     on the target file.
     """
 
-    def __init__(self, encoder: HDCEncoder | None = None):
+    def __init__(self, encoder: Optional[HDCEncoder] = None):
         self.encoder = encoder or HDCEncoder(ItemMemory())
         self.prefix = "user.cortex.ghost"
 

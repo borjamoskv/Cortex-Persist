@@ -9,6 +9,7 @@ Provides native CLI commands for NotebookLM synchronization:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import os
@@ -199,7 +200,7 @@ def fragment_cmd(output_dir: str):
 @click.option(
     "--mode", type=click.Choice(["digest", "domains", "both"]), default="both", help="What to sync"
 )
-def sync_cmd(drive_path: str | None, mode: str):
+def sync_cmd(drive_path: Optional[str], mode: str):
     """Sync exports to Google Drive for NotebookLM auto-pickup."""
     # Detect or use provided path
     if drive_path:
@@ -332,7 +333,7 @@ def status_cmd():
     default=None,
     help="Google Drive folder path (auto-detected if not set)",
 )
-def ingest_cmd(drive_path: str | None):
+def ingest_cmd(drive_path: Optional[str]):
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
 

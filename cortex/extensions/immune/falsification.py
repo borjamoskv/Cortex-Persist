@@ -2,6 +2,8 @@
 CORTEX V5 - Evolutionary Epistemology (IMMUNITAS-Ω)
 Tactical Falsification (Karl Popper): Axiom 15 Operational Falsification.
 """
+from __future__ import annotations
+
 
 import copy
 import logging
@@ -137,7 +139,7 @@ class EvolutionaryFalsifier:
         for k, v in sat_mutant.items():
             if isinstance(v, str):
                 sat_mutant[k] = v * 10000
-            elif isinstance(v, int | float):
+            elif isinstance(v, (int, float)):
                 sat_mutant[k] = v * 10e9
         mutations.append(sat_mutant)
 

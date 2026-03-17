@@ -1,3 +1,4 @@
+from typing import Optional
 import json
 import logging
 import os
@@ -34,8 +35,8 @@ LOCAL_OPENAI_URL = os.getenv("CCR_OPENAI_URL", "http://localhost:11434/v1/chat/c
 LOCAL_MODEL = os.getenv("CCR_LOCAL_MODEL", "qwen2.5-coder:32b")
 
 # Lazy Singletons for Isothermal Membrane
-_encode_engine: AsyncEncoder | None = None
-_vector_db: SovereignVectorStoreL2 | None = None
+_encode_engine: Optional[AsyncEncoder] = None
+_vector_db: Optional[SovereignVectorStoreL2] = None
 
 
 async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:

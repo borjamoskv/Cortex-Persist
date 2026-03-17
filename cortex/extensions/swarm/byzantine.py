@@ -5,7 +5,7 @@ Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 
 import hashlib
 import json
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -44,7 +44,7 @@ class ByzantineConsensus:
 
         return await asyncio.to_thread(_sync_hash)
 
-    async def execute_consensus(self, proposals: dict[str, T]) -> T | None:
+    async def execute_consensus(self, proposals: dict[str, T]) -> Optional[T]:
         """
         Takes proposals from multiple nodes. Validates them via reputation-weighted
         thresholding. Returns the absolute truth or None if BFT consensus fails.

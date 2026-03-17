@@ -17,7 +17,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from cortex.extensions.evolution.agents import SovereignAgent
@@ -79,7 +79,7 @@ class FitnessLandscape:
     """
 
     def __init__(self) -> None:
-        self._cache: LandscapeState | None = None
+        self._cache: Optional[LandscapeState] = None
         self._last_ceiling: float = _BASE_CEILING
 
     def compute(self) -> LandscapeState:

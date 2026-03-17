@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import asyncio
 import json
 import logging
@@ -40,7 +41,7 @@ class SnapshotRecord:
     size_mb: float
 
 
-def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:
+def _parse_snapshot_meta(meta_file: Path) -> Optional[SnapshotRecord]:
     try:
         data = _read_snapshot_meta(meta_file)
         db_file = Path(data["path"])
@@ -87,7 +88,7 @@ class SnapshotManager:
     Manages physical and logical snapshots of the CORTEX database.
     """
 
-    def __init__(self, db_path: str | Path = DEFAULT_DB_PATH):
+    def __init__(self, db_path: Union[str, Path] = DEFAULT_DB_PATH):
         self.db_path = Path(db_path).expanduser()
         self.snapshot_dir = self.db_path.parent / "snapshots"
         self.snapshot_dir.mkdir(parents=True, exist_ok=True)

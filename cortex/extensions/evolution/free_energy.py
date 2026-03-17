@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.evolution.agents import AgentDomain
 from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
@@ -258,7 +258,7 @@ class FreeEnergyMonitor:
     Thread-safe. Uses the same CortexMetrics sync layer.
     """
 
-    def __init__(self, cortex_metrics: CortexMetrics | None = None) -> None:
+    def __init__(self, cortex_metrics: Optional[CortexMetrics] = None) -> None:
         self._metrics = cortex_metrics or CortexMetrics()
         self._history: list[dict[AgentDomain, FreeEnergyState]] = []
         self._max_history: int = 100

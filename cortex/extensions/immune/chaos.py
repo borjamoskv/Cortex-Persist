@@ -9,7 +9,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 
 logger = logging.getLogger("cortex.extensions.immune.chaos")
 
@@ -36,16 +36,16 @@ class ChaosGate:
 
     name: str = "default_gate"
     is_active: bool = True
-    fail_after_n: int | None = None
+    fail_after_n: Optional[int] = None
     op_count: int = 0
-    scenario: ChaosScenario | None = None
-    pending_scenario: ChaosScenario | None = None
+    scenario: Optional[ChaosScenario] = None
+    pending_scenario: Optional[ChaosScenario] = None
 
     def arm(
         self,
         scenario: ChaosScenario,
         *,
-        after_n: int | None = None,
+        after_n: Optional[int] = None,
     ) -> None:
         """Arm the gate to explode. Instant or delayed."""
         self.pending_scenario = scenario

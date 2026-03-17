@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.config import DEFAULT_DB_PATH
 
@@ -231,7 +231,7 @@ def _run_async(coro: Any) -> Any:
     return sovereign_run(coro)
 
 
-async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
+async def _get_engine_active_facts(project: Optional[str] = None) -> list[Any]:
     """Fetch cleartext facts using CortexEngine."""
     from cortex.cli.common import get_engine
 
@@ -244,7 +244,7 @@ async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
         await engine.close()
 
 
-def _detect_cloud_sync() -> tuple[Path, str] | None:
+def _detect_cloud_sync() -> Optional[tuple[Path, str]]:
     """Detect appropriate cloud storage sync folder."""
     for provider, candidates in CLOUD_PROVIDERS.items():
         for candidate in candidates:
@@ -255,7 +255,7 @@ def _detect_cloud_sync() -> tuple[Path, str] | None:
 
 
 def _get_entities_and_relations(
-    project: str | None = None,
+    project: Optional[str] = None,
 ) -> tuple[Any, Any]:
     """Load entity graph for NotebookLM context."""
     import pandas as pd

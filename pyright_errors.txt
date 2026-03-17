@@ -1,382 +1,382 @@
-/Users/borjafernandezangulo/30_CORTEX/cortex/adk/runner.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/adk/runner.py:124:14 - warning: No se ha podido resolver la importación "google.adk.sessions". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/adk/runner.py:176:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/agents/scavenger_core.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/agents/scavenger_core.py:118:15 - error: Falta el argumento para el parámetro "token_count" (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/auth/backends.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/auth/backends.py:177:16 - warning: No se ha podido resolver la importación "asyncpg". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/browser/engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/browser/engine.py:4:6 - warning: No se ha podido resolver la importación "playwright.async_api". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/browser/engine.py:50:26 - error: "add_init_script" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/__init__.py:64:16 - error: El tipo "Command | None" no se puede asignar al tipo de valor devuelto "Command"
+./cortex/adk/runner.py
+  ./cortex/adk/runner.py:124:14 - warning: No se ha podido resolver la importación "google.adk.sessions". (reportMissingImports)
+  ./cortex/adk/runner.py:176:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
+./cortex/agents/scavenger_core.py
+  ./cortex/agents/scavenger_core.py:118:15 - error: Falta el argumento para el parámetro "token_count" (reportCallIssue)
+./cortex/auth/backends.py
+  ./cortex/auth/backends.py:177:16 - warning: No se ha podido resolver la importación "asyncpg". (reportMissingImports)
+./cortex/browser/engine.py
+  ./cortex/browser/engine.py:4:6 - warning: No se ha podido resolver la importación "playwright.async_api". (reportMissingImports)
+  ./cortex/browser/engine.py:50:26 - error: "add_init_script" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+./cortex/cli/__init__.py
+  ./cortex/cli/__init__.py:64:16 - error: El tipo "Command | None" no se puede asignar al tipo de valor devuelto "Command"
     El tipo "Command | None" no se puede asignar al tipo "Command"
       "None" no se puede asignar a "Command" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/apotheosis_cmds.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/apotheosis_cmds.py:251:14 - warning: No se ha podido resolver la importación "radon.complexity". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/health_cmds.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/health_cmds.py:11:40 - error: "get_db_path" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/health_dashboard.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/health_dashboard.py:13:40 - error: "get_db_path" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/notebooklm_data.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/notebooklm_data.py:261:12 - warning: No se ha podido resolver la importación "pandas". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/radar_cmds.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/radar_cmds.py:37:30 - error: No se puede tener acceso al atributo "db_path" para la clase "CortexEngine"
+./cortex/cli/apotheosis_cmds.py
+  ./cortex/cli/apotheosis_cmds.py:251:14 - warning: No se ha podido resolver la importación "radon.complexity". (reportMissingImports)
+./cortex/cli/health_cmds.py
+  ./cortex/cli/health_cmds.py:11:40 - error: "get_db_path" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/cli/health_dashboard.py
+  ./cortex/cli/health_dashboard.py:13:40 - error: "get_db_path" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/cli/notebooklm_data.py
+  ./cortex/cli/notebooklm_data.py:261:12 - warning: No se ha podido resolver la importación "pandas". (reportMissingImports)
+./cortex/cli/radar_cmds.py
+  ./cortex/cli/radar_cmds.py:37:30 - error: No se puede tener acceso al atributo "db_path" para la clase "CortexEngine"
     Atributo "db_path" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/radar_cmds.py:39:22 - warning: No se ha podido resolver la importación "cortex.engine.user_memory". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/radar_cmds.py:51:20 - error: El objeto de tipo "None" no se puede suscribir (reportOptionalSubscript)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/relay_daemon.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/relay_daemon.py:4:8 - warning: La importación "aiofiles" no se ha podido resolver desde el origen (reportMissingModuleSource)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/timeline_cmds.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/timeline_cmds.py:77:63 - error: El parámetro "project" ya está asignado (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/timeline_cmds.py:159:39 - error: "err_empty_results" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/timeline_cmds.py:159:58 - error: "handle_cli_error" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/cli/trust_cmds.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/trust_cmds.py:204:10 - warning: No se ha podido resolver la importación "cortex.db". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/cli/trust_cmds.py:310:25 - error: No se puede tener acceso al atributo "attack" para la clase "str"
+  ./cortex/cli/radar_cmds.py:39:22 - warning: No se ha podido resolver la importación "cortex.engine.user_memory". (reportMissingImports)
+  ./cortex/cli/radar_cmds.py:51:20 - error: El objeto de tipo "None" no se puede suscribir (reportOptionalSubscript)
+./cortex/cli/relay_daemon.py
+  ./cortex/cli/relay_daemon.py:4:8 - warning: La importación "aiofiles" no se ha podido resolver desde el origen (reportMissingModuleSource)
+./cortex/cli/timeline_cmds.py
+  ./cortex/cli/timeline_cmds.py:77:63 - error: El parámetro "project" ya está asignado (reportCallIssue)
+  ./cortex/cli/timeline_cmds.py:159:39 - error: "err_empty_results" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+  ./cortex/cli/timeline_cmds.py:159:58 - error: "handle_cli_error" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/cli/trust_cmds.py
+  ./cortex/cli/trust_cmds.py:204:10 - warning: No se ha podido resolver la importación "cortex.db". (reportMissingImports)
+  ./cortex/cli/trust_cmds.py:310:25 - error: No se puede tener acceso al atributo "attack" para la clase "str"
     Atributo "attack" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/compaction/consolidator.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/consolidator.py:106:36 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/consolidator.py:122:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/consolidator.py:254:47 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+./cortex/compaction/consolidator.py
+  ./cortex/compaction/consolidator.py:106:36 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+  ./cortex/compaction/consolidator.py:122:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
+  ./cortex/compaction/consolidator.py:254:47 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/compaction/lang_compress.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/lang_compress.py:324:36 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/lang_compress.py:342:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/lang_compress.py:468:25 - error: El tipo "tuple[Unknown, str | Unknown | None, dict[str, Any] | dict[Unknown, Unknown]]" no se puede asignar al tipo de valor devuelto "tuple[int, str, dict[str, Any]]"
+./cortex/compaction/lang_compress.py
+  ./cortex/compaction/lang_compress.py:324:36 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+  ./cortex/compaction/lang_compress.py:342:14 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
+  ./cortex/compaction/lang_compress.py:468:25 - error: El tipo "tuple[Unknown, str | Unknown | None, dict[str, Any] | dict[Unknown, Unknown]]" no se puede asignar al tipo de valor devuelto "tuple[int, str, dict[str, Any]]"
     El tipo "str | Unknown | None" no se puede asignar al tipo "str"
       "None" no se puede asignar a "str" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/compaction/mem0_pipeline.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compaction/mem0_pipeline.py:5:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/compliance/tracker.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compliance/tracker.py:113:16 - error: El tipo "Unknown | None" no se puede asignar al tipo de valor devuelto "int"
+./cortex/compaction/mem0_pipeline.py
+  ./cortex/compaction/mem0_pipeline.py:5:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
+./cortex/compliance/tracker.py
+  ./cortex/compliance/tracker.py:113:16 - error: El tipo "Unknown | None" no se puede asignar al tipo de valor devuelto "int"
     El tipo "Unknown | None" no se puede asignar al tipo "int"
       "None" no se puede asignar a "int" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compliance/tracker.py:148:16 - error: El tipo "Unknown | None" no se puede asignar al tipo de valor devuelto "dict[str, Any]"
+  ./cortex/compliance/tracker.py:148:16 - error: El tipo "Unknown | None" no se puede asignar al tipo de valor devuelto "dict[str, Any]"
     El tipo "Unknown | None" no se puede asignar al tipo "dict[str, Any]"
       "None" no se puede asignar a "dict[str, Any]" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/compliance/tracker.py:184:55 - error: Argumento de tipo "Unknown | None" no puede ser asignado a parámetro "facts_summary" de tipo "dict[str, Any]" en función "_evaluate_article_12"
+  ./cortex/compliance/tracker.py:184:55 - error: Argumento de tipo "Unknown | None" no puede ser asignado a parámetro "facts_summary" de tipo "dict[str, Any]" en función "_evaluate_article_12"
     El tipo "Unknown | None" no se puede asignar al tipo "dict[str, Any]"
       "None" no se puede asignar a "dict[str, Any]" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/context/hiagent.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/context/hiagent.py:4:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/core/lineage.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/core/lineage.py:93:9 - error: Argumento de tipo "Literal[True]" no puede ser asignado a parámetro "value" de tipo "LineageNode" en función "__setitem__"
+./cortex/context/hiagent.py
+  ./cortex/context/hiagent.py:4:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
+./cortex/core/lineage.py
+  ./cortex/core/lineage.py:93:9 - error: Argumento de tipo "Literal[True]" no puede ser asignado a parámetro "value" de tipo "LineageNode" en función "__setitem__"
     "Literal[True]" no se puede asignar a "LineageNode" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/ccr_proxy.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/ccr_proxy.py:55:36 - error: "recall" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/centaur/heartbeat.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/centaur/heartbeat.py:122:52 - error: Argumento de tipo "CentauroMissionResult" no puede ser asignado a parámetro "result" de tipo "dict[Unknown, Unknown]" en función "_deposit_to_iturria"
+./cortex/daemon/ccr_proxy.py
+  ./cortex/daemon/ccr_proxy.py:55:36 - error: "recall" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+./cortex/daemon/centaur/heartbeat.py
+  ./cortex/daemon/centaur/heartbeat.py:122:52 - error: Argumento de tipo "CentauroMissionResult" no puede ser asignado a parámetro "result" de tipo "dict[Unknown, Unknown]" en función "_deposit_to_iturria"
     "CentauroMissionResult" no se puede asignar a "dict[Unknown, Unknown]" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/core.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/core.py:229:11 - error: Los comentarios de Pyright utilizados para controlar los ajustes a nivel de archivo deben aparecer en su propia línea
+./cortex/daemon/core.py
+  ./cortex/daemon/core.py:229:11 - error: Los comentarios de Pyright utilizados para controlar los ajustes a nivel de archivo deben aparecer en su propia línea
     Utilice "# pyright: ignore[<diagnostic rules>]" para suprimir el diagnóstico de una sola línea
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/epistemic_breaker.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/epistemic_breaker.py:5:6 - warning: No se ha podido resolver la importación "cortex.utils.time". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/epistemic_breaker.py:70:18 - warning: No se ha podido resolver la importación "cortex.facts.fact". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/epistemic_breaker.py:98:18 - warning: No se ha podido resolver la importación "cortex.facts.fact". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/health_loop.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/health_loop.py:143:18 - warning: No se ha podido resolver la importación "cortex.notifications.macos". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/loops/watcher.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/loops/watcher.py:26:12 - error: El operador "in" no se admite para los tipos "Literal['HEAD']" y "bytes | str"
+./cortex/daemon/epistemic_breaker.py
+  ./cortex/daemon/epistemic_breaker.py:5:6 - warning: No se ha podido resolver la importación "cortex.utils.time". (reportMissingImports)
+  ./cortex/daemon/epistemic_breaker.py:70:18 - warning: No se ha podido resolver la importación "cortex.facts.fact". (reportMissingImports)
+  ./cortex/daemon/epistemic_breaker.py:98:18 - warning: No se ha podido resolver la importación "cortex.facts.fact". (reportMissingImports)
+./cortex/daemon/health_loop.py
+  ./cortex/daemon/health_loop.py:143:18 - warning: No se ha podido resolver la importación "cortex.notifications.macos". (reportMissingImports)
+./cortex/daemon/loops/watcher.py
+  ./cortex/daemon/loops/watcher.py:26:12 - error: El operador "in" no se admite para los tipos "Literal['HEAD']" y "bytes | str"
     El operador "in" no se admite para los tipos "Literal['HEAD']" y "bytes" (reportOperatorIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/loops/watcher.py:35:42 - error: Argumento de tipo "bytes | str" no puede ser asignado a parámetro "args" de tipo "StrPath" en función "__new__"
+  ./cortex/daemon/loops/watcher.py:35:42 - error: Argumento de tipo "bytes | str" no puede ser asignado a parámetro "args" de tipo "StrPath" en función "__new__"
     El tipo "bytes | str" no se puede asignar al tipo "StrPath"
       El tipo "bytes" no se puede asignar al tipo "StrPath"
         "bytes" no se puede asignar a "str"
         "bytes" no es compatible con el protocolo "PathLike[str]"
           "__fspath__" no está presente. (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/__init__.py:37:5 - warning: "AutonomousMejoraloMonitor" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/__init__.py:43:5 - warning: "EntropyMonitor" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/auto_audit.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/auto_audit.py:10:34 - error: "AutoAuditAlert" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/dependency_health.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/dependency_health.py:154:18 - warning: No se ha podido resolver la importación "cortex.memory.provider". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/evaluation.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/evaluation.py:44:29 - error: Argumento de tipo "Path" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
+./cortex/daemon/monitors/__init__.py
+  ./cortex/daemon/monitors/__init__.py:37:5 - warning: "AutonomousMejoraloMonitor" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/daemon/monitors/__init__.py:43:5 - warning: "EntropyMonitor" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/daemon/monitors/auto_audit.py
+  ./cortex/daemon/monitors/auto_audit.py:10:34 - error: "AutoAuditAlert" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/daemon/monitors/dependency_health.py
+  ./cortex/daemon/monitors/dependency_health.py:154:18 - warning: No se ha podido resolver la importación "cortex.memory.provider". (reportMissingImports)
+./cortex/daemon/monitors/evaluation.py
+  ./cortex/daemon/monitors/evaluation.py:44:29 - error: Argumento de tipo "Path" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
     "Path" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/security.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/security.py:40:30 - error: El objeto de tipo "object" no es invocable
+./cortex/daemon/monitors/security.py
+  ./cortex/daemon/monitors/security.py:40:30 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/signals.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/signals.py:75:16 - error: El operador ">" no se admite para los tipos "CoroutineType[Any, Any, int]" y "Literal[0]" (reportOperatorIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/tombstone.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/monitors/tombstone.py:61:17 - error: Argumento de tipo "Path" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
+./cortex/daemon/monitors/signals.py
+  ./cortex/daemon/monitors/signals.py:75:16 - error: El operador ">" no se admite para los tipos "CoroutineType[Any, Any, int]" y "Literal[0]" (reportOperatorIssue)
+./cortex/daemon/monitors/tombstone.py
+  ./cortex/daemon/monitors/tombstone.py:61:17 - error: Argumento de tipo "Path" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
     "Path" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/monitor.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/monitor.py:121:20 - warning: La importación "psutil" no se ha podido resolver desde el origen (reportMissingModuleSource)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/runner.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/runner.py:16:12 - warning: No se ha podido resolver la importación "uvloop". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/runner.py:24:10 - warning: No se ha podido resolver la importación "arq". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/compaction_monitor/runner.py:25:10 - warning: No se ha podido resolver la importación "arq.connections". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/sentinel_monitor/monitor.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/sentinel_monitor/monitor.py:66:18 - warning: No se ha podido resolver la importación "cortex.engine.sync_write". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:35:24 - error: El argumento de la clase debe ser una clase base (reportGeneralTypeIssues)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:42:31 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:54:34 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:57:33 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:60:33 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/ast_oracle.py:82:25 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/fs_entropy_oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/fs_entropy_oracle.py:74:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
+./cortex/daemon/sidecar/compaction_monitor/monitor.py
+  ./cortex/daemon/sidecar/compaction_monitor/monitor.py:121:20 - warning: La importación "psutil" no se ha podido resolver desde el origen (reportMissingModuleSource)
+./cortex/daemon/sidecar/compaction_monitor/runner.py
+  ./cortex/daemon/sidecar/compaction_monitor/runner.py:16:12 - warning: No se ha podido resolver la importación "uvloop". (reportMissingImports)
+  ./cortex/daemon/sidecar/compaction_monitor/runner.py:24:10 - warning: No se ha podido resolver la importación "arq". (reportMissingImports)
+  ./cortex/daemon/sidecar/compaction_monitor/runner.py:25:10 - warning: No se ha podido resolver la importación "arq.connections". (reportMissingImports)
+./cortex/daemon/sidecar/sentinel_monitor/monitor.py
+  ./cortex/daemon/sidecar/sentinel_monitor/monitor.py:66:18 - warning: No se ha podido resolver la importación "cortex.engine.sync_write". (reportMissingImports)
+./cortex/daemon/sidecar/telemetry/ast_oracle.py
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:35:24 - error: El argumento de la clase debe ser una clase base (reportGeneralTypeIssues)
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:42:31 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:54:34 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:57:33 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:60:33 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+  ./cortex/daemon/sidecar/telemetry/ast_oracle.py:82:25 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+./cortex/daemon/sidecar/telemetry/fs_entropy_oracle.py
+  ./cortex/daemon/sidecar/telemetry/fs_entropy_oracle.py:74:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
     Atributo "store_sync" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/iot_oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/iot_oracle.py:105:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
+./cortex/daemon/sidecar/telemetry/iot_oracle.py
+  ./cortex/daemon/sidecar/telemetry/iot_oracle.py:105:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
     Atributo "store_sync" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/network_void_oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/network_void_oracle.py:60:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
+./cortex/daemon/sidecar/telemetry/network_void_oracle.py
+  ./cortex/daemon/sidecar/telemetry/network_void_oracle.py:60:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
     Atributo "store_sync" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/network_void_oracle.py:84:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
+  ./cortex/daemon/sidecar/telemetry/network_void_oracle.py:84:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
     Atributo "store_sync" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/thermodynamics_oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/telemetry/thermodynamics_oracle.py:65:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
+./cortex/daemon/sidecar/telemetry/thermodynamics_oracle.py
+  ./cortex/daemon/sidecar/telemetry/thermodynamics_oracle.py:65:29 - error: No se puede tener acceso al atributo "store_sync" para la clase "AsyncCortexEngine"
     Atributo "store_sync" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/trends_oracle/oracle.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/trends_oracle/oracle.py:10:8 - warning: No se ha podido resolver la importación "pandas". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/sidecar/trends_oracle/oracle.py:11:6 - warning: No se ha podido resolver la importación "pytrends.request". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/state.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/state.py:23:22 - error: Ninguna sobrecarga para "min" coincide con los argumentos proporcionados (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/state.py:23:45 - error: Argumento de tipo "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" no puede ser asignado a parámetro "key" de tipo "(_T@min) -> SupportsRichComparison" en función "min"
+./cortex/daemon/sidecar/trends_oracle/oracle.py
+  ./cortex/daemon/sidecar/trends_oracle/oracle.py:10:8 - warning: No se ha podido resolver la importación "pandas". (reportMissingImports)
+  ./cortex/daemon/sidecar/trends_oracle/oracle.py:11:6 - warning: No se ha podido resolver la importación "pytrends.request". (reportMissingImports)
+./cortex/daemon/state.py
+  ./cortex/daemon/state.py:23:22 - error: Ninguna sobrecarga para "min" coincide con los argumentos proporcionados (reportCallIssue)
+  ./cortex/daemon/state.py:23:45 - error: Argumento de tipo "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" no puede ser asignado a parámetro "key" de tipo "(_T@min) -> SupportsRichComparison" en función "min"
     Ninguna función sobrecargada coincide con el tipo "(Unknown) -> SupportsRichComparison" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/daemon/zero_prompting.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/daemon/zero_prompting.py:108:32 - error: No se puede tener acceso al atributo "pool" para la clase "CortexEngine"
+./cortex/daemon/zero_prompting.py
+  ./cortex/daemon/zero_prompting.py:108:32 - error: No se puede tener acceso al atributo "pool" para la clase "CortexEngine"
     Atributo "pool" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/database/core.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/database/core.py:152:29 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "isolation_level" de tipo "_IsolationLevel" en función "connect"
+./cortex/database/core.py
+  ./cortex/database/core.py:152:29 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "isolation_level" de tipo "_IsolationLevel" en función "connect"
     El tipo "str | None" no se puede asignar al tipo "_IsolationLevel"
       El tipo "str" no se puede asignar al tipo "_IsolationLevel"
         "str" no se puede asignar a "None"
         "str" no se puede asignar al tipo "Literal['DEFERRED']"
         "str" no se puede asignar al tipo "Literal['EXCLUSIVE']"
         "str" no se puede asignar al tipo "Literal['IMMEDIATE']" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/database/schema.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/database/schema.py:34:1 - warning: No se admite la operación en "__all__", por lo que la lista de símbolos exportada puede ser incorrecta. (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/embeddings/byok.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/embeddings/byok.py:16:10 - warning: No se ha podido resolver la importación "openai". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/embeddings/manager.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/embeddings/manager.py:106:31 - error: No se puede tener acceso al atributo "embed_multimodal" para la clase "LocalEmbedder"
+./cortex/database/schema.py
+  ./cortex/database/schema.py:34:1 - warning: No se admite la operación en "__all__", por lo que la lista de símbolos exportada puede ser incorrecta. (reportUnsupportedDunderAll)
+./cortex/embeddings/byok.py
+  ./cortex/embeddings/byok.py:16:10 - warning: No se ha podido resolver la importación "openai". (reportMissingImports)
+./cortex/embeddings/manager.py
+  ./cortex/embeddings/manager.py:106:31 - error: No se puede tener acceso al atributo "embed_multimodal" para la clase "LocalEmbedder"
     Atributo "embed_multimodal" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/embeddings/manager.py:125:31 - error: No se puede tener acceso al atributo "embed_image" para la clase "LocalEmbedder"
+  ./cortex/embeddings/manager.py:125:31 - error: No se puede tener acceso al atributo "embed_image" para la clase "LocalEmbedder"
     Atributo "embed_image" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/engine_async.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/engine_async.py:96:24 - error: El tipo "Ok[int | None]" no se puede asignar al tipo de valor devuelto "Result[int, str] | None"
+./cortex/engine_async.py
+  ./cortex/engine_async.py:96:24 - error: El tipo "Ok[int | None]" no se puede asignar al tipo de valor devuelto "Result[int, str] | None"
     El tipo "Ok[int | None]" no se puede asignar al tipo "Result[int, str] | None"
       "Ok[int | None]" no se puede asignar a "Ok[int]"
         El parámetro de tipo "T@Ok" es invariable, pero "int | None" no es el mismo que "int"
       "Ok[int | None]" no se puede asignar a "Err[str]"
       "Ok[int | None]" no se puede asignar a "None" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/engine_async.py:141:19 - error: Argumento de tipo "int | None" no puede ser asignado a parámetro "tx_id" de tipo "int" en función "_update_transaction_hash_if_needed"
+  ./cortex/engine_async.py:141:19 - error: Argumento de tipo "int | None" no puede ser asignado a parámetro "tx_id" de tipo "int" en función "_update_transaction_hash_if_needed"
     El tipo "int | None" no se puede asignar al tipo "int"
       "None" no se puede asignar a "int" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/engine_async.py:154:16 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
+  ./cortex/engine_async.py:154:16 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
     El tipo "int | None" no se puede asignar al tipo "int"
       "None" no se puede asignar a "int" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/engine_optimized.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/engine_optimized.py:296:62 - error: No se puede tener acceso al atributo "err" para la clase "Ok[int]"
+./cortex/engine_optimized.py
+  ./cortex/engine_optimized.py:296:62 - error: No se puede tener acceso al atributo "err" para la clase "Ok[int]"
     Atributo "err" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/engine_optimized.py:296:62 - error: No se puede tener acceso al atributo "err" para la clase "Err[str]"
+  ./cortex/engine_optimized.py:296:62 - error: No se puede tener acceso al atributo "err" para la clase "Err[str]"
     Atributo "err" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/episodic/boot.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/episodic/boot.py:322:17 - error: El objeto de tipo "object" no es invocable
+./cortex/episodic/boot.py
+  ./cortex/episodic/boot.py:322:17 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/events/loop.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/events/loop.py:77:6 - warning: TypeVar "T" solo aparece una vez en la firma de la función genérica
+./cortex/events/loop.py
+  ./cortex/events/loop.py:77:6 - warning: TypeVar "T" solo aparece una vez en la firma de la función genérica
     Usar "object" en su lugar (reportInvalidTypeVarUse)
-/Users/borjafernandezangulo/30_CORTEX/cortex/evolution/engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/evolution/engine.py:131:42 - error: Argumento de tipo "dict[AgentDomain, DomainMetrics]" no puede ser asignado a parámetro "metrics" de tipo "dict[str, DomainMetrics]" en función "_evaluate_adversarial"
+./cortex/evolution/engine.py
+  ./cortex/evolution/engine.py:131:42 - error: Argumento de tipo "dict[AgentDomain, DomainMetrics]" no puede ser asignado a parámetro "metrics" de tipo "dict[str, DomainMetrics]" en función "_evaluate_adversarial"
     "dict[AgentDomain, DomainMetrics]" no se puede asignar a "dict[str, DomainMetrics]"
       El parámetro de tipo "_KT@dict" es invariable, pero "AgentDomain" no es el mismo que "str" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/evolution/engine.py:142:45 - error: Argumento de tipo "dict[AgentDomain, DomainMetrics]" no puede ser asignado a parámetro "metrics" de tipo "dict[str, DomainMetrics]" en función "_process_sovereign"
+  ./cortex/evolution/engine.py:142:45 - error: Argumento de tipo "dict[AgentDomain, DomainMetrics]" no puede ser asignado a parámetro "metrics" de tipo "dict[str, DomainMetrics]" en función "_process_sovereign"
     "dict[AgentDomain, DomainMetrics]" no se puede asignar a "dict[str, DomainMetrics]"
       El parámetro de tipo "_KT@dict" es invariable, pero "AgentDomain" no es el mismo que "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/evolution/operations_mixin.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/evolution/operations_mixin.py:300:40 - error: Argumento de tipo "AgentDomain" no puede ser asignado a parámetro "key" de tipo "str" en función "get"
+./cortex/evolution/operations_mixin.py
+  ./cortex/evolution/operations_mixin.py:300:40 - error: Argumento de tipo "AgentDomain" no puede ser asignado a parámetro "key" de tipo "str" en función "get"
     "AgentDomain" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/evolution/ouroboros_omega.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/evolution/ouroboros_omega.py:91:32 - error: Argumento de tipo "AsyncFunctionDef" no puede ser asignado a parámetro "node" de tipo "FunctionDef" en función "visit_FunctionDef"
+./cortex/evolution/ouroboros_omega.py
+  ./cortex/evolution/ouroboros_omega.py:91:32 - error: Argumento de tipo "AsyncFunctionDef" no puede ser asignado a parámetro "node" de tipo "FunctionDef" en función "visit_FunctionDef"
     "AsyncFunctionDef" no se puede asignar a "FunctionDef" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/evolution/ouroboros_omega.py:179:39 - error: Argumento de tipo "AsyncFunctionDef" no puede ser asignado a parámetro "node" de tipo "FunctionDef" en función "visit_FunctionDef"
+  ./cortex/evolution/ouroboros_omega.py:179:39 - error: Argumento de tipo "AsyncFunctionDef" no puede ser asignado a parámetro "node" de tipo "FunctionDef" en función "visit_FunctionDef"
     "AsyncFunctionDef" no se puede asignar a "FunctionDef" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/gateway/adapters/openai_spoof.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/adapters/openai_spoof.py:93:60 - error: No se puede tener acceso al atributo "decode" para la clase "memoryview[int]"
+./cortex/gateway/adapters/openai_spoof.py
+  ./cortex/gateway/adapters/openai_spoof.py:93:60 - error: No se puede tener acceso al atributo "decode" para la clase "memoryview[int]"
     Atributo "decode" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:49:14 - warning: No se ha podido resolver la importación "ghost_chain". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:50:14 - warning: No se ha podido resolver la importación "ghost_platform". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:51:14 - warning: No se ha podido resolver la importación "ghost_vlm". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:56:22 - warning: No se ha podido resolver la importación "ghost_guard". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:98:14 - warning: No se ha podido resolver la importación "ghost_resilience". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/gateway/handlers/gidatu.py:99:14 - warning: No se ha podido resolver la importación "ghost_vlm". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:20:5 - warning: "ComponentSpec" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:21:5 - warning: "GenesisEngine" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:22:5 - warning: "GenesisResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:23:5 - warning: "GenesisValidator" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:24:5 - warning: "SystemAssembler" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:25:5 - warning: "SystemSpec" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:26:5 - warning: "SystemTemplate" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/genesis/__init__.py:27:5 - warning: "TemplateRegistry" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/graph/backends/sqlite/query.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/backends/sqlite/query.py:156:35 - error: No se puede tener acceso al atributo "conn" para la clase "SQLiteQueryMixin*"
+./cortex/gateway/handlers/gidatu.py
+  ./cortex/gateway/handlers/gidatu.py:49:14 - warning: No se ha podido resolver la importación "ghost_chain". (reportMissingImports)
+  ./cortex/gateway/handlers/gidatu.py:50:14 - warning: No se ha podido resolver la importación "ghost_platform". (reportMissingImports)
+  ./cortex/gateway/handlers/gidatu.py:51:14 - warning: No se ha podido resolver la importación "ghost_vlm". (reportMissingImports)
+  ./cortex/gateway/handlers/gidatu.py:56:22 - warning: No se ha podido resolver la importación "ghost_guard". (reportMissingImports)
+  ./cortex/gateway/handlers/gidatu.py:98:14 - warning: No se ha podido resolver la importación "ghost_resilience". (reportMissingImports)
+  ./cortex/gateway/handlers/gidatu.py:99:14 - warning: No se ha podido resolver la importación "ghost_vlm". (reportMissingImports)
+./cortex/genesis/__init__.py
+  ./cortex/genesis/__init__.py:20:5 - warning: "ComponentSpec" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:21:5 - warning: "GenesisEngine" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:22:5 - warning: "GenesisResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:23:5 - warning: "GenesisValidator" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:24:5 - warning: "SystemAssembler" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:25:5 - warning: "SystemSpec" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:26:5 - warning: "SystemTemplate" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/genesis/__init__.py:27:5 - warning: "TemplateRegistry" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/graph/backends/sqlite/query.py
+  ./cortex/graph/backends/sqlite/query.py:156:35 - error: No se puede tener acceso al atributo "conn" para la clase "SQLiteQueryMixin*"
     Atributo "conn" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/backends/sqlite/query.py:159:31 - error: No se puede tener acceso al atributo "conn" para la clase "SQLiteQueryMixin*"
+  ./cortex/graph/backends/sqlite/query.py:159:31 - error: No se puede tener acceso al atributo "conn" para la clase "SQLiteQueryMixin*"
     Atributo "conn" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/graph/engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/engine.py:211:52 - error: Argumentos posicionales esperados 2 (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/engine.py:234:54 - error: Argumentos posicionales esperados 2 (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/engine.py:253:63 - error: Argumentos posicionales esperados 3 (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/graph/engine.py:265:73 - error: Argumentos posicionales esperados 3 (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/guards/contradiction_guard.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/guards/contradiction_guard.py:347:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Row]"
+./cortex/graph/engine.py
+  ./cortex/graph/engine.py:211:52 - error: Argumentos posicionales esperados 2 (reportCallIssue)
+  ./cortex/graph/engine.py:234:54 - error: Argumentos posicionales esperados 2 (reportCallIssue)
+  ./cortex/graph/engine.py:253:63 - error: Argumentos posicionales esperados 3 (reportCallIssue)
+  ./cortex/graph/engine.py:265:73 - error: Argumentos posicionales esperados 3 (reportCallIssue)
+./cortex/guards/contradiction_guard.py
+  ./cortex/guards/contradiction_guard.py:347:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Row]"
     "Iterable[Row]" no se puede asignar a "list[Row]" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/guards/contradiction_guard.py:439:44 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "rows" de tipo "list[Unknown]" en función "_prepare_decisions"
+  ./cortex/guards/contradiction_guard.py:439:44 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "rows" de tipo "list[Unknown]" en función "_prepare_decisions"
     "Iterable[Row]" no se puede asignar a "list[Unknown]" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/ha/gossip.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/ha/gossip.py:183:32 - error: No se puede tener acceso al atributo "_perform_gossip" para la clase "GossipProtocol*"
+./cortex/ha/gossip.py
+  ./cortex/ha/gossip.py:183:32 - error: No se puede tener acceso al atributo "_perform_gossip" para la clase "GossipProtocol*"
     Atributo "_perform_gossip" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/hypervisor/compressor.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/hypervisor/compressor.py:39:45 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
+./cortex/hypervisor/compressor.py
+  ./cortex/hypervisor/compressor.py:39:45 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
     Atributo "consensus_score" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/hypervisor/core.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/hypervisor/core.py:174:38 - error: No se puede tener acceso al atributo "created_at" para la clase "dict[str, Any]"
+./cortex/hypervisor/core.py
+  ./cortex/hypervisor/core.py:174:38 - error: No se puede tener acceso al atributo "created_at" para la clase "dict[str, Any]"
     Atributo "created_at" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:14:5 - warning: "ErrorBoundary" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:15:5 - warning: "EvolutionaryFalsifier" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:16:5 - warning: "FilterResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:17:5 - warning: "ImmuneArbiter" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:18:5 - warning: "TriageResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:19:5 - warning: "Verdict" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/__init__.py:20:5 - warning: "error_boundary" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/immune/chaos.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/chaos.py:103:16 - error: El tipo "dict[Unknown, Unknown]* | object* | T@async_interceptor | Literal['!!CORRUPTED_STRING_BY_CHAOS_GATE!!']" no se puede asignar al tipo de valor devuelto "T@async_interceptor"
+./cortex/immune/__init__.py
+  ./cortex/immune/__init__.py:14:5 - warning: "ErrorBoundary" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:15:5 - warning: "EvolutionaryFalsifier" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:16:5 - warning: "FilterResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:17:5 - warning: "ImmuneArbiter" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:18:5 - warning: "TriageResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:19:5 - warning: "Verdict" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/immune/__init__.py:20:5 - warning: "error_boundary" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/immune/chaos.py
+  ./cortex/immune/chaos.py:103:16 - error: El tipo "dict[Unknown, Unknown]* | object* | T@async_interceptor | Literal['!!CORRUPTED_STRING_BY_CHAOS_GATE!!']" no se puede asignar al tipo de valor devuelto "T@async_interceptor"
     El tipo "dict[Unknown, Unknown]* | object* | T@async_interceptor | Literal['!!CORRUPTED_STRING_BY_CHAOS_GATE!!']" no se puede asignar al tipo "T@async_interceptor" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/immune/error_boundary.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/error_boundary.py:200:30 - error: Argumento de tipo "F@decorator" no puede ser asignado a parámetro "wrapped" de tipo "(**_PWrapped@wraps) -> _RWrapped@wraps" en función "wraps"
+./cortex/immune/error_boundary.py
+  ./cortex/immune/error_boundary.py:200:30 - error: Argumento de tipo "F@decorator" no puede ser asignado a parámetro "wrapped" de tipo "(**_PWrapped@wraps) -> _RWrapped@wraps" en función "wraps"
     El tipo "F@decorator" no se puede asignar al tipo "(**_PWrapped@wraps) -> _RWrapped@wraps" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/error_boundary.py:209:28 - error: El objeto de tipo "object*" no es invocable
+  ./cortex/immune/error_boundary.py:209:28 - error: El objeto de tipo "object*" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/immune/membrane.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/immune/membrane.py:77:31 - error: Argumento de tipo "list[FilterResult | BaseException]" no puede ser asignado a parámetro "results" de tipo "list[FilterResult]" en función "_triage"
+./cortex/immune/membrane.py
+  ./cortex/immune/membrane.py:77:31 - error: Argumento de tipo "list[FilterResult | BaseException]" no puede ser asignado a parámetro "results" de tipo "list[FilterResult]" en función "_triage"
     "list[FilterResult | BaseException]" no se puede asignar a "list[FilterResult]"
       El parámetro de tipo "_T@list" es invariable, pero "FilterResult | BaseException" no es el mismo que "FilterResult"
       Considere la posibilidad de cambiar de "lista" a "Sequence" que es covariante (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/llm/_models.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/llm/_models.py:130:53 - error: El tipo "None" no se puede asignar al tipo declarado "list[dict[str, str | None]]"
+./cortex/llm/_models.py
+  ./cortex/llm/_models.py:130:53 - error: El tipo "None" no se puede asignar al tipo declarado "list[dict[str, str | None]]"
     "None" no se puede asignar a "list[dict[str, str | None]]" (reportAssignmentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/llm/_telemetry.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/llm/_telemetry.py:48:31 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
+./cortex/llm/_telemetry.py
+  ./cortex/llm/_telemetry.py:48:31 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "db_path" de tipo "str" en función "connect"
     El tipo "str | None" no se puede asignar al tipo "str"
       "None" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/llm/boundary.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/llm/boundary.py:109:69 - error: Se espera 1 argumento posicional (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/llm/boundary.py:112:56 - error: Argumento de tipo "dict[str, Any]" no puede ser asignado a parámetro de tipo "str | None"
+./cortex/llm/boundary.py
+  ./cortex/llm/boundary.py:109:69 - error: Se espera 1 argumento posicional (reportCallIssue)
+  ./cortex/llm/boundary.py:112:56 - error: Argumento de tipo "dict[str, Any]" no puede ser asignado a parámetro de tipo "str | None"
     El tipo "dict[str, Any]" no se puede asignar al tipo "str | None"
       "dict[str, Any]" no se puede asignar a "str"
       "dict[str, Any]" no se puede asignar a "None" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/llm/provider.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/llm/provider.py:150:33 - error: "rstrip" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py:13:5 - warning: "MCPServerConfig" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py:14:5 - warning: "create_mcp_server" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py:15:5 - warning: "create_resilient_gateway" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py:16:5 - warning: "run_resilient_gateway" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/__init__.py:17:5 - warning: "run_server" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/aether_server.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/aether_server.py:16:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/aether_server.py:89:6 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:15:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:80:16 - error: El objeto de tipo "object" no es invocable
+./cortex/llm/provider.py
+  ./cortex/llm/provider.py:150:33 - error: "rstrip" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+./cortex/mcp/__init__.py
+  ./cortex/mcp/__init__.py:13:5 - warning: "MCPServerConfig" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/mcp/__init__.py:14:5 - warning: "create_mcp_server" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/mcp/__init__.py:15:5 - warning: "create_resilient_gateway" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/mcp/__init__.py:16:5 - warning: "run_resilient_gateway" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/mcp/__init__.py:17:5 - warning: "run_server" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/mcp/aether_server.py
+  ./cortex/mcp/aether_server.py:16:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/aether_server.py:89:6 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+./cortex/mcp/genesis_tools.py
+  ./cortex/mcp/genesis_tools.py:15:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/genesis_tools.py:80:16 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:91:22 - error: El objeto de tipo "object" no es invocable
+  ./cortex/mcp/genesis_tools.py:91:22 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:125:16 - error: El objeto de tipo "object" no es invocable
+  ./cortex/mcp/genesis_tools.py:125:16 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:131:18 - error: El objeto de tipo "object" no es invocable
+  ./cortex/mcp/genesis_tools.py:131:18 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/genesis_tools.py:145:20 - error: El objeto de tipo "object" no es invocable
+  ./cortex/mcp/genesis_tools.py:145:20 - error: El objeto de tipo "object" no es invocable
     Atributo "__call__" desconocido (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/hilbert_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/hilbert_tools.py:46:22 - warning: No se ha podido resolver la importación "conjectures". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/hilbert_tools.py:75:22 - warning: No se ha podido resolver la importación "millennium_assault". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/hilbert_tools.py:92:22 - warning: No se ha podido resolver la importación "hilbert_engine". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/hilbert_tools.py:95:26 - warning: No se ha podido resolver la importación "z3". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:3:6 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:5:30 - error: "get_engine" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:20:23 - error: No se puede tener acceso al atributo "activate_app" para la clase "MaestroUI"
+./cortex/mcp/hilbert_tools.py
+  ./cortex/mcp/hilbert_tools.py:46:22 - warning: No se ha podido resolver la importación "conjectures". (reportMissingImports)
+  ./cortex/mcp/hilbert_tools.py:75:22 - warning: No se ha podido resolver la importación "millennium_assault". (reportMissingImports)
+  ./cortex/mcp/hilbert_tools.py:92:22 - warning: No se ha podido resolver la importación "hilbert_engine". (reportMissingImports)
+  ./cortex/mcp/hilbert_tools.py:95:26 - warning: No se ha podido resolver la importación "z3". (reportMissingImports)
+./cortex/mcp/maestro_tools.py
+  ./cortex/mcp/maestro_tools.py:3:6 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/maestro_tools.py:5:30 - error: "get_engine" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+  ./cortex/mcp/maestro_tools.py:20:23 - error: No se puede tener acceso al atributo "activate_app" para la clase "MaestroUI"
     Atributo "activate_app" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:31:17 - error: No se puede tener acceso al atributo "activate_app" para la clase "MaestroUI"
+  ./cortex/mcp/maestro_tools.py:31:17 - error: No se puede tener acceso al atributo "activate_app" para la clase "MaestroUI"
     Atributo "activate_app" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:35:27 - error: No se puede tener acceso al atributo "inject_keystroke" para la clase "MaestroUI"
+  ./cortex/mcp/maestro_tools.py:35:27 - error: No se puede tener acceso al atributo "inject_keystroke" para la clase "MaestroUI"
     Atributo "inject_keystroke" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/maestro_tools.py:46:23 - error: No se puede tener acceso al atributo "click_menu_item" para la clase "MaestroUI"
+  ./cortex/mcp/maestro_tools.py:46:23 - error: No se puede tener acceso al atributo "click_menu_item" para la clase "MaestroUI"
     Atributo "click_menu_item" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/mega_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/mega_tools.py:20:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/mega_tools.py:168:42 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+./cortex/mcp/mega_tools.py
+  ./cortex/mcp/mega_tools.py:20:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/mega_tools.py:168:42 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/mega_tools.py:173:44 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+  ./cortex/mcp/mega_tools.py:173:44 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/mega_tools.py:179:36 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+  ./cortex/mcp/mega_tools.py:179:36 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py:3:6 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py:23:36 - error: No se puede tener acceso al atributo "create_album" para la clase "GRAMMYOrchestrator"
+./cortex/mcp/music_tools.py
+  ./cortex/mcp/music_tools.py:3:6 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/music_tools.py:23:36 - error: No se puede tener acceso al atributo "create_album" para la clase "GRAMMYOrchestrator"
     Atributo "create_album" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py:44:57 - error: No se puede tener acceso al atributo "create_album" para la clase "GRAMMYOrchestrator"
+  ./cortex/mcp/music_tools.py:44:57 - error: No se puede tener acceso al atributo "create_album" para la clase "GRAMMYOrchestrator"
     Atributo "create_album" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py:49:61 - error: Ningún parámetro llamado "provider" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/music_tools.py:71:86 - error: No se puede tener acceso al atributo "gri_score" para la clase "float"
+  ./cortex/mcp/music_tools.py:49:61 - error: Ningún parámetro llamado "provider" (reportCallIssue)
+  ./cortex/mcp/music_tools.py:71:86 - error: No se puede tener acceso al atributo "gri_score" para la clase "float"
     Atributo "gri_score" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:47:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:103:30 - error: "ClientTimeout" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:104:24 - error: "ClientSession" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:258:12 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:268:24 - error: "markdownify" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:280:12 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:286:24 - error: "markdownify" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/resilient_gateway.py:307:6 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/server.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/server.py:42:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/trust_compliance.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/trust_compliance.py:16:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mcp/trust_tools.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mcp/trust_tools.py:24:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/mejoralo/daemon.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mejoralo/daemon.py:55:13 - error: Argumento de tipo "str | Any | Path" no puede ser asignado a parámetro "db" de tipo "str" en función "get_engine"
+./cortex/mcp/resilient_gateway.py
+  ./cortex/mcp/resilient_gateway.py:47:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+  ./cortex/mcp/resilient_gateway.py:103:30 - error: "ClientTimeout" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/mcp/resilient_gateway.py:104:24 - error: "ClientSession" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/mcp/resilient_gateway.py:258:12 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
+  ./cortex/mcp/resilient_gateway.py:268:24 - error: "markdownify" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/mcp/resilient_gateway.py:280:12 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
+  ./cortex/mcp/resilient_gateway.py:286:24 - error: "markdownify" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/mcp/resilient_gateway.py:307:6 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+./cortex/mcp/server.py
+  ./cortex/mcp/server.py:42:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+./cortex/mcp/trust_compliance.py
+  ./cortex/mcp/trust_compliance.py:16:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+./cortex/mcp/trust_tools.py
+  ./cortex/mcp/trust_tools.py:24:10 - warning: No se ha podido resolver la importación "mcp.server.fastmcp". (reportMissingImports)
+./cortex/mejoralo/daemon.py
+  ./cortex/mejoralo/daemon.py:55:13 - error: Argumento de tipo "str | Any | Path" no puede ser asignado a parámetro "db" de tipo "str" en función "get_engine"
     El tipo "str | Any | Path" no se puede asignar al tipo "str"
       "Path" no se puede asignar a "str" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/mejoralo/daemon.py:129:13 - error: Ningún parámetro llamado "query" (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/memory/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/__init__.py:117:5 - warning: "VectorStoreL2" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/__init__.py:200:22 - warning: No se ha podido resolver la importación "cortex.memory.vector_store". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/memory/distributed_cache.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/distributed_cache.py:136:27 - error: "from_url" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/distributed_cache.py:146:25 - error: "exceptions" no es un atributo conocido del módulo "redis.asyncio" (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/distributed_cache.py:146:25 - error: "exceptions" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-/Users/borjafernandezangulo/30_CORTEX/cortex/memory/memory_archaeology.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/memory_archaeology.py:150:34 - error: No se puede tener acceso al atributo "agenerate" para la clase "SovereignLLM"
+  ./cortex/mejoralo/daemon.py:129:13 - error: Ningún parámetro llamado "query" (reportCallIssue)
+./cortex/memory/__init__.py
+  ./cortex/memory/__init__.py:117:5 - warning: "VectorStoreL2" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/memory/__init__.py:200:22 - warning: No se ha podido resolver la importación "cortex.memory.vector_store". (reportMissingImports)
+./cortex/memory/distributed_cache.py
+  ./cortex/memory/distributed_cache.py:136:27 - error: "from_url" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/memory/distributed_cache.py:146:25 - error: "exceptions" no es un atributo conocido del módulo "redis.asyncio" (reportAttributeAccessIssue)
+  ./cortex/memory/distributed_cache.py:146:25 - error: "exceptions" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+./cortex/memory/memory_archaeology.py
+  ./cortex/memory/memory_archaeology.py:150:34 - error: No se puede tener acceso al atributo "agenerate" para la clase "SovereignLLM"
     Atributo "agenerate" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/memory/resonance.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/resonance.py:72:60 - error: No se puede tener acceso al atributo "source_file" para la clase "CortexSemanticEngram"
+./cortex/memory/resonance.py
+  ./cortex/memory/resonance.py:72:60 - error: No se puede tener acceso al atributo "source_file" para la clase "CortexSemanticEngram"
     Atributo "source_file" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/resonance.py:75:54 - error: No se puede tener acceso al atributo "project" para la clase "CortexSemanticEngram"
+  ./cortex/memory/resonance.py:75:54 - error: No se puede tener acceso al atributo "project" para la clase "CortexSemanticEngram"
     Atributo "project" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/resonance.py:95:34 - error: No se puede tener acceso al atributo "cortisol" para la clase "DigitalEndocrine"
+  ./cortex/memory/resonance.py:95:34 - error: No se puede tener acceso al atributo "cortisol" para la clase "DigitalEndocrine"
     Atributo "cortisol" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/memory/resonance.py:95:69 - error: No se puede tener acceso al atributo "dopamine" para la clase "DigitalEndocrine"
+  ./cortex/memory/resonance.py:95:69 - error: No se puede tener acceso al atributo "dopamine" para la clase "DigitalEndocrine"
     Atributo "dopamine" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/metering/tracker.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/metering/tracker.py:96:42 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "database" de tipo "StrOrBytesPath" en función "connect"
+./cortex/metering/tracker.py
+  ./cortex/metering/tracker.py:96:42 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "database" de tipo "StrOrBytesPath" en función "connect"
     El tipo "str | None" no se puede asignar al tipo "StrOrBytesPath"
       El tipo "None" no se puede asignar al tipo "StrOrBytesPath"
         "None" no se puede asignar a "str"
@@ -385,220 +385,220 @@
           "__fspath__" no está presente.
         "None" no es compatible con el protocolo "PathLike[bytes]"
           "__fspath__" no está presente. (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/music_engine/dsp_apotheosis.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/music_engine/dsp_apotheosis.py:121:28 - error: El operador "*" no se admite para los tipos "NDArray[complex128]" y "Array | _Array1D[float64] | ndarray[tuple[int], dtype[Any]] | NDArray[Unknown] | NDArray[Incomplete]"
+./cortex/music_engine/dsp_apotheosis.py
+  ./cortex/music_engine/dsp_apotheosis.py:121:28 - error: El operador "*" no se admite para los tipos "NDArray[complex128]" y "Array | _Array1D[float64] | ndarray[tuple[int], dtype[Any]] | NDArray[Unknown] | NDArray[Incomplete]"
     El operador "*" no se admite para los tipos "NDArray[complex128]" y "Array" (reportOperatorIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/music_engine/midi_engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/music_engine/midi_engine.py:469:16 - warning: No se ha podido resolver la importación "mido". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/perception/observer.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/perception/observer.py:38:25 - error: El argumento de la clase debe ser una clase base (reportGeneralTypeIssues)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/perception/observer.py:53:35 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/perception/observer.py:139:26 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
-/Users/borjafernandezangulo/30_CORTEX/cortex/policy/engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/policy/engine.py:156:41 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
+./cortex/music_engine/midi_engine.py
+  ./cortex/music_engine/midi_engine.py:469:16 - warning: No se ha podido resolver la importación "mido". (reportMissingImports)
+./cortex/perception/observer.py
+  ./cortex/perception/observer.py:38:25 - error: El argumento de la clase debe ser una clase base (reportGeneralTypeIssues)
+  ./cortex/perception/observer.py:53:35 - error: Variable no permitida en la expresión de tipo (reportInvalidTypeForm)
+  ./cortex/perception/observer.py:139:26 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
+./cortex/policy/engine.py
+  ./cortex/policy/engine.py:156:41 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
     Atributo "consensus_score" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/policy/engine.py:203:17 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
+  ./cortex/policy/engine.py:203:17 - error: No se puede tener acceso al atributo "consensus_score" para la clase "Fact"
     Atributo "consensus_score" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/policy/engine.py:272:20 - error: El tipo "list[dict[str, Any]]" no se puede asignar al tipo de valor devuelto "list[Fact]"
+  ./cortex/policy/engine.py:272:20 - error: El tipo "list[dict[str, Any]]" no se puede asignar al tipo de valor devuelto "list[Fact]"
     "list[dict[str, Any]]" no se puede asignar a "list[Fact]"
       El parámetro de tipo "_T@list" es invariable, pero "dict[str, Any]" no es el mismo que "Fact"
       Considere la posibilidad de cambiar de "lista" a "Sequence" que es covariante (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/policy/engine.py:286:34 - error: Argumento de tipo "list[dict[str, Any]]" no puede ser asignado a parámetro "iterable" de tipo "Iterable[Fact]" en función "extend"
+  ./cortex/policy/engine.py:286:34 - error: Argumento de tipo "list[dict[str, Any]]" no puede ser asignado a parámetro "iterable" de tipo "Iterable[Fact]" en función "extend"
     "list[dict[str, Any]]" no se puede asignar a "Iterable[Fact]"
       El parámetro de tipo "_T_co@Iterable" es covariante, pero "dict[str, Any]" no es un subtipo de "Fact"
         "dict[str, Any]" no se puede asignar a "Fact" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/policy/memory_os.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/policy/memory_os.py:5:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/red_team/hydra_chaos.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/red_team/hydra_chaos.py:110:21 - error: El tipo "tuple[str | None, str, int]" no se puede asignar al tipo de valor devuelto "tuple[str, str, int]"
+./cortex/policy/memory_os.py
+  ./cortex/policy/memory_os.py:5:12 - warning: No se ha podido resolver la importación "structlog". (reportMissingImports)
+./cortex/red_team/hydra_chaos.py
+  ./cortex/red_team/hydra_chaos.py:110:21 - error: El tipo "tuple[str | None, str, int]" no se puede asignar al tipo de valor devuelto "tuple[str, str, int]"
     El tipo "str | None" no se puede asignar al tipo "str"
       "None" no se puede asignar a "str" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py:14:5 - warning: "RevenueEngine" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py:15:5 - warning: "Opportunity" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py:16:5 - warning: "ExecutionResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py:17:5 - warning: "RevenueReport" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/__init__.py:18:5 - warning: "RevenueVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/revenue/vectors/__init__.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/vectors/__init__.py:6:5 - warning: "MicroSaaSVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/vectors/__init__.py:7:5 - warning: "ArbitrageVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/revenue/vectors/__init__.py:8:5 - warning: "OutreachVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/admin.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/admin.py:43:10 - warning: No se ha podido resolver la importación "cortex.auth.api_keys". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/ask.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/ask.py:126:43 - error: No se puede tener acceso al atributo "list_providers" para la clase "type[LLMProvider]"
+./cortex/revenue/__init__.py
+  ./cortex/revenue/__init__.py:14:5 - warning: "RevenueEngine" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/__init__.py:15:5 - warning: "Opportunity" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/__init__.py:16:5 - warning: "ExecutionResult" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/__init__.py:17:5 - warning: "RevenueReport" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/__init__.py:18:5 - warning: "RevenueVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/revenue/vectors/__init__.py
+  ./cortex/revenue/vectors/__init__.py:6:5 - warning: "MicroSaaSVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/vectors/__init__.py:7:5 - warning: "ArbitrageVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+  ./cortex/revenue/vectors/__init__.py:8:5 - warning: "OutreachVector" se especifica en __all__ pero no está presente en el módulo (reportUnsupportedDunderAll)
+./cortex/routes/admin.py
+  ./cortex/routes/admin.py:43:10 - warning: No se ha podido resolver la importación "cortex.auth.api_keys". (reportMissingImports)
+./cortex/routes/ask.py
+  ./cortex/routes/ask.py:126:43 - error: No se puede tener acceso al atributo "list_providers" para la clase "type[LLMProvider]"
     Atributo "list_providers" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/ask.py:285:41 - error: No se puede tener acceso al atributo "list_providers" para la clase "type[LLMProvider]"
+  ./cortex/routes/ask.py:285:41 - error: No se puede tener acceso al atributo "list_providers" para la clase "type[LLMProvider]"
     Atributo "list_providers" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/events.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/events.py:11:6 - warning: No se ha podido resolver la importación "sse_starlette.sse". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:49:20 - error: No se puede tener acceso al atributo "source" para la clase "StoreRequest"
+./cortex/routes/events.py
+  ./cortex/routes/events.py:11:6 - warning: No se ha podido resolver la importación "sse_starlette.sse". (reportMissingImports)
+./cortex/routes/facts.py
+  ./cortex/routes/facts.py:49:20 - error: No se puede tener acceso al atributo "source" para la clase "StoreRequest"
     Atributo "source" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:73:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:74:13 - error: Ningún parámetro llamado "valid_from" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:75:13 - error: Ningún parámetro llamado "valid_until" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:80:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:82:13 - error: Ningún parámetro llamado "consensus_score" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:116:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/facts.py:160:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/runtime.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/runtime.py:16:12 - error: El tipo "HealthReport" no se puede asignar al tipo de valor devuelto "dict[Unknown, Unknown]"
+  ./cortex/routes/facts.py:73:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
+  ./cortex/routes/facts.py:74:13 - error: Ningún parámetro llamado "valid_from" (reportCallIssue)
+  ./cortex/routes/facts.py:75:13 - error: Ningún parámetro llamado "valid_until" (reportCallIssue)
+  ./cortex/routes/facts.py:80:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
+  ./cortex/routes/facts.py:82:13 - error: Ningún parámetro llamado "consensus_score" (reportCallIssue)
+  ./cortex/routes/facts.py:116:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
+  ./cortex/routes/facts.py:160:13 - error: Ningún parámetro llamado "confidence" (reportCallIssue)
+./cortex/routes/runtime.py
+  ./cortex/routes/runtime.py:16:12 - error: El tipo "HealthReport" no se puede asignar al tipo de valor devuelto "dict[Unknown, Unknown]"
     "HealthReport" no se puede asignar a "dict[Unknown, Unknown]" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/runtime.py:16:32 - error: Argumento de tipo "Literal['healthy']" no puede ser asignado a parámetro "status" de tipo "Literal['ok', 'degraded', 'blocked']" en función "__init__"
+  ./cortex/routes/runtime.py:16:32 - error: Argumento de tipo "Literal['healthy']" no puede ser asignado a parámetro "status" de tipo "Literal['ok', 'degraded', 'blocked']" en función "__init__"
     El tipo "Literal['healthy']" no se puede asignar al tipo "Literal['ok', 'degraded', 'blocked']"
       "Literal['healthy']" no se puede asignar al tipo "Literal['ok']"
       "Literal['healthy']" no se puede asignar al tipo "Literal['degraded']"
       "Literal['healthy']" no se puede asignar al tipo "Literal['blocked']" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/search.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/search.py:43:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/search.py:81:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/stripe.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/stripe.py:175:26 - error: "checkout" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/stripe.py:199:24 - error: "Webhook" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/stripe.py:232:35 - error: "Customer" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/topology_ws.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/topology_ws.py:48:80 - error: La expresión de tipo "None" no se puede asignar al parámetro de tipo "list[dict[Unknown, Unknown]]"
+./cortex/routes/search.py
+  ./cortex/routes/search.py:43:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
+  ./cortex/routes/search.py:81:13 - error: Ningún parámetro llamado "tx_id" (reportCallIssue)
+./cortex/routes/stripe.py
+  ./cortex/routes/stripe.py:175:26 - error: "checkout" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
+  ./cortex/routes/stripe.py:199:24 - error: "Webhook" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
+  ./cortex/routes/stripe.py:232:35 - error: "Customer" no es un atributo conocido del módulo "stripe" (reportAttributeAccessIssue)
+./cortex/routes/topology_ws.py
+  ./cortex/routes/topology_ws.py:48:80 - error: La expresión de tipo "None" no se puede asignar al parámetro de tipo "list[dict[Unknown, Unknown]]"
     "None" no se puede asignar a "list[dict[Unknown, Unknown]]" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/routes/translate.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/translate.py:11:24 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/routes/translate.py:12:10 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/search/federation.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/search/federation.py:137:39 - error: "lower" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/search/federation.py:148:25 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "content" de tipo "str" en función "__init__"
+./cortex/routes/translate.py
+  ./cortex/routes/translate.py:11:24 - error: "genai" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+  ./cortex/routes/translate.py:12:10 - warning: No se ha podido resolver la importación "google.genai". (reportMissingImports)
+./cortex/search/federation.py
+  ./cortex/search/federation.py:137:39 - error: "lower" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+  ./cortex/search/federation.py:148:25 - error: Argumento de tipo "str | None" no puede ser asignado a parámetro "content" de tipo "str" en función "__init__"
     El tipo "str | None" no se puede asignar al tipo "str"
       "None" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/search/text.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/search/text.py:105:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Unknown]"
+./cortex/search/text.py
+  ./cortex/search/text.py:105:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Unknown]"
     "Iterable[Row]" no se puede asignar a "list[Unknown]" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/search/text.py:149:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Unknown]"
+  ./cortex/search/text.py:149:12 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[Unknown]"
     "Iterable[Row]" no se puede asignar a "list[Unknown]" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/search/vector.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/search/vector.py:209:25 - error: Argumento de tipo "str | Any | None" no puede ser asignado a parámetro "content" de tipo "str" en función "__init__"
+./cortex/search/vector.py
+  ./cortex/search/vector.py:209:25 - error: Argumento de tipo "str | Any | None" no puede ser asignado a parámetro "content" de tipo "str" en función "__init__"
     El tipo "str | Any | None" no se puede asignar al tipo "str"
       "None" no se puede asignar a "str" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/security/injection_guard.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/security/injection_guard.py:322:22 - warning: No se ha podido resolver la importación "cortex.llm.models". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/security/injection_guard.py:323:47 - error: "CortexRouter" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/services/notebooklm.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/services/notebooklm.py:173:49 - error: No se puede tener acceso al atributo "timestamp" para la clase "Fact"
+./cortex/security/injection_guard.py
+  ./cortex/security/injection_guard.py:322:22 - warning: No se ha podido resolver la importación "cortex.llm.models". (reportMissingImports)
+  ./cortex/security/injection_guard.py:323:47 - error: "CortexRouter" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/services/notebooklm.py
+  ./cortex/services/notebooklm.py:173:49 - error: No se puede tener acceso al atributo "timestamp" para la clase "Fact"
     Atributo "timestamp" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/shannon/scanner.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/shannon/scanner.py:253:32 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+./cortex/shannon/scanner.py
+  ./cortex/shannon/scanner.py:253:32 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/shannon/scanner.py:254:48 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+  ./cortex/shannon/scanner.py:254:48 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/shannon/scanner.py:254:61 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
+  ./cortex/shannon/scanner.py:254:61 - error: Argumento de tipo "Iterable[Row]" no puede ser asignado a parámetro "obj" de tipo "Sized" en función "len"
     "Iterable[Row]" no es compatible con el protocolo "Sized"
       "__len__" no está presente. (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/signals/bus.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/signals/bus.py:105:20 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
+./cortex/signals/bus.py
+  ./cortex/signals/bus.py:105:20 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
     El tipo "int | None" no se puede asignar al tipo "int"
       "None" no se puede asignar a "int" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/signals/bus.py:132:33 - error: Argumento de tipo "Row" no puede ser asignado a parámetro "row" de tipo "tuple[Unknown, ...]" en función "signal_from_row"
+  ./cortex/signals/bus.py:132:33 - error: Argumento de tipo "Row" no puede ser asignado a parámetro "row" de tipo "tuple[Unknown, ...]" en función "signal_from_row"
     "Row" no se puede asignar a "tuple[Unknown, ...]" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/signals/bus.py:152:33 - error: Argumento de tipo "Row" no puede ser asignado a parámetro "row" de tipo "tuple[Unknown, ...]" en función "signal_from_row"
+  ./cortex/signals/bus.py:152:33 - error: Argumento de tipo "Row" no puede ser asignado a parámetro "row" de tipo "tuple[Unknown, ...]" en función "signal_from_row"
     "Row" no se puede asignar a "tuple[Unknown, ...]" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/signals/bus.py:293:20 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
+  ./cortex/signals/bus.py:293:20 - error: El tipo "int | None" no se puede asignar al tipo de valor devuelto "int"
     El tipo "int | None" no se puede asignar al tipo "int"
       "None" no se puede asignar a "int" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/skills/autodidact/synthesis.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/autodidact/synthesis.py:234:31 - error: El tipo "str | Unknown | list[Any]" no se puede asignar al tipo declarado "list[str]"
+./cortex/skills/autodidact/synthesis.py
+  ./cortex/skills/autodidact/synthesis.py:234:31 - error: El tipo "str | Unknown | list[Any]" no se puede asignar al tipo declarado "list[str]"
     El tipo "str | Unknown | list[Any]" no se puede asignar al tipo "list[str]"
       "str" no se puede asignar a "list[str]" (reportAssignmentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py:10:12 - warning: No se ha podido resolver la importación "instructor". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py:11:10 - warning: No se ha podido resolver la importación "openai". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py:33:30 - error: No se puede tener acceso al atributo "success" para la clase "ScrapeResult"
+./cortex/skills/niche_arbitrage/pipeline.py
+  ./cortex/skills/niche_arbitrage/pipeline.py:10:12 - warning: No se ha podido resolver la importación "instructor". (reportMissingImports)
+  ./cortex/skills/niche_arbitrage/pipeline.py:11:10 - warning: No se ha podido resolver la importación "openai". (reportMissingImports)
+  ./cortex/skills/niche_arbitrage/pipeline.py:33:30 - error: No se puede tener acceso al atributo "success" para la clase "ScrapeResult"
     Atributo "success" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py:33:59 - error: No se puede tener acceso al atributo "markdown" para la clase "ScrapeResult"
+  ./cortex/skills/niche_arbitrage/pipeline.py:33:59 - error: No se puede tener acceso al atributo "markdown" para la clase "ScrapeResult"
     Atributo "markdown" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/skills/niche_arbitrage/pipeline.py:41:75 - error: No se puede tener acceso al atributo "markdown" para la clase "ScrapeResult"
+  ./cortex/skills/niche_arbitrage/pipeline.py:41:75 - error: No se puede tener acceso al atributo "markdown" para la clase "ScrapeResult"
     Atributo "markdown" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py:93:39 - error: "listxattr" no es un atributo conocido del módulo "os" (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py:99:20 - warning: No se ha podido resolver la importación "xattr". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py:133:20 - warning: No se ha podido resolver la importación "xattr". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py:171:20 - error: El tipo "dict[Unknown, Unknown]" no se puede asignar al tipo de valor devuelto "GhostTrace | None"
+./cortex/songlines/sensor.py
+  ./cortex/songlines/sensor.py:93:39 - error: "listxattr" no es un atributo conocido del módulo "os" (reportAttributeAccessIssue)
+  ./cortex/songlines/sensor.py:99:20 - warning: No se ha podido resolver la importación "xattr". (reportMissingImports)
+  ./cortex/songlines/sensor.py:133:20 - warning: No se ha podido resolver la importación "xattr". (reportMissingImports)
+  ./cortex/songlines/sensor.py:171:20 - error: El tipo "dict[Unknown, Unknown]" no se puede asignar al tipo de valor devuelto "GhostTrace | None"
     El tipo "dict[Unknown, Unknown]" no se puede asignar al tipo "GhostTrace | None"
       "dict[Unknown, Unknown]" no se puede asignar a "GhostTrace"
       "dict[Unknown, Unknown]" no se puede asignar a "None" (reportReturnType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/songlines/sensor.py:180:20 - error: "removexattr" no es un atributo conocido del módulo "os" (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py:71:30 - error: Ninguna sobrecarga para "field" coincide con los argumentos proporcionados (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py:71:52 - error: Argumento de tipo "object" no puede ser asignado a parámetro "default_factory" de tipo "Literal[_MISSING_TYPE.MISSING]" en función "field"
+  ./cortex/songlines/sensor.py:180:20 - error: "removexattr" no es un atributo conocido del módulo "os" (reportAttributeAccessIssue)
+./cortex/sovereign/engine.py
+  ./cortex/sovereign/engine.py:71:30 - error: Ninguna sobrecarga para "field" coincide con los argumentos proporcionados (reportCallIssue)
+  ./cortex/sovereign/engine.py:71:52 - error: Argumento de tipo "object" no puede ser asignado a parámetro "default_factory" de tipo "Literal[_MISSING_TYPE.MISSING]" en función "field"
     "object" no se puede asignar a "Literal[_MISSING_TYPE.MISSING]" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py:305:40 - error: No se puede tener acceso al atributo "serotonin" para la clase "DigitalEndocrine"
+  ./cortex/sovereign/engine.py:305:40 - error: No se puede tener acceso al atributo "serotonin" para la clase "DigitalEndocrine"
     Atributo "serotonin" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py:309:42 - error: No se puede tener acceso al atributo "BLOCK" para la clase "object"
+  ./cortex/sovereign/engine.py:309:42 - error: No se puede tener acceso al atributo "BLOCK" para la clase "object"
     Atributo "BLOCK" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/engine.py:344:71 - error: Argumento de tipo "dict[str, Unknown | bool]" no puede ser asignado a parámetro "tenant_id" de tipo "str" en función "ingest_context" (reportArgumentType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:128:14 - warning: No se ha podido resolver la importación "opentelemetry". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:129:14 - warning: No se ha podido resolver la importación "opentelemetry.exporter.otlp.proto.grpc.metric_exporter". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:130:14 - warning: No se ha podido resolver la importación "opentelemetry.exporter.otlp.proto.grpc.trace_exporter". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:131:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.metrics". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:132:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.metrics.export". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:133:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.resources". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:134:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.trace". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:135:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.trace.export". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/sovereign/observability.py:174:10 - warning: No se ha podido resolver la importación "opentelemetry.metrics". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/storage/postgres.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/postgres.py:101:20 - warning: No se ha podido resolver la importación "asyncpg". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py:88:18 - warning: No se ha podido resolver la importación "qdrant_client". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py:110:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py:151:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py:203:18 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/qdrant.py:227:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/storage/turso.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/storage/turso.py:44:20 - warning: No se ha podido resolver la importación "libsql_experimental". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/auto_fix.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/auto_fix.py:204:16 - error: Ninguna sobrecarga para "max" coincide con los argumentos proporcionados (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/auto_fix.py:204:32 - error: Argumento de tipo "Overload[(key: GhostClass, default: None = None, /) -> (int | None), (key: GhostClass, default: int, /) -> int, (key: GhostClass, default: _T@get, /) -> (int | _T@get)]" no puede ser asignado a parámetro "key" de tipo "(_T@max) -> SupportsRichComparison" en función "max"
+  ./cortex/sovereign/engine.py:344:71 - error: Argumento de tipo "dict[str, Unknown | bool]" no puede ser asignado a parámetro "tenant_id" de tipo "str" en función "ingest_context" (reportArgumentType)
+./cortex/sovereign/observability.py
+  ./cortex/sovereign/observability.py:128:14 - warning: No se ha podido resolver la importación "opentelemetry". (reportMissingImports)
+  ./cortex/sovereign/observability.py:129:14 - warning: No se ha podido resolver la importación "opentelemetry.exporter.otlp.proto.grpc.metric_exporter". (reportMissingImports)
+  ./cortex/sovereign/observability.py:130:14 - warning: No se ha podido resolver la importación "opentelemetry.exporter.otlp.proto.grpc.trace_exporter". (reportMissingImports)
+  ./cortex/sovereign/observability.py:131:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.metrics". (reportMissingImports)
+  ./cortex/sovereign/observability.py:132:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.metrics.export". (reportMissingImports)
+  ./cortex/sovereign/observability.py:133:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.resources". (reportMissingImports)
+  ./cortex/sovereign/observability.py:134:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.trace". (reportMissingImports)
+  ./cortex/sovereign/observability.py:135:14 - warning: No se ha podido resolver la importación "opentelemetry.sdk.trace.export". (reportMissingImports)
+  ./cortex/sovereign/observability.py:174:10 - warning: No se ha podido resolver la importación "opentelemetry.metrics". (reportMissingImports)
+./cortex/storage/postgres.py
+  ./cortex/storage/postgres.py:101:20 - warning: No se ha podido resolver la importación "asyncpg". (reportMissingImports)
+./cortex/storage/qdrant.py
+  ./cortex/storage/qdrant.py:88:18 - warning: No se ha podido resolver la importación "qdrant_client". (reportMissingImports)
+  ./cortex/storage/qdrant.py:110:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
+  ./cortex/storage/qdrant.py:151:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
+  ./cortex/storage/qdrant.py:203:18 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
+  ./cortex/storage/qdrant.py:227:14 - warning: No se ha podido resolver la importación "qdrant_client.models". (reportMissingImports)
+./cortex/storage/turso.py
+  ./cortex/storage/turso.py:44:20 - warning: No se ha podido resolver la importación "libsql_experimental". (reportMissingImports)
+./cortex/swarm/auto_fix.py
+  ./cortex/swarm/auto_fix.py:204:16 - error: Ninguna sobrecarga para "max" coincide con los argumentos proporcionados (reportCallIssue)
+  ./cortex/swarm/auto_fix.py:204:32 - error: Argumento de tipo "Overload[(key: GhostClass, default: None = None, /) -> (int | None), (key: GhostClass, default: int, /) -> int, (key: GhostClass, default: _T@get, /) -> (int | _T@get)]" no puede ser asignado a parámetro "key" de tipo "(_T@max) -> SupportsRichComparison" en función "max"
     Ninguna función sobrecargada coincide con el tipo "(GhostClass) -> SupportsRichComparison" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/auto_fix.py:238:15 - error: No se puede tener acceso al atributo "add" para la clase "TaskQueue"
+  ./cortex/swarm/auto_fix.py:238:15 - error: No se puede tener acceso al atributo "add" para la clase "TaskQueue"
     Atributo "add" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/centauro_engine.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/centauro_engine.py:168:16 - error: El tipo "tuple[CoroutineType[Any, Any, str | None] | None, int]" no se puede asignar al tipo de valor devuelto "tuple[str | None, int]"
+./cortex/swarm/centauro_engine.py
+  ./cortex/swarm/centauro_engine.py:168:16 - error: El tipo "tuple[CoroutineType[Any, Any, str | None] | None, int]" no se puede asignar al tipo de valor devuelto "tuple[str | None, int]"
     El tipo "CoroutineType[Any, Any, str | None] | None" no se puede asignar al tipo "str | None"
       El tipo "CoroutineType[Any, Any, str | None]" no se puede asignar al tipo "str | None"
         "CoroutineType[Any, Any, str | None]" no se puede asignar a "str"
         "CoroutineType[Any, Any, str | None]" no se puede asignar a "None" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/crystal_synthesis.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/crystal_synthesis.py:110:74 - error: No se puede tener acceso al atributo "error" para la clase "Ok[str]"
+./cortex/swarm/crystal_synthesis.py
+  ./cortex/swarm/crystal_synthesis.py:110:74 - error: No se puede tener acceso al atributo "error" para la clase "Ok[str]"
     Atributo "error" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/crystal_synthesis.py:113:29 - error: No se puede tener acceso al atributo "error" para la clase "Ok[str]"
+  ./cortex/swarm/crystal_synthesis.py:113:29 - error: No se puede tener acceso al atributo "error" para la clase "Ok[str]"
     Atributo "error" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/josu_daemon.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/josu_daemon.py:125:18 - error: "_toolbox_watcher_task" no se especificó en __slots__ (reportGeneralTypeIssues)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/langgraph_supervisor.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/langgraph_supervisor.py:9:10 - warning: No se ha podido resolver la importación "langgraph.graph". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/langgraph_supervisor.py:67:30 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/langgraph_supervisor.py:106:57 - error: "astream" no es un atributo conocido de "None" (reportOptionalMemberAccess)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/mailbox.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/mailbox.py:64:20 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[tuple[str, str, str]]"
+./cortex/swarm/josu_daemon.py
+  ./cortex/swarm/josu_daemon.py:125:18 - error: "_toolbox_watcher_task" no se especificó en __slots__ (reportGeneralTypeIssues)
+./cortex/swarm/langgraph_supervisor.py
+  ./cortex/swarm/langgraph_supervisor.py:9:10 - warning: No se ha podido resolver la importación "langgraph.graph". (reportMissingImports)
+  ./cortex/swarm/langgraph_supervisor.py:67:30 - error: No se puede llamar al objeto de tipo "None" (reportOptionalCall)
+  ./cortex/swarm/langgraph_supervisor.py:106:57 - error: "astream" no es un atributo conocido de "None" (reportOptionalMemberAccess)
+./cortex/swarm/mailbox.py
+  ./cortex/swarm/mailbox.py:64:20 - error: El tipo "Iterable[Row]" no se puede asignar al tipo de valor devuelto "list[tuple[str, str, str]]"
     "Iterable[Row]" no se puede asignar a "list[tuple[str, str, str]]" (reportReturnType)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/orchestrator_deep_think.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/orchestrator_deep_think.py:7:6 - warning: No se ha podido resolver la importación "cortex.agents.factory". (reportMissingImports)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/orchestrator_deep_think.py:150:47 - error: "similarity" es un símbolo de importación desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/swarm/telemetry_gate.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/swarm/telemetry_gate.py:36:10 - warning: No se ha podido resolver la importación "langsmith.run_trees". (reportMissingImports)
-/Users/borjafernandezangulo/30_CORTEX/cortex/thinking/orchestra_introspection.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/thinking/orchestra_introspection.py:87:36 - error: No se puede tener acceso al atributo "think" para la clase "OrchestraIntrospectionMixin*"
+./cortex/swarm/orchestrator_deep_think.py
+  ./cortex/swarm/orchestrator_deep_think.py:7:6 - warning: No se ha podido resolver la importación "cortex.agents.factory". (reportMissingImports)
+  ./cortex/swarm/orchestrator_deep_think.py:150:47 - error: "similarity" es un símbolo de importación desconocido (reportAttributeAccessIssue)
+./cortex/swarm/telemetry_gate.py
+  ./cortex/swarm/telemetry_gate.py:36:10 - warning: No se ha podido resolver la importación "langsmith.run_trees". (reportMissingImports)
+./cortex/thinking/orchestra_introspection.py
+  ./cortex/thinking/orchestra_introspection.py:87:36 - error: No se puede tener acceso al atributo "think" para la clase "OrchestraIntrospectionMixin*"
     Atributo "think" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/thinking/orchestra_introspection.py:104:40 - error: No se puede tener acceso al atributo "think" para la clase "OrchestraIntrospectionMixin*"
+  ./cortex/thinking/orchestra_introspection.py:104:40 - error: No se puede tener acceso al atributo "think" para la clase "OrchestraIntrospectionMixin*"
     Atributo "think" desconocido (reportAttributeAccessIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/thinking/orchestra_introspection.py:175:31 - error: No se puede tener acceso al atributo "_history" para la clase "OrchestraIntrospectionMixin*"
+  ./cortex/thinking/orchestra_introspection.py:175:31 - error: No se puede tener acceso al atributo "_history" para la clase "OrchestraIntrospectionMixin*"
     Atributo "_history" desconocido (reportAttributeAccessIssue)
-/Users/borjafernandezangulo/30_CORTEX/cortex/training/test_braintrust_rlhf.py
-  /Users/borjafernandezangulo/30_CORTEX/cortex/training/test_braintrust_rlhf.py:20:20 - error: Argumento de tipo "str" no puede ser asignado a parámetro "id" de tipo "int" en función "__init__"
+./cortex/training/test_braintrust_rlhf.py
+  ./cortex/training/test_braintrust_rlhf.py:20:20 - error: Argumento de tipo "str" no puede ser asignado a parámetro "id" de tipo "int" en función "__init__"
     "str" no se puede asignar a "int" (reportArgumentType)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/training/test_braintrust_rlhf.py:66:66 - error: Ningún parámetro llamado "triad" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/training/test_braintrust_rlhf.py:67:43 - error: Ningún parámetro llamado "triad" (reportCallIssue)
-  /Users/borjafernandezangulo/30_CORTEX/cortex/training/test_braintrust_rlhf.py:82:20 - error: "float" no se awaitable
+  ./cortex/training/test_braintrust_rlhf.py:66:66 - error: Ningún parámetro llamado "triad" (reportCallIssue)
+  ./cortex/training/test_braintrust_rlhf.py:67:43 - error: Ningún parámetro llamado "triad" (reportCallIssue)
+  ./cortex/training/test_braintrust_rlhf.py:82:20 - error: "float" no se awaitable
     "float" no es compatible con el protocolo "Awaitable[_T_co@Awaitable]"
       "__await__" no está presente. (reportGeneralTypeIssues)
 186 errors, 108 warnings, 0 informations

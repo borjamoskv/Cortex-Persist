@@ -12,6 +12,7 @@ Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import re
 import sys
@@ -115,8 +116,8 @@ def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> No
 
 
 def scan_raw_connects(
-    root: str | Path = "cortex",
-    whitelist: frozenset[str] | None = None,
+    root: Union[str, Path] = "cortex",
+    whitelist: Optional[frozenset[str]] = None,
 ) -> list[ConnectionViolation]:
     """Scan CORTEX source for unauthorized sqlite3.connect() calls.
 

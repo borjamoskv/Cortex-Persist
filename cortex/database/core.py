@@ -32,7 +32,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 import aiosqlite
 
@@ -122,10 +122,10 @@ def connect(
     *,
     uri: bool = False,
     check_same_thread: bool = False,
-    row_factory: Any | None = None,
+    row_factory: Optional[Any] = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
-    isolation_level: str | None = None,
+    isolation_level: Optional[str] = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 

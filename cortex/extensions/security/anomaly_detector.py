@@ -14,7 +14,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.extensions.security.anomaly_detector")
 
@@ -103,7 +103,7 @@ class AnomalyDetector:
     # Bulk mutation threshold (events in 10 seconds)
     BULK_THRESHOLD: int = 20
 
-    def __init__(self, rate_limit: int | None = None) -> None:
+    def __init__(self, rate_limit: Optional[int] = None) -> None:
         self._rate_limit = rate_limit or self.DEFAULT_RATE_LIMIT
         # source -> list of timestamps
         self._rate_tracker: dict[str, list[float]] = defaultdict(list)
@@ -116,7 +116,7 @@ class AnomalyDetector:
         self._daily_anomalies: int = 0
         self._daily_blocked: int = 0
 
-    def record_event(self, event: SecurityEvent) -> AnomalyReport | None:
+    def record_event(self, event: SecurityEvent) -> Optional[AnomalyReport]:
         """Record an event and check for anomalies.
 
         Returns AnomalyReport if anomalous, None if normal.
@@ -220,7 +220,7 @@ class AnomalyDetector:
 
     # ── Internal Methods ──
 
-    def _check_rate(self, source: str, now: float) -> AnomalyReport | None:
+    def _check_rate(self, source: str, now: float) -> Optional[AnomalyReport]:
         """Check if source exceeds rate limit."""
         self._prune_rate_tracker(source, now)
         self._rate_tracker[source].append(now)
@@ -240,7 +240,7 @@ class AnomalyDetector:
             )
         return None
 
-    def _check_bulk_mutation(self, source: str, now: float) -> AnomalyReport | None:
+    def _check_bulk_mutation(self, source: str, now: float) -> Optional[AnomalyReport]:
         """Detect bulk mutations (many events in very short window)."""
         recent = [
             t
@@ -260,7 +260,7 @@ class AnomalyDetector:
             )
         return None
 
-    def _check_baseline(self, event: SecurityEvent) -> AnomalyReport | None:
+    def _check_baseline(self, event: SecurityEvent) -> Optional[AnomalyReport]:
         """Z-score behavioral analysis against project baseline."""
         baseline = self.get_baseline(event.project)
         if baseline.total_events < 10:

@@ -5,6 +5,7 @@ and dispatches to AgentToolkit. No framework dependency.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import re
@@ -69,7 +70,7 @@ class ExecutorState:
 class ExecutorAgent:
     """Iterative tool-calling executor agent."""
 
-    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
+    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
         self._llm = llm
         self._base_system = base_system_prompt
 
@@ -165,7 +166,7 @@ class ExecutorAgent:
         return "\n\n".join(parts)
 
     @staticmethod
-    def _parse_tool_call(text: str) -> ToolCall | None:
+    def _parse_tool_call(text: str) -> Optional[ToolCall]:
         """Extract first <tool_call> block from LLM output."""
         match = re.search(r"<tool_call>(.*?)</tool_call>", text, re.DOTALL)
         if not match:

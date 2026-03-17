@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.aether.critic import CriticAgent
 from cortex.extensions.aether.executor import ExecutorAgent
@@ -41,7 +41,7 @@ class PerceptionDimension:
 class DecisionDimension:
     """D2: Architecture & Intent (Wraps PlannerAgent)."""
 
-    def __init__(self, llm, system_prompt: str | None = None) -> None:
+    def __init__(self, llm, system_prompt: Optional[str] = None) -> None:
         self.planner = PlannerAgent(llm, system_prompt)
         self.redteam = RedTeamAgent(llm)
 
@@ -75,7 +75,7 @@ class DecisionDimension:
 class CreationDimension:
     """D3: Construction / Materialization (Wraps ExecutorAgent)."""
 
-    def __init__(self, llm, system_prompt: str | None = None) -> None:
+    def __init__(self, llm, system_prompt: Optional[str] = None) -> None:
         self.executor = ExecutorAgent(llm, system_prompt)
 
     async def process(
@@ -84,7 +84,7 @@ class CreationDimension:
         toolkit: AgentToolkit,
         state: DimensionalState,
         plan: Any,
-    ) -> str | None:
+    ) -> Optional[str]:
         """Execute the plan and write code to disk."""
         if not plan:
             logger.info("D3 (Creation) blocked: waiting for stable D2 plan.")
@@ -106,7 +106,7 @@ class CreationDimension:
 class ValidationDimension:
     """D4: Siege & Entropy (Wraps CriticAgent & TesterAgent)."""
 
-    def __init__(self, llm, system_prompt: str | None = None) -> None:
+    def __init__(self, llm, system_prompt: Optional[str] = None) -> None:
         self.critic = CriticAgent(llm, system_prompt)
         self.tester = TesterAgent()
 

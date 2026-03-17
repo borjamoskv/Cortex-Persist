@@ -6,6 +6,7 @@ Never deletes — only deprecates. Enables time-travel queries.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime, timezone
 
@@ -22,7 +23,7 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None) -> bool:
+def is_valid_at(valid_from: str, valid_until: Optional[str], at: Optional[str] = None) -> bool:
     """Check if a fact is valid at a specific point in time.
 
     Args:
@@ -45,8 +46,8 @@ def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None)
 
 
 def build_temporal_filter_params(
-    as_of: str | None = None,
-    table_alias: str | None = None,
+    as_of: Optional[str] = None,
+    table_alias: Optional[str] = None,
 ) -> tuple[str, list]:
     """Build parameterized SQL WHERE clause for temporal filtering.
 
@@ -82,7 +83,7 @@ def build_temporal_filter_params(
 
 def time_travel_filter(
     tx_id: int,
-    table_alias: str | None = None,
+    table_alias: Optional[str] = None,
 ) -> tuple[str, list]:
     """Build SQL WHERE clause to reconstruct fact state at a specific transaction.
 

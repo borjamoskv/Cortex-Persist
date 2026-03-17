@@ -23,7 +23,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
 from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
@@ -170,7 +170,7 @@ async def _apply_strategies(
 async def compact(
     engine: CortexEngine,
     project: str,
-    strategies: list[CompactionStrategy] | None = None,
+    strategies: Optional[list[CompactionStrategy]] = None,
     dry_run: bool = False,
     similarity_threshold: float = 0.85,
     max_age_days: int = 90,
@@ -334,7 +334,7 @@ def _append_type_section(lines: list[str], fact_type: str, facts: list[Any]) -> 
 
 async def get_compaction_stats(
     engine: CortexEngine,
-    project: str | None = None,
+    project: Optional[str] = None,
 ) -> dict[str, Any]:
     """Get compaction history and statistics."""
     conn = await engine.get_conn()

@@ -2,11 +2,13 @@
 Sovereign Electronic Music Engine (GRAMMY-Ω).
 Master Orchestrator powered by Gemini-3.1-Pro-Preview.
 """
+from __future__ import annotations
+
 
 import json
 import logging
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -77,7 +79,7 @@ class GRAMMYOrchestrator:
     def __init__(self, tenant_id: str = "default", project: str = "grammy-electronic-omega"):
         self.tenant_id = tenant_id
         self.project = project
-        self.current_album: AlbumContext | None = None
+        self.current_album: Optional[AlbumContext] = None
         self.llm_manager = LLMManager()
 
         # Audio Backends (Frontier Models + Local)
@@ -349,7 +351,7 @@ class GRAMMYOrchestrator:
         concept: str,
         num_tracks: int = 3,
         bpm_range: tuple[int, int] = (120, 140),
-        keys: list[str] | None = None,
+        keys: Optional[list[str]] = None,
         mode: str = "local",
     ) -> AlbumContext:
         """Batch-compose an album with N tracks."""

@@ -13,7 +13,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ SKILLS_ROOT = Path(os.path.expanduser("~/.gemini/antigravity/skills"))
 class SovereignBridge:
     """Orchestrates interaction with the Antigravity skill ecosystem."""
 
-    def __init__(self, skills_root: Path | None = None) -> None:
+    def __init__(self, skills_root: Optional[Path] = None) -> None:
         self.skills_root = skills_root or SKILLS_ROOT
         self.registry: dict[str, Any] = {}
         self._ensure_path()

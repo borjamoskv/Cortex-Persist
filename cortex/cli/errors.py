@@ -13,7 +13,7 @@ import os
 import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 from rich.panel import Panel
 
@@ -72,7 +72,7 @@ class CortexErrorStruct:
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 
-def _lang() -> str | None:
+def _lang() -> Optional[str]:
     """Detect current language from environment or context."""
     import os
 
@@ -230,7 +230,7 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
         return os_struct
 
     # Runtime generic
-    if isinstance(e, RuntimeError | ValueError):
+    if isinstance(e, (RuntimeError, ValueError)):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",
@@ -250,7 +250,7 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
 
 def _classify_sqlite_error(
     e: Exception, error_str: str, ctx_prefix: str
-) -> CortexErrorStruct | None:
+) -> Optional[CortexErrorStruct]:
     import sqlite3
 
     if isinstance(e, sqlite3.OperationalError) and "locked" in error_str.lower():
@@ -285,7 +285,7 @@ def _classify_sqlite_error(
 
 def _classify_os_error(
     e: Exception, error_str: str, ctx_prefix: str, db_path: str
-) -> CortexErrorStruct | None:
+) -> Optional[CortexErrorStruct]:
     if isinstance(e, FileNotFoundError):
         if db_path and "cortex" in error_str.lower():
             return CortexErrorStruct(
@@ -315,13 +315,10 @@ def _classify_os_error(
             message=f"Error del sistema{ctx_prefix}",
             detail=error_str,
             hint="Verifica permisos y espacio en disco.",
-            http_status=500,
         )
 
-    return None
-
     # Runtime generic
-    if isinstance(e, RuntimeError | ValueError):
+    if isinstance(e, (RuntimeError, ValueError)):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",

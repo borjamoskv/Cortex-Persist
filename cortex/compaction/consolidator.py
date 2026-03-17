@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -80,7 +80,7 @@ class ConsolidationResult:
     deprecated_ids: list[int] = field(default_factory=list)
     clusters: list[ClusterResult] = field(default_factory=list)
     dry_run: bool = False
-    error: str | None = None
+    error: Optional[str] = None
 
 
 class BeliefConsolidator:

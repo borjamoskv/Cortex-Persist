@@ -3,7 +3,7 @@ import logging
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from cortex.engine_async import AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
@@ -22,14 +22,14 @@ class CuatridaOrchestrator:
         self.engine = engine
         self.mejoralo = MejoraloEngine(engine=engine)  # type: ignore[reportArgumentType]
         self.metrics = CuatridaMetrics()
-        self._last_tx_id: int | None = None
+        self._last_tx_id: Optional[int] = None
 
     async def log_decision(
         self,
         project: str,
         intent: str,
         dimension: Dimension,
-        metadata: dict[str, Any] | None = None,
+        metadata: Optional[dict[str, Any]] = None,
         conn: Any = None,
     ) -> DecisionNode:
         """
@@ -89,7 +89,7 @@ class CuatridaOrchestrator:
         )
         return node
 
-    async def validate_aesthetic(self, project: str, path: str | Path) -> bool:
+    async def validate_aesthetic(self, project: str, path: Union[str, Path]) -> bool:
         """
         Dimension C: The Consul of Honor checks for 130/100 standards.
         """

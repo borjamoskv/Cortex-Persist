@@ -9,6 +9,7 @@ The nervous system of MOSKV-1 — exposed through the command line.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 
@@ -41,7 +42,7 @@ def signal_cmds() -> None:
 @click.option("--source", "-s", default="cli", help="Emitter identity")
 @click.option("--project", "-p", default=None, help="Project scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def emit_cmd(event_type: str, payload_json: str, source: str, project: str | None, db: str) -> None:
+def emit_cmd(event_type: str, payload_json: str, source: str, project: Optional[str], db: str) -> None:
     """Emit a signal into the bus.
 
     Examples:
@@ -75,9 +76,9 @@ def emit_cmd(event_type: str, payload_json: str, source: str, project: str | Non
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def poll_cmd(
-    event_type: str | None,
-    source: str | None,
-    project: str | None,
+    event_type: Optional[str],
+    source: Optional[str],
+    project: Optional[str],
     consumer: str,
     limit: int,
     db: str,
@@ -134,9 +135,9 @@ def poll_cmd(
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def history_cmd(
-    event_type: str | None,
-    source: str | None,
-    project: str | None,
+    event_type: Optional[str],
+    source: Optional[str],
+    project: Optional[str],
     limit: int,
     db: str,
 ) -> None:

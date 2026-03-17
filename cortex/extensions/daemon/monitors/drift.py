@@ -5,6 +5,7 @@ against the persisted baseline. Fires DriftAlert if health drops below threshold
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import logging
 import sqlite3
@@ -28,8 +29,8 @@ class DriftMonitorDaemon:
 
     def __init__(
         self,
-        vectors_db_path: Path | str,
-        cortex_dir: Path | str | None = None,
+        vectors_db_path: Union[Path, str],
+        cortex_dir: Optional[Union[Path, str]] = None,
         interval_seconds: int = 6 * 3600,  # 6 hours
         health_threshold: float = 0.5,
         model_name: str = "all-MiniLM-L6-v2",
@@ -104,7 +105,7 @@ class DriftMonitorDaemon:
         logger.info("DriftMonitor: Healthy (%.2f) — %s", health, result["detail"])
         return []
 
-    def _read_embeddings(self) -> np.ndarray | None:
+    def _read_embeddings(self) -> Optional[np.ndarray]:
         """Read embedding vectors from the sqlite-vec store.
 
         Samples up to max_sample vectors to keep computation bounded.

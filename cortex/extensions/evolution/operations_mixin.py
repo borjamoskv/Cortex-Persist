@@ -1,21 +1,33 @@
 """Evolution Operations Mixin — genetic operators and adversarial processes."""
-# pyright: reportAttributeAccessIssue=false
+from __future__ import annotations
 
+# pyright: reportAttributeAccessIssue=false
 import asyncio
 import logging
 import random
 import secrets
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.evolution.action import SymbolicActionState
-from cortex.extensions.evolution.agents import Mutation, MutationType, SovereignAgent, SubAgent
+from cortex.extensions.evolution.agents import (
+    AgentDomain,
+    Mutation,
+    MutationType,
+    SovereignAgent,
+    SubAgent,
+)
 from cortex.extensions.evolution.cortex_metrics import DomainMetrics
 from cortex.extensions.evolution.models import EvolutionMetric, EvolutionMutation
 from cortex.extensions.evolution.strategies import DEFAULT_STRATEGIES
 
 if TYPE_CHECKING:
-    pass
+    from cortex.extensions.evolution.action import SymbolicActionEngine
+    from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
+    from cortex.extensions.evolution.models import EngineParameters
+    from cortex.extensions.gate.ouroboros import OuroborosGate
+    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex.ledger import SovereignLedger
 
 logger = logging.getLogger("cortex.extensions.evolution.engine.ops")
 
@@ -23,12 +35,23 @@ logger = logging.getLogger("cortex.extensions.evolution.engine.ops")
 class EvolutionOpsMixin:
     """Mixin for genetic operations, extinctions, and adversarial grounding."""
 
+    if TYPE_CHECKING:
+        params: EngineParameters
+        sovereigns: list[SovereignAgent]
+        cycle_count: int
+        _endocrine: DigitalEndocrine
+        _ledger: SovereignLedger
+        _evolution_ledger: EvolutionLedgerDB
+        _ouroboros: Optional[OuroborosGate]
+        _action_engine: SymbolicActionEngine
+        _broadcast_task: Optional[asyncio.Task]
+
     def _apply_epigenetic_modulation(self) -> None:
         """Modulate mutation rate and selection pressure via DigitalEndocrine."""
         self.params.mutation_rate = max(0.05, min(0.4, 0.1 + (self._endocrine.dopamine * 0.2)))
         self.params.selection_pressure = max(0.1, min(0.6, 0.3 + (self._endocrine.cortisol * 0.3)))
 
-    async def _evaluate_adversarial(self, metrics: dict[str, DomainMetrics]) -> None:
+    async def _evaluate_adversarial(self, metrics: dict[AgentDomain, DomainMetrics]) -> None:
         """Ground agent fitness in real telemetry (350/100)."""
         for sovereign in getattr(self, "sovereigns", []):
             domain_telemetry = metrics.get(sovereign.domain)
@@ -93,11 +116,12 @@ class EvolutionOpsMixin:
 
     def _crossover(self, parent_a: SubAgent, parent_b: SubAgent) -> SubAgent:
         """Perform genetic crossover combining two parent SubAgents into a new offspring."""
+        cycle = getattr(self, "cycle_count", 0)
         child = SubAgent(
-            id=f"sub_{parent_a.domain.name.lower()}_gen{self.cycle_count}_"
+            id=f"sub_{parent_a.domain.name.lower()}_gen{cycle}_"
             f"{random.randint(1000, 9999)}",
             domain=parent_a.domain,
-            name=f"Hybrid-{parent_a.name[:4]}-{parent_b.name[:4]}",
+            name=f"Offspring-{parent_a.id}x{parent_b.id}",
             generation=max(parent_a.generation, parent_b.generation) + 1,
         )
 
@@ -109,21 +133,21 @@ class EvolutionOpsMixin:
         t_a = parent_a.parameters.get("temperature", 0.5)
         t_b = parent_b.parameters.get("temperature", 0.5)
         child.parameters = {
-            "temperature": round((t_a + t_b) / 2.0, 2),
-            "top_p": round(
-                (parent_a.parameters.get("top_p", 0.9) + parent_b.parameters.get("top_p", 0.9)) / 2,
-                2,
+            "temperature": float(f"{(t_a + t_b) / 2.0:.2f}"),
+            "top_p": float(
+                f"{(parent_a.parameters.get('top_p', 0.9) + parent_b.parameters.get('top_p', 0.9)) / 2:.2f}"
             ),
             "tools": list(
-                set(parent_a.parameters.get("tools", []))
-                | set(parent_b.parameters.get("tools", []))
+                set(parent_a.parameters.get("tools", [])).union(
+                    set(parent_b.parameters.get("tools", []))
+                )
             )[:5],
         }
 
         if random.random() < self.params.mutation_rate:
             shift = random.uniform(-0.1, 0.1) * (1.0 + self._endocrine.dopamine)
             child.parameters["temperature"] = max(
-                0.01, min(1.0, round(child.parameters["temperature"] + shift, 2))
+                0.01, min(1.0, float(f"{child.parameters['temperature'] + shift:.2f}"))
             )
 
         return child
@@ -198,6 +222,7 @@ class EvolutionOpsMixin:
         if not self._ouroboros:
             return
 
+        assert self._ouroboros is not None
         target = await asyncio.to_thread(self._ouroboros.identify_dead_weight)
         if target:
             logger.warning("Ouroboros: Amputating project %s due to high entropy.", target)
@@ -214,6 +239,7 @@ class EvolutionOpsMixin:
             except ImportError:
                 pass
 
+            assert self._ouroboros is not None
             result = await asyncio.to_thread(self._ouroboros.measure_entropy)
             logger.info("Ouroboros: Pruning complete. New Entropy: %.4f", result["entropy_index"])
 
@@ -227,8 +253,15 @@ class EvolutionOpsMixin:
                     logger.info("Ouroboros: Culled weakest subagent %s", worst.id)
 
     async def _process_sovereign(
-        self, sovereign: SovereignAgent, metrics: dict[str, DomainMetrics]
-    ) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
+        self,
+        sovereign: SovereignAgent,
+        metrics: dict[AgentDomain, DomainMetrics]
+    ) -> tuple[
+        list[EvolutionMutation],
+        list[EvolutionMutation],
+        int,
+        Optional[SymbolicActionState]
+    ]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1
         domain_grace = 0.0
@@ -242,7 +275,7 @@ class EvolutionOpsMixin:
             if mutation:
                 prev_h = sovereign.state_hash
                 sovereign.apply_mutation(mutation)
-                domain_grace += mutation.delta_fitness
+                domain_grace += float(mutation.delta_fitness)
 
                 p_mutation = EvolutionMutation(
                     agent_id=sovereign.id,
@@ -271,7 +304,7 @@ class EvolutionOpsMixin:
                 if mutation:
                     prev_h_sub = sub.state_hash
                     sub.apply_mutation(mutation)
-                    sub_grace = mutation.delta_fitness / 10.0
+                    sub_grace = float(mutation.delta_fitness) / 10.0
                     domain_grace += sub_grace
 
                     p_mutation = EvolutionMutation(
@@ -305,7 +338,7 @@ class EvolutionOpsMixin:
             )
 
         # Crossover & Survival
-        subs = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
+        subs: list[SubAgent] = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
         elite = subs[:3]
         cull_count = max(1, int(len(subs) * getattr(self.params, "selection_pressure", 0.3)))
         survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]

@@ -27,7 +27,7 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
@@ -104,7 +104,7 @@ class JosuProactiveDaemon:
         self.workspace_manager = workspace_manager
         self._results: list[FixResult] = []
         self._active_tasks: int = 0
-        self._toolbox_watchdog: Any | None = None
+        self._toolbox_watchdog: Optional[Any] = None
 
     async def proactive_loop(self) -> None:
         """Lifecycle loop. Scans → Filters → Spawns → Sleeps."""

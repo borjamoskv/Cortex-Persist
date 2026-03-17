@@ -8,7 +8,7 @@ and executing AppleScript via the LLM.
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.router import IntentProfile
@@ -77,7 +77,7 @@ class MacMaestroAgent:
             "script": script_code,
         }
 
-    def _parse_json_response(self, text: str) -> dict[str, Any] | None:
+    def _parse_json_response(self, text: str) -> Optional[dict[str, Any]]:
         try:
             return json.loads(text)
         except json.JSONDecodeError:

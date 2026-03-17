@@ -4,6 +4,7 @@ Pydantic-validated schemas for requests, results, and batch jobs.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import enum
 import hashlib
@@ -59,7 +60,7 @@ class ScrapeResult:
     strategy_used: ExtractionStrategy
     elapsed_ms: float
     status: str = "success"
-    error: str | None = None
+    error: Optional[str] = None
     metadata: dict = field(default_factory=dict)
 
     @staticmethod
@@ -75,7 +76,7 @@ class ScrapeResult:
         content: str,
         strategy: ExtractionStrategy,
         elapsed_ms: float,
-        metadata: dict | None = None,
+        metadata: Optional[dict] = None,
     ) -> ScrapeResult:
         """Factory for successful extractions."""
         return cls(
@@ -129,7 +130,7 @@ class ScrapeJob:
     results: list[ScrapeResult] = field(default_factory=list)
     checkpoint_index: int = 0
     created_at: float = field(default_factory=time.time)
-    completed_at: float | None = None
+    completed_at: Optional[float] = None
     strategy: ExtractionStrategy = ExtractionStrategy.AUTO
 
     @property

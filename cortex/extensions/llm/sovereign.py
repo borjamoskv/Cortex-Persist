@@ -39,6 +39,7 @@ Usage::
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -132,7 +133,7 @@ class SovereignLLM:
     def __init__(
         self,
         *,
-        preferred_providers: list[str] | None = None,
+        preferred_providers: Optional[list[str]] = None,
         temperature: float = 0.3,
         max_tokens: int = 2048,
         timeout_seconds: float = 60.0,
@@ -246,7 +247,7 @@ class SovereignLLM:
         mode: str,
         chain: list[str],
         errors: list[str],
-    ) -> SovereignResult | None:
+    ) -> Optional[SovereignResult]:
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
@@ -288,7 +289,7 @@ class SovereignLLM:
         errors: list[str],
         is_local: bool,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> SovereignResult | None:
+    ) -> Optional[SovereignResult]:
         """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
@@ -334,10 +335,10 @@ class SovereignLLM:
         chain: list[str],
         errors: list[str],
         *,
-        presets: dict | None = None,
+        presets: Optional[dict] = None,
         is_local: bool = False,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> SovereignResult | None:
+    ) -> Optional[SovereignResult]:
         """Attempt a single provider. Returns None on failure."""
         if presets is None:
             presets = load_presets()
@@ -412,7 +413,7 @@ class Inquisitor(SovereignLLM):
     def __init__(
         self,
         *,
-        preferred_providers: list[str] | None = None,
+        preferred_providers: Optional[list[str]] = None,
         timeout_seconds: float = 60.0,
     ):
         super().__init__(

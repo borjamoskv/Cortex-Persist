@@ -5,6 +5,7 @@ Enables developers to track their usage and plan limits.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/v1/usage", tags=["usage"])
 logger = logging.getLogger(__name__)
 
 # FastAPI dependency — lazily initialized, overridable in tests
-_tracker: UsageTracker | None = None
+_tracker: Optional[UsageTracker] = None
 
 
 def get_tracker() -> UsageTracker:

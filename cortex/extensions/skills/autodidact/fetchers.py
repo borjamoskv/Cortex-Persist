@@ -1,5 +1,7 @@
+import asyncio
 import logging
 import os
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -8,6 +10,8 @@ import httpx
 from cortex.utils.pulmones import sovereign_circuit_breaker
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.FETCHERS")
+
+ERR_PREFIX = "[ERROR]"
 
 # ==============================================================================
 # 0. CONFIGURACIÓN DURA (Zero-Trust)
@@ -146,6 +150,13 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
     """Extrae, asimila y retorna el Cristal Cognitivo (Markdown)."""
     try:
         parsed = urlparse(target)
+        # Handle local files directly
+        if parsed.scheme == "file":
+            file_path = Path(parsed.path)
+            if not file_path.exists():
+                return f"{ERR_PREFIX} File not found: {file_path}"
+            return await asyncio.to_thread(file_path.read_text, encoding="utf-8")
+
         hostname = (parsed.hostname or "").lower()
         is_youtube = hostname in ("youtube.com", "youtu.be") or hostname.endswith((".youtube.com", ".youtu.be"))
         if intent_type == "quick_read" and not is_youtube:

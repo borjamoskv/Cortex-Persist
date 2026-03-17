@@ -5,6 +5,7 @@ The ScraperEngine orchestrates fallback cascades between them.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import re
@@ -63,7 +64,7 @@ class _HtmlToMarkdown(HTMLParser):
         self._title = ""
         self._in_title = False
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]):
         tag = tag.lower()
         if tag in _SKIP_TAGS:
             self._skip_depth += 1

@@ -6,7 +6,7 @@ import json
 import os
 import sqlite3
 import time
-from typing import Any
+from typing import Any, Optional
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
@@ -94,10 +94,10 @@ class NexusDB:
 
     def query(
         self,
-        origin: DomainOrigin | None = None,
-        intent: IntentType | None = None,
-        project: str | None = None,
-        since: float | None = None,
+        origin: Optional[DomainOrigin] = None,
+        intent: Optional[IntentType] = None,
+        project: Optional[str] = None,
+        since: Optional[float] = None,
         limit: int = 50,
     ) -> list[dict[str, Any]]:
         """Query the World Model. All filters are optional."""
@@ -134,7 +134,7 @@ class NexusDB:
         conn.close()
         return n
 
-    def purge_old(self, older_than: float | None = None) -> int:
+    def purge_old(self, older_than: Optional[float] = None) -> int:
         """Remove mutations older than a timestamp. Returns count deleted."""
         cutoff = older_than or (time.time() - 86400 * 7)  # Default: 7 days
         conn = self._get_conn()

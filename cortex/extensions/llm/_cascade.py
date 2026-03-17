@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from cortex.extensions.llm._models import CascadeTier, IntentProfile
 
@@ -38,7 +38,7 @@ class CascadeManager:
         # provider_name -> nxdomain_timestamp (circuit broken)
         self._nxdomain_cache: dict[str, float] = {}
 
-    def get_a_record(self, provider_name: str) -> tuple[float, float] | None:
+    def get_a_record(self, provider_name: str) -> Optional[tuple[float, float]]:
         """Return A-record (time, latency) if exists and fresh."""
         record = self._a_records.get(provider_name)
         if record and (time.time() - record[0]) < self.positive_ttl:

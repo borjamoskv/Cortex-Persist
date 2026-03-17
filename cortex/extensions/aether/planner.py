@@ -4,6 +4,7 @@ Reads repo structure and emits a structured implementation plan.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -41,7 +42,7 @@ _MAX_FILE_READ = 3000
 class PlannerAgent:
     """Analyzes a repo and emits a structured PlanOutput."""
 
-    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
+    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
         self._llm = llm
         self._base_system = base_system_prompt
 

@@ -14,7 +14,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
@@ -58,7 +58,7 @@ def _add_finding_to_issues(file_issues: dict[str, list[str]], dim_name: str, fin
         file_issues.setdefault(rel_path, []).append(f"({dim_name}) {finding}")
 
 
-def _extract_path_from_finding(finding: str) -> str | None:
+def _extract_path_from_finding(finding: str) -> Optional[str]:
     """Extract file relative path from typical MEJORAlo findings."""
     if " -> " in finding or " → " in finding:
         return finding.split(":", 1)[0].strip()
@@ -75,9 +75,9 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
-    project: str | None = None,
-) -> str | None:
+    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
+    project: Optional[str] = None,
+) -> Optional[str]:
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
 
     Returns the new code if successful, None otherwise.
@@ -110,13 +110,13 @@ def _calculate_total_complexity(source_code: str) -> int:
 def _apply_and_verify(
     top_file_rel: str,
     new_code: str,
-    path: str | Path,
+    path: Union[str, Path],
     level: int,
     iteration: int,
     console: Any,
     current_score: int,
-    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
-    project: str | None = None,
+    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
+    project: Optional[str] = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
     abs_path = Path(path).resolve() / top_file_rel
@@ -158,8 +158,8 @@ def _run_functional_inquisitor(
     original_code: str,
     top_file_rel: str,
     console: Any,
-    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
-    project: str | None,
+    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
+    project: Optional[str],
     abs_path: Path,
 ) -> bool:
     if abs_path.suffix != ".py":
@@ -200,12 +200,12 @@ def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
 
 def _run_delta_testing(
     top_file_rel: str,
-    path: str | Path,
+    path: Union[str, Path],
     original_code: str,
     abs_path: Path,
     console: Any,
-    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
-    project: str | None,
+    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
+    project: Optional[str],
     level: int = 1,
 ) -> bool:
     pytest_cmd = [sys.executable, "-m", "pytest"]
@@ -259,15 +259,15 @@ def _run_delta_testing(
 
 def _commit_healed_file(
     abs_path: Path,
-    path: str | Path,
+    path: Union[str, Path],
     top_file_rel: str,
     level: int,
     iteration: int,
     current_score: int,
     console: Any,
     complexity_delta: int = 0,
-    engine: MejoraloEngine | None = None,
-    project: str | None = None,
+    engine: Optional[MejoraloEngine] = None,
+    project: Optional[str] = None,
 ) -> bool:
     try:
         commit_msg = (
@@ -330,10 +330,10 @@ def _detect_escalation_level(
 
 def heal_project(
     project: str,
-    path: str | Path,
+    path: Union[str, Path],
     target_score: int,
     scan_result: ScanResult,
-    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
+    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -379,13 +379,13 @@ def heal_project(
 
 def _run_healing_iteration(
     project: str,
-    path: str | Path,
+    path: Union[str, Path],
     level: int,
     iteration: int,
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
-    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
+    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.extensions.mejoralo.scan import scan

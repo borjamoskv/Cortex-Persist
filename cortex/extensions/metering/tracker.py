@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 __all__ = ["UsageRecord", "UsageTracker"]
 
@@ -66,7 +66,7 @@ class UsageRecord:
         method: str = "GET",
         status_code: int = 200,
         tokens_used: int = 0,
-        timestamp: str | None = None,
+        timestamp: Optional[str] = None,
     ):
         self.tenant_id = tenant_id
         self.endpoint = endpoint
@@ -83,13 +83,13 @@ class UsageTracker:
     with batched monthly summary updates.
     """
 
-    def __init__(self, db_path: str | None = None):
+    def __init__(self, db_path: Optional[str] = None):
         if db_path is None:
             from cortex.config import DB_PATH
 
             db_path = DB_PATH
         self._db_path = db_path
-        self._conn: sqlite3.Connection | None = None
+        self._conn: Optional[sqlite3.Connection] = None
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
@@ -134,7 +134,7 @@ class UsageTracker:
     def get_usage(
         self,
         tenant_id: str,
-        month_bucket: str | None = None,
+        month_bucket: Optional[str] = None,
     ) -> dict[str, Any]:
         """Get usage stats for a tenant in a given month.
 
@@ -192,7 +192,7 @@ class UsageTracker:
     def get_endpoint_breakdown(
         self,
         tenant_id: str,
-        month_bucket: str | None = None,
+        month_bucket: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         """Get per-endpoint breakdown for a tenant in a month."""
         conn = self._get_conn()

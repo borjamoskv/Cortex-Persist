@@ -4,6 +4,7 @@ Uses sealed Grade enum for comparisons. TrendDetector for drift.
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import logging
 import time
@@ -31,18 +32,18 @@ class HealthLoop:
 
     def __init__(
         self,
-        db_path: str | Path = "",
+        db_path: Union[str, Path] = "",
         interval: float = DEFAULT_INTERVAL,
-        notify_fn: Callable[[str, str], None] | None = None,
+        notify_fn: Optional[Callable[[str, str], None]] = None,
     ) -> None:
         self._db_path = str(db_path)
         self._interval = interval
         self._notify_fn = notify_fn
-        self._last_grade: Grade | None = None
+        self._last_grade: Optional[Grade] = None
         self._last_alert: float = 0.0
         self._trend = TrendDetector()
 
-    def tick(self) -> dict | None:
+    def tick(self) -> Optional[dict]:
         """Run one health check cycle."""
         try:
             collector = HealthCollector(db_path=self._db_path)

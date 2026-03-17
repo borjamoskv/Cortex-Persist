@@ -10,6 +10,7 @@ DERIVATION: Axiom Ω₂ (Entropic Asymmetry) — reduce noise in the signal.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import hashlib
 import random
@@ -277,7 +278,7 @@ class CommitPoet:
         diff_summary: str,
         files: list[str],
         *,
-        commit_type: str | None = None,
+        commit_type: Optional[str] = None,
     ) -> str:
         """Generate an original commit message from staged change metadata.
 
@@ -539,8 +540,8 @@ def generate_commit_message(
     diff_summary: str,
     files: list[str],
     *,
-    commit_type: str | None = None,
-    seed: int | None = None,
+    commit_type: Optional[str] = None,
+    seed: Optional[int] = None,
 ) -> str:
     """Convenience function — generate a single commit message.
 

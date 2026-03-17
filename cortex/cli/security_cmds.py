@@ -6,6 +6,7 @@ integrity audits, and daily reports.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -90,7 +91,7 @@ def security_status() -> None:
 @security_cli.command("scan")
 @click.argument("content", required=False, default=None)
 @click.option("--file", "-f", "filepath", help="Scan content from file")
-def security_scan(content: str | None, filepath: str | None) -> None:
+def security_scan(content: Optional[str], filepath: Optional[str]) -> None:
     """Manual full scan of content."""
     from cortex.extensions.security.injection_guard import GUARD
     from cortex.extensions.security.threat_feed import ThreatFeedEngine

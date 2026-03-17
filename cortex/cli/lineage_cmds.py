@@ -1,3 +1,4 @@
+from typing import Optional
 """CORTEX CLI — Lineage & Epistemic Audit Commands.
 
 Provides verification of Ω₃-V: Verifiable Lineage.
@@ -50,7 +51,7 @@ def trace_lineage(fact_id: int, db: str, depth: int):
         verifier = LineageVerifier(engine)
         root = await verifier.get_lineage(fact_id, max_depth=depth)
 
-        def build_rich_tree(node: LineageNode, tree_obj: Tree | None = None) -> Tree:
+        def build_rich_tree(node: LineageNode, tree_obj: Optional[Tree] = None) -> Tree:
             status = "[green]✅[/green]" if node.is_valid else "[red]❌[/red]"
             text = f"{status} [bold]#{node.fact_id}[/bold] [{node.fact_type}] "
             label = f"{text}{node.content[:60]}..."

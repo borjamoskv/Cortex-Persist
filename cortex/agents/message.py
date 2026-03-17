@@ -10,7 +10,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 
@@ -40,7 +40,7 @@ class MessageKind(str, Enum):
     SHUTDOWN = "shutdown"
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentMessage:
     """Typed message for inter-agent communication."""
 
@@ -50,8 +50,8 @@ class AgentMessage:
     kind: MessageKind
     payload: dict[str, Any]
     created_at: float = field(default_factory=time.time)
-    correlation_id: str | None = None
-    causation_id: str | None = None
+    correlation_id: Optional[str] = None
+    causation_id: Optional[str] = None
     ttl: int = 3600
     priority: int = 0
     trace_context: dict[str, Any] = field(default_factory=dict)
@@ -100,11 +100,11 @@ def new_message(
     kind: MessageKind,
     payload: dict[str, Any],
     *,
-    correlation_id: str | None = None,
-    causation_id: str | None = None,
+    correlation_id: Optional[str] = None,
+    causation_id: Optional[str] = None,
     ttl: int = 3600,
     priority: int = 0,
-    trace_context: dict[str, Any] | None = None,
+    trace_context: Optional[dict[str, Any]] = None,
 ) -> AgentMessage:
     """Factory for creating new messages with auto-generated IDs."""
     return AgentMessage(

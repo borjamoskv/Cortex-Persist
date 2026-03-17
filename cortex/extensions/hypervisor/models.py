@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 
 __all__ = ["Memory", "HealthReport", "Receipt"]
 
@@ -50,5 +50,5 @@ class HealthReport:
 
     status: Literal["healthy", "degraded", "critical"]
     memory_count: int
-    last_activity: datetime | None
+    last_activity: Optional[datetime]
     integrity: Literal["verified", "unverified"]

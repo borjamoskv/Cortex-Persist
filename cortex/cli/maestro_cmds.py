@@ -6,6 +6,7 @@ desde la terminal.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 
@@ -88,7 +89,7 @@ def find_cmd(app_name: str, query: str, by: str):
 @click.argument("key")
 @click.argument("modifiers", nargs=-1)
 @click.option("--app", default=None, help="App objetivo")
-def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
+def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: Optional[str]):
     """
     Envía un atajo de teclado.
 
@@ -112,7 +113,7 @@ def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
 @maestro.command("type")
 @click.argument("text")
 @click.option("--app", default=None, help="App objetivo")
-def type_cmd(text: str, app: str | None):
+def type_cmd(text: str, app: Optional[str]):
     """Escribe texto en la app activa (clipboard para cadenas largas)."""
 
     async def _run():
@@ -287,7 +288,7 @@ def fullscreen_cmd(app_name: str):
 
 @maestro.command("capture")
 @click.option("--output", "-o", default=None, help="Ruta de salida para la captura")
-def capture_cmd(output: str | None):
+def capture_cmd(output: Optional[str]):
     """Captura de pantalla del display principal."""
 
     async def _run():

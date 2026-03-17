@@ -24,7 +24,7 @@ import asyncio
 import base64
 import logging
 import os
-from typing import Any
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -74,7 +74,7 @@ _FALLBACK_CONFIGS: dict[str, dict[str, Any]] = {
 }
 
 # ─── Provider Config Loader ─────────────────────────────────────────
-_CONFIGS_CACHE: dict[str, dict[str, Any]] | None = None
+_CONFIGS_CACHE: Optional[dict[str, dict[str, Any]]] = None
 
 
 def _convert_preset(name: str, preset: dict[str, Any]) -> dict[str, Any]:
@@ -161,7 +161,7 @@ class APIEmbedder:
     def __init__(
         self,
         provider: str = "gemini",
-        api_key: str | None = None,
+        api_key: Optional[str] = None,
         target_dimension: int = 768,
         task_type: str = "RETRIEVAL_DOCUMENT",
     ):
@@ -185,7 +185,7 @@ class APIEmbedder:
 
     # ─── Text Embedding (all providers) ───────────────────────────
 
-    async def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+    async def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
         """Generate embedding(s). Accepts single text or list."""
         if isinstance(text, list):
             return await self.embed_batch(text)
@@ -220,7 +220,7 @@ class APIEmbedder:
     async def embed_multimodal(
         self,
         parts: list[dict[str, Any]],
-        task_type: str | None = None,
+        task_type: Optional[str] = None,
     ) -> list[float]:
         """Generate embedding from multimodal content parts.
 
@@ -273,7 +273,7 @@ class APIEmbedder:
         self,
         image_bytes: bytes,
         mime_type: str = "image/png",
-        task_type: str | None = None,
+        task_type: Optional[str] = None,
     ) -> list[float]:
         """Embed a single image. Convenience wrapper around embed_multimodal.
 
@@ -298,8 +298,8 @@ class APIEmbedder:
     async def embed_document(
         self,
         text: str,
-        images: list[tuple[bytes, str]] | None = None,
-        task_type: str | None = None,
+        images: Optional[list[tuple[bytes, str]]] = None,
+        task_type: Optional[str] = None,
     ) -> list[float]:
         """Embed a document with interleaved text and images.
 

@@ -8,6 +8,7 @@ Validates that a generated system is structurally sound:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import ast
 import logging
@@ -32,7 +33,7 @@ class GenesisValidator:
         self,
         spec: SystemSpec,
         created_files: list[str],
-        base_dir: Path | None = None,
+        base_dir: Optional[Path] = None,
     ) -> tuple[bool, list[str]]:
         """Validate a generated system.
 
@@ -106,7 +107,7 @@ class GenesisValidator:
         self,
         spec: SystemSpec,
         files: list[str],
-        base_dir: Path | None,
+        base_dir: Optional[Path],
     ) -> list[str]:
         """Check that an __init__.py was created for module-type systems."""
         if spec.system_type not in ("module", "mixin"):

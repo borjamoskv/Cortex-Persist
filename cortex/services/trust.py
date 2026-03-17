@@ -12,7 +12,7 @@ import hashlib
 import logging
 import sqlite3
 import time
-from typing import Any
+from typing import Any, Optional
 
 from cortex.database.core import connect as db_connect
 
@@ -46,10 +46,10 @@ class FactVerification:
 
     fact_id: int
     valid: bool
-    tx_id: int | None
-    project: str | None
-    timestamp: float | None
-    violation: str | None = None
+    tx_id: Optional[int]
+    project: Optional[str]
+    timestamp: Optional[float]
+    violation: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ class TrustService:
 
     def __init__(self, db_path: str) -> None:
         self.db_path = db_path
-        self._cached_conn: sqlite3.Connection | None = None
+        self._cached_conn: Optional[sqlite3.Connection] = None
 
     # ------------------------------------------------------------------
     # Connection management
@@ -143,7 +143,7 @@ class TrustService:
         recomputed = hashlib.sha256(content.encode()).hexdigest()
         valid = recomputed == stored_hash
 
-        violation: str | None = None
+        violation: Optional[str] = None
         if not valid:
             violation = f"HASH_MISMATCH — stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
             logger.warning(
@@ -160,7 +160,7 @@ class TrustService:
 
     def verify_batch(
         self,
-        fact_ids: list[int] | None = None,
+        fact_ids: Optional[list[int]] = None,
         *,
         limit: int = 500,
     ) -> list[FactVerification]:
@@ -311,7 +311,7 @@ class TrustService:
     # Audit trail
     # ------------------------------------------------------------------
 
-    def get_audit_trail(self, project: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+    def get_audit_trail(self, project: Optional[str] = None, limit: int = 50) -> list[dict[str, Any]]:
         """Fetch audit trail rows via index-backed ordering."""
         conn = self._get_conn()
         if project:
@@ -443,7 +443,7 @@ class TrustVerifier:
         else:
             self._profiles[actor]["failure"] += self.asymmetric_penalty
 
-    async def calculate_trust_score(self, source_actor: str, confidence_marker: str | None = None) -> float:
+    async def calculate_trust_score(self, source_actor: str, confidence_marker: Optional[str] = None) -> float:
         """Admission score for an actor, potentially modified by epistemic markers."""
         profile = self.get_profile(source_actor)
         score = profile.score

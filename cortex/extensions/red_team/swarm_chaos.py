@@ -3,7 +3,7 @@ import logging
 import random
 import re
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Optional
 
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.extensions.immune.falsification import EvolutionaryFalsifier
@@ -17,7 +17,7 @@ class RedTeamSwarm:
     The Red Team Swarm: Orchestrates controlled failure injections to evolve CORTEX's immunity.
     """
 
-    def __init__(self, target_namespaces: list[str] | None = None):
+    def __init__(self, target_namespaces: Optional[list[str]] = None):
         self.falsifier = EvolutionaryFalsifier(failure_tolerance=1)
         self.discovery = DiscoveryProvider(target_namespaces)
         self.active_injectors = []

@@ -31,7 +31,7 @@ import functools
 import threading
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 __all__ = [
     "SlowOpTipEmitter",
@@ -245,7 +245,7 @@ def tip_on_slow(
     threshold: float = _DEFAULT_THRESHOLD,
     interval: float = _DEFAULT_INTERVAL,
     lang: str = _DEFAULT_LANG,
-    label: str | None = None,
+    label: Optional[str] = None,
     use_spinner: bool = False,
 ) -> Callable:
     """Decorator that emits tips if the decorated function exceeds threshold.

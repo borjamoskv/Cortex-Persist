@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 import click
 from rich.panel import Panel
@@ -87,7 +87,7 @@ class ROIMetrics:
         return f"{ratio:,.1f}/1"
 
 
-def _parse_chronos_meta(raw_meta: Any, enc: Any) -> dict[str, Any] | None:
+def _parse_chronos_meta(raw_meta: Any, enc: Any) -> Optional[dict[str, Any]]:
     """Decrypt and parse chronos metadata securely."""
     if not raw_meta:
         return None

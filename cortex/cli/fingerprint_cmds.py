@@ -1,6 +1,7 @@
 """CLI commands: cortex fingerprint — cognitive pattern extraction."""
 
 from __future__ import annotations
+from typing import Optional
 
 import json as json_mod
 
@@ -48,7 +49,7 @@ def _arch_badge(name: str, confidence: float) -> str:
 @click.option("--prompt", is_flag=True, help="Output agent prompt injection.")
 @click.option("--top", default=15, help="Max domain preferences shown.", show_default=True)
 def fingerprint_extract(
-    project: str | None,
+    project: Optional[str],
     as_json: bool,
     prompt: bool,
     top: int,

@@ -7,6 +7,7 @@ them into structured CORTEX Memos (Markdown).
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import os
@@ -93,7 +94,7 @@ async def _ingest_and_organize(path: Path) -> str:
 @bibliotecario_cmds.command("ordenar")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--output", "-o", help="Output file path for the organized memo")
-def ordenar(path: str, output: str | None):
+def ordenar(path: str, output: Optional[str]):
     """Ingest a file or directory and output a structured CORTEX Memo."""
     target_path = Path(path)
 

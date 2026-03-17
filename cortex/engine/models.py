@@ -1,6 +1,7 @@
 """CORTEX Engine — Fact Model and helpers."""
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 from dataclasses import dataclass
@@ -8,7 +9,7 @@ from dataclasses import dataclass
 __all__ = ["Fact", "row_to_fact"]
 
 
-@dataclass(slots=True)
+@dataclass
 class Fact:
     id: int
     tenant_id: str
@@ -21,10 +22,10 @@ class Fact:
     updated_at: str
     is_tombstoned: bool = False
     is_quarantined: bool = False
-    hash: str | None = None
-    valid_from: str | None = None
-    valid_until: str | None = None
-    source: str | None = None
+    hash: Optional[str] = None
+    valid_from: Optional[str] = None
+    valid_until: Optional[str] = None
+    source: Optional[str] = None
     confidence: str = "C3"
 
     def is_active(self) -> bool:

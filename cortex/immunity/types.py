@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 
 class ImmunityState(str, Enum):
@@ -22,7 +22,7 @@ class RiskLevel(str, Enum):
     CRITICAL = "critical"
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class PathogenProfile:
     entropy_score: float
     contradiction_density: float
@@ -46,15 +46,15 @@ class PathogenProfile:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class ImmuneArtifact:
     artifact_id: str
     artifact_type: str
     payload: Mapping[str, Any]
     state: ImmunityState = ImmunityState.OBSERVED
-    profile: PathogenProfile | None = None
+    profile: Optional[PathogenProfile] = None
     reasons: list[str] = field(default_factory=list)
-    sealed_at: str | None = None
+    sealed_at: Optional[str] = None
     parent_ids: list[str] = field(default_factory=list)
 
 
@@ -66,7 +66,7 @@ class SealViolation(Exception):
     pass
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class SealRecord:
     artifact_id: str
     content_hash: str

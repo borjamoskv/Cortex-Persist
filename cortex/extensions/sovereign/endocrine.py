@@ -7,6 +7,7 @@ contextual cues and system health metrics.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 
@@ -34,7 +35,7 @@ class DigitalEndocrine:
         return self._tenant_states[tenant_id]
 
     def ingest_context(
-        self, message: str, tenant_id: str = "default", metadata: dict | None = None
+        self, message: str, tenant_id: str = "default", metadata: Optional[dict] = None
     ) -> None:
         """Update hormone levels based on incoming context telemetry with damping."""
         state = self._get_state(tenant_id)
@@ -103,7 +104,17 @@ class DigitalEndocrine:
         """Return the current biological state of the agent."""
         state = self._get_state(tenant_id)
         return {
-            "hormones": {k: round(v, 3) for k, v in state.items()},
-            "temperature": round(self.get_temperature(tenant_id), 2),
+            "hormones": {k: float(f"{v:.3f}") for k, v in state.items()},
+            "temperature": float(f"{self.get_temperature(tenant_id):.2f}"),
             "style": self.get_response_style(tenant_id),
         }
+
+    @property
+    def dopamine(self) -> float:
+        """Helper to get default dopamine level."""
+        return self._get_state("default")["dopamine"]
+
+    @property
+    def cortisol(self) -> float:
+        """Helper to get default cortisol level."""
+        return self._get_state("default")["cortisol"]

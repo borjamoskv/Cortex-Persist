@@ -9,6 +9,7 @@ Each engram carries a causal chain enabling:
 """
 
 from __future__ import annotations
+from typing import Union
 
 import logging
 from dataclasses import dataclass
@@ -141,7 +142,7 @@ class CausalGraph:
 
     @property
     def node_count(self) -> int:
-        all_ids = set(self._forward.keys()) | set(self._backward.keys())
+        all_ids = Union[set(self._forward.keys()), set(self._backward.keys())]
         return len(all_ids)
 
     @property

@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import os
 from collections.abc import Sequence
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 
 __all__ = [
     "rerank_search_results",
@@ -51,7 +51,7 @@ class CrossEncoderReranker:
     Thread-safe via Python's GIL for the predict call.
     """
 
-    _instance: CrossEncoderReranker | None = None
+    _instance: Optional[CrossEncoderReranker] = None
     _model: Any = None
     _model_name: str = _DEFAULT_MODEL
     _available: bool = False
@@ -132,7 +132,7 @@ _reranker = CrossEncoderReranker()
 def rerank_search_results(
     query: str,
     results: Sequence[Any],
-    top_n: int | None = None,
+    top_n: Optional[int] = None,
     content_attr: str = "content",
 ) -> list[Any]:
     """Rerank SearchResult objects using the cross-encoder.
@@ -178,7 +178,7 @@ def rerank_search_results(
 def rerank_dicts(
     query: str,
     results: list[dict[str, Any]],
-    top_n: int | None = None,
+    top_n: Optional[int] = None,
     content_key: str = "content",
 ) -> list[dict[str, Any]]:
     """Rerank dicts (from episodic retrieval) using the cross-encoder.

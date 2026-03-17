@@ -8,7 +8,7 @@ If the tenant needs documentation, the architecture has failed.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
@@ -55,9 +55,9 @@ class AgentHandle:
         content: str,
         *,
         fact_type: str = "knowledge",
-        source: str | None = None,
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
+        source: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        meta: Optional[dict[str, Any]] = None,
     ) -> Receipt:
         """Store a memory. Returns an opaque receipt.
 

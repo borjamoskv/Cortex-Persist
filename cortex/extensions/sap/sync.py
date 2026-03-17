@@ -10,7 +10,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.sap.client import SAPClient
 from cortex.extensions.sap.mapper import SAPMapper
@@ -58,7 +58,7 @@ class SAPSync:
         entity_set: str,
         project: str,
         *,
-        filters: str | None = None,
+        filters: Optional[str] = None,
         top: int = 100,
     ) -> SAPSyncResult:
         """Pull entities from SAP into CORTEX.
@@ -188,7 +188,7 @@ class SAPSync:
         project: str,
         *,
         conflict_strategy: str = "sap_wins",
-        filters: str | None = None,
+        filters: Optional[str] = None,
         top: int = 100,
     ) -> SAPSyncResult:
         """Full bidirectional sync.

@@ -8,7 +8,7 @@ import logging
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.daemon.models import SecurityAlert
 from cortex.memory import AsyncEncoder, VectorStoreL2
@@ -26,8 +26,8 @@ class SecurityMonitor:
     def __init__(self, log_path: str = "~/.cortex/firewall.log", threshold: float = 0.85):
         self.log_path = Path(log_path).expanduser()
         self.threshold = threshold
-        self._encoder: AsyncEncoder | None = None
-        self._vector_store: VectorStoreL2 | None = None  # type: ignore[reportInvalidTypeForm]
+        self._encoder: Optional[AsyncEncoder] = None
+        self._vector_store: Optional[VectorStoreL2] = None  # type: ignore[reportInvalidTypeForm]
 
     async def _get_store(self) -> VectorStoreL2:  # type: ignore[reportInvalidTypeForm]
         """Lazily initialize the local LLM encoder and L2 vector store."""
@@ -94,7 +94,7 @@ class SecurityMonitor:
         self,
         store: VectorStoreL2,
         event: dict[str, Any],  # type: ignore[reportInvalidTypeForm]
-    ) -> SecurityAlert | None:
+    ) -> Optional[SecurityAlert]:
         """Process a single event and return an alert if a threat is detected."""
         payload = event.get("payload", "")
         if not payload:

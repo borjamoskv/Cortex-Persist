@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import random
 from decimal import Decimal
-from typing import Any, Protocol
+from typing import Any, Optional, Protocol
 
 from cortex.extensions.market_maker.models import TrendSignal
 
@@ -28,8 +28,8 @@ class TrendDetector:
 
     def __init__(
         self,
-        http_client: HttpClient | None = None,
-        random_seed: int | None = None,
+        http_client: Optional[HttpClient] = None,
+        random_seed: Optional[int] = None,
     ) -> None:
         self._http = http_client
         self._rng = random.Random(random_seed)

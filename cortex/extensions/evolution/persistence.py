@@ -9,7 +9,7 @@ import logging
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 from cortex.extensions.evolution.agents import (
     AgentDomain,
@@ -112,7 +112,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         return False
 
 
-def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[SovereignAgent], int] | None:
+def load_swarm(path: Path = DEFAULT_STATE_PATH) -> Optional[tuple[list[SovereignAgent], int]]:
     """
     Carga el estado. Si falla, intenta cargar el backup más reciente disponible
     (Auto-Rollback).
@@ -175,7 +175,7 @@ def _parse_mutations(raw: list[dict]) -> list[Mutation]:
     return mutations
 
 
-def _reconstruct_subagent(s_data: dict) -> SubAgent | None:
+def _reconstruct_subagent(s_data: dict) -> Optional[SubAgent]:
     """Reconstruct a SubAgent from a serialized dict."""
     try:
         s_domain = AgentDomain[s_data["domain"]]

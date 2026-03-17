@@ -3,9 +3,11 @@ CORTEX v5.0 — Conflict-Free Replicated Data Types (CRDTs).
 
 Provides data structures for eventual consistency in HA clusters.
 """
+from __future__ import annotations
+
 
 from dataclasses import dataclass, field
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Union
 
 __all__ = [
     "LWWRegister",
@@ -34,7 +36,7 @@ class VectorClock:
 
     def merge(self, other: "VectorClock") -> "VectorClock":
         """Merge with another vector clock (taking max of each counter)."""
-        all_nodes = set(self.counters.keys()) | set(other.counters.keys())
+        all_nodes = Union[set(self.counters.keys()), set(other.counters.keys())]
         new_counters = {}
         for node in all_nodes:
             new_counters[node] = max(self.counters.get(node, 0), other.counters.get(node, 0))
@@ -50,7 +52,7 @@ class VectorClock:
             - 'equal': self and other are identical
             - 'concurrent': neither happened before the other
         """
-        all_nodes = set(self.counters.keys()) | set(other.counters.keys())
+        all_nodes = Union[set(self.counters.keys()), set(other.counters.keys())]
         dominates = False
         dominated = False
 

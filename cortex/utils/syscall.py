@@ -15,6 +15,7 @@ import os
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Union, Optional
 
 logger = logging.getLogger("cortex.sys")
 
@@ -25,10 +26,10 @@ class SovereignSys:
     All agents must use this interface instead of raw os/subprocess.
     """
 
-    def __init__(self, root: str | Path):
+    def __init__(self, root: Union[str, Path]):
         self.root = Path(root).resolve()
 
-    def _is_safe(self, path: str | Path) -> bool:
+    def _is_safe(self, path: Union[str, Path]) -> bool:
         """Verify that a path is within the sovereign root (sandbox)."""
         try:
             target = (self.root / path).resolve()
@@ -64,7 +65,7 @@ class SovereignSys:
         except (FileNotFoundError, PermissionError, OSError) as e:
             return f"[ERROR] Execution failed: {e}"
 
-    def read(self, rel_path: str | Path) -> str:
+    def read(self, rel_path: Union[str, Path]) -> str:
         """Read a file within the sandbox."""
         if not self._is_safe(rel_path):
             return f"[ERROR] Access denied: {rel_path} is outside sandbox."
@@ -74,7 +75,7 @@ class SovereignSys:
         except (OSError, UnicodeDecodeError) as e:
             return f"[ERROR] Read failed: {e}"
 
-    def write(self, rel_path: str | Path, content: str) -> str:
+    def write(self, rel_path: Union[str, Path], content: str) -> str:
         """Write a file within the sandbox."""
         if not self._is_safe(rel_path):
             return f"[ERROR] Access denied: {rel_path} is outside sandbox."
@@ -87,7 +88,7 @@ class SovereignSys:
         except OSError as e:
             return f"[ERROR] Write failed: {e}"
 
-    def list_dir(self, rel_path: str | Path = ".") -> str:
+    def list_dir(self, rel_path: Union[str, Path] = ".") -> str:
         """List directory contents within the sandbox."""
         if not self._is_safe(rel_path):
             return f"[ERROR] Access denied: {rel_path} is outside sandbox."

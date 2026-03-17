@@ -38,6 +38,7 @@ the second is a consequence — the system develops reflexes.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 
@@ -71,7 +72,7 @@ def emit_fact_stored(
     fact_type: str,
     source: str,
     tenant_id: str = "default",
-    total_facts: int | None = None,
+    total_facts: Optional[int] = None,
 ) -> None:
     """Fire-and-forget emission of ``fact:stored`` into the Signal Bus.
 

@@ -1,3 +1,4 @@
+from typing import Optional, Union
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 
@@ -97,7 +98,7 @@ class McCabeVisitor(ast.NodeVisitor):
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         self._check_complexity(node)
 
-    def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+    def _check_complexity(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> None:
         # Calculate McCabe for this scope
         comp = 1
         for child in ast.walk(node):
@@ -172,7 +173,7 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
 
 def _analyze_single_file(
     sf: Path, root: Path
-) -> tuple[int, str | None, list[str], list[str], list[str]]:
+) -> tuple[int, Optional[str], list[str], list[str], list[str]]:
     """Analyse a single file and return its metrics."""
     try:
         content = sf.read_text(errors="replace")
@@ -488,7 +489,7 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
 # ─── Main Entry Point ────────────────────────────────────────────────
 
 
-def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = False) -> ScanResult:
+def scan(project: str, path: Union[str, Path], deep: bool = False, brutal: bool = False) -> ScanResult:
     """Execute X-Ray 13D scan on a project directory.
 
     If brutal is True, deep is implied and penalties are more severe.

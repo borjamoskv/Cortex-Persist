@@ -84,7 +84,7 @@ cor
     "time": "1773464172886",
     "generalDiagnostics": [
         {
-            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/daemon.py",
+            "file": "./cortex/aether/daemon.py",
             "severity": "error",
             "message": "Argumento de tipo \"str | None\" no puede ser asignado a parámetro \"token\" de tipo \"str\" en función \"__init__\"\n  El tipo \"str | None\" no se puede asignar al tipo \"str\"\n    \"None\" no se puede asignar a \"str\"",
             "range": {
@@ -100,7 +100,7 @@ cor
             "rule": "reportArgumentType"
         },
         {
-            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py",
+            "file": "./cortex/aether/tools.py",
             "severity": "warning",
             "message": "No se ha podido resolver la importación \"nest_asyncio\".",
             "range": {
@@ -116,7 +116,7 @@ cor
             "rule": "reportMissingImports"
         },
         {
-            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py",
+            "file": "./cortex/aether/tools.py",
             "severity": "error",
             "message": "Se esperaba la clase pero se recibió \"(obj: object, /) -> TypeIs[(...) -> object]\"",
             "range": {
@@ -132,7 +132,7 @@ cor
             "rule": "reportGeneralTypeIssues"
         },
         {
-            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/agent/degradation.py",
+            "file": "./cortex/agent/degradation.py",
             "severity": "error
 
 ────────────────────────────────────────

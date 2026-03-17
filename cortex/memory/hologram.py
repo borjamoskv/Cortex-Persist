@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 
@@ -43,7 +43,7 @@ class HolographicMemory:
         self._lock = asyncio.Lock()
 
         # Matrix E containing all embeddings (N, dimension).
-        self._tensor: np.ndarray | None = None
+        self._tensor: Optional[np.ndarray] = None
 
         # Parallel arrays for fast metadata lookup and scoring
         self._metadata: list[dict[str, Any]] = []
@@ -146,8 +146,8 @@ class HolographicMemory:
         query: str,
         limit: int = 5,
         tenant_id: str = "default",
-        project_id: str | None = None,
-        layer: str | None = None,
+        project_id: Optional[str] = None,
+        layer: Optional[str] = None,
     ) -> list[CortexFactModel]:
         """[VECTOR-2] Zero-Friction O(1) recall from RAM hologram."""
         if not self._ready:

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Optional
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -48,11 +51,11 @@ class AskRequest(BaseModel):
     """RAG query: search CORTEX memory and synthesize an answer."""
 
     query: str = Field(..., min_length=1, max_length=4096, description="Natural language question")
-    project: str | None = Field(None, description="Filter by project (optional)")
+    project: Optional[str] = Field(None, description="Filter by project (optional)")
     k: int = Field(10, ge=1, le=50, description="Number of facts to retrieve")
     temperature: float = Field(0.3, ge=0.0, le=2.0, description="LLM sampling temperature")
     max_tokens: int = Field(2048, ge=64, le=8192, description="Max response tokens")
-    system_prompt: str | None = Field(None, description="Override system prompt (optional)")
+    system_prompt: Optional[str] = Field(None, description="Override system prompt (optional)")
 
 
 class AskSource(BaseModel):
@@ -79,7 +82,7 @@ class LLMStatusResponse(BaseModel):
 
     available: bool
     provider: str
-    model: str | None = None
+    model: Optional[str] = None
     supported_providers: list[str]
 
 

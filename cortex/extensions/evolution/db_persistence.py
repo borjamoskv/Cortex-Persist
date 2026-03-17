@@ -33,7 +33,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -95,7 +95,7 @@ async def save_to_db(
 
 async def load_from_db(
     db_path: str | Path = _DEFAULT_DB,
-) -> tuple[list[SovereignAgent], int] | None:
+) -> Optional[tuple[list[SovereignAgent], int]]:
     """Load the most recent swarm state from CORTEX DB.
 
     Implements episodic recall via hippocampal pattern completion

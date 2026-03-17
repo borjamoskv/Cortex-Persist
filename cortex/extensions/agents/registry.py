@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.extensions.agents.registry")
 
@@ -160,7 +160,7 @@ class AgentRegistry:
     Loads definitions lazily upon first access.
     """
 
-    _instance: AgentRegistry | None = None
+    _instance: Optional[AgentRegistry] = None
     _agents: dict[str, AgentDefinition] = {}
     _loaded: bool = False
 
@@ -169,7 +169,7 @@ class AgentRegistry:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def load_all(self, definitions_dir: Path | None = None) -> None:
+    def load_all(self, definitions_dir: Optional[Path] = None) -> None:
         """Scan and load all .yaml definitions in the directory.
 
         Args:
@@ -202,7 +202,7 @@ class AgentRegistry:
             self.load_all()
         return dict(self._agents)
 
-    def get(self, agent_id: str) -> AgentDefinition | None:
+    def get(self, agent_id: str) -> Optional[AgentDefinition]:
         """Retrieve a specific agent definition by its ID (filename stem)."""
         if not self._loaded:
             self.load_all()
@@ -222,6 +222,6 @@ def list_agents() -> list[str]:
     return list(AgentRegistry().agents.keys())
 
 
-def get_agent(agent_id: str) -> AgentDefinition | None:
+def get_agent(agent_id: str) -> Optional[AgentDefinition]:
     """Retrieve an agent definition by ID."""
     return AgentRegistry().get(agent_id)

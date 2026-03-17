@@ -7,6 +7,7 @@ the user's goal before they explicitly articulate it.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import hashlib
 import json
@@ -212,8 +213,8 @@ class NeuralIntentEngine:
     def __init__(self) -> None:
         self.app_sensor = get_window_sensor()
         self.clip_sensor = get_clipboard_sensor()
-        self._last_context: NeuralContext | None = None
-        self._last_hypothesis: NeuralHypothesis | None = None
+        self._last_context: Optional[NeuralContext] = None
+        self._last_hypothesis: Optional[NeuralHypothesis] = None
         self._last_hypothesis_timestamp: float = 0.0
 
         self._rules_path = get_cortex_dir() / "neural_rules.json"
@@ -300,7 +301,7 @@ class NeuralIntentEngine:
 
     def infer_intent(
         self, context: NeuralContext, raw_clipboard: str = ""
-    ) -> NeuralHypothesis | None:
+    ) -> Optional[NeuralHypothesis]:
         """Run heuristics over context to detect intent.
 
         Returns None if no intent matched, or if context hasn't changed
@@ -327,7 +328,7 @@ class NeuralIntentEngine:
         rule: tuple[re.Pattern, re.Pattern, str, str, str],
         context: NeuralContext,
         raw_clipboard: str,
-    ) -> NeuralHypothesis | None:
+    ) -> Optional[NeuralHypothesis]:
         """Check if a single rule matches the current context."""
         app_re, clip_re, intent, conf, trigger = rule
 

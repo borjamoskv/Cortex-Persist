@@ -4,6 +4,7 @@ Precision first. All monetary/scoring logic explicitly uses Decimal.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from dataclasses import dataclass
 from decimal import Decimal
@@ -67,7 +68,7 @@ class MVPArtifact:
     """Phase 3: Rendered zero-click MVP."""
 
     html_content: str
-    stripe_price_id: str | None = None
+    stripe_price_id: Optional[str] = None
 
 
 @dataclass
@@ -77,6 +78,6 @@ class Experiment:
     id: str
     topic: str
     status: ExperimentStatus
-    opportunity: Opportunity | None = None
-    mvp: MVPArtifact | None = None
-    validation: ValidationResult | None = None
+    opportunity: Optional[Opportunity] = None
+    mvp: Optional[MVPArtifact] = None
+    validation: Optional[ValidationResult] = None

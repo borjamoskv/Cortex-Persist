@@ -5,6 +5,7 @@ Thin CLI wrapper; all logic lives in cortex.genesis.engine.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import sys
 from pathlib import Path
@@ -43,7 +44,7 @@ def genesis_group() -> None:
 def create(
     name: str,
     system_type: str,
-    target_dir: str | None,
+    target_dir: Optional[str],
     auto_cli: bool,
     auto_tests: bool,
     description: str,

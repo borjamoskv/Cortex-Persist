@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -16,7 +17,7 @@ async def run_applescript(
     script: str,
     require_success: bool = True,
     timeout: float = 30.0,
-) -> str | None:
+) -> Optional[str]:
     """
     Ejecuta un AppleScript de forma asíncrona vía osascript.
 
@@ -93,7 +94,7 @@ async def is_app_running(app_name: str) -> bool:
     return result == "true"
 
 
-async def get_frontmost_app() -> str | None:
+async def get_frontmost_app() -> Optional[str]:
     """Devuelve el nombre de la aplicación en primer plano."""
     script = """
     tell application "System Events"
@@ -111,7 +112,7 @@ async def set_clipboard(text: str) -> None:
     await run_applescript(script)
 
 
-async def get_clipboard() -> str | None:
+async def get_clipboard() -> Optional[str]:
     """Lee el contenido actual del clipboard del sistema."""
     script = "return (the clipboard as text)"
     return await run_applescript(script, require_success=False)

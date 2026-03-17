@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import SqliteMessageBus
@@ -36,7 +36,7 @@ class HandoffAgent(BaseAgent):
         manifest: AgentManifest,
         bus: SqliteMessageBus,
         tool_registry: ToolRegistry,
-        handoff_dir: Path | None = None,
+        handoff_dir: Optional[Path] = None,
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
         self._handoff_dir = handoff_dir or Path("~/.cortex/handoffs").expanduser()

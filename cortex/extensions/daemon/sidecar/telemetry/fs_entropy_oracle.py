@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine
@@ -12,7 +12,7 @@ class FSEntropyOracle:
     def __init__(
         self,
         engine: AsyncCortexEngine,
-        target_dir: str | Path,
+        target_dir: Union[str, Path],
         poll_interval: float = 3600.0,
         entropy_threshold_mb: float = 50.0,
     ) -> None:

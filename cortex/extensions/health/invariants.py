@@ -5,6 +5,7 @@ breaks automatically.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from cortex.extensions.health.collector import (
     CollectorRegistry,
@@ -15,7 +16,7 @@ from cortex.extensions.health.models import Grade
 
 
 def verify_health_system(
-    registry: CollectorRegistry | None = None,
+    registry: Optional[CollectorRegistry] = None,
 ) -> list[str]:
     """Verify all health system invariants.
 

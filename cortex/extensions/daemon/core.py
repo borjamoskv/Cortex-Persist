@@ -1,6 +1,7 @@
 """MoskvDaemon — Main daemon orchestrator."""
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import json
@@ -118,7 +119,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def __init__(
         self,
-        sites: list[str] | None = None,
+        sites: Optional[list[str]] = None,
         config_dir: Path = AGENT_DIR / "memory",
         stale_hours: float = DEFAULT_STALE_HOURS,
         memory_stale_hours: float = DEFAULT_MEMORY_STALE_HOURS,
@@ -147,7 +148,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def _init_core_monitors(
         self,
         file_config: dict,
-        sites: list[str] | None,
+        sites: Optional[list[str]],
         stale_hours: float,
         memory_stale_hours: float,
     ) -> None:
@@ -262,8 +263,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def _init_background_agents(self, file_config: dict) -> None:
         """Initialize autonomous background agents like Aether."""
         # pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false  # type: ignore[type-error]
-        self._aether_daemon: AetherDaemon | None = None
-        self.aether_monitor: AetherMonitor | None = None
+        self._aether_daemon: Optional[AetherDaemon] = None
+        self.aether_monitor: Optional[AetherMonitor] = None
         if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
             try:
                 aether_queue = TaskQueue()
@@ -544,7 +545,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             logger.error("Failed to save status: %s", e)
 
     @staticmethod
-    def load_status() -> dict | None:
+    def load_status() -> Optional[dict]:
         """Load last daemon status from disk."""
         if not STATUS_FILE.exists():
             return None

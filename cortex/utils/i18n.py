@@ -16,14 +16,14 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Final, NamedTuple, TypeAlias
+from typing import Any, Callable, Dict, Final, List, NamedTuple, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
 # Type Aliases
-TranslationKey: TypeAlias = str
-TranslationMap: TypeAlias = dict[str, str]
-LocaleData: TypeAlias = dict[TranslationKey, TranslationMap]
+TranslationKey = str
+TranslationMap = dict[str, str]
+LocaleData = dict[TranslationKey, TranslationMap]
 
 
 class Lang(str, Enum):
@@ -45,7 +45,7 @@ _TRANSLATIONS: LocaleData = {}
 _LOAD_LOCK: Final[threading.Lock] = threading.Lock()
 
 # Thread-local context for language overrides
-_LOCALT_CONTEXT: contextvars.ContextVar[Lang | None] = contextvars.ContextVar(
+_LOCALT_CONTEXT: contextvars.ContextVar[Optional[Lang]] = contextvars.ContextVar(
     "cortex_locale", default=None
 )
 
@@ -100,7 +100,7 @@ def _load_translations() -> LocaleData:
     return _TRANSLATIONS
 
 
-def register_translation(key: TranslationKey, lang: Lang | str, value: str) -> None:
+def register_translation(key: TranslationKey, lang: Union[Lang, str], value: str) -> None:
     """Sovereign Injection: Register or override a translation at runtime.
 
     This allows plugins/daemons to expand the language model without file I/O.
@@ -120,7 +120,7 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-def _normalize_lang(lang: str | Lang | None) -> Lang:
+def _normalize_lang(lang: Optional[Union[str, Lang]]) -> Lang:
     """Fast normalization of language codes with primary-tag fallback."""
     if isinstance(lang, Lang):
         return lang
@@ -138,7 +138,7 @@ def _normalize_lang(lang: str | Lang | None) -> Lang:
 
 
 @lru_cache(maxsize=4096)
-def _cached_trans(key: TranslationKey, lang_code: Lang) -> str | None:
+def _cached_trans(key: TranslationKey, lang_code: Lang) -> Optional[str]:
     """Atomic cached lookup with sovereign fallback hierarchy.
 
     Returns None if key is missing to distinguish from 'key as value'.
@@ -246,7 +246,7 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
         threading.Thread(target=asyncio.run, args=(_repair(),), daemon=True).start()
 
 
-def get_trans(key: TranslationKey, lang: Lang | str | None = None, **kwargs: Any) -> str:
+def get_trans(key: TranslationKey, lang: Optional[Union[Lang, str]] = None, **kwargs: Any) -> str:
     """Retrieve localized string formatted with variables.
 
     O(1) lookup via LRU. Supports dynamic string interpolation.
@@ -281,7 +281,7 @@ def has_translation(key: str) -> bool:
 
 
 @contextmanager
-def override_locale(lang: str | Lang) -> Generator[None, None, None]:
+def override_locale(lang: Union[str, Lang]) -> Generator[None, None, None]:
     """Context manager to scope the translation language for the current thread/task."""
     normalized = _normalize_lang(lang)
     token = _LOCALT_CONTEXT.set(normalized)
@@ -296,7 +296,7 @@ class CacheStats(NamedTuple):
 
     hits: int
     misses: int
-    maxsize: int | None
+    maxsize: Optional[int]
     currsize: int
 
 

@@ -9,7 +9,7 @@ import logging
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import Any, Final, TypedDict
+from typing import Any, Final, Optional, TypedDict, typing
 
 from cortex.utils.errors import CortexError
 
@@ -204,7 +204,7 @@ class KeterReservoir:
         """)
         self._conn.commit()
 
-    def get(self, mission_id: str) -> KeterPayload | None:
+    def get(self, mission_id: str) -> Optional[KeterPayload]:
         import json
         import sqlite3
 
@@ -255,7 +255,7 @@ class KeterEngine:
         db_path = os.path.join(config_dir, "keter_reservoir.db")
         self._reservoir = KeterReservoir(db_path)
 
-    def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
+    def _dispatch_skill(self, manifest: Any) -> Optional[SovereignPhase]:
         slug = getattr(manifest, "slug", "")
         if "evolv" in slug or "intencion" in slug:
             return IntentAlchemist()
@@ -304,7 +304,7 @@ class KeterEngine:
 
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
-    ) -> tuple[str, KeterPayload | None]:
+    ) -> tuple[str, Optional[KeterPayload]]:
         import hashlib
 
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()

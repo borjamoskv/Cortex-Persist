@@ -5,7 +5,7 @@ CORTEX v5.1 — SovereignGate Models.
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from .enums import ActionLevel, ActionStatus, GatePolicy
 
@@ -19,16 +19,16 @@ class PendingAction:
     action_id: str
     level: ActionLevel
     description: str
-    command: list[str] | None = None
-    project: str | None = None
+    command: Optional[list[str]] = None
+    project: Optional[str] = None
     context: dict[str, Any] = field(default_factory=dict)
     status: ActionStatus = ActionStatus.PENDING
     created_at: float = field(default_factory=time.time)
-    approved_at: float | None = None
-    executed_at: float | None = None
+    approved_at: Optional[float] = None
+    executed_at: Optional[float] = None
     hmac_challenge: str = ""
-    operator_id: str | None = None
-    result: dict[str, Any] | None = None
+    operator_id: Optional[str] = None
+    result: Optional[dict[str, Any]] = None
 
     def is_expired(self, timeout_seconds: float) -> bool:
         """Check if the action has exceeded its timeout."""

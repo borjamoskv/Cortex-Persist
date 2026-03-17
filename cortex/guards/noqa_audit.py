@@ -14,6 +14,7 @@ Usage (monthly): cortex guards noqa-report --since="30 days ago"
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import re
 import subprocess
@@ -100,8 +101,8 @@ class NoqaAudit:
 
     def scan(
         self,
-        include_paths: list[str] | None = None,
-        exclude_paths: list[str] | None = None,
+        include_paths: Optional[list[str]] = None,
+        exclude_paths: Optional[list[str]] = None,
     ) -> list[NoqaEntry]:
         """
         Static scan: find all noqa:BLE001 in the codebase.

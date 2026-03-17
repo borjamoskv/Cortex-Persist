@@ -1,6 +1,7 @@
 """Daemon data classes and constants."""
 
 from __future__ import annotations
+from typing import Optional
 
 import dataclasses
 from dataclasses import dataclass, field
@@ -92,7 +93,7 @@ class GhostAlert:
     last_activity: str
     hours_stale: float
     mood: str = ""
-    blocked_by: str | None = None
+    blocked_by: Optional[str] = None
 
 
 @dataclass
@@ -219,7 +220,7 @@ class SignalAlert:
 
     event_type: str
     message: str
-    project: str | None = None
+    project: Optional[str] = None
     payload: dict = field(default_factory=dict)
 
 

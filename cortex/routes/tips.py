@@ -10,6 +10,7 @@ Endpoints:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -46,7 +47,7 @@ class TipResponse(BaseModel):
     category: str
     lang: str
     source: str
-    project: str | None = None
+    project: Optional[str] = None
     relevance: float = 1.0
     formatted: str = ""
 
@@ -71,9 +72,9 @@ class TipsListResponse(BaseModel):
     tips: list[TipResponse]
     count: int = Field(description="Number of tips returned")
     lang: str
-    category: str | None = None
-    project: str | None = None
-    total_available: int | None = None
+    category: Optional[str] = None
+    project: Optional[str] = None
+    total_available: Optional[int] = None
 
 
 class CategoriesResponse(BaseModel):
@@ -86,7 +87,7 @@ class CategoriesResponse(BaseModel):
 
 # ─── Singleton Engine ────────────────────────────────────────────────
 
-_tips_engine: TipsEngine | None = None
+_tips_engine: Optional[TipsEngine] = None
 
 
 def _get_tips_engine(engine: CortexEngine) -> TipsEngine:

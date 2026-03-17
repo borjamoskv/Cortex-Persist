@@ -1,3 +1,4 @@
+from typing import Optional, Union
 """CORTEX v5.0 — Dependency Extractor.
 
 Calculates topological dependencies for topological sorting.
@@ -11,7 +12,7 @@ logger = logging.getLogger("cortex.extensions.mejoralo.deps")
 
 
 def sort_by_topological_order(
-    file_issues: dict[str, list[str]], root_path: str | Path
+    file_issues: dict[str, list[str]], root_path: Union[str, Path]
 ) -> list[tuple[str, list[str]]]:
     """Sort target files by dependency (bottom-up)."""
     import networkx as nx
@@ -52,7 +53,7 @@ def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
     return deps
 
 
-def _get_module_name_from_node(node: ast.AST) -> str | None:
+def _get_module_name_from_node(node: ast.AST) -> Optional[str]:
     """Helper to extract module true name from AST import node."""
     if isinstance(node, ast.Import):
         for alias in node.names:

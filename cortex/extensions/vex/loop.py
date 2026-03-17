@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable, Coroutine
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 from cortex.extensions.vex.models import (
     ExecutionReceipt,
@@ -62,7 +62,7 @@ class VEXRunner:
     def __init__(
         self,
         engine: CortexEngine,
-        tool_executor: ToolExecutor | None = None,
+        tool_executor: Optional[ToolExecutor] = None,
         max_step_retries: int = 0,
         tether_checks: bool = True,
     ) -> None:
@@ -234,9 +234,9 @@ class VEXRunner:
         step: PlannedStep,
         success: bool,
         output: str,
-        error: str | None,
+        error: Optional[str],
         duration_ms: int,
-    ) -> str | None:
+    ) -> Optional[str]:
         """Record a step execution in the hash-chained ledger."""
         try:
             conn = await self._engine.get_conn()
@@ -276,7 +276,7 @@ class VEXRunner:
             logger.error("Failed to record step transaction: %s", exc)
             return None
 
-    async def _create_checkpoint(self, task_id: str) -> str | None:
+    async def _create_checkpoint(self, task_id: str) -> Optional[str]:
         """Create a Merkle checkpoint for this task's transactions."""
         try:
             if self._engine._ledger:
@@ -295,8 +295,8 @@ class VEXRunner:
         step: PlannedStep,
         success: bool,
         output: str,
-        tx_hash: str | None,
-    ) -> int | None:
+        tx_hash: Optional[str],
+    ) -> Optional[int]:
         """Persist step result as a CORTEX fact."""
         try:
             status_str = "✅" if success else "❌"
@@ -343,7 +343,7 @@ class VEXRunner:
 
     # ─── Tether Integration ───────────────────────────────────────
 
-    async def _check_tether(self, step: PlannedStep) -> str | None:
+    async def _check_tether(self, step: PlannedStep) -> Optional[str]:
         """Check if a step violates tether boundaries.
 
         Returns violation reason or None if allowed.

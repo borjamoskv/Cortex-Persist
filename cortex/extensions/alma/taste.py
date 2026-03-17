@@ -13,7 +13,7 @@ import math
 import re
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 __all__ = [
     "TasteDimension",
@@ -99,7 +99,7 @@ _REUSE_MARKERS: tuple[re.Pattern[str], ...] = (
 )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TasteDimension:
     """Score for a single quality dimension."""
 
@@ -109,7 +109,7 @@ class TasteDimension:
     signal: str  # Human-readable justification
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TasteVerdict:
     """Complete taste evaluation result."""
 
@@ -140,15 +140,15 @@ class TasteEngine:
 
     def __init__(
         self,
-        weights: dict[str, float] | None = None,
-        grade_thresholds: list[tuple[float, str]] | None = None,
+        weights: Optional[dict[str, float]] = None,
+        grade_thresholds: Optional[list[tuple[float, str]]] = None,
     ) -> None:
         self._weights = weights or dict(_DEFAULT_WEIGHTS)
         self._thresholds = grade_thresholds or list(_GRADE_THRESHOLDS)
         # Pre-compute total weight for normalization
         self._total_weight = sum(self._weights.values())
 
-    def evaluate(self, content: str, context: dict[str, Any] | None = None) -> TasteVerdict:
+    def evaluate(self, content: str, context: Optional[dict[str, Any]] = None) -> TasteVerdict:
         """Evaluate content quality across all taste dimensions.
 
         Args:
@@ -193,7 +193,7 @@ class TasteEngine:
     def rank_ideas(
         self,
         ideas: list[str],
-        context: dict[str, Any] | None = None,
+        context: Optional[dict[str, Any]] = None,
     ) -> list[TasteVerdict]:
         """Rank multiple ideas by taste score, highest first.
 

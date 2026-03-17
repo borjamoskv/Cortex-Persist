@@ -4,6 +4,7 @@ Thread-safe O(1) pop via atomic UPDATE+SELECT.
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import logging
 import sqlite3
@@ -44,7 +45,7 @@ CREATE INDEX IF NOT EXISTS idx_agent_tasks_status
 class TaskQueue:
     """Thread-safe SQLite task queue for Aether agent tasks."""
 
-    def __init__(self, db_path: Path | str | None = None) -> None:
+    def __init__(self, db_path: Optional[Union[Path, str]] = None) -> None:
         if db_path is None:
             db_path = Path.home() / ".cortex" / "aether.db"
             # Auto-migrate legacy jules.db if it exists
@@ -112,7 +113,7 @@ class TaskQueue:
         logger.info("✅ Enqueued task [%s] — %s", task.id, task.title)
         return task
 
-    def pop_next(self) -> AgentTask | None:
+    def pop_next(self) -> Optional[AgentTask]:
         """Atomically pop the oldest pending task and mark it as planning.
 
         Uses SQLite 3.35+ UPDATE ... RETURNING for true process-level O(1)
@@ -153,7 +154,7 @@ class TaskQueue:
         with self._conn() as conn:
             conn.execute(f"UPDATE agent_tasks SET {set_clause} WHERE id = ?", values)
 
-    def get(self, task_id: str) -> AgentTask | None:
+    def get(self, task_id: str) -> Optional[AgentTask]:
         """Fetch a task by ID."""
         with self._conn() as conn:
             row = conn.execute("SELECT * FROM agent_tasks WHERE id = ?", (task_id,)).fetchone()
@@ -163,7 +164,7 @@ class TaskQueue:
 
     def list_tasks(
         self,
-        status: str | None = None,
+        status: Optional[str] = None,
         limit: int = 50,
     ) -> list[AgentTask]:
         """List tasks, optionally filtered by status."""

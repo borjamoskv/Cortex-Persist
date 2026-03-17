@@ -13,7 +13,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 __all__ = [
     "ExecutionReceipt",
@@ -129,12 +129,12 @@ class StepResult:
     step_id: str
     success: bool
     output: str = ""
-    error: str | None = None
+    error: Optional[str] = None
     duration_ms: int = 0
     started_at: str = ""
     completed_at: str = ""
-    tx_hash: str | None = None
-    fact_id: int | None = None
+    tx_hash: Optional[str] = None
+    fact_id: Optional[int] = None
 
     def content_hash(self) -> str:
         """Hash of the result — covers output + success status."""
@@ -178,11 +178,11 @@ class ExecutionReceipt:
     intent: str = ""
     status: VEXStatus = VEXStatus.PLANNED
     steps: list[StepResult] = field(default_factory=list)
-    merkle_root: str | None = None
+    merkle_root: Optional[str] = None
     total_duration_ms: int = 0
     consensus_score: float = 1.0
     created_at: str = field(default_factory=_now_iso)
-    completed_at: str | None = None
+    completed_at: Optional[str] = None
     model: str = ""
     source: str = "agent:vex"
 

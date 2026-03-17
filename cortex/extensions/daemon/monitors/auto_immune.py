@@ -4,6 +4,7 @@ Reads stale ghosts and dispatches them to the Aether Agent queue for autonomous 
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import json
 import logging
@@ -29,7 +30,7 @@ class AutoImmuneMonitor(BaseMonitor):
 
     def __init__(
         self,
-        queue: TaskQueue | None = None,
+        queue: Optional[TaskQueue] = None,
         ghosts_path: Path = AGENT_DIR / "memory" / "ghosts.json",
         stale_hours: float = DEFAULT_STALE_HOURS,
     ):
@@ -80,7 +81,7 @@ class AutoImmuneMonitor(BaseMonitor):
         except (ValueError, TypeError):
             return False
 
-    def _dispatch(self, project: str, data: dict) -> str | None:
+    def _dispatch(self, project: str, data: dict) -> Optional[str]:
         """Creates and enqueues an AgentTask for the ghost."""
         if not self.queue:
             return None

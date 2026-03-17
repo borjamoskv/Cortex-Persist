@@ -18,6 +18,7 @@ from EmbeddingManager. Gracefully degrades when no LLM is configured.
 """
 
 from __future__ import annotations
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import logging
 import os
@@ -89,7 +90,7 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> str | None:
+    ) -> Optional[str]:
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
         if p is None:

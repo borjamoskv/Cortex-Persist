@@ -5,6 +5,7 @@ Allows sending system alerts directly to your phone without external APIs.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -21,7 +22,7 @@ class IMessageAdapter(BaseAdapter):
 
     name = "imessage"
 
-    def __init__(self, target_phone_or_email: str | None = None):
+    def __init__(self, target_phone_or_email: Optional[str] = None):
         super().__init__()
         self.target = target_phone_or_email
 

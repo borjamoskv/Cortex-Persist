@@ -32,7 +32,7 @@ from __future__ import annotations
 import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Union
 
 __all__ = ["Ok", "Err", "Result", "safe", "safe_async"]
 
@@ -60,11 +60,11 @@ class Ok(Generic[T]):
     def unwrap_or(self, default: T) -> T:  # type: ignore[override]
         return self.value
 
-    def map(self, fn: Callable[[T], U]) -> Result[U, Any]:
+    def map(self, fn: Callable[[T], U]) -> "Result[U, Any]":
         """Apply fn to the value, stay on success track."""
         return Ok(fn(self.value))
 
-    def flat_map(self, fn: Callable[[T], Result[U, Any]]) -> Result[U, Any]:
+    def flat_map(self, fn: Callable[[T], "Result[U, Any]"]) -> "Result[U, Any]":
         """Monadic bind — apply fn that returns a Result."""
         return fn(self.value)
 
@@ -112,7 +112,7 @@ class Err(Generic[E]):
 
 
 # Union type for pattern matching and type narrowing
-Result = Ok[T] | Err[E]
+Result = Union[Ok[T], Err[E]]
 
 
 def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:

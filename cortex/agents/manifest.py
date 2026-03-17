@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class AgentManifest:
     """Immutable runtime identity and policy contract.
 

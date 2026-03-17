@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.songlines.sensor import TopographicSensor
 
@@ -24,7 +24,7 @@ class ThermalEconomy:
     # Maximum active ghosts allowed in a project topography
     MAX_FIELD_DENSITY = 50
 
-    def __init__(self, sensor: TopographicSensor | None = None):
+    def __init__(self, sensor: Optional[TopographicSensor] = None):
         self.sensor = sensor or TopographicSensor()
 
     def check_entropy(self, root_dir: Path) -> dict[str, Any]:

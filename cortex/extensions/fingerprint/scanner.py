@@ -7,7 +7,7 @@ Each method runs a focused SQL query and returns structured raw data.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -40,21 +40,21 @@ class FingerprintScanner:
 
     async def confidence_distribution(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> dict[str, int]:
         """Count facts per confidence level."""
         return await self._grouped_count("confidence", project)
 
     async def fact_type_distribution(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> dict[str, int]:
         """Count facts per fact_type."""
         return await self._grouped_count("fact_type", project)
 
     async def total_facts(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> int:
         """Count all active facts."""
         where, params = self._where(project)
@@ -77,7 +77,7 @@ class FingerprintScanner:
 
     async def avg_content_length(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> float:
         """Average character length of fact content."""
         where, params = self._where(project)
@@ -91,7 +91,7 @@ class FingerprintScanner:
 
     async def recency_ratio(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
         recent_days: int = 30,
     ) -> tuple[int, int]:
         """Facts in last N days vs total — measures recency bias.
@@ -120,7 +120,7 @@ class FingerprintScanner:
 
     async def active_days(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> tuple[int, float]:
         """Number of distinct days with ≥1 fact and total span in days.
 
@@ -148,7 +148,7 @@ class FingerprintScanner:
 
     async def domain_profiles(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
         top_n: int = 20,
     ) -> list[dict]:
         """Per-(project, fact_type) profile: count, avg content len, last seen, source.
@@ -219,7 +219,7 @@ class FingerprintScanner:
 
     async def weekly_velocity_per_domain(
         self,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> dict[tuple[str, str], float]:
         """Facts per week for each (project, fact_type) pair."""
         where, params = self._where(project)
@@ -239,7 +239,7 @@ class FingerprintScanner:
 
     # ── Internal ─────────────────────────────────────────────────
 
-    def _where(self, project: str | None) -> tuple[str, list]:
+    def _where(self, project: Optional[str]) -> tuple[str, list]:
         """Build WHERE clause and params."""
         where = _ACTIVE
         params: list = []
@@ -251,7 +251,7 @@ class FingerprintScanner:
     async def _grouped_count(
         self,
         column: str,
-        project: str | None,
+        project: Optional[str],
     ) -> dict[str, int]:
         """Generic GROUP BY COUNT for a single column."""
         where, params = self._where(project)

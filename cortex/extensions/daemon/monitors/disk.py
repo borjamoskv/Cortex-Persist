@@ -5,6 +5,7 @@ on every health check cycle. Cache invalidates after 60s by default.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import time
@@ -33,7 +34,7 @@ class DiskMonitor:
         self.watch_path = watch_path
         self.threshold_mb = threshold_mb
         self._cache_ttl = cache_ttl_seconds
-        self._cached_size_mb: float | None = None
+        self._cached_size_mb: Optional[float] = None
         self._cache_ts: float = 0.0
 
     def check(self) -> list[DiskAlert]:

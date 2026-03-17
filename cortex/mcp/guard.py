@@ -11,6 +11,7 @@ before it touches the database.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import re
@@ -62,7 +63,7 @@ class MCPGuard:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        tags: list[str] | None = None,
+        tags: Optional[list[str]] = None,
     ) -> None:
         """Validate inputs for cortex_store. Raises ValueError on violation."""
         # Project
@@ -110,7 +111,7 @@ class MCPGuard:
             )
 
     @classmethod
-    def _validate_tags(cls, tags: list[str] | None) -> None:
+    def _validate_tags(cls, tags: Optional[list[str]]) -> None:
         """Validate tag list against hard limits."""
         if not tags:
             return

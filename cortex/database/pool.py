@@ -6,6 +6,7 @@ Handles connection lifecycle, health checks, and WAL mode optimization.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import asyncio
 import logging
@@ -38,8 +39,8 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
-        min_connections: int | None = None,
-        max_connections: int | None = None,
+        min_connections: Optional[int] = None,
+        max_connections: Optional[int] = None,
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):
@@ -112,7 +113,7 @@ class CortexConnectionPool:
 
         # Enforce max concurrency
         await self._semaphore.acquire()
-        conn: aiosqlite.Connection | None = None
+        conn: Optional[aiosqlite.Connection] = None
 
         try:
             # 1. Get or create connection

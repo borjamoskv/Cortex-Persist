@@ -8,7 +8,7 @@ and a composite health score.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from cortex.extensions.shannon.analyzer import (
     dead_weight,
@@ -180,7 +180,7 @@ class EntropyReport:
     @staticmethod
     async def analyze(
         engine: CortexEngine,
-        project: str | None = None,
+        project: Optional[str] = None,
     ) -> dict:
         """Run complete entropy analysis and return structured results.
 

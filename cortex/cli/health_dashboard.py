@@ -5,6 +5,7 @@ Added to the `cortex health` command group.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -15,7 +16,7 @@ from cortex.cli.common import console, get_db_path  # type: ignore[reportAttribu
 
 @click.command("dashboard")
 @click.option("--db", "db_path", default=None, help="DB path override.")
-def dashboard(db_path: str | None, samples: int, interval: float) -> None:
+def dashboard(db_path: Optional[str], samples: int, interval: float) -> None:
     """Rich interactive live dashboard for CORTEX Health."""
     from cortex.extensions.health.collector import HealthCollector
     from cortex.extensions.health.models import Grade

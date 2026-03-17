@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Optional, Protocol, Union
 
 logger = logging.getLogger("cortex.extensions.swarm.code_smith")
 
@@ -99,8 +99,8 @@ class SmithResult:
     phase_reached: SmithPhase
     success: bool
     generated_code: str = ""
-    validation: ASTValidationResult | None = None
-    test_result: SandboxResult | None = None
+    validation: Optional[ASTValidationResult] = None
+    test_result: Optional[SandboxResult] = None
     commit_hash: str = ""
     error: str = ""
     duration_ms: float = 0.0
@@ -153,7 +153,7 @@ class KGVTracker:
         )
         logger.debug("KGV recorded: %s → %s", file_path, content_hash[:12])
 
-    def get(self, file_path: str) -> KnownGoodVersion | None:
+    def get(self, file_path: str) -> Optional[KnownGoodVersion]:
         """Retrieve the KGV for a file path."""
         return self._versions.get(file_path)
 
@@ -179,7 +179,7 @@ class LocalProcessSandbox:
 
     def __init__(
         self,
-        tmp_dir: str | Path | None = None,
+        tmp_dir: Optional[Union[str, Path]] = None,
     ) -> None:
         import tempfile
 
@@ -274,8 +274,8 @@ class CodeSmith:
     def __init__(
         self,
         generator: CodeGenerator,
-        sandbox: SandboxExecutor | None = None,
-        validator: ASTValidator | None = None,
+        sandbox: Optional[SandboxExecutor] = None,
+        validator: Optional[ASTValidator] = None,
     ) -> None:
         self._generator = generator
         self._sandbox = sandbox or LocalProcessSandbox()

@@ -3,6 +3,8 @@ CORTEX V4 Bicameral Console (Subconscious Interface)
 
 Separates the Sovereign Agent's monologue into Limbic, Motor, and Autonomic streams.
 """
+from __future__ import annotations
+
 
 import json
 import os

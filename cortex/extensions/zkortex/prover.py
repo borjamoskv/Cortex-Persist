@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.zkortex.commitment import KnowledgeCommitment, commit
 from cortex.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
@@ -51,7 +51,7 @@ class ZKOrtexProver:
       - El mundo exterior NUNCA ve: los hechos, las memorias, las fuentes
     """
 
-    def __init__(self, session_id: str | None = None) -> None:
+    def __init__(self, session_id: Optional[str] = None) -> None:
         import uuid
 
         self._session_id = session_id or str(uuid.uuid4())
@@ -96,7 +96,7 @@ class ZKOrtexProver:
         self,
         fact_id: str,
         fact_content: str,
-        metadata: dict[str, str] | None = None,
+        metadata: Optional[dict[str, str]] = None,
     ) -> KnowledgeCommitment:
         """
         Genera un commitment a `fact_content` bajo el identificador `fact_id`.
@@ -116,7 +116,7 @@ class ZKOrtexProver:
         logger.debug("Commitment issued for fact_id='%s'", fact_id)
         return c
 
-    def open_commitment(self, fact_id: str) -> tuple[str, KnowledgeCommitment] | None:
+    def open_commitment(self, fact_id: str) -> Optional[tuple[str, KnowledgeCommitment]]:
         """
         Abre un commitment — revela el hecho y el blinding factor.
 

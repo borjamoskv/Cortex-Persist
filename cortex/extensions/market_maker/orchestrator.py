@@ -4,6 +4,7 @@ Ties all 4 phases together: Detect -> Score -> Generate -> Validate.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 import uuid
@@ -25,7 +26,7 @@ log = logging.getLogger(__name__)
 class MarketMakerOrchestrator:
     """End-to-end engine for the Autonomous Market Maker."""
 
-    def __init__(self, random_seed: int | None = None) -> None:
+    def __init__(self, random_seed: Optional[int] = None) -> None:
         self.detector = TrendDetector(random_seed=random_seed)
         self.scorer = OpportunityScorer(random_seed=random_seed)
         self.generator = MVPGenerator()
@@ -110,5 +111,5 @@ class MarketMakerOrchestrator:
         """Integra con CORTEX Core Engine para persistir aprendizajes."""
         log.debug("Persistiendo fact en memory (mock) para exp %s", experiment.id)
 
-    def get_experiment(self, exp_id: str) -> Experiment | None:
+    def get_experiment(self, exp_id: str) -> Optional[Experiment]:
         return self._experiments.get(exp_id)

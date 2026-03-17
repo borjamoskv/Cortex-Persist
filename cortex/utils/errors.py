@@ -6,6 +6,7 @@ through API boundaries (Sprint 0 security directive).
 """
 
 from __future__ import annotations
+from typing import Optional
 
 __all__ = [
     "CortexError",
@@ -90,7 +91,7 @@ class ValidationBoundaryError(CortexError):
     Carries structured error info for automated retry/correction loops.
     """
 
-    def __init__(self, message: str, validation_errors: list[dict] | None = None):
+    def __init__(self, message: str, validation_errors: Optional[list[dict]] = None):
         super().__init__(message)
         self.validation_errors = validation_errors or []
 

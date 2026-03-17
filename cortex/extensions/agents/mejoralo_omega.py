@@ -14,7 +14,7 @@ import logging
 import math
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
@@ -42,10 +42,10 @@ class MejoraloOmegaAgent:
     def __init__(
         self,
         project: str,
-        base_path: str | Path,
+        base_path: Union[str, Path],
         target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
         cycle_interval: int = DEFAULT_CYCLE_INTERVAL,
-        db_path: str | Path | None = None,
+        db_path: Optional[Union[str, Path]] = None,
     ):
         self.project = project
         self.base_path = Path(base_path).resolve()
@@ -92,7 +92,7 @@ class MejoraloOmegaAgent:
         except ImportError:
             logger.debug("Agent registry not available; using defaults.")
 
-    async def run(self, max_cycles: int | None = None) -> dict[str, Any]:
+    async def run(self, max_cycles: Optional[int] = None) -> dict[str, Any]:
         """Main execution loop — runs until stopped or max_cycles reached.
 
         Returns:
@@ -227,7 +227,7 @@ class MejoraloOmegaAgent:
         return ranked[:10]  # Top 10 entropy targets
 
     @staticmethod
-    def _extract_file(finding: str) -> str | None:
+    def _extract_file(finding: str) -> Optional[str]:
         """Extract file path from a scan finding string."""
         if " -> " in finding or " → " in finding:
             return finding.split(":", 1)[0].strip()
@@ -292,7 +292,7 @@ class MejoraloOmegaAgent:
 async def run_omega_cli(
     project: str,
     path: str,
-    max_cycles: int | None = None,
+    max_cycles: Optional[int] = None,
     interval: int = DEFAULT_CYCLE_INTERVAL,
     target: int = DAEMON_DEFAULT_TARGET_SCORE,
 ) -> dict[str, Any]:

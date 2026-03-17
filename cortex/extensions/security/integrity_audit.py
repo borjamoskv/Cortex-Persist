@@ -13,7 +13,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from cortex import config
 
@@ -96,7 +96,7 @@ class IntegrityAuditor:
     3. Orphaned facts (broken chain links)
     """
 
-    def __init__(self, db_path: str | None = None) -> None:
+    def __init__(self, db_path: Optional[str] = None) -> None:
         self._db_path = db_path or str(config.DB_PATH)
 
     async def full_audit(self) -> AuditReport:
@@ -204,7 +204,7 @@ class IntegrityAuditor:
         if not facts:
             return status
 
-        prev_hash: str | None = None
+        prev_hash: Optional[str] = None
         hash_index: dict[str, int] = {}  # hash -> fact_id
 
         for fact in facts:
@@ -215,7 +215,7 @@ class IntegrityAuditor:
         return status
 
     def _verify_single_fact(
-        self, fact: Any, prev_hash: str | None, hash_index: dict[str, int], status: ChainStatus
+        self, fact: Any, prev_hash: Optional[str], hash_index: dict[str, int], status: ChainStatus
     ) -> None:
         fact_id = fact["id"]
         content = fact["content"] or ""

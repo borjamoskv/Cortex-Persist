@@ -9,7 +9,7 @@ import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, Optional, TYPE_CHECKING
 
 __all__ = [
     "AGENT_DIR",
@@ -129,8 +129,8 @@ def atomic_write(path: Path, content: str) -> None:
 
 def get_existing_contents(
     engine: CortexEngine,
-    project: str | None = None,
-    fact_type: str | None = None,
+    project: Optional[str] = None,
+    fact_type: Optional[str] = None,
 ) -> set[str]:
     """Obtiene set de contenidos existentes para deduplicación rápida.
 
@@ -171,7 +171,7 @@ def get_existing_contents(
     return result | normalized
 
 
-def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
+def db_content_hash(engine: CortexEngine, fact_type: Optional[str] = None) -> str:
     """Calcula SHA-256 del contenido actual en DB para un tipo de fact.
 
     Esto permite detectar si la DB ha cambiado desde el último write-back

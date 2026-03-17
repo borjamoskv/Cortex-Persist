@@ -11,7 +11,7 @@ import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.extensions.evolution.ouroboros")
 
@@ -215,7 +215,7 @@ class OuroborosOmega:
 
         self.original_hash = hashlib.sha256(self.original_source.encode()).hexdigest()
 
-    async def diagnose(self, source_code: str | None = None) -> DiagnosisMatrix:
+    async def diagnose(self, source_code: Optional[str] = None) -> DiagnosisMatrix:
         """Phase 1: Analysis (Topological Mapping)"""
         code = source_code if source_code is not None else self.original_source
         tree = ast.parse(code)

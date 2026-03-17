@@ -11,6 +11,7 @@ creates a semantic digest of the intended action and propagates it via Gossip.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import logging
 from dataclasses import dataclass
@@ -30,7 +31,7 @@ class GeaclCommitResult:
 
     success: bool
     verdict: ByzantineVerdict
-    action_digest: str | None
+    action_digest: Optional[str]
     domain: str
 
 
@@ -54,7 +55,7 @@ class GEACLCoordinator:
         intent: str,
         domain: str,
         responses: list[ModelResponse],
-        history: ThinkingHistory | None = None,
+        history: Optional[ThinkingHistory] = None,
     ) -> GeaclCommitResult:
         """
         Evaluate LLM responses using WBFT and propagate the decision context via Gossip.

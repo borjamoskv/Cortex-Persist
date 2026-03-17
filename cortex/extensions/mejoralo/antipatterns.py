@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Optional, Union
 """
 CORTEX v6.0 — Antipattern Scanner.
 
@@ -93,11 +96,11 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
 
         value = node.value
         # Skip strings, None, booleans, Ellipsis
-        if isinstance(value, str | bytes | bool | type(None) | type(...)):
+        if isinstance(value, (str, bytes, bool, type(None), type(...))):
             return
 
         # Skip whitelisted values
-        if isinstance(value, int | float) and value in _MAGIC_WHITELIST:
+        if isinstance(value, (int, float)) and value in _MAGIC_WHITELIST:
             return
 
         # Check context — is this in a comparison, return, or arithmetic?
@@ -142,7 +145,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
         if (
             isinstance(node.value, ast.Name)
             and isinstance(node.slice, ast.Constant)
-            and isinstance(node.slice.value, str | int)
+            and isinstance(node.slice.value, (str, int))
         ):
             # Check if this is inside a try block (then it's guarded)
             # We can't easily check ancestry in a simple visitor,
@@ -162,7 +165,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
 
     def _check_return_type_hint(
         self,
-        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
     ) -> None:
         """Public functions without return type hints hide intent."""
         if node.name.startswith("_"):
@@ -195,7 +198,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
 
     def _check_too_many_params(
         self,
-        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
     ) -> None:
         """Too many parameters is a code smell (implicit complexity)."""
         args = node.args
@@ -231,7 +234,7 @@ class _DeadCodeVisitor(ast.NodeVisitor):
 
     def _check_body(self, body: list[ast.stmt]) -> None:
         for i, stmt in enumerate(body):
-            if isinstance(stmt, ast.Return | ast.Raise | ast.Break | ast.Continue):
+            if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
                 # Check if there's code after this statement (in same block)
                 remaining = body[i + 1 :]
                 # Filter out pass statements and string literals (docstrings)
@@ -312,7 +315,7 @@ def _scan_single_file(
     _DeadCodeVisitor(rel, findings).visit(tree)
 
 
-def _gather_python_files(root: Path) -> tuple[list[Path], Path] | None:
+def _gather_python_files(root: Path) -> Optional[tuple[list[Path], Path]]:
     """Gather Python files to scan and determine the scan root."""
     if root.is_file():
         return [root], root.parent
@@ -333,7 +336,7 @@ def _gather_python_files(root: Path) -> tuple[list[Path], Path] | None:
 
 
 def scan_antipatterns(
-    path: str | Path,
+    path: Union[str, Path],
     *,
     root_package: str = "cortex",
     include_magic: bool = False,

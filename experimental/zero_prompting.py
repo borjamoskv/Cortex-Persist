@@ -15,7 +15,7 @@ detects that the user has been blocked for a configurable amount of time.
 from __future__ import annotations
 import time
 from dataclasses import dataclass, field
-from typing import Callable, Optional
+from typing import Callable
 
 
 @dataclass

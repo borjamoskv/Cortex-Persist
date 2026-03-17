@@ -8,6 +8,7 @@ it architecturally manifests it.
 """
 
 from __future__ import annotations
+from typing import Optional, Union
 
 import logging
 import os
@@ -25,7 +26,7 @@ class Autopoiesis:
     Promoted from experimental to core sovereign layer.
     """
 
-    def __init__(self, tool_dir: str | os.PathLike = "~/.cortex/tools") -> None:
+    def __init__(self, tool_dir: Union[str, os.PathLike] = "~/.cortex/tools") -> None:
         self.tool_dir = Path(os.path.expanduser(tool_dir))
         self.tool_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Autopoiesis engine activated at %s", self.tool_dir)
@@ -50,7 +51,7 @@ class Autopoiesis:
     def generate_and_register(
         self,
         generator: Callable[[], str],
-        validator: Callable[[str], bool] | None = None,
+        validator: Optional[Callable[[str], bool]] = None,
     ) -> Path:
         """Generate a script, execute it, and register it if valid."""
         source = generator()

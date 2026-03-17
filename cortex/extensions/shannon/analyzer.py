@@ -17,6 +17,7 @@ Functions:
 """
 
 from __future__ import annotations
+from typing import Union
 
 import math
 
@@ -135,7 +136,7 @@ def kl_divergence(
     Returns:
         KL divergence in bits. Always ≥ 0.
     """
-    all_keys = set(p) | set(q)
+    all_keys = Union[set(p), set(q)]
     if not all_keys:
         return 0.0
 
@@ -165,7 +166,7 @@ def jensen_shannon_divergence(
     Returns:
         JSD in bits. 0.0 for identical distributions. ∈ [0.0, 1.0].
     """
-    all_keys = set(p) | set(q)
+    all_keys = Union[set(p), set(q)]
     if not all_keys:
         return 0.0
 
@@ -272,7 +273,7 @@ def cross_entropy(
     Returns:
         Cross-entropy in bits. Always ≥ 0.
     """
-    all_keys = set(p) | set(q)
+    all_keys = Union[set(p), set(q)]
     if not all_keys:
         return 0.0
 

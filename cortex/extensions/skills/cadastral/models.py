@@ -6,6 +6,7 @@ zone classifications, coordinates, risk scores, and blind-spot reports.
 """
 
 from __future__ import annotations
+from typing import Optional
 
 import hashlib
 import time
@@ -81,7 +82,7 @@ class Coordinate:
 
     latitude: float
     longitude: float
-    altitude_m: float | None = None
+    altitude_m: Optional[float] = None
 
     def __post_init__(self) -> None:
         if not (-90.0 <= self.latitude <= 90.0):
