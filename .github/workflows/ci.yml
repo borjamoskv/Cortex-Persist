@@ -42,7 +42,7 @@ jobs:
         run: bandit -r cortex/ -c pyproject.toml --severity-level medium -f json -o bandit-report.json || true
       - name: Upload Bandit report
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         with:
           name: bandit-report
           path: bandit-report.json
@@ -52,7 +52,7 @@ jobs:
           format: cyclonedx-json
           output-file: sbom.json
       - name: Upload SBOM
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         with:
           name: sbom
           path: sbom.json
@@ -99,7 +99,7 @@ jobs:
           pip install build
           python -m build
       - name: Upload artifact
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         with:
           name: dist
           path: dist/
