@@ -6,7 +6,7 @@ from rich.table import Table
 
 from cortex.cli.common import _run_async, console, get_engine
 from cortex.engine.decalcifier import SovereignDecalcifier
-from cortex.songlines.sensor import TopographicSensor
+from cortex.extensions.songlines.sensor import TopographicSensor
 
 
 @click.group(name="radar")
@@ -34,16 +34,7 @@ def scan(path: str, entropy: bool):
     if entropy:
         async def _get_entropy():
             conn = await engine._get_conn()
-            db_path = engine.db_path # Assuming engine has a db_path attribute  # type: ignore[type-error]
-            try:
-                from cortex.engine.user_memory import UserConfigManager
-
-                config_manager = UserConfigManager(db_path)
-                cfg = await config_manager.get_config()
-                sources_list = cfg.get("radar_sources", []) if cfg else []
-                _sources = [s for s in sources_list if "niche" in s or "arbitrage" in s]
-            except Exception:
-                pass  # Fallback if config cannot be loaded or parsed
+            # conn obtained for direct query below
             # Stated or low confidence facts are considered entropy/calcification candidates
             cursor = await conn.execute(
                 "SELECT count(*) FROM facts WHERE confidence IN ('stated', 'C3', 'C2', 'C1') AND is_tombstoned = 0"

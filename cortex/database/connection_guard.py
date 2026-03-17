@@ -36,29 +36,39 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # Engine low-level
         "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
         "cortex/engine/decalcifier.py",  # Sync schema maintenance
-        # Agent/system infra
-        "cortex/agents/system_prompt.py",  # Documentation strings, not actual usage
+        # Agent/system infra (pre- and post-refactor paths)
+        "cortex/agents/system_prompt.py",
+        "cortex/extensions/agents/system_prompt.py",
         # Evolution/metrics (sync telemetry)
         "cortex/evolution/cortex_metrics.py",
         "cortex/evolution/shannon_metrics.py",
+        "cortex/extensions/evolution/shannon_metrics.py",
         # Swarm budget tracker (sync, thread-safe)
         "cortex/swarm/budget.py",
+        "cortex/extensions/swarm/budget.py",
         # Utils/pulmones (sync background workers)
         "cortex/utils/pulmones_worker.py",
         "cortex/utils/pulmones.py",
         # Aether queue (sync fallback)
         "cortex/aether/queue.py",
+        "cortex/extensions/aether/queue.py",
         # TTT ghost harvester
         "cortex/ttt/ghost_harvester.py",
+        "cortex/extensions/ttt/ghost_harvester.py",
         # Metering tracker (sync, hot path)
         "cortex/metering/tracker.py",
+        "cortex/extensions/metering/tracker.py",
         # Health collector (sync reads for Prometheus hot path)
         "cortex/health/collector.py",
+        "cortex/extensions/health/collector.py",
         # UI swarm board (local read-only)
         "cortex/ui/swarm_board.py",
+        "cortex/extensions/ui/swarm_board.py",
         # Daemon queues (sync centaur/auto_audit)
         "cortex/daemon/centaur/queue.py",
         "cortex/daemon/monitors/auto_audit.py",
+        "cortex/extensions/daemon/centaur/queue.py",
+        "cortex/extensions/daemon/monitors/auto_audit.py",
     }
 )
 
