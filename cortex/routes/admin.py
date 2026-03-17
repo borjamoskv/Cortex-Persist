@@ -40,7 +40,7 @@ from cortex.utils.export import export_facts
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
-    from cortex.auth.api_keys import ApiKeyManager
+    from cortex.auth.manager import AuthManager as ApiKeyManager
 
 __all__ = [
     "create_api_key",
@@ -392,7 +392,7 @@ async def list_api_keys(
     keys = await manager.list_keys()
     return [
         ApiKeyListItem(
-            id=k.id,
+            id=str(k.id),
             name=k.name,
             prefix=k.key_prefix,
             tenant_id=k.tenant_id,
@@ -418,7 +418,7 @@ async def generate_handoff_context(
 
     Used for transferring agentic state between platforms (macOS -> Web).
     """
-    from cortex.agents.handoff import generate_handoff, save_handoff
+    from cortex.extensions.agents.handoff import generate_handoff, save_handoff
 
     lang = _get_lang(request)
 
