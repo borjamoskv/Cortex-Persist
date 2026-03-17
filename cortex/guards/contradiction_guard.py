@@ -14,7 +14,6 @@ Returns a ConflictReport with scored candidates.
 """
 
 from __future__ import annotations
-from typing import Optional, Union
 
 import logging
 import re
@@ -208,7 +207,7 @@ def _jaccard(a: set[str], b: set[str]) -> float:
     """Jaccard similarity coefficient."""
     if not a or not b:
         return 0.0
-    union = Union[a, b]
+    union = a | b
     return len(a & b) / len(union) if union else 0.0
 
 
@@ -234,7 +233,7 @@ def _is_noise(content: str) -> bool:
 
 
 # ── Extracted helpers (Suntsitu: CC flattening) ─────────────────────
-def _decrypt_content(content: str, decrypt_fn: Optional[Callable]) -> Optional[str]:
+def _decrypt_content(content: str, decrypt_fn: Callable | None) -> str | None:
     """Decrypt content if needed, returning None on failure."""
     if not decrypt_fn or not content.startswith("v6_aesgcm:"):
         return content
@@ -276,9 +275,9 @@ def _score_candidate(
     new_tokens: set[str],
     new_content: str,
     new_project: str,
-    decrypt_fn: Optional[Callable],
+    decrypt_fn: Callable | None,
     min_score: float,
-) -> Optional[ConflictCandidate]:
+) -> ConflictCandidate | None:
     """Score a single row against new content. Returns None if below threshold."""
     content = _decrypt_content(row["content"], decrypt_fn)
     if not content or _is_noise(content):
@@ -353,8 +352,8 @@ async def detect_contradictions(
     new_content: str,
     new_project: str,
     *,
-    db_path: Union[str, Path] = DEFAULT_DB_PATH,
-    decrypt_fn: Optional[Callable] = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    decrypt_fn: Callable | None = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
 ) -> ConflictReport:
@@ -415,8 +414,8 @@ async def detect_contradictions(
 # ── CLI-friendly batch scanner ──────────────────────────────────────
 async def scan_all_contradictions(
     *,
-    db_path: Union[str, Path] = DEFAULT_DB_PATH,
-    decrypt_fn: Optional[Callable] = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    decrypt_fn: Callable | None = None,
     min_score: float = 0.45,
     limit: int = 50,
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
@@ -490,7 +489,7 @@ def _compare_decisions(
     a: dict,
     b: dict,
     min_score: float,
-) -> Optional[tuple[float, ConflictCandidate, ConflictCandidate]]:
+) -> tuple[float, ConflictCandidate, ConflictCandidate] | None:
     """Score and classify a potential conflict between two decisions."""
     score = _jaccard(a["tokens"], b["tokens"])
     if score < min_score:
@@ -524,7 +523,7 @@ def _compare_decisions(
     return (score, ca, cb)
 
 
-def _prepare_decisions(rows: list, decrypt_fn: Optional[Callable]) -> list[dict]:
+def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
     for row in rows:
