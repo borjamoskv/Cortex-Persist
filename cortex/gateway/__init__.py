@@ -56,8 +56,6 @@ class GatewayIntent(str, Enum):
     EMIT = "emit"  # Fire a notification event
     MISSION = "mission"  # Launch a swarm mission
     ASK = "ask"  # Ask the AI (LLM pass-through with memory context)
-    MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
-    MEJORALO = "mejoralo"  # Trigger a MEJORAlo scan
 
 
 @dataclass
