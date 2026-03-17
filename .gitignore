@@ -96,6 +96,19 @@ repro_*.py
 inspect_*.py
 verify_*.py
 smoke_test_*.py
+fix_*.py
+analyze_*.py
+run_*.py
+store_*.py
+check_*.py
+demo_*.py
+ingest_*.py
+extract_*.py
+rework_*.py
+persist_*.py
+daemon_orchestrator.py
+cortex_load.py
+tracer.py
 ghosts*.txt
 kimi_*.md
 context_for_kimi.md
@@ -105,6 +118,10 @@ test_output.txt
 safety_net.patch
 implementation_plan.md
 static-analysis.datadog.yml
+pyright_*.json
+web_tsc_report.txt
+search_results.txt
+bad_animation.html
 
 # ── Internal docs patterns ───────────────────────
 WAVE5_*.md
@@ -123,6 +140,65 @@ blue/
 code-agent-academy/
 comienzos-clone/
 cortex-export-*.json
+ShadowStudio/
+lyria_app/
+awwwards-engine/
+moltbook/
+AgentArena/
+CortexDash.app/
+aether_drop/
+airdrops/
+ghost_test_zone/
+tmp_test_db/
+vectors/
+experimental_ui/
+projects/
+sovereign-agency/
+open-cortex/
+cortex-hypervisor/
+
+# ── Audio / Media (never track) ──────────────────
+White_Pony_Master/
+White_Pony_Stems/
+Rework_POC_Generations/
+trompetas-inaki/
+video_transcript*.vtt
+video_transcript*.txt
+
+# ── Web projects (separate repos) ────────────────
+cortexpersist-com/
+cortexpersist-dev/
+cortexpersist-docs/
+cortexpersist-landing/
+cortexpersist-org/
+cortexpersist-api/
+nexus-dashboard/
+dashboard/
+web/
+web-org/
+yt-remotion-video/
+yt-sync-extension/
+
+# ── Marketing / Sales ────────────────────────────
+marketing/
+sales-assets/
+COMMERCE_STARVATION_PIPELINE.md
+SOVEREIGN_MANIFESTO.md
+architecture_endgame.md
+cortex_audit_report.md
+cortex_notebooklm_guide.md
+nemesis.md
+handoff.json
+goplus_report.json
+cortex_blacklist_master.json
+metamask_blacklist_payload.json
+seals_report.json
+manifest_blockchain_forensics.yaml
+create_docx.py
+generate_cortex_docx.py
+deploy_to_antigravity.sh
+sovereign_sync.sh
+sovereign_watchdog.sh
 
 # Sensitive data — never track
 notebooklm_domains/
@@ -154,5 +230,4 @@ sovereign_agent/
 xokas-elevator/
 yt-notebooklm-ext/
 auramem/
-yt-remotion-video/
 nexus-dashboard/.next/

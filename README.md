@@ -207,57 +207,32 @@ block-beta
 
 ## Integrations
 
-CORTEX plugs into your existing stack:
+CORTEX plugs into your existing stack — IDEs (Claude Code, Cursor, Windsurf via MCP),
+agent frameworks (LangChain, CrewAI, AutoGen, Google ADK), memory layers (Mem0, Zep, Letta),
+and databases (SQLite, AlloyDB, PostgreSQL, Qdrant). Runs on macOS, Linux, and Windows.
 
-- **IDEs**: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity (via MCP)
-- **Agent Frameworks**: LangChain, CrewAI, AutoGen, Google ADK
-- **Memory Layers**: Sits on top of Mem0, Zep, Letta as verification layer
-- **Databases**: SQLite (local), AlloyDB, PostgreSQL, Turso (edge)
-- **Vector Stores**: sqlite-vec (local), Qdrant (self-hosted or cloud)
-- **Deployment**: Docker, Kubernetes, bare metal, `pip install`
-
----
-
-## Cross-Platform
-
-CORTEX runs natively on any environment without Docker:
-
-- **macOS** (launchd & osascript notifications)
-- **Linux** (systemd & notify-send)
-- **Windows** (Task Scheduler & PowerShell)
-
-See [Cross-Platform Guide](docs/cross_platform_guide.md).
-
----
-
-## Regulatory Positioning
-
-CORTEX provides the traceability, integrity verification, and audit infrastructure
-that regulated environments require. It does not by itself make a system "compliant"
-— compliance depends on the role, use case, and risk category of the deploying system.
-
-What CORTEX provides:
-
-- **Tamper-evident storage** of all agent decisions (hash-chained ledger)
-- **Automatic audit trail** generation with timestamped, verifiable records
-- **Integrity verification** via Merkle tree checkpoints
-- **Full decision lineage** — trace any conclusion back to its origin
-
-These capabilities support the traceability and logging requirements
-described in frameworks such as the EU AI Act (Article 12), among others.
+See [Integrations & Cross-Platform Guide](docs/cross_platform_guide.md).
 
 ---
 
 ## Documentation
 
-- [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
 - [Architecture](docs/architecture.md) — topology, module map, and data flow
-- [Capabilities](docs/architecture/CORTEX-CAPABILITIES.md) — structural properties enabled by CORTEX topology
 - [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) — trust boundaries and threat model
-- [Axioms](docs/AXIOMS.md) — epistemic and design axioms
 - [Contributing](./CONTRIBUTING.md) — contribution workflow
-- [Security Policy](./SECURITY.md) — vulnerability disclosure
 - [Roadmap](./ROADMAP.md) — development timeline
+- [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
+
+---
+
+## Regulatory Positioning
+
+CORTEX provides traceability, integrity verification, and audit infrastructure
+for regulated environments. It does not by itself make a system "compliant"
+— compliance depends on the role, use case, and risk category of the deploying system.
+
+These capabilities support traceability and logging requirements
+described in frameworks such as the EU AI Act (Article 12), among others.
 
 ---
 

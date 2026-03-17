@@ -1,5 +1,0 @@
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-<frozen genericpath>:51: KeyboardInterrupt
-(to show a full traceback on KeyboardInterrupt use --full-trace)
-no tests collected in 0.63s
