@@ -1,8 +1,0 @@
-{
-  "name": "awwwards-engine",
-  "version": "1.0.0",
-  "description": "Sovereign WebGL Engine",
-  "scripts": {
-    "start": "python3 -m http.server 8080"
-  }
-}
