@@ -21,7 +21,7 @@ ATTACKER_FLEET = [
 
 RPC_BASE = "https://mainnet.base.org"
 # CORTEX PATHS
-PROJECT_ROOT = "/Users/borjafernandezangulo/cortex"
+PROJECT_ROOT = "."
 
 
 class GodMode:

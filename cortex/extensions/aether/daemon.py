@@ -112,13 +112,14 @@ class AetherDaemon:
 
     def _github_poll_loop(self) -> None:
         """Polls GitHub for issues labeled 'aether' and enqueues them."""
-        if not self._github_token:
+        token = self._github_token
+        if not token:
             return
             
         from cortex.extensions.aether.github_ingestor import GitHubIngestor
 
         ingestor = GitHubIngestor(
-            token=self._github_token,
+            token=token,
             repos=self._github_repos,
             queue=self._queue,
         )

@@ -18,14 +18,14 @@
     <key>ProgramArguments</key>
     <array>
         <!-- ⚠️  Adjust this path to your venv Python -->
-        <string>/Users/borjafernandezangulo/cortex/.venv/bin/python</string>
+        <string>./.venv/bin/python</string>
         <string>-m</string>
         <string>cortex.daemon_cli</string>
         <string>check</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/borjafernandezangulo/cortex</string>
+    <string>.</string>
 
     <!-- Run every 5 minutes -->
     <key>StartInterval</key>
@@ -44,15 +44,15 @@
 
     <!-- Logs: persistent location (~/.cortex/logs/) -->
     <key>StandardOutPath</key>
-    <string>/Users/borjafernandezangulo/.cortex/logs/moskv-daemon.log</string>
+    <string>~/.cortex/logs/moskv-daemon.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/borjafernandezangulo/.cortex/logs/moskv-daemon.err</string>
+    <string>~/.cortex/logs/moskv-daemon.err</string>
 
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin:/Users/borjafernandezangulo/cortex/.venv/bin</string>
+        <string>/usr/local/bin:/usr/bin:/bin:./.venv/bin</string>
     </dict>
 </dict>
 </plist>

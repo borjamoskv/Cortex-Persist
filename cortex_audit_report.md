@@ -27,7 +27,7 @@
 - **Mypy Typechecker:** 18 errores detectados principalmente en `cortex/cli/loop_cmds.py`, `red_team/hydra_chaos.py`, `adk/runner.py`, y `api/core.py` (Problemas de atributos y corrutinas no esperadas / olvidadas).
 - **Pytest:** Timeout general al superar los 120 segundos. Se recomienda ejecutar `make test-fast` para aislar pruebas lentas (ej. Embeddings o RAG).
 - **Security Scanners (Bandit/Safety):** Riesgo Medio en handlers OData, aislamientos mitigados (Nodes of Sacrifice).
-- **Veredicto TOM:** El uso de **Sacrifice Nodes** ([CTX-2682](file:///Users/borjafernandezangulo/cortex/notebooklm_domains/cortex-operations-2026-03-03.md#L38)) valida el aislamiento de `cv2` y subprocesos. No hay sangrado binario detectado.
+- **Veredicto TOM:** El uso de **Sacrifice Nodes** ([CTX-2682](file://./notebooklm_domains/cortex-operations-2026-03-03.md#L38)) valida el aislamiento de `cv2` y subprocesos. No hay sangrado binario detectado.
 
 
 ---

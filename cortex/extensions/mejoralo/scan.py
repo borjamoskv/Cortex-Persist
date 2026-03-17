@@ -12,6 +12,8 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cortex.extensions.mejoralo.constants import (
+    GHOST_MIN_SUBTREE_SIZE,
+    GHOST_PENALTY_PER_FINDING,
     INDENT_NESTING_THRESHOLD,
     MAX_FINDINGS_ARCH,
     MAX_FINDINGS_COMPLEXITY,
@@ -201,14 +203,105 @@ def _analyze_single_file(
     return loc, large_file, psi, sec, comp
 
 
+# ─── Ghost Detection (Code Ghosts via AST Subtree Hashing) ───────────
+
+
+def _hash_ast_subtree(node: ast.AST) -> int:
+    """Recursively hash an AST subtree using node type and field names.
+
+    Ignores identifiers and literals to detect structural clones, not variable renames.
+    Returns a stable integer hash of the structural shape.
+    """
+    # Use type name + sorted field names as signature
+    parts: list[str] = [type(node).__name__]
+    for field_name, value in ast.iter_fields(node):
+        if field_name in ("lineno", "col_offset", "end_lineno", "end_col_offset"):
+            continue
+        if isinstance(value, list):
+            parts.extend(_hash_ast_subtree(child) if isinstance(child, ast.AST) else field_name
+                         for child in value)  # type: ignore[assignment]
+        elif isinstance(value, ast.AST):
+            parts.append(str(_hash_ast_subtree(value)))
+        else:
+            # For constants and names, use the type only (ignore actual value)
+            # to detect structural ghosts even when variable names differ
+            parts.append(type(value).__name__)
+    return hash(tuple(parts))
+
+
+def _count_subtree_nodes(node: ast.AST) -> int:
+    """Count total number of nodes in an AST subtree."""
+    return sum(1 for _ in ast.walk(node))
+
+
+def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
+    """Detect structurally duplicate AST subtrees across all Python source files.
+
+    Algorithm:
+        1. For every function/class definition, compute a structural AST hash.
+        2. Build a hash → [(file, node_name, line)] map.
+        3. Any hash with ≥2 entries is a Code Ghost (structural clone).
+
+    Only subtrees with ≥ GHOST_MIN_SUBTREE_SIZE nodes are evaluated
+    to avoid false positives from trivially short functions.
+
+    Returns:
+        List of human-readable ghost finding strings.
+    """
+    # hash → list[(rel_path, node_name, lineno)]
+    hash_registry: dict[int, list[tuple[str, str, int]]] = {}
+
+    for sf in source_files:
+        if sf.suffix != ".py":
+            continue
+        try:
+            src = sf.read_text(errors="replace")
+            tree = ast.parse(src)
+        except (OSError, SyntaxError):
+            continue
+
+        rel_path = str(sf.relative_to(root))
+
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            if _count_subtree_nodes(node) < GHOST_MIN_SUBTREE_SIZE:
+                continue
+            h = _hash_ast_subtree(node)
+            name = getattr(node, "name", "<anonymous>")
+            line = getattr(node, "lineno", 0)
+            hash_registry.setdefault(h, []).append((rel_path, name, line))
+
+    findings: list[str] = []
+    for occurrences in hash_registry.values():
+        if len(occurrences) < 2:
+            continue
+        # Only report if the clones span different files or same file different names
+        files_involved = {o[0] for o in occurrences}
+        names_involved = {o[1] for o in occurrences}
+        if len(files_involved) == 1 and len(names_involved) == 1:
+            continue  # Same function definition (e.g. inherited override) — skip
+
+        for fn, name, lineno in occurrences:
+            other_locations = ", ".join(
+                f"{Path(f).name}:{n}:{ln}" for f, n, ln in occurrences if f != fn or n != name
+            )
+            findings.append(
+                f"{fn}:{lineno} → code_ghost: ({name}) Structural clone matched with [{other_locations}]"
+            )
+
+    return findings
+
+
 def _analyze_files(
     source_files: list[Path],
     root: Path,
-) -> tuple[int, list[str], list[str], list[str], list[str]]:
-    """Analyze all source files for LOC, architecture, psi, security, complexity.
+) -> tuple[int, list[str], list[str], list[str], list[str], list[str]]:
+    """Analyze all source files for LOC, architecture, psi, security, complexity, ghosts.
 
     Returns:
-        (total_loc, large_files, psi_findings, security_findings, complexity_findings)
+        (total_loc, large_files, psi_findings, security_findings,
+         complexity_findings, ghost_findings)
     """
     total_loc = 0
     large_files: list[str] = []
@@ -228,7 +321,13 @@ def _analyze_files(
         security_findings.extend(sec)
         complexity_findings.extend(comp)
 
-    return total_loc, large_files, psi_findings, security_findings, complexity_findings
+    # Ghost detection runs after all files are collected (cross-file analysis)
+    ghost_findings = _detect_code_ghosts(source_files, root)
+
+    return (
+        total_loc, large_files, psi_findings, security_findings,
+        complexity_findings, ghost_findings
+    )
 
 
 # ─── Dimension Scoring ───────────────────────────────────────────────
@@ -241,6 +340,7 @@ def _score_dimensions(
     psi_findings: list[str],
     security_findings: list[str],
     complexity_findings: list[str],
+    ghost_findings: list[str],
     brutal: bool = False,
 ) -> list[DimensionResult]:
     """Calculate scores for each X-Ray dimension."""
@@ -318,6 +418,20 @@ def _score_dimensions(
         )
     )
 
+    # Fantasmas (Code Ghosts) — Structural clones burning entropy
+    if not has_files:
+        ghost_score = 100  # No files = no ghosts
+    else:
+        ghost_score = max(0, 100 - min(100, len(ghost_findings) * GHOST_PENALTY_PER_FINDING))
+    dimensions.append(
+        DimensionResult(
+            name="Fantasmas",
+            score=ghost_score,
+            weight="medium",
+            findings=ghost_findings[:MAX_FINDINGS_COMPLEXITY],
+        )
+    )
+
     # 14. Sovereign Excellence (Sovereign Pass)
     # Provides up to 30 bonus points for perfect code.
     sov_score = 0
@@ -328,6 +442,7 @@ def _score_dimensions(
         and sec_score == 100
         and complexity_score == 100
         and psi_score == 100
+        and ghost_score == 100
     ):
         sov_score = 100
         sov_findings = ["Sovereign Quality Standard achieved (130/100)"]
@@ -399,7 +514,7 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
     if root.is_dir():
         source_files = _collect_source_files(root_dir, exts)
 
-    total_loc, large_files, psi, sec, comp = _analyze_files(source_files, root_dir)
+    total_loc, large_files, psi, sec, comp, ghosts = _analyze_files(source_files, root_dir)
 
     dimensions = _score_dimensions(
         source_files,
@@ -408,6 +523,7 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
         psi,
         sec,
         comp,
+        ghosts,
         brutal=brutal,
     )
     score = _compute_weighted_score(dimensions)

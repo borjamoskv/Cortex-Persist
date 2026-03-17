@@ -486,7 +486,7 @@
 
 ### Decision
 
-> **[CTX-717]** Frontend Next.js en /Users/borjafernandezangulo/projects/omni-translate. Componentes: page.tsx (hero CORTEX), Features.tsx (9 caps), HowItWorks.tsx (4 use cases), Playground.tsx (multi-tab 4 endpoints), Skills.tsx (6 skills soberanos), Pricing.tsx (Pro 49 + Team 199 Stripe). Build 0 errores Turbopack 2.2s. <!-- /CTX-717 -->
+> **[CTX-717]** Frontend Next.js en ~/projects/omni-translate. Componentes: page.tsx (hero CORTEX), Features.tsx (9 caps), HowItWorks.tsx (4 use cases), Playground.tsx (multi-tab 4 endpoints), Skills.tsx (6 skills soberanos), Pricing.tsx (Pro 49 + Team 199 Stripe). Build 0 errores Turbopack 2.2s. <!-- /CTX-717 -->
 
 ---
 

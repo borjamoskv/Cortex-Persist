@@ -7,8 +7,8 @@ from web3 import Web3
 FUNDER_ADDR = "0x2340E6826B572522E0a59Ad25f27b600C69820dd"
 THRESHOLD_WEI = 500000000000000 # 0.0005 ETH
 RPC_URL = "https://mainnet.base.org"
-TSUNAMI_SCRIPT = "/Users/borjafernandezangulo/cortex/scripts/dust_tsunami_v2.py"
-PYTHON_PATH = "/Users/borjafernandezangulo/cortex/.venv/bin/python"
+TSUNAMI_SCRIPT = "./scripts/dust_tsunami_v2.py"
+PYTHON_PATH = "./.venv/bin/python"
 
 def watch_and_fire():
     w3 = Web3(Web3.HTTPProvider(RPC_URL))

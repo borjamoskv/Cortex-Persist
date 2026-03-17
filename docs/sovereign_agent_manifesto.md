@@ -442,7 +442,7 @@ CORTEX exposes the Bicameral Mind through a visual terminal interface using `ric
 | **Trust** | Gold | Ledger, Merkle | Cryptographic verification |
 | **Bio** | Green | Circadian, Endocrine | Biological system status |
 
-**Implementation:** [`cortex/cli/bicameral.py`](file:///Users/borjafernandezangulo/cortex/cortex/cli/bicameral.py)
+**Implementation:** [`cortex/cli/bicameral.py`](file://./cortex/cli/bicameral.py)
 
 ---
 

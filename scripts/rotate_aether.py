@@ -14,7 +14,7 @@ from pathlib import Path
 # Paths
 CORTEX_HOME = Path.home() / ".cortex"
 SNAPSHOT_FILE = CORTEX_HOME / "context-snapshot.md"
-CORTEX_SRC = Path("/Users/borjafernandezangulo/cortex")
+CORTEX_SRC = Path(".")
 PROFILES_DIR = CORTEX_SRC / "cortex" / "agents" / "definitions" / "profiles"
 TARGET_PROFILE = CORTEX_SRC / "cortex" / "agents" / "definitions" / "aether.yaml"
 

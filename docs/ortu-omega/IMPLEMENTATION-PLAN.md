@@ -1,7 +1,7 @@
 # IMPLEMENTATION-PLAN.md — ORTU-Ω Phase 3
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  
-> **Input**: [PILLAR-MAP.md](file:///Users/borjafernandezangulo/30_CORTEX/docs/ortu-omega/PILLAR-MAP.md) · [API-SURFACE.md](file:///Users/borjafernandezangulo/30_CORTEX/docs/ortu-omega/API-SURFACE.md)  
+> **Input**: [PILLAR-MAP.md](file://./docs/ortu-omega/PILLAR-MAP.md) · [API-SURFACE.md](file://./docs/ortu-omega/API-SURFACE.md)  
 > **Generated**: 2026-03-14
 
 ---

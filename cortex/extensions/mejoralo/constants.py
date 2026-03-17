@@ -41,6 +41,16 @@ __all__ = [
     "SWARM_TEMPERATURE_STEP",
     "SWARM_TIMEOUT_SECONDS",
     "TOTAL_SCANNER_COUNT",
+    # Ghost detection
+    "GHOST_SIMILARITY_THRESHOLD",
+    "GHOST_MIN_SUBTREE_SIZE",
+    "GHOST_PENALTY_PER_FINDING",
+    # CHRONOS-1 Yield
+    "CHRONOS_HOURS_PER_FILE",
+    "CHRONOS_HOURS_PER_CODEPATH",
+    "CHRONOS_COMPLEXITY_DIVISOR",
+    # Taint Circuit Breaker
+    "TAINT_TAG",
 ]
 
 STACK_MARKERS = {
@@ -122,6 +132,19 @@ HEAL_TEMPERATURES: dict[int, float] = {
 MAX_FUNC_PARAMS = 5  # Max recommended parameters per function
 MAX_FAN_OUT = 12  # Max allowed import fan-out per module
 TOTAL_SCANNER_COUNT = 6  # Number of antipattern scanners
+
+# ─── Ghost Detection Constants ────────────────────────────────────
+GHOST_SIMILARITY_THRESHOLD = 0.80  # AST subtree hashes that match ≥80% = ghost
+GHOST_MIN_SUBTREE_SIZE = 5  # Minimum number of AST nodes in a subtree to check
+GHOST_PENALTY_PER_FINDING = 8  # Score penalty per code ghost discovered
+
+# ─── CHRONOS-1 Yield Constants ─────────────────────────────────────
+CHRONOS_HOURS_PER_FILE = 6  # Hours per healed file (linear term)
+CHRONOS_HOURS_PER_CODEPATH = 12  # Hours per codepath affected
+CHRONOS_COMPLEXITY_DIVISOR = 3  # Divisor for cyclomatic_complexity_delta
+
+# ─── Taint Circuit Breaker ──────────────────────────────────────────
+TAINT_TAG = "mejoralo-tainted"  # CORTEX tag for permanently blacklisted files
 
 # ─── Daemon Constants ─────────────────────────────────────────────
 DAEMON_DEFAULT_SCAN_INTERVAL = 1800  # 30 minutes between scans

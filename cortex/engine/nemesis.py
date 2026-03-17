@@ -49,7 +49,7 @@ class NemesisProtocol:
         ),
     ]
 
-    NEMESIS_PATH = "/Users/borjafernandezangulo/cortex/nemesis.md"
+    NEMESIS_PATH = "./nemesis.md"
 
     @classmethod
     def _load_dynamic_antibodies(cls) -> list[tuple[str, str]]:

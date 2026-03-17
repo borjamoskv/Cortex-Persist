@@ -264,7 +264,7 @@ def main() -> None:
 
     from dotenv import load_dotenv
 
-    load_dotenv("/Users/borjafernandezangulo/cortex/.env")
+    load_dotenv("./.env")
 
     asyncio.run(run_trending_engine(submolt=args.submolt, dry_run=args.dry_run))
 

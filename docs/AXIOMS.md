@@ -183,3 +183,25 @@ For the full operational axiom registry (AX-001 through AX-028), including Const
 Canonical source of truth: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
 
 ---
+
+## AX-IMM: Inmunología Computacional Formal (Metabolismo Defensivo)
+
+> CORTEX no es solo un sistema "que recuerda bien". Es un sistema que sobrevive a la contaminación.
+
+El paso de *persistencia confiable* a *metabolismo defensivo* cambia la ontología del sistema. Un output alucinado o corrupto no es un fallo lógico aislado; es **material replicante**. Si toca memoria persistente, routing o consenso, se propaga causalmente y se convierte en un *agente infeccioso de estado*.
+
+Por lo tanto, la arquitectura de CORTEX opera como un metabolismo estructurado:
+
+- **Guard (Inmunidad Innata):** Controla la admisión en la frontera ("¿Dejo pasar esto?"). Si falla, entra basura.
+- **Seal (Encapsulación):** Controla la irreversibilidad ("¿Qué partes del pasado quedan fuera del universo mutable?"). Si falla, canonizas la infección.
+- **Block Verification (Serología Forense):** Comprueba que la historia causal no ha sido reescrita por necrosis tardía, detectando colonización silenciosa incluso después de persistir.
+
+El pipeline transicional es: `ingestión → guards → scoring patógeno → cuarentena → verificación cruzada → promoción → seal → auditoría post-seal`. Ante incertidumbre semántica con capacidad de propagación, la única acción válida no es un warning o retry, sino la **amputación** de la rama para salvar la topología global.
+
+### AX-IMM-01: Umbral de Promoción Epidemiológica
+
+Ningún estado con capacidad de propagación causal puede ser promovido sin un perfil inmunológico explícito (estimación de *entropy_score*, *contradiction_density*, *provenance_confidence*, *mutation_risk*). Todo artefacto tiene un perfil epidemiológico, no solo validez sintáctica.
+
+### AX-IMM-02: Mutación Post-Sello como Infección
+
+Toda mutación sobre estado sellado se interpreta primero como incidente de seguridad y amenaza de entropía, no como error de aplicación. La anomalía en el tejido cicatrizado es prueba de hostilidad o colapso interno.
