@@ -296,7 +296,7 @@ class AgentToolkit:
 
     def dispatch(self, tool_name: str, args: dict[str, str]) -> str:
         """Dispatch a tool call by name. Returns string result."""
-        
+
         # 0. Capability Guard Verification (Axiom Ω₄)
         if self.capability_guard:
             # Map tools to their operative RiskTier

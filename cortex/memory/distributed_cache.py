@@ -38,12 +38,15 @@ except ImportError:
     async def async_interceptor(gate: Any, func: Any, *args: Any, **kwargs: Any) -> Any:
         return await func(*args, **kwargs)
 
+
 try:
     from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 except ImportError:
+
     class DummyErrorGhostPipeline:
         def capture_sync(self, *args: Any, **kwargs: Any) -> None:
             pass
+
     ErrorGhostPipeline = DummyErrorGhostPipeline  # type: ignore[assignment, misc]
 
 try:

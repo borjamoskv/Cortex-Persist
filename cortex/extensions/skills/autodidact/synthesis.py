@@ -109,7 +109,7 @@ async def generate_cortex_embedding(text: str) -> list[float]:
     return await encode_engine.encode(text)
 
 
-async def check_semantic_redundancy(text_snippet: str) ->Optional[ tuple[bool, str ]]:
+async def check_semantic_redundancy(text_snippet: str) -> Optional[tuple[bool, str]]:
     """Axioma Ω₂: Si ya sabemos esto, aniquilamos la operación."""
     try:
         nearest = await vector_db.recall(

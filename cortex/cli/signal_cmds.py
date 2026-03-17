@@ -42,7 +42,9 @@ def signal_cmds() -> None:
 @click.option("--source", "-s", default="cli", help="Emitter identity")
 @click.option("--project", "-p", default=None, help="Project scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def emit_cmd(event_type: str, payload_json: str, source: str, project: Optional[str], db: str) -> None:
+def emit_cmd(
+    event_type: str, payload_json: str, source: str, project: Optional[str], db: str
+) -> None:
     """Emit a signal into the bus.
 
     Examples:

@@ -102,4 +102,3 @@ def test_property_score_negative_propagation() -> None:
     ]
     results = retrieve_for_causal_gap(gap, corpus)
     assert results[0].final_score == -1.0
-

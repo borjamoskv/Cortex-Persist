@@ -4,6 +4,7 @@
 Integración CORTEX con Coinbase Developer Platform.
 Singleton: una única instancia por proceso.
 """
+
 from __future__ import annotations
 
 import asyncio

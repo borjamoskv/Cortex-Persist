@@ -49,14 +49,20 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
 
     reversibility_penalty = risk_penalty_map[inp.action_risk]
 
-    if not inp.had_backup and inp.action_risk in {ActionRisk.FILE_WRITE, ActionRisk.SCHEMA_MUTATION, ActionRisk.DESTRUCTIVE}:
+    if not inp.had_backup and inp.action_risk in {
+        ActionRisk.FILE_WRITE,
+        ActionRisk.SCHEMA_MUTATION,
+        ActionRisk.DESTRUCTIVE,
+    }:
         reversibility_penalty += 0.35
 
     if inp.touched_persistent_state:
         reversibility_penalty += 0.05
 
     score = signal_gain - reversibility_penalty
-    waste_ratio = 0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+    waste_ratio = (
+        0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+    )
 
     return ExergyResult(
         score=score,

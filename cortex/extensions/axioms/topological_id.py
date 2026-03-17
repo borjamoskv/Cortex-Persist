@@ -5,6 +5,7 @@ Axiom: Entropic Asymmetry & Multi-Scale Causality
 Replaces UUIDv4. Generates lexicographically sortable, distributed IDs.
 Ensures perfect causal order without relying on absolute timestamps.
 """
+
 from __future__ import annotations
 
 import threading

@@ -24,7 +24,9 @@ def mock_db():
 class TestNightShiftCrystalDaemon:
     @pytest.mark.asyncio
     @patch("cortex.extensions.swarm.nightshift_daemon.discover", new_callable=AsyncMock)
-    @patch("cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock)
+    @patch(
+        "cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock
+    )
     @patch("cortex.extensions.swarm.crystal_thermometer.scan_all_crystals", new_callable=AsyncMock)
     @patch("cortex.extensions.swarm.crystal_consolidator.consolidate", new_callable=AsyncMock)
     async def test_full_cycle_success(
@@ -95,7 +97,9 @@ class TestNightShiftCrystalDaemon:
 
     @pytest.mark.asyncio
     @patch("cortex.extensions.swarm.nightshift_daemon.discover", new_callable=AsyncMock)
-    @patch("cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock)
+    @patch(
+        "cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock
+    )
     async def test_pipeline_failure(self, mock_run, mock_discover, mock_db) -> None:
         """Test cycle handles pipeline exceptions gracefully."""
         mock_discover.return_value = [{"type": "web"}]
@@ -109,7 +113,9 @@ class TestNightShiftCrystalDaemon:
 
     @pytest.mark.asyncio
     @patch("cortex.extensions.swarm.nightshift_daemon.discover", new_callable=AsyncMock)
-    @patch("cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock)
+    @patch(
+        "cortex.extensions.swarm.nightshift_daemon.NightShiftPipeline.run", new_callable=AsyncMock
+    )
     @patch("cortex.extensions.swarm.crystal_thermometer.scan_all_crystals", new_callable=AsyncMock)
     async def test_consolidation_failure_but_cycle_completes(
         self, mock_scan, mock_run, mock_discover, mock_db
@@ -128,7 +134,8 @@ class TestNightShiftCrystalDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "cortex.extensions.swarm.nightshift_daemon.NightShiftCrystalDaemon.run_cycle", new_callable=AsyncMock
+        "cortex.extensions.swarm.nightshift_daemon.NightShiftCrystalDaemon.run_cycle",
+        new_callable=AsyncMock,
     )
     async def test_daemon_loop_cooldown(self, mock_run_cycle) -> None:
         """Verifies the daemon loop executes and respects the stop signal."""

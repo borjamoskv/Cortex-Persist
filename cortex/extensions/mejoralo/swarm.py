@@ -130,9 +130,7 @@ class MejoraloSwarm:
             if result is not None:
                 console.print(f"  [green]✨ Cirujía AST completada [{file_path.name}][/]")
                 return result
-            console.print(
-                "  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]"
-            )
+            console.print("  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]")
 
         # 📦 Full-file fallback
         base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
@@ -222,10 +220,7 @@ class MejoraloSwarm:
 
         # Re-indent the patched node
         patch_lines = patched_node_source.splitlines(keepends=True)
-        re_indented = [
-            (indent_str + line if line.strip() else line)
-            for line in patch_lines
-        ]
+        re_indented = [(indent_str + line if line.strip() else line) for line in patch_lines]
 
         # Splice
         new_lines = lines[:start_idx] + re_indented + lines[end_idx:]
@@ -289,7 +284,8 @@ class MejoraloSwarm:
         try:
             patched_tree = ast.parse(patched_node)
             top_level = [
-                n for n in ast.iter_child_nodes(patched_tree)
+                n
+                for n in ast.iter_child_nodes(patched_tree)
                 if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
             ]
             if len(top_level) != 1:

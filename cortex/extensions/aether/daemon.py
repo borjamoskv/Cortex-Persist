@@ -116,7 +116,7 @@ class AetherDaemon:
         token = self._github_token
         if not token:
             return
-            
+
         from cortex.extensions.aether.github_ingestor import GitHubIngestor
 
         ingestor = GitHubIngestor(

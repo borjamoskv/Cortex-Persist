@@ -43,9 +43,7 @@ class EvolutionEngine(EvolutionOpsMixin):
     """
 
     def __init__(
-        self,
-        sovereigns: Optional[list[SovereignAgent]] = None,
-        engine: Optional[Any] = None
+        self, sovereigns: Optional[list[SovereignAgent]] = None, engine: Optional[Any] = None
     ):
         self.sovereigns = sovereigns or []
         self.params = EngineParameters()

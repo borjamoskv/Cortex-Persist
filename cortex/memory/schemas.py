@@ -62,7 +62,9 @@ class SchemaEngine:
     __slots__ = ("_schemas", "_config")
 
     def __init__(
-        self, schemas: Optional[list[MemorySchema]] = None, config: Optional[SchemaEngineConfig] = None
+        self,
+        schemas: Optional[list[MemorySchema]] = None,
+        config: Optional[SchemaEngineConfig] = None,
     ) -> None:
         self._config = config or SchemaEngineConfig()
         self._schemas: dict[str, MemorySchema] = {}

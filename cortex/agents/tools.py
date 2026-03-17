@@ -56,9 +56,7 @@ class ToolRegistry:
             raise KeyError(f"Tool not found: {name}")
 
         if allowed is not None and name not in allowed:
-            raise PermissionError(
-                f"Tool '{name}' is not in the agent's allowed tools: {allowed}"
-            )
+            raise PermissionError(f"Tool '{name}' is not in the agent's allowed tools: {allowed}")
 
         return self._tools[name]
 

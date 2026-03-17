@@ -155,5 +155,6 @@ async def _merge_duplicate_group(
                 # The canonical fact is already correct — skip silently.
                 logger.warning(
                     "Dedup merge update skipped for fact %d: %s",
-                    canonical_id, e,
+                    canonical_id,
+                    e,
                 )

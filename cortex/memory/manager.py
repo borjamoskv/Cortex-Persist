@@ -32,8 +32,10 @@ from cortex.routes.notch_ws import notify_notch_pruning
 try:
     from cortex.extensions.security.tenant import get_tenant_id
 except ImportError:
+
     def get_tenant_id() -> str:
         return "default"
+
 
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine

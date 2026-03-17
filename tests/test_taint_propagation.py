@@ -149,7 +149,7 @@ class TestPropagateTaint:
             "child": _node("child", parents=["P1", "P2", "P3"]),
         }
 
-        touched = propagate_taint("P1", graph)
+        propagate_taint("P1", graph)
 
         # 1/3 = 33% < 50% → SUSPECT, not TAINTED
         assert graph["child"].taint_status == TaintStatus.SUSPECT
@@ -163,7 +163,7 @@ class TestPropagateTaint:
             "child": _node("child", parents=["P1", "P2"]),
         }
 
-        touched = propagate_taint("P1", graph)
+        propagate_taint("P1", graph)
 
         # 1/2 = 50% ≥ 50% → TAINTED
         assert graph["child"].taint_status == TaintStatus.TAINTED

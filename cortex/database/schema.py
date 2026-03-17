@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS facts (
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
     tags        TEXT NOT NULL DEFAULT '[]',
-    meta        TEXT DEFAULT '{}',
+    metadata    TEXT DEFAULT '{}',
     hash        TEXT,
     valid_from  TEXT,
     valid_until TEXT,

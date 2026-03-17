@@ -8,7 +8,9 @@ from typing import Any, Final, Optional
 
 logger = logging.getLogger("cortex.extensions.llm.presets")
 
-_ASSET_PATH: Final[str] = str(Path(__file__).parent.parent.parent.parent / "config" / "llm_presets.json")
+_ASSET_PATH: Final[str] = str(
+    Path(__file__).parent.parent.parent.parent / "config" / "llm_presets.json"
+)
 
 # Global cache for presets to avoid redundant I/O
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}

@@ -1,4 +1,3 @@
-
 """Sovereign Arbiter — The Strict Validation Membrane (Ω₃).
 
 Implements the Byzantine Default: I verify, then trust.

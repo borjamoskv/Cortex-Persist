@@ -174,7 +174,7 @@ class AsyncCausalGraph:
                 old_conf = "C5"
                 old_meta: dict[str, Any] = {}
                 async with self.conn.execute(
-                    "SELECT confidence, meta FROM facts WHERE id = ?",
+                    "SELECT confidence, metadata FROM facts WHERE id = ?",
                     (current_id,),
                 ) as cur:
                     row = await cur.fetchone()
@@ -190,8 +190,7 @@ class AsyncCausalGraph:
                 old_meta["taint_timestamp"] = now
 
                 await self.conn.execute(
-                    "UPDATE facts SET confidence = ?, meta = ? "
-                    "WHERE id = ?",
+                    "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ?",
                     (new_conf, json.dumps(old_meta), current_id),
                 )
 
@@ -212,7 +211,8 @@ class AsyncCausalGraph:
                     )
                 except aiosqlite.Error as e:
                     logger.debug(
-                        "Failed to record taint link: %s", e,
+                        "Failed to record taint link: %s",
+                        e,
                     )
 
                 changes.append(
@@ -226,8 +226,7 @@ class AsyncCausalGraph:
 
             # Traverse structural edges only
             async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges "
-                "WHERE parent_id = ? AND edge_type != ?",
+                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type != ?",
                 (current_id, EDGE_TAINTED_BY),
             ) as cursor:
                 async for row in cursor:
@@ -252,7 +251,7 @@ class AsyncCausalGraph:
             current_id = queue.pop(0)
             async with self.conn.execute(
                 "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND tenant_id = ?",
-                (current_id, tenant_id)
+                (current_id, tenant_id),
             ) as cursor:
                 async for row in cursor:
                     child_id = row[0]
@@ -286,11 +285,10 @@ class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact (sync)."""
 
     @staticmethod
-    def find_parent_signal(
-        db_path: str, project: Optional[str] = None
-    ) -> Optional[int]:
+    def find_parent_signal(db_path: str, project: Optional[str] = None) -> Optional[int]:
         """Finds the most recent unconsumed causal signal."""
         import sqlite3
+
         try:
             with sqlite3.connect(db_path) as conn:
                 bus = SignalBus(conn)

@@ -28,8 +28,7 @@ class TestCoveringIndices:
         conn.commit()
 
         cursor = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='index' "
-            "AND name='idx_facts_tenant_valid'"
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_facts_tenant_valid'"
         )
         assert cursor.fetchone() is not None, "idx_facts_tenant_valid missing"
         conn.close()
@@ -51,8 +50,7 @@ class TestCoveringIndices:
         conn.commit()
 
         cursor = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='index' "
-            "AND name='idx_facts_proj_valid'"
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_facts_proj_valid'"
         )
         assert cursor.fetchone() is not None, "idx_facts_proj_valid missing"
         conn.close()
@@ -98,17 +96,24 @@ class TestFTS5Triggers:
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                "default", "test-proj", "sovereign memory system",
-                "decision", "C4", "2026-01-01", "[]", "test",
-                "{}", 1.0, "2026-01-01", "2026-01-01",
+                "default",
+                "test-proj",
+                "sovereign memory system",
+                "decision",
+                "C4",
+                "2026-01-01",
+                "[]",
+                "test",
+                "{}",
+                1.0,
+                "2026-01-01",
+                "2026-01-01",
             ),
         )
         conn.commit()
 
         # Search FTS5
-        cursor = conn.execute(
-            "SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'"
-        )
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
         rows = cursor.fetchall()
         assert len(rows) == 1, f"Expected 1 FTS hit, got {len(rows)}"
         conn.close()
@@ -123,28 +128,31 @@ class TestFTS5Triggers:
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                "default", "test-proj", "old content here",
-                "decision", "C4", "2026-01-01", "[]", "test",
-                "{}", 1.0, "2026-01-01", "2026-01-01",
+                "default",
+                "test-proj",
+                "old content here",
+                "decision",
+                "C4",
+                "2026-01-01",
+                "[]",
+                "test",
+                "{}",
+                1.0,
+                "2026-01-01",
+                "2026-01-01",
             ),
         )
         conn.commit()
 
-        conn.execute(
-            "UPDATE facts SET content = 'new sovereign content' WHERE id = 1"
-        )
+        conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = 1")
         conn.commit()
 
         # Old content should be gone
-        cursor = conn.execute(
-            "SELECT rowid FROM facts_fts WHERE content MATCH 'old'"
-        )
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'old'")
         assert cursor.fetchone() is None, "Old content still in FTS"
 
         # New content should be findable
-        cursor = conn.execute(
-            "SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'"
-        )
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
         assert cursor.fetchone() is not None, "New content missing from FTS"
         conn.close()
 
@@ -158,9 +166,18 @@ class TestFTS5Triggers:
             "created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                "default", "test-proj", "ephemeral data",
-                "decision", "C4", "2026-01-01", "[]", "test",
-                "{}", 1.0, "2026-01-01", "2026-01-01",
+                "default",
+                "test-proj",
+                "ephemeral data",
+                "decision",
+                "C4",
+                "2026-01-01",
+                "[]",
+                "test",
+                "{}",
+                1.0,
+                "2026-01-01",
+                "2026-01-01",
             ),
         )
         conn.commit()
@@ -168,9 +185,7 @@ class TestFTS5Triggers:
         conn.execute("DELETE FROM facts WHERE id = 1")
         conn.commit()
 
-        cursor = conn.execute(
-            "SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'"
-        )
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'")
         assert cursor.fetchone() is None, "Deleted fact still in FTS"
         conn.close()
 
@@ -219,9 +234,7 @@ class TestPoolExpansion:
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
-            assert pool.min_connections == 4, (
-                f"Expected min=4, got {pool.min_connections}"
-            )
+            assert pool.min_connections == 4, f"Expected min=4, got {pool.min_connections}"
         finally:
             os.environ.clear()
             os.environ.update(env)
@@ -236,9 +249,7 @@ class TestPoolExpansion:
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
-            assert pool.max_connections == 32, (
-                f"Expected max=32, got {pool.max_connections}"
-            )
+            assert pool.max_connections == 32, f"Expected max=32, got {pool.max_connections}"
         finally:
             os.environ.clear()
             os.environ.update(env)
@@ -252,9 +263,7 @@ class TestPoolExpansion:
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
-            assert pool.min_connections == 8, (
-                f"Expected min=8, got {pool.min_connections}"
-            )
+            assert pool.min_connections == 8, f"Expected min=8, got {pool.min_connections}"
         finally:
             os.environ.clear()
             os.environ.update(env)
@@ -268,9 +277,7 @@ class TestPoolExpansion:
             from cortex.database.pool import AsyncConnectionPool
 
             pool = AsyncConnectionPool(db_path=":memory:")
-            assert pool.max_connections == 64, (
-                f"Expected max=64, got {pool.max_connections}"
-            )
+            assert pool.max_connections == 64, f"Expected max=64, got {pool.max_connections}"
         finally:
             os.environ.clear()
             os.environ.update(env)

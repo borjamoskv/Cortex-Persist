@@ -2,6 +2,7 @@
 CORTEX V5 - Evolutionary Epistemology (IMMUNITAS-Ω)
 Tactical Falsification (Karl Popper): Axiom 15 Operational Falsification.
 """
+
 from __future__ import annotations
 
 import copy

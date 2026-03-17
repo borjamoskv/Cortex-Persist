@@ -75,6 +75,7 @@ class FakeVerificationAgent(BaseAgent):
                 )
             )
 
+
 async def eventually_assert(condition, timeout=1.0, interval=0.05):
     start = asyncio.get_event_loop().time()
     while asyncio.get_event_loop().time() - start < timeout:
@@ -91,7 +92,7 @@ async def test_omega_prime_executes_tool_and_completes_task():
 
     req_manifest = AgentManifest(agent_id="requester", purpose="test")
     requester = SpyAgent(manifest=req_manifest, bus=bus)
-    
+
     verifier = FakeVerificationAgent(bus=bus)
 
     omega_manifest = AgentManifest(agent_id="omega-prime", purpose="test")
@@ -100,7 +101,7 @@ async def test_omega_prime_executes_tool_and_completes_task():
         bus=bus,
         tool_executor=tool_executor,
     )
-    
+
     # We wire up the fake bus manually for testing
     bus.subscribe(requester.agent_id, requester.handle_message)
     bus.subscribe(omega.agent_id, omega.handle_message)
@@ -120,11 +121,11 @@ async def test_omega_prime_executes_tool_and_completes_task():
     )
 
     await bus.send(msg)
-    
-    await eventually_assert(
-        lambda: requester.has_message_type(MessageKind.TASK_COMPLETED)
+
+    await eventually_assert(lambda: requester.has_message_type(MessageKind.TASK_COMPLETED))
+
+    completed_msg = next(
+        m for m in requester.received_messages if m.kind == MessageKind.TASK_COMPLETED
     )
-    
-    completed_msg = next(m for m in requester.received_messages if m.kind == MessageKind.TASK_COMPLETED)
     assert completed_msg.payload["task_id"] == "task-1"
     assert completed_msg.payload["output"] == {"answer": 42}

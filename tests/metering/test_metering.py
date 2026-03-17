@@ -56,7 +56,7 @@ class TestUsageTracker:
 
     def test_multiple_records_aggregate(self, tracker):
         """Multiple records should accumulate in monthly summary."""
-        for i in range(5):
+        for _i in range(5):
             tracker.record(
                 UsageRecord(
                     tenant_id="tenant-a",

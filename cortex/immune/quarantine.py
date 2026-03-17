@@ -9,6 +9,7 @@ class BlastRadiusReport:
     causal_dependency_count: int
     criticality_score: float
 
+
 @dataclass(frozen=True)
 class DemolitionDecision:
     allowed: bool
@@ -16,13 +17,16 @@ class DemolitionDecision:
     requires_snapshot: bool
     reason: str
 
-def evaluate_demolition(report: BlastRadiusReport, has_snapshot: bool, modifies_schema: bool) -> DemolitionDecision:
+
+def evaluate_demolition(
+    report: BlastRadiusReport, has_snapshot: bool, modifies_schema: bool
+) -> DemolitionDecision:
     if report.criticality_score > 0.8:
         return DemolitionDecision(
             allowed=False,
             requires_quarantine=True,
             requires_snapshot=True,
-            reason="Criticality > 0.8. Direct demolition denied, requires quarantine."
+            reason="Criticality > 0.8. Direct demolition denied, requires quarantine.",
         )
 
     if not has_snapshot:
@@ -30,21 +34,21 @@ def evaluate_demolition(report: BlastRadiusReport, has_snapshot: bool, modifies_
             allowed=False,
             requires_quarantine=True,
             requires_snapshot=True,
-            reason="Destructive mutation without snapshot is prohibited."
+            reason="Destructive mutation without snapshot is prohibited.",
         )
-        
+
     if modifies_schema:
         if not has_snapshot:
             return DemolitionDecision(
                 allowed=False,
                 requires_quarantine=False,
                 requires_snapshot=True,
-                reason="Schema mutation requires strict snapshot rollback."
+                reason="Schema mutation requires strict snapshot rollback.",
             )
-            
+
     return DemolitionDecision(
         allowed=True,
         requires_quarantine=report.criticality_score > 0.4,
         requires_snapshot=True,
-        reason="Demolition allowed under quarantine and snapshot conditions."
+        reason="Demolition allowed under quarantine and snapshot conditions.",
     )

@@ -159,7 +159,6 @@ class OmegaPrimeAgent(BaseAgent):
                 retryable=False,
             )
 
-
     def _plan(self, task: TaskRequestPayload) -> dict:
         objective = task.objective.lower()
 

@@ -121,7 +121,7 @@ class NeuralGrowthEngine:
                 # Se sincroniza con la "conciencia colectiva".
                 logger.info("🧬 [GROWTH] Morphic Resonance detected: %s", content[:50])
                 await conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, created_at, updated_at, meta) "
+                    "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, created_at, updated_at, metadata) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         "system",

@@ -8,13 +8,14 @@ from cortex.utils.errors import SovereignViolation
 
 logger = logging.getLogger("cortex.guards.frontier")
 
+
 class FrontierModelGuard:
     """
     Enforces Rule 1.3: Strictly mandates frontier or high-tier models.
     Rejects 'low', 'flash', 'haiku', or 'mini' models.
     """
 
-    def __init__(self, presets_path:str | Optional[Path]= None):
+    def __init__(self, presets_path: str | Optional[Path] = None):
         if presets_path is None:
             # Default location relative to project root or cortex package
             # Based on previous research: config/llm_presets.json
@@ -22,19 +23,22 @@ class FrontierModelGuard:
         else:
             self.presets_path = Path(presets_path)
 
-    def validate_config(self, provider: str, model:Optional[str]= None) -> None:
+    def validate_config(self, provider: str, model: Optional[str] = None) -> None:
         """
         Validates the current LLM configuration against Rule 1.3.
-        
+
         Args:
             provider: The LLM provider (e.g., 'openai', 'ollama').
             model: Optional specific model name. If None, checks provider default.
-            
+
         Raises:
             SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
         """
         if not self.presets_path.exists():
-            logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
+            logger.warning(
+                "FrontierModelGuard: presets file not found at %s. Skipping validation.",
+                self.presets_path,
+            )
             return
 
         try:
@@ -60,4 +64,8 @@ class FrontierModelGuard:
             logger.error(msg)
             raise SovereignViolation(msg)
 
-        logger.info("FrontierModelGuard: Configuration validated. Provider '%s' (Tier: %s) is compliant.", provider, tier)
+        logger.info(
+            "FrontierModelGuard: Configuration validated. Provider '%s' (Tier: %s) is compliant.",
+            provider,
+            tier,
+        )

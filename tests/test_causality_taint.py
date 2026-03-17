@@ -74,9 +74,7 @@ def _create_db(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-def _insert_fact(
-    conn: sqlite3.Connection, fact_id: int, confidence: str = "C5"
-) -> None:
+def _insert_fact(conn: sqlite3.Connection, fact_id: int, confidence: str = "C5") -> None:
     conn.execute(
         "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
         (fact_id, f"fact-{fact_id}", confidence),
@@ -85,12 +83,10 @@ def _insert_fact(
 
 
 def _insert_edge(
-    conn: sqlite3.Connection, fact_id: int, parent_id: int,
-    edge_type: str = EDGE_DERIVED_FROM
+    conn: sqlite3.Connection, fact_id: int, parent_id: int, edge_type: str = EDGE_DERIVED_FROM
 ) -> None:
     conn.execute(
-        "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
-        "VALUES (?, ?, ?, ?)",
+        "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
         (fact_id, parent_id, edge_type, "default"),
     )
     conn.commit()
@@ -105,6 +101,7 @@ async def test_propagate_taint_single_child() -> None:
     await conn.execute("PRAGMA journal_mode=WAL")
 
     from cortex.engine.causality import AsyncCausalGraph
+
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
@@ -121,8 +118,7 @@ async def test_propagate_taint_single_child() -> None:
         (2, "child-fact", "C5"),
     )
     await conn.execute(
-        "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
-        "VALUES (?, ?, ?, ?)",
+        "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
         (2, 1, EDGE_DERIVED_FROM, "default"),
     )
     await conn.commit()
@@ -142,9 +138,7 @@ async def test_propagate_taint_single_child() -> None:
     assert change["hops"] == 1
 
     # Verify DB updated
-    async with conn.execute(
-        "SELECT confidence, meta FROM facts WHERE id = 2"
-    ) as cursor:
+    async with conn.execute("SELECT confidence, meta FROM facts WHERE id = 2") as cursor:
         row = await cursor.fetchone()
     assert row[0] == "C4"
     meta = json.loads(row[1])
@@ -250,7 +244,7 @@ async def test_propagate_taint_cyclic_graph() -> None:
 
     # Terminated cleanly despite the cycle.
     assert report.affected_count >= 2
-    
+
     await conn.close()
 
 

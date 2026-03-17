@@ -197,7 +197,7 @@ class FactMutationEngine:
 
         # 1. Fetch current scores
         async with conn.execute(
-            "SELECT json_extract(meta, '$.consensus_score'), confidence FROM facts WHERE id = ?",
+            "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?",
             (fact_id,),
         ) as cursor:
             row = await cursor.fetchone()
@@ -216,9 +216,9 @@ class FactMutationEngine:
 
         await conn.execute(
             "UPDATE facts SET confidence = ?, updated_at = ?, "
-            "meta = CASE "
-            "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
-            "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+            "metadata = CASE "
+            "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
+            "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
             "END "
             "WHERE id = ?",
             (new_confidence, ts, new_score, fact_id),
@@ -237,9 +237,9 @@ class FactMutationEngine:
         # We skip the json_set for encrypted blobs to prevent OperationalError.
         await conn.execute(
             "UPDATE facts SET valid_until = ?, updated_at = ?, "
-            "meta = CASE "
-            "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
-            "  ELSE json_set(COALESCE(meta, '{}'), '$.deprecation_reason', ?) "
+            "metadata = CASE "
+            "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
+            "  ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?) "
             "END "
             "WHERE id = ?",
             (ts, ts, reason, fact_id),
@@ -252,14 +252,12 @@ class FactMutationEngine:
         payload: dict,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
-        ts = payload.get(
-            "timestamp", datetime.now(timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
         await conn.execute(
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
-            "meta = CASE "
-            "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
-            "  ELSE json_set(COALESCE(meta, '{}'), '$.tombstoned_at', ?, '$.tombstone_reason', ?) "
+            "metadata = CASE "
+            "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
+            "  ELSE json_set(COALESCE(metadata, '{}'), '$.tombstoned_at', ?, '$.tombstone_reason', ?) "
             "END "
             "WHERE id = ?",
             (ts, ts, ts, reason, fact_id),
@@ -305,9 +303,9 @@ class FactMutationEngine:
         if score is not None and confidence is not None:
             await conn.execute(
                 "UPDATE facts SET confidence = ?, "
-                "meta = CASE "
-                "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
-                "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+                "metadata = CASE "
+                "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
+                "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
                 "END "
                 "WHERE id = ?",
                 (confidence, score, fact_id),
@@ -315,9 +313,9 @@ class FactMutationEngine:
         elif score is not None:
             await conn.execute(
                 "UPDATE facts SET "
-                "meta = CASE "
-                "  WHEN meta LIKE 'v6_aesgcm:%' THEN meta "
-                "  ELSE json_set(COALESCE(meta, '{}'), '$.consensus_score', ?) "
+                "metadata = CASE "
+                "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
+                "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
                 "END "
                 "WHERE id = ?",
                 (score, fact_id),

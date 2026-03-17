@@ -146,7 +146,7 @@ class CompoundYieldTracker:
         import json
 
         # First check meta for explicitly tracked hours
-        cursor = conn.execute("SELECT meta FROM facts WHERE id = ?", (fact_id,))
+        cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         if not row:
             return 0.0
@@ -275,7 +275,7 @@ class CompoundYieldTracker:
 
                 cursor = conn.execute(
                     "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
+                    " valid_from, source, metadata, created_at, updated_at)"
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         "default",

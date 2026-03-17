@@ -343,7 +343,7 @@ class TestAutoResolve:
             None,
         )
         await db.commit()
-        d2 = await insert_fact_record(
+        await insert_fact_record(
             db,
             "default",
             "proj",

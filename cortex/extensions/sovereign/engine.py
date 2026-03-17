@@ -341,7 +341,9 @@ async def run_pipeline(
 
         ctx.results.append(result)
         # Update endocrine context after each phase if needed
-        ctx.endocrine.ingest_context(f"Completed phase {phase.name}", metadata={"success": result.success})
+        ctx.endocrine.ingest_context(
+            f"Completed phase {phase.name}", metadata={"success": result.success}
+        )
 
     return ctx
 

@@ -34,7 +34,9 @@ class VisionEngine:
         self._screenshots_dir = os.path.expanduser("~/.cortex/screenshots")
         os.makedirs(self._screenshots_dir, exist_ok=True)
 
-    def capture_screen(self, region: Optional[tuple[int, int, int, int]] = None) -> InteractionResult:
+    def capture_screen(
+        self, region: Optional[tuple[int, int, int, int]] = None
+    ) -> InteractionResult:
         """
         Captures the screen or a region and saves it to the CORTEX screenshots dir.
         Returns the path to the saved image.

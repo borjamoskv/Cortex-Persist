@@ -158,7 +158,9 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
             return await asyncio.to_thread(file_path.read_text, encoding="utf-8")
 
         hostname = (parsed.hostname or "").lower()
-        is_youtube = hostname in ("youtube.com", "youtu.be") or hostname.endswith((".youtube.com", ".youtu.be"))
+        is_youtube = hostname in ("youtube.com", "youtu.be") or hostname.endswith(
+            (".youtube.com", ".youtu.be")
+        )
         if intent_type == "quick_read" and not is_youtube:
             return _unwrap(await fetch_jina_markdown(target))
         elif is_youtube and intent_type in ("quick_read", "deep_learn"):

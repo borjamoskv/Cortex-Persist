@@ -3,6 +3,7 @@
 Detects physical and temporal contradictions in the daily logs.
 Implementación directa del Axioma Ω₂ (Asimetría Entrópica) y CORTEX-Sovereignty.
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -58,9 +58,7 @@ class BaseAgent:
 
     async def handle_message(self, message: AgentMessage) -> None:
         """Process an incoming message. Subclasses MUST override."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement handle_message()"
-        )
+        raise NotImplementedError(f"{self.__class__.__name__} must implement handle_message()")
 
     async def tick(self) -> None:
         """Periodic autonomous work. Daemons override this.
@@ -119,10 +117,7 @@ class BaseAgent:
                 )
 
                 # Auto-quarantine after too many consecutive errors
-                if (
-                    self.state.consecutive_errors
-                    >= self.manifest.max_consecutive_errors
-                ):
+                if self.state.consecutive_errors >= self.manifest.max_consecutive_errors:
                     self.state.status = AgentStatus.QUARANTINED
                     logger.error(
                         "[%s] QUARANTINED after %d consecutive errors",
@@ -188,9 +183,7 @@ class BaseAgent:
 
     async def use_tool(self, tool_name: str, **kwargs: Any) -> Any:
         """Invoke a tool respecting manifest policy."""
-        tool = self.tools.get(
-            tool_name, allowed=self.manifest.tools_allowed or None
-        )
+        tool = self.tools.get(tool_name, allowed=self.manifest.tools_allowed or None)
         return await tool.execute(**kwargs)
 
     # ── Messaging helpers ────────────────────────────────────────

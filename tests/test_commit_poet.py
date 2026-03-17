@@ -145,7 +145,9 @@ class TestScopeExtraction:
 class TestAntiRepetition:
     """Verify the engine avoids repeating messages."""
 
-    def test_no_consecutive_duplicates(self, poet: CommitPoet, feat_diff: str, feat_files: list[str]):
+    def test_no_consecutive_duplicates(
+        self, poet: CommitPoet, feat_diff: str, feat_files: list[str]
+    ):
         messages: list[str] = []
         for _ in range(10):
             msg = poet.compose(feat_diff, feat_files)
@@ -173,9 +175,7 @@ class TestEmojiSignature:
         msg = poet.compose(feat_diff, feat_files)
         # The message should end with a non-ASCII character (emoji)
         last_char = msg.rstrip()[-1]
-        assert ord(last_char) > 127 or msg.rstrip()[-2] == "\ufe0f", (
-            f"Missing emoji: {msg}"
-        )
+        assert ord(last_char) > 127 or msg.rstrip()[-2] == "\ufe0f", f"Missing emoji: {msg}"
 
 
 # ── Message Length ────────────────────────────────────────────────────────────
