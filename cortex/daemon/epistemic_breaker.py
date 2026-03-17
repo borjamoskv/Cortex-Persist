@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import random
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -37,22 +36,45 @@ class EpistemicBreakerDaemon:
         self.circuit_open = False  # False = System is awake and acting. True = Sleep/Compressing.
 
     async def _measure_entropy(self) -> float:
-        """
-        Calculates the current cognitive entropy (0.0 to 1.0).
-        In a real scenario, this queries the DB for rapid fact insertion rates,
-        unlinked ghosts, or contradiction spikes.
-        For now, we simulate a metric based on hypothetical DB stats and random noise.
-        """
-        # Placeholder query: how many 'error' or 'contradiction' facts recently?
-        # In a full CORTEX DB, we'd query via self.engine
-        pass
+        """Deterministic cognitive entropy (0.0–1.0) from engine stats.
 
-        # Simulate entropy metric. Under normal load it's low. Sometimes it spikes.
-        # This will be replaced by actual deterministic O(1) metrics from the DB.
-        simulated_noise = random.uniform(0.1, 0.4)
+        Components (weighted):
+          - orphan_ratio   (0.30): orphan facts / active facts
+          - error_density  (0.25): error-type facts / active facts
+          - deprecation    (0.20): deprecated / total facts
+          - growth_rate    (0.25): Δ(facts) since last evaluation, normalized
 
-        # Let's say if the system is running "hot", noise increases.
-        return simulated_noise
+        Returns 0.0 under clean state, approaches 1.0 under systemic stress.
+        """
+        try:
+            s = await self.engine.stats()
+        except Exception:
+            logger.debug("_measure_entropy: engine.stats() unavailable, returning 0")
+            return 0.0
+
+        active = max(s.get("active_facts", 0), 1)
+        total = max(s.get("total_facts", 0), 1)
+        orphans = s.get("orphan_facts", 0)
+        deprecated = s.get("deprecated_facts", 0)
+        error_count = s.get("types", {}).get("error", 0)
+
+        orphan_ratio = min(orphans / active, 1.0)
+        error_density = min(error_count / active, 1.0)
+        deprecation_ratio = min(deprecated / total, 1.0)
+
+        # Growth rate: compare current fact count to last snapshot
+        delta = max(active - self._last_fact_count, 0)
+        # Normalize: >200 new facts per cycle → saturated
+        growth_rate = min(delta / 200.0, 1.0)
+        self._last_fact_count = active
+
+        entropy = (
+            orphan_ratio * 0.30
+            + error_density * 0.25
+            + deprecation_ratio * 0.20
+            + growth_rate * 0.25
+        )
+        return round(min(entropy, 1.0), 4)
 
     async def _trigger_sleep_cycle(self):
         """
@@ -121,11 +143,6 @@ class EpistemicBreakerDaemon:
             try:
                 # 1. Measure the current state of chaos
                 entropy = await self._measure_entropy()
-
-                # We can also simulate an artificial spike to test it occasionally
-                if random.random() > 0.95:
-                    logger.warning("🌩️ Simulated Neural Storm detected. Artificial entropy spike.")
-                    entropy = 0.99
 
                 if entropy >= self.max_entropy_threshold:
                     logger.critical(
