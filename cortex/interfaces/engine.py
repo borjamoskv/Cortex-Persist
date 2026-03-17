@@ -22,9 +22,20 @@ class EngineProtocol(Protocol):
     Provides connection access, session management, and core operations
     without coupling to the full CortexEngine implementation.
     """
-
     _db_path: Path
     _vec_available: bool
+
+    @property
+    def memory(self) -> Any:
+        ...
+
+    @property
+    def embeddings(self) -> Any:
+        ...
+
+    def _resolve_tenant(self, tenant_id: str) -> str:
+        """Resolve tenant namespace."""
+        ...
 
     async def get_conn(self) -> aiosqlite.Connection:
         """Returns the async database connection."""
@@ -51,14 +62,48 @@ class EngineProtocol(Protocol):
         """Store a fact and return its ID."""
         ...
 
+    async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
+        """Store multiple facts in a transaction."""
+        ...
+
+    async def get_fact(self, fact_id: int) -> Any | None:
+        """Get fact by ID."""
+        ...
+
+    async def get_all_active_facts(
+        self,
+        tenant_id: str = "default",
+        project: str | None = None,
+        fact_types: list[str] | None = None,
+    ) -> list[Any]:
+        """Get all active facts matching criteria."""
+        ...
+
     async def recall(
         self,
         project: str,
         query: str | None = None,
         tenant_id: str = "default",
         **kwargs: Any,
-    ) -> list[dict[str, Any]]:
+    ) -> list[Any]:
         """Recall facts matching criteria."""
+        ...
+
+    async def history(
+        self,
+        project: str,
+        tenant_id: str = "default",
+        as_of: str | None = None,
+    ) -> list[Any]:
+        """Temporal history."""
+        ...
+
+    async def time_travel(
+        self,
+        tenant_id: str = "default",
+        tx_id: int | None = None,
+    ) -> list[Any]:
+        """Project state reconstruction."""
         ...
 
     async def search(
@@ -67,7 +112,7 @@ class EngineProtocol(Protocol):
         project: str | None = None,
         tenant_id: str = "default",
         **kwargs: Any,
-    ) -> list[dict[str, Any]]:
+    ) -> list[Any]:
         """Semantic/hybrid search."""
         ...
 
@@ -75,10 +120,26 @@ class EngineProtocol(Protocol):
         self,
         fact_id: int,
         reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
         tenant_id: str = "default",
-        **kwargs: Any,
     ) -> bool:
         """Soft-delete a fact."""
+        ...
+
+    async def register_ghost(
+        self,
+        reference: str,
+        context: str,
+        project: str,
+        target_file: str | Path | None = None,
+        conn: aiosqlite.Connection | None = None,
+        root_dir: Path | None = None,
+    ) -> str:
+        """Register a ghost fact."""
+        ...
+
+    async def stats(self) -> dict[str, Any]:
+        """System stats."""
         ...
 
     async def close(self) -> None:

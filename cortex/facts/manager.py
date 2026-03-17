@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import ValidationError
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.store_validators import validate_content
 from cortex.utils.canonical import now_iso
+
+if TYPE_CHECKING:
+    from cortex.interfaces.engine import EngineProtocol
 
 _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 
@@ -20,7 +23,7 @@ logger = logging.getLogger("cortex.facts")
 class FactManager:
     """Manages the full lifecycle and retrieval of facts."""
 
-    def __init__(self, engine):
+    def __init__(self, engine: EngineProtocol):
         self.engine = engine
 
     # Minimum content length to prevent garbage facts.
@@ -75,11 +78,11 @@ class FactManager:
                         results = await self.engine.search(
                             query=content, tenant_id=tenant_id, project=project, top_k=1
                         )
-                        if results and results[0].score > 0.90:
+                        if results and results[0].score > 0.90:  # type: ignore[reportAttributeAccessIssue]
                             logger.info(
                                 "V8 Guardrail: Fact discarded - Semantic Duplicate of #%s (Score: %.2f)",
-                                results[0].fact_id,
-                                results[0].score,
+                                results[0].fact_id,  # type: ignore[reportAttributeAccessIssue]
+                                results[0].score,  # type: ignore[reportAttributeAccessIssue]
                             )
                             # We update updated_at / last_accessed
                             await conn.execute(  # type: ignore[reportOptionalMemberAccess]
@@ -87,17 +90,18 @@ class FactManager:
                                 (now_iso(), results[0].fact_id),
                             )
                             await conn.commit()  # type: ignore[reportOptionalMemberAccess]
-                            return results[0].fact_id
+                            return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
         except (OSError, RuntimeError, ValueError) as e:
             # The ValidationError import was moved to the top of the file.
             if isinstance(e, ValidationError):
                 raise ValueError(f"Ingestion Validation Failed: {e}") from e
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from cortex.engine.store_mixin import StoreMixin
+        from typing import cast
 
+        from cortex.engine.store_mixin import StoreMixin
         return await StoreMixin._store_impl(
-            self.engine,
+            cast("StoreMixin", self.engine),
             conn,  # type: ignore[reportArgumentType]
             project,
             content,
@@ -129,7 +133,7 @@ class FactManager:
         """Lower-level fetch from engine database."""
         conn = await self.engine.get_conn()
         cursor = await conn.execute(query, params)
-        return [row_to_fact(r) for r in await cursor.fetchall()]
+        return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
 
     async def get_all_active_facts(
         self,
@@ -163,12 +167,12 @@ class FactManager:
         self, tx_id: int, tenant_id: str = "default", project: str | None = None
     ) -> list[Fact]:
         """Project state reconstruction delegated to QueryMixin."""
-        results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id, project=project)
+        results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id)
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
     reconstruct_state = time_travel
 
-    async def register_ghost(self, reference: str, context: str, project: str) -> int:
+    async def register_ghost(self, reference: str, context: str, project: str) -> str:
         """Register a new ghost, delegated to GhostMixin."""
         return await self.engine.register_ghost(reference, context, project)
 

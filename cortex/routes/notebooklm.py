@@ -88,12 +88,19 @@ async def notebooklm_digest(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Generate Master Digest with Shadow Key anchors."""
+    from fastapi import HTTPException
+
     from cortex.config import DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
 
+    base_dir = Path.cwd().resolve()
+    target_file = (base_dir / output).resolve()
+    if not str(target_file).startswith(str(base_dir)):
+        raise HTTPException(status_code=400, detail="Path traversal detected")
+
     svc = NotebookLMService(str(DEFAULT_DB_PATH))
     content = await svc.generate_digest(project=project)
-    Path(output).write_text(content, encoding="utf-8")
+    target_file.write_text(content, encoding="utf-8")
     word_count = len(content.split())
 
     return {
@@ -110,11 +117,18 @@ async def notebooklm_fragment(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Fragment CORTEX facts into semantic domain files."""
+    from fastapi import HTTPException
+
     from cortex.config import DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
 
+    base_dir = Path.cwd().resolve()
+    target_dir = (base_dir / output_dir).resolve()
+    if not str(target_dir).startswith(str(base_dir)):
+        raise HTTPException(status_code=400, detail="Path traversal detected")
+
     svc = NotebookLMService(str(DEFAULT_DB_PATH))
-    counts = await svc.fragment_by_domain(Path(output_dir))
+    counts = await svc.fragment_by_domain(target_dir)
 
     return {"domains": counts, "total_facts": sum(counts.values())}
 
@@ -136,7 +150,15 @@ async def notebooklm_sync(
     target = None
     provider_name = "Custom"
     if drive_path:
-        target = Path(drive_path)
+        home = Path.home().resolve()
+        requested = Path(drive_path).expanduser().resolve()
+        if not str(requested).startswith(str(home)):
+            from fastapi import HTTPException
+
+            raise HTTPException(
+                status_code=400, detail="Invalid drive_path. Must be within the home directory."
+            )
+        target = requested
     else:
         for provider, paths in CLOUD_PROVIDERS.items():
             for p in paths:

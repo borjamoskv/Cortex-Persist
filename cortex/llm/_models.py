@@ -128,7 +128,7 @@ class CortexPrompt(BaseModel):
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
     episodic_context: list[dict[str, str | None]] = Field(
-        default=None,
+        default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)

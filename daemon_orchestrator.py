@@ -111,8 +111,9 @@ async def send_mail(req: MailRequest):
     try:
         service.users().messages().send(userId="me", body={"raw": raw}).execute()
         return {"status": "sent"}
-    except Exception as e:
-        return {"error": str(e)}
+    except Exception:
+        logger.exception("Failed to send email via Gmail API")
+        return {"error": "Failed to send email"}
 
 
 @app.get("/mail/pulse")

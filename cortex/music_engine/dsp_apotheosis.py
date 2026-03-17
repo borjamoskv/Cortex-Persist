@@ -118,7 +118,7 @@ class DSPApotheosis:
             gain = scipy.signal.savgol_filter(gain, win_size, 3)
 
         # Apply gain in frequency domain
-        spectrum_matched = spectrum * gain
+        spectrum_matched = spectrum * gain  # type: ignore[operator]
         audio_matched = np.fft.irfft(spectrum_matched, n=n)
 
         return audio_matched

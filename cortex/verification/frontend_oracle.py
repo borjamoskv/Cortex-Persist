@@ -27,7 +27,7 @@ class FrontendOracle:
         # Extract JS blocks from .html or use full content for .js/.ts
         if filepath.endswith(".html"):
             scripts = re.findall(
-                r"<script.*?>\s*(.*?)\s*</script>", content, re.DOTALL | re.IGNORECASE
+                r"<script.*?>\s*(.*?)\s*</script[^>]*>", content, re.DOTALL | re.IGNORECASE
             )
             js_content = "\n".join(scripts)
         else:

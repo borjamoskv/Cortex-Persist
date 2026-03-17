@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from cortex.auth import AuthResult, require_permission
 
 try:
-    from google import genai
+    from google import genai  # type: ignore[attr-defined]
     from google.genai import types
 except ImportError:
     genai = None

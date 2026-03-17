@@ -488,7 +488,9 @@ class HTTPClient:
                 elif resp.status_code in (301, 302, 403, 404, 410):
                     return None
             except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError) as exc:
-                log.debug("[%s/%s] %s: %s", attempt + 1, self._max_retries, url, exc)
+                parsed = urlparse(url)
+                safe_url = parsed._replace(query="<redacted>").geturl() if parsed.query else url
+                log.debug("[%s/%s] %s: %s", attempt + 1, self._max_retries, safe_url, exc)
                 await asyncio.sleep(2**attempt)
             except Exception as exc:
                 log.debug("Unexpected: %s", exc)

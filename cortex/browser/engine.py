@@ -46,6 +46,7 @@ class BrowserEngine:
             raise RuntimeError("Context failed to create.")
         self._page = await self._context.new_page()
 
+        assert self._page is not None
         # Override navigator.webdriver
         await self._page.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"

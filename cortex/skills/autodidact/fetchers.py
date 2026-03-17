@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -144,7 +145,9 @@ def _unwrap(res: Any) -> Any:
 async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
     """Extrae, asimila y retorna el Cristal Cognitivo (Markdown)."""
     try:
-        is_youtube = "youtube.com" in target or "youtu.be" in target
+        parsed = urlparse(target)
+        hostname = (parsed.hostname or "").lower()
+        is_youtube = hostname in ("youtube.com", "youtu.be") or hostname.endswith((".youtube.com", ".youtu.be"))
         if intent_type == "quick_read" and not is_youtube:
             return _unwrap(await fetch_jina_markdown(target))
         elif is_youtube and intent_type in ("quick_read", "deep_learn"):

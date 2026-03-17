@@ -93,7 +93,7 @@ async def openai_chat_completions(
                     yield f"data: {JSONResponse(data).body.decode()}\n\n"
             except Exception as e:  # noqa: BLE001 — streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)
-                yield f'data: {{"error": "{str(e)}"}}\n\n'
+                yield 'data: {"error": "Internal streaming error"}\n\n'
 
             yield "data: [DONE]\n\n"
 
@@ -144,4 +144,4 @@ async def openai_chat_completions(
         }
     except Exception as e:  # noqa: BLE001 — endpoint boundary
         logger.error("Spoof Completion Error: %s", e)
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Internal server error") from e

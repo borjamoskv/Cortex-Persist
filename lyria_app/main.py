@@ -37,7 +37,8 @@ async def get_axioms():
                 })
         return {"axioms": axioms}
     except Exception as e:
-        return {"error": str(e), "axioms": []}
+        print(f"Error fetching axioms: {e}")
+        return {"error": "Failed to fetch axioms", "axioms": []}
 
 
 @app.websocket("/ws/generate")
@@ -101,7 +102,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Error in Lyria bridge: {e}")
         try:
-            await websocket.send_json({"error": str(e)})
+            await websocket.send_json({"error": "Failed to stream audio"})
         except Exception:
             pass
     finally:

@@ -62,6 +62,10 @@ class CapatazOrchestrator:
         coro_func: Callable,
         args: list | tuple = (),
         kwargs: dict | None = None,
+        lock_resource: str | None = None,
+        lock_manager: Any | None = None,
+        lock_timeout_s: float = 10.0,
+        lock_ttl_s: float = 30.0,
     ) -> Any:
         """Run a single task under the mission context."""
         task = SwarmTask(name=name, agent_name=agent_name, status=TaskStatus.RUNNING)
@@ -69,8 +73,22 @@ class CapatazOrchestrator:
 
         logger.info("[%s] Capataz: Deploying %s to task: %s", self.mission_id, agent_name, name)
 
+        lock_acquired = False
         try:
             kwargs = kwargs or {}
+            
+            # Acquire lock if specified
+            if lock_resource and lock_manager:
+                logger.debug("[%s] Capataz: Agent %s attempting to acquire lock on %s", self.mission_id, agent_name, lock_resource)
+                lock_acquired = await lock_manager.acquire(
+                    resource=lock_resource,
+                    agent_id=agent_name,
+                    timeout_s=lock_timeout_s,
+                    ttl_s=lock_ttl_s
+                )
+                if not lock_acquired:
+                    raise asyncio.TimeoutError(f"Agent {agent_name} failed to acquire lock on {lock_resource}")
+
             result = await coro_func(*args, **kwargs)
             task.status = TaskStatus.COMPLETED
             task.result = result
@@ -81,6 +99,9 @@ class CapatazOrchestrator:
             logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name, e)
             raise
         finally:
+            if lock_acquired and lock_resource and lock_manager:
+                logger.debug("[%s] Capataz: Agent %s releasing lock on %s", self.mission_id, agent_name, lock_resource)
+                await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
 
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
@@ -94,6 +115,10 @@ class CapatazOrchestrator:
                     coro_func=td["func"],
                     args=td.get("args", ()),
                     kwargs=td.get("kwargs", {}),
+                    lock_resource=td.get("lock_resource"),
+                    lock_manager=td.get("lock_manager"),
+                    lock_timeout_s=td.get("lock_timeout_s", 10.0),
+                    lock_ttl_s=td.get("lock_ttl_s", 30.0),
                 )
             )
         return await asyncio.gather(*loop_tasks, return_exceptions=True)

@@ -71,7 +71,7 @@ async def spawn_agent(profile: dict[str, str], uid: str, submolt: str = "general
         logger.error("[%s] Moltbook no devolvió API key. Abortando.", agent_name)
         return
 
-    logger.info("[%s] Identidad forjada. API Key obtenida: %s...", agent_name, api_key[:8])
+    logger.info("[%s] Identidad forjada. API Key obtenida.", agent_name)
 
     # Update client with the new dedicated key
     mb_client = MoltbookClient(api_key=api_key)

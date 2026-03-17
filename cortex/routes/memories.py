@@ -201,8 +201,9 @@ async def batch_store(
                 parent_decision_id=mem.parent_decision_id,
             )
             ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError) as e:
-            errors.append({"index": i, "error": str(e)})
+        except (sqlite3.Error, ValueError, OSError):
+            logger.exception("Failed to batch store memory at index %d", i)
+            errors.append({"index": i, "error": "Failed to store memory"})
 
     return {
         "stored": len(ids),

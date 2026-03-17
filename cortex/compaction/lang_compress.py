@@ -321,7 +321,7 @@ class LangCompressor:
         """Lazy-init Gemini client."""
         if self._client is None:
             try:
-                from google import genai
+                from google import genai  # type: ignore[attr-defined]
 
                 self._client = genai.Client()
             except (ImportError, ValueError, OSError, RuntimeError) as e:

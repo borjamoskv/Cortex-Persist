@@ -7,6 +7,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import aiosqlite
 import sqlite_vec
@@ -33,6 +34,14 @@ from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker  # noqa: E402
 from cortex.engine.lock import SovereignLock  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
+
+if TYPE_CHECKING:
+    from cortex.interfaces.engine import EngineProtocol
+
+# Limit the maximum number of tags per fact.
+MAX_TAGS_PER_FACT = 20
+
+# We use the unified GuardPipeline for AX-033 logic.
 
 
 class CortexEngine(
