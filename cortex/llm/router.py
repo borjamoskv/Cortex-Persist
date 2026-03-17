@@ -188,11 +188,64 @@ class CortexLLMRouter:
         """Clear NXDOMAIN records."""
         self._cascade._nxdomain_cache.clear()
 
+    # ── Shannon Compression (Ω₁₃: Entropic Containment) ────────────
+
+    # Maximum word count for working_memory before compression triggers.
+    # ~32k words ≈ ~40k tokens — safety margin for most providers.
+    _MAX_WORKING_MEMORY_WORDS: int = 32_000
+
+    # After compression, keep the first message (instruction) and last N messages.
+    _COMPRESSED_TAIL_MESSAGES: int = 6
+
+    @staticmethod
+    def _compress_working_memory(
+        messages: list[dict[str, str]],
+        max_words: int,
+        tail: int,
+    ) -> list[dict[str, str]]:
+        """Truncate working_memory if it exceeds the entropic safety threshold.
+
+        Preserves the first message (user instruction seed) and the last
+        ``tail`` messages (recent context). Intermediate messages are replaced
+        with a single compressed summary marker.
+
+        Returns the original list unmodified if within budget.
+        """
+        total_words = sum(len(m.get("content", "").split()) for m in messages)
+        if total_words <= max_words or len(messages) <= tail + 1:
+            return messages
+
+        head = messages[:1]
+        compressed_marker = {
+            "role": "system",
+            "content": (
+                f"[CORTEX Ω₁₃ Shannon Compression] "
+                f"{len(messages) - 1 - tail} intermediate messages truncated "
+                f"({total_words} words exceeded {max_words} word budget). "
+                f"Only seed instruction and last {tail} messages retained."
+            ),
+        }
+        recent = messages[-tail:]
+        logger.warning(
+            "🗜️ [SHANNON] Compressed working_memory: %d msgs (%d words) → %d msgs",
+            len(messages),
+            total_words,
+            len(head) + 1 + len(recent),
+        )
+        return head + [compressed_marker] + recent
+
     async def execute_resilient(self, prompt: CortexPrompt) -> Result[str, str]:
         """Ejecuta inferencia con cascade determinista por intención.
 
         Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
         """
+        # Ω₁₃ Shannon Compression: prevent quadratic token burn
+        prompt.working_memory = self._compress_working_memory(
+            prompt.working_memory,
+            self._MAX_WORKING_MEMORY_WORDS,
+            self._COMPRESSED_TAIL_MESSAGES,
+        )
+
         # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
         prompt_key = hashlib.sha256(
             f"{prompt.system_instruction}:{prompt.working_memory}:{prompt.intent}".encode()

@@ -28,6 +28,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import random
 import time
 from typing import Any
 
@@ -339,9 +340,17 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
                 response.latency_ms = (time.monotonic() - start) * 1000
                 return response
 
-            # Esperar antes de retry
+            # Exponential backoff + jitter (Ω₁₃: prevent thermal token burn)
             if attempt < attempts - 1:
-                await asyncio.sleep(self.config.retry_delay_seconds)
+                backoff = min(
+                    60.0,
+                    self.config.retry_delay_seconds * (2 ** attempt)
+                ) + random.uniform(0, 1.0)
+                logger.info(
+                    "⏳ Backoff %.1fs before retry %d/%d for %s:%s",
+                    backoff, attempt + 2, attempts, provider_name, model,
+                )
+                await asyncio.sleep(backoff)
 
         latency = (time.monotonic() - start) * 1000
         return ModelResponse(

@@ -22,7 +22,7 @@ class EpistemicBreakerDaemon:
         self,
         engine,
         check_interval_seconds: int = 300,
-        max_entropy_threshold: float = 0.85,
+        max_entropy_threshold: float = 0.70,
     ):
         self.engine = engine
         self.check_interval_seconds = check_interval_seconds
@@ -86,7 +86,7 @@ class EpistemicBreakerDaemon:
         )
 
         # TODO: Call actual `compaction` module or `autodidact-omega` to reduce H(X)
-        await asyncio.sleep(5)  # Simulate deep sleep and compression time
+        await asyncio.sleep(15)  # Cooldown: simulate deep compression cycle (Ω₁₃)
 
         logger.info(
             "🟢 [EPISTEMIC BREAKER] Compression complete. Entropy reduced. CLOSING CIRCUIT."
