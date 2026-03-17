@@ -6,9 +6,10 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 """
 
 from __future__ import annotations
+
 import json
 import logging
-from typing import Any, Optional, ClassVar
+from typing import Any, ClassVar, Optional
 
 import aiosqlite
 
@@ -17,16 +18,17 @@ from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.privacy_mixin import PrivacyMixin
-from cortex.engine.store_quarantine_mixin import QuarantineMixin
-from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
 from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
     purge_logic,
 )
+from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validation import run_store_validation_logic
+from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+
 # now_iso removed (internal use relocated)
 
 __all__ = ["StoreMixin"]
@@ -104,7 +106,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             )
 
     async def _run_store_validation(
-        self, conn: aiosqlite.Connection, project: str, content: str, tenant_id: str, fact_type: str, tags: Optional[list[str]], confidence: str, source: Optional[str], meta: Optional[dict[str, Any]]
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        content: str,
+        tenant_id: str,
+        fact_type: str,
+        tags: Optional[list[str]],
+        confidence: str,
+        source: Optional[str],
+        meta: Optional[dict[str, Any]],
     ) -> tuple[Optional[int], Optional[dict[str, Any]], str, str]:
         """Delegated validation logic (Ω₁₃, Semantic Dedup, Bridge)."""
         return await run_store_validation_logic(
@@ -157,7 +168,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id = (
             tx_id
             if tx_id is not None
-            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})
+            else await self._log_transaction(
+                conn, project, "store", {"fact_type": fact_type}
+            )
         )
         fact_id = await insert_fact_record(
             conn,
@@ -175,20 +188,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         )
 
         # ─── Dual-Write Bridge: sync parent_decision_id to facts_meta ───
-        try:
-            cursor = await conn.execute(
-                "SELECT parent_decision_id FROM facts WHERE id = ?",
-                (fact_id,),
-            )
-            row = await cursor.fetchone()
-            resolved_parent = row[0] if row else None
-            if resolved_parent is not None:
+        if parent_decision_id is not None:
+            try:
+                # facts_meta is sharded/virtual; this update is for vector store parity
+                # Using parent_decision_id from scope instead of SELECTing from facts
                 await conn.execute(
                     "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
-                    (str(resolved_parent), fact_id),
+                    (str(parent_decision_id), fact_id),
                 )
-        except (aiosqlite.Error, OSError):
-            pass
+            except (aiosqlite.Error, OSError):
+                pass
 
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
             await embed_fact_async(
@@ -251,7 +260,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
             if not row:
-                raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
+                raise ValueError(
+                    f"Fact {fact_id} not found or belongs to another tenant"
+                )
 
             (
                 db_tenant_id,
@@ -293,7 +304,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn=conn,
                 commit=False,
             )
-            
+
             await conn.commit()
             return new_id
 

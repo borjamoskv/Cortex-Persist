@@ -38,6 +38,9 @@ SOVEREIGN_MARKERS: frozenset[str] = frozenset(
     }
 )
 
+# Rule 1.3 — Only frontier and high tier models are allowed
+ALLOWED_TIERS: frozenset[str] = frozenset({"frontier", "high"})
+
 
 @dataclass()
 class DependencyViolation:

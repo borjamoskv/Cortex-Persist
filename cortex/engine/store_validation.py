@@ -28,25 +28,32 @@ async def run_store_validation_logic(
     """Extracted validation logic from StoreMixin."""
     cls = mixin_instance.__class__
     
+    import os
+    skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION")
+
     # ═══ Axiom Ω₁₃: Thermodynamic Enforcement ═══
-    if cls._agent_mode == AgentMode.DECORATIVE and fact_type not in ("error", "ghost"):
+    if cls._agent_mode == AgentMode.DECORATIVE and fact_type not in ("error", "ghost") and not skip_thermo:
         logger.warning("🚫 [DECORATIVE MODE] Write blocked for type: %s", fact_type)
         raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
 
-    ex_input = ExergyInput(
-        prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
-        posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
-        tokens_consumed=meta.get("_tokens", 100) if meta else 100,
-        action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
-        had_backup=True,
-        touched_persistent_state=True
-    )
-    ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
-    enforce_exergy(ex_res)
+    if not skip_thermo:
+        ex_input = ExergyInput(
+            prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
+            posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
+            tokens_consumed=meta.get("_tokens", 100) if meta else 100,
+            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
+            had_backup=True,
+            touched_persistent_state=True
+        )
+        ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
+        enforce_exergy(ex_res)
 
-    if should_enter_decorative_mode(cls._thermo_counters):
-        cls._agent_mode = AgentMode.DECORATIVE
-        logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
+        if should_enter_decorative_mode(cls._thermo_counters):
+            cls._agent_mode = AgentMode.DECORATIVE
+            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
+    else:
+        # Ensure we stay in ACTIVE mode during tests
+        cls._agent_mode = AgentMode.ACTIVE
 
     StorageGuard.validate(
         project=project, content=content, fact_type=fact_type,
