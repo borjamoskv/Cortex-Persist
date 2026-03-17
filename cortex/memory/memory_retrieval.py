@@ -8,7 +8,7 @@ No state mutations. Always returns serializable dicts.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.memory.manager import CortexMemoryManager
@@ -23,6 +23,54 @@ __all__ = [
 
 logger = logging.getLogger("cortex.memory.retrieval")
 
+# ==============================================================================
+# FEATURE FLAG: Cross-Encoder Reranking
+# ==============================================================================
+ENABLE_CROSS_ENCODER_RERANK = True
+
+_cross_encoder = None
+
+def get_cross_encoder() -> Any:
+    """Load the cross-encoder models lazily to avoid heavy initializations."""
+    global _cross_encoder
+    if _cross_encoder is None:
+        if not ENABLE_CROSS_ENCODER_RERANK:
+            _cross_encoder = False
+            return _cross_encoder
+        try:
+            from sentence_transformers.cross_encoder import CrossEncoder
+            # Extremely fast and small local cross-encoder for semantic reranking
+            _cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', max_length=512)
+        except ImportError:
+            logger.warning("sentence-transformers not installed; skipping cross-encoder reranking")
+            _cross_encoder = False
+        except Exception as e:
+            logger.error("Failed to load cross-encoder: %s", e)
+            _cross_encoder = False
+    return _cross_encoder
+
+def apply_cross_encoder_rerank(query: str, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Contextual relevance evaluation using a local Cross-Encoder."""
+    if not results or not query or not ENABLE_CROSS_ENCODER_RERANK:
+        return results
+    ce = get_cross_encoder()
+    if not ce:
+        return results
+        
+    pairs = [(query, r.get("content", "")) for r in results]
+    try:
+        scores = ce.predict(pairs)
+        for score, r in zip(scores, results, strict=False):
+            # Blend cross encoder score with dense/RRF score
+            original_score = r.get("score", 0.0)
+            r["score"] = (original_score * 0.3) + (float(score) * 0.7)
+            r["_ce_score"] = float(score)
+            
+        results.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+    except Exception as e:
+        logger.warning("Cross-encoder reranking failed during prediction: %s", e)
+    
+    return results
 
 class KnowledgeGapException(Exception):
     """Raised when Metamemory FOK evaluates retrieval potential as too low to proceed."""
@@ -30,7 +78,7 @@ class KnowledgeGapException(Exception):
     pass
 
 
-def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> dict[str, Any]:
+def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
     """Convert a fact model to a context-ready dict."""
     return {
         "id": fact.id,
@@ -72,7 +120,7 @@ async def _fetch_hdc_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
@@ -95,7 +143,7 @@ async def _fetch_dense_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
@@ -149,9 +197,9 @@ async def retrieve_episodic_context(
     manager: CortexMemoryManager,
     tenant_id: str,
     project_id: str,
-    query: Optional[str],
+    query: str | None,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve and fuse facts from all available L2 layers.
 
@@ -203,6 +251,10 @@ async def retrieve_episodic_context(
         results = [fact_to_dict(f) for f in hdc_results[:max_episodes]]
     else:
         results = [fact_to_dict(f) for f in dense_results[:max_episodes]]
+
+    # 5.5. Cross-Encoder Reranking
+    if ENABLE_CROSS_ENCODER_RERANK:
+        results = apply_cross_encoder_rerank(query, results)
 
     # 6. Hebbian Ranking Boost (STDP edge weights)
     results = _apply_hebbian_boost(manager, results)
