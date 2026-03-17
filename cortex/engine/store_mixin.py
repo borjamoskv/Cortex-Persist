@@ -28,7 +28,14 @@ from cortex.engine.storage_guard import StorageGuard
 from cortex.engine.store_guards import run_security_guards
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
+from cortex.guards.thermodynamic import (
+    AgentMode,
+    ThermodynamicCounters,
+    should_enter_decorative_mode,
+)
+from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
 from cortex.memory.temporal import now_iso
+from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
 
 __all__ = ["StoreMixin"]
 
@@ -48,6 +55,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
     _thermal_decay_cache: ClassVar[dict[int, int]] = {}
+    _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
+    _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
 
     async def store(
         self,
@@ -105,6 +114,32 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def _run_store_validation(
         self, conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
     ) -> tuple[int | None, dict | None, str, str]:
+        # ═══ Axiom Ω₁₃: Thermodynamic Enforcement ═══
+        if self.__class__._agent_mode == AgentMode.DECORATIVE and fact_type not in (
+            "error", "ghost"
+        ):
+            logger.warning("🚫 [DECORATIVE MODE] Write blocked for type: %s", fact_type)
+            raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
+
+        # Calculate Exergy for the proposal
+        # We estimate uncertainty reduction. If it's a new fact, prior=1.0, posterior=0.2 (arbitrary for skeleton)
+        # In a real integration, these would come from the LLM's logprobs or the engine's information gain metric.
+        ex_input = ExergyInput(
+            prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
+            posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
+            tokens_consumed=meta.get("_tokens", 100) if meta else 100,
+            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
+            had_backup=True,
+            touched_persistent_state=True
+        )
+        ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
+        enforce_exergy(ex_res)
+
+        # Update counters and check for mode transition
+        if should_enter_decorative_mode(self.__class__._thermo_counters):
+            self.__class__._agent_mode = AgentMode.DECORATIVE
+            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
+
         StorageGuard.validate(
             project=project,
             content=content,
@@ -196,7 +231,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if hasattr(membrane_log, "model_dump"):
             meta["_membrane_log"] = membrane_log.model_dump()
         else:
-            meta["_membrane_log"] = membrane_log.dict()  # Fallback for V1 if needed
+            meta["_membrane_log"] = membrane_log.dict()
 
         meta = await resolve_causality_async(conn, project, meta)
 
@@ -221,7 +256,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     fact_type = "bridge"
                     # Prescriptive pattern adoption: ensure bridge content follows BridgeGuard format
                     if "→" not in content and "->" not in content:
-                        content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
+                        content = (
+                            f"Pattern from {source_proj} → {project}. Adaptation: {content}"
+                        )
 
         if fact_type == "bridge":
             bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
@@ -550,6 +587,73 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             conn, project, "invalidate", {"fact_id": fact_id, "reason": reason}
         )
         return True
+
+    async def purge(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        force: bool = False,
+    ) -> bool:
+        """Axiom Ω₄: Bounded Demolition (Hard Delete with Blast Radius check)."""
+        tenant_id = self._resolve_tenant(tenant_id)
+
+        async with self.session() as conn:
+            # 1. Fetch metadata for blast radius evaluation
+            from cortex.engine.causality import AsyncCausalGraph
+            graph = AsyncCausalGraph(conn)
+            
+            # Check if fact exists
+            async with conn.execute(
+                "SELECT project, fact_type FROM facts WHERE id = ? AND tenant_id = ?",
+                (fact_id, tenant_id)
+            ) as cursor:
+                row = await cursor.fetchone()
+            if not row:
+                return False
+            
+            project, fact_type = row
+            
+            # 2. Calculate Blast Radius
+            dep_count = await graph.calculate_blast_radius(fact_id, tenant_id)
+            
+            # Score criticality (example heuristic)
+            criticality = 0.0
+            if fact_type == "rule":
+                criticality += 0.5
+            criticality += min(0.4, dep_count * 0.1)
+            
+            report = BlastRadiusReport(
+                reverse_import_count=0, # Placeholder for more complex analytics
+                test_reference_count=0,
+                runtime_entrypoint_count=0,
+                causal_dependency_count=dep_count,
+                criticality_score=criticality
+            )
+            
+            # 3. Evaluate Demolition
+            # Check for snapshot existence (example check)
+            has_snapshot = True # Placeholder: in a real system, check snapshot registry
+            modifies_schema = (fact_type == "rule")
+            
+            decision = evaluate_demolition(report, has_snapshot, modifies_schema)
+            
+            if not decision.allowed and not force:
+                logger.warning("🚫 DEMOLITION DENIED: %s (Fact #%d)", decision.reason, fact_id)
+                if decision.requires_quarantine:
+                    # Move to quarantine instead of deleting
+                    await self.invalidate(fact_id, reason=f"Quarantined: {decision.reason}", conn=conn, tenant_id=tenant_id)
+                raise RuntimeError(f"Bounded Demolition Denied: {decision.reason}")
+
+            # 4. Perform Demolition
+            await conn.execute("DELETE FROM facts WHERE id = ?", (fact_id,))
+            await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
+            await conn.execute("DELETE FROM causal_edges WHERE fact_id = ? OR parent_id = ?", (fact_id, fact_id))
+            
+            await self._log_transaction(
+                conn, project, "purge", {"fact_id": fact_id, "blast_radius": dep_count}
+            )
+            await conn.commit()
+            return True
 
     _validate_content = staticmethod(validate_content)
     _check_dedup = staticmethod(check_dedup)

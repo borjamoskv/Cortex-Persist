@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
+
+import aiosqlite
 
 
 class EpistemicStatus(str, Enum):
@@ -10,6 +11,12 @@ class EpistemicStatus(str, Enum):
     OBSOLETE = "obsolete"
 
 
+EDGE_DERIVED_FROM = "derived_from"
+EDGE_TRIGGERED_BY = "triggered_by"
+EDGE_UPDATED_FROM = "updated_from"
+EDGE_TAINTED_BY = "tainted_by"
+
+
 @dataclass
 class LedgerEvent:
     event_id: str
@@ -17,14 +24,14 @@ class LedgerEvent:
     status: EpistemicStatus
     trust_score: float
     created_at: str
-    last_revalidated_at: Optional[str] = None
+    last_revalidated_at: str | None = None
     tainted: bool = False
 
 
 class CausalGraph:
     def __init__(self):
-        self._events: Dict[str, LedgerEvent] = {}
-        self._children: Dict[str, List[str]] = {}
+        self._events: dict[str, LedgerEvent] = {}
+        self._children: dict[str, list[str]] = {}
 
     def get_event(self, event_id: str) -> LedgerEvent:
         return self._events[event_id]
@@ -39,7 +46,7 @@ class CausalGraph:
                 self._children[parent_id] = []
             self._children[parent_id].append(event.event_id)
 
-    def get_descendants(self, node_id: str) -> List[str]:
+    def get_descendants(self, node_id: str) -> list[str]:
         return self._children.get(node_id, [])
 
     def __getitem__(self, node_id: str) -> LedgerEvent:
@@ -68,5 +75,55 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
             event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
             event.tainted = True
 
-        for child_id in graph.get_descendants(node_id):
-            queue.append((child_id, depth + 1))
+class AsyncCausalGraph:
+    def __init__(self, conn: aiosqlite.Connection):
+        self.conn = conn
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str) -> None:
+        """Propagate taint (C1 confidence + tainted flag) to all children in the DAG."""
+        # This is a database-backed propagation
+        queue = [(fact_id, 0)]
+        visited = {fact_id}
+
+        while queue:
+            current_id, depth = queue.pop(0)
+            
+            # Update current fact if it's not the root (root is updated by caller usually, but let's be safe)
+            if depth > 0:
+                # Update confidence and mark as tainted
+                # We use a direct SQL update for performance within the transaction
+                await self.conn.execute(
+                    "UPDATE facts_meta SET confidence = 'C1', tainted = 1 WHERE id = ?",
+                    (current_id,)
+                )
+            
+            # Find children
+            async with self.conn.execute(
+                "SELECT id FROM facts WHERE parent_decision_id = ? AND tenant_id = ?",
+                (current_id, tenant_id)
+            ) as cursor:
+                async for row in cursor:
+                    child_id = row[0]
+                    if child_id not in visited:
+                        visited.add(child_id)
+                        queue.append((child_id, depth + 1))
+
+    async def calculate_blast_radius(self, fact_id: int, tenant_id: str) -> int:
+        """Calculate the number of dependent facts in the causal DAG."""
+        count = 0
+        queue = [fact_id]
+        visited = {fact_id}
+
+        while queue:
+            current_id = queue.pop(0)
+            async with self.conn.execute(
+                "SELECT id FROM facts WHERE parent_decision_id = ? AND tenant_id = ?",
+                (current_id, tenant_id)
+            ) as cursor:
+                async for row in cursor:
+                    child_id = row[0]
+                    if child_id not in visited:
+                        visited.add(child_id)
+                        queue.append(child_id)
+                        count += 1
+        return count
