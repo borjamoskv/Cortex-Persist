@@ -1,7 +1,7 @@
 [project]
 name = "cortex-persist"
 version = "0.3.0b2"
-description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
+description = "Tamper-evident audit and decision lineage for AI systems — cryptographic verification, integrity proofs, and traceability for agent memory."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
