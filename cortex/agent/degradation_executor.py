@@ -13,7 +13,7 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any, ParamSpec, TypeVar
 
-from cortex.agent.degradation import (
+from cortex.agent.degradation_types import (
     AgentAction,
     AgentDegradedError,
     AgentResult,
