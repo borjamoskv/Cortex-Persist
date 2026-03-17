@@ -55,7 +55,7 @@ class TestLogDecision:
         assert "eu_ai_act" in meta
         assert meta["eu_ai_act"]["article"] == "12"
         assert meta["eu_ai_act"]["decision_type"] == "rejection"
-        assert meta["eu_ai_act"]["agent_id"] == "agent:loan-processor"
+        assert meta["eu_ai_act"]["agent_id"] == "AGENT:LOAN_PROCESSOR"
 
     async def test_custom_meta_merged(self, tracker):
         fact_id = tracker.log_decision(
@@ -83,7 +83,7 @@ class TestLogDecision:
         conn = await tracker._engine.get_conn()
         cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
-        assert row[0] == "test-agent"
+        assert row[0] == "TEST_AGENT"
 
     async def test_custom_project_override(self, tracker):
         fact_id = tracker.log_decision(
@@ -94,7 +94,7 @@ class TestLogDecision:
         conn = await tracker._engine.get_conn()
         cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
-        assert row[0] == "custom-project"
+        assert row[0] == "CUSTOM_PROJECT"
 
 
 # ─── verify_chain ─────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ class TestExportAudit:
         assert summary["total_facts"] == 3
         assert summary["active_facts"] == 3
         assert "decision" in summary["by_type"]
-        assert "agent:counter" in summary["sources"]
+        assert "AGENT:COUNTER" in summary["sources"]
 
     async def test_include_facts_flag(self, tracker):
         tracker.log_decision(

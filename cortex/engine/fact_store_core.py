@@ -129,15 +129,7 @@ async def insert_fact_record(
     fact_id = cursor.lastrowid
     assert fact_id is not None
 
-    # FTS Update
-    try:
-        await conn.execute(
-            "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type),
-        )
-    except (sqlite3.Error, aiosqlite.Error) as e:
-        logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
+    # FTS Update is now handled completely by SQLite triggers
 
     # Causal Infrastructure (ANAMNESIS-Ω)
     try:

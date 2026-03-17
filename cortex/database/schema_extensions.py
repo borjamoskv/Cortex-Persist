@@ -264,30 +264,28 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     content,
     project,
     tags,
-    fact_type
+    fact_type,
+    content='facts',
+    content_rowid='id'
 );
 """
 
 CREATE_FACTS_FTS_TRIGGERS = """
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
-AFTER INSERT ON facts
-BEGIN
+CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts BEGIN
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+  VALUES (new.id, new.content, new.project, new.tags, new.fact_type);
 END;
 
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
-AFTER UPDATE OF content, project, tags, fact_type ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
+CREATE TRIGGER IF NOT EXISTS facts_au AFTER UPDATE ON facts BEGIN
+  INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type)
+  VALUES('delete', old.id, old.content, old.project, old.tags, old.fact_type);
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+  VALUES (new.id, new.content, new.project, new.tags, new.fact_type);
 END;
 
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
-BEFORE DELETE ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
+CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
+  INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type)
+  VALUES('delete', old.id, old.content, old.project, old.tags, old.fact_type);
 END;
 """
 
@@ -300,6 +298,17 @@ CREATE TABLE IF NOT EXISTS merkle_roots (
     tx_end_id       INTEGER NOT NULL,
     tx_count        INTEGER NOT NULL,
     timestamp       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_INTEGRITY_CHECKS = """
+CREATE TABLE IF NOT EXISTS integrity_checks (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    check_type      TEXT NOT NULL,
+    status          TEXT NOT NULL,
+    details         TEXT NOT NULL,
+    started_at      TEXT NOT NULL,
+    completed_at    TEXT NOT NULL
 );
 """
 
@@ -365,4 +374,5 @@ EXTENSION_SCHEMA = [
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
+    CREATE_INTEGRITY_CHECKS,
 ]

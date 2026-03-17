@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Quality Gates (11 Seals) — Sovereign Local Enforcement.
+"""CORTEX Quality Gates (21 Seals) — Sovereign Local Enforcement.
 
-Executes all 11 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
+Executes all 21 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
 Zero latency axiom enforcement (AX-020).
 
 Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
@@ -551,12 +551,11 @@ async def main() -> int:
     await check_gate_10_prompt_size()
 
     printer.head("SEALS SUMMARY")
-    failed = [i + 1 for i, r in enumerate(results) if not r]
-    # Remap index 10 → seal 11 in the summary
-    remapped = [11 if s == 10 else s for s in failed]
+    _GATE_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    failed = [_GATE_ORDER[i] for i, r in enumerate(results) if not r]
 
-    if remapped:
-        printer.fail(f"SEALS BROKEN: {remapped}")
+    if failed:
+        printer.fail(f"SEALS BROKEN: {failed}")
         print("\nFix violations before pushing.")
         return 1
     else:

@@ -14,15 +14,25 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import re
 from typing import Any
 
 __all__ = [
+    "canonical_project_id",
     "canonical_json",
     "compute_tx_hash",
     "compute_tx_hash_v1",
     "compute_fact_hash",
     "now_iso",
 ]
+
+
+def canonical_project_id(value: str) -> str:
+    """Canonicalize project/agent identifier for robust lookup/persistence."""
+    s = value.strip()
+    s = s.replace("-", "_")
+    s = re.sub(r"\s+", "_", s)
+    return s.upper()
 
 
 def now_iso() -> str:

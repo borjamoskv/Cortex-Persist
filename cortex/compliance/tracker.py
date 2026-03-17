@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.utils.canonical import canonical_project_id
 
 __all__ = ["ComplianceTracker"]
 
@@ -97,6 +98,8 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
+        proj = canonical_project_id(proj)
+        agent_id = canonical_project_id(agent_id)
         now = datetime.now(timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
@@ -173,6 +176,7 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
+        proj = canonical_project_id(proj)
 
         # 1. Run integrity check
         integrity = self.verify_chain()

@@ -1,9 +1,13 @@
 """
 Sovereign Synchronization (Axiom Ω₂: Entropic Asymmetry).
 
-Implementation of a Lock-Free synchronization mechanism.
-Instead of blocking threads/coroutines, agents append their INTENT to a shared ledger.
-A projection (lock_state) determines the current truth.
+Lock mechanism using append-only intent ledger.
+
+Architecture:
+- acquire(): atomic INSERT intent + promote (single BEGIN IMMEDIATE),
+  then read-only poll with constant 50ms sleep.
+- release(): atomic evict + promote next (single BEGIN IMMEDIATE).
+- Polling is READ-ONLY — zero write contention during wait.
 """
 
 from __future__ import annotations
@@ -19,35 +23,28 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.lock")
 
+_POLL_INTERVAL = 0.05  # 50ms — tight enough for throughput
+
 
 class SovereignLock:
-    """
-    Sovereign Lock mechanism.
-    130/100: Zero-friction append-only concurrency.
-    """
+    """Sovereign Lock: append-only intent ledger with state projection."""
 
     def __init__(self, engine: Any):
         self._engine = engine
         self._db_path = getattr(engine, "db_path", None) or getattr(engine, "_db_path", None)
 
     @asynccontextmanager
-    async def _dedicated_conn(self):
-        """Open a dedicated aiosqlite connection for lock operations.
-
-        The engine uses a single shared connection (engine.session() returns the
-        same conn every time). Concurrent lock users would serialize on that conn
-        object, producing a deadlock when the polling loop and the release happen
-        from different coroutines. Opening a fresh connection per operation avoids
-        this at the cost of a small open/close overhead (acceptable for lock paths).
-        """
+    async def _conn(self):
+        """Dedicated aiosqlite connection (WAL mode, 10s busy timeout)."""
         import aiosqlite
 
         db_path = str(self._db_path or getattr(self._engine, "_db_path", None))
         async with aiosqlite.connect(db_path) as conn:
-            # WAL mode so concurrent readers don't block writers
             await conn.execute("PRAGMA journal_mode=WAL")
-            await conn.execute("PRAGMA busy_timeout=5000")
+            await conn.execute("PRAGMA busy_timeout=10000")
             yield conn
+
+    # ─── Public API ────────────────────────────────────────────────────
 
     async def acquire(
         self,
@@ -57,131 +54,186 @@ class SovereignLock:
         ttl_s: float = 30.0,
         priority: int = 0,
     ) -> bool:
-        """Attempts to acquire a lock via append-only intent ledger."""
+        """Insert intent + initial promote, then read-only poll."""
         expires_at = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 
-        # 1. Append intent + trigger initial reduction
-        async with self._dedicated_conn() as conn:
+        # 1. Atomic: insert intent + try to promote (single writer txn)
+        async with self._conn() as conn:
+            await conn.execute("BEGIN IMMEDIATE")
             await conn.execute(
-                "INSERT INTO lock_intents (resource, agent_id, action, priority, expires_at) "
+                "INSERT INTO lock_intents "
+                "(resource, agent_id, action, priority, expires_at) "
                 "VALUES (?, ?, ?, ?, ?)",
                 (resource, agent_id, "request", priority, expires_at),
             )
+            holder = await self._promote_if_free(conn, resource)
             await conn.commit()
-            await self._reduce_resource(conn, resource)
 
-        # 2. Poll for state collapse — each poll uses a fresh connection
-        start_time = datetime.now(timezone.utc)
-        while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
-            async with self._dedicated_conn() as conn:
+        # Fast path: we got promoted immediately
+        if holder == agent_id:
+            logger.debug("SovereignLock: %s acquired by %s (fast)", resource, agent_id)
+            return True
+
+        # 2. Read-only poll loop (no writes, no contention)
+        deadline = datetime.now(timezone.utc) + timedelta(seconds=timeout_s)
+        while datetime.now(timezone.utc) < deadline:
+            await asyncio.sleep(_POLL_INTERVAL)
+
+            async with self._conn() as conn:
                 async with conn.execute(
-                    "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
+                    "SELECT holder_agent, expires_at " "FROM lock_state WHERE resource = ?",
                     (resource,),
-                ) as cursor:
-                    row = await cursor.fetchone()
-                if row:
-                    holder, expiry = row
-                    if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
-                        await self._clear_expired(conn, resource)
-                        continue
-                    if holder == agent_id:
-                        logger.debug("SovereignLock: %s acquired by %s", resource, agent_id)
-                        return True
-            await asyncio.sleep(0.05)
+                ) as cur:
+                    row = await cur.fetchone()
 
-        logger.warning("SovereignLock: Timeout acquiring %s for %s", resource, agent_id)
+            if not row:
+                # State cleared but not yet promoted — rare race;
+                # next release() or acquire() will promote.
+                continue
+
+            holder, expiry = row
+            if holder == agent_id:
+                logger.debug(
+                    "SovereignLock: %s acquired by %s",
+                    resource,
+                    agent_id,
+                )
+                return True
+
+            # Expired holder → evict and promote atomically
+            if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
+                async with self._conn() as conn:
+                    await conn.execute("BEGIN IMMEDIATE")
+                    await self._evict_and_promote(conn, resource)
+                    await conn.commit()
+
+        logger.warning(
+            "SovereignLock: Timeout acquiring %s for %s",
+            resource,
+            agent_id,
+        )
         return False
 
     async def release(self, resource: str, agent_id: str):
-        """Registers a 'release' intent and flattens the result."""
-        async with self._dedicated_conn() as conn:
+        """Atomic: remove holder + promote next candidate."""
+        async with self._conn() as conn:
+            await conn.execute("BEGIN IMMEDIATE")
+            # Clean expired intents
+            now = datetime.now(timezone.utc).isoformat()
             await conn.execute(
-                "INSERT INTO lock_intents (resource, agent_id, action) VALUES (?, ?, ?)",
-                (resource, agent_id, "release"),
+                "DELETE FROM lock_intents " "WHERE expires_at < ? AND action = 'request'",
+                (now,),
             )
+            # Remove all intents from this agent for this resource
+            await conn.execute(
+                "DELETE FROM lock_intents " "WHERE resource = ? AND agent_id = ?",
+                (resource, agent_id),
+            )
+            # Clear current holder
+            await conn.execute(
+                "DELETE FROM lock_state WHERE resource = ?",
+                (resource,),
+            )
+            # Promote next candidate
+            await self._promote_if_free(conn, resource)
             await conn.commit()
-            await self._reduce_resource(conn, resource)
-            logger.debug("SovereignLock: Resource %s released by %s", resource, agent_id)
+
+        logger.debug("SovereignLock: %s released by %s", resource, agent_id)
 
     async def is_locked(self, resource: str) -> bool:
-        """Check current state without waiting."""
-        async with self._engine.session() as conn:
+        """Read-only state check."""
+        async with self._conn() as conn:
             async with conn.execute(
-                "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?", (resource,)
-            ) as cursor:
-                row = await cursor.fetchone()
-            if not row:
-                return False
-            holder, expiry = row
-            if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
-                return False
-            return holder is not None
-
-    # ─── Private Reduction Logic ───────────────────────────────────────
-
-    async def _reduce_resource(self, conn: aiosqlite.Connection, resource: str):
-        """The 'Reduction' logic: flattens the intent history into current state."""
-        # 1. Clear expired intents
-        now = datetime.now(timezone.utc).isoformat()
-        await conn.execute(
-            "DELETE FROM lock_intents WHERE expires_at < ? AND action = 'request'", (now,)
-        )
-
-        # 2. Get unhandled intents for this resource
-        async with conn.execute(
-            "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
-        ) as cursor:
-            state_row = await cursor.fetchone()
-        current_holder = state_row[0] if state_row else None
-
-        # Check for release intent for current holder
-        if current_holder:
-            async with conn.execute(
-                "SELECT id FROM lock_intents WHERE resource = ? AND agent_id = ? "
-                "AND action = 'release' ORDER BY id DESC LIMIT 1",
-                (resource, current_holder),
-            ) as cursor:
-                has_release = await cursor.fetchone() is not None
-            if has_release:
-                # Holder released. Delete related intents and clear state.
-                await conn.execute(
-                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
-                    (resource, current_holder),
-                )
-                await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
-                current_holder = None
-
-        # Pick the next candidate (FIFO + Priority)
-        if not current_holder:
-            async with conn.execute(
-                "SELECT agent_id, expires_at FROM lock_intents "
-                "WHERE resource = ? AND action = 'request' "
-                "ORDER BY priority DESC, id ASC LIMIT 1",
+                "SELECT holder_agent, expires_at " "FROM lock_state WHERE resource = ?",
                 (resource,),
-            ) as cursor:
-                row = await cursor.fetchone()
-            if row:
-                new_holder, new_expiry = row
-                await conn.execute(
-                    "INSERT OR REPLACE INTO lock_state (resource, holder_agent, acquired_at, "
-                    "expires_at) VALUES (?, ?, ?, ?)",
-                    (resource, new_holder, datetime.now(timezone.utc).isoformat(), new_expiry),
-                )
-                # Cleanup depth info
-                async with conn.execute(
-                    "SELECT COUNT(*) FROM lock_intents WHERE resource = ? AND action = 'request'",
-                    (resource,),
-                ) as cursor:
-                    count_row = await cursor.fetchone()
-                depth = count_row[0] if count_row else 0
-                await conn.execute(
-                    "UPDATE lock_state SET queue_depth = ? WHERE resource = ?", (depth, resource)
-                )
+            ) as cur:
+                row = await cur.fetchone()
+        if not row:
+            return False
+        holder, expiry = row
+        if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
+            return False
+        return holder is not None
 
-        await conn.commit()
+    # ─── Private ───────────────────────────────────────────────────────
 
-    async def _clear_expired(self, conn: aiosqlite.Connection, resource: str):
-        """Cleanup expired lock state."""
-        await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
-        await conn.commit()
-        await self._reduce_resource(conn, resource)
+    async def _promote_if_free(self, conn: aiosqlite.Connection, resource: str) -> str | None:
+        """If no valid holder exists, promote the top candidate.
+
+        MUST be called inside BEGIN IMMEDIATE. Does NOT commit.
+        Returns the current (or newly promoted) holder agent_id.
+        """
+        async with conn.execute(
+            "SELECT holder_agent, expires_at " "FROM lock_state WHERE resource = ?",
+            (resource,),
+        ) as cur:
+            state = await cur.fetchone()
+
+        if state:
+            holder, expiry = state
+            if holder and (
+                not expiry or datetime.fromisoformat(expiry) >= datetime.now(timezone.utc)
+            ):
+                return holder  # Valid holder, nothing to promote
+
+            # Expired — evict
+            await conn.execute(
+                "DELETE FROM lock_state WHERE resource = ?",
+                (resource,),
+            )
+            await conn.execute(
+                "DELETE FROM lock_intents " "WHERE resource = ? AND agent_id = ?",
+                (resource, holder),
+            )
+
+        # Pick next candidate (priority DESC, FIFO ASC)
+        async with conn.execute(
+            "SELECT agent_id, expires_at FROM lock_intents "
+            "WHERE resource = ? AND action = 'request' "
+            "ORDER BY priority DESC, id ASC LIMIT 1",
+            (resource,),
+        ) as cur:
+            row = await cur.fetchone()
+
+        if row:
+            new_holder, new_expiry = row
+            now = datetime.now(timezone.utc).isoformat()
+            async with conn.execute(
+                "SELECT COUNT(*) FROM lock_intents " "WHERE resource = ? AND action = 'request'",
+                (resource,),
+            ) as cur:
+                depth = (await cur.fetchone())[0]
+            await conn.execute(
+                "INSERT OR REPLACE INTO lock_state "
+                "(resource, holder_agent, acquired_at, "
+                "expires_at, queue_depth) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (resource, new_holder, now, new_expiry, depth),
+            )
+            return new_holder
+
+        return None
+
+    async def _evict_and_promote(self, conn: aiosqlite.Connection, resource: str):
+        """Evict expired holder and promote next. Inside BEGIN IMMEDIATE."""
+        async with conn.execute(
+            "SELECT holder_agent, expires_at " "FROM lock_state WHERE resource = ?",
+            (resource,),
+        ) as cur:
+            row = await cur.fetchone()
+
+        if not row:
+            return
+
+        holder, expiry = row
+        if expiry and datetime.fromisoformat(expiry) < datetime.now(timezone.utc):
+            await conn.execute(
+                "DELETE FROM lock_state WHERE resource = ?",
+                (resource,),
+            )
+            if holder:
+                await conn.execute(
+                    "DELETE FROM lock_intents " "WHERE resource = ? AND agent_id = ?",
+                    (resource, holder),
+                )
+            await self._promote_if_free(conn, resource)

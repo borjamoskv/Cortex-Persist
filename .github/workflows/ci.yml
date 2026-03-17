@@ -24,9 +24,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[all]"
 
-      # Si tienes dependencias dev separadas (asegurando ruff, mypy, pytest)
-      - name: Install Test Dependencies
-        run: pip install ruff mypy pytest pre-commit
+      - name: Install Quality Tools
+        run: pip install ruff pyright pytest pre-commit
 
       - name: Lint
         run: ruff check .
@@ -35,7 +34,7 @@ jobs:
         run: ruff format --check .
 
       - name: Type check
-        run: mypy .
+        run: pyright cortex/
 
       - name: Tests
         run: pytest -q tests/

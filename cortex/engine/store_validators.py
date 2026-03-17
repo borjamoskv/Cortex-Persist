@@ -28,7 +28,9 @@ def normalize_project(raw: str) -> str:
     CORTEX/cortex-style splits that bypass the (tenant_id, project, hash)
     deduplication gate in check_dedup.
     """
-    return raw.strip().upper().replace("-", "_").replace(" ", "_")
+    from cortex.utils.canonical import canonical_project_id
+
+    return canonical_project_id(raw)
 
 
 def validate_content(project: str, content: str, fact_type: str) -> str:

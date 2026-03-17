@@ -12,7 +12,6 @@ console = Console()
 
 def _find_transaction(conn, fact_id: int, fact_tx_id: int | None):
     """Look up the transaction for a fact, trying direct ID then join."""
-from __future__ import annotations
     tx = None
     if fact_tx_id:
         tx = conn.execute(
