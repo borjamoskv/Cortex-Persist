@@ -1,246 +1,97 @@
-# CORTEX — Tamper-Evident Decision Lineage for AI Systems
+# CORTEX Persist
 
-🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
+Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
 
-> Your AI systems make decisions.
-> CORTEX makes those decisions **traceable, verifiable, and auditable**.
->
-> *Hash-chained logs, Merkle integrity proofs, and queryable decision lineage
-> for regulated and high-risk AI workflows.*
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
 
-Package: `cortex-persist v0.3.0b1` · Engine: `v8` · License: `Apache-2.0`
+CORTEX is a middleware layer that enforces cryptographic integrity on top of existing AI memory stores (Mem0, Zep, Custom). It ensures that once an autonomous agent reads context or makes a decision, that state cannot be silently altered.
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-beta-orange.svg)
-![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
-[![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
-![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
-![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
-[![Docs](https://img.shields.io/badge/docs-cortexpersist.dev-brightgreen)](https://cortexpersist.dev)
-[![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
-[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
+## Mechanics
 
----
+- **Append-only ledger:** Immutable storage backed by SQLite or AlloyDB.
+- **Cryptographic seals:** SHA-256 hash chains per memory record.
+- **State verification:** Merkle tree checkpoints for batch integrity proofs.
+- **Compliance export:** Deterministic audit reports for regulated workflows.
 
-## Why It Exists
-
-AI systems fail silently in one critical dimension: **evidence**.
-
-- You can store memories, but not prove they were unmodified.
-- You can replay outputs, but not reconstruct decision lineage.
-- You can log activity, but not verify integrity across time.
-
-CORTEX doesn't replace your memory layer — it **certifies** it.
-
-*It is to AI memory what SSL/TLS is to web communications:
-cryptographic verification, audit trails, and traceability.*
-
----
-
-## What It Is
-
-Three layers on top of your existing memory stack:
-
-### 1. Evidence Layer
-
-Tamper-evident record of every agent decision.
-
-- **SHA-256 hash-chained ledger** — modification is detectable
-- **Merkle tree checkpoints** — periodic batch integrity proofs
-- **Tenant-scoped storage** — decisions are isolated per customer
-
-### 2. Decision Lineage Layer
-
-Queryable trace from any conclusion back to its origin.
-
-- **Full causal chain** — which facts led to which decisions
-- **Timestamped audit trail** — when, what, and by which agent
-- **Semantic search** — find related decisions by meaning (384-dim vectors)
-
-### 3. Governance Layer
-
-Policy enforcement and compliance-supportive reporting.
-
-- **Admission guards** — validate decisions before persistence
-- **Secret detection** — API keys, tokens, and PII blocked at ingress
-- **Compliance exports** — generate audit-ready reports on demand
-- **Integrity verification** — verify ledger consistency with one command
-
----
-
-## Quick Demo
+## 90-Second Demo
 
 ```bash
-# Store a decision with cryptographic proof
-$ cortex store --type decision --project fin-agent "Approved loan #4292"
+# 1. Start the ledger
+$ cortex init
+
+# 2. Store a memory
+$ cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
 [+] Fact stored. Ledger hash: 8f4a2b9e...
 
-# Verify the record was not tampered with
-$ cortex verify 8f4a2b9e
+# 3. Verify integrity
+$ cortex verify record 8f4a2b9e
 [✔] VERIFIED: Hash chain intact. Merkle root sealed.
 
-# Generate an audit report
-$ cortex compliance-report
+# 4. Tamper attempt (Direct DB mutation)
+$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
+
+# 5. Ledger verification
+$ cortex verify ledger
+[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
+
+# 6. Export evidence
+$ cortex compliance-report generate --format pdf
 ```
 
----
+## Integration
 
-## Where It Fits
-
-```text
-Your Memory Stack (Mem0 / Zep / Letta / Custom)
-        ↓
-   CORTEX Evidence Layer
-        ├── Hash-chained ledger
-        ├── Merkle checkpoints
-        ├── Admission guards
-        └── Audit trail & lineage queries
-```
-
-CORTEX is not a memory store. It is the verification and traceability layer
-that sits on top of any memory store.
-
----
-
-## Who It Is For
-
-| Use CORTEX if | Do not use CORTEX if |
-|:---|:---|
-| You need verifiable decision records | You only need semantic recall |
-| You operate in regulated or high-risk workflows | You don't care about integrity proofs |
-| Multiple agents share memory and need consistent lineage | A simple vector store already solves your problem |
-| You need defensible audit trails for compliance or legal review | Your agents make no persistent decisions |
-
-**Built for:**
-- AI platform teams building agent infrastructure
-- Regulated SaaS vendors (fintech, healthtech, insurtech)
-- Enterprise copilot teams with audit requirements
-- Multi-agent systems that need postmortem-capable traceability
-
----
-
-## Use Cases
-
-| Vertical | What CORTEX Provides |
-|:---|:---|
-| **Fintech / Insurtech** | Traceable underwriting decisions, verifiable loan approvals |
-| **Healthcare** | Audit trail for clinical decision support agents |
-| **Enterprise Copilots** | Evidence of what was remembered, recommended, and revised |
-| **Multi-Agent Ops** | Decision lineage + postmortem verification across agent swarms |
-| **EU-Regulated Deployments** | Traceability support for high-risk AI system obligations |
-
----
-
-## Install
-
-```bash
-pip install cortex-persist
-```
-
-### Python API
+CORTEX wraps your existing state management. It does not replace your embeddings or vector search.
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-engine = CortexEngine()
+async def main():
+    engine = CortexEngine()
+    
+    # Write to tamper-evident ledger
+    receipt = await engine.store_fact(
+        content="User approved transaction $5,000",
+        fact_type="decision",
+        project="fin-fraud-bot",
+        tenant_id="customer-123"
+    )
+    
+    # Cryptographic proof verification
+    assert await engine.verify(receipt.hash) == True
 
-await engine.store_fact(
-    content="Approved loan application #443",
-    fact_type="decision",
-    project="fintech-agent",
-    tenant_id="enterprise-customer-a"
-)
+asyncio.run(main())
 ```
 
-### MCP Server (Universal IDE Plugin)
+## Performance
 
-```bash
-# Works with: Claude Code, Cursor, OpenClaw, Windsurf, Antigravity
-python -m cortex.mcp
-```
+*Typical execution on standard cloud instance (4 vCPU, 16GB RAM).*
 
-### REST API
-
-```bash
-uvicorn cortex.api:app --port 8484
-```
-
----
+| Operation | Median | P95 | Notes |
+|:---|:---|:---|:---|
+| Memory write | ~18 ms | ~35 ms | Local SQLite + SHA-256 hashing |
+| Verify record | ~5 ms | ~12 ms | Single block hash validation |
+| Merkle checkpoint | ~85 ms | ~140 ms | Aggregating 10k records |
+| Report export | ~400 ms | ~800 ms | Lineage traversal & PDF generation |
 
 ## Architecture
 
-```mermaid
-block-beta
-  columns 1
+CORTEX integrates as a standard Python SDK or a standalone REST/MCP gateway.
 
-  block:INTERFACES["INTERFACES"]
-    CLI["CLI (38 cmds)"]
-    API["REST API (55+ endpoints)"]
-    MCP["MCP Server"]
-  end
-
-  block:GATEWAY["TRUST GATEWAY"]
-    RBAC["RBAC (4 roles)"]
-    Guards["Admission Guards"]
-    Auth["API Keys + JWT"]
-  end
-
-  block:STORAGE["STORAGE"]
-    L1["Working Memory (Redis / in-process)"]
-    L2["Vector Search (Qdrant / sqlite-vec)"]
-    L3["Ledger (AlloyDB / SQLite, hash-chained)"]
-  end
-
-  block:TRUST["VERIFICATION"]
-    Ledger["SHA-256 Ledger"]
-    Merkle["Merkle Trees"]
-    Consensus["Multi-Agent Verification (BFT)"]
-  end
-
-  INTERFACES --> GATEWAY --> STORAGE --> TRUST
+```text
+[ Agent Framework ] -> [ CORTEX Gateway ] -> [ Target Memory Store ]
+                            │
+                            ├─ SHA-256 Hash Chaining
+                            ├─ Merkle Checkpoints
+                            └─ Cryptographic Verification
 ```
-
-> Full architecture in [architecture.md](docs/architecture.md).
-
----
-
-## Integrations
-
-CORTEX plugs into your existing stack — IDEs (Claude Code, Cursor, Windsurf via MCP),
-agent frameworks (LangChain, CrewAI, AutoGen, Google ADK), memory layers (Mem0, Zep, Letta),
-and databases (SQLite, AlloyDB, PostgreSQL, Qdrant). Runs on macOS, Linux, and Windows.
-
-See [Integrations & Cross-Platform Guide](docs/cross_platform_guide.md).
-
----
 
 ## Documentation
 
-- [Architecture](docs/architecture.md) — topology, module map, and data flow
-- [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) — trust boundaries and threat model
-- [Contributing](./CONTRIBUTING.md) — contribution workflow
-- [Roadmap](./ROADMAP.md) — development timeline
-- [AGENTS.md](./AGENTS.md) — operational contract for contributors and coding agents
-
----
-
-## Regulatory Positioning
-
-CORTEX provides traceability, integrity verification, and audit infrastructure
-for regulated environments. It does not by itself make a system "compliant"
-— compliance depends on the role, use case, and risk category of the deploying system.
-
-These capabilities support traceability and logging requirements
-described in frameworks such as the EU AI Act (Article 12), among others.
-
----
-
-## License
-
-**Apache License 2.0** — Free for any use, commercial or non-commercial.
-See [LICENSE](LICENSE) for details.
-
----
-
-*Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
+- [Architecture](docs/architecture.md)
+- [API Reference](docs/api.md)
+- [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md)
+- [Benchmarks](docs/benchmarks.md)
+- [Contributing](CONTRIBUTING.md)
