@@ -1,8 +1,7 @@
 import asyncio
 import logging
 import random
-
-from cortex.utils.time import now_utc
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class EpistemicBreakerDaemon:
         # Internal state to track entropy derivative
         self._last_fact_count = 0
         self._last_error_count = 0
-        self._last_evaluation_time = now_utc()
+        self._last_evaluation_time = datetime.now(timezone.utc)
 
         # System State
         self.circuit_open = False  # False = System is awake and acting. True = Sleep/Compressing.
