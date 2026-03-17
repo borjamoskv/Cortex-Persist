@@ -56,6 +56,8 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # TTT ghost harvester
         "cortex/ttt/ghost_harvester.py",
         "cortex/extensions/ttt/ghost_harvester.py",
+        # Causality (sync oracle — thread-safe)
+        "cortex/engine/causality.py",
         # Metering tracker (sync, hot path)
         "cortex/metering/tracker.py",
         "cortex/extensions/metering/tracker.py",
