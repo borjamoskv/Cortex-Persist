@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
+
+if TYPE_CHECKING:
+    from cortex.search.causal_gap import CausalGap
+
 
 __all__ = ["SearchMixin"]
 
@@ -28,6 +32,7 @@ class SearchMixin(EngineMixinBase):
         graph_depth: int = 0,
         include_graph: bool = False,
         confidence: str | None = None,
+        causal_gap: CausalGap | None = None,
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
@@ -48,6 +53,7 @@ class SearchMixin(EngineMixinBase):
                     project=project,
                     as_of=as_of,
                     confidence=confidence,
+                    causal_gap=causal_gap,
                     **kwargs,
                 )
 

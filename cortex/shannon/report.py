@@ -11,6 +11,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from cortex.shannon.analyzer import (
+    dead_weight,
     exergy_score,
     max_entropy,
     mutual_information,
@@ -18,6 +19,7 @@ from cortex.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
+from cortex.shannon.exergy import compute_exergy_report
 from cortex.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
@@ -244,6 +246,22 @@ class EntropyReport:
             "system": 0.3,
         }
         type_exergy = exergy_score(type_dist, usage_weights)
+        type_dead_weight = dead_weight(type_dist, usage_weights)
+
+        # Full exergy report — Ω₁₃: useful work measurement, not just entropy
+        # Map high-confidence facts to decisions_enabled proxy
+        conf_decisions = sum(
+            v for k, v in type_dist.items()
+            if k in {"decision", "architecture", "error", "bridge"}
+        )
+        exergy_report = compute_exergy_report(
+            entropy_score=type_block["H"],
+            compression_ratio=1.0 - type_r,  # low redundancy = high compression
+            downstream_utility=type_exergy,
+            decisions_enabled=conf_decisions,
+            tokens_spent=max(total, 1),
+            noise_fraction=min(type_dead_weight / max(type_block["H"], 1e-15), 1.0),
+        )
 
         # Diagnose with enriched inputs
         diagnosis, recommendations = _diagnose(
@@ -257,6 +275,15 @@ class EntropyReport:
             "total_facts": total,
             "health_score": health,
             "exergy_score": round(type_exergy, 4),
+            "exergy_report": {
+                "entropy_score": exergy_report.entropy_score,
+                "compression_ratio": exergy_report.compression_ratio,
+                "exergy_score": exergy_report.exergy_score,
+                "downstream_utility": exergy_report.downstream_utility,
+                "noise_fraction": exergy_report.noise_fraction,
+                "useful_work_ratio": exergy_report.useful_work_ratio,
+            },
+            "dead_weight_bits": round(type_dead_weight, 4),
             "project_filter": project,
             "temporal_trend": trend,
             "velocity_per_day": velocity,
