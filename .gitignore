@@ -18,6 +18,12 @@ credentials.json
 **/secrets/
 service-account*.json
 
+# ── Secret leak prevention (hardened) ─────────────
+.venv_transcript/
+*.html.static
+**/metadata/
+**/cloud-metadata/
+
 # ── Dependencies ──────────────────────────────────
 node_modules/
 .venv/
