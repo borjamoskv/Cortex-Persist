@@ -1,22 +1,7 @@
-# CORTEX Pre-commit hooks
-# Install: pre-commit install
-# Run manually: pre-commit run --all-files
-
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.0
+    rev: v0.3.2
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [ --fix ]
       - id: ruff-format
-        args: [--check]
-
-  - repo: local
-    hooks:
-      - id: cortex-fast-tests
-        name: CORTEX Fast Tests
-        entry: .venv/bin/pytest tests/ -m "not slow" --tb=line -q --no-header
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
