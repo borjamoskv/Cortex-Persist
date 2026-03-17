@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM python:3.12-slim-bookworm as builder
+FROM python:3.14-slim-bookworm as builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 RUN python -c "from cortex.embeddings import LocalEmbedder; LocalEmbedder()"
 
 # Stage 2: Runtime
-FROM python:3.12-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 LABEL maintainer="borjamoskv.com"
 LABEL description="CORTEX — Sovereign Memory Engine for AI Agents"
