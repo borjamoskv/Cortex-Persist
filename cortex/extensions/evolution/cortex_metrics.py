@@ -52,6 +52,7 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.database.core import connect_async_ctx
 from cortex.extensions.evolution.agents import AgentDomain
 
 logger = logging.getLogger(__name__)
@@ -241,7 +242,7 @@ async def fetch_domain_metrics(
     m = DomainMetrics(domain=domain)
 
     try:
-        async with aiosqlite.connect(str(db_path)) as conn:
+        async with connect_async_ctx(str(db_path)) as conn:
             for project in projects:
                 # ── Fact counts by type ──
                 for fact_type, attr in (

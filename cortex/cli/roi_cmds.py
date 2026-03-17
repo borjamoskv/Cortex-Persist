@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import click
 from rich.panel import Panel
@@ -87,7 +87,7 @@ class ROIMetrics:
         return f"{ratio:,.1f}/1"
 
 
-def _parse_chronos_meta(raw_meta: Any, enc: Any) -> Optional[dict[str, Any]]:
+def _parse_chronos_meta(raw_meta: Any, enc: Any) -> dict[str, Any] | None:
     """Decrypt and parse chronos metadata securely."""
     if not raw_meta:
         return None
@@ -116,7 +116,7 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
     enc = get_default_encrypter()
 
     async with conn.execute(
-        "SELECT project, meta FROM facts WHERE valid_until IS NULL AND meta IS NOT NULL"
+        "SELECT project, metadata FROM facts WHERE valid_until IS NULL AND metadata IS NOT NULL"
     ) as cursor:
         rows = await cursor.fetchall()
 

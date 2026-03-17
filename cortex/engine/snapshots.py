@@ -7,11 +7,9 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
-
-import aiosqlite
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.database.core import connect_async_ctx
 
 __all__ = ["SnapshotRecord", "SnapshotManager"]
 
@@ -41,7 +39,7 @@ class SnapshotRecord:
     size_mb: float
 
 
-def _parse_snapshot_meta(meta_file: Path) -> Optional[SnapshotRecord]:
+def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:
     try:
         data = _read_snapshot_meta(meta_file)
         db_file = Path(data["path"])
@@ -112,7 +110,7 @@ class SnapshotManager:
         dest_path = self.snapshot_dir / filename
 
         # Use VACUUM INTO for a consistent backup of a live database in WAL mode
-        async with aiosqlite.connect(str(self.db_path)) as conn:
+        async with connect_async_ctx(str(self.db_path)) as conn:
             try:
                 # SQLite doesn't support parameters for VACUUM INTO.
                 # Since we sanitized 'name' and we control 'snapshot_dir',

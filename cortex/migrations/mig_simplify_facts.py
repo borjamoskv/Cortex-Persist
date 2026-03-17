@@ -1,6 +1,11 @@
 """
 Migration: Simplify Facts Table
-Collapses non-essential columns into the `meta` JSON field to reduce DB entropy.
+Collapses non-essential columns into the `metadata` JSON field to reduce DB entropy.
+
+.. warning:: DESTRUCTIVE MIGRATION
+   This migration drops columns from the facts table. It is NOT reversible.
+   The live DB has 32 columns; this migration collapses to 11.
+   DO NOT RUN without explicit operator approval and a backup.
 """
 
 import logging
@@ -11,7 +16,7 @@ logger = logging.getLogger("cortex")
 
 def migrate_simplify_facts(conn: sqlite3.Connection) -> None:
     """Migrates the facts table, moving deprecated columns into the meta JSON field."""
-    logger.info("Migrating facts table: simplifying structure and moving fields to `meta`...")
+    logger.info("Migrating facts table: simplifying structure and moving fields to `metadata`...")
 
     # 1. Create the new facts table
     conn.execute("""
@@ -22,7 +27,7 @@ def migrate_simplify_facts(conn: sqlite3.Connection) -> None:
             content     TEXT NOT NULL,
             fact_type   TEXT NOT NULL DEFAULT 'knowledge',
             tags        TEXT NOT NULL DEFAULT '[]',
-            meta        TEXT DEFAULT '{}',
+            metadata    TEXT DEFAULT '{}',
             hash        TEXT,
             created_at  TEXT NOT NULL DEFAULT (datetime('now')),
             updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
@@ -36,12 +41,12 @@ def migrate_simplify_facts(conn: sqlite3.Connection) -> None:
     # but json_set handles NULLs by inserting JSON null.
     conn.execute("""
         INSERT INTO facts_new (
-            id, tenant_id, project, content, fact_type, tags, hash, created_at, updated_at, is_tombstoned, meta
+            id, tenant_id, project, content, fact_type, tags, hash, created_at, updated_at, is_tombstoned, metadata
         )
         SELECT 
             id, tenant_id, project, content, fact_type, tags, hash, created_at, updated_at, is_tombstoned,
             json_set(
-                COALESCE(meta, '{}'),
+                COALESCE(metadata, '{}'),
                 '$.confidence', confidence,
                 '$.cognitive_layer', cognitive_layer,
                 '$.parent_decision_id', parent_decision_id,

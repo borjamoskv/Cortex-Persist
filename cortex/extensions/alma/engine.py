@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.extensions.alma.taste import TasteVerdict
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 import aiosqlite
 
 from cortex.config import DB_PATH
+from cortex.database.core import connect_async_ctx
 from cortex.telemetry.metrics import metrics
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ class SoulState:
     wisdom: float  # 0.0 - 1.0 (Bridge/Decision fact depth)
     synergy: float  # 0.0 - 1.0 (System health, response time)
     vibe: str  # Categorical label: "zen", "chaotic", "focused", "dormant", "overloaded"
-    last_taste: Optional[TasteVerdict] = None  # Last taste evaluation
+    last_taste: TasteVerdict | None = None  # Last taste evaluation
     timestamp: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,12 +44,12 @@ class AlmaEngine:
 
     def __init__(self, memory_manager: Any):
         self._memory = memory_manager
-        self._last_state: Optional[SoulState] = None
-        self._last_taste: Optional[TasteVerdict] = None
-        self._taste_engine: Optional[Any] = None  # Lazy-loaded
+        self._last_state: SoulState | None = None
+        self._last_taste: TasteVerdict | None = None
+        self._taste_engine: Any | None = None  # Lazy-loaded
         self._smoothing_factor = 0.8  # EMA for state transitions
 
-    async def pulse(self, mock_wisdom: Optional[float] = None) -> SoulState:
+    async def pulse(self, mock_wisdom: float | None = None) -> SoulState:
         """Calculate the current soul state based on real-time metrics."""
         # 1. Anxiety: Ledger violations, HTTP 500s, Thalamus filtering
         ledger_violations = metrics._counters.get("cortex_ledger_violations_total", 0)
@@ -86,7 +87,7 @@ class AlmaEngine:
         """Estimate wisdom based on high-value facts."""
         try:
             # Connect to DB and count bridges/decisions
-            async with aiosqlite.connect(DB_PATH) as db:
+            async with connect_async_ctx(str(DB_PATH)) as db:
                 query = (
                     "SELECT COUNT(*) FROM memory_events "
                     "WHERE metadata LIKE '%bridge%' OR metadata LIKE '%decision%'"
@@ -146,7 +147,7 @@ class AlmaEngine:
     def evaluate_taste(
         self,
         content: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> TasteVerdict:
         """Evaluate content quality using the Taste Engine.
 

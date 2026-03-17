@@ -11,9 +11,11 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
+
+from cortex.database.core import connect_async
 
 __all__ = [
     "AsyncConnectionPool",
@@ -79,7 +81,7 @@ class SimpleAsyncCache:
         self.ttl = ttl_seconds
         self._cache: dict[str, tuple[float, Any]] = {}
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         if key not in self._cache:
             return None
         timestamp, value = self._cache[key]
@@ -111,12 +113,7 @@ class AsyncConnectionPool:
         self._lock = asyncio.Lock()
 
     async def _create_connection(self) -> aiosqlite.Connection:
-        import aiosqlite
-
-        from cortex.database.core import apply_pragmas_async
-
-        conn = await aiosqlite.connect(self.db_path, timeout=30.0)
-        await apply_pragmas_async(conn)
+        conn = await connect_async(self.db_path)
         # Quick health check
         async with conn.execute("SELECT 1") as cursor:
             await cursor.fetchone()
@@ -144,7 +141,7 @@ class AsyncConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[aiosqlite.Connection]:
         """Acquire a connection with timeout."""
-        conn: Optional[aiosqlite.Connection] = None
+        conn: aiosqlite.Connection | None = None
         try:
             conn = await asyncio.wait_for(self._pool.get(), timeout=self.acquire_timeout)
         except asyncio.TimeoutError:

@@ -33,10 +33,11 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
+from cortex.database.core import connect_async_ctx
 from cortex.extensions.evolution.agents import SovereignAgent
 from cortex.extensions.evolution.persistence import (
     SCHEMA_VERSION,
@@ -62,7 +63,7 @@ CREATE TABLE IF NOT EXISTS evolution_state (
 
 async def ensure_table(db_path: str | Path = _DEFAULT_DB) -> None:
     """Create the evolution_state table if missing.  Idempotent."""
-    async with aiosqlite.connect(str(db_path)) as conn:
+    async with connect_async_ctx(str(db_path)) as conn:
         await conn.execute(CREATE_EVOLUTION_STATE)
         await conn.commit()
 
@@ -83,7 +84,7 @@ async def save_to_db(
         "agents": [_agent_to_dict(a) for a in agents],
     }
     state_json = json.dumps(state)
-    async with aiosqlite.connect(str(db_path)) as conn:
+    async with connect_async_ctx(str(db_path)) as conn:
         await conn.execute(CREATE_EVOLUTION_STATE)
         await conn.execute(
             "INSERT OR REPLACE INTO evolution_state (cycle, state_json) VALUES (?, ?)",
@@ -95,7 +96,7 @@ async def save_to_db(
 
 async def load_from_db(
     db_path: str | Path = _DEFAULT_DB,
-) -> Optional[tuple[list[SovereignAgent], int]]:
+) -> tuple[list[SovereignAgent], int] | None:
     """Load the most recent swarm state from CORTEX DB.
 
     Implements episodic recall via hippocampal pattern completion
@@ -110,7 +111,7 @@ async def load_from_db(
         return None
 
     try:
-        async with aiosqlite.connect(str(db_path)) as conn:
+        async with connect_async_ctx(str(db_path)) as conn:
             await conn.execute(CREATE_EVOLUTION_STATE)
             async with conn.execute(
                 "SELECT state_json, cycle FROM evolution_state ORDER BY cycle DESC LIMIT 1"
@@ -149,7 +150,7 @@ async def get_evolution_history(
         return []
 
     try:
-        async with aiosqlite.connect(str(db_path)) as conn:
+        async with connect_async_ctx(str(db_path)) as conn:
             await conn.execute(CREATE_EVOLUTION_STATE)
             async with conn.execute(
                 "SELECT cycle, created_at FROM evolution_state ORDER BY cycle DESC LIMIT ?",

@@ -18,6 +18,8 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.database.core import connect_async_ctx
+
 logger = logging.getLogger("cortex.reporter")
 
 
@@ -59,7 +61,7 @@ class SovereignReporter:
     async def collect_metrics(self) -> ManifoldStatus:
         """Aggregate data from all Ω-dimensions using Async I/O."""
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
+            async with connect_async_ctx(self.db_path) as conn:
                 # 130/100: Reusing existing CausalGraph/SignalBus (assuming they
                 # can be adapted or we query directly for speed)
                 # Since CausalGraph and SignalBus take a sync sqlite3.Connection
@@ -132,7 +134,7 @@ class SovereignReporter:
             pass
 
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
+            async with connect_async_ctx(self.db_path) as conn:
                 cursor = await conn.execute("PRAGMA data_version")
                 row = await cursor.fetchone()
                 last_version = row[0] if row else 0

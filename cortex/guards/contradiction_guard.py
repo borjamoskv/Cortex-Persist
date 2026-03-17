@@ -21,11 +21,11 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 import aiosqlite
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
@@ -234,7 +234,7 @@ def _is_noise(content: str) -> bool:
 
 
 # ── Extracted helpers (Suntsitu: CC flattening) ─────────────────────
-def _decrypt_content(content: str, decrypt_fn: Optional[Callable]) -> Optional[str]:
+def _decrypt_content(content: str, decrypt_fn: Callable | None) -> str | None:
     """Decrypt content if needed, returning None on failure."""
     if not decrypt_fn or not content.startswith("v6_aesgcm:"):
         return content
@@ -276,9 +276,9 @@ def _score_candidate(
     new_tokens: set[str],
     new_content: str,
     new_project: str,
-    decrypt_fn: Optional[Callable],
+    decrypt_fn: Callable | None,
     min_score: float,
-) -> Optional[ConflictCandidate]:
+) -> ConflictCandidate | None:
     """Score a single row against new content. Returns None if below threshold."""
     content = _decrypt_content(row["content"], decrypt_fn)
     if not content or _is_noise(content):
@@ -354,7 +354,7 @@ async def detect_contradictions(
     new_project: str,
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: Optional[Callable] = None,
+    decrypt_fn: Callable | None = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
 ) -> ConflictReport:
@@ -381,7 +381,7 @@ async def detect_contradictions(
 
     report = ConflictReport(new_content, new_project)
 
-    async with aiosqlite.connect(str(db_path)) as conn:
+    async with connect_async_ctx(str(db_path)) as conn:
         conn.row_factory = aiosqlite.Row
         try:
             rows = await _fetch_decision_rows(
@@ -416,7 +416,7 @@ async def detect_contradictions(
 async def scan_all_contradictions(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: Optional[Callable] = None,
+    decrypt_fn: Callable | None = None,
     min_score: float = 0.45,
     limit: int = 50,
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
@@ -425,7 +425,7 @@ async def scan_all_contradictions(
 
     Returns list of (decision_a, decision_b) pairs ordered by overlap.
     """
-    async with aiosqlite.connect(str(db_path)) as conn:
+    async with connect_async_ctx(str(db_path)) as conn:
         conn.row_factory = aiosqlite.Row
         try:
             cursor = await conn.execute(
@@ -490,7 +490,7 @@ def _compare_decisions(
     a: dict,
     b: dict,
     min_score: float,
-) -> Optional[tuple[float, ConflictCandidate, ConflictCandidate]]:
+) -> tuple[float, ConflictCandidate, ConflictCandidate] | None:
     """Score and classify a potential conflict between two decisions."""
     score = _jaccard(a["tokens"], b["tokens"])
     if score < min_score:
@@ -524,7 +524,7 @@ def _compare_decisions(
     return (score, ca, cb)
 
 
-def _prepare_decisions(rows: list, decrypt_fn: Optional[Callable]) -> list[dict]:
+def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
     for row in rows:

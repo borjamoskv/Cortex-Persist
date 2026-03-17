@@ -13,9 +13,12 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
+
+import aiosqlite
 
 from cortex import config
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.extensions.security.integrity_audit")
 
@@ -96,7 +99,7 @@ class IntegrityAuditor:
     3. Orphaned facts (broken chain links)
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         self._db_path = db_path or str(config.DB_PATH)
 
     async def full_audit(self) -> AuditReport:
@@ -110,9 +113,7 @@ class IntegrityAuditor:
         )
 
         try:
-            import aiosqlite
-
-            async with aiosqlite.connect(self._db_path) as db:
+            async with connect_async_ctx(self._db_path) as db:
                 db.row_factory = aiosqlite.Row
 
                 # Get all facts ordered by ID
@@ -165,9 +166,7 @@ class IntegrityAuditor:
     async def verify_chain(self) -> ChainStatus:
         """Verify only the hash chain (quick check)."""
         try:
-            import aiosqlite
-
-            async with aiosqlite.connect(self._db_path) as db:
+            async with connect_async_ctx(self._db_path) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
                     "SELECT id, content, hash, prev_hash FROM facts ORDER BY id ASC"
@@ -181,9 +180,7 @@ class IntegrityAuditor:
     async def verify_signatures(self) -> list[TamperedFact]:
         """Verify only Ed25519 signatures."""
         try:
-            import aiosqlite
-
-            async with aiosqlite.connect(self._db_path) as db:
+            async with connect_async_ctx(self._db_path) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
                     "SELECT id, content, hash, signature FROM facts "
@@ -204,7 +201,7 @@ class IntegrityAuditor:
         if not facts:
             return status
 
-        prev_hash: Optional[str] = None
+        prev_hash: str | None = None
         hash_index: dict[str, int] = {}  # hash -> fact_id
 
         for fact in facts:
@@ -215,7 +212,7 @@ class IntegrityAuditor:
         return status
 
     def _verify_single_fact(
-        self, fact: Any, prev_hash: Optional[str], hash_index: dict[str, int], status: ChainStatus
+        self, fact: Any, prev_hash: str | None, hash_index: dict[str, int], status: ChainStatus
     ) -> None:
         fact_id = fact["id"]
         content = fact["content"] or ""

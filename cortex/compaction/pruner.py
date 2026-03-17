@@ -12,9 +12,10 @@ import json
 import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import aiosqlite
+
+from cortex.database.core import connect_async_ctx
 
 __all__ = ["EmbeddingPrunerMixin"]
 
@@ -54,7 +55,7 @@ class EmbeddingPrunerMixin:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         stats = {"pruned_count": 0, "skipped_count": 0, "errors": []}
 
-        async with aiosqlite.connect(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with connect_async_ctx(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
             # Find deprecated facts with embeddings older than cutoff
             cursor = await conn.execute(
                 """
@@ -114,13 +115,13 @@ class EmbeddingPrunerMixin:
             logger.error("Failed to prune fact_id=%d: %s", fact_id, e)
             stats["errors"].append({"fact_id": fact_id, "error": str(e)})
 
-    async def verify_embedding_hash(self, fact_id: int) -> Optional[dict]:
+    async def verify_embedding_hash(self, fact_id: int) -> dict | None:
         """Check if a pruned embedding's hash exists and return metadata.
 
         Returns:
             dict with 'fact_id', 'hash', 'pruned_at', 'reason' or None.
         """
-        async with aiosqlite.connect(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with connect_async_ctx(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
             cursor = await conn.execute(
                 "SELECT fact_id, hash, pruned_at, reason FROM pruned_embeddings WHERE fact_id = ?",
                 (fact_id,),
@@ -139,7 +140,7 @@ class EmbeddingPrunerMixin:
 
     async def get_pruning_stats(self) -> dict:
         """Get summary statistics about pruned embeddings."""
-        async with aiosqlite.connect(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with connect_async_ctx(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]
             active = await conn.execute("SELECT COUNT(*) FROM fact_embeddings")
             active_count = (await active.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 

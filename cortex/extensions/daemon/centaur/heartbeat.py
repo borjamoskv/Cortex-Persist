@@ -9,8 +9,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-import aiosqlite
-
+from cortex.database.core import connect_async_ctx
 from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
@@ -70,7 +69,7 @@ class HeartbeatDaemon:
 
                 from cortex.extensions.daemon.models import CORTEX_DB
 
-                async with aiosqlite.connect(CORTEX_DB, timeout=5.0) as conn:
+                async with connect_async_ctx(CORTEX_DB) as conn:
                     await decalcifier.decalcify_cycle(conn)
 
             except Exception as e:  # noqa: BLE001

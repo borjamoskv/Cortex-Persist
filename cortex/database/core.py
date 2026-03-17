@@ -32,7 +32,9 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from typing import Any, Final, Optional
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Any, Final
 
 import aiosqlite
 
@@ -42,6 +44,7 @@ __all__ = [
     "connect",
     "connect_writer",
     "connect_async",
+    "connect_async_ctx",
     "apply_pragmas_async",
     "apply_pragmas_async_readonly",
 ]
@@ -122,10 +125,10 @@ def connect(
     *,
     uri: bool = False,
     check_same_thread: bool = False,
-    row_factory: Optional[Any] = None,
+    row_factory: Any | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
-    isolation_level: Optional[str] = None,
+    isolation_level: str | None = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 
@@ -229,6 +232,29 @@ async def connect_async(
     else:
         await apply_pragmas_async(conn)
     return conn
+
+
+@asynccontextmanager
+async def connect_async_ctx(
+    db_path: str,
+    *,
+    read_only: bool = False,
+) -> AsyncIterator[aiosqlite.Connection]:
+    """Context manager wrapping connect_async().
+
+    Drop-in replacement for ``async with aiosqlite.connect(path)``
+    that guarantees WAL, busy_timeout, and all sovereign pragmas.
+
+    Usage::
+
+        async with connect_async_ctx("/path/to/db") as conn:
+            await conn.execute("SELECT 1")
+    """
+    conn = await connect_async(db_path, read_only=read_only)
+    try:
+        yield conn
+    finally:
+        await conn.close()
 
 
 async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:

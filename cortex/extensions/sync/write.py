@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.extensions.sync")
 
 
-def _decrypt_json(val: Optional[str]) -> dict:
+def _decrypt_json(val: str | None) -> dict:
     if not val or not str(val).strip():
         return {}
     if str(val).startswith("v6_aesgcm:"):
@@ -45,7 +45,7 @@ def _decrypt_json(val: Optional[str]) -> dict:
         return {}
 
 
-def _decrypt_json_list(val: Optional[str]) -> list:
+def _decrypt_json_list(val: str | None) -> list:
     if not val or not str(val).strip():
         return []
     if str(val).startswith("v6_aesgcm:"):
@@ -71,8 +71,8 @@ async def _writeback_if_changed(
     wb_fn,
     result: WritebackResult,
     wb_hashes: dict,
-    hash_key: Optional[str] = None,
-    hash_value: Optional[str] = None,
+    hash_key: str | None = None,
+    hash_value: str | None = None,
 ) -> None:
     """Hash-check and writeback a single fact type."""
     key = hash_key or fact_type
@@ -139,7 +139,7 @@ async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> No
     """Reconstruye ghosts.json desde facts tipo 'ghost'."""
     conn = await engine.get_conn()
     cursor = await conn.execute(
-        "SELECT project, meta FROM facts "
+        "SELECT project, metadata FROM facts "
         "WHERE fact_type = 'ghost' AND valid_until IS NULL "
         "ORDER BY project"
     )
@@ -175,7 +175,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
 
     # Knowledge global — reconstruir desde DB
     cursor = await conn.execute(
-        "SELECT content, tags, confidence, valid_from, meta FROM facts "
+        "SELECT content, tags, confidence, valid_from, metadata FROM facts "
         "WHERE project = '__system__' AND fact_type = 'knowledge' "
         "AND valid_until IS NULL ORDER BY id"
     )
@@ -196,7 +196,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
 
     # Decisions global — reconstruir desde DB
     cursor = await conn.execute(
-        "SELECT content, meta FROM facts "
+        "SELECT content, metadata FROM facts "
         "WHERE project = '__system__' AND fact_type = 'decision' "
         "AND valid_until IS NULL ORDER BY id"
     )
@@ -232,7 +232,7 @@ async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> 
     """Reconstruye mistakes.jsonl desde facts tipo 'error'."""
     conn = await engine.get_conn()
     cursor = await conn.execute(
-        "SELECT project, content, tags, valid_from, meta FROM facts "
+        "SELECT project, content, tags, valid_from, metadata FROM facts "
         "WHERE fact_type = 'error' AND valid_until IS NULL ORDER BY id"
     )
     rows = await cursor.fetchall()
@@ -263,7 +263,7 @@ async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> N
     """Reconstruye bridges.jsonl desde facts tipo 'bridge'."""
     conn = await engine.get_conn()
     cursor = await conn.execute(
-        "SELECT content, tags, valid_from, meta FROM facts "
+        "SELECT content, tags, valid_from, metadata FROM facts "
         "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
     )
     rows = await cursor.fetchall()

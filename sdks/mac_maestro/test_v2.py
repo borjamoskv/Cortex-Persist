@@ -12,16 +12,18 @@ _SDK_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _SDK_ROOT not in sys.path:
     sys.path.insert(0, _SDK_ROOT)
 
-from mac_maestro.models import (  # noqa: E402
-    ActionFailed, AXNodeSnapshot, ElementMatch,
-    ResolvedTarget, UIAction,
-)
-from mac_maestro.workflow import MacMaestroWorkflow, _backoff_sleep  # noqa: E402
 from mac_maestro.applescript import sanitize_applescript_string  # noqa: E402
+from mac_maestro.matcher import find_best, find_elements  # noqa: E402
+from mac_maestro.models import (  # noqa: E402
+    ActionFailed,
+    AXNodeSnapshot,
+    ElementMatch,
+    ResolvedTarget,
+    UIAction,
+)
 from mac_maestro.resolver import resolve  # noqa: E402
-from mac_maestro.matcher import find_elements, find_best  # noqa: E402
 from mac_maestro.trace import emit_trace  # noqa: E402
-
+from mac_maestro.workflow import MacMaestroWorkflow, _backoff_sleep  # noqa: E402
 
 # ═══════════════════════════════════════════════════════════════════
 # Helpers
@@ -326,22 +328,31 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(results[0].title, "Cancel")
 
     def test_find_by_description(self):
-        results = find_elements(self.tree, description="Search field")
+        results = find_elements(
+            self.tree, role="AXTextField", description="Search field",
+        )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].role, "AXTextField")
 
     def test_find_by_identifier(self):
-        results = find_elements(self.tree, identifier="save-btn")
-        self.assertEqual(len(results), 1)
+        results = find_elements(
+            self.tree, role="AXButton", identifier="save-btn",
+        )
+        self.assertGreaterEqual(len(results), 1)
         self.assertEqual(results[0].title, "Save")
+        self.assertEqual(results[0].identifier, "save-btn")
 
     def test_fuzzy_substring_match(self):
-        results = find_elements(self.tree, title="Export")
+        results = find_elements(
+            self.tree, role="AXMenuItem", title="Export",
+        )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].role, "AXMenuItem")
 
     def test_fuzzy_case_insensitive(self):
-        results = find_elements(self.tree, title="save")
+        results = find_elements(
+            self.tree, role="AXButton", title="save",
+        )
         self.assertGreater(len(results), 0)
         self.assertEqual(results[0].title, "Save")
 

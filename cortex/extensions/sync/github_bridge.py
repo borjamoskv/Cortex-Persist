@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
@@ -78,7 +78,7 @@ class GitHubCortexBridge:
 
     # ─── Public API ──────────────────────────────────────────────────
 
-    async def sync_all(self, repo_filter: Optional[str] = None) -> SyncResult:
+    async def sync_all(self, repo_filter: str | None = None) -> SyncResult:
         """Discover repos and sync all issues/PRs into CORTEX.
 
         Parameters
@@ -114,7 +114,7 @@ class GitHubCortexBridge:
 
     # ─── Repo Discovery ──────────────────────────────────────────────
 
-    async def _discover_repos(self, repo_filter: Optional[str]) -> list[str]:
+    async def _discover_repos(self, repo_filter: str | None) -> list[str]:
         """List public repos for the owner. Returns full names (owner/repo)."""
         if repo_filter:
             return [f"{self._owner}/{repo_filter}"]
@@ -300,7 +300,7 @@ class GitHubCortexBridge:
         try:
             conn = await self._engine.get_conn()
             cursor = await conn.execute(
-                "SELECT id, meta FROM facts "
+                "SELECT id, metadata FROM facts "
                 "WHERE fact_type = 'bridge' AND valid_until IS NULL "
                 "AND source = ?",
                 (_SOURCE,),

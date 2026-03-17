@@ -8,7 +8,6 @@ Never deletes — only deprecates. Enables time-travel queries.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
 
 __all__ = [
     "build_temporal_filter_params",
@@ -23,7 +22,7 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def is_valid_at(valid_from: str, valid_until: Optional[str], at: Optional[str] = None) -> bool:
+def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None) -> bool:
     """Check if a fact is valid at a specific point in time.
 
     Args:
@@ -46,8 +45,8 @@ def is_valid_at(valid_from: str, valid_until: Optional[str], at: Optional[str] =
 
 
 def build_temporal_filter_params(
-    as_of: Optional[str] = None,
-    table_alias: Optional[str] = None,
+    as_of: str | None = None,
+    table_alias: str | None = None,
 ) -> tuple[str, list]:
     """Build parameterized SQL WHERE clause for temporal filtering.
 
@@ -74,16 +73,16 @@ def build_temporal_filter_params(
         return f"{prefix}is_tombstoned = 0", []
     else:
         return (
-            f"coalesce(json_extract({prefix}meta, '$.valid_from'), {prefix}created_at) <= ? AND "
-            f"({prefix}is_tombstoned = 0 OR json_extract({prefix}meta, '$.valid_until') > ? OR "
-            f"json_extract({prefix}meta, '$.tombstoned_at') > ?)",
+            f"coalesce(json_extract({prefix}metadata, '$.valid_from'), {prefix}created_at) <= ? AND "
+            f"({prefix}is_tombstoned = 0 OR json_extract({prefix}metadata, '$.valid_until') > ? OR "
+            f"json_extract({prefix}metadata, '$.tombstoned_at') > ?)",
             [as_of, as_of, as_of],
         )
 
 
 def time_travel_filter(
     tx_id: int,
-    table_alias: Optional[str] = None,
+    table_alias: str | None = None,
 ) -> tuple[str, list]:
     """Build SQL WHERE clause to reconstruct fact state at a specific transaction.
 
@@ -111,11 +110,11 @@ def time_travel_filter(
         prefix = ""
 
     return (
-        f"json_extract({prefix}meta, '$.tx_id') <= ? AND ("  # nosec B608
+        f"json_extract({prefix}metadata, '$.tx_id') <= ? AND ("  # nosec B608
         f"{prefix}is_tombstoned = 0 OR "
-        f"json_extract({prefix}meta, '$.valid_until') > "
+        f"json_extract({prefix}metadata, '$.valid_until') > "
         "(SELECT timestamp FROM transactions WHERE id = ?) OR "
-        f"json_extract({prefix}meta, '$.tombstoned_at') > "
+        f"json_extract({prefix}metadata, '$.tombstoned_at') > "
         "(SELECT timestamp FROM transactions WHERE id = ?))",
         [tx_id, tx_id, tx_id],
     )
