@@ -22,6 +22,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
+from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 
@@ -99,6 +100,7 @@ class SovereignVectorStoreL2:
 
             # Register Sovereign Functions
             self._conn.create_function("cortex_decay", 4, cortex_decay)
+            self._conn.create_function("cortex_exergy", 1, calculate_exergy)
 
             # Initialization
             self._conn.execute("""
@@ -364,22 +366,27 @@ class SovereignVectorStoreL2:
         meta_tb, vec_tb = self._get_domain_tables(conn, tenant_id, project_id)
 
         sql = f"""
-            SELECT
-                m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
-                m.cognitive_layer, m.parent_decision_id, m.metadata,
-                v.embedding,
-                ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
-                 cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
-                 m.success_rate) as final_score
-            FROM {meta_tb} m
-            JOIN {vec_tb} v ON m.rowid = v.rowid
-            WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+            SELECT * FROM (
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
+                    m.cognitive_layer, m.parent_decision_id, m.metadata,
+                    v.embedding,
+                    (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as base_similarity,
+                    ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
+                     cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
+                     m.success_rate *
+                     cortex_exergy(m.content)) as final_score
+                FROM {meta_tb} m
+                JOIN {vec_tb} v ON m.rowid = v.rowid
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+            )
+            WHERE base_similarity > 0.3
         """
-        params = [embedding_bytes, now, self._half_life, tenant_id, project_id]
+        params = [embedding_bytes, embedding_bytes, now, self._half_life, tenant_id, project_id]
 
         if layer:
-            sql += " AND m.cognitive_layer = ?"
+            sql += " AND cognitive_layer = ?"
             params.append(layer)
 
         sql += " ORDER BY final_score DESC LIMIT ?"

@@ -42,5 +42,14 @@ def mock_local_embedder(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_anomaly_detector():
     """Reset the anomaly detector before each test to prevent bulk mutation blocks."""
-    from cortex.security.anomaly_detector import DETECTOR
+    from cortex.extensions.security.anomaly_detector import DETECTOR
     DETECTOR.reset()
+
+
+@pytest.fixture(autouse=True)
+def inject_test_master_key(monkeypatch):
+    """Ensure a deterministic Master Key is available for tests."""
+    monkeypatch.setenv("CORTEX_TESTING", "1")
+    # Base64 for 32 bytes of '0'
+    monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
