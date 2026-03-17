@@ -28,7 +28,6 @@ except ImportError:
     MemoryOS = None  # type: ignore
 
 
-
 try:
     from cortex.extensions.security.tenant import get_tenant_id
 except ImportError:
@@ -348,9 +347,12 @@ class CortexMemoryManager:
         )
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            from cortex.routes.notch_ws import notify_notch_pruning
+            try:
+                from cortex.routes.notch_ws import notify_notch_pruning
 
-            await notify_notch_pruning()
+                await notify_notch_pruning()
+            except ImportError:
+                logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
             return f"filtered:{action}"
 
         dedup_id = self._check_deduplication(tenant_id, project_id, content)
