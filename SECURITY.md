@@ -11,9 +11,18 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Email: **<security@cortexpersist.com>**
+Email: **<security@cortexpersist.com>** or use GitHub Security Advisories anonymously.
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
+
+## Internal SLA for Remediation
+
+| Severity | Time to Fix | Examples |
+| :------- | :---------- | :------- |
+| **Critical** | Inmediato (< 24h) | RCE, Auth bypass, Exposed Secrets |
+| **High** | 72h | XSS, CSRF, IDOR |
+| **Medium** | Siguiente release menor | Information disclosure (low risk), DoS (complex) |
+| **Low** | Backlog / Tooling debt | Best practices, outdated deps (non-exploitable) |
 
 ## Security Features
 
